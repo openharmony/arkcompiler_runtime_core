@@ -37,6 +37,7 @@ struct Program {
     std::map<std::string, panda::pandasm::LiteralArray> literalarray_table;
     std::set<std::string> strings;
     std::unordered_set<Type> array_types;
+    bool isGeneratedFromMergedAbc {false};
 
     /*
      * Returns a JSON string with the program structure and scopes locations

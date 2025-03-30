@@ -14,15 +14,7 @@
  */
 
 #include "mutex.h"
-#include "fmutex.h"
 #include "utils/logger.h"
-#include "utils/type_helpers.h"
-
-#include <cstring>
-#include <cerrno>
-#include <ctime>
-
-#include <sched.h>
 
 namespace panda::os::unix::memory::futex {
 

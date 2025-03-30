@@ -38,8 +38,8 @@ class LibAbcKitCreateDynCreateobjectwithexcludedkeys : public ::testing::Test {}
 static void FillMainBb1(AbckitFile *file, AbckitGraph *graph, AbckitBasicBlock *bbMain, bool isWide)
 {
     auto *createobjectwithbuffer = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
-    auto *stringValue = g_implM->createString(file, "value");
-    auto *stringAge = g_implM->createString(file, "age");
+    auto *stringValue = g_implM->createString(file, "value", strlen("value"));
+    auto *stringAge = g_implM->createString(file, "age", strlen("age"));
     auto *loadStringValue = g_dynG->iCreateLoadString(graph, stringValue);
     auto *loadStringAge = g_dynG->iCreateLoadString(graph, stringAge);
 
@@ -56,7 +56,7 @@ static void FillMainBb1(AbckitFile *file, AbckitGraph *graph, AbckitBasicBlock *
     g_implG->bbAddInstBack(bbMain, loadStringAge);
     g_implG->bbAddInstBack(bbMain, createobjectwithexcludedkeys);
 
-    auto *stringPrint = g_implM->createString(file, "print");
+    auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
     auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
     auto *callarg11 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, loadStringValue);
     auto *callarg12 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, loadStringAge);
@@ -70,9 +70,9 @@ static void FillMainBb1(AbckitFile *file, AbckitGraph *graph, AbckitBasicBlock *
 static void FillMainBb2(AbckitFile *file, AbckitGraph *graph, AbckitBasicBlock *bbMain, bool isWide)
 {
     auto *createobjectwithbuffer = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
-    auto *stringValue = g_implM->createString(file, "value");
-    auto *stringAge = g_implM->createString(file, "age");
-    auto *stringName = g_implM->createString(file, "name");
+    auto *stringValue = g_implM->createString(file, "value", strlen("value"));
+    auto *stringAge = g_implM->createString(file, "age", strlen("age"));
+    auto *stringName = g_implM->createString(file, "name", strlen("name"));
     auto *loadStringValue = g_dynG->iCreateLoadString(graph, stringValue);
     auto *loadStringAge = g_dynG->iCreateLoadString(graph, stringAge);
     auto *createobjectwithexcludedkeys =
@@ -88,7 +88,7 @@ static void FillMainBb2(AbckitFile *file, AbckitGraph *graph, AbckitBasicBlock *
 
     auto *ldundef2 = g_dynG->iCreateLdundefined(graph);
     auto *returnUndef = g_dynG->iCreateReturnundefined(graph);
-    auto *stringPrint = g_implM->createString(file, "print");
+    auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
     auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
     auto *ldobjbynameValue = g_dynG->iCreateLdobjbyname(graph, createobjectwithexcludedkeys, stringValue);
     auto *ldobjbynameAge = g_dynG->iCreateLdobjbyname(graph, createobjectwithexcludedkeys, stringAge);
@@ -119,7 +119,8 @@ static void FillUndefBB(AbckitGraph *graph, AbckitBasicBlock *bbUndef)
     g_implG->bbAddInstBack(bbUndef, ifInst2);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithexcludedkeys_1)
 {
     auto output =
@@ -136,7 +137,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithex
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);
@@ -171,7 +172,8 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithex
     EXPECT_TRUE(helpers::Match(output, "value\nage\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithexcludedkeys_2)
 {
     auto output =
@@ -188,7 +190,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithex
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);
@@ -241,7 +243,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateWideCreateobjectwi
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);
@@ -294,7 +296,7 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateWideCreateobjectwi
             auto *bbThrow = g_implG->bbCreateEmpty(graph);
             auto *bbMain = g_implG->bbCreateEmpty(graph);
 
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, bbThrow);
             g_implG->bbAppendSuccBlock(bb, bbUndef);
             g_implG->bbAppendSuccBlock(bbUndef, bbMain);

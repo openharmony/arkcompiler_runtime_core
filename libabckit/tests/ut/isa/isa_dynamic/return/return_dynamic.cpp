@@ -53,7 +53,7 @@ void TransformIrDynReturnInstValid(AbckitGraph *graph,
     AbckitInst *retOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN);
     ASSERT_NE(retOp, nullptr);
 
-    auto *constZero = g_implG->gCreateConstantU64(graph, 0);
+    auto *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
     auto *mainInst = returnInstToCheck(graph, constZero);
     ASSERT_NE(mainInst, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -90,7 +90,7 @@ std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchemaForDynRe
 
 class LibAbcKitCreateDynReturnInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturnundefined, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturnundefined, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynReturnInstTest, CreateDynReturnundefinedValid)
 {
     auto output =
@@ -114,7 +114,7 @@ TEST_F(LibAbcKitCreateDynReturnInstTest, CreateDynReturnundefinedValid)
     EXPECT_TRUE(helpers::Match(output, "undefined\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturn, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturn, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynReturnInstTest, CreateDynReturnValid)
 {
     auto output =

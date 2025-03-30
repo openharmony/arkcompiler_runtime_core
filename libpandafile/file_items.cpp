@@ -15,24 +15,24 @@
 
 #include "file_items.h"
 #include "file_item_container.h"
-#include "macros.h"
-#include "utils/bit_utils.h"
-#include "utils/leb128.h"
-#include "utils/utf.h"
-
-#include <iomanip>
 
 namespace panda::panda_file {
 
 bool IsDynamicLanguage(panda::panda_file::SourceLang lang)
 {
-    return lang == panda::panda_file::SourceLang::ECMASCRIPT;
+    return lang != panda::panda_file::SourceLang::PANDA_ASSEMBLY;
 }
 
 std::optional<panda::panda_file::SourceLang> LanguageFromString(const std::string_view &lang)
 {
     if (lang == "ECMAScript") {
         return panda::panda_file::SourceLang::ECMASCRIPT;
+    } else if (lang == "JavaScript") {
+        return panda::panda_file::SourceLang::JAVASCRIPT;
+    } else if (lang == "TypeScript") {
+        return panda::panda_file::SourceLang::TYPESCRIPT;
+    } else if (lang == "ArkTS") {
+        return panda::panda_file::SourceLang::ARKTS;
     }
     return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
 }
@@ -41,6 +41,12 @@ const char *LanguageToString(panda::panda_file::SourceLang lang)
 {
     if (lang == panda::panda_file::SourceLang::ECMASCRIPT) {
         return "ECMAScript";
+    } else if (lang == panda::panda_file::SourceLang::JAVASCRIPT) {
+        return "JavaScript";
+    } else if (lang == panda::panda_file::SourceLang::TYPESCRIPT) {
+        return "TypeScript";
+    } else if (lang == panda::panda_file::SourceLang::ARKTS) {
+        return "ArkTS";
     }
     return "PandaAssembly";
 }
@@ -57,7 +63,7 @@ const char *GetCctorName([[maybe_unused]] panda::panda_file::SourceLang lang)
 
 const char *GetStringClassDescriptor(panda::panda_file::SourceLang lang)
 {
-    if (lang == panda::panda_file::SourceLang::ECMASCRIPT) {
+    if (lang != panda::panda_file::SourceLang::PANDA_ASSEMBLY) {
         return "Lpanda/JSString;";
     }
     return "Lpanda/String;";

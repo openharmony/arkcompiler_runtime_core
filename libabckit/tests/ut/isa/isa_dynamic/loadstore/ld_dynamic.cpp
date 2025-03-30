@@ -88,80 +88,80 @@ static void ValidTest(AbckitInst *(*ldInstToCheck)(AbckitGraph *graph), AbckitIs
 
 class LibAbcKitDynLdInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnan, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnan, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdnanValid)
 {
     ValidTest(g_dynG->iCreateLdnan, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDNAN, "NaN\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdinfinity, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdinfinity, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdinfinityValid)
 {
     ValidTest(g_dynG->iCreateLdinfinity, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDINFINITY, "Infinity\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdundefined, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdundefined, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdundefinedValid)
 {
     ValidTest(g_dynG->iCreateLdundefined, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, "undefined\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnull, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnull, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdnullValid)
 {
     ValidTest(g_dynG->iCreateLdnull, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDNULL, "null\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsymbol, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsymbol, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdsymbolValid)
 {
     ValidTest(g_dynG->iCreateLdsymbol, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDSYMBOL,
               "function Symbol\\(\\) \\{ \\[native code\\] \\}\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdglobal, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdglobal, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdglobalValid)
 {
     ValidTest(g_dynG->iCreateLdglobal, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDGLOBAL, "\\[object Object\\]\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdtrue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdtrue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdtrueValid)
 {
     ValidTest(g_dynG->iCreateLdtrue, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDTRUE, "true\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfalse, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfalse, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdfalseValid)
 {
     ValidTest(g_dynG->iCreateLdfalse, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE, "false\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdhole, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdhole, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdholeValid)
 {
     ValidTest(g_dynG->iCreateLdhole, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDHOLE, "\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfunction, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfunction, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdfunctionValid)
 {
     ValidTest(g_dynG->iCreateLdfunction, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFUNCTION, "", true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnewtarget, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnewtarget, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdnewtargetValid)
 {
     ValidTest(g_dynG->iCreateLdnewtarget, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDNEWTARGET, "\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthis, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthis, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynLdthisValid)
 {
     ValidTest(g_dynG->iCreateLdthis, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDTHIS, "\\[object Object\\]\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTryldglobalbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTryldglobalbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynTryldglobalbynameValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/tryldglobalbyname.abc",
@@ -169,19 +169,19 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTryldglobalbynameValid)
     EXPECT_TRUE(helpers::Match(output, ""));
 
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-        auto *stringPrint = g_implM->createString(file, "print");
+        auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
         auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         auto *newobjrange = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE);
         // CC-OFFNXT(G.FMT.02)
-        auto *stringf = g_implM->createString(file, "f");
+        auto *stringf = g_implM->createString(file, "f", strlen("f"));
         auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, newobjrange, stringf);
         auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyname);
-        auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+        auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
         // CC-OFFNXT(G.FMT.02)
-        g_implG->iInsertBefore(tryldglobalbyname, ldundefined);
-        g_implG->iInsertBefore(ldobjbyname, ldundefined);
-        g_implG->iInsertBefore(callarg1, ldundefined);
+        g_implG->iInsertBefore(tryldglobalbyname, returnundefined);
+        g_implG->iInsertBefore(ldobjbyname, returnundefined);
+        g_implG->iInsertBefore(callarg1, returnundefined);
     };
 
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/tryldglobalbyname.abc",
@@ -193,7 +193,7 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTryldglobalbynameValid)
     EXPECT_TRUE(helpers::Match(output, "123\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTrystglobalbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTrystglobalbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynLdInstTest, CreateDynTrystglobalbynameValid)
 {
     helpers::TransformMethod(
@@ -203,11 +203,11 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTrystglobalbynameValid)
             auto arr = std::vector<AbckitLiteral *>();
             arr.emplace_back(g_implM->createLiteralU32(file, 0));
             arr.emplace_back(g_implM->createLiteralU32(file, 111));
-            arr.emplace_back(g_implM->createLiteralString(file, "hello"));
+            arr.emplace_back(g_implM->createLiteralString(file, "hello", strlen("hello")));
             auto *litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
 
             auto *createarraywithbuffer = g_dynG->iCreateCreatearraywithbuffer(graph, litArr);
-            auto *stringO = g_implM->createString(file, "o");
+            auto *stringO = g_implM->createString(file, "o", strlen("o"));
             auto *trystglobalbyname = g_dynG->iCreateTrystglobalbyname(graph, createarraywithbuffer, stringO);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *callarg0 = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0);
@@ -229,8 +229,7 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTrystglobalbynameValid)
                      {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER, {}},
                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYSTGLOBALBYNAME, {4}},
                      {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {3}},
-                     {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                     {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                     {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                  }},
                 {{1}, {}, {}}};
             helpers::VerifyGraph(graph, bbSchemas);

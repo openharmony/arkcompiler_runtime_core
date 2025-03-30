@@ -17,32 +17,38 @@
 #define CPP_ABCKIT_CORE_ANNOTATION_ELEMENT_IMPL_H
 
 #include "./annotation_element.h"
+#include "./annotation.h"
 
 namespace abckit::core {
 
-inline std::string_view AnnotationElement::GetName() const
+inline const File *AnnotationElement::GetFile() const
+{
+    return GetResource();
+}
+
+inline std::string AnnotationElement::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();
-    AbckitString *abcStr = conf->cIapi_->annotationElementGetName(GetView());
+    AbckitString *cString = conf->cIapi_->annotationElementGetName(GetView());
     CheckError(conf);
-    std::string_view sView = conf->cIapi_->abckitStringToString(abcStr);
+    std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
-    return sView;
+    return str;
 }
 
 inline abckit::Value AnnotationElement::GetValue() const
 {
-    const ApiConfig *conf = GetApiConfig();
-    AbckitValue *value = conf->cIapi_->annotationElementGetValue(GetView());
-    CheckError(conf);
-    return Value(value, conf, GetResource());
+    auto value = GetApiConfig()->cIapi_->annotationElementGetValue(GetView());
+    CheckError(GetApiConfig());
+    return Value(value, GetApiConfig(), GetResource());
 }
 
-inline AnnotationElement::AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf, const File *file)
-    : ViewInResource(anne), conf_(conf)
+inline Annotation AnnotationElement::GetAnnotation() const
 {
-    SetResource(file);
-};
+    auto anno = GetApiConfig()->cIapi_->annotationElementGetAnnotation(GetView());
+    CheckError(GetApiConfig());
+    return Annotation(anno, GetApiConfig(), GetResource());
+}
 
 }  // namespace abckit::core
 

@@ -70,6 +70,8 @@ static void TransformIrSendableClass(AbckitFile *file, AbckitGraph *graph, bool 
     auto *sendableKlass = CreateSendableClass(klass, file, graph);
     ASSERT_NE(sendableKlass, nullptr);
 
+    // Slot number passed to create newsendableenv allows [0, slot number - 1] slots to be used by other instructions in
+    // this env. Slot index imm used in stsendablevar and ldsendablevar must be less than the slot number.
     AbckitInst *newsendableenv = isWideMode ? g_dynG->iCreateCallruntimeWidenewsendableenv(graph, imm + 1)
                                             : g_dynG->iCreateCallruntimeNewsendableenv(graph, imm + 1);
     ASSERT_NE(newsendableenv, nullptr);
@@ -162,7 +164,7 @@ static void TransformIrLdSendableClass(AbckitFile *file, AbckitGraph *graph)
     ASSERT_NE(ret, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *str = g_implM->createString(file, "foo");
+    auto *str = g_implM->createString(file, "foo", strlen("foo"));
     ASSERT_NE(str, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -245,8 +247,7 @@ static void VerifyIrSendableClass(AbckitGraph *graph, bool isWideMode)
              {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRUNTIME_DEFINESENDABLECLASS, {2}},
              {4, stsendablevar, {3}},
              {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {1}},
-             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-             {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
          }},
         {{1}, {}, {}}};
 
@@ -366,37 +367,43 @@ static void ModifySendableClass(bool isWideMode, uint64_t imm = 0x0)
     EXPECT_TRUE(helpers::Match(output, "0\nHello\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinesendableclass, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinesendableclass, abc-kind=ArkTS1,
+// category=positive, extension=c
 TEST_F(LibAbcKitCreateDynSendable, DefineSendableClass)
 {
     ModifySendableClass(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendablevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendablevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, LdSendableVar_imm4)
 {
     ModifySendableClass(false, 0x0);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendablevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendablevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, LdSendableVar_imm8)
 {
     ModifySendableClass(false, 0x10);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeNewsendableenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeNewsendableenv, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, NewSendableEnv)
 {
     ModifySendableClass(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeStsendablevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeStsendablevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, StSendableVar_imm4)
 {
     ModifySendableClass(false, 0x0);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeStsendablevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeStsendablevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, StSendableVar_imm8)
 {
     ModifySendableClass(false, 0x10);
@@ -409,7 +416,8 @@ TEST_F(LibAbcKitCreateDynSendable, LdExternalModuleVar)
     ModifySendableClass(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendableclass, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendableclass, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, LdSendableClass)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/sendable/ldsendableclass_dynamic.abc",
@@ -429,19 +437,22 @@ TEST_F(LibAbcKitCreateDynSendable, LdSendableClass)
     EXPECT_TRUE(helpers::Match(output, "Hello\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWideldsendablevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWideldsendablevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, WideLdSendableVar)
 {
     ModifySendableClass(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWidenewsendableenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWidenewsendableenv, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, WideNewSendableEnv)
 {
     ModifySendableClass(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWidestsendablevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWidestsendablevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSendable, WideStSendableVar)
 {
     ModifySendableClass(true);

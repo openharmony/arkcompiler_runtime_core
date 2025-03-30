@@ -261,7 +261,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, CoreAnnotationElementToArktsAnnotationElem
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::arktsAnnotationToCoreAnnotation, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::arktsAnnotationToCoreAnnotation, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsAnnotationToCoreAnnotation)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -269,7 +270,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsAnnotationToCoreAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::coreAnnotationToArktsAnnotation, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::coreAnnotationToArktsAnnotation, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, CoreAnnotationToArktsAnnotation)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -296,7 +298,7 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsAnnotationInterfaceToCoreAnnotationIn
 }
 
 // Test: test-kind=api, api=ArktsInspectApiImpl::arktsAnnotationInterfaceFieldToCoreAnnotationInterfaceField,
-// abc-kind=ArkTS2, category=positive
+// abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsAnnotationInterfaceFieldToCoreAnnotationInterfaceField)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -305,7 +307,7 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsAnnotationInterfaceFieldToCoreAnnotat
 }
 
 // Test: test-kind=api, api=ArktsInspectApiImpl::coreAnnotationInterfaceFieldToArktsAnnotationInterfaceField,
-// abc-kind=ArkTS2, category=positive
+// abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, CoreAnnotationInterfaceFieldToArktsAnnotationInterfaceField)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -313,7 +315,7 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, CoreAnnotationInterfaceFieldToArktsAnnotat
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::coreClassToArktsClass, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::coreClassToArktsClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, CoreClassToArktsClass)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -329,7 +331,7 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, CoreClassToArktsClassNeg)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::arktsClassToCoreClass, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::arktsClassToCoreClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsClassToCoreClass)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -337,7 +339,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsClassToCoreClass)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::coreFunctionToArktsFunction, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::coreFunctionToArktsFunction, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, CoreFunctionToArktsFunction)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -353,7 +356,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, CoreFunctionToArktsFunctionNeg)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::arktsFunctionToCoreFunction, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::arktsFunctionToCoreFunction, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsFunctionToCoreFunction)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -361,7 +365,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsFunctionToCoreFunction)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::coreModuleToArktsModule, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::coreModuleToArktsModule, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, CoreModuleToArktsModule)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -377,7 +382,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, CoreModuleToArktsModuleNeg)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::arktsModuleToCoreModule, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::arktsModuleToCoreModule, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsModuleToCoreModule)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -385,7 +391,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsModuleToCoreModule)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::coreNamespaceToArktsNamespace, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::coreNamespaceToArktsNamespace, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, CoreNamespaceToArktsNamespace)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",
@@ -393,7 +400,8 @@ TEST_F(LibAbcKitArkTSInspectApiCasts, CoreNamespaceToArktsNamespace)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::arktsNamespaceToCoreNamespace, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::arktsNamespaceToCoreNamespace, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiCasts, ArktsNamespaceToCoreNamespace)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/extensions/arkts/inspect_api/api_casts/api_casts.abc", "foo",

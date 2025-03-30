@@ -16,14 +16,10 @@
 #ifndef CPP_ABCKIT_HASH_SPECIALIZATIONS_H
 #define CPP_ABCKIT_HASH_SPECIALIZATIONS_H
 
-#include <cstdint>
-#include <memory>
-
 #include "./config.h"
 
 #include "./basic_block.h"
 #include "./instruction.h"
-#include "./value.h"
 #include "./literal.h"
 #include "./literal_array.h"
 
@@ -33,7 +29,6 @@
 #include "./core/annotation.h"
 #include "./core/class.h"
 #include "./core/export_descriptor.h"
-#include "./core/field.h"
 #include "./core/function.h"
 #include "./core/import_descriptor.h"
 #include "./core/module.h"
@@ -45,7 +40,6 @@
 #include "./arkts/annotation.h"
 #include "./arkts/class.h"
 #include "./arkts/export_descriptor.h"
-#include "./arkts/field.h"
 #include "./arkts/function.h"
 #include "./arkts/import_descriptor.h"
 #include "./arkts/module.h"
@@ -96,10 +90,6 @@ struct hash<abckit::core::ExportDescriptor> : public abckit::DefaultHash<abckit:
 };
 
 template <>
-struct hash<abckit::core::Field> : public abckit::DefaultHash<abckit::core::Field> {
-};
-
-template <>
 struct hash<abckit::core::Function> : public abckit::DefaultHash<abckit::core::Function> {
 };
 
@@ -138,10 +128,6 @@ struct hash<abckit::arkts::Class> : public abckit::DefaultHash<abckit::arkts::Cl
 
 template <>
 struct hash<abckit::arkts::ExportDescriptor> : public abckit::DefaultHash<abckit::arkts::ExportDescriptor> {
-};
-
-template <>
-struct hash<abckit::arkts::Field> : public abckit::DefaultHash<abckit::arkts::Field> {
 };
 
 template <>

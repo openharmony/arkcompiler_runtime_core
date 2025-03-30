@@ -52,7 +52,7 @@ static void InspectMethodDynamicValid(AbckitGraph *graph)
     CheckTypeOfInst(secondInst, ABCKIT_TYPE_ID_ANY);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetType, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetType, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetTypeDynamicTest, GetTypeDynamic)
 {
     AbckitFile *file = nullptr;

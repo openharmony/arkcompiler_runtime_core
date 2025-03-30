@@ -49,7 +49,7 @@ void TransformIrNegativeInst(AbckitGraph *graph, AbckitFile *file, AbckitCoreCla
     ASSERT_NE(isInstance, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    AbckitInst *idx = g_implG->gCreateConstantI64(graph, 1);
+    AbckitInst *idx = g_implG->gFindOrCreateConstantI64(graph, 1);
     g_implG->iSetInput(isInstance, idx, 0);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -78,7 +78,7 @@ void TransformIrNegativeBinInst(AbckitGraph *graph)
     ASSERT_NE(ret, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    AbckitInst *idx = g_implG->gCreateConstantI64(graph, 5);
+    AbckitInst *idx = g_implG->gFindOrCreateConstantI64(graph, 5);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *addInst = g_statG->iCreateAdd(graph, loadString, idx);
@@ -95,11 +95,11 @@ class LibAbcKitGraphVerifierTest : public ::testing::Test {};
 // Test: test-kind=internal, abc-kind=ArkTS2, category=internal
 TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierInst)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc",
-                                            "graph_verifier/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "graph_verifier/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nfalse\n"));
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *method = helpers::FindMethodByName(file, "foo");
     ASSERT_NE(method, nullptr);
     auto *module = g_implI->functionGetModule(method);
@@ -111,7 +111,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierInst)
     TransformIrNegativeInst(graph, g_implI->functionGetFile(method), classCtxFinder.klass);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
     g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);
@@ -120,11 +120,11 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierInst)
 // Test: test-kind=internal, abc-kind=ArkTS2, category=internal
 TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc",
-                                            "graph_verifier/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "graph_verifier/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nfalse\n"));
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *method = helpers::FindMethodByName(file, "bar");
     ASSERT_NE(method, nullptr);
 
@@ -132,7 +132,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
     TransformIrNegativeBB(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
     g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);
@@ -141,11 +141,11 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
 // Test: test-kind=internal, abc-kind=ArkTS2, category=internal
 TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBinInst)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc",
-                                            "graph_verifier/ETSGLOBAL", "main");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc";
+    auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "graph_verifier/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "123\nfalse\n"));
 
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc");
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     auto *method = helpers::FindMethodByName(file, "foo");
     ASSERT_NE(method, nullptr);
 
@@ -153,7 +153,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBinInst)
     TransformIrNegativeBinInst(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
-    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
     g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);

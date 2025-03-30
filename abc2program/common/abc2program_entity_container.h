@@ -25,7 +25,7 @@
 
 namespace panda::abc2program {
 
-const panda::panda_file::SourceLang LANG_ECMA = panda::panda_file::SourceLang::ECMASCRIPT;
+const panda::panda_file::SourceLang DEFUALT_SOURCE_LANG = panda::panda_file::DEFUALT_SOURCE_LANG;
 
 class Abc2ProgramEntityContainer {
 public:
@@ -55,7 +55,14 @@ public:
     std::string GetLiteralArrayIdName(uint32_t literal_array_id);
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
     void ModifyRecordName(std::string &record_name);
+    void ModifyPkgNameForRecordName(std::string &record_name);
+    void ModifyPkgNameForFieldName(std::string &field_name);
     bool IsSourceFileRecord(const std::string& record_name);
+
+    void SetModifyPkgName(const std::string &modify_pkg_name)
+    {
+        modify_pkg_name_ = modify_pkg_name;
+    }
 
 private:
     std::string ConcatFullMethodNameById(const panda_file::File::EntityId &method_id);
@@ -72,6 +79,7 @@ private:
     uint32_t current_class_id_{0};
     // It should modify record name when the bundle_name_ is not empty
     std::string bundle_name_ {};
+    std::string modify_pkg_name_ {};
 };  // class Abc2ProgramEntityContainer
 
 }  // namespace panda::abc2program

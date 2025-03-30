@@ -14,7 +14,6 @@
  */
 
 #include "abc_field_processor.h"
-#include "abc2program_log.h"
 #include "abc_literal_array_processor.h"
 #include "file-inl.h"
 #include "literal_data_accessor.h"
@@ -25,7 +24,7 @@ AbcFieldProcessor::AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2P
                                      pandasm::Record &record)
     : AbcFileEntityProcessor(entity_id, entity_container), record_(record),
       type_converter_(entity_container),
-      field_(pandasm::Field(LANG_ECMA))
+      field_(pandasm::Field(record.language))
 {
     field_data_accessor_ = std::make_unique<panda_file::FieldDataAccessor>(*file_, entity_id_);
 }
@@ -47,6 +46,7 @@ void AbcFieldProcessor::FillFieldName()
 {
     panda_file::File::EntityId field_name_id = field_data_accessor_->GetNameId();
     field_.name = GetStringById(field_name_id);
+    type_converter_.EntityContainer().ModifyPkgNameForFieldName(field_.name);
 }
 
 void AbcFieldProcessor::FillFieldType()

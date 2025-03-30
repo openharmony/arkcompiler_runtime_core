@@ -59,31 +59,31 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 
 class LibAbcKitCreateBinInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAdd, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAdd, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstTest, CreateAddValid)
 {
     ValidTest(g_statG->iCreateAdd, ABCKIT_ISA_API_STATIC_OPCODE_ADD, "12\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMul, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMul, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstTest, CreateMulValid)
 {
     ValidTest(g_statG->iCreateMul, ABCKIT_ISA_API_STATIC_OPCODE_MUL, "20\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateDiv, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateDiv, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstTest, CreateDivValid)
 {
     ValidTest(g_statG->iCreateDiv, ABCKIT_ISA_API_STATIC_OPCODE_DIV, "5\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMod, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMod, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstTest, CreateModValid)
 {
     ValidTest(g_statG->iCreateMod, ABCKIT_ISA_API_STATIC_OPCODE_MOD, "0\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateSub, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateSub, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateBinInstTest, CreateSubValid)
 {
     ValidTest(g_statG->iCreateSub, ABCKIT_ISA_API_STATIC_OPCODE_SUB, "8\n");

@@ -16,9 +16,6 @@
 #include "os/file.h"
 
 #include <fcntl.h>
-#include <string_view>
-
-#include "macros.h"
 
 namespace panda::os::file {
 

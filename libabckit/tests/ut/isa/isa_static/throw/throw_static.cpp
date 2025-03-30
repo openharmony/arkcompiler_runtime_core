@@ -36,7 +36,7 @@ auto g_statG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitThrowStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateThrow, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateThrow, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitThrowStaticTest, LibAbcKitTestThrow)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/throw/throw_static.abc",

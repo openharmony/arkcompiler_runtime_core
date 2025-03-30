@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_NAMESPACE_H
 
 #include "../core/namespace.h"
+#include "./function.h"
 #include "../base_concepts.h"
 
 namespace abckit::arkts {
@@ -69,8 +70,11 @@ public:
      */
     ~Namespace() override = default;
 
-    // Other API's.
-    // ...
+    /**
+     * @brief Returns constructor function for Namespace.
+     * @return Function that is invoked upon Namespace construction.
+     */
+    Function GetConstructor() const;
 
 private:
     /**

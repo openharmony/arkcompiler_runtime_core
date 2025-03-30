@@ -27,7 +27,7 @@ static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitInspectApiStringsTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=InspectApiImpl::abckitStringToString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::abckitStringToString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiStringsTest, AbckitStringToStringStatic)
 {
     ASSERT_NE(g_impl, nullptr);
@@ -45,7 +45,7 @@ TEST_F(LibAbcKitInspectApiStringsTest, AbckitStringToStringStatic)
     ASSERT_EQ(name, testString);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::abckitStringToString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::abckitStringToString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiStringsTest, AbckitStringToStringDynamic)
 {
     ASSERT_NE(g_impl, nullptr);

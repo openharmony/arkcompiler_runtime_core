@@ -44,7 +44,7 @@ static void TransformIrCreateNullPtrInstValid(AbckitGraph *graph)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::gCreateNullPtr, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::gCreateNullPtr, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateNullPtrInstTest, CreateNullPtrValid)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_nullptr/create_nullptr_static.abc",

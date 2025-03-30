@@ -253,84 +253,90 @@ static void EnumerateAnonymousFunctions(const char *abcFilePath, TestStructType 
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::fileEnumerateModules, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::fileEnumerateModules, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicFileEnumerateModules)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateNamespaces, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateNamespaces, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicModuleEnumerateNamespaces)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicModuleEnumerateClasses)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateTopLevelFunctions, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateTopLevelFunctions, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicModuleEnumerateTopLevelFunctions)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::namespaceGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicNamespaceGetName)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateNamespaces, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateNamespaces, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicNamespaceEnumerateNamespaces)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateClasses, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateClasses, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicNamespaceEnumerateClasses)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateTopLevelFunctions, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::namespaceEnumerateTopLevelFunctions, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicNamespaceEnumerateTopLevelFunctions)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicClassEnumerateMethods)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionEnumerateNestedFunctions, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionEnumerateNestedFunctions, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicFunctionEnumerateNestedFunctions)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionEnumerateNestedClasses, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionEnumerateNestedClasses, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicFunctionEnumerateNestedClasses)
 {
     EnumerateAllMethods(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic.abc",
                         g_namesDynamic);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateAnonymousFunctions, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateAnonymousFunctions, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicClassEnumerateAnonymousFunctions)
 {
     std::cerr << __PRETTY_FUNCTION__ << '\n';
@@ -353,7 +359,8 @@ TEST_F(LibAbcKitInspectApiEnumeratorsTest, DynamicClassEnumerateAnonymousFunctio
                                 testStruct);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateAnonymousFunctions, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateAnonymousFunctions, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiEnumeratorsTest, StaticClassEnumerateAnonymousFunctions)
 {
     TestStructType testStruct;

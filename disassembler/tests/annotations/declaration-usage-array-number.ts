@@ -17,8 +17,8 @@
     a: number[];
 }
 
-@#Anno({a: [1, -2, 3]})
+@__$$ETS_ANNOTATION$$__Anno({a: [1, -2, 3]})
 class A {
-    @#Anno({a: new Array<number>()})
+    @__$$ETS_ANNOTATION$$__Anno({a: new Array<number>()})
     foo() {}
 }

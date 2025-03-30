@@ -148,7 +148,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
     TransformIrEpilog(graph, userData, time, callInst);
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal, extension=c
 TEST_F(LibAbcKitInternalTest, LibAbcKitTestICSlotAllocator)
 {
     auto output =
@@ -160,11 +160,12 @@ TEST_F(LibAbcKitInternalTest, LibAbcKitTestICSlotAllocator)
         ABCKIT_ABC_DIR "internal/ICSlotAllocator/ICSlotAllocator_modified.abc", "handle",
         [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
             UserData data = {};
-            data.print = g_implM->createString(file, "print");
-            data.date = g_implM->createString(file, "Date");
-            data.getTime = g_implM->createString(file, "getTime");
-            data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle");
-            data.consume = g_implM->createString(file, "Ellapsed time:");
+            data.print = g_implM->createString(file, "print", strlen("print"));
+            data.date = g_implM->createString(file, "Date", strlen("Date"));
+            data.getTime = g_implM->createString(file, "getTime", strlen("getTime"));
+            data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle",
+                                             strlen("file: src/MyClass, function: MyClass.handle"));
+            data.consume = g_implM->createString(file, "Ellapsed time:", strlen("Ellapsed time:"));
             TransformIr(graph, &data);
         },
         [](AbckitGraph *graph) {
@@ -190,7 +191,6 @@ TEST_F(LibAbcKitInternalTest, LibAbcKitTestICSlotAllocator)
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_SUB2, 0XA},
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, 0X1A},
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, 0XB},
-                                                             {ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, -1},
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, -1}});
             // NOLINTEND(readability-magic-numbers)
         });

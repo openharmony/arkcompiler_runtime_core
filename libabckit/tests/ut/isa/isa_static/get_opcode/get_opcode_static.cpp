@@ -65,7 +65,7 @@ void InspectIr(AbckitGraph *graph)
 
 class LibAbcKitIgetOpcodeStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iGetOpcode, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iGetOpcode, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIgetOpcodeStaticTest, LibAbcKitTestIgetOpcode)
 {
     helpers::InspectMethod(

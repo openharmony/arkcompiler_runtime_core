@@ -25,6 +25,7 @@ class AssemblyEmitterTest : public testing::Test {
 
 static const std::string SLOT_NUMBER = "L_ESSlotNumberAnnotation;";
 static const std::string CONCURRENT_MODULE_REQUESTS = "L_ESConcurrentModuleRequestsAnnotation;";
+static const std::string EXPECTED_PROPERTY = "L_ESExpectedPropertyCountAnnotation;";
 
 /**
  * @tc.name: assembly_access_flag_test_001
@@ -48,7 +49,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_access_flag_test_001, TestSize.Level1)
         auto class_name = class_accessor.GetName();
         auto access_flag = class_accessor.GetAccessFlags();
         auto name = std::string(utf::Mutf8AsCString(class_name.data));
-        if (name == SLOT_NUMBER || name == CONCURRENT_MODULE_REQUESTS) {
+        if (name == SLOT_NUMBER || name == CONCURRENT_MODULE_REQUESTS || name == EXPECTED_PROPERTY) {
             EXPECT_EQ(access_flag, ACC_PUBLIC | ACC_ANNOTATION);
         } else {
             EXPECT_EQ(access_flag, ACC_PUBLIC);

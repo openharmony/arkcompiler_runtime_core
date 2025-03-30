@@ -77,6 +77,7 @@ ohos_shared_library("abc2program") {
   if (is_mingw) {
     output_extension = "dll"
   }
+  cflags = [ "-Wno-c++20-designator" ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -107,6 +108,8 @@ ohos_static_library("abc2program_frontend_static") {
   } else {
     external_deps = [ "bounds_checking_function:libsec_static" ]
   }
+  cflags = [ "-Wno-c++20-designator" ]
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }

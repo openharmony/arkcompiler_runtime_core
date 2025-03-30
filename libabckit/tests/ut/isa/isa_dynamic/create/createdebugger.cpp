@@ -37,7 +37,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitIcreateTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDebugger, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDebugger, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIcreateTest, IcreateDebugger)
 {
     helpers::TransformMethod(
@@ -63,8 +63,7 @@ TEST_F(LibAbcKitIcreateTest, IcreateDebugger)
                   {2},
                   {
                       {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEBUGGER, {}},
-                      {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                      {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{1}, {}, {}}});
             helpers::VerifyGraph(graph, bbSchemas);

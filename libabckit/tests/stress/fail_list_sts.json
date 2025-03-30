@@ -1,0 +1,12 @@
+{
+    "/tmp/abckit_test_ets/escompat/WeakSetGCTest.sts": 1,
+    "/tmp/abckit_test_ets/escompat/WeakMapGCTest.sts": 1,
+    "/tmp/abckit_test_ets/regression/16169_false_unreachable_statement_after_class.sts": 1,
+    "/tmp/abckit_test_ets/spec/03.types/References_Types/Tuples_type/tuple_as_param_default_1.sts": 1,
+    "/tmp/abckit_test_ets/spec/09.classes/Constructor_Declaration/constructor_default_params_0004.sts": 1,
+    "/tmp/abckit_test_ets/spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.4.Optional_Parameters/function-optional-parameters-03.sts": 1,
+    "/tmp/abckit_test_ets/spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_nested_04.sts": 1,
+    "/tmp/abckit_test_ets/spec/03.types/References_Types/3.8.12.Nullish_Types/defined-primitive-type-nullable-union_2.sts": 1,
+    "/tmp/abckit_test_ets/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-lambda-no-param.sts": 1,
+    "/tmp/abckit_test_ets/spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-lambda-param-non-empty.sts": 1
+}

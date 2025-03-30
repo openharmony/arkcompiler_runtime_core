@@ -31,7 +31,7 @@ static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitModifyApiTypesTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=InspectApiImpl::typeGetTypeId, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::typeGetTypeId, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, TypeGetTypeIdDynamic)
 {
     AbckitFile *file = nullptr;
@@ -51,7 +51,7 @@ TEST_F(LibAbcKitModifyApiTypesTest, TypeGetTypeIdDynamic)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::typeGetTypeId, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::typeGetTypeId, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, TypeGetTypeIdStatic)
 {
     AbckitFile *file = nullptr;
@@ -71,7 +71,7 @@ TEST_F(LibAbcKitModifyApiTypesTest, TypeGetTypeIdStatic)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::typeGetReferenceClass, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::typeGetReferenceClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, TypeGetReferenceClassStatic)
 {
     AbckitFile *file = nullptr;

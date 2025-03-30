@@ -26,8 +26,8 @@ namespace libabckit::test::helpers_nullptr {
 
 void TestNullptr(void (*apiToCheck)(AbckitFile *));
 void TestNullptr(void (*apiToCheck)(AbckitGraph *));
-void TestNullptr(AbckitFile *(*apiToCheck)(const char *));
-void TestNullptr(void (*apiToCheck)(AbckitFile *, const char *));
+void TestNullptr(AbckitFile *(*apiToCheck)(const char *, size_t));
+void TestNullptr(void (*apiToCheck)(AbckitFile *, const char *, size_t));
 void TestNullptr(AbckitCoreAnnotationElement *(*apiToCheck)(AbckitArktsAnnotationElement *));
 void TestNullptr(AbckitCoreAnnotationInterfaceField *(*apiToCheck)(AbckitArktsAnnotationInterfaceField *));
 void TestNullptr(AbckitCoreAnnotationInterface *(*apiToCheck)(AbckitArktsAnnotationInterface *));
@@ -67,6 +67,7 @@ void TestNullptr(AbckitArktsImportDescriptor *(*apiToCheck)(AbckitArktsModule *,
 void TestNullptr(void (*apiToCheck)(AbckitArktsModule *, AbckitArktsExportDescriptor *));
 void TestNullptr(void (*apiToCheck)(AbckitArktsModule *, AbckitArktsImportDescriptor *));
 void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *, AbckitInst *));
+void TestNullptr(AbckitBasicBlock *(*apiToCheck)(AbckitBasicBlock *, AbckitInst *, bool));
 void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *, AbckitBasicBlock *));
 void TestNullptr(bool (*apiToCheck)(AbckitBasicBlock *, AbckitBasicBlock *));
 void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *));
@@ -116,6 +117,7 @@ void TestNullptr(AbckitString *(*apiToCheck)(AbckitInst *));
 void TestNullptr(AbckitType *(*apiToCheck)(AbckitInst *));
 void TestNullptr(void (*apiToCheck)(AbckitInst *));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, size_t, uint64_t));
+void TestNullptr(AbckitBitImmSize (*apiToCheck)(AbckitInst *, size_t));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, AbckitInst *, uint32_t));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, size_t, ...));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, AbckitLiteralArray *));
@@ -271,17 +273,17 @@ void TestNullptr(AbckitValue *(*apiToCheck)(AbckitFile *, AbckitValue **, size_t
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, bool));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, double));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, float));
-void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, const char *));
+void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, const char *, size_t));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, uint16_t));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, uint32_t));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, uint64_t));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, uint8_t));
 void TestNullptr(AbckitLiteral *(*apiToCheck)(AbckitFile *, AbckitCoreFunction *));
 void TestNullptr(AbckitType *(*apiToCheck)(AbckitFile *, AbckitCoreClass *));
-void TestNullptr(AbckitString *(*apiToCheck)(AbckitFile *, const char *));
+void TestNullptr(AbckitString *(*apiToCheck)(AbckitFile *, const char *, size_t));
 void TestNullptr(AbckitType *(*apiToCheck)(AbckitFile *, AbckitTypeId));
 void TestNullptr(AbckitValue *(*apiToCheck)(AbckitFile *, double));
-void TestNullptr(AbckitValue *(*apiToCheck)(AbckitFile *, const char *));
+void TestNullptr(AbckitValue *(*apiToCheck)(AbckitFile *, const char *, size_t));
 void TestNullptr(AbckitValue *(*apiToCheck)(AbckitFile *, bool));
 void TestNullptr(AbckitArktsModule *(*apiToCheck)(AbckitFile *, const AbckitArktsV1ExternalModuleCreateParams *));
 void TestNullptr(AbckitJsModule *(*apiToCheck)(AbckitFile *, const AbckitJsExternalModuleCreateParams *));

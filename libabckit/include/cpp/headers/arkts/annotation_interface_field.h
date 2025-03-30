@@ -39,9 +39,9 @@ class AnnotationInterfaceField : public core::AnnotationInterfaceField {
 public:
     /**
      * @brief Constructor Arkts API AnnotationInterfaceField from the Core API with compatibility check
-     * @param other - Core API AnnotationInterfaceField
+     * @param coreOther - Core API AnnotationInterfaceField
      */
-    explicit AnnotationInterfaceField(const core::AnnotationInterfaceField &other);
+    explicit AnnotationInterfaceField(const core::AnnotationInterfaceField &coreOther);
 
     /**
      * @brief Construct a new Annotation Interface Field object
@@ -74,8 +74,6 @@ public:
      * @brief Destroy the Annotation Interface Field object
      */
     ~AnnotationInterfaceField() override = default;
-    // Other API.
-    // ...
 
 private:
     /**

@@ -35,7 +35,7 @@ class LibAbcKitCreateReturnInstTest : public ::testing::Test {};
 
 static void TransformIrCreateReturnInstValid(AbckitGraph *graph)
 {
-    AbckitInst *firstInst = g_implG->gCreateConstantI64(graph, 5);
+    AbckitInst *firstInst = g_implG->gFindOrCreateConstantI64(graph, 5);
     AbckitInst *mainInst = g_statG->iCreateReturn(graph, firstInst);
     ASSERT_NE(mainInst, nullptr);
 
@@ -70,7 +70,7 @@ static void TransformIrCreateReturnVoidInstValid(AbckitGraph *graph)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturn, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturn, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateReturnInstTest, CreateReturnValid)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static.abc",
@@ -100,7 +100,7 @@ TEST_F(LibAbcKitCreateReturnInstTest, CreateReturnValid)
     EXPECT_TRUE(helpers::Match(output, "5\n11\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturnVoid, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturnVoid, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateReturnInstTest, CreateReturnVoidValid)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/return/return_static.abc",

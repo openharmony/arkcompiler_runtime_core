@@ -413,55 +413,63 @@ static void TestSuperCallArrowRangeImplLarge(bool isWideMode)
     EXPECT_TRUE(helpers::Match(output, "Hello\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallthisrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallthisrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateSuperCallThisRange)
 {
     TestSuperCallThisRangeImpl(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallthisrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallthisrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateSuperCallThisRange_large)
 {
     TestSuperCallThisRangeImplLarge(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallthisrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallthisrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateWideSuperCallThisRange)
 {
     TestSuperCallThisRangeImpl(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallthisrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallthisrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateWideSuperCallThisRange_large)
 {
     TestSuperCallThisRangeImplLarge(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallspread, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallspread, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateSuperCallSpread)
 {
     TestSuperCallSpreadImpl();
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallarrowrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallarrowrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateSuperCallArrowRange)
 {
     TestSuperCallArrowRangeImpl(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallarrowrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallarrowrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateSuperCallArrowRange_large)
 {
     TestSuperCallArrowRangeImplLarge(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallarrowrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallarrowrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateWideSuperCallArrowRange)
 {
     TestSuperCallArrowRangeImpl(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallarrowrange, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallarrowrange, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynSuperCall, CreateWideSuperCallArrowRange_large)
 {
     TestSuperCallArrowRangeImplLarge(true);

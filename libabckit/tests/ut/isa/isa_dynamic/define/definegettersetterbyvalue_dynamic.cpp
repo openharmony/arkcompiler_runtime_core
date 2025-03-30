@@ -34,7 +34,8 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynDefineGetterSetter : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_1)
 {
     auto output =
@@ -50,22 +51,22 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_1)
             auto *createObj = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *ldfalse = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE);
-            auto *getterStr = g_implM->createString(file, "getter");
+            auto *getterStr = g_implM->createString(file, "getter", strlen("getter"));
             auto *loadString = g_dynG->iCreateLoadString(graph, getterStr);
             auto *definegetter = g_dynG->iCreateDefinegettersetterbyvalue(graph, ldfalse, createObj, loadString,
                                                                           getterFunc, ldundefined);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *ldundefinedLast = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(loadString, ldundefinedLast);
-            g_implG->iInsertBefore(definegetter, ldundefinedLast);
+            auto *returnundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(loadString, returnundefined);
+            g_implG->iInsertBefore(definegetter, returnundefined);
 
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *ldglobal = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createObj, getterStr);
             auto *callarg = g_dynG->iCreateCallarg1(graph, ldglobal, ldobjbyname);
-            g_implG->iInsertBefore(ldglobal, ldundefinedLast);
-            g_implG->iInsertBefore(ldobjbyname, ldundefinedLast);
-            g_implG->iInsertBefore(callarg, ldundefinedLast);
+            g_implG->iInsertBefore(ldglobal, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
+            g_implG->iInsertBefore(callarg, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -74,7 +75,8 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_1)
     EXPECT_TRUE(helpers::Match(output, "getter\n123\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_2)
 {
     auto output =
@@ -90,18 +92,18 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_2)
             auto *createObj = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
             auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
             auto *ldfalse = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE);
-            auto *setterStr = g_implM->createString(file, "setter");
+            auto *setterStr = g_implM->createString(file, "setter", strlen("setter"));
             auto *loadString = g_dynG->iCreateLoadString(graph, setterStr);
             auto *definesetter = g_dynG->iCreateDefinegettersetterbyvalue(graph, ldfalse, createObj, loadString,
                                                                           ldundefined, setterFunc);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *ldundefinedLast = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(loadString, ldundefinedLast);
-            g_implG->iInsertBefore(definesetter, ldundefinedLast);
+            auto *returnundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(loadString, returnundefined);
+            g_implG->iInsertBefore(definesetter, returnundefined);
 
-            auto *const1 = g_implG->gCreateConstantU64(graph, 5);
+            auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 5);
             auto *stobj = g_dynG->iCreateStobjbyname(graph, const1, setterStr, createObj);
-            g_implG->iInsertBefore(stobj, ldundefinedLast);
+            g_implG->iInsertBefore(stobj, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -110,7 +112,8 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_2)
     EXPECT_TRUE(helpers::Match(output, "setter\n5\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_3)
 {
     auto output =
@@ -125,26 +128,26 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_3)
             auto *getterFunc = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC);
             auto *createObj = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
             auto *ldfalse = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDFALSE);
-            auto *getterStr = g_implM->createString(file, "getter");
+            auto *getterStr = g_implM->createString(file, "getter", strlen("getter"));
             auto *loadString = g_dynG->iCreateLoadString(graph, getterStr);
             auto *definesetter =
                 g_dynG->iCreateDefinegettersetterbyvalue(graph, ldfalse, createObj, loadString, getterFunc, getterFunc);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *ldundefinedLast = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(loadString, ldundefinedLast);
-            g_implG->iInsertBefore(definesetter, ldundefinedLast);
+            auto *returnundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(loadString, returnundefined);
+            g_implG->iInsertBefore(definesetter, returnundefined);
 
-            auto *const1 = g_implG->gCreateConstantU64(graph, 5);
+            auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 5);
             auto *stobj = g_dynG->iCreateStobjbyname(graph, const1, getterStr, createObj);
-            g_implG->iInsertBefore(stobj, ldundefinedLast);
+            g_implG->iInsertBefore(stobj, returnundefined);
 
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *ldglobal = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createObj, getterStr);
             auto *callarg = g_dynG->iCreateCallarg1(graph, ldglobal, ldobjbyname);
-            g_implG->iInsertBefore(ldglobal, ldundefinedLast);
-            g_implG->iInsertBefore(ldobjbyname, ldundefinedLast);
-            g_implG->iInsertBefore(callarg, ldundefinedLast);
+            g_implG->iInsertBefore(ldglobal, returnundefined);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
+            g_implG->iInsertBefore(callarg, returnundefined);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR

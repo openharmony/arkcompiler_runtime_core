@@ -141,14 +141,14 @@ def template(name, inst, indent, context = {})
 end
 
 def get_cc(inst)
-  return 'compiler::ConditionCode::CC_EQ' if inst.opcode.start_with? 'jeq'
-  return 'compiler::ConditionCode::CC_NE' if inst.opcode.start_with? 'jne'
-  return 'compiler::ConditionCode::CC_LT' if inst.opcode.start_with? 'jlt'
-  return 'compiler::ConditionCode::CC_GT' if inst.opcode.start_with? 'jgt'
-  return 'compiler::ConditionCode::CC_LE' if inst.opcode.start_with? 'jle'
-  return 'compiler::ConditionCode::CC_GE' if inst.opcode.start_with? 'jge'
-  return 'compiler::ConditionCode::CC_EQ' if inst.opcode.start_with? 'jstricteq'
-  return 'compiler::ConditionCode::CC_NE' if inst.opcode.start_with? 'jnstricteq'
+  return 'ark::compiler::ConditionCode::CC_EQ' if inst.opcode.start_with? 'jeq'
+  return 'ark::compiler::ConditionCode::CC_NE' if inst.opcode.start_with? 'jne'
+  return 'ark::compiler::ConditionCode::CC_LT' if inst.opcode.start_with? 'jlt'
+  return 'ark::compiler::ConditionCode::CC_GT' if inst.opcode.start_with? 'jgt'
+  return 'ark::compiler::ConditionCode::CC_LE' if inst.opcode.start_with? 'jle'
+  return 'ark::compiler::ConditionCode::CC_GE' if inst.opcode.start_with? 'jge'
+  return 'ark::compiler::ConditionCode::CC_EQ' if inst.opcode.start_with? 'jstricteq'
+  return 'ark::compiler::ConditionCode::CC_NE' if inst.opcode.start_with? 'jnstricteq'
   raise 'get_cc: wrong opcode #{inst.opcode}'
 end
 
@@ -162,9 +162,6 @@ end
 #include "libabckit/src/irbuilder_dynamic/inst_builder_dyn-inl.h"
 
 namespace libabckit {
-
-// NOLINTNEXTLINE(google-build-using-namespace)
-using namespace ark;
 
 % additional_deprecated_opcodes = ["JNSTRICTEQUNDEFINED",
 %                                 "JSTRICTEQUNDEFINED",
@@ -285,10 +282,10 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInst* bcInst) // NOLINT(re
 %     name = opc
 %     acc_read = inst.acc.include?("in")
 %     acc_write = inst.acc.include?("out")
-%     ret_type = acc_write ? "compiler::DataType::ANY" : "compiler::DataType::VOID"
+%     ret_type = acc_write ? "ark::compiler::DataType::ANY" : "ark::compiler::DataType::VOID"
 %     iname = inst.intrinsic_name ? inst.intrinsic_name : opc
-%     intrinsicId = "compiler::RuntimeInterface::IntrinsicId::DYN_" + iname
-%     intrinsic_external_js_id = "compiler::RuntimeInterface::IntrinsicId::DYN_" + opc
+%     intrinsicId = "ark::compiler::RuntimeInterface::IntrinsicId::DYN_" + iname
+%     intrinsic_external_js_id = "ark::compiler::RuntimeInterface::IntrinsicId::DYN_" + opc
         case BytecodeInst::Opcode::<%= opc %>:
         {
             auto intrinsicId = <%= intrinsic_external_js_id %>;
@@ -331,7 +328,7 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInst* bcInst) // NOLINT(re
             {
                 auto input = GetDefinitionAcc();
                 inst->AppendInput(input);
-                inst->AddInputType(compiler::DataType::ANY);
+                inst->AddInputType(ark::compiler::DataType::ANY);
             }
 %     end
 %     imm_index = 0
@@ -346,7 +343,7 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInst* bcInst) // NOLINT(re
             {
                 auto input = GetDefinition(bcInst->GetVReg(<%= vreg_index %>));
                 inst->AppendInput(input);
-                inst->AddInputType(compiler::DataType::ANY);
+                inst->AddInputType(ark::compiler::DataType::ANY);
             }
 %           vreg_index = vreg_index + 1
 %       elsif param.id?
@@ -374,7 +371,7 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInst* bcInst) // NOLINT(re
             for (uint32_t i = 1; i < <%= num_actual_vregs %>; ++i) {
                 auto input = GetDefinition(startReg + i);
                 inst->AppendInput(input);
-                inst->AddInputType(compiler::DataType::ANY);
+                inst->AddInputType(ark::compiler::DataType::ANY);
             }
 %     end
             AddInstruction(inst);

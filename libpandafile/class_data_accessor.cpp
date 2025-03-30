@@ -15,9 +15,6 @@
 
 #include "class_data_accessor.h"
 
-#include "utils/leb128.h"
-#include "utils/utf.h"
-
 namespace panda::panda_file {
 
 ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId class_id)

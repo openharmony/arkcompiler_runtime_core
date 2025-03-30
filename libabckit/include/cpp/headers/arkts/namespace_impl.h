@@ -29,6 +29,16 @@ inline AbckitArktsNamespace *Namespace::TargetCast() const
 
 inline Namespace::Namespace(const core::Namespace &other) : core::Namespace(other), targetChecker_(this) {}
 
+inline Function Namespace::GetConstructor() const
+{
+    auto arktsNamespace = GetApiConfig()->cArktsIapi_->coreNamespaceToArktsNamespace(GetView());
+    CheckError(GetApiConfig());
+    auto arktsCon = GetApiConfig()->cArktsIapi_->arktsV1NamespaceGetConstructor(arktsNamespace);
+    CheckError(GetApiConfig());
+    auto coreCon = GetApiConfig()->cArktsIapi_->arktsFunctionToCoreFunction(arktsCon);
+    return Function(core::Function(coreCon, GetApiConfig(), GetResource()));
+}
+
 }  // namespace abckit::arkts
 
 #endif  // CPP_ABCKIT_ARKTS_NAMESPACE_IMPL_H

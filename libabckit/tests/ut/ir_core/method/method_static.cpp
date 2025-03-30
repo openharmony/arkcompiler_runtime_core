@@ -45,7 +45,7 @@ void TransformSetSetCallMethod(AbckitGraph *graph, AbckitCoreFunction *bar)
 
 class LibAbcKitMethodStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::iSetFunction, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetFunction, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitMethodStaticTest, LibAbcKitTestSetCallMethod)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc",

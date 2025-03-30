@@ -36,8 +36,6 @@ void TransformIR(AbckitGraph *graph)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    g_implG->bbEraseSuccBlock(startBB, 0);
-
     AbckitInst *param1 = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_PARAMETER);
     ASSERT_NE(param1, nullptr);
     AbckitInst *param0 = g_implG->iGetPrev(param1);
@@ -52,10 +50,11 @@ void TransformIR(AbckitGraph *graph)
     g_implG->bbAddInstBack(ifBB, ifInst);
 
     g_implG->bbAppendSuccBlock(ifBB, succBBs[0]);
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
 
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(ifBB, falseBB);
-    auto *constm1 = g_implG->gCreateConstantI32(graph, -1);
+    auto *constm1 = g_implG->gFindOrCreateConstantI32(graph, -1);
 
     g_implG->bbAppendSuccBlock(falseBB, endBB);
 
@@ -66,7 +65,7 @@ void TransformIR(AbckitGraph *graph)
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticParameterCheck)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/parameter_check/parameter_check_static.abc",

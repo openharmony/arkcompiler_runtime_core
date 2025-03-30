@@ -35,7 +35,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynIsinInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsin, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsin, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynIsinInstTest, CreateDynIsinValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/isin/isin_dynamic.abc", "isin_dynamic");

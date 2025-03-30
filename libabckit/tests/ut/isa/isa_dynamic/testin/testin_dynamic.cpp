@@ -95,7 +95,7 @@ static void TestImpl(uint64_t slot, const char *expectedOutput)
     EXPECT_TRUE(helpers::Match(output, expectedOutput));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTestin, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTestin, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynTestin, CreateTestIn_1)
 {
     TestImpl(0x0, "true\nfalse\n");

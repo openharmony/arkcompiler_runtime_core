@@ -79,7 +79,7 @@ export interface IApiResponse {
 export const handleResponseLogs = createAsyncThunk(
     'logs/compileLogs',
     async (response: IApiResponse, thunkAPI) => {
-        
+
         const handleLog = (
             data: ICompileData | IRunData | IDisassemblyData | undefined,
             logTypeOut: ELogType,

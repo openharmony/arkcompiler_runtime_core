@@ -37,7 +37,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitIrInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IsetInput_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -53,7 +53,7 @@ TEST_F(LibAbcKitIrInstTest, IsetInput_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IsetInput_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func",
@@ -68,7 +68,7 @@ TEST_F(LibAbcKitIrInstTest, IsetInput_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetInput, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetInput, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetInput_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -98,7 +98,7 @@ TEST_F(LibAbcKitIrInstTest, IgetInput_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetInput, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetInput, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetInput_3)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func",
@@ -125,7 +125,7 @@ TEST_F(LibAbcKitIrInstTest, IgetInput_4)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetInputCount, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetInputCount, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetInputCount_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -138,7 +138,7 @@ TEST_F(LibAbcKitIrInstTest, IgetInputCount_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetInputCount, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetInputCount, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetInputCount_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func",
@@ -150,13 +150,13 @@ TEST_F(LibAbcKitIrInstTest, IgetInputCount_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetImmediateCount, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateCount, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetImmediateCount_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
-                               auto const2 = g_implG->gCreateConstantU64(graph, 2);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto const2 = g_implG->gFindOrCreateConstantU64(graph, 2);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
                                auto *add = g_statG->iCreateAdd(graph, const1, const2);
 
@@ -167,12 +167,12 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediateCount_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetImmediateCount, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateCount, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetImmediateCount_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
                                auto *getnextpropname = g_dynG->iCreateGetnextpropname(graph, const1);
 
@@ -183,12 +183,12 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediateCount_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetImmediate, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediate, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetImmediate_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
 
                                ASSERT_EQ(g_implG->iGetImmediate(addi, 0), 2);
@@ -201,8 +201,8 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediate_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
-                               auto const2 = g_implG->gCreateConstantU64(graph, 2);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto const2 = g_implG->gFindOrCreateConstantU64(graph, 2);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
                                auto *add = g_statG->iCreateAdd(graph, const1, const2);
 
@@ -215,7 +215,7 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediate_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetImmediate, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediate, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetImmediate_3)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
@@ -232,7 +232,7 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediate_4)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
                                auto *getnextpropname = g_dynG->iCreateGetnextpropname(graph, const1);
 
@@ -245,12 +245,12 @@ TEST_F(LibAbcKitIrInstTest, IgetImmediate_4)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetImmediate, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetImmediate, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IsetImmediate_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
 
                                ASSERT_EQ(g_implG->iGetImmediate(addi, 0), 2);
@@ -267,8 +267,8 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
-                               auto const2 = g_implG->gCreateConstantU64(graph, 2);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto const2 = g_implG->gFindOrCreateConstantU64(graph, 2);
                                auto *addi = g_statG->iCreateAddI(graph, const1, 2);
                                auto *add = g_statG->iCreateAdd(graph, const1, const2);
 
@@ -281,7 +281,7 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetImmediate, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetImmediate, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IsetImmediate_3)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
@@ -302,7 +302,7 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_4)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                               auto const1 = g_implG->gCreateConstantU64(graph, 1);
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
                                auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
                                auto *getnextpropname = g_dynG->iCreateGetnextpropname(graph, const1);
 
@@ -315,7 +315,73 @@ TEST_F(LibAbcKitIrInstTest, IsetImmediate_4)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetNext, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetImmediate, abc-kind=ArkTS1, category=negative
+TEST_F(LibAbcKitIrInstTest, IsetImmediate_5)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediate(newlexenv, 0), 2);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                               g_implG->iSetImmediate(newlexenv, 0, 0x100);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+                               ASSERT_EQ(g_implG->iGetImmediate(newlexenv, 0), 2);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_1)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *newlexenv = g_dynG->iCreateNewlexenv(graph, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(newlexenv, 0), AbckitBitImmSize::BITSIZE_8);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_2)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *wideldlexvar = g_dynG->iCreateWideLdlexvar(graph, 1000, 1);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(wideldlexvar, 1), AbckitBitImmSize::BITSIZE_16);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_3)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto *addi = g_statG->iCreateAddI(graph, const1, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(addi, 0), AbckitBitImmSize::BITSIZE_8);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetImmediateSize, abc-kind=ArkTS2, category=positive, extension=c
+TEST_F(LibAbcKitIrInstTest, IgetImmediateSize_4)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
+                               auto *xori = g_statG->iCreateXorI(graph, const1, 2);
+
+                               ASSERT_EQ(g_implG->iGetImmediateSize(xori, 0), AbckitBitImmSize::BITSIZE_32);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iGetNext, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetNext_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -329,7 +395,7 @@ TEST_F(LibAbcKitIrInstTest, IgetNext_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetNext, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetNext, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetNext_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
@@ -342,7 +408,7 @@ TEST_F(LibAbcKitIrInstTest, IgetNext_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetPrev, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetPrev, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetPrev_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -357,7 +423,7 @@ TEST_F(LibAbcKitIrInstTest, IgetPrev_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetPrev, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetPrev, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetPrev_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
@@ -371,7 +437,7 @@ TEST_F(LibAbcKitIrInstTest, IgetPrev_2)
                            });
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetOpcode, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetOpcode, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetOpcode_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -384,7 +450,7 @@ TEST_F(LibAbcKitIrInstTest, IgetOpcode_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IinsertBefore_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -392,8 +458,8 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_1)
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                auto *start = helpers::BBgetSuccBlocks(g_implG->gGetStartBasicBlock(graph))[0];
                                auto *inst = g_implG->bbGetLastInst(start);
-                               auto *constOne = g_implG->gCreateConstantI64(graph, 1U);
-                               auto *constZero = g_implG->gCreateConstantI64(graph, 0U);
+                               auto *constOne = g_implG->gFindOrCreateConstantI64(graph, 1U);
+                               auto *constZero = g_implG->gFindOrCreateConstantI64(graph, 0U);
                                auto *instAdd = g_statG->iCreateAdd(graph, constOne, constZero);
                                g_implG->iInsertBefore(instAdd, inst);
                                ASSERT_EQ(g_implG->iGetPrev(inst), instAdd);
@@ -401,7 +467,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IinsertBefore_2)
 {
     helpers::TransformMethod(
@@ -412,7 +478,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_2)
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->bbGetFirstInst(start));
             auto *inst2 = g_implG->bbGetFirstInst(bb);
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_statG->iCreateNeg(graph, newInst);
             g_implG->iInsertBefore(negInst, inst2);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -434,15 +500,15 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_2)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IinsertBefore_3)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
                            [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                auto *start = helpers::BBgetSuccBlocks(g_implG->gGetStartBasicBlock(graph))[0];
                                auto *inst = g_implG->bbGetLastInst(start);
-                               auto *constOne = g_implG->gCreateConstantI64(graph, 1U);
-                               auto *constZero = g_implG->gCreateConstantI64(graph, 0U);
+                               auto *constOne = g_implG->gFindOrCreateConstantI64(graph, 1U);
+                               auto *constZero = g_implG->gFindOrCreateConstantI64(graph, 0U);
                                auto *instAdd = g_dynG->iCreateAdd2(graph, constOne, constZero);
                                g_implG->iInsertBefore(instAdd, inst);
                                ASSERT_EQ(g_implG->iGetPrev(inst), instAdd);
@@ -450,7 +516,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_3)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iInsertBefore, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IinsertBefore_4)
 {
     helpers::TransformMethod(
@@ -461,7 +527,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_4)
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->bbGetFirstInst(start))));
             auto *inst2 = g_implG->bbGetFirstInst(bb);
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_dynG->iCreateNeg(graph, newInst);
             g_implG->iInsertBefore(negInst, inst2);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -476,7 +542,6 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_4)
                   {2},
                   {
                       {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEG, {3}},
-                      {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
                       {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{1}, {}, {}}});
@@ -487,7 +552,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_4)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iInsertAfter, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iInsertAfter, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IinsertAfter_1)
 {
     helpers::TransformMethod(
@@ -497,11 +562,11 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_1)
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->bbGetFirstInst(start));
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_statG->iCreateNeg(graph, newInst);
             auto *addInst = g_statG->iCreateAdd(graph, negInst, newInst);
 
-            g_implG->bbEraseSuccBlock(start, 0);
+            g_implG->bbDisconnectSuccBlock(start, 0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *empty = g_implG->bbCreateEmpty(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -535,7 +600,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_1)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iInsertAfter, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iInsertAfter, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IinsertAfter_2)
 {
     helpers::TransformMethod(
@@ -545,11 +610,11 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_2)
             auto *start = g_implG->gGetStartBasicBlock(graph);
             auto *bb = helpers::BBgetSuccBlocks(start)[0];
             auto *inst = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->bbGetFirstInst(start))));
-            auto *newInst = g_implG->gCreateConstantI64(graph, 1U);
+            auto *newInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
             auto *negInst = g_dynG->iCreateNeg(graph, newInst);
             auto *addInst = g_dynG->iCreateAdd2(graph, negInst, newInst);
 
-            g_implG->bbEraseSuccBlock(start, 0);
+            g_implG->bbDisconnectSuccBlock(start, 0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *empty = g_implG->bbCreateEmpty(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -576,7 +641,6 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_2)
                  {{1},
                   {3},
                   {
-                      {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
                       {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{2}, {}, {}}});
@@ -587,7 +651,7 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_2)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetBasicBlock, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetBasicBlock, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetBasicBlock_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -601,7 +665,7 @@ TEST_F(LibAbcKitIrInstTest, IgetBasicBlock_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetBasicBlock, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetBasicBlock, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetBasicBlock_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
@@ -614,7 +678,20 @@ TEST_F(LibAbcKitIrInstTest, IgetBasicBlock_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iCheckDominance, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetGraph, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitIrInstTest, IgetGraph_1)
+{
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
+                           [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+                               auto *start = g_implG->gGetStartBasicBlock(graph);
+                               auto *inst = g_implG->bbGetFirstInst(start);
+
+                               ASSERT_EQ(g_implG->iGetGraph(inst), graph);
+                               ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                           });
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iCheckDominance, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IcheckDominance_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -629,7 +706,7 @@ TEST_F(LibAbcKitIrInstTest, IcheckDominance_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iCheckDominance, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iCheckDominance, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IcheckDominance_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
@@ -643,7 +720,7 @@ TEST_F(LibAbcKitIrInstTest, IcheckDominance_2)
                            });
 }
 
-// Test: test-kind=api, api=ApiImpl::GetLastError, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::GetLastError, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, GetLastError)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -658,7 +735,7 @@ TEST_F(LibAbcKitIrInstTest, GetLastError)
                            });
 }
 
-// Test: test-kind=api, api=ApiImpl::GetLastError, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::GetLastError, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, GetLastError_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
@@ -672,7 +749,7 @@ TEST_F(LibAbcKitIrInstTest, GetLastError_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetUserCount, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetUserCount, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetUserCount_1)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -686,7 +763,7 @@ TEST_F(LibAbcKitIrInstTest, IgetUserCount_1)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetUserCount, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetUserCount, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetUserCount_2)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "Test",
@@ -699,7 +776,7 @@ TEST_F(LibAbcKitIrInstTest, IgetUserCount_2)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iVisitUsers, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iVisitUsers, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IvisitUsers_1)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -720,7 +797,7 @@ TEST_F(LibAbcKitIrInstTest, IvisitUsers_1)
                            "test2:inst_manipulation_static.Test;i32;i32;", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iVisitUsers, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iVisitUsers, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IvisitUsers_2)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -739,7 +816,7 @@ TEST_F(LibAbcKitIrInstTest, IvisitUsers_2)
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iVisitInputs, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iVisitInputs, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IvisitInputs_1)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -757,7 +834,7 @@ TEST_F(LibAbcKitIrInstTest, IvisitInputs_1)
                            "test2:inst_manipulation_static.Test;i32;i32;", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iVisitInputs, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iVisitInputs, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IvisitInputs_2)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -781,9 +858,9 @@ TEST_F(LibAbcKitIrInstTest, IsetLiteralArray_1)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", &file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test", [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-        auto *constInst = g_implG->gCreateConstantI64(graph, 1U);
+        auto *constInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
         auto arr = std::vector<AbckitLiteral *>();
-        AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf");
+        AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
         AbckitLiteral *res2 = g_implM->createLiteralDouble(file, 1.0);
         arr.emplace_back(res1);
         arr.emplace_back(res2);
@@ -794,7 +871,7 @@ TEST_F(LibAbcKitIrInstTest, IsetLiteralArray_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetLiteralArray, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetLiteralArray, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IsetLiteralArray_2)
 {
     AbckitFile *file = nullptr;
@@ -808,7 +885,7 @@ TEST_F(LibAbcKitIrInstTest, IsetLiteralArray_2)
             auto *bb = g_implG->bbGetSuccBlock(start, 0);
             auto *inst = g_implG->bbGetFirstInst(bb);
             auto arr = std::vector<AbckitLiteral *>();
-            AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf");
+            AbckitLiteral *res1 = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
             AbckitLiteral *res2 = g_implM->createLiteralDouble(file, 1.0);
             arr.emplace_back(res1);
             arr.emplace_back(res2);
@@ -832,14 +909,14 @@ TEST_F(LibAbcKitIrInstTest, IgetLiteralArray_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     helpers::TransformMethod(file, "test",
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                                 auto *constInst = g_implG->gCreateConstantI64(graph, 1U);
+                                 auto *constInst = g_implG->gFindOrCreateConstantI64(graph, 1U);
                                  g_implG->iGetLiteralArray(constInst);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetLiteralArray, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetLiteralArray, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetLiteralArray_2)
 {
     AbckitFile *file = nullptr;
@@ -879,7 +956,7 @@ TEST_F(LibAbcKitIrInstTest, IgetLiteralArray_2)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetId_1)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -893,7 +970,7 @@ TEST_F(LibAbcKitIrInstTest, IgetId_1)
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test3", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetId_2)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -922,7 +999,7 @@ TEST_F(LibAbcKitIrInstTest, IgetId_2)
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "test3", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetId_3)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -937,7 +1014,7 @@ TEST_F(LibAbcKitIrInstTest, IgetId_3)
                            cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetId, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetId_4)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -966,7 +1043,7 @@ TEST_F(LibAbcKitIrInstTest, IgetId_4)
                            cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetFunction, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetFunction, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetFunction_1)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -987,7 +1064,7 @@ TEST_F(LibAbcKitIrInstTest, IgetFunction_1)
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc", "main", cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetFunction, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetFunction, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IgetFunction_2)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -1037,7 +1114,7 @@ TEST_F(LibAbcKitIrInstTest, IgetFunction_4)
                            cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, Iremove_1)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -1056,7 +1133,7 @@ TEST_F(LibAbcKitIrInstTest, Iremove_1)
     EXPECT_TRUE(helpers::Match(output, "test2\n1 2 3 4 5 0\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, Iremove_2)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -1097,7 +1174,7 @@ TEST_F(LibAbcKitIrInstTest, Iremove_3)
     EXPECT_TRUE(helpers::Match(output, "test2\n1 2 3 4 5 0\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, Iremove_4)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -1119,7 +1196,7 @@ TEST_F(LibAbcKitIrInstTest, Iremove_4)
     EXPECT_TRUE(helpers::Match(output, "10\naa\n4 5 6 7 undefined\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iRemove, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IcreateCallrange)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -1141,7 +1218,7 @@ TEST_F(LibAbcKitIrInstTest, IcreateCallrange)
     EXPECT_TRUE(helpers::Match(output, "10\naa\n4 5 6 7 undefined\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IappendInput_1)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -1154,7 +1231,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_1)
                                  auto *found = helpers::FindMethodByName(file, "test0:i32;void;");
                                  ASSERT_NE(found, nullptr);
                                  g_implG->iSetFunction(call, found);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 6);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 6);
                                  g_implG->iAppendInput(call, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                              });
@@ -1164,7 +1241,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_1)
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\ntest0  6\n1 2 3 4 5 0\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IappendInput_2)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -1175,7 +1252,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_2)
         // CC-OFFNXT(G.FMT.02)
         ASSERT_NE(found, nullptr);
         g_implG->iSetFunction(call, found);
-        auto *const1 = g_implG->gCreateConstantI32(graph, 6);
+        auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 6);
         g_implG->iAppendInput(call, const1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
@@ -1189,7 +1266,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_2)
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\ntest2\n1 2 3 4 5 0\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IappendInput_3)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -1200,7 +1277,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_3)
                              "func_main_0",
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *call = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRANGE);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iSetImmediate(call, 1, 5);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
                                  g_implG->iAppendInput(call, const1);
@@ -1220,7 +1297,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_4)
                              "main", [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *start = g_implG->gGetStartBasicBlock(graph);
                                  auto *inst = g_implG->bbGetFirstInst(start);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1233,7 +1310,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_5)
                              ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static_modified.abc",
                              "main", [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1248,7 +1325,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_6)
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *start = helpers::BBgetSuccBlocks(g_implG->gGetStartBasicBlock(graph))[0];
                                  auto *inst = g_implG->bbGetFirstInst(start);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1263,7 +1340,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_7)
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *start = g_implG->gGetStartBasicBlock(graph);
                                  auto *inst = g_implG->bbGetFirstInst(start);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(inst, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
@@ -1277,13 +1354,13 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_8)
                              "func_main_0",
                              [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
                                  auto *call = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0);
-                                 auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+                                 auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
                                  g_implG->iAppendInput(call, const1);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
                              });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iAppendInput, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IappendInput_9)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_static.abc",
@@ -1297,7 +1374,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_9)
             helpers::FindMethodByName(file, "_ctor_:inst_manipulation_static.Test;i32;i32;i32;i32;i32;i32;void;");
         ASSERT_NE(found, nullptr);
         g_implG->iSetFunction(call, found);
-        auto *const1 = g_implG->gCreateConstantI32(graph, 8);
+        auto *const1 = g_implG->gFindOrCreateConstantI32(graph, 8);
         g_implG->iAppendInput(call, const1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
@@ -1310,7 +1387,7 @@ TEST_F(LibAbcKitIrInstTest, IappendInput_9)
     EXPECT_TRUE(helpers::Match(output, "test\ntest2\n1 2 3 4 5 8\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iCheckIsCall, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iCheckIsCall, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IcheckIsCall_1)
 {
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -1344,7 +1421,7 @@ TEST_F(LibAbcKitIrInstTest, IcheckIsCall_1)
                            cb);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iCheckIsCall, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iCheckIsCall, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, IcheckIsCall_2)
 {
     helpers::InspectMethod(
@@ -1414,12 +1491,11 @@ static void CompareDump1(std::stringstream &ss)
         // CC-OFFNXT(WordsTool.190)
         "\\s+21.any  Intrinsic.callarg1\\s+0x[a-f0-9]+ v3, v8\\s+bc: 0x[a-f0-9]+\n"
         "\\s+26.any  Intrinsic.callrange\\s+0x[a-f0-9]+, 0x4 v4, v22, v23, v24, v25\\s+bc: 0x[a-f0-9]+\n"
-        "\\s+27.any  Intrinsic.ldundefined\\s+bc: 0x[a-f0-9]+\n"
-        "\\s+28.void Intrinsic.returnundefined\\s+bc: 0x[a-f0-9]+\n\n";
+        "\\s+27.void Intrinsic.returnundefined\\s+bc: 0x[a-f0-9]+\n\n";
     EXPECT_TRUE(helpers::Match(ss.str(), expected));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iDump, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iDump, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, Idump_1)
 {
     auto userInspector = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -1479,7 +1555,7 @@ static void CompareDump2(std::stringstream &ss)
     EXPECT_TRUE(helpers::Match(ss.str(), expected));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iDump, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iDump, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstTest, Idump_2)
 {
     auto userInspector = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {

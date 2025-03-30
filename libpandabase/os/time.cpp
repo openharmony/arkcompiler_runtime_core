@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
-#include "os/time.h"
-
-#include <chrono>
-#include <ctime>
-
 #ifdef PANDA_TARGET_UNIX
 #include "platforms/unix/libpandabase/time.h"
 #elif PANDA_TARGET_WINDOWS

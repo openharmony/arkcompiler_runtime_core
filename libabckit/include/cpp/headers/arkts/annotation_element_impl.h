@@ -32,11 +32,11 @@ inline AnnotationElement::AnnotationElement(const core::AnnotationElement &coreO
 {
 }
 
-inline std::string_view AnnotationElement::GetName() const
+inline std::string AnnotationElement::GetName() const
 {
     AbckitString *abcName = GetApiConfig()->cIapi_->annotationElementGetName(GetView());
     CheckError(GetApiConfig());
-    std::string_view name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
+    std::string name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
     CheckError(GetApiConfig());
     return name;
 }

@@ -37,11 +37,11 @@ void TransformIrIcreateIf(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -57,11 +57,11 @@ void TransformIrIcreateIfNeg(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -77,11 +77,11 @@ void TransformIrIsetConditionCode(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -99,11 +99,11 @@ void TransformIrIsetConditionCodeNeg(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -121,11 +121,11 @@ void TransformIrIgetConditionCode(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -144,11 +144,11 @@ void TransformIrIgetConditionCodeNeg(AbckitGraph *graph)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
-    AbckitInst *constOne = g_implG->gCreateConstantU64(graph, 1);
-    AbckitInst *constZero = g_implG->gCreateConstantU64(graph, 0);
+    AbckitInst *constOne = g_implG->gFindOrCreateConstantU64(graph, 1);
+    AbckitInst *constZero = g_implG->gFindOrCreateConstantU64(graph, 0);
 
     AbckitBasicBlock *trueBB = succBBs[0];
-    g_implG->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+    g_implG->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(falseBB, g_implG->gGetEndBasicBlock(graph));
     g_implG->bbAddInstBack(falseBB, g_statG->iCreateReturn(graph, constZero));
@@ -198,7 +198,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> GetSchema1()
             {{2, 3}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIf, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIf, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestCreateIf)
 {
     helpers::TransformMethod(
@@ -258,7 +258,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiStaticOpcode>> GetSchema2()
             {{2, 3}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iSetConditionCode, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iSetConditionCode, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestSetCondidionCodePos)
 {
     helpers::TransformMethod(
@@ -286,7 +286,7 @@ TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestSetCondidionCodeNeg)
         [](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema2()); });
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iGetConditionCode, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iGetConditionCode, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfStaticTest, LibAbcKitTestGetCondidionCodePos)
 {
     helpers::TransformMethod(

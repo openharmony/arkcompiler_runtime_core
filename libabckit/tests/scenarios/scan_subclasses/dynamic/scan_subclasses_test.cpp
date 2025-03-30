@@ -24,14 +24,15 @@ namespace libabckit::test {
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestScanSubclasses)
 {
     // CC-OFFNXT(G.NAM.03) project code style
     constexpr auto VERSION = ABCKIT_VERSION_RELEASE_1_0_0;
 
     auto *impl = AbckitGetApiImpl(VERSION);
-    AbckitFile *file = impl->openAbc(ABCKIT_ABC_DIR "scenarios/scan_subclasses/dynamic/scan_subclasses.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/scan_subclasses/dynamic/scan_subclasses.abc";
+    AbckitFile *file = impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_NE(file, nullptr);
 
     const std::vector<ClassInfo> baseClassInfo = {{"modules/base", "Base"}};

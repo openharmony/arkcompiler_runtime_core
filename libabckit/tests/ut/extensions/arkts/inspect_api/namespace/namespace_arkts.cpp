@@ -36,7 +36,8 @@ static const std::unordered_map<std::string, std::string> NAMESPACE_TO_FUNC = {
     {"N2", "f2"},
 };
 
-// Test: test-kind=api, api=ArktsInspectApiImpl::arktsV1NamespaceGetConstructor, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ArktsInspectApiImpl::arktsV1NamespaceGetConstructor, abc-kind=ArkTS2, category=positive,
+// extension=c
 TEST_F(LibAbcKitArkTSInspectApiNamespace, ArktsV1NamespaceGetConstructor)
 {
     AbckitFile *file = nullptr;

@@ -41,14 +41,14 @@ void CreateLoopDynamic(AbckitGraph *graph, AbckitFile *file)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    AbckitInst *forConst = g_implG->gCreateConstantU64(graph, 0xa);
-    AbckitInst *zero = g_implG->gCreateConstantU64(graph, 0x0);
-    AbckitInst *forStep = g_implG->gCreateConstantU64(graph, 0x2);
+    AbckitInst *forConst = g_implG->gFindOrCreateConstantU64(graph, 0xa);
+    AbckitInst *zero = g_implG->gFindOrCreateConstantU64(graph, 0x0);
+    AbckitInst *forStep = g_implG->gFindOrCreateConstantU64(graph, 0x2);
 
     g_implG->bbAddInstBack(startBB, forConst);
     g_implG->bbAddInstBack(startBB, zero);
     g_implG->bbAddInstBack(startBB, forStep);
-    g_implG->bbEraseSuccBlock(startBB, 0);
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
 
     AbckitBasicBlock *forBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(startBB, forBB);
@@ -67,7 +67,7 @@ void CreateLoopDynamic(AbckitGraph *graph, AbckitFile *file)
     g_implG->bbAddInstBack(trueBB, add);
     g_implG->iAppendInput(phi, add);
 
-    auto *print = g_dynG->iCreateTryldglobalbyname(graph, g_implM->createString(file, "print"));
+    auto *print = g_dynG->iCreateTryldglobalbyname(graph, g_implM->createString(file, "print", strlen("print")));
     g_implG->bbAddInstBack(trueBB, print);
     auto *call = g_dynG->iCreateCallarg1(graph, print, phi);
     g_implG->bbAddInstBack(trueBB, call);
@@ -89,15 +89,15 @@ void CreateLoopStatic(AbckitGraph *graph, AbckitCoreFunction *consoleLogInt)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    AbckitInst *forConst = g_implG->gCreateConstantU64(graph, 0xa);
-    AbckitInst *zero = g_implG->gCreateConstantU64(graph, 0x0);
-    AbckitInst *forStep = g_implG->gCreateConstantU64(graph, 0x1);
+    AbckitInst *forConst = g_implG->gFindOrCreateConstantU64(graph, 0xa);
+    AbckitInst *zero = g_implG->gFindOrCreateConstantU64(graph, 0x0);
+    AbckitInst *forStep = g_implG->gFindOrCreateConstantU64(graph, 0x1);
 
     g_implG->bbAddInstBack(startBB, forConst);
     g_implG->bbAddInstBack(startBB, zero);
     g_implG->bbAddInstBack(startBB, forStep);
 
-    g_implG->bbEraseSuccBlock(startBB, 0);
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
 
     AbckitBasicBlock *forBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(startBB, forBB);
@@ -131,7 +131,7 @@ void CreateLoopStatic(AbckitGraph *graph, AbckitCoreFunction *consoleLogInt)
 
 class LibAbcKitLoopStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopTestStatic)
 {
     auto output =
@@ -148,7 +148,7 @@ TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopTestStatic)
                                        "loop_static/ETSGLOBAL", "main");
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopDynamic)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/ir_core/loops/loop_dynamic.abc", "loop_dynamic");

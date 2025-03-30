@@ -24,6 +24,7 @@
 #include "../../include/c/isa/isa_dynamic.h"
 #include "../../src/include_v2/c/isa/isa_static.h"
 #include "../../include/c/extensions/arkts/metadata_arkts.h"
+#include "../../include/c/extensions/js/metadata_js.h"
 
 // CC-OFFNXT(G.NAM.01) false positive
 extern std::queue<std::string> g_calledFuncs;
@@ -35,6 +36,8 @@ AbckitIsaApiDynamic const *AbckitGetMockIsaApiDynamicImpl(AbckitApiVersion versi
 AbckitIsaApiStatic const *AbckitGetMockIsaApiStaticImpl(AbckitApiVersion version);
 AbckitArktsInspectApi const *AbckitGetMockArktsInspectApiImpl(AbckitApiVersion version);
 AbckitArktsModifyApi const *AbckitGetMockArktsModifyApiImpl(AbckitApiVersion version);
+AbckitJsModifyApi const *AbckitGetMockJsModifyApiImpl(AbckitApiVersion version);
+AbckitJsInspectApi const *AbckitGetMockJsInspectApiImpl(AbckitApiVersion version);
 AbckitGraphApi const *AbckitGetMockGraphApiImpl(AbckitApiVersion version);
 
 #endif

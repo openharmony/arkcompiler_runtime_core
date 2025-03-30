@@ -244,6 +244,16 @@ struct NamepsaceByNameContext {
     const char *name;
 };
 
+struct AnnotationInterfaceByNameContext {
+    AbckitCoreAnnotationInterface *ai;
+    const char *name;
+};
+
+struct AnnotationByNameContext {
+    AbckitCoreAnnotation *anno;
+    const char *name;
+};
+
 AbckitCoreFunction *FindMethodByName(AbckitFile *file, const std::string &name);
 AbckitCoreNamespace *FindNamespaceByName(AbckitFile *file, const std::string &name);
 bool ModuleByNameFinder(AbckitCoreModule *module, void *data);
@@ -252,6 +262,8 @@ bool ExportByAliasFinder(AbckitCoreExportDescriptor *ed, void *data);
 bool ClassByNameFinder(AbckitCoreClass *klass, void *data);
 bool NamespaceByNameFinder(AbckitCoreNamespace *n, void *data);
 bool MethodByNameFinder(AbckitCoreFunction *method, void *data);
+bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *data);
+bool AnnotationByNameFinder(AbckitCoreAnnotation *anno, void *data);
 bool NameToModuleCollector(AbckitCoreModule *module, void *data);
 bool ModuleImportsCollector(AbckitCoreImportDescriptor *id, void *data);
 bool ModuleExportsCollector(AbckitCoreExportDescriptor *ed, void *data);

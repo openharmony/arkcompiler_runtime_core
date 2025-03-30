@@ -34,7 +34,8 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynCreateobjectwithbuffer : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_1)
 {
     auto output =
@@ -47,30 +48,30 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_1
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/create/createobjectwithbuffer_dynamic_modified.abc", "func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto arr = std::vector<AbckitLiteral *>();
-            arr.emplace_back(g_implM->createLiteralString(file, "a"));
+            arr.emplace_back(g_implM->createLiteralString(file, "a", strlen("a")));
             arr.emplace_back(g_implM->createLiteralU32(file, 1));
-            arr.emplace_back(g_implM->createLiteralString(file, "b"));
-            arr.emplace_back(g_implM->createLiteralString(file, "str"));
+            arr.emplace_back(g_implM->createLiteralString(file, "b", strlen("b")));
+            arr.emplace_back(g_implM->createLiteralString(file, "str", strlen("str")));
             auto *litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
 
             auto *createobjectwithbuffer = g_dynG->iCreateCreateobjectwithbuffer(graph, litArr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
-            auto *stringA = g_implM->createString(file, "a");
+            auto *stringA = g_implM->createString(file, "a", strlen("a"));
             auto *ldobjbynameA = g_dynG->iCreateLdobjbyname(graph, createobjectwithbuffer, stringA);
-            auto *stringB = g_implM->createString(file, "b");
+            auto *stringB = g_implM->createString(file, "b", strlen("b"));
             auto *ldobjbynameB = g_dynG->iCreateLdobjbyname(graph, createobjectwithbuffer, stringB);
             auto *callarg10 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameA);
             auto *callarg11 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameB);
 
-            auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createobjectwithbuffer, ldundef);
-            g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-            g_implG->iInsertBefore(ldobjbynameA, ldundef);
-            g_implG->iInsertBefore(ldobjbynameB, ldundef);
-            g_implG->iInsertBefore(callarg10, ldundef);
-            g_implG->iInsertBefore(callarg11, ldundef);
+            auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createobjectwithbuffer, returnundef);
+            g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+            g_implG->iInsertBefore(ldobjbynameA, returnundef);
+            g_implG->iInsertBefore(ldobjbynameB, returnundef);
+            g_implG->iInsertBefore(callarg10, returnundef);
+            g_implG->iInsertBefore(callarg11, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -79,7 +80,8 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_1
     EXPECT_TRUE(helpers::Match(output, "1\nstr\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_2)
 {
     auto output =
@@ -92,21 +94,21 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_2
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/create/createobjectwithbuffer_dynamic_modified.abc", "func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto arr = std::vector<AbckitLiteral *>();
-            arr.emplace_back(g_implM->createLiteralString(file, "toString"));
+            arr.emplace_back(g_implM->createLiteralString(file, "toString", strlen("toString")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "toString")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 0));
             auto *litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
 
             auto *createobjectwithbuffer = g_dynG->iCreateCreateobjectwithbuffer(graph, litArr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, createobjectwithbuffer);
 
-            auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createobjectwithbuffer, ldundef);
-            g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-            g_implG->iInsertBefore(callarg1, ldundef);
+            auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createobjectwithbuffer, returnundef);
+            g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+            g_implG->iInsertBefore(callarg1, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -115,7 +117,8 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_2
     EXPECT_TRUE(helpers::Match(output, "objA\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_3)
 {
     auto output =
@@ -128,29 +131,29 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_3
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/create/createobjectwithbuffer_dynamic_modified.abc", "func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto arr = std::vector<AbckitLiteral *>();
-            arr.emplace_back(g_implM->createLiteralString(file, "foo"));
+            arr.emplace_back(g_implM->createLiteralString(file, "foo", strlen("foo")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "foo")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 0));
-            arr.emplace_back(g_implM->createLiteralString(file, "bar"));
+            arr.emplace_back(g_implM->createLiteralString(file, "bar", strlen("bar")));
             arr.emplace_back(g_implM->createLiteralMethod(file, helpers::FindMethodByName(file, "bar")));
             arr.emplace_back(g_implM->createLiteralMethodAffiliate(file, 1));
             auto *litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
 
             auto *createobjectwithbuffer = g_dynG->iCreateCreateobjectwithbuffer(graph, litArr);
-            auto *stringFoo = g_implM->createString(file, "foo");
-            auto *stringBar = g_implM->createString(file, "bar");
+            auto *stringFoo = g_implM->createString(file, "foo", strlen("foo"));
+            auto *stringBar = g_implM->createString(file, "bar", strlen("bar"));
             auto *ldobjbynameFoo = g_dynG->iCreateLdobjbyname(graph, createobjectwithbuffer, stringFoo);
             auto *ldobjbynameBar = g_dynG->iCreateLdobjbyname(graph, createobjectwithbuffer, stringBar);
             auto *callthisFoo = g_dynG->iCreateCallthis0(graph, ldobjbynameFoo, createobjectwithbuffer);
             auto *callthisBar = g_dynG->iCreateCallthis1(graph, ldobjbynameBar, createobjectwithbuffer,
-                                                         g_implG->gCreateConstantU64(graph, 777));
+                                                         g_implG->gFindOrCreateConstantU64(graph, 777));
 
-            auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createobjectwithbuffer, ldundef);
-            g_implG->iInsertBefore(ldobjbynameFoo, ldundef);
-            g_implG->iInsertBefore(ldobjbynameBar, ldundef);
-            g_implG->iInsertBefore(callthisFoo, ldundef);
-            g_implG->iInsertBefore(callthisBar, ldundef);
+            auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createobjectwithbuffer, returnundef);
+            g_implG->iInsertBefore(ldobjbynameFoo, returnundef);
+            g_implG->iInsertBefore(ldobjbynameBar, returnundef);
+            g_implG->iInsertBefore(callthisFoo, returnundef);
+            g_implG->iInsertBefore(callthisBar, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR

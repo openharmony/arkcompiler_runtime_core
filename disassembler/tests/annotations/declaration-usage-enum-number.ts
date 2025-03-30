@@ -22,8 +22,8 @@ const enum E {
     a: E = new Number(0) as number;
 }
 
-@#Anno({a : 1})
+@__$$ETS_ANNOTATION$$__Anno({a : 1})
 class A {
-    @#Anno({a : -2})
+    @__$$ETS_ANNOTATION$$__Anno({a : -2})
     foo() {}
 }

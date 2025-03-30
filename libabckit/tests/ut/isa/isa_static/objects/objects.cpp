@@ -115,7 +115,7 @@ static void TransformIrCreateInitObject(AbckitGraph *graph, size_t numArg)
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    AbckitInst *constantInst = numArg > 0 ? g_implG->gCreateConstantI64(graph, 0x1) : nullptr;
+    AbckitInst *constantInst = numArg > 0 ? g_implG->gFindOrCreateConstantI64(graph, 0x1) : nullptr;
     if (constantInst != nullptr) {
         g_implG->iInsertBefore(constantInst, lastInst);
     }
@@ -164,7 +164,7 @@ void InitObjectTest(size_t numArg, helpers::InstSchema<AbckitIsaApiStaticOpcode>
     EXPECT_TRUE(helpers::Match(output, expectedOutput));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewObject, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateNewObject)
 {
     auto output =
@@ -211,37 +211,37 @@ TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateNewObject)
     EXPECT_TRUE(helpers::Match(output, "A\nB\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateInitObjectArg0)
 {
     InitObjectTest(0, {4U, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {}}, "A\nC\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateInitObjectArg1)
 {
     InitObjectTest(1, {4U, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {0}}, "A\nC 1\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateInitObjectArg2)
 {
     InitObjectTest(2U, {4U, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {0, 0}}, "A\nC 11\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateInitObjectArg3)
 {
     InitObjectTest(3U, {4U, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {0, 0, 0}}, "A\nC 111\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateInitObjectArg4)
 {
     InitObjectTest(4U, {4U, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {0, 0, 0, 0}}, "A\nC 1111\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitICreateObjectsStaticTest, LibAbcKitTestCreateIcreateInitObjectArg5)
 {
     InitObjectTest(5U, {4U, ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT, {0, 0, 0, 0, 0}}, "A\nC 11111\n");

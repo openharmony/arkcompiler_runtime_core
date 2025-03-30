@@ -25,12 +25,12 @@
     c: boolean[] = [true, false];
 }
 
-@#Anno1({a: 42})
-@#Anno2({b: "abc"})
-@#Anno3({c: [false, true]})
+@__$$ETS_ANNOTATION$$__Anno1({a: 42})
+@__$$ETS_ANNOTATION$$__Anno2({b: "abc"})
+@__$$ETS_ANNOTATION$$__Anno3({c: [false, true]})
 class A {
-    @#Anno1({a: 42})
-    @#Anno2({b: "abc"})
-    @#Anno3({c: [false, true]})
+    @__$$ETS_ANNOTATION$$__Anno1({a: 42})
+    @__$$ETS_ANNOTATION$$__Anno2({b: "abc"})
+    @__$$ETS_ANNOTATION$$__Anno3({c: [false, true]})
     foo() {}
 }

@@ -46,7 +46,7 @@ void TransformLoadStringIr(AbckitFile *file, AbckitGraph *graph)
     ASSERT_NE(ret, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *str = g_implM->createString(file, "foo");
+    auto *str = g_implM->createString(file, "foo", strlen("foo"));
     ASSERT_NE(str, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -65,7 +65,7 @@ void TransformLoadStringIr(AbckitFile *file, AbckitGraph *graph)
 
 class LibAbcKitLoadStringDynamicTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLoadString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLoadString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitLoadStringDynamicTest, LibAbcKitTestLoadString)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/load_string/load_string_dynamic.abc",

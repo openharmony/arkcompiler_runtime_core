@@ -26,11 +26,13 @@ function clear_tests() {
     rm -rf tests/null_args_tests/null_args_tests_*
     rm -rf tests/wrong_ctx_tests/wrong_ctx_tests_*
     rm -rf tests/wrong_mode_tests/wrong_mode_tests_*
+    rm -rf tests/wrong_imm_tests/wrong_imm_tests_*
 }
 
 function generate_tests() {
     ruby scripts/gen_wrong_ctx_tests.rb
     ruby scripts/gen_wrong_mode_tests.rb
+    ruby scripts/gen_wrong_imm_tests.rb
     ruby scripts/gen_null_arg_tests.rb
 }
 

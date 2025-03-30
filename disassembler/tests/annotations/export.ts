@@ -19,9 +19,9 @@ export @interface Anno2 {
     a: number = 0;
 }
 
-@#Anno1()
+@__$$ETS_ANNOTATION$$__Anno1()
 export class A {}
 
-@#Anno1()
+@__$$ETS_ANNOTATION$$__Anno1()
 export default class B {}
 

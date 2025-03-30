@@ -15,8 +15,6 @@
 
 #include "abc_method_processor.h"
 #include "abc_code_processor.h"
-#include "method_data_accessor-inl.h"
-#include "file_items.h"
 
 namespace panda::abc2program {
 
@@ -24,10 +22,11 @@ AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id,
                                        Abc2ProgramEntityContainer &entity_container)
     : AbcFileEntityProcessor(entity_id, entity_container),
       type_converter_(entity_container),
-      function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_), LANG_ECMA)),
+      function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_), DEFUALT_SOURCE_LANG)),
       debug_info_extractor_(entity_container.GetDebugInfoExtractor())
 {
     method_data_accessor_ = std::make_unique<panda_file::MethodDataAccessor>(*file_, entity_id_);
+    function_.language = method_data_accessor_->GetSourceLang().value_or(DEFUALT_SOURCE_LANG);
 }
 
 void AbcMethodProcessor::FillProgramData()
@@ -44,8 +43,7 @@ void AbcMethodProcessor::FillFunctionData()
     FillCodeData();
     FillDebugInfo();
     FillFuncAnnotation();
-    FillSlotsNum();
-    FillConcurrentModuleRequests();
+    FillAnnotationData();
 }
 
 void AbcMethodProcessor::FillProto()
@@ -54,7 +52,9 @@ void AbcMethodProcessor::FillProto()
     pandasm::Type any_type = pandasm::Type(ANY_TYPE_NAME, 0);
     function_.return_type = any_type;
     for (uint8_t i = 0; i < params_num; i++) {
-        function_.params.emplace_back(pandasm::Function::Parameter(any_type, LANG_ECMA));
+        function_.params.emplace_back(
+            pandasm::Function::Parameter(any_type, function_.language)
+        );
     }
 }
 
@@ -133,26 +133,24 @@ void AbcMethodProcessor::FillFuncAnnotation()
     });
 }
 
-void AbcMethodProcessor::FillSlotsNum()
+void AbcMethodProcessor::FillAnnotationData()
 {
     for (auto annotation : function_.metadata->GetAnnotations()) {
-        if (annotation.GetName() == SLOT_NUMBER_RECORD_NAME && !annotation.GetElements().empty()) {
-            uint32_t slots_num = annotation.GetElements()[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
+        const auto& name = annotation.GetName();
+        const auto& elements = annotation.GetElements();
+
+        if (name == SLOT_NUMBER_RECORD_NAME && !elements.empty()) {
+            uint32_t slots_num = elements[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
             function_.SetSlotsNum(static_cast<size_t>(slots_num));
+        } else if (name == CONCURRENT_MODULE_REQUEST_RECORD_NAME) {
+            for (auto &elem : elements) {
+                function_.concurrent_module_requests.emplace_back(
+                    elem.GetValue()->GetAsScalar()->GetValue<uint32_t>());
+            }
+        } else if (name == EXPECTED_PROPERTY_COUNT_RECORD_NAME && !elements.empty()) {
+            uint32_t expected_property = elements[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
+            function_.SetExpectedPropertyCount(static_cast<size_t>(expected_property));
         }
     }
 }
-
-void AbcMethodProcessor::FillConcurrentModuleRequests()
-{
-    for (auto annotation : function_.metadata->GetAnnotations()) {
-        if (annotation.GetName() != CONCURRENT_MODULE_REQUEST_RECORD_NAME) {
-            continue;
-        }
-        for (auto &elem : annotation.GetElements()) {
-            function_.concurrent_module_requests.emplace_back(elem.GetValue()->GetAsScalar()->GetValue<uint32_t>());
-        }
-    }
-}
-
 } // namespace panda::abc2program

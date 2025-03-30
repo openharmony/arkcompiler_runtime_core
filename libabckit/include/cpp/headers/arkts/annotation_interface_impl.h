@@ -17,7 +17,11 @@
 #define CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_IMPL_H
 
 #include "./annotation_interface.h"
+#include "./annotation_interface_field.h"
+#include "../core/annotation_interface.h"
+#include "../core/annotation_interface_field.h"
 
+// NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
 
 inline AbckitArktsAnnotationInterface *AnnotationInterface::TargetCast() const
@@ -32,6 +36,26 @@ inline AnnotationInterface::AnnotationInterface(const core::AnnotationInterface 
 {
 }
 
+inline arkts::AnnotationInterfaceField AnnotationInterface::AddField(std::string_view name, Type type, Value value)
+{
+    const struct AbckitArktsAnnotationInterfaceFieldCreateParams params {
+        name.data(), type.GetView(), value.GetView()
+    };
+    auto arktsAif = GetApiConfig()->cArktsMapi_->annotationInterfaceAddField(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto coreAif = GetApiConfig()->cArktsIapi_->arktsAnnotationInterfaceFieldToCoreAnnotationInterfaceField(arktsAif);
+    CheckError(GetApiConfig());
+    return AnnotationInterfaceField(core::AnnotationInterfaceField(coreAif, GetApiConfig(), GetResource()));
+}
+
+inline AnnotationInterface AnnotationInterface::RemoveField(AnnotationInterfaceField field) const
+{
+    GetApiConfig()->cArktsMapi_->annotationInterfaceRemoveField(TargetCast(), field.TargetCast());
+    CheckError(GetApiConfig());
+    return *this;
+}
+
 }  // namespace abckit::arkts
+// NOLINTEND(performance-unnecessary-value-param)
 
 #endif  // CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_IMPL_H

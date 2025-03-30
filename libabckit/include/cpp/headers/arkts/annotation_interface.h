@@ -18,6 +18,7 @@
 
 #include "../core/annotation_interface.h"
 #include "../base_concepts.h"
+#include "../type.h"
 
 namespace abckit::arkts {
 
@@ -38,9 +39,9 @@ class AnnotationInterface : public core::AnnotationInterface {
 public:
     /**
      * @brief Constructor Arkts API AnnotationInterface from the Core API with compatibility check
-     * @param other - Core API AnnotationInterface
+     * @param coreOther - Core API AnnotationInterface
      */
-    explicit AnnotationInterface(const core::AnnotationInterface &other);
+    explicit AnnotationInterface(const core::AnnotationInterface &coreOther);
 
     /**
      * @brief Construct a new Annotation Interface object
@@ -72,8 +73,33 @@ public:
      * @brief Destroy the Annotation Interface object
      */
     ~AnnotationInterface() override = default;
-    // Other API.
-    // ...
+
+    /**
+     * @brief Add new field to the annotation interface.
+     * @return Newly created annotation field.
+     * @param [ in ] type - Type that is used to create the field of the Annotation Interface.
+     * @param [ in ] value - Value that is used to create the field of the Annotation Interface.
+     * @param [ in ] name - Name that is used to create the field of the Annotation Interface.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation interface itself doesn't have `ABCKIT_TARGET_ARK_TS_V1`
+     * target.
+     */
+    AnnotationInterfaceField AddField(std::string_view name, Type type, Value value);
+
+    /**
+     * @brief Remove field from the annotation interface.
+     * @param [ in ] field - Field to remove from the Annotation Interface.
+     * @return New state of AnnotationInterface.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if annotation interface doesn't have `ABCKIT_TARGET_ARK_TS_V1`
+     * target.
+     * @note Set `ABCKIT_STATUS_TODO` error if annotation interface does not have the field `field`.
+     */
+    AnnotationInterface RemoveField(AnnotationInterfaceField field) const;
 
 private:
     /**

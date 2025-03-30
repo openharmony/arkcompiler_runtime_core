@@ -72,7 +72,6 @@ void Disassembler::Serialize(std::ostream &os, bool add_separators, bool print_i
 {
     if (os.bad()) {
         LOG(DEBUG, DISASSEMBLER) << "> serialization failed. os bad\n";
-
         return;
     }
 
@@ -80,8 +79,6 @@ void Disassembler::Serialize(std::ostream &os, bool add_separators, bool print_i
         std::string abc_file = GetFileNameByPath(file_->GetFilename());
         os << "# source binary: " << abc_file << "\n\n";
     }
-
-    SerializeLanguage(os);
 
     if (add_separators) {
         os << "# ====================\n"
@@ -166,7 +163,7 @@ void Disassembler::GetRecord(pandasm::Record *record, const panda_file::File::En
 
 void Disassembler::AddMethodToTables(const panda_file::File::EntityId &method_id)
 {
-    pandasm::Function new_method("", file_language_);
+    pandasm::Function new_method("", GetMethodLanguage(method_id));
     GetMethod(&new_method, method_id);
 
     const auto signature = pandasm::GetFunctionSignatureFromName(new_method.name, new_method.params);
@@ -494,19 +491,8 @@ void Disassembler::GetRecords()
 
         const panda_file::File::EntityId record_id {class_id};
         auto language = GetRecordLanguage(record_id);
-        if (language != file_language_) {
-            if (file_language_ == panda_file::SourceLang::PANDA_ASSEMBLY) {
-                file_language_ = language;
-            } else if (language != panda_file::SourceLang::PANDA_ASSEMBLY) {
-                LOG(ERROR, DISASSEMBLER) << "> possible error encountered in record at" << class_off << " (0x"
-                                         << std::hex << class_off << "). record's language  ("
-                                         << panda_file::LanguageToString(language)
-                                         << ")  differs from file's language ("
-                                         << panda_file::LanguageToString(file_language_) << ")!";
-            }
-        }
 
-        pandasm::Record record("", file_language_);
+        pandasm::Record record("", language);
         GetRecord(&record, record_id);
 
         if (prog_.record_table.find(record.name) == prog_.record_table.end()) {
@@ -521,7 +507,7 @@ void Disassembler::GetFields(pandasm::Record *record, const panda_file::File::En
     panda_file::ClassDataAccessor class_accessor {*file_, record_id};
 
     class_accessor.EnumerateFields([&](panda_file::FieldDataAccessor &field_accessor) -> void {
-        pandasm::Field field(file_language_);
+        pandasm::Field field(record->language);
 
         panda_file::File::EntityId field_name_id = field_accessor.GetNameId();
         field.name = StringDataToString(file_->GetStringData(field_name_id));
@@ -766,7 +752,7 @@ void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::
     method->return_type = pandasm::Type("any", 0);
 
     for (uint8_t i = 0; i < params_num; i++) {
-        method->params.push_back(pandasm::Function::Parameter(pandasm::Type("any", 0), file_language_));
+        method->params.push_back(pandasm::Function::Parameter(pandasm::Type("any", 0), method->language));
     }
 }
 
@@ -968,7 +954,7 @@ void Disassembler::GetMetaData(pandasm::Function *method, const panda_file::File
         LOG(DEBUG, DISASSEMBLER) << "method (raw: \'" << method_name_raw
                                  << "\') is not static. emplacing self-argument of type " << this_type.GetName();
 
-        method->params.insert(method->params.begin(), pandasm::Function::Parameter(this_type, file_language_));
+        method->params.insert(method->params.begin(), pandasm::Function::Parameter(this_type, method->language));
     } else {
         method->metadata->SetAttribute("static");
     }
@@ -977,8 +963,8 @@ void Disassembler::GetMetaData(pandasm::Function *method, const panda_file::File
         method->metadata->SetAttribute("external");
     }
 
-    std::string ctor_name = panda::panda_file::GetCtorName(file_language_);
-    std::string cctor_name = panda::panda_file::GetCctorName(file_language_);
+    std::string ctor_name = panda::panda_file::GetCtorName(method->language);
+    std::string cctor_name = panda::panda_file::GetCctorName(method->language);
 
     const bool is_ctor = (method_name_raw == ctor_name);
     const bool is_cctor = (method_name_raw == cctor_name);
@@ -1281,7 +1267,7 @@ std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &m
 {
     panda::panda_file::MethodDataAccessor method_accessor(*file_, method_id);
 
-    pandasm::Function method(GetFullMethodName(method_id), file_language_);
+    pandasm::Function method(GetFullMethodName(method_id), GetMethodLanguage(method_id));
     if (method_accessor.GetCodeId().has_value()) {
         GetParams(&method, method_accessor.GetCodeId().value());
     }
@@ -1639,7 +1625,7 @@ void Disassembler::Serialize(const pandasm::Record &record, std::ostream &os, bo
     if (IsSystemType(record.name)) {
         return;
     }
-
+    os << ".language " << panda::panda_file::LanguageToString(record.language) << std::endl;
     os << ".record " << record.name;
 
     const auto record_iter = prog_ann_.record_annotations.find(record.name);
@@ -1932,6 +1918,7 @@ void Disassembler::SerializeInstructions(const pandasm::Function &method, std::o
 void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, bool print_information) const
 {
     SerializeMethodAnnotations(method, os);
+    os << ".language " << panda::panda_file::LanguageToString(method.language) << std::endl;
     os << ".function " << method.return_type.GetPandasmName() << " " << method.name << "(";
 
     if (method.params.size() > 0) {
@@ -2152,11 +2139,23 @@ std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::Fil
 panda::panda_file::SourceLang Disassembler::GetRecordLanguage(panda_file::File::EntityId class_id) const
 {
     if (file_->IsExternal(class_id)) {
-        return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+        // Keep the same behavior with abc2program
+        return panda_file::DEFUALT_SOURCE_LANG;
     }
 
     panda_file::ClassDataAccessor cda(*file_, class_id);
-    return cda.GetSourceLang().value_or(panda_file::SourceLang::PANDA_ASSEMBLY);
+    return cda.GetSourceLang().value_or(panda_file::DEFUALT_SOURCE_LANG);
+}
+
+panda::panda_file::SourceLang Disassembler::GetMethodLanguage(panda_file::File::EntityId method_id) const
+{
+    if (file_->IsExternal(method_id)) {
+        // Keep the same behavior with abc2program
+        return panda_file::DEFUALT_SOURCE_LANG;
+    }
+
+    panda_file::MethodDataAccessor method_accessor(*file_, method_id);
+    return method_accessor.GetSourceLang().value_or(panda_file::DEFUALT_SOURCE_LANG);
 }
 
 static void translateImmToLabel(pandasm::Ins *pa_ins, LabelTable *label_table, const uint8_t *ins_arr,

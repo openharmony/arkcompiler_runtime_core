@@ -58,13 +58,13 @@ static void ValidTest(AbckitInst *(*unaryInstToCheck)(AbckitGraph *graph, Abckit
 
 class LibAbcKitUnaryInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNeg, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNeg, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitUnaryInstTest, CreateNegValid)
 {
     ValidTest(g_statG->iCreateNeg, ABCKIT_ISA_API_STATIC_OPCODE_NEG, "-10\n");
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNot, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNot, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitUnaryInstTest, CreateNotValid)
 {
     ValidTest(g_statG->iCreateNot, ABCKIT_ISA_API_STATIC_OPCODE_NOT, "-11\n");

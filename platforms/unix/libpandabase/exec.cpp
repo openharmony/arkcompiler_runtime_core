@@ -13,14 +13,8 @@
  * limitations under the License.
  */
 
-#include "os/exec.h"
-
-#include <cerrno>
-#include <iosfwd>
-#include <string>
 #include <unistd.h>
 
-#include "macros.h"
 #include "os/error.h"
 #include "os/failure_retry.h"
 #include "sys/wait.h"

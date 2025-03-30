@@ -193,15 +193,14 @@ static void TransformIrGetModuleNamespace(AbckitGraph *graph, AbckitString *func
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto getModuleNamespaceInst = isWide ? g_dynG->iCreateWideGetmodulenamespace(graph, ctxFinder.module)
                                          : g_dynG->iCreateGetmodulenamespace(graph, ctxFinder.module);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto ldObjByNameInst = g_dynG->iCreateLdobjbyname(graph, getModuleNamespaceInst, funcName);
     auto callInst = g_dynG->iCreateCallthis0(graph, ldObjByNameInst, getModuleNamespaceInst);
-    g_implG->iInsertBefore(getModuleNamespaceInst, ldundefI);
-    g_implG->iInsertBefore(ldObjByNameInst, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(getModuleNamespaceInst, lastInst);
+    g_implG->iInsertBefore(ldObjByNameInst, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrLdExternalModuleVar(AbckitGraph *graph, AbckitString *funcName, bool isWide = false)
@@ -217,15 +216,14 @@ static void TransformIrLdExternalModuleVar(AbckitGraph *graph, AbckitString *fun
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto ldExternalModuleVarInst = isWide ? g_dynG->iCreateWideLdexternalmodulevar(graph, importFinder.id)
                                           : g_dynG->iCreateLdexternalmodulevar(graph, importFinder.id);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldExternalModuleVarInst, funcName);
     auto callInst = g_dynG->iCreateCallarg0(graph, ldExternalModuleVarInst);
-    g_implG->iInsertBefore(ldExternalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(ldExternalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrLdLocalModuleVar(AbckitGraph *graph, AbckitString *localVarName, AbckitString *funcName,
@@ -242,17 +240,16 @@ static void TransformIrLdLocalModuleVar(AbckitGraph *graph, AbckitString *localV
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto tryLdGlobalByNameInst = g_dynG->iCreateTryldglobalbyname(graph, funcName);
     auto ldLocalModuleVarInst = isWide ? g_dynG->iCreateWideLdlocalmodulevar(graph, exportFinder.ed)
                                        : g_dynG->iCreateLdlocalmodulevar(graph, exportFinder.ed);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldLocalModuleVarInst, localVarName);
     auto callInst = g_dynG->iCreateCallarg1(graph, tryLdGlobalByNameInst, ldLocalModuleVarInst);
-    g_implG->iInsertBefore(tryLdGlobalByNameInst, ldundefI);
-    g_implG->iInsertBefore(ldLocalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(tryLdGlobalByNameInst, lastInst);
+    g_implG->iInsertBefore(ldLocalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrStModuleVar(AbckitGraph *graph, AbckitString *localVarName, AbckitString *funcName,
@@ -271,7 +268,6 @@ static void TransformIrStModuleVar(AbckitGraph *graph, AbckitString *localVarNam
     auto *const1Inst = g_implG->bbGetLastInst(startBB);
     auto *mainBB = g_implG->bbGetSuccBlock(startBB, 0);
     auto *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto tryLdGlobalByNameInst = g_dynG->iCreateTryldglobalbyname(graph, funcName);
     auto stModuleVarInst = isWide ? g_dynG->iCreateWideStmodulevar(graph, const1Inst, exportFinder.ed)
                                   : g_dynG->iCreateStmodulevar(graph, const1Inst, exportFinder.ed);
@@ -281,11 +277,11 @@ static void TransformIrStModuleVar(AbckitGraph *graph, AbckitString *localVarNam
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldLocalModuleVarInst, localVarName);
     auto callInst = g_dynG->iCreateCallarg1(graph, tryLdGlobalByNameInst, ldLocalModuleVarInst);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_implG->iInsertBefore(tryLdGlobalByNameInst, ldundefI);
-    g_implG->iInsertBefore(stModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(ldLocalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(tryLdGlobalByNameInst, lastInst);
+    g_implG->iInsertBefore(stModuleVarInst, lastInst);
+    g_implG->iInsertBefore(ldLocalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static std::vector<helpers::InstSchema<AbckitIsaApiDynamicOpcode>> g_bb2Insts {
@@ -336,8 +332,7 @@ static std::vector<helpers::InstSchema<AbckitIsaApiDynamicOpcode>> g_bb2Insts {
     {54, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, {53, 15}},
     {55, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {16}},
     {56, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, {55, 16}},
-    {57, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-    {58, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}};
+    {57, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}};
 
 static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchemaForModules()
 {
@@ -360,7 +355,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchemaF
 // Modules Tests
 // ========================================
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iSetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iSetModule, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetModule)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -454,7 +449,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetModuleWrongModule)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iSetImportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iSetImportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetImportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -546,7 +541,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetImportDescriptorWrongImport)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iSetExportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iSetExportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetExportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -638,7 +633,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIsetExportDescriptorWrongExport)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetModule, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetModule)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -692,7 +687,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetModuleWrongInst)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetImportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetImportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetImportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -753,7 +748,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetImportDescriptorWrongInst)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetExportDescriptor, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetExportDescriptor, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetExportDescriptor)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -815,7 +810,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, DynamicIgetExportDescriptorWrongInst)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetmodulenamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetmodulenamespace, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynGetmodulenamespace)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -830,7 +826,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynGetmodulenamespace)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "sameFuncInDifferentModules");
+            AbckitString *abckitstr =
+                g_implM->createString(file, "sameFuncInDifferentModules", strlen("sameFuncInDifferentModules"));
 
             TransformIrGetModuleNamespace(graph, abckitstr);
         },
@@ -851,7 +848,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynGetmodulenamespace)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideGetmodulenamespace, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideGetmodulenamespace, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideGetmodulenamespace)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -866,7 +864,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideGetmodulenamesp
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "sameFuncInDifferentModules");
+            AbckitString *abckitstr =
+                g_implM->createString(file, "sameFuncInDifferentModules", strlen("sameFuncInDifferentModules"));
 
             TransformIrGetModuleNamespace(graph, abckitstr, true);
         },
@@ -887,7 +886,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideGetmodulenamesp
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdexternalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdexternalmodulevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdexternalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -902,7 +902,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdexternalmodulevar
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "MF1M2");
+            AbckitString *abckitstr = g_implM->createString(file, "MF1M2", strlen("MF1M2"));
 
             TransformIrLdExternalModuleVar(graph, abckitstr);
         },
@@ -923,7 +923,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdexternalmodulevar
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdexternalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdexternalmodulevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdexternalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -938,7 +939,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdexternalmodul
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "MF1M2");
+            AbckitString *abckitstr = g_implM->createString(file, "MF1M2", strlen("MF1M2"));
 
             TransformIrLdExternalModuleVar(graph, abckitstr, true);
         },
@@ -959,7 +960,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdexternalmodul
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlocalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlocalmodulevar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdlocalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -974,8 +975,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdlocalmodulevar)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet", strlen("LocalExportLet"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrLdLocalModuleVar(graph, abckitstr, abckitcallStr);
         },
@@ -998,7 +999,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynLdlocalmodulevar)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlocalmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlocalmodulevar, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdlocalmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -1013,8 +1015,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdlocalmoduleva
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportLet", strlen("LocalExportLet"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrLdLocalModuleVar(graph, abckitstr, abckitcallStr, true);
         },
@@ -1037,7 +1039,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideLdlocalmoduleva
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStmodulevar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynStmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -1052,8 +1054,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynStmodulevar)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst", strlen("LocalExportConst"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrStModuleVar(graph, abckitstr, abckitcallStr);
         },
@@ -1078,7 +1080,7 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynStmodulevar)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideStmodulevar)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
@@ -1093,8 +1095,8 @@ TEST_F(LibAbcKitIsaDynamicModulesTest, LibAbcKitTestCreateDynWideStmodulevar)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/modules/isa_dynamic_modules_modified.abc", "isa_dynamic_modules.func_main_0",
         [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst");
-            AbckitString *abckitcallStr = g_implM->createString(file, "print");
+            AbckitString *abckitstr = g_implM->createString(file, "LocalExportConst", strlen("LocalExportConst"));
+            AbckitString *abckitcallStr = g_implM->createString(file, "print", strlen("print"));
 
             TransformIrStModuleVar(graph, abckitstr, abckitcallStr, true);
         },

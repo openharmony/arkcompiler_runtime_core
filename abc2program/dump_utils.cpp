@@ -112,7 +112,6 @@ pandasm::Ins PandasmDumperUtils::DeepCopyIns(const pandasm::Ins &input)
     auto &debug_ins = res.ins_debug;
     debug_ins.line_number = input.ins_debug.line_number;
     debug_ins.column_number = input.ins_debug.column_number;
-    debug_ins.whole_line = input.ins_debug.whole_line;
     debug_ins.bound_left = input.ins_debug.bound_left;
     debug_ins.bound_right = input.ins_debug.bound_right;
     return res;

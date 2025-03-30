@@ -52,7 +52,7 @@ void TransformLoadNullValueIr(AbckitGraph *graph)
 
 class LibAbcKitLoadNullValueStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadNullValue, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadNullValue, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitLoadNullValueStaticTest, LibAbcKitTestLoadNullValue)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_nullvalue/load_nullvalue_static.abc",

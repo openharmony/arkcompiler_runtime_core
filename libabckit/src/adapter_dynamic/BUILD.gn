@@ -28,6 +28,7 @@ group("abckit_adapter_dynamic_header_deps") {
 ohos_source_set("abckit_adapter_dynamic_source_set") {
   sources = [
     "abckit_dynamic.cpp",
+    "convert.cpp",
     "helpers_dynamic.cpp",
     "metadata_inspect_dynamic.cpp",
     "metadata_modify_dynamic.cpp",

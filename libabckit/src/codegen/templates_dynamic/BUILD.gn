@@ -53,3 +53,13 @@ ark_gen_file("codegen_visitors_dyn_inc") {
   requires = [ "$ark_root_dynamic/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/../generated/codegen_visitors_dyn.inc"
 }
+
+ark_isa_gen("abckit_isa_gen") {
+  template_files = [ "insn_info.h.erb" ]
+  sources = "."
+  destination = "$target_gen_dir/../generated"
+  requires = [
+    "codegen_dynamic_isapi.rb",
+    "$ark_root_dynamic/assembler/asm_isapi.rb",
+  ]
+}

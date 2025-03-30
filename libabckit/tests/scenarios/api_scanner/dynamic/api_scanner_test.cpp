@@ -22,13 +22,13 @@ namespace libabckit::test {
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestApiScannerDynamic)
 {
     const auto version = ABCKIT_VERSION_RELEASE_1_0_0;
     auto *impl = AbckitGetApiImpl(version);
     auto filePath = ABCKIT_ABC_DIR "scenarios/api_scanner/dynamic/api_scanner.abc";
-    AbckitFile *file = impl->openAbc(filePath);
+    AbckitFile *file = impl->openAbc(filePath, strlen(filePath));
     std::vector<ApiInfo> apiList = {{"modules/apiNamespace", "ApiNamespace", "foo"},
                                     {"modules/toplevelApi", "bar", ""},
                                     {"@ohos.geolocation", "geolocation", "getCurrentLocation"}};

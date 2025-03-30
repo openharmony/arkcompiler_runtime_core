@@ -13,19 +13,35 @@
  * limitations under the License.
  */
 
-#include <queue>
+#include <stack>
 #include <string>
+#include <iostream>
+#include "logger.h"
 
 #include "./check_mock.h"
 
-std::queue<std::string> g_calledFuncs;
+std::stack<std::string> g_calledFuncs;
 
 bool CheckMockedApi(const std::string &apiName)
 {
     if (g_calledFuncs.empty()) {
         return false;
     }
-    auto apiStr = std::move(g_calledFuncs.front());
+    auto apiStr = std::move(g_calledFuncs.top());
+    LIBABCKIT_LOG(DEBUG) << "TOP NAME " << apiStr << "\n";
     g_calledFuncs.pop();
     return apiStr == apiName;
+}
+
+bool CheckMockedStackEmpty()
+{
+    if (!g_calledFuncs.empty()) {
+        std::cerr << "Stack remains: " << std::endl;
+        while (!g_calledFuncs.empty()) {
+            std::cerr << g_calledFuncs.top() << std::endl;
+            g_calledFuncs.pop();
+        }
+        return false;
+    }
+    return g_calledFuncs.empty();
 }

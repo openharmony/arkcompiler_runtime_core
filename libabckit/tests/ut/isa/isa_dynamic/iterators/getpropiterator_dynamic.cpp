@@ -76,7 +76,7 @@ static void TransformIr(AbckitGraph *graph)
     }
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetpropiterator, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetpropiterator, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynGetPropIteratorInstTest, CreateDynGetpropiteratorValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/iterators/getpropiterator_dynamic.abc",

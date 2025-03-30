@@ -60,8 +60,8 @@ const std::string HELLO_WORLD_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "H
 const std::string HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpResult.txt";
 const std::string HELLO_WORLD_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDumpExpected.txt";
 const std::string HELLO_WORLD_DEBUG_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpExpected.txt";
-constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 73;
-constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 5;
+constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 72;
+constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 4;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
 constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 7;
 constexpr uint8_t TOTAL_NUM_OF_ASYNC_METHOD_LITERALS = 6;
@@ -560,15 +560,9 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, Te
     // check ins[71]
     const pandasm::Ins &ins71 = function.ins[71];
     std::string pa_ins_str71 = ins71.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str71 == "label@71: ldundefined");
+    EXPECT_TRUE(pa_ins_str71 == "label@71: returnundefined");
     EXPECT_TRUE(ins71.label == "label@71");
     EXPECT_TRUE(ins71.set_label);
-    // check ins[72]
-    const pandasm::Ins &ins72 = function.ins[72];
-    std::string pa_ins_str72 = ins72.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str72 == "returnundefined");
-    EXPECT_TRUE(ins72.label == "");
-    EXPECT_FALSE(ins72.set_label);
     // check catch blocks
     constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS = 3;
     EXPECT_TRUE(function.catch_blocks.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS);
@@ -602,18 +596,11 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
 {
     const pandasm::Function &function = *goo_function_;
     size_t regs_num = function.regs_num;
-    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 2;
+    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 1;
     EXPECT_TRUE(function.name == FUNC_NAME.goo);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_GOO_METHOD_INS);
     // check ins[0]
-    constexpr uint32_t INDEX_OF_FUNC_LDUNDEFINED = 0;
-    const pandasm::Ins &ins0 = function.ins[INDEX_OF_FUNC_LDUNDEFINED];
-    std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str0 == "ldundefined");
-    EXPECT_TRUE(ins0.label == "");
-    EXPECT_FALSE(ins0.set_label);
-    // check ins[1]
-    constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 1;
+    constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 0;
     const pandasm::Ins &ins1 = function.ins[INDEX_OF_FUNC_RETURNUNDEFINED];
     std::string pa_ins_str1 = ins1.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str1 == "returnundefined");
@@ -839,30 +826,6 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_ins_debug,
     EXPECT_TRUE(ins5.ins_debug.column_number == 11);
 }
 
-/*-------------------------------------- Cases of debug mode above --------------------------------------*/
-/*------------------------------------- Case of json file below -------------------------------------*/
-
-/**
- * @tc.name: abc2program_json_field_test
- * @tc.desc: get json field metadata
- * @tc.type: FUNC
- * @tc.require: issueIAJKTS
- */
-HWTEST_F(Abc2ProgramJsonTest, abc2program_json_field_test, TestSize.Level1)
-{
-    auto it = prog_->record_table.find(JSON_TEST_FILE_NAME);
-    ASSERT(it != prog_->record_table.end());
-    const pandasm::Record &record = it->second;
-    const std::vector<pandasm::Field> &field_list = record.field_list;
-    EXPECT_EQ(field_list.size(), 1);
-    const pandasm::Field &field = field_list[0];
-    EXPECT_EQ(field.name, JSON_FILE_CONTENT);
-    std::optional<pandasm::ScalarValue> val = field.metadata->GetValue();
-    EXPECT_TRUE(val.has_value());
-    auto content = val.value().GetValue<std::string>();
-    EXPECT_EQ(content, "{\n  \"name\" : \"Import json\"\n}");
-}
-
 /**
  * @tc.name: abc2program_hello_world_test_open_abc_file
  * @tc.desc: open a non-existent abc file
@@ -900,9 +863,12 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_driver_run
     const char* args5[] = {"abc2program_options", "--debug", "--debug-file", "debug_file_path"};
     EXPECT_TRUE(driver_.Run(argc5, args5));
     int argc6 = 3;
-    const char* args6[] = {"abc2program_options", HELLO_WORLD_ABC_TEST_FILE_NAME.c_str(),
-                            HELLO_WORLD_DUMP_RESULT_FILE_NAME.c_str()};
+    const char* args6[] = {"abc2program_options", HELLO_WORLD_DEBUG_ABC_TEST_FILE_NAME.c_str(),
+                            HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME.c_str()};
     EXPECT_FALSE(driver_.Run(argc6, args6));
+    if (REMOVE_DUMP_RESULT_FILES) {
+        Abc2ProgramTestUtils::RemoveDumpResultFile(HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME);
+    }
 }
 
 /**
@@ -921,6 +887,30 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_Label, Tes
     std::string result_null = test.GetMappedLabel(label2, label_map);
     EXPECT_EQ(result_found, "second_mapped_label");
     EXPECT_EQ(result_null, "");
+}
+
+/*-------------------------------------- Cases of debug mode above --------------------------------------*/
+/*-------------------------------------- Case of json file below ----------------------------------------*/
+
+/**
+ * @tc.name: abc2program_json_field_test
+ * @tc.desc: get json field metadata
+ * @tc.type: FUNC
+ * @tc.require: issueIAJKTS
+ */
+HWTEST_F(Abc2ProgramJsonTest, abc2program_json_field_test, TestSize.Level1)
+{
+    auto it = prog_->record_table.find(JSON_TEST_FILE_NAME);
+    ASSERT(it != prog_->record_table.end());
+    const pandasm::Record &record = it->second;
+    const std::vector<pandasm::Field> &field_list = record.field_list;
+    EXPECT_EQ(field_list.size(), 1);
+    const pandasm::Field &field = field_list[0];
+    EXPECT_EQ(field.name, JSON_FILE_CONTENT);
+    std::optional<pandasm::ScalarValue> val = field.metadata->GetValue();
+    EXPECT_TRUE(val.has_value());
+    auto content = val.value().GetValue<std::string>();
+    EXPECT_EQ(content, "{\n  \"name\" : \"Import json\"\n}");
 }
 
 /**

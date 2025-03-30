@@ -34,7 +34,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynGetNextProp : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetnextpropname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetnextpropname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynGetNextProp, IcreateGetnextpropname_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/get_insts/getnextpropname_dynamic.abc",
@@ -50,16 +50,14 @@ TEST_F(LibAbcKitCreateDynGetNextProp, IcreateGetnextpropname_1)
             auto *newBB = g_implG->bbCreateEmpty(graph);
             auto *newFalseBB = g_implG->bbCreateEmpty(graph);
             auto *newEndBB = g_implG->bbCreateEmpty(graph);
-            g_implG->bbEraseSuccBlock(bb, 0);
+            g_implG->bbDisconnectSuccBlock(bb, 0);
             g_implG->bbAppendSuccBlock(bb, newBB);
             g_implG->bbAppendSuccBlock(newBB, newEndBB);  // true branch -> end block
             g_implG->bbAppendSuccBlock(newBB, newFalseBB);
             g_implG->bbAppendSuccBlock(newFalseBB, newBB);
             g_implG->bbAppendSuccBlock(newEndBB, g_implG->gGetEndBasicBlock(graph));
 
-            auto *ldundefLast = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            auto *returnundef = g_implG->iGetNext(ldundefLast);
-            g_implG->iRemove(ldundefLast);
+            auto *returnundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             g_implG->iRemove(returnundef);
 
             auto *iterator = g_dynG->iCreateGetpropiterator(graph, createArr);
@@ -80,7 +78,7 @@ TEST_F(LibAbcKitCreateDynGetNextProp, IcreateGetnextpropname_1)
             g_implG->bbAddInstBack(newEndBB, ldundef2);
             g_implG->bbAddInstBack(newEndBB, returnundef2);
 
-            auto *stringPrint = g_implM->createString(file, "print");
+            auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyvalue = g_dynG->iCreateLdobjbyvalue(graph, getnextpropname, createArr);
             auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue);

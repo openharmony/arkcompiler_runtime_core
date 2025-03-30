@@ -53,10 +53,9 @@ static void CreateEpilog(AbckitInst *inst, AbckitBasicBlock *bb, UserData *userD
     while (inst != nullptr) {
         if (g_dynG->iGetOpcode(inst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED) {
             // Epilog
-            auto *undef = g_implG->iGetPrev(inst);
             auto *dateClass2 = g_dynG->iCreateTryldglobalbyname(graph, userData->date);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            g_implG->iInsertBefore(dateClass2, undef);
+            g_implG->iInsertBefore(dateClass2, inst);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *dateObj2 = g_dynG->iCreateNewobjrange(graph, 1, dateClass2);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -206,14 +205,13 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> GetCorrectBBSch
               {31, ABCKIT_ISA_API_DYNAMIC_OPCODE_SUB2, {9, 27}},
               {32, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
               {33, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {32, 31}},
-              {34, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-              {35, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+              {34, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
           }},
          {{4}, {}, {}}});
     return bbSchemas;
 }
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicAddLog)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_dynamic.abc", "add_log_dynamic");
@@ -224,11 +222,12 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicAddLog)
         ABCKIT_ABC_DIR "scenarios/add_log/add_log_dynamic_modified.abc", "handle",
         [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
             UserData data = {};
-            data.print = g_implM->createString(file, "print");
-            data.date = g_implM->createString(file, "Date");
-            data.getTime = g_implM->createString(file, "getTime");
-            data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle");
-            data.consume = g_implM->createString(file, "Ellapsed time:");
+            data.print = g_implM->createString(file, "print", strlen("print"));
+            data.date = g_implM->createString(file, "Date", strlen("Date"));
+            data.getTime = g_implM->createString(file, "getTime", strlen("getTime"));
+            data.str = g_implM->createString(file, "file: src/MyClass, function: MyClass.handle",
+                                             strlen("file: src/MyClass, function: MyClass.handle"));
+            data.consume = g_implM->createString(file, "Ellapsed time:", strlen("Ellapsed time:"));
 
             TransformIr(graph, &data);
         },

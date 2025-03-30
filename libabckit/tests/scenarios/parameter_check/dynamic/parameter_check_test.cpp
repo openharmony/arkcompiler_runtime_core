@@ -24,7 +24,7 @@ namespace libabckit::test {
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestParameterCheck)
 {
     static constexpr auto VERSION = ABCKIT_VERSION_RELEASE_1_0_0;
@@ -33,7 +33,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestParameterCheck)
     const std::string entryPoint = "parameter_check";
 
     auto *impl = AbckitGetApiImpl(VERSION);
-    AbckitFile *file = impl->openAbc(INPUT_PATH);
+    AbckitFile *file = impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_NE(file, nullptr);
 
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, entryPoint);
@@ -55,7 +55,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestParameterCheck)
 
     AbckitFile *modCtxI = modifier.GetFile();
     ASSERT_NE(modCtxI, nullptr);
-    impl->writeAbc(modCtxI, OUTPUT_PATH);
+    impl->writeAbc(modCtxI, OUTPUT_PATH, strlen(OUTPUT_PATH));
     impl->closeFile(file);
 
     output = helpers::ExecuteDynamicAbc(OUTPUT_PATH, entryPoint);

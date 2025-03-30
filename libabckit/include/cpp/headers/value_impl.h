@@ -17,8 +17,17 @@
 #define CPP_ABCKIT_VALUE_IMPL_H
 
 #include "./value.h"
+#include "./type.h"
+#include "./literal_array.h"
 
 namespace abckit {
+
+inline Type Value::GetType() const
+{
+    auto value = GetApiConfig()->cIapi_->valueGetType(GetView());
+    CheckError(GetApiConfig());
+    return Type(value, GetApiConfig(), GetResource());
+}
 
 inline bool Value::GetU1() const
 {
@@ -34,15 +43,28 @@ inline double Value::GetDouble() const
     return ret;
 }
 
-inline std::string_view Value::GetString() const
+inline std::string Value::GetString() const
 {
     AbckitString *abcStr = GetApiConfig()->cIapi_->valueGetString(GetView());
     CheckError(GetApiConfig());
-    std::string_view str = GetApiConfig()->cIapi_->abckitStringToString(abcStr);
+    std::string str = GetApiConfig()->cIapi_->abckitStringToString(abcStr);
     CheckError(GetApiConfig());
     return str;
 }
 
+inline const File *Value::GetFile() const
+{
+    CheckError(GetApiConfig());
+    return GetResource();
+}
+
+inline LiteralArray Value::GetLiteralArray() const
+{
+    auto ret = GetApiConfig()->cIapi_->arrayValueGetLiteralArray(GetView());
+    CheckError(GetApiConfig());
+    return LiteralArray(ret, GetApiConfig(), GetResource());
+}
+
 }  // namespace abckit
 
-#endif  // CPP_ABCKIT_VALUE_IMPL_H
+#endif

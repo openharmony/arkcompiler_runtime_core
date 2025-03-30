@@ -19,7 +19,9 @@
 #include "./annotation.h"
 #include "./annotation_element.h"
 #include "../value.h"
+#include "../core/annotation_element.h"
 
+// NOLINTBEGIN(performance-unnecessary-value-param)
 namespace abckit::arkts {
 
 inline AbckitArktsAnnotation *Annotation::TargetCast() const
@@ -31,17 +33,18 @@ inline AbckitArktsAnnotation *Annotation::TargetCast() const
 
 inline Annotation::Annotation(const core::Annotation &coreOther) : core::Annotation(coreOther), targetChecker_(this) {}
 
-inline arkts::Annotation &Annotation::AddElement(const abckit::Value &val, const std::string &name)
+inline arkts::Annotation Annotation::AddElement(const abckit::Value &val, std::string_view name) const
 {
     struct AbckitArktsAnnotationElementCreateParams params {
-        name.c_str(), val.GetView()
+        name.data(), val.GetView()
     };
     GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(TargetCast(), &params);
     CheckError(GetApiConfig());
     return *this;
 }
 
-inline AbckitCoreAnnotationElement *Annotation::AddAndGetElementImpl(AbckitArktsAnnotationElementCreateParams *params)
+inline AbckitCoreAnnotationElement *Annotation::AddAndGetElementImpl(
+    AbckitArktsAnnotationElementCreateParams *params) const
 {
     AbckitArktsAnnotationElement *arktsAnni =
         GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(TargetCast(), params);
@@ -52,7 +55,7 @@ inline AbckitCoreAnnotationElement *Annotation::AddAndGetElementImpl(AbckitArkts
     return coreAnni;
 }
 
-inline arkts::AnnotationElement Annotation::AddAndGetElement(const abckit::Value &val, const std::string_view name)
+inline arkts::AnnotationElement Annotation::AddAndGetElement(const abckit::Value &val, std::string_view name) const
 {
     struct AbckitArktsAnnotationElementCreateParams params {
         name.data(), val.GetView()
@@ -62,6 +65,27 @@ inline arkts::AnnotationElement Annotation::AddAndGetElement(const abckit::Value
     return arkts::AnnotationElement(element);
 }
 
+inline AnnotationElement Annotation::AddAnnotationElement(std::string_view name, Value value) const
+{
+    struct AbckitArktsAnnotationElementCreateParams params {
+        name.data(), value.GetView()
+    };
+
+    auto arktsAnnoElem = GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(TargetCast(), &params);
+    CheckError(GetApiConfig());
+    auto coreAnnoElenm = GetApiConfig()->cArktsIapi_->arktsAnnotationElementToCoreAnnotationElement(arktsAnnoElem);
+    CheckError(GetApiConfig());
+    return AnnotationElement(core::AnnotationElement(coreAnnoElenm, GetApiConfig(), GetResource()));
+}
+
+inline Annotation Annotation::RemoveAnnotationElement(AnnotationElement elem) const
+{
+    GetApiConfig()->cArktsMapi_->annotationRemoveAnnotationElement(TargetCast(), elem.TargetCast());
+    CheckError(GetApiConfig());
+    return *this;
+}
+
 }  // namespace abckit::arkts
+// NOLINTEND(performance-unnecessary-value-param)
 
 #endif  // CPP_ABCKIT_ARKTS_ANNOTATION_IMPL_H

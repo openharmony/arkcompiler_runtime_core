@@ -47,8 +47,10 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
     AbckitInst *initInst = g_implG->bbGetFirstInst(bb);
     AbckitInst *prevRetInst = g_implG->iGetPrev(g_implG->bbGetLastInst(bb));
 
-    AbckitBasicBlock *tryBegin = g_implG->bbSplitBlockAfterInstruction(initInst, true);
-    AbckitBasicBlock *tryEnd = g_implG->bbSplitBlockAfterInstruction(prevRetInst, true);
+    AbckitBasicBlock *tryBegin =
+        g_implG->bbSplitBlockAfterInstruction(g_implG->iGetBasicBlock(initInst), initInst, true);
+    AbckitBasicBlock *tryEnd =
+        g_implG->bbSplitBlockAfterInstruction(g_implG->iGetBasicBlock(prevRetInst), prevRetInst, true);
 
     // Fill catchBlock
     AbckitBasicBlock *catchBlock = g_implG->bbCreateEmpty(graph);
@@ -72,7 +74,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
     g_implG->gInsertTryCatch(tryBegin, tryEnd, catchBlock, catchBlock);
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicAddTryCatch)
 {
     auto output =
@@ -84,7 +86,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicAddTryCatch)
         ABCKIT_ABC_DIR "scenarios/add_try_catch/dynamic/add_try_catch_modified.abc", "run",
         [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
             UserData uData {};
-            uData.print = g_implM->createString(file, "print");
+            uData.print = g_implM->createString(file, "print", strlen("print"));
             TransformIr(graph, &uData);
         },
         []([[maybe_unused]] AbckitGraph *graph) {});

@@ -534,7 +534,7 @@ static void AnnotationGetFile(AbckitFile *file, AbckitCoreFunction *method, Abck
     EXPECT_TRUE(g_impl->getLastError() == ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationElementGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationElementGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetName)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -542,7 +542,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationElementGetValue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationElementGetValue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetValue)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -550,7 +550,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetValue)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationElementGetAnnotation, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationElementGetAnnotation, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetAnnotation)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -558,7 +559,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetAnnotation)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationElementGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationElementGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetFile)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -566,7 +567,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationElementGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateAnnotations, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateAnnotations, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, ClassEnumerateAnnotations)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -574,7 +575,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, ClassEnumerateAnnotations)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationGetInterface, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationGetInterface, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationGetInterface)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -582,7 +583,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationGetInterface)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceGetName)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -590,7 +591,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceGetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceGetFile)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -598,7 +599,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateAnnotationInterfaces, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateAnnotationInterfaces, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, ModuleEnumerateAnnotationInterfaces)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -606,7 +608,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, ModuleEnumerateAnnotationInterfaces)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceGetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceGetModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceGetModule)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -614,7 +617,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceGetModule)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceEnumerateFields, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceEnumerateFields, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceEnumerateFields)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -622,7 +626,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceEnumerateFields)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetFile, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetFile)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -630,7 +635,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetName, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetName)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -638,7 +644,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetInterface, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetInterface, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetInterface)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -646,7 +653,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetInterface
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetType, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetType, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetType)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -654,7 +662,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetType)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetDefaultValue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationInterfaceFieldGetDefaultValue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetDefaultValue)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -662,7 +671,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationInterfaceFieldGetDefaultVa
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationEnumerateElements, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationEnumerateElements, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationEnumerateElements)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -670,7 +679,7 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationEnumerateElements)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::annotationGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::annotationGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationGetFile)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",
@@ -678,7 +687,8 @@ TEST_F(LibAbcKitInspectApiAnnotationsTests, AnnotationGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::functionEnumerateAnnotations, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::functionEnumerateAnnotations, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiAnnotationsTests, FunctionEnumerateAnnotations)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic.abc",

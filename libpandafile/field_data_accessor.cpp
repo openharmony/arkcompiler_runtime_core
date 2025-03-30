@@ -15,8 +15,6 @@
 
 #include "field_data_accessor.h"
 
-#include "utils/leb128.h"
-
 namespace panda::panda_file {
 
 FieldDataAccessor::FieldDataAccessor(const File &panda_file, File::EntityId field_id)

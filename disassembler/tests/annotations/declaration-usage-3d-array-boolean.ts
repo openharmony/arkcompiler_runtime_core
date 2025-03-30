@@ -17,8 +17,8 @@
     a: boolean[][][];
 }
 
-@#Anno({a: [[[true, false, true]]]})
+@__$$ETS_ANNOTATION$$__Anno({a: [[[true, false, true]]]})
 class A {
-    @#Anno({a: [[new Array<boolean>()]]})
+    @__$$ETS_ANNOTATION$$__Anno({a: [[new Array<boolean>()]]})
     foo() {}
 }

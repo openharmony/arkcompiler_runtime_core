@@ -136,6 +136,10 @@ class Instruction < SimpleDelegator
     properties.include? 'inlinable'
   end
 
+  def no_side_effect?
+    properties.include? 'no_side_effect'
+  end
+
   def opcode_idx
     if prefix
       dig(:opcode_idx) << 8 | prefix.opcode_idx

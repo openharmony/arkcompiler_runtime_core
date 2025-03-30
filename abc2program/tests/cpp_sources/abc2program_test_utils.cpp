@@ -54,17 +54,22 @@ std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_
                                                                                     "toString",
                                                                                     "varA",
                                                                                     "x"};
-std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {"_ESModuleRecord",
-                                                                                    "_ESSlotNumberAnnotation",
-                                                                                    "_ESScopeNamesRecord",
-                                                                                    "_GLOBAL"};
-std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord",
-                                                                                          "_ESScopeNamesRecord",
-                                                                                          "_GLOBAL",
-                                                                                          "_GLOBAL",
-                                                                                          "_GLOBAL",
-                                                                                          "_GLOBAL",
-                                                                                          "_GLOBAL"};
+std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {
+    "_ESExpectedPropertyCountAnnotation",
+    "_ESModuleRecord",
+    "_ESSlotNumberAnnotation",
+    "_ESScopeNamesRecord",
+    "_GLOBAL"
+};
+std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {
+    "_ESModuleRecord",
+    "_ESScopeNamesRecord",
+    "_GLOBAL",
+    "_GLOBAL",
+    "_GLOBAL",
+    "_GLOBAL",
+    "_GLOBAL"
+};
 
 std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 6, 8, 10, 21};
 

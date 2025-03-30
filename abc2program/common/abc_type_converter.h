@@ -29,6 +29,10 @@ public:
                                              size_t &ref_idx) const;
     pandasm::Type FieldTypeToPandasmType(const uint32_t &type) const;
 
+    Abc2ProgramEntityContainer &EntityContainer() const
+    {
+        return entity_container_;
+    }
 private:
     Abc2ProgramEntityContainer &entity_container_;
 };  // class AbcTypeConverter

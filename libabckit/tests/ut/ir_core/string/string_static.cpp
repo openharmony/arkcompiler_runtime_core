@@ -37,7 +37,7 @@ void TransformSetStringIrStatic(AbckitGraph *graph, AbckitFile *file)
     ASSERT_NE(loadStr, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *newStr = g_implM->createString(file, "STRING");
+    auto *newStr = g_implM->createString(file, "STRING", strlen("STRING"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_implG->iSetString(loadStr, newStr);
@@ -61,7 +61,7 @@ void CheckGetStringIrStatic(AbckitGraph *graph)
 
 class LibAbcKitStringStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::iSetString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitStringStaticTest, LibAbcKitTestSetString)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/string/string_static.abc",
@@ -79,7 +79,7 @@ TEST_F(LibAbcKitStringStaticTest, LibAbcKitTestSetString)
     EXPECT_TRUE(helpers::Match(output, "STRING\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitStringStaticTest, LibAbcKitTestGetString)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/string/string_static.abc",

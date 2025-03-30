@@ -15,7 +15,6 @@
 
 #include "../../../include/cpp/abckit_cpp.h"
 #include "../check_mock.h"
-
 #include <gtest/gtest.h>
 
 namespace libabckit::test {
@@ -25,6 +24,7 @@ class LibAbcKitCppMockTest : public ::testing::Test {};
 // Test: test-kind=mock, api=File::WriteAbc, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockTest, CppTestMockFile)
 {
+    ASSERT_TRUE(CheckMockedStackEmpty());
     {
         abckit::File file("abckit.abc");
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
@@ -32,11 +32,13 @@ TEST_F(LibAbcKitCppMockTest, CppTestMockFile)
         ASSERT_TRUE(CheckMockedApi("WriteAbc"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=mock, api=File::EnumerateModules, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockTest, CppTestMockFileEnumerateModules)
 {
+    ASSERT_TRUE(CheckMockedStackEmpty());
     {
         abckit::File file("abckit.abc");
         ASSERT_TRUE(CheckMockedApi("OpenAbc"));
@@ -54,6 +56,23 @@ TEST_F(LibAbcKitCppMockTest, CppTestMockFileEnumerateModules)
         ASSERT_TRUE(CheckMockedApi("WriteAbc"));
     }
     ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
+}
+
+// Test: test-kind=mock, api=File::GetModules, abc-kind=ArkTS1, category=internal, extension=cpp
+TEST_F(LibAbcKitCppMockTest, CppTestGetModule)
+{
+    ASSERT_TRUE(CheckMockedStackEmpty());
+    {
+        abckit::File file("abckit.abc");
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+        abckit::core::Module mdl = file.GetModules()[0];
+        ASSERT_TRUE(CheckMockedApi("FileEnumerateModules"));
+        abckit::core::Class cls = mdl.GetClasses()[0];
+        ASSERT_TRUE(CheckMockedApi("ModuleEnumerateClasses"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+    ASSERT_TRUE(CheckMockedStackEmpty());
 }
 
 }  // namespace libabckit::test

@@ -27,6 +27,13 @@ namespace libabckit::test {
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
+static constexpr auto MODIFIED_DYNAMIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc";
+static constexpr auto MODIFIED_STATIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc";
+static constexpr auto MODIFIED_EMPTY_DYNAMIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc";
+
 class LibAbcKitInspectApiClassesTest : public ::testing::Test {};
 
 static bool ClassCountrer(AbckitCoreClass *klass, void *data)
@@ -36,7 +43,7 @@ static bool ClassCountrer(AbckitCoreClass *klass, void *data)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClasses)
 {
     AbckitFile *file = nullptr;
@@ -57,7 +64,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClasses)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClasses)
 {
     AbckitFile *file = nullptr;
@@ -78,7 +85,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClasses)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClassesEmpty)
 {
     AbckitFile *file = nullptr;
@@ -99,7 +106,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticModuleEnumerateClassesEmpty)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateClasses, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClassesEmpty)
 {
     AbckitFile *file = nullptr;
@@ -120,7 +127,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicModuleEnumerateClassesEmpty)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetNameSmoke)
 {
     AbckitFile *file = nullptr;
@@ -150,13 +157,13 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetNameSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetNameSmoke)
 {
     AbckitFile *file = nullptr;
@@ -186,7 +193,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetNameSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -211,7 +218,7 @@ static bool ClassNameCollector(AbckitCoreClass *klass, void *data)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetName)
 {
     AbckitFile *file = nullptr;
@@ -236,7 +243,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetName)
 {
     AbckitFile *file = nullptr;
@@ -256,7 +263,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetName)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -270,7 +277,7 @@ static bool DummyMethodVisitor(AbckitCoreFunction *method, void * /*data*/)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSmoke)
 {
     AbckitFile *file = nullptr;
@@ -307,7 +314,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSmoke)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSmoke)
 {
     AbckitFile *file = nullptr;
@@ -341,7 +348,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -354,7 +361,7 @@ static bool MethodCountrer(AbckitCoreFunction *method, void *data)
     return true;
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsEmpty)
 {
     AbckitFile *file = nullptr;
@@ -386,7 +393,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsEmpty)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsEmpty)
 {
     AbckitFile *file = nullptr;
@@ -414,13 +421,13 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsEmpty)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_EMPTY_DYNAMIC, strlen(MODIFIED_EMPTY_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSeveralMethods)
 {
     AbckitFile *file = nullptr;
@@ -453,7 +460,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassEnumerateMethodsSeveralMethods)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classEnumerateMethods, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSeveralMethods)
 {
     AbckitFile *file = nullptr;
@@ -482,13 +489,13 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSeveralMethod
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_EMPTY_DYNAMIC, strlen(MODIFIED_EMPTY_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFile)
 {
     AbckitFile *file = nullptr;
@@ -517,7 +524,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, ClassGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetFile)
 {
     AbckitFile *file = nullptr;
@@ -542,13 +549,13 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetFile)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetModule)
 {
     AbckitFile *file = nullptr;
@@ -571,13 +578,13 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetModule)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
 {
     AbckitFile *file = nullptr;
@@ -600,13 +607,13 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetParentFunction, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetParentFunction, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetParentFunction)
 {
     AbckitFile *file = nullptr;
@@ -638,7 +645,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetParentFunction)
         return true;
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

@@ -243,7 +243,7 @@ void BranchEliminator::DeleteUnreachableBranch(AbckitInst *ifInst) const
     // if true ==> delete false branch
     implG_->iRemove(ifInst);
 
-    implG_->bbEraseSuccBlock(bb, result ? 1 : 0);
+    implG_->bbDisconnectSuccBlock(bb, result ? 1 : 0);
     implG_->gRunPassRemoveUnreachableBlocks(implG_->bbGetGraph(bb));
 }
 

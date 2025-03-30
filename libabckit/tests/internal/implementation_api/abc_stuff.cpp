@@ -37,10 +37,11 @@ struct ModuleData {
     std::vector<const char *> moduleMethods = {};
 };
 
-// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, OpenAbcStatic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
@@ -70,16 +71,17 @@ TEST_F(LibAbcKitAbcStuff, OpenAbcStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, WriteAbcStatic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "internal/implementation_api/abc_static_tmp.abc");
+    g_impl->writeAbc(file, INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_static_tmp.abc");
+    file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     std::vector<struct ClassData> userData = {{"ClassA", {"foo", "bar"}}, {"ClassB", {"baz", "func"}}};
@@ -108,19 +110,21 @@ TEST_F(LibAbcKitAbcStuff, WriteAbcStatic)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, CloseFileStatic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_static.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::openAbc, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, OpenAbcDynamic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     struct ModuleData userData = {"abc_dynamic", {"foo", "bar", "baz", "func"}};
@@ -140,16 +144,17 @@ TEST_F(LibAbcKitAbcStuff, OpenAbcDynamic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::writeAbc, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, WriteAbcDynamic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic_tmp.abc");
+    g_impl->writeAbc(file, INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic_tmp.abc");
+    file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     struct ModuleData userData = {"abc_dynamic", {"foo", "bar", "baz", "func"}};
@@ -169,10 +174,11 @@ TEST_F(LibAbcKitAbcStuff, WriteAbcDynamic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ApiImpl::closeFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitAbcStuff, CloseFileDynamic)
 {
-    auto *file = g_impl->openAbc(ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc");
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "internal/implementation_api/abc_dynamic.abc";
+    auto *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

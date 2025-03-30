@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <string_view>
 #include "assembly-parser.h"
 #include "utils/number-utils.h"
 

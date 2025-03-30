@@ -41,16 +41,16 @@ static void TransformIrMain(AbckitFile *file, AbckitGraph *graph, bool isWideMod
     auto *mainBB = g_implG->gGetBasicBlock(graph, 0);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *firstConst = g_implG->gCreateConstantI32(graph, 0x1);
+    auto *firstConst = g_implG->gFindOrCreateConstantI32(graph, 0x1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto *secondConst = g_implG->gCreateConstantI32(graph, 0x3);
+    auto *secondConst = g_implG->gFindOrCreateConstantI32(graph, 0x3);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *newlexenv = nullptr;
     if (isWithName) {
         std::array<AbckitLiteral *, 5U> statlitarr = {
-            g_implM->createLiteralU32(file, 2), g_implM->createLiteralString(file, "x"),
-            g_implM->createLiteralU32(file, 0), g_implM->createLiteralString(file, "y"),
+            g_implM->createLiteralU32(file, 2), g_implM->createLiteralString(file, "x", strlen("x")),
+            g_implM->createLiteralU32(file, 0), g_implM->createLiteralString(file, "y", strlen("x")),
             g_implM->createLiteralU32(file, 1)};
         AbckitLiteralArray *litarr = g_implM->createLiteralArray(file, statlitarr.data(), 5U);
         newlexenv = isWideMode ? g_dynG->iCreateWideNewlexenvwithname(graph, 0x2, litarr)
@@ -98,7 +98,7 @@ static void TransformIrMain(AbckitFile *file, AbckitGraph *graph, bool isWideMod
 
 static void TransformIrFuncs(AbckitFile *file, AbckitGraph *graph, uint32_t slot, bool isWideMode)
 {
-    auto *firstConst = g_implG->gCreateConstantI32(graph, 0x1);
+    auto *firstConst = g_implG->gFindOrCreateConstantI32(graph, 0x1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *ldlexvar = nullptr;
@@ -110,9 +110,9 @@ static void TransformIrFuncs(AbckitFile *file, AbckitGraph *graph, uint32_t slot
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     AbckitString *name = nullptr;
     if (slot == 0x0) {
-        name = g_implM->createString(file, "x");
+        name = g_implM->createString(file, "x", strlen("x"));
     } else if (slot == 0x1) {
-        name = g_implM->createString(file, "y");
+        name = g_implM->createString(file, "y", strlen("y"));
     }
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto *throwundef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldlexvar, name);
@@ -169,9 +169,8 @@ static void ValidateIrMain(AbckitGraph *graph, bool isWideMode, bool isWithName)
              {15, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
              {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {6}},
              {17, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {15, 16}},
-             {18, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-             {19, ABCKIT_ISA_API_DYNAMIC_OPCODE_POPLEXENV, {}},
-             {20, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+             {18, ABCKIT_ISA_API_DYNAMIC_OPCODE_POPLEXENV, {}},
+             {19, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
          }},
         {{1}, {}, {}}};
 
@@ -239,55 +238,56 @@ static void TestLexEnvVar(bool isWideMode, bool isWithName = false)
     EXPECT_TRUE(helpers::Match(output, "2\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenv, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, NewLexenv)
 {
     TestLexEnvVar(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, StLexvar)
 {
     TestLexEnvVar(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, LdLexvar)
 {
     TestLexEnvVar(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenv, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideNewLexenv)
 {
     TestLexEnvVar(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideStLexvar)
 {
     TestLexEnvVar(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideLdLexvar)
 {
     TestLexEnvVar(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenvwithname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenvwithname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, NewLexenvWithName)
 {
     TestLexEnvVar(false, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenvwithname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenvwithname, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideNewLexenvWithName)
 {
     TestLexEnvVar(true, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreatePoplexenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreatePoplexenv, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, PopLexenv)
 {
     TestLexEnvVar(false);

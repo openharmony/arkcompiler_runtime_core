@@ -82,7 +82,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     LIBABCKIT_LOG_TEST(DEBUG) << "TransformMethod: " << inputPath << '\n';
 
     // Open file
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Transform method
@@ -99,7 +99,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     g_impl->destroyGraph(graph);
 
     // Write output
-    g_impl->writeAbc(file, outputPath.c_str());
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
@@ -110,7 +110,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     LIBABCKIT_LOG_TEST(DEBUG) << "TransformMethod: " << inputPath << '\n';
 
     // Open file
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Transform method
@@ -121,7 +121,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Write output
-    g_impl->writeAbc(file, outputPath.c_str());
+    g_impl->writeAbc(file, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
@@ -161,7 +161,7 @@ void InspectMethod(const std::string &inputPath, const std::string &methodSignat
     LIBABCKIT_LOG_TEST(DEBUG) << "InspectMethod: " << inputPath << '\n';
 
     // Open file
-    AbckitFile *file = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *file = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Inspect method
@@ -443,11 +443,25 @@ void AssertMethodVisitor([[maybe_unused]] AbckitCoreFunction *method, [[maybe_un
     EXPECT_TRUE(data != nullptr);
 }
 
+void AssertAnnotationInterfaceVisitor(AbckitCoreAnnotationInterface *ai, void *data)
+{
+    ASSERT_TRUE(ai != nullptr);
+    ASSERT_TRUE(data != nullptr);
+}
+
+void AssertAnnotationVisitor(AbckitCoreAnnotation *anno, void *data)
+{
+    ASSERT_NE(anno, nullptr);
+    auto ai = g_implI->annotationGetInterface(anno);
+    ASSERT_NE(ai, nullptr);
+    ASSERT_NE(data, nullptr);
+}
+
 void AssertOpenAbc(const char *fname, AbckitFile **file)
 {
     ASSERT_NE(g_impl, nullptr);
     ASSERT_NE(g_implI, nullptr);
-    *file = g_impl->openAbc(fname);
+    *file = g_impl->openAbc(fname, strlen(fname));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(*file, nullptr);
 }
@@ -515,6 +529,37 @@ bool ExportByAliasFinder(AbckitCoreExportDescriptor *ed, void *data)
     auto name = helpers::AbckitStringToString(g_implI->exportDescriptorGetAlias(ed));
     if (name == ctxFinder->name) {
         ctxFinder->ed = ed;
+        return false;
+    }
+
+    return true;
+}
+
+bool AnnotationInterfaceByNameFinder(AbckitCoreAnnotationInterface *ai, void *data)
+{
+    AssertAnnotationInterfaceVisitor(ai, data);
+
+    auto ctxFinder = reinterpret_cast<AnnotationInterfaceByNameContext *>(data);
+    auto str = g_implI->annotationInterfaceGetName(ai);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->ai = ai;
+        return false;
+    }
+
+    return true;
+}
+
+bool AnnotationByNameFinder(AbckitCoreAnnotation *anno, void *data)
+{
+    AssertAnnotationVisitor(anno, data);
+
+    auto ctxFinder = reinterpret_cast<AnnotationByNameContext *>(data);
+    auto ai = g_implI->annotationGetInterface(anno);
+    auto str = g_implI->annotationInterfaceGetName(ai);
+    auto name = helpers::AbckitStringToString(str);
+    if (name == ctxFinder->name) {
+        ctxFinder->anno = anno;
         return false;
     }
 

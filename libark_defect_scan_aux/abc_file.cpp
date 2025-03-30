@@ -247,6 +247,9 @@ std::string AbcFile::GetLocalNameByExportName(std::string_view export_name, std:
         record_name = std::string(MODULE_CLASS);
     }
     auto module_record = GetModuleRecordByName(std::string(record_name));
+    if (module_record == nullptr) {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc, can't get module_record";
+    }
     return module_record->GetLocalNameByExportName(export_name);
 }
 
@@ -263,6 +266,9 @@ std::string AbcFile::GetImportNameByExportName(std::string_view export_name, std
         record_name = std::string(MODULE_CLASS);
     }
     auto module_record = GetModuleRecordByName(std::string(record_name));
+    if (module_record == nullptr) {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc, can't get module_record";
+    }
     return  module_record->GetImportNameByExportName(export_name);
 }
 
@@ -279,6 +285,9 @@ std::string AbcFile::GetModuleNameByExportName(std::string_view export_name, std
         record_name = std::string(MODULE_CLASS);
     }
     auto module_record = GetModuleRecordByName(std::string(record_name));
+    if (module_record == nullptr) {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc, can't get module_record";
+    }
     return module_record->GetModuleNameByExportName(export_name);
 }
 
@@ -294,6 +303,9 @@ std::string AbcFile::GetModuleNameByLocalName(std::string_view local_name, std::
         record_name = std::string(MODULE_CLASS);
     }
     auto module_record = GetModuleRecordByName(std::string(record_name));
+    if (module_record == nullptr) {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc, can't get module_record";
+    }
     return module_record->GetModuleNameByLocalName(local_name);
 }
 
@@ -309,6 +321,9 @@ std::string AbcFile::GetImportNameByLocalName(std::string_view local_name, std::
         record_name = std::string(MODULE_CLASS);
     }
     auto module_record = GetModuleRecordByName(std::string(record_name));
+    if (module_record == nullptr) {
+        LOG(FATAL, DEFECT_SCAN_AUX) << "Failed to GetLocalNameByExportName from merge abc, can't get module_record";
+    }
     return module_record->GetImportNameByLocalName(local_name);
 }
 

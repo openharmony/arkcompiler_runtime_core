@@ -33,6 +33,8 @@ static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
+static constexpr auto MODIFIED = ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc";
+
 class LibAbcKitInspectApiModulesTest : public ::testing::Test {};
 
 // ========================================
@@ -168,7 +170,7 @@ static AbckitTarget GetFileTarget(AbckitFile *file, const char *moduleName)
 // Modules Tests
 // ========================================
 
-// Test: test-kind=api, api=InspectApiImpl::moduleGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetName)
 {
     AbckitFile *file = nullptr;
@@ -185,14 +187,14 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetName)
         ASSERT_NE(gotNames.find(expectedName), gotNames.end());
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
 // NOTE: fix after ets2bundle integrated into abckit unit tests
-// Test: test-kind=api, api=InspectApiImpl::moduleIsExternal, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleIsExternal, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleIsExternal)
 {
     AbckitFile *file = nullptr;
@@ -215,13 +217,15 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleIsExternal)
         ASSERT_EQ(g_implI->moduleIsExternal(module), expected[name.data()]);
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_external_modified.abc");
+    constexpr auto OUTPUT_PATH =
+        ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_external_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetFile)
 {
     AbckitFile *file = nullptr;
@@ -239,7 +243,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetFile)
         ASSERT_EQ(file, file);
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -249,7 +253,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetFile)
 // Imports
 // ========================================
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateImports, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateImports, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateImports)
 {
     AbckitFile *file = nullptr;
@@ -267,13 +271,13 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateImports)
 
     ASSERT_EQ(gotImports.size(), 5U);
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetName)
 {
     AbckitFile *file = nullptr;
@@ -302,13 +306,13 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetName)
         }
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetAlias, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetAlias, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetAlias)
 {
     AbckitFile *file = nullptr;
@@ -332,13 +336,13 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetAlias)
         ASSERT_NE(gotImportAliases.find(expectedName), gotImportAliases.end());
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetFile)
 {
     AbckitFile *file = nullptr;
@@ -361,13 +365,14 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetFile)
         ASSERT_EQ(file, g_implI->moduleGetFile(m));
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportingModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportingModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportingModule)
 {
     AbckitFile *file = nullptr;
@@ -390,13 +395,14 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportingModule
         ASSERT_EQ(impM, m);
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportedModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportedModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportedModule)
 {
     AbckitFile *file = nullptr;
@@ -435,7 +441,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportedModule)
         ASSERT_EQ(impM, expected.find(strName.data())->second);
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -445,7 +451,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportedModule)
 // Exports
 // ========================================
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateExports, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateExports, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateExports)
 {
     AbckitFile *file = nullptr;
@@ -463,13 +469,13 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateExports)
 
     ASSERT_EQ(gotExports.size(), 10U);
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetName)
 {
     AbckitFile *file = nullptr;
@@ -504,13 +510,13 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetName)
         }
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetAlias, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetAlias, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetAlias)
 {
     AbckitFile *file = nullptr;
@@ -541,13 +547,13 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetAlias)
         ASSERT_NE(gotExportAliases.find(expectedName), gotExportAliases.end());
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetFile)
 {
     AbckitFile *file = nullptr;
@@ -570,13 +576,14 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetFile)
         ASSERT_EQ(file, g_implI->moduleGetFile(m));
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportingModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportingModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportingModule)
 {
     AbckitFile *file = nullptr;
@@ -599,13 +606,14 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportingModule
         ASSERT_EQ(expM, m);
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportedModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportedModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportedModule)
 {
     AbckitFile *file = nullptr;
@@ -649,13 +657,14 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportedModule)
         ASSERT_EQ(impM, expected.find(strName.data())->second);
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED, strlen(MODIFIED));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::fileEnumerateExternalModules, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::fileEnumerateExternalModules, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicFileEnumerateExternalModules)
 {
     AbckitFile *file = nullptr;
@@ -673,13 +682,15 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicFileEnumerateExternalModules)
         ASSERT_NE(expected.find(name.data()), expected.end());
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_external_modified.abc");
+    constexpr auto OUTPUT_PATH =
+        ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/modules/modules_dynamic_external_modified.abc";
+    g_impl->writeAbc(file, OUTPUT_PATH, strlen(OUTPUT_PATH));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleGetTarget, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleGetTarget, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetTarget)
 {
     AbckitFile *jsFile = nullptr;

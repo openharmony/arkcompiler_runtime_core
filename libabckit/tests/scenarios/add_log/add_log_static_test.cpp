@@ -92,7 +92,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticAddLog)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_static.abc",
@@ -111,8 +111,8 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestStaticAddLog)
             auto mname = g_implI->functionGetName(method);
             auto methodName = helpers::GetCropFuncName(helpers::AbckitStringToString(mname).data());
             std::string startMsg = "file: NOTE; function: " + methodName;
-            userData.str1 = g_implM->createString(file, startMsg.c_str());
-            userData.str2 = g_implM->createString(file, "Elapsed time:");
+            userData.str1 = g_implM->createString(file, startMsg.c_str(), startMsg.size());
+            userData.str2 = g_implM->createString(file, "Elapsed time:", strlen("Elapsed time:"));
 
             TransformIr(graph, &userData);
         },

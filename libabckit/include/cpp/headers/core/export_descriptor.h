@@ -18,7 +18,7 @@
 
 #include "../base_classes.h"
 
-#include <string_view>
+#include <string>
 
 namespace abckit::core {
 
@@ -33,8 +33,14 @@ class ExportDescriptor : public ViewInResource<AbckitCoreExportDescriptor *, con
     friend class abckit::core::Module;
     /// @brief to access private constructor
     friend class abckit::arkts::Module;
+    /// @brief to access private constructor
+    friend class abckit::js::Module;
+    /// @brief to access private constructor
+    friend class abckit::Instruction;
     /// @brief abckit::DefaultHash<ExportDescriptor>
     friend class abckit::DefaultHash<ExportDescriptor>;
+    /// @brief abckit::DynamicIsa
+    friend class abckit::DynamicIsa;
 
 protected:
     /// @brief Core API View type
@@ -58,7 +64,7 @@ public:
      * @brief Construct a new Export Descriptor object
      * @param other
      */
-    ExportDescriptor(ExportDescriptor &&other) = default;
+    ExportDescriptor(ExportDescriptor &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -73,13 +79,41 @@ public:
     ~ExportDescriptor() override = default;
 
     /**
-     * @brief Get the Name object
-     * @return std::string_view
+     * @brief Returns binary file that the export descriptor is a part of.
+     * @return Pointer to the `File` that the export is a part of.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName() const;
+    const File *GetFile() const;
 
-    // Core API's.
-    // ...
+    /**
+     * @brief Get the Name object
+     * @return std::string
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
+
+    /**
+     * @brief Returns exporting module.
+     * @return `core::Module` that the export `e` is a part of.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Module GetExportingModule() const;
+
+    /**
+     * @brief Returns exported module.
+     * @return `core::Module` that the export `e` exports from. For local
+     * entity export equals to the exporting module. For re-exports may be different.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Module GetExportedModule() const;
+
+    /**
+     * @brief Returns alias for export descriptor.
+     * @return `std::string` - alias of the exported entity.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetAlias() const;
 
 private:
     ExportDescriptor(AbckitCoreExportDescriptor *module, const ApiConfig *conf, const File *file)

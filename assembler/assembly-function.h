@@ -61,10 +61,9 @@ struct Function {
 
     struct Parameter {
         Type type;
-        std::unique_ptr<ParamMetadata> metadata;
 
         Parameter(Type t, panda::panda_file::SourceLang lang)
-            : type(std::move(t)), metadata(extensions::MetadataExtension::CreateParamMetadata(lang))
+            : type(std::move(t))
         {
         }
     };
@@ -89,6 +88,7 @@ struct Function {
     panda::panda_file::FunctionKind function_kind = panda::panda_file::FunctionKind::NONE;
     size_t slots_num = 0;
     std::vector<int> concurrent_module_requests;
+    size_t expected_property_count = 0;
 
     void SetSlotsNum(size_t num)
     {
@@ -108,6 +108,16 @@ struct Function {
     panda::panda_file::FunctionKind GetFunctionKind() const
     {
         return function_kind;
+    }
+
+    void SetExpectedPropertyCount(size_t count)
+    {
+        expected_property_count = count;
+    }
+
+    size_t GetExpectedPropertyCount() const
+    {
+        return expected_property_count;
     }
 
     void SetInsDebug(const std::vector<debuginfo::Ins> &ins_debug)

@@ -24,8 +24,13 @@ enum class SourceLang : uint8_t {
     <%= short_plugin_lang %> = <%= plugin_opts["lang_enum_id"] %>,
 % end
     ECMASCRIPT = 0,
-    PANDA_ASSEMBLY = 1
+    PANDA_ASSEMBLY = 1,
+    JAVASCRIPT = 2,
+    TYPESCRIPT = 3,
+    ARKTS = 4
 };
+
+constexpr SourceLang DEFUALT_SOURCE_LANG = SourceLang::ECMASCRIPT;
 
 constexpr uint8_t LANG_COUNT = <%= Common::plugins.length + 1 %>;
 
@@ -61,8 +66,20 @@ inline std::ostream &operator<<(std::ostream &stream, SourceLang lang)
             stream << "<%= name %>";
             break;
 % end
+        case panda::panda_file::SourceLang::ECMASCRIPT:
+            stream << "ECMAScript";
+            break;
         case panda::panda_file::SourceLang::PANDA_ASSEMBLY:
             stream << "Panda Assembly";
+            break;
+        case panda::panda_file::SourceLang::JAVASCRIPT:
+            stream << "JavaScript";
+            break;
+        case panda::panda_file::SourceLang::TYPESCRIPT:
+            stream << "TypeScript";
+            break;
+        case panda::panda_file::SourceLang::ARKTS:
+            stream << "ArkTS";
             break;
         default:
             UNREACHABLE();

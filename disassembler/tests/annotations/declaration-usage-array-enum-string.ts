@@ -22,8 +22,8 @@ const enum E {
     a: E[] = new Array<E>(2);
 }
 
-@#Anno({a: ["Hello", "world", "Hello"]})
+@__$$ETS_ANNOTATION$$__Anno({a: ["Hello", "world", "Hello"]})
 class A {
-    @#Anno({a: new Array<E>(3)})
+    @__$$ETS_ANNOTATION$$__Anno({a: new Array<E>(3)})
     foo() {}
 }

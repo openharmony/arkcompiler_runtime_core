@@ -49,11 +49,11 @@ static void StByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_NE(param, nullptr);
     }
 
-    AbckitInst *newAge = g_implG->gCreateConstantI32(graph, 2);
+    AbckitInst *newAge = g_implG->gFindOrCreateConstantI32(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(newAge, nullptr);
 
-    AbckitString *fieldName = g_implM->createString(file, "age");
+    AbckitString *fieldName = g_implM->createString(file, "age", strlen("age"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(fieldName, nullptr);
 
@@ -66,7 +66,7 @@ static void StByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(store, nullptr);
 
-    AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+    AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ret, nullptr);
 
@@ -193,7 +193,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicIcreateStthisbynameLarge)
 
 static void StByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
 {
-    AbckitInst *newAge = g_implG->gCreateConstantI32(graph, 2);
+    AbckitInst *newAge = g_implG->gFindOrCreateConstantI32(graph, 2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(newAge, nullptr);
 
@@ -203,7 +203,7 @@ static void StByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(param, nullptr);
     }
-    AbckitString *fieldName = g_implM->createString(file, "age");
+    AbckitString *fieldName = g_implM->createString(file, "age", strlen("age"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(fieldName, nullptr);
 
@@ -220,7 +220,7 @@ static void StByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(store, nullptr);
 
-    AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+    AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ret, nullptr);
 
@@ -356,7 +356,7 @@ static void LdByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(param, nullptr);
     }
-    AbckitString *funcName = g_implM->createString(file, "getName");
+    AbckitString *funcName = g_implM->createString(file, "getName", strlen("getName"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(funcName, nullptr);
 
@@ -465,7 +465,7 @@ static void LdByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
         ASSERT_NE(param, nullptr);
     }
 
-    AbckitString *funcName = g_implM->createString(file, "getName");
+    AbckitString *funcName = g_implM->createString(file, "getName", strlen("getName"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(funcName, nullptr);
 

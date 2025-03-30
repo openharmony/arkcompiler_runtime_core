@@ -49,7 +49,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicIcreateStarrayspread)
         ABCKIT_ABC_DIR "ut/extensions/js/modify_api/arrays/starrayspread.abc",
         ABCKIT_ABC_DIR "ut/extensions/js/modify_api/arrays/starrayspread_modified.abc", "starrayspread.func_main_0",
         [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
-            AbckitInst *ind = g_implG->gCreateConstantI32(graph, 0);
+            AbckitInst *ind = g_implG->gFindOrCreateConstantI32(graph, 0);
             AbckitInst *str = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING);
             AbckitInst *emptyArray = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEEMPTYARRAY);
             AbckitInst *spread = g_dynG->iCreateStarrayspread(graph, str, emptyArray, ind);

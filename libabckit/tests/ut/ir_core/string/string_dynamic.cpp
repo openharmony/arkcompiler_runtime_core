@@ -36,7 +36,7 @@ void TransformSetStringIrDynamic(AbckitGraph *graph, AbckitFile *file)
     ASSERT_NE(loadStr, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    auto *newStr = g_implM->createString(file, "STRING");
+    auto *newStr = g_implM->createString(file, "STRING", strlen("STRING"));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_implG->iSetString(loadStr, newStr);
@@ -60,7 +60,7 @@ void CheckGetStringIrDynamic(AbckitGraph *graph)
 
 class LibAbcKitStringDynamicTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::iSetString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitStringDynamicTest, LibAbcKitTestSetString)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/ir_core/string/string_dynamic.abc", "string_dynamic");
@@ -77,7 +77,7 @@ TEST_F(LibAbcKitStringDynamicTest, LibAbcKitTestSetString)
     EXPECT_TRUE(helpers::Match(output, "STRING\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitStringDynamicTest, LibAbcKitTestGetString)
 {
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/string/string_dynamic.abc",

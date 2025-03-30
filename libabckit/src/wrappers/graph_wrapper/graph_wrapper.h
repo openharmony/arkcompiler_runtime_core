@@ -32,9 +32,9 @@ namespace libabckit {
 class GraphWrapper {
 public:
     static void CreateGraphWrappers(AbckitGraph *graph);
-    static std::tuple<AbckitGraph *, AbckitStatus> BuildGraphDynamic(FileWrapper *pf, AbckitIrInterface *irInterface,
-                                                                     AbckitFile *file, uint32_t methodOffset);
-    static std::tuple<void *, AbckitStatus> BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName);
+    static AbckitGraph *BuildGraphDynamic(FileWrapper *pf, AbckitIrInterface *irInterface, AbckitFile *file,
+                                          uint32_t methodOffset);
+    static void *BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName);
     static void DestroyGraphDynamic(AbckitGraph *graph);
 };
 

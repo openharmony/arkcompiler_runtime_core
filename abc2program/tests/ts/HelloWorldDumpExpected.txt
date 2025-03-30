@@ -1,43 +1,50 @@
-# source binary: out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/HelloWorld.abc
-
-.language ECMAScript
+# source binary: /mnt/data/shixiaowei/oh2/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/HelloWorld.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_1437 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
+_ESModuleRecord_1529 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
 
-_ESScopeNamesRecord_1413 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
+_ESScopeNamesRecord_1505 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
 
-_GLOBAL_1517 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1609 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1534 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_1626 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_1543 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1635 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_1565 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
+_GLOBAL_1657 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
 
-_GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1565, ]}
+_GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1657, ]}
 
 
 
 # ====================
 # RECORDS
 
+.language ECMAScript
+.record _ESExpectedPropertyCountAnnotation {
+}
+.record.source_file 
+
+.language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1466
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1529
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_1442
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_1505
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESSlotNumberAnnotation {
 }
 .record.source_file 
 
+.language ECMAScript
 .record _GLOBAL {
 }
 .record.source_file 
@@ -49,6 +56,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 1
+.language ECMAScript
 .function any .#*#add(any a0, any a1, any a2, any a3, any a4) {
 	lda a4                                   # line: 75           # column: 0
 	add2 0x0, a3                             # line: 75           # column: 0
@@ -58,6 +66,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::ASYNC_NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#*#asyncArrowFunc(any a0, any a1, any a2) {
 	nop                                      # line: 18446744073709551615           # column: 0
 	asyncfunctionenter                       # line: 18446744073709551615           # column: 0
@@ -79,6 +88,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::ASYNC_GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 4
+.language ECMAScript
 .function any .#*#asyncGenerateFunc(any a0, any a1, any a2) {
 	nop                                      # line: 18446744073709551615           # column: 0
 	createasyncgeneratorobj a0               # line: 18446744073709551615           # column: 0
@@ -168,6 +178,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 24
+.language ECMAScript
 .function any .#*#foo(any a0, any a1, any a2) {
 	nop                                      # line: 40           # column: 0
 	ldundefined                              # line: 40           # column: 0
@@ -240,8 +251,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	jeqz label@71                            # line: 40           # column: 0
 	lda v2                                   # line: 40           # column: 0
 	throw                                    # line: 40           # column: 0
-	label@71: ldundefined                    # line: 18446744073709551615           # column: 0
-	returnundefined                          # line: 66           # column: 0
+	label@71: returnundefined                # line: 66           # column: 0
 .catchall :
 	try_begin_label : label@9
 	try_end_label : label@11
@@ -262,6 +272,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 4
+.language ECMAScript
 .function any .#*#generateFunc(any a0, any a1, any a2) {
 	nop                                      # line: 18446744073709551615           # column: 0
 	label@1: ldai 0x0                        # line: 18446744073709551615           # column: 0
@@ -325,25 +336,26 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#*#goo(any a0, any a1, any a2) {
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 68           # column: 0
 }
 
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#*#hoo(any a0, any a1, any a2) {
 	fldai 1.230000e+00                       # line: 71           # column: 0
 	trystglobalbyname 0x0, varA              # line: 71           # column: 0
 	createobjectwithbuffer 0x1, _GLOBAL_1518 # line: 72           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 73           # column: 0
 }
 
 .function_kind FunctionKind::ASYNC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#*@3*#method(any a0, any a1, any a2) {
 	nop                                      # line: 18446744073709551615           # column: 0
 	createasyncgeneratorobj a0               # line: 18446744073709551615           # column: 0
@@ -376,8 +388,11 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 }
 
 .function_kind FunctionKind::FUNCTION
+ _ESExpectedPropertyCountAnnotation
+ ExpectedPropertyCount 1
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#~@0=#HelloWorld(any a0, any a1, any a2) {
 	lda.str HelloWorld                       # line: 22           # column: 0
 	stobjbyname 0x0, str, a2                 # line: 22           # column: 0
@@ -388,6 +403,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#~@1=#Lit(any a0, any a1, any a2) {
 	lda a2                                   # line: 0           # column: 0
 	return                                   # line: 0           # column: 0
@@ -396,6 +412,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::NONE
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#~@1>#lit(any a0, any a1, any a2) {
 	nop                                      # line: 18446744073709551615           # column: 0
 	label@1: creategeneratorobj a0           # line: 18446744073709551615           # column: 0
@@ -431,8 +448,11 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 }
 
 .function_kind FunctionKind::NONE
+ _ESExpectedPropertyCountAnnotation
+ ExpectedPropertyCount 1
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#~@2=#NestedLiteralArray(any a0, any a1, any a2) {
 	ldai 0x1                                 # line: 34           # column: 0
 	stobjbyname 0x0, num, a2                 # line: 34           # column: 0
@@ -443,14 +463,15 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function_kind FunctionKind::NONE
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#~@2>#NestedLiteralArray(any a0, any a1, any a2) {
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 31           # column: 0
 }
 
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 28
+.language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
 	newlexenv 0x2                            # line: 18446744073709551615           # column: 0
 	lda a1                                   # line: 18446744073709551615           # column: 0
@@ -470,15 +491,15 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	stmodulevar 0x0                          # line: 17           # column: 0
 	ldhole                                   # line: 21           # column: 0
 	sta v3                                   # line: 21           # column: 0
-	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1535, 0x0, v3 # line: 21           # column: 0
+	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1607, 0x0, v3 # line: 21           # column: 0
 	ldobjbyname 0x6, prototype               # line: 21           # column: 0
 	ldhole                                   # line: 25           # column: 0
 	sta v3                                   # line: 25           # column: 0
-	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1544, 0x0, v3 # line: 25           # column: 0
+	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1616, 0x0, v3 # line: 25           # column: 0
 	ldobjbyname 0x9, prototype               # line: 25           # column: 0
 	ldhole                                   # line: 29           # column: 0
 	sta v3                                   # line: 29           # column: 0
-	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1585, 0x0, v3 # line: 29           # column: 0
+	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1657, 0x0, v3 # line: 29           # column: 0
 	lda.str                                  # line: 37           # column: 0
 	trystglobalbyname 0xc, string            # line: 37           # column: 0
 	definefunc 0xd, .#*#add, 0x2             # line: 75           # column: 0
@@ -502,7 +523,6 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	callarg1 0x18, v1                        # line: 90           # column: 0
 	lda v2                                   # line: 92           # column: 0
 	callarg0 0x1a                            # line: 92           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 18446744073709551615           # column: 0
 }
 

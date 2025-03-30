@@ -135,7 +135,7 @@ enum AbckitIsaApiStaticConditionCode {
  */
 struct AbckitIsaApiStatic {
     /**
-     * @brief iGetClass.
+     * @brief Returns core class of `inst`.
      * @return AbckitCoreClass *.
      * @param [ in ] AbckitInst *inst .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inst  is NULL.
@@ -143,7 +143,7 @@ struct AbckitIsaApiStatic {
     AbckitCoreClass *(*iGetClass)(AbckitInst *inst /* in */);
 
     /**
-     * @brief iSetClass.
+     * @brief Sets `inst`'s class.
      * @return void .
      * @param [ in ] AbckitInst *inst .
      * @param [ in ]  AbckitCoreClass *klass .
@@ -153,7 +153,7 @@ struct AbckitIsaApiStatic {
     void (*iSetClass)(AbckitInst *inst /* in */, AbckitCoreClass *klass /* in */);
 
     /**
-     * @brief iGetConditionCode.
+     * @brief Returns condition code.
      * @return enum AbckitIsaApiStaticConditionCode .
      * @param [ in ] AbckitInst *inst .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inst  is NULL.
@@ -161,7 +161,7 @@ struct AbckitIsaApiStatic {
     enum AbckitIsaApiStaticConditionCode (*iGetConditionCode)(AbckitInst *inst /* in */);
 
     /**
-     * @brief iSetConditionCode.
+     * @brief Sets condition code.
      * @return void .
      * @param [ in ] AbckitInst *inst .
      * @param [ in ]  enum AbckitIsaApiStaticConditionCode cc .
@@ -170,7 +170,7 @@ struct AbckitIsaApiStatic {
     void (*iSetConditionCode)(AbckitInst *inst /* in */, enum AbckitIsaApiStaticConditionCode cc /* in */);
 
     /**
-     * @brief iGetOpcode.
+     * @brief Returns `inst`'s opcode.
      * @return enum AbckitIsaApiStaticOpcode .
      * @param [ in ] AbckitInst *inst .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inst  is NULL.
@@ -179,7 +179,7 @@ struct AbckitIsaApiStatic {
 
     /* For Cast instructions */
     /**
-     * @brief iSetTargetType.
+     * @brief Sets target type 't' for 'inst'.
      * @return void .
      * @param [ in ] AbckitInst *inst .
      * @param [ in ]  enum AbckitTypeId t .
@@ -189,7 +189,7 @@ struct AbckitIsaApiStatic {
 
     /* For Cast instructions */
     /**
-     * @brief iGetTargetType.
+     * @brief Returns `inst`'s target type.
      * @return enum AbckitTypeId .
      * @param [ in ] AbckitInst *inst .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inst  is NULL.
@@ -197,7 +197,7 @@ struct AbckitIsaApiStatic {
     enum AbckitTypeId (*iGetTargetType)(AbckitInst *inst /* in */);
 
     /**
-     * @brief iCreateCmp.
+     * @brief Creates `cmp` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -205,11 +205,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateCmp)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateLoadString.
+     * @brief Creates `load string` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitString *str .
@@ -219,7 +221,7 @@ struct AbckitIsaApiStatic {
     AbckitInst *(*iCreateLoadString)(AbckitGraph *graph /* in */, AbckitString *str /* in */);
 
     /**
-     * @brief iCreateReturn.
+     * @brief Creates `return` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -229,7 +231,7 @@ struct AbckitIsaApiStatic {
     AbckitInst *(*iCreateReturn)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */);
 
     /**
-     * @brief iCreateIf.
+     * @brief Creates `If` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -238,32 +240,37 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cc` is ABCKIT_ISA_API_STATIC_CONDITION_CODE_CC_NONE
      */
     AbckitInst *(*iCreateIf)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */,
                              enum AbckitIsaApiStaticConditionCode cc /* in */);
 
     /**
-     * @brief iCreateNeg.
+     * @brief Creates `Neg` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
      */
     AbckitInst *(*iCreateNeg)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */);
 
     /**
-     * @brief iCreateNot.
+     * @brief Creates `Not` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
      */
     AbckitInst *(*iCreateNot)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */);
 
     /**
-     * @brief iCreateAdd.
+     * @brief Creates `Add` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -271,11 +278,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateAdd)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateSub.
+     * @brief Creates `Sub` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -283,11 +292,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateSub)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateMul.
+     * @brief Creates `Mul` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -295,11 +306,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateMul)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateDiv.
+     * @brief Creates `Div` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -307,11 +320,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateDiv)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateMod.
+     * @brief Creates `Mod` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -319,11 +334,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateMod)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateShl.
+     * @brief Creates `Shl` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -331,11 +348,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateShl)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateShr.
+     * @brief Creates `Shr` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -343,11 +362,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateShr)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateAShr.
+     * @brief Creates `AShr` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -355,11 +376,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateAShr)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateAnd.
+     * @brief Creates `And` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -367,11 +390,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateAnd)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateOr.
+     * @brief Creates `Or` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -379,11 +404,13 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateOr)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateXor.
+     * @brief Creates `Xor` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -391,23 +418,29 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
      */
     AbckitInst *(*iCreateXor)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateCast.
+     * @brief Creates `Cast` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ] enum AbckitTypeId targetType .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input0->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if input1->graph is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if targetTypeId <= ABCKIT_TYPE_ID_INVALID
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if targetTypeId > ABCKIT_TYPE_ID_REFERENCE
      */
     AbckitInst *(*iCreateCast)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */,
                                enum AbckitTypeId targetType /* in */);
 
     /**
-     * @brief gCreateNullPtr.
+     * @brief Creates `NullPtr` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
@@ -415,30 +448,31 @@ struct AbckitIsaApiStatic {
     AbckitInst *(*gCreateNullPtr)(AbckitGraph *graph /* in */);
 
     /**
-     * @brief iCreateNewArray.
+     * @brief Creates `NewArray` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitCoreClass *inputClass .
      * @param [ in ] AbckitInst *inputSize .
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitCoreClass *inputClass  is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputSize  is NULL.
+     * @note UNSUPPORTED
      */
     AbckitInst *(*iCreateNewArray)(AbckitGraph *graph /* in */, AbckitCoreClass *inputClass /* in */,
                                    AbckitInst *inputSize /* in */);
 
     /**
-     * @brief iCreateNewObject.
+     * @brief Creates `NewObject` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitCoreClass *inputClass .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitCoreClass *inputClass  is NULL.
+     * @note Set `ABCKIT_STATUS_INTERNAL_ERROR` error if inputClass->owningModule  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph->file` and `inputClass->owningModule->file`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateNewObject)(AbckitGraph *graph /* in */, AbckitCoreClass *inputClass /* in */);
 
     /**
-     * @brief iCreateInitObject.
+     * @brief Creates `InitObject` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitCoreFunction *function .
@@ -446,12 +480,15 @@ struct AbckitIsaApiStatic {
      * @param  ... .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitCoreFunction *function  is NULL.
+     * @note Set `ABCKIT_STATUS_INTERNAL_ERROR` error if inputFunction->owningModule  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph->file` and `inputFunction->owningModule->file`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateInitObject)(AbckitGraph *graph /* in */, AbckitCoreFunction *function /* in */,
                                      size_t argCount /* in */, ... /* function params */);
 
     /**
-     * @brief iCreateLoadArray.
+     * @brief Creates `LoadArray` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *arrayRef .
@@ -460,12 +497,14 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *arrayRef  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *idx  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `arrayRef->graph`
+     * @note and `idx->graph`are not the same.
      */
     AbckitInst *(*iCreateLoadArray)(AbckitGraph *graph /* in */, AbckitInst *arrayRef /* in */,
                                     AbckitInst *idx /* in */, enum AbckitTypeId returnTypeId /* in */);
 
     /**
-     * @brief iCreateStoreArray.
+     * @brief Creates `StoreArray` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *arrayRef .
@@ -476,13 +515,15 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *arrayRef  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *idx  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *value  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `arrayRef->graph`,
+     * @note `idx->graph` and `value->graph` are not the same.
      */
     AbckitInst *(*iCreateStoreArray)(AbckitGraph *graph /* in */, AbckitInst *arrayRef /* in */,
                                      AbckitInst *idx /* in */, AbckitInst *value /* in */,
                                      enum AbckitTypeId valueTypeId /* in */);
 
     /**
-     * @brief iCreateStoreArrayWide.
+     * @brief Creates `StoreArrayWide` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *arrayRef .
@@ -493,23 +534,27 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *arrayRef  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *idx  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *value  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `arrayRef->graph`,
+     * @note `idx->graph` and `value->graph` are not the same.
      */
     AbckitInst *(*iCreateStoreArrayWide)(AbckitGraph *graph /* in */, AbckitInst *arrayRef /* in */,
                                          AbckitInst *idx /* in */, AbckitInst *value /* in */,
                                          enum AbckitTypeId valueTypeId /* in */);
 
     /**
-     * @brief iCreateLenArray.
+     * @brief Creates `LenArray` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *arr .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *arr  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `arr->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateLenArray)(AbckitGraph *graph /* in */, AbckitInst *arr /* in */);
 
     /**
-     * @brief iCreateLoadConstArray.
+     * @brief Creates `LoadConstArray` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitLiteralArray *literalArray .
@@ -519,7 +564,7 @@ struct AbckitIsaApiStatic {
     AbckitInst *(*iCreateLoadConstArray)(AbckitGraph *graph /* in */, AbckitLiteralArray *literalArray /* in */);
 
     /**
-     * @brief iCreateCheckCast.
+     * @brief Creates `CheckCast` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *inputObj .
@@ -527,12 +572,14 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputObj  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitType *targetType  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `inputObj->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateCheckCast)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */,
                                     AbckitType *targetType /* in */);
 
     /**
-     * @brief iCreateIsInstance.
+     * @brief Creates `IsInstance` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *inputObj .
@@ -540,6 +587,8 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputObj  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitType *targetType  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph` and `inputObj->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateIsInstance)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */,
                                      AbckitType *targetType /* in */);
@@ -553,7 +602,7 @@ struct AbckitIsaApiStatic {
     AbckitInst *(*iCreateLoadNullValue)(AbckitGraph *graph /* in */);
 
     /**
-     * @brief iCreateReturnVoid.
+     * @brief Creates `ReturnVoid` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
@@ -561,7 +610,7 @@ struct AbckitIsaApiStatic {
     AbckitInst *(*iCreateReturnVoid)(AbckitGraph *graph /* in */);
 
     /**
-     * @brief iCreateEquals.
+     * @brief Creates `Equals` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
@@ -569,6 +618,8 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note and `input1->graph` are not the same.
      */
     AbckitInst *(*iCreateEquals)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
 
@@ -586,7 +637,7 @@ struct AbckitIsaApiStatic {
                                        AbckitInst *input1 /* in */);
 
     /**
-     * @brief iCreateCallStatic.
+     * @brief Creates `CallStatic` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitCoreFunction *function .
@@ -594,12 +645,15 @@ struct AbckitIsaApiStatic {
      * @param  ... .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitCoreFunction *function  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `function->graph`
+     * @note are not the same.
+     * @note Set `ABCKIT_STATUS_INTERNAL_ERROR` error if `inputFunction->owningModule` is NULL
      */
     AbckitInst *(*iCreateCallStatic)(AbckitGraph *graph /* in */, AbckitCoreFunction *function /* in */,
                                      size_t argCount /* in */, ... /* function params */);
 
     /**
-     * @brief iCreateCallVirtual.
+     * @brief Creates `CallVirtual` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *inputObj .
@@ -609,149 +663,180 @@ struct AbckitIsaApiStatic {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputObj  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitCoreFunction *function  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `inputObj->graph`
+     * @note are not the same.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph->file`, `inputFunction->owningModule->file`
+     * @note are not the same.
+     * @note Set `ABCKIT_STATUS_INTERNAL_ERROR` error if `inputFunction->owningModule` is NULL
      */
     AbckitInst *(*iCreateCallVirtual)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */,
                                       AbckitCoreFunction *function /* in */, size_t argCount /* in */,
                                       ... /* function params */);
 
     /**
-     * @brief iCreateAddI.
+     * @brief Creates `AddI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateAddI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateSubI.
+     * @brief Creates `SubI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateSubI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateMulI.
+     * @brief Creates `MulI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateMulI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateDivI.
+     * @brief Creates `DivI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateDivI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateModI.
+     * @brief Creates `ModI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateModI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateShlI.
+     * @brief Creates `ShlI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateShlI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateShrI.
+     * @brief Creates `ShrI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateShrI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateAShrI.
+     * @brief Creates `AShrI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateAShrI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateAndI.
+     * @brief Creates `AndI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateAndI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateOrI.
+     * @brief Creates `OrI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateOrI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateXorI.
+     * @brief Creates `XorI` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *input0 .
      * @param [ in ]  uint64_t imm .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `input0->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateXorI)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, uint64_t imm /* in */);
 
     /**
-     * @brief iCreateThrow.
+     * @brief Creates `Throw` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *acc .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *acc  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `acc->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateThrow)(AbckitGraph *graph /* in */, AbckitInst *acc /* in */);
 
     /**
-     * @brief iCreateIsUndefined.
+     * @brief Creates `IsUndefined` inst.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @param [ in ]  AbckitInst *inputObj .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *inputObj  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `graph`, `inputObj->graph`
+     * @note are not the same.
      */
     AbckitInst *(*iCreateIsUndefined)(AbckitGraph *graph /* in */, AbckitInst *inputObj /* in */);
 };

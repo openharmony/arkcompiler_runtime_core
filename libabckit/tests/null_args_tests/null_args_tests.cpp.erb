@@ -48,7 +48,7 @@ class LibAbcKitNullptrTests<%=domain%><%=iteration%> : public ::testing::Test {}
 % slice_end = index + slice_size - 1
 % api_funcs_arr[slice_start..slice_end].each do |api_func|
 // Test: test-kind=api, api=<%= domain %>::<%= api_func %>,
-// abc-kind=NoABC, category=negative-nullptr
+// abc-kind=NoABC, category=negative-nullptr, extension=c
 TEST_F(LibAbcKitNullptrTests<%=domain%><%=iteration%>, <%= api_func %>)
 {
     helpers_nullptr::TestNullptr(<%= domain_var %>-><%= api_func %>);

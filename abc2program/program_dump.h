@@ -31,10 +31,12 @@ public:
 
 private:
     void DumpAbcFilePath(std::ostream &os) const;
+    void DumpLanguage(std::ostream &os, const panda::panda_file::SourceLang lang) const;
     void DumpProgramLanguage(std::ostream &os) const;
     void DumpLiteralArrayTable(std::ostream &os) const;
     void DumpRecordTable(std::ostream &os) const;
     void DumpRecord(std::ostream &os, const pandasm::Record &record) const;
+    void DumpRecordLanguage(std::ostream &os, const pandasm::Record &record) const;
     bool DumpRecordMetaData(std::ostream &os, const pandasm::Record &record) const;
     void DumpFieldList(std::ostream &os, const pandasm::Record &record) const;
     void DumpField(std::ostream &os, const pandasm::Field &field) const;
@@ -42,6 +44,7 @@ private:
     void DumpRecordSourceFile(std::ostream &os, const pandasm::Record &record) const;
     void DumpFunctionTable(std::ostream &os);
     void DumpFunction(std::ostream &os, const pandasm::Function &function);
+    void DumpFunctionLanguage(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionKind(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionAnnotations(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionHead(std::ostream &os, const pandasm::Function &function) const;

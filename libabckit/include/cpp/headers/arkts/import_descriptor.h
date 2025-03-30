@@ -73,9 +73,6 @@ public:
      */
     ~ImportDescriptor() override = default;
 
-    // Other API.
-    // ...
-
 private:
     /**
      * @brief Converts underlying import descriptor from Core to Arkts target

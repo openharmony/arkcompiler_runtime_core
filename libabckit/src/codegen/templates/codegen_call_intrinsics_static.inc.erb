@@ -15,7 +15,7 @@
 
 % Runtime.intrinsics.select{ |i| i.static && !i.signature.stackrange && !i.is_stub && !i.compiler_only && i.has_impl? &&
 %         !i.clear_flags.include?('call') }.each do |intrinsic|
-    case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_<%= intrinsic.enum_name %>: {
+    case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_<%= intrinsic.enum_name %>: {
 %       types = intrinsic.signature.args.map { |i| i.gsub("\\[", "[]") } + [intrinsic.signature.ret]
 %       # `inspect` escapes possible backslashes in ret type descriptor
 %       plugin_opts = Common::plugins[intrinsic.space.upcase]

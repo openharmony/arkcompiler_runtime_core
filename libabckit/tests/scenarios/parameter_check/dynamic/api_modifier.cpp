@@ -18,6 +18,7 @@
 #include "libabckit/include/c/metadata_core.h"
 
 #include <iostream>
+#include <cstring>
 
 void ApiModifier::Run()
 {
@@ -114,13 +115,13 @@ void ApiModifier::AddParamChecker(AbckitCoreFunction *method)
             return true;
         });
 
-        AbckitString *str = implM_->createString(file, "length");
+        AbckitString *str = implM_->createString(file, "length", strlen("length"));
 
-        AbckitInst *constant = implG_->gCreateConstantI32(graph, -1);
+        AbckitInst *constant = implG_->gFindOrCreateConstantI32(graph, -1);
         AbckitInst *arrLength = dynG_->iCreateLdobjbyname(graph, arr, str);
 
         AbckitBasicBlock *trueBB = succBBs[0];
-        implG_->bbEraseSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
+        implG_->bbDisconnectSuccBlock(startBB, ABCKIT_TRUE_SUCC_IDX);
         AbckitBasicBlock *falseBB = implG_->bbCreateEmpty(graph);
         implG_->bbAppendSuccBlock(falseBB, implG_->gGetEndBasicBlock(graph));
         implG_->bbAddInstBack(falseBB, dynG_->iCreateReturn(graph, constant));

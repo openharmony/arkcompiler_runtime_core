@@ -58,13 +58,12 @@ void TransformIR(AbckitGraph *graph, bool isDynamic = false)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    g_implG->bbEraseSuccBlock(startBB, 0);
-
     auto [param0, param1] = IRFindParameters(graph, isDynamic);
 
     ASSERT_NE(param0, nullptr);
     ASSERT_NE(param1, nullptr);
 
+    g_implG->bbDisconnectSuccBlock(startBB, 0);
     AbckitBasicBlock *ifBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(startBB, ifBB);
     AbckitInst *ifInst = nullptr;
@@ -113,7 +112,7 @@ void TransformIR(AbckitGraph *graph, bool isDynamic = false)
 
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitGetPhiTest, StaticBBcreatePhi)
 {
     auto output =
@@ -161,7 +160,7 @@ TEST_F(LibAbcKitGetPhiTest, StaticBBcreatePhi)
     EXPECT_TRUE(helpers::Match(output, "-1\n4\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitGetPhiTest, DynamicBBcreatePhi)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/ir_core/phi/phi_dynamic.abc", "phi_dynamic");

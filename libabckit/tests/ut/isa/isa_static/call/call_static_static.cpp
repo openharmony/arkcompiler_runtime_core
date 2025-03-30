@@ -79,7 +79,7 @@ void TransformCallStaticIrArgs(AbckitGraph *graph, AbckitCoreFunction *func)
 
 class LibAbcKitCallStaticStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic1)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static.abc",
@@ -117,7 +117,7 @@ TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic1)
     EXPECT_TRUE(helpers::Match(output, "A::foo\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic2)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static.abc",
@@ -152,7 +152,7 @@ TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic2)
     EXPECT_TRUE(helpers::Match(output, "bar\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCallStaticStaticTest, LibAbcKitTestCallStatic3)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/call/call_static_static.abc",

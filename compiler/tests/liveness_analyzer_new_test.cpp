@@ -114,16 +114,14 @@ HWTEST_F(LivenessAnalyzerTest, liveness_analyzer_test_002, TestSize.Level1)
                           "v12\t[30:32)@ ; \n"
                           "v11\t[32:34)@ ; \n"
                           "BB 5\t[24:26)\n"
-                          "BB 1\t[34:44)\n"
+                          "BB 1\t[34:40)\n"
                           "v18\t[36:38)@ ; \n"
                           "v17\t[38:40)@ ; \n"
-                          "v20\t[40:42)@ ; \n"
-                          "v19\t[42:44)@ ; \n"
-                          "BB 8\t[44:46)\n\n"
+                          "BB 8\t[40:42)\n\n"
                           "Registers intervals\n-\n\n"
                           "Vector registers intervals\n"
                           "vr0: [2:4); [4:6); [6:8); [8:20); [14:16); [18:20); [20:22); [30:32); [32:34); [36:38); "
-                          "[38:40); [40:42); [42:44)\n\n"
+                          "[38:40)\n\n"
                           "Stack slots intervals\n-\n";
         EXPECT_EQ(out.str(), str);
         EXPECT_TRUE(location.IsFpRegister());
@@ -152,15 +150,13 @@ HWTEST_F(LivenessAnalyzerTest, liveness_analyzer_test_002, TestSize.Level1)
               "v12\t[30:32)@ ; \n"
               "v11\t[32:34)@ ; \n"
               "BB 5\t[24:26)\n"
-              "BB 1\t[34:44)\n"
+              "BB 1\t[34:40)\n"
               "v18\t[36:38)@ ; \n"
               "v17\t[38:40)@ ; \n"
-              "v20\t[40:42)@ ; \n"
-              "v19\t[42:44)@ ; \n"
-              "BB 8\t[44:46)\n\n"
+              "BB 8\t[40:42)\n\n"
               "Registers intervals\n"
               "r0: [2:4); [4:6); [6:8); [8:20); [14:16); [18:20); [20:22); [30:32); [32:34); [36:38); "
-              "[38:40); [40:42); [42:44)\n\n"
+              "[38:40)\n\n"
               "Vector registers intervals\n-\n\n"
               "Stack slots intervals\n-\n";
         EXPECT_EQ(out.str(), str);
@@ -190,17 +186,15 @@ HWTEST_F(LivenessAnalyzerTest, liveness_analyzer_test_002, TestSize.Level1)
               "v12\t[30:32)@ ; \n"
               "v11\t[32:34)@ ; \n"
               "BB 5\t[24:26)\n"
-              "BB 1\t[34:44)\n"
+              "BB 1\t[34:40)\n"
               "v18\t[36:38)@ ; \n"
               "v17\t[38:40)@ ; \n"
-              "v20\t[40:42)@ ; \n"
-              "v19\t[42:44)@ ; \n"
-              "BB 8\t[44:46)\n\n"
+              "BB 8\t[40:42)\n\n"
               "Registers intervals\n-\n\n"
               "Vector registers intervals\n-\n\n"
               "Stack slots intervals\n"
               "s0: [2:4); [4:6); [6:8); [8:20); [14:16); [18:20); [20:22); [30:32); [32:34); [36:38); "
-              "[38:40); [40:42); [42:44)\n";
+              "[38:40)\n";
         EXPECT_EQ(out.str(), str);
         EXPECT_TRUE(location2.IsStack());
     });

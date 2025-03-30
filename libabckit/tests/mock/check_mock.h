@@ -19,5 +19,6 @@
 #include <string>
 
 bool CheckMockedApi(const std::string &apiName);
+bool CheckMockedStackEmpty();
 
 #endif

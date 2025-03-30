@@ -109,9 +109,9 @@ extern "C" AbckitValue *CreateValueU1(AbckitFile *file, bool value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateValueU1Dynamic(file, value);
+            return FindOrCreateValueU1Dynamic(file, value);
         case Mode::STATIC:
-            return CreateValueU1Static(file, value);
+            return FindOrCreateValueU1Static(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -125,26 +125,27 @@ extern "C" AbckitValue *CreateValueDouble(AbckitFile *file, double value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateValueDoubleDynamic(file, value);
+            return FindOrCreateValueDoubleDynamic(file, value);
         case Mode::STATIC:
-            return CreateValueDoubleStatic(file, value);
+            return FindOrCreateValueDoubleStatic(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
 }
 
-extern "C" AbckitValue *CreateValueString(AbckitFile *file, const char *value)
+extern "C" AbckitValue *CreateValueString(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
+    LIBABCKIT_ZERO_ARGUMENT(len, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateValueStringDynamic(file, value);
+            return FindOrCreateValueStringDynamic(file, value, len);
         case Mode::STATIC:
-            return CreateValueStringStatic(file, value);
+            return FindOrCreateValueStringStatic(file, value, len);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -159,9 +160,10 @@ extern "C" AbckitValue *CreateLiteralArrayValue(AbckitFile *file, AbckitValue **
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralArrayValueDynamic(file, value, size);
+            return FindOrCreateLiteralArrayValueDynamic(file, value, size);
         case Mode::STATIC:
-            return CreateLiteralArrayValueStatic(file, value, size);
+            statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
+            return nullptr;
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -171,19 +173,19 @@ extern "C" AbckitValue *CreateLiteralArrayValue(AbckitFile *file, AbckitValue **
 // String
 // ========================================
 
-extern "C" AbckitString *CreateString(AbckitFile *file, const char *value)
+extern "C" AbckitString *CreateString(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
-
+    LIBABCKIT_ZERO_ARGUMENT(len, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateStringDynamic(file, value);
+            return CreateStringDynamic(file, value, len);
         case Mode::STATIC:
-            return CreateStringStatic(file, value);
+            return CreateStringStatic(file, value, len);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -218,9 +220,9 @@ extern "C" AbckitLiteral *CreateLiteralBool(AbckitFile *file, bool value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralBoolDynamic(file, value);
+            return FindOrCreateLiteralBoolDynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralBoolStatic(file, value);
+            return FindOrCreateLiteralBoolStatic(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -234,9 +236,9 @@ extern "C" AbckitLiteral *CreateLiteralU8(AbckitFile *file, uint8_t value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralU8Dynamic(file, value);
+            return FindOrCreateLiteralU8Dynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralU8Static(file, value);
+            return FindOrCreateLiteralU8Static(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -250,9 +252,9 @@ extern "C" AbckitLiteral *CreateLiteralU16(AbckitFile *file, uint16_t value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralU16Dynamic(file, value);
+            return FindOrCreateLiteralU16Dynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralU16Static(file, value);
+            return FindOrCreateLiteralU16Static(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -266,9 +268,9 @@ extern "C" AbckitLiteral *CreateLiteralMethodAffiliate(AbckitFile *file, uint16_
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralMethodAffiliateDynamic(file, value);
+            return FindOrCreateLiteralMethodAffiliateDynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralMethodAffiliateStatic(file, value);
+            return FindOrCreateLiteralMethodAffiliateStatic(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -281,9 +283,9 @@ extern "C" AbckitLiteral *CreateLiteralU32(AbckitFile *file, uint32_t value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralU32Dynamic(file, value);
+            return FindOrCreateLiteralU32Dynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralU32Static(file, value);
+            return FindOrCreateLiteralU32Static(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -297,9 +299,9 @@ extern "C" AbckitLiteral *CreateLiteralU64(AbckitFile *file, uint64_t value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralU64Dynamic(file, value);
+            return FindOrCreateLiteralU64Dynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralU64Static(file, value);
+            return FindOrCreateLiteralU64Static(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -313,9 +315,9 @@ extern "C" AbckitLiteral *CreateLiteralFloat(AbckitFile *file, float value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralFloatDynamic(file, value);
+            return FindOrCreateLiteralFloatDynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralFloatStatic(file, value);
+            return FindOrCreateLiteralFloatStatic(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -329,9 +331,9 @@ extern "C" AbckitLiteral *CreateLiteralDouble(AbckitFile *file, double value)
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralDoubleDynamic(file, value);
+            return FindOrCreateLiteralDoubleDynamic(file, value);
         case Mode::STATIC:
-            return CreateLiteralDoubleStatic(file, value);
+            return FindOrCreateLiteralDoubleStatic(file, value);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -346,7 +348,7 @@ extern "C" AbckitLiteral *CreateLiteralLiteralArray(AbckitFile *file, AbckitLite
     LIBABCKIT_BAD_ARGUMENT(litarr, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralLiteralArrayDynamic(file, litarr);
+            return FindOrCreateLiteralLiteralArrayDynamic(file, litarr);
         case Mode::STATIC:
             statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
             return nullptr;
@@ -355,18 +357,19 @@ extern "C" AbckitLiteral *CreateLiteralLiteralArray(AbckitFile *file, AbckitLite
     }
 }
 
-extern "C" AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value)
+extern "C" AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *value, size_t len)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
+    LIBABCKIT_ZERO_ARGUMENT(len, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralStringDynamic(file, value);
+            return FindOrCreateLiteralStringDynamic(file, value, len);
         case Mode::STATIC:
-            return CreateLiteralStringStatic(file, value);
+            return FindOrCreateLiteralStringStatic(file, value, len);
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -381,9 +384,9 @@ extern "C" AbckitLiteral *CreateLiteralMethod(AbckitFile *file, AbckitCoreFuncti
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return CreateLiteralMethodDynamic(file, function);
+            return FindOrCreateLiteralMethodDynamic(file, function);
         case Mode::STATIC:
-            return CreateLiteralMethodStatic(file, function);
+            return FindOrCreateLiteralMethodStatic(file, function);
         default:
             LIBABCKIT_UNREACHABLE;
     }

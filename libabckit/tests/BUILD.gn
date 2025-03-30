@@ -19,6 +19,7 @@ import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 template("create_merge_file") {
   assert(defined(invoker.input_file), "input_file is required!")
   assert(defined(invoker.output_file), "output_file is required!")
+  assert(defined(invoker.source_lang), "source_lang is required!")
 
   extra_dependencies = []
   if (defined(invoker.extra_dependencies)) {
@@ -32,6 +33,7 @@ template("create_merge_file") {
       rebase_path(target_gen_dir),
       rebase_path(invoker.input_file),
       rebase_path(invoker.output_file),
+      invoker.source_lang,
     ]
 
     deps = extra_dependencies
@@ -40,9 +42,44 @@ template("create_merge_file") {
   }
 }
 
+clean_scenario_js_from_ets_files = [
+  "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic",
+  "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses",
+  "clean_scenarios/c_api/dynamic/parameter_check/parameter_check",
+  "clean_scenarios/c_api/dynamic/api_scanner/api_scanner",
+  "clean_scenarios/c_api/dynamic/branch_eliminator/branch_eliminator",
+  "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch",
+  "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic",
+  "clean_scenarios/cpp_api/dynamic/branch_eliminator/branch_eliminator",
+  "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner",
+  "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch",
+  "clean_scenarios/cpp_api/dynamic/parameter_check/parameter_check",
+  "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses",
+]
+
+clean_scenario_ts_files = [
+  "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site",
+  "clean_scenarios/c_api/dynamic/router_table/router_table",
+
+  "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site",
+  "clean_scenarios/cpp_api/dynamic/router_table/router_table",
+]
+
+clean_scenario_ets_files =
+    [ "clean_scenarios/c_api/static/add_log/add_log_static" ]
+
 test_js_path = "//arkcompiler/runtime_core/libabckit/tests/"
 
 test_js_files = [
+  "ut/metadata_core/inspect_api/modules/targets/JS_target",
+  "ut/extensions/js/inspect_api/api_casts/JSapi_casts",
+  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic",
+  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic_external",
+  "ut/extensions/js/inspect_api/enumerators/JSenumerators0_dynamic",
+  "ut/extensions/js/modify_api/modules/JSmodules_dynamic_modify",
+]
+
+test_js_from_ets_files = [
   "cpp/tests/cpp_test_dynamic_js",
 
   "ut/metadata_core/inspect_api/classes/classes_dynamic",
@@ -50,7 +87,6 @@ test_js_files = [
   "ut/metadata_core/inspect_api/literals/literals_dynamic",
   "ut/metadata_core/inspect_api/values/values_dynamic",
   "ut/metadata_core/inspect_api/modules/modules_dynamic",
-  "ut/metadata_core/inspect_api/modules/targets/JS_target",
   "ut/metadata_core/inspect_api/modules/modules_dynamic_external",
   "ut/metadata_core/inspect_api/types/types_dynamic",
   "ut/metadata_core/modify_api/strings/strings_dynamic",
@@ -60,11 +96,6 @@ test_js_files = [
   "ut/metadata_core/inspect_api/files/file_dynamic",
   "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify",
   "ut/extensions/arkts/inspect_api/modules/modules_dynamic",
-  "ut/extensions/js/inspect_api/api_casts/JSapi_casts",
-  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic",
-  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic_external",
-  "ut/extensions/js/inspect_api/enumerators/JSenumerators0_dynamic",
-  "ut/extensions/js/modify_api/modules/JSmodules_dynamic_modify",
   "ut/extensions/js/modify_api/super_this/store_super",
   "ut/extensions/js/modify_api/super_this/load_super",
   "ut/extensions/js/modify_api/super_this/store_this",
@@ -141,6 +172,7 @@ test_js_files = [
   "ut/isa/isa_dynamic/async/asynciterator_dynamic",
   "ut/isa/isa_dynamic/apply/apply_dynamic",
   "ut/isa/isa_dynamic/apply/newobjapply_dynamic",
+  "ut/isa/isa_dynamic/immsize/immsize_dynamic",
 
   "ut/ir_core/graph/graph_dynamic",
   "ut/ir_core/inst_manipulation/inst_manipulation_dynamic",
@@ -166,17 +198,6 @@ test_js_files = [
   "scenarios/branch_eliminator/dynamic/branch_eliminator",
   "scenarios/scan_subclasses/dynamic/scan_subclasses",
   "scenarios/parameter_check/dynamic/parameter_check",
-  "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic",
-  "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses",
-  "scenarios_c_api_clean/dynamic/parameter_check/parameter_check",
-  "scenarios_c_api_clean/dynamic/api_scanner/api_scanner",
-  "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator",
-  "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch",
-  "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic",
-  "scenarios_cpp_api_clean/dynamic/branch_eliminator/branch_eliminator",
-  "scenarios_cpp_api_clean/dynamic/api_scanner/api_scanner",
-  "scenarios_cpp_api_clean/dynamic/parameter_check/parameter_check",
-  "scenarios_cpp_api_clean/dynamic/scan_subclasses/scan_subclasses",
 
   "internal/ICSlotAllocator/ICSlotAllocator",
   "internal/implementation_api/abc_dynamic",
@@ -184,7 +205,9 @@ test_js_files = [
   "internal/mem_manager/abc_dynamic_2",
 
   "wrong_mode_tests/mode_test_dynamic",
+  "wrong_imm_tests/wrong_imm_test_dynamic",
 ]
+test_js_from_ets_files += clean_scenario_js_from_ets_files
 
 test_ts_files = [
   "cpp/tests/cpp_test_dynamic",
@@ -206,12 +229,10 @@ test_ts_files = [
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts_dynamic",
   "ut/extensions/arkts/modify_api/annotations/annotations_dynamic",
 
-  "scenarios_c_api_clean/dynamic/replace_call_site/replace_call_site",
-  "scenarios_c_api_clean/dynamic/router_table/router_table",
-
-  "scenarios_cpp_api_clean/dynamic/replace_call_site/replace_call_site",
-  "scenarios_cpp_api_clean/dynamic/router_table/router_table",
+  "regression/issue_IB1YEI/issue_IB1YEI",
+  "regression/issue_IB2T4M/issue_IB2T4M",
 ]
+test_ts_files += clean_scenario_ts_files
 
 test_ets_files = [
   "ut/metadata_core/inspect_api/modules/targets/ArkTS2_target",
@@ -247,7 +268,6 @@ test_ets_files = [
   "ut/isa/isa_static/cast/target_type_static",
   "ut/isa/isa_static/call/call_static_static",
   "ut/isa/isa_static/call/call_virtual_static",
-  "ut/ir_core/catchphi/catchphi_static",
   "ut/isa/isa_static/cmp/create_cmp_static",
   "ut/isa/isa_static/load_nullvalue/load_nullvalue_static",
   "ut/isa/isa_static/load_string/load_string_static",
@@ -262,6 +282,7 @@ test_ets_files = [
   "ut/isa/isa_static/return/return_static",
   "ut/isa/isa_static/create_nullptr/create_nullptr_static",
 
+  "ut/ir_core/catchphi/catchphi_static",
   "ut/ir_core/graph/graph_static",
   "ut/ir_core/inst_manipulation/inst_manipulation_static",
   "ut/ir_core/basic_blocks/basic_blocks_static",
@@ -289,8 +310,8 @@ test_ets_files = [
   "scenarios/replace_callsite/replace_callsite_static",
   "scenarios/api_scanner/static/api_scanner_static",
   "scenarios/static_branch_elimination/static_branch_elimination",
-  "scenarios_c_api_clean/static/add_log/add_log_static",
 ]
+test_ets_files += clean_scenario_ets_files
 
 module_output_path = "arkcompiler/runtime_core/libabckit"
 
@@ -302,6 +323,33 @@ foreach(file, test_js_files) {
   create_merge_file("${file}_merge") {
     input_file = "$test_js"
     output_file = "$test_merge_file"
+    source_lang = "js"
+  }
+  es2abc_gen_abc("gen_${file}_abc") {
+    # Only targets in this file can depend on this.
+    extra_visibility = [ ":*" ]
+    extra_dependencies = [ ":${file}_merge" ]
+    src_js = "@" + rebase_path(test_merge_file)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--module",
+      "--merge-abc",
+    ]
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, test_js_from_ets_files) {
+  test_js = "${test_js_path}${file}.js"
+  test_merge_file = "$target_out_dir/${file}_merge.txt"
+  test_abc = "$target_out_dir/${file}.abc"
+
+  create_merge_file("${file}_merge") {
+    input_file = "$test_js"
+    output_file = "$test_merge_file"
+    source_lang = "ets"
   }
   es2abc_gen_abc("gen_${file}_abc") {
     # Only targets in this file can depend on this.
@@ -327,6 +375,7 @@ foreach(file, test_ts_files) {
   create_merge_file("${file}_merge") {
     input_file = "$test_ts"
     output_file = "$test_merge_file"
+    source_lang = "ets"
   }
   es2abc_gen_abc("gen_${file}_abc") {
     # Only targets in this file can depend on this.
@@ -419,17 +468,47 @@ libabckit_host_unittest_action("abckit_mock_gtests") {
   sources = [
     # mock infrastructure
     "mock/abckit_api_mock.cpp",
+    "mock/abckit_values_mock.cpp",
     "mock/arkts_inspect_api_impl_mock.cpp",
     "mock/arkts_modify_api_impl_mock.cpp",
     "mock/check_mock.cpp",
     "mock/graph_api_impl_mock.cpp",
     "mock/isa_api_dynamic_impl_mock.cpp",
     "mock/isa_api_static_impl_mock.cpp",
+    "mock/js_inspect_api_impl_mock.cpp",
+    "mock/js_modify_api_impl_mock.cpp",
     "mock/metadata_inspect_impl_mock.cpp",
     "mock/metadata_modify_impl_mock.cpp",
 
     #mock tests
+    "mock/tests/arkts/cpp_api_annotation.cpp",
+    "mock/tests/arkts/cpp_api_annotation_element.cpp",
+    "mock/tests/arkts/cpp_api_annotation_interface.cpp",
+    "mock/tests/arkts/cpp_api_class.cpp",
+    "mock/tests/arkts/cpp_api_function.cpp",
+    "mock/tests/arkts/cpp_api_module.cpp",
+    "mock/tests/arkts/cpp_api_namespace.cpp",
+    "mock/tests/core/cpp_api_annotation.cpp",
+    "mock/tests/core/cpp_api_annotation_element.cpp",
+    "mock/tests/core/cpp_api_annotation_interface.cpp",
+    "mock/tests/core/cpp_api_annotation_interface_field.cpp",
+    "mock/tests/core/cpp_api_class.cpp",
+    "mock/tests/core/cpp_api_export_descriptor.cpp",
+    "mock/tests/core/cpp_api_function.cpp",
+    "mock/tests/core/cpp_api_import_descriptor.cpp",
+    "mock/tests/core/cpp_api_module.cpp",
+    "mock/tests/core/cpp_api_namespace.cpp",
+    "mock/tests/cpp_api_file.cpp",
+    "mock/tests/cpp_api_literal_array.cpp",
+    "mock/tests/cpp_mock_bb.cpp",
+    "mock/tests/cpp_mock_dyn_isa_0.cpp",
+    "mock/tests/cpp_mock_dyn_isa_1.cpp",
     "mock/tests/cpp_mock_file.cpp",
+    "mock/tests/cpp_mock_graph.cpp",
+    "mock/tests/cpp_mock_instruction.cpp",
+    "mock/tests/cpp_mock_literal.cpp",
+    "mock/tests/cpp_mock_type.cpp",
+    "mock/tests/cpp_mock_value.cpp",
   ]
 
   include_dirs = [
@@ -446,11 +525,29 @@ libabckit_host_unittest_action("abckit_gtests") {
   module_out_path = module_output_path
 
   sources = [
+    "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
+    "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/c_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/c_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/c_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
+    "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch.cpp",
+    "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
     "cpp/tests/cpp_test.cpp",
     "helpers/helpers.cpp",
     "helpers/helpers_mode.cpp",
     "helpers/helpers_nullptr.cpp",
     "helpers/helpers_wrong_ctx.cpp",
+    "helpers/helpers_wrong_imm.cpp",
     "helpers/visit_helper/visit_helper.cpp",
     "internal/ICSlotAllocator/ICSlotAllocator.cpp",
     "internal/implementation_api/abc_stuff.cpp",
@@ -467,6 +564,9 @@ libabckit_host_unittest_action("abckit_gtests") {
     "null_args_tests/null_args_tests_JsInspectApiImpl_0.cpp",
     "null_args_tests/null_args_tests_JsModifyApiImpl_0.cpp",
     "null_args_tests/null_args_tests_ModifyApiImpl_0.cpp",
+    "regression/issue_IB1YEI/c_api/issue_IB1YEI.cpp",
+    "regression/issue_IB1YEI/cpp_api/issue_IB1YEI.cpp",
+    "regression/issue_IB2T4M/c_api/issue_IB2T4M.cpp",
     "scenarios/add_log/add_log_dynamic_test.cpp",
     "scenarios/add_log/add_log_static_test.cpp",
     "scenarios/add_try_catch/dynamic/add_try_catch_test.cpp",
@@ -484,22 +584,6 @@ libabckit_host_unittest_action("abckit_gtests") {
     "scenarios/scan_subclasses/dynamic/scan_subclasses_test.cpp",
     "scenarios/scan_subclasses/dynamic/subclasses_scanner.cpp",
     "scenarios/static_branch_elimination/static_branch_elimination.cpp",
-    "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_test.cpp",
-    "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch_test.cpp",
-    "scenarios_c_api_clean/dynamic/api_scanner/api_scanner_test.cpp",
-    "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator_test.cpp",
-    "scenarios_c_api_clean/dynamic/parameter_check/parameter_check_test.cpp",
-    "scenarios_c_api_clean/dynamic/replace_call_site/replace_call_site_test.cpp",
-    "scenarios_c_api_clean/dynamic/router_table/router_table_test.cpp",
-    "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses_test.cpp",
-    "scenarios_c_api_clean/static/add_log/add_log_static_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/api_scanner/api_scanner_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/branch_eliminator/branch_eliminator_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/parameter_check/parameter_check_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/replace_call_site/replace_call_site_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/router_table/router_table_test.cpp",
-    "scenarios_cpp_api_clean/dynamic/scan_subclasses/scan_subclasses_test.cpp",
     "ut/extensions/arkts/inspect_api/api_casts/api_casts.cpp",
     "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
     "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
@@ -564,6 +648,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "ut/isa/isa_dynamic/get_insts/getresumemode_dynamic.cpp",
     "ut/isa/isa_dynamic/get_insts/gettemplateobject_dynamic.cpp",
     "ut/isa/isa_dynamic/get_insts/getunmappedargs_dynamic.cpp",
+    "ut/isa/isa_dynamic/immsize/immsize_dynamic.cpp",
     "ut/isa/isa_dynamic/import/dynamicimport_dynamic.cpp",
     "ut/isa/isa_dynamic/instanceof/instanceof_dynamic.cpp",
     "ut/isa/isa_dynamic/isin/isin_dynamic.cpp",
@@ -628,6 +713,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "wrong_ctx_tests/wrong_ctx_tests_IsaApiDynamicImpl_1.cpp",
     "wrong_ctx_tests/wrong_ctx_tests_IsaApiStaticImpl_0.cpp",
     "wrong_ctx_tests/wrong_ctx_tests_ModifyApiImpl_0.cpp",
+    "wrong_imm_tests/wrong_imm_tests_IsaApiDynamicImpl_0.cpp",
     "wrong_mode_tests/wrong_mode_tests_IsaApiDynamicImpl_0.cpp",
     "wrong_mode_tests/wrong_mode_tests_IsaApiDynamicImpl_1.cpp",
     "wrong_mode_tests/wrong_mode_tests_IsaApiStaticImpl_0.cpp",
@@ -653,6 +739,10 @@ libabckit_host_unittest_action("abckit_gtests") {
     deps += [ ":gen_${file}_abc" ]
   }
 
+  foreach(file, test_js_from_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
   foreach(file, test_ts_files) {
     deps += [ ":gen_${file}_abc" ]
   }
@@ -675,18 +765,90 @@ libabckit_host_unittest_action("abckit_gtests") {
   ]
 }
 
-group("libabckit_stress_tests_package") {
+libabckit_host_unittest_action("abckit_clean_scenarios") {
+  module_out_path = module_output_path
+
+  sources = [
+    "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
+    "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/c_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/c_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/c_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/c_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/c_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
+    "clean_scenarios/c_api/static/add_log/add_log_static_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_log/add_log_dynamic_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/add_try_catch/add_try_catch.cpp",
+    "clean_scenarios/cpp_api/dynamic/api_scanner/api_scanner_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/branch_eliminator/branch_eliminator_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/parameter_check/parameter_check_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/replace_call_site/replace_call_site_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/router_table/router_table_test.cpp",
+    "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
+    "helpers/helpers.cpp",
+    "helpers/helpers_mode.cpp",
+    "helpers/visit_helper/visit_helper.cpp",
+  ]
+
+  include_dirs = [
+    "$ark_root_dynamic",
+    "$abckit_root",
+    "$abckit_root/include",
+    "$abckit_root/src",
+    "$abckit_root/tests",
+  ]
+
+  configs = [ "$abckit_root:abckit_config" ]
+
+  deps = [
+    ":abckit_ets_vm_helpers",
+    ":abckit_js_vm_helpers",
+    "$abckit_root/src:libabckit",
+  ]
+
+  foreach(file, clean_scenario_js_from_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, clean_scenario_ts_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, clean_scenario_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  if (is_ohos && is_standard_system) {
+    test_abc_dir = "/data/test"
+  } else {
+    test_abc_dir = rebase_path(target_out_dir)
+  }
+
+  test_js_dir = rebase_path(test_js_path)
+
+  defines = [
+    "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
+    "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+  ]
+}
+
+group("abckit_stress_tests_package") {
   deps = [
     "$abckit_root/abckit:abckit(${host_toolchain})",
-    "$abckit_root/abckit/stress_plugin:abckit_stress_plugin(${host_toolchain})",
+    "$abckit_root/tests/stress/abckit_plugin:abckit_stress_plugin(${host_toolchain})",
     "$ark_root_static/verification/verifier:verifier_bin(${host_toolchain})",
   ]
 }
 
-action("abckit_stress_tests") {
-  deps = [ ":libabckit_stress_tests_package" ]
-  outputs = [ "$target_gen_dir/abckit_stress_tests.txt" ]
-  script = "stress/stress.py"
+group("abckit_stress_tests_apps") {
+  testonly = true
+  if (abckit_enable) {
+    deps = [
+      "apps:abckit_test_apps_build",
+      "apps:abckit_test_apps_run_stress",
+    ]
+  }
 }
 
 ohos_source_set("abckit_js_vm_helpers") {

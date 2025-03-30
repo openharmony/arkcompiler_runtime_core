@@ -20,18 +20,18 @@
 namespace OHOS {
     void TraceFuzzTest(const uint8_t* data, size_t size)
     {
-        const char* dataChar = reinterpret_cast<const char*>(data);
+        std::string str(data, data + size);
 
         panda::trace::internal::g_trace_marker_fd = 1;
-        panda::trace::BeginTracePoint(dataChar);
+        panda::trace::BeginTracePoint(str.c_str());
 
         panda::trace::EndTracePoint();
 
         int32_t val32_t = static_cast<int32_t>(size);
-        panda::trace::IntTracePoint(dataChar, val32_t);
+        panda::trace::IntTracePoint(str.c_str(), val32_t);
 
         int64_t val64_t = static_cast<int64_t>(size);
-        panda::trace::Int64TracePoint(dataChar, val64_t);
+        panda::trace::Int64TracePoint(str.c_str(), val64_t);
     }
 }
 

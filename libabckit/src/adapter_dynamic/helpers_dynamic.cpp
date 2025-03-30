@@ -19,6 +19,7 @@
 #include "libabckit/src/logger.h"
 #include "libabckit/src/statuses_impl.h"
 #include "assembler/assembly-program.h"
+#include "assembler/assembly-record.h"
 
 #if defined(_WIN32)
 #include <cwchar>
@@ -129,7 +130,7 @@ bool CheckRegularImport(ModuleUpdateData *updateData, panda::pandasm::Ins *inst)
             if (foundIdx == updateData->regularImportsIdxMap.end()) {
                 LIBABCKIT_LOG(DEBUG) << "There is an instruction '" << inst->ToString()
                                      << "' with an unknown regular import index '" << std::hex << imm << "'\n";
-                statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+                statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
                 return false;
             }
             inst->imms[0] = (int64_t)foundIdx->second;
@@ -149,7 +150,7 @@ bool CheckLocalExports(ModuleUpdateData *updateData, panda::pandasm::Ins *inst)
             if (foundIdx == updateData->localExportsIdxMap.end()) {
                 LIBABCKIT_LOG(DEBUG) << "There is an instruction '" << inst->ToString()
                                      << "' with an unknown local export index '" << std::hex << imm << "'\n";
-                statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+                statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
                 return false;
             }
             inst->imms[0] = (int64_t)foundIdx->second;
@@ -196,7 +197,7 @@ bool UpdateModuleLiteralArray(AbckitFile *file, const std::string &recName)
     auto module = file->localModules.find(recName);
     if (module == file->localModules.end()) {
         LIBABCKIT_LOG(DEBUG) << "Can not find module with name '" << recName << "'\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return false;
     }
     AbckitModulePayloadDyn *mPayload = GetModulePayload(module->second.get());
@@ -249,12 +250,13 @@ bool UpdateModuleLiteralArray(AbckitFile *file, const std::string &recName)
 
 namespace libabckit {
 
+// CC-OFFNXT(G.FUN.01-CPP) helper function
 const panda_file::File *EmitDynamicProgram(AbckitFile *file, pandasm::Program *program,
                                            pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp, bool getFile,
-                                           const char *path)
+                                           std::string_view path)
 {
     for (auto &[recName, rec] : program->record_table) {
-        if (IsServiceRecord(recName) || IsAnnotationInterfaceRecord(rec) || IsExternalRecord(rec)) {
+        if (!IsModuleDescriptorRecord(rec) || IsExternalRecord(rec)) {
             continue;
         }
         if (!UpdateModuleLiteralArray(file, recName)) {
@@ -266,16 +268,18 @@ const panda_file::File *EmitDynamicProgram(AbckitFile *file, pandasm::Program *p
         const panda_file::File *res {nullptr};
         if (!getFile) {
             std::map<std::string, size_t> *statp = nullptr;
-            if (!pandasm::AsmEmitter::Emit(path, *program, statp, mapsp)) {
-                statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+            if (!pandasm::AsmEmitter::Emit(std::string(path), *program, statp, mapsp)) {
+                LIBABCKIT_LOG_NO_FUNC(DEBUG)
+                    << "[EmitDynamicProgram] FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
+                statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
             }
             return res;
         }
         return pandasm::AsmEmitter::Emit(*program, mapsp, 1U).release();
     }();
     if (getFile && pf == nullptr) {
-        LIBABCKIT_LOG(DEBUG) << "LIBABCKIT WriteAbcDynamic FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        LIBABCKIT_LOG(DEBUG) << "FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return nullptr;
     }
 
@@ -467,7 +471,26 @@ bool IsServiceRecord(const std::string &name)
 {
     constexpr const std::string_view TSTYPE_ANNO_RECORD_NAME = "_TestAnnotation";
     return name == TSTYPE_ANNO_RECORD_NAME || name == "_ESConcurrentModuleRequestsAnnotation" ||
-           name == "L_ESSlotNumberAnnotation" || name == "_ESSlotNumberAnnotation";
+           name == "L_ESSlotNumberAnnotation" || name == "_ESSlotNumberAnnotation" ||
+           name == "_ESExpectedPropertyCountAnnotation";
+}
+
+bool IsModuleDescriptorRecord(const pandasm::Record &rec)
+{
+    constexpr std::array<std::string_view, 2> REQUIRED_FIELDS = {
+        "moduleRecordIdx",
+        "scopeNames",
+    };
+
+    for (const auto &fieldName : REQUIRED_FIELDS) {
+        auto it = std::find_if(rec.field_list.begin(), rec.field_list.end(),
+                               [&fieldName](const auto &field) { return fieldName == field.name; });
+        if (it == rec.field_list.end()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool IsAnnotationInterfaceRecord(const pandasm::Record &rec)
@@ -616,121 +639,194 @@ std::string GetClassNameFromCtor(const std::string &ctorName, const AbckitLitera
     return DemangleScopeName(className.substr(1), scopeNames);
 }
 
-static void LiteralDeleter(pandasm_Literal *p)
-{
-    delete reinterpret_cast<pandasm::LiteralArray::Literal *>(p);
-}
-
 template <class T>
-static AbckitLiteral *GetOrCreateLit(AbckitFile *file, std::unordered_map<T, std::unique_ptr<AbckitLiteral>> &cache,
-                                     T value, panda_file::LiteralTag tagImpl)
+static AbckitLiteral *FindOrCreateLiteral(AbckitFile *file,
+                                          std::unordered_map<T, std::unique_ptr<AbckitLiteral>> &cache, T value,
+                                          panda_file::LiteralTag tagImpl)
 {
     if (cache.count(value) == 1) {
         return cache[value].get();
     }
 
+    auto literalDeleter = [](pandasm_Literal *p) -> void {
+        delete reinterpret_cast<pandasm::LiteralArray::Literal *>(p);
+    };
+
     auto *literal = new pandasm::LiteralArray::Literal();
     literal->tag_ = tagImpl;
     literal->value_ = value;
     auto abcLit = std::make_unique<AbckitLiteral>(
-        file, AbckitLiteralImplT(reinterpret_cast<pandasm_Literal *>(literal), LiteralDeleter));
+        file, AbckitLiteralImplT(reinterpret_cast<pandasm_Literal *>(literal), literalDeleter));
     cache.insert({value, std::move(abcLit)});
     return cache[value].get();
 }
 
-AbckitLiteral *GetOrCreateLiteralBoolDynamic(AbckitFile *file, bool value)
+AbckitLiteral *FindOrCreateLiteralBoolDynamicImpl(AbckitFile *file, bool value)
 {
-    return GetOrCreateLit(file, file->literals.boolLits, value, panda_file::LiteralTag::BOOL);
+    return FindOrCreateLiteral(file, file->literals.boolLits, value, panda_file::LiteralTag::BOOL);
 }
 
-AbckitLiteral *GetOrCreateLiteralU8Dynamic(AbckitFile *file, uint8_t value)
+AbckitLiteral *FindOrCreateLiteralU8DynamicImpl(AbckitFile *file, uint8_t value)
 {
-    return GetOrCreateLit(file, file->literals.u8Lits, value, panda_file::LiteralTag::ARRAY_U8);
+    return FindOrCreateLiteral(file, file->literals.u8Lits, value, panda_file::LiteralTag::ARRAY_U8);
 }
 
-AbckitLiteral *GetOrCreateLiteralU16Dynamic(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralU16DynamicImpl(AbckitFile *file, uint16_t value)
 {
-    return GetOrCreateLit(file, file->literals.u16Lits, value, panda_file::LiteralTag::ARRAY_U16);
+    return FindOrCreateLiteral(file, file->literals.u16Lits, value, panda_file::LiteralTag::ARRAY_U16);
 }
 
-AbckitLiteral *GetOrCreateLiteralMethodAffiliateDynamic(AbckitFile *file, uint16_t value)
+AbckitLiteral *FindOrCreateLiteralMethodAffiliateDynamicImpl(AbckitFile *file, uint16_t value)
 {
-    return GetOrCreateLit(file, file->literals.methodAffilateLits, value, panda_file::LiteralTag::METHODAFFILIATE);
+    return FindOrCreateLiteral(file, file->literals.methodAffilateLits, value, panda_file::LiteralTag::METHODAFFILIATE);
 }
 
-AbckitLiteral *GetOrCreateLiteralU32Dynamic(AbckitFile *file, uint32_t value)
+AbckitLiteral *FindOrCreateLiteralU32DynamicImpl(AbckitFile *file, uint32_t value)
 {
-    return GetOrCreateLit(file, file->literals.u32Lits, value, panda_file::LiteralTag::INTEGER);
+    return FindOrCreateLiteral(file, file->literals.u32Lits, value, panda_file::LiteralTag::INTEGER);
 }
 
-AbckitLiteral *GetOrCreateLiteralU64Dynamic(AbckitFile *file, uint64_t value)
+AbckitLiteral *FindOrCreateLiteralU64DynamicImpl(AbckitFile *file, uint64_t value)
 {
-    return GetOrCreateLit(file, file->literals.u64Lits, value, panda_file::LiteralTag::ARRAY_U64);
+    return FindOrCreateLiteral(file, file->literals.u64Lits, value, panda_file::LiteralTag::ARRAY_U64);
 }
 
-AbckitLiteral *GetOrCreateLiteralFloatDynamic(AbckitFile *file, float value)
+AbckitLiteral *FindOrCreateLiteralFloatDynamicImpl(AbckitFile *file, float value)
 {
-    return GetOrCreateLit(file, file->literals.floatLits, value, panda_file::LiteralTag::FLOAT);
+    return FindOrCreateLiteral(file, file->literals.floatLits, value, panda_file::LiteralTag::FLOAT);
 }
 
-AbckitLiteral *GetOrCreateLiteralDoubleDynamic(AbckitFile *file, double value)
+AbckitLiteral *FindOrCreateLiteralDoubleDynamicImpl(AbckitFile *file, double value)
 {
-    return GetOrCreateLit(file, file->literals.doubleLits, value, panda_file::LiteralTag::DOUBLE);
+    return FindOrCreateLiteral(file, file->literals.doubleLits, value, panda_file::LiteralTag::DOUBLE);
 }
 
-AbckitLiteral *GetOrCreateLiteralLiteralArrayDynamic(AbckitFile *file, const std::string &value)
+AbckitLiteral *FindOrCreateLiteralLiteralArrayDynamicImpl(AbckitFile *file, const std::string &value)
 {
-    return GetOrCreateLit(file, file->literals.litArrLits, value, panda_file::LiteralTag::LITERALARRAY);
+    return FindOrCreateLiteral(file, file->literals.litArrLits, value, panda_file::LiteralTag::LITERALARRAY);
 }
 
-AbckitLiteral *GetOrCreateLiteralStringDynamic(AbckitFile *file, const std::string &value)
+AbckitLiteral *FindOrCreateLiteralStringDynamicImpl(AbckitFile *file, const std::string &value)
 {
-    return GetOrCreateLit(file, file->literals.stringLits, value, panda_file::LiteralTag::STRING);
+    return FindOrCreateLiteral(file, file->literals.stringLits, value, panda_file::LiteralTag::STRING);
 }
 
-AbckitLiteral *GetOrCreateLiteralMethodDynamic(AbckitFile *file, const std::string &value)
+AbckitLiteral *FindOrCreateLiteralMethodDynamicImpl(AbckitFile *file, const std::string &value)
 {
-    return GetOrCreateLit(file, file->literals.methodLits, value, panda_file::LiteralTag::METHOD);
+    return FindOrCreateLiteral(file, file->literals.methodLits, value, panda_file::LiteralTag::METHOD);
 }
 
-AbckitLiteral *GetOrCreateLiteralDynamic(AbckitFile *file, const pandasm::LiteralArray::Literal &value)
+AbckitLiteral *FindOrCreateLiteralDynamic(AbckitFile *file, const pandasm::LiteralArray::Literal &value)
 {
     switch (value.tag_) {
         case panda_file::LiteralTag::ARRAY_U1:
         case panda_file::LiteralTag::BOOL:
-            return GetOrCreateLiteralBoolDynamic(file, std::get<bool>(value.value_));
+            return FindOrCreateLiteralBoolDynamicImpl(file, std::get<bool>(value.value_));
         case panda_file::LiteralTag::ARRAY_U8:
         case panda_file::LiteralTag::ARRAY_I8:
-            return GetOrCreateLiteralU8Dynamic(file, std::get<uint8_t>(value.value_));
+            return FindOrCreateLiteralU8DynamicImpl(file, std::get<uint8_t>(value.value_));
         case panda_file::LiteralTag::ARRAY_U16:
         case panda_file::LiteralTag::ARRAY_I16:
-            return GetOrCreateLiteralU16Dynamic(file, std::get<uint16_t>(value.value_));
+            return FindOrCreateLiteralU16DynamicImpl(file, std::get<uint16_t>(value.value_));
         case panda_file::LiteralTag::ARRAY_U32:
         case panda_file::LiteralTag::ARRAY_I32:
         case panda_file::LiteralTag::INTEGER:
-            return GetOrCreateLiteralU32Dynamic(file, std::get<uint32_t>(value.value_));
+            return FindOrCreateLiteralU32DynamicImpl(file, std::get<uint32_t>(value.value_));
         case panda_file::LiteralTag::ARRAY_U64:
         case panda_file::LiteralTag::ARRAY_I64:
-            return GetOrCreateLiteralU64Dynamic(file, std::get<uint64_t>(value.value_));
+            return FindOrCreateLiteralU64DynamicImpl(file, std::get<uint64_t>(value.value_));
         case panda_file::LiteralTag::ARRAY_F32:
         case panda_file::LiteralTag::FLOAT:
-            return GetOrCreateLiteralFloatDynamic(file, std::get<float>(value.value_));
+            return FindOrCreateLiteralFloatDynamicImpl(file, std::get<float>(value.value_));
         case panda_file::LiteralTag::ARRAY_F64:
         case panda_file::LiteralTag::DOUBLE:
-            return GetOrCreateLiteralDoubleDynamic(file, std::get<double>(value.value_));
+            return FindOrCreateLiteralDoubleDynamicImpl(file, std::get<double>(value.value_));
         case panda_file::LiteralTag::ARRAY_STRING:
         case panda_file::LiteralTag::STRING:
-            return GetOrCreateLiteralStringDynamic(file, std::get<std::string>(value.value_));
+            return FindOrCreateLiteralStringDynamicImpl(file, std::get<std::string>(value.value_));
         case panda_file::LiteralTag::METHOD:
         case panda_file::LiteralTag::GETTER:
         case panda_file::LiteralTag::SETTER:
         case panda_file::LiteralTag::GENERATORMETHOD:
         case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
-            return GetOrCreateLiteralMethodDynamic(file, std::get<std::string>(value.value_));
+            return FindOrCreateLiteralMethodDynamicImpl(file, std::get<std::string>(value.value_));
         case panda_file::LiteralTag::METHODAFFILIATE:
-            return GetOrCreateLiteralMethodAffiliateDynamic(file, std::get<uint16_t>(value.value_));
+            return FindOrCreateLiteralMethodAffiliateDynamicImpl(file, std::get<uint16_t>(value.value_));
         case panda_file::LiteralTag::LITERALARRAY:
-            return GetOrCreateLiteralLiteralArrayDynamic(file, std::get<std::string>(value.value_));
+            return FindOrCreateLiteralLiteralArrayDynamicImpl(file, std::get<std::string>(value.value_));
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
+template <class T, pandasm::Value::Type PANDASM_VALUE_TYPE>
+static AbckitValue *FindOrCreateScalarValue(AbckitFile *file,
+                                            std::unordered_map<T, std::unique_ptr<AbckitValue>> &cache, T value)
+{
+    if (cache.count(value) == 1) {
+        return cache[value].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<panda::pandasm::ScalarValue *>(val); };
+
+    auto *pval = new pandasm::ScalarValue(pandasm::ScalarValue::Create<PANDASM_VALUE_TYPE>(value));
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    cache.insert({value, std::move(abcVal)});
+    return cache[value].get();
+}
+
+AbckitValue *FindOrCreateValueU1DynamicImpl(AbckitFile *file, bool value)
+{
+    return FindOrCreateScalarValue<bool, panda::pandasm::Value::Type::U1>(file, file->values.boolVals, value);
+}
+
+AbckitValue *FindOrCreateValueDoubleDynamicImpl(AbckitFile *file, double value)
+{
+    return FindOrCreateScalarValue<double, panda::pandasm::Value::Type::F64>(file, file->values.doubleVals, value);
+}
+
+AbckitValue *FindOrCreateValueStringDynamicImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, panda::pandasm::Value::Type::STRING>(file, file->values.stringVals,
+                                                                                     value);
+}
+
+AbckitValue *FindOrCreateLiteralArrayValueDynamicImpl(AbckitFile *file, const std::string &value)
+{
+    return FindOrCreateScalarValue<std::string, panda::pandasm::Value::Type::LITERALARRAY>(
+        file, file->values.litarrVals, value);
+}
+
+AbckitValue *FindOrCreateValueDynamic(AbckitFile *file, const pandasm::Value &value)
+{
+    switch (value.GetType()) {
+        case pandasm::Value::Type::U1:
+            return FindOrCreateValueU1DynamicImpl(file, value.GetAsScalar()->GetValue<bool>());
+        case pandasm::Value::Type::F64:
+            return FindOrCreateValueDoubleDynamicImpl(file, value.GetAsScalar()->GetValue<double>());
+        case pandasm::Value::Type::STRING:
+            return FindOrCreateValueStringDynamicImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case pandasm::Value::Type::LITERALARRAY:
+            return FindOrCreateLiteralArrayValueDynamicImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case pandasm::Value::Type::I8:
+        case pandasm::Value::Type::U8:
+        case pandasm::Value::Type::I16:
+        case pandasm::Value::Type::U16:
+        case pandasm::Value::Type::I32:
+        case pandasm::Value::Type::U32:
+        case pandasm::Value::Type::I64:
+        case pandasm::Value::Type::U64:
+        case pandasm::Value::Type::F32:
+        case pandasm::Value::Type::STRING_NULLPTR:
+        case pandasm::Value::Type::RECORD:
+        case pandasm::Value::Type::METHOD:
+        case pandasm::Value::Type::ENUM:
+        case pandasm::Value::Type::ANNOTATION:
+        case pandasm::Value::Type::ARRAY:
+        case pandasm::Value::Type::VOID:
+        case pandasm::Value::Type::METHOD_HANDLE:
+        case pandasm::Value::Type::UNKNOWN:
         default:
             LIBABCKIT_UNREACHABLE;
     }

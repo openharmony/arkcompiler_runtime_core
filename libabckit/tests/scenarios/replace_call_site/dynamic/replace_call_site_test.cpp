@@ -91,7 +91,7 @@ bool VisitBlock(AbckitBasicBlock *bb, void *data)
             auto *ldExternal = g_dynG->iCreateLdexternalmodulevar(vData->ctxG, vData->ci);
             auto *classThrow = g_dynG->iCreateThrowUndefinedifholewithname(
                 vData->ctxG, ldExternal, g_implI->classGetName(vData->ud->classToReplace));
-            auto *constInst = g_implG->gCreateConstantI32(vData->ctxG, 5);
+            auto *constInst = g_implG->gFindOrCreateConstantI32(vData->ctxG, 5);
             auto *ldobj = g_dynG->iCreateLdobjbyname(vData->ctxG, ldExternal,
                                                      g_implI->functionGetName(vData->ud->methodToReplace));
 
@@ -188,7 +188,7 @@ static void ClassReplaceCallSite(VisitHelper &visitor, UserData &ud, AbckitCoreC
     });
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicReplaceCallSite)
 {
     std::string inputPath = ABCKIT_ABC_DIR "scenarios/replace_call_site/dynamic/replace_call_site.abc";
@@ -197,7 +197,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicReplaceCallSite)
     auto output = helpers::ExecuteDynamicAbc(inputPath, "replace_call_site");
     EXPECT_TRUE(helpers::Match(output, "3\n"));
 
-    AbckitFile *ctxI = g_impl->openAbc(inputPath.c_str());
+    AbckitFile *ctxI = g_impl->openAbc(inputPath.c_str(), inputPath.size());
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     auto visitor = VisitHelper(ctxI, g_impl, g_implI, g_implG, g_dynG);
@@ -222,7 +222,7 @@ TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicReplaceCallSite)
         visitor.EnumerateModuleClasses(mod, [&](AbckitCoreClass *klass) { ClassReplaceCallSite(visitor, ud, klass); });
     });
 
-    g_impl->writeAbc(ctxI, outputPath.c_str());
+    g_impl->writeAbc(ctxI, outputPath.c_str(), outputPath.size());
     g_impl->closeFile(ctxI);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

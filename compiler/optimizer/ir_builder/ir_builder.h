@@ -144,7 +144,7 @@ private:
     ArenaSet<uint32_t> catches_pc_;
     ArenaMultiMap<uint32_t, TryCodeBlock> try_blocks_;
     ArenaList<TryCodeBlock *> opened_try_blocks_;
-    ArenaUnorderedSet<BasicBlock *> catch_handlers_;
+    ArenaSet<BasicBlock *> catch_handlers_;
     InstVector inst_defs_;
     RuntimeInterface::MethodPtr method_ = nullptr;
 };

@@ -62,6 +62,7 @@ components:
   - name: hotreload
   - name: ECMASCRIPT
   - name: defect_scan_aux
+  - name: pandaguard
 
 dfx_components:
   - name: common

@@ -17,8 +17,8 @@
     a: boolean;
 }
 
-@#Anno({a : true})
+@__$$ETS_ANNOTATION$$__Anno({a : true})
 class A {
-    @#Anno({a : false})
+    @__$$ETS_ANNOTATION$$__Anno({a : false})
     foo() {}
 }

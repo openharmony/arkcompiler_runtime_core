@@ -17,7 +17,6 @@
 
 #include "malloc_mem_pool-inl.h"
 #include "mmap_mem_pool-inl.h"
-#include "utils/logger.h"
 
 namespace panda {
 

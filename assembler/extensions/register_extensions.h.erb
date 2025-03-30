@@ -24,6 +24,9 @@ std::unique_ptr<panda::pandasm::RecordMetadata> MetadataExtension::CreateRecordM
 {
     switch (lang) {
         case Language::ECMASCRIPT:
+        case Language::JAVASCRIPT:
+        case Language::TYPESCRIPT:
+        case Language::ARKTS:
             return std::make_unique<panda::pandasm::extensions::ecmascript::RecordMetadata>();
         case Language::PANDA_ASSEMBLY:
             return std::make_unique<panda::pandasm::RecordMetadata>();
@@ -39,6 +42,9 @@ std::unique_ptr<panda::pandasm::FieldMetadata> MetadataExtension::CreateFieldMet
 {
     switch (lang) {
         case Language::ECMASCRIPT:
+        case Language::JAVASCRIPT:
+        case Language::TYPESCRIPT:
+        case Language::ARKTS:
             return std::make_unique<panda::pandasm::FieldMetadata>();
         case Language::PANDA_ASSEMBLY:
             return std::make_unique<panda::pandasm::FieldMetadata>();
@@ -54,6 +60,9 @@ std::unique_ptr<panda::pandasm::FunctionMetadata> MetadataExtension::CreateFunct
 {
     switch (lang) {
         case Language::ECMASCRIPT:
+        case Language::JAVASCRIPT:
+        case Language::TYPESCRIPT:
+        case Language::ARKTS:
             return std::make_unique<panda::pandasm::FunctionMetadata>();
         case Language::PANDA_ASSEMBLY:
             return std::make_unique<panda::pandasm::FunctionMetadata>();
@@ -69,6 +78,9 @@ std::unique_ptr<panda::pandasm::ParamMetadata> MetadataExtension::CreateParamMet
 {
     switch (lang) {
         case Language::ECMASCRIPT:
+        case Language::JAVASCRIPT:
+        case Language::TYPESCRIPT:
+        case Language::ARKTS:
             return std::make_unique<panda::pandasm::ParamMetadata>();
         case Language::PANDA_ASSEMBLY:
             return std::make_unique<panda::pandasm::ParamMetadata>();

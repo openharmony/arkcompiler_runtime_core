@@ -51,10 +51,17 @@ public:
         return record_name_;
     }
 
+    void SetName(const std::string &name)
+    {
+        this->record_name_ = name;
+    }
+
     const std::vector<AnnotationElement> &GetElements() const
     {
         return elements_;
     }
+
+    void EnumerateAnnotationElements(const std::function<void(AnnotationElement&)> &callback);
 
     void AddElement(AnnotationElement &&element)
     {
@@ -553,6 +560,11 @@ public:
     std::string GetName() const
     {
         return name_;
+    }
+
+    void SetName(const std::string &name)
+    {
+        this->name_ = name;
     }
 
     Value *GetValue() const

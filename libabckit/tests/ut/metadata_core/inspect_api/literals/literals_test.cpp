@@ -26,9 +26,14 @@ static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implM = AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
+static constexpr auto MODIFIED_DYNAMIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc";
+static constexpr auto MODIFIED_STATIC =
+    ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc";
+
 class LibAbcKitInspectApiLiteralsTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_1)
 {
     AbckitFile *file = nullptr;
@@ -38,13 +43,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_TRUE(val);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_1)
 {
     AbckitFile *file = nullptr;
@@ -54,13 +59,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_1)
 {
     AbckitFile *file = nullptr;
@@ -70,13 +75,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_1)
 {
     AbckitFile *file = nullptr;
@@ -86,13 +91,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_1)
 {
     AbckitFile *file = nullptr;
@@ -102,13 +107,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_1)
 {
     AbckitFile *file = nullptr;
@@ -118,13 +123,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_1)
 {
     AbckitFile *file = nullptr;
@@ -134,13 +139,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_FLOAT_EQ(val, 1.0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_1)
 {
     AbckitFile *file = nullptr;
@@ -150,13 +155,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_DOUBLE_EQ(val, 1.0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetLiteralArray, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetLiteralArray, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetLiteralArray_1)
 {
     AbckitFile *file = nullptr;
@@ -171,29 +176,29 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetLiteralArray_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, litarr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     auto val = g_implI->literalGetString(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(helpers::AbckitStringToString(val), "asdf");
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetMethod, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetMethod, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethod_1)
 {
     AbckitFile *file = nullptr;
@@ -203,43 +208,44 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethod_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(helpers::AbckitStringToString(val), "literals_dynamic.#*#foo");
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetTag, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetTag, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetTag_1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_STRING);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFile_1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     ASSERT_EQ(g_implI->literalGetFile(res), file);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalArrayEnumerateElements, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalArrayEnumerateElements, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralArrayEnumerateElements_1)
 {
     AbckitFile *file = nullptr;
@@ -275,7 +281,7 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralArrayEnumerateElements_1)
             g_implM->createLiteralBool(file, true),
             g_implM->createLiteralU32(file, val1),
             g_implM->createLiteralDouble(file, val2),
-            g_implM->createLiteralString(file, "asdf"),
+            g_implM->createLiteralString(file, "asdf", strlen("asdf")),
         });
         auto litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -290,13 +296,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralArrayEnumerateElements_1)
         std::for_each(newArr.begin(), newArr.end(), [&](AbckitLiteral *lit) { checkLit(lit); });
     }
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_2)
 {
     AbckitFile *file = nullptr;
@@ -306,13 +312,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_TRUE(val);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_2)
 {
     AbckitFile *file = nullptr;
@@ -322,13 +328,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_2)
 {
     AbckitFile *file = nullptr;
@@ -338,13 +344,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_2)
 {
     AbckitFile *file = nullptr;
@@ -354,13 +360,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_2)
 {
     AbckitFile *file = nullptr;
@@ -370,13 +376,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_2)
 {
     AbckitFile *file = nullptr;
@@ -386,13 +392,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(val, 1);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_2)
 {
     AbckitFile *file = nullptr;
@@ -402,13 +408,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_FLOAT_EQ(val, 1.0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_2)
 {
     AbckitFile *file = nullptr;
@@ -418,59 +424,59 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_DOUBLE_EQ(val, 1.0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_2)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     auto val = g_implI->literalGetString(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(helpers::AbckitStringToString(val), "asdf");
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetTag, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetTag, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetTag_2)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     ASSERT_EQ(g_implI->literalGetTag(res), ABCKIT_LITERAL_TAG_STRING);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetFile, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetFile, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFile_2)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_static.abc", &file);
-    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf");
+    AbckitLiteral *res = g_implM->createLiteralString(file, "asdf", strlen("asdf"));
     ASSERT_EQ(g_implI->literalGetFile(res), file);
 
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_3)
 {
     AbckitFile *file = nullptr;
@@ -479,13 +485,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_3)
     g_implI->literalGetBool(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetBool, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_4)
 {
     AbckitFile *file = nullptr;
@@ -494,13 +500,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetBool_4)
     g_implI->literalGetBool(res);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_3)
 {
     AbckitFile *file = nullptr;
@@ -510,13 +516,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU8, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_4)
 {
     AbckitFile *file = nullptr;
@@ -526,13 +532,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU8_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_3)
 {
     AbckitFile *file = nullptr;
@@ -542,13 +548,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU16, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_4)
 {
     AbckitFile *file = nullptr;
@@ -558,13 +564,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU16_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_3)
 {
     AbckitFile *file = nullptr;
@@ -574,13 +580,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetMethodAffiliate, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_4)
 {
     AbckitFile *file = nullptr;
@@ -590,13 +596,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethodAffiliate_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_3)
 {
     AbckitFile *file = nullptr;
@@ -606,13 +612,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU32, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_4)
 {
     AbckitFile *file = nullptr;
@@ -622,13 +628,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU32_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_3)
 {
     AbckitFile *file = nullptr;
@@ -638,13 +644,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetU64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_4)
 {
     AbckitFile *file = nullptr;
@@ -654,13 +660,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetU64_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_3)
 {
     AbckitFile *file = nullptr;
@@ -670,13 +676,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_FLOAT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetFloat, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_4)
 {
     AbckitFile *file = nullptr;
@@ -686,13 +692,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetFloat_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_FLOAT_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_3)
 {
     AbckitFile *file = nullptr;
@@ -702,13 +708,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_DOUBLE_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetDouble, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_4)
 {
     AbckitFile *file = nullptr;
@@ -718,13 +724,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetDouble_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_DOUBLE_EQ(val, 0);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetLiteralArray, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetLiteralArray, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetLiteralArray_3)
 {
     AbckitFile *file = nullptr;
@@ -734,13 +740,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetLiteralArray_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetLiteralArray, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetLiteralArray, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetLiteralArray_4)
 {
     AbckitFile *file = nullptr;
@@ -750,13 +756,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetLiteralArray_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
     ASSERT_EQ(val, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_3)
 {
     AbckitFile *file = nullptr;
@@ -766,13 +772,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_4)
 {
     AbckitFile *file = nullptr;
@@ -782,13 +788,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetString_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetMethod, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetMethod, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethod_3)
 {
     AbckitFile *file = nullptr;
@@ -798,13 +804,13 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethod_3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_LITERAL_TYPE);
     ASSERT_EQ(val, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::literalGetMethod, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::literalGetMethod, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethod_4)
 {
     AbckitFile *file = nullptr;
@@ -814,7 +820,7 @@ TEST_F(LibAbcKitInspectApiLiteralsTest, LiteralGetMethod_4)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_UNSUPPORTED);
     ASSERT_EQ(val, nullptr);
     // Write output file
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/literals/literals_static_modified.abc");
+    g_impl->writeAbc(file, MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

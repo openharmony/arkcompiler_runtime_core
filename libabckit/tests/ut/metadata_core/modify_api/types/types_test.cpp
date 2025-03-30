@@ -48,7 +48,7 @@ static void InspectMethodValid(AbckitFile *file)
     }
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createType, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createType, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, CreateTypesDynamic)
 {
     AbckitFile *file = nullptr;
@@ -59,14 +59,14 @@ TEST_F(LibAbcKitModifyApiTypesTest, CreateTypesDynamic)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createType, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createType, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, CreateTypeStatic)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/types/types_static.abc", "foo",
                            [](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *) { InspectMethodValid(file); });
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createReferenceType, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createReferenceType, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiTypesTest, CreateReferenceTypeDynamic)
 {
     AbckitFile *file = nullptr;

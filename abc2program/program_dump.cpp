@@ -16,8 +16,6 @@
 #include "program_dump.h"
 #include "abc2program_log.h"
 #include "common/abc_file_utils.h"
-#include "dump_utils.h"
-#include "os/file.h"
 
 namespace panda::abc2program {
 
@@ -26,7 +24,6 @@ void PandasmProgramDumper::Dump(std::ostream &os, const pandasm::Program &progra
     program_ = &program;
     os << std::flush;
     DumpAbcFilePath(os);
-    DumpProgramLanguage(os);
     DumpLiteralArrayTable(os);
     DumpRecordTable(os);
     DumpFunctionTable(os);
@@ -47,15 +44,36 @@ void PandasmProgramDumper::DumpAbcFilePath(std::ostream &os) const
     os << DUMP_TITLE_SOURCE_BINARY << file_abs_path << DUMP_CONTENT_DOUBLE_ENDL;
 }
 
-void PandasmProgramDumper::DumpProgramLanguage(std::ostream &os) const
+void PandasmProgramDumper::DumpLanguage(std::ostream &os, const panda::panda_file::SourceLang lang) const
 {
     os << DUMP_TITLE_LANGUAGE;
-    if (program_->lang == panda::panda_file::SourceLang::ECMASCRIPT) {
+    if (lang == panda::panda_file::SourceLang::ECMASCRIPT) {
         os << DUMP_CONTENT_ECMASCRIPT;
+    } else if (lang == panda::panda_file::SourceLang::JAVASCRIPT) {
+        os << DUMP_CONTENT_JAVASCRIPT;
+    } else if (lang == panda::panda_file::SourceLang::TYPESCRIPT) {
+        os << DUMP_CONTENT_TYPESCRIPT;
+    } else if (lang == panda::panda_file::SourceLang::ARKTS) {
+        os << DUMP_CONTENT_ARKTS;
     } else {
         os << DUMP_CONTENT_PANDA_ASSEMBLY;
     }
-    os << DUMP_CONTENT_DOUBLE_ENDL;
+    os << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpProgramLanguage(std::ostream &os) const
+{
+    DumpLanguage(os, program_->lang);
+}
+
+void PandasmProgramDumper::DumpRecordLanguage(std::ostream &os, const pandasm::Record &record) const
+{
+    DumpLanguage(os, record.language);
+}
+
+void PandasmProgramDumper::DumpFunctionLanguage(std::ostream &os, const pandasm::Function &function) const
+{
+    DumpLanguage(os, function.language);
 }
 
 void PandasmProgramDumper::DumpLiteralArrayTable(std::ostream &os) const
@@ -105,6 +123,7 @@ void PandasmProgramDumper::DumpRecordTable(std::ostream &os) const
 
 void PandasmProgramDumper::DumpRecord(std::ostream &os, const pandasm::Record &record) const
 {
+    DumpRecordLanguage(os, record);
     if (is_normalized_) {
         if (AbcFileUtils::IsGlobalTypeName(record.name)) {
             return;
@@ -246,6 +265,7 @@ void PandasmProgramDumper::DumpFunction(std::ostream &os, const pandasm::Functio
     if (!is_normalized_ || !is_debug_) {
         DumpFunctionAnnotations(os, function);
     }
+    DumpFunctionLanguage(os, function);
     DumpFunctionHead(os, function);
     DumpFunctionBody(os, function);
 }
@@ -260,8 +280,8 @@ void PandasmProgramDumper::DumpFunctionAnnotations(std::ostream &os, const panda
 {
     for (auto &annotation : function.metadata->GetAnnotations()) {
         DumpAnnotationData(os, annotation);
+        os << DUMP_CONTENT_SINGLE_ENDL;
     }
-    os << DUMP_CONTENT_SINGLE_ENDL;
 }
 
 void PandasmProgramDumper::DumpFunctionHead(std::ostream &os, const pandasm::Function &function) const

@@ -52,7 +52,7 @@ void TransformSetSetCallMethod(AbckitGraph *graph, AbckitCoreFunction *foo)
 
 class LibAbcKitMethodDynamicTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::iSetFunction, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetFunction, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitMethodDynamicTest, LibAbcKitTestSetCallMethod)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_dynamic.abc", "method_dynamic");

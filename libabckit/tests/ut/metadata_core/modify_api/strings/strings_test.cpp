@@ -50,8 +50,7 @@ auto g_dynamicCreateString2Lambda = [](AbckitGraph *graph) {
         {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING, {}},
         {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDLEXVAR, {}},
         {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {10, 9}},
-        {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-        {13, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+        {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
     });
     helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb2({{0}, {2}, insts2});
     helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb3({{1}, {}, {}});
@@ -68,12 +67,12 @@ struct UserData {
     AbckitFile *file = nullptr;
 };
 
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString)
 {
     UserData userData = {};
     auto testImpl = [&userData]() {
-        auto abckitstr = g_implM->createString(userData.file, "newString");
+        auto abckitstr = g_implM->createString(userData.file, "newString", strlen("newString"));
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(abckitstr, nullptr);
 
@@ -91,7 +90,7 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString2)
 {
     UserData userData = {};
@@ -99,13 +98,13 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString2)
         AbckitInst *callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
         auto consoleLogStr = helpers::FindMethodByName(userData.file, "ConsoleLogStr");
 
-        auto str1 = g_implM->createString(userData.file, "string1");
+        auto str1 = g_implM->createString(userData.file, "string1", strlen("string1"));
         auto loadString1 = g_statG->iCreateLoadString(graph, str1);
         g_implG->iInsertAfter(loadString1, callOp);
         AbckitInst *log1 = g_statG->iCreateCallStatic(graph, consoleLogStr, 1, loadString1);
         g_implG->iInsertAfter(log1, loadString1);
 
-        auto str2 = g_implM->createString(userData.file, "string2");
+        auto str2 = g_implM->createString(userData.file, "string2", strlen("string2"));
         auto loadString2 = g_statG->iCreateLoadString(graph, str2);
         g_implG->iInsertAfter(loadString2, log1);
         AbckitInst *log2 = g_statG->iCreateCallStatic(graph, consoleLogStr, 1, loadString2);
@@ -139,12 +138,12 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString2)
         });
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString)
 {
     UserData userData = {};
     auto testImpl = [&userData]() {
-        auto abckitstr = g_implM->createString(userData.file, "newString");
+        auto abckitstr = g_implM->createString(userData.file, "newString", strlen("newString"));
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_NE(abckitstr, nullptr);
 
@@ -164,7 +163,7 @@ TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString)
 }
 
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/strings/strings_dynamic.abc",
@@ -175,8 +174,8 @@ TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString2)
     auto testImpl = [&userData](AbckitGraph *graph) {
         AbckitInst *callOp = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1);
 
-        auto str1 = g_implM->createString(userData.file, "string1");
-        auto str2 = g_implM->createString(userData.file, "string2");
+        auto str1 = g_implM->createString(userData.file, "string1", strlen("string1"));
+        auto str2 = g_implM->createString(userData.file, "string2", strlen("string2"));
 
         auto loadString1 = g_dynG->iCreateLoadString(graph, str1);
         g_implG->iInsertAfter(loadString1, callOp);

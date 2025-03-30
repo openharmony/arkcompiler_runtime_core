@@ -64,15 +64,13 @@ static void VerifyBbSchem1(AbckitGraph *graph)
          {4},
          {{15, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
           {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {15, 3}}}},
-        {{2, 3},
-         {5},
-         {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-          {21, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+        {{2, 3}, {5}, {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
         {{4}, {}, {}}};
     helpers::VerifyGraph(graph, bbSchemas);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gRunPassRemoveUnreachableBlocks, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gRunPassRemoveUnreachableBlocks, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_1)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -85,7 +83,7 @@ TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_1)
         [&](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *bb2 = g_implG->gGetBasicBlock(graph, 2);
             g_implG->iRemove(g_implG->bbGetLastInst(bb2));
-            g_implG->bbEraseSuccBlock(bb2, 0x0);
+            g_implG->bbDisconnectSuccBlock(bb2, 0x0);
             g_implG->gRunPassRemoveUnreachableBlocks(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
@@ -123,15 +121,13 @@ static void VerifyBbSchem2(AbckitGraph *graph)
          {4},
          {{15, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
           {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {15, 3}}}},
-        {{2, 3},
-         {5},
-         {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-          {21, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+        {{2, 3}, {5}, {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
         {{4}, {}, {}}};
     helpers::VerifyGraph(graph, bbSchemas);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gRunPassRemoveUnreachableBlocks, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gRunPassRemoveUnreachableBlocks, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_2)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -144,7 +140,7 @@ TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_2)
         [&](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *bb2 = g_implG->gGetBasicBlock(graph, 2);
             g_implG->iRemove(g_implG->bbGetLastInst(bb2));
-            g_implG->bbEraseSuccBlock(bb2, 0x1);
+            g_implG->bbDisconnectSuccBlock(bb2, 0x1);
             g_implG->gRunPassRemoveUnreachableBlocks(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
@@ -184,15 +180,13 @@ static void VerifyBbSchem3(AbckitGraph *graph)
          {{14, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
           {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_ADD2, {15, 3}},
           {17, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {14, 16}}}},
-        {{2, 3},
-         {5},
-         {{21, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-          {22, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+        {{2, 3}, {5}, {{21, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
         {{4}, {}, {}}};
     helpers::VerifyGraph(graph, bbSchemas);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gRunPassRemoveUnreachableBlocks, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gRunPassRemoveUnreachableBlocks, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_3)
 {
     auto output = helpers::ExecuteDynamicAbc(
@@ -205,7 +199,7 @@ TEST_F(LibAbcKitBasicBlocksDynTest, GrunPassRemoveUnreachableBlocks_3)
         [&](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *bb0 = g_implG->gGetBasicBlock(graph, 0);
             g_implG->iRemove(g_implG->bbGetLastInst(bb0));
-            g_implG->bbEraseSuccBlock(bb0, 0x0);
+            g_implG->bbDisconnectSuccBlock(bb0, 0x0);
             g_implG->gRunPassRemoveUnreachableBlocks(graph);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
@@ -247,12 +241,12 @@ static void VerifyGraphStart(AbckitFile *file)
     g_impl->destroyGraph(graph);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetStartBasicBlock, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetStartBasicBlock, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksDynTest, GgetStartBasicBlockValid)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc");
-    LIBABCKIT_LOG(DEBUG) << "LibAbcKitBasicBlocksDynTest: "
-                         << ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc" << std::endl;
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
+    LIBABCKIT_LOG(DEBUG) << "LibAbcKitBasicBlocksDynTest: " << INPUT_PATH << std::endl;
 
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -287,12 +281,12 @@ static void VerifyGraphEnd(AbckitFile *file)
     g_impl->destroyGraph(graph);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gGetEndBasicBlock, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gGetEndBasicBlock, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksDynTest, GgetEndBasicBlockValid)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc");
-    LIBABCKIT_LOG(DEBUG) << "LibAbcKitBasicBlocksDynTest: "
-                         << ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc" << std::endl;
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
+    LIBABCKIT_LOG(DEBUG) << "LibAbcKitBasicBlocksDynTest: " << INPUT_PATH << std::endl;
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     VerifyGraphEnd(file);
@@ -365,12 +359,12 @@ static void VerifyGraphVisitBlocks(AbckitFile *file)
     g_impl->destroyGraph(graph);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gVisitBlocksRpo, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gVisitBlocksRpo, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksDynTest, GvisitBlocksRPO)
 {
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc");
-    LIBABCKIT_LOG(DEBUG) << "LibAbcKitBasicBlocksDynTest: "
-                         << ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc" << std::endl;
+    constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_basic_block/graph_basic_block_simple.abc";
+    AbckitFile *file = g_impl->openAbc(INPUT_PATH, strlen(INPUT_PATH));
+    LIBABCKIT_LOG(DEBUG) << "LibAbcKitBasicBlocksDynTest: " << INPUT_PATH << std::endl;
 
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

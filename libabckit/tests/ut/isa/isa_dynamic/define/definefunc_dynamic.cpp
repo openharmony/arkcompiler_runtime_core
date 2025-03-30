@@ -62,7 +62,7 @@ auto g_icreateDefineFuncTransformCb = [](AbckitFile *file, AbckitCoreFunction * 
 
 class LibAbcKitCreateDynDefineFunc : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefunc, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefunc, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynDefineFunc, IcreateDefinefunc)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefunc_dynamic.abc",
@@ -85,8 +85,7 @@ TEST_F(LibAbcKitCreateDynDefineFunc, IcreateDefinefunc)
                  {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC, {}},
                  {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {4}},
                  {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {9}},
-                 {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                 {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                 {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
              }},
             {{1}, {}, {}}};
         // CC-OFFNXT(G.FMT.02)

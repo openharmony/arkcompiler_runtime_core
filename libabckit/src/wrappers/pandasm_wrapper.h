@@ -22,6 +22,10 @@
 #include <vector>
 #include <variant>
 
+namespace panda::panda_file {
+enum class SourceLang : uint8_t;
+}  // namespace panda::panda_file
+
 namespace libabckit {
 
 struct LiteralArrayWrapper;
@@ -170,7 +174,7 @@ class PandasmWrapper {
 public:
     using ArgTypes = std::variant<uint8_t, int64_t, double, uint64_t, uint32_t, std::string>;
 
-    static FunctionWrapper *CreateWrappedFunction();
+    static FunctionWrapper *CreateWrappedFunction(panda::panda_file::SourceLang lang);
 
     static FunctionWrapper *GetWrappedFunction(void *function)
     {

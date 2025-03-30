@@ -276,6 +276,16 @@ public:
      */
     Resource &operator=(const Resource &) = delete;
 
+    /**
+     * @brief Operator ==
+     * @param rhs
+     * @return bool
+     */
+    bool operator==(const Resource &rhs) const
+    {
+        return GetResource() == rhs.GetResource();
+    }
+
 protected:
     /**
      * @brief Constructor

@@ -14,8 +14,6 @@
  */
 
 #include "pgo.h"
-#include "os/filesystem.h"
-#include "utils/logger.h"
 
 namespace panda::panda_file::pgo {
 

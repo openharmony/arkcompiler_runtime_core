@@ -17,8 +17,6 @@
 
 #include "libabckit/src/adapter_dynamic/runtime_adapter_dynamic.h"
 
-using namespace ark;
-
 namespace libabckit {
 
 % additional_deprecated_opcodes = ["JNSTRICTEQUNDEFINED",
@@ -44,10 +42,10 @@ namespace libabckit {
 % skipped_opcodes = additional_deprecated_opcodes + replaced_opcodes
 
 // NOLINTNEXTLINE(readability-function-size)
-static inline AbckitIsaApiDynamicOpcode GetDYNIntrinsicOpcode(compiler::IntrinsicInst *inst) {
+static inline AbckitIsaApiDynamicOpcode GetDYNIntrinsicOpcode(ark::compiler::IntrinsicInst *inst) {
     switch(inst->GetIntrinsicId()) {
 % Panda::instructions.select{|b| b.namespace == "ecmascript"}.each do |inst|
-        case compiler::RuntimeInterface::IntrinsicId::DYN_<%= inst.opcode.upcase %>: {
+        case ark::compiler::RuntimeInterface::IntrinsicId::DYN_<%= inst.opcode.upcase %>: {
 %   if (inst.mnemonic.include? "deprecated") || (skipped_opcodes.include? inst.mnemonic.upcase)
             return ABCKIT_ISA_API_DYNAMIC_OPCODE_INVALID;
 %   else
@@ -62,11 +60,11 @@ static inline AbckitIsaApiDynamicOpcode GetDYNIntrinsicOpcode(compiler::Intrinsi
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-static inline size_t GetIntrinicDYNMaxInputsCount(compiler::IntrinsicInst *inst) {
+static inline size_t GetIntrinicDYNMaxInputsCount(ark::compiler::IntrinsicInst *inst) {
     switch(inst->GetIntrinsicId()) {
 % Panda::instructions.select{|b| b.namespace == "ecmascript"}.each do |inst|
 %   if !(inst.mnemonic.include? "deprecated") && !(skipped_opcodes.include? inst.mnemonic.upcase)
-        case compiler::RuntimeInterface::IntrinsicId::DYN_<%= inst.opcode.upcase %>:
+        case ark::compiler::RuntimeInterface::IntrinsicId::DYN_<%= inst.opcode.upcase %>:
 %     if (inst.mnemonic.include? "range")
             return -1;
 %     else
@@ -82,13 +80,13 @@ static inline size_t GetIntrinicDYNMaxInputsCount(compiler::IntrinsicInst *inst)
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-static inline bool IsCallDYNInst(compiler::Inst *inst) {
+static inline bool IsCallDYNInst(ark::compiler::Inst *inst) {
     if (!inst->IsIntrinsic()) {
         return inst->IsCall();
     }
     switch(inst->CastToIntrinsic()->GetIntrinsicId()) {
 % Panda::instructions.select{|b| b.namespace == "ecmascript"}.each do |inst|
-        case compiler::RuntimeInterface::IntrinsicId::DYN_<%= inst.opcode.upcase %>: {
+        case ark::compiler::RuntimeInterface::IntrinsicId::DYN_<%= inst.opcode.upcase %>: {
 %   mnemonic = inst.mnemonic.split(/\s|\./)
 %   if ((mnemonic.length() > 1) && (mnemonic[0] == "callruntime") && ((mnemonic[1]).include? "call"))
             return true;
@@ -103,6 +101,9 @@ static inline bool IsCallDYNInst(compiler::Inst *inst) {
 %   end
         }
 % end
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING: {
+            return false;
+        }
         default: {
             LIBABCKIT_UNREACHABLE;
         }

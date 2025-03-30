@@ -15,7 +15,6 @@
 
 #include "abc2program_compiler.h"
 #include "abc_class_processor.h"
-#include "file_format_version.h"
 #include "utils/timers.h"
 
 namespace panda::abc2program {
@@ -64,7 +63,10 @@ const panda_file::DebugInfoExtractor &Abc2ProgramCompiler::GetDebugInfoExtractor
 pandasm::Program *Abc2ProgramCompiler::CompileAbcFile()
 {
     prog_ = new pandasm::Program();
-    prog_->lang = LANG_ECMA;
+    // An abc may be generated from serveral kinds of source files.
+    // prog_->lang should not be used for setting any other structure's language such as record.
+    // Since prog_->lang will not be emitted into abc, this will not effect the integraty of generated abc file.
+    prog_->lang = DEFUALT_SOURCE_LANG;
     auto classes = file_->GetClasses();
     std::string record_name = "";
     for (size_t i = 0; i < classes.size(); i++) {
@@ -79,6 +81,9 @@ void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &reco
 {
     Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset(),
                                                 bundle_name_);
+    if (!modify_pkg_name_.empty()) {
+        entity_container.SetModifyPkgName(modify_pkg_name_);
+    }
     record_name = entity_container.GetFullRecordNameById(record_id);
     panda::Timer::timerStart(EVENT_COMPILE_ABC_FILE_RECORD, record_name);
     AbcClassProcessor class_processor(record_id, entity_container);

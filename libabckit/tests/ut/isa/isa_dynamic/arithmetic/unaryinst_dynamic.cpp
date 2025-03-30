@@ -59,67 +59,68 @@ static void ValidTest(AbckitInst *(*unaryInstToCheck)(AbckitGraph *graph, Abckit
 
 class LibAbcKitDynUnaryInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNot, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNot, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynNotValid)
 {
     ValidTest(g_dynG->iCreateNot, ABCKIT_ISA_API_DYNAMIC_OPCODE_NOT, "-11\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNeg, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNeg, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynNegValid)
 {
     ValidTest(g_dynG->iCreateNeg, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEG, "-10\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInc, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInc, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynIncValid)
 {
     ValidTest(g_dynG->iCreateInc, ABCKIT_ISA_API_DYNAMIC_OPCODE_INC, "11\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDec, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDec, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynDecValid)
 {
     ValidTest(g_dynG->iCreateDec, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEC, "9\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIstrue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIstrue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynIstrueValid)
 {
     ValidTest(g_dynG->iCreateIstrue, ABCKIT_ISA_API_DYNAMIC_OPCODE_ISTRUE, "true\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIstrue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIstrue, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynCallruntimeIstrueValid)
 {
     ValidTest(g_dynG->iCreateCallruntimeIstrue, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRUNTIME_ISTRUE, "true\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsfalse, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsfalse, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynIsfalseValid)
 {
     ValidTest(g_dynG->iCreateIsfalse, ABCKIT_ISA_API_DYNAMIC_OPCODE_ISFALSE, "false\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIsfalse, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIsfalse, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynCallruntimeIsfalseValid)
 {
     ValidTest(g_dynG->iCreateCallruntimeIsfalse, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRUNTIME_ISFALSE, "false\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumber, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumber, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynTonumberValid)
 {
     ValidTest(g_dynG->iCreateTonumber, ABCKIT_ISA_API_DYNAMIC_OPCODE_TONUMBER, "10\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumeric, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumeric, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynTonumericValid)
 {
     ValidTest(g_dynG->iCreateTonumeric, ABCKIT_ISA_API_DYNAMIC_OPCODE_TONUMERIC, "10\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTypeof, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTypeof, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynUnaryInstTest, CreateDynTypeofValid)
 {
     ValidTest(g_dynG->iCreateTypeof, ABCKIT_ISA_API_DYNAMIC_OPCODE_TYPEOF, "number\n");

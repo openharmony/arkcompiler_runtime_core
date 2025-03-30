@@ -36,9 +36,9 @@ namespace {
 
 void TransformIrStatic(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
@@ -52,9 +52,9 @@ void TransformIrStatic(AbckitGraph *graph)
 
 void TransformIrStatic2(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10U);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10U);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20U);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20U);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
@@ -65,7 +65,7 @@ void TransformIrStatic2(AbckitGraph *graph)
 }
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, StaticSetInput)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static.abc",
@@ -101,7 +101,7 @@ TEST_F(LibAbcKitIrInstInputsTest, StaticSetInput)
     EXPECT_TRUE(helpers::Match(output, "10 20\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, StaticSetInputs)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static.abc",
@@ -140,9 +140,9 @@ TEST_F(LibAbcKitIrInstInputsTest, StaticSetInputs)
 namespace {
 void TransformIrDynamic(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
@@ -156,9 +156,9 @@ void TransformIrDynamic(AbckitGraph *graph)
 
 void TransformIrDynamic2(AbckitGraph *graph)
 {
-    auto constant1 = g_implG->gCreateConstantI64(graph, 10);
+    auto constant1 = g_implG->gFindOrCreateConstantI64(graph, 10);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto constant2 = g_implG->gCreateConstantI64(graph, 20);
+    auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
@@ -168,7 +168,7 @@ void TransformIrDynamic2(AbckitGraph *graph)
 }
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInput)
 {
     helpers::TransformMethod(
@@ -189,8 +189,7 @@ TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInput)
                 {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
                 {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {5}},
                 {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1, {10, 11, 3}},
-                {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
             });
             helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb2({{0}, {2}, insts2});
             helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb3({{1}, {}, {}});
@@ -199,7 +198,7 @@ TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInput)
         });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInputs)
 {
     auto cb = [](AbckitGraph *graph) {
@@ -219,8 +218,7 @@ TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInputs)
             {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {5}},
             {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1, {10, 11, 3}},
-            {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-            {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+            {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
         });
         helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb2({{0}, {2}, insts2});
         helpers::BBSchema<AbckitIsaApiDynamicOpcode> bb3({{1}, {}, {}});

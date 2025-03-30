@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 
-namespace libabckit::mock {
+namespace libabckit::mock::metadata_inspect {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
@@ -31,21 +31,21 @@ namespace libabckit::mock {
 // File
 // ========================================
 
-inline AbckitFileVersion FileGetVersion(AbckitFile *file)
+AbckitFileVersion FileGetVersion(AbckitFile *file)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     return DEFAULT_FILE_VERSION;
 }
 
-inline bool FileEnumerateModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
+bool FileEnumerateModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
     return cb(DEFAULT_CORE_MODULE, data);
 }
 
-inline bool FileEnumerateExternalModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
+bool FileEnumerateExternalModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
@@ -56,82 +56,80 @@ inline bool FileEnumerateExternalModules(AbckitFile *file, void *data, bool (*cb
 // Module
 // ========================================
 
-inline AbckitFile *ModuleGetFile(AbckitCoreModule *m)
+AbckitFile *ModuleGetFile(AbckitCoreModule *m)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return DEFAULT_FILE;
 }
 
-inline AbckitTarget ModuleGetTarget(AbckitCoreModule *m)
+AbckitTarget ModuleGetTarget(AbckitCoreModule *m)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return DEFAULT_TARGET;
 }
 
-inline AbckitString *ModuleGetName(AbckitCoreModule *m)
+AbckitString *ModuleGetName(AbckitCoreModule *m)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return DEFAULT_STRING;
 }
 
-inline bool ModuleIsExternal(AbckitCoreModule *m)
+bool ModuleIsExternal(AbckitCoreModule *m)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return true;
 }
 
-inline bool ModuleEnumerateImports(AbckitCoreModule *m, void *data,
-                                   bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
+bool ModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return cb(DEFAULT_CORE_IMPORT_DESCRIPTOR, data);
 }
 
-inline bool ModuleEnumerateExports(AbckitCoreModule *m, void *data,
-                                   bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
+bool ModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return cb(DEFAULT_CORE_EXPORT_DESCRIPTOR, data);
 }
 
-inline bool ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data))
+bool ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return cb(DEFAULT_CORE_NAMESPACE, data);
 }
 
-inline bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
+bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return cb(DEFAULT_CORE_CLASS, data);
 }
 
-inline bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
-                                             bool (*cb)(AbckitCoreFunction *function, void *data))
+bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+                                      bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline bool ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
-                                              bool (*cb)(AbckitCoreFunction *function, void *data))
+bool ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+                                       bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
     return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
-                                                bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
+bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+                                         bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
@@ -142,38 +140,37 @@ inline bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
 // Namespace
 // ========================================
 
-inline AbckitString *NamespaceGetName(AbckitCoreNamespace *n)
+AbckitString *NamespaceGetName(AbckitCoreNamespace *n)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
     return DEFAULT_STRING;
 }
 
-inline AbckitCoreNamespace *NamespaceGetParentNamespace(AbckitCoreNamespace *n)
+AbckitCoreNamespace *NamespaceGetParentNamespace(AbckitCoreNamespace *n)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
     return DEFAULT_CORE_NAMESPACE;
 }
 
-inline bool NamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
-                                         bool (*cb)(AbckitCoreNamespace *klass, void *data))
+bool NamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
+                                  bool (*cb)(AbckitCoreNamespace *klass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
     return cb(DEFAULT_CORE_NAMESPACE, data);
 }
 
-inline bool NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data,
-                                      bool (*cb)(AbckitCoreClass *klass, void *data))
+bool NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
     return cb(DEFAULT_CORE_CLASS, data);
 }
 
-inline bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
-                                                bool (*cb)(AbckitCoreFunction *func, void *data))
+bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
+                                         bool (*cb)(AbckitCoreFunction *func, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
@@ -184,35 +181,35 @@ inline bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *da
 // ImportDescriptor
 // ========================================
 
-inline AbckitFile *ImportDescriptorGetFile(AbckitCoreImportDescriptor *i)
+AbckitFile *ImportDescriptorGetFile(AbckitCoreImportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_IMPORT_DESCRIPTOR);
     return DEFAULT_FILE;
 }
 
-inline AbckitCoreModule *ImportDescriptorGetImportedModule(AbckitCoreImportDescriptor *i)
+AbckitCoreModule *ImportDescriptorGetImportedModule(AbckitCoreImportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_IMPORT_DESCRIPTOR);
     return DEFAULT_CORE_MODULE;
 }
 
-inline AbckitCoreModule *ImportDescriptorGetImportingModule(AbckitCoreImportDescriptor *i)
+AbckitCoreModule *ImportDescriptorGetImportingModule(AbckitCoreImportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_IMPORT_DESCRIPTOR);
     return DEFAULT_CORE_MODULE;
 }
 
-inline AbckitString *ImportDescriptorGetName(AbckitCoreImportDescriptor *i)
+AbckitString *ImportDescriptorGetName(AbckitCoreImportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_IMPORT_DESCRIPTOR);
     return DEFAULT_STRING;
 }
 
-inline AbckitString *ImportDescriptorGetAlias(AbckitCoreImportDescriptor *i)
+AbckitString *ImportDescriptorGetAlias(AbckitCoreImportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_IMPORT_DESCRIPTOR);
@@ -223,35 +220,35 @@ inline AbckitString *ImportDescriptorGetAlias(AbckitCoreImportDescriptor *i)
 // ExportDescriptor
 // ========================================
 
-inline AbckitFile *ExportDescriptorGetFile(AbckitCoreExportDescriptor *i)
+AbckitFile *ExportDescriptorGetFile(AbckitCoreExportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_EXPORT_DESCRIPTOR);
     return DEFAULT_FILE;
 }
 
-inline AbckitCoreModule *ExportDescriptorGetExportingModule(AbckitCoreExportDescriptor *i)
+AbckitCoreModule *ExportDescriptorGetExportingModule(AbckitCoreExportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_EXPORT_DESCRIPTOR);
     return DEFAULT_CORE_MODULE;
 }
 
-inline AbckitCoreModule *ExportDescriptorGetExportedModule(AbckitCoreExportDescriptor *i)
+AbckitCoreModule *ExportDescriptorGetExportedModule(AbckitCoreExportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_EXPORT_DESCRIPTOR);
     return DEFAULT_CORE_MODULE;
 }
 
-inline AbckitString *ExportDescriptorGetName(AbckitCoreExportDescriptor *i)
+AbckitString *ExportDescriptorGetName(AbckitCoreExportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_EXPORT_DESCRIPTOR);
     return DEFAULT_STRING;
 }
 
-inline AbckitString *ExportDescriptorGetAlias(AbckitCoreExportDescriptor *i)
+AbckitString *ExportDescriptorGetAlias(AbckitCoreExportDescriptor *i)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(i == DEFAULT_CORE_EXPORT_DESCRIPTOR);
@@ -262,51 +259,49 @@ inline AbckitString *ExportDescriptorGetAlias(AbckitCoreExportDescriptor *i)
 // Class
 // ========================================
 
-inline AbckitFile *ClassGetFile(AbckitCoreClass *klass)
+AbckitFile *ClassGetFile(AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
     return DEFAULT_FILE;
 }
 
-inline AbckitCoreModule *ClassGetModule(AbckitCoreClass *klass)
+AbckitCoreModule *ClassGetModule(AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
     return DEFAULT_CORE_MODULE;
 }
 
-inline AbckitString *ClassGetName(AbckitCoreClass *klass)
+AbckitString *ClassGetName(AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
     return DEFAULT_STRING;
 }
 
-inline AbckitCoreFunction *ClassGetParentFunction(AbckitCoreClass *klass)
+AbckitCoreFunction *ClassGetParentFunction(AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
     return DEFAULT_CORE_FUNCTION;
 }
 
-inline AbckitCoreNamespace *ClassGetParentNamespace(AbckitCoreClass *klass)
+AbckitCoreNamespace *ClassGetParentNamespace(AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
     return DEFAULT_CORE_NAMESPACE;
 }
 
-inline bool ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
-                                  bool (*cb)(AbckitCoreFunction *function, void *data))
+bool ClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
     return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
-                                      bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
@@ -317,29 +312,29 @@ inline bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
 // AnnotationInterface
 // ========================================
 
-inline AbckitFile *AnnotationInterfaceGetFile(AbckitCoreAnnotationInterface *anno)
+AbckitFile *AnnotationInterfaceGetFile(AbckitCoreAnnotationInterface *anno)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION_INTERFACE);
     return DEFAULT_FILE;
 }
 
-inline AbckitCoreModule *AnnotationInterfaceGetModule(AbckitCoreAnnotationInterface *anno)
+AbckitCoreModule *AnnotationInterfaceGetModule(AbckitCoreAnnotationInterface *anno)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION_INTERFACE);
     return DEFAULT_CORE_MODULE;
 }
 
-inline AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterface *ai)
+AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterface *ai)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(ai == DEFAULT_CORE_ANNOTATION_INTERFACE);
     return DEFAULT_STRING;
 }
 
-inline bool AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
-                                               bool (*cb)(AbckitCoreAnnotationInterfaceField *fld, void *data))
+bool AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
+                                        bool (*cb)(AbckitCoreAnnotationInterfaceField *fld, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(ai == DEFAULT_CORE_ANNOTATION_INTERFACE);
@@ -350,35 +345,35 @@ inline bool AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai
 // AnnotationInterfaceField
 // ========================================
 
-inline AbckitFile *AnnotationInterfaceFieldGetFile(AbckitCoreAnnotationInterfaceField *fld)
+AbckitFile *AnnotationInterfaceFieldGetFile(AbckitCoreAnnotationInterfaceField *fld)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(fld == DEFAULT_CORE_ANNOTATION_INTERFACE_FIELD);
     return DEFAULT_FILE;
 }
 
-inline AbckitCoreAnnotationInterface *AnnotationInterfaceFieldGetInterface(AbckitCoreAnnotationInterfaceField *fld)
+AbckitCoreAnnotationInterface *AnnotationInterfaceFieldGetInterface(AbckitCoreAnnotationInterfaceField *fld)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(fld == DEFAULT_CORE_ANNOTATION_INTERFACE_FIELD);
     return DEFAULT_CORE_ANNOTATION_INTERFACE;
 }
 
-inline AbckitString *AnnotationInterfaceFieldGetName(AbckitCoreAnnotationInterfaceField *fld)
+AbckitString *AnnotationInterfaceFieldGetName(AbckitCoreAnnotationInterfaceField *fld)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(fld == DEFAULT_CORE_ANNOTATION_INTERFACE_FIELD);
     return DEFAULT_STRING;
 }
 
-inline AbckitType *AnnotationInterfaceFieldGetType(AbckitCoreAnnotationInterfaceField *fld)
+AbckitType *AnnotationInterfaceFieldGetType(AbckitCoreAnnotationInterfaceField *fld)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(fld == DEFAULT_CORE_ANNOTATION_INTERFACE_FIELD);
     return DEFAULT_TYPE;
 }
 
-inline AbckitValue *AnnotationInterfaceFieldGetDefaultValue(AbckitCoreAnnotationInterfaceField *fld)
+AbckitValue *AnnotationInterfaceFieldGetDefaultValue(AbckitCoreAnnotationInterfaceField *fld)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(fld == DEFAULT_CORE_ANNOTATION_INTERFACE_FIELD);
@@ -389,94 +384,94 @@ inline AbckitValue *AnnotationInterfaceFieldGetDefaultValue(AbckitCoreAnnotation
 // Function
 // ========================================
 
-inline AbckitFile *FunctionGetFile(AbckitCoreFunction *function)
+AbckitFile *FunctionGetFile(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_FILE;
 }
 
-inline AbckitCoreModule *FunctionGetModule(AbckitCoreFunction *function)
+AbckitCoreModule *FunctionGetModule(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_CORE_MODULE;
 }
 
-inline AbckitString *FunctionGetName(AbckitCoreFunction *function)
+AbckitString *FunctionGetName(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_STRING;
 }
 
-inline AbckitCoreFunction *FunctionGetParentFunction(AbckitCoreFunction *function)
+AbckitCoreFunction *FunctionGetParentFunction(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_CORE_FUNCTION;
 }
 
-inline AbckitCoreClass *FunctionGetParentClass(AbckitCoreFunction *function)
+AbckitCoreClass *FunctionGetParentClass(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_CORE_CLASS;
 }
 
-inline AbckitCoreNamespace *FunctionGetParentNamespace(AbckitCoreFunction *function)
+AbckitCoreNamespace *FunctionGetParentNamespace(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_CORE_NAMESPACE;
 }
 
-inline bool FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
-                                             bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
+bool FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
+                                      bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline bool FunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
-                                           bool (*cb)(AbckitCoreClass *nestedClass, void *data))
+bool FunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+                                    bool (*cb)(AbckitCoreClass *nestedClass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return cb(DEFAULT_CORE_CLASS, data);
 }
 
-inline bool FunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
-                                         bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+bool FunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
+                                  bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return cb(DEFAULT_CORE_ANNOTATION, data);
 }
 
-inline AbckitGraph *CreateGraphFromFunction(AbckitCoreFunction *function)
+AbckitGraph *CreateGraphFromFunction(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_GRAPH;
 }
 
-inline bool FunctionIsStatic(AbckitCoreFunction *function)
+bool FunctionIsStatic(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_BOOL;
 }
 
-inline bool FunctionIsCtor(AbckitCoreFunction *function)
+bool FunctionIsCtor(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
     return DEFAULT_BOOL;
 }
 
-inline bool FunctionIsAnonymous(AbckitCoreFunction *function)
+bool FunctionIsAnonymous(AbckitCoreFunction *function)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
@@ -487,21 +482,21 @@ inline bool FunctionIsAnonymous(AbckitCoreFunction *function)
 // Annotation
 // ========================================
 
-inline AbckitFile *AnnotationGetFile(AbckitCoreAnnotation *anno)
+AbckitFile *AnnotationGetFile(AbckitCoreAnnotation *anno)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
     return DEFAULT_FILE;
 }
-inline AbckitCoreAnnotationInterface *AnnotationGetInterface(AbckitCoreAnnotation *anno)
+AbckitCoreAnnotationInterface *AnnotationGetInterface(AbckitCoreAnnotation *anno)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
     return DEFAULT_CORE_ANNOTATION_INTERFACE;
 }
 
-inline bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
-                                        bool (*cb)(AbckitCoreAnnotationElement *ae, void *data))
+bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
+                                 bool (*cb)(AbckitCoreAnnotationElement *ae, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
@@ -512,28 +507,28 @@ inline bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
 // AnnotationElement
 // ========================================
 
-inline AbckitFile *AnnotationElementGetFile(AbckitCoreAnnotationElement *ae)
+AbckitFile *AnnotationElementGetFile(AbckitCoreAnnotationElement *ae)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(ae == DEFAULT_CORE_ANNOTATION_ELEMENT);
     return DEFAULT_FILE;
 }
 
-inline AbckitCoreAnnotation *AnnotationElementGetAnnotation(AbckitCoreAnnotationElement *ae)
+AbckitCoreAnnotation *AnnotationElementGetAnnotation(AbckitCoreAnnotationElement *ae)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(ae == DEFAULT_CORE_ANNOTATION_ELEMENT);
     return DEFAULT_CORE_ANNOTATION;
 }
 
-inline AbckitString *AnnotationElementGetName(AbckitCoreAnnotationElement *ae)
+AbckitString *AnnotationElementGetName(AbckitCoreAnnotationElement *ae)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(ae == DEFAULT_CORE_ANNOTATION_ELEMENT);
     return DEFAULT_STRING;
 }
 
-inline AbckitValue *AnnotationElementGetValue(AbckitCoreAnnotationElement *ae)
+AbckitValue *AnnotationElementGetValue(AbckitCoreAnnotationElement *ae)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(ae == DEFAULT_CORE_ANNOTATION_ELEMENT);
@@ -544,14 +539,14 @@ inline AbckitValue *AnnotationElementGetValue(AbckitCoreAnnotationElement *ae)
 // Type
 // ========================================
 
-inline AbckitTypeId TypeGetTypeId(AbckitType *type)
+AbckitTypeId TypeGetTypeId(AbckitType *type)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(type == DEFAULT_TYPE);
     return DEFAULT_TYPE_ID;
 }
 
-inline AbckitCoreClass *TypeGetReferenceClass(AbckitType *type)
+AbckitCoreClass *TypeGetReferenceClass(AbckitType *type)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(type == DEFAULT_TYPE);
@@ -562,42 +557,42 @@ inline AbckitCoreClass *TypeGetReferenceClass(AbckitType *type)
 // Value
 // ========================================
 
-inline AbckitFile *ValueGetFile(AbckitValue *value)
+AbckitFile *ValueGetFile(AbckitValue *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_VALUE);
     return DEFAULT_FILE;
 }
 
-inline AbckitType *ValueGetType(AbckitValue *value)
+AbckitType *ValueGetType(AbckitValue *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_VALUE);
     return DEFAULT_TYPE;
 }
 
-inline bool ValueGetU1(AbckitValue *value)
+bool ValueGetU1(AbckitValue *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_VALUE);
     return DEFAULT_BOOL;
 }
 
-inline double ValueGetDouble(AbckitValue *value)
+double ValueGetDouble(AbckitValue *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_VALUE);
     return DEFAULT_DOUBLE;
 }
 
-inline AbckitString *ValueGetString(AbckitValue *value)
+AbckitString *ValueGetString(AbckitValue *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_VALUE);
     return DEFAULT_STRING;
 }
 
-inline AbckitLiteralArray *ArrayValueGetLiteralArray(AbckitValue *value)
+AbckitLiteralArray *ArrayValueGetLiteralArray(AbckitValue *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_VALUE);
@@ -608,7 +603,7 @@ inline AbckitLiteralArray *ArrayValueGetLiteralArray(AbckitValue *value)
 // String
 // ========================================
 
-inline const char *AbckitStringToString(AbckitString *value)
+const char *AbckitStringToString(AbckitString *value)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(value == DEFAULT_STRING);
@@ -619,8 +614,8 @@ inline const char *AbckitStringToString(AbckitString *value)
 // LiteralArray
 // ========================================
 
-inline bool LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *data,
-                                          bool (*cb)(AbckitFile *file, AbckitLiteral *v, void *data))
+bool LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *data,
+                                   bool (*cb)(AbckitFile *file, AbckitLiteral *v, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(litArr == DEFAULT_LITERAL_ARRAY);
@@ -631,91 +626,91 @@ inline bool LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *data
 // Literal
 // ========================================
 
-inline AbckitFile *LiteralGetFile(AbckitLiteral *lit)
+AbckitFile *LiteralGetFile(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_FILE;
 }
 
-inline AbckitLiteralTag LiteralGetTag(AbckitLiteral *lit)
+AbckitLiteralTag LiteralGetTag(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_LITERAL_TAG;
 }
 
-inline bool LiteralGetBool(AbckitLiteral *lit)
+bool LiteralGetBool(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_BOOL;
 }
 
-inline uint8_t LiteralGetU8(AbckitLiteral *lit)
+uint8_t LiteralGetU8(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_U8;
 }
 
-inline uint16_t LiteralGetU16(AbckitLiteral *lit)
+uint16_t LiteralGetU16(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_U16;
 }
 
-inline uint16_t LiteralGetMethodAffiliate(AbckitLiteral *lit)
+uint16_t LiteralGetMethodAffiliate(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_U16;
 }
 
-inline uint32_t LiteralGetU32(AbckitLiteral *lit)
+uint32_t LiteralGetU32(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_U32;
 }
 
-inline uint64_t LiteralGetU64(AbckitLiteral *lit)
+uint64_t LiteralGetU64(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_U64;
 }
 
-inline float LiteralGetFloat(AbckitLiteral *lit)
+float LiteralGetFloat(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_FLOAT;
 }
 
-inline double LiteralGetDouble(AbckitLiteral *lit)
+double LiteralGetDouble(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_DOUBLE;
 }
 
-inline AbckitLiteralArray *LiteralGetLiteralArray(AbckitLiteral *lit)
+AbckitLiteralArray *LiteralGetLiteralArray(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_LITERAL_ARRAY;
 }
 
-inline AbckitString *LiteralGetString(AbckitLiteral *lit)
+AbckitString *LiteralGetString(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
     return DEFAULT_STRING;
 }
 
-inline AbckitString *LiteralGetMethod(AbckitLiteral *lit)
+AbckitString *LiteralGetMethod(AbckitLiteral *lit)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(lit == DEFAULT_LITERAL);
@@ -889,11 +884,11 @@ static AbckitInspectApi g_inspectApiImpl = {
 
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace libabckit::mock
+}  // namespace libabckit::mock::metadata_inspect
 
 AbckitInspectApi const *AbckitGetMockInspectApiImpl([[maybe_unused]] AbckitApiVersion version)
 {
-    return &libabckit::mock::g_inspectApiImpl;
+    return &libabckit::mock::metadata_inspect::g_inspectApiImpl;
 }
 
 #endif  // ABCKIT_INSPECT_IMPL_MOCK

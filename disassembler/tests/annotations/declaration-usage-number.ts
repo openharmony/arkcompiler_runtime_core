@@ -17,8 +17,8 @@
     a: number;
 }
 
-@#Anno({a : 42})
+@__$$ETS_ANNOTATION$$__Anno({a : 42})
 class A {
-    @#Anno({a : -314})
+    @__$$ETS_ANNOTATION$$__Anno({a : -314})
     foo() {}
 }

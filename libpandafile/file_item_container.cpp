@@ -14,9 +14,6 @@
  */
 
 #include "file_item_container.h"
-#include "macros.h"
-#include "file_format_version.h"
-#include "pgo.h"
 
 namespace panda::panda_file {
 

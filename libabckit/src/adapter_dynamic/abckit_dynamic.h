@@ -21,8 +21,8 @@
 
 namespace libabckit {
 
-AbckitFile *OpenAbcDynamic(const char *path);
-void WriteAbcDynamic(AbckitFile *file, const char *path);
+AbckitFile *OpenAbcDynamic(const char *path, size_t len);
+void WriteAbcDynamic(AbckitFile *file, const char *path, size_t len);
 void DestroyGraphDynamic(AbckitGraph *graph);
 void CloseFileDynamic(AbckitFile *file);
 

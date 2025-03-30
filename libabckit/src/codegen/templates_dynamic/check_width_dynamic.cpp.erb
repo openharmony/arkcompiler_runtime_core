@@ -19,17 +19,17 @@ void RegEncoderDynamic::VisitIf([[maybe_unused]] GraphVisitor* v, Inst* instBase
     [[maybe_unused]] auto re = static_cast<RegEncoderDynamic*>(v);
     [[maybe_unused]] auto inst = instBase->CastToIf();
     switch (inst->GetCc()) {
-    case compiler::CC_EQ:
-    case compiler::CC_NE:
-    case compiler::CC_LT:
-    case compiler::CC_LE:
-    case compiler::CC_GT:
-    case compiler::CC_GE: {
+    case ark::compiler::CC_EQ:
+    case ark::compiler::CC_NE:
+    case ark::compiler::CC_LT:
+    case ark::compiler::CC_LE:
+    case ark::compiler::CC_GT:
+    case ark::compiler::CC_GE: {
         re->Check8Width(inst);
         break;
     }
     default:
-        std::cerr << "CheckWidth for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+        std::cerr << "CheckWidth for " << ark::compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
         re->success_ = false;
     }
 }
@@ -37,16 +37,16 @@ void RegEncoderDynamic::VisitIfImm([[maybe_unused]] GraphVisitor* v, Inst* instB
     [[maybe_unused]] auto re = static_cast<RegEncoderDynamic*>(v);
     [[maybe_unused]] auto inst = instBase->CastToIfImm();
     switch (inst->GetCc()) {
-    case compiler::CC_EQ:
-    case compiler::CC_NE:
-    case compiler::CC_LT:
-    case compiler::CC_LE:
-    case compiler::CC_GT:
-    case compiler::CC_GE: {
+    case ark::compiler::CC_EQ:
+    case ark::compiler::CC_NE:
+    case ark::compiler::CC_LT:
+    case ark::compiler::CC_LE:
+    case ark::compiler::CC_GT:
+    case ark::compiler::CC_GE: {
         break;
     }
     default:
-        std::cerr << "CheckWidth for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+        std::cerr << "CheckWidth for " << ark::compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
         re->success_ = false;
     }
 }

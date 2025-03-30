@@ -19,20 +19,19 @@ import multiprocessing.pool
 import sys
 from abc import abstractmethod
 from typing import Tuple, List
-import logging
 
 import stress_common
 
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
-
 
 class Test:
+
     def __init__(self, source: str, abc: str):
         self.source = source
         self.abc = abc
 
 
 class Result:
+
     def __init__(self, source, result, stdout=None, stderr=None):
         self.source = source
         self.result = result
@@ -43,7 +42,8 @@ class Result:
 class StressTest:
 
     def run(self, tests: List[Test]):
-        logging.debug('Running ABCKit...')
+        logger = stress_common.create_logger()
+        logger.debug('Running ABCKit...')
         result_all = {}
         counter = 0
 
@@ -52,7 +52,6 @@ class StressTest:
                 result_all[result.source] = {}
                 result_all[result.source]['error'] = result.result
                 counter += 1
-                sys.stdout.write(f'{counter}/{len(tests)}    \r')  # CC-OFF(G.LOG.02) progress print
 
         return result_all
 
@@ -69,19 +68,21 @@ class StressTest:
         pass
 
     def build(self) -> List[Test]:
+        logger = stress_common.create_logger()
         tests: List[str] = self.collect()
 
-        logging.debug('Running compiler...')
+        logger.debug('Running compiler...')
         compiled_tests: List[Test] = []
         counter = 0
         with multiprocessing.pool.ThreadPool(stress_common.NPROC) as pool:
-            for js_path, abc_path, retcode in pool.imap(self.compile_single, tests, chunksize=20):
+            for js_path, abc_path, retcode in pool.imap(self.compile_single,
+                                                        tests,
+                                                        chunksize=20):
                 if retcode == 0:
                     compiled_tests.append(Test(js_path, abc_path))
                 counter += 1
-                sys.stdout.write(f'{counter}/{len(tests)}    \r')  # CC-OFF(G.LOG.02) progress print
 
-        logging.debug('Tests successfully compiled: %s', len(compiled_tests))
+        logger.debug('Tests successfully compiled: %s', len(compiled_tests))
         return compiled_tests
 
     @abstractmethod
@@ -90,4 +91,8 @@ class StressTest:
 
     @abstractmethod
     def get_compiler_path(self, build_dir) -> str:
+        pass
+
+    @abstractmethod
+    def get_fail_list_path(self, build_dir) -> str:
         pass

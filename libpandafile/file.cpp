@@ -13,32 +13,12 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-#include <cerrno>
-#include <cstdio>
-#include <cstring>
-#include <map>
-#include <memory>
-#include <string>
-#include <variant>
-
 #include "data_protect.h"
-#include "file_format_version.h"
 #include "file-inl.h"
 #include "file_items.h"
-#include "mem/mem.h"
-#include "os/file.h"
-#include "os/filesystem.h"
-#include "os/mem.h"
 #include "panda_cache.h"
-#include "securec.h"
 #include "trace/trace.h"
-#include "utils/hash.h"
-#include "utils/logger.h"
-#include "utils/utf.h"
-#include "utils/span.h"
 #include "zip_archive.h"
-#include "zlib.h"
 
 namespace panda::panda_file {
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)

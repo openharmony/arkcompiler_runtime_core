@@ -15,9 +15,6 @@
 
 #include "pool_map.h"
 
-#include "mem/mem.h"
-#include "mem/space.h"
-
 namespace panda {
 
 void PoolMap::AddPoolToMap(const void *pool_addr, size_t pool_size, SpaceType space_type, AllocatorType allocator_type,

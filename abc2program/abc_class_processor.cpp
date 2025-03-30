@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include "abc_class_processor.h"
 #include "abc_field_processor.h"
 #include "abc_literal_array_processor.h"
 #include "abc_method_processor.h"
-#include "mangling.h"
 
 namespace panda::abc2program {
 
 AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container)
-    : AbcFileEntityProcessor(entity_id, entity_container), record_(pandasm::Record("", LANG_ECMA))
+    : AbcFileEntityProcessor(entity_id, entity_container), record_(pandasm::Record("", DEFUALT_SOURCE_LANG))
 {
     if (!file_->IsExternal(entity_id_)) {
         class_data_accessor_ = std::make_unique<panda_file::ClassDataAccessor>(*file_, entity_id_);
@@ -32,7 +30,6 @@ AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2P
 
 void AbcClassProcessor::FillProgramData()
 {
-    program_->lang = LANG_ECMA;
     FillRecord();
     FillFunctions();
     FillLiteralArrayTable();
@@ -51,6 +48,9 @@ void AbcClassProcessor::FillRecord()
     }
     if (!file_->IsExternal(entity_id_)) {
         record_.metadata->SetAccessFlags(class_data_accessor_->GetAccessFlags());
+        record_.language = class_data_accessor_->GetSourceLang().value_or(DEFUALT_SOURCE_LANG);
+    } else {
+        record_.language = DEFUALT_SOURCE_LANG;
     }
     ASSERT(program_->record_table.count(record_.name) == 0);
     FillRecordData();

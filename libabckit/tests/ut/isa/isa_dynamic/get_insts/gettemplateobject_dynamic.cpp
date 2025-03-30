@@ -35,22 +35,22 @@ auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 auto g_icreateGettemplateobject1Lambda = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-    auto *worldStr = g_implM->createString(file, "world");
+    auto *worldStr = g_implM->createString(file, "world", strlen("world"));
     auto *loadStringWorld = g_dynG->iCreateLoadString(graph, worldStr);
-    auto *stringPrint = g_implM->createString(file, "print");
+    auto *stringPrint = g_implM->createString(file, "print", strlen("print"));
     auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
     auto *createemptyarray1 = g_dynG->iCreateCreateemptyarray(graph);
     auto *createemptyarray2 = g_dynG->iCreateCreateemptyarray(graph);
-    auto *helloStr = g_implM->createString(file, "Hello ");
+    auto *helloStr = g_implM->createString(file, "Hello ", strlen("Hello "));
     auto *loadStringHello = g_dynG->iCreateLoadString(graph, helloStr);
-    auto *const0 = g_implG->gCreateConstantU64(graph, 0);
+    auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0);
     auto *definefieldbyvalue1 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadStringHello, const0, createemptyarray1);
     auto *definefieldbyvalue2 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadStringHello, const0, createemptyarray2);
-    auto *str2 = g_implM->createString(file, "!");
+    auto *str2 = g_implM->createString(file, "!", strlen("!"));
     auto *loadString2 = g_dynG->iCreateLoadString(graph, str2);
-    auto *const1 = g_implG->gCreateConstantU64(graph, 1);
+    auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
     auto *definefieldbyvalue3 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadString2, const1, createemptyarray1);
     auto *definefieldbyvalue4 =
@@ -66,30 +66,30 @@ auto g_icreateGettemplateobject1Lambda = [](AbckitFile *file, AbckitCoreFunction
     auto *callargs2 = g_dynG->iCreateCallargs2(graph, deffunc, gettemplateobject, loadStringWorld);
     auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, callargs2);
 
-    auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-    g_implG->iInsertBefore(loadStringWorld, ldundef);
-    g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-    g_implG->iInsertBefore(createemptyarray1, ldundef);
-    g_implG->iInsertBefore(createemptyarray2, ldundef);
-    g_implG->iInsertBefore(loadStringHello, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue1, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue2, ldundef);
-    g_implG->iInsertBefore(loadString2, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue3, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue4, ldundef);
-    g_implG->iInsertBefore(createemptyarray3, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue5, ldundef);
-    g_implG->iInsertBefore(definefieldbyvalue6, ldundef);
-    g_implG->iInsertBefore(gettemplateobject, ldundef);
-    g_implG->iInsertBefore(callargs2, ldundef);
-    g_implG->iInsertBefore(callarg1, ldundef);
+    auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+    g_implG->iInsertBefore(loadStringWorld, returnundef);
+    g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+    g_implG->iInsertBefore(createemptyarray1, returnundef);
+    g_implG->iInsertBefore(createemptyarray2, returnundef);
+    g_implG->iInsertBefore(loadStringHello, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue1, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue2, returnundef);
+    g_implG->iInsertBefore(loadString2, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue3, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue4, returnundef);
+    g_implG->iInsertBefore(createemptyarray3, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue5, returnundef);
+    g_implG->iInsertBefore(definefieldbyvalue6, returnundef);
+    g_implG->iInsertBefore(gettemplateobject, returnundef);
+    g_implG->iInsertBefore(callargs2, returnundef);
+    g_implG->iInsertBefore(callarg1, returnundef);
 };
 
 }  // namespace
 
 class LibAbcKitCreateDynGettemplateobject : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGettemplateobject, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGettemplateobject, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynGettemplateobject, IcreateGettemplateobject_1)
 {
     auto output = helpers::ExecuteDynamicAbc(

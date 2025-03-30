@@ -35,7 +35,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynDefineField : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
@@ -46,11 +46,11 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_1)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc", "instance_initializer",
         [&](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
-            auto *name = g_implM->createString(file, "b");
+            auto *name = g_implM->createString(file, "b", strlen("b"));
             ASSERT_NE(name, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            auto *constant = g_implG->gCreateConstantI32(graph, 4);
+            auto *constant = g_implG->gFindOrCreateConstantI32(graph, 4);
             ASSERT_NE(constant, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -76,7 +76,7 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_1)
     EXPECT_TRUE(helpers::Match(output, "2\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
@@ -87,11 +87,11 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_2)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc", "instance_initializer",
         [&](AbckitFile *file, AbckitCoreFunction *, AbckitGraph *graph) {
-            auto *name = g_implM->createString(file, "b");
+            auto *name = g_implM->createString(file, "b", strlen("b"));
             ASSERT_NE(name, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            auto *str = g_implM->createString(file, "Hello");
+            auto *str = g_implM->createString(file, "Hello", strlen("Hello"));
             ASSERT_NE(str, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -123,7 +123,8 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_2)
     EXPECT_TRUE(helpers::Match(output, "2\nHello\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
@@ -134,11 +135,11 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_1)
                              ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc",
                              "instance_initializer",
                              [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                                 auto *name = g_implM->createString(file, "b");
+                                 auto *name = g_implM->createString(file, "b", strlen("b"));
                                  ASSERT_NE(name, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-                                 auto *constant = g_implG->gCreateConstantI32(graph, 4);
+                                 auto *constant = g_implG->gFindOrCreateConstantI32(graph, 4);
                                  ASSERT_NE(constant, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -163,7 +164,8 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_1)
     EXPECT_TRUE(helpers::Match(output, "2\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.abc",
@@ -174,11 +176,11 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_2)
                              ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldbyname_dynamic_modified.abc",
                              "instance_initializer",
                              [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-                                 auto *name = g_implM->createString(file, "b");
+                                 auto *name = g_implM->createString(file, "b", strlen("b"));
                                  ASSERT_NE(name, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-                                 auto *str = g_implM->createString(file, "World");
+                                 auto *str = g_implM->createString(file, "World", strlen("World"));
                                  ASSERT_NE(str, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
