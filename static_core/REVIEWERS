@@ -83,6 +83,7 @@ static_core/tests/panda/                                 @igelhaus
 static_core/tests/test-lists/                            ^amate ^sergeyandreev @kuchkovairina
 static_core/tests/tests-u-runner/                        ^amate @sergeyandreev @anton-sysoev
 static_core/tests/verifier-tests/                        @igelhaus
+static_core/tests/vm-benchmarks/                         @mr_aramis @giteeman46 ^Prof1983
 static_core/libpandabase/tests/genmc/                    @udav
 static_core/libpandabase/tests/ringbuf/                  @udav
 static_core/libpandabase/tests/taskmanager/              @udav @molotkovmikhail
