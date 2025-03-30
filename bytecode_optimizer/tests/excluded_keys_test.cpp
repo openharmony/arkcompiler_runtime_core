@@ -86,14 +86,17 @@ HWTEST_F(ExcludedKeysTest, excluded_keys_001, testing::ext::TestSize.Level1)
     auto it = program.function_table.find(fun_name);
     EXPECT_NE(it, program.function_table.end());
     auto &func = it->second;
+    for (auto &ins : func.ins) {
+        std::cerr << ins->ToString() << std::endl;
+    }
 
     EmitAndOptimize("ExcludedKeysTest1.abc", program);
 
     // Collect valid instructions
-    std::vector<panda::pandasm::Ins> insns;
+    std::vector<const panda::pandasm::Ins *> insns;
     for (const auto &in : func.ins) {
-        if (in.opcode != panda::pandasm::Opcode::INVALID) {
-            insns.emplace_back(in);
+        if (in->opcode != panda::pandasm::Opcode::INVALID) {
+            insns.emplace_back(in.get());
         }
     }
 
@@ -137,16 +140,16 @@ HWTEST_F(ExcludedKeysTest, excluded_keys_001, testing::ext::TestSize.Level1)
     for (size_t i = 0; i < insns.size(); i++) {
         const auto &opt_ins = insns[i];
         const auto &expected_ins = expected_func.ins[i];
-        EXPECT_EQ(opt_ins.opcode, expected_ins.opcode);
+        EXPECT_EQ(opt_ins->opcode, expected_ins->opcode);
 
-        EXPECT_EQ(opt_ins.imms.size(), expected_ins.imms.size());
-        for (size_t k = 0; k < opt_ins.imms.size(); k++) {
-            EXPECT_EQ(opt_ins.imms[k], expected_ins.imms[k]);
+        EXPECT_EQ(opt_ins->Imms().size(), expected_ins->Imms().size());
+        for (size_t k = 0; k < opt_ins->Imms().size(); k++) {
+            EXPECT_EQ(opt_ins->Imms()[k], expected_ins->Imms()[k]);
         }
 
-        EXPECT_EQ(opt_ins.ids.size(), expected_ins.ids.size());
-        for (size_t k = 0; k < opt_ins.ids.size(); k++) {
-            EXPECT_EQ(opt_ins.ids[k], expected_ins.ids[k]);
+        EXPECT_EQ(opt_ins->Ids().size(), expected_ins->Ids().size());
+        for (size_t k = 0; k < opt_ins->Ids().size(); k++) {
+            EXPECT_EQ(opt_ins->Ids()[k], expected_ins->Ids()[k]);
         }
     }
 }

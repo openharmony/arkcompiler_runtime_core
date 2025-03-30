@@ -413,12 +413,12 @@ bool GraphAnalyzer::IsComponentClass(const InstructionInfo &inIns)
     InstructionInfo out;
     FillInstInfo(inIns, tryldglobalbyname, out);
 
-    const std::string baseClassName = out.ins_->ids[0];
+    const std::string baseClassName = out.ins_->GetId(0);
     if (baseClassName != UI_COMPONENT_BASE_CLASS_VIEW_PU && baseClassName != UI_COMPONENT_BASE_CLASS_VIEW_V2) {
         return false;
     }
 
-    LOG(INFO, PANDAGUARD) << TAG << "found UI component:" << inIns.ins_->ids[0];
+    LOG(INFO, PANDAGUARD) << TAG << "found UI component:" << inIns.ins_->GetId(0);
 
     return true;
 }
@@ -481,7 +481,7 @@ void GraphAnalyzer::GetNewObjRangeInfo(const InstructionInfo &inIns, std::string
     }
     InstructionInfo tryInstInfo;
     FillInstInfo(inIns, tryInst, tryInstInfo);
-    name = tryInstInfo.ins_->ids[INDEX_0];
+    name = tryInstInfo.ins_->GetId(INDEX_0);
     if (name.empty()) {
         return;
     }
@@ -515,7 +515,7 @@ std::string GraphAnalyzer::GetCallName(const InstructionInfo &inIns)
 
     InstructionInfo nameIns;
     FillInstInfo(inIns, callNameInst, nameIns);
-    return nameIns.ins_->ids[INDEX_0];
+    return nameIns.ins_->GetId(INDEX_0);
 }
 
 void GraphAnalyzer::GetCallLdaStrParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out)
@@ -610,8 +610,8 @@ void GraphAnalyzer::GetIsInInfo(const InstructionInfo &inIns, std::vector<Instru
         return;
     }
 
-    if ((ldStrInstInfo.ins_->ids[INDEX_0] == ldInstInfo.ins_->ids[INDEX_0]) &&
-        (ldInstInfo.ins_->ids[INDEX_0] == stInstInfo.ins_->ids[INDEX_0])) {
+    if ((ldStrInstInfo.ins_->GetId(INDEX_0) == ldInstInfo.ins_->GetId(INDEX_0)) &&
+        (ldInstInfo.ins_->GetId(INDEX_0) == stInstInfo.ins_->GetId(INDEX_0))) {
         out.emplace_back(ldStrInstInfo);
         out.emplace_back(ldInstInfo);
         out.emplace_back(stInstInfo);

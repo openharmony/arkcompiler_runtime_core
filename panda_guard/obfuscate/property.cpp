@@ -66,7 +66,7 @@ void panda::guard::Property::Update()
                              ErrorCode::GENERIC_ERROR, "get bad insInfo for ins" << this->name_);
 
     this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->name_);
-    this->nameInfo_.ins_->ids[0] = this->obfName_;
+    this->nameInfo_.ins_->GetId(0) = this->obfName_;
     this->program_->prog_->strings.emplace(this->obfName_);
 
     for (auto &defineIns : this->defineInsList_) {
@@ -76,7 +76,7 @@ void panda::guard::Property::Update()
         }
 
         if (!IsGetLdaStrPropertyIns(defineIns)) {
-            defineIns.ins_->ids[0] = this->obfName_;
+            defineIns.ins_->GetId(0) = this->obfName_;
         }
     }
 }

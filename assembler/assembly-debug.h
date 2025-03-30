@@ -23,8 +23,6 @@ namespace panda::pandasm::debuginfo {
 struct Ins {
     size_t line_number = 0;
     uint32_t column_number = 0;
-    size_t bound_left = 0;
-    size_t bound_right = 0;
 
     void SetLineNumber(size_t ln)
     {
@@ -37,8 +35,8 @@ struct Ins {
     }
 
     Ins() = default;
-    Ins(size_t l_n, std::string &f_c, size_t b_l, size_t b_r)
-        : line_number(l_n), bound_left(b_l), bound_right(b_r)
+    Ins(size_t l_n)
+        : line_number(l_n)
     {
     }
 };

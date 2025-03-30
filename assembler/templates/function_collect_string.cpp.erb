@@ -21,7 +21,7 @@ namespace panda::pandasm {
 std::set<std::string> panda::pandasm::Function::CollectStringsFromFunctionInsns() const {
     std::set<std::string> function_strings {};
     for (const auto &panda_insn : this->ins) {
-        switch (panda_insn.opcode) {
+        switch (panda_insn->opcode) {
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
 % insn = group[index_of_max(group.map(&:format).map(&:size))]
 %       if (insn.properties.include?('string_id') || insn.properties.include?('method_id'))
@@ -33,12 +33,12 @@ std::set<std::string> panda::pandasm::Function::CollectStringsFromFunctionInsns(
 %                       id_properties = insn.properties.slice(property_idx_start, insn.properties.length - property_idx_start)
 %                       id_properties.each_with_index do |prop, prop_idx|
 %                           if prop == 'string_id'
-                function_strings.insert(panda_insn.ids[<%= num_id %>]);
+                function_strings.insert(panda_insn->Ids()[<%= num_id %>]);
 %                               property_idx_start += prop_idx + 1
 %                               num_id += 1
 %                               break
 %                           elsif prop == 'method_id'
-                function_strings.insert(panda_insn.ids[<%= num_id %>]);
+                function_strings.insert(panda_insn->Ids()[<%= num_id %>]);
 %                               property_idx_start += prop_idx + 1
 %                               num_id += 1
 %                               break

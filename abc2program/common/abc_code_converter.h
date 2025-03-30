@@ -27,7 +27,7 @@ class AbcCodeConverter {
 public:
     explicit AbcCodeConverter(Abc2ProgramEntityContainer &entity_container)
         : entity_container_(entity_container), file_(entity_container_.GetAbcFile()) {}
-    pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
+    pandasm::Ins *BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode opcode) const;
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;

@@ -22,8 +22,8 @@ std::string panda::pandasm::Ins::ToString(std::string endline, bool print_args /
                                           size_t first_arg_idx /* = 0*/) const {
     std::string full_operation = "";
     std::string reg_case = "";
-    if (this->set_label) {
-        full_operation += this->label +": ";
+    if (this->IsLabel()) {
+        full_operation += static_cast<const LabelIns *>(this)->Label() +": ";
     }
     switch(this->opcode) {
 

@@ -46,8 +46,8 @@ HWTEST_F(ParserTest, parser_test_001, TestSize.Level1)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 1) << "1 expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[1], 2) << "2 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetReg(0), 1) << "1 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetReg(1), 2) << "2 expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -68,9 +68,10 @@ HWTEST_F(ParserTest, parser_test_002, TestSize.Level1)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].label, "label") << "label expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].set_label, true) << "true expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::INVALID) << "NONE expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->Label(), "label") <<
+        "label expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->IsLabel(), true) << "true expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->opcode, Opcode::INVALID) << "NONE expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -208,10 +209,10 @@ HWTEST_F(ParserTest, parser_test_009, TestSize.Level1)
     auto it = program.function_table.find(fun_name);
     EXPECT_NE(it, program.function_table.end());
     auto &func = it->second;
-    EXPECT_NE(func.ins[0].opcode, Opcode::NOP);
-    EXPECT_EQ(func.ins[3].regs[0], 4U);
-    EXPECT_EQ(func.ins[1].regs[0], 1U);
-    EXPECT_EQ(func.ins[5].imms[0], Ins::IType(int64_t(0x1)));
+    EXPECT_NE(func.ins[0]->opcode, Opcode::NOP);
+    EXPECT_EQ(func.ins[3]->GetReg(0), 4U);
+    EXPECT_EQ(func.ins[1]->GetReg(0), 1U);
+    EXPECT_EQ(func.ins[5]->GetImm(0), IType(int64_t(0x1)));
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -251,9 +252,9 @@ HWTEST_F(ParserTest, parser_test_010, TestSize.Level1)
     const std::string func_name = "func:(any,any,any)";
     auto it = item.Value().function_table.find(func_name);
     EXPECT_NE(it, item.Value().function_table.end());
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3].ids[0], "foo") << "nain expected";
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[0].regs[0], 0) << "1 expected";
-    EXPECT_EQ(item.Value().function_table.at(func_name).ins[0].regs[1], 5) << "2 expected";
+    EXPECT_EQ(item.Value().function_table.at(func_name).ins[3]->GetId(0), "foo") << "nain expected";
+    EXPECT_EQ(item.Value().function_table.at(func_name).ins[0]->GetReg(0), 0) << "1 expected";
+    EXPECT_EQ(item.Value().function_table.at(func_name).ins[0]->GetReg(1), 5) << "2 expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -306,13 +307,14 @@ HWTEST_F(ParserTest, parser_test_013, TestSize.Level1)
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
-    v.push_back(l.TokenizeString("l123: jmp l123}").first);
+    v.push_back(l.TokenizeString("l123:").first);
+    v.push_back(l.TokenizeString("jmp l123}").first);
     auto item = p.Parse(v);
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::JMP) << "ID expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].ids[0], "l123") << "l123 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->opcode, Opcode::JMP) << "ID expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->GetId(0), "l123") << "l123 expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE";
 }
 
@@ -386,7 +388,7 @@ HWTEST_F(ParserTest, parser_test_017, TestSize.Level1)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::RETURN) << "NONE expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->opcode, Opcode::RETURN) << "NONE expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -559,8 +561,8 @@ HWTEST_F(ParserTest, parser_test_022, TestSize.Level1)
     auto it = item.Value().function_table.find(sig_main);
     size_t num_size = 2U;
 
-    auto func_m123_at = item.Value().function_table.at(sig_m123).ins;
-    auto func_main_at = item.Value().function_table.at(sig_main).ins;
+    auto &func_m123_at = item.Value().function_table.at(sig_m123).ins;
+    auto &func_main_at = item.Value().function_table.at(sig_main).ins;
 
     EXPECT_NE(it, item.Value().function_table.end());
     EXPECT_EQ(item.Value().function_table.at(sig_main).name, sig_main);
@@ -579,16 +581,16 @@ HWTEST_F(ParserTest, parser_test_022, TestSize.Level1)
     EXPECT_EQ(func_main_table->is_defined, true);
     EXPECT_EQ(func_m123_table->line_number, 13U);
     EXPECT_EQ(func_m123_table->is_defined, true);
-    EXPECT_EQ(func_main_at[5].opcode, Opcode::INVALID);
-    EXPECT_EQ(func_main_at[5].label, "label");
-    EXPECT_EQ(func_main_at[1].regs[0], 0U);
-    EXPECT_EQ(func_main_at[2].regs[0], 0U);
-    EXPECT_EQ(func_main_at[3].set_label, false);
-    EXPECT_EQ(func_m123_at[2].opcode, Opcode::LDAI);
-    EXPECT_EQ(func_m123_at[0].opcode, Opcode::INVALID);
-    EXPECT_EQ(func_m123_at[0].label, "la1");
-    EXPECT_EQ(func_m123_at[1].set_label, false);
-    EXPECT_EQ(func_m123_at[1].ids[0], "la1");
+    EXPECT_EQ(func_main_at[5]->opcode, Opcode::INVALID);
+    EXPECT_EQ(func_main_at[5]->Label(), "label");
+    EXPECT_EQ(func_main_at[1]->GetReg(0), 0U);
+    EXPECT_EQ(func_main_at[2]->GetReg(0), 0U);
+    EXPECT_EQ(func_main_at[3]->IsLabel(), false);
+    EXPECT_EQ(func_m123_at[2]->opcode, Opcode::LDAI);
+    EXPECT_EQ(func_m123_at[0]->opcode, Opcode::INVALID);
+    EXPECT_EQ(func_m123_at[0]->Label(), "la1");
+    EXPECT_EQ(func_m123_at[1]->IsLabel(), false);
+    EXPECT_EQ(func_m123_at[1]->GetId(0), "la1");
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -624,8 +626,8 @@ HWTEST_F(ParserTest, parser_test_023, TestSize.Level1)
     EXPECT_EQ(item.Value().function_table.at(sig_main).name, sig_main);
     EXPECT_EQ(item.Value().function_table.at(sig_main).GetParamsNum(), 0U);
     EXPECT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::I32);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1].opcode, Opcode::LDAI);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[3].set_label, true);
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->opcode, Opcode::LDAI);
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[3]->IsLabel(), true);
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -713,7 +715,7 @@ HWTEST_F(ParserTest, parser_test_026, TestSize.Level1)
     auto item = p.Parse(v);
 
     const auto sig_niam = GetFunctionSignatureFromName("niam", {});
-    EXPECT_EQ(item.Value().function_table.at(sig_niam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_niam).ins[0]->GetImm(0), IType(int64_t(-1))) << "-1 expected";
 }
 
 /**
@@ -754,11 +756,11 @@ HWTEST_F(ParserTest, parser_test_027, TestSize.Level1)
     const auto sig_niam4 = GetFunctionSignatureFromName("niam4", {});
     const auto sig_niam5 = GetFunctionSignatureFromName("niam5", {});
 
-    EXPECT_EQ(item.Value().function_table.at(sig_niam1).ins[0].ins_debug.line_number, 2U) << "2 expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_niam2).ins[0].ins_debug.line_number, 5U) << "5 expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_niam3).ins[0].ins_debug.line_number, 9U) << "9 expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_niam4).ins[0].ins_debug.line_number, 11U) << "11 expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_niam5).ins[0].ins_debug.line_number, 12U) << "12 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_niam1).ins[0]->ins_debug.line_number, 2U) << "2 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_niam2).ins[0]->ins_debug.line_number, 5U) << "5 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_niam3).ins[0]->ins_debug.line_number, 9U) << "9 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_niam4).ins[0]->ins_debug.line_number, 11U) << "11 expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_niam5).ins[0]->ins_debug.line_number, 12U) << "12 expected";
 }
 
 /**
@@ -991,18 +993,18 @@ HWTEST_F(ParserTest, parser_test_032, TestSize.Level1)
     EXPECT_EQ(item.Value().function_table.at(sig_nain10).name, sig_nain10);
     EXPECT_EQ(item.Value().function_table.at(sig_nain11).name, sig_nain11);
 
-    EXPECT_EQ(item.Value().function_table.at(sig_nain1).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain2).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain3).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain4).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain5).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain6).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain7).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain8).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain9).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain10).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain11).ins[0].opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain12).ins[0].opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain1).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain2).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain3).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain4).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain5).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain6).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain7).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain8).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain9).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain10).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain11).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain12).ins[0]->opcode, Opcode::MOV);
 }
 
 /**
@@ -1053,7 +1055,7 @@ HWTEST_F(ParserTest, parser_test_033, TestSize.Level1)
 
 /**
  * @tc.name: parser_test_034
- * @tc.desc: Verify the ins.opcode function.
+ * @tc.desc: Verify the ins->opcode function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -1064,7 +1066,8 @@ HWTEST_F(ParserTest, parser_test_034, TestSize.Level1)
     Parser p;
     v.push_back(l.TokenizeString(".function u1 nain1(i64 a0) <> {").first);
     v.push_back(l.TokenizeString("sta a0").first);
-    v.push_back(l.TokenizeString("L: mov v0, a0").first);
+    v.push_back(l.TokenizeString("L:").first);
+    v.push_back(l.TokenizeString("mov v0, a0").first);
     v.push_back(l.TokenizeString("sta v4").first);
     v.push_back(l.TokenizeString("jmp L").first);
     v.push_back(l.TokenizeString("}").first);
@@ -1077,11 +1080,12 @@ HWTEST_F(ParserTest, parser_test_034, TestSize.Level1)
     const auto sig_nain1 = GetFunctionSignatureFromName("nain1", params);
     auto it = item.Value().function_table.find(sig_nain1);
     EXPECT_NE(it, item.Value().function_table.end());
-    auto func_table = item.Value().function_table.at(sig_nain1).ins;
-    EXPECT_EQ(OperandTypePrint(func_table[0].opcode), "reg");
-    EXPECT_EQ(OperandTypePrint(func_table[1].opcode), "reg_reg");
-    EXPECT_EQ(OperandTypePrint(func_table[2].opcode), "reg");
-    EXPECT_EQ(OperandTypePrint(func_table[3].opcode), "label");
+    auto &func_table = item.Value().function_table.at(sig_nain1).ins;
+    EXPECT_EQ(OperandTypePrint(func_table[0]->opcode), "reg");
+    EXPECT_EQ(func_table[1]->opcode, Opcode::INVALID);
+    EXPECT_EQ(OperandTypePrint(func_table[2]->opcode), "reg_reg");
+    EXPECT_EQ(OperandTypePrint(func_table[3]->opcode), "reg");
+    EXPECT_EQ(OperandTypePrint(func_table[4]->opcode), "label");
 }
 
 /**
@@ -1326,8 +1330,8 @@ HWTEST_F(ParserTest, parser_test_039, TestSize.Level1)
         EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         EXPECT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {};
-        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[0]->Regs(), regs);
+        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[1]->Regs(), regs);
     }
 
     {
@@ -1346,8 +1350,8 @@ HWTEST_F(ParserTest, parser_test_039, TestSize.Level1)
         EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         EXPECT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0};
-        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[0]->Regs(), regs);
+        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[1]->Regs(), regs);
     }
 
     {
@@ -1366,8 +1370,8 @@ HWTEST_F(ParserTest, parser_test_039, TestSize.Level1)
         EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
         EXPECT_TRUE(item.HasValue());
         std::vector<uint16_t> regs {0, 1};
-        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[0].regs, regs);
-        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[1].regs, regs);
+        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[0]->Regs(), regs);
+        EXPECT_EQ(item.Value().function_table.at(sig_f).ins[1]->Regs(), regs);
     }
 
     {

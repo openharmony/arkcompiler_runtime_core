@@ -20,14 +20,14 @@ namespace panda::bytecodeopt {
 
 using panda_file::LiteralTag;
 
-void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result)
+void DoLda(compiler::Register reg, std::vector<pandasm::InsPtr> &result)
 {
     if (reg != compiler::ACC_REG_ID) {
         result.emplace_back(pandasm::Create_LDA(reg));
     }
 }
 
-void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result)
+void DoSta(compiler::Register reg, std::vector<pandasm::InsPtr> &result)
 {
     if (reg != compiler::ACC_REG_ID) {
         result.emplace_back(pandasm::Create_STA(reg));
@@ -102,7 +102,7 @@ bool BytecodeGen::RunImpl()
     for (auto *bb : GetGraph()->GetTryBeginBlocks()) {
         VisitTryBegin(bb);
     }
-    function_->ins = std::move(GetResult());
+    function_->ins = GetResult();
     function_->catch_blocks = catch_blocks_;
     return true;
 }
@@ -115,7 +115,7 @@ void BytecodeGen::EmitJump(const BasicBlock *bb)
     if (bb->GetLastInst() == nullptr) {
         ASSERT(bb->IsEmpty());
         suc_bb = bb->GetSuccsBlocks()[0];
-        result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
+        result_.emplace_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
         return;
     }
 
@@ -130,14 +130,14 @@ void BytecodeGen::EmitJump(const BasicBlock *bb)
             suc_bb = bb->GetSuccsBlocks()[0];
             break;
     }
-    result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
+    result_.emplace_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
 }
 
 void BytecodeGen::AddLineNumber(const Inst *inst, const size_t idx)
 {
     if (ir_interface_ != nullptr && idx < result_.size()) {
         auto ln = ir_interface_->GetLineNumberByPc(inst->GetPc());
-        result_[idx].ins_debug.SetLineNumber(ln);
+        result_[idx]->ins_debug.SetLineNumber(ln);
     }
 }
 
@@ -145,7 +145,7 @@ void BytecodeGen::AddColumnNumber(const Inst *inst, const uint32_t idx)
 {
     if (ir_interface_ != nullptr && idx < result_.size()) {
         auto cn = ir_interface_->GetColumnNumberByPc(inst->GetPc());
-        result_[idx].ins_debug.SetColumnNumber(cn);
+        result_[idx]->ins_debug.SetColumnNumber(cn);
     }
 }
 
@@ -166,7 +166,6 @@ void BytecodeGen::EncodeSpillFillData(const compiler::SpillFillData &sf)
         return;
     }
 
-    pandasm::Ins move;
     result_.emplace_back(pandasm::Create_MOV(sf.DstValue(), sf.SrcValue()));
     return;
 }
@@ -203,8 +202,6 @@ void BytecodeGen::VisitConstant(GraphVisitor *visitor, Inst *inst)
         return;
     }
 
-    pandasm::Ins movi;
-    movi.regs.emplace_back(inst->GetDstReg());
     switch (type) {
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64:
@@ -239,11 +236,8 @@ void BytecodeGen::EncodeSta(compiler::Register reg, compiler::DataType::Type typ
             LOG(ERROR, BYTECODE_OPTIMIZER) << "EncodeSta with unknown type" << type;
             success_ = false;
     }
-    pandasm::Ins sta;
-    sta.opcode = opc;
-    sta.regs.emplace_back(reg);
 
-    result_.emplace_back(sta);
+    result_.emplace_back(pandasm::Create_STA(reg));
 }
 
 // NOLINTNEXTLINE(readability-function-size)
@@ -381,7 +375,6 @@ void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
 
 void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *inst_base)
 {
-    pandasm::Ins ins;
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToLoadString();
     /* Do not emit unused code for Str -> CastValueToAnyType chains */
@@ -398,7 +391,6 @@ void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *inst_base)
 
 void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *inst_base)
 {
-    pandasm::Ins ins;
     auto enc = static_cast<BytecodeGen *>(v);
     auto inst = inst_base->CastToReturn();
     switch (inst->GetType()) {
