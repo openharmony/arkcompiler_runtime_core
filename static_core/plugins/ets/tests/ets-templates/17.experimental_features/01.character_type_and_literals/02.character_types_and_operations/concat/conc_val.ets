@@ -23,16 +23,16 @@ function main() {
     let v1 = {{v.v1}}
     let v2 = {{v.v2}}
 
-    assertEQ( "" + v1 + v2, {{v.r1}} )
-    assertEQ( v1 + "" + v2, {{v.r1}} )
-    assertEQ( v1 + v2 + "", {{v.r2}} )
+    assertEQ("" + v1 + v2, {{v.r1}})
+    assertEQ(v1 + "" + v2, {{v.r1}})
+    assertEQ((v1 + v2) as char + "", {{v.r2}})
 
-    assertEQ( "" + {{v.v1}} + v2, {{v.r1}} )
-    assertEQ( {{v.v1}} + "" + v2, {{v.r1}} )
-    assertEQ( {{v.v1}} + v2 + "", {{v.r2}} )
+    assertEQ("" + {{v.v1}} + v2, {{v.r1}})
+    assertEQ({{v.v1}} + "" + v2, {{v.r1}})
+    assertEQ(({{v.v1}} + v2) as char + "", {{v.r2}})
 
-    assertEQ( "" + {{v.v1}} + {{v.v2}}, {{v.r1}} )
-    assertEQ( {{v.v1}} + "" + {{v.v2}}, {{v.r1}} )
-    assertEQ( {{v.v1}} + {{v.v2}} + "", {{v.r2}} )
+    assertEQ("" + {{v.v1}} + {{v.v2}}, {{v.r1}})
+    assertEQ({{v.v1}} + "" + {{v.v2}}, {{v.r1}})
+    assertEQ(({{v.v1}} + {{v.v2}}) as char + "", {{v.r2}})
 }
 {%- endfor %}

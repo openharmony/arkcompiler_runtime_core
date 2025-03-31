@@ -22,7 +22,7 @@ vals:
       b: 'false'
       r: c'A' + c'\uF000'
 
-    - v1: c'\uFFFE' + c'\u0023'
-      v2: c'\u0021' + c'\u0001'
+    - v1: (c'\uFFFE' + c'\u0023') as char
+      v2: (c'\u0021' + c'\u0001') as char
       b: 'true'
       r: c'!'

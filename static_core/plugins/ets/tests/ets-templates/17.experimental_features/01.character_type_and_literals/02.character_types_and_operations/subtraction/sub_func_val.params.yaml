@@ -19,7 +19,7 @@ vals:
 
     - v1: c'\u0041'
       v2: c'\u0001'
-      exp: "sub(v1, v2) - c' '"
+      exp: "(sub(v1, v2) - c' ') as char"
       r: c' '
 
     - v1: c'\uFFFF'
@@ -39,7 +39,7 @@ vals:
 
     - v1: c'\u1010'
       v2: c'\u0101'
-      exp: "sub(v1 - c'\\u0101', v2 - c'\\u1010')"
+      exp: "sub((v1 - c'\\u0101') as char, (v2 - c'\\u1010') as char)"
       r: c'\u1E1E'
 
     - v1: c'∬'
