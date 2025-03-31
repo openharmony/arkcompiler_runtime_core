@@ -17,14 +17,6 @@
 02.lexical_elements/07.keywords/types_20.ets
 02.lexical_elements/07.keywords/types_24.ets
 
-#23980
-02.lexical_elements/09.literals/04.bigint_literals/bigint_func_0.ets
-02.lexical_elements/09.literals/04.bigint_literals/bigint_func_1.ets
-02.lexical_elements/09.literals/04.bigint_literals/bigint_func_2.ets
-02.lexical_elements/09.literals/04.bigint_literals/bigint_func_3.ets
-02.lexical_elements/09.literals/04.bigint_literals/bigint_func_4.ets
-02.lexical_elements/09.literals/04.bigint_literals/bigint_func_5.ets
-
 #24028 not implemented
 03.types/01.predefined_types/class_types_declaration_2.ets
 03.types/03.using_types/array_value_types_declaration_18.ets
