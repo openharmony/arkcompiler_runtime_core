@@ -36,19 +36,19 @@ const FIXED_17339 = false;
 function testOptionals() {
     // #22991
     // let x = optionalCall(123, 321, 5)
-    // assert(x == 123 + 321 + 5);
+    // assertTrue(x == 123 + 321 + 5);
     // x = optionalCall(23, 21)
-    // assert(x == 23 + 21 + 1);
+    // assertTrue(x == 23 + 21 + 1);
     // x = optionalCall(100)
-    // assert(x == 100 + 130 + 1);
+    // assertTrue(x == 100 + 130 + 1);
     // x = optionalCall()
-    // assert(x == 123 + 130 + 1);
+    // assertTrue(x == 123 + 130 + 1);
 
     // #22991
     // x = singleRequired(123, 321)
-    // assert(x == 123 + 321 + 123);
+    // assertTrue(x == 123 + 321 + 123);
     // x = singleRequired(100)
-    // assert(x == 100 + 123 + 123);
+    // assertTrue(x == 100 + 123 + 123);
 
     return true;
 }

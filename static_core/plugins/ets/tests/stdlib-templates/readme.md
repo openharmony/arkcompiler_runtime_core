@@ -76,7 +76,7 @@ function main(): int {
        console.println();
     }
 
-    assert passed_counter  == max_test;
+    assertEQ(passed_counter, max_test)
     return 0;
 }
 

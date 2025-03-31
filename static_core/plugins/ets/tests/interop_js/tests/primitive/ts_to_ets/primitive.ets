@@ -14,107 +14,107 @@
  */
 
 function checkBoolean(val: boolean) {
-    assert(val == true)
+    assertTrue(val == true)
 }
 
 function checkBooleanBoxed(val: Boolean) {
-    assert(val == true)
+    assertTrue(val == true)
 }
 
 function checkByte(val: byte) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkByteOverflow(val: byte, oriVal: int) {
-    assert(val == oriVal as byte)
+    assertTrue(val == oriVal as byte)
 }
 
 function checkByteBoxed(val: Byte) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkShort(val: short) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkShortBoxed(val: Short) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkShortOverflow(val: short, oriVal: int) {
-    assert(val == oriVal as short)
+    assertTrue(val == oriVal as short)
 }
 
 function checkInt(val: int) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkIntBoxed(val: Int) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkIntOverflow(val: int, oriVal: long) {
-    assert(val == oriVal as int)
+    assertTrue(val == oriVal as int)
 }
 
 function checkLong(val: long) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkLongBoxed(val: Long) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkFloat(val: float) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkFloatBoxed(val: Float) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkFloatOverflow(val: float, oriVal: number) {
-    assert(val == oriVal as float)
+    assertTrue(val == oriVal as float)
 }
 
 function checkDouble(val: double) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkDoubleBoxed(val: Double) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkNumber(val: number) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkNumberBoxed(val: Number) {
-    assert(val == 1)
+    assertTrue(val == 1)
 }
 
 function checkChar(val: char) {
-    assert(val == c'1')
+    assertTrue(val == c'1')
 }
 
 function checkCharBoxed(val: Char) {
-    assert(val.unboxed() == c'1')
+    assertTrue(val.unboxed() == c'1')
 }
 
 function checkString(val: string) {
-    assert(val == '1')
+    assertTrue(val == '1')
 }
 
 function checkStringBoxed(val: String) {
-    assert(val == '1')
+    assertTrue(val == '1')
 }
 
 function checkBigint(val: bigint) {
-    assert(val == 1n)
+    assertTrue(val == 1n)
 }
 
 function checkBigintBoxed(val: BigInt) {
-    assert(val == 1n)
+    assertTrue(val == 1n)
 }
 
 function checkNull(val: null) {

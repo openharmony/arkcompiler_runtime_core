@@ -26,8 +26,8 @@ function Test_indirect_call_type_extra_set_call(): boolean {
     let result_number: number;
     // [result_string, result_number] = reply; // Segmentation fault (core dumped)
 
-    // assert(result_string == EXPECTED_STRING);
-    // assert(result_number == EXPECTED_NUMBER);
+    // assertTrue(result_string == EXPECTED_STRING);
+    // assertTrue(result_number == EXPECTED_NUMBER);
 
     // return true;
     return false;
@@ -45,8 +45,8 @@ function Test_indirect_call_type_extra_set_apply(): boolean {
     let result_number: number;
     // [result_string, result_number] = reply; // Segmentation fault (core dumped)
 
-    // assert(result_string == EXPECTED_STRING);
-    // assert(result_number == EXPECTED_NUMBER);
+    // assertTrue(result_string == EXPECTED_STRING);
+    // assertTrue(result_number == EXPECTED_NUMBER);
 
     // return true;
     return false;
@@ -65,8 +65,8 @@ function Test_indirect_call_type_extra_set_bind_with_arg(): boolean {
     let result_number: number;
 
     // [result_string, result_number] = reply; // Segmentation fault (core dumped)
-    // assert(result_string == EXPECTED_STRING);
-    // assert(result_number == EXPECTED_NUMBER);
+    // assertTrue(result_string == EXPECTED_STRING);
+    // assertTrue(result_number == EXPECTED_NUMBER);
 
     // return true;
     return false;
@@ -85,8 +85,8 @@ function Test_indirect_call_type_extra_set_bind_without_arg(): boolean {
     let result_number: number;
 
     // [result_string, result_number] = reply; // Segmentation fault (core dumped)
-    // assert(result_string == EXPECTED_STRING);
-    // assert(result_number == EXPECTED_NUMBER);
+    // assertTrue(result_string == EXPECTED_STRING);
+    // assertTrue(result_number == EXPECTED_NUMBER);
 
     // return true;
     return false;
