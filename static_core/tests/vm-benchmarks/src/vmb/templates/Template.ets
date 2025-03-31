@@ -29,6 +29,8 @@
         GC pause (ms):        $gc
 */
 
+package $bench_name;
+
 $imports
 
 $common

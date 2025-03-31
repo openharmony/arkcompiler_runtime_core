@@ -71,7 +71,7 @@ class Tool(ToolBase):
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.ark} ' \
                    f'--boot-panda-files={self.etsstdlib} ' \
                    f'--load-runtimes=ets {opts} {self.custom} ' \
-                   '{options} {abc} ETSGLOBAL::main'
+                   '{options} {abc} {name}.ETSGLOBAL::main'
 
     @property
     def name(self) -> str:
@@ -96,7 +96,7 @@ class Tool(ToolBase):
         if OptFlags.GC_STATS in bu_flags:
             gclog = str(abc.with_suffix('.gclog.txt'))
         arkts_cmd = self.cmd.format(
-            abc=abc, options=options, gclog=gclog, an=an)
+            name=bu.name, abc=abc, options=options, gclog=gclog, an=an)
         res = self.x_run(arkts_cmd)
         bu.parse_run_output(res)
         if OptFlags.JIT_STATS in bu_flags:
