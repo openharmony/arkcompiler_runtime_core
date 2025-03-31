@@ -58,18 +58,10 @@ export namespace taskpool {
          * @param name The name of task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never,
-                    p8: never, p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never,
-                    p16: never) => NullishType, p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType,
-                    p5?: NullishType, p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType,
-                    p10?: NullishType, p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType,
-                    p15?: NullishType, p16?: NullishType) {
+        constructor(name: string, func: Function, ...args: NullishType[]) {
             this.name = name;
-            this.func = ():NullishType => {
-                return (func as (p1: NullishType, p2: NullishType, p3: NullishType, p4: NullishType, p5: NullishType,
-                                 p6: NullishType, p7: NullishType, p8: NullishType, p9: NullishType, p10: NullishType,
-                                 p11: NullishType, p12: NullishType, p13: NullishType, p14: NullishType, p15: NullishType,
-                                 p16: NullishType) => NullishType)(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
+            this.f = (): NullishType => {
+                return func.unsafeCall(...args);
             };
             this.totalDuration = 0;
             this.ioDuration = 0;
@@ -86,12 +78,8 @@ export namespace taskpool {
          *
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never, p8: never,
-                    p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never, p16: never) => NullishType,
-                    p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType, p5?: NullishType,
-                    p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType, p10?: NullishType,
-                    p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType, p15?: NullishType, p16?: NullishType) {
-            this("", func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
+        constructor(func: Function, ...args: NullishType[]) {
+            this("", func, ...args);
         }
 
         /**
@@ -284,7 +272,7 @@ export namespace taskpool {
         }
 
         /// Concurrent function to execute in taskpool
-        func: () => NullishType;
+        f: () => NullishType;
 
         /// The concurrent function arguments
         arguments?: NullishType[];
@@ -361,7 +349,7 @@ export namespace taskpool {
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
             try {
-                result = this.func();
+                result = this.f();
                 this.callUserCallback(this.onSuccessCallback);
             } catch (e: Error) {
                 try {
@@ -510,26 +498,16 @@ export namespace taskpool {
          * @param name The name of long task
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(name: string, func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never,
-                    p8: never, p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never,
-                    p16: never) => NullishType, p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType,
-                    p5?: NullishType, p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType,
-                    p10?: NullishType, p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType,
-                    p15?: NullishType, p16?: NullishType) {
-            super(name, func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
+        constructor(name: string, func: Function, ...args: NullishType[]) {
+            super(name, func, ...args);
         }
 
         /**
          * Create a LongTask instance
          * @param func Concurrent function to execute in the taskpool
          */
-        constructor(func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never,
-                    p8: never, p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never,
-                    p16: never) => NullishType, p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType,
-                    p5?: NullishType, p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType,
-                    p10?: NullishType, p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType,
-                    p15?: NullishType, p16?: NullishType) {
-            super("", func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
+        constructor(func: Function, ...args: NullishType[]) {
+            super("", func, ...args);
         }
 
         internal override checkExecution(): void {
@@ -566,13 +544,8 @@ export namespace taskpool {
          *
          * @param func the concurrent function to add to the task group
          */
-        addTask(func: (p1: never, p2: never, p3: never, p4: never, p5: never, p6: never, p7: never, p8: never,
-                       p9: never, p10: never, p11: never, p12: never, p13: never, p14: never, p15: never, p16: never) => NullishType,
-                       p1?: NullishType, p2?: NullishType, p3?: NullishType, p4?: NullishType, p5?: NullishType,
-                       p6?: NullishType, p7?: NullishType, p8?: NullishType , p9?: NullishType, p10?: NullishType,
-                       p11?: NullishType, p12?: NullishType, p13?: NullishType, p14?: NullishType, p15?: NullishType,
-                       p16?: NullishType): void {
-            this.addTask(new Task(func, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16));
+        addTask(func: Function, ...args: NullishType[]): void {
+            this.addTask(new Task(func, ...args));
         }
 
         /**
@@ -733,90 +706,8 @@ export namespace taskpool {
 
     // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
 
-    export function execute(
-        func: () => NullishType
-        ): Promise<NullishType> {
-        return launch func();
-    }
-    export function execute<A1>(
-        func: (p1: A1) => NullishType,
-        a1: A1): Promise<NullishType> {
-        return launch func(a1);
-    }
-    export function execute<A1, A2>(
-        func: (p1: A1, p2: A2) => NullishType,
-        a1: A1, a2: A2): Promise<NullishType> {
-        return launch func(a1, a2);
-    }
-    export function execute<A1, A2, A3>(
-        func: (p1: A1, p2: A2, p3: A3) => NullishType,
-        a1: A1, a2: A2, a3: A3): Promise<NullishType> {
-        return launch func(a1, a2, a3);
-    }
-    export function execute<A1, A2, A3, A4>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4);
-    }
-    export function execute<A1, A2, A3, A4, A5>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13, p14: A14) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13, p14: A14, p15: A15) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
-    }
-    export function execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16>(
-        func: (p1: A1, p2: A2, p3: A3, p4: A4, p5: A5, p6: A6, p7: A7, p8: A8, p9: A9, p10: A10, p11: A11, p12: A12, p13: A13, p14: A14, p15: A15, p16: A16) => NullishType,
-        a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16): Promise<NullishType> {
-        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
+    export function execute(func: Function, ...args: NullishType[]): Promise<NullishType> {
+        return launch func.unsafeCall(args);
     }
 
     /**

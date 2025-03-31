@@ -415,7 +415,6 @@ function main(): int {
         let res3 = await p3;
         assertEQ(res3, "123");
         assertEQ(resultStr, "123");
-        resultStr = "";
         let task4 = new taskpool.Task(func3, 100);
         let task5 = new taskpool.Task(func3, 200);
         let task6 = new taskpool.Task(func3, 100);
