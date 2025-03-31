@@ -64,7 +64,7 @@ static_core/libpandabase/mem/                            ^dmitriitr @udav
 static_core/libpandabase/os/*mem*                        ^dmitriitr @udav
 static_core/libpandabase/tests/*mem*                     @udav
 static_core/platforms/**/*mem*                           ^dmitriitr @udav
-static_core/plugins/ets/playground                       @anton-sysoev
+static_core/plugins/ets/playground                       @anton-sysoev @dreamdoomwalker
 static_core/runtime/arch/                                @Prof1983
 static_core/runtime/bridge/                              @Prof1983
 static_core/runtime/coroutines/                          ^dmitriitr @konstanting
@@ -81,7 +81,7 @@ static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof1983
 static_core/tests/panda/                                 @igelhaus
 static_core/tests/test-lists/                            ^amate ^sergeyandreev @kuchkovairina
-static_core/tests/tests-u-runner/                        ^amate @sergeyandreev @anton-sysoev
+static_core/tests/tests-u-runner/                        ^amate @sergeyandreev @anton-sysoev @dreamdoomwalker
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/libpandabase/tests/genmc/                    @udav
 static_core/libpandabase/tests/ringbuf/                  @udav
@@ -100,8 +100,8 @@ static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @udav
 static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof1983
 static_core/plugins/ets/runtime/ets_runtime_interface*   @Prof1983
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
-static_core/plugins/ets/sdk/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
-static_core/plugins/ets/stdlib/                          ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
+static_core/plugins/ets/sdk/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
+static_core/plugins/ets/stdlib/                          ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/tests/ani                        @liwentao_uiw @v-cherkashin ^slynkodenis
 static_core/plugins/ets/verification/                    @igelhaus
 static_core/runtime/include/mem/                         ^dmitriitr @udav
@@ -111,21 +111,21 @@ static_core/plugins/ets/runtime/interop_js/              @nazarovkonstantin @vpu
 static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @udav ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof1983
-static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
+static_core/plugins/ets/runtime/intrinsics/escompat_*                         ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/runtime/intrinsics/escompat_taskpool.cpp              ^dmitriitr ^konstanting @ipetrov
-static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
-static_core/plugins/ets/runtime/intrinsics/std_core_Method.cpp                @aleksander-sotov ^anton-sysoev
-static_core/plugins/ets/runtime/intrinsics/std_core_Type*                     @aleksander-sotov ^anton-sysoev
-static_core/plugins/ets/runtime/intrinsics/std_core_Value.cpp                 @aleksander-sotov ^anton-sysoev
+static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
+static_core/plugins/ets/runtime/intrinsics/std_core_Method.cpp                @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/runtime/intrinsics/std_core_Type*                     @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/runtime/intrinsics/std_core_Value.cpp                 @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @udav
 static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @udav
 static_core/plugins/ets/runtime/mem/                                          ^dmitriitr @udav
-static_core/plugins/ets/runtime/regexp/                                       ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
+static_core/plugins/ets/runtime/regexp/                                       ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/runtime/types/*atomic*                                ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*promise*                               ^dmitriitr @konstanting
-static_core/plugins/ets/runtime/types/*typeapi*                               @aleksander-sotov ^anton-sysoev
+static_core/plugins/ets/runtime/types/*typeapi*                               @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/stdlib/escompat/Atomics.sts                           ^dmitriitr @konstanting
-static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
+static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof1983 @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @nazarovkonstantin @ignatenkooleg @Prof1983
 static_core/plugins/ets/tests/checked/                                        @Prof1983
@@ -138,27 +138,27 @@ static_core/plugins/ets/tests/test-lists/                                     ^a
 static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @kuchkovairina @dreamdoomwalker
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @dreamdoomwalker ^trubachevilya ^hufeng20 @nazarovkonstantin
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @dreamdoomwalker ^amate @sergeyandreev @anton-sysoev
-static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
+static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         ^dmitriitr @konstanting
-static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev
-static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev
+static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav
 static_core/plugins/ets/stdlib/std/core/GC.sts                                ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Method.sts                            @aleksander-sotov ^anton-sysoev
-static_core/plugins/ets/stdlib/std/core/Object.sts                            @aleksander-sotov ^anton-sysoev
+static_core/plugins/ets/stdlib/std/core/Method.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/stdlib/std/core/Object.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/stdlib/std/core/Promise.sts                           ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev
-static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @aleksander-sotov ^anton-sysoev
-static_core/plugins/ets/stdlib/std/core/Value.sts                             @aleksander-sotov ^anton-sysoev
+static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/stdlib/std/core/Value.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
-static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
-static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
+static_core/plugins/ets/tests/ets_func_tests/escompat/                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
+static_core/plugins/ets/tests/ets_func_tests/std/                             ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/tests/ets_test_suite/atomics/                         @konstanting
 static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.sts    @konstanting
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting
@@ -173,7 +173,7 @@ static_core/plugins/ets/tests/interop_js/tests/checked/                       ^i
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus @nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @dreamdoomwalker ^igelhaus ^trubachevilya @ivagin ^hufeng20 ^Prof1983
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
-static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin ^dmitriitr @konstanting ^udav
+static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^dreamdoomwalker
 
 /abc2program/ @ctw-ian @chenqy930
 /assembler/ @ctw-ian
