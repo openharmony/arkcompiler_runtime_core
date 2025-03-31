@@ -16,3 +16,7 @@
 function getBooleanTuple(): [boolean, boolean, boolean, boolean, boolean] {
     return [true, false, true, true, false];
 }
+
+function getEmptyTuple(): [] {
+    return [];
+}

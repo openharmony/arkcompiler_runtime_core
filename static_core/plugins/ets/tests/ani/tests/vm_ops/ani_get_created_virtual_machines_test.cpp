@@ -16,6 +16,11 @@
 #include "ani_gtest.h"
 
 namespace ark::ets::ani::testing {
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+static ani_int Sum([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
+{
+    return a + b;
+}
 
 class GetCreatedVMsTest : public ::testing::Test {
 public:
@@ -58,4 +63,40 @@ TEST_F(GetCreatedVMsTest, getCreatedVMs)
     ASSERT_EQ(ANI_GetCreatedVMs(&vm, bufferSize, &size), ANI_OK);
     ASSERT_EQ(size, 0);
 }
+
+TEST_F(GetCreatedVMsTest, combination)
+{
+    ani_vm *vm = nullptr;
+    std::string bootFileString = BuildOptionString();
+    ani_option bootFileOption = {bootFileString.data(), nullptr};
+    std::vector<ani_option> options;
+    options.push_back(bootFileOption);
+    ani_options optionsPtr = {options.size(), options.data()};
+    ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm), ANI_OK);
+    ani_size size = 0;
+    ani_size bufferSize = 1;
+    ASSERT_EQ(ANI_GetCreatedVMs(&vm, bufferSize, &size), ANI_OK);
+    ani_env *env = nullptr;
+    ASSERT_EQ(vm->GetEnv(ANI_VERSION_1, &env), ANI_OK);
+    ASSERT_NE(env, nullptr);
+    ASSERT_EQ(env->GetVM(&vm), ANI_OK);
+    ani_namespace ns;
+    ASSERT_EQ(env->FindNamespace("Lani_get_created_virtual_machines_test/ops;", &ns), ANI_OK);
+    ASSERT_NE(ns, nullptr);
+    std::array functions = {
+        ani_native_function {"sum", "II:I", reinterpret_cast<void *>(Sum)},
+    };
+    ASSERT_EQ(env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
+
+    ani_function fn {};
+    ASSERT_EQ(env->Namespace_FindFunction(ns, "checkSum", ":Z", &fn), ANI_OK);
+    ASSERT_NE(fn, nullptr);
+    ani_boolean value = 0U;
+    ASSERT_EQ(env->Function_Call_Boolean(fn, &value), ANI_OK);
+    ASSERT_EQ(value, true);
+    ASSERT_EQ(vm->DestroyVM(), ANI_OK);
+    vm = nullptr;
+    ASSERT_EQ(ANI_GetCreatedVMs(&vm, bufferSize, &size), ANI_OK);
+    ASSERT_EQ(vm, nullptr);
+}  // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 }  // namespace ark::ets::ani::testing

@@ -47,7 +47,10 @@ TEST_F(AttachThreadTest, attach_interopDisabled)
         ani_options aniArgs {1, &interopEnabled};
         EXPECT_NE(vm_, nullptr) << "vm_ is nullptr";
         EXPECT_EQ(vm_->c_api->AttachCurrentThread(nullptr, &aniArgs, ANI_VERSION_1, &etsEnv), ANI_INVALID_ARGS);
-        EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, 2, &etsEnv), ANI_INVALID_VERSION);
+        const int32_t versionNew = 2;
+        const int32_t versionOld = 0;
+        EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, versionNew, &etsEnv), ANI_INVALID_VERSION);
+        EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, versionOld, &etsEnv), ANI_INVALID_VERSION);
         EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, nullptr), ANI_INVALID_ARGS);
         EXPECT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &etsEnv), ANI_OK);
         EXPECT_NE(etsEnv, nullptr);

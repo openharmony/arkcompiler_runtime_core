@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,9 @@
  * limitations under the License.
  */
 
-function getEmptyTuple(): [] {
-    return [];
+namespace ops {
+export native function sum(a: int, b: int): int;
+function checkSum(): boolean {
+    return ops.sum(8, 16) == 24;
 }
-
-function getTestPrimitiveTuple(): [boolean, char, byte, short, int, long, float, double] {
-    return [true, 'x', 127, 300, 500, 600, 100.0, 400.0];
-}
-
-function getReferenceTuple(): [String, double[], String] {
-    return [new String("Hello"), [1, 2, 3, 4, 5], "world"];
-}
-
-function getCharTuple(): [char, char, char, char, char] {
-    return ['H', 'e', 'l', 'l', 'o']
 }

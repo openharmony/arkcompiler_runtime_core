@@ -29,6 +29,8 @@ TEST_F(GetVMTest, valid_argument)
 TEST_F(GetVMTest, invalid_argument)
 {
     ASSERT_EQ(env_->GetVM(nullptr), ANI_INVALID_ARGS);
+    ani_vm *vm = nullptr;
+    ASSERT_EQ(env_->c_api->GetVM(nullptr, &vm), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing

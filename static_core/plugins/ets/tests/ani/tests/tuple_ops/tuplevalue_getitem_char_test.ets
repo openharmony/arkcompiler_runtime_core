@@ -20,3 +20,7 @@ function getCharTuple(): [char, char, char, char, char] {
 function getReferenceTuple(): [String, double[], String] {
     return [new String("Hello"), [1, 2, 3, 4, 5], "world"];
 }
+
+function getTestPrimitiveTuple(): [boolean, char, byte, short, int, long, float, double] {
+    return [true, 'x', 127, 300, 500, 600, 100.0, 400.0];
+}
