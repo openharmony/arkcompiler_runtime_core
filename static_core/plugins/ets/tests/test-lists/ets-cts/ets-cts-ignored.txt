@@ -1241,18 +1241,6 @@
 07.expressions/33.constant_expression/check_enum/constant_logical_expression_9.ets
 07.expressions/33.constant_expression/check_enum/constant_logical_expression_10.ets
 
-#23307
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_0.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_1.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_2.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_3.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_4.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_5.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_6.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_7.ets
-07.expressions/33.constant_expression/check_enum/constant_num_chain_initializer_8.ets
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_2.ets
-
 #23309
 07.expressions/33.constant_expression/check_enum/constant_str_chain_initializer_2.ets
 
