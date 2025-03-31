@@ -164,6 +164,7 @@ private:
     const size_t increaseThresholdPercent_ {0U};
     // We can load a value of the variable from several threads, so need to use atomic
     std::atomic<size_t> targetThreasholdSize_ {0U};
+    const bool gcForceXgcEnabled_ {false};
 };
 
 }  // namespace ark::ets::interop::js
