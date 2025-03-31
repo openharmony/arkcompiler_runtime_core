@@ -17,12 +17,32 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-class ClassSetStaticFieldShortTest : public AniTest {};
+
+class ClassSetStaticFieldShortTest : public AniTest {
+public:
+    void CheckFieldValue(const char *className, const char *fieldName)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+        ani_static_field field {};
+        ASSERT_EQ(env_->Class_FindStaticField(cls, fieldName, &field), ANI_OK);
+        ASSERT_NE(field, nullptr);
+        ani_short result = 0U;
+        const ani_short target = 3U;
+        ASSERT_EQ(env_->Class_GetStaticField_Short(cls, field, &result), ANI_OK);
+        ASSERT_EQ(result, target);
+        const ani_short setTar = 30U;
+        ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, setTar), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticField_Short(cls, field, &result), ANI_OK);
+        ASSERT_EQ(result, setTar);
+    }
+};
+
 TEST_F(ClassSetStaticFieldShortTest, set_short)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_short result = 0;
@@ -35,9 +55,9 @@ TEST_F(ClassSetStaticFieldShortTest, set_short)
 
 TEST_F(ClassSetStaticFieldShortTest, set_short_c_api)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_short result = 0;
@@ -50,9 +70,9 @@ TEST_F(ClassSetStaticFieldShortTest, set_short_c_api)
 
 TEST_F(ClassSetStaticFieldShortTest, set_invalid_field_type)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, 7U), ANI_INVALID_TYPE);
@@ -60,9 +80,9 @@ TEST_F(ClassSetStaticFieldShortTest, set_invalid_field_type)
 
 TEST_F(ClassSetStaticFieldShortTest, invalid_argument2)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_short result = 0;
@@ -73,9 +93,76 @@ TEST_F(ClassSetStaticFieldShortTest, invalid_argument2)
 
 TEST_F(ClassSetStaticFieldShortTest, invalid_argument3)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticField_Short(cls, nullptr, 7U), ANI_INVALID_ARGS);
 }
+
+TEST_F(ClassSetStaticFieldShortTest, invalid_argument4)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
+    ani_static_field field = nullptr;
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    ani_short result = 0;
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_Short(nullptr, cls, field, result), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassSetStaticFieldShortTest, special_values)
+{
+    ani_class cls {};
+    ani_static_field field {};
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    ani_short single = 0;
+    ani_short max = std::numeric_limits<ani_short>::max();
+    ani_short min = std::numeric_limits<ani_short>::min();
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, max), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Short(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, max);
+
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, min), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Short(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, min);
+}
+
+TEST_F(ClassSetStaticFieldShortTest, combination_test1)
+{
+    ani_class cls {};
+    ani_static_field field {};
+    const ani_short setTarget = 127U;
+    const ani_short setTarget2 = 125U;
+    ani_short single = 0U;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_short_test/TestSetShort;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    const int32_t loopNum = 3;
+    for (int32_t i = 0; i < loopNum; i++) {
+        ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, setTarget), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticField_Short(cls, field, &single), ANI_OK);
+        ASSERT_EQ(single, setTarget);
+    }
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, setTarget2), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Short(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, setTarget2);
+}
+
+TEST_F(ClassSetStaticFieldShortTest, combination_test2)
+{
+    CheckFieldValue("Lclass_set_static_field_short_test/TestSetShort;", "short_value");
+}
+
+TEST_F(ClassSetStaticFieldShortTest, combination_test3)
+{
+    CheckFieldValue("Lclass_set_static_field_short_test/TestSetShortA;", "short_value");
+}
+
+TEST_F(ClassSetStaticFieldShortTest, combination_test4)
+{
+    CheckFieldValue("Lclass_set_static_field_short_test/TestSetShortFinal;", "short_value");
+}
 }  // namespace ark::ets::ani::testing
-   // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

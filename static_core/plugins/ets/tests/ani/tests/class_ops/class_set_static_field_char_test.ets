@@ -16,3 +16,11 @@ class TestSetChar {
     static char_value: char = 'a';
     static string_value: string = "";
 }
+
+class TestSetCharA extends TestSetChar {
+    static char_value: char = 'a';
+}
+
+final class TestSetCharFinal extends TestSetChar {
+    static char_value: char = 'a';
+}
