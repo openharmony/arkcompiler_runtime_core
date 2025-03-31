@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath15)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath15)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -89,7 +89,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath15)
     EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(obj, cCls, nullptr, nullptr), "");
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath16)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath16)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

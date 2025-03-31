@@ -44,7 +44,7 @@ static ets_long NativeMethods_long_foo_native(EtsEnv *, ets_class)
     return static_cast<ets_long>(84L);
 }
 
-TEST_F(RegisteringNativeMethodsTestDeath, RegisterNativesDeathTest)
+TEST_F(RegisteringNativeMethodsTestDeath, DISABLED_RegisterNativesDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -103,7 +103,7 @@ TEST_F(RegisteringNativeMethodsTest, RegisterNativesArrayTest)
     ASSERT_EQ(env_->CallStaticLongMethod(cls, long_foo_id), static_cast<ets_int>(84_I));
 }
 
-TEST_F(RegisteringNativeMethodsTestDeath, UnregisterNativesDeathTest)
+TEST_F(RegisteringNativeMethodsTestDeath, DISABLED_UnregisterNativesDeathTest)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

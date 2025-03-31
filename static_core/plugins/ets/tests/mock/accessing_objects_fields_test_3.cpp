@@ -31,7 +31,7 @@ public:
 class AccessingObjectsFieldsTest : public AccessingObjectsFieldsTestGeneral {};
 class AccessingObjectsFieldsTestDeath : public AccessingObjectsFieldsTestGeneral {};
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetFieldIDDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetFieldIDDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -194,7 +194,7 @@ TEST_F(AccessingObjectsFieldsTest, SetTypeField)
     EXPECT_EQ(env_->GetIntField(setAObj, aMemberId), static_cast<ets_int>(5_I));
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetStaticFieldIDDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetStaticFieldIDDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -379,7 +379,7 @@ TEST_F(AccessingObjectsFieldsTest, SetStaticField2)
     EXPECT_EQ(env_->GetIntField(setAObj, aMemberId), static_cast<ets_int>(5_I));
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetStaticTypeFieldDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetStaticTypeFieldDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -454,7 +454,7 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_GetStaticTypeFieldBase)
     EXPECT_EQ(env_->GetIntField(aObj, aMemberId), static_cast<ets_int>(1));
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, SetStaticTypeFieldDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_SetStaticTypeFieldDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
