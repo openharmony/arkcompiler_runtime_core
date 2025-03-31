@@ -175,6 +175,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
                                          heapManager->GetMemStats(), runtimeIface_);
     stringTable_ = allocator->New<StringTable>();
     monitorPool_ = allocator->New<MonitorPool>(allocator);
+    finalizationRegistryManager_ = allocator->New<FinalizationRegistryManager>(this);
     referenceProcessor_ = allocator->New<mem::ets::EtsReferenceProcessor>(mm_->GetGC());
 
     auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
@@ -199,6 +200,7 @@ PandaEtsVM::~PandaEtsVM()
     allocator->Delete(coroutineManager_);
     allocator->Delete(referenceProcessor_);
     allocator->Delete(monitorPool_);
+    allocator->Delete(finalizationRegistryManager_);
     allocator->Delete(stringTable_);
     allocator->Delete(compiler_);
 
@@ -373,19 +375,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
     ASSERT(Coroutine::GetCurrent() != nullptr);
     ASSERT(GetMutatorLock()->HasLock());
     auto coroutine = EtsCoroutine::GetCurrent();
-    auto *coroManager = coroutine->GetCoroutineManager();
-
-    if (finRegLastIndex_ != 0 && UpdateFinRegCoroCountAndCheckIfCleanupNeeded()) {
-        auto *objArray =
-            EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
-        auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
-        Method *cleanup = PlatformTypes(this)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
-        auto launchMode =
-            coroManager->IsMainWorker(coroutine) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
-        auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(launchMode))};
-        [[maybe_unused]] bool launchResult = coroManager->Launch(event, cleanup, std::move(args), launchMode);
-        ASSERT(launchResult);
-    }
+    GetFinalizationRegistryManager()->StartCleanupCoroIfNeeded(coroutine);
     coroutine->GetPandaVM()->CleanFinalizableReferenceList();
 }
 
@@ -782,70 +772,6 @@ void PandaEtsVM::DeleteWeakGlobalRef(ets_weak weakRef)
         return;
     }
     GetGlobalObjectStorage()->Remove(ref);
-}
-
-static void SortFinalizationRegistryArray(EtsHandle<EtsObjectArray> &objArrayHandle, size_t &finRegLastIndex)
-{
-    size_t head = 0;
-    size_t tail = objArrayHandle->GetLength() - 1;
-    while (head < tail) {
-        while (head < tail && objArrayHandle->Get(head) != nullptr) {
-            head++;
-        }
-        while (head < tail && objArrayHandle->Get(tail) == nullptr) {
-            tail--;
-        }
-        if (head < tail) {
-            objArrayHandle->Set(head, objArrayHandle->Get(tail));
-            objArrayHandle->Set(tail, nullptr);
-        }
-    }
-    finRegLastIndex = tail;
-}
-
-static void EnsureFinalizationRegistryInstancesCapacity(EtsCoroutine *coro, size_t &finRegLastIndex,
-                                                        mem::Reference *&ref)
-{
-    auto *vm = coro->GetPandaVM();
-    EtsClass *objectClass = vm->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
-    if (ref == nullptr) {
-        constexpr uint32_t SIZE = 10;
-        auto *objArray = EtsObjectArray::Create(objectClass, SIZE, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-        ref = vm->GetGlobalObjectStorage()->Add(objArray->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
-        finRegLastIndex = 0;
-        return;
-    }
-    auto *objArray = EtsObjectArray::FromCoreType(vm->GetGlobalObjectStorage()->Get(ref));
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObjectArray> objArrayHandle(coro, objArray);
-    ASSERT(objArrayHandle.GetPtr() != nullptr);
-    size_t finRegCapacity = objArrayHandle->GetLength();
-    if (finRegLastIndex >= finRegCapacity) {
-        SortFinalizationRegistryArray(objArrayHandle, finRegLastIndex);
-        if (finRegLastIndex >= finRegCapacity) {
-            auto *newFinalizationRegistryInstances = EtsObjectArray::Create(objectClass, (finRegCapacity * 2U) + 1U,
-                                                                            SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-            objArrayHandle->CopyDataTo(newFinalizationRegistryInstances);
-            vm->GetGlobalObjectStorage()->Remove(ref);
-            ref = vm->GetGlobalObjectStorage()->Add(newFinalizationRegistryInstances->GetCoreType(),
-                                                    ark::mem::Reference::ObjectType::GLOBAL);
-        }
-    }
-}
-
-void PandaEtsVM::RegisterFinalizationRegistryInstance(EtsObject *instance)
-{
-    ASSERT_MANAGED_CODE();
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> instanceHandle(coroutine, instance);
-    EnsureFinalizationRegistryInstancesCapacity(coroutine, finRegLastIndex_,
-                                                registeredFinalizationRegistryInstancesRef_);
-    auto *objArray =
-        EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
-    ASSERT(objArray->GetLength() != 0);
-    objArray->Set(finRegLastIndex_, instanceHandle.GetPtr());
-    finRegLastIndex_++;
 }
 
 void PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,

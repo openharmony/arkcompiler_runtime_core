@@ -26,7 +26,7 @@ extern "C" EtsInt StdFinalizationRegistryRegisterInstance(EtsObject *instance)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    coro->GetPandaVM()->RegisterFinalizationRegistryInstance(instance);
+    coro->GetPandaVM()->GetFinalizationRegistryManager()->RegisterInstance(instance);
     auto launchMode = coro->GetCoroutineManager()->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER
                                                                       : CoroutineLaunchMode::DEFAULT;
     return static_cast<EtsInt>(launchMode);
@@ -36,7 +36,7 @@ extern "C" void StdFinalizationRegistryFinishCleanup()
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    coro->GetPandaVM()->FinalizationRegistryCoroutineExecuted();
+    coro->GetPandaVM()->GetFinalizationRegistryManager()->CleanupCoroFinished();
 }
 
 }  // namespace ark::ets::intrinsics
