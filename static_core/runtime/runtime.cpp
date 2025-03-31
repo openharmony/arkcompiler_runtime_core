@@ -795,12 +795,22 @@ bool Runtime::HandleAotOptions()
     if (!aotFiles.empty()) {
         for (auto &fname : aotFiles) {
             auto res = FileManager::LoadAnFile(fname, true);
+#ifdef PANDA_TARGET_OHOS
+            if (!res) {
+                LOG(ERROR, AOT) << "Failed to load AoT file: " << res.Error();
+                continue;
+            }
+            if (!res.Value()) {
+                LOG(ERROR, AOT) << "Failed to load '" << fname << "' with unknown reason";
+            }
+#else
             if (!res) {
                 LOG(FATAL, AOT) << "Failed to load AoT file: " << res.Error();
             }
             if (!res.Value()) {
                 LOG(FATAL, AOT) << "Failed to load '" << fname << "' with unknown reason";
             }
+#endif
         }
     }
 
