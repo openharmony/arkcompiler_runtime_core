@@ -330,9 +330,6 @@
 #24167 no methods should be inherited using readonly utility type
 05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_0.ets
 
-#20330 Compiler doesn't respect type argument for Array<T>
-05.generics/03.utility_types/04.record_utility_type/rec_3.ets
-
 #23079
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_5.ets
 
