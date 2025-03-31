@@ -1926,13 +1926,15 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 class ArrayValuesIterator_T<T> implements IterableIterator<T> {
     private parent: Array<T>
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: Array<T>) {
         this.parent = parent
     }
 
     override next(): IteratorResult<T> {
-        if (this.idx >= this.parent.actualLength) {
+        if (this.isDone || this.idx >= this.parent.actualLength) {
+            this.isDone = true
             return new IteratorResult<T>()
         }
         return new IteratorResult<T>(this.parent.$_get_unsafe(this.idx++))
@@ -1950,13 +1952,15 @@ class ArrayValuesIterator_T<T> implements IterableIterator<T> {
 class ArrayEntriesIterator_T<T> implements IterableIterator<[number, T]> {
     private parent: Array<T>
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: Array<T>) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, T]> {
-        if (this.idx >= this.parent.actualLength) {
+        if (this.isDone || this.idx >= this.parent.actualLength) {
+            this.isDone = true
             return new IteratorResult<[number, T]>()
         }
         const i = this.idx++;
