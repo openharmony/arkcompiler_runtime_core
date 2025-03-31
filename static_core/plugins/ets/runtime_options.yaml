@@ -73,7 +73,7 @@ options:
   lang:
     - ets
   type: std::string
-  default: heap-trigger-test
+  default: heap-trigger
   possible_values:
     - heap-trigger-test
     - heap-trigger

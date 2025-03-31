@@ -420,17 +420,6 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     }
     ASSERT(!currentCoro->HasPendingException());
 
-    EtsPromise *promise = EtsPromise::Create(currentCoro);
-    if (UNLIKELY(promise == nullptr)) {
-        ThrowOutOfMemoryError(currentCoro, "Cannot allocate Promise");
-        return 0;
-    }
-    auto *coroManager = currentCoro->GetCoroutineManager();
-    auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
-
-    auto *cm = currentCoro->GetCoroutineManager();
-
     PandaVector<Value> args;
     args.reserve(method->GetNumArgs());
     Span<uint8_t> gprArgs(regArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
@@ -453,6 +442,20 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
 
     arch::ValueWriter writer(&args);
     ARCH_COPY_METHOD_ARGS(method, argReader, writer);
+
+    // Create object after arg fix ^^^.
+    // Arg fix is needed for StackWalker. So if GC gets triggered in EtsPromise::Create
+    // it StackWalker correctly finds all vregs.
+    EtsPromise *promise = EtsPromise::Create(currentCoro);
+    if (UNLIKELY(promise == nullptr)) {
+        ThrowOutOfMemoryError(currentCoro, "Cannot allocate Promise");
+        return 0;
+    }
+    auto *coroManager = currentCoro->GetCoroutineManager();
+    auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
+
+    auto *cm = currentCoro->GetCoroutineManager();
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
