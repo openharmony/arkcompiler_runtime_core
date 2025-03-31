@@ -98,7 +98,7 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
 #ifdef PANDA_JS_ETS_HYBRID_MODE
-    if (runtimeOptions.GetGcType("ets") != "g1-gc" || runtimeOptions.IsNoAsyncJit()) {
+    if (runtimeOptions.IsEnableXgc() && (runtimeOptions.GetGcType("ets") != "g1-gc" || runtimeOptions.IsNoAsyncJit())) {
         // XGC is not implemented for other GC types
         LOG(ERROR, RUNTIME) << "GC type must be g1-gc and no-async-jit option must be false";
         return false;

@@ -21,3 +21,10 @@ options:
   type: uint32_t
   default: 20
   description: Percent for XGC threshold increasing
+
+- name: enable-xgc
+  lang:
+    - ets
+  type: bool
+  default: true
+  description: Enable XGC
