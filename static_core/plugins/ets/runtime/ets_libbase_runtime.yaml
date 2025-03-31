@@ -1827,6 +1827,16 @@ intrinsics:
       args: [f64]
     impl: ark::ets::intrinsics::StdCoreDoubleToExponential
 
+  - name: StdCoreDoubleToExponentialWithNoDigit
+    space: ets
+    class_name: std.core.Double
+    method_name: toExponentialWithNoDigit
+    static: false
+    signature:
+      ret: std.core.String
+      args: []
+    impl: ark::ets::intrinsics::StdCoreDoubleToExponentialWithNoDigit
+
   - name: StdCoreDoubleToPrecision
     space: ets
     class_name: std.core.Double
