@@ -1,8 +1,10 @@
-# #22588
+#22588
 std/core/CollatorTest.ets
-# #15592 Timeouts. Will be fixed when generics accept primitives as type arguments
+
+#15592 Timeouts. Will be fixed when generics accept primitives as type arguments
 std/core/SortInternalTestByte.ets
 std/core/SortInternalTestInt.ets
 std/core/SortInternalTestShort.ets
-# #20525
+
+#20525
 std/concurrency/AsyncLockTest.ets

@@ -1,2 +1,5 @@
-# #20821
+#20821
 escompat/JsonReplacerTest.ets
+
+#22500
+std/containers/ArrayTestChecked.ets
