@@ -35,6 +35,7 @@ enum class GCWorkersTaskTypes : uint32_t {
     TASK_UPDATE_REMSET_REFS,
     TASK_ENQUEUE_REMSET_REFS,
     TASK_EVACUATE_REGIONS,
+    TASK_MARK_WHOLE_REGION,
 };
 
 constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
@@ -62,6 +63,8 @@ constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
             return "Enqueue remset references task";
         case GCWorkersTaskTypes::TASK_EVACUATE_REGIONS:
             return "Evacuate regions task";
+        case GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION:
+            return "Mark whole region task";
         default:
             return "Unknown task";
     }
@@ -71,7 +74,8 @@ class GCWorkersTask : public TaskInterface {
 public:
     explicit GCWorkersTask(GCWorkersTaskTypes type = GCWorkersTaskTypes::TASK_EMPTY) : taskType_(type)
     {
-        ASSERT(type == GCWorkersTaskTypes::TASK_EMPTY || type == GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS);
+        ASSERT(type == GCWorkersTaskTypes::TASK_EMPTY || type == GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS ||
+               type == GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION);
     }
 
     ~GCWorkersTask() = default;
@@ -170,6 +174,26 @@ public:
     {
         return static_cast<MovedObjectsRange *>(storage_);
     }
+};
+
+class GCMarkWholeRegionTask : public GCWorkersTask {
+public:
+    explicit GCMarkWholeRegionTask(Region *region, PandaDeque<ObjectHeader *> *markedObjDeque)
+        : GCWorkersTask(GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION), region_(region), markedObjDeque_(markedObjDeque)
+    {
+    }
+    DEFAULT_COPY_SEMANTIC(GCMarkWholeRegionTask);
+    DEFAULT_MOVE_SEMANTIC(GCMarkWholeRegionTask);
+    ~GCMarkWholeRegionTask() = default;
+
+    std::pair<Region *, PandaDeque<ObjectHeader *> *> GetInfo() const
+    {
+        return std::make_pair(region_, markedObjDeque_);
+    }
+
+private:
+    Region *region_;
+    PandaDeque<ObjectHeader *> *markedObjDeque_;
 };
 
 }  // namespace ark::mem

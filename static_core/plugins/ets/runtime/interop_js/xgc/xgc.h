@@ -17,6 +17,7 @@
 #define PANDA_PLUGINGS_ETS_RUNTIME_INTEROP_JS_HYBRID_XGC_XGC_H
 
 #include "hybrid/ecma_vm_interface.h"
+#include "plugins/ets/runtime/interop_js/app_state_manager.h"
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "runtime/mem/gc/gc_trigger.h"
 

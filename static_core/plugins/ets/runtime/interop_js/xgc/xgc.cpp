@@ -412,7 +412,7 @@ ALWAYS_INLINE bool XGC::NeedToTriggerXGC([[maybe_unused]] const mem::GC *gc) con
     }
 #if defined(PANDA_TARGET_OHOS)
     // Don't trigger XGC in high sensitive case
-    if (gc->GetPandaVm()->GetAppState().GetState() == AppState::State::SENSITIVE_START) {
+    if (AppStateManager::GetCurrent()->GetAppState().GetState() == AppState::State::SENSITIVE_START) {
         return false;
     }
 #endif  // PANDA_TARGET_OHOS

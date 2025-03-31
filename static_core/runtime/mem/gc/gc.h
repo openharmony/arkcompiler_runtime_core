@@ -491,6 +491,9 @@ public:
 
     bool IsClearSoftReferencesEnabled() const;
 
+    bool GetFastGCFlag() const;
+    void SetFastGCFlag(bool fastGC);
+
 protected:
     /// @brief Runs all phases
     void RunPhases(GCTask &task);
@@ -796,6 +799,7 @@ private:
     PandaVM *vm_ {nullptr};
     std::atomic<bool> isFullGc_ {false};
     std::atomic<bool> isPostponeEnabled_ {false};
+    std::atomic<bool> fastGC_ {false};
     bool clearSoftReferencesEnabled_ {false};
 };
 

@@ -81,16 +81,17 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
 static void AppStateCallback(int state, int64_t timeStamp)
 {
     auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
-    auto *pandaVm = Runtime::GetCurrent()->GetPandaVM();
-    pandaVm->UpdateAppState(appState);
+    auto *etsVm = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
+    AppStateManager::GetCurrent()->UpdateAppState(appState);
+    etsVm->GetGC()->SetFastGCFlag(appState.GetState() == AppState::State::SENSITIVE_START);
     switch (static_cast<AppState::State>(state)) {
         case AppState::State::SENSITIVE_START:
-            pandaVm->GetGC()->PostponeGCStart();
+            etsVm->GetGC()->PostponeGCStart();
             break;
         case AppState::State::SENSITIVE_END:
             [[fallthrough]];
         case AppState::State::COLD_START_FINISHED:
-            pandaVm->GetGC()->PostponeGCEnd();
+            etsVm->GetGC()->PostponeGCEnd();
             break;
         default:
             break;
@@ -749,6 +750,7 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
     if (!CheckRuntimeOptions(mainCoro)) {
         return false;
     }
+    AppStateManager::Create();
     {
         ScopedManagedCodeThread sm(mainCoro);
         InteropCtx::Init(mainCoro, static_cast<napi_env>(napiEnv));
@@ -766,7 +768,12 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 
     // In the hybrid mode with JSVM=leading VM, we are binding the EtsVM lifetime to the JSVM's env lifetime
     napi_add_env_cleanup_hook(
-        InteropCtx::Current()->GetJSEnv(), [](void *) { ark::Runtime::Destroy(); }, nullptr);
+        InteropCtx::Current()->GetJSEnv(),
+        [](void *) {
+            AppStateManager::Destroy();
+            ark::Runtime::Destroy();
+        },
+        nullptr);
 #if defined(PANDA_TARGET_OHOS)
     return TryInitInteropInJsEnv(napiEnv);
 #else

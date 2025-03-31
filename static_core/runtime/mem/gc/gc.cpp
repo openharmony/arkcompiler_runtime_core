@@ -280,23 +280,31 @@ void GC::RestoreCpuAffinity()
     ResetCpuAffinity(false);
 }
 
+bool GC::GetFastGCFlag() const
+{
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    return fastGC_.load(std::memory_order_relaxed);
+}
+
+void GC::SetFastGCFlag(bool fastGC)
+{
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    fastGC_.store(fastGC, std::memory_order_relaxed);
+}
+
 bool GC::NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) const
 {
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
     // should become visible
     auto newCounter = gcCounter_.load(std::memory_order_acquire);
     ASSERT(newCounter >= counterBeforeWaiting);
-    bool isSensitiveState = false;
-    // NOTE(malinin, 24305): refactor appstate to be moved to another method
-#if defined(PANDA_TARGET_OHOS)
-    auto currentState = this->GetPandaVm()->GetAppState();
-    isSensitiveState = currentState.GetState() == AppState::State::SENSITIVE_START;
-#endif
-    bool shouldRunAccordingToAppState = !(isSensitiveState && task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
+    bool shouldRunGCAccordingToFlag = !(GetFastGCFlag() && task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
     // Atomic with acquire order reason: data race with last_cause_ with dependecies on reads after the load which
     // should become visible
     return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason) &&
-           shouldRunAccordingToAppState;
+           shouldRunGCAccordingToFlag;
 }
 
 bool GC::GCPhasesPreparation(const GCTask &task)
