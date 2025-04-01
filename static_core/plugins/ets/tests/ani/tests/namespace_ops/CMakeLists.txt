@@ -26,18 +26,21 @@ ani_add_gtest(ani_test_namespace_find_namespace
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_namespace_test.ets
 )
 
-ani_add_gtest(ani_test_namespace_find_class
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_class_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_class_test.ets
-)
-
 # NOTE(ypigunova) enable tests. Issue: #23593
 if (PANDA_TARGET_ARM32)
     return()
 endif()
 
+ani_add_gtest(ani_test_namespace_find_class
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_class_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_class_test.ets
+)
+
 ani_add_gtest(ani_test_namespace_find_enum
-    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_enum_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_find_enum_test.ets
+)
+ani_add_gtest(ani_test_namespace_combinatorial
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_combinatorial_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/namespace_combinatorial_test.ets
 )

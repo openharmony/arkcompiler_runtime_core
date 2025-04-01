@@ -14,11 +14,20 @@
  */
 
 export namespace ops {
+    let a: int = 1;
     function getInitialIntValue(): int {
-        return 0;
+        return 1;
     }
+    class A {}
+    namespace ttt {}
+    enum Color {
+        RED,
+        BLUE,
+        GREEN
+    }
+    export native function sum(a: int, b: int): int;
 }
-namespace opsT {
+namespace opst {
     function getInitialIntValue(): int {
         return 0;
     }
@@ -26,10 +35,37 @@ namespace opsT {
 
 namespace outer {
     namespace inner {
+        let a: int = 1;
         function getInitialIntValue(): int {
-            return 0;
+            return 1;
         }
+        class A {}
+        namespace ttt {}
+        enum Color {
+            RED,
+            BLUE,
+            GREEN
+        }
+        export native function sum(a: int, b: int): int;
     }
 } 
 
-    
+namespace a {
+    namespace a {}
+}
+namespace b {}
+namespace c {}
+namespace d {}
+namespace e {}
+namespace f {}
+namespace g {}
+namespace h {}
+namespace i {}
+namespace j {}
+
+namespace at {
+    namespace bt {
+        namespace ct {}
+    }
+    namespace ct {}
+}

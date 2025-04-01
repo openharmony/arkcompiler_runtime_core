@@ -16,3 +16,17 @@
 export let moduleX: int = 3;
 export let moduleXS: String = "abc";
 let moduleS: String = "abc";
+export let moduleA: int = 3;
+export let moduleB: int = 3;
+export let moduleC: int = 3;
+export let moduleD: int = 3;
+export let moduleE: int = 3;
+export let moduleF: int = 3;
+export let moduleG: int = 3;
+export let moduleH: int = 3;
+export let moduleI: int = 3;
+export let moduleJ: int = 3;
+namespace ops {
+    let moduleT: int = 3;
+}
+const moduleXB = 1;

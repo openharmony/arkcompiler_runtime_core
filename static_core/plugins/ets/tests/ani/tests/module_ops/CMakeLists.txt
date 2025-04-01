@@ -23,25 +23,31 @@ ani_add_gtest(ani_test_module_find_variable
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_variable_test.ets
 )
 
+# NOTE(ypigunova) enable tests. Issue: #23593
+if (PANDA_TARGET_ARM32)
+    return()
+endif()
+
 ani_add_gtest(ani_test_module_find_class
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_class_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_class_test.ets
 )
 
-ani_add_gtest(ani_test_module_find_namespace
+ani_add_gtest(ani_test_module_find_combination
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.ets
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_combination_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_combination_test.ets
 )
-
-# NOTE(ypigunova) enable tests. Issue: #23593
-if (PANDA_TARGET_ARM32)
-    return()
-endif()
 
 ani_add_gtest(ani_test_module_find_enum
     ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_enum_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_enum_test.ets
+)
+
+ani_add_gtest(ani_test_module_find_namespace
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module_find_namespace_test.ets
 )
