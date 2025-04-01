@@ -526,9 +526,7 @@ export function setTimeout(func: Function): number {
  * @returns number - timer id
  */
 export function setTimeout(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
-    return startTimer(():void => {
-        func.unsafeCall(...args)
-    }, delayMs, true);
+    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, false);
 }
 
 /**
@@ -584,9 +582,7 @@ export function setInterval(func: Function): number {
  * @returns number - timer id
  */
 export function setInterval(func: Function, delayMs: number, ...args: FixedArray<NullishType>): number {
-    return startTimer(():void => {
-        func.unsafeCall(...args)
-    }, delayMs, false);
+    return startTimer((): void => { func.unsafeCall(...args) }, delayMs, true);
 }
 
 /**
@@ -623,13 +619,13 @@ export function clearInterval(timerId: number): void {
     stopTimer(timerId);
 }
 
-function startTimer(func: () => void, delayMs: number, oneShotTimer: boolean): number
+function startTimer(func: () => void, delayMs: number, repeat: boolean): number
 {
     const realDelayMs = delayMs as int; 
     if (CoroutineExtras.isMainWorker()) {
-        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, oneShotTimer) as number;
+        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat) as number;
     }
-    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, !oneShotTimer) as number;
+    return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat) as number;
 }
 
 function stopTimer(timerId: number): void
@@ -641,5 +637,5 @@ function stopTimer(timerId: number): void
     clearTimer(timerId as int);
 }
 
-native function startTimerImpl(func: Object, delayMs: int, oneShotTimer: boolean): int;
+native function startTimerImpl(func: Object, delayMs: int, repeat: boolean): int;
 native function stopTimerImpl(timerId: int): void;

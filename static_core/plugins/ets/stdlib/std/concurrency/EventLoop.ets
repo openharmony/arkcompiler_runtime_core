@@ -39,7 +39,7 @@ class EventLoop {
     }
 
     static createTimer(callback: Callback, delay: int, repeat: boolean): Timer {
-        return EventLoop.timerTable.createTimer(callback, delay, repeat);
+        return EventLoop.timerTable.createTimer(callback, delay, repeat, 0);
     }
 
     static clearTimer(id: TimerId) {
@@ -135,10 +135,11 @@ class Registry {
 };
 
 class Timer {
-    constructor(callback: Callback, delay: int, repeat: boolean, id: TimerId) {
+    constructor(callback: Callback, delay: int, repeat: boolean, linkedTimer: long, id: TimerId) {
         this.callback = callback;
         this.delay = delay;
         this.repeat = repeat;
+        this.linkedTimer = linkedTimer;
         this.id = id;
         this.startTime = Date.now();
         this.elapsedTime = 0;
@@ -170,9 +171,14 @@ class Timer {
         this.elapsedTime = 0;
     }
 
+    public hasLinkedTimer(): boolean {
+        return this.linkedTimer != 0;
+    }
+
     private callback: Callback;
     private delay: int;
     private repeat: boolean;
+    private linkedTimer: long;
     private id: TimerId;
     private startTime: number;
     private elapsedTime: number;
@@ -185,18 +191,37 @@ class TimerTable {
         this.timers = new Map<TimerId, Timer>();
     }
 
-    public createTimer(callback: Callback, delay: int, repeat: boolean): Timer {
+    public createTimer(callback: Object, delay: int, repeat: boolean, linkedTimer: long): Timer {
+        return this.createTimer(callback as Callback, delay, repeat, linkedTimer);
+    }
+
+    public createTimer(callback: Callback, delay: int, repeat: boolean, linkedTimer: long): Timer {
         let timer: Timer;
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
             let timerId = this.nextFreeId++;
-            timer = new Timer(callback, delay, repeat, timerId);
+            timer = new Timer(callback, delay, repeat, linkedTimer, timerId);
             this.timers.set(timerId, timer);
+        });
+        return timer;
+    }
+
+    public findTimer(id: TimerId): Timer | undefined {
+        let timer: Timer | undefined;
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            timer = this.timers.get(id);
         });
         return timer;
     }
 
     public clearTimer(id: TimerId) {
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            let timer = this.timers.get(id);
+            if (timer === undefined) {
+                return;
+            }
+            if (timer!.hasLinkedTimer() && !CoroutineExtras.workerHasExternalScheduler()) {
+                throw new Error('Failed to clear timer. Unable to clear interop timer from non-interop worker');
+            }
             this.timers.delete(id);
         });
     }

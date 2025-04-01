@@ -108,7 +108,7 @@ static bool RegisterAppStateCallback([[maybe_unused]] napi_env env)
 #endif
 }
 
-static bool RegisterTimerModule(napi_env jsEnv)
+static bool RegisterTimerModule()
 {
     ani_vm *vm = nullptr;
     ani_size count = 0;
@@ -124,7 +124,7 @@ static bool RegisterTimerModule(napi_env jsEnv)
     ani_env *aniEnv = nullptr;
     status = vm->GetEnv(ANI_VERSION_1, &aniEnv);
     ASSERT(status == ANI_OK);
-    return TimerModule::Init(aniEnv, jsEnv);
+    return TimerModule::Init(aniEnv);
 }
 
 static void RegisterEventLoopModule(EtsCoroutine *coro)
@@ -756,7 +756,7 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 
     // NOTE(konstanting): support instantiation in the TimerModule and move this code to the InteropCtx constructor.
     // The TimerModule should be bound to the exact JsEnv
-    if (!RegisterTimerModule(InteropCtx::Current()->GetJSEnv())) {
+    if (!RegisterTimerModule()) {
         // throw some errors
     }
     if (!RegisterAppStateCallback(InteropCtx::Current()->GetJSEnv())) {

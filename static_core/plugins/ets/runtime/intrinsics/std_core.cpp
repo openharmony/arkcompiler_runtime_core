@@ -155,6 +155,12 @@ extern "C" EtsBoolean StdSystemIsMainWorker()
     return static_cast<EtsBoolean>(coro->GetCoroutineManager()->IsMainWorker(coro));
 }
 
+extern "C" EtsBoolean StdSystemWorkerHasExternalScheduler()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    return static_cast<EtsBoolean>(coro->GetWorker()->IsExternalSchedulingEnabled());
+}
+
 extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
 {
     if (UNLIKELY(scaler == 0)) {

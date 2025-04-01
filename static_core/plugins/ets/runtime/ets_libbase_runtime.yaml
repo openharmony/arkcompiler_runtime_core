@@ -4111,6 +4111,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdSystemIsMainWorker
 
+  - name: StdCoroutineWorkerHasExternalScheduler
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: workerHasExternalScheduler
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::StdSystemWorkerHasExternalScheduler
+
   - name: StdCoroutineScaleWorkersPool
     space: ets
     class_name: std.debug.concurrency.CoroutineExtras
