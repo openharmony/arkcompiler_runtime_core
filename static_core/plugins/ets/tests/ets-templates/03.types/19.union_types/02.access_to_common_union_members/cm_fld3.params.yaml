@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -137,22 +137,22 @@ cases:
     - decl: |-
           // interfaces, properties of union type
           interface I {
-              fld: Number|null|String
+              fld: string|number|undefined
           }
           interface J {
-              fld: Number|String|null
+              fld: string|number|undefined
           }
           class A implements I {
-              fld: number|null|string = 42.0
+              fld: string|number|undefined = 42.0
           }
           class B implements J {
-              fld: 'a'|null|string|number|never
+              fld: 'a'|string|number|undefined
           }
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
           assertEQ(u1.fld, 42.0)
-          assertEQ(u2.fld, null)
+          assertEQ(u2.fld, undefined)
 
     - decl: |-
           // interfaces, properties of array type
