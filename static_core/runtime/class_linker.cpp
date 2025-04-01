@@ -308,6 +308,24 @@ private:
     panda_file::ClassDataAccessor *dataAccessor_;
 };
 
+void ClassLinker::FreeITableAndInterfaces(ITable itable, Span<Class *> &interfaces)
+{
+    auto table = itable.Get();
+    if (!table.Empty()) {
+        for (size_t i = 0; i < table.Size(); i++) {
+            Span<Method *> imethods = table[i].GetMethods();
+            if (!imethods.Empty()) {
+                allocator_->Free(imethods.begin());
+            }
+            table[i].SetInterface(nullptr);
+        }
+        allocator_->Free(table.begin());
+    }
+    if (!interfaces.Empty()) {
+        allocator_->Free(interfaces.begin());
+    }
+}
+
 bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
                                  Span<Class *> interfaces, ClassLinkerContext *context,
                                  ClassLinkerErrorHandler *errorHandler)
@@ -322,6 +340,7 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::Class
         return false;
     }
     if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
+        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(dataAccessor, info.itableBuilder->GetITable());
@@ -370,6 +389,7 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, Span<Method> meth
         return false;
     }
     if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
+        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(info.itableBuilder->GetITable(), isInterface);
