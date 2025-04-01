@@ -37,7 +37,7 @@ cases:
     - sig1: 'p1: A[], p2: B[]'
       arg1: '[new A(), new A()], [new B(), new B()]'
       sig2: 'p1: A[], p2: Object[]'
-      arg2: '[new A(), new A()], [new A(), new A()]'
+      arg2: '[new A(), new A()], [new Object(), new Object()]'
       decl: |-
           class A {}
           class B {}

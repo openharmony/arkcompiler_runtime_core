@@ -121,8 +121,8 @@ cases:
           interface I {}
           class A implements I {}
       vals:
-          - { type: 'A[]', expr: 'new A[1]' }
-          - { type: 'I[]', expr: 'new A[1]' }
+          - { type: 'A[]', expr: '[new A]' }
+          - { type: 'I[]', expr: '[new A]' }
           - { type: 'Comparable<Float>[]', expr: '[new Float(3.14f)]' }
 
     - res: 'object'

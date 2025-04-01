@@ -18,7 +18,7 @@ cases:
   - { type: '(a: Boolean) => Object[]', expr: '(a: Boolean): Object[] => { return [a]; }', op: '!==' }
   - { type: 'String|null', expr: 'null', op: '!==' }
   - { type: '((a: Object) => Object)[]|null', expr: '[]', op: '!==' }
-  - { type: '(Double|null)[][]', expr: 'new Double[1][1]', op: '!==' }
+  - { type: '(double|null)[][]', expr: '[[1.0, 2.0, null]]', op: '!==' }
 
   - defs: |-
       interface I {}

@@ -101,32 +101,32 @@ function_decls:
           assertTrue(foo() instanceof Long[][])
 
     - decl: |-
-          let s: Long[][] = new Long[1][1]
-          function foo() {  // infer Object[][]
+          let s: long[][] = new long[1][1]
+          function foo() {  // infer Error[][]|long[][]
               if (s != null)
                   return s;
               else
                   return new Error[1][1];
           }
       call: |-
-          let v: Object[][] = foo();
-          assertTrue(foo() instanceof Object[][])
+          let v: long[][] = foo() as long[][];
+          assertEQ(v[0][0], 0)
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
-          function foo() {  // infer Object[]
-              if (s != null)
+          function foo() {  // infer Error[]|Long[][]
+              if (s == null)
                   return s;
               else
                   return new Error[1];
           }
       call: |-
-          let v: Object[] = foo();
-          assertTrue(foo() instanceof Object[])
+          let v: Error[] = foo() as Error[];
+          assertEQ(v.length, 1)
 
     - decl: |-
           let s: Long[][] | null = new Long[1][1]
-          function foo() {  // infer Object
+          function foo() {  // infer Error|Long[][]
               if (s != null)
                   return s;
               else

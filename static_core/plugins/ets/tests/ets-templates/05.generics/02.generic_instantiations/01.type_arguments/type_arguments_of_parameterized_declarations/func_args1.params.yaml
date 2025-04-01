@@ -58,6 +58,7 @@ cases:
       if (foo <X[]> (v, new Y<X>[0]) !== v) {
           return 1;
       }
+    tags: 'compile-only, negative'
 
   - use: |-
       let v: Color[] = [Color.Red]
@@ -99,6 +100,7 @@ cases:
       }
     decl: |-
       type B = X[]|null
+    tags: 'compile-only, negative'
 
   # Autoboxing of primitives
   - use: |-

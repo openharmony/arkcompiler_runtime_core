@@ -18,22 +18,15 @@
 desc: >-
     Function types conversion is the conversion of one function type to another.
     Composite context, array, function type conversion, implicit
+tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 
 function main() {
-    try {
 {% for t in c['to'] %}
-        let w{{loop.index}}: ({{t.type}})[] = [foo, foo]
-        w{{loop.index}} = [foo]
-        assertTrue( w{{loop.index}}[0]{{t.call}} )
-
-        let q{{loop.index}}: ({{t.type}} throws)[] = []
-        q{{loop.index}} = [foo, foo, foo]
-        assertTrue( q{{loop.index}}[2]{{t.call}} )
+    let w{{loop.index}}: ({{t.type}})[] = [foo, foo]
+    w{{loop.index}} = [foo]
+    assertTrue( w{{loop.index}}[0]{{t.call}} )
 {% endfor %}
-    } catch (e) {
-        assertTrue(false)
-    }
 }
 {%- endfor %}

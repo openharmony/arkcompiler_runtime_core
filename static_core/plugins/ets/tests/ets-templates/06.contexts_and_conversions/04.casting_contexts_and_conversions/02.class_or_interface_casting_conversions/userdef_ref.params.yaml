@@ -120,6 +120,7 @@ cases:
     stype: A[]
     val: new B[1]
     dtype: I[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       interface I {}
@@ -146,6 +147,7 @@ cases:
     stype: A[]
     val: '[new B()] as B[]'
     dtype: B[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       class A {}
@@ -153,6 +155,7 @@ cases:
     stype: Object[]
     val: '[new B(), new B()] as B[]'
     dtype: B[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       class A {}
@@ -160,6 +163,7 @@ cases:
     stype: Object[]
     val: '[new B(), new B()] as B[]'
     dtype: A[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       class A {}
@@ -168,6 +172,7 @@ cases:
     stype: A[]
     val: '[new C()] as C[]'
     dtype: B[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       class S<V> {}
@@ -175,12 +180,14 @@ cases:
     stype: S<Int>[]
     val: new T<Int>[1]
     dtype: T<Int>[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       class A {}
     stype: Object[]
     val: new A[1]
     dtype: A[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       class A {}
@@ -193,6 +200,7 @@ cases:
     stype: Object
     val: new A[1][1][1]
     dtype: Object[][]
+    tags: 'compile-only, negative'
 
   # array of interfaces
   - defs: |-
@@ -201,6 +209,7 @@ cases:
     stype: J[]
     val: new A[1]
     dtype: A[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       interface J {}
@@ -208,6 +217,7 @@ cases:
     stype: Object[]
     val: new A[1]
     dtype: J[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       interface I {}
@@ -216,6 +226,7 @@ cases:
     stype: I[]
     val: new A[1]
     dtype: J[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       interface I {}
@@ -224,6 +235,7 @@ cases:
     stype: I[]
     val: new A[1]
     dtype: J[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       interface I {}
@@ -232,6 +244,7 @@ cases:
     stype: I[]
     val: new B[1]
     dtype: A[]
+    tags: 'compile-only, negative'
 
   - defs: |-
       interface I {}
@@ -240,6 +253,7 @@ cases:
     stype: I[]
     val: new B[1]
     dtype: A[]
+    tags: 'compile-only, negative'
 
   # array of functions
   - defs: |-

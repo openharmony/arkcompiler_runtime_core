@@ -75,7 +75,7 @@ cases:
               name: string|null = null
           }
       use: |-
-          let arr: A[] = new B[2]
+          let arr: A[] = [new B, new B]
           arr[0] = { name: "John" }
           arr[1] = { name: "Jack" }
           assertTrue( arr[0] instanceof A && arr[0].name == "John" )
