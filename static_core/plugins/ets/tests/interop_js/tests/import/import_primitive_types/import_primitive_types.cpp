@@ -54,8 +54,8 @@ TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeSymbol)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeSymbol"));
 }
-// NOTE issue (17741) - enable this after fix import bigInt
-TEST_F(EtsImportPrimitiveTypesTsToEtsTest, DISABLED_checkChangeBigInt)
+
+TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeBigInt)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeBigInt"));
 }

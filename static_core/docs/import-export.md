@@ -38,10 +38,10 @@ function main() {
 }
 ```
 
-It is ensured currently via the *ETSParser::ParseDefaultSources* method, which parse an internally created ets file  named "<default_import>.sts", that contains ```import * from "stdlibPath"``` import declarations for every stdlib path. What might stands out here is that in the case of import with allBinding: ```import * as M from "..."``` it would be necessary to specify an alias, but it is allowed internally for stdlibs to enable calls by simple name.
+It is ensured currently via the *ETSParser::ParseDefaultSources* method, which parse an internally created ets file  named "<default_import>.ets", that contains ```import * from "stdlibPath"``` import declarations for every stdlib path. What might stands out here is that in the case of import with allBinding: ```import * as M from "..."``` it would be necessary to specify an alias, but it is allowed internally for stdlibs to enable calls by simple name.
 
 ```
-// <default_import>.sts
+// <default_import>.ets
 import * from "std/core";
 import * from "std/math";
 // ...
@@ -60,8 +60,8 @@ Which paths included in this list are stored in a vector that can be retrieved v
       ...
     },
     "dynamicPaths": {
-      "dynamic_js_import_tests": {"language": "js", "hasDecl": false},
-      "path/to/runtime_core/static_core/tools/es2panda/test/parser/ets/dynamic_import_tests": {"language": "js", "hasDecl": true}
+      "dynamic_js_import_tests": {"language": "js"},
+      "path/to/runtime_core/static_core/tools/es2panda/test/parser/ets/dynamic_import_tests": {"language": "js", "declPath": "path/to/ets/declaration"}
     }
   }
 }
@@ -76,7 +76,7 @@ The fact that the given program is now a separate module or package module is re
 The following examples are showing what these cases looks like in the assembly code:
 
 ```
-    // test.sts
+    // test.ets
     let a: Int = 2;
 
 function foo() {}
@@ -188,19 +188,19 @@ This **foreignBinding_** member helps to eliminate "export waterfall" that symbo
 
 
 ```
-// C.sts
+// C.ets
 export let a = 2
 ```
 
-```b.sts
-// B.sts
-import { a } from c.sts  // 'a' marked as foreign
+```b.ets
+// B.ets
+import { a } from c.ets  // 'a' marked as foreign
 ```
 
 ```
-// A.sts
-import { a } from b.sts
-// 'a' is not visible here, since 'a' is foreign in B.sts
+// A.ets
+import { a } from b.ets
+// 'a' is not visible here, since 'a' is foreign in B.ets
 ```
 
 ### 4.3. Improvement possibilities/suggestions
@@ -223,7 +223,7 @@ Import directive use the following form:
 
 ## 5.1. Resolving importPath
 
-The *importPath* is a string literal which can be points to a module (separate module | package module) or a folder (package folder, or a folder which contains an index.ts/index.sts file). It can be specified with a relative or an absolute path, with or without a file extension, and must be able to manage the paths entered in arktsconfig as well.
+The *importPath* is a string literal which can be points to a module (separate module | package module) or a folder (package folder, or a folder which contains an index.ts/index.ets file). It can be specified with a relative or an absolute path, with or without a file extension, and must be able to manage the paths entered in arktsconfig as well.
 Resolving these paths within the compiler is the responsibility of the *importPathManager*. In the process of parsing an import path, the string literal will be passed to the importPathManager which will resolve it as an absolute path and adds it to an own list, called *parseList_.*
 The latter list serves to let the compiler know what still needs to be parsed (handle and avoid duplications), and this list will be requested and traversed during the *ParseSources* call. The importPathManager also handles errors that can be caught before parsing, for example non-existent, incorrectly specified import paths, but not errors that can only be found after parsing (for example, the package folder should contains only package files that use the same package directive, etc.)
 
@@ -325,10 +325,10 @@ In nutshell, when a top-level declaration is exported, the following happens:
 Default import binding allows importing a declaration exported from some module as default export
 
 ```
-//export.sts
+//export.ets
 export default class TestClass {}
 
-//import.sts
+//import.ets
 import ImportedClass from "./export"
 ```
 
@@ -410,20 +410,20 @@ As it has been mentioned above, renaming inside selective export is still under 
     * A compile time error will be thrown, if something is being imported using its original name, but it was exported with an alias
     * Similar behaviour will occur if something is being referred by its original name after being imported with a namespace import:
         ```
-        //export.sts
+        //export.ets
         function test_func(): void {}
 
         export {test_func as foo}
 
-        //import.sts
+        //import.ets
         import * as all from "./export
         all.test_func() //A compile time error will be thrown at this point, since 'test_func' has an alias 'foo'
         ```
     * Support for exporting an imported program element will also be added at some point:
         ```
-        //export.sts
+        //export.ets
         export function foo(): void {}
-        //export_imported.sts
+        //export_imported.ets
         import {foo} from "./export"
 
         export {foo}
@@ -446,10 +446,10 @@ reExportDirective:
 ```
 
     ```
-    //export.sts
+    //export.ets
     export function foo(): void {}
 
-    //re-export.sts
+    //re-export.ets
     export {foo} from "./export"
     ```
 
@@ -474,30 +474,30 @@ A brief description how it works:
 Currently, re-export is a bit tweaked. See the following example, that is a typical usage of re-export:
 
 ```
-// C.sts
+// C.ets
 export let a = 3
 
-// B.sts
-export {a} from "./C.sts"
+// B.ets
+export {a} from "./C.ets"
 
-// A.sts
-import {a} from "./B.sts"
+// A.ets
+import {a} from "./B.ets"
 ```
 
-On a very high level view, the engine copies the path of C.sts (that is defined in B.sts for re-export", and creates a direct import call to C.sts from A.sts. The following code symbolizes it:
+On a very high level view, the engine copies the path of C.ets (that is defined in B.ets for re-export", and creates a direct import call to C.ets from A.ets. The following code symbolizes it:
 
 ```
-// C.sts
+// C.ets
 export let a = 3
 
-// B.sts
-export {a} from "./C.sts"
+// B.ets
+export {a} from "./C.ets"
 
-// A.sts
-import {a} from "./C.sts"  <---- here, a direct import call is executed to C.sts, that works, but not correct.
+// A.ets
+import {a} from "./C.ets"  <---- here, a direct import call is executed to C.ets, that works, but not correct.
 ```
 
-Instead, B.sts should import all variables from C.sts and all re-exported variables should be stored in a separated re-exported-variables variable map in B. These variables are not visible in B.sts (for usage) since they are treated for re-export only. After that, A.sts can import all exported variables from B.sts including re-exported-variables.
+Instead, B.ets should import all variables from C.ets and all re-exported variables should be stored in a separated re-exported-variables variable map in B. These variables are not visible in B.ets (for usage) since they are treated for re-export only. After that, A.ets can import all exported variables from B.ets including re-exported-variables.
 
 
 ### 6.6. Type exports

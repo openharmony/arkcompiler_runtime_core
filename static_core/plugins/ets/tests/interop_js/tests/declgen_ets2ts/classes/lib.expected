@@ -12,41 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-interface I0 {
+ 
+export declare interface I0 {
     I0Method(a: string): string;
 }
-export {I0};
-
-
-interface I1 {
+export declare interface I1 {
     I1Method(a: number): number;
 }
-export {I1};
-
-
-class Base {
-    public a: number = {} as any;
-    public constructor(a: number) {};
-};
-(Base as any) = (globalThis as any).Panda.getClass('LBase;');
-export {Base};
-exports.Base = Base;
-
-class Derived extends Base implements I0, I1 {
-    public I0Method(a: string): string { return {} as any; };
-    public I1Method(a: number): number { return {} as any; };
-    public b: number = {} as any;
-    public constructor(a: number, b: number){ super(...{} as (ConstructorParameters<typeof Base>)); };
-};
-(Derived as any) = (globalThis as any).Panda.getClass('LDerived;');
-export {Derived};
-exports.Derived = Derived;
-
+export declare class Base {
+    public a: number;
+    public constructor(a: number);
+}
+export declare class Derived extends Base implements I0, I1 {
+    public I0Method(a: string): string;
+    public I1Method(a: number): number;
+    public b: number;
+    public constructor(a: number, b: number);
+}

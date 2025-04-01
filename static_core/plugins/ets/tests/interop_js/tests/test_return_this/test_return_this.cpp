@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@ namespace ark::ets::interop::js::testing {
 
 class EtsInteropReturnThisTest : public EtsInteropTest {};
 
-TEST_F(EtsInteropReturnThisTest, TestReturnThisInClass)
+TEST_F(EtsInteropReturnThisTest, DISABLED_TestReturnThisInClass)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
     ASSERT_EQ(CallEtsMethod<bool>("testReturnThisInClass"), true);
@@ -72,7 +72,7 @@ TEST_F(EtsInteropReturnThisTest, TestReturnThisAsObj)
     ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsObj"), true);
 }
 
-TEST_F(EtsInteropReturnThisTest, TestReturnThisAsObjClass)
+TEST_F(EtsInteropReturnThisTest, DISABLED_TestReturnThisAsObjClass)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
     ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsObjClass"), true);

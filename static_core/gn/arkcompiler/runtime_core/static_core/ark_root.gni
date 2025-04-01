@@ -12,3 +12,5 @@
 # limitations under the License.
 
 import("//ark_root.gni")
+
+arkplatform_include = "../../../../../arkplatform"

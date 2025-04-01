@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MUTEX_H
 
 #include "libpandabase/mem/object_pointer.h"
+#include "runtime/include/thread_scopes.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_waiters_list.h"
@@ -81,6 +82,7 @@ public:
         // to avoid use-after-free in CoroutineEvent::Happen method
         event.Lock();
         GetWaitersList(coro)->PushBack(awaitee);
+        ScopedNativeCodeThread nativeCode(coro);
         coroManager->Await(&event);
     }
 

@@ -25,22 +25,24 @@
 
 .function void run(A a0, B a1) <external>
 
-.union_field i32 bar
-.union_field i32 baz
+.record $NamedAccessMeta-i32 {
+    i32 bar
+    i32 baz
+}
 
 .function void test_1(std.core.Object a0) {
-    ets.ldobj.name a0, baz
+    ets.ldobj.name a0, $NamedAccessMeta-i32.baz
     movi v0, 2
     add2 v0
-    ets.stobj.name a0, baz
+    ets.stobj.name a0, $NamedAccessMeta-i32.baz
     return.void
 }
 
 .function void test_2(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name  a0, baz
+    ets.ldobj.name  a0, $NamedAccessMeta-i32.baz
     movi v0, 3
     add2 v0
-    ets.stobj.name a1, bar
+    ets.stobj.name a1, $NamedAccessMeta-i32.bar
     return.void
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ public:
     static void VisitCallIndirect(GraphVisitor *visitor, Inst *inst);
     static void VisitCall(GraphVisitor *visitor, Inst *inst);
     static void VisitCallDynamic(GraphVisitor *visitor, Inst *inst);
+    static void VisitCallNative(GraphVisitor *visitor, Inst *inst);
     static void VisitIntrinsic(GraphVisitor *visitor, Inst *inst);
     static void VisitParameter(GraphVisitor *visitor, Inst *inst);
     static void VisitReturn(GraphVisitor *visitor, Inst *inst);

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ function_decls:
       call: |-
           i = 0;
           foo()
-          assert(i == 1);
+          assertTrue(i == 1);
 
     - decl: |-
           let i = 0
@@ -32,7 +32,7 @@ function_decls:
       call: |-
           i = 0;
           foo()
-          assert(i == 1);
+          assertTrue(i == 1);
 
     - decl: |-
           let s = "foo"
@@ -41,7 +41,7 @@ function_decls:
           }
       call: |-
           let v: string = foo();
-          assert(foo() == "foo")
+          assertTrue(foo() == "foo")
 
     - decl: |-
           let s: int = 42
@@ -50,7 +50,7 @@ function_decls:
           }
       call: |-
           let v: int = foo();
-          assert(foo() == 42)
+          assertTrue(foo() == 42)
 
     - decl: |-
           let s: number = 1.0
@@ -59,7 +59,7 @@ function_decls:
           }
       call: |-
           let v: number = foo();
-          assert(foo() == 1.0)
+          assertTrue(foo() == 1.0)
 
     - decl: |-
           let s = new Error()
@@ -68,7 +68,7 @@ function_decls:
           }
       call: |-
           let v: Error = foo();
-          assert(foo() instanceof Error)
+          assertTrue(foo() instanceof Error)
 
     - decl: |-
           let s: number[] = [1.0, 2.0, 3.0]
@@ -77,7 +77,7 @@ function_decls:
           }
       call: |-
           let v = foo();
-          assert(v instanceof number[] && v.length == 3)
+          assertTrue(v instanceof number[] && v.length == 3)
 
     - decl: |-
           let s: Boolean[] = new Boolean[0]
@@ -86,7 +86,7 @@ function_decls:
           }
       call: |-
           let v = foo();
-          assert(v instanceof Boolean[] && v.length == 0)
+          assertTrue(v instanceof Boolean[] && v.length == 0)
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
@@ -98,7 +98,7 @@ function_decls:
           }
       call: |-
           let v: Long[][] = foo();
-          assert(foo() instanceof Long[][])
+          assertTrue(foo() instanceof Long[][])
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
@@ -110,7 +110,7 @@ function_decls:
           }
       call: |-
           let v: Object[][] = foo();
-          assert(foo() instanceof Object[][])
+          assertTrue(foo() instanceof Object[][])
 
     - decl: |-
           let s: Long[][] = new Long[1][1]
@@ -122,7 +122,7 @@ function_decls:
           }
       call: |-
           let v: Object[] = foo();
-          assert(foo() instanceof Object[])
+          assertTrue(foo() instanceof Object[])
 
     - decl: |-
           let s: Long[][] | null = new Long[1][1]
@@ -134,7 +134,7 @@ function_decls:
           }
       call: |-
           let v = foo();
-          assert(v instanceof Object)
+          assertTrue(v instanceof Object)
 
     - decl: |-
           class A {}
@@ -152,7 +152,7 @@ function_decls:
           }
       call: |-
           let v: A = foo();
-          assert(foo() instanceof A)
+          assertTrue(foo() instanceof A)
 
     - decl: |-
           class A {}
@@ -170,7 +170,7 @@ function_decls:
       call: |-
           let v: B[] = new B[1]
           v[0] = foo();
-          assert(foo() instanceof D)
+          assertTrue(foo() instanceof D)
 
     - decl: |-
           let s = 0
@@ -182,7 +182,7 @@ function_decls:
           }
       call: |-
           let v: Promise<Boolean> = foo()
-          assert(foo() instanceof Promise)
+          assertTrue(foo() instanceof Promise)
 
     - decl: |-
         let s = new Object()

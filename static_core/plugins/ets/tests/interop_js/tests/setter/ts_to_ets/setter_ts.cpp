@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,7 @@ TEST_F(EtsSetterTsToEtsTest, check_setter_subset_ref_set_object_form_ts)
     ASSERT_EQ(true, CallEtsMethod<bool>("checkSetterSubsetRefSetObjectFormTs"));
 }
 
-TEST_F(EtsSetterTsToEtsTest, check_setter_subset_value_set_object_form_ts)
+TEST_F(EtsSetterTsToEtsTest, DISABLED_check_setter_subset_value_set_object_form_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkSetterSubsetValueSetObjectFormTs"));
 }

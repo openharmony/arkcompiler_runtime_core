@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,18 +45,29 @@ using Result = ark::static_linker::Result;
 using ark::static_linker::DefaultConfig;
 using ark::static_linker::Link;
 
+#ifdef TEST_STATIC_LINKER_WITH_STS
+constexpr std::string_view ABC_FILE_EXTENSION = ".abc";
+constexpr size_t ABC_FILE_EXTENSION_LENGTH = 4;
+#endif
 constexpr size_t TEST_REPEAT_COUNT = 10;
 
-std::pair<int, std::string> ExecPanda(const std::string &file)
+std::pair<int, std::string> ExecPanda(const std::string &file, const std::string &loadRuntimes = "core",
+                                      const std::string &entryPoint = "_GLOBAL::main")
 {
     auto opts = ark::RuntimeOptions {};
-    auto boot = opts.GetBootPandaFiles();
-    for (auto &a : boot) {
-        a.insert(0, "../");
+    if (loadRuntimes == "ets") {
+        opts.SetBootPandaFiles({"../../plugins/ets/etsstdlib.abc"});
+    } else if (loadRuntimes == "core") {
+        auto boot = opts.GetBootPandaFiles();
+        for (auto &a : boot) {
+            a.insert(0, "../");
+        }
+        opts.SetBootPandaFiles(std::move(boot));
+    } else {
+        return {1, "unknown loadRuntimes " + loadRuntimes};
     }
-    opts.SetBootPandaFiles(std::move(boot));
 
-    opts.SetLoadRuntimes({"core"});
+    opts.SetLoadRuntimes({loadRuntimes});
 
     opts.SetPandaFiles({file});
     if (!ark::Runtime::Create(opts)) {
@@ -70,7 +81,7 @@ std::pair<int, std::string> ExecPanda(const std::string &file)
     auto reset = [&old](auto *cout) { cout->rdbuf(old); };
     auto guard = std::unique_ptr<std::ostream, decltype(reset)>(&std::cout, reset);
 
-    auto res = runtime->ExecutePandaFile(file, "_GLOBAL::main", {});
+    auto res = runtime->ExecutePandaFile(file, entryPoint, {});
     auto ret = std::pair<int, std::string> {};
     if (!res) {
         ret = {1, "error " + std::to_string((int)res.Error())};
@@ -266,6 +277,40 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
     } while (std::next_permutation(perms.begin(), perms.end()));
 }
 
+#ifdef TEST_STATIC_LINKER_WITH_STS
+void TestSts(const std::string &path, const std::vector<std::string> &files, bool isGood = true)
+{
+    const auto sourcePathPrefix = "data/ets/" + path + "/";
+    const auto targetPathPrefix = "data/output/" + path + "/";
+
+    std::string linkerCommand = "../../bin/ark_link";
+    linkerCommand.append(" --output " + targetPathPrefix + "linked.abc");
+    linkerCommand.append(" -- ");
+    for (const auto &f : files) {
+        if (f.length() < ABC_FILE_EXTENSION_LENGTH ||
+            f.substr(f.length() - ABC_FILE_EXTENSION_LENGTH) != ABC_FILE_EXTENSION) {
+            linkerCommand.push_back('@');  // test filesinfo
+        }
+        linkerCommand.append(sourcePathPrefix + f);
+        linkerCommand.push_back(' ');
+    }
+    // NOLINTNEXTLINE(cert-env33-c)
+    auto linkRes = std::system(linkerCommand.c_str());
+
+    if (isGood) {
+        ASSERT_EQ(linkRes, 0);
+        auto gold = std::string {};
+        ASSERT_TRUE(ReadFile<false>(sourcePathPrefix + "out.gold", gold));
+        NormalizeGold(gold);
+        auto ret = ExecPanda(targetPathPrefix + "linked.abc", "ets", "1/ETSGLOBAL::main");
+        ASSERT_EQ(ret.first, 0);
+        ASSERT_EQ(ret.second, gold);
+    } else {
+        ASSERT_NE(linkRes, 0);
+    }
+}
+#endif
+
 TEST(linkertests, HelloWorld)
 {
     TestSingle("hello_world");
@@ -413,13 +458,55 @@ TEST(linkertests, ForeignBase)
         func.AddInstruction(ark::pandasm::Create_LDOBJ(0, "Derv.fld"));
         func.AddInstruction(ark::pandasm::Create_RETURN_VOID());
 
-        progDer.functionTable.emplace(func.name, std::move(func));
+        progDer.functionInstanceTable.emplace(func.name, std::move(func));
 
         ASSERT_TRUE(ark::pandasm::AsmEmitter::Emit(dervPath, progDer));
     }
 
     auto res = Link(DefaultConfig(), "data/multi/ForeignBase.linked.abc", {basePath, dervPath});
     ASSERT_TRUE(res.errors.empty()) << res.errors.front();
+#endif
+}
+
+TEST(linkertests, StsHelloWorld)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestSts("hello_world", {"1.ets.abc"});
+#endif
+}
+
+TEST(linkertests, StsForeignClass)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestSts("fclass", {"1.ets.abc", "2.ets.abc"});
+#endif
+}
+
+TEST(linkertests, StsForeignMethod)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestSts("fmethod", {"1.ets.abc", "2.ets.abc"});
+#endif
+}
+
+TEST(linkertests, StsFMethodOverloaded)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestSts("fmethod_overloaded", {"1.ets.abc", "2.ets.abc"});
+#endif
+}
+
+TEST(linkertests, StsFMethodOverloaded2)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestSts("fmethod_overloaded_2", {"1.ets.abc", "2.ets.abc", "3.ets.abc", "4.ets.abc"});
+#endif
+}
+
+TEST(linkertests, FilesInfo)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestSts("filesinfo", {"filesinfo.txt"});
 #endif
 }
 }  // namespace

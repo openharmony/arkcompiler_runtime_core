@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,6 +198,14 @@ void ThrowClassCircularityError(const PandaString &className, const LanguageCont
     auto *thread = ManagedThread::GetCurrent();
     PandaString msg = "Class or interface \"" + className + "\" is its own superclass or superinterface";
     ThrowException(ctx, thread, ctx.GetClassCircularityErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
+}
+
+void ThrowCoroutinesLimitExceedError(const PandaString &msg)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    auto ctx = GetLanguageContext(thread);
+
+    ThrowException(ctx, thread, ctx.GetCoroutinesLimitExceedErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
 NO_ADDRESS_SANITIZE void DropCFrameIfNecessary(ManagedThread *thread, StackWalker *stack, Frame *origFrame,
@@ -440,7 +448,8 @@ void HandlePendingException(UnwindPolicy policy)
     ASSERT(thread->HasPendingException());
     LOG(DEBUG, INTEROP) << "HandlePendingException";
 
-    thread->GetVM()->ClearInteropHandleScopes(thread->GetCurrentFrame());
+    // NOTE(konstanting): a potential candidate for moving out of the core part
+    thread->GetVM()->CleanupCompiledFrameResources(thread->GetCurrentFrame());
 
     auto stack = StackWalker::Create(thread, policy);
     ASSERT(stack.IsCFrame());

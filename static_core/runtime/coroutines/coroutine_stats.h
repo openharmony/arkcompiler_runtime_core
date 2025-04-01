@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,10 @@
 
 #include "runtime/include/histogram-inl.h"
 #include "runtime/include/mem/panda_containers.h"
+#include "runtime/coroutines/utils.h"
 #include <array>
 
 namespace ark {
-
-template <class T>
-constexpr size_t ToIndex(T idx)
-{
-    return static_cast<size_t>(idx);
-}
 
 template <class T>
 constexpr size_t COROUTINE_STATS_ENUM_SIZE = static_cast<size_t>(T::LAST_ID);
@@ -72,7 +67,7 @@ enum class CoroutineMemStats {
 class CoroutineStatsBase {
 public:
     NO_COPY_SEMANTIC(CoroutineStatsBase);
-    NO_MOVE_SEMANTIC(CoroutineStatsBase);
+    DEFAULT_MOVE_SEMANTIC(CoroutineStatsBase);
 
     /* supplementary types */
     /// possible aggregate types for the metrics
@@ -151,7 +146,7 @@ std::ostream &operator<<(std::ostream &os, CoroutineStatsBase::AggregateType id)
 class CoroutineWorkerStats : public CoroutineStatsBase {
 public:
     NO_COPY_SEMANTIC(CoroutineWorkerStats);
-    NO_MOVE_SEMANTIC(CoroutineWorkerStats);
+    DEFAULT_MOVE_SEMANTIC(CoroutineWorkerStats);
 
     explicit CoroutineWorkerStats(PandaString name) : workerName_(std::move(name)) {}
     ~CoroutineWorkerStats() override = default;
@@ -235,11 +230,11 @@ public:
      *
      * @param workerStats a vector that holds per-worker statistic instance pointers
      */
-    PandaString GetFullStatistics(PandaVector<CoroutineWorkerStats *> &&workerStats) const;
+    PandaString GetFullStatistics(const PandaVector<CoroutineWorkerStats> &workerStats) const;
 
 protected:
     /// Aggregates data for the workers. Does not include global (not per-worker) metrics!
-    static TimeStatsDataArray GenerateTimeStatsDataArray(const PandaVector<CoroutineWorkerStats *> &workerStats);
+    static TimeStatsDataArray GenerateTimeStatsDataArray(const PandaVector<CoroutineWorkerStats> &workerStats);
 };
 
 }  // namespace ark

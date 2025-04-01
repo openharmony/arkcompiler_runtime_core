@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ cases:
       const a: T = 0x80 as byte;
     check: |-
       function main() {
-          assert(foo(a) == 1);
+          assertTrue(foo(a) == 1);
       }
 
   - decl: |-
@@ -27,7 +27,7 @@ cases:
       const a: T = 0x7FFF as short;
     check: |-
       function main() {
-          assert(foo(a) == 2);
+          assertTrue(foo(a) == 2);
       }
 
   - decl: |-
@@ -35,7 +35,7 @@ cases:
       const a: T = 127 as int;
     check: |-
       function main() {
-          assert(foo(a) == 3);
+          assertTrue(foo(a) == 3);
       }
 
   - decl: |-
@@ -43,7 +43,7 @@ cases:
       const a: T = 127 as long;
     check: |-
       function main() {
-          assert(foo(a) == 4);
+          assertTrue(foo(a) == 4);
       }
 
   - decl: |-
@@ -51,7 +51,7 @@ cases:
       const a: T = -0.0 as float;
     check: |-
       function main() {
-          assert(foo(a) == 5);
+          assertTrue(foo(a) == 5);
       }
 
   - decl: |-
@@ -59,7 +59,7 @@ cases:
       const a: T = -0.0 as double;
     check: |-
       function main() {
-          assert(foo(a) == 6); // double is an alias to number
+          assertTrue(foo(a) == 6); // double is an alias to number
       }
 
   - decl: |-
@@ -67,7 +67,7 @@ cases:
       const a: T = -0.0 as number;
     check: |-
       function main() {
-          assert(foo(a) == 6);
+          assertTrue(foo(a) == 6);
       }
 
   - decl: |-
@@ -75,7 +75,7 @@ cases:
       const a: T = c'a';
     check: |-
       function main() {
-          assert(foo(a) == 7);
+          assertTrue(foo(a) == 7);
       }
 
   - decl: |-
@@ -83,7 +83,7 @@ cases:
       const a: T = true;
     check: |-
       function main() {
-          assert(foo(a) == 8);
+          assertTrue(foo(a) == 8);
       }
 
   # Boxed
@@ -92,7 +92,7 @@ cases:
       const a: T = new Byte(0x7F as byte);
     check: |-
       function main() {
-          assert(foo(a) == 11);
+          assertTrue(foo(a) == 11);
       }
 
   - decl: |-
@@ -100,7 +100,7 @@ cases:
       const a: T = new Short(2 as short);
     check: |-
       function main() {
-          assert(foo(a) == 12);
+          assertTrue(foo(a) == 12);
       }
 
   - decl: |-
@@ -108,7 +108,7 @@ cases:
       const a: T = new Int(3 as int);
     check: |-
       function main() {
-          assert(foo(a) == 13);
+          assertTrue(foo(a) == 13);
       }
 
   - decl: |-
@@ -116,7 +116,7 @@ cases:
       const a: T = new Long(4 as long);
     check: |-
       function main() {
-          assert(foo(a) == 14);
+          assertTrue(foo(a) == 14);
       }
 
   - decl: |-
@@ -124,7 +124,7 @@ cases:
       const a: T = new Float(0.1 as float);
     check: |-
       function main() {
-          assert(foo(a) == 15);
+          assertTrue(foo(a) == 15);
       }
 
   - decl: |-
@@ -132,7 +132,7 @@ cases:
       const a: T = new Double(0.1 as double);
     check: |-
       function main() {
-          assert(foo(a) == 16); // Double is an alias to Number
+          assertTrue(foo(a) == 16); // Double is an alias to Number
       }
 
   - decl: |-
@@ -140,7 +140,7 @@ cases:
       const a: T = new Number(0.1 as number);
     check: |-
       function main() {
-          assert(foo(a) == 16);
+          assertTrue(foo(a) == 16);
       }
 
   - decl: |-
@@ -148,7 +148,7 @@ cases:
       const a: T = new Char(c'b');
     check: |-
       function main() {
-          assert(foo(a) == 17);
+          assertTrue(foo(a) == 17);
       }
 
   - decl: |-
@@ -156,7 +156,7 @@ cases:
       const a: T = "some string";
     check: |-
       function main() {
-          assert(foo(a) == 18); // string is an alias to String
+          assertTrue(foo(a) == 18); // string is an alias to String
       }
 
   - decl: |-
@@ -164,7 +164,7 @@ cases:
       const a: T = new String("some string");
     check: |-
       function main() {
-          assert(foo(a) == 18);
+          assertTrue(foo(a) == 18);
       }
 
   - decl: |-
@@ -172,7 +172,7 @@ cases:
       const a: T = new Boolean(false);
     check: |-
       function main() {
-          assert(foo(a) == 19);
+          assertTrue(foo(a) == 19);
       }
 
     # Custom
@@ -181,7 +181,7 @@ cases:
       const a: T = [1, -2];
     check: |-
       function main() {
-          assert(foo(a) == 21);
+          assertTrue(foo(a) == 21);
       }
 
   - decl: |-
@@ -189,12 +189,12 @@ cases:
       const a: T = [[new Int(1)], [new Int(-2)]];
     check: |-
       function main() {
-          assert(foo(a) == 22);
+          assertTrue(foo(a) == 22);
       }
 
   - decl: |-
       const a: TPL = [1.4, "str"];
     check: |-
       function main() {
-          assert(foo(a) == 24);
+          assertTrue(foo(a) == 24);
       }

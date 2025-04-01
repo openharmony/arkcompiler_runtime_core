@@ -13,30 +13,14 @@
  * limitations under the License.
  */
 
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
 import { Lib2Class, Lib2Class2, IntAlias } from "./lib2";
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-class C {
-    public constructor() {};
-    public o1: Lib2Class = {} as any;
-    public o2: Lib2Class2 = {} as any;
-    public v1: number = {} as any;
-};
-(C as any) = (globalThis as any).Panda.getClass('LC;');
-export {C};
-exports.C = C;
-
-class DynObjWrapper {
-    public dynObj_: any = {} as any;
-    constructor() {};
-};
-(DynObjWrapper as any) = (globalThis as any).Panda.getClass('LDynObjWrapper;');
-export {DynObjWrapper};
-exports.DynObjWrapper = DynObjWrapper;
-
+export declare class C {
+    public constructor();
+    public o1: Lib2Class;
+    public o2: Lib2Class2;
+    public v1: number;
+}
+export declare class DynObjWrapper {
+    public dynObj_: any;
+    constructor();
+}

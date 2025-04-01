@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
+#include "types/ets_primitives.h"
 
 namespace ark::ets::intrinsics {
 
@@ -100,7 +101,7 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
     auto coroutine = EtsCoroutine::GetCurrent();
     auto nameStr = name->GetMutf8();
     if (nameStr.empty()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::FILE_NOT_FOUND_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::FILE_NOT_FOUND_ERROR,
                           "The native library path is empty");
         return;
     }
@@ -120,6 +121,7 @@ extern "C" void LoadLibrary(ark::ets::EtsString *name)
 
 extern "C" void StdSystemScheduleCoroutine()
 {
+    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
     auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
     cm->Schedule();
 }
@@ -138,6 +140,27 @@ extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
 extern "C" int32_t StdSystemGetCoroutineId()
 {
     return EtsCoroutine::GetCurrent()->GetCoroutineId();
+}
+
+extern "C" EtsBoolean StdSystemIsMainWorker()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    return static_cast<EtsBoolean>(coro->GetCoroutineManager()->IsMainWorker(coro));
+}
+
+extern "C" void StdSystemScaleWorkersPool(int32_t scaler)
+{
+    if (UNLIKELY(scaler == 0)) {
+        return;
+    }
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *vm = coro->GetPandaVM();
+    auto *runtime = vm->GetRuntime();
+    if (scaler > 0) {
+        coro->GetManager()->CreateWorkers(scaler, runtime, vm);
+        return;
+    }
+    Coroutine::GetCurrent()->GetManager()->FinalizeWorkers(std::abs(scaler), runtime, vm);
 }
 
 extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)

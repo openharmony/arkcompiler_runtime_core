@@ -19,4 +19,5 @@ call build_stdlib.bat
 call build_tutorial.bat
 call build_system.bat
 call build_spec.bat
+call build_runtime.bat
 echo all pdf files are in appropriate 'build' sub-folder for every document

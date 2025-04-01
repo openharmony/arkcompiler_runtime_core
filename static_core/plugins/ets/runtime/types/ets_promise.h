@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "runtime/coroutines/coroutine_events.h"
-#include "plugins/ets/runtime/ets_remote_promise_resolver.h"
 
 namespace ark::ets {
 
@@ -143,6 +142,15 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_), p->GetCoreType());
     }
 
+    static void CreateLink(EtsObject *source, EtsPromise *target)
+    {
+        EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
+        auto *jobQueue = currentCoro->GetExternalIfaceTable()->GetJobQueue();
+        if (jobQueue != nullptr) {
+            jobQueue->CreateLink(source, target->AsObject());
+        }
+    }
+
     EtsMutex *GetMutex(EtsCoroutine *coro)
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_));
@@ -242,11 +250,6 @@ public:
     // launch promise then/catch callback: void()
     static void LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode);
 
-    void SetEtsPromiseResolver(RemotePromiseResolver *resolver)
-    {
-        remotePromiseResolver_ = reinterpret_cast<EtsLong>(resolver);
-    }
-
 private:
     void OnPromiseCompletion(EtsCoroutine *coro);
 
@@ -255,16 +258,6 @@ private:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_), nullptr);
         queueSize_ = 0;
-    }
-
-    RemotePromiseResolver *GetPromiseResolver() const
-    {
-        return reinterpret_cast<RemotePromiseResolver *>(remotePromiseResolver_);
-    }
-
-    void InvalidatePromiseResolver()
-    {
-        SetEtsPromiseResolver(nullptr);
     }
 
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
@@ -276,8 +269,7 @@ private:
     ObjectPointer<EtsObject> interopObject_;      // internal object used in js interop
     ObjectPointer<EtsObject> linkedPromise_;      // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
-    EtsLong remotePromiseResolver_;  // resolver for mirror promise
-    uint32_t state_;                 // the Promise's state
+    uint32_t state_;  // the Promise's state
 
     friend class test::EtsPromiseTest;
 };

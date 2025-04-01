@@ -1,0 +1,336 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          class A {
+              fld: int
+              foo() { this.fld = 1 }
+          }
+      use: |-
+          // Promise of void
+          let r: Promise<void> = launch new A().foo()
+          assertTrue((await r) == undefined)
+
+    - decl: |-
+          interface I {
+              foo(p: int): int;
+          }
+          class A implements I {
+              foo(p: int): int {
+                  return p + p
+              }
+          }
+      use: |-
+          // Promise of primitive
+          let i: I = new A()
+          let r = launch i.foo(42)
+          assertTrue((await r) == 84)
+
+    - decl: |-
+          interface I {
+              foo(p: Double): Double {
+                  return p + p
+              }
+          }
+          class A implements I {}
+      use: |-
+          // Promise of boxed
+          let r: Promise<Double> = launch new A().foo(new Double(42.0))
+          assertTrue((await r) == 84.0)
+
+    - decl: |-
+          class A {
+              foo(p: int): string {
+                  return `${p}`
+              }
+          }
+      use: |-
+          // Promise of string
+          let r: Promise<string> = launch new A().foo(42)
+          assertTrue((await r) == '42')
+
+    - decl: |-
+          class A {
+              foo(p: int): String {
+                  return new String(`${p}`)
+              }
+          }
+      use: |-
+          // Promise of String
+          let r: Promise<String> = launch new A().foo(42)
+          assertTrue((await r) instanceof String)
+
+    - decl: |-
+          class A {}
+          class B {
+              foo(p: Object): Object {
+                  return p
+              }
+          }
+      use: |-
+          // Promise of Object
+          let r: Promise<Object> = launch new B().foo(new A())
+          assertTrue((await r) instanceof A)
+
+    - decl: |-
+          class A {
+              foo(p: Number|undefined): Number|undefined {
+                  return p instanceof Number ? p + 1 : p
+              }
+          }
+      use: |-
+          // Promise of nullish
+          let r: Promise<Number|undefined> = launch new A().foo(42)
+          assertTrue((await r) == 43)
+
+    - decl: |-
+          class A {
+              foo(p: Number|null): Number|null {
+                  return p instanceof Number ? p + 1 : p
+              }
+          }
+      use: |-
+          // Promise of nullish
+          let r = launch new A().foo(42)
+          assertTrue((await r) == 43)
+
+    - decl: |-
+          class A {
+              foo(p: Int|null|undefined): Int|null|undefined {
+                  return p == null || p == undefined ? p : p + 1
+              }
+          }
+      use: |-
+          // Promise of nullish
+          let r: Promise<Int|undefined|null> = launch new A().foo(42)
+          assertTrue((await r) == 43)
+
+    - decl: |-
+          class A {
+              foo(p: string): string {
+                  return p + p
+              }
+              bar(p: string): Promise<string> {
+                  return launch this.foo(p)
+              }
+          }
+      use: |-
+          // Promise of promise
+          let r: Promise<Promise<String>> = launch new A().bar('A');
+          assertTrue((await r) == 'AA')
+
+    - decl: |-
+          class A {
+              foo(): int[] {
+                  return [1, 2, 3]
+              }
+          }
+      use: |-
+          // Promise of array
+          let r: Promise<int[]> = launch new A().foo()
+          let q: int[] = await r
+          assertTrue(q[0] == 1 && q[1] == 2 && q[2] == 3)
+
+    - decl: |-
+          class A {
+              foo(): (p: string) => string {
+                  return (p: string): string => { return p + p }
+              }
+          }
+      use: |-
+          // Promise of function
+          let r: Promise<(p: string) => string> = launch new A().foo()
+          assertTrue((await r)('A') == 'AA')
+
+    - decl: |-
+          type UT = number | string | boolean
+          class A {
+              foo(p: int): UT {
+                  return p == 0 ? true : p > 0 ? new Number(p) : `${p}`
+              }
+          }
+      use: |-
+          // Promise of union
+          let r = launch new A().foo(-1);
+          let q: boolean|number|string = await r
+          assertTrue(q as string == '-1')
+
+    - decl: |-
+          class A {
+              foo(p: int): [boolean, Error] {
+                  return [p > 0, new Error()]
+              }
+          }
+      use: |-
+          // Promise of tuple
+          let r: Promise<[boolean, Error]> = launch new A().foo(42);
+          let q: [boolean, Error] = await r
+          assertTrue(q[0] && (q[1] instanceof Error))
+
+    - decl: |-
+          class A {
+              foo(p: string): BigInt {
+                  return new BigInt(p)
+              }
+          }
+      use: |-
+          // Promise of BigInt
+          let r: Promise<BigInt> = launch new A().foo('123456789012345678901234567890')
+          let q: BigInt = await r
+          assertTrue(q == 123456789012345678901234567890n)
+
+    - decl: |-
+          class A {
+              foo(p: bigint): bigint {
+                  return p
+              }
+          }
+      use: |-
+          // Promise of bigint
+          let r = launch new A().foo(123456789012345678901234567890n)
+          let q: bigint = await r
+          assertTrue(q == 123456789012345678901234567890n)
+
+    - decl: |-
+          class A {
+              fld: int
+              constructor(p: int) {
+                  this.fld = p
+              }
+              foo(p: int): int {
+                  return this.fld + p
+              }
+          }
+      use: |-
+          // array of promises
+          let arr: Promise<int>[] = [
+              launch new A(1).foo(1),
+              launch new A(2).foo(2),
+              launch new A(3).foo(3),
+              launch new A(4).foo(4),
+              launch new A(5).foo(5),
+              launch new A(6).foo(6),
+              launch new A(7).foo(7),
+              launch new A(8).foo(8),
+              launch new A(9).foo(9),
+              launch new A(0).foo(0),
+          ]
+          let cnt = 0
+          for (let v of arr) cnt += (await v)
+          assertTrue(cnt == 90)
+
+    - decl: |-
+          class A {
+              fld: int
+              constructor(p: int) {
+                  this.fld = p
+              }
+              foo(p: int): int {
+                  return this.fld + p
+              }
+          }
+      use: |-
+          let arr: Object[] = new Object[10]
+          for (let i = 0; i < 10; i++) {
+              arr[i] = new A(i)
+          }
+          for (let i = 0; i < 10; i++) {
+              arr[i] = launch (arr[i] as A).foo(i)
+          }
+          let cnt = 0
+          for (let i = 9; i >= 0; i--) {
+              cnt += (await arr[i] as Promise<int>)
+          }
+          assertTrue(cnt == 90)
+
+    - decl: |-
+          enum Color { Red, Green, Blue }
+          class A {
+              foo(p: int): Color {
+                  return p > 0 ? Color.Green : Color.Blue
+              }
+          }
+      use: |-
+          // Promise of enum
+          let r = launch new A().foo(42)
+          assertTrue((await r) == Color.Green)
+
+    - decl: |-
+          enum Color { R = "red", G = "green", B = "blue" }
+          class A {
+              foo(p: int): Color {
+                  return p > 0 ? Color.G : Color.B
+              }
+          }
+      use: |-
+          // Promise of string-based enum
+          let r: Promise<Color> = launch new A().foo(-42)
+          assertTrue((await r) == Color.B)
+
+    - decl: |-
+          class B<U> {
+              foo<U>(p: U): U {
+                  return p
+              }
+          }
+          class A<T> {
+              fld: Promise<T>
+              constructor(p: T) {
+                  this.fld = launch new B<T>().foo<T>(p)
+              }
+              meth(): T {
+                  return await this.fld
+              }
+          }
+      use: |-
+          // Promise of T
+          let a: A<string> = new A<string>("abc")
+          assertTrue(a.meth() == "abc")
+
+    - decl: |-
+          class A {
+              fld: Promise<string>|null|undefined
+              static foo(p: number): string {
+                  return '' + p
+              }
+          }
+      use: |-
+          // Launch in object literal
+          let a: A = { fld: launch A.foo(42.0) }
+          assertTrue((await a.fld!) == '42')
+
+    - decl: |-
+          let s = 'ABC'
+          class A {
+              foo(p: () => Promise<string>): string {
+                  return await p()
+              }
+          }
+      use: |-
+          // Launch in argument lambda
+          let r = new A().foo((): Promise<string> => launch ((): string => s)())
+          assertTrue(r == 'ABC')
+
+    - decl: |-
+          let s = 'ABC'
+          class A {
+              foo(p: () => Promise<string>): string {
+                  return await p()
+              }
+          }
+      use: |-
+          // Launch in trailing lambda
+          let r = new A().foo() { return launch ((): string => s)() }
+          assertTrue(r == 'ABC')

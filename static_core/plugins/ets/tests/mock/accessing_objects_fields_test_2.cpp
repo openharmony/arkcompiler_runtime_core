@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests1)
 
     EXPECT_DEATH(env_->SetObjectField(nullptr, nullptr, nullptr), "");
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_method aCtor = env_->Getp_method(aCls, "<ctor>", ":V");
     ASSERT_NE(aCtor, nullptr);
@@ -59,7 +59,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests2)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F");
     ASSERT_NE(cls, nullptr);
     ets_field member0Id = env_->Getp_field(cls, "member0", "Z");
     ASSERT_NE(member0Id, nullptr);
@@ -77,12 +77,12 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests2)
     ASSERT_NE(member6Id, nullptr);
     ets_field member7Id = env_->Getp_field(cls, "member7", "D");
     ASSERT_NE(member7Id, nullptr);
-    ets_field member8Id = env_->Getp_field(cls, "member8", "LA;");
+    ets_field member8Id = env_->Getp_field(cls, "member8", "LAccessingObjectsFieldsTest/A;");
     ASSERT_NE(member8Id, nullptr);
 
     EXPECT_DEATH(env_->SetObjectField(nullptr, member8Id, nullptr), "");
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_method aCtor = env_->Getp_method(aCls, "<ctor>", ":V");
     ASSERT_NE(aCtor, nullptr);
@@ -104,7 +104,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests3)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F");
     ASSERT_NE(cls, nullptr);
     ets_method ctor = env_->Getp_method(cls, "<ctor>", ":V");
     ASSERT_NE(ctor, nullptr);
@@ -113,7 +113,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests3)
 
     EXPECT_DEATH(env_->SetObjectField(obj, nullptr, nullptr), "");
 
-    ets_class aCls = env_->FindClass("F");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/F");
     ASSERT_NE(aCls, nullptr);
     ets_method aCtor = env_->Getp_method(aCls, "<ctor>", ":V");
     ASSERT_NE(aCtor, nullptr);

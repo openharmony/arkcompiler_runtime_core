@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of valid access modifiers
+--- # List of access modifiers
 modifiers:
   - "private"
   - "internal"
@@ -19,11 +19,11 @@ modifiers:
   - "protected"
   - "public"
 
- # List of valid class members
+ # List of class members
 members:
-  - "x: int;"
-  - "foo(): void {}"
-  - "inner class B{}"
-  - "interface I{}"
-  - "enum Color {Red, Green}"
-  - "constructor() {}"
+  - { body: "x: int;" }
+  - { body: "foo(): void {}" }
+  - { body: "class B{}", unsupported: "true" }
+  - { body: "interface I{}", unsupported: "true" }
+  - { body: "enum Color {Red, Green}", unsupported: "true" }
+  - { body: "constructor() {}" }

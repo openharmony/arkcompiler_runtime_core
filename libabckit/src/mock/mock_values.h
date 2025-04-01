@@ -19,20 +19,18 @@
 #include <cstdint>
 #include <cstring>
 
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern const char *DEFAULT_PATH;
-extern const size_t DEFAULT_PATH_SIZE;
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern const char *DEFAULT_CONST_CHAR;
-extern const size_t DEFAULT_CONST_CHAR_SIZE;
-extern const bool DEFAULT_BOOL;
-extern const uint8_t DEFAULT_U8;
-extern const uint16_t DEFAULT_U16;
-extern const uint32_t DEFAULT_U32;
-extern const int32_t DEFAULT_I32;
-extern const uint64_t DEFAULT_U64;
-extern const int64_t DEFAULT_I64;
-extern const size_t DEFAULT_SIZE_T;
+constexpr const char *DEFAULT_PATH = "abckit.abc";
+const size_t DEFAULT_PATH_SIZE = std::strlen(DEFAULT_PATH) + 1;
+constexpr const char *DEFAULT_CONST_CHAR = "abckit default const char*";
+const size_t DEFAULT_CONST_CHAR_SIZE = std::strlen(DEFAULT_CONST_CHAR) + 1;
+constexpr bool DEFAULT_BOOL = true;
+constexpr uint8_t DEFAULT_U8 = 0x11;
+constexpr uint16_t DEFAULT_U16 = 0x1111;
+constexpr uint32_t DEFAULT_U32 = 0x11111111;
+constexpr int32_t DEFAULT_I32 = 0x11111112;
+constexpr uint64_t DEFAULT_U64 = 0x1111111122222222;
+constexpr int64_t DEFAULT_I64 = 0x1111111122222223;
+constexpr size_t DEFAULT_SIZE_T = 0x1111111133333333;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-cstyle-cast)
 #define DEFAULT_ENUM_ABCKIT_ISA_TYPE (enum AbckitInst())

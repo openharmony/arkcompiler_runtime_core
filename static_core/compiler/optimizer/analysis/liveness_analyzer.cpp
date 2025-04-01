@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "optimizer/ir/analysis.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
@@ -265,17 +266,19 @@ void LivenessAnalyzer::SetUsePositions(Inst *userInst, LifeNumber lifeNumber)
     if (userInst->IsCatchPhi() || userInst->IsSaveState()) {
         return;
     }
-    for (size_t i = 0; i < userInst->GetInputsCount(); i++) {
-        auto location = userInst->GetLocation(i);
-        if (!location.IsAnyRegister()) {
-            continue;
-        }
-        auto inputInst = userInst->GetDataFlowInput(i);
-        auto li = GetInstLifeIntervals(inputInst);
-        if (location.IsRegisterValid()) {
-            useTable_.AddUseOnFixedLocation(inputInst, location, lifeNumber);
-        } else if (location.IsUnallocatedRegister()) {
-            li->AddUsePosition(lifeNumber);
+    if (!InstHasPseudoInputs(userInst)) {
+        for (size_t i = 0; i < userInst->GetInputsCount(); i++) {
+            auto location = userInst->GetLocation(i);
+            if (!location.IsAnyRegister()) {
+                continue;
+            }
+            auto inputInst = userInst->GetDataFlowInput(i);
+            auto li = GetInstLifeIntervals(inputInst);
+            if (location.IsRegisterValid()) {
+                useTable_.AddUseOnFixedLocation(inputInst, location, lifeNumber);
+            } else if (location.IsUnallocatedRegister()) {
+                li->AddUsePosition(lifeNumber);
+            }
         }
     }
 
@@ -465,6 +468,11 @@ void LivenessAnalyzer::AdjustInputsLifetime(Inst *inst, LiveRange liveRange, Ins
     for (auto input : inst->GetInputs()) {
         auto inputInst = inst->GetDataFlowInput(input.GetInst());
         liveSet->Add(inputInst->GetLinearNumber());
+        if (inst->GetOpcode() == Opcode::WrapObjectNative) {
+            auto *nativeCall = inst->GetUsers().Front().GetInst();
+            // need to ensure that ref inputs will live until Native API call, +1 for spilling on stack
+            liveRange.SetEnd(GetInstLifeNumber(nativeCall) + 1U);
+        }
         SetInputRange(inst, inputInst, liveRange);
     }
 
@@ -757,8 +765,8 @@ void LivenessAnalyzer::BlockFixedRegisters(Inst *inst)
 
     auto blockFrom = GetInstLifeNumber(inst);
     if (IsCallBlockingRegisters(inst)) {
-        BlockPhysicalRegisters<false>(blockFrom);
-        BlockPhysicalRegisters<true>(blockFrom);
+        BlockPhysicalRegisters<false>(inst, blockFrom);
+        BlockPhysicalRegisters<true>(inst, blockFrom);
     }
     for (auto i = 0U; i < inst->GetInputsCount(); ++i) {
         BlockFixedLocationRegister(inst->GetLocation(i), blockFrom);
@@ -788,14 +796,35 @@ void LivenessAnalyzer::BlockFixedRegisters(Inst *inst)
     }
 }
 
+bool LivenessAnalyzer::IsNativeApiRuntimeCall(Inst *inst)
+{
+    return (inst->IsNativeApiCall() && inst->IsRuntimeCall()) ||
+           (inst->IsIntrinsic() && (inst->CastToIntrinsic()->GetIntrinsicId() ==
+                                        RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_BEGIN_NATIVE_METHOD ||
+                                    inst->CastToIntrinsic()->GetIntrinsicId() ==
+                                        RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_END_NATIVE_METHOD_PRIM ||
+                                    inst->CastToIntrinsic()->GetIntrinsicId() ==
+                                        RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_END_NATIVE_METHOD_OBJ));
+}
+
 template <bool IS_FP>
-void LivenessAnalyzer::BlockPhysicalRegisters(LifeNumber blockFrom)
+void LivenessAnalyzer::BlockPhysicalRegisters(Inst *inst, LifeNumber blockFrom)
 {
     auto arch = GetGraph()->GetArch();
     RegMask callerRegs {GetCallerRegsMask(arch, IS_FP)};
     for (auto reg = GetFirstCallerReg(arch, IS_FP); reg <= GetLastCallerReg(arch, IS_FP); ++reg) {
         if (callerRegs.test(reg)) {
             BlockReg<IS_FP>(reg, blockFrom, blockFrom + 1U, true);
+        }
+    }
+
+    // callee registers should not live through runtime native api calls, callees should be spilled on stack
+    if (IsNativeApiRuntimeCall(inst)) {
+        RegMask calleeRegs = GetCalleeRegsMask(arch, IS_FP);
+        for (auto reg = GetFirstCalleeReg(arch, IS_FP); reg <= GetLastCalleeReg(arch, IS_FP); ++reg) {
+            if (calleeRegs.test(reg)) {
+                BlockReg<IS_FP>(reg, blockFrom, blockFrom + 1U, true);
+            }
         }
     }
 }

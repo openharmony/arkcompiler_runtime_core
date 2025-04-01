@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,14 @@
 #include <libpandafile/include/source_lang_enum.h>
 
 #include "libpandabase/macros.h"
+#include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/class_root.h"
 #include "runtime/include/mem/panda_string.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 
 namespace ark {
 
@@ -36,6 +38,8 @@ class ObjectHeader;
 }  // namespace ark
 
 namespace ark::ets {
+
+class EtsRuntimeLinker;
 
 class EtsClassLinkerExtension : public ClassLinkerExtension {
 public:
@@ -67,12 +71,15 @@ public:
 
     bool InitializeClass(Class *klass) override;
 
+    bool IsMethodNativeApi(const Method *method) const override;
+
     const void *GetNativeEntryPointFor(Method *method) const override;
 
-    bool CanThrowException([[maybe_unused]] const Method *method) const override
-    {
-        return true;
-    }
+    bool CanThrowException([[maybe_unused]] const Method *method) const override;
+
+    bool IsNecessarySwitchThreadState(const Method *method) const override;
+
+    bool CanNativeMethodUseObjects(const Method *method) const override;
 
     ClassLinkerErrorHandler *GetErrorHandler() override
     {
@@ -82,157 +89,14 @@ public:
     Class *FromClassObject(ark::ObjectHeader *obj) override;
     size_t GetClassObjectSizeFromClassSize(uint32_t size) override;
 
+    ClassLinkerContext *CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path) override;
+
     void InitializeBuiltinClasses();
     void InitializeBuiltinSpecialClasses();
 
-    Class *GetObjectClass()
+    EtsPlatformTypes const *GetPlatformTypes()
     {
-        return GetClassRoot(ClassRoot::OBJECT);
-    }
-
-    Class *GetUndefinedClass() const
-    {
-        return undefinedClass_;
-    }
-
-    Class *GetPromiseClass()
-    {
-        return promiseClass_;
-    }
-
-    Class *GetPromiseRefClass()
-    {
-        return promiseRefClass_;
-    }
-
-    Class *GetWaitersListClass()
-    {
-        return waiterListClass_;
-    }
-
-    Class *GetMutexClass()
-    {
-        return mutexClass_;
-    }
-
-    Class *GetEventClass()
-    {
-        return eventClass_;
-    }
-
-    Class *GetCondVarClass()
-    {
-        return condVarClass_;
-    }
-
-    Class *GetBigIntClass()
-    {
-        return bigintClass_;
-    }
-
-    Class *GetExceptionClass()
-    {
-        return exceptionClass_;
-    }
-
-    Class *GetErrorClass()
-    {
-        return errorClass_;
-    }
-
-    Class *GetArrayAsListIntClass()
-    {
-        return arrayAsListIntClass_;
-    }
-
-    Class *GetArrayClass()
-    {
-        return arrayClass_;
-    }
-
-    Class *GetArrayBufferClass()
-    {
-        return arraybufClass_;
-    }
-
-    Class *GetStringBuilderClass()
-    {
-        return stringBuilderClass_;
-    }
-
-    Class *GetSharedMemoryClass()
-    {
-        return sharedMemoryClass_;
-    }
-
-    Class *GetTypeAPIFieldClass()
-    {
-        return typeapiFieldClass_;
-    }
-
-    Class *GetTypeAPIMethodClass()
-    {
-        return typeapiMethodClass_;
-    }
-
-    Class *GetTypeAPIParameterClass()
-    {
-        return typeapiParameterClass_;
-    }
-
-    Class *GetFunctionClass()
-    {
-        return functionClass_;
-    }
-
-    Class *GetBoxBooleanClass()
-    {
-        return boxBooleanClass_;
-    }
-
-    Class *GetBoxByteClass()
-    {
-        return boxByteClass_;
-    }
-
-    Class *GetBoxCharClass()
-    {
-        return boxCharClass_;
-    }
-
-    Class *GetBoxShortClass()
-    {
-        return boxShortClass_;
-    }
-
-    Class *GetBoxIntClass()
-    {
-        return boxIntClass_;
-    }
-
-    Class *GetBoxLongClass()
-    {
-        return boxLongClass_;
-    }
-
-    Class *GetBoxFloatClass()
-    {
-        return boxFloatClass_;
-    }
-
-    Class *GetBoxDoubleClass()
-    {
-        return boxDoubleClass_;
-    }
-
-    Class *GetFinalizableWeakRefClass()
-    {
-        return finalizableWeakClass_;
-    }
-
-    Method *GetSubscribeOnAnotherPromiseMethod()
-    {
-        return subscribeOnAnotherPromiseMethod_;
+        return plaformTypes_.get();
     }
 
     static EtsClassLinkerExtension *FromCoreType(ClassLinkerExtension *ext)
@@ -246,10 +110,10 @@ public:
         return langCtx_;
     }
 
-    bool IsJSValueClass(Class *maybeJSValue) const
-    {
-        return maybeJSValue == jsvalueClass_;
-    }
+    static EtsRuntimeLinker *GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx);
+
+    /// @brief Removes reference to `RuntimeLinker` from `BootContext` and `EtsClassLinkerContext`.
+    static void RemoveRefToLinker(ClassLinkerContext *ctx);
 
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);
@@ -275,42 +139,7 @@ private:
     LanguageContext langCtx_ {nullptr};
     mem::HeapManager *heapManager_ {nullptr};
 
-    // Cached classes
-    Class *undefinedClass_ = nullptr;
-    // std.core box classes
-    Class *boxBooleanClass_ = nullptr;
-    Class *boxByteClass_ = nullptr;
-    Class *boxCharClass_ = nullptr;
-    Class *boxShortClass_ = nullptr;
-    Class *boxIntClass_ = nullptr;
-    Class *boxLongClass_ = nullptr;
-    Class *boxFloatClass_ = nullptr;
-    Class *boxDoubleClass_ = nullptr;
-    // std.core special types
-    Class *bigintClass_ = nullptr;
-    Class *functionClass_ = nullptr;
-    // std.core
-    Class *exceptionClass_ = nullptr;
-    Class *errorClass_ = nullptr;
-    Class *promiseClass_ = nullptr;
-    Method *subscribeOnAnotherPromiseMethod_ = nullptr;
-    Class *promiseRefClass_ = nullptr;
-    Class *waiterListClass_ = nullptr;
-    Class *mutexClass_ = nullptr;
-    Class *eventClass_ = nullptr;
-    Class *condVarClass_ = nullptr;
-    Class *arrayClass_ = nullptr;
-    Class *arraybufClass_ = nullptr;
-    Class *stringBuilderClass_ = nullptr;
-    Class *arrayAsListIntClass_ = nullptr;
-    Class *jsvalueClass_ = nullptr;
-    Class *finalizableWeakClass_ = nullptr;
-    // Cached type API classes
-    Class *typeapiFieldClass_ = nullptr;
-    Class *typeapiMethodClass_ = nullptr;
-    Class *typeapiParameterClass_ = nullptr;
-    // escompat
-    Class *sharedMemoryClass_ = nullptr;
+    PandaUniquePtr<EtsPlatformTypes> plaformTypes_ {nullptr};
 };
 
 }  // namespace ark::ets

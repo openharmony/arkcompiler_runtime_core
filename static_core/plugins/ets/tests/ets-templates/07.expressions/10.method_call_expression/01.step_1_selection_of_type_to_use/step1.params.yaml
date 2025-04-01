@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,11 +35,11 @@ cases:
       use: |-
           // using class type references
           let a: A = new A()
-          assert a.met() == "A"
+          assertEQ( a.met(), "A" )
           let b: B = new B()
-          assert b.met() == "B"
+          assertEQ( b.met(), "B" )
           let c: C = new C()
-          assert c.met() == "C"
+          assertEQ( c.met(), "C" )
 
     - decl: |-
           interface I {
@@ -66,11 +66,11 @@ cases:
       use: |-
           // using type aliases
           let a: TA = new TA()
-          assert a.met() == "A"
+          assertEQ( a.met(), "A" )
           let b: TB = new TB()
-          assert b.met() == "B"
+          assertEQ( b.met(), "B" )
           let c: TC = new TC()
-          assert c.met() == "C"
+          assertEQ( c.met(), "C" )
 
     - decl: |-
           interface I {
@@ -91,9 +91,9 @@ cases:
           class C implements I {}
       use: |-
           // using super for referring immediate superclass
-          assert new A().met() == "A"
-          assert new B().met() == "BA"
-          assert new C().met() == "I"
+          assertEQ( new A().met(), "A" )
+          assertEQ( new B().met(), "BA" )
+          assertEQ( new C().met(), "I" )
 
     - decl: |-
           class Base {
@@ -109,9 +109,9 @@ cases:
           }
       use: |-
           // using super for referring 2nd level superclass
-          assert new Base().met() == "Base"
-          assert new A().met() == "Base"
-          assert new B().met() == "BBase"
+          assertEQ( new Base().met(), "Base" )
+          assertEQ( new A().met(), "Base" )
+          assertEQ( new B().met(), "BBase" )
 
     - decl: |-
           interface I {
@@ -141,9 +141,9 @@ cases:
           }
       use: |-
           // using class type expression
-          assert createA().met() == "A"
-          assert createB().met() == "BA"
-          assert createC().met() == "I"
+          assertEQ( createA().met(), "A" )
+          assertEQ( createB().met(), "BA" )
+          assertEQ( createC().met(), "I" )
 
     - decl: |-
           class X {
@@ -168,7 +168,7 @@ cases:
           // using type parameter constraint
           let v: A<Z> = new A<Z>()
           v.setFld(new Z())
-          assert v.m() == "X"
+          assertEQ( v.m(), "X" )
 
     - decl: |-
           class X {
@@ -197,4 +197,4 @@ cases:
           // using type parameter constraint
           let v: A<Z> = new A<Z>()
           v.setFld(new Z())
-          assert v.m() == "Y"
+          assertEQ( v.m(), "Y" )

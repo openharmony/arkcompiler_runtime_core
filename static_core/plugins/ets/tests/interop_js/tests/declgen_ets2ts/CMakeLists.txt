@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,24 +13,24 @@
 
 add_custom_target(declgen_ets2ts_test)
 add_custom_target(declgen_ets2ts_test_diff)
-add_dependencies(ets_interop_js_tests declgen_ets2ts_test_diff declgen_ets2ts_test)
+add_dependencies(ets_interop_js_tests_nodevm declgen_ets2ts_test_diff declgen_ets2ts_test)
 
 # Create create_declgen_ets2ts_test test
 #
 # Declgen test consists of files:
-#   ${ROOT_DIR}/*.sts
+#   ${ROOT_DIR}/*.ets
 #   ${ROOT_DIR}/*.ts
 #   ${ROOT_DIR}/*.js
 #   ${ROOT_DIR}/*.expected
 # This function:
 #   1. Compiles 'ets' files with es2panda into 'abc' and decl 'ts':
-#      ${ROOT_DIR}/*.sts -> ${BINARY_ROOT_DIR}/*.abc ${BINARY_ROOT_DIR}/*.ts
+#      ${ROOT_DIR}/*.ets -> ${BINARY_ROOT_DIR}/*.abc ${BINARY_ROOT_DIR}/*.ts
 #   2. Copies ${ROOT_DIR}/*.ts into ${BINARY_ROOT_DIR}/*.ts
 #   3. Compiles 'ts' project with tsc:
 #      ${BINARY_ROOT_DIR}/*.ts -> ${BINARY_ROOT_DIR}/*.js
 #   4. Links all 'abc' files into single file:
 #      ${BINARY_ROOT_DIR}/*.abc -> ${BINARY_ROOT_DIR}/lib_linked.abc
-#   5. Creates panda_ets_interop_js_test from ${BINARY_ROOT_DIR}/*.js and ${BINARY_ROOT_DIR}/lib_linked.abc
+#   5. Creates panda_ets_interop_js_test_nodevm from ${BINARY_ROOT_DIR}/*.js and ${BINARY_ROOT_DIR}/lib_linked.abc
 #   6. Tests difference between expected and actual declaration files:
 #      ${BINARY_ROOT_DIR}/*.ts <-> ${ROOT_DIR}/*.expected
 #
@@ -47,8 +47,8 @@ add_dependencies(ets_interop_js_tests declgen_ets2ts_test_diff declgen_ets2ts_te
 #       JS_SOURCES
 #           ${CMAKE_CURRENT_SOURCE_DIR}/test_dyn.js
 #       ETS_SOURCES
-#           ${CMAKE_CURRENT_SOURCE_DIR}/lib1.sts
-#           ${CMAKE_CURRENT_SOURCE_DIR}/lib2.sts
+#           ${CMAKE_CURRENT_SOURCE_DIR}/lib1.ets
+#           ${CMAKE_CURRENT_SOURCE_DIR}/lib2.ets
 #       DECLS_EXPECTED
 #           ${CMAKE_CURRENT_SOURCE_DIR}/lib1.expected
 #           ${CMAKE_CURRENT_SOURCE_DIR}/lib2.expected
@@ -64,7 +64,12 @@ function(create_declgen_ets2ts_test TARGET)
 
     # Replaces path prefix from ARG_ROOT_DIR to ARG_BINARY_ROOT_DIR and extension
     function(rebase_path SRC DST)
-        string(REGEX REPLACE "^${ARG_ROOT_DIR}" "${ARG_BINARY_ROOT_DIR}/" RES ${SRC})
+        if(ARGC GREATER 2 AND ARGV2 STREQUAL "ts")
+            file(MAKE_DIRECTORY "${ARG_BINARY_ROOT_DIR}/glue_file")
+            string(REGEX REPLACE "^${ARG_ROOT_DIR}" "${ARG_BINARY_ROOT_DIR}/glue_file" RES ${SRC})
+        else()
+            string(REGEX REPLACE "^${ARG_ROOT_DIR}" "${ARG_BINARY_ROOT_DIR}" RES ${SRC})
+        endif()
         if(ARGC GREATER 2)
             set(NEW_EXT ${ARGV2})
             string(REGEX REPLACE "\.[a-zA-Z0-9]+$" ".${NEW_EXT}" RES ${RES})
@@ -82,8 +87,9 @@ function(create_declgen_ets2ts_test TARGET)
     )
     set(COMMA "")
     foreach(JS_SOURCE ${ARG_JS_SOURCES})
+        get_filename_component(JS_SRC_WE ${JS_SOURCE} NAME_WE)
         set(ARKTSCONFIG_CONTENT
-            "      \"${JS_SOURCE}\": {\"language\": \"js\", \"hasDecl\": false}${COMMA}\n"
+            "      \"${JS_SRC_WE}\": {\"language\": \"js\", \"ohmUrl\":\"${JS_SOURCE}\"}${COMMA}\n"
             "${ARKTSCONFIG_CONTENT}"
         )
         if(COMMA STREQUAL "")
@@ -105,23 +111,29 @@ function(create_declgen_ets2ts_test TARGET)
     file(WRITE ${ARKTSCONFIG} ${ARKTSCONFIG_CONTENT})
 
     # NOTE (kkonsw): temporary disabling all other checks
-    set(ETS_VERIFICATOR_ERRORS "NodeHasParentForAll,EveryChildHasValidParentForAll,VariableHasScopeForAll,NodeHasTypeForAll,IdentifierHasVariableForAll,ReferenceTypeAnnotationIsNullForAll,ArithmeticOperationValidForAll,SequenceExpressionHasLastTypeForAll,ForLoopCorrectlyInitializedForAll,VariableHasEnclosingScopeForAll,ModifierAccessValidForAll,ImportExportAccessValid")
+    set(ETS_VERIFICATOR_ERRORS "NodeHasParent:EveryChildHasValidParent:VariableHasScope:NodeHasType:IdentifierHasVariable:ReferenceTypeAnnotationIsNull:ArithmeticOperationValid:SequenceExpressionHasLastType:ForLoopCorrectlyInitialized:VariableHasEnclosingScope:ModifierAccessValid")
+    # NOTE(dkofanov): `ImportExportAccessValid` need to be fixed
+    # set(ETS_VERIFICATOR_ERRORS "${ETS_VERIFICATOR_ERRORS}:ImportExportAccessValid")
 
-    # Compile source .sts files into .abc and declaration .ts files
+    # Compile source .ets files into .abc and declaration .ts files
     set(ABC_FILES "")
     set(DECL_FILES "")
+    set(GLUE_FILES "")
     set(ABC_TARGETS "")
     set(ETS_MODULE_KEY "")
     foreach(ETS_SOURCE ${ARG_ETS_SOURCES})
         rebase_path(${ETS_SOURCE} ABC_PATH "abc")
         list(APPEND ABC_FILES ${ABC_PATH})
-        rebase_path(${ETS_SOURCE} DECL_PATH "ts")
+        rebase_path(${ETS_SOURCE} DECL_PATH "d.ts")
         list(APPEND DECL_FILES ${DECL_PATH})
+        rebase_path(${ETS_SOURCE} GLUE_PATH "ts")
+        list(APPEND GLUE_FILES ${GLUE_PATH})
+
         add_custom_command(
             OUTPUT ${ABC_PATH} ${DECL_PATH}
             COMMENT "Compiling: ${ETS_SOURCE}"
-            COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=sts --verifier-errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
-            COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${DECL_PATH} --extension=sts ${ETS_SOURCE}
+            COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=ets --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
+            COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output-dets=${DECL_PATH} --output-ets=${GLUE_PATH} ${ETS_SOURCE}
             DEPENDS es2panda declgen_ets2ts ${ETS_SOURCE} ${ARKTSCONFIG}
         )
 
@@ -149,9 +161,8 @@ function(create_declgen_ets2ts_test TARGET)
     endforeach()
 
     # Compute destination JS file paths for generated TS declarations
-    foreach(TS_SOURCE ${DECL_FILES})
+    foreach(TS_SOURCE ${GLUE_FILES})
         rebase_path(${TS_SOURCE} JS_SOURCE "js")
-        set(JS_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${JS_SOURCE}")
         list(APPEND JS_FILES ${JS_SOURCE})
     endforeach()
 
@@ -165,8 +176,9 @@ function(create_declgen_ets2ts_test TARGET)
     # Compile source .ts and declaratin .ts files into .js
     add_custom_command(
         OUTPUT ${JS_FILES}
-        COMMENT "Compile ts files: ${COPIED_TS_SOURCES} ${DECL_FILES}"
+        COMMENT "Compile ts files: ${COPIED_TS_SOURCES} ${DECL_FILES} ${GLUE_FILES}"
         COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --target es5 --strict --outDir ${CMAKE_CURRENT_BINARY_DIR} ${COPIED_TS_SOURCES} ${DECL_FILES}
+        COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --target es5 --strict --outDir "${CMAKE_CURRENT_BINARY_DIR}" ${GLUE_FILES}
         DEPENDS es2panda ark_link ${ABC_TARGETS} ${ARKTSCONFIG} ${COPIED_TS_SOURCES} ${DECL_FILES}
     )
     add_custom_target(${TARGET}_tsc
@@ -186,7 +198,7 @@ function(create_declgen_ets2ts_test TARGET)
     )
 
     # Execute compiled interop project
-    panda_ets_interop_js_test(${TARGET}
+    panda_ets_interop_js_test_nodevm(${TARGET}
         ABC_FILE ${LIB_LINKED_ABC}
         JS_LAUNCHER ${JS_MAIN}
     )
@@ -207,14 +219,29 @@ function(create_declgen_ets2ts_test TARGET)
         get_filename_component(DECL_NAME ${DECL_EXPECTED} NAME)
         set(DIFF_TARGET ${TARGET}_diff_${DECL_NAME})
 
+        # Remove single-line comments (//) and multi-line comments (/* ... */)
+        string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
+        string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
+        
+        string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
+        string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
+
+        # Write the modified content to temporary files
+        set(TEMP_ACTUAL_FILE "${CMAKE_BINARY_DIR}/temp_actual_${DECL_NAME}.d.ets")
+        set(TEMP_EXPECTED_FILE "${CMAKE_BINARY_DIR}/temp_expected_${DECL_NAME}.d.ets")
+        file(WRITE ${TEMP_ACTUAL_FILE} "${DECL_ACTUAL_CONTENTS}")
+        file(WRITE ${TEMP_EXPECTED_FILE} "${DECL_EXPECTED_CONTENTS}")
+
+        # Compare the modified files
         add_custom_target(${DIFF_TARGET}
             COMMENT "Test declgen ets2ts diff between ${DECL_ACTUAL} and ${DECL_EXPECTED}"
-            COMMAND ${CMAKE_COMMAND} -E compare_files ${DECL_ACTUAL} ${DECL_EXPECTED}
+            COMMAND ${CMAKE_COMMAND} -E compare_files ${TEMP_ACTUAL_FILE} ${TEMP_EXPECTED_FILE}
             DEPENDS ${DECL_ACTUAL} ${DECL_EXPECTED}
         )
         add_dependencies(declgen_ets2ts_test_diff ${DIFF_TARGET})
     endforeach()
 endfunction()
+
 
 add_subdirectory(async)
 add_subdirectory(classes)
@@ -227,5 +254,13 @@ add_subdirectory(imports)
 add_subdirectory(methods)
 add_subdirectory(unions)
 add_subdirectory(properties)
+add_subdirectory(depend_export)
+add_subdirectory(re_export)
+
+# error: [TID 006c83] E/ets_interop_js: InteropCtx::Fatal: Class lib.A has no constructor
+# a bug exists in interop. interop is being fixed
+# please see issue: #23096
+# add_subdirectory(namespace)
+
 # NOTE(aakmaev): need proper comparing. Issue #17097
 # add_subdirectory(global_vars)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,8 +37,8 @@ Expected<bool, std::string> AotManager::AddFile(const std::string &fileName, Run
         aotFile.Value()->InitializeGot(runtime);
     }
 
-    LOG(DEBUG, AOT) << "AOT file '" << fileName << "' has been loaded, code=" << aotFile.Value()->GetCode()
-                    << ", code_size=" << aotFile.Value()->GetCodeSize();
+    LOG(INFO, AOT) << "AOT file '" << fileName << "' has been loaded, code=" << aotFile.Value()->GetCode()
+                   << ", code_size=" << aotFile.Value()->GetCodeSize();
     LOG(DEBUG, AOT) << "  It contains the following panda files:";
     for (auto header : aotFile.Value()->FileHeaders()) {
         LOG(DEBUG, AOT) << "  " << aotFile.Value()->GetString(header.fileNameStr);

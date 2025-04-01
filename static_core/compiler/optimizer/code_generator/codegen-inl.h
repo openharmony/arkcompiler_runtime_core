@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -222,6 +222,19 @@ inline ssize_t Codegen::GetStackOffset(Location location)
 
     ASSERT(location.GetKind() == LocationType::STACK);
     return GetFrameLayout().GetSpillOffsetFromSpInBytes(location.GetValue());
+}
+
+inline ssize_t Codegen::GetBaseOffset(Location location)
+{
+    ASSERT(location.IsRegisterValid());
+    auto *frame = GetFrameInfo();
+    auto regNum = location.GetValue();
+    bool isFp = location.IsFpRegister();
+
+    auto offset = isFp ? frame->GetFpCalleesOffset() : frame->GetCalleesOffset();
+    offset += GetCalleeRegsMask(GetArch(), isFp).GetDistanceFromTail(regNum);
+    offset *= GetFrameLayout().GetSlotSize();
+    return offset;
 }
 
 inline MemRef Codegen::GetMemRefForSlot(Location location)

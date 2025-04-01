@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -360,7 +360,7 @@ void SetIsCorrectField(EtsObject *regexpExecArrayObj, bool value)
     EtsClass *resultClass = regexpExecArray->GetClass();
     auto *resultCorrectField = resultClass->GetDeclaredFieldIDByName(IS_CORRECT_FIELD_NAME);
 
-    regexpExecArray->SetFieldPrimitive<bool>(resultCorrectField, value);
+    regexpExecArray->SetFieldPrimitive<EtsBoolean>(resultCorrectField, ToEtsBoolean(value));
 }
 
 void SetInputField(EtsObject *regexpExecArrayObj, EtsString *inputStrObj)

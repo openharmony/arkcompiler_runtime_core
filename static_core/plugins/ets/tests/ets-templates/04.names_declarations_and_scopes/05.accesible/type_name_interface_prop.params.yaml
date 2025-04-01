@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,8 +21,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == 0x80 as byte);
-          assert(a.bar(a.foo) == 0x80 as byte);
+          assertTrue(a.foo == 0x80 as byte);
+          assertTrue(a.bar(a.foo) == 0x80 as byte);
       }
 
   - decl: |-
@@ -32,8 +32,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == 0x7FFF as short);
-          assert(a.bar(a.foo) == 0x7FFF as short);
+          assertTrue(a.foo == 0x7FFF as short);
+          assertTrue(a.bar(a.foo) == 0x7FFF as short);
       }
 
   - decl: |-
@@ -43,8 +43,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == 127 as int);
-          assert(a.bar(a.foo) == 127 as int);
+          assertTrue(a.foo == 127 as int);
+          assertTrue(a.bar(a.foo) == 127 as int);
       }
 
   - decl: |-
@@ -54,8 +54,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == 127 as long);
-          assert(a.bar(a.foo) == 127 as long);
+          assertTrue(a.foo == 127 as long);
+          assertTrue(a.bar(a.foo) == 127 as long);
       }
 
   - decl: |-
@@ -65,8 +65,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == +0.0 as float);
-          assert(a.bar(a.foo) == +0.0 as float);
+          assertTrue(a.foo == +0.0 as float);
+          assertTrue(a.bar(a.foo) == +0.0 as float);
       }
 
   - decl: |-
@@ -76,8 +76,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == +0.0 as double);
-          assert(a.bar(a.foo) == +0.0 as double);
+          assertTrue(a.foo == +0.0 as double);
+          assertTrue(a.bar(a.foo) == +0.0 as double);
       }
 
   - decl: |-
@@ -87,8 +87,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == +0.0 as number);
-          assert(a.bar(a.foo) == +0.0 as number);
+          assertTrue(a.foo == +0.0 as number);
+          assertTrue(a.bar(a.foo) == +0.0 as number);
       }
 
   - decl: |-
@@ -98,8 +98,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == c'a');
-          assert(a.bar(a.foo) == c'a');
+          assertTrue(a.foo == c'a');
+          assertTrue(a.bar(a.foo) == c'a');
       }
 
   - decl: |-
@@ -109,8 +109,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == false);
-          assert(a.bar(a.foo) == false);
+          assertTrue(a.foo == false);
+          assertTrue(a.bar(a.foo) == false);
       }
 
   # Boxed
@@ -121,8 +121,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == 0x7F as byte);
-          assert(a.bar(a.foo).unboxed() == 0x7F as byte);
+          assertTrue(a.foo.unboxed() == 0x7F as byte);
+          assertTrue(a.bar(a.foo).unboxed() == 0x7F as byte);
       }
 
   - decl: |-
@@ -132,8 +132,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == 2 as short);
-          assert(a.bar(a.foo).unboxed() == 2 as short);
+          assertTrue(a.foo.unboxed() == 2 as short);
+          assertTrue(a.bar(a.foo).unboxed() == 2 as short);
       }
 
   - decl: |-
@@ -143,8 +143,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == 3 as int);
-          assert(a.bar(a.foo).unboxed() == 3 as int);
+          assertTrue(a.foo.unboxed() == 3 as int);
+          assertTrue(a.bar(a.foo).unboxed() == 3 as int);
       }
 
   - decl: |-
@@ -154,8 +154,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == 4 as long);
-          assert(a.bar(a.foo).unboxed() == 4 as long);
+          assertTrue(a.foo.unboxed() == 4 as long);
+          assertTrue(a.bar(a.foo).unboxed() == 4 as long);
       }
 
   - decl: |-
@@ -165,8 +165,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == 0.1 as float);
-          assert(a.bar(a.foo).unboxed() == 0.1 as float);
+          assertTrue(a.foo.unboxed() == 0.1 as float);
+          assertTrue(a.bar(a.foo).unboxed() == 0.1 as float);
       }
 
   - decl: |-
@@ -176,8 +176,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == 0.1 as double);
-          assert(a.bar(a.foo).unboxed() == 0.1 as double);
+          assertTrue(a.foo.unboxed() == 0.1 as double);
+          assertTrue(a.bar(a.foo).unboxed() == 0.1 as double);
       }
 
   - decl: |-
@@ -187,8 +187,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == 0.1 as number);
-          assert(a.bar(a.foo).unboxed() == 0.1 as number);
+          assertTrue(a.foo.unboxed() == 0.1 as number);
+          assertTrue(a.bar(a.foo).unboxed() == 0.1 as number);
       }
 
   - decl: |-
@@ -198,8 +198,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == c'b');
-          assert(a.bar(a.foo).unboxed() == c'b');
+          assertTrue(a.foo.unboxed() == c'b');
+          assertTrue(a.bar(a.foo).unboxed() == c'b');
       }
 
   - decl: |-
@@ -209,8 +209,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == "some string");
-          assert(a.bar(a.foo) == "some string");
+          assertTrue(a.foo == "some string");
+          assertTrue(a.bar(a.foo) == "some string");
       }
 
   - decl: |-
@@ -220,8 +220,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == "some string");
-          assert(a.bar(a.foo) == "some string");
+          assertTrue(a.foo == "some string");
+          assertTrue(a.bar(a.foo) == "some string");
       }
 
   - decl: |-
@@ -231,25 +231,26 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.unboxed() == false);
-          assert(a.bar(a.foo).unboxed() == false);
+          assertTrue(a.foo.unboxed() == false);
+          assertTrue(a.bar(a.foo).unboxed() == false);
       }
 
     # Custom
   - decl: |-
       type T = int[]
+    tags: 'compile-only, negative'
     init: |-
       foo = [1, -2];
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.length == 2);
-          assert(a.foo[0] == 1);
-          assert(a.foo[1] == -2);
+          assertTrue(a.foo.length == 2);
+          assertTrue(a.foo[0] == 1);
+          assertTrue(a.foo[1] == -2);
           let c = a.bar(a.foo);
-          assert(a.foo.length == c.length);
-          assert(a.foo[0] == c[0]);
-          assert(a.foo[1] == c[1]);
+          assertTrue(a.foo.length == c.length);
+          assertTrue(a.foo[0] == c[0]);
+          assertTrue(a.foo[1] == c[1]);
       }
 
   - decl: |-
@@ -259,19 +260,19 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo.length == 2);
-          assert(a.foo[0].length == 2);
-          assert(a.foo[1].length == 1);
-          assert(a.foo[0][0].unboxed() == 1);
-          assert(a.foo[0][1].unboxed() == 3);
-          assert(a.foo[1][0].unboxed() == -2);
+          assertTrue(a.foo.length == 2);
+          assertTrue(a.foo[0].length == 2);
+          assertTrue(a.foo[1].length == 1);
+          assertTrue(a.foo[0][0].unboxed() == 1);
+          assertTrue(a.foo[0][1].unboxed() == 3);
+          assertTrue(a.foo[1][0].unboxed() == -2);
           let c = a.bar(a.foo);
-          assert(a.foo.length == c.length);
-          assert(a.foo[0].length == c[0].length);
-          assert(a.foo[1].length == c[1].length);
-          assert(a.foo[0][0].unboxed() == c[0][0].unboxed());
-          assert(a.foo[0][1].unboxed() == c[0][1].unboxed());
-          assert(a.foo[1][0].unboxed() == c[1][0].unboxed());
+          assertTrue(a.foo.length == c.length);
+          assertTrue(a.foo[0].length == c[0].length);
+          assertTrue(a.foo[1].length == c[1].length);
+          assertTrue(a.foo[0][0].unboxed() == c[0][0].unboxed());
+          assertTrue(a.foo[0][1].unboxed() == c[0][1].unboxed());
+          assertTrue(a.foo[1][0].unboxed() == c[1][0].unboxed());
       }
 
   - decl: |-
@@ -282,8 +283,8 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo == Colors.Blue);
-          assert(a.bar(a.foo) == Colors.Blue);
+          assertTrue(a.foo == Colors.Blue);
+          assertTrue(a.bar(a.foo) == Colors.Blue);
       }
 
   - decl: |-
@@ -293,11 +294,11 @@ cases:
     check: |-
       function main() {
           let a: A = new A();
-          assert(a.foo instanceof T);
-          assert(a.foo[0] == "str");
-          assert(a.foo[1] == 1.4);
+          assertTrue(a.foo instanceof T);
+          assertTrue(a.foo[0] == "str");
+          assertTrue(a.foo[1] == 1.4);
           let b = a.bar(a.foo);
-          assert(a == b)
-          assert(a.foo[0] == b[0]);
-          assert(a.foo[1] == b[1]);
+          assertTrue(a == b)
+          assertTrue(a.foo[0] == b[0]);
+          assertTrue(a.foo[1] == b[1]);
       }

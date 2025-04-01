@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,10 +34,8 @@ class TestETS(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
 
-        self.main_entry_point = "ETSGLOBAL::main"
         self.metadata: TestMetadata = get_metadata(Path(test_path))
-        if self.metadata.package is not None:
-            self.main_entry_point = f"{self.metadata.package}.{self.main_entry_point}"
+        self.main_entry_point = f"{self.metadata.module}.ETSGLOBAL::main"
 
         # If test fails it contains reason (of FailKind enum) of first failed step
         # It's supposed if the first step is failed then no step is executed further
@@ -108,23 +106,28 @@ class TestETS(TestFileBased):
     def runtime_args(self) -> List[str]:
         if not self.dependent_files:
             return super().runtime_args
-        return self.add_boot_panda_files(super().runtime_args)
+        return self.add_panda_files(super().runtime_args)
 
     @property
     def verifier_args(self) -> List[str]:
         if not self.dependent_files:
             return super().verifier_args
-        return self.add_boot_panda_files(super().verifier_args)
+        return self.add_panda_files(super().verifier_args)
 
-    def add_boot_panda_files(self, args: List[str]) -> List[str]:
+    def add_panda_files(self, args: List[str]) -> List[str]:
+        opt_name = '--panda-files'
+        met_panda_files_opt = False
         dep_files_args = []
         for arg in args:
-            name = '--boot-panda-files'
-            if name in arg:
+            if opt_name in arg:
+                met_panda_files_opt = True
                 _, value = arg.split('=')
-                dep_files_args.append(f'{name}={":".join([value] + [dt.test_abc for dt in self.dependent_files])}')
+                dep_files_args.append(f'{opt_name}={":".join([value] + [dt.test_abc for dt in self.dependent_files])}')
             else:
                 dep_files_args.append(arg)
+        # Add the option only in case of non-empty dependency files list
+        if not met_panda_files_opt and len(self.dependent_files) > 0:
+            dep_files_args.append(f'{opt_name}={":".join(dt.test_abc for dt in self.dependent_files)}')
         return dep_files_args
 
     # pylint: disable=too-many-return-statements
@@ -235,8 +238,6 @@ class TestETS(TestFileBased):
 
     def _run_compiler(self, test_abc: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = []
-        if not self.is_valid_test:
-            es2panda_flags.append('--ets-module')
         es2panda_flags.extend(self.test_env.es2panda_args)
         es2panda_flags.append(f"--output={test_abc}")
         es2panda_flags.append(self.path)

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,19 +12,19 @@
 # limitations under the License.
 
 
-panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_ref
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.ets
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_value
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_value
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.ets
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_union
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_union
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.ets
 )
 
 add_custom_target(ets_interop_js_scenarios_ets_to_js_indirect)

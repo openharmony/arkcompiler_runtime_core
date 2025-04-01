@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,55 +19,60 @@
 .record std.core.Exception <external> {
     std.core.String message <external>
 }
-.record std.core.NoSuchFieldError <external> {
+.record std.core.LinkerUnresolvedFieldError <external> {
     std.core.String message <external>
 }
 .record A {}
 .record B {
     std.core.Exception bar
-    std.core.NoSuchFieldError baz
+    std.core.LinkerUnresolvedFieldError baz
 }
 .record C {
-    std.core.NoSuchFieldError foo
+    std.core.LinkerUnresolvedFieldError foo
 }
 
-.function std.core.NoSuchFieldError A.baz(A a0) <access.function=public> {
-    newobj v0, std.core.NoSuchFieldError
+.function std.core.LinkerUnresolvedFieldError A.<get>baz(A a0) <access.function=public> {
+    newobj v0, std.core.LinkerUnresolvedFieldError
     lda.str "42"
-    stobj.obj v0, std.core.NoSuchFieldError.message
+    stobj.obj v0, std.core.LinkerUnresolvedFieldError.message
     lda.obj v0
     return.obj
 }
 
-.function void C.bar(C a0, std.core.Exception a1) <access.function=public> {
+.function void C.<set>bar(C a0, std.core.Exception a1) <access.function=public> {
     ldobj.v.obj v0, a0, C.foo
     ldobj.obj a1, std.core.Exception.message
-    stobj.obj v0, std.core.NoSuchFieldError.message
+    stobj.obj v0, std.core.LinkerUnresolvedFieldError.message
     return.void
 }
 
-.union_field std.core.Exception bar
-.union_field std.core.NoSuchFieldError baz
+.record $NamedAccessMeta-std-core-Exception {
+    std.core.Exception bar
+}
+
+.record $NamedAccessMeta-std-core-LinkerUnresolvedFieldError {
+    std.core.LinkerUnresolvedFieldError baz
+}
 
 .function void test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name.obj a0, baz
+    ets.ldobj.name.obj a0, $NamedAccessMeta-std-core-LinkerUnresolvedFieldError.baz
     sta.obj v0
-    ldobj.v.obj v1, v0, std.core.NoSuchFieldError.message
+    ldobj.v.obj v1, v0, std.core.LinkerUnresolvedFieldError.message
     lda.str "42"
     sta.obj v2
     call.short std.core.String.equals, v1, v2
     movi v2, 1
     jne v2, fail_test
     lda.str "44"
-    stobj.obj v0, std.core.NoSuchFieldError.message
+    stobj.obj v0, std.core.LinkerUnresolvedFieldError.message
     lda.obj v0
-    ets.stobj.name.obj a1, bar
+    ets.stobj.name.obj a1, $NamedAccessMeta-std-core-Exception.bar
     return.void
 fail_test:
     lda.str "88"
-    stobj.obj v0, std.core.NoSuchFieldError.message
+    stobj.obj v0, std.core.LinkerUnresolvedFieldError.message
     lda.obj v0
-    ets.stobj.name.obj a1, bar
+    ets.stobj.name.obj a1, $NamedAccessMeta-std-core-Exception.bar
     return.void
 }
 
@@ -75,13 +80,13 @@ fail_test:
     newobj v0, A
     newobj v1, B
     newobj v2, C
-    newobj v3, std.core.NoSuchFieldError
+    newobj v3, std.core.LinkerUnresolvedFieldError
     lda.str "42"
-    stobj.obj v3, std.core.NoSuchFieldError.message
+    stobj.obj v3, std.core.LinkerUnresolvedFieldError.message
     stobj.v.obj v3, v1, B.baz
-    newobj v4, std.core.NoSuchFieldError
+    newobj v4, std.core.LinkerUnresolvedFieldError
     lda.str "42"
-    stobj.obj v4, std.core.NoSuchFieldError.message
+    stobj.obj v4, std.core.LinkerUnresolvedFieldError.message
     stobj.v.obj v4, v2, C.foo
 
     call.short test, v0, v1

@@ -13,20 +13,9 @@
  * limitations under the License.
  */
 
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-class DynPropertiesWrapper {
-    public dynProps_: any = {} as any;
-    public setPropertyExternal(key: string, value: string): void { return {} as any; };
-    public getPropertyExternal(key: string): string { return {} as any; };
-    constructor() {};
-};
-(DynPropertiesWrapper as any) = (globalThis as any).Panda.getClass('LDynPropertiesWrapper;');
-export {DynPropertiesWrapper};
-exports.DynPropertiesWrapper = DynPropertiesWrapper;
-
+export declare class DynPropertiesWrapper {
+    public dynProps_: any;
+    public setPropertyExternal(key: string, value: string): void;
+    public getPropertyExternal(key: string): string;
+    constructor();
+}

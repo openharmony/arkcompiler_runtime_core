@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,12 @@
 #include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
 #include "runtime/include/thread.h"
+#include "plugins/ets/runtime/ets_modifiers.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_class.h"
-#include "plugins/ets/runtime/types/ets_type.h"
+#include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/types/ets_value.h"
 
 namespace ark {
@@ -34,6 +36,9 @@ class Value;
 }  // namespace ark
 
 namespace ark::ets {
+namespace ani {
+class ScopedManagedCodeFix;
+}  // namespace ani
 namespace napi {
 class ScopedManagedCodeFix;
 }  // namespace napi
@@ -42,11 +47,12 @@ class PandaEtsEnv;
 
 class EtsMethod {
 public:
-    PANDA_PUBLIC_API static EtsMethod *FromTypeDescriptor(const PandaString &td);
+    PANDA_PUBLIC_API static EtsMethod *FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker *contextLinker);
 
     PANDA_PUBLIC_API static bool IsMethod(const PandaString &td);
 
     PANDA_PUBLIC_API EtsValue Invoke(napi::ScopedManagedCodeFix *s, Value *args);
+    PANDA_PUBLIC_API ani_status Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue *result);
 
     void InvokeVoid(napi::ScopedManagedCodeFix *s, Value *args)
     {
@@ -182,6 +188,21 @@ public:
         return (GetAccessFlags() & ACC_CRITICAL_NATIVE) != 0;
     }
 
+    bool IsBindedNativeFunction() const
+    {
+        return GetPandaMethod()->GetNativePointer() != nullptr;
+    }
+
+    bool IsFunction() const
+    {
+        return (GetAccessFlags() & ACC_FUNCTION) != 0;
+    }
+
+    bool IsDeprecatedNativeAPI() const
+    {
+        return (GetAccessFlags() & ACC_DEPRECATED_NATIVE_API) != 0;
+    }
+
     bool IsConstructor() const
     {
         return GetPandaMethod()->IsConstructor();
@@ -214,16 +235,40 @@ public:
         return name->GetMutf8().rfind(SETTER_BEGIN, 0) == 0;
     }
 
-    void RegisterNativeImpl(void *impl)
+    bool RegisterNativeMethod(const void *ptr)
     {
-        ASSERT(IsNative());
-        GetPandaMethod()->SetNativePointer(impl);
+        return RegisterNative(ptr, false);
     }
 
-    void UnregisterNativeImpl()
+    bool RegisterNativeFunction(const void *ptr)
+    {
+        return RegisterNative(ptr, true);
+    }
+
+    bool RegisterNativeDeprecated(void *impl)
     {
         ASSERT(IsNative());
-        GetPandaMethod()->SetNativePointer(nullptr);
+        ASSERT(!IsFunction());
+        if (IsBindedNativeFunction()) {
+            return false;
+        }
+        Method *m = GetPandaMethod();
+        m->SetAccessFlags(m->GetAccessFlags() | ACC_DEPRECATED_NATIVE_API);
+        m->SetNativePointer(impl);
+        return true;
+    }
+
+    bool UnregisterNativeDeprecated()
+    {
+        ASSERT(IsNative());
+        ASSERT(!IsFunction());
+        if (!IsBindedNativeFunction()) {
+            return false;
+        }
+        Method *m = GetPandaMethod();
+        m->SetNativePointer(nullptr);
+        m->SetAccessFlags(m->GetAccessFlags() & ~ACC_DEPRECATED_NATIVE_API);
+        return true;
     }
 
     uint32_t GetAccessFlags() const
@@ -270,6 +315,11 @@ public:
         return GetPandaMethod()->GetClassSourceFile();
     }
 
+    static const EtsMethod *FromRuntimeMethod(const Method *method)
+    {
+        return reinterpret_cast<const EtsMethod *>(method);
+    }
+
     static EtsMethod *FromRuntimeMethod(Method *method)
     {
         return reinterpret_cast<EtsMethod *>(method);
@@ -304,6 +354,23 @@ public:
 
     NO_COPY_SEMANTIC(EtsMethod);
     NO_MOVE_SEMANTIC(EtsMethod);
+
+private:
+    bool RegisterNative(const void *ptr, bool isFunction)
+    {
+        ASSERT(IsNative());
+        if (IsBindedNativeFunction()) {
+            return false;
+        }
+        ASSERT(!IsFunction());
+        Method *m = GetPandaMethod();
+        if (isFunction) {
+            // NOTE: ACC_FUNCTION flag must be set during class loading, #22482
+            m->SetAccessFlags(m->GetAccessFlags() | ACC_FUNCTION);
+        }
+        m->SetNativePointer(const_cast<void *>(ptr));
+        return true;
+    }
 };
 
 }  // namespace ark::ets

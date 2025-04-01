@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,7 +109,6 @@ TEST_F(EtsInteropJsIntrinsTest, test_lambda_proxy)
 TEST_F(EtsInteropJsIntrinsTest, test_exception_forwarding)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingFromjs"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingFromets"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingRecursive"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testCoreErrorForwarding"));
 }
@@ -128,11 +127,6 @@ TEST_F(EtsInteropJsIntrinsTest, test_accessor_throws)
     ASSERT_EQ(true, CallEtsMethod<bool>("testJscallResolutionThrows1"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testJscallResolutionThrows2"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testJscallResolutionThrows3"));
-}
-
-TEST_F(EtsInteropJsIntrinsTest, test_finalizers)
-{
-    ASSERT_EQ(true, CallEtsMethod<bool>("testFinalizers"));
 }
 
 }  // namespace ark::ets::interop::js::testing

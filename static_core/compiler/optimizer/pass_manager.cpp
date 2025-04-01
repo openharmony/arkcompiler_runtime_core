@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
+#include "optimizer/ir/graph_cloner.h"
 #include "optimizer/ir/visualizer_printer.h"
 
 #include "optimizer/analysis/alias_analysis.h"
@@ -75,7 +76,7 @@ std::string PassManager::GetFileName([[maybe_unused]] const char *passName, [[ma
     std::stringstream ssFullpath;
     ASSERT(GetGraph()->GetRuntime() != nullptr);
 
-    std::string folderName(g_options.GetCompilerDumpFolder());
+    const auto &folderName(g_options.GetCompilerDumpFolder());
 
     os::CreateDirectories(folderName);
     constexpr auto IMM_3 = 3;
@@ -101,6 +102,22 @@ std::string PassManager::GetFileName([[maybe_unused]] const char *passName, [[ma
     return "";
 #endif  // ENABLE_IR_DUMP
 }
+
+static void CleanupChecksForDump(Graph *graph)
+{
+    for (auto *block : graph->GetVectorBlocks()) {
+        if (block == nullptr) {
+            continue;
+        }
+        for (auto inst : block->InstsSafe()) {
+            if (inst->IsCheck()) {
+                inst->ReplaceUsers(Inst::GetDataFlowInput(inst));
+                block->RemoveInst(inst);
+            }
+        }
+    }
+}
+
 void PassManager::DumpGraph([[maybe_unused]] const char *passName)
 {
 #ifdef ENABLE_IR_DUMP
@@ -110,7 +127,14 @@ void PassManager::DumpGraph([[maybe_unused]] const char *passName)
         std::cerr << errno << " ERROR: " << strerror(errno) << "\n" << fileName << std::endl;
     }
     ASSERT(strm.is_open());
-    GetGraph()->Dump(&strm);
+    if (g_options.IsCompilerDumpNoChecks()) {
+        auto clone = GraphCloner(GetGraph(), GetAllocator(), GetLocalAllocator()).CloneGraph();
+        clone->GetPassManager()->SetCheckMode(true);
+        CleanupChecksForDump(clone);
+        clone->Dump(&strm);
+    } else {
+        GetGraph()->Dump(&strm);
+    }
 #endif  // ENABLE_IR_DUMP
 }
 void PassManager::DumpLifeIntervals([[maybe_unused]] const char *passName)

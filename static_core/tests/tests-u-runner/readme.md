@@ -3,7 +3,7 @@
 ## Prerequisites
 -   Panda build
 -   Python3 with required libs (`tqdm`, `dataclasses`, `python-dotenv`, etc). Make sure that `scripts/install-deps-ubuntu` has run with option `-i=test`
--   Suite `ets-es-checked` requires [node and some packages](#sts-es-checked-dependencies)
+-   Suite `ets-es-checked` requires [node and some packages](#ets-es-checked-dependencies)
 
 ## Quick run
 
@@ -37,13 +37,13 @@ export BUILD=/path/to/panda/build
 python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUILD
 ```
 
-### Supported STS test suites
+### Supported ETS test suites
 
 -   `--parser` - parser (aka regression)
     Tests folders:
       - `ets_frontend/ets2panda/test/parser/ets`
       - `ets_frontend/ets2panda/test/compiler/ets`
--   `--ets-func-tests` - tests for ArkTS: standard library and sts func tests
+-   `--ets-func-tests` - tests for ArkTS: standard library and ets func tests
     Tests folder: `plugins/ets/tests/ets_func_tests/`
     Chapters:
       - `all`
@@ -59,9 +59,9 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
       - `chapter-2-of-4`
       - `chapter-3-of-4`
       - `chapter-4-of-4`
--   `--ets-es-checked` - `STS tests that cross validate results with ts`
+-   `--ets-es-checked` - `ETS tests that cross validate results with ts`
     `--ets-gc-stress` - `GC stress tests`
--   `--ets-runtime` - `STS runtime tests`
+-   `--ets-runtime` - `ETS runtime tests`
     Tests folder: `ets_frontend/ets2panda/test/runtime/ets`
 -   `--ets-cts` - CTS language specification tests
     Tests folder: `plugins/ets/tests/ets-templates`
@@ -85,6 +85,9 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
       - `chapters06-09`
       - `chapters10-12`
       - `chapters13-17`
+-   `--ets-sdk` - tests for ArkTS SDK
+    Tests folder: `plugins/ets/tests/ets_sdk/`
+
 
 ### Supported JS test suites
 
@@ -177,7 +180,7 @@ In any test list the test is specified as path to the test file relative from th
 
 -   array-large.js
 -   built-ins/Date/UTC/fp-evaluation-order.js
--   tests/stdlib/std/math/sqrt-negative-01.sts
+-   tests/stdlib/std/math/sqrt-negative-01.ets
 
 Test file specified in the option `--test-file` should be set in this format too.
 By default, ignored or excluded lists are located in correspondent project folder (for example for ArkTS should be `runtime_core/static_core/tests/tests-u-runner/test-lists`)
@@ -236,7 +239,7 @@ ArkTS Specification coverage report shows test statistics for every specificatio
 ## Generation options:
 
 -   `--generate-only`/`general.generate-only` - only generate tests without running them. Tests are run as usual without this option.
--   `--force-generate`/`ets.force-generate` - force STS tests generation from templates
+-   `--force-generate`/`ets.force-generate` - force ETS tests generation from templates
 
 ## Timeout options:
 
@@ -297,7 +300,7 @@ It performs checks by running `pylint` and `mypy`.
 
 For `pylint` settings see `.pylintrc` file. For `mypy` settings see `mypy.ini` file.
 
-## STS ES checked dependencies
+## ETS ES checked dependencies
 - ruby (installed by default with `$PROJECT/scripts/install-deps-ubuntu -i=dev`)
 - node and ts-node, to install them see commands below
 
@@ -310,13 +313,13 @@ npm install
 ```
 
 ## Custom suite
-If you want to run arbitrary set of STS tests with URunner you can use a custom suite like (minimal configuration):
+If you want to run arbitrary set of ETS tests with URunner you can use a custom suite like (minimal configuration):
 
 `$PROJECT/tests/tests-u-runner/runner.sh $PROJECT --ets-custom --build-dir $BUILD --custom-suite SUITE_NAME --custom-test-root TEST_ROOT --custom-list-root LIST_ROOT`
 
 where:
 - SUITE_NAME - a tag used to name the suite
-- TEST_ROOT - a path to the folder with tests (*.sts files or templates)
+- TEST_ROOT - a path to the folder with tests (*.ets files or templates)
 - LIST_ROOT - a path to the folder with ignored/excluded lists. Note: SUITE_NAME is used as a <test-suite-name> in the name of the test list (see #Test lists for details)
 
 In yaml configuration file these options can be specified as:

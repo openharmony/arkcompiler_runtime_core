@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,14 @@ function runTest(test, pandaOptions) {
 		'--panda-files',
 		penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
 	].concat(pandaOptions);
-	const etsVmRes = etsVm.createRuntime(options);
+	const etsVmRes = etsVm.createRuntimeLegacy(options);
 	if (!etsVmRes) {
 		console.error(`Failed to create ETS runtime`);
 		return 1;
 	}
 	try {
-		let res = etsVm.call(test);
+		const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+		let res = runTestImpl();
 		if (res !== 0) {
 			throw 'test failed: ' + res;
 		}

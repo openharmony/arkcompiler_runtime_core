@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -432,6 +432,17 @@ std::unique_ptr<const File> OpenPandaFileOrZip(std::string_view location,
  * OpenPandaFileFromMemory from file buffer.
  */
 std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t size, std::string tag = "");
+
+/*
+ * OpenPandaFileFromMemory from secure buffer.
+ */
+std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size, std::string filename = "");
+
+/*
+ * OpenZipPandaFile from the location zip.
+ */
+std::unique_ptr<const File> OpenZipPandaFile(FILE *fp, std::string_view location, std::string_view archiveFilename,
+                                             panda_file::File::OpenMode openMode = panda_file::File::READ_ONLY);
 
 /*
  * OpenPandaFile from location which specicify the name.

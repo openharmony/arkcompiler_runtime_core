@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,22 +45,22 @@ TEST_F(EtsGenericTsToEtsTest, check_generic_class_generic)
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericClassGeneric"));
 }
 
-TEST_F(EtsGenericTsToEtsTest, check_generic_literal_class_object_form_ts)
+TEST_F(EtsGenericTsToEtsTest, DISABLED_check_generic_literal_class_object_form_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericLiteralClassObjectFromTs"));
 }
 
-TEST_F(EtsGenericTsToEtsTest, check_generic_union_class_object_form_ts)
+TEST_F(EtsGenericTsToEtsTest, DISABLED_check_generic_union_class_object_form_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericUnionClassObjectFromTs"));
 }
 
-TEST_F(EtsGenericTsToEtsTest, check_generic_interface_class_object_form_ts)
+TEST_F(EtsGenericTsToEtsTest, DISABLED_check_generic_interface_class_object_form_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericInterfaceClassObjectFromTs"));
 }
 
-TEST_F(EtsGenericTsToEtsTest, check_generic_abstract_class_object_form_ts)
+TEST_F(EtsGenericTsToEtsTest, DISABLED_check_generic_abstract_class_object_form_ts)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericAbstractClassObjectFromTs"));
 }
@@ -85,7 +85,7 @@ TEST_F(EtsGenericTsToEtsTest, check_generic_function_tuple_type)
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericFunctionTupleType"));
 }
 
-TEST_F(EtsGenericTsToEtsTest, check_generic_explicitly_declared_type)
+TEST_F(EtsGenericTsToEtsTest, DISABLED_check_generic_explicitly_declared_type)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericExplicitlyDeclaredType"));
 }

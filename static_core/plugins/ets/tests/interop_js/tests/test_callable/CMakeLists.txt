@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,8 +14,8 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_gtest(ets_interop_js_test_callable
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_test_callable
     CPP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_callable.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_callable.sts
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_callable.ets
     ETS_CONFIG ${ETS_CONFIG}
 )

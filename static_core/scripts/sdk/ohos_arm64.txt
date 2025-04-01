@@ -7,10 +7,11 @@ lib/libarkbytecodeopt.so
 lib/libarkcompiler.so
 lib/libarkdisassembler.so
 lib/libarkfile.so
+lib/libarkplatform.so
 lib/libarkruntime.so
 lib/libetsnative.so
-lib/libarkruntime_static.a
 lib/libarktarget_options.so
+lib/libani_helpers.so
 lib/libarkziparchive.so
 lib/libc_secshared.so
 lib/libdprof.a
@@ -21,4 +22,5 @@ lib/libets_interop_js_napi.so
 lib/libhmicui18n.z.so
 lib/libhmicuuc.z.so
 lib/libinit_icu.a
-plugins/ecmascript/ecmastdlib/ecmastdlib.abc
+lib/libllvmbackend.so
+lib/libLLVM-15.so

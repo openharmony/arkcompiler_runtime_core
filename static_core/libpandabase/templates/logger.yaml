@@ -67,6 +67,7 @@ components:
   - name: es2panda
   - name: static_linker
   - name: task_manager
+  - name: stdlib
 
 dfx_components:
   - name: common

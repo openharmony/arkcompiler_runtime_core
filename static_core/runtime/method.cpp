@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -502,7 +502,11 @@ bool Method::Verify()
         LOG(DEBUG, VERIFIER) << "Skipping verification of system method " << GetFullName(true);
         return true;
     }
-    return verifier::Verify(service, this, mode) == verifier::Status::OK;
+    if (verifier::Verify(service, this, mode) != verifier::Status::OK) {
+        LOG(ERROR, VERIFIER) << "Method verification failed: " << GetFullName(true);
+        return false;
+    }
+    return true;
 }
 
 inline void Method::FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
@@ -579,6 +583,7 @@ void Method::StartProfiling()
         }
     }
     EVENT_INTERP_PROFILING(events::InterpProfilingAction::START, GetFullName(), vcalls.size());
+    Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->TryAddMethodToProfile(this);
 }
 
 void Method::StopProfiling()

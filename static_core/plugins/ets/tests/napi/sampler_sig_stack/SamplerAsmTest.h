@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_TESTS_NAPI_SAMPLER_SIG_STACK_SAMPLERASMTEST_H
 #define PANDA_PLUGINS_ETS_TESTS_NAPI_SAMPLER_SIG_STACK_SAMPLERASMTEST_H
 
-#include <ets_napi.h>
+#include <ani.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,7 +24,7 @@ extern "C" {
 
 //  NOLINTBEGIN(readability-identifier-naming, readability-named-parameter)
 
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSumEightElements(EtsEnv *, ets_class);
+ANI_EXPORT ani_int NativeSumEightElements(ani_env *);
 
 //  NOLINTEND(readability-identifier-naming, readability-named-parameter)
 

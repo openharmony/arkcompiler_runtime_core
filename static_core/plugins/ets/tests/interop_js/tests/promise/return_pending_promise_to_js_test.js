@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,29 +15,39 @@
 
 let testSuccess = false;
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 function init() {
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-		process.exit(1);
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
 	}
 	return etsVm;
 }
 
 function callEts(etsVm) {
-	let res = etsVm.call('testReturnPendingPromise');
+	const testReturnPendingPromise = etsVm.getFunction('LETSGLOBAL;', 'testReturnPendingPromise');
+	let res = testReturnPendingPromise();
 	if (typeof res !== 'object') {
-		console.log('Result is not an object');
-		process.exit(1);
+		throw Error('Result is not an object');
 	}
 	if (res.constructor.name !== 'Promise') {
-		console.log("Expect result type 'Promise' but get '" + res.constructor.name + "'");
-		process.exit(1);
+		throw Error("Expect result type 'Promise' but get '" + res.constructor.name + "'");
 	}
 	return res;
 }
 
 async function doAwait(p) {
-	value = await p;
+	let value = await p;
 	if (value === 'Panda') {
 		testSuccess = true;
 	}
@@ -52,29 +62,25 @@ function doThen(p) {
 }
 
 function queueTasks(etsVm) {
-	queueMicrotask(() => {
-		if (testSuccess) {
-			console.log('Promise must not be resolved');
-			process.exit(1);
-		}
-		if (!etsVm.call('resolvePendingPromise')) {
-			console.log("Call of 'resolvePendingPromise' return false");
+	let tId = 0;
+	let queueTasksHelper = () => {
+		if (!testSuccess) {
 			return null;
 		}
-        queueMicrotask(() => {
-            queueTasksHelper(testSuccess);
-            return null;
-        });
-        return null;
-	});
-}
+		helper.clearInterval(tId);
+		return null;
+	};
 
-function queueTasksHelper(testSuccess) {
-	if (!testSuccess) {
-		console.log('Promise is not resolved or value is wrong');
-		process.exit(1);
-	}
-	return null;
+	helper.setTimeout(() => {
+		if (testSuccess) {
+			throw Error('Promise must not be resolved');
+		}
+		const resolvePendingPromise = etsVm.getFunction('LETSGLOBAL;', 'resolvePendingPromise');
+		if (!resolvePendingPromise()) {
+			throw Error("Call of 'resolvePendingPromise' return false");
+		}
+        tId = helper.setInterval(queueTasksHelper, 0);
+	}, 0);
 }
 
 function runAwaitTest() {
@@ -97,14 +103,12 @@ function runTest(test) {
 	} else if (test === 'then') {
 		runThenTest();
 	} else {
-		console.log('No such test');
-		process.exit(1);
+		throw Error('No such test');
 	}
 }
 
-let args = process.argv;
-if (args.length !== 3) {
-	console.log('Expected test name');
-	process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 5) {
+	throw Error('Expected test name');
 }
-runTest(args[2]);
+runTest(args[4]);

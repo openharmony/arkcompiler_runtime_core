@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <string>
 
 #include "ets_runtime_interface.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "types/ets_method.h"
 
@@ -23,7 +24,7 @@ namespace ark::ets {
 compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
     if (id == RuntimeInterface::MEM_PROMISE_CLASS_ID) {
-        return PandaEtsVM::GetCurrent()->GetClassLinker()->GetEtsClassLinkerExtension()->GetPromiseClass();
+        return PlatformTypes(PandaEtsVM::GetCurrent())->corePromise->GetRuntimeClass();
     }
     return PandaRuntimeInterface::GetClass(method, id);
 }
@@ -32,17 +33,37 @@ compiler::RuntimeInterface::FieldPtr EtsRuntimeInterface::ResolveLookUpField(Fie
 {
     ASSERT(rawField != nullptr);
     ASSERT(klass != nullptr);
-    return ClassCast(klass)->LookupFieldByName(FieldCast(rawField)->GetName());
+    Class *current = ClassCast(klass);
+    Field *raw = FieldCast(rawField);
+    while (current != nullptr) {
+        Field *field = LookupFieldByName(raw->GetName(), current);
+        if (LIKELY(field != nullptr)) {
+            return field;
+        }
+        current = current->GetBase();
+    }
+    return nullptr;
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE>
 compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetLookUpCall(FieldPtr rawField, ClassPtr klass,
                                                                          bool isSetter)
 {
-    if (isSetter) {
-        return ClassCast(klass)->LookupSetterByName<FIELD_TYPE>(FieldCast(rawField)->GetName());
+    Field *raw = FieldCast(rawField);
+    Method *method = nullptr;
+    Class *current = ClassCast(klass);
+    while (current != nullptr) {
+        if (isSetter) {
+            method = LookupSetterByName<FIELD_TYPE>(raw->GetName(), current);
+        } else {
+            method = LookupGetterByName<FIELD_TYPE>(raw->GetName(), current);
+        }
+        if (LIKELY(method != nullptr)) {
+            return method;
+        }
+        current = current->GetBase();
     }
-    return ClassCast(klass)->LookupGetterByName<FIELD_TYPE>(FieldCast(rawField)->GetName());
+    return method;
 }
 
 compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(FieldPtr rawField, ClassPtr klass,
@@ -83,9 +104,9 @@ compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(Fie
     return nullptr;
 }
 
-uint64_t EtsRuntimeInterface::GetUndefinedObject() const
+uint64_t EtsRuntimeInterface::GetUniqueObject() const
 {
-    return ToUintPtr(PandaEtsVM::GetCurrent()->GetUndefinedObject());
+    return ToUintPtr(PandaEtsVM::GetCurrent()->GetNullValue());
 }
 
 compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallKind(MethodPtr methodPtr) const
@@ -191,13 +212,12 @@ uint32_t EtsRuntimeInterface::GetClassOffsetObject(MethodPtr method) const
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
 {
-    return PandaEtsVM::GetCurrent()->GetClassLinker()->GetEtsClassLinkerExtension()->GetStringBuilderClass();
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreStringBuilder->GetRuntimeClass();
 }
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
 {
-    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    for (auto ctor : classLinker->GetStringBuilderClass()->GetConstructors()) {
+    for (auto ctor : PlatformTypes()->coreStringBuilder->GetConstructors()) {
         if (IsMethodStringBuilderDefaultConstructor(ctor)) {
             return ctor;
         }
@@ -379,6 +399,31 @@ bool EtsRuntimeInterface::IsClassValueTyped(ClassPtr klass) const
 void *EtsRuntimeInterface::GetDoubleToStringCache() const
 {
     return ark::ets::PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+}
+
+bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
+{
+    return true;
+}
+
+uint64_t EtsRuntimeInterface::GetDeprecatedNativeApiMask() const
+{
+    return ACC_DEPRECATED_NATIVE_API;
+}
+
+uint64_t EtsRuntimeInterface::GetNativeApiStaticFunctionMask() const
+{
+    return ACC_FUNCTION;
+}
+
+uint32_t EtsRuntimeInterface::GetRuntimeClassOffset(Arch arch) const
+{
+    return ark::cross_values::GetEtsClassRuntimeClassOffset(arch);
+}
+
+size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const
+{
+    return ark::cross_values::GetEtsCoroutineAniEnvOffset(arch);
 }
 
 }  // namespace ark::ets

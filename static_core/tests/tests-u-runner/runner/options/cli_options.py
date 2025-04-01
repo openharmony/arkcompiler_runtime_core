@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -115,8 +115,12 @@ def add_sts_test_suite_args(parser: argparse.ArgumentParser) -> None:
         '--ets-custom', action='store_true', dest='ets_custom',
         default=None, help='run custom ETS suite test')
     ets_mutex_group.add_argument(
-        '--sts-ts-subset', action='store_true', dest='sts_ts_subset',
+        '--ets-ts-subset', action='store_true', dest='ets_ts_subset',
         default=None, help='run comparing static VM vs dynamic one on TS subset suite test')
+    ets_mutex_group.add_argument(
+        '--ets-sdk', action='store_true', dest='ets_sdk',
+        default=None, help='run sdk tests')
+
 
 
 def add_other_test_suite_args(parser: argparse.ArgumentParser) -> None:
@@ -509,6 +513,28 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
         help='Stacks files in the specified directory')
 
 
+def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        '--declgen-ets2ts-cts', action='store_true', dest='declgen_ets2ts_cts',
+        default=None,
+        help="run declgen_ets2ts ets-templates tests")
+    parser.add_argument(
+        '--declgen-ets2ts-func-tests', action='store_true', dest='declgen_ets2ts_func_tests',
+        default=None,
+        help="run declgen_ets2ts test against ETS STDLIB TEMPLATES and manual written ETS tests")
+    parser.add_argument(
+        '--declgen-ets2ts-runtime', action='store_true', dest='declgen_ets2ts_runtime',
+        default=None,
+        help="run declgen_ets2ts ETS runtime tests")
+
+
+def add_declgen_ts2ets_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        '--declgen-ts2ets-cts', action='store_true', dest='declgen_ts2ets_cts',
+        default=None,
+        help="run declgen_ts2ets ts-templates tests")
+
+
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Regression test runner")
 
@@ -527,5 +553,7 @@ def get_args() -> argparse.Namespace:
     add_time_report_args(parser)
     add_test_lists_args(parser)
     add_coverage_args(parser)
+    add_declgen_ets2ts_args(parser)
+    add_declgen_ts2ets_args(parser)
 
     return parser.parse_args()

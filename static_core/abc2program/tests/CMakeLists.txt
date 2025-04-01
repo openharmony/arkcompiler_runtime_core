@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sts)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ets)
 
 set(abc2progTestFiles
     "HelloWorld"
@@ -22,8 +22,8 @@ add_custom_target(abc2program_gen)
 
 foreach(NAME ${abc2progTestFiles})
     add_custom_target(abc2program_gen_${NAME} COMMENT "Generating ${NAME} for abc2program"
-        COMMAND ${PANDA_BINARY_ROOT}/bin/es2panda ${CMAKE_CURRENT_SOURCE_DIR}/sts/${NAME}.sts
-        --output=${CMAKE_CURRENT_BINARY_DIR}/sts/${NAME}.abc
+        COMMAND ${PANDA_BINARY_ROOT}/bin/es2panda ${CMAKE_CURRENT_SOURCE_DIR}/ets/${NAME}.ets
+        --output=${CMAKE_CURRENT_BINARY_DIR}/ets/${NAME}.abc
         DEPENDS es2panda)
     add_dependencies(abc2program_gen abc2program_gen_${NAME})
 endforeach()

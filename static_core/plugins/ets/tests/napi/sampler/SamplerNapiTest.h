@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,10 @@ extern "C" {
 
 //  NOLINTBEGIN(readability-identifier-naming, readability-named-parameter)
 
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSlowFunction(EtsEnv *, ets_class, ets_int);
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeFastFunction(EtsEnv *, ets_class);
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeNAPISlowFunction(EtsEnv *, ets_class, ets_int);
-ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeNAPIFastFunction(EtsEnv *, ets_class, ets_int);
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeSlowFunction(EtsEnv *, ets_class, ets_int);
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeFastFunction(EtsEnv *, ets_class);
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeNAPISlowFunction(EtsEnv *, ets_class, ets_int);
+ETS_EXPORT ets_int ETS_CALL ETS_SamplerNapiTest_ETSGLOBAL_NativeNAPIFastFunction(EtsEnv *, ets_class, ets_int);
 
 //  NOLINTEND(readability-identifier-naming, readability-named-parameter)
 

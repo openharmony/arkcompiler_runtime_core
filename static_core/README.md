@@ -26,7 +26,7 @@ If you want additionally to install Python dependencies for running tests add a 
 ```
 $ sudo ./scripts/install-deps-ubuntu -i=dev -i=test
 ```
-It creates a virtual environment .venv-panda in your home directory with all required dependencies. 
+It creates a virtual environment .venv-panda in your home directory with all required dependencies.
 Later, tests Python scripts can activate this environment. If you already have run with the parameter `-i=test`
 the second time it might be skipped.
 
@@ -37,6 +37,18 @@ Panda uses third party libraries. To install the libraries and apply patches, ru
 ```
 $ ./scripts/install-third-party --force-clone
 ```
+
+# Ets frontend
+
+To build panda SDK, you should also checkout following project:
+```
+git clone https://gitee.com/openharmony/arkcompiler_ets_frontend
+```
+And create symlink in static_core directory:
+```
+ln -s /path/to/arkcompiler_ets_frontend /path/to/arkcompiler_runtime_core/static_core/tools/es2panda
+```
+Note: please, check, that for `arkcompiler_ets_frontend` you use the same branch as for `arkcompiler_runtime_core`.
 
 # Building
 
@@ -157,11 +169,12 @@ $ cd /path/to/panda/repository
 $ /path/to/gn/repository/out/gn --args=is_standard_system=true gen out
 $ ninja -C out <target name>
 ```
-To use LLVM Backend add the following arguments:
+
+By default gn build uses LLVM Backend, so one must provide `llvm_target_dir="/path/to/llvm-15-{type}-{arch}"` if it is not in default location. To build without llvm add the following arguments:
 ```
-$ /path/to/gn/repository/out/gn out is_llvmbackend=true llvm_target_dir="/opt/llvm-15-{type}-{arch}" ...
+$ /path/to/gn/repository/out/gn out is_llvmbackend=false ...
 ```
-Setting `is_llvmbackend=true` option enables the same scenarios as `-DPANDA_LLVM_BACKEND=true` option in cmake builds
+Option `is_llvmbackend=true` in gn is the same scenarios as `-DPANDA_LLVM_BACKEND=true` option in cmake builds
 
 ## Further reading
 

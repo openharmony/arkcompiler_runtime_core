@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,28 +125,28 @@ public:
     NO_MOVE_SEMANTIC(CompletionEvent);
 
     /**
-     * @param promise A weak reference (from global storage) to the language-dependent promise object that will hold
-     * the coroutine return value.
+     * @param returnValueObject A weak reference (from global storage) to the language-dependent language object that
+     * will hold the coroutine return value.
      */
-    explicit CompletionEvent(mem::Reference *promise, CoroutineManager *coroManager)
-        : CoroutineEvent(Type::COMPLETION, coroManager), promise_(promise)
+    explicit CompletionEvent(mem::Reference *returnValueObject, CoroutineManager *coroManager)
+        : CoroutineEvent(Type::COMPLETION, coroManager), returnValueObject_(returnValueObject)
     {
     }
     ~CompletionEvent() override = default;
 
-    mem::Reference *ReleasePromise()
+    mem::Reference *ReleaseReturnValueObject()
     {
-        return std::exchange(promise_, nullptr);
+        return std::exchange(returnValueObject_, nullptr);
     }
 
-    void SetPromise(mem::Reference *promise)
+    void SetReturnValueObject(mem::Reference *returnValueObject)
     {
-        ASSERT(promise_ == nullptr);
-        promise_ = promise;
+        ASSERT(returnValueObject_ == nullptr);
+        returnValueObject_ = returnValueObject;
     }
 
 private:
-    mem::Reference *promise_ = nullptr;
+    mem::Reference *returnValueObject_ = nullptr;
 };
 
 }  // namespace ark

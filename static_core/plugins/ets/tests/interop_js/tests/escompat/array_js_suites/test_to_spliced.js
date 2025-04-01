@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require('escompat.test.js');
+const { etsVm, getTestModule } = require('../escompat.test.abc');
 
 const etsMod = getTestModule('escompat_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
@@ -22,7 +22,7 @@ const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSToSpliced = etsMod.getFunction('Array_TestJSToSpliced');
 
 // NOTE(kprokopenko): change to `x.length` when interop support properties
-const etsArrLen = (x) => x['<get>length'].call(x);
+const etsArrLen = (x) => x.length;
 
 // NOTE(oignatenko) enable after interop will be supported for this method signature
 const FIXES_IMPLEMENTED = false;

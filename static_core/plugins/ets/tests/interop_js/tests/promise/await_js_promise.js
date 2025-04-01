@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,34 +26,38 @@ let ERROR = 1;
 let INFO = 2;
 function msg(s, lvl) {
 	if (LOG_LEVEL >= lvl) {
-		console.log(s);
+		print(s);
 	}
 }
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 function init() {
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi');
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 	const etsOpts = {
-		'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-		'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
 		'gc-trigger-type': 'heap-trigger',
 		'load-runtimes': 'ets',
 		'compiler-enable-jit': 'false',
 		'run-gc-in-place': 'true',
-		'coroutine-js-mode': 'true',
 		'coroutine-impl': 'stackful',
-		//'log-debug': 'coroutines'
+		'coroutine-enable-external-scheduling': 'true',
+		// 'log-debug': 'coroutines'
 	};
 	const createRes = etsVm.createRuntime(etsOpts);
 	if (!createRes) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
+		throw Error('Cannot create ETS runtime');
 	}
 	return etsVm;
 }
 
 async function doAwait(pr) {
 	msg('Await func: start', INFO);
-	value = await pr;
+	let value = await pr;
 	msg('Await func: await returned: ' + value, INFO);
 	if (value === 'Panda') {
 		testSuccess = true;
@@ -81,40 +85,37 @@ function runAwaitTest(name, promiseCreator, promiseResolver) {
 	let etsVm = init();
 	let promise = promiseCreator();
 	// similar to async JS function call. Returns a Promise instance
-	let res = etsVm.call('testAwaitJsPromise', promise);
+	const testAwaitJsPromise = etsVm.getFunction('LETSGLOBAL;', 'testAwaitJsPromise');
+	let res = testAwaitJsPromise(promise);
 	msg('Called testAwaitJsPromise OK, result:', INFO);
 	msg(res, INFO);
 	if (typeof res !== 'object') {
-		msg('Result is not an object', FATAL);
-		process.exit(1);
+		throw Error('Result is not an object');
 	}
 	if (res.constructor.name !== 'Promise') {
-		msg("Expect result type 'Promise' but get '" + res.constructor.name + "'", FATAL);
-		process.exit(1);
+		throw Error("Expect result type 'Promise' but get '" + res.constructor.name + "'");
 	}
 	let anotherRes = doAwait(res);
 	msg('Called doAwait OK, res: ', INFO);
 	msg(anotherRes, INFO);
-	queueMicrotask(() => {
+	helper.setTimeout(() => {
 		if (testSuccess) {
-			msg('Promise must not be resolved until JS resolves the passed one', FATAL);
-			process.exit(1);
+			throw Error('Promise must not be resolved until JS resolves the passed one');
 		}
 		// resolve the passed promise if necessary
 		promiseResolver(PROMISE_RESOLVE_VALUE);
 		// after Q is processed, the test should pass
-		queueMicrotask(async () => {
+		helper.setTimeout(async () => {
 			msg('Starting await of doAwait() result, its state is:', INFO);
 			msg(anotherRes, INFO);
 			await anotherRes;
 			if (!testSuccess) {
-				msg('Promise is not resolved or value is wrong', FATAL);
-				process.exit(1);
+				throw Error('Promise is not resolved or value is wrong');
 			} else {
 				msg('Test PASSED', INFO);
 			}
-		});
-	});
+		}, 0);
+	}, 0);
 }
 
 function runAwaitPendingTest() {
@@ -133,19 +134,12 @@ function runTest(test) {
 	} else if (test === 'resolved') {
 		runAwaitResolvedTest();
 	} else {
-		msg('No such test', FATAL);
-		process.exit(1);
+		throw Error('No such test');
 	}
 }
 
-process.on('uncaughtException', function (err) {
-	msg(err.stack, ERROR);
-	throw err;
-});
-
-let args = process.argv;
-if (args.length !== 3) {
-	msg('Expected test name', FATAL);
-	process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 5) {
+	throw Error('Expected test name');
 }
-runTest(args[2]);
+runTest(args[4]);

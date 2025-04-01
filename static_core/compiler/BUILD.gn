@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -83,11 +83,13 @@ libarkcompiler_sources = [
   "compiler_logger.cpp",
   "compiler_options.cpp",
   "optimizer/analysis/alias_analysis.cpp",
+  "optimizer/analysis/alias_visitor.cpp",
   "optimizer/analysis/bounds_analysis.cpp",
   "optimizer/analysis/catch_inputs.cpp",
   "optimizer/analysis/countable_loop_parser.cpp",
   "optimizer/analysis/dominators_tree.cpp",
   "optimizer/analysis/linear_order.cpp",
+  "optimizer/analysis/live_in_analysis.cpp",
   "optimizer/analysis/live_registers.cpp",
   "optimizer/analysis/liveness_analyzer.cpp",
   "optimizer/analysis/liveness_use_table.cpp",
@@ -139,6 +141,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/memory_barriers.cpp",
   "optimizer/optimizations/memory_coalescing.cpp",
   "optimizer/optimizations/move_constants.cpp",
+  "optimizer/optimizations/native_call_optimization.cpp",
   "optimizer/optimizations/object_type_check_elimination.cpp",
   "optimizer/optimizations/optimize_string_concat.cpp",
   "optimizer/optimizations/peepholes.cpp",
@@ -336,7 +339,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
     ]
   }
   if (enable_codegen) {
-    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_static" ]
+    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_dependency_static" ]
   }
   deps += plugin_compiler_deps
 

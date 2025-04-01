@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,7 @@ private:
     void StartAotFile(const panda_file::File &pfileRef);
     bool CompileFiles();
     bool TryLoadPandaFile(const std::string &fileName, PandaVM *vm);
+    std::unique_ptr<const panda_file::File> TryLoadZipPandaFile(const std::string &fileName);
     bool CompilePandaFile(const panda_file::File &pfileRef);
     ark::Class *ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId);
     bool PossibleToCompile(const panda_file::File &pfileRef, const ark::Class *klass,

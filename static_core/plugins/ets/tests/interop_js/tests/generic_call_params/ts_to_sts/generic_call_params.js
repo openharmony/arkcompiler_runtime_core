@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,31 +28,19 @@ let __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (ConstrFoo.prototype = b.prototype, new ConstrFoo());
     };
 })();
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.ClassSubset = exports.Vector = exports.tsInt = exports.tsString = void 0;
-exports.applyFunctionGenericUnion = applyFunctionGenericUnion;
-exports.applyFunctionGeneric = applyFunctionGeneric;
-exports.applyFunctionGenericTuple = applyFunctionGenericTuple;
-exports.subsetClassCallFromTs = subsetClassCallFromTs;
-exports.genericExtendsClass = genericExtendsClass;
-exports.genericExtendsClassCallFromTs = genericExtendsClassCallFromTs;
-exports.applyFunctionGenericArray = applyFunctionGenericArray;
-exports.applyFunctionGenericArrayCallFromTs = applyFunctionGenericArrayCallFromTs;
-exports.applyFunWithConstraints = applyFunWithConstraints;
-exports.genericKeyof = genericKeyof;
-exports.tsString = 'string';
-exports.tsInt = 1;
+export let tsString = 'string';
+export let tsInt = 1;
 let add = function (a, b) { return a + b; };
-function applyFunctionGenericUnion(value1, value2, func) {
+export function applyFunctionGenericUnion(value1, value2, func) {
     return func(value1, value2);
 }
-function applyFunctionGeneric(value1, value2, func) {
+export function applyFunctionGeneric(value1, value2, func) {
     return func(value1, value2);
 }
-function applyFunctionGenericTuple(value1, value2, func) {
+export function applyFunctionGenericTuple(value1, value2, func) {
     return func(value1, value2);
 }
-let Vector = /** @class */ (function () {
+export let Vector = /** @class */ (function () {
     function vector(x) {
         this.x = x;
     }
@@ -64,7 +52,6 @@ let Vector = /** @class */ (function () {
     };
     return vector;
 }());
-exports.Vector = Vector;
 let Parent = /** @class */ (function () {
     function parent() {
     }
@@ -73,40 +60,39 @@ let Parent = /** @class */ (function () {
     };
     return parent;
 }());
-let ClassSubset = /** @class */ (function (_super) {
+export let ClassSubset = /** @class */ (function (_super) {
     __extends(ClassSubset, _super);
     function ClassSubset(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return ClassSubset;
 }(Parent));
-exports.ClassSubset = ClassSubset;
-function subsetClassCallFromTs() {
+export function subsetClassCallFromTs() {
     let GClass = new ClassSubset();
-    return GClass.get(exports.tsInt, exports.tsInt, add);
+    return GClass.get(tsInt, tsInt, add);
 }
-function genericExtendsClass(value1) {
+export function genericExtendsClass(value1) {
     value1.add();
     return value1;
 }
-function genericExtendsClassCallFromTs(arg) {
+export function genericExtendsClassCallFromTs(arg) {
     return genericExtendsClass(arg);
 }
-function applyFunctionGenericArray(values, func) {
+export function applyFunctionGenericArray(values, func) {
     let result = values[0];
     for (let i = 1; i < values.length; i++) {
         result = func(result, values[i]);
     }
     return result;
 }
-function applyFunctionGenericArrayCallFromTs(array) {
+export function applyFunctionGenericArrayCallFromTs(array) {
     let add = function (a, b) { return a + b; };
     return applyFunctionGenericArray(array, add);
 }
-function applyFunWithConstraints(value1, value2, func) {
+export function applyFunWithConstraints(value1, value2, func) {
     return func(value1, value2);
 }
-function genericKeyof(obj, keys) {
+export function genericKeyof(obj, keys) {
     return {
         obj: obj,
         keys: keys,

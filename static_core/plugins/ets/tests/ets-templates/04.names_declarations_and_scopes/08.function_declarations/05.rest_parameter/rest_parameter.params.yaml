@@ -13,7 +13,7 @@
 
 ---
 cases:
-  # example from the specification
+  # 0. example from the specification
   - sig: |-
       sum(...numbers: int[]): int
     def: |-
@@ -23,7 +23,7 @@ cases:
     call: |-
       if (sum() == 0 && sum(1) == 1 && sum(1, 2, 3) == 6) return 0;
 
-  # array of arrays
+  # 1. array of arrays
   - sig: |-
       sum(...arrays: int[][]): int
     def: |-
@@ -38,7 +38,7 @@ cases:
       let a3: int[] = [9, 9, 9]
       if (sum(a1) == 6 && sum(a1, a2) == 24 && sum(a3, a2, a1) == 51) return 0;
 
-  # return the array
+  # 2. return the array
   - sig: |-
       foo(...p: int[]): int[]
     def: |-
@@ -47,7 +47,7 @@ cases:
       let v: int[] = foo(10, 20, 30)
       if (v.length == 3 && v[0] == 10 && v[1] == 20 && v[2] == 30) return 0;
 
-  # array of nullables
+  # 3. array of nullables
   - sig: |-
       sum(...p: (Int|null)[]): int
     def: |-
@@ -57,7 +57,7 @@ cases:
     call: |-
       if (sum(1, null, 2) == 3 && sum(null, null, 99, null) == 99) return 0;
 
-  # array and extra argument
+  # 4. array and extra argument
   - sig: |-
       foo(x: int, ...p: int[]): int[]
     def: |-
@@ -66,7 +66,7 @@ cases:
       let v: int[] = foo(10, 20)
       if (v.length == 1 && v[0] == 20) return 0;
 
-  # array and extra arguments
+  # 5. array and extra arguments
   - sig: |-
       foo(x: int, y: int, ...p: int[]): int
     def: |-
@@ -75,7 +75,7 @@ cases:
       let v = foo(10, 20, 30, 40, 50, 60, 70, 80, 90)
       if (v == 37) return 0;
 
-  # empty array
+  # 6. empty array
   - sig: |-
       foo(...p: int[]): int[]
     def: |-
@@ -84,7 +84,7 @@ cases:
       let v: int[] = foo()
       if (v.length == 0) return 0;
 
-  # empty array with extra argument
+  # 7. empty array with extra argument
   - sig: |-
       foo(x: int, ...p: int[]): int[]
     def: |-
@@ -93,7 +93,7 @@ cases:
       let v: int[] = foo(10)
       if (v.length == 0) return 0;
 
-  # array in extra argument
+  # 8. array in extra argument
   - sig: |-
       foo(q: int[], ...p: int[]): int
     def: |-
@@ -105,7 +105,7 @@ cases:
       let v: int = foo([1, 2], 10, 20)
       if (v == 33) return 0;
 
-  # passing different types
+  # 9. passing different types
   - sig: |-
       foo(x: double, y: boolean, ...p: char[]): string
     def: |-
@@ -116,7 +116,7 @@ cases:
       let v = foo(1.5, false, c'A', c'B')
       if (v == "1.5false2AB") return 0;
 
-  # generic function
+  # 10. generic function
   - sig: |-
       foo<T>(x: T, ...p: T[]): T[]
     def: |-
@@ -128,7 +128,7 @@ cases:
       // TODO: when the error with generic function return type will be fixed, the more usual form can be used:
       // if (v.length == 3 && v[0] == "A" && v[1] == "B" && v[2] == "C" && q.length == 1 && q[0] == 2) return 0;
 
-  # generic function with nullable argument
+  # 11. generic function with nullable argument
   - sig: |-
       foo<T>(...p: T[]): T[]
     def: |-
@@ -136,3 +136,50 @@ cases:
     call: |-
       let v: (Object|null)[] = foo<Object|null>(null, new Long(), new Short(), new Object(), null)
       if (v.length == 5) return 0;
+
+  # 12. spread tuple
+  - sig: |-
+      sum(...numbers: [number, number, number]): number
+    def: |-
+      return numbers[0] + numbers[1] + numbers[2];
+    call: |-
+      let x: [number, number, number] = [1, 2, 3]
+      assertEQ(sum(...x), 6)
+
+  # 13. spread Array
+  - sig: |-
+      sum(...numbers: Array<number>): number
+    def: |-
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+
+    call: |-
+      let x: Array<number> = [1, 2, 3]
+      assertEQ(sum(...x), 6)
+
+  # 14. spread FixedArray
+  - sig: |-
+      sum(...numbers: FixedArray<number>): number
+    def: |-
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+
+    call: |-
+      let x: FixedArray<number> = [1, 2, 3]
+      assertEQ(sum(...x), 6)
+
+  # 15. spread 2 arrays
+  - sig: |-
+      sum(...numbers: int[]): int
+    def: |-
+      return 1
+    call: |-
+      const arr1 = [1, 2, 3]
+      const arr2 = [4, 5, 6]
+      const combined = [...arr1, ...arr2]
+      const copy = [...arr1]
+      if (true) return 0;

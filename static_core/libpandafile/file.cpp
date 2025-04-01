@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -187,9 +187,9 @@ std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, 
     return file;
 }
 
-static std::unique_ptr<const panda_file::File> OpenZipPandaFile(FILE *fp, std::string_view location,
-                                                                std::string_view archiveFilename,
-                                                                panda_file::File::OpenMode openMode)
+std::unique_ptr<const panda_file::File> OpenZipPandaFile(FILE *fp, std::string_view location,
+                                                         std::string_view archiveFilename,
+                                                         panda_file::File::OpenMode openMode)
 {
     // Open Zipfile and do the extraction.
     ZipArchiveHandle zipfile = nullptr;
@@ -306,6 +306,27 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
     return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
 }
 
+std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size, std::string filename)
+{
+    if (buffer == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "OpenPandaFileFromSecureMemory buffer is nullptr'";
+        return nullptr;
+    }
+
+    auto *mem = reinterpret_cast<std::byte *>(buffer);
+    os::mem::ConstBytePtr ptr(mem, size, [](std::byte *, size_t) noexcept {});
+    if (ptr.Get() == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "Failed to open panda file from secure memory'";
+        return nullptr;
+    }
+
+    std::hash<std::byte *> hash;
+    if (filename.empty()) {  // filename is sandbox path in application
+        filename = std::to_string(hash(mem));
+    }
+    return panda_file::File::OpenFromMemory(std::move(ptr), filename);
+}
+
 class ClassIdxIterator {
 public:
     // NOLINTNEXTLINE(readability-identifier-naming)
@@ -408,7 +429,7 @@ File::File(std::string filename, os::mem::ConstBytePtr &&base)
     : base_(std::forward<os::mem::ConstBytePtr>(base)),
       filename_(std::move(filename)),
       filenameHash_(CalcFilenameHash(filename_)),
-      fullFilename_(os::GetAbsolutePath(filename_)),
+      fullFilename_(os::GetAbsolutePath(filename_).empty() ? filename_ : os::GetAbsolutePath(filename_)),
       pandaCache_(std::make_unique<PandaCache>()),
       uniqId_(MergeHashes(filenameHash_, GetHash32(reinterpret_cast<const uint8_t *>(GetHeader()), sizeof(Header))))
 {

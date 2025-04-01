@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,46 +13,48 @@
  * limitations under the License.
  */
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 async function runTest(test) {
-    let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+    const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+    const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-	let runtimeCreated = etsVm.createRuntime({
-		'boot-panda-files': process.env.ARK_ETS_STDLIB_PATH + ':' + process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-		'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-		'gc-trigger-type': 'heap-trigger',
-		'compiler-enable-jit': 'false',
-		'run-gc-in-place': 'true',
-		'coroutine-impl': 'stackful',
-		'coroutine-workers-count': 2,
-		'coroutine-js-mode': true,
+    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 
-	});
+    let runtimeCreated = etsVm.createRuntime({
+        'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+        'panda-files': gtestAbcPath,
+        'gc-trigger-type': 'heap-trigger',
+        'compiler-enable-jit': 'false',
+        'run-gc-in-place': 'true',
+        'coroutine-impl': 'stackful',
+        'coroutine-workers-count': 2,
+        'coroutine-enable-external-scheduling': 'true',
+        // 'log-debug': 'coroutines'
+    });
     if (!runtimeCreated) {
-        console.log('Cannot create ETS runtime');
-        process.exit(1);
+        throw Error('Cannot create ETS runtime');
     }
     let valueToResolveWith = 42;
-    let promise = etsVm.call(test, valueToResolveWith);
+    const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+    let promise = runTestImpl(valueToResolveWith);
     if (promise == null) {
-        console.log('Function returned null');
-        process.exit(-1);
+        throw Error('Function returned null');
     }
-    etsVm.call('signalPromiseInJs');
+    const signalPromiseInJs = etsVm.getFunction('LETSGLOBAL;', 'signalPromiseInJs');
+    signalPromiseInJs();
     try {
         let result = await promise;
         if (result !== valueToResolveWith) {
-            console.log('Promise was not resolved correctly: result: ', result, ' expected: ', valueToResolveWith);
-            process.exit(-1);
+            throw Error('Promise was not resolved correctly: result: ', result, ' expected: ', valueToResolveWith);
         }
     } catch (error) {
-        console.log('Promise was rejected with error:', error);
-        process.exit(-1);
+        throw Error('Promise was rejected with error:', error);
     }
 }
 
-let args = process.argv;
-if (args.length !== 3) {
-    console.log('Expected test name');
-    process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 5) {
+    throw Error('Expected test name');
 }
-runTest(args[2]);
+runTest(args[4]);

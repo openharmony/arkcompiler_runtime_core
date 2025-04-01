@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.notNullishObj = exports.Obj = exports.tsString = exports.tsInt = void 0;
-exports.tsInt = 1;
-exports.tsString = 'string';
-exports.Obj = {
+export let tsInt = 1;
+export let tsString = 'string';
+export let Obj = {
     name: 'test',
     inside: {
         name: 'test'
     },
-    sum: function () { return exports.tsInt; },
+    sum: function () { return tsInt; },
     arr: [1, 2, 3]
 };
-exports.notNullishObj = {
+export let notNullishObj = {
     secondName: null,
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "ark_hz/ark_js_runtime.h"
+#include <uv.h>
 #include "ark_js_runtime.h"
 #include "utils/utils.h"
 
@@ -36,14 +37,22 @@ bool ArkJsRuntime::ProcessOptions(int argc, const char **argv, arg_list_t *filen
         return false;
     }
 
-    std::string files = argv[argc - 1];
-    if (!ecmascript::base::StringHelper::EndsWith(files, ".abc")) {
-        std::cerr << "The last argument must be abc file" << std::endl;
+    size_t jsvmArgsEndIdx = 0;
+    for (int idx = 1; idx < argc; ++idx) {
+        if (ecmascript::base::StringHelper::EndsWith(argv[idx], ".abc")) {
+            jsvmArgsEndIdx = idx;
+            break;
+        }
+    }
+
+    std::string files = argv[jsvmArgsEndIdx];
+    if (files.empty()) {
+        std::cerr << "Abc file must pass after arguments to jsvm" << std::endl;
         std::cerr << GetHelper();
         return 1;
     }
 
-    bool retOpt = options_.ParseCommand(argc - 1, argv);
+    bool retOpt = options_.ParseCommand(jsvmArgsEndIdx, argv);
     if (!retOpt) {
         std::cerr << GetHelper();
         return false;
@@ -70,8 +79,6 @@ bool ArkJsRuntime::Init()
     engine_->SetGetAssetFunc(utils::GetAsset);
     engine_->SetCleanEnv([this] { JSNApi::DestroyJSVM(vm_); });
 
-    uv_loop_init(&loop_);
-
     return true;
 }
 
@@ -81,10 +88,28 @@ bool ArkJsRuntime::Execute(const std::string &filename)
     return JSNApi::Execute(vm_, filename, options_.GetEntryPoint());
 }
 
+uv_loop_t *ArkJsRuntime::GetUVLoop()
+{
+    return engine_->GetUVLoop();
+}
+
 void ArkJsRuntime::Loop()
 {
-    while (uv_run(&loop_, UV_RUN_NOWAIT)) {
-        uv_run(engine_->GetUVLoop(), UV_RUN_NOWAIT);
+    // 2 here for NativeEngine async_t and 1 for main CallbackPoster
+    static constexpr uint32_t MANUALLY_HANDLED_ASYNC_COUNT = 2U + 1U;  // CC-OFF(G.NAM.03-CPP) project code style
+    auto *loop = GetUVLoop();
+    auto cntHandles = []([[maybe_unused]] uv_handle_t *handle, void *arg) {
+        auto *cnt = reinterpret_cast<uint32_t *>(arg);
+        (*cnt)++;
+    };
+    // CC-OFFNXT(G.CTL.03) false positive
+    while (true) {
+        uint32_t handleCount = 0;
+        uv_walk(loop, cntHandles, &handleCount);
+        if (handleCount <= MANUALLY_HANDLED_ASYNC_COUNT) {
+            break;
+        }
+        engine_->Loop(LOOP_ONCE);
     }
 }
 

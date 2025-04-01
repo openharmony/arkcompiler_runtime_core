@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,27 +23,32 @@
     i32 foo
 }
 
-.function i64 A.baz(A a0) <access.function=public> {
+.function i64 A.<get>baz(A a0) <access.function=public> {
     ldai.64 42
     return.64
 }
 
-.function void C.bar(C a0, i32 a1) <access.function=public> {
+.function void C.<set>bar(C a0, i32 a1) <access.function=public> {
     mov.obj v0, a0
     lda a1
     stobj v0, C.foo
     return.void
 }
 
-.union_field i32 bar
-.union_field i64 baz
+.record $NamedAccessMeta-i32 {
+    i32 bar
+}
+
+.record $NamedAccessMeta-i64 {
+    i64 baz
+}
 
 .function i32 test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name.64 a0, baz
+    ets.ldobj.name.64 a0, $NamedAccessMeta-i64.baz
     i64toi32
     movi v0, 5
     add2 v0
-    ets.stobj.name a1, bar
+    ets.stobj.name a1, $NamedAccessMeta-i32.bar
     return
 }
 

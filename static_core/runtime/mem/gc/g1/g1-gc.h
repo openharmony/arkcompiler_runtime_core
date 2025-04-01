@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,8 @@ public:
 
     bool MarkObjectIfNotMarked(ObjectHeader *object) override;
 
+    void MarkObjectRecursively(ObjectHeader *object);
+
     bool InGCSweepRange(const ObjectHeader *object) const override;
 
     void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
@@ -148,6 +150,7 @@ public:
     void ComputeNewSize() override;
     bool Trigger(PandaUniquePtr<GCTask> task) override;
     void EvacuateStartingWith(void *ref) override;
+    void SetExtensionData(GCExtensionData *data) override;
 
 protected:
     ALWAYS_INLINE ObjectAllocatorG1<LanguageConfig::MT_MODE> *GetG1ObjectAllocator() const
@@ -217,8 +220,9 @@ private:
     /// Determine whether GC need to run concurrent mark or mixed GC
     bool ScheduleMixedGCAndConcurrentMark(ark::GCTask &task);
 
-    /// Start concurrent mark
-    void RunConcurrentMark(ark::GCTask &task);
+    /// Start concurrent GC
+    template <typename OnPauseMarker, typename ConcurrentMarker>
+    void RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pmarker, ConcurrentMarker &cmarker);
 
     void RunPhasesForRegions([[maybe_unused]] ark::GCTask &task, const CollectionSet &collectibleRegions);
 
@@ -245,26 +249,20 @@ private:
 
     /**
      * Mark predicate with calculation of live bytes in region
-     * @see MarkStackCond
-     *
+     * @tparam ATOMICALLY atomically or non-atomically live bytes calculation
      * @param object marked object from marking-stack
-     *
-     * @return true
-     */
-    static void CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
-
-    /**
-     * Mark predicate with calculation of live bytes in region, not atomically
+     * @param baseKlass class of the passed object from marking-stack
+     * @see MarkStack
      * @see ConcurrentMarkImpl
-     *
-     * @param object marked object from marking-stack
      */
-    static void CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
+    template <bool ATOMICALLY = true>
+    static void CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
 
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
     void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
 
-    GCRootVisitor CreateGCRootVisitorForMixedMark(GCMarkingStackType &objectsStack);
+    template <typename Marker, typename Predicate>
+    GCRootVisitor CreateGCRootVisitor(GCMarkingStackType &objectsStack, Marker &marker, const Predicate &refPred);
 
     /**
      * Mark roots and add them to the stack
@@ -280,7 +278,11 @@ private:
      * STW
      * @param objects_stack
      */
-    void InitialMark(GCMarkingStackType *objectsStack);
+    template <bool PROCESS_WEAK_REFS, typename Marker>
+    void InitialMark(GCMarkingStackType &markingStack, Marker &marker);
+
+    template <typename Marker>
+    void UnmarkAll(Marker &marker);
 
     void MarkStackMixed(GCMarkingStackType *stack);
 
@@ -333,8 +335,6 @@ private:
     template <bool FULL_GC, bool USE_WORKERS>
     void UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_GC> *movedObjectsContainer);
 
-    void Sweep();
-
     bool IsMarked(const ObjectHeader *object) const override;
     bool IsMarkedEx(const ObjectHeader *object) const override;
 
@@ -349,30 +349,30 @@ private:
      */
     void OnPauseMark(GCTask &task, GCMarkingStackType *objectsStack, bool useGcWorkers);
 
-    /// Start process of concurrent marking
-    void ConcurrentMarking(ark::GCTask &task);
-
     /// Iterate over roots and mark them concurrently
-    template <bool PROCESS_WEAK_REFS>
-    NO_THREAD_SAFETY_ANALYSIS void ConcurrentMarkImpl(GCMarkingStackType *objectsStack);
+    template <bool PROCESS_WEAK_REFS, bool ATOMICALLY, typename Marker>
+    NO_THREAD_SAFETY_ANALYSIS void ConcurrentMarkImpl(GCMarkingStackType *objectsStack, Marker &marker);
 
     void PauseTimeGoalDelay();
-
-    void InitialMark(GCMarkingStackType &markingStack);
 
     /*
      * Mark the heap in concurrent mode and calculate live bytes
      */
-    template <bool PROCESS_WEAK_REFS>
-    void ConcurrentMark(GCMarkingStackType *objectsStack);
+    template <bool PROCESS_WEAK_REFS, typename Marker>
+    void ConcurrentMark(const GCTask &task, GCMarkingStackType *objectsStack, Marker &marker);
 
     /// ReMarks objects after Concurrent marking and actualize information about live bytes
-    void Remark(ark::GCTask const &task);
+    template <bool PROCESS_WEAK_REFS, typename Marker>
+    void Remark(const GCTask &task, Marker &marker);
 
     /// Sweep VM refs for non-regular (humongous + nonmovable) objects
     void SweepNonRegularVmRefs();
 
     void SweepRegularVmRefs();
+
+    void VerifyHeapBeforeConcurrent();
+
+    void ConcurrentSweep(ark::GCTask &task);
 
     /// Return collectible regions
     CollectionSet GetCollectibleRegions(ark::GCTask const &task, bool isMixed);
@@ -407,7 +407,8 @@ private:
      * Add data from SATB buffer to the object stack
      * @param object_stack - stack to add data to
      */
-    void DrainSatb(GCAdaptiveMarkingStack *objectStack);
+    template <typename Marker>
+    void DrainSatb(GCAdaptiveMarkingStack *objectStack, Marker &marker);
 
     void HandlePendingDirtyCards();
 
@@ -474,7 +475,16 @@ private:
     size_t GetUniqueRemsetRefsCount() const;
 
     void ExecuteMarkingTask(GCMarkWorkersTask::StackType *objectsStack);
-    void ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack);
+    template <typename Marker>
+    void ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker);
+    /**
+     * @brief Method gets stack with only one array object initially.
+     * The stack also has an information about the interval in the array
+     * that should be traversed in the current task
+     * @param objectsStack stack, initially having one array object
+     */
+    template <typename Marker>
+    void ExecuteHugeArrayMarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker);
     void ExecuteFullMarkingTask(GCMarkWorkersTask::StackType *objectsStack);
     void ExecuteCompactingTask(Region *region, const ObjectVisitor &movedObjectsSaver);
     void ExecuteEnqueueRemsetsTask(GCUpdateRefsWorkersTask<false>::MovedObjectsRange *movedObjectsRange);
@@ -482,9 +492,12 @@ private:
 
     void PrintFragmentationMetrics(const char *title);
 
-    G1GCPauseMarker<LanguageConfig> marker_;
-    G1GCConcurrentMarker<LanguageConfig> concMarker_;
+    G1GCMarker<LanguageConfig, true> marker_;
+    G1GCMarker<LanguageConfig, false> concMarker_;
     G1GCMixedMarker<LanguageConfig> mixedMarker_;
+    XGCMarker<LanguageConfig, true> onPauseXMarker_;
+    // NOTE(audovichenko): Do not use atomics in concXMarker_
+    XGCMarker<LanguageConfig, true> concXMarker_;
     /// Flag indicates if we currently in concurrent marking phase
     std::atomic<bool> concurrentMarkingFlag_ {false};
     /// Flag indicates if we need to interrupt concurrent marking

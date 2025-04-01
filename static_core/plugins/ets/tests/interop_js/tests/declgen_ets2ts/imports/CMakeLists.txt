@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,8 +23,8 @@ create_declgen_ets2ts_test(imports
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/lib3.js
     ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib1.sts
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib2.sts
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib1.ets
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib2.ets
     DECLS_EXPECTED
         ${CMAKE_CURRENT_SOURCE_DIR}/lib1.expected
         ${CMAKE_CURRENT_SOURCE_DIR}/lib2.expected

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 namespace ark::ets::interop::js::js_proxy {
 
 extern "C" void CallJSProxyBridge(Method *method, ...);
+extern "C" void CallJSFunctionBridge(Method *method, ...);
 
 // Create JSProxy class descriptor that will respond to IsProxyClass
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
@@ -48,20 +49,20 @@ static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptorP
     return proxyDescriptorData;
 }
 
-static void InitProxyMethod(Class *cls, Method *src, Method *proxy)
+static void InitProxyMethod(Class *cls, Method *src, Method *proxy, void *entryPoint)
 {
     new (proxy) Method(src);
 
     proxy->SetAccessFlags((src->GetAccessFlags() & ~(ACC_ABSTRACT | ACC_DEFAULT_INTERFACE_METHOD)) | ACC_FINAL);
     proxy->SetClass(cls);
-    proxy->SetCompiledEntryPoint(reinterpret_cast<void *>(CallJSProxyBridge));
+    proxy->SetCompiledEntryPoint(entryPoint);
 }
 
-/*static*/
-std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> targetMethods)
+/*
+ * BuildProxyMethods
+ */
+static Span<Method> BuildProxyMethods(Class *cls, Span<Method *> targetMethods, void *entryPoint)
 {
-    Class *cls = etsClass->GetRuntimeClass();
-    ASSERT(!IsProxyClass(cls) && !etsClass->IsFinal());
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
     PandaVector<size_t> targetMethodsIdx;
@@ -77,8 +78,21 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> targ
     Span<Method> proxyMethods {classLinker->GetAllocator()->AllocArray<Method>(numTargets), numTargets};
 
     for (size_t i = 0; i < numTargets; ++i) {
-        InitProxyMethod(cls, targetMethods[targetMethodsIdx[i]], &proxyMethods[i]);
+        InitProxyMethod(cls, targetMethods[targetMethodsIdx[i]], &proxyMethods[i],
+                        reinterpret_cast<void *>(entryPoint));
     }
+
+    return proxyMethods;
+}
+
+/*static*/
+JSProxy *JSProxy::CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMethods)
+{
+    Class *cls = etsClass->GetRuntimeClass();
+    ASSERT(!IsProxyClass(cls) && !etsClass->IsFinal());
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+
+    auto proxyMethods = BuildProxyMethods(cls, targetMethods, reinterpret_cast<void *>(CallJSProxyBridge));
 
     auto descriptor = MakeProxyDescriptor(cls->GetDescriptor());
     uint32_t accessFlags = cls->GetAccessFlags() | ACC_PROXY | ACC_FINAL;
@@ -94,9 +108,69 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> targ
 
     ASSERT(IsProxyClass(proxyCls));
 
-    // CC-OFFNXT(G.RES.09) private constructor
-    auto jsProxy = std::unique_ptr<JSProxy>(new JSProxy(EtsClass::FromRuntimeClass(proxyCls)));
+    auto jsProxy = Runtime::GetCurrent()->GetInternalAllocator()->New<JSProxy>(EtsClass::FromRuntimeClass(proxyCls));
     return jsProxy;
+}
+
+/*static*/
+JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+
+    Class *interfaceCls = functionInterface->GetRuntimeClass();
+    ASSERT(interfaceCls->IsInterface());
+
+    // create JSFunctoinProxy class descriptor that will respond to IsProxyClass
+    auto descriptor = MakeProxyDescriptor(interfaceCls->GetDescriptor());
+
+    // use `Object` as the base class for the proxy function
+    Class *objectClass = ctx->GetObjectClass();
+
+    // get the proxy function class if it is already created
+    // otherwise, create the class
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinkerContext *context = objectClass->GetLoadContext();
+
+    Class *proxyFunctionCls = classLinker->GetClass(descriptor.get(), true, context);
+
+    if (proxyFunctionCls == nullptr) {
+        uint32_t accessFlags = objectClass->GetAccessFlags() | ACC_PROXY | ACC_FINAL;
+
+        auto methods = interfaceCls->GetMethods();
+        PandaVector<Method *> methodPtrs;
+        for (auto &method : methods) {
+            methodPtrs.push_back(&method);
+        }
+
+        // build proxy methods
+        // proxy invokeN(eg. invoke1) method to JSFunctionCallBackBridge
+        // the JSFunctionCallBackBridge will call the JS function
+        // and return the result to the caller
+        auto invokeNProxyMethod = BuildProxyMethods(interfaceCls, {methodPtrs.data(), methodPtrs.size()},
+                                                    reinterpret_cast<void *>(CallJSFunctionBridge));
+
+        // create span of interface class
+        // the proxy function is a class that implements the interface functionN (eg.function1)
+
+        Span<Class *> interfacesSpan {classLinker->GetAllocator()->AllocArray<Class *>(1), 1};
+        interfacesSpan[0] = interfaceCls;
+
+        // not proxy any fields
+        Span<Field> fields {};
+
+        proxyFunctionCls = classLinker->BuildClass(descriptor.get(), true, accessFlags, invokeNProxyMethod, fields,
+                                                   objectClass, interfacesSpan, context, false);
+
+        proxyFunctionCls->SetState(Class::State::INITIALIZING);
+        proxyFunctionCls->SetState(Class::State::INITIALIZED);
+    }
+
+    ASSERT(IsProxyClass(proxyFunctionCls));
+
+    auto functionProxy =
+        Runtime::GetCurrent()->GetInternalAllocator()->New<JSProxy>(EtsClass::FromRuntimeClass(proxyFunctionCls));
+    return functionProxy;
 }
 
 }  // namespace ark::ets::interop::js::js_proxy

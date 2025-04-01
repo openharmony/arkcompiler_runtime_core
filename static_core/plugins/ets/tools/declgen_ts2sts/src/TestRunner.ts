@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ interface TestReport {
 }
 
 const copyright = `/*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,7 +160,7 @@ function compareExpectedAndActualOutputs(test: Test, emitResult: ts.EmitResult):
   void emitResult;
 
   const expected = fs.readFileSync(test.expectedOutput).toString().replace(copyright, '');
-  const actualPath = path.join(test.outDir, `${test.name}${Extension.DSTS}`);
+  const actualPath = path.join(test.outDir, `${test.name}${Extension.DETS}`);
   const actual = fs.readFileSync(actualPath).toString();
 
   if (expected !== actual) {
@@ -264,7 +264,7 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
   for (const name of basenames) {
     const testSource = `${name}${ts.Extension.Ts}`;
     const expectedReport = `${name}${ts.Extension.Json}`;
-    const expectedOutput = `${name}${Extension.DSTS}`;
+    const expectedOutput = `${name}${Extension.DETS}`;
 
     if (!dirContents.includes(testSource)) {
       throw new Error(`Test ${name} is missing it's source file <${testSource}>!`);

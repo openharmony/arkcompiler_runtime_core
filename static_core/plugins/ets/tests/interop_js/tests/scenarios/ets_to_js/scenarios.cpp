@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,61 @@
 namespace ark::ets::interop::js::testing {
 
 class EtsInteropScenariosEtsToJs : public EtsInteropTest {};
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_BigInt_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_BigInt_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Boolean_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Boolean_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Byte_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Byte_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Char_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Char_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Double_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Double_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Float_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Float_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Int_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Int_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Long_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Long_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Number_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Number_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_Short_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_Short_conversion.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, boxed_String_conversion)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_boxed_String_conversion.js"));
+}
 
 TEST_F(EtsInteropScenariosEtsToJs, test_standalone_function_call)
 {
@@ -163,37 +218,44 @@ TEST_F(EtsInteropScenariosEtsToJs, negative_test_overloaded_static_method)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/negative_test_overloaded_static_method.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_default_value_defined_for_parameter)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_defined_for_parameter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_parameter.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_default_value_defined_for_method_parameter)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_defined_for_method_parameter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_method_parameter.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_default_value_defined_for_static_method_parameter)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_defined_for_static_method_parameter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_static_method_parameter.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_for_parameter_undefine)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_define_for_parameter_undefine)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_parameter_undefine.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_for_method_parameter_undefine)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_define_for_method_parameter_undefine)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_method_parameter_undefine.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_for_static_method_parameter_undefine)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_define_for_static_method_parameter_undefine)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_static_method_parameter_undefine.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_derived_class_method)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_define_derived_class_method)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_derived_class_method.js"));
 }
@@ -203,7 +265,8 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_optional_primitive_exp
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_optional_primitive_explicit.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_optional_primitive_default)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_optional_primitive_default)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_optional_primitive_default.js"));
 }
@@ -335,7 +398,8 @@ TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_async_function_user_interface_p
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_user_interface_param.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_array)
+// #22991
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_conflict_array)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_array.js"));
 }

@@ -13,35 +13,20 @@
  * limitations under the License.
  */
 
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function main(): void { return {} as any; };
-(main as any) = ETSGLOBAL.main;
-
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-class Fields {
-    public readonly readonlyBoolean_: boolean = {} as any;
-    public static staticFloat_: number = {} as any;
-    public number_: number = {} as any;
-    public Number_: number = {} as any;
-    public double_: number = {} as any;
-    public Double_: number = {} as any;
-    public int_: number = {} as any;
-    public string_: string = {} as any;
-    public nullableString_: string | null = {} as any;
-    public object_: Object = {} as any;
-    public rangeError_: RangeError = {} as any;
-    public uint8Array_: Uint8Array = {} as any;
-    public uint16Array_: Uint16Array = {} as any;
-    public uint32Array_: Uint32Array = {} as any;
-    constructor() {};
-};
-(Fields as any) = (globalThis as any).Panda.getClass('LFields;');
-export {Fields};
-exports.Fields = Fields;
-
+export declare class Fields {
+    public readonly readonlyBoolean_: boolean;
+    public static staticFloat_: number;
+    public number_: number;
+    public Number_: number;
+    public double_: number;
+    public Double_: number;
+    public int_: number;
+    public string_: string;
+    public nullableString_: string | null;
+    public object_: Object;
+    public rangeError_: RangeError;
+    public uint8Array_: Uint8Array;
+    public uint16Array_: Uint16Array;
+    public uint32Array_: Uint32Array;
+    constructor();
+}

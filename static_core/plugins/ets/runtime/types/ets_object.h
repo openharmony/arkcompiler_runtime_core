@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,10 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_
 
+#include <cstdint>
+#include "plugins/ets/runtime/ets_mark_word.h"
 #include "mark_word.h"
+#include "mem/mem.h"
 #include "runtime/include/object_header-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -48,6 +51,11 @@ public:
         return klass->IsAssignableFrom(GetClass());
     }
 
+    bool HasField(EtsField *field) const
+    {
+        return field->GetDeclaringClass()->IsAssignableFrom(field->GetDeclaringClass());
+    }
+
     EtsObject *GetAndSetFieldObject(size_t offset, EtsObject *value, std::memory_order memoryOrder)
     {
         return FromCoreType(GetCoreType()->GetAndSetFieldObject(offset, value->GetCoreType(), memoryOrder));
@@ -56,6 +64,8 @@ public:
     template <class T>
     T GetFieldPrimitive(EtsField *field)
     {
+        ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
+        ASSERT(HasField(field));
         return GetCoreType()->GetFieldPrimitive<T>(*field->GetRuntimeField());
     }
 
@@ -77,6 +87,8 @@ public:
     template <class T>
     void SetFieldPrimitive(EtsField *field, T value)
     {
+        ASSERT(field->GetEtsType() == GetEtsTypeByPrimitive<T>());
+        ASSERT(HasField(field));
         GetCoreType()->SetFieldPrimitive<T>(*field->GetRuntimeField(), value);
     }
 
@@ -98,6 +110,8 @@ public:
     template <bool NEED_READ_BARRIER = true>
     PANDA_PUBLIC_API EtsObject *GetFieldObject(EtsField *field) const
     {
+        ASSERT(field->GetEtsType() == EtsType::OBJECT);
+        ASSERT(HasField(field));
         return reinterpret_cast<EtsObject *>(
             GetCoreType()->GetFieldObject<NEED_READ_BARRIER>(*field->GetRuntimeField()));
     }
@@ -119,6 +133,8 @@ public:
     template <bool NEED_WRITE_BARRIER = true>
     void SetFieldObject(EtsField *field, EtsObject *value)
     {
+        ASSERT(field->GetEtsType() == EtsType::OBJECT);
+        ASSERT(HasField(field));
         GetCoreType()->SetFieldObject<NEED_WRITE_BARRIER>(*field->GetRuntimeField(),
                                                           reinterpret_cast<ObjectHeader *>(value));
     }
@@ -197,35 +213,73 @@ public:
      */
     uint32_t GetHashCode();
 
-    inline bool IsHashed() const
+    /**
+     * @brief Get interop index of object. It should be setted. You can check if it's setted by
+     * HasInteropIndexed method.
+     * This method is thread safe to GetHashCode, HasInteropIndexed methods. Also it's thread safe to itself.
+     * @see HasInteropIndexed, GetHashCode.
+     * @return interop index of object.
+     */
+    uint32_t GetInteropIndex() const;
+
+    /**
+     * @brief This method sets interop index of the object. Object must not have it. You can check if it's setted by
+     * HasInteropIndexed method.
+     * This method is thread safe to GetHashCode, HasInteropIndexed methods. IT IN NOT THREAD SAFE TO ITSELF!
+     * @see HasInteropIndexed, GetHashCode.
+     */
+    void SetInteropIndex(uint32_t index);
+
+    /**
+     * @brief This method drops interop index of the object. Object must have it. You can check if it's setted by
+     * HasInteropIndexed method. If object is in USE_INFO state, it will no be changed until Deflate method is called.
+     * This method is thread safe to GetHashCode, HasInteropIndexed methods. IT IN NOT THREAD SAFE TO ITSELF!
+     * @see HasInteropIndexed, GetHashCode, Deflate
+     */
+    void DropInteropIndex();
+
+    bool HasInteropIndex() const
     {
-        return AtomicGetMark().GetState() == MarkWord::STATE_HASHED;
+        bool hasInteropIndex = false;
+        while (!TryCheckIfHasInteropIndex(&hasInteropIndex)) {
+        }
+        return hasInteropIndex;
     }
 
-    inline uint32_t GetInteropHash() const
+    bool IsHashed() const
     {
-        ASSERT(IsHashed());
-        return GetMark().GetHash();
+        auto mark = AtomicGetMark(std::memory_order_relaxed);
+        auto markState = mark.GetState();
+        return markState == EtsMarkWord::STATE_USE_INFO || markState == EtsMarkWord::STATE_HASHED;
     }
 
-    inline void SetInteropHash(uint32_t hash)
+    bool IsUsedInfo() const
     {
-        MarkWord oldMark = AtomicGetMark();
-        ASSERT(oldMark.GetState() == ark::MarkWord::STATE_UNLOCKED);
-        MarkWord newMark = oldMark.DecodeFromHash(hash);
-        ASSERT(newMark.GetState() == MarkWord::STATE_HASHED);
-        [[maybe_unused]] bool res = AtomicSetMark(oldMark, newMark);
-        ASSERT(res);  // NOTE(vpukhov): something went wrong
+        auto mark = AtomicGetMark(std::memory_order_relaxed);
+        auto markState = mark.GetState();
+        return markState == EtsMarkWord::STATE_USE_INFO;
     }
 
-    inline void DropInteropHash()
+    ALWAYS_INLINE void SetMark(EtsMarkWord word)
     {
-        ASSERT_MANAGED_CODE();
-        MarkWord oldMark = AtomicGetMark();
-        ASSERT(oldMark.GetState() == MarkWord::STATE_HASHED);
-        MarkWord newMark = oldMark.DecodeFromUnlocked();
-        [[maybe_unused]] bool res = AtomicSetMark(oldMark, newMark);
-        ASSERT(res);  // NOTE(vpukhov): something went wrong
+        ObjectHeader::SetMark(word.ToMark());
+    }
+
+    ALWAYS_INLINE EtsMarkWord AtomicGetMark(std::memory_order memoryOrder = std::memory_order_seq_cst) const
+    {
+        return EtsMarkWord::FromMarkWord(ObjectHeader::AtomicGetMark(memoryOrder));
+    }
+
+    ALWAYS_INLINE EtsMarkWord GetMark() const
+    {
+        return EtsMarkWord::FromMarkWord(ObjectHeader::GetMark());
+    }
+
+    template <bool STRONG = true>
+    ALWAYS_INLINE bool AtomicSetMark(EtsMarkWord &oldMarkWord, EtsMarkWord newMarkWord,
+                                     std::memory_order memoryOrder = std::memory_order_seq_cst)
+    {
+        return ObjectHeader::AtomicSetMark<STRONG>(oldMarkWord, newMarkWord.ToMark(), memoryOrder);
     }
 
     EtsObject() = delete;
@@ -236,6 +290,15 @@ protected:
     using ObjectHeader = ::ark::ObjectHeader;
 
 private:
+    static inline uint32_t GenerateHashCode();
+
+    [[nodiscard]] bool TryGetHashCode(uint32_t *hash);
+    [[nodiscard]] bool TryGetInteropIndex(uint32_t *index) const;
+    [[nodiscard]] bool TrySetInteropIndex(uint32_t index);
+    [[nodiscard]] bool TryDropInteropIndex();
+    [[nodiscard]] bool TryDeflate();
+    [[nodiscard]] PANDA_PUBLIC_API bool TryCheckIfHasInteropIndex(bool *hasInteropIndexed) const;
+
     NO_COPY_SEMANTIC(EtsObject);
     NO_MOVE_SEMANTIC(EtsObject);
 };

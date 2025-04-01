@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,8 @@ namespace ark::ets::interop::js::js_proxy {
 
 class JSProxy {
 public:
-    static std::unique_ptr<JSProxy> Create(EtsClass *etsClass, Span<Method *> targetMethods);
+    static JSProxy *CreateBuiltinProxy(EtsClass *etsClass, Span<Method *> targetMethods);
+    static JSProxy *CreateFunctionProxy(EtsClass *functionInterface);
 
     EtsClass *GetProxyClass() const
     {
@@ -54,6 +55,9 @@ private:
     EtsClass *const proxyKlass_ {};
     // NOTE(vpukhov): add flag if original class has final methods or public fields
     // NOTE(vpukhov): must ensure compat-class methods except accessors do not access its private state
+
+    // Allocator calls our private ctor
+    friend class mem::Allocator;
 };
 
 }  // namespace ark::ets::interop::js::js_proxy

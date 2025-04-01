@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,6 @@
 #include "runtime/include/locks.h"
 #include "runtime/include/method-inl.h"
 #include "runtime/include/object_header-inl.h"
-#include "runtime/include/relayout_profiler.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread-inl.h"
@@ -3076,7 +3075,7 @@ public:
         }
 
         this->GetFrame()->SetAcc(this->GetAcc());
-        auto *field = RuntimeIfaceT::ResolveField(this->GetThread(), *this->GetFrame()->GetMethod(), id);
+        auto *field = RuntimeIfaceT::ResolveField(this->GetThread(), *this->GetFrame()->GetMethod(), id, NEED_INIT);
         this->GetAcc() = this->GetFrame()->GetAcc();
         if (UNLIKELY(field == nullptr)) {
             ASSERT(this->GetThread()->HasPendingException());
@@ -3419,7 +3418,6 @@ public:
         if (method->HasCompiledCode()) {
             CallCompiledCode<FORMAT, IS_DYNAMIC_T>(method);
         } else {
-            ADD_PROFILE_CODE_ITEM(method);
             CallInterpreterStackless<FrameHelper, FORMAT, IS_DYNAMIC_T, IS_RANGE, ACCEPT_ACC, INITOBJ, CALL>(method);
         }
     }

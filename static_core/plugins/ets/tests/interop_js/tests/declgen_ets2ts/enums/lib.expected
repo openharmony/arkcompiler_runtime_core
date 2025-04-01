@@ -13,27 +13,36 @@
  * limitations under the License.
  */
 
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-enum Letter {
-    A = 0,
-    B = 1,
-    C = 2,
+export declare class Letter {
+    public static <cctor>(): void;
+    public constructor(ordinal: number);
+    public static readonly A: number;
+    public static readonly B: number;
+    public static readonly C: number;
+    public getName(): string;
+    public static getValueOf(name: string): number;
+    public static fromValue(value: number): number;
+    public valueOf(): number;
+    public toString(): string;
+    public static values(): number[];
+    public getOrdinal(): number;
+    public static $_get(e: number): string;
 }
-export {Letter};
-exports.Letter = Letter;
 
-enum Color {
-    Red = 0,
-    Green = -100,
-    Blue = -99,
-    White = 0,
+export declare class Color {
+    public static <cctor>(): void;
+    public constructor(ordinal: number);
+    public static readonly Red: number;
+    public static readonly Green: number;
+    public static readonly Blue: number;
+    public static readonly White: number;
+    public getName(): string;
+    public static getValueOf(name: string): number;
+    public static fromValue(value: number): number;
+    public valueOf(): number;
+    public toString(): string;
+    public static values(): number[];
+    public getOrdinal(): number;
+    public static $_get(e: number): string;
 }
-export {Color};
-exports.Color = Color;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,9 +109,7 @@ public:
     }
 
     bool SignalActionHandler(int sig, siginfo_t *info, void *context);
-    bool InOatCode(const siginfo_t *siginfo, const void *context, bool checkBytecodePc) const;
-    bool InOtherCode(int sig, const siginfo_t *info, const void *context) const;
-
+    bool InCompiledCode(const siginfo_t *siginfo, const void *context, bool checkBytecodePc) const;
     void AddHandler(SignalHandler *handler, bool oatCode);
 
     void RemoveHandler(SignalHandler *handler);
@@ -133,7 +131,7 @@ public:
 private:
     bool isInit_ {false};
     mem::InternalAllocatorPtr allocator_;
-    PandaVector<SignalHandler *> oatCodeHandler_;
+    PandaVector<SignalHandler *> compiledCodeHandler_;
     PandaVector<SignalHandler *> otherHandlers_;
     NO_COPY_SEMANTIC(SignalManager);
 };
@@ -173,6 +171,28 @@ public:
 
     NO_COPY_SEMANTIC(StackOverflowHandler);
     NO_MOVE_SEMANTIC(StackOverflowHandler);
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+};
+
+class SamplingProfilerHandler final : public SignalHandler {
+public:
+    SamplingProfilerHandler() = default;
+    ~SamplingProfilerHandler() override = default;
+
+    NO_COPY_SEMANTIC(SamplingProfilerHandler);
+    NO_MOVE_SEMANTIC(SamplingProfilerHandler);
+
+    bool Action(int sig, siginfo_t *siginfo, void *context) override;
+};
+
+class CrashFallbackDumpHandler final : public SignalHandler {
+public:
+    CrashFallbackDumpHandler() = default;
+    ~CrashFallbackDumpHandler() override = default;
+
+    NO_COPY_SEMANTIC(CrashFallbackDumpHandler);
+    NO_MOVE_SEMANTIC(CrashFallbackDumpHandler);
 
     bool Action(int sig, siginfo_t *siginfo, void *context) override;
 };

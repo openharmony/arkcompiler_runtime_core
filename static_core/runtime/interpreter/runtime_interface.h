@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,11 +82,11 @@ public:
         return pda.GetNumArgs();
     }
 
-    static Field *ResolveField(ManagedThread *thread, const Method &caller, BytecodeId id)
+    static Field *ResolveField(ManagedThread *thread, const Method &caller, BytecodeId id, bool isStatic)
     {
         auto resolvedId = caller.GetClass()->ResolveFieldIndex(id.AsIndex());
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-        auto *field = classLinker->GetField(caller, resolvedId);
+        auto *field = classLinker->GetField(caller, resolvedId, isStatic);
         if (field == nullptr) {
             return nullptr;
         }

@@ -1,0 +1,36 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+User Details
+  Name: John
+  Age: 30
+  Email: john@example.com
+Application Info
+  Version: 1.0.0
+    System Details
+    OS: Windows
+    Browser: Chrome
+    Performance
+    Memory: 4GB
+    CPU: 2.4GHz
+Debug Information
+  Debug Level: Verbose
+  Stack Trace: Enabled
+  Logging: Enabled
+API Calls
+  GET /users
+    Request Details
+    Headers: ConsoleGroupTest.RequestHeaders {Authorization: Bearer token}
+    Response
+    Status: 200
+    Data: [ConsoleGroupTest.User {id: 1, name: John}]

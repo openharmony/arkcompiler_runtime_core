@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,4 +15,7 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/import_selective_exported.sts ${CMAKE_CURRENT_BINARY_DIR} selective_export_with_alias EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/selective_export.sts)
+run_int_ets_code(selective_export_with_alias ${CMAKE_CURRENT_BINARY_DIR} SOURCES
+                 ${CMAKE_CURRENT_SOURCE_DIR}/selective_export.ets;
+                 ${CMAKE_CURRENT_SOURCE_DIR}/import_selective_exported.ets)
+

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,8 @@
 
 namespace ark::abc2program {
 
-constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "sts/HelloWorld.abc";
-constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "sts/Functions.abc";
+constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "ets/HelloWorld.abc";
+constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "ets/Functions.abc";
 
 class Abc2ProgramTest : public testing::Test {
 public:
@@ -90,16 +90,20 @@ TEST_F(Abc2ProgramHelloWorldTest, RecordTable)
 
 TEST_F(Abc2ProgramHelloWorldTest, Functions)
 {
-    std::set<std::string> expectedFunctions = {"ETSGLOBAL._$init$_:void;",
-                                               "ETSGLOBAL._cctor_:void;",
-                                               "ETSGLOBAL.main:void;",
-                                               "HelloWorld._ctor_:HelloWorld;void;",
-                                               "HelloWorld.bar:HelloWorld;std.core.Object;std.core.Object;",
-                                               "HelloWorld.foo:HelloWorld;i32;i32;",
-                                               "std.core.Console.log:std.core.Console;i32;void;",
-                                               "std.core.Object._ctor_:std.core.Object;void;"};
+    std::set<std::string> expectedFunctions = {
+        "HelloWorld.ETSGLOBAL._$init$_:void;",
+        "HelloWorld.ETSGLOBAL._cctor_:void;",
+        "HelloWorld.ETSGLOBAL.main:void;",
+        "HelloWorld.HelloWorld._ctor_:HelloWorld.HelloWorld;void;",
+        "HelloWorld.HelloWorld.bar:HelloWorld.HelloWorld;std.core.Object;std.core.Object;",
+        "HelloWorld.HelloWorld.foo:HelloWorld.HelloWorld;i32;i32;",
+        "std.core.Console.log:std.core.Console;i32;void;",
+        "std.core.Object._ctor_:std.core.Object;void;"};
     std::set<std::string> existingFunctions {};
-    for (auto &it : prog->functionTable) {
+    for (auto &it : prog->functionStaticTable) {
+        existingFunctions.insert(it.first);
+    }
+    for (auto &it : prog->functionInstanceTable) {
         existingFunctions.insert(it.first);
     }
     bool result = ValidateString(existingFunctions, expectedFunctions);
@@ -145,16 +149,20 @@ TEST_F(Abc2ProgramFunctionsTest, RecordTable)
 TEST_F(Abc2ProgramFunctionsTest, Functions)
 {
     std::set<std::string> expectedFunctions = {
-        "ETSGLOBAL._$init$_:void;",
-        "ETSGLOBAL._cctor_:void;",
-        "ETSGLOBAL.bar:f64;std.core.String;",
-        "ETSGLOBAL.foo:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL._$init$_:void;",
+        "Functions.ETSGLOBAL._cctor_:void;",
+        "Functions.ETSGLOBAL.bar:f64;std.core.String;",
+        "Functions.ETSGLOBAL.foo:std.core.String;std.core.String;",
+        "Functions.ETSGLOBAL.main:void;",
         "std.core.StringBuilder._ctor_:std.core.StringBuilder;void;",
         "std.core.StringBuilder.append:std.core.StringBuilder;f64;std.core.StringBuilder;",
         "std.core.StringBuilder.append:std.core.StringBuilder;std.core.String;std.core.StringBuilder;",
         "std.core.StringBuilder.toString:std.core.StringBuilder;std.core.String;"};
     std::set<std::string> existingFunctions {};
-    for (auto &it : prog->functionTable) {
+    for (auto &it : prog->functionStaticTable) {
+        existingFunctions.insert(it.first);
+    }
+    for (auto &it : prog->functionInstanceTable) {
         existingFunctions.insert(it.first);
     }
     bool result = ValidateString(existingFunctions, expectedFunctions);

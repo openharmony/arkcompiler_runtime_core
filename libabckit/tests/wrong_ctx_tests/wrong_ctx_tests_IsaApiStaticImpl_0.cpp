@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -282,6 +282,13 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateReturn)
 TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateEquals)
 {
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateEquals);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStrictEquals,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStrictEquals)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateStrictEquals);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateSub,

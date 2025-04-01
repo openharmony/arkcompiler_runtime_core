@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -341,7 +341,7 @@ void EncodeVisitor::VisitNullPtr(GraphVisitor *visitor, Inst *inst)
     enc->GetEncoder()->EncodeMov(dst, Imm(0));
 }
 
-void EncodeVisitor::VisitLoadUndefined(GraphVisitor *visitor, Inst *inst)
+void EncodeVisitor::VisitLoadUniqueObject(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto type = inst->GetType();
@@ -349,9 +349,9 @@ void EncodeVisitor::VisitLoadUndefined(GraphVisitor *visitor, Inst *inst)
     auto runtime = enc->GetCodegen()->GetGraph()->GetRuntime();
     auto graph = enc->GetCodegen()->GetGraph();
     if (graph->IsJitOrOsrMode()) {
-        enc->GetEncoder()->EncodeMov(dst, Imm(runtime->GetUndefinedObject()));
+        enc->GetEncoder()->EncodeMov(dst, Imm(runtime->GetUniqueObject()));
     } else {
-        auto ref = MemRef(enc->GetCodegen()->ThreadReg(), runtime->GetTlsUndefinedObjectOffset(graph->GetArch()));
+        auto ref = MemRef(enc->GetCodegen()->ThreadReg(), runtime->GetTlsUniqueObjectOffset(graph->GetArch()));
         enc->GetEncoder()->EncodeLdr(dst, false, ref);
     }
 }
@@ -2194,6 +2194,18 @@ void EncodeVisitor::VisitCallDynamic(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     enc->GetCodegen()->EmitCallDynamic(inst->CastToCallDynamic());
+}
+
+void EncodeVisitor::VisitCallNative(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    enc->GetCodegen()->EmitCallNative(inst->CastToCallNative());
+}
+
+void EncodeVisitor::VisitWrapObjectNative(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    enc->GetCodegen()->WrapObjectNative(inst->CastToWrapObjectNative());
 }
 
 void EncodeVisitor::VisitLoadConstantPool(GraphVisitor *visitor, Inst *inst)

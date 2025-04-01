@@ -60,8 +60,8 @@ llvm::PreservedAnalyses PandaRuntimeLowering::run(llvm::Function &function, llvm
         }
         for (auto call : calls) {
             auto callee = call->getCalledFunction();
-            ASSERT((callee != nullptr && !callee->isIntrinsic()) ||
-                   callee->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize);
+            ASSERT(callee != nullptr &&
+                   (!callee->isIntrinsic() || callee->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize));
 
             // LLVM is able to process pure recursive calls, but they may confuse StackWalker after deoptimization
             if (callee == &function && !hasDeopt) {

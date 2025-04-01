@@ -34,7 +34,7 @@ TEST_F(EtsInteropScenariosJsToEtsConflictTypes, Test_function_arg_type_conflict_
 }
 
 // NOTE(splatov) #17379 enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosJsToEtsConflictTypes, DISABLED_Test_function_arg_type_conflict_boolean)
+TEST_F(EtsInteropScenariosJsToEtsConflictTypes, Test_function_arg_type_conflict_boolean)
 {
     auto ret = CallEtsMethod<bool>("TestFunctionArgTypeConflictBoolean");
     ASSERT_EQ(ret, true);

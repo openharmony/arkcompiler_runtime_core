@@ -28,7 +28,7 @@ ManagedThread *EtsPlugin::CreateManagedThread() const
     auto rt = Runtime::GetCurrent();
     auto vm = rt->GetPandaVM();
     auto coroman = static_cast<CoroutineManager *>(vm->GetThreadManager());
-    return coroman->CreateEntrypointlessCoroutine(rt, vm, true, "_coro_");
+    return coroman->CreateEntrypointlessCoroutine(rt, vm, true, "_coro_", Coroutine::Type::MUTATOR);
 }
 
 void EtsPlugin::DestroyManagedThread(ManagedThread *thr) const

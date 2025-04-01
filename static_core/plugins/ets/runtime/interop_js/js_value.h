@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/include/coretypes/class.h"
 #include "utils/small_vector.h"
@@ -118,10 +119,11 @@ public:
         if (UNLIKELY(jsvalue == nullptr)) {
             return nullptr;
         }
-        jsvalue->SetRefValue(ctx->GetJSEnv(), value, type);
-        return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
+        jsvalue->SetRefValue(ctx, value, type);
+        return jsvalue;
     }
 
+    // prefer JSConvertJSValue::WrapWithNullCheck
     napi_value GetNapiValue(napi_env env);
 
     bool GetBoolean() const
@@ -151,7 +153,8 @@ public:
     napi_value GetRefValue(napi_env env)
     {
         napi_value value;
-        NAPI_ASSERT_OK(napi_get_reference_value(env, GetNapiRef(), &value));
+        auto napiRef = GetNapiRef(env);
+        NAPI_ASSERT_OK(napi_get_reference_value(env, napiRef, &value));
         return value;
     }
 
@@ -217,17 +220,20 @@ private:
     // Returns moved jsValue
     [[nodiscard]] static JSValue *AttachFinalizer(EtsCoroutine *coro, JSValue *jsValue);
 
-    void SetNapiRef(napi_ref ref, napi_valuetype type)
-    {
-        ASSERT(IsRefType(type));
-        SetType(type);
-        SetData(ref);
-    }
-
-    napi_ref GetNapiRef() const
+    napi_ref GetNapiRef(napi_env env) const
     {
         ASSERT(IsRefType(GetType()));
-        return GetData<napi_ref>();
+
+        ets_proxy::SharedReference *sharedRef = GetData<ets_proxy::SharedReference *>();
+
+        // Interop ctx check:
+        // check if the ctx is the same as the one that created the reference
+        if (sharedRef->GetCtx()->GetJSEnv() != env) {
+            // NOTE(MockMockBlack, #24062): to be replaced with a runtime exception
+            InteropFatal("InteropFatal, interop object must be used in the same interopCtx as it was created.");
+        }
+
+        return sharedRef->GetJsRef();
     }
 
     void SetUndefined()
@@ -265,12 +271,12 @@ private:
         // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 
-    void SetRefValue(napi_env env, napi_value jsValue, napi_valuetype type)
+    void SetRefValue(InteropCtx *ctx, napi_value jsValue, napi_valuetype type)
     {
-        ASSERT(GetValueType(env, jsValue) == type);
-        napi_ref jsRef;
-        NAPI_ASSERT_OK(napi_create_reference(env, jsValue, 1, &jsRef));
-        SetNapiRef(jsRef, type);
+        ASSERT(GetValueType(ctx->GetJSEnv(), jsValue) == type);
+        ASSERT(IsRefType(type));
+        SetType(type);
+        SetData(ctx->GetSharedRefStorage()->CreateJSObjectRef(ctx, this, jsValue));
     }
 
     FIELD_UNUSED uint32_t type_;

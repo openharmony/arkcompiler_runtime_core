@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,11 +28,12 @@ public:
     {
         return ark::cross_values::GetEtsCoroutinePromiseClassOffset(arch);
     }
-    size_t GetTlsUndefinedObjectOffset(Arch arch) const override
+    size_t GetTlsNativeApiOffset(Arch arch) const override;
+    size_t GetTlsUniqueObjectOffset(Arch arch) const override
     {
-        return ark::cross_values::GetEtsCoroutineUndefinedObjectOffset(arch);
+        return ark::cross_values::GetEtsCoroutineNullValueOffset(arch);
     }
-    uint64_t GetUndefinedObject() const override;
+    uint64_t GetUniqueObject() const override;
     InteropCallKind GetInteropCallKind(MethodPtr methodPtr) const override;
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
@@ -64,6 +65,10 @@ public:
     IntrinsicId GetStringBuilderToStringIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
     void *GetDoubleToStringCache() const override;
+    bool IsNativeMethodOptimizationEnabled() const override;
+    uint64_t GetDeprecatedNativeApiMask() const override;
+    uint64_t GetNativeApiStaticFunctionMask() const override;
+    uint32_t GetRuntimeClassOffset(Arch arch) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;

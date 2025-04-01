@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,15 +60,15 @@ bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const Metho
 
 class RefTypeLink {
 public:
-    explicit RefTypeLink(uint8_t const *descr) : descriptor_(descr) {}
-    RefTypeLink(panda_file::File const *pf, panda_file::File::EntityId idx)
-        : pf_(pf), id_(idx), descriptor_(pf->GetStringData(idx).data)
+    explicit RefTypeLink(const ClassLinkerContext *ctx, uint8_t const *descr) : ctx_(ctx), descriptor_(descr) {}
+    RefTypeLink(const ClassLinkerContext *ctx, panda_file::File const *pf, panda_file::File::EntityId idx)
+        : ctx_(ctx), pf_(pf), id_(idx), descriptor_(pf->GetStringData(idx).data)
     {
     }
 
-    static RefTypeLink InPDA(panda_file::ProtoDataAccessor &pda, uint32_t idx)
+    static RefTypeLink InPDA(const ClassLinkerContext *ctx, panda_file::ProtoDataAccessor &pda, uint32_t idx)
     {
-        return RefTypeLink(&pda.GetPandaFile(), pda.GetReferenceType(idx));
+        return RefTypeLink(ctx, &pda.GetPandaFile(), pda.GetReferenceType(idx));
     }
 
     uint8_t const *GetDescriptor()
@@ -95,14 +95,13 @@ public:
 private:
     bool Resolve()
     {
-        if (pf_ != nullptr && !pf_->IsExternal(id_)) {
+        if (IsResolved()) {
             return true;
         }
 
-        auto linker = Runtime::GetCurrent()->GetClassLinker();
-
+        // Need to traverse `RuntimeLinker` chain, which is why `EnumeratePandaFilesInChain` is used
         // NOTE(vpukhov): speedup lookup with tls cache
-        linker->EnumeratePandaFiles([this](panda_file::File const &itpf) {
+        ctx_->EnumeratePandaFilesInChain([this](panda_file::File const &itpf) {
             auto itClassId = itpf.GetClassId(descriptor_);
             if (itClassId.IsValid() && !itpf.IsExternal(itClassId)) {
                 pf_ = &itpf;
@@ -111,9 +110,15 @@ private:
             }
             return true;
         });
-        return pf_ != nullptr;
+        return IsResolved();
     }
 
+    bool IsResolved() const
+    {
+        return (pf_ != nullptr) && !pf_->IsExternal(id_);
+    }
+
+    const ClassLinkerContext *ctx_ {};
     panda_file::File const *pf_ {};
     panda_file::File::EntityId id_ {};
     uint8_t const *descriptor_ {};
@@ -125,9 +130,9 @@ static inline bool IsPrimitveDescriptor(uint8_t const *descr)
     return descr[0] != 0 && descr[1] == 0;
 }
 
-static bool RefIsAssignableToImpl(RefTypeLink sub, RefTypeLink super, uint32_t depth);
+static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super, uint32_t depth);
 
-static bool RefExtendsOrImplements(RefTypeLink sub, RefTypeLink super, uint32_t depth)
+static bool RefExtendsOrImplements(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super, uint32_t depth)
 {
     auto superCDAOpt = super.CreateCDA();
     if (!superCDAOpt.has_value()) {
@@ -145,8 +150,8 @@ static bool RefExtendsOrImplements(RefTypeLink sub, RefTypeLink super, uint32_t 
 
     if (superCDA.IsInterface()) {
         for (size_t i = 0; i < subCDA.GetIfacesNumber(); ++i) {
-            auto iface = RefTypeLink(&subCDA.GetPandaFile(), subCDA.GetInterfaceId(i));
-            if (RefIsAssignableToImpl(iface, super, depth)) {
+            auto iface = RefTypeLink(ctx, &subCDA.GetPandaFile(), subCDA.GetInterfaceId(i));
+            if (RefIsAssignableToImpl(ctx, iface, super, depth)) {
                 return true;
             }
         }
@@ -155,10 +160,10 @@ static bool RefExtendsOrImplements(RefTypeLink sub, RefTypeLink super, uint32_t 
     if (subCDA.IsInterface() || subCDA.GetSuperClassId().GetOffset() == 0) {
         return false;
     }
-    return RefIsAssignableToImpl(RefTypeLink(&subCDA.GetPandaFile(), subCDA.GetSuperClassId()), super, depth);
+    return RefIsAssignableToImpl(ctx, RefTypeLink(ctx, &subCDA.GetPandaFile(), subCDA.GetSuperClassId()), super, depth);
 }
 
-static bool RefIsAssignableToImpl(RefTypeLink sub, RefTypeLink super, uint32_t depth)
+static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super, uint32_t depth)
 {
     if (UNLIKELY(depth-- == 0)) {
         LOG(ERROR, CLASS_LINKER) << "Max class assignability test depth reached";
@@ -177,26 +182,27 @@ static bool RefIsAssignableToImpl(RefTypeLink sub, RefTypeLink super, uint32_t d
         if (!ClassHelper::IsArrayDescriptor(sub.GetDescriptor())) {
             return false;
         }
-        RefTypeLink subComp(ClassHelper::GetComponentDescriptor(sub.GetDescriptor()));
-        RefTypeLink superComp(ClassHelper::GetComponentDescriptor(super.GetDescriptor()));
-        return RefIsAssignableToImpl(subComp, superComp, depth);
+        RefTypeLink subComp(ctx, ClassHelper::GetComponentDescriptor(sub.GetDescriptor()));
+        RefTypeLink superComp(ctx, ClassHelper::GetComponentDescriptor(super.GetDescriptor()));
+        return RefIsAssignableToImpl(ctx, subComp, superComp, depth);
     }
     // Assume array does not implement interfaces
     if (ClassHelper::IsArrayDescriptor(sub.GetDescriptor())) {
         return false;
     }
 
-    return RefExtendsOrImplements(sub, super, depth);
+    return RefExtendsOrImplements(ctx, sub, super, depth);
 }
 
-static inline bool RefIsAssignableTo(RefTypeLink sub, RefTypeLink super)
+static inline bool RefIsAssignableTo(const ClassLinkerContext *ctx, RefTypeLink sub, RefTypeLink super)
 {
     static constexpr uint32_t ASSIGNABILITY_MAX_DEPTH = 256U;
-    return RefIsAssignableToImpl(sub, super, ASSIGNABILITY_MAX_DEPTH);
+    return RefIsAssignableToImpl(ctx, sub, super, ASSIGNABILITY_MAX_DEPTH);
 }
 
-bool ETSProtoIsOverriddenBy(Method::ProtoId const &base, Method::ProtoId const &derv)
+bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv)
 {
+    ASSERT(ctx != nullptr);
     auto basePDA = panda_file::ProtoDataAccessor(base.GetPandaFile(), base.GetEntityId());
     auto dervPDA = panda_file::ProtoDataAccessor(derv.GetPandaFile(), derv.GetEntityId());
     if (dervPDA.GetNumElements() != basePDA.GetNumElements()) {
@@ -209,9 +215,9 @@ bool ETSProtoIsOverriddenBy(Method::ProtoId const &base, Method::ProtoId const &
             return false;
         }
         if (dervPDA.GetType(i).IsReference()) {
-            auto dervRef = RefTypeLink::InPDA(dervPDA, refIdx);
-            auto baseRef = RefTypeLink::InPDA(basePDA, refIdx);
-            auto res = i == 0 ? RefIsAssignableTo(dervRef, baseRef) : RefIsAssignableTo(baseRef, dervRef);
+            auto dervRef = RefTypeLink::InPDA(ctx, dervPDA, refIdx);
+            auto baseRef = RefTypeLink::InPDA(ctx, basePDA, refIdx);
+            auto res = i == 0 ? RefIsAssignableTo(ctx, dervRef, baseRef) : RefIsAssignableTo(ctx, baseRef, dervRef);
             if (!res) {
                 return false;
             }

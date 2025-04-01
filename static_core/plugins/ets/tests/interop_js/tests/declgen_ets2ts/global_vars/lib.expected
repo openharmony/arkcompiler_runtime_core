@@ -13,24 +13,8 @@
  * limitations under the License.
  */
 
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-export {_$init$_};
-exports._$init$_ = _$init$_;
-_$init$_();
-
-const CONSTANT: number = ETSGLOBAL.CONSTANT;
-export {CONSTANT};
-exports.CONSTANT = CONSTANT;
-
-class Bibka {
-    public static NOT_GLOBAL: number = {} as any;
-    constructor() {};
-};
-(Bibka as any) = (globalThis as any).Panda.getClass('LBibka;');
-export {Bibka};
-exports.Bibka = Bibka;
-
+export declare const CONSTANT: number;
+export declare class Bibka {
+    public readonly static NOT_GLOBAL: number;
+    constructor();
+}

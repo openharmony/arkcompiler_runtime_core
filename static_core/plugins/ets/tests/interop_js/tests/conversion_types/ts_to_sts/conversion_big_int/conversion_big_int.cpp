@@ -20,8 +20,7 @@ namespace ark::ets::interop::js::testing {
 
 class EtsConversionBigIntTsToEtsTest : public EtsInteropTest {};
 
-// NOTE issue (17741) - enable this after fix import bigInt
-TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkTypeBigInt)
+TEST_F(EtsConversionBigIntTsToEtsTest, checkTypeBigInt)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkTypeBigInt"));
 }
@@ -64,6 +63,16 @@ TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToDouble)
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToChar)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToChar"));
+}
+
+TEST_F(EtsConversionBigIntTsToEtsTest, checkReturnBigInt)
+{
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkReturnBigInt"));
+}
+
+TEST_F(EtsConversionBigIntTsToEtsTest, checkReturnBigIntObj)
+{
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkReturnBigIntObj"));
 }
 
 }  // namespace ark::ets::interop::js::testing

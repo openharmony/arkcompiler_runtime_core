@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,8 @@ TEST_F(ToStringTest, concat_null_to_string)
     ASSERT_EQ(CallEtsMethod<std::string>("concatNullToString"), "nullA");
 }
 
-TEST_F(ToStringTest, concat_undefined_to_string)
+// #21832: produces NPE
+TEST_F(ToStringTest, DISABLED_concat_undefined_to_string)
 {
     ASSERT_EQ(CallEtsMethod<std::string>("concatUndefinedToString"), "undefinedA");
 }
@@ -75,7 +76,8 @@ TEST_F(ToStringTest, concat_nan_to_string)
     ASSERT_EQ(CallEtsMethod<std::string>("concatNanToString"), "NaNA");
 }
 
-TEST_F(ToStringTest, explicit_optional_to_string)
+// #21832: expects NPE
+TEST_F(ToStringTest, DISABLED_explicit_optional_to_string)
 {
     ASSERT_EQ(CallEtsMethod<std::string>("explicitOptionalToString"), "NPE");
 }

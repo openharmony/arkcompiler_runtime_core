@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,10 +39,10 @@ endif()
 panda_add_library(sampler_asm_test SHARED ${SAMPLER_ASM_TEST_SOURCES})
 set_target_properties(sampler_asm_test PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${SAMPLER_GEN_ASM_LIB_DIR})
 panda_target_link_libraries(sampler_asm_test arkruntime)
-panda_target_include_directories(sampler_asm_test PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+panda_target_include_directories(sampler_asm_test PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani/)
 add_custom_target(sampler_asm_test_suite COMMENT "Running signal alternate stack sampler test")
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
@@ -55,7 +55,7 @@ set(testing_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Compile Ets tests
 add_custom_target(sampler_asm_es2panda
-    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerAsmTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerAsmTest.sts
+    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerAsmTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerAsmTest.ets
     WORKING_DIRECTORY "${testing_dir}"
     DEPENDS ${es2panda_target}
 )
@@ -63,7 +63,7 @@ add_dependencies(sampler_asm_es2panda sampler_asm_test)
 
 # Run tests
 add_custom_target(sampler_asm_run
-    COMMAND LD_LIBRARY_PATH=${SAMPLER_GEN_ASM_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --sampling-profiler-output-file=${testing_dir}/stack_output.aspt ${testing_dir}/SamplerAsmTest.abc ETSGLOBAL::main
+    COMMAND LD_LIBRARY_PATH=${SAMPLER_GEN_ASM_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --sampling-profiler-output-file=${testing_dir}/stack_output.aspt ${testing_dir}/SamplerAsmTest.abc SamplerAsmTest.ETSGLOBAL::main
     WORKING_DIRECTORY "${SAMPLER_GEN_ASM_LIB_DIR}"
     DEPENDS ark etsstdlib sampler_asm_es2panda
 )

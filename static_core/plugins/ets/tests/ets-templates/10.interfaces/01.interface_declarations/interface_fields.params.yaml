@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- 
+---
 # List of identifiers
 identifiers:
   - debug
@@ -23,11 +23,11 @@ identifiers:
 
 # List of default values for primitive types
 default_value:
-  - {type: byte,    value: 0}
-  - {type: short,   value: 0}
-  - {type: int,     value: 0}
-  - {type: long,    value: 0}
-  - {type: float,   value: 0.0}
-  - {type: double,  value: 0.0}
-  - {type: char,    value: c'\u0000'}
-  - {type: boolean, value: 'false'}
+  - {type: byte}
+  - {type: short}
+  - {type: int}
+  - {type: long}
+  - {type: float}
+  - {type: double}
+  - {type: char}
+  - {type: boolean}

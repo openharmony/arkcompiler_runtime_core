@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
@@ -464,7 +465,7 @@ NO_UB_SANITIZE static ets_class FindClass(EtsEnv *env, const char *name)
     if (etsEnv->HasPendingException()) {
         EtsThrowable *currentException = etsEnv->GetThrowable();
         std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
-        if (exceptionString == panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION) {
+        if (exceptionString == panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR) {
             etsEnv->ClearException();
 
             PandaStringStream ss;
@@ -2482,7 +2483,7 @@ NO_UB_SANITIZE static ets_int RegisterNatives(EtsEnv *env, ets_class cls, const 
         }
 
         SetNativeCallType(method, nativeFlag);
-        method->RegisterNativeImpl(methods[i].func);
+        method->RegisterNativeDeprecated(methods[i].func);
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     return ETS_OK;
@@ -2497,7 +2498,7 @@ NO_UB_SANITIZE static ets_int UnregisterNatives(EtsEnv *env, ets_class cls)
     EtsClass *klass = s.ToInternalType(cls);
     klass->EnumerateMethods([](EtsMethod *method) {
         if (method->IsNative()) {
-            method->UnregisterNativeImpl();
+            method->UnregisterNativeDeprecated();
         }
         return false;
     });
@@ -2765,6 +2766,98 @@ NO_UB_SANITIZE static ets_status DeferredReject(EtsEnv *env, ets_deferred deferr
     DeleteGlobalRef(env, reinterpret_cast<ets_object>(deferred));
     return ETS_OKAY;
 }
+
+static ets_status DoCreateArrayBuffer(ets_env *env, void *externalData, size_t length, EtsFinalize finalizeCB,
+                                      void *finalizeHint, void **resultData, ets_arraybuffer *resultBuffer,
+                                      bool external)
+{
+    CHECK_ARG(env, resultBuffer);
+    ETS_NAPI_RETURN_IF_GT(length, static_cast<size_t>(std::numeric_limits<ets_int>::max()), ETS_INVALID_ARG);
+
+    PandaEtsNapiEnv *pandaEnv = PandaEtsNapiEnv::ToPandaEtsEnv(env);
+    EtsCoroutine *coro = pandaEnv->GetEtsCoroutine();
+
+    ScopedManagedCodeFix s(pandaEnv);
+
+    EtsEscompatArrayBuffer *internalArrayBuffer = nullptr;
+    if (external) {
+        internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, externalData, length, finalizeCB, finalizeHint);
+    } else {
+        internalArrayBuffer = EtsEscompatArrayBuffer::Create(coro, length, resultData);
+    }
+
+    ETS_NAPI_RETURN_IF_EQ(coro->HasPendingException(), true, ETS_PENDING_EXCEPTION);
+    ASSERT(internalArrayBuffer != nullptr);
+
+    ets_object arrayObject = s.AddLocalRef(internalArrayBuffer);
+    ETS_NAPI_RETURN_IF_EQ(coro->HasPendingException(), true, ETS_PENDING_EXCEPTION);
+    ASSERT(arrayObject != nullptr);
+
+    *resultBuffer = reinterpret_cast<ets_arraybuffer>(arrayObject);
+    return ETS_OKAY;
+}
+
+NO_UB_SANITIZE static ets_status ArrayBufferCreate(ets_env *env, size_t byteLength, void **resultData,
+                                                   ets_arraybuffer *resultBuffer)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, resultData);
+    return DoCreateArrayBuffer(env, nullptr, byteLength, nullptr, nullptr, resultData, resultBuffer, false);
+}
+
+NO_UB_SANITIZE static ets_status ArrayBufferCreateExternal(ets_env *env, void *externalData, size_t byteLength,
+                                                           EtsFinalize finalizeCB, void *finalizeHint,
+                                                           ets_arraybuffer *resultBuffer)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, finalizeCB);
+    CHECK_ARG(env, externalData);
+    return DoCreateArrayBuffer(env, externalData, byteLength, finalizeCB, finalizeHint, nullptr, resultBuffer, true);
+}
+
+NO_UB_SANITIZE static ets_status ArrayBufferGetInfo(ets_env *env, ets_arraybuffer buffer, void **resultData,
+                                                    size_t *resultByteLength)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, buffer);
+    CHECK_ARG(env, resultData);
+    CHECK_ARG(env, resultByteLength);
+    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    auto *internalArrayBuffer = s.Convert<EtsEscompatArrayBuffer>(buffer);
+    *resultData = internalArrayBuffer->GetData();
+    *resultByteLength = internalArrayBuffer->GetByteLength();
+    return ETS_OKAY;
+}
+
+NO_UB_SANITIZE static ets_status ArrayBufferDetach(ets_env *env, ets_arraybuffer buffer)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, buffer);
+    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    auto *internalArrayBuffer = s.Convert<EtsEscompatArrayBuffer>(buffer);
+    if (!internalArrayBuffer->IsDetachable()) {
+        return ETS_DETACHABLE_ARRAYBUFFER_EXPECTED;
+    }
+    internalArrayBuffer->Detach();
+    return ETS_OKAY;
+}
+
+NO_UB_SANITIZE static ets_status ArrayBufferIsDetached(ets_env *env, ets_arraybuffer buffer, bool *result)
+{
+    ETS_NAPI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_ARG(env, buffer);
+    CHECK_ARG(env, result);
+    ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    auto *internalArrayBuffer = s.Convert<EtsEscompatArrayBuffer>(buffer);
+    *result = internalArrayBuffer->WasDetached();
+    return ETS_OKAY;
+}
+
 // NewDirectByteBuffer,
 // GetDirectBufferAddress,
 // GetDirectBufferCapacity,
@@ -2997,6 +3090,11 @@ const ETS_NativeInterface NATIVE_INTERFACE = {
     PromiseCreate,
     DeferredResolve,
     DeferredReject,
+    ArrayBufferCreate,
+    ArrayBufferCreateExternal,
+    ArrayBufferGetInfo,
+    ArrayBufferDetach,
+    ArrayBufferIsDetached,
 };
 // clang-format on
 

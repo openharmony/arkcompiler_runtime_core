@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ cases:
     check: |-
       function main() {
           let a: T = 0x80 as byte; // -128
-          assert(foo(a) == 0x80 as byte);
+          assertTrue(foo(a) == 0x80 as byte);
       }
 
   - decl: |-
@@ -27,7 +27,7 @@ cases:
     check: |-
       function main() {
           let a: T = 0x7FFF as short; // 32767
-          assert(foo(a) == 0x7FFF as short);
+          assertTrue(foo(a) == 0x7FFF as short);
       }
 
   - decl: |-
@@ -35,7 +35,7 @@ cases:
     check: |-
       function main() {
           let a: T = 127 as int;
-          assert(foo(a) == 127 as int);
+          assertTrue(foo(a) == 127 as int);
       }
 
   - decl: |-
@@ -43,7 +43,7 @@ cases:
     check: |-
       function main() {
          let a: T = 127 as long;
-         assert(foo(a) == 127 as long);
+         assertTrue(foo(a) == 127 as long);
       }
 
   - decl: |-
@@ -51,7 +51,7 @@ cases:
     check: |-
       function main() {
           let a: T = -0.0 as float;
-          assert(foo(a) == -0.0 as float);
+          assertTrue(foo(a) == -0.0 as float);
       }
 
   - decl: |-
@@ -59,7 +59,7 @@ cases:
     check: |-
       function main() {
           let a: T = -0.0 as double;
-          assert(foo(a) == -0.0 as double); // double is an alias to number
+          assertTrue(foo(a) == -0.0 as double); // double is an alias to number
       }
 
   - decl: |-
@@ -67,7 +67,7 @@ cases:
     check: |-
       function main() {
           let a: T = -0.0 as number;
-          assert(foo(a) == -0.0 as number);
+          assertTrue(foo(a) == -0.0 as number);
       }
 
   - decl: |-
@@ -75,7 +75,7 @@ cases:
     check: |-
       function main() {
           let a: T = c'a';
-          assert(foo(a) == c'a');
+          assertTrue(foo(a) == c'a');
       }
 
   - decl: |-
@@ -83,7 +83,7 @@ cases:
     check: |-
       function main() {
           let a: T = true;
-          assert(foo(a) == true);
+          assertTrue(foo(a) == true);
       }
 
   # Boxed
@@ -92,7 +92,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Byte(0x7F as byte);
-          assert(foo(a).unboxed() == 0x7F as byte);
+          assertTrue(foo(a).unboxed() == 0x7F as byte);
       }
 
   - decl: |-
@@ -100,7 +100,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Short(2 as short);
-          assert(foo(a).unboxed() == 2 as short);
+          assertTrue(foo(a).unboxed() == 2 as short);
       }
 
   - decl: |-
@@ -108,7 +108,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Int(3 as int);
-          assert(foo(a).unboxed() == 3 as int);
+          assertTrue(foo(a).unboxed() == 3 as int);
       }
 
   - decl: |-
@@ -116,7 +116,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Long(4 as long);
-          assert(foo(a).unboxed() == 4 as long);
+          assertTrue(foo(a).unboxed() == 4 as long);
       }
 
   - decl: |-
@@ -124,7 +124,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Float(0.1 as float);
-          assert(foo(a).unboxed() == 0.1 as float);
+          assertTrue(foo(a).unboxed() == 0.1 as float);
       }
 
   - decl: |-
@@ -132,7 +132,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Double(0.1 as double);
-          assert(foo(a).unboxed() == 0.1 as double); // Double is an alias to Number
+          assertTrue(foo(a).unboxed() == 0.1 as double); // Double is an alias to Number
       }
 
   - decl: |-
@@ -140,7 +140,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Number(0.1 as number);
-          assert(foo(a).unboxed() == 0.1 as number);
+          assertTrue(foo(a).unboxed() == 0.1 as number);
       }
 
   - decl: |-
@@ -148,7 +148,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Char(c'b');
-          assert(foo(a).unboxed() == c'b');
+          assertTrue(foo(a).unboxed() == c'b');
       }
 
   - decl: |-
@@ -156,7 +156,7 @@ cases:
     check: |-
       function main() {
           let a: T = "some string";
-          assert(foo(a) == "some string"); // string is an alias to String
+          assertTrue(foo(a) == "some string"); // string is an alias to String
       }
 
   - decl: |-
@@ -164,7 +164,7 @@ cases:
     check: |-
       function main() {
           let a: T = new String("some string");
-          assert(foo(a) == "some string");
+          assertTrue(foo(a) == "some string");
       }
 
   - decl: |-
@@ -172,7 +172,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Boolean(false);
-          assert(foo(a).unboxed() == false);
+          assertTrue(foo(a).unboxed() == false);
       }
 
     # Custom
@@ -182,9 +182,9 @@ cases:
       function main() {
           let a: T = [1, -2];
           let b = foo(a);
-          assert(a.length == b.length);
-          assert(a[0] == b[0]);
-          assert(a[1] == b[1]);
+          assertTrue(a.length == b.length);
+          assertTrue(a[0] == b[0]);
+          assertTrue(a[1] == b[1]);
       }
 
   - decl: |-
@@ -193,11 +193,11 @@ cases:
       function main() {
           let a: T = [[new Int(1)], [new Int(-2)]];
           let b = foo(a);
-          assert(a.length == b.length);
-          assert(a[0].length == b[0].length);
-          assert(a[1].length == b[1].length);
-          assert(a[0][0].unboxed() == b[0][0].unboxed());
-          assert(a[1][0].unboxed() == b[1][0].unboxed());
+          assertTrue(a.length == b.length);
+          assertTrue(a[0].length == b[0].length);
+          assertTrue(a[1].length == b[1].length);
+          assertTrue(a[0][0].unboxed() == b[0][0].unboxed());
+          assertTrue(a[1][0].unboxed() == b[1][0].unboxed());
       }
 
   - decl: |-
@@ -206,7 +206,7 @@ cases:
     check: |-
       function main() {
           let a: T = Colors.Blue;
-          assert(foo(a) == Colors.Blue);
+          assertTrue(foo(a) == Colors.Blue);
       }
 
   - decl: |-
@@ -215,6 +215,15 @@ cases:
       function main() {
           let a: T = ["str", 1.4];
           let b = foo(a);
-          assert(b instanceof T)
-          assert(a == b)
+          assertTrue(b instanceof T)
+          assertTrue(a == b)
+      }
+
+  - decl: |-
+      enum Color {Red, Blue=-2}
+      type T = Color
+
+    check: |- 
+      function main() {
+          let a: T = T.Blue;
       }

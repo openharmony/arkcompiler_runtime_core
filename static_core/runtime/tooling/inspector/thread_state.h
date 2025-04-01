@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@ public:
     void StepOut();
     void Pause();
     void SetBreakpointsActive(bool active);
+    void SetSkipAllPauses(bool skip);
     /**
      * @brief Set a breakpoint with optional condition.
      * @param locations to set breakpoint at, all will have the same BreakpointId.
@@ -60,6 +61,15 @@ public:
      */
     BreakpointId SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition = nullptr);
     void RemoveBreakpoint(BreakpointId id);
+
+    template <typename F>
+    void EnumerateBreakpoints(const F &func)
+    {
+        for (const auto &[loc, id] : breakpointLocations_) {
+            func(loc, id);
+        }
+    }
+
     void SetPauseOnExceptions(PauseOnExceptionsState state);
 
     void OnException(bool uncaught);
@@ -115,6 +125,7 @@ private:
     PauseOnExceptionsState pauseOnExceptionsState_ {PauseOnExceptionsState::NONE};
 
     bool paused_ {false};
+    bool skipAllPauses_ {false};
 };
 }  // namespace ark::tooling::inspector
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,111 +65,29 @@ EtsClass *EtsClassLinker::GetClass(const panda_file::File &pf, panda_file::File:
     return LIKELY(cls != nullptr) ? EtsClass::FromRuntimeClass(cls) : nullptr;
 }
 
-Method *EtsClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::EntityId id)
+Method *EtsClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::EntityId id,
+                                  ClassLinkerContext *classLinkerContext, ClassLinkerErrorHandler *errorHandler)
 {
-    return classLinker_->GetMethod(pf, id);
+    return classLinker_->GetMethod(pf, id, classLinkerContext, errorHandler);
 }
 
 Method *EtsClassLinker::GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine)
 {
+    ASSERT(method != nullptr);
     panda_file::File::EntityId asyncAnnId = EtsAnnotation::FindAsyncAnnotation(method);
     ASSERT(asyncAnnId.IsValid());
     const panda_file::File &pf = *method->GetPandaFile();
     panda_file::AnnotationDataAccessor ada(pf, asyncAnnId);
     auto implMethodId = ada.GetElement(0).GetScalarValue().Get<panda_file::File::EntityId>();
-    Method *result = GetMethod(pf, implMethodId);
+    auto *ctx = method->GetClass()->GetLoadContext();
+    Method *result = GetMethod(pf, implMethodId, ctx);
     if (result == nullptr) {
         panda_file::MethodDataAccessor mda(pf, implMethodId);
         PandaStringStream out;
         out << "Cannot resolve async method " << mda.GetFullName();
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR, out.str());
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR, out.str());
     }
     return result;
-}
-
-EtsClass *EtsClassLinker::GetObjectClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetObjectClass());
-}
-
-EtsClass *EtsClassLinker::GetPromiseClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetPromiseClass());
-}
-
-EtsClass *EtsClassLinker::GetPromiseRefClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetPromiseRefClass());
-}
-
-EtsClass *EtsClassLinker::GetWaitersListClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetWaitersListClass());
-}
-
-EtsClass *EtsClassLinker::GetMutexClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetMutexClass());
-}
-
-EtsClass *EtsClassLinker::GetEventClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetEventClass());
-}
-
-EtsClass *EtsClassLinker::GetCondVarClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetCondVarClass());
-}
-
-EtsClass *EtsClassLinker::GetArrayClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetArrayClass());
-}
-
-EtsClass *EtsClassLinker::GetArrayBufferClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetArrayBufferClass());
-}
-
-EtsClass *EtsClassLinker::GetStringBuilderClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetStringBuilderClass());
-}
-
-EtsClass *EtsClassLinker::GetSharedMemoryClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetSharedMemoryClass());
-}
-
-EtsClass *EtsClassLinker::GetTypeAPIFieldClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetTypeAPIFieldClass());
-}
-
-EtsClass *EtsClassLinker::GetTypeAPIMethodClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetTypeAPIMethodClass());
-}
-
-EtsClass *EtsClassLinker::GetTypeAPIParameterClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetTypeAPIParameterClass());
-}
-
-EtsClass *EtsClassLinker::GetFunctionClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetFunctionClass());
-}
-
-EtsClass *EtsClassLinker::GetFinalizableWeakRefClass()
-{
-    return EtsClass::FromRuntimeClass(ext_->GetFinalizableWeakRefClass());
-}
-
-Method *EtsClassLinker::GetSubscribeOnAnotherPromiseMethod()
-{
-    return ext_->GetSubscribeOnAnotherPromiseMethod();
 }
 
 }  // namespace ark::ets

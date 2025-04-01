@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_gtest(ets_interop_js__generic_as_parameter_sts_to_ts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_as_parameter_sts_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.ets
+    JS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_extend_interface.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_any_type_parameter.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_collect_generic.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_extend_class.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_tuple_parameter_generic.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_constructor.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_default_type.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/generic_as_parameter.test.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_extend_type.js
+    COMPILATION_JS_WITH_CJS_ON
 )

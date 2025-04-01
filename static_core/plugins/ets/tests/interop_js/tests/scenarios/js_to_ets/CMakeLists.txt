@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,21 +15,21 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_gtest(ets_interop_js_scenarios_js_to_ets
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_symbol_test_js_to_sts
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_symbol_test_js_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_scenarios_js_to_ets_conflict_types
+panda_ets_interop_js_nodevm_gtest(ets_interop_js_scenarios_js_to_ets_conflict_types
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,10 +22,10 @@ parser.add_argument("--file", type=str)
 args = parser.parse_args()
 file_name = args.file
 
-trace_list = ["LETSGLOBAL::CallNativeSlowFunction; LETSGLOBAL::NativeSlowFunction;",
-    "LETSGLOBAL::CallNativeFastFunction; LETSGLOBAL::NativeFastFunction;",
-    "LETSGLOBAL::CallNativeNAPIFastFunction; LETSGLOBAL::NativeNAPIFastFunction;",
-    "LETSGLOBAL::CallNativeNAPISlowFunction; LETSGLOBAL::NativeNAPISlowFunction; LETSGLOBAL::SlowETSFunction;"]
+trace_list = ["LSamplerNapiTest/ETSGLOBAL::CallNativeSlowFunction; LSamplerNapiTest/ETSGLOBAL::NativeSlowFunction;",
+    "LSamplerNapiTest/ETSGLOBAL::CallNativeFastFunction; LSamplerNapiTest/ETSGLOBAL::NativeFastFunction;",
+    "LSamplerNapiTest/ETSGLOBAL::CallNativeNAPIFastFunction; LSamplerNapiTest/ETSGLOBAL::NativeNAPIFastFunction;",
+    "LSamplerNapiTest/ETSGLOBAL::CallNativeNAPISlowFunction; LSamplerNapiTest/ETSGLOBAL::NativeNAPISlowFunction; LSamplerNapiTest/ETSGLOBAL::SlowETSFunction;"]
 
 ALL_TRACES_FOUND = True
 

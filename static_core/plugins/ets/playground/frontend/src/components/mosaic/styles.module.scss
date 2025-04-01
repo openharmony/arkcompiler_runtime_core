@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@
 }
 .tab[aria-selected=true], .tab:not([aria-disabled=true]):hover {
   color: var(--primary1) !important;
+}
+.tab {
+  overflow: visible;
 }
 .tab[aria-selected=true] {
   border-bottom: 3px solid var(--primary1) !important;
@@ -53,4 +56,19 @@
 .tabContent {
   height: 100%;
   overflow: auto;
+}
+.notif {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--primary1);
+  border: 2px solid var(--background-color);
+  position: absolute;
+  right: -12px;
+  top: 8px;
+}
+
+.customHeader {
+  width: 100%;
+  padding: 0 20px;
 }

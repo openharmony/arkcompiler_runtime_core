@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -56,6 +56,10 @@ options:
     type: bool
     default: false
     description: Suppress dumping of some data (bc, SaveState instructions, etc)
+  - name: no-checks
+    type: bool
+    default: false
+    description: Dump data-flow inputs instead of check instructions
   - name: life-intervals
     type: bool
     default: false
@@ -166,11 +170,13 @@ options:
     - reserve-sb-buffer
     - savestate-opt
     - try-catch-resolving
+    - type-propagation
     - vn-opt
     - bridges-ss
     - pm
     - pea
     - interop-intrinsic-opt
+    - native-call-opt
   description: Set log compiler components
   tags: [debug]
   delimiter: ","
@@ -393,6 +399,12 @@ options:
   type: bool
   default: false
   description: Apply Memory Coalescing only to aligned accesses
+  tags: [perf]
+
+- name: compiler-optimize-native-calls
+  type: bool
+  default: true
+  description: Optimize Native API methods (insert call without asm bridge)
   tags: [perf]
 
 - name: compiler-print-stats

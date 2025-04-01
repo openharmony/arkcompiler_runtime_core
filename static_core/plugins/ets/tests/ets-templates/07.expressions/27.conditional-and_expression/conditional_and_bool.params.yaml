@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,18 +17,18 @@ cases:
     decl: |-
       let a: boolean = true;
       let b: boolean = true;
-      assert((a && b) == true);
+      assertTrue((a && b) == true);
 
   - doc: Conditional AND for 2x boolean - true false
     decl: |-
       let a: boolean = true;
       let b: boolean = false;
-      assert((a && b) == false);
+      assertTrue((a && b) == false);
 
   - doc: Conditional AND for 2x boolean - false unknown
     decl: |-
       let a: boolean = false;
-      assert((a && fail()) == false);
+      assertTrue((a && fail()) == false);
 
   - doc: Conditional AND for 4x boolean - true true true true
     decl: |-
@@ -36,7 +36,7 @@ cases:
       let b: boolean = true;
       let c: boolean = true;
       let d: boolean = true;
-      assert((a && b && c && d) == true)
+      assertTrue((a && b && c && d) == true)
 
   - doc: Conditional AND for 4x boolean - true true true false
     decl: |-
@@ -44,23 +44,23 @@ cases:
       let b: boolean = true;
       let c: boolean = true;
       let d: boolean = false;
-      assert((a && b && c && d) == false)
+      assertTrue((a && b && c && d) == false)
 
   - doc: Conditional AND for 4x boolean - true true false unknown
     decl: |-
       let a: boolean = true;
       let b: boolean = true;
       let c: boolean = false;
-      assert((a && b && c && fail()) == false)
+      assertTrue((a && b && c && fail()) == false)
 
   - doc: Conditional AND for 4x boolean - true false unknown...
     decl: |-
       let a: boolean = true;
       let b: boolean = false;
-      assert((a && b && fail() && fail()) == false)
+      assertTrue((a && b && fail() && fail()) == false)
 
   - doc: Conditional AND for 4x boolean - false unknown...
     decl: |-
       let a: boolean = false;
-      assert((a && fail() && fail() && fail()) == false)
+      assertTrue((a && fail() && fail() && fail()) == false)
 

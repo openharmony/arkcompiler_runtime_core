@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,33 +13,44 @@
  * limitations under the License.
  */
 
+const helper = requireNapiPreview('libinterop_test_helper.so', false);
+
 function runTest(test) {
-	console.log('Running test ' + test);
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
+	print('Running test ' + test);
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
 	}
-	let res = etsVm.call(test);
+	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	runTestImpl();
 	let counter = 0;
 	const maxCounter = 5;
 	const checkDelay = 1000;
+	let tId = 0;
 	let checkCallback = () => {
 		++counter;
 		if (counter === maxCounter) {
 			throw new Error('Test failed: timeout.');
 		}
-		let result = etsVm.call('check');
-		if (!result) {
-			setTimeout(checkCallback, checkDelay);
+		const check = etsVm.getFunction('LETSGLOBAL;', 'check');
+		let result = check();
+		if (result) {
+			helper.clearInterval(tId);
 		}
 	};
-	setTimeout(checkCallback, checkDelay);
+	tId = helper.setInterval(checkCallback, checkDelay);
 }
 
-let args = process.argv;
-if (args.length !== 3) {
-	console.log('Expected test name');
-	process.exit(1);
+let args = helper.getArgv();
+if (args.length !== 5) {
+	throw Error('Expected test name');
 }
-runTest(args[2]);
+runTest(args[4]);

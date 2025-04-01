@@ -3,6 +3,7 @@ bin/ark_aot
 bin/ark_disasm
 bin/ark_link
 bin/es2panda
+bin/verifier
 lib/libarkaotmanager.so
 lib/libarkassembler.so
 lib/libarkbase.so
@@ -12,6 +13,8 @@ lib/libarkdisassembler.so
 lib/libarkfile.so
 lib/libarklinker.so
 lib/libarkruntime.so
+lib/libarktarget_options.so
+lib/libani_helpers.so
 lib/libetsnative.so
 lib/libarkziparchive.so
 lib/libc_secshared.so

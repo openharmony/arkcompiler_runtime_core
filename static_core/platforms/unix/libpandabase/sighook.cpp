@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,31 +38,17 @@ namespace ark {
 
 static decltype(&sigaction) g_realSigaction;
 static decltype(&sigprocmask) g_realSigProcMask;
-static bool g_isInitReally {false};
-static bool g_isInitKeyCreate {false};
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-#if PANDA_TARGET_MACOS
-__attribute__((init_priority(101))) static os::memory::Mutex g_realLock;
-#else
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static os::memory::Mutex g_realLock;
-#endif
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static os::memory::Mutex g_keyCreateLock;
 
 static os::memory::PandaThreadKey GetHandlingSignalKey()
 {
     static os::memory::PandaThreadKey key;
-    {
-        os::memory::LockHolder lock(g_keyCreateLock);
-        if (!g_isInitKeyCreate) {
-            int rc = os::memory::PandaThreadKeyCreate(&key, nullptr);
-            if (rc != 0) {
-                LOG(FATAL, RUNTIME) << "failed to create sigchain thread key: " << os::Error(rc).ToString();
-            }
-            g_isInitKeyCreate = true;
+    [[maybe_unused]] static bool init = []() {
+        if (int rc = os::memory::PandaThreadKeyCreate(&key, nullptr); rc != 0) {
+            LOG(FATAL, RUNTIME) << "failed to create sigchain thread key: " << os::Error(rc).ToString();
         }
-    }
+        return true;
+    }();
+
     return key;
 }
 
@@ -298,20 +284,17 @@ void SignalHook::Handler(int signo, siginfo_t *siginfo, void *ucontextRaw)
 }
 
 template <typename Sigaction>
-static bool FindRealSignal(Sigaction *realFun, [[maybe_unused]] Sigaction hookFun, const char *name)
+static bool FindRealSigfn(Sigaction *realFun, Sigaction hookFun, const char *name)
 {
-    void *findFun = dlsym(RTLD_NEXT, name);
-    if (findFun != nullptr) {
-        *realFun = reinterpret_cast<Sigaction>(findFun);
-    } else {
-        findFun = dlsym(RTLD_DEFAULT, name);
-        if (findFun == nullptr || reinterpret_cast<uintptr_t>(findFun) == reinterpret_cast<uintptr_t>(hookFun) ||
-            reinterpret_cast<uintptr_t>(findFun) == reinterpret_cast<uintptr_t>(sigaction)) {
+    auto found = reinterpret_cast<Sigaction>(dlsym(RTLD_NEXT, name));
+    if (found == nullptr) {
+        found = reinterpret_cast<Sigaction>(dlsym(RTLD_DEFAULT, name));
+        if (found == nullptr || found == hookFun) {
             LOG(ERROR, RUNTIME) << "dlsym(RTLD_DEFAULT, " << name << ") can not find really " << name;
             return false;
         }
-        *realFun = reinterpret_cast<Sigaction>(findFun);
     }
+    *realFun = found;
     LOG(INFO, RUNTIME) << "find " << name << " success";
     return true;
 }
@@ -322,19 +305,13 @@ __attribute__((constructor(102))) static bool InitRealSignalFun()
 __attribute__((constructor)) static bool InitRealSignalFun()
 #endif
 {
-    {
-        os::memory::LockHolder lock(g_realLock);
-        if (!g_isInitReally) {
-            bool isError = true;
-            isError = isError && FindRealSignal(&g_realSigaction, sigaction, "sigaction");
-            isError = isError && FindRealSignal(&g_realSigProcMask, sigprocmask, "sigprocmask");
-            if (isError) {
-                g_isInitReally = true;
-            }
-            return isError;
-        }
-    }
-    return true;
+    static bool initialized = ([]() {
+        bool success = true;
+        success &= FindRealSigfn(&g_realSigaction, sigaction, "sigaction");
+        success &= FindRealSigfn(&g_realSigProcMask, sigprocmask, "sigprocmask");
+        return success;
+    })();
+    return initialized;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -361,8 +338,8 @@ static int RegisterUserHandler(int signal, const struct sigaction *newAction, st
     return really(signal, newAction, oldAction);
 }
 
-int RegisterUserMask(int how, const sigset_t *newSet, sigset_t *oldSet,
-                     int (*really)(int, const sigset_t *, sigset_t *))
+static int RegisterUserMask(int how, const sigset_t *newSet, sigset_t *oldSet,
+                            int (*really)(int, const sigset_t *, sigset_t *))
 {
     if (GetHandlingSignal()) {
         return really(how, newSet, oldSet);
@@ -384,29 +361,15 @@ int RegisterUserMask(int how, const sigset_t *newSet, sigset_t *oldSet,
     return really(how, buildSigsetConst, oldSet);
 }
 
-// NOTE: #2681
-// when use ADDRESS_SANITIZER, will exposed a bug,try to define 'sigaction' will happen SIGSEGV
-#ifdef USE_ADDRESS_SANITIZER
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" int sigaction([[maybe_unused]] int sig, [[maybe_unused]] const struct sigaction *__restrict act,
-                         [[maybe_unused]] struct sigaction *oact)  // NOLINT(readability-identifier-naming)
+// CC-OFFNXT(G.NAM.03) libc hook
+// NOLINT(readability-identifier-naming)
+extern "C" int sigaction(int sig, const struct sigaction *__restrict act, struct sigaction *oact)
 {
     if (!InitRealSignalFun()) {
         return -1;
     }
     return RegisterUserHandler(sig, act, oact, g_realSigaction);
 }
-#else
-// NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" int sigactionStub([[maybe_unused]] int sig, [[maybe_unused]] const struct sigaction *__restrict act,
-                             [[maybe_unused]] struct sigaction *oact)  // NOLINT(readability-identifier-naming)
-{
-    if (!InitRealSignalFun()) {
-        return -1;
-    }
-    return RegisterUserHandler(sig, act, oact, g_realSigaction);
-}
-#endif  // USE_ADDRESS_SANITIZER
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern "C" int sigprocmask(int how, const sigset_t *newSet, sigset_t *oldSet)  // NOLINT
@@ -485,8 +448,6 @@ extern "C" void EnsureFrontOfChain(int signal)
 
 void ClearSignalHooksHandlersArray()
 {
-    g_isInitReally = false;
-    g_isInitKeyCreate = false;
     for (int i = 1; i < _NSIG; i++) {
         g_signalHooks[i].ClearHookActionHandlers();
     }

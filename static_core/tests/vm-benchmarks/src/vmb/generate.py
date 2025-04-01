@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,7 +38,7 @@ log = logging.getLogger('vmb')
 
 class BenchGenerator:
     def __init__(self, args: Args) -> None:
-        self.args = args  # need to keeep full cmdline for measure overrides
+        self.args = args  # need to keep full cmdline for measure overrides
         self.paths: List[Path] = args.paths
         self.out_dir: Path = Path(args.outdir).joinpath('benches').resolve()
         self.override_src_ext: Set[str] = args.src_langs
@@ -54,9 +54,14 @@ class BenchGenerator:
     @staticmethod
     def search_test_files_in_dir(d: Path,
                                  root: Path,
-                                 ext: Iterable[str] = ()) -> List[SrcPath]:
+                                 ext: Iterable[str] = (),
+                                 allowed_dir_name: str = None) -> List[SrcPath]:
+        if allowed_dir_name:
+            log.trace('Search test files, allowed dir name: %s', allowed_dir_name)
         files = []
         for p in d.glob('**/*'):
+            if allowed_dir_name and not p.parent.name == allowed_dir_name:
+                continue
             if p.parent.parent.name == 'common':
                 continue
             if p.suffix and p.suffix in ext:
@@ -67,18 +72,20 @@ class BenchGenerator:
         return files
 
     @staticmethod
-    def process_test_list(lst: Path, ext: Iterable[str] = ()) -> List[SrcPath]:
+    def process_test_list(lst: Path, ext: Iterable[str] = (),
+                          allowed_dir_name: str = None) -> List[SrcPath]:
         cwd = Path.cwd().resolve()
         paths = [cwd.joinpath(p) for p in read_list_file(lst)]
         files = []
         for p in paths:
-            x = BenchGenerator.search_test_files_in_dir(p, p, ext)
+            x = BenchGenerator.search_test_files_in_dir(p, p, ext, allowed_dir_name)
             files += x
         return files
 
     @staticmethod
     def search_test_files(paths: List[Path],
-                          ext: Iterable[str] = ()) -> List[SrcPath]:
+                          ext: Iterable[str] = (),
+                          allowed_dir_name: str = None) -> List[SrcPath]:
         """Collect all src files to gen process.
 
         Returns flat list of (Full, Relative) paths
@@ -91,14 +98,14 @@ class BenchGenerator:
             if root.is_file():
                 if '.lst' == root.suffix:
                     log.debug('Processing list file: %s', root)
-                    files += BenchGenerator.process_test_list(root, ext)
+                    files += BenchGenerator.process_test_list(root, ext, allowed_dir_name)
                     continue
                 if root.suffix not in ext:
                     continue
                 files.append(SrcPath(root, Path('.')))
-            # in case of dir search by file extention
+            # in case of dir search by file extension
             elif root.is_dir():
-                files += BenchGenerator.search_test_files_in_dir(d, root, ext)
+                files += BenchGenerator.search_test_files_in_dir(d, root, ext, allowed_dir_name)
             else:
                 log.warning('Src: %s not found!', root)
         return files
@@ -123,7 +130,7 @@ class BenchGenerator:
 
     @staticmethod
     def check_common_files(full: Path, lang_name: str) -> str:
-        """Check if there is 'common' code at ../common/sts/*.sts.
+        """Check if there is 'common' code at ../common/ets/*.ets.
 
         This feature is actually meaningless now
         and added only for the compatibility with existing tests
@@ -145,7 +152,7 @@ class BenchGenerator:
 
     @staticmethod
     def check_resources(full: Path, lang_name: str, dest: Path) -> bool:
-        """Check 'resources' at ../sts/*.sts and link to destdir."""
+        """Check 'resources' at ../ets/*.ets and link to destdir."""
         if full.parent.name != lang_name:
             return False
         resources = full.parent.parent.joinpath('resources')
@@ -242,8 +249,7 @@ class BenchGenerator:
             return tpl
         raise RuntimeError(f'Template {name} not found!')
 
-    def process_source_file(self, src: Path, lang: LangBase
-                            ) -> Iterable[TemplateVars]:
+    def process_source_file(self, src: Path, lang: LangBase) -> Iterable[TemplateVars]:
         with open(src, 'r', encoding="utf-8") as f:
             full_src = f.read()
         if '@Benchmark' not in full_src:
@@ -261,7 +267,7 @@ class BenchGenerator:
 
     def add_bu(self, bus: List[BenchUnit], template: Template,
                lang_impl: LangBase, src: SrcPath, variant: TemplateVars,
-               settings: Optional[GenSettings], out_ext: str) -> None:
+               settings: Optional[GenSettings], out_ext: str) -> BenchUnit:
         try:
             bu = BenchGenerator.emit_bench_variant(
                 variant, template, lang_impl, src, self.out_dir, out_ext)
@@ -274,6 +280,7 @@ class BenchGenerator:
         except Exception as e:
             log.error(e)
             die(self.abort, 'Aborting on first fail...')
+        return bu
 
     def generate(self, lang: str,
                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
@@ -298,16 +305,102 @@ class BenchGenerator:
 
 
 @log_time
-def generate_main(args: Args,
-                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
+def generate_main_regular(args: Args,
+                          settings: Optional[GenSettings] = None) -> List[BenchUnit]:
     """Command: Generate benches from doclets."""
     log.info("Starting GEN phase...")
+    log.trace("GEN phase args:  %s", args)
     generator = BenchGenerator(args)
     bus: List[BenchUnit] = []
     for lang in args.langs:
         bus += generator.generate(lang, settings=settings)
     log.passed('Generated %d bench units', len(bus))
     return bus
+
+
+def generate_mode(mode: str, lang: str,
+                  generator: BenchGenerator,
+                  settings: Optional[GenSettings] = None, arkjs_suffix: str = '') -> List[BenchUnit]:
+    """Generate benchmark sources for requested language."""
+    log.trace("Interop GEN for mode: %s", mode)
+    bus: List[BenchUnit] = []
+    lang_impl = generator.get_lang(lang)
+    src_ext = lang_impl.src
+    out_ext = lang_impl.ext
+    template_name = f'Template{lang_impl.ext}'
+    if settings:  # override if set in platform
+        src_ext = settings.src
+        out_ext = settings.out
+        template_name = settings.template
+    template = generator.get_template(template_name)
+    for src in BenchGenerator.search_test_files(generator.paths, ext=src_ext, allowed_dir_name=mode):
+        for variant in generator.process_source_file(src.full, lang_impl):
+            bu = generator.add_bu(bus, template, lang_impl, src,
+                                  variant, settings, out_ext)
+            if mode == 'bu_a2j' and lang == 'ets':
+                create_interop_runner(generator, variant, bu, arkjs_suffix=arkjs_suffix)
+    return tags_workaround(bus, mode)
+
+
+def create_interop_runner(generator: BenchGenerator, variant: TemplateVars, bu: BenchUnit, arkjs_suffix: str = ''):
+    runner_template = generator.get_template('TemplateInteropA2J' + arkjs_suffix + '.js')
+    runner_js = runner_template.substitute({'METHOD': variant.method_name,
+                                            'STATE': variant.state_name,
+                                            'NAME': variant.bench_name})
+    runner_file = bu.path.joinpath('InteropRunner.js')
+    log.trace("Generating %s", str(runner_file))
+    with create_file(runner_file) as f:
+        f.write(runner_js)
+
+
+def tags_workaround(bus: List[BenchUnit], mode: str) -> List[BenchUnit]:
+    if not bus:
+        return bus
+    for bu in bus:
+        if hasattr(bu, 'tags') and bu.tags:
+            continue  # Note need to find out why this is sometimes not the case
+        tags: Set[str] = set()
+        tags.add(mode)
+        bu.tags = tags
+    return bus
+
+
+@log_time
+def generate_main_interop(generator: BenchGenerator = None, arkjs_suffix: str = '') -> List[BenchUnit]:
+    """Command: Generate benches from doclets."""
+    log.info("Starting interop GEN phase...",)
+    bus: List[BenchUnit] = []
+    if not generator:
+        log.warning("Generator for interop is not defined, stop")
+        return bus  # empty
+    # Note a2a and a2j templates are like in arkts_host
+    bus += generate_mode('bu_a2a', 'ets', generator, settings=GenSettings(src={'.ets'},
+                         template='Template.ets',
+                         out='.ets',
+                         link_to_src=False))
+    bus += generate_mode('bu_a2j', 'ets', generator, settings=GenSettings(src={'.ets'},
+                         template='Template.ets',
+                         out='.ets',
+                         link_to_src=False), arkjs_suffix=arkjs_suffix)
+    bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
+                         template='TemplateInteropJ2A' + arkjs_suffix + '.js',
+                         out='.js',
+                         link_to_src=False))
+    bus += generate_mode('bu_j2j', 'js', generator, settings=GenSettings(src={'.js'},
+                         template='Template.js',
+                         out='.js',
+                         link_to_src=False))
+    log.passed('Generated %d bench units', len(bus))
+    return sorted(bus, key=lambda x: x.path)
+
+
+def generate_main(args: Args,
+                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
+    if args.langs and 'interop' in args.langs:
+        return generate_main_interop(BenchGenerator(args))
+    if args.langs and 'interop_arkjs' in args.langs:
+        return generate_main_interop(BenchGenerator(args), arkjs_suffix='_arkjs')
+    return generate_main_regular(args, settings)
 
 
 if __name__ == '__main__':
