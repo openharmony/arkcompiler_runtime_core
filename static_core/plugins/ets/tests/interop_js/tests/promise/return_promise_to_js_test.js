@@ -40,6 +40,7 @@ function runTest(test, iter) {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
 		'coroutine-enable-external-scheduling': 'true',
+		'xgc-trigger-type': 'never',
 	};
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
