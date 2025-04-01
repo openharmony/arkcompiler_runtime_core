@@ -16,11 +16,11 @@
 {% for c in cases %}
 
 /*---
-desc: Test the compile-time error occures if type parameters with a varance modifier incorrectly used.
+desc: Test the compile-time error occures if a function, methos or constructor type parameters have a varance modifier specified.
 tags: [compile-only, negative]
 ---*/
 
-class A<{{c.param}}> {
+class A{{c.param}} {
   {{c.expression}}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,30 @@
 {% for c in cases %}
 
 /*---
-desc: Test the compile-time error occures if type parameters with a varance modifier incorrectly used.
-tags: [compile-only, negative]
+desc: Test of invariant no type parameter modifier. 
 ---*/
 
-class A<{{c.param}}> {
-  {{c.expression}}
+interface I<T> {
+  c: T
+  f(p: T): T
+  f1(p: T): string
+  f2(): T
+}
+
+class A<T> implements I<T> {
+  c: T
+  constructor(p: T) { this.c = p }
+  f(p: T): T { return p }
+  f1(p: T): string { return "v = " + p }
+  f2(): T { return this.c }
+}
+
+function main(): void {
+  let arg: {{c.type}} = {{c.value}}
+  let a: I<{{c.type}}> = new A<{{c.type}}>(arg)
+  assertEQ(a.f(arg), {{c.value}})
+  assertEQ(a.f1(arg), {{c.value1}})
+  assertEQ(a.f2(), {{c.value}})
 }
 
 {% endfor %}

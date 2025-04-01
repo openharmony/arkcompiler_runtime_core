@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ desc: Test the compile-time error occures if type parameters with a varance modi
 tags: [compile-only, negative]
 ---*/
 
-class A<{{c.param}}> {
+interface I<{{c.param}}> {
   {{c.expression}}
 }
 

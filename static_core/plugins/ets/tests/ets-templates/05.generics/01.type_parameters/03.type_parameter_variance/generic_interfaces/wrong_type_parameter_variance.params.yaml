@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,19 +13,10 @@
 
 ---
 cases:
-  - decl: |
-      class B {}
-      class D extends B {}
-
-      class FixedG<T> {}
-    use: |
-      let fb: FixedG<B> = new FixedG<D>
-  - decl:
-      class B {}
-      class D extends B {}
-
-      class InG<in T> {}
-      class OutG<out T> {}
-    use: |
-      let ib: InG<B> = new InG<D>
-      let ob: OutG<D> = new OutG<B>
+  - { param: "in T",  expression: "f(): T"            }
+  - { param: "in T",  expression: "f(p: T): T"        }
+  - { param: "in T",  expression: "field: T"          }
+  - { param: "in T",  expression: "readonly field: T" }
+  - { param: "out T", expression: "f(p: T)"           }
+  - { param: "out T", expression: "f(p: T): T"        }
+  - { param: "out T", expression: "field: T"          }
