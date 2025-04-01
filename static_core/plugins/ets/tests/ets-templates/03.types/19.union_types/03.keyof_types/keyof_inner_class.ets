@@ -13,23 +13,16 @@
  * limitations under the License.
  */
 
+{% for case in cases %}
+
 /*---
-desc: Module contains top-level declaration - classes, interfaces
-tags: [compile-only, not-a-test]
+desc: >-
+    The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+    The resultant new type is a union of names (as string literal types) of all accessible members of the class or interface type.
 ---*/
 
-export class A {}
-export class B extends A {
-  foo = 1
+function main() {
+    {{case.check|indent}}
 }
-export final class C extends B {
-  bar() {}
-}
-export abstract class AC {
-  abstract foo()
-  bar: boolean
-}
-export interface I {
-  foo()
-  bar: char
-}
+
+{% endfor %}

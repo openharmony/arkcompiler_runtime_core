@@ -15,54 +15,79 @@ cases:
   # Fields
   - def: |-
       i: byte
-    type: \"i\"
+    check:
+      - '"i"'
+
   - def: |-
       i: int
       j: boolean
       k: string
       n: number
       O_1: Object
-    type: \"i\" | \"j\" | \"k\" | \"n\" | \"O_1\"
+    check:
+      - '"i"'
+      - '"j"'
+      - '"k"'
+      - '"n"'
+      - '"O_1"'
+
   - def: |-
       i: int|byte|string|undefined
       j: undefined|char|null
-    type: \"i\" | \"j\"
+    check:
+      - '"i"'
+      - '"j"'
+
   - def: |-
       longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_: long
-    type: \"longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_\"
+    check:
+      - '"longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_"'
+
   # Fields and methods
   - def: |-
       var2: number[]
       foo: number[]
       var1()
       bar() { return true }
-    type: \"bar\" | \"foo\" | \"var1\" | \"var2\"
+    check:
+      - '"bar"'
+      - '"foo"'
+      - '"var1"'
+      - '"var2"'
+
     # Overloading
   - def: |-
       foo()
       foo(i: int)
       foo(j: number)
-    type: \"foo\"
+    check:
+      - '"foo"'
+
     # Not included
-  - type: never
+  - check:
+    - never
+
     # Different types check
   - def: |-
       i: string|number|undefined|null
-    type: \"i\"
+    check:
+      - '"i"'
+
   - decl: |-
       type custom = int
     def: |-
       i: custom
-    type: \"i\"
+    check:
+      - '"i"'
+
   - decl: |-
       enum ENUM {Red, Orange, Green}
     def: |-
       i: ENUM
-    type: \"i\"
+    check:
+      - '"i"'
+
   - def: |-
       i?: boolean
-    type: \"i\"
-
-
-  - def: |-
-      generic
+    check:
+      - '"i"'

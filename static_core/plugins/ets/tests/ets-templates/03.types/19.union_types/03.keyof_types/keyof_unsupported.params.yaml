@@ -13,42 +13,50 @@
 
 cases:
   - decl: |-
+      let a: number = 1.2
+    check: |-
+      type t = keyof a
+
+  - decl: |-
       function foo() {}
     check: |-
-      keyof foo
+      type t = keyof foo
+
   - decl: |-
       function foo() { return new Object() }
     check: |-
-      keyof foo()
+      type t = keyof foo()
+
   - check: |-
-      keyof 1
-  - decl: |-
-      class A {
-        number() {}
-      }
-    check: |-
-      type t = keyof A
-      let i: t = 1 as number
-  - decl: |-
-      type t = string
-    check: |-
-      keyof t
+      type t = keyof 1
+
   - decl: |-
       type t = number[]
     check: |-
-      keyof t
+      type t = keyof t
+
+  - decl: |-
+      type func = (x: int): int
+    check: |-
+      type t = keyof func
+
+  - check: |-
+      type t = keyof { foo: 1, bar: "str" }
+
   - decl: |-
       class A {}
       interface I {}
     check: |-
-      keyof A | I
+      type t = keyof A | I
+
   - decl: |-
       class A {}
       interface I {}
     check: |-
-      keyof ( A | I )
+      type t = keyof ( A | I )
+
   - decl: |-
       class A {}
       interface I {}
     check: |-
-      keyof ( A | I )[]
+      type t = keyof ( A | I )[]
