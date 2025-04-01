@@ -29,6 +29,10 @@
 namespace ark::ets::ani {
 
 class ManagedCodeAccessor {
+    // We use 'long' type for the magic number to support both 32-bit and 64-bit architectures at the same time.
+    static constexpr long REF_UNDEFINED_VALUE = -1UL;   // NOLINT(google-runtime-int)
+    static constexpr long WREF_UNDEFINED_VALUE = -2UL;  // NOLINT(google-runtime-int)
+
 public:
     explicit ManagedCodeAccessor(PandaEnv *env) : env_(env) {}
     ~ManagedCodeAccessor() = default;
@@ -45,12 +49,12 @@ public:
 
     static bool IsUndefined(ani_ref ref)
     {
-        return ref == nullptr;
+        return ref == ToNativePtr<__ani_ref>(REF_UNDEFINED_VALUE);
     }
 
     static bool IsUndefined(ani_wref ref)
     {
-        return ref == nullptr;
+        return ref == ToNativePtr<__ani_wref>(WREF_UNDEFINED_VALUE);
     }
 
     static bool IsUndefined(EtsObject *object)
@@ -65,13 +69,13 @@ public:
 
     static ani_status GetUndefinedWRef(ani_wref *result)
     {
-        *result = nullptr;
+        *result = ToNativePtr<__ani_wref>(WREF_UNDEFINED_VALUE);
         return ANI_OK;
     }
 
     static ani_status GetUndefinedRef(ani_ref *result)
     {
-        *result = nullptr;
+        *result = ToNativePtr<__ani_ref>(REF_UNDEFINED_VALUE);
         return ANI_OK;
     }
 
