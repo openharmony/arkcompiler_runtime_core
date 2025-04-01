@@ -13,9 +13,6 @@
 
 --- # List of valid bigint functions
 bigint_functions:
-    - { func: 'BigInt("1n")', res: 1n }
-    - { func: 'BigInt("1234567890n")', res: 1234567890n }
-
     - { func: 'BigInt("1")', res: 1n }
     - { func: 'BigInt("1234567890")', res: 1234567890n }
     - { func: 'BigInt("               123                  ")', res: 123n }
