@@ -18,3 +18,54 @@ function sum(a0: int, a1: int): int {
     return a0 + a1 as int;
 }
 }
+
+function moduleFunction(value1: int, value2: int): int {
+    return value1 + value2 as int;
+}
+
+function moduleFunction(value1: int, value2: int, value3: int): int {
+    return value1 + value2 + value3 as int;
+}
+
+namespace A {
+    function intFunctionA(value1: int, value2: int): int {
+        return value1 + value2 as int;
+    }
+
+    function intFunctionA(value1: int, value2: int, value3: int): int {
+        return value1 + value2 + value3 as int;
+    }
+
+    function nestedFunction(value1: int, value2: int): int {
+        let lambdaFunction: (p1: int, p2: int) => int =
+            (param1: int, param2: int): int => {
+                return param1 + param2 as int;
+        };
+        return lambdaFunction(value1, value2);
+    }
+    
+    export function recursiveFunction(value: int): int {
+        if (value <= 1) {
+            return 1;
+        } else {
+            return value + recursiveFunction(value - 1) as int;
+        }
+    }
+
+    function calculateSum(value1: int, value2: int, value3: char, value4: double): int {
+        let aChar: char = 'A';
+        if (value3 == aChar) {
+            return value2 - value1 as int;
+        }
+        if (value4 == 1.0) {
+            return value1;
+        }
+        return value2 + value1 as int;
+    }
+
+    namespace B {
+        function intFunctionB(value1: int, value2: int): int {
+            return value1 + value2 as int;
+        }
+    }
+}

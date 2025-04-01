@@ -12,16 +12,19 @@
 # limitations under the License.
 
 ani_add_gtest(ani_test_function_call_short
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_short_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_short_test.ets
 )
 
 ani_add_gtest(ani_test_function_call_int
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_int_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_int_test.ets
 )
 
 ani_add_gtest(ani_test_function_call_long
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_long_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_long_test.ets
 )
