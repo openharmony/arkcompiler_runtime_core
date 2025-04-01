@@ -81,6 +81,10 @@ public:
     EtsClass *coreMethod;
     EtsClass *coreParameter;
 
+    EtsClass *escompatRecord;
+    EtsMethod *escompatRecordGetter;
+    EtsMethod *escompatRecordSetter;
+
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;

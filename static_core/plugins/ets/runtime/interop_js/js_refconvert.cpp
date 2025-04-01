@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 
 namespace ark::ets::interop::js {
 
@@ -33,6 +34,11 @@ static bool IsFunctionClass(InteropCtx *ctx, Class *klass)
         }
     }
     return false;
+}
+
+static bool IsRecord(Class *klass)
+{
+    return PlatformTypes()->escompatRecord->GetRuntimeClass()->IsAssignableFrom(klass);
 }
 
 static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Class *klass)
@@ -53,6 +59,10 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
 
     if (IsFunctionClass(ctx, klass)) {
         return std::make_unique<JSRefConvertFunction>(klass);
+    }
+
+    if (IsRecord(klass)) {
+        return std::make_unique<JSRefConvertRecord>(ctx);
     }
 
     if (klass->IsInterface()) {
