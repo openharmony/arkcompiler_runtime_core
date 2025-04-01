@@ -23,4 +23,4 @@ declare function add(a: number, b: number): number;
 declare const result: number;
 declare const numbers: number[];
 declare const tuple: [number, number, number];
-declare const person: JSValue;
+declare const person: ESObject;

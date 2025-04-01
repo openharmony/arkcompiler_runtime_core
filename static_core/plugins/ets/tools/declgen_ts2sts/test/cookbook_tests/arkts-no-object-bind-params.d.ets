@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare function getFullName(args0: JSValue, args1: JSValue): void;
-export declare function foo(): JSValue;
-export declare function bar(arg: JSValue): JSValue;
+export declare function getFullName(args0: ESObject, args1: ESObject): void;
+export declare function foo(): ESObject;
+export declare function bar(arg: ESObject): ESObject;
 export declare function UserInfo(name: string, age: number): void;
 export declare function gwtUserName(code: number): string;

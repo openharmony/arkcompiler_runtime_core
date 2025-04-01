@@ -12,10 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Example1 = ESObject;
-interface Animal {
-    live(): void;
+
+export interface CallableInterface {
+    (param: string): boolean;
+    method1(): void;
 }
-interface Dog extends Animal {
-    woof(): void;
+
+export interface OptionalMethodInterface {
+    method1?(): void;
+    method2(): void;
+}
+
+export interface MixedInterface {
+    (param: number): string;
+    method1?(): void;
+    method2(): void;
+}
+
+export interface CallableInterface1 {
+    (param: string): boolean;
+}
+  
+export interface OptionalMethodInterface1 {
+    method1?(): void;
+}
+  
+export interface NormalInterface {
+    method2(): void;
 }

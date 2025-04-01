@@ -12,5 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare function foo(): JSValue;
-export declare function bar(arg: JSValue): JSValue;
+export declare function foo(): ESObject;
+export declare function bar(arg: ESObject): ESObject;

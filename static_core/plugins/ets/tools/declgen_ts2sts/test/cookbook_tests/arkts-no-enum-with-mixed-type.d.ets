@@ -14,8 +14,8 @@
  */
 declare function enumReturnFunc(): Color;
 declare function enumParmFunc(role: UserRole): boolean;
-declare function enumXAsParam(param: JSValue): string;
-declare function enumXAsReturn(): JSValue;
+declare function enumXAsParam(param: ESObject): string;
+declare function enumXAsReturn(): ESObject;
 declare enum Color {
     Red = 0,
     Green = 1,
@@ -27,7 +27,7 @@ declare enum UserRole {
     Viewer = "viewer",
     Guest = "guest"
 }
-export declare const X: JSValue;
+export declare const X: ESObject;
 declare enum T {
     a = 1,
     b = 2,

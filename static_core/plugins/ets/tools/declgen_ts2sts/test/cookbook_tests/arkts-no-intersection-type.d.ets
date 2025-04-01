@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type A = JSValue;
-export type PersonEmployee = JSValue;
-export type LoggerValidator = JSValue;
-type User = JSValue;
-export type ActiveUser = JSValue;
-export {};
+export type A = ESObject;
+export type PersonEmployee = ESObject;
+export type LoggerValidator = ESObject;
+type User = ESObject;
+export type ActiveUser = ESObject;
+declare class Logger {
+    log(message: string): void;
+}
+declare class Validator {
+    validate(data: ESObject): boolean;
+}
 interface Person {
     name: string;
     age: number;
@@ -25,10 +30,4 @@ interface Person {
 interface Employee {
     employeeId: string;
     department: string;
-}
-declare class Logger {
-    log(message: string): void;
-}
-declare class Validator {
-    validate(data: JSValue): boolean;
 }

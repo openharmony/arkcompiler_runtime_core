@@ -12,10 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Example1 = ESObject;
-interface Animal {
-    live(): void;
-}
-interface Dog extends Animal {
-    woof(): void;
+export type Class1<T> = ESObject;
+export type Nullable<T> = ESObject;
+export type Person = ESObject;
+export type ReadonlyPerson = ESObject;
+export type ArrayElementMap<T extends ESObject[], U> = ESObject;
+export type NumberArray = [number, number, number];
+export type StringArray = ArrayElementMap<NumberArray, string>;
+export type Book = ESObject;
+export type SelectedKeys = 'title' | 'author';
+export type PartialBook = ESObject;
+export type a = Person;
+export declare class Class2<T> {
+    a: Person;
 }
