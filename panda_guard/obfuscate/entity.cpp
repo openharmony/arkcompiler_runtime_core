@@ -28,19 +28,19 @@ void panda::guard::Entity::Create()
     this->Build();
     this->RefreshNeedUpdate();
 
-    LOG(INFO, PANDAGUARD) << TAG << "needUpdate:" << (this->needUpdate ? "true" : "false");
+    LOG(INFO, PANDAGUARD) << TAG << "needUpdate:" << (this->needUpdate_ ? "true" : "false");
 }
 
 void panda::guard::Entity::Obfuscate()
 {
-    if (!this->needUpdate) {
+    if (!this->needUpdate_) {
         this->WriteNameCache();
         return;
     }
 
     this->Update();
 
-    this->obfuscated = true;
+    this->obfuscated_ = true;
 }
 
 void panda::guard::Entity::Build() {}
@@ -130,12 +130,13 @@ bool panda::guard::TopLevelOptionEntity::NeedUpdate(const Entity &entity)
 
 void panda::guard::TopLevelOptionEntity::RefreshNeedUpdate()
 {
-    this->needUpdate = NeedUpdate(*this);
+    this->needUpdate_ = NeedUpdate(*this);
 }
 
 void panda::guard::TopLevelOptionEntity::WritePropertyCache(const panda::guard::Entity &entity)
 {
-    if (!entity.obfuscated || entity.GetName().empty() || entity.GetObfName().empty() || (entity.scope_ != TOP_LEVEL)) {
+    if (!entity.obfuscated_ || entity.GetName().empty() || entity.GetObfName().empty() ||
+        (entity.scope_ != TOP_LEVEL)) {
         return;
     }
 
@@ -178,12 +179,12 @@ bool panda::guard::PropertyOptionEntity::NeedUpdate(const Entity &entity)
 
 void panda::guard::PropertyOptionEntity::RefreshNeedUpdate()
 {
-    this->needUpdate = NeedUpdate(*this);
+    this->needUpdate_ = NeedUpdate(*this);
 }
 
 void panda::guard::PropertyOptionEntity::WritePropertyCache(const panda::guard::Entity &entity)
 {
-    if (!entity.obfuscated || entity.GetName().empty() || entity.GetObfName().empty()) {
+    if (!entity.obfuscated_ || entity.GetName().empty() || entity.GetObfName().empty()) {
         return;
     }
 

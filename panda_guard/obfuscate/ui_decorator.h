@@ -129,7 +129,7 @@ private:
 
     std::shared_ptr<Property> GetObjectOuterProperty(const std::string &literalArrayIdx) const;
 
-    void ForEachIns(const InstructionInfo &inst);
+    void EnumerateIns(const InstructionInfo &inst);
 
 public:
     InstructionInfo baseInst_ {};  // obtain ui decorator information by this inst
