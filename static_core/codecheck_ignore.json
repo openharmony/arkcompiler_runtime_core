@@ -1,7 +1,6 @@
 {
   "cmake/third_party/icu/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/openssl/CMakeLists.txt": {"bc-40001": "*"},
-  "cmake/third_party/pcre2/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/securec/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/toolchain_websocket/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/typescript/CMakeLists.txt": {"bc-40001": "*"},

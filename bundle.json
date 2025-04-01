@@ -34,8 +34,7 @@
                 "libuv"
             ],
             "third_party": [
-                "musl",
-                "pcre2"
+                "musl"
             ]
         },
         "build": {

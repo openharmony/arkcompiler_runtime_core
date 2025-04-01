@@ -78,7 +78,7 @@ export namespace xml {
         private static readonly const lineEndRegExp = new RegExp("\n", "m")
         private static readonly const selfCloseTagRegExp = new RegExp("<([\\w:]+)([^<^>])*?/>", "m")
         private static readonly const normalTagRegExp = new RegExp("<([\\w:]+)[\\s\\S]*?>[\\s\\S]*?<\*?>", "m")
-        private static readonly const startTagRegExp = new RegExp("<([\\w:.-]+)\\s*","m")
+        private static readonly const startTagRegExp = new RegExp("<([\\w-:.]+)\\s*","m")
         private static readonly const selfCloseTagParamRegExp = (tagName: string) => { return new RegExp(`<${tagName}[^<^>]*?\/>`,'m') }
         private static readonly const normalTagParamRegExp = (tagName: string) => { return new RegExp(`<${tagName}([\\s\\S]*?)>([\\s\\S]*?)<\/${tagName}>`,'gm') }
         private static readonly const attributeRegExp = new RegExp("([\\w:-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*'|\\w+)\\s*", "m")

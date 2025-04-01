@@ -315,7 +315,6 @@ if(PANDA_WITH_RUNTIME)
 
     set(ICU_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/icu)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/icu)
-    add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/pcre2)
 endif()
 
 # ----- Testing ----------------------------------------------------------------

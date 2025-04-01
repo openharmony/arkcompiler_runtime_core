@@ -402,7 +402,7 @@ export class RegExp extends Object {
         return this.compile()
     }
 
-    private native execImpl(pattern: String, flags: String, str: String): RegExpExecArray;
+    private native execImpl(str: String): RegExpExecArray;
     /**
      * Executes a search for a match in a specified string and returns a result array
      *
@@ -413,7 +413,7 @@ export class RegExp extends Object {
      * @see RegExpExecArray
      */
     public exec(str: String): RegExpExecArray | null {
-        const res = this.execImpl(this.pattern_, this.flags_, str)
+        const res = this.execImpl(str)
         if (res.isCorrect) {
             return res
         } else {
@@ -636,7 +636,7 @@ export class RegExp extends Object {
      * @returns true if match was found
      */
     public test(str: String): boolean {
-        return this.execImpl(this.pattern_, this.flags_, str).isCorrect
+        return this.execImpl(str).isCorrect
     }
 
     /**
@@ -704,7 +704,7 @@ export class RegExp extends Object {
         this.pattern_ = pattern
         this.flags_ = flags === undefined ? "" : flags!
         this.source_ = RegExp.escapePattern(pattern)
-        this.flags_ = Array.from(this.flags_.split("")).sort().join("") 
+        this.compile()
     }
 
     /**
