@@ -67,7 +67,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns A new Double instance
      */
-    static $_invoke(): number {
+    static $_invoke(): Number {
         return new Double();
     }
 
@@ -78,7 +78,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns A new Double instance
      */
-    static $_invoke(value: String | Number | BigInt | undefined): number {
+    static $_invoke(value: String | Number | BigInt | undefined): Number {
         if (value instanceof String) {
             return new Double(value as String);
         } else if (value instanceof Number) {
