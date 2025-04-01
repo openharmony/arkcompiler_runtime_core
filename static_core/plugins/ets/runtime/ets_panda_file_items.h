@@ -157,7 +157,7 @@ static constexpr std::string_view ANI_UNSAFE_QUICK                     = "Lstd/a
 static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/annotations/ani/unsafe/Direct;";
 
 // Module annotation class
-static constexpr std::string_view ANNOTATION_MODULE                    = "Lstd/annotations/Module;";
+static constexpr std::string_view ANNOTATION_MODULE                    = "Lets/annotation/Module;";
 
 // escompat
 static constexpr std::string_view SHARED_MEMORY                        = "Lescompat/SharedMemory;";
