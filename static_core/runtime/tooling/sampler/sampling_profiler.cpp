@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <sys/syscall.h>
+#include <atomic>
 
 #include "libpandabase/macros.h"
 #include "os/thread.h"
@@ -113,7 +114,9 @@ void Sampler::Destroy(Sampler *sampler)
 {
     ASSERT(instance_ != nullptr);
     ASSERT(instance_ == sampler);
-    ASSERT(!sampler->isActive_);
+
+    // Atomic with acquire order reason: To ensure start/stop load correctly
+    ASSERT(!sampler->isActive_.load(std::memory_order_acquire));
 
     LOG(INFO, PROFILER) << "Total samples: " << g_sTotalSamples << "\nLost samples: " << g_sLostSamples;
     LOG(INFO, PROFILER) << "Lost samples(Invalid method ptr): " << g_sLostInvalidSamples
@@ -182,7 +185,8 @@ void Sampler::LoadModule(std::string_view name)
 
 bool Sampler::Start(const char *filename)
 {
-    if (isActive_) {
+    // Atomic with acquire order reason: To ensure start/stop load correctly
+    if (isActive_.load(std::memory_order_acquire)) {
         LOG(ERROR, PROFILER) << "Attemp to start sampling profiler while it's already started";
         return false;
     }
@@ -192,7 +196,8 @@ bool Sampler::Start(const char *filename)
         return false;
     }
 
-    isActive_ = true;
+    // Atomic with release order reason: To ensure start store correctly
+    isActive_.store(true, std::memory_order_release);
     // Creating std::string instead of sending pointer to avoid UB stack-use-after-scope
     listenerThread_ = std::make_unique<std::thread>(&Sampler::ListenerThreadEntry, this, std::string(filename));
     listenerTid_ = listenerThread_->native_handle();
@@ -206,7 +211,8 @@ bool Sampler::Start(const char *filename)
 
 void Sampler::Stop()
 {
-    if (!isActive_) {
+    // Atomic with acquire order reason: To ensure start/stop load correctly
+    if (!isActive_.load(std::memory_order_acquire)) {
         LOG(ERROR, PROFILER) << "Attemp to stop sampling profiler, but it was not started";
         return;
     }
@@ -219,7 +225,8 @@ void Sampler::Stop()
         UNREACHABLE();
     }
 
-    isActive_ = false;
+    // Atomic with release order reason: To ensure stop store correctly
+    isActive_.store(false, std::memory_order_release);
     samplerThread_->join();
     listenerThread_->join();
 
@@ -516,8 +523,8 @@ void Sampler::SamplerThreadEntry()
     ++g_sCurrentHandlersCounter;
 
     auto pid = getpid();
-    // Atomic with relaxed order reason: data race with isActive_
-    while (isActive_.load(std::memory_order_relaxed)) {
+    // Atomic with acquire order reason: To ensure start/stop load correctly
+    while (isActive_.load(std::memory_order_acquire)) {
         {
             os::memory::LockHolder holder(managedThreadsLock_);
             for (const auto &threadId : managedThreads_) {
@@ -552,8 +559,8 @@ void Sampler::ListenerThreadEntry(std::string outputFile)
     WriteLoadedPandaFiles(writerPtr.get());
 
     SampleInfo bufferSample;
-    // Atomic with relaxed order reason: data race with isActive_
-    while (isActive_.load(std::memory_order_relaxed)) {
+    // Atomic with acquire order reason: To ensure start/stop load correctly
+    while (isActive_.load(std::memory_order_acquire)) {
         WriteLoadedPandaFiles(writerPtr.get());
         communicator_.ReadSample(&bufferSample);
         if (LIKELY(bufferSample.stackInfo.managedStackSize != 0)) {
