@@ -14,7 +14,8 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
+files: [./file_A.ets]
 ---*/
 
 import { A } from './file_A.ets'

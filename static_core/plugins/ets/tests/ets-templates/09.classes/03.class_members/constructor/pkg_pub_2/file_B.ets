@@ -16,6 +16,7 @@
 /*---
 tags: [not-a-test, compile-only]
 ---*/
+
 package pkg_pub;
 
 class B extends A {

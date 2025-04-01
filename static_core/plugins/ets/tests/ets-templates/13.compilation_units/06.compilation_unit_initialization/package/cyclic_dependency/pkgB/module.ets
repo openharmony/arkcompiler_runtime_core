@@ -14,7 +14,7 @@
  */
 
 /*---
-tags: [compile-only, not-a-test]
+tags: [compile-only, not-a-test, negative]
 ---*/
 
 package pkgB;

@@ -14,8 +14,10 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
+files: [./file_A.ets]
 ---*/
+
 package pkg_priv;
 
 class B extends A {

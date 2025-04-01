@@ -87,6 +87,9 @@ class TestMetadata:
             error_message = f"Incorrect format of specification chapter number : {self.spec}"
             _LOGGER.error(error_message)
 
+    def get_package_name(self) -> str:
+        return self.package if self.package is not None else ""
+
 
 def get_metadata(path: Path) -> TestMetadata:
     data = Path.read_text(path)

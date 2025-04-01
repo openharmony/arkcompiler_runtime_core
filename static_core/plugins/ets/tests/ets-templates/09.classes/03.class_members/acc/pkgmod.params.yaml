@@ -23,7 +23,7 @@ cases:
           a.foo = 42
           assertEQ( a.foo, 42 )
 
-    - files: './pkg_pub_2/file_A.ets, ./pkg_pub_2/file_B.ets'
+    - files: './pkg_pub_2/file_B.ets'
       decl: |-
           import { B } from './pkg_pub_2';
       use: |-
@@ -43,7 +43,7 @@ cases:
           a.foo = 42
           assertEQ( a.foo, 44 )
 
-    - files: './pkg_prot_2/file_A.ets, ./pkg_prot_2/file_B.ets'
+    - files: './pkg_prot_2/file_B.ets'
       decl: |-
           import { B } from './pkg_prot_2';
       use: |-
@@ -63,7 +63,7 @@ cases:
           a.foo = 42
           assertEQ( a.foo, 42 )
 
-    - files: './pkg_priv_2/file_A.ets, ./pkg_priv_2/file_B.ets'
+    - files: './pkg_priv_2/file_B.ets'
       tags: 'compile-only, negative'
       decl: |-
           import { B } from './pkg_priv_2';
