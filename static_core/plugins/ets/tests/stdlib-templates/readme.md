@@ -1,5 +1,5 @@
 ##  Prerequisites
-- All paths below are relative paths regarding root of arkcompiler_runtime_core repository (<https://gitee.com/openharmony-sig/arkcompiler_runtime_core.git>)
+- All paths below are relative paths regarding root of arkcompiler_runtime_core repository (<https://gitee.com/openharmony/arkcompiler_runtime_core.git>)
 - The following libraries (Jinja2==3.1.2  MarkupSafe==2.1.1  PyYAML==6.0) are required for test code generator
 - These libraries can be installed by running scripts/install-deps-ubuntu. This script creates the python virtual environment (.venv-panda in the user's home directory) and installs required libraries there.
   - Go to root of arkcompiler runtime core repository
