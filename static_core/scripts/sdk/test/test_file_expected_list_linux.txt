@@ -4,6 +4,7 @@ build-sdk/sdk/linux_host_tools/bin/ark
 build-sdk/sdk/linux_host_tools/bin/ark_aot
 build-sdk/sdk/linux_host_tools/bin/ark_disasm
 build-sdk/sdk/linux_host_tools/bin/ark_link
+build-sdk/sdk/linux_host_tools/bin/aspt_converter
 build-sdk/sdk/linux_host_tools/bin/es2panda
 build-sdk/sdk/linux_host_tools/bin/verifier
 build-sdk/sdk/linux_host_tools/lib
