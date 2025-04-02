@@ -178,3 +178,57 @@ generic_in_out:
       const result = animalConsumer.consume(new Dog());
       assertEQ(result instanceof Animal, true);
       assertEQ(result instanceof Dog, true);
+
+  - desc: Verify the combination of covariance and inversion.
+    dec1: |-
+      let a: number = 10;
+      interface A<out T> {
+        value: T;
+      }
+      interface Consumer<in T> {
+        consume(value: T): void;
+      }
+      function createA<T>(value: T): A<T> {
+        return { value };
+      }
+      class AnyConsumer implements Consumer<object> {
+        consume(value: object): void {
+          a = 11;
+        }
+      }
+    check: |-
+      const numberA = createA(42);
+      const anyA: A<object> = numberA;
+      assertEQ(anyA.value, 42);
+      const anyConsumer = new AnyConsumer();
+      const numberConsumer: Consumer<number> = anyConsumer;
+      numberConsumer.consume(anyA.value);
+      assertEQ(a, 11);
+
+  - desc: Verify the application of contravariance of the in keyword 'in' function parameters.
+    dec1: |-
+      interface FunctionWrapper<in T> {
+        func: (value: T) => void;
+      }
+      function createFunctionWrapper<T>(func: (value: T) => void): FunctionWrapper<T> {
+        return { func };
+      }
+    check: |-
+      let a: number = 10;
+      const anyFunctionWrapper = createFunctionWrapper((value: object) => {
+        a = 11;
+      });
+      const numberFunctionWrapper: FunctionWrapper<number> = anyFunctionWrapper;
+      assertEQ(a, 10);
+      numberFunctionWrapper.func(42);
+      assertEQ(a, 11);
+
+  - desc: Verify the covariance of the 'out' keyword.
+    dec1: |-
+      interface A<out T> {
+        value: T;
+      }
+    check: |-
+      const a: A<string> = { value: 'hello' };
+      const b: A<object> = a;
+      assertEQ(b.value, 'hello');

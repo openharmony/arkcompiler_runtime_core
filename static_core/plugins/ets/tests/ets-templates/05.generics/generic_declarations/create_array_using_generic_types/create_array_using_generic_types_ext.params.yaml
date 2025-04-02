@@ -135,3 +135,64 @@ case:
       ] ;
       assertEQ(numArray[0][0], 0);
       assertEQ(numArray[1][2], false);
+
+  - desc: Instantiate built-in generic arrays(Array<T>) with number[] type.
+    logic: |-
+        let numArray: Array<number[]> = new Array<number[]>(
+          [1, 2, 3],
+          [4, 5, 6],
+          [7, 8, 9]
+        );
+        assertEQ(numArray[0][0], 1);
+        assertEQ(numArray[2][2], 9);
+
+  - desc: Instantiate built-in generic arrays(Array<T>) with tuple type.
+    logic: |-
+      let numArray: Array<[number, string, boolean]> = new Array<[number, string, boolean]>([0, "a", false]);
+      assertEQ(numArray[0][0], 0);
+      assertEQ(numArray[0][1], "a");
+      assertEQ(numArray[0][2], false);
+  
+  - desc: |-
+      Instantiate built-in generic arrays(Array<T>) with function type.
+      tags:
+        - positive
+        - compile-only
+    decl: |-
+      let tmp: number = 1;
+    logic: |-
+        let callbacks: Array<() => void> = new Array<() => void>(
+          () => { tmp++; },
+          () => { tmp++; }
+        );
+        assertEQ(tmp1, 3);
+
+  - desc: |-
+      Constraint array instantiation type in type alias.
+      tags:
+        - negative
+        - compile-only
+    logic: |-
+        type MyArray<T extends number> = T[];
+        let arr: MyArray<string> = ["a", "b", "a"];
+
+  - desc: Instantiate built-in generic arrays(Array<T>) with byte types.
+    logic: |-
+        let numArray: Array<byte> = new Array<byte>(1, 2, 3);
+        assertEQ(numArray[0], 1);
+        assertEQ(numArray[1], 2);
+        assertEQ(numArray[2], 3);
+
+  - desc: Instantiate built-in generic arrays(Array<T>) with short types.
+    logic: |-
+        let numArray: Array<short> = new Array<short>(1, 2, 3);
+        assertEQ(numArray[0], 1);
+        assertEQ(numArray[1], 2);
+        assertEQ(numArray[2], 3);
+
+  - desc: Instantiate built-in generic arrays(Array<T>) with char types.
+    logic: |-
+        let numArray: Array<char> = new Array<char>(1, 2, 3);
+        assertEQ(numArray[0], 1);
+        assertEQ(numArray[1], 2);
+        assertEQ(numArray[2], 3);
