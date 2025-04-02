@@ -449,5 +449,145 @@ export namespace util {
             }
         }
     }
+    
+    export interface DecoderOptions {
+        fatal?: boolean;
+        ignoreBOM?: boolean;
+    }
+
+    export class TextDecoder {
+
+        static { loadLibrary("ets_sdk_native") }
+
+        private encoding_: string = "utf-8";
+        private fatal_: boolean = false;
+        ignoreBOM_: boolean = false;
+        const CONVERTER_FLAGS_FATAL = 0x2;
+        const CONVERTER_FLAGS_IGNORE_BOM = 0x4;
+        private nativeDecoder_: long;
+
+        constructor(encoding?: string, options?: DecoderOptions) {
+            let flags = 0;
+            if (encoding) {
+                this.encoding_ = encoding;
+            }
+            if (options) {
+                flags |= options.fatal ? this.CONVERTER_FLAGS_FATAL : 0;
+                flags |= options.ignoreBOM ? this.CONVERTER_FLAGS_IGNORE_BOM : 0;
+                this.fatal_ = options.fatal ?? false;
+                this.ignoreBOM_ = options.ignoreBOM ?? false;
+            }
+            this.bindNativeDecoder(this.encoding_, flags);
+        }
+
+        static create(encoding?: string, options?: DecoderOptions) {
+            return new TextDecoder(encoding, options);
+        }
+
+        public decodeToString(input: Uint8Array, options?: DecodeToStringOptions): string {
+            if (input.length === 0) {
+                return '';
+            }
+            return this.decode(input, options?.stream ?? false);
+        }
+
+        get encoding(): string {
+            return this.encoding_;
+        }
+
+        get fatal(): boolean {
+            return this.fatal_;
+        }
+
+        get ignoreBOM(): boolean {
+            return this.ignoreBOM_;
+        }
+
+        private native bindNativeDecoder(encoding: string, flags: int): void;
+        private native decode(input: Uint8Array, decodeWithStream: boolean): string;
+    }
+
+    export interface EncodeIntoUint8ArrayInfo {
+        read: int;
+        written: int;
+    }
+
+    class EncodeIntoUint8ArrayInfoInner implements EncodeIntoUint8ArrayInfo {
+        read: int;
+        written: int;
+        constructor(outRead: int, outWritten: int) {
+            this.read = outRead;
+            this.written = outWritten;
+        }
+    }
+
+    export class TextEncoder {
+
+        static { loadLibrary("ets_sdk_native") }
+
+        private encoding_: string = "utf-8";
+
+        constructor(encoding?: string)
+        {
+            if (!encoding) {
+                this.encoding_ = "utf-8";
+                return;
+            }
+            let tempString: string = encoding.toLowerCase();
+            let flag: boolean = TextEncoder.checkEncodingFormat(tempString);
+            if (!flag) {
+                throw new BusinessError(`Wrong encoding format, the current '${encoding}' format is not support.`);
+            }
+            this.encoding_ = tempString;
+        }
+
+        static create(encoding?: string): TextEncoder
+        {
+            return new TextEncoder(encoding);
+        }
+
+        encodeInto(input?: string): Uint8Array
+        {
+            if (!input) {
+                return new Uint8Array(0);
+            }
+            return TextEncoder.doEncodeInto(input, this.encoding_);
+        }
+
+        encodeIntoUint8Array(input: string, dest: Uint8Array): EncodeIntoUint8ArrayInfo
+        {
+            return TextEncoder.doEncodeInfoUint8Array(input, this.encoding_, dest);
+        }
+
+        get encoding(): string {
+            return this.encoding_;
+        }
+
+        private static checkEncodingFormat(encoding: string): boolean
+        {
+            const knownEncodings: string[] = [
+                "utf-8", "utf-16be", "utf-16le", "gbk", "gb2312", "gb18030", "ibm866",
+                "iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", "iso-8859-5", "iso-8859-6",
+                "iso-8859-7", "iso-8859-8", "iso-8859-8-i", "iso-8859-10", "iso-8859-13",
+                "iso-8859-14", "iso-8859-15", "koi8-r", "koi8-u", "macintosh",
+                "windows-874", "windows-1250", "windows-1251", "windows-1252",
+                "windows-1253", "windows-1254", "windows-1255", "windows-1256",
+                "windows-1257", "windows-1258", "big5", "euc-jp", "iso-2022-jp",
+                "shift_jis", "euc-kr", "x-mac-cyrillic"
+            ];
+            for (const enc of knownEncodings) {
+                if (enc == encoding) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static native doEncodeInto(
+            input: string, inputEncoding: string): Uint8Array;
+
+        private static native doEncodeInfoUint8Array(
+            input: string, inputEncoding: string, destArray: Uint8Array): EncodeIntoUint8ArrayInfo;
+    }
 }
 
