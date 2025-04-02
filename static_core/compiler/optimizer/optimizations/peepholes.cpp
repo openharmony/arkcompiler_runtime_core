@@ -1536,6 +1536,12 @@ void Peepholes::VisitStore([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void Peepholes::VisitStoreObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::StoreObject);
+
+    auto visitor = static_cast<Peepholes *>(v);
+    if (visitor->TryOptimizeBoxedLoadStoreObject(inst)) {
+        PEEPHOLE_IS_APPLIED(visitor, inst);
+    }
+
     EliminateInstPrecedingStore<StoreObjectInst>(v, inst);
 }
 
@@ -2724,6 +2730,17 @@ void Peepholes::VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst)
     PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
 }
 
+void Peepholes::VisitLoadObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::LoadObject);
+
+    auto visitor = static_cast<Peepholes *>(v);
+    if (visitor->TryOptimizeBoxedLoadStoreObject(inst)) {
+        PEEPHOLE_IS_APPLIED(visitor, inst);
+        return;
+    }
+}
+
 void Peepholes::VisitLoadStatic(GraphVisitor *v, Inst *inst)
 {
     if (ConstFoldingLoadStatic(inst)) {
@@ -2878,6 +2895,24 @@ bool Peepholes::TrySimplifyNegationPattern(Inst *inst)
     // This is used last of all if no case has worked!
     if (CreateCompareInsteadOfXorAdd(inst)) {
         PEEPHOLE_IS_APPLIED(this, inst);
+        return true;
+    }
+    return false;
+}
+
+bool Peepholes::TryOptimizeBoxedLoadStoreObject(Inst *inst)
+{
+    // We can allow some optimizations over LoadObject and StoreObject instructions
+    // if their types match boxed types.
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    graph->RunPass<ObjectTypePropagation>();
+
+    auto runtime = graph->GetRuntime();
+    auto typeInfo = inst->GetDataFlowInput(0)->GetObjectTypeInfo();
+    auto klass = typeInfo.GetClass();
+    if (klass != nullptr && runtime->IsBoxedClass(klass)) {
+        inst->ClearFlag(compiler::inst_flags::NO_CSE);
+        inst->ClearFlag(compiler::inst_flags::NO_HOIST);
         return true;
     }
     return false;

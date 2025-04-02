@@ -69,6 +69,7 @@ public:
     uint64_t GetDeprecatedNativeApiMask() const override;
     uint64_t GetNativeApiStaticFunctionMask() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
+    bool IsBoxedClass(ClassPtr klass) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;
