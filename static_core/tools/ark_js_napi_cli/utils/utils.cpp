@@ -22,7 +22,8 @@
 namespace panda::utils {
 // CC-OFFNXT(G.FUN.01): public API
 void GetAsset(const std::string &uri, [[maybe_unused]] uint8_t **buff, [[maybe_unused]] size_t *buffSize,
-              std::vector<uint8_t> &content, std::string &ami, bool &useSecureMem, [[maybe_unused]] bool isRestricted)
+              std::vector<uint8_t> &content, std::string &ami, bool &useSecureMem, [[maybe_unused]] void **mapper,
+              [[maybe_unused]] bool isRestricted)
 {
     size_t index = uri.find_last_of(".");
     if (index == std::string::npos) {
