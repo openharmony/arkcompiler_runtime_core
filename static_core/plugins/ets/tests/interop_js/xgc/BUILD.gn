@@ -172,6 +172,36 @@ interop_test("mark_test_sts_ref_js") {
   sources = [ "mark_test_utils.cpp" ]
 }
 
+interop_test("root_from_ea_test") {
+  js = [
+    "ea_coro/ea_test_runner.js",
+    "ea_coro/root_from_ea_test.js",
+  ]
+  js_modules = [ "ea_coro/root_from_ea_worker.js" ]
+  ets = "ea_coro/xgc_ea.ets"
+  sources = [ "ea_coro/ea_test_module.cpp" ]
+}
+
+interop_test("ea_shared_objects_test") {
+  js = [
+    "ea_coro/ea_test_runner.js",
+    "ea_coro/ea_shared_objects_test.js",
+  ]
+  js_modules = [ "ea_coro/ea_shared_objects_worker.js" ]
+  ets = "ea_coro/xgc_ea.ets"
+  sources = [ "ea_coro/ea_test_module.cpp" ]
+}
+
+interop_test("ea_cycle_test") {
+  js = [
+    "ea_coro/ea_test_runner.js",
+    "ea_coro/ea_cycle_test.js",
+  ]
+  js_modules = [ "ea_coro/ea_cycle_worker.js" ]
+  ets = "ea_coro/xgc_ea.ets"
+  sources = [ "ea_coro/ea_test_module.cpp" ]
+}
+
 group("xgc_tests") {
   if (ark_ets_hybrid) {
     deps = [
@@ -192,6 +222,13 @@ group("xgc_tests") {
       ":sweep_cycle_test",
       ":sweep_js2sts_test",
       ":sweep_sts2js_test",
+    ]
+
+    # Tests with EA coroutines
+    deps += [
+      ":ea_cycle_test",
+      ":ea_shared_objects_test",
+      ":root_from_ea_test",
     ]
   }
 }

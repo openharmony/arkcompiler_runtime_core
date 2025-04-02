@@ -54,6 +54,27 @@ template("interop_test") {
     in_puts = invoker.js
     out_puts = [ jsabc_file ]
   }
+  js_deps = [ ":${target_name}_jsabc" ]
+  if (defined(invoker.js_modules)) {
+    foreach(js_file, invoker.js_modules) {
+      js_module_path = rebase_path(js_file)
+      js_module_name = get_path_info(js_file, "name")
+      js_module_abc = "$target_out_dir/${target_name}/${js_module_name}.abc"
+      es2abc_gen_abc("${target_name}_${js_module_name}_jsabc") {
+        extra_visibility = [ ":*" ]
+        src_js = js_module_path
+        dst_file = rebase_path(js_module_abc)
+        extra_args = [
+          "--module",
+          "--merge-abc",
+        ]
+        in_puts = [ "${js_file}" ]
+        out_puts = [ js_module_abc ]
+      }
+      js_deps += [ ":${target_name}_${js_module_name}_jsabc" ]
+    }
+  }
+
   es2panda_gen("${target_name}_stsabc") {
     inputs = [ sts_file ]
     outputs = [ stsabc_file ]
@@ -100,15 +121,15 @@ template("interop_test") {
       jsabc_file,
       stsabc_file,
     ]
-    deps = [
-      ":${target_name}_jsabc",
-      ":${target_name}_stsabc",
-      "$ark_root/plugins/ets:etsstdlib",
-      "$ark_root/plugins/ets/runtime/interop_js:ets_interop_js_napi",
-      "$ark_root/tools/ark_js_napi_cli:ark_js_napi_cli(${host_toolchain})",
-      "$etsruntime_root:libark_jsruntime",
-      "$etsruntime_root/ecmascript/compiler:stub.an",
-    ]
+    deps =
+        js_deps + [
+          ":${target_name}_stsabc",
+          "$ark_root/plugins/ets:etsstdlib",
+          "$ark_root/plugins/ets/runtime/interop_js:ets_interop_js_napi",
+          "$ark_root/tools/ark_js_napi_cli:ark_js_napi_cli(${host_toolchain})",
+          "$etsruntime_root:libark_jsruntime",
+          "$etsruntime_root/ecmascript/compiler:stub.an",
+        ]
     if (defined(invoker.sources)) {
       deps += [ ":${target_name}_module" ]
     }
