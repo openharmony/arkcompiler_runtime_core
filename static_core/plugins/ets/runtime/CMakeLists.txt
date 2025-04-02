@@ -76,6 +76,9 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/napi/ets_napi_native_interface.cpp
     ${ETS_EXT_SOURCES}/napi/ets_mangle.cpp
     ${ETS_EXT_SOURCES}/regexp/regexp_executor.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp_16.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp_8.cpp
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
