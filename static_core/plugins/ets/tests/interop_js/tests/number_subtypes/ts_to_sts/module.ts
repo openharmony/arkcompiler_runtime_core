@@ -12,21 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-function evaluateNumber(v0, v1) {
+export function evaluateNumber(v0, v1) {
 	return v0 + v1;
 }
 
-function emptyFunction() {
-	console.log('Hello from empty function');
+export function emptyFunction() {
+	print('Hello from empty function');
 }
 
-function evaluateObject(obj) {
+export function evaluateObject(obj) {
 	return new ExampleClass(obj.v0 + obj.v1, obj.v0 + obj.v1);
 }
 
-function evaluateArray(arr, size) {
+export function evaluateArray(arr, size) {
 	let result = [];
 	for (let i = 0; i < size; i++) {
 		result[i] = arr[i] + i * i;
@@ -34,7 +33,7 @@ function evaluateArray(arr, size) {
 	return result;
 }
 
-class ExampleClass {
+export class ExampleClass {
 	constructor(v0, v1) {
 		this.v0 = v0;
 		this.v1 = v1;
@@ -74,7 +73,7 @@ class ExampleClass {
 	}
 }
 
-class ClassWithEmptyConstructor {
+export class ClassWithEmptyConstructor {
 	constructor() {
 		this.v0 = 42;
 		this.v1 = 42;
@@ -97,44 +96,16 @@ class ClassWithEmptyConstructor {
 	}
 }
 
-/**
- * TS Namespace for reference
- *
- * export namespace MyNamespace {
- *     class Kitten {
- *         constructor(id: number, name: string) {
- *             this.id = id;
- *             this.name = name;
- *         }
- *
- *         id: number;
- *         name: string;
- *     }
- *
- *     export function createKitten(id: number, name: string) {
- *         return new Kitten(id, name);
- *     }
- * }
- */
-
-let MyNamespace;
-(function (MyNamespace) {
-	const Kitten = /** @class */ (function () {
-		function kitten(id, name) {
-			this.id = id;
-			this.name = name;
-		}
-		return kitten;
-	})();
-	function createKitten(id, name) {
-		return new Kitten(id, name);
-	}
-	MyNamespace.createKitten = createKitten;
-})((MyNamespace = exports.MyNamespace || (exports.MyNamespace = {})));
-
-exports.evaluateNumber = evaluateNumber;
-exports.ExampleClass = ExampleClass;
-exports.emptyFunction = emptyFunction;
-exports.evaluateObject = evaluateObject;
-exports.ClassWithEmptyConstructor = ClassWithEmptyConstructor;
-exports.evaluateArray = evaluateArray;
+export namespace MyNamespace {
+    class Kitten {
+        constructor(id: number, name: string) {
+            this.id = id;
+            this.name = name;
+        }
+        id: number;
+        name: string;
+    }
+    export function createKitten(id: number, name: string) {
+        return new Kitten(id, name);
+    }
+}

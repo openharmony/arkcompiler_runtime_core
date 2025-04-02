@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-const { getTestClass } = require('ets_proxy.test.js');
+const {
+    getTestClass,
+} = require('ets_proxy.test.abc');
+
 const PrimitivesAccess = getTestClass('PrimitivesAccess');
 const PrimitivesAccessStatic = getTestClass('PrimitivesAccessStatic');
+
 
 let pa = new PrimitivesAccess();
 let pas = PrimitivesAccessStatic;

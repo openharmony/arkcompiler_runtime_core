@@ -45,7 +45,7 @@ function runTest(test) {
 }
 
 let args = helper.getArgv();
-if (args.length !== 5) {
+if (args.length !== 6) {
 	throw Error('Expected test name');
 }
-runTest(args[4]);
+runTest(args[5]);

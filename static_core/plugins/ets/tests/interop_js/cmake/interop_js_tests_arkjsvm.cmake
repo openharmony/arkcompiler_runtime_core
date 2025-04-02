@@ -152,6 +152,7 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
         LAUNCHER
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
+            --enable-force-gc=false
             --entry-point=gtest_launcher_arkjsvm
             ${INTEROP_TESTS_DIR}/gtest_launcher_arkjsvm.abc
             ${TARGET}
@@ -234,6 +235,7 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
             ${CUSTOM_PRERUN_ENVIRONMENT}
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
+            --enable-force-gc=false
             --entry-point=${LAUNCHER_CLEAR_NAME}
             ${${COMPILED_LAUNCHER_NAME}}
             ${ARG_LAUNCHER_ARGS}

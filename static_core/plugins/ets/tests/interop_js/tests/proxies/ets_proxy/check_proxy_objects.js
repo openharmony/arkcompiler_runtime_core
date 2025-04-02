@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-const { getTestClass } = require('ets_proxy.test.js');
+const {
+    getTestClass,
+} = require('ets_proxy.test.abc');
+
 const ListNode = getTestClass('ListNode');
 
 {
@@ -33,7 +36,8 @@ const ListNode = getTestClass('ListNode');
 	ASSERT_EQ(n1.tag, 1);
 	ASSERT_EQ(n1.next, undefined);
 
-	ASSERT_TRUE(Object.getOwnPropertyNames(n1).length === 0);
+	// napi_xref_wrap add _proxynapiwrapper property
+	ASSERT_TRUE(Object.getOwnPropertyNames(n1).length === 1);
 	ASSERT_TRUE(Object.isSealed(n1));
 }
 
