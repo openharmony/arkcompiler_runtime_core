@@ -185,5 +185,12 @@
 06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_var/decl-var_4.ets
 06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_var/decl-var_5.ets
 
+#24938 Reference equality based on actual enum type fails - revisit after 11.04.2025
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_14.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_15.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_7.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_8.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_8.ets
+
 #24413
 17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_35.ets

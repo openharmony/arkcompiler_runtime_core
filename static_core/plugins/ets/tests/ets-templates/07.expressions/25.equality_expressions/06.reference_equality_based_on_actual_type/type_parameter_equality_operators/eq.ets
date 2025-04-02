@@ -17,22 +17,32 @@
 /*---
 desc: A value of type Object can be compared to a value of any reference type.
 ---*/
-function eq<P, Q>(p: P, q: Q): boolean {
-    return p == q
+
+function eq<P, Q>(p: P, q: Q, ps: string, qs: string): string {
+    if (p == q && q == p) {
+        return ''
+    } else {
+        return '\n' + ps + ' == ' + qs + ', expected true, got false'
+    }
 }
-function ne<P, Q>(p: P, q: Q): boolean {
-    return p != q
+function ne<P, Q>(p: P, q: Q, ps: string, qs: string): string {
+    if (p != q || q != p) {
+        return '\n' + ps + ' != ' + qs + ', expected false, got true'
+    } else {
+        return ''
+    }
 }
 
 {{c.decl}}
 
-function main(): int {
-{%- for p in c['case'] %}
-{%- for q in c['case'] %}
-    if (!eq<Object, Object>({{p}}, {{q}})) return 1
-    if (ne<Object, Object>({{p}}, {{q}})) return 1
+function main() {
+    let failed: string = ''
+{%- for p in c['case1'] %}
+{%- for q in c['case2'] %}
+    failed += eq<Object, Object>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
+    failed += ne<Object, Object>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
 {%- endfor %}
 {%- endfor %}
-    return 0
+    assertTrue(failed == '', 'Failed operations: ' + failed)
 }
 {%- endfor %}
