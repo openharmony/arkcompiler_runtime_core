@@ -19,23 +19,32 @@ cases:
         set foo(i: int) { this._foo = i } 
       }
     check: |-
-      assertEQ(keyof A, "foo")
+      type t = keyof A
+      let a: t = "foo"
+      assertEQ(typeof a, string)
+
   - decl: |-
       class A {
         private _foo: int
-        private get foo(): int { return this._foo } 
+        get foo(): int { return this._foo } 
         set foo(i: int) { this._foo = i } 
       }
     check: |-
-      assertEQ(keyof A, "foo")
+      type t = keyof A
+      let a: t = "_foo"
+    tags: compile-only,negative
+
   - decl: |-
-      class A {
+      abstract class A {
         private _foo: int
-        private get foo(): int { return this._foo } 
-        private set foo(i: int) { this._foo = i } 
+        get foo(): int { return this._foo } 
+        set foo(i: int) { this._foo = i } 
       }
     check: |-
-      assertEQ(keyof A, never)
+      type t = keyof A
+      let a: t = "foo"
+      assertEQ(typeof a, string)
+
   - decl: |-
       final class A {
         private _foo: int
@@ -43,11 +52,16 @@ cases:
         set foo(i: int) { this._foo = i } 
       }
     check: |-
-      assertEQ(keyof A, "foo")
+      type t = keyof A
+      let a: t = "foo"
+      assertEQ(typeof a, string)
+
   - decl: |-
       interface I {
         get foo(): int 
         set foo(i: int) 
       }
     check: |-
-      assertEQ(keyof I, "foo")
+      type t = keyof I
+      let a: t = "foo"
+      assertEQ(typeof a, string)

@@ -21,10 +21,10 @@ files:
 - ./module.ets
 ---*/
 
-{{c.import}}
+{{c.import|indent}}
 
 function main(): void {
-  {{c.call}}
+  {{c.call|indent}}
 }
 
 {% endfor %}

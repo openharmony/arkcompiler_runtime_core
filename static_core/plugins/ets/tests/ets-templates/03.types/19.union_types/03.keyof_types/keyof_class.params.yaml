@@ -20,95 +20,215 @@ cases:
   # Fields
   - def: |-
       i: byte = 0
-    type: \"i\"
+    check: 
+      - '"i"'
+
+  - def: |-
+      i: byte = 0
+    check:
+      - '"j"'
+    tags: compile-only,negative
+
   - def: |-
       i = 0
       j = true
-      k = \"some str\"
+      k = "some str"
       n = 1.1
       O_1 = new Object()
-    type: \"i\" | \"j\" | \"k\" | \"n\" | \"O_1\"
+    check: 
+      - '"i"'
+      - '"j"'
+      - '"k"'
+      - '"n"'
+      - '"O_1"'
+
   - def: |-
       i: int|byte|string|undefined = 0
       j: undefined|char|null = c'S'
-    type: \"i\" | \"j\"
+    check: 
+      - '"i"'
+      - '"j"'
+
   - def: |-
       longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_ = 0
-    type: \"longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_\"
+    check: 
+      - '"longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_longvarname_"'
+
   # Fields and methods
   - def: |-
       var2: number[] = new number[1]
       foo: number[] = new number[2]
       var1() {}
       bar() { return true }
-    type: \"bar\" | \"foo\" | \"var1\" | \"var2\"
-    # Static
+    check: 
+      - '"var2"'
+      - '"foo"'
+      - '"var1"'
+      - '"bar"'
+
+  # Static
   - def: |-
       static a = 1
-    type: \"a\"
+    check: 
+      - '"a"'
+
   - def: |-
       static foo() {}
-    type: \"foo\"
+    check: 
+      - '"foo"'
+
   - def: |-
       static foo() {}
       static bar = 1
-    type: \"bar\" | \"foo\"
+    check: 
+      - '"bar"'
+      - '"foo"'
+
   - def: |-
       static sfoo() {}
       foo() {}
       static sbar = 1
       bar = 1
-    type: \"bar\" | \"foo\" | \"sbar\" | \"sfoo\"
-    # Overloading
+    check: 
+      - '"bar"'
+      - '"foo"'
+      - '"sbar"'
+      - '"sfoo"'
+
+  # Overloading
   - def: |-
       foo() {}
       foo(i: int) {}
       foo(j: number) {}
       constructor() {}
-    type: \"foo\"
-    # Not included
+    check: 
+      - '"foo"'
+
+  # Not included
   - def: |-
       constructor() {}
       constructor(i: int) {}
-    type: never
+    check: 
+      - never
+
+  - def: |-
+      constructor() {}
+    check:
+      - '"constructor"'
+    tags: compile-only,negative
+
   - def: |-
       static {}
-    type: never
-  - type: never
-    # Access modifiers
+    check: 
+      - never
+
+  - def: |-
+      static {}
+    check:
+      - '"static"'
+    tags: compile-only,negative
+
+  # Access modifiers
   - def: |-
       public var1 = 1
       protected var2 = false
-      private var3 = \"str\"
+      private var3 = "str"
       private bar(i: int) {}
       public bar() {}
-      default foo() {}
+      foo() {}
       protected jay() {}
       private raf() {}
-    type: \"bar\" | \"foo\" | \"jay\" | \"var1\" | \"var2\"
-    # Different types check
+    check:
+      - '"foo"'
+      - '"var1"'
+      - '"bar"'
+
+  - def: |-
+      public var1 = 1
+      protected var2 = false
+      private var3 = "str"
+      private bar(i: int) {}
+      public bar() {}
+      foo() {}
+      protected jay() {}
+      private raf() {}
+    check:
+      - '"var2"'
+    tags: negative, compile-only
+
+  - def: |-
+      public var1 = 1
+      protected var2 = false
+      private var3 = "str"
+      private bar(i: int) {}
+      public bar() {}
+      foo() {}
+      protected jay() {}
+      private raf() {}
+    check:
+      - '"var3"'
+    tags: negative, compile-only
+
+  - def: |-
+      public var1 = 1
+      protected var2 = false
+      private var3 = "str"
+      private bar(i: int) {}
+      public bar() {}
+      foo() {}
+      protected jay() {}
+      private raf() {}
+    check:
+      - '"jay"'
+    tags: negative, compile-only
+
+  - def: |-
+      public var1 = 1
+      protected var2 = false
+      private var3 = "str"
+      private bar(i: int) {}
+      public bar() {}
+      foo() {}
+      protected jay() {}
+      private raf() {}
+    check:
+      - '"raf"'
+    tags: negative, compile-only
+
+  # Different types check
   - def: |-
       i: string|number|undefined|null = "str"
-    type: \"i\"
+    check:
+      - '"i"'
+
   - decl: |-
       type custom = int
     def: |-
       i: custom = 1
-    type: \"i\"
+    check:
+      - '"i"'
+
   - decl: |-
       enum ENUM {Red, Orange, Green}
     def: |-
       i: ENUM = ENUM.Green
-    type: \"i\"
+    check:
+      - '"i"'
+
   - def: |-
-      i?: boolean = 1
-    type: \"i\"
+      i?: boolean = true
+    check:
+      - '"i"'
+
     # field initialized at constructor level
   - def: |-
       i: int
-      constructor() { i = 1 }
-    type: \"i\"
+      constructor() { this.i = 1 }
+    check:
+      - '"i"'
+
     # readonly field
   - def: |-
       readonly i: int = 1
-    type: \"i\"
+    check:
+      - '"i"'
