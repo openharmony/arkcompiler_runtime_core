@@ -70,7 +70,7 @@ static bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_
 static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object)
 {
     uintptr_t memBase = 0;
-    const char *zipPath = std::getenv("ANI_GTEST_ABC_PATH");
+    const char *zipPath = std::getenv("ARK_ETS_INTEROP_JS_GTEST_ABC_PATH");
     if (zipPath == nullptr) {
         return 0;
     }
@@ -132,7 +132,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *className = "Lbacktrace_test/TestBacktrace;";
+    static const char *className = "LTest/TestBacktrace;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;

@@ -82,14 +82,6 @@ def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
                         help='Comma-separated list of lang plugins')
     parser.add_argument('-o', '--outdir', default='generated', type=str,
                         help='Dir for generated benches')
-    parser.add_argument('-T', '--tags',
-                        default=set(),
-                        type=comma_separated_list,
-                        help='Filter by tag (comma-separated list)')
-    parser.add_argument('-ST', '--skip-tags',
-                        default=set(),
-                        type=comma_separated_list,
-                        help='Skip if tagged (comma-separated list)')
     parser.add_argument('-t', '--tests',
                         default=set(),
                         type=comma_separated_list,
@@ -174,6 +166,17 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
                         help='Percentage of tolerance in comparison')
 
 
+def add_filter_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('-T', '--tags',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Filter by tag (comma-separated list)')
+    parser.add_argument('-ST', '--skip-tags',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Skip if tagged (comma-separated list)')
+
+
 class _ArgumentParser(argparse.ArgumentParser):
 
     def __init__(self, command: Command) -> None:
@@ -197,11 +200,13 @@ class _ArgumentParser(argparse.ArgumentParser):
         if command in (Command.GEN, Command.ALL):
             add_gen_opts(self, command)
             add_measurement_opts(self)
+            add_filter_opts(self)
         # Runner-specific options
         if command in (Command.RUN, Command.ALL):
             add_run_opts(self)
         if command in (Command.REPORT,):
             add_report_opts(self)
+            add_filter_opts(self)
 
     @staticmethod
     def __epilog() -> str:

@@ -17,17 +17,19 @@
 
 #include "libpandabase/macros.h"
 #include "libpandabase/os/system_environment.h"
-#include "plugins/ets/runtime/napi/ets_napi.h"
+#include "plugins/ets/runtime/ani/ani.h"
 
 namespace {
 
-std::vector<ets_string> SplitString(EtsEnv *env, std::string_view from, char delim)
+std::vector<ani_string> SplitString(ani_env *env, std::string_view from, char delim)
 {
-    std::vector<ets_string> list;
+    std::vector<ani_string> list;
     std::istringstream iss {from.data()};
     std::string part;
     while (std::getline(iss, part, delim)) {
-        list.emplace_back(env->NewStringUTF(part.data()));
+        ani_string newString;
+        env->String_NewUTF8(part.data(), part.size(), &newString);
+        list.emplace_back(newString);
     }
     return list;
 }
@@ -36,30 +38,47 @@ std::vector<ets_string> SplitString(EtsEnv *env, std::string_view from, char del
 
 extern "C" {
 // NOLINTNEXTLINE(readability-identifier-naming)
-ETS_EXPORT ets_objectArray ETS_CALL getAppAbcFiles(EtsEnv *env, [[maybe_unused]] ets_class /* unused */)
+ANI_EXPORT ani_array getAppAbcFiles(ani_env *env, [[maybe_unused]] ani_class)
 {
     auto appAbcFiles = ark::os::system_environment::GetEnvironmentVar("APP_ABC_FILES");
     const auto paths = SplitString(env, appAbcFiles, ':');
     ASSERT(!paths.empty());
 
-    auto stringClass = env->FindClass("std/core/String");
+    ani_class stringClass;
+    env->FindClass("Lstd/core/String;", &stringClass);
     ASSERT(stringClass != nullptr);
-    auto pathsArray = env->NewObjectsArray(paths.size(), stringClass, paths[0]);
+    ani_array_ref pathsArray;
+    env->Array_New_Ref(stringClass, paths.size(), paths[0], &pathsArray);
     for (size_t i = 0; i < paths.size(); ++i) {
-        env->SetObjectArrayElement(pathsArray, i, paths[i]);
+        env->Array_Set_Ref(pathsArray, i, paths[i]);
     }
     return pathsArray;
 }
 
-ETS_EXPORT ets_int ETS_CALL EtsNapiOnLoad(EtsEnv *env)
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *version)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    EtsNativeMethod method {"getAppAbcFiles", ":[Lstd/core/String;", reinterpret_cast<void *>(getAppAbcFiles)};
+    ani_env *env;
+    *version = ANI_VERSION_1;
+    if (ANI_OK != vm->GetEnv(*version, &env)) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
+    }
 
-    ets_class spawnGlobalClass = env->FindClass("@spawn/spawn/ETSGLOBAL");
-    ASSERT(spawnGlobalClass != nullptr);
-    [[maybe_unused]] auto status = env->RegisterNatives(spawnGlobalClass, &method, 1);
-    ASSERT(status == ETS_OK);
-    return ETS_NAPI_VERSION_1_0;
+    ani_native_function function {"getAppAbcFiles", ":[Lstd/core/String;", reinterpret_cast<void *>(getAppAbcFiles)};
+
+    std::string_view mdl = "L@spawn/spawn;";
+    ani_module spawnModule;
+    if (ANI_OK != env->FindModule(mdl.data(), &spawnModule)) {
+        std::cerr << "Not found '" << mdl << "'" << std::endl;
+        return ANI_ERROR;
+    }
+
+    if (ANI_OK != env->Module_BindNativeFunctions(spawnModule, &function, 1)) {
+        std::cerr << "Failed binds an array of methods to the specified class" << std::endl;
+        return ANI_ERROR;
+    }
+
+    return ANI_OK;
 }
 }

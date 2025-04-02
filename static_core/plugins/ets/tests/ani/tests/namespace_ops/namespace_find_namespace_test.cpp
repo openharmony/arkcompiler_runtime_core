@@ -22,123 +22,128 @@ class NamespaceFindNamespaceTest : public AniTest {};
 TEST_F(NamespaceFindNamespaceTest, find_namespace01)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/test;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Lrosen;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ASSERT_EQ(env_->Namespace_FindNamespace(result, "LB;", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 }
 
 TEST_F(NamespaceFindNamespaceTest, find_namespace02)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/test;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest;", &result), ANI_NOT_FOUND);
+    const int32_t loopCount = 3;
+    for (int32_t i = 0; i < loopCount; i++) {
+        ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &result), ANI_OK);
+        ASSERT_NE(result, nullptr);
+    }
+    ASSERT_EQ(env_->Namespace_FindNamespace(result, "LB;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ani_function method {};
+    ASSERT_EQ(env_->Namespace_FindFunction(result, "intMethod", "II:I", &method), ANI_OK);
+    ASSERT_NE(method, nullptr);
 }
 
 TEST_F(NamespaceFindNamespaceTest, find_namespace03)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/test;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltesttt;", &result), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ASSERT_EQ(env_->Namespace_FindNamespace(result, "LC;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ASSERT_EQ(env_->Namespace_FindNamespace(result, "LD;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
 }
 
 TEST_F(NamespaceFindNamespaceTest, find_namespace04)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/test;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ani_namespace tmp {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Lrosen;", &tmp), ANI_OK);
-    ASSERT_NE(tmp, nullptr);
+    ani_namespace nsB {};
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &nsB), ANI_OK);
+    ASSERT_NE(nsB, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(tmp, "Ltest;", &result), ANI_OK);
+    ASSERT_EQ(env_->Namespace_FindNamespace(nsB, "LB;", &result), ANI_OK);
     ASSERT_NE(result, nullptr);
 }
 
 TEST_F(NamespaceFindNamespaceTest, find_namespace05)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/test;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
     ani_namespace tmp {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Lrosenn;", &tmp), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LD;", &tmp), ANI_OK);
+    ASSERT_NE(tmp, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(tmp, "Ltest;", &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LE;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ASSERT_EQ(env_->Namespace_FindNamespace(result, "LC;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ASSERT_EQ(env_->Namespace_FindNamespace(result, "LD;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
 }
 
 TEST_F(NamespaceFindNamespaceTest, find_namespace06)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/test;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ani_namespace tmp {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Lrosen;", &tmp), ANI_OK);
-    ASSERT_NE(tmp, nullptr);
+    ani_namespace nsC {};
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA/C;", &nsC), ANI_OK);
+    ASSERT_NE(nsC, nullptr);
 
     ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(tmp, "Ltesttt;", &result), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    ASSERT_EQ(env_->Namespace_FindNamespace(result, "LC;", &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
 }
 
 TEST_F(NamespaceFindNamespaceTest, find_namespace07)
 {
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/test;", &ns), ANI_OK);
     ASSERT_NE(ns, nullptr);
 
-    ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "/rosen;", &result), ANI_NOT_FOUND);
-}
+    ani_namespace nsC {};
+    ASSERT_EQ(env_->c_api->Namespace_FindNamespace(nullptr, ns, "LA/C;", &nsC), ANI_INVALID_ARGS);
 
-TEST_F(NamespaceFindNamespaceTest, find_namespace08)
-{
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
+    ASSERT_EQ(env_->Namespace_FindNamespace(nullptr, "LA/C;", &nsC), ANI_INVALID_ARGS);
 
-    ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(nullptr, "Ltest;", &result), ANI_INVALID_ARGS);
-}
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, nullptr, &nsC), ANI_INVALID_ARGS);
 
-TEST_F(NamespaceFindNamespaceTest, find_namespace09)
-{
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "", &nsC), ANI_NOT_FOUND);
 
-    ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, nullptr, &result), ANI_INVALID_ARGS);
-}
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA/CA;", &nsC), ANI_NOT_FOUND);
 
-TEST_F(NamespaceFindNamespaceTest, find_namespace10)
-{
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Ltest;", nullptr), ANI_INVALID_ARGS);
-}
-
-TEST_F(NamespaceFindNamespaceTest, find_namespace11)
-{
-    ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lnamespace_find_namespace_test/anyns;", &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    ani_namespace result {};
-    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "Lrosen/test;", &result), ANI_OK);
-    ASSERT_NE(result, nullptr);
+    ASSERT_EQ(env_->Namespace_FindNamespace(ns, "LA/C;", nullptr), ANI_INVALID_ARGS);
 }
 }  // namespace ark::ets::ani::testing

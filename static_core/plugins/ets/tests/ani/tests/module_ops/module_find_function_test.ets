@@ -23,14 +23,18 @@ export namespace ops {
     }
 }
 
-function getIntValue(i: int): void {}
-function getIntValue(i: String): void {}
-function getIntValue(): int {
+function getIntValue(i: int): int {
     return 0;
+}
+function getIntValue(i: String): int {
+    return 1;
+}
+function getIntValue(): int {
+    return 2;
 }
 
 export function getInitialStringValue(): String {
-    return "";
+    return "a";
 }
 
 function overloaded(i: int): int {
@@ -39,3 +43,38 @@ function overloaded(i: int): int {
 function overloaded(): int {
     return 1
 }
+function getIntValueA(i: int): void {}
+function getIntValueB(i: int): void {}
+function getIntValueC(i: int): void {}
+function getIntValueD(i: int): void {}
+function getIntValueE(i: int): void {}
+function getIntValueF(i: int): void {}
+function getIntValueG(i: int): void {}
+function getIntValueH(i: int): void {}
+function getIntValueI(i: int): void {}
+function getIntValueJ(i: int): void {}
+
+class Test
+{
+    public getIntValue(): int {
+        return 0;
+    }
+    public getIntValueA(): int {
+        return 0;
+    }
+};
+class TestA extends Test {
+    public static addIntValue(a: int, b: int): int {
+        return a + b;
+    }
+    public getIntValueA(): int {
+        return 0;
+    }
+};
+
+async function async_f(a: int): Promise<int> {
+    return a;
+}
+
+function SetIntValueJ(i: int): void {}
+

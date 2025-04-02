@@ -1805,6 +1805,13 @@ public:
         return std::get<T>(value_);
     }
 
+    // NOTE: fix in follow-up patch (#24481)
+    template <class T>
+    void SetValueUnsafe(T value)
+    {
+        std::get<T>(value_) = value;
+    }
+
     size_t CalculateSize() const override;
 
     size_t Alignment() override;
@@ -1840,6 +1847,12 @@ public:
     PANDA_PUBLIC_API void AddItems(const std::vector<LiteralItem> &item);
 
     const std::vector<LiteralItem> &GetItems() const
+    {
+        return items_;
+    }
+
+    // NOTE: fix in follow-up patch (#24481)
+    std::vector<LiteralItem> &GetItemsUnsafe()
     {
         return items_;
     }

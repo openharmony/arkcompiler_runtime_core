@@ -12,11 +12,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-namespace test002A {
-    enum EnumA002 {
+
+namespace enumns {
+    enum Color {
         RED,
         GREEN,
         BLUE
     }
+
+    enum ColorInt {
+        RED = 5,
+        GREEN = 77,
+        BLUE = 9999
+    }
+
+    enum ColorString {
+        RED = "str_red",
+        GREEN = "str_green",
+        BLUE = "str_blue"
+    }
 }
+
+namespace enumns {
+    namespace subnsA {
+        enum Color {
+            RED,
+            GREEN,
+            BLUE
+        }
+    }
+    namespace subnsB {
+        enum ColorInt {
+            RED = 5,
+            GREEN = 77,
+            BLUE = 9999
+        }
+
+        enum ColorString {
+            RED = "str_red",
+            GREEN = "str_green",
+            BLUE = "str_blue"
+        }
+
+        enum testEnum {
+            RED = 1,
+            GREEN = 2,
+            BLUE = 3
+        }
+    }
+}
+
+namespace test {
+    namespace testA {
+        enum testC {
+            RED = 1,
+            GREEN = 2,
+            BLUE = 3
+        }
+
+        namespace testB {
+            enum testC {
+                RED = 1,
+                GREEN = 2,
+                BLUE = 3
+            }
+        }
+    }
+}
+ 

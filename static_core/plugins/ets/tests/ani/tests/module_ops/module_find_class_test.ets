@@ -14,28 +14,24 @@
  */
 
 export class ATest {};
-
-
 class BTest {};
-
 namespace ops {
     class C {} 
 };
-
 abstract class Person {
-    public abstract add_method(a0: int, a1: int): int;
+    public abstract addMethod(a0: int, a1: int): int;
 };
 
 class Student extends Person {
-    public override add_method(a0: int, a1: int): int
-    {
+    static b: int = 1;
+    static readonly c: int = 0;
+    public override addMethod(a0: int, a1: int): int {
         return a0 + a1;
     }
 };
 
 final class Child extends Person {
-    public override add_method(a0: int, a1: int): int
-    {
+    public override addMethod(a0: int, a1: int): int {
         return a0 + a1;
     }
 };
@@ -44,8 +40,50 @@ interface AA {
     foo(x: double): double;
 };
 
-export class BB implements AA {
-    foo(x: double): double { return x };
+interface AAB {
+    eat(x: int): int;
+};
+export class BB implements AA, AAB {
+    foo(x: double): double { return x; }
+    eat(x: int): int { return x; }
 };
 
+class A {}
+class B {}
+class C {}
+class D {}
+class E {}
+class F {}
+class G {}
+class H {}
+class I {}
+class J {}
+
+namespace aaa_test {
+    class BBBTest {}
+}
+
+class AT {}
+class BT extends AT {}
+class CT extends BT {}
+
+interface Container<T> {
+  add(item: T): void;
+}
+
+class ContainerTest<T> implements Container<T>{
+    items: (T | undefined)[];
+    index: int = 0;
+    length: int = 0;
+    constructor(length:int) {
+        this.items = new (T | undefined)[length];
+        this.length = length;
+    }
+    override add(item: T): void {
+        if (this.index >= this.length) {
+            return;
+        }
+        this.items[this.index++] = item;
+    }
+}
     

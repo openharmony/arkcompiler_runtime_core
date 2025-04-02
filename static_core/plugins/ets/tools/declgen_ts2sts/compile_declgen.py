@@ -49,16 +49,10 @@ def run_pack(execution_path):
     run_cmd(cmd, execution_path)
 
 
-def run_install(execution_path):
-    cmd = ["npm", "install"]
-    run_cmd(cmd, execution_path)
-
-
 def main(args):
     source_path = args[0]
     dest_and_exec_path = args[1]
     copy_dir(source_path, dest_and_exec_path)
-    run_install(dest_and_exec_path)
     run_build(dest_and_exec_path)
     run_pack(dest_and_exec_path)
 

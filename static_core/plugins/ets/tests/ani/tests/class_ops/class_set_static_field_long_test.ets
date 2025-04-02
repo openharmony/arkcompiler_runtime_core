@@ -16,3 +16,11 @@ class TestSetLong {
     static long_value: long = 24;
     static string_value: string = "";
 }
+
+class TestSetLongA extends TestSetLong {
+    static long_value: long = 24;
+}
+
+final class TestSetLongFinal extends TestSetLong {
+    static long_value: long = 24;
+}

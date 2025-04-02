@@ -31,7 +31,7 @@ function(build_spawn_native_module TARGET OUTPUT_DIR)
     panda_add_library(${TARGET} SHARED spawn/spawn.cpp)
     set_target_properties(${TARGET} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR})
     panda_target_link_libraries(${TARGET} arkruntime)
-    panda_target_include_directories(${TARGET} PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+    panda_target_include_directories(${TARGET} PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani)
 endfunction()
 
 function(build_spawn_managed_code TARGET ABC_FILES WORK_DIR)

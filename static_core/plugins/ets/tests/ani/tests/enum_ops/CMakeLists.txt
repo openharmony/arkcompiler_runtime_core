@@ -16,11 +16,6 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-ani_add_gtest(ani_test_find_enum_namespace
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_namespace_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/find_enum_namespace_test.ets
-)
-
 ani_add_gtest(ani_test_get_enum_item
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_item_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/get_enum_item_test.ets

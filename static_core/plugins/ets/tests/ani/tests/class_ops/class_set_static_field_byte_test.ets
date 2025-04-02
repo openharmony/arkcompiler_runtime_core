@@ -16,3 +16,11 @@ class TestSetByte {
     static byte_value: byte = 126;
     static string_value: string = "";
 }
+
+class TestSetByteA extends TestSetByte {
+    static byte_value: byte = 126;
+}
+
+final class TestSetByteFinal extends TestSetByte {
+    static byte_value: byte = 126;
+}

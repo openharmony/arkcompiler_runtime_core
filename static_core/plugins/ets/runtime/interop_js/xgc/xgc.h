@@ -157,6 +157,8 @@ private:
     std::atomic_bool isXGcInProgress_ {false};
     bool remarkFinished_ {false};  // GUARDED_BY(mutatorLock)
 
+    bool enableXgc_ {false};
+
     /// Trigger specific fields ///
 
     size_t beforeGCStorageSize_ {0U};
@@ -164,6 +166,7 @@ private:
     const size_t increaseThresholdPercent_ {0U};
     // We can load a value of the variable from several threads, so need to use atomic
     std::atomic<size_t> targetThreasholdSize_ {0U};
+    const bool gcForceXgcEnabled_ {false};
 };
 
 }  // namespace ark::ets::interop::js

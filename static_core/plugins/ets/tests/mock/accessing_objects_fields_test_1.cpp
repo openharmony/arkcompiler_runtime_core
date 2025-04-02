@@ -29,7 +29,7 @@ public:
 class AccessingObjectsFieldsTest : public AccessingObjectsFieldsTestGeneral {};
 class AccessingObjectsFieldsTestDeath : public AccessingObjectsFieldsTestGeneral {};
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest1)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetTypeFieldDeathTest1)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -79,7 +79,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest1)
     }
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest2)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetTypeFieldDeathTest2)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

@@ -18,3 +18,54 @@ function sum(a0: long, a1: long): long {
     return a0 + a1 as long;
 }
 }
+
+function moduleFunction(value1: long, value2: long): long {
+    return value1 + value2 as long;
+}
+
+function moduleFunction(value1: long, value2: long, value3: long): long {
+    return value1 + value2 + value3 as long;
+}
+
+namespace A {
+    function longFunctionA(value1: long, value2: long): long {
+        return value1 + value2 as long;
+    }
+
+    function longFunctionA(value1: long, value2: long, value3: long): long {
+        return value1 + value2 + value3 as long;
+    }
+
+    function nestedFunction(value1: long, value2: long): long {
+        let lambdaFunction: (p1: long, p2: long) => long =
+            (param1: long, param2: long): long => {
+                return param1 + param2 as long;
+        };
+        return lambdaFunction(value1, value2);
+    }
+    
+    export function recursiveFunction(value: int): long {
+        if (value <= 1) {
+            return 1;
+        } else {
+            return value + recursiveFunction(value - 1) as long;
+        }
+    }
+
+    function calculateSum(value1: long, value2: long, value3: char, value4: double): long {
+        let aChar: char = 'A';
+        if (value3 == aChar) {
+            return value2 - value1 as long;
+        }
+        if (value4 == 1.0) {
+            return value1;
+        }
+        return value2 + value1 as long;
+    }
+
+    namespace B {
+        function longFunctionB(value1: long, value2: long): long {
+            return value1 + value2 as long;
+        }
+    }
+}

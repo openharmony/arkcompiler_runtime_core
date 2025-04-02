@@ -16,3 +16,11 @@ class TestSetFloat {
     static float_value: float = 18.0;
     static string_value: string = "";
 }
+
+class TestSetFloatA extends TestSetFloat {
+    static float_value: float = 18.0;
+}
+
+final class TestSetFloatFinal extends TestSetFloat {
+    static float_value: float = 18.0;
+}

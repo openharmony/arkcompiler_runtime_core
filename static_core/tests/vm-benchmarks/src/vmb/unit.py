@@ -54,7 +54,7 @@ class BenchUnit:
                  tags: Optional[Iterable[str]] = None,
                  bugs: Optional[Iterable[str]] = None) -> None:
         self.path: Path = Path(path)
-        self.src_for_es2panda_override: Path = None
+        self.src_for_es2panda_override: Optional[Path] = None
         self.__src: Optional[Path] = self.path.joinpath(src) if src else None
         self.__libs: List[Path] = [
             self.path.joinpath(lib) for lib in libs] if libs else []

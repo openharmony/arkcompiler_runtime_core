@@ -19,7 +19,7 @@ vals:
 
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: foo(false, v1, v2) + v1
+      exp: "foo(false, v1, v2) + v1"
       r: c'A'
 
     - v1: c'\u0020'
@@ -34,5 +34,5 @@ vals:
 
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: "c' ' + foo(false, v2 + v1, v2 - v1)"
+      exp: "c' ' + foo(false, (v2 + v1) as Char, (v2 - v1) as Char)"
       r: v2

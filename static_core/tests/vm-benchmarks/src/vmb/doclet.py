@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -354,8 +354,10 @@ class TemplateVars:  # pylint: disable=invalid-name
             # check tags filter:
             tags = set(parsed.tags + b.tags)  # @State::@Tags + @Bench::@Tags
             if skip_tags and set.intersection(tags, skip_tags):
+                log.debug("%s skipped by skip-tags %s", b.name, skip_tags)
                 continue
             if tags_filter and not set.intersection(tags, tags_filter):
+                log.debug("%s filtered out by tags %s", b.name, tags)
                 continue
             # if no params fixtures will be [()]
             fix_id = 0

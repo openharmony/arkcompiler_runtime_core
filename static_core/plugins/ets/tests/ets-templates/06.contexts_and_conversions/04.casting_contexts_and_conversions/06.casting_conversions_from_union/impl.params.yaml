@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -137,6 +137,7 @@ cases:
 
     # arrays
     - from_type: Derived1[]|Derived2[]
+      tags: 'compile-only, negative'
       decl: |-
           class Base {}
           class Derived1 extends Base {}
@@ -181,6 +182,7 @@ cases:
           - { type: string, v: 'ia' }
 
     - from_type: Byte[]|Short[]|Int[]|Long[]
+      tags: 'compile-only, negative'
       decl: |-
           let ia: Int[] = [new Int(42)] as Int[]
       types:
@@ -203,6 +205,7 @@ cases:
           - { type: Object, v: 'da' }
 
     - from_type: Float[]|Double[]
+      tags: 'compile-only, negative'
       decl: |-
           let da: Double[] = [new Double(42.0)] as Double[]
       types:

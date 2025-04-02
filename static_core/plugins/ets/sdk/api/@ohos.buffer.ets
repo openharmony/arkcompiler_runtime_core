@@ -414,6 +414,18 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`, OutOfBoundsErr
             this.buffer = buffer;
             this.byteOffset = 0;
         }
+    
+        /**
+         * Returns a string decoded from the buffer's contents.
+         * 
+         * @returns {string} The decoded string
+         */
+        public toString(): string {
+            let resolvedEncoding: string = "utf8";
+            let resolvedStart: int = 0;
+            let resolvedEnd: int = buffer.byteLength(this.buffer) as int;
+            return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
+        }
 
         /**
          * Returns a string decoded from the buffer's contents.

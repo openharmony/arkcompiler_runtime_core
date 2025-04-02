@@ -18,22 +18,14 @@
 desc: >-
     Function types conversion is the conversion of one function type to another.
     Declaration context, variable, function type conversion, implicit
+tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 
 function main() {
-    try {
 {% for t in c['to'] %}
-        let w{{loop.index}}: {{t.type}} = foo
-        assertTrue( w{{loop.index}}{{t.call}} )
+    let w{{loop.index}}: {{t.type}} = foo
+    assertTrue( w{{loop.index}}{{t.call}} )
 {% endfor %}
-
-{% for t in c['to'] %}
-        let q{{loop.index}}: {{t.type}} throws = foo
-        assertTrue( q{{loop.index}}{{t.call}} )
-{% endfor %}
-    } catch(e) {
-        assertTrue(false)
-    }
 }
 {%- endfor %}

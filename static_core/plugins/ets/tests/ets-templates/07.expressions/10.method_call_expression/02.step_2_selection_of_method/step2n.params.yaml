@@ -15,40 +15,6 @@
 cases:
     - decl: |-
           class C {
-              met(p: number): string {
-                  return "n"
-              }
-              met(...p: number[]): string {
-                  return "nR"
-              }
-              met(p: number, q: number = 0.0): string {
-                  return "nD1"
-              }
-          }
-      use: |-
-          // more than one applicable method
-          let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-
-    - decl: |-
-          class C {
-              met(p: number): string {
-                  return "n"
-              }
-              met(...p: number[]): string {
-                  return "nR"
-              }
-              met(p: number, q?: Number): string {
-                  return "nD2"
-              }
-          }
-      use: |-
-          // more than one applicable method
-          let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
-
-    - decl: |-
-          class C {
               met(...p: number[]): string {
                   return "nR"
               }

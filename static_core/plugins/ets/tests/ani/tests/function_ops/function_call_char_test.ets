@@ -17,9 +17,9 @@ namespace ops {
 function sub(c0: char, c1: char): char {
     let c: Char = new Char('0');
     if (c0 > c1) {
-        c = c0 - c1;
+        c = c0 - c1 as char;
     } else {
-        c = c1 - c0;
+        c = c1 - c0 as char;
     }
     return c as char;
 }

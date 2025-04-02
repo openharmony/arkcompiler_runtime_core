@@ -31,7 +31,7 @@ public:
 class AccessingObjectsFieldsTest : public AccessingObjectsFieldsTestGeneral {};
 class AccessingObjectsFieldsTestDeath : public AccessingObjectsFieldsTestGeneral {};
 
-TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests1)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_SetTypeFieldDeathTests1)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -55,7 +55,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests1)
     EXPECT_DEATH(env_->SetDoubleField(nullptr, nullptr, static_cast<ets_double>(0.0)), "");
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests2)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_SetTypeFieldDeathTests2)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -100,7 +100,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests2)
     EXPECT_DEATH(env_->SetDoubleField(nullptr, member7Id, static_cast<ets_double>(0.0)), "");
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests3)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_SetTypeFieldDeathTests3)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

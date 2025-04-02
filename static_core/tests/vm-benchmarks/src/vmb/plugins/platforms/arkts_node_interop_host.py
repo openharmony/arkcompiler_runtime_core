@@ -71,7 +71,8 @@ class Platform(PlatformBase):
             log.debug('Bench unit does not have tags, looking for freestyle benchmarks to run')
             self.run_generated(bu)
             return
-
+        if not bu.doclet_src:
+            raise ValueError(f'Sources for unit {bu.name} are not set')
         if 'bu_a2a' in bu.tags:
             self.es2panda(bu)
             self.ark(bu)
