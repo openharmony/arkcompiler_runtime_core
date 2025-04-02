@@ -15,19 +15,25 @@
 {%- for c in cases %}
 
 /*---
-desc: Call context, lambda, constant narrowing integer conversion, implicit
+desc: Call context, method, constant narrowing integer conversion, implicit
+tags: [compile-only, negative]
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for v in c['values'] %}
 const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 {%- endfor %}
 
+class A {
+    meth(p: {{c.to_type}}): {{c.to_type}} { return p }
+}
+
 function main(): int {
+    let a: A = new A()
 {%- for v in c['values'] %}
-    if (((p: {{c.to_type}}): {{c.to_type}} => { return p })({{v.expr|safe}}) != {{v.val}}) {  // expression
+    if (a.meth({{v.expr|safe}}) != {{v.val}}) {  // expression
         return 1
     }
-    if (((p: {{c.to_type}}): {{c.to_type}} => { return p })(c{{loop.index}}) != {{v.val}}) {  // constant
+    if (a.meth(c{{loop.index}}) != {{v.val}}) {  // constant
         return 1
     }
 {%- endfor %}
