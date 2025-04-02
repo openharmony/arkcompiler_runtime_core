@@ -250,6 +250,7 @@ std/core/IntlDateTimeStyleFormatTest.ets
 std/core/IntlLocaleTest.ets
 std/core/IntlLocaleTest2.ets
 std/core/IntlPluralRulesTest.ets
+std/core/IntlListFormatTest.ets
 std/core/Object.ets
 std/core/TypeClassTypeTest.ets
 std/core/TypeCreateClassTest.ets
