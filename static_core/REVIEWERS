@@ -129,7 +129,7 @@ static_core/plugins/ets/templates/stdlib/                                     ^a
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof1983 @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @semenovaleksandr @ignatenkooleg @Prof1983
 static_core/plugins/ets/tests/checked/                                        @Prof1983
-static_core/plugins/ets/tests/ets-templates/                                  @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
+static_core/plugins/ets/tests/ets-templates/                                  ^Prof1983 @igelhaus ^ragnvald @fotograf @zsw_zhushiwei ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets_es_checked/                                 ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/tests/ets_sdk/                                        ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin
 static_core/plugins/ets/tests/interop_js/                                     ^igelhaus @semenovaleksandr ^rokashevichsvetlana ^kurnevichstanislav
