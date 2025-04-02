@@ -461,7 +461,7 @@
     status: ''
 '7.12':
     title: Indexing Expressions
-    status: ''
+    status: No testable assertions
 7.12.1:
     title: Array Indexing Expression
     status: ''
@@ -491,7 +491,7 @@
     status: ''
 '7.20':
     title: Unary Expressions
-    status: ''
+    status: No testable assertions
 7.20.1:
     title: Postfix Increment
     status: ''
@@ -518,7 +518,7 @@
     status: ''
 '7.21':
     title: Multiplicative Expressions
-    status: ''
+    status: No testable assertions
 7.21.1:
     title: Multiplication
     status: ''
@@ -530,7 +530,7 @@
     status: ''
 '7.22':
     title: Additive Expressions
-    status: ''
+    status: No testable assertions
 7.22.1:
     title: String Concatenation
     status: ''
@@ -542,7 +542,7 @@
     status: ''
 '7.24':
     title: Relational Expressions
-    status: ''
+    status: No testable assertions
 7.24.1:
     title: Numerical Relational Operators
     status: ''
@@ -587,7 +587,7 @@
     status: ''
 '7.26':
     title: Bitwise and Logical Expressions
-    status: Finished
+    status: No testable assertions
 7.26.1:
     title: Integer Bitwise Operators
     status: Finished
@@ -902,7 +902,7 @@
     status: ''
 '13.9':
     title: Export Directives
-    status: ''
+    status: No testable assertions
 13.9.1:
     title: Selective Export Directive
     status: ''
@@ -965,7 +965,7 @@
     status: ''
 '15.2':
     title: Type Identity
-    status: ''
+    status: No testable assertions
 '15.3':
     title: Assignability
     status: ''
@@ -1001,7 +1001,7 @@
     status: ''
 '15.8':
     title: Overload Resolution
-    status: ''
+    status: No testable assertions
 15.8.1:
     title: Selection of Applicable Candidates
     status: ''
@@ -1187,7 +1187,7 @@
     status: ''
 '18.5':
     title: Standard Annotations
-    status: ''
+    status: No testable assertions
 18.5.1:
     title: Retention Annotation
     status: ''
