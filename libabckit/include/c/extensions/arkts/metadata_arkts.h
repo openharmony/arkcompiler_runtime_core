@@ -197,6 +197,190 @@ struct AbckitArktsInspectApi {
      */
     AbckitArktsClass *(*coreClassToArktsClass)(AbckitCoreClass *klass);
 
+    /**
+     * @brief Returns whether class `klass` is final.
+     * @return `true` if class `klass` is final.
+     * @param [ in ] klass - Class to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     */
+    bool (*arktsClassIsFinal)(AbckitArktsClass *klass);
+
+    /**
+     * @brief Returns whether class `klass` is abstract.
+     * @return `true` if class `klass` is abstract.
+     * @param [ in ] klass - Class to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     */
+    bool (*arktsClassIsAbstract)(AbckitArktsClass *klass);
+
+    /* ========================================
+     * Interface
+     * ======================================== */
+
+    /**
+     * @brief Convert an instance of type `AbckitArktsInterface` to the instance of type `AbckitCoreInterface`, which
+     * can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-independent representation of the `iface`.
+     * @param [ in ] iface - Interface to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    AbckitCoreInterface *(*arktsInterfaceToCoreInterface)(AbckitArktsInterface *iface);
+
+    /**
+     * @brief Convert an instance of type `AbckitCoreInterface` to the instance of type `AbckitArktsInterface`, which
+     * can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-dependent representation of the `iface`.
+     * @param [ in ] iface - Interface to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `iface` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsInterface *(*coreInterfaceToArktsInterface)(AbckitCoreInterface *iface);
+
+    /* ========================================
+     * Enum
+     * ======================================== */
+
+    /**
+     * @brief Convert an instance of type `AbckitArktsEnum` to the instance of type `AbckitCoreEnum`, which
+     * can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-independent representation of the `enm`.
+     * @param [ in ] enm - Enum to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     */
+    AbckitCoreEnum *(*arktsEnumToCoreEnum)(AbckitArktsEnum *enm);
+
+    /**
+     * @brief Convert an instance of type `AbckitCoreEnum` to the instance of type `AbckitArktsEnum`, which
+     * can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-dependent representation of the `enm`.
+     * @param [ in ] enm - Enum to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enm` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `enm` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsEnum *(*coreEnumToArktsEnum)(AbckitCoreEnum *enm);
+
+    /* ========================================
+     * Module Field
+     * ======================================== */
+
+    /**
+     * @brief Convert an instance of type `AbckitArktsModuleField` to the instance of type `AbckitCoreModuleField`,
+     * which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-independent representation of the `field`.
+     * @param [ in ] field - Module field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreModuleField *(*arktsModuleFieldToCoreModuleField)(AbckitArktsModuleField *field);
+
+    /**
+     * @brief Convert an instance of type `AbckitCoreModuleField` to the instance of type `AbckitArktsModuleField`,
+     * which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-dependent representation of the `field`.
+     * @param [ in ] field - Module field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsModuleField *(*coreModuleFieldToArktsModuleField)(AbckitCoreModuleField *field);
+
+    /**
+     * @brief Returns whether module field `field` is readonly.
+     * @return `true` if field `field` is readonly.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*arktsModuleFieldIsReadonly)(AbckitArktsModuleField *field);
+
+    /* ========================================
+     * Class Field
+     * ======================================== */
+
+    /**
+     * @brief Convert an instance of type `AbckitArktsClassField` to the instance of type `AbckitCoreClassField`,
+     * which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-independent representation of the `field`.
+     * @param [ in ] field - Class field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreClassField *(*arktsClassFieldToCoreClassField)(AbckitArktsClassField *field);
+
+    /**
+     * @brief Convert an instance of type `AbckitCoreClassField` to the instance of type `AbckitArktsClassField`,
+     * which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-dependent representation of the `field`.
+     * @param [ in ] field - Class field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsClassField *(*coreClassFieldToArktsClassField)(AbckitCoreClassField *field);
+
+    /**
+     * @brief Returns whether class field `field` is readonly.
+     * @return `true` if field `field` is readonly.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*arktsClassFieldIsReadonly)(AbckitArktsClassField *field);
+
+    /* ========================================
+     * Interface Field
+     * ======================================== */
+
+    /**
+     * @brief Convert an instance of type `AbckitArktsInterfaceField` to the instance of type
+     * `AbckitCoreInterfaceField`, which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-independent representation of the `field`.
+     * @param [ in ] field - Interface field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreInterfaceField *(*arktsInterfaceFieldToCoreInterfaceField)(AbckitArktsInterfaceField *field);
+
+    /**
+     * @brief Convert an instance of type `AbckitCoreInterfaceField` to the instance of type
+     * `AbckitArktsInterfaceField`, which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-dependent representation of the `field`.
+     * @param [ in ] field - Interface field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsInterfaceField *(*coreInterfaceFieldToArktsInterfaceField)(AbckitCoreInterfaceField *field);
+
+    /**
+     * @brief Returns whether interface field `field` is readonly.
+     * @return `true` if field `field` is readonly.
+     * @param [ in ] field - Field to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*arktsInterfaceFieldIsReadonly)(AbckitArktsInterfaceField *field);
+
+    /* ========================================
+     * Enum Field
+     * ======================================== */
+
+    /**
+     * @brief Convert an instance of type `AbckitArktsEnumField` to the instance of type `AbckitCoreEnumField`,
+     * which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-independent representation of the `field`.
+     * @param [ in ] field - Enum field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    AbckitCoreEnumField *(*arktsEnumFieldToCoreEnumField)(AbckitArktsEnumField *field);
+
+    /**
+     * @brief Convert an instance of type `AbckitCoreEnumField` to the instance of type `AbckitArktsEnumField`,
+     * which can be used to invoke the corresponding APIs.
+     * @return Pointer to the language-dependent representation of the `field`.
+     * @param [ in ] field - Enum field to convert.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `field` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsEnumField *(*coreEnumFieldToArktsEnumField)(AbckitCoreEnumField *field);
+
     /* ========================================
      * Function
      * ======================================== */
@@ -228,6 +412,30 @@ struct AbckitArktsInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
      */
     bool (*functionIsNative)(AbckitArktsFunction *function);
+
+    /**
+     * @brief Check whether the `function` is async.
+     * @return `true` if `function` is async, `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsAsync)(AbckitArktsFunction *function);
+
+    /**
+     * @brief Check whether the `function` is final.
+     * @return `true` if `function` is final, `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsFinal)(AbckitArktsFunction *function);
+
+    /**
+     * @brief Check whether the `function` is abstract.
+     * @return `true` if `function` is abstract, `false` otherwise.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    bool (*functionIsAbstract)(AbckitArktsFunction *function);
 
     /* ========================================
      * Annotation
@@ -549,6 +757,471 @@ struct AbckitArktsModifyApi {
      */
     void (*classRemoveAnnotation)(AbckitArktsClass *klass, AbckitArktsAnnotation *anno);
 
+    /**
+     * @brief Adds interface `iface` to the list of interfaces that class `klass` implements.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] iface - Interface to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     */
+    bool (*classAddInterface)(AbckitArktsClass *klass, AbckitArktsInterface *iface);
+
+    /**
+     * @brief Removes interface `iface` from the list of interfaces that class `klass` implements.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] iface - Interface to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is not an interface of class `klass`.
+     */
+    bool (*classRemoveInterface)(AbckitArktsClass *klass, AbckitArktsInterface *iface);
+
+    /**
+     * @brief Set super class `superClass` for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] superClass - Super class to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superClass` is NULL.
+     */
+    bool (*classSetSuperClass)(AbckitArktsClass *klass, AbckitArktsClass *superClass);
+
+    /**
+     * @brief Set name for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*classSetName)(AbckitArktsClass *klass, const char *name);
+
+    /**
+     * @brief Adds field `field` to the list of fields for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] field - Field to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*classAddField)(AbckitArktsClass *klass, AbckitArktsClassField *field);
+
+    /**
+     * @brief Removes field `field` from the list of fields for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] field - Field to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is not a field of class `klass`.
+     */
+    bool (*classRemoveField)(AbckitArktsClass *klass, AbckitArktsClassField *field);
+
+    /**
+     * @brief Adds method `method` to the list of methods for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] method - Method to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
+     */
+    bool (*classAddMethod)(AbckitArktsClass *klass, AbckitArktsFunction *method);
+
+    /**
+     * @brief Removes method `method` from the list of methods for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] method - Method to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is not a method of class `klass`.
+     */
+    bool (*classRemoveMethod)(AbckitArktsClass *klass, AbckitArktsFunction *method);
+
+    /**
+     * @brief Creates new class with name `name`.
+     * @return Pointer to the created class.
+     * @param [ in ] name - Name of the class to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    AbckitArktsClass *(*createClass)(const char *name);
+
+    /**
+     * @brief Sets owning module for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] module - Module to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
+     */
+    bool (*classSetOwningModule)(AbckitArktsClass *klass, AbckitArktsModule *module);
+
+    /**
+     * @brief Sets parent function for class `klass`.
+     * @return `true` on success.
+     * @param [ in ] klass - Class to be inspected.
+     * @param [ in ] func - Function to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     */
+    bool (*classSetParentFunction)(AbckitArktsClass *klass, AbckitArktsFunction *func);
+
+    /* ========================================
+     * Interface
+     * ======================================== */
+
+    /**
+     * @brief Adds super interface `iface` to the list of super interfaces for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] superInterface - Super interface to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superInterface` is NULL.
+     */
+    bool (*interfaceAddSuperInterface)(AbckitArktsInterface *iface, AbckitArktsInterface *superInterface);
+
+    /**
+     * @brief Removes super interface `iface` from the list of super interfaces for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] superInterface - Super interface to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superInterface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `superInterface` is not a super interface of `iface`.
+     */
+    bool (*interfaceRemoveSuperInterface)(AbckitArktsInterface *iface, AbckitArktsInterface *superInterface);
+
+    /**
+     * @brief Sets name for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*interfaceSetName)(AbckitArktsInterface *iface, const char *name);
+
+    /**
+     * @brief Adds field `field` to the list of fields for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] field - Field to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     */
+    bool (*interfaceAddField)(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field);
+
+    /**
+     * @brief Removes field `field` from the list of fields for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] field - Field to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is not a field of interface `iface`.
+     */
+    bool (*interfaceRemoveField)(AbckitArktsInterface *iface, AbckitArktsInterfaceField *field);
+
+    /**
+     * @brief Adds method `method` to the list of methods for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] method - Method to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
+     */
+    bool (*interfaceAddMethod)(AbckitArktsInterface *iface, AbckitArktsFunction *method);
+
+    /**
+     * @brief Removes method `method` from the list of methods for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] method - Method to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is not a method of interface `iface`.
+     */
+    bool (*interfaceRemoveMethod)(AbckitArktsInterface *iface, AbckitArktsFunction *method);
+
+    /**
+     * @brief Sets owning module for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] module - Module to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
+     */
+    bool (*interfaceSetOwningModule)(AbckitArktsInterface *iface, AbckitArktsModule *module);
+
+    /**
+     * @brief Sets parent function for interface `iface`.
+     * @return `true` on success.
+     * @param [ in ] iface - Interface to be inspected.
+     * @param [ in ] func - Function to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     */
+    bool (*interfaceSetParentFunction)(AbckitArktsInterface *iface, AbckitArktsFunction *func);
+
+    /**
+     * @brief Creates new interface with name `name`.
+     * @return Pointer to the created interface.
+     * @param [ in ] name - Name of the interface to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    AbckitArktsInterface *(*createInterface)(const char *name);
+
+    /* ========================================
+     * Module Field
+     * ======================================== */
+
+    /**
+     * @brief Adds annotation `anno` to the list of annotations for module field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] anno - Annotation to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     */
+    bool (*moduleFieldAddAnnotation)(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno);
+
+    /**
+     * @brief Removes annotation `anno` from the list of annotations for module field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] anno - Annotation to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is not an annotation of field `field`.
+     */
+    bool (*moduleFieldRemoveAnnotation)(AbckitArktsModuleField *field, AbckitArktsAnnotation *anno);
+
+    /**
+     * @brief Sets name for module field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*moduleFieldSetName)(AbckitArktsModuleField *field, const char *name);
+
+    /**
+     * @brief Sets type for module field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     */
+    bool (*moduleFieldSetType)(AbckitArktsModuleField *field, AbckitType *type);
+
+    /**
+     * @brief Sets value for module field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] value - Value to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    bool (*moduleFieldSetValue)(AbckitArktsModuleField *field, AbckitValue *value);
+
+    /**
+     * @brief Create new module field with name `name`, type `type` and value `value` for module `module`.
+     * @return Pointer to the created module field.
+     * @param [ in ] module - Module to be modified.
+     * @param [ in ] name - Name of the field to be created.
+     * @param [ in ] type - Type of the field to be created.
+     * @param [ in ] value - Value of the field to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    AbckitArktsModuleField *(*createModuleField)(AbckitArktsModule *module, const char *name, AbckitType *type,
+                                                 AbckitValue *value);
+
+    /* ========================================
+     * Class Field
+     * ======================================== */
+
+    /**
+     * @brief Adds annotation `anno` to the list of annotations for class field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] anno - Annotation to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     */
+    bool (*classFieldAddAnnotation)(AbckitArktsClassField *field, AbckitArktsAnnotation *anno);
+
+    /**
+     * @brief Removes annotation `anno` from the list of annotations for class field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] anno - Annotation to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is not an annotation of field `field`.
+     */
+    bool (*classFieldRemoveAnnotation)(AbckitArktsClassField *field, AbckitArktsAnnotation *anno);
+
+    /**
+     * @brief Sets name for class field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*classFieldSetName)(AbckitArktsClassField *field, const char *name);
+
+    /**
+     * @brief Sets type for class field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     */
+    bool (*classFieldSetType)(AbckitArktsClassField *field, AbckitType *type);
+
+    /**
+     * @brief Sets value for class field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] value - Value to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    bool (*classFieldSetValue)(AbckitArktsClassField *field, AbckitValue *value);
+
+    /**
+     * @brief Create new class field with name `name`, type `type` and value `value` for class `klass`.
+     * @return Pointer to the created class field.
+     * @param [ in ] klass - Class to be modified.
+     * @param [ in ] name - Name of the field to be created.
+     * @param [ in ] type - Type of the field to be created.
+     * @param [ in ] value - Value of the field to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    AbckitArktsClassField *(*createClassField)(AbckitArktsClass *klass, const char *name, AbckitType *type,
+                                               AbckitValue *value);
+
+    /* ========================================
+     * Interface Field
+     * ======================================== */
+
+    /**
+     * @brief Adds annotation `anno` to the list of annotations for interface field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] anno - Annotation to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     */
+    bool (*interfaceFieldAddAnnotation)(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno);
+
+    /**
+     * @brief Removes annotation `anno` from the list of annotations for interface field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] anno - Annotation to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is not an annotation of field `field`.
+     */
+    bool (*interfaceFieldRemoveAnnotation)(AbckitArktsInterfaceField *field, AbckitArktsAnnotation *anno);
+
+    /**
+     * @brief Sets name for interface field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*interfaceFieldSetName)(AbckitArktsInterfaceField *field, const char *name);
+
+    /**
+     * @brief Sets type for interface field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     */
+    bool (*interfaceFieldSetType)(AbckitArktsInterfaceField *field, AbckitType *type);
+
+    /**
+     * @brief Create new interface field with name `name`, type `type` and value `value` for interface `iface`.
+     * @return Pointer to the created interface field.
+     * @param [ in ] iface - Interface to be modified.
+     * @param [ in ] name - Name of the field to be created.
+     * @param [ in ] type - Type of the field to be created.
+     * @param [ in ] value - Value of the field to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `iface` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    AbckitArktsInterfaceField *(*createInterfaceField)(AbckitArktsInterface *iface, const char *name, AbckitType *type,
+                                                       AbckitValue *value);
+
+    /* ========================================
+     * Enum Field
+     * ======================================== */
+
+    /**
+     * @brief Sets name for enum field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*enumFieldSetName)(AbckitArktsEnumField *field, const char *name);
+
+    /**
+     * @brief Sets type for enum field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     */
+    bool (*enumFieldSetType)(AbckitArktsEnumField *field, AbckitType *type);
+
+    /**
+     * @brief Sets value for enum field `field`.
+     * @return `true` on success.
+     * @param [ in ] field - Field to be inspected.
+     * @param [ in ] value - Value to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `field` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    bool (*enumFieldSetValue)(AbckitArktsEnumField *field, AbckitValue *value);
+
+    /**
+     * @brief Create new enum field with name `name`, type `type` and value `value` for enum `enum`.
+     * @return Pointer to the created enum field.
+     * @param [ in ] enm - Enum to be modified.
+     * @param [ in ] name - Name of the field to be created.
+     * @param [ in ] type - Type of the field to be created.
+     * @param [ in ] value - Value of the field to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `enum` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
+     */
+    AbckitArktsEnumField *(*createEnumField)(AbckitArktsEnum *enm, const char *name, AbckitType *type,
+                                             AbckitValue *value);
+
     /* ========================================
      * AnnotationInterface
      * ======================================== */
@@ -609,6 +1282,87 @@ struct AbckitArktsModifyApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if function `function` doesn't have the annotation `anno`.
      */
     void (*functionRemoveAnnotation)(AbckitArktsFunction *function, AbckitArktsAnnotation *anno);
+
+    /**
+     * @brief Sets owning module for function `function`.
+     * @return `true` on success.
+     * @param [ in ] function - Function to be inspected.
+     * @param [ in ] module - Module to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `module` is NULL.
+     */
+    bool (*functionSetOwningModule)(AbckitArktsFunction *function, AbckitArktsModule *module);
+
+    /**
+     * @brief Sets parent class for function `function`.
+     * @return `true` on success.
+     * @param [ in ] function - Function to be inspected.
+     * @param [ in ] class - Class to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `class` is NULL.
+     */
+    bool (*functionSetParentClass)(AbckitArktsFunction *function, AbckitArktsClass *klass);
+
+    /**
+     * @brief Sets parent function for function `function`.
+     * @return `true` on success.
+     * @param [ in ] function - Function to be inspected.
+     * @param [ in ] parentFunction - Function to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `parentFunction` is NULL.
+     */
+    bool (*functionSetParentFunction)(AbckitArktsFunction *function, AbckitArktsFunction *parentFunction);
+
+    /**
+     * @brief Sets name for function `function`.
+     * @return `true` on success.
+     * @param [ in ] function - Function to be inspected.
+     * @param [ in ] name - Name to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     */
+    bool (*functionSetName)(AbckitArktsFunction *function, const char *name);
+
+    /**
+     * @brief Adds parameter `param` to the list of parameters for function `func`.
+     * @return `true` on success.
+     * @param [ in ] func - Function to be inspected.
+     * @param [ in ] param - Parameter to be added.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is NULL.
+     */
+    bool (*functionAddParameter)(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
+
+    /**
+     * @brief Removes parameter `param` from the list of parameters for function `func`.
+     * @return `true` on success.
+     * @param [ in ] func - Function to be inspected.
+     * @param [ in ] param - Parameter to be removed.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `param` is not a parameter of function `func`.
+     */
+    bool (*functionRemoveParameter)(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
+
+    /**
+     * @brief Sets return type for function `func`.
+     * @return `true` on success.
+     * @param [ in ] func - Function to be inspected.
+     * @param [ in ] type - Type to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `type` is NULL.
+     */
+    bool (*functionSetReturnType)(AbckitArktsFunction *func, AbckitType *type);
+
+    /**
+     * @brief Creates new function with name `name` and return type `returnType`.
+     * @return Pointer to the created function.
+     * @param [ in ] name - Name of the function to be created.
+     * @param [ in ] returnType - Return type of the function to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `name` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `returnType` is NULL.
+     */
+    AbckitArktsFunction *(*createFunction)(const char *name, AbckitType *returnType);
 
     /* ========================================
      * Annotation

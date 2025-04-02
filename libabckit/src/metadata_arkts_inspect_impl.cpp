@@ -159,6 +159,149 @@ extern "C" AbckitArktsClass *CoreClassToArktsClass(AbckitCoreClass *c)
     return c->GetArkTSImpl();
 }
 
+extern "C" bool ArktsClassIsFinal(AbckitArktsClass *klass)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    return false;
+}
+
+extern "C" bool ArktsClassIsAbstract(AbckitArktsClass *klass)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    return false;
+}
+
+/* ========================================
+ * Interface
+ * ======================================== */
+
+extern "C" AbckitCoreInterface *ArktsInterfaceToCoreInterface(AbckitArktsInterface *iface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    return nullptr;
+}
+
+extern "C" AbckitArktsInterface *CoreInterfaceToArktsInterface(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    return nullptr;
+}
+
+/* ========================================
+ * Enum
+ * ======================================== */
+
+extern "C" AbckitCoreEnum *ArktsEnumToCoreEnum(AbckitArktsEnum *enm)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)enm;
+    return nullptr;
+}
+
+extern "C" AbckitArktsEnum *CoreEnumToArktsEnum(AbckitCoreEnum *enm)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)enm;
+    return nullptr;
+}
+
+/* ========================================
+ * Module Field
+ * ======================================== */
+
+extern "C" AbckitCoreModuleField *ArktsModuleFieldToCoreModuleField(AbckitArktsModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitArktsModuleField *CoreModuleFieldToArktsModuleField(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" bool ArktsModuleFieldIsReadonly(AbckitArktsModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+/* ========================================
+ * Class Field
+ * ======================================== */
+
+extern "C" AbckitCoreClassField *ArktsClassFieldToCoreClassField(AbckitArktsClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitArktsClassField *CoreClassFieldToArktsClassField(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" bool ArktsClassFieldIsReadonly(AbckitArktsClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+/* ========================================
+ * Interface Field
+ * ======================================== */
+
+extern "C" AbckitCoreInterfaceField *ArktsInterfaceFieldToCoreInterfaceField(AbckitArktsInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitArktsInterfaceField *CoreInterfaceFieldToArktsInterfaceField(AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" bool ArktsInterfaceFieldIsReadonly(AbckitArktsInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+/* ========================================
+ * Enum Field
+ * ======================================== */
+
+extern "C" AbckitCoreEnumField *ArktsEnumFieldToCoreEnumField(AbckitArktsEnumField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitArktsEnumField *CoreEnumFieldToArktsEnumField(AbckitCoreEnumField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
 // ========================================
 // Function
 // ========================================
@@ -194,6 +337,27 @@ extern "C" bool FunctionIsNative(AbckitArktsFunction *function)
         default:
             LIBABCKIT_UNREACHABLE;
     }
+}
+
+extern "C" bool FunctionIsAsync(AbckitArktsFunction *function)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    return false;
+}
+
+extern "C" bool FunctionIsFinal(AbckitArktsFunction *function)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    return false;
+}
+
+extern "C" bool FunctionIsAbstract(AbckitArktsFunction *function)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    return false;
 }
 
 // ========================================
@@ -337,13 +501,50 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
     // Class
     // ========================================
 
-    ArktsClassToCoreClass, CoreClassToArktsClass,
+    ArktsClassToCoreClass, CoreClassToArktsClass, ArktsClassIsFinal, ArktsClassIsAbstract,
+
+    // ========================================
+    // Interface
+    // ========================================
+
+    ArktsInterfaceToCoreInterface, CoreInterfaceToArktsInterface,
+
+    // ========================================
+    // Enum
+    // ========================================
+
+    ArktsEnumToCoreEnum, CoreEnumToArktsEnum,
+
+    // ========================================
+    // Module Field
+    // ========================================
+
+    ArktsModuleFieldToCoreModuleField, CoreModuleFieldToArktsModuleField, ArktsModuleFieldIsReadonly,
+
+    // ========================================
+    // Class Field
+    // ========================================
+
+    ArktsClassFieldToCoreClassField, CoreClassFieldToArktsClassField, ArktsClassFieldIsReadonly,
+
+    // ========================================
+    // Interface Field
+    // ========================================
+
+    ArktsInterfaceFieldToCoreInterfaceField, CoreInterfaceFieldToArktsInterfaceField, ArktsInterfaceFieldIsReadonly,
+
+    // ========================================
+    // Enum Field
+    // ========================================
+
+    ArktsEnumFieldToCoreEnumField, CoreEnumFieldToArktsEnumField,
 
     // ========================================
     // Function
     // ========================================
 
-    ArktsFunctionToCoreFunction, CoreFunctionToArktsFunction, FunctionIsNative,
+    ArktsFunctionToCoreFunction, CoreFunctionToArktsFunction, FunctionIsNative, FunctionIsAsync, FunctionIsFinal,
+    FunctionIsAbstract,
 
     // ========================================
     // Annotation

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -193,6 +193,35 @@ extern "C" bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*c
         default:
             LIBABCKIT_UNREACHABLE;
     }
+}
+
+extern "C" bool ModuleEnumerateInterfaces(AbckitCoreModule *m, void *data,
+                                          bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)m;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+extern "C" bool ModuleEnumerateEnums(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreEnum *enm, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)m;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+extern "C" bool ModuleEnumerateFields(AbckitCoreModule *m, void *data,
+                                      bool (*cb)(AbckitCoreModuleField *field, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)m;
+    (void)data;
+    (void)cb;
+    return false;
 }
 
 extern "C" bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
@@ -498,6 +527,14 @@ extern "C" AbckitCoreNamespace *ClassGetParentNamespace(AbckitCoreClass *klass)
     return klass->parentNamespace;
 }
 
+extern "C" AbckitCoreClass *ClassGetSuperClass(AbckitCoreClass *klass)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
+    return klass->superClass;
+}
+
 extern "C" bool ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
                                       bool (*cb)(AbckitCoreFunction *function, void *data))
 {
@@ -536,6 +573,284 @@ extern "C" bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
         default:
             LIBABCKIT_UNREACHABLE;
     }
+}
+
+extern "C" bool ClassEnumerateInterfaces(AbckitCoreClass *klass, void *data,
+                                         bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+extern "C" bool ClassEnumerateFields(AbckitCoreClass *klass, void *data,
+                                     bool (*cb)(AbckitCoreClassField *field, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)klass;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+// ========================================
+// Interface
+// ========================================
+
+extern "C" AbckitFile *InterfaceGetFile(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    return nullptr;
+}
+
+extern "C" AbckitCoreModule *InterfaceGetModule(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    return nullptr;
+}
+
+extern "C" AbckitString *InterfaceGetName(AbckitCoreInterface *iface)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    return nullptr;
+}
+
+extern "C" bool InterfaceEnumerateSuperInterfaces(AbckitCoreInterface *iface, void *data,
+                                                  bool (*cb)(AbckitCoreInterface *iface, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+extern "C" bool InterfaceEnumerateMethods(AbckitCoreInterface *iface, void *data,
+                                          bool (*cb)(AbckitCoreFunction *func, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+extern "C" bool InterfaceEnumerateAnnotations(AbckitCoreInterface *iface, void *data,
+                                              bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+extern "C" bool InterfaceEnumerateFields(AbckitCoreInterface *iface, void *data,
+                                         bool (*cb)(AbckitCoreInterfaceField *field, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)iface;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+// ========================================
+// Module Field
+// ========================================
+
+extern "C" AbckitCoreModule *ModuleFieldGetModule(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitString *ModuleFieldGetName(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitType *ModuleFieldGetType(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitValue *ModuleFieldGetValue(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" bool ModuleFieldIsPublic(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ModuleFieldIsPrivate(AbckitCoreModuleField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ModuleFieldEnumerateAnnotations(AbckitCoreModuleField *field, void *data,
+                                                bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+// ========================================
+// Class Field
+// ========================================
+
+extern "C" AbckitCoreClass *ClassFieldGetClass(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitString *ClassFieldGetName(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitType *ClassFieldGetType(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitValue *ClassFieldGetValue(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" bool ClassFieldIsPublic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ClassFieldIsProtected(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ClassFieldIsPrivate(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ClassFieldIsStatic(AbckitCoreClassField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return false;
+}
+
+extern "C" bool ClassFieldEnumerateAnnotations(AbckitCoreClassField *field, void *data,
+                                               bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+// ========================================
+// Interface Field
+// ========================================
+
+extern "C" AbckitCoreInterface *InterfaceFieldGetInterface(AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitString *InterfaceFieldGetName(AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitType *InterfaceFieldGetType(AbckitCoreInterfaceField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" bool InterfaceFieldEnumerateAnnotations(AbckitCoreInterfaceField *field, void *data,
+                                                   bool (*cb)(AbckitCoreAnnotation *anno, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+// ========================================
+// Enum Field
+// ========================================
+
+extern "C" AbckitCoreEnum *EnumFieldGetEnum(AbckitCoreEnumField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitString *EnumFieldGetName(AbckitCoreEnumField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitType *EnumFieldGetType(AbckitCoreEnumField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
+}
+
+extern "C" AbckitValue *EnumFieldGetValue(AbckitCoreEnumField *field)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)field;
+    return nullptr;
 }
 
 // ========================================
@@ -817,6 +1132,44 @@ extern "C" bool FunctionIsAnonymous(AbckitCoreFunction *function)
         return FunctionIsAnonymousDynamic(function);
     }
     return FunctionIsAnonymousStatic(function);
+}
+
+extern "C" bool FunctionIsPublic(AbckitCoreFunction *function)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    return false;
+}
+
+extern "C" bool FunctionIsProtected(AbckitCoreFunction *function)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    return false;
+}
+
+extern "C" bool FunctionIsPrivate(AbckitCoreFunction *function)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    return false;
+}
+
+extern "C" bool FunctionEnumerateParameters(AbckitCoreFunction *function, void *data,
+                                            bool (*cb)(AbckitCoreFunctionParam *param, void *data))
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    (void)data;
+    (void)cb;
+    return false;
+}
+
+extern "C" AbckitType *FunctionGetReturnType(AbckitCoreFunction *function)
+{
+    LIBABCKIT_UNIMPLEMENTED;
+    (void)function;
+    return nullptr;
 }
 
 // ========================================
@@ -1360,6 +1713,9 @@ AbckitInspectApi g_inspectApiImpl = {
     ModuleEnumerateExports,
     ModuleEnumerateNamespaces,
     ModuleEnumerateClasses,
+    ModuleEnumerateInterfaces,
+    ModuleEnumerateEnums,
+    ModuleEnumerateFields,
     ModuleEnumerateTopLevelFunctions,
     ModuleEnumerateAnonymousFunctions,
     ModuleEnumerateAnnotationInterfaces,
@@ -1403,8 +1759,67 @@ AbckitInspectApi g_inspectApiImpl = {
     ClassGetName,
     ClassGetParentFunction,
     ClassGetParentNamespace,
+    ClassGetSuperClass,
     ClassEnumerateMethods,
     ClassEnumerateAnnotations,
+    ClassEnumerateInterfaces,
+    ClassEnumerateFields,
+
+    // ========================================
+    // Interface
+    // ========================================
+
+    InterfaceGetFile,
+    InterfaceGetModule,
+    InterfaceGetName,
+    InterfaceEnumerateSuperInterfaces,
+    InterfaceEnumerateMethods,
+    InterfaceEnumerateAnnotations,
+    InterfaceEnumerateFields,
+
+    // ========================================
+    // Module Field
+    // ========================================
+
+    ModuleFieldGetModule,
+    ModuleFieldGetName,
+    ModuleFieldGetType,
+    ModuleFieldGetValue,
+    ModuleFieldIsPublic,
+    ModuleFieldIsPrivate,
+    ModuleFieldEnumerateAnnotations,
+
+    // ========================================
+    // Class Field
+    // ========================================
+
+    ClassFieldGetClass,
+    ClassFieldGetName,
+    ClassFieldGetType,
+    ClassFieldGetValue,
+    ClassFieldIsPublic,
+    ClassFieldIsProtected,
+    ClassFieldIsPrivate,
+    ClassFieldIsStatic,
+    ClassFieldEnumerateAnnotations,
+
+    // ========================================
+    // Interface Field
+    // ========================================
+
+    InterfaceFieldGetInterface,
+    InterfaceFieldGetName,
+    InterfaceFieldGetType,
+    InterfaceFieldEnumerateAnnotations,
+
+    // ========================================
+    // Enum Field
+    // ========================================
+
+    EnumFieldGetEnum,
+    EnumFieldGetName,
+    EnumFieldGetType,
+    EnumFieldGetValue,
 
     // ========================================
     // Function
@@ -1423,6 +1838,11 @@ AbckitInspectApi g_inspectApiImpl = {
     FunctionIsStatic,
     FunctionIsCtor,
     FunctionIsAnonymous,
+    FunctionIsPublic,
+    FunctionIsProtected,
+    FunctionIsPrivate,
+    FunctionEnumerateParameters,
+    FunctionGetReturnType,
 
     // ========================================
     // Annotation

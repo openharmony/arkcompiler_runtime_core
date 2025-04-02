@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,19 +37,31 @@ struct AbckitCoreModule;
 struct AbckitCoreNamespace;
 struct AbckitCoreClass;
 struct AbckitCoreFunction;
-struct AbckitCoreField;
 struct AbckitCoreAnnotation;
 struct AbckitCoreAnnotationElement;
 struct AbckitCoreAnnotationInterface;
 struct AbckitCoreAnnotationInterfaceField;
 struct AbckitCoreImportDescriptor;
 struct AbckitCoreExportDescriptor;
+struct AbckitCoreInterface;
+struct AbckitCoreEnum;
+struct AbckitCoreModuleField;
+struct AbckitCoreClassField;
+struct AbckitCoreInterfaceField;
+struct AbckitCoreEnumField;
+struct AbckitCoreFunctionParam;
 
 struct AbckitArktsModule;
 struct AbckitArktsNamespace;
 struct AbckitArktsClass;
+struct AbckitArktsInterface;
+struct AbckitArktsEnum;
 struct AbckitArktsFunction;
-struct AbckitArktsField;
+struct AbckitArktsFunctionParam;
+struct AbckitArktsModuleField;
+struct AbckitArktsClassField;
+struct AbckitArktsInterfaceField;
+struct AbckitArktsEnumField;
 struct AbckitArktsAnnotation;
 struct AbckitArktsAnnotationElement;
 struct AbckitArktsAnnotationInterface;
@@ -81,19 +93,31 @@ typedef struct AbckitCoreModule AbckitCoreModule;
 typedef struct AbckitCoreNamespace AbckitCoreNamespace;
 typedef struct AbckitCoreClass AbckitCoreClass;
 typedef struct AbckitCoreFunction AbckitCoreFunction;
-typedef struct AbckitCoreField AbckitCoreField;
 typedef struct AbckitCoreAnnotation AbckitCoreAnnotation;
 typedef struct AbckitCoreAnnotationElement AbckitCoreAnnotationElement;
 typedef struct AbckitCoreAnnotationInterface AbckitCoreAnnotationInterface;
 typedef struct AbckitCoreAnnotationInterfaceField AbckitCoreAnnotationInterfaceField;
 typedef struct AbckitCoreImportDescriptor AbckitCoreImportDescriptor;
 typedef struct AbckitCoreExportDescriptor AbckitCoreExportDescriptor;
+typedef struct AbckitCoreInterface AbckitCoreInterface;
+typedef struct AbckitCoreEnum AbckitCoreEnum;
+typedef struct AbckitCoreModuleField AbckitCoreModuleField;
+typedef struct AbckitCoreClassField AbckitCoreClassField;
+typedef struct AbckitCoreInterfaceField AbckitCoreInterfaceField;
+typedef struct AbckitCoreEnumField AbckitCoreEnumField;
+typedef struct AbckitCoreFunctionParam AbckitCoreFunctionParam;
 
 typedef struct AbckitArktsModule AbckitArktsModule;
 typedef struct AbckitArktsNamespace AbckitArktsNamespace;
 typedef struct AbckitArktsClass AbckitArktsClass;
+typedef struct AbckitArktsInterface AbckitArktsInterface;
+typedef struct AbckitArktsEnum AbckitArktsEnum;
 typedef struct AbckitArktsFunction AbckitArktsFunction;
-typedef struct AbckitArktsField AbckitArktsField;
+typedef struct AbckitArktsFunctionParam AbckitArktsFunctionParam;
+typedef struct AbckitArktsModuleField AbckitArktsModuleField;
+typedef struct AbckitArktsClassField AbckitArktsClassField;
+typedef struct AbckitArktsInterfaceField AbckitArktsInterfaceField;
+typedef struct AbckitArktsEnumField AbckitArktsEnumField;
 typedef struct AbckitArktsAnnotation AbckitArktsAnnotation;
 typedef struct AbckitArktsAnnotationElement AbckitArktsAnnotationElement;
 typedef struct AbckitArktsAnnotationInterface AbckitArktsAnnotationInterface;
