@@ -11,6 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ani_add_gtest(ani_test_arraybuffer_accessors
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/accessors_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/accessors_test.ets
+)
+
 ani_add_gtest(ani_test_arraybuffer_create
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_create_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arraybuffer_create_test.ets

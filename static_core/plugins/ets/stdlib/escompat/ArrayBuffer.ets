@@ -164,8 +164,18 @@ export class ArrayBuffer extends Buffer
      * @param i index
      *
      * @returns byte at index
+     *
+     * @throws {IndexOutOfBoundsError} if `pos` is out of bound
      */
-    public native override at(pos: int): byte
+    public final at(pos: int): byte {
+        if (this.data !== undefined) {
+            this.doBoundaryCheck(pos)
+            // NOTE(dslynko, #24647) research performance of managed code compared to intrinsics
+            return this.data![pos]
+        }
+        // Fallback to access through native pointer
+        return this.atImpl(pos)
+    }
 
     /**
      * Sets data at specified index.
@@ -174,8 +184,19 @@ export class ArrayBuffer extends Buffer
      * @param b new value
      *
      * @param i index
+     *
+     * @throws {IndexOutOfBoundsError} if `pos` is out of bound
      */
-    public native override set(pos: int, val: byte): void
+    public final set(pos: int, val: byte): void {
+        if (this.data !== undefined) {
+            this.doBoundaryCheck(pos)
+            // NOTE(dslynko, #24647) research performance of managed code compared to intrinsics
+            this.data![pos] = val
+        } else {
+            // Fallback to access through native pointer
+            this.setImpl(pos, val)
+        }
+    }
 
     public override getByteLength(): int {
         return this._byteLength
@@ -193,8 +214,22 @@ export class ArrayBuffer extends Buffer
         return this.isResizable
     }
 
-    /// @brief Copy `this.byteLength` bytes starting from `begin` index of `other` data
-    private native setValues(other: ArrayBuffer, begin: int): void
+    /// @brief Explicitly does boundary check, as `data` array can shrink down
+    private final doBoundaryCheck(pos: int): void {
+        if (pos < 0 || pos >= this._byteLength) {
+            throw new IndexOutOfBoundsError("ArrayBuffer position " + pos + " is out of bounds")
+        }
+    }
+
+    /**
+     * @brief Copies into `this` array `this.byteLength` bytes starting from `begin` index of `other` data
+     * Always valid for a non-detached ArrayBuffer
+     */
+    private final native setValues(other: ArrayBuffer, begin: int): void
+    /// @brief Reads byte from specified position. Always valid for a non-detached ArrayBuffer
+    private final native atImpl(pos: int): byte
+    /// @brief Writes byte at specified position. Always valid for a non-detached ArrayBuffer
+    private final native setImpl(pos: int, val: byte): void
 
     /**
      * Resizes the ArrayBuffer
@@ -356,7 +391,7 @@ export class ArrayBuffer extends Buffer
 
     
     // Fields' order is important due to alignment
-    private data: byte[] | undefined
+    private data: FixedArray<byte> | undefined
     // Length in bytes
     private _byteLength: int
     // Pointer to underlying array, which is either non-movable array or native

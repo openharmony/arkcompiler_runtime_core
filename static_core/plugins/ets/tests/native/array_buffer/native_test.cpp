@@ -17,9 +17,6 @@
 #include <limits>
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/tests/native/native_test_helper.h"
-#include "plugins/ets/runtime/types/ets_method.h"
-#include "runtime/include/runtime.h"
-#include "runtime/include/runtime_options.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
 
