@@ -22,6 +22,7 @@
         "ram": "",
         "deps": {
             "components": [
+                "json",
                 "bounds_checking_function",
                 "ets_runtime",
                 "hilog",
@@ -34,6 +35,7 @@
                 "libuv"
             ],
             "third_party": [
+                "json",
                 "musl"
             ]
         },
