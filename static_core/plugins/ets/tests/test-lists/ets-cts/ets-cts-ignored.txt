@@ -1337,9 +1337,6 @@
 13.compilation_units/09.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/09.export_directives/04.re-export_directive/pkg03_re-export_all.ets
 
-#23945
-13.compilation_units/09.export_directives/02.single_export_directive/ambient04_test.ets
-
 #22692
 15.semantic_rules/05.compatibility_call_args/tuple_rest_params_0.ets
 15.semantic_rules/05.compatibility_call_args/tuple_rest_params_1.ets
