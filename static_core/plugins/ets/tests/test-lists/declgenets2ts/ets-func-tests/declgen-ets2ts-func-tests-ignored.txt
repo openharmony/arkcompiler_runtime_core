@@ -36,6 +36,9 @@ spec/11.Enumerations/enum_trailing_comma_04.ets
 spec/11.Enumerations/issue14636.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/non_linux_path_separators.ets
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/export.ets
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/import.ets
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/reexport.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
@@ -174,10 +177,13 @@ spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Ex
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_05.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@LocalStorageLink.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Observed.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Prop.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink_2.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-class-extends-struct.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_1.ets
+spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_n_01.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0000.ets
@@ -243,6 +249,7 @@ std/core/CollatorTest.ets
 std/core/DateTimeFormatTest.ets
 std/core/IntlDateFormatTest.ets
 std/core/IntlDateTimeStyleFormatTest.ets
+std/core/IntlPluralRulesTest.ets
 std/core/IntlLocaleTest.ets
 std/core/IntlLocaleTest2.ets
 std/core/Object.ets
