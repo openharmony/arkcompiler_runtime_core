@@ -830,14 +830,6 @@
 #19096
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.ets
 
-#23763
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.ets
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_11.ets
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_12.ets
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_13.ets
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_14.ets
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_16.ets
-
 #23766
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.ets
 
