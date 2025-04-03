@@ -92,9 +92,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @throws StringIndexOutOfBoundsError if index is negative or >= length
      */
-    public $_get(index: int): char {
-        return this.charAt(index);
-    }
+    public native $_get(index: int): char;
 
     /**
      * Checks equality of this string and another Object as String
