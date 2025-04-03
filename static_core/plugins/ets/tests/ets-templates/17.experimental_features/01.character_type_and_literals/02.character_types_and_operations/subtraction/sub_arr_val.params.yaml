@@ -12,36 +12,43 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0020'
       v2: c'\u0041'
       exp: 'v2 - v1'
       r: c'!'
 
+    # 1.
     - v1: c'\u0041'
       v2: c'\u0001'
       exp: "v1 - v2 - c' '"
       r: c' '
 
+    # 2.
     - v1: c'\uFFFF'
       v2: c'\uFFFF'
       exp: 'v1 - v2'
       r: c'\u0000'
 
+    # 3. Widening to int happens
     - v1: c'\uFFFF'
       v2: c'\u0000'
-      exp: 'v2 - v1'
+      exp: '(v2 - v1) as char'
       r: c'\u0001'
 
+    # 4. Widening to int happens
     - v1: c'\uFFFF'
       v2: c'\u000F'
-      exp: "c'\\u000F' - v1"
+      exp: "(c'\\u000F' - v1) as char"
       r: c'\u0010'
 
+    # 5. Widening to int happens
     - v1: c'\u1010'
       v2: c'\u0101'
-      exp: "v1 - c'\\u0101' - v2 - c'\\u1010'"
+      exp: "(v1 - c'\\u0101' - v2 - c'\\u1010') as char"
       r: c'\uFDFE'
 
+    # 6.
     - v1: c'∬'
       v2: c'\x01'
       exp: 'v1 - v2'

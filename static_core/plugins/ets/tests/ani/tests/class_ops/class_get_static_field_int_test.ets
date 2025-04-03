@@ -13,6 +13,20 @@
  * limitations under the License.
  */
 class TestInt {
-    static int_value: int = 1024;
+    static int_value: int = 3;
     static string_value: String = "1024";
+    static specia1: int = 0;
+    static specia3: string = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static min: int = -2147483648;
+    static max: int = 2147483647;
+}
+
+class TestIntA extends TestInt {
+    static int_value: int = 3;
+}
+
+final class TestIntFinal extends TestInt {
+    static int_value: int = 3;
 }

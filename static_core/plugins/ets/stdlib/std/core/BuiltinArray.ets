@@ -975,13 +975,15 @@ export function keys(self: boolean[]): IterableIterator<number> {
 class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
     private parent: boolean[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: boolean[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<boolean> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<boolean>()
         }
         return new IteratorResult<boolean>(this.parent[this.idx++])
@@ -999,13 +1001,15 @@ class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
 class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]> {
     private parent: boolean[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: boolean[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, boolean]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, boolean]>()
         }
         const i = this.idx++;
@@ -1931,13 +1935,15 @@ export function keys(self: byte[]): IterableIterator<number> {
 class ArrayValuesIterator_byte implements IterableIterator<byte> {
     private parent: byte[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: byte[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<byte> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<byte>()
         }
         return new IteratorResult<byte>(this.parent[this.idx++])
@@ -1955,13 +1961,15 @@ class ArrayValuesIterator_byte implements IterableIterator<byte> {
 class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
     private parent: byte[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: byte[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, byte]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, byte]>()
         }
         const i = this.idx++;
@@ -2887,13 +2895,15 @@ export function keys(self: short[]): IterableIterator<number> {
 class ArrayValuesIterator_short implements IterableIterator<short> {
     private parent: short[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: short[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<short> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<short>()
         }
         return new IteratorResult<short>(this.parent[this.idx++])
@@ -2911,13 +2921,15 @@ class ArrayValuesIterator_short implements IterableIterator<short> {
 class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
     private parent: short[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: short[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, short]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, short]>()
         }
         const i = this.idx++;
@@ -3843,13 +3855,15 @@ export function keys(self: int[]): IterableIterator<number> {
 class ArrayValuesIterator_int implements IterableIterator<int> {
     private parent: int[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: int[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<int> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<int>()
         }
         return new IteratorResult<int>(this.parent[this.idx++])
@@ -3867,13 +3881,15 @@ class ArrayValuesIterator_int implements IterableIterator<int> {
 class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
     private parent: int[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: int[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, int]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, int]>()
         }
         const i = this.idx++;
@@ -4799,13 +4815,15 @@ export function keys(self: long[]): IterableIterator<number> {
 class ArrayValuesIterator_long implements IterableIterator<long> {
     private parent: long[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: long[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<long> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<long>()
         }
         return new IteratorResult<long>(this.parent[this.idx++])
@@ -4823,13 +4841,15 @@ class ArrayValuesIterator_long implements IterableIterator<long> {
 class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
     private parent: long[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: long[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, long]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, long]>()
         }
         const i = this.idx++;
@@ -5763,13 +5783,15 @@ export function keys(self: float[]): IterableIterator<number> {
 class ArrayValuesIterator_float implements IterableIterator<float> {
     private parent: float[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: float[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<float> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<float>()
         }
         return new IteratorResult<float>(this.parent[this.idx++])
@@ -5787,13 +5809,15 @@ class ArrayValuesIterator_float implements IterableIterator<float> {
 class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
     private parent: float[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: float[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, float]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, float]>()
         }
         const i = this.idx++;
@@ -6727,13 +6751,15 @@ export function keys(self: double[]): IterableIterator<number> {
 class ArrayValuesIterator_double implements IterableIterator<double> {
     private parent: double[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: double[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<double> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<double>()
         }
         return new IteratorResult<double>(this.parent[this.idx++])
@@ -6751,13 +6777,15 @@ class ArrayValuesIterator_double implements IterableIterator<double> {
 class ArrayEntriesIterator_double implements IterableIterator<[number, double]> {
     private parent: double[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: double[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, double]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, double]>()
         }
         const i = this.idx++;
@@ -7683,13 +7711,15 @@ export function keys(self: char[]): IterableIterator<number> {
 class ArrayValuesIterator_char implements IterableIterator<char> {
     private parent: char[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: char[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<char> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<char>()
         }
         return new IteratorResult<char>(this.parent[this.idx++])
@@ -7707,13 +7737,15 @@ class ArrayValuesIterator_char implements IterableIterator<char> {
 class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
     private parent: char[]
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: char[]) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, char]> {
-        if (this.idx >= this.parent.length) {
+        if (this.isDone || this.idx >= this.parent.length) {
+            this.isDone = true
             return new IteratorResult<[number, char]>()
         }
         const i = this.idx++;

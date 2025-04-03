@@ -45,11 +45,13 @@ list(APPEND SITES
 add_custom_target(ets_interop_js_perf_benchmarks)
 
 macro(add_ets_interop_js_benchmark BENCHMARK CALLER CALLEE)
-    panda_ets_interop_js_test_nodevm(ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE}_${BENCHMARK}
-        NODE_OPTIONS "--jitless"
+    # NOTE: must be refactored, because not all targets has dependency from caller.js and callee.js
+    panda_ets_interop_js_test_arkjsvm(ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE}_${BENCHMARK}
         ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/caller.ets ${CMAKE_CURRENT_LIST_DIR}/callee.ets
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/launcher.js
+        JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/callee.js ${CMAKE_CURRENT_LIST_DIR}/caller.js
         LAUNCHER_ARGS ${BENCHMARK} ${CALLER} ${CALLEE} ${WARMUP} ${ITERS}
+        COMPILATION_JS_WITH_CJS_ON
     )
     add_dependencies(ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE} ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE}_${BENCHMARK})
 endmacro()

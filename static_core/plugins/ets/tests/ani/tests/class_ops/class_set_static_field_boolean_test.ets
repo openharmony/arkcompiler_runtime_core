@@ -16,3 +16,11 @@ class TestSetBoolean {
     static bool_value: boolean = false;
     static string_value: string = "";
 }
+
+class TestSetBooleanA extends TestSetBoolean {
+    static bool_value: boolean = false;
+}
+
+final class TestSetBooleanFinal extends TestSetBoolean {
+    static bool_value: boolean = false;
+}

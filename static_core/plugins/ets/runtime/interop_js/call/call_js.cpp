@@ -299,9 +299,8 @@ static std::optional<std::pair<napi_value, napi_value>> ResolveQualifiedReceiver
 
     auto resolveName = [&jsThis, &jsVal, &env](const std::string &name) -> bool {
         jsThis = jsVal;
-        INTEROP_LOG(DEBUG) << "JSRuntimeCallJS: resolve name: " << name;
-        napi_status rc = napi_get_named_property(env, jsVal, name.c_str(), &jsVal);
-        if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+
+        if (!NapiGetNamedProperty(env, jsVal, name.c_str(), &jsVal)) {
             ASSERT(NapiIsExceptionPending(env));
             return false;
         }
@@ -379,8 +378,8 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSBase(Method *method, uint8_t
             auto success = ctx->GetConstStringStorage()->EnumerateStrings(
                 qnameStart, qnameLen, [&jsThis, &jsVal, env](napi_value jsStr) {
                     jsThis = jsVal;
-                    napi_status rc = napi_get_property(env, jsVal, jsStr, &jsVal);
-                    if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+
+                    if (!NapiGetProperty(env, jsVal, jsStr, &jsVal)) {
                         ASSERT(NapiIsExceptionPending(env));
                         return false;
                     }
@@ -442,8 +441,7 @@ extern "C" uint64_t CallJSProxy(Method *method, uint8_t *args, uint8_t *inStackA
             ASSERT(GetValueType(env, jsThis) == napi_object);
             const char *methodName = utf::Mutf8AsCString(st->GetMethod()->GetName().data);
             napi_value jsFn;
-            napi_status rc = napi_get_named_property(env, jsThis, methodName, &jsFn);
-            if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+            if (!NapiGetNamedProperty(env, jsThis, methodName, &jsFn)) {
                 ASSERT(NapiIsExceptionPending(env));
                 return false;
             }

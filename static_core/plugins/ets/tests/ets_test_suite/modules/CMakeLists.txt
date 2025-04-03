@@ -445,8 +445,6 @@ add_custom_target(ets_modules_tests
                     ets_modules_mismatched_test
                     ets_modules_loop_inheritance_class_test
                     ets_modules_multiple_override_test
-                    # 22978 case a memory leak
-                    #ets_modules_multiple_implement_test
-                    # 22978 end
+                    ets_modules_multiple_implement_test
                     ets_modules_verification_mode_test)
 add_dependencies(ets_tests ets_modules_tests)

@@ -28,6 +28,13 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "utils/span.h"
 
+// NOLINTBEGIN(readability-identifier-naming)
+// CC-OFFNXT(G.FMT.10) project code style
+__attribute__((weak)) napi_status napi_load_module_with_module_request([[maybe_unused]] napi_env env,
+                                                                       [[maybe_unused]] const char *request_name,
+                                                                       [[maybe_unused]] napi_value *result);
+// NOLINTEND(readability-identifier-naming)
+
 namespace ark::ets::interop::js::testing {
 
 class EtsInteropTest : public ::testing::Test {
@@ -125,7 +132,7 @@ public:
     }
 
 private:
-    bool LoadModule(const std::string &moduleName, const std::string &modulePath)
+    bool LoadModuleNodeJS(const std::string &moduleName, const std::string &modulePath)
     {
         [[maybe_unused]] napi_status status;
 
@@ -140,12 +147,7 @@ private:
         ASSERT(status == napi_ok);
 
         napi_value jsPath;
-        std::string pathToModule;
-        if (runOnArkJSVM_) {
-            pathToModule = jsAbcFilePath_ + "/" + modulePath;
-        } else {
-            pathToModule = interopJsTestPath_ + "/" + modulePath;
-        }
+        std::string pathToModule = interopJsTestPath_ + "/" + modulePath;
         status = napi_create_string_utf8(jsEnv_, pathToModule.data(), pathToModule.length(), &jsPath);
 
         napi_value jsGtestEnvObject = GetJsGtestEnvObject(jsEnv_);
@@ -154,6 +156,30 @@ private:
         status = napi_call_function(jsEnv_, jsUndefined, jsRequire, 1, &jsPath, &jsModule);
         ASSERT(status == napi_ok);
 
+        status = napi_set_named_property(jsEnv_, jsGtestEnvObject, moduleName.c_str(), jsModule);
+
+        return status == napi_ok;
+    }
+
+    bool LoadModule(const std::string &moduleName, const std::string &modulePath)
+    {
+        if (!runOnArkJSVM_) {
+            return LoadModuleNodeJS(moduleName, modulePath);
+        }
+
+        napi_value jsModule;
+        std::string pathToModule = jsAbcFilePath_ + "/" + modulePath;
+
+        napi_status status = napi_load_module_with_module_request(jsEnv_, pathToModule.c_str(), &jsModule);
+        if (status == napi_pending_exception) {
+            napi_value exp;
+            napi_get_and_clear_last_exception(jsEnv_, &exp);
+            napi_fatal_exception(jsEnv_, exp);
+            std::cerr << "Unable to load module due to exception" << std::endl;
+            UNREACHABLE();
+        }
+
+        napi_value jsGtestEnvObject = GetJsGtestEnvObject(jsEnv_);
         status = napi_set_named_property(jsEnv_, jsGtestEnvObject, moduleName.c_str(), jsModule);
 
         return status == napi_ok;

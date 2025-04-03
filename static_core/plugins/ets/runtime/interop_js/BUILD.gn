@@ -64,7 +64,7 @@ ohos_source_set("ets_interop_js_napi_static") {
   }
 
   if (is_ohos && is_standard_system) {
-    defines = [ "PANDA_USE_OHOS_LOG" ]
+    defines = [ "PANDA_OHOS_USE_INNER_HILOG" ]
     deps += [ ":etsstdlib_install" ]
     external_deps = [
       "hilog:libhilog",

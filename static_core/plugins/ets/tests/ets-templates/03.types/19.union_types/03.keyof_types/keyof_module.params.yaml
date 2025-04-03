@@ -15,24 +15,41 @@ cases:
   - import: |-
         import {A} from "./module.ets"
     call: |-
-        assertEQ(keyof A, never)
+        let n: never
+        type t = keyof A
+        let a: t = n
 
   - import: |-
         import {B} from "./module.ets"
     call: |-
-        assertEQ(keyof B, "foo")
+        type t = keyof B
+        let a: t = "foo"
+        let b: "foo" = a
+        a = b
 
   - import: |-
         import {C} from "./module.ets"
     call: |-
-        assertEQ(keyof C, "foo")
+        type t = keyof C
+        let a: t = "foo"
+        let b: "foo"|"bar" = a
+        b = "bar"
+        a = b
 
   - import: |-
         import {AC} from "./module.ets"
     call: |-
-        assertEQ(keyof AC, "bar" | "foo")
+        type t = keyof AC
+        let a: t = "foo"
+        let b: "foo"|"bar" = a
+        b = "bar"
+        a = b
 
   - import: |-
         import {I} from "./module.ets"
     call: |-
-        assertEQ(keyof i, "bar" | "foo")
+        type t = keyof I
+        let a: t = "foo"
+        let b: "foo"|"bar" = a
+        b = "bar"
+        a = b

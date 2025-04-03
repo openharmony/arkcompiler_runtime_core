@@ -21,10 +21,10 @@ desc: >-
     The resultant new type is a union of names (as string literal types) of all accessible members of the class or interface type.
 ---*/
 
-{{case.decl}}
+{{case.decl|indent}}
 
 function main() {
-   {{case.check}}
+   {{case.check|indent}}
 }
 
 {% endfor %}

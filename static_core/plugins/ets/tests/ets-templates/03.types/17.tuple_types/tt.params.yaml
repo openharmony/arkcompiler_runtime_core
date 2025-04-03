@@ -147,8 +147,8 @@ cases:
           let a: A<[string|null, string|null] | null> = new A<[string|null, string|null] | null>(null)
           a.setFld(["A", null])
           let res = a.getFld()
-          assertTrue( res[0] === "A" )
-          assertTrue( res[1] === null )
+          assertTrue( res![0] === "A" )
+          assertTrue( res![1] === null )
 
     - decl: |-
           const index: int = 1

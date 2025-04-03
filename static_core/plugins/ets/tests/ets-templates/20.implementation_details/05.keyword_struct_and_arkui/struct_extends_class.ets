@@ -15,6 +15,7 @@
 
 /*---
 desc: Keyword 'struct' can be used as a replacement for the keyword 'class'. Check stuct as class extends another class.
+tags: [compile-only, negative]
 ---*/
 
 class Test {

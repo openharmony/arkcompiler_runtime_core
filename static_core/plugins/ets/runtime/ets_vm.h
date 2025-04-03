@@ -270,6 +270,13 @@ public:
         return true;
     }
 
+    void FinalizationRegistryCoroutineExecuted()
+    {
+        // // Atomic with acq_rel order reason: other threads should see correct value
+        [[maybe_unused]] uint32_t oldCnt = finRegCleanupCoroCount_.fetch_sub(1, std::memory_order_acq_rel);
+        ASSERT(oldCnt > 0);
+    }
+
     void CleanupCompiledFrameResources(Frame *frame) override
     {
         auto *coro = EtsCoroutine::GetCurrent();
@@ -391,6 +398,23 @@ private:
 
     static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine);
 
+    /// @brief Increase number of cleanup coroutines and check if not exceeds limit
+    bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
+    {
+        // Limit of cleanup coroutines count
+        constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;
+        // Atomic with acquire order reason: getting correct value
+        uint32_t cnt = finRegCleanupCoroCount_.load(std::memory_order_acquire);
+        uint32_t oldCnt = cnt;
+        // Atomic with acq_rel order reason: sync for counter
+        while (cnt < MAX_FINREG_CLEANUP_COROS &&
+               !finRegCleanupCoroCount_.compare_exchange_weak(cnt, cnt + 1U, std::memory_order_acq_rel,
+                                                              std::memory_order_acquire)) {
+            oldCnt = cnt;
+        }
+        return oldCnt < MAX_FINREG_CLEANUP_COROS;
+    }
+
     void InitializeRandomEngine()
     {
         ASSERT(!randomEngine_);
@@ -417,6 +441,7 @@ private:
     os::memory::Mutex finalizableWeakRefListLock_;
     NativeLibraryProvider nativeLibraryProvider_;
     size_t finRegLastIndex_ {0};
+    std::atomic<uint32_t> finRegCleanupCoroCount_ {0};
     mem::Reference *registeredFinalizationRegistryInstancesRef_ {nullptr};
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
     os::memory::Mutex rootProviderlock_;

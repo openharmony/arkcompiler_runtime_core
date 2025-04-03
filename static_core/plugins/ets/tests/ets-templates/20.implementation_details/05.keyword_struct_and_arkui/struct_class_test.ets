@@ -14,7 +14,10 @@
  */
 
 /*---
-desc: Keyword 'struct' can be used as a replacement for the keyword 'class'. Check stuct implementation as class.
+desc:  >-
+        Keyword 'struct' can be used as a replacement for the keyword 'class'. Check stuct implementation as class.
+        'TypeError: Structs are only used to define UI components, it should be translated at 'plugin after parser' phase.
+tags: [compile-only, negative]
 ---*/
 
 struct StructClass {

@@ -17,11 +17,12 @@
 
 /*---
 desc: The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
+tags: [compile-only, negative]
 ---*/
 
 {{case.decl}}
 
 function main() {
-  {{case.check}}
+  {{case.check|indent}}
 }
 {% endfor %}

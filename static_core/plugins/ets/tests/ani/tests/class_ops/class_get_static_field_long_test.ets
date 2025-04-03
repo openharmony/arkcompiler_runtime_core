@@ -15,4 +15,18 @@
 class TestLong {
     static long_value: long = 24;
     static string_value: String = "24";
+    static specia1: int = 0;
+    static specia3: string = "";
+    static specia4: null = null;
+    static specia5: undefined  = undefined ;
+    static min: long = -9223372036854775808;
+    static max: long = 9223372036854775807;
+}
+
+class TestLongA extends TestLong {
+    static long_value: long = 24;
+}
+
+final class TestLongFinal extends TestLong {
+    static long_value: long = 24;
 }

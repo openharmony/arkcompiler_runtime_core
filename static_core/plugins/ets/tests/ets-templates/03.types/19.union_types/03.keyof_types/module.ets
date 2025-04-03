@@ -20,13 +20,13 @@ tags: [compile-only, not-a-test]
 
 export class A {}
 export class B extends A {
-  foo: 1
+  foo = 1
 }
-export final class C {
-  foo() {}
+export final class C extends B {
+  bar() {}
 }
 export abstract class AC {
-  foo()
+  abstract foo()
   bar: boolean
 }
 export interface I {

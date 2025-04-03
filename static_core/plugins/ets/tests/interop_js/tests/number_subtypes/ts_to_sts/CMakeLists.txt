@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated")
 
 gen_file(TARGET test_number_subtypes_gen_cpp
@@ -28,8 +28,7 @@ gen_file(TARGET test_number_subtypes_gen_ets
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_number_subtypes_ts_to_sts
     CPP_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.cpp
     ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.ets
-    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.js
-    COMPILATION_JS_WITH_CJS_ON
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.ts
 )
 
 add_dependencies(ets_interop_js_test_number_subtypes_ts_to_sts test_number_subtypes_gen_cpp)
