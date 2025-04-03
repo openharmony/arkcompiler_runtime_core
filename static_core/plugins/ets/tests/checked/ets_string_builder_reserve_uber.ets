@@ -44,10 +44,6 @@
 //! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
 //! EVENT_NOT     "SbBufferRealloc"
 
-//! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=gen-gc)
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"
-
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=g1-gc)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ets_string_builder_reserve_uber.ETSGLOBAL::main"

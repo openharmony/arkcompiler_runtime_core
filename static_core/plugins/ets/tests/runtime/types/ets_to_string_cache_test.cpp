@@ -286,7 +286,7 @@ TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionUniqueHashes)
 }
 
 INSTANTIATE_TEST_SUITE_P(EtsToStringCacheTestSuite, EtsToStringCacheParamTest,
-                         testing::Combine(testing::Values("stw", "gen-gc", "g1-gc"),
+                         testing::Combine(testing::Values("stw", "g1-gc"),
                                           testing::Values(GenType::COPY, GenType::SHUFFLE, GenType::INDEPENDENT)));
 
 TEST_F(EtsToStringCacheTest, BitcastTestCached)

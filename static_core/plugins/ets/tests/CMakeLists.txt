@@ -154,7 +154,7 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
     string(FIND "${RUNTIME_ARGUMENTS}" "--gc-type" GC_TYPE_SET)
     if(NOT PANDA_LLVM_INTERPRETER AND ${GC_TYPE_SET} EQUAL -1)
         add_custom_target(${TARGET}
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=g1-gc
             COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw
         )
     else()
@@ -390,7 +390,7 @@ function(run_int_jit_aot_ets_code_foreach_gc PARENT_TARGET ETS_SRC WORK_DIR TARG
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "" "${multiValueArgs}" ${ARGN})
 
-    set(gc_types g1-gc gen-gc stw)
+    set(gc_types g1-gc stw)
 
     foreach(gc_type ${gc_types})
         set(extra_options RUNTIME_EXTRA_OPTIONS "--gc-type=${gc_type};${ARG_RUNTIME_EXTRA_OPTIONS}")

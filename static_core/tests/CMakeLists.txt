@@ -455,7 +455,7 @@ function(add_test_file)
         add_dependencies(${suite} ${target}-verifier)
     endif()
 
-    set(gc_types "stw" "gen-gc" "g1-gc")
+    set(gc_types "stw" "g1-gc")
     if (NOT PANDA_TARGET_ARM32) # Arm32 is not supported in the Irtoc
         if (PANDA_LLVM_INTERPRETER)
             set(interp_types "cpp" "irtoc" "llvm")
