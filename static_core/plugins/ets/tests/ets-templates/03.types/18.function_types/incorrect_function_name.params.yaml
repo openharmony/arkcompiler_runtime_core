@@ -58,8 +58,6 @@ ids:
     - 'do'
     - 'interface'
     - 'return'
-    - 'instanceof'
-    - 'typeof'
     - 'main'
 
     # incorrect characters used
