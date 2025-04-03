@@ -286,18 +286,9 @@ bool GC::NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) 
     // should become visible
     auto newCounter = gcCounter_.load(std::memory_order_acquire);
     ASSERT(newCounter >= counterBeforeWaiting);
-    bool isSensitiveState = false;
-    // NOTE(malinin, 24305): refactor appstate to be moved to another method
-#if defined(PANDA_TARGET_OHOS)
-    auto currentState = this->GetPandaVm()->GetAppState();
-    isSensitiveState = currentState.GetState() == AppState::State::SENSITIVE_START;
-#endif
-    bool shouldRunAccordingToAppState = !(isSensitiveState && (task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE ||
-                                                               task.reason == GCTaskCause::CROSSREF_CAUSE));
     // Atomic with acquire order reason: data race with last_cause_ with dependecies on reads after the load which
     // should become visible
-    return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason) &&
-           shouldRunAccordingToAppState;
+    return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason);
 }
 
 bool GC::GCPhasesPreparation(const GCTask &task)
@@ -537,7 +528,6 @@ void GC::PostponeGCEnd()
     // Don't check IsPostponeEnabled because runtime can be created
     // during app launch. In this case PostponeGCStart is not called.
     isPostponeEnabled_ = false;
-    gcWorker_->OnPostponeGCEnd();
 }
 
 bool GC::IsPostponeEnabled() const
