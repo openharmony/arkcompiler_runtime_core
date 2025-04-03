@@ -27,11 +27,11 @@ cases:
 
     - use: |-
           let d = ["a", 1, 3.14]
-          assertTrue( d instanceof ("a"|Int|Number)[] )
+          assertTrue( d instanceof (string|number)[] )
 
     - use: |-
           let d = ["a" + "", 1, 3.14]
-          assertTrue( d instanceof (String|Int|Double)[] )
+          assertTrue( d instanceof (String|Number)[] )
 
     - decl: |-
           class A {}
@@ -45,7 +45,7 @@ cases:
 
     - use: |-
           let x = [new Long(), new Number(), null, new Short(), undefined]
-          assertTrue( x instanceof (Long|Number|Short|null|undefined)[] )
+          assertTrue( x instanceof (number|null|undefined)[] )
 
     - decl: |-
           let cnt: number
@@ -63,22 +63,22 @@ cases:
           assertTrue( [bar, null, baz, foo] instanceof (F|null)[] )
 
     - use: |-
-          assertTrue( [false, 1, 14, 33.98] instanceof (Int|Number|Boolean)[] )
+          assertTrue( [false, 1, 14, 33.98] instanceof (Number|Boolean)[] )
 
     - use: |-
-          assertTrue( [0 as long, "0", 0 as short, 0x1 as int] instanceof (Long|Short|Int|"0")[] )
+          assertTrue( [0 as long, "0", 0 as short, 0x1 as int] instanceof (number|string)[] )
 
     - use: |-
           assertTrue( [new Object(), null, new Error(), null] instanceof (Object|null)[] )
 
     - use: |-
-          assertTrue( [new Boolean(true), "aaa", new Long()] instanceof (Boolean|"aaa"|Long)[] )
+          assertTrue( [new Boolean(true), "aaa", new Long()] instanceof (Boolean|string|long)[] )
 
     - use: |-
-          assertTrue( ["aa", "bb", null, "cc", null] instanceof ("aa"|"bb"|"cc"|null)[] )
+          assertTrue( ["aa", "bb", null, "cc", null] instanceof (string|null)[] )
 
     - use: |-
-          assertTrue( [0, 1, 2, "aaa", 3, "bbb"] instanceof ("aaa"|"bbb"|int)[] )
+          assertTrue( [0, 1, 2, "aaa", 3, "bbb"] instanceof (string|int)[] )
 
     - use: |-
           assertTrue( [null, null, null, ] instanceof (null)[] )
@@ -95,7 +95,7 @@ cases:
     - decl: |-
           let a = [true, "a", 42.0]
       use: |-
-          assertTrue( a instanceof (Boolean|"a"|Number)[] )
+          assertTrue( a instanceof (Boolean|string|Number)[] )
 
     - decl: |-
           class A {}
@@ -116,7 +116,7 @@ cases:
     - decl: |-
           let a = ["a", "b", "c", "s", ]
       use: |-
-          assertTrue( a instanceof ("a"|"b"|"c"|"s")[] )
+          assertTrue( a instanceof string[] )
 
     - decl: |-
           let s: string = "s"
@@ -133,13 +133,13 @@ cases:
           let b: J = new B
       use: |-
           let x = [a, b, "a", "b", a, b, "a", "b"]
-          assertTrue( x instanceof (I|J|"a"|"b")[] )
+          assertTrue( x instanceof (I|J|string)[] )
 
     - decl: |-
           let a = c'1'
       use: |-
           let x = [a, c'2', '1', '2',]
-          assertTrue( x instanceof ('1'|'2'|Char)[])
+          assertTrue( x instanceof (string|Char)[])
 
     - decl: |-
           let b: bigint|double = 0n
@@ -147,4 +147,4 @@ cases:
           let d: [number, Error] = [1.0, new Error]
       use: |-
           let x = [b, c, d, "1"]
-          assertTrue(x instanceof ("1"|[number, Error]|Double|String|BigInt)[])
+          assertTrue(x instanceof (string|[number, Error]|Double|BigInt)[])
