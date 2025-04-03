@@ -13,29 +13,29 @@
  * limitations under the License.
  */
 
-import {a} from './a';
+import { a } from './a';
 import * as b from './b';
 export let c;
 export * from './d';
-export {e} from './e';
+export { e } from './e';
 
 class HelloWorld {
   str = 'HelloWorld';
 }
 
 class Lit {
-  *lit(): Generator<never, void, unknown> {}
+  *lit(): Generator<never, void, unknown> { }
 }
 
 class NestedLiteralArray {
   num: number = 1;
-  NestedLiteralArray(): void {}
+  NestedLiteralArray(): void { }
   constructor() {
     'use sendable';
   }
 }
 
-msg : string = '';
+msg: string = '';
 
 function foo(): void {
   try {
@@ -66,11 +66,11 @@ function foo(): void {
   }
 }
 
-function goo(): void {}
+function goo(): void { }
 
 function hoo(): void {
   varA = 1.23;
-  let obj = {async * method(): AsyncGenerator<never, void, unknown> {}};
+  let obj = { async * method(): AsyncGenerator<never, void, unknown> { } };
 }
 
 let add = (a: number, b: number): number => a + b;
@@ -84,10 +84,18 @@ async function* asyncGenerateFunc(): AsyncGenerator<string, void, unknown> {
   yield 'hello';
 }
 
-const asyncArrowFunc = async (): Promise<void> => {};
+const asyncArrowFunc = async (): Promise<void> => { };
 
 foo();
 
 print(goo.toString());
 
 hoo();
+
+function sendableFunction() {
+  "use sendable";
+}
+
+async function asyncSendableFunction() {
+  "use sendable";
+}

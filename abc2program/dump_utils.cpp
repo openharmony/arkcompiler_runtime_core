@@ -58,6 +58,12 @@ FunctionKindToStringMap PandasmDumperUtils::function_kind_to_string_map_ = {
     {panda_file::FunctionKind::ASYNC_GENERATOR_FUNCTION, "FunctionKind::ASYNC_GENERATOR_FUNCTION"},
     {panda_file::FunctionKind::ASYNC_NC_FUNCTION, "FunctionKind::ASYNC_NC_FUNCTION"},
     {panda_file::FunctionKind::CONCURRENT_FUNCTION, "FunctionKind::CONCURRENT_FUNCTION"},
+    {static_cast<panda_file::FunctionKind>(static_cast<uint8_t>(panda_file::FunctionKind::FUNCTION) |
+                                           static_cast<uint8_t>(panda_file::FunctionKind::SENDABLE_FUNCTION)),
+     "FunctionKind::SENDABLE_FUNCTION"},
+    {static_cast<panda_file::FunctionKind>(static_cast<uint8_t>(panda_file::FunctionKind::ASYNC_FUNCTION) |
+                                           static_cast<uint8_t>(panda_file::FunctionKind::SENDABLE_FUNCTION)),
+     "FunctionKind::SENDABLE_ASYNC_FUNCTION"},
 };
 
 std::string PandasmDumperUtils::GetFunctionKindString(panda_file::FunctionKind function_kind)
