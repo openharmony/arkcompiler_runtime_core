@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,11 +269,11 @@ TEST_F(EtsObjectTest, CompareAndSetFieldObject)
     ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj2);
 
     ASSERT_TRUE(
-        barObj->CompareAndSetFieldObject(foo1Field->GetOffset(), fooObj1, fooObj2, std::memory_order_relaxed, false));
+        barObj->CompareAndSetFieldObject(foo1Field->GetOffset(), fooObj1, fooObj2, std::memory_order_relaxed, true));
     ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj2);
 
     ASSERT_TRUE(
-        barObj->CompareAndSetFieldObject(foo2Field->GetOffset(), fooObj2, fooObj1, std::memory_order_relaxed, false));
+        barObj->CompareAndSetFieldObject(foo2Field->GetOffset(), fooObj2, fooObj1, std::memory_order_relaxed, true));
     ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj1);
 }
 
