@@ -67,7 +67,7 @@ enum AbckitBitImmSize {
 /**
  * @brief Struct that holds the pointers to the graph manipulation API.
  */
-struct AbckitGraphApi {
+struct CAPI_EXPORT AbckitGraphApi {
     /**
      * @brief Returns ISA type for given graph.
      * @return ISA of the graph.
@@ -947,7 +947,7 @@ struct AbckitGraphApi {
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitGraphApi const *AbckitGetGraphApiImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitGraphApi const *AbckitGetGraphApiImpl(enum AbckitApiVersion version);
 
 #ifdef __cplusplus
 }
