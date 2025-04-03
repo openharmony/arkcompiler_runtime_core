@@ -54,16 +54,19 @@ ani_add_gtest(ani_test_function_call_double
 )
 
 ani_add_gtest(ani_test_function_call_float
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_float_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_float_test.ets
 )
 
 ani_add_gtest(ani_test_function_call_void
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_void_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_void_test.ets
 )
 
 ani_add_gtest(ani_test_function_call_char
+    ETS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.json
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/function_call_char_test.ets
 )
