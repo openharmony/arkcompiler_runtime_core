@@ -26,6 +26,14 @@
 extern "C" {
 #endif
 
+#ifndef CAPI_EXPORT
+#ifdef PANDA_TARGET_WINDOWS
+#define CAPI_EXPORT __declspec(dllexport)
+#else
+#define CAPI_EXPORT __attribute__((visibility("default")))
+#endif
+#endif
+
 struct AbckitFile;
 struct AbckitString;
 struct AbckitType;
