@@ -70,23 +70,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.$_set(i as int, val)
     }
 
-    public $_get(idx: int): T {
-        if (idx >= this.actualLength || idx < 0) {
-            throw new RangeError("Out of bounds")
-        }
-        return this.buffer[idx] as T
-    }
+    public native $_get(idx: int): T;
 
     internal $_get_unsafe(idx: int): T {
         return this.buffer[idx] as T
     }
 
-    public $_set(idx: int, val: T): void {
-        if (idx >= this.actualLength) {
-            throw new RangeError("Out of bounds")
-        }
-        this.buffer[idx] = val
-    }
+    public native $_set(idx: int, val: T): void;
 
     private $_set_unsafe(idx: int, val: T): void {
         this.buffer[idx] = val

@@ -18,6 +18,8 @@
 void BuildIsFiniteIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead);
 void BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildEscompatArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildEscompatArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildInt8ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildInt8ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 // CC-OFFNXT(G.NAM.01,G.NAM.03) false positive

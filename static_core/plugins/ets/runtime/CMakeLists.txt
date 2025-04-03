@@ -32,6 +32,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
     ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
     ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp

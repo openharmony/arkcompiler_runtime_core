@@ -40,6 +40,14 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_EMPTY: {
     Builder()->BuildStringIsEmptyIntrinsic(bcInst_, ACC_READ);
     break;
 }
+case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_GET: {
+    Builder()->BuildEscompatArrayGetIntrinsic(bcInst_, ACC_READ);
+    break;
+}
+case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_SET: {
+    Builder()->BuildEscompatArraySetIntrinsic(bcInst_, ACC_READ);
+    break;
+}
 case RuntimeInterface::IntrinsicId::INTRINSIC_INT8_ARRAY_SET_INT:
 case RuntimeInterface::IntrinsicId::INTRINSIC_INT8_ARRAY_SET_BYTE: {
     Builder()->BuildInt8ArraySetIntrinsic(bcInst_, ACC_READ);

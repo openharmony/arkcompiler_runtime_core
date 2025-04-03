@@ -1505,6 +1505,29 @@ intrinsics:
       args: [ std.core.String, std.core.String, i64, u1 ]
     impl: ark::ets::intrinsics::EscompatDateGetLocaleString
 
+##################
+# escompat.Array #
+##################
+  - name: EscompatArrayGet
+    space: ets
+    class_name: escompat.Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayGet
+
+  - name: EscompatArraySet
+    space: ets
+    class_name: escompat.Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [ i32, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArraySet
+
 ########################
 # escompat.ArrayBuffer #
 ########################
