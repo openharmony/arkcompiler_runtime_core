@@ -16,7 +16,6 @@
 #include "libpandabase/macros.h"
 #include "stdlib_ani_helpers.h"
 #include <cassert>
-#include "stdlib_ani_helpers.h"
 
 namespace ark::ets::stdlib::intl {
 
