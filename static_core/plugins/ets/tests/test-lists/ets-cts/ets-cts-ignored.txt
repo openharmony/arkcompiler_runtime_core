@@ -1,7 +1,3 @@
-#23499 CTE instead of successful compilation
-02.lexical_elements/07.keywords/soft_6.ets
-02.lexical_elements/07.keywords/soft_13.ets
-
 #23500 Successful compilation instead of CTE
 02.lexical_elements/07.keywords/hard_16.ets
 02.lexical_elements/07.keywords/hard_29.ets
