@@ -261,12 +261,6 @@
 #18115 CTE on a union type variable in instanceof
 06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/un2_0.ets
 
-#20483 es2panda aborts on literal type conversion in field initialization expression
-06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_0.ets
-06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_2.ets
-06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_4.ets
-06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_6.ets
-
 #enum cannot be assigned to type Object - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_func/call-func_21.ets
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_arr/comp-arr_21.ets
@@ -849,31 +843,8 @@
 #23818 Compiler doesn't detect circular references
 09.classes/09.constructor_declaration/02.constructor_body/circular_reference.ets
 
-#23898
-09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_10.ets
-09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_11.ets
-09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_12.ets
-09.classes/11.local_classes_and_interfaces/local_class_and_interface_declaration_17.ets
-
-#23899
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_0.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_1.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_2.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_3.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_4.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_5.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_6.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_7.ets
-09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_8.ets
-
-#22788 ES2PANDA_FAIL - fails of negative, compile-only
-09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.ets
-
 #24685
 10.interfaces/03.interface_body/issue24865.ets
-
-#23530
-10.interfaces/05.interface_properties/external_interface_with_property_1.ets
 
 #16840
 10.interfaces/04.interface_members/methods_overriding.ets

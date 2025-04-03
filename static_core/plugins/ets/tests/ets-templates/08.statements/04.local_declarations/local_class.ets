@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: Local declaration in statement (const)
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {

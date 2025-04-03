@@ -96,6 +96,10 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/method_args1_6.ets
 
 # move from exclude to ignore list on 4/12
+#24669
+05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.ets
+
+# move from exclude to ignore list on 4/12
 #24169
 05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_11.ets
 05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_12.ets
@@ -274,16 +278,6 @@
 06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_var/decl-var_4.ets
 06.contexts_and_conversions/05.implicit_conversions/08.function_types_conversions/decl_var/decl-var_5.ets
 
-#24938 Reference equality based on actual enum type fails - revisit after 11.04.2025
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_14.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_15.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_7.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_8.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_8.ets
-
-#24413
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_35.ets
-
 # move from exclude to ignore list on 4/12
 #24935
 07.expressions/11.function_call_expression/fcall_n_9.ets
@@ -292,10 +286,24 @@
 #24941
 07.expressions/11.function_call_expression/fcall_10.ets
 
+#24938 Reference equality based on actual enum type fails - revisit after 11.04.2025
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_14.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_15.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_7.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_8.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_8.ets
+
+#24697
+08.statements/04.local_declarations/local_class.ets
+09.classes/01.class_declaration/local_class_in_func_neg.ets
+09.classes/01.class_declaration/local_interface_in_func_neg_1.ets
+09.classes/01.class_declaration/local_interface_in_func_neg_2.ets
+09.classes/01.class_declaration/local_interface_in_meth_neg_1.ets
+09.classes/01.class_declaration/local_interface_in_meth_neg_2.ets
+
+#24413
+17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_35.ets
+
 # move from exclude to ignore list on 4/12
 #24840
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_3.ets
-
-# move from exclude to ignore list on 4/12
-#24669
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.ets
