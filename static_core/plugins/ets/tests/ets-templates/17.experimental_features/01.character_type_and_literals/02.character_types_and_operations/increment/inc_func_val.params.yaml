@@ -12,42 +12,52 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0020'
       exp: 'incPre(v1)'
       res: c'!'
 
+    # 1.
     - v1: c'\u0020'
       exp: 'incPost(v1)'
       res: c'!'
 
+    # 2.
     - v1: c'\u0020'
       exp: "(c' ' + incPre(v1)) as char"
       res: c'A'
 
+    # 3.
     - v1: c'\u0020'
       exp: "(c' ' + incPost(v1)) as char"
       res: c'A'
 
+    # 4.
     - v1: c'\uFFFF'
       exp: "incPre(v1)"
       res: c'\x00'
 
+    # 5.
     - v1: c'\uFFFF'
       exp: "incPost(v1)"
       res: c'\x00'
 
+    # 6. Widening to int happens
     - v1: c'\uFFFF'
       exp: "incPre((c'!' + v1 + v1) as char)"
       res: c'\u0020'
 
+    # 7. Widening to int happens
     - v1: c'\uFFFF'
       exp: "incPost((c'!' + v1 + v1) as char)"
       res: c'\u0020'
 
+    # 8. Widening to int happens
     - v1: c'\u0F0F'
       exp: "(incPre((v1 + c'1') as char) + incPre(c'\\uACD9')) as char"
       res: c'\uBC1B'
 
+    # 9. Widening to int happens
     - v1: c'\u0F0F'
       exp: "(incPost((v1 + c'1') as char) + incPost(c'\\uACD9')) as char"
       res: c'\uBC1B'

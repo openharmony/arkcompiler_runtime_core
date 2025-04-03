@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,26 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for v in  vals %}
+
 /*---
 desc: >-
-    ArkTS provides a number of operators to act on character values:
-    Character operators that produce a value of type char.
+    Widening Primitive Conversion converts cher to int, so char + char => int
+tags: [compile-only, negative]
 ---*/
 
-function minus(p: Char): Char {
-    // Widening to int happens
-    return -p as Char
-}
-
-function plus(p: Char): Char {
-    // Widening to int happens
-    return +p as Char
+function foo(c: boolean, p: char, q: char): char {
+    return c ? p : q
 }
 
 function main() {
-    const v1 = new Char({{v.v1}})
+    const v1 = c'\u0020'
+    const v2 = c'\u0021'
 
-    assertEQ( ({{v.exp}}), {{v.r}} )
+    assertEQ( (c' ' + foo(false, v2 + v1, v2 - v1)), 1 )
 }
-{%- endfor %}

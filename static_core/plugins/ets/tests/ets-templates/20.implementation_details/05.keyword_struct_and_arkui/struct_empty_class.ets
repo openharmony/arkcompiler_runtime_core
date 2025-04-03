@@ -15,8 +15,7 @@
 
 /*---
 desc: Keyword 'struct' can be used as a replacement for the keyword 'class'. Check empty struct as class.
-tags:
-- compile-only
+tags: [compile-only, negative]
 ---*/
 
 struct StructClass {}
