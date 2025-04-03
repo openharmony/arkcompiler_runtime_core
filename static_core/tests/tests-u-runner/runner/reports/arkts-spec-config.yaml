@@ -804,9 +804,6 @@
 '9.10':
     title: Inheritance
     status: ''
-'9.11':
-    title: Local Classes and Interfaces
-    status: ''
 '10':
     title: Interfaces
     status: No testable assertions
