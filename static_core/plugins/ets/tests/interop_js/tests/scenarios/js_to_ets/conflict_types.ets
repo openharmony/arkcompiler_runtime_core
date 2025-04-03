@@ -67,8 +67,8 @@ function TestFunctionArgTypeConflictMap(): boolean {
 }
 
 function TestFunctionArgTypeConflictObject(): boolean {
-    const object = js.functionArgTypeConflictObject() as Object;
-    return typeof object == 'object' && object instanceof Object;
+    const obj = js.functionArgTypeConflictObject() as Object;
+    return typeof obj == 'object' && obj instanceof Object;
 }
 
 function TestFunctionArgTypeConflictString(): boolean {
