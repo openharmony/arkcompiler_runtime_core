@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_test_nodevm(ets_interop_js__test_proxy_reference_storage_2
+panda_ets_interop_js_test_arkjsvm(ets_interop_js__test_proxy_reference_storage_2
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_proxy_reference_storage_2.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/test_proxy_reference_storage_2.js
 )

@@ -16,7 +16,7 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_backtracetest
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_backtracetest
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.ets
 )
