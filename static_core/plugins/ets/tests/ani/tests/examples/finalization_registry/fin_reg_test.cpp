@@ -29,7 +29,6 @@ public:
         return "";
     }
 
-    template <bool WITH_ARG>
     void CreateFinalizationRegistry(NativeCallback cb, ani_object *finReg, ani_method *registerMethod)
     {
         ASSERT_NE(finReg, nullptr);
@@ -40,15 +39,12 @@ public:
         std::string_view registerSignature = "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V";
         ASSERT_EQ(env_->Class_FindMethod(finRegClass, "register", registerSignature.data(), registerMethod), ANI_OK);
 
-        std::string_view ctorSignature = "Lstd/core/Function0;:V";
-        if constexpr (WITH_ARG) {
-            ctorSignature = "Lstd/core/Function1;:V";
-        }
+        std::string_view ctorSignature = "Lstd/core/Function1;:V";
         ani_method ctor = nullptr;
         ASSERT_EQ(env_->Class_FindMethod(finRegClass, "<ctor>", ctorSignature.data(), &ctor), ANI_OK);
 
         ani_object managedCb = nullptr;
-        CreateManagedCallback<WITH_ARG>(cb, &managedCb);
+        CreateManagedCallback(cb, &managedCb);
 
         ASSERT_EQ(env_->Object_New(finRegClass, ctor, finReg, managedCb), ANI_OK);
     }
@@ -104,7 +100,6 @@ private:
         reinterpret_cast<NativeCallback>(cbPtr)(env, cbArg);
     }
 
-    template <bool WITH_ARG>
     void CreateManagedCallback(NativeCallback cb, ani_object *managedCb)
     {
         ASSERT_NE(managedCb, nullptr);
@@ -114,12 +109,8 @@ private:
             env_->Object_New(nativeCallbackClass_, nativeCallbackCtor_, &nativeCb, reinterpret_cast<ani_long>(cb)),
             ANI_OK);
 
-        std::string factorySignature = callbackClassName_ + ":Lstd/core/Function0;";
-        std::string_view creatorName = "createCallback";
-        if constexpr (WITH_ARG) {
-            factorySignature = callbackClassName_ + ":Lstd/core/Function1;";
-            creatorName = "createCallbackWithArg";
-        }
+        std::string factorySignature = callbackClassName_ + ":Lstd/core/Function1;";
+        std::string_view creatorName = "createCallbackWithArg";
 
         ani_ref createdManagedCb = nullptr;
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Ref(nativeCallbackClass_, creatorName.data(),
@@ -149,7 +140,7 @@ TEST_F(FinalizationRegistryTest, test_native_finalizer)
 {
     ani_object finReg = nullptr;
     ani_method registerMethod = nullptr;
-    CreateFinalizationRegistry<false>(FinalizeWithGlobalCount, &finReg, &registerMethod);
+    CreateFinalizationRegistry(FinalizeWithGlobalCount, &finReg, &registerMethod);
 
     ASSERT_EQ(env_->CreateLocalScope(NUMBER_OF_REFS), ANI_OK);
 
@@ -219,7 +210,7 @@ TEST_F(FinalizationRegistryTest, test_finalizer_with_managed_access)
 {
     ani_object finReg = nullptr;
     ani_method registerMethod = nullptr;
-    CreateFinalizationRegistry<true>(FinalizeWithManagedMark, &finReg, &registerMethod);
+    CreateFinalizationRegistry(FinalizeWithManagedMark, &finReg, &registerMethod);
 
     std::array<ani_ref, NUMBER_OF_REFS> finalizationMarkers {nullptr};
     auto markerClassDescriptor = GetFinalizationMarkerClassDescriptor();
