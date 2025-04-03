@@ -20,9 +20,11 @@ desc: Inheritance methods from Object class.
 params: {{method}}
 ---*/
 
+class C {}
+
 function main(): void {
-    let s: String = new String("test");
-    s.{{method}}
+    let c: C = new C
+    c.{{method}}
 }
 
 {% endfor %}
