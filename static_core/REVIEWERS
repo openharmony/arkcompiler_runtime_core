@@ -67,10 +67,10 @@ static_core/platforms/**/*mem*                           ^dmitriitr @udav
 static_core/plugins/ets/playground                       @anton-sysoev @dreamdoomwalker
 static_core/runtime/arch/                                @Prof1983
 static_core/runtime/bridge/                              @Prof1983
-static_core/runtime/coroutines/                          ^dmitriitr @konstanting
+static_core/runtime/coroutines/                          ^dmitriitr @konstanting ^ychen3
 static_core/runtime/entrypoints/                         @Prof1983
 static_core/runtime/entrypoints/entrypoints.*            @mbolshov
-static_core/runtime/fibers/                              @konstanting
+static_core/runtime/fibers/                              @konstanting ^ychen3
 static_core/runtime/jit/                                 @Prof1983
 static_core/runtime/mem/                                 ^dmitriitr @udav
 static_core/runtime/tooling/                             @ragnvald
@@ -94,7 +94,7 @@ static_core/plugins/ets/irtoc_scripts/                   @Prof1983 @mbolshov
 static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  ^Prof1983 ^kosovpavel @asidorov
 static_core/plugins/ets/runtime/                         @vpukhov
-static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting
+static_core/plugins/ets/runtime/*coroutine*              ^dmitriitr @konstanting ^ychen3
 static_core/plugins/ets/runtime/ani                      @liwentao_uiw @v-cherkashin ^slynkodenis
 static_core/plugins/ets/runtime/ets_entrypoints*         @Prof1983 @mbolshov
 static_core/plugins/ets/runtime/ets_handle*              ^dmitriitr @udav
@@ -142,9 +142,9 @@ static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @d
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
-static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong
+static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
-static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         ^dmitriitr @konstanting
+static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         ^dmitriitr @konstanting ^ychen3
 static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav
