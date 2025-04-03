@@ -13,7 +13,7 @@
 
 add_custom_target(declgen_ets2ts_test)
 add_custom_target(declgen_ets2ts_test_diff)
-add_dependencies(ets_interop_js_tests_nodevm declgen_ets2ts_test_diff declgen_ets2ts_test)
+add_dependencies(ets_interop_js_tests_arkjsvm declgen_ets2ts_test_diff declgen_ets2ts_test)
 
 # Create create_declgen_ets2ts_test test
 #
@@ -30,7 +30,7 @@ add_dependencies(ets_interop_js_tests_nodevm declgen_ets2ts_test_diff declgen_et
 #      ${BINARY_ROOT_DIR}/*.ts -> ${BINARY_ROOT_DIR}/*.js
 #   4. Links all 'abc' files into single file:
 #      ${BINARY_ROOT_DIR}/*.abc -> ${BINARY_ROOT_DIR}/lib_linked.abc
-#   5. Creates panda_ets_interop_js_test_nodevm from ${BINARY_ROOT_DIR}/*.js and ${BINARY_ROOT_DIR}/lib_linked.abc
+#   5. Creates panda_ets_interop_js_test_arkjsvm from ${BINARY_ROOT_DIR}/*.js and ${BINARY_ROOT_DIR}/lib_linked.abc
 #   6. Tests difference between expected and actual declaration files:
 #      ${BINARY_ROOT_DIR}/*.ts <-> ${ROOT_DIR}/*.expected
 #
@@ -57,10 +57,23 @@ function(create_declgen_ets2ts_test TARGET)
     cmake_parse_arguments(
         ARG
         ""
-        "ROOT_DIR;BINARY_ROOT_DIR;TS_MAIN"
+        "ROOT_DIR;BINARY_ROOT_DIR;TS_MAIN;ETS_VM_LAUNCHER;"
         "TS_SOURCES;ETS_SOURCES;JS_SOURCES;DECLS_EXPECTED"
         ${ARGN}
     )
+
+    set(TARGET "declgen_ets2ts_test_${TARGET}")
+
+    set(ALL_DYNAMIC_SOURCES)
+    if (DEFINED ARG_TS_SOURCES)
+        list(APPEND ALL_DYNAMIC_SOURCES ${ARG_TS_SOURCES})
+    endif()
+    if (DEFINED ARG_JS_SOURCES)
+        list(APPEND ALL_DYNAMIC_SOURCES ${ARG_JS_SOURCES})
+    endif()
+    if (DEFINED ARG_ETS_VM_LAUNCHER)
+        list(APPEND ALL_DYNAMIC_SOURCES ${ARG_ETS_VM_LAUNCHER})
+    endif()
 
     # Replaces path prefix from ARG_ROOT_DIR to ARG_BINARY_ROOT_DIR and extension
     function(rebase_path SRC DST)
@@ -77,7 +90,7 @@ function(create_declgen_ets2ts_test TARGET)
         set(${DST} ${RES} PARENT_SCOPE)
     endfunction()
 
-    set(TARGET "declgen_ets2ts_test_${TARGET}")
+    set(JS_TO_ABC_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/compiled_js)
 
     # Create arktsconfig.json with "dynamicPaths" for js modules
     set(ARKTSCONFIG_CONTENT
@@ -89,7 +102,7 @@ function(create_declgen_ets2ts_test TARGET)
     foreach(JS_SOURCE ${ARG_JS_SOURCES})
         get_filename_component(JS_SRC_WE ${JS_SOURCE} NAME_WE)
         set(ARKTSCONFIG_CONTENT
-            "      \"${JS_SRC_WE}\": {\"language\": \"js\", \"ohmUrl\":\"${JS_SOURCE}\"}${COMMA}\n"
+            "      \"${JS_SRC_WE}\": {\"language\": \"js\", \"ohmUrl\":\"${JS_TO_ABC_OUTPUT_DIR}/${JS_SRC_WE}\"}${COMMA}\n"
             "${ARKTSCONFIG_CONTENT}"
         )
         if(COMMA STREQUAL "")
@@ -130,7 +143,7 @@ function(create_declgen_ets2ts_test TARGET)
         list(APPEND GLUE_FILES ${GLUE_PATH})
 
         add_custom_command(
-            OUTPUT ${ABC_PATH} ${DECL_PATH}
+            OUTPUT ${ABC_PATH} ${DECL_PATH} ${GLUE_PATH}
             COMMENT "Compiling: ${ETS_SOURCE}"
             COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=ets --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
             COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output-dets=${DECL_PATH} --output-ets=${GLUE_PATH} ${ETS_SOURCE}
@@ -166,13 +179,6 @@ function(create_declgen_ets2ts_test TARGET)
         list(APPEND JS_FILES ${JS_SOURCE})
     endforeach()
 
-    # Copy main.ts into build folder and compute main.js path
-    rebase_path(${ARG_TS_MAIN} COPIED_TS_MAIN)
-    configure_file(${ARG_TS_MAIN} ${COPIED_TS_MAIN} COPYONLY)
-    list(APPEND COPIED_TS_SOURCES ${COPIED_TS_MAIN})
-    rebase_path(${COPIED_TS_MAIN} JS_MAIN "js")
-    list(APPEND JS_FILES ${JS_MAIN})
-
     # Compile source .ts and declaratin .ts files into .js
     add_custom_command(
         OUTPUT ${JS_FILES}
@@ -197,10 +203,15 @@ function(create_declgen_ets2ts_test TARGET)
         DEPENDS ${LIB_LINKED_ABC}
     )
 
+    list(APPEND ALL_DYNAMIC_SOURCES ${DECL_FILES})
+    list(APPEND ALL_DYNAMIC_SOURCES ${GLUE_FILES})
+
     # Execute compiled interop project
-    panda_ets_interop_js_test_nodevm(${TARGET}
+    panda_ets_interop_js_test_arkjsvm(${TARGET}
         ABC_FILE ${LIB_LINKED_ABC}
-        JS_LAUNCHER ${JS_MAIN}
+        JS_LAUNCHER ${ARG_TS_MAIN}
+        JS_SOURCES ${ALL_DYNAMIC_SOURCES}
+        DYNAMIC_ABC_OUTPUT_DIR ${JS_TO_ABC_OUTPUT_DIR}
     )
     add_dependencies(${TARGET} ${TARGET}_tsc ${TARGET}_link)
     add_dependencies(declgen_ets2ts_test ${TARGET})
@@ -222,7 +233,7 @@ function(create_declgen_ets2ts_test TARGET)
         # Remove single-line comments (//) and multi-line comments (/* ... */)
         string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
         string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
-        
+
         string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
         string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
 

@@ -18,6 +18,8 @@ create_declgen_ets2ts_test(getters_setters
         ${CMAKE_CURRENT_BINARY_DIR}
     TS_MAIN
         ${CMAKE_CURRENT_SOURCE_DIR}/main.ts
+    ETS_VM_LAUNCHER
+        ${CMAKE_CURRENT_SOURCE_DIR}/../ets_vm_launcher.ts
     TS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/getters_setters.ts
     ETS_SOURCES

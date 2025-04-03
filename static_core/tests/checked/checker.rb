@@ -57,6 +57,8 @@ OptionParser.new do |opts|
   opts.on('--checker-filter=STRING', 'Run only checkers with filter-matched name') do |v|
     options.checker_filter = v
   end
+  opts.on('--interop', 'Do interop-specific actions')
+    options.interop = true
 end.parse!(into: options)
 
 $LOG_LEVEL = options.verbose ? Logger::DEBUG : Logger::ERROR
@@ -208,6 +210,11 @@ class Checker
 
   def init_run
     Dir.mkdir(@cwd) unless File.exists?(@cwd)
+    if @options.interop
+      # module directory need only for interop with ArkJSVM
+      module_dir_path = File.join(@cwd, "module")
+      Dir.mkdir(module_dir_path) unless Dir.exist?(module_dir_path)
+    end
     clear_data
   end
 
@@ -251,7 +258,7 @@ class Checker
         @args << '--compiler-hotness-threshold=0 --no-async-jit=true --compiler-enable-jit=true'
       when :force_profiling
         next unless value
-        @args << '--compiler-profiling-threshold=0 --no-async-jit=true --compiler-enable-jit=true' 
+        @args << '--compiler-profiling-threshold=0 --no-async-jit=true --compiler-enable-jit=true'
       when :pgo_emit_profdata
         next unless value
         @profdata_file = "#{@cwd}/#{File.basename(@options.test_file, File.extname(@options.test_file))}.profdata"
@@ -274,8 +281,10 @@ class Checker
     @args = @args.join(' ')
     aot_arg = @aot_file.empty? ? '' : "--aot-file #{@aot_file}"
 
+    compiler_dump = @options.interop ? "--compiler-dump:folder=./ir_dump" : "--compiler-dump"
+
     cmd = "#{@options.run_prefix} #{@options.panda} --compiler-queue-type=simple --compiler-ignore-failures=false #{@options.panda_options} \
-                #{aot_arg} #{@args} --events-output=csv --compiler-dump --compiler-disasm-dump:single-file #{@options.test_file} #{entry}"
+                #{aot_arg} #{@args} --events-output=csv #{compiler_dump} --compiler-disasm-dump:single-file #{@options.test_file} #{entry}"
     $curr_cmd = "#{env} #{cmd}"
     log.debug "Panda command: #{$curr_cmd}"
 

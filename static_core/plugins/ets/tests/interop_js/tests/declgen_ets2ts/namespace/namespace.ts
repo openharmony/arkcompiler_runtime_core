@@ -21,7 +21,8 @@ const FIX_INTEROP: boolean = false;
 import { A } from './lib';
 
 function assertEq<T>(a: T, b: T): void {
-	console.log(`assertEq: '${a}' === '${b}'`);
+	// @ts-ignore
+	print(`assertEq: '${a}' === '${b}'`);
 	if (a !== b) {
 		throw new Error(`assertEq failed: '${a}' === '${b}'`);
 	}
