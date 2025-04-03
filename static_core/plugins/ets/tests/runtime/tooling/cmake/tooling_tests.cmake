@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,23 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
+add_custom_target(tooling_ets_tests COMMENT "Common target to run tooling ETS tests")
 
-# Add gtest-based tests to ani_tests target.
-#
-# Example usage:
-#   ani_add_gtest(test_name
-#     ETS_CONFIG path/to/arktsconfig.json
-#     CPP_SOURCES
-#       tests/unit1_test.cpp
-#       tests/unit2_test.cpp
-#     ETS_SOURCES
-#       tests/unit1_test.ets
-#     LIBRARIES
-#       lib_target1
-#       lib_target2
-#   )
-function(ani_add_gtest TARGET)
+function(tooling_ets_native_test TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
         ""
@@ -46,11 +32,11 @@ function(ani_add_gtest TARGET)
         ETS_CONFIG ${ARG_ETS_CONFIG}
         ETS_SOURCES ${ARG_ETS_SOURCES}
         CPP_SOURCES ${ARG_CPP_SOURCES}
-        LIBRARIES ${ARG_LIBRARIES} ani_gtest
+        LIBRARIES ${ARG_LIBRARIES}
         TSAN_EXTRA_OPTIONS ${ARG_TSAN_EXTRA_OPTIONS}
-        ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
+        ETS_GTEST_ABC_PATH "MANAGED_GTEST_ABC_PATH"
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
         VERIFY_SOURCES ${VERIFY_SOURCES}
-        TEST_GROUP ani_tests
+        TEST_GROUP tooling_ets_tests
     )
-endfunction(ani_add_gtest)
+endfunction(tooling_ets_native_test)
