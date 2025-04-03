@@ -81,7 +81,7 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
 static void AppStateCallback(int state, int64_t timeStamp)
 {
     auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
-    auto *pandaVm = EtsCoroutine::GetCurrent()->GetPandaVM();
+    auto *pandaVm = Runtime::GetCurrent()->GetPandaVM();
     pandaVm->UpdateAppState(appState);
     if (UNLIKELY(static_cast<AppState::State>(state) == AppState::State::COLD_START_FINISHED)) {
         pandaVm->GetGC()->PostponeGCEnd();
@@ -673,7 +673,8 @@ static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *m
 {
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
     auto gcType = mainCoro->GetVM()->GetGC()->GetType();
-    if (Runtime::GetOptions().IsEnableXgc() && (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {
+    if ((Runtime::GetOptions().GetXgcTriggerType() != "never") &&
+        (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {
         // XGC is not implemented for other GC types
         LOG(ERROR, RUNTIME) << "XGC requires GC type to be g1-gc and no-async-jit option must be false";
         return false;

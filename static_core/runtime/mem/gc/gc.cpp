@@ -292,8 +292,7 @@ bool GC::NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) 
     auto currentState = this->GetPandaVm()->GetAppState();
     isSensitiveState = currentState.GetState() == AppState::State::SENSITIVE_START;
 #endif
-    bool shouldRunAccordingToAppState = !(isSensitiveState && (task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE ||
-                                                               task.reason == GCTaskCause::CROSSREF_CAUSE));
+    bool shouldRunAccordingToAppState = !(isSensitiveState && task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
     // Atomic with acquire order reason: data race with last_cause_ with dependecies on reads after the load which
     // should become visible
     return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason) &&

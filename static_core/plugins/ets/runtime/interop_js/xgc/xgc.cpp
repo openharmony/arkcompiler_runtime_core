@@ -53,17 +53,31 @@ private:
 
 XGC *XGC::instance_ = nullptr;
 
+static constexpr XGC::TriggerPolicy GetXGCTriggerPolicyByString(std::string_view policyStr)
+{
+    if (policyStr == "default") {
+        return XGC::TriggerPolicy::DEFAULT;
+    }
+    if (policyStr == "force") {
+        return XGC::TriggerPolicy::FORCE;
+    }
+    if (policyStr == "never") {
+        return XGC::TriggerPolicy::NEVER;
+    }
+    return XGC::TriggerPolicy::INVALID;
+}
+
 XGC::XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedReferenceStorage *storage)
     : vm_(vm),
       storage_(storage),
       stsVmIface_(stsVmIface),
-      enableXgc_(Runtime::GetCurrent()->GetOptions().IsEnableXgc()),
       minimalThresholdSize_(Runtime::GetCurrent()->GetOptions().GetXgcMinTriggerThreshold()),
       increaseThresholdPercent_(
           std::min(PERCENT_100_U32, Runtime::GetCurrent()->GetOptions().GetXgcTriggerPercentThreshold())),
-      gcForceXgcEnabled_(Runtime::GetCurrent()->GetOptions().IsGcForceXgcEnabled())
+      treiggerPolicy_(GetXGCTriggerPolicyByString(Runtime::GetCurrent()->GetOptions().GetXgcTriggerType()))
 {
     ASSERT(minimalThresholdSize_ <= storage->MaxSize());
+    ASSERT(treiggerPolicy_ != XGC::TriggerPolicy::INVALID);
     // Atomic with relaxed order reason: data race with targetThreasholdSize_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     targetThreasholdSize_.store(minimalThresholdSize_, std::memory_order_relaxed);
@@ -356,9 +370,6 @@ size_t XGC::ComputeNewSize()
 bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
 {
     ASSERT_MANAGED_CODE();
-    if (!enableXgc_) {
-        return false;
-    }
     LOG(DEBUG, GC_TRIGGER) << "Trigger XGC. Current storage size = " << storage_->Size();
     // NOTE(ipetrov, #20146): Iterate over all contexts
     auto *coro = EtsCoroutine::GetCurrent();
@@ -377,21 +388,40 @@ bool XGC::Trigger(mem::GC *gc, PandaUniquePtr<GCTask> task)
     return true;
 }
 
-void XGC::TriggerGcIfNeeded(mem::GC *gc)
+ALWAYS_INLINE bool XGC::NeedToTriggerXGC([[maybe_unused]] const mem::GC *gc) const
 {
-    if (gcForceXgcEnabled_) {
-        LOG(DEBUG, ETS_INTEROP_JS) << "force Xgc when create Ets And Js object";
-        Trigger(gc, MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos()));
-        return;
+    switch (treiggerPolicy_) {
+        case TriggerPolicy::FORCE:
+            return true;
+        case TriggerPolicy::NEVER:
+            return false;
+        case TriggerPolicy::DEFAULT:
+            [[fallthrough]];
+        default:
+            break;
     }
     // Atomic with relaxed order reason: data race with isXGcInProgress_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     if (isXGcInProgress_.load(std::memory_order_relaxed)) {
-        return;
+        return false;
     }
     // Atomic with relaxed order reason: data race with targetThreasholdSize_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     if (storage_->Size() < targetThreasholdSize_.load(std::memory_order_relaxed)) {
+        return false;
+    }
+#if defined(PANDA_TARGET_OHOS)
+    // Don't trigger XGC in high sensitive case
+    if (gc->GetPandaVm()->GetAppState().GetState() == AppState::State::SENSITIVE_START) {
+        return false;
+    }
+#endif  // PANDA_TARGET_OHOS
+    return true;
+}
+
+void XGC::TriggerGcIfNeeded(mem::GC *gc)
+{
+    if (!NeedToTriggerXGC(gc)) {
         return;
     }
     this->Trigger(gc, MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos()));

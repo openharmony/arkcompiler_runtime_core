@@ -165,10 +165,9 @@ void GCWorker::RunGC(PandaUniquePtr<GCTask> task)
     if (task == nullptr || task->reason == GCTaskCause::INVALID_CAUSE) {
         return;
     }
-    if (gc_->IsPostponeEnabled() &&
-        (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE || task->reason == GCTaskCause::CROSSREF_CAUSE)) {
+    if (gc_->IsPostponeEnabled() && (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE)) {
         os::memory::LockHolder lh(postponedTasksMutex_);
-        if (!postponedTasks_.empty() && postponedTasks_.back()->reason != task->reason) {
+        if (postponedTasks_.empty() || postponedTasks_.back()->reason != task->reason) {
             postponedTasks_.push(std::move(task));
         }
         return;

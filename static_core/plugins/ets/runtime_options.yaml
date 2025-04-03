@@ -237,8 +237,3 @@ options:
   type: bool
   default: false
   description: Enable external coroutine scheduling (e.g. in event loop)
-
-- name: gc-force-xgc-enabled
-  type: bool
-  default: false
-  description: Enable force XGC when create interop object
