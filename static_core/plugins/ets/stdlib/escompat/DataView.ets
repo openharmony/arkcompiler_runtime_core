@@ -73,7 +73,7 @@ export final class DataView implements ArrayBufferView {
      * @throws RangeError if provided indicies are invalid
      */
     public constructor(buffer: ArrayBufferLike, byteOffset?: Number, byteLength?: Number) {
-        this(buffer, asIntOrDefault(byteOffset, 0), asIntOrDefault(byteLength, (buffer as Buffer).getByteLength()))
+        this(buffer, asIntOrDefault(byteOffset, 0), asIntOrDefault(byteLength, (buffer as Buffer).getByteLength() - asIntOrDefault(byteOffset, 0)))
     }
     // === Int8 ===
 
