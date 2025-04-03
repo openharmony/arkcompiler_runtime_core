@@ -55,3 +55,29 @@ cases:
       use: |-
           let e = foo() // CTE: void cannot be used as type annotation
 
+    - decl: |-
+          function bar(callee: () => void): void {}
+      use: |-
+          bar("A") // CTE: not a function type called
+
+    - decl: |-
+          function bar(callee: () => void): void {
+            callee()
+          }
+      use: |-
+          bar((): int => { return 1 }) // CTE: No matching call signature
+
+    - decl: |-
+          function bar(callee: () => void): void {
+            callee()
+          }
+      use: |-
+          bar((a: int): void => {}) // CTE: No matching call signature
+
+    - decl: |-
+          function bar(callee: (a: int) => void): void {
+            callee(1)
+          }
+      use: |-
+          bar((): void => {}) // CTE: No matching call signature
+

@@ -311,9 +311,6 @@
 #14962
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/interface_args_12.ets
 
-#24648
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.ets
-
 #23754
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_0.ets
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_1.ets
@@ -1225,9 +1222,6 @@
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_28.ets
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_29.ets
 
-#24427
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_3.ets
-
 #24428
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc2.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_0.ets
@@ -1284,10 +1278,6 @@
 #15767 Cannot select the right method among overloaded ones
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_3.ets
 
-#15817 Tests failing on the latest dev branch status
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_14.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_11.ets
-
 #24112
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_11.ets
@@ -1302,6 +1292,8 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_9.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_9.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_14.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_11.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_4.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_4.ets
 

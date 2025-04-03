@@ -163,3 +163,17 @@ cases:
           v = (): number => { return globl }
           globl = 9.81
           assertEQ( (v as NumberFunc)(), 9.81 )
+
+    - decl: |-
+          function foo(): int { return 1 }
+          function call(callee: () => int): int {
+            return callee()
+          }
+          class A {
+            static method(): int { return 2 }
+            method(): int { return 3 }
+          }
+      use: |-
+          assertEQ(call(foo), 1)
+          assertEQ(call(A.method), 2)
+          assertEQ(call((new A).method), 3)
