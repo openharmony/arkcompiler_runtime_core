@@ -149,9 +149,6 @@
 #24110
 04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_23.ets
 
-#19720
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_8.ets
-
 #23065
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_7.ets
 
