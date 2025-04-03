@@ -42,6 +42,10 @@ public:
     {
         bundle_name_ = bundle_name;
     }
+    void SetModifyPkgName(const std::string &modify_pkg_name)
+    {
+        modify_pkg_name_ = modify_pkg_name;
+    }
 
 private:
     std::unique_ptr<const panda_file::File> file_;
@@ -50,6 +54,7 @@ private:
     pandasm::Program *prog_ = nullptr;
     // It should modify record name when the bundle_name_ is not empty
     std::string bundle_name_ {};
+    std::string modify_pkg_name_ {};
 }; // class Abc2ProgramCompiler
 
 } // namespace panda::abc2program

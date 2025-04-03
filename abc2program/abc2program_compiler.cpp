@@ -81,6 +81,9 @@ void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &reco
 {
     Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset(),
                                                 bundle_name_);
+    if (!modify_pkg_name_.empty()) {
+        entity_container.SetModifyPkgName(modify_pkg_name_);
+    }
     record_name = entity_container.GetFullRecordNameById(record_id);
     panda::Timer::timerStart(EVENT_COMPILE_ABC_FILE_RECORD, record_name);
     AbcClassProcessor class_processor(record_id, entity_container);

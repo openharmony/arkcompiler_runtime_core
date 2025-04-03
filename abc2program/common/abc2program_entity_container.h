@@ -55,7 +55,14 @@ public:
     std::string GetLiteralArrayIdName(uint32_t literal_array_id);
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
     void ModifyRecordName(std::string &record_name);
+    void ModifyPkgNameForRecordName(std::string &record_name);
+    void ModifyPkgNameForFieldName(std::string &field_name);
     bool IsSourceFileRecord(const std::string& record_name);
+
+    void SetModifyPkgName(const std::string &modify_pkg_name)
+    {
+        modify_pkg_name_ = modify_pkg_name;
+    }
 
 private:
     std::string ConcatFullMethodNameById(const panda_file::File::EntityId &method_id);
@@ -72,6 +79,7 @@ private:
     uint32_t current_class_id_{0};
     // It should modify record name when the bundle_name_ is not empty
     std::string bundle_name_ {};
+    std::string modify_pkg_name_ {};
 };  // class Abc2ProgramEntityContainer
 
 }  // namespace panda::abc2program
