@@ -143,9 +143,9 @@ EtsMethod *EtsClass::GetMethod(const char *name)
     return reinterpret_cast<EtsMethod *>(coreMethod);
 }
 
-EtsMethod *EtsClass::GetMethod(const char *name, const char *signature)
+EtsMethod *EtsClass::GetMethod(const char *name, const char *signature, bool isANIFormat)
 {
-    EtsMethodSignature methodSignature(signature);
+    EtsMethodSignature methodSignature(signature, isANIFormat);
     if (!methodSignature.IsValid()) {
         LOG(ERROR, ETS_NAPI) << "Wrong method signature:" << signature;
         return nullptr;
