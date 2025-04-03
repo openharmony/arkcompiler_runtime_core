@@ -194,3 +194,19 @@
 
 #24413
 17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_35.ets
+
+# move from exclude to ignore list on 4/12
+#24935
+07.expressions/11.function_call_expression/fcall_n_9.ets
+
+# move from exclude to ignore list on 4/12
+#24941
+07.expressions/11.function_call_expression/fcall_10.ets
+
+# move from exclude to ignore list on 4/12
+#24840
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co3_over_3.ets
+
+# move from exclude to ignore list on 4/12
+#24669
+05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.ets

@@ -124,3 +124,9 @@ cases:
   - use: |-
       let v: A<Color> = new A<Color>(Color.Red)
       assertTrue(v != null)
+
+  - use: |-
+      let v: A<B> = new A<B>([new A<X|null>(new X())])
+    decl: |-
+      type B = A<X|null>[]
+    bound: ' extends Object|null'
