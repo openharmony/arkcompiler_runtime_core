@@ -142,7 +142,7 @@ static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @d
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
-static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav
+static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         ^dmitriitr @konstanting
 static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker
