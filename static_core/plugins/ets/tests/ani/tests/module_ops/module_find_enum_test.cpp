@@ -62,8 +62,8 @@ TEST_F(ModuleFindEnumTest, invalid_args)
     ASSERT_EQ(env_->c_api->Module_FindEnum(nullptr, module, "LBColor;", &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(nullptr, "LBColor;", &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(module, nullptr, &aniEnum), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->Module_FindEnum(module, "", &aniEnum), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Module_FindEnum(module, "#BColor;", &aniEnum), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Module_FindEnum(module, "", &aniEnum), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Module_FindEnum(module, "#BColor;", &aniEnum), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Module_FindEnum(module, "LBColor;", &aniEnum), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Module_FindEnum(module, "LBColor", &aniEnum), ANI_NOT_FOUND);
     ASSERT_EQ(env_->Module_FindEnum(module, "LBColor;", nullptr), ANI_INVALID_ARGS);

@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MODULE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_MODULE_H_
 
+#include "ani.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_variable.h"
 
