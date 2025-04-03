@@ -26,8 +26,8 @@ class RefType {
 
 function main() {
     const objects: RefType[] = [new RefType(), new RefType()]
-    const object = objects[1]
-    object.field = 777            // change the field in the array element
+    const obj = objects[1]
+    obj.field = 777            // change the field in the array element
     assertTrue( objects[0].field == 666 )
     assertTrue( objects[1].field == 777 )
     // console.log(objects[0].filed) // prints 666

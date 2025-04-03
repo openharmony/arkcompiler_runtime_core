@@ -23,8 +23,8 @@ class RefType {
 
 function main(): void {
   const objects: RefType[] = [new RefType(), new RefType()];
-  const object = objects[1];
-  object.field = 110;
+  const obj = objects[1];
+  obj.field = 110;
   assertEQ(objects[0].field, 100);
   assertEQ(objects[1].field, 110);
 }

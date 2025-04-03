@@ -59,9 +59,6 @@
 #24420
 03.types/19.union_types/ut_34.ets
 
-#22987 es2panda aborts when name of the declaration clashes with the predefined type or standard library entity name.
-04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n10.ets
-
 #24649
 04.names_declarations_and_scopes/04.scopes/type_param_class_neg_3.ets
 
@@ -676,9 +673,6 @@
 
 #23978
 08.statements/14.throw_statements/throw_neg2.ets
-
-#22148
-09.classes/01.class_declaration/03.class_extension_clause/extends_object_class.ets
 
 #23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets

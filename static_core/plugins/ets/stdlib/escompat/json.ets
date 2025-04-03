@@ -1337,8 +1337,8 @@ class JSONValueParser {
             }
         }
 
-        let object = classType.make()
-        let classVal = Value.of(object) as ClassValue
+        let obj = classType.make()
+        let classVal = Value.of(obj) as ClassValue
         const jsonObjFields = jsonObj.getFields()
         for (let field_num = 0; field_num < classType.getFieldsNum(); field_num++) {
             let classField = classType.getField(field_num)
@@ -1355,7 +1355,7 @@ class JSONValueParser {
             setClassFieldFn(classVal, classField.getName(), classFieldVal)
         }
 
-        return object
+        return obj
     }
 
     private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
