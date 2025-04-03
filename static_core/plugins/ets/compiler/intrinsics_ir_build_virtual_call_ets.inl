@@ -17,6 +17,7 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_IS_SAME_REFERENCE
     Builder()->BuildStdRuntimeEquals(bcInst_, ACC_READ);
     break;
 }
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CHAR_AT: {
     if (!Builder()->TryBuildStringCharAtIntrinsic(bcInst_, ACC_READ)) {
         BuildDefaultVirtualCallIntrinsic(intrinsicId);
