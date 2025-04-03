@@ -14,13 +14,71 @@
  */
 
 class A {
-    public static new_A()
+    public static newA()
     {
         return new A();
     }
 
-    public int_method(a0: int, a1: int): int
+    public intMethod(a0: int, a1: int): int
     {
         return a0 + a1;
+    }
+
+    public intMethodVoidParam(): int
+    {
+        return 5 as int;
+    }
+
+    public intMethodMultipleParam(a0: int, a1: boolean, a2:float, a3:short, a4:double): int
+    {
+        if (a1) {
+            return a0 + a3;
+        } else if (a4 > a2) {
+            return a0;
+        } else {
+            return a0 - a3;
+        }
+    }
+
+    public nestedMethod(data1: int, data2: int): int
+    {
+        let method = (value1: int, value2: int): int => {
+            return value1 + value2;
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: int): int
+    {
+        if (a0 > 100) {
+            return a0;
+        } else {
+            return this.recursionMethod(a0 + 10);
+        }
+    }
+}
+
+final class B extends A {
+
+    public subIntMethodVoidParam(): int
+    {
+        return 8 as int;
+    }
+}
+
+abstract class C {
+    public abstract func(a: int, b: int): int;
+}
+
+class D extends C {
+    public override func(a: int, b: int): int {
+        return (a + b) as int;
+    }
+}
+
+class E extends D {
+    public override func(a: int, b: int): int {
+        return (a - b) as int;
     }
 }
