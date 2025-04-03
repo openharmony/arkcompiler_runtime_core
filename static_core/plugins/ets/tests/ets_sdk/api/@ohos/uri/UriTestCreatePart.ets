@@ -104,7 +104,7 @@ function testSpecialCharacters001() {
   assertEQ(newUri.authority, "www.bi an'|{}()$~,;*!_-+:80");
   assertEQ(newUri.fragment, "par(,;/) '_$:?+a{}|m=10-!*&para~m1=20!-~");
   assertEQ(newUri.host, "www.bi an'|{}()$~,;*!_-+");
-  assertEQ(newUri.userInfo, "");
+  assertEQ(newUri.userInfo, null);
   assertEQ(newUri.port, "80");
 }
 
@@ -113,7 +113,7 @@ function testspecialPort001() {
   let newUri = new uri.URI(uriStr);
   assertEQ(newUri.toString(), "http://publickinfo:-1");
   assertEQ(newUri.port, "-1");
-  assertEQ(newUri.host, "");
+  assertEQ(newUri.host, null);
   assertEQ(newUri.authority, "publickinfo:-1");
 }
 
@@ -131,7 +131,7 @@ function testspecialPort003() {
   let newUri = new uri.URI(uriStr);
   assertEQ(newUri.toString(), "http://publickinfo:600000000332");
   assertEQ(newUri.port, "-1");
-  assertEQ(newUri.host, "");
+  assertEQ(newUri.host, null);
   assertEQ(newUri.authority, "publickinfo:600000000332");
 }
 
