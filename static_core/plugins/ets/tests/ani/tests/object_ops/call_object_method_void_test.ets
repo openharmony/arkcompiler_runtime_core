@@ -14,20 +14,93 @@
  */
 
 class A {
-    public static new_A(): A
+    public static newA()
     {
         return new A();
     }
 
+    private count_: int;
+
     public voidMethod(a0: int, a1: int): void
     {
-        this.count_ += a0;
-        this.count_ += a1;
+        this.count_ = a0  + a1;
     }
 
     public getCount(): int
     {
         return this.count_;
     }
+
+    public voidMethodVoidParam(): void
+    {
+        this.count_ = 10;
+    }
+
+    public voidMethodMultipleParam(a0: int, a1: boolean, a2:float, a3:int, a4:float): void
+    {
+        if (a1) {
+            this.count_ = a0 + a3;
+        } else if (a4 > a2) {
+            this.count_ = a0 - a3;
+        } else {
+            this.count_ = a0;
+        }
+    }
+
+    public nestedMethod(data1: int, data2: int): void
+    {
+        let method = (value1: int, value2: int): void => {
+            this.count_ = value1 + value2;
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: int): void
+    {
+        if (a0 > 100) {
+            this.count_ = a0;
+        } else {
+            return this.recursionMethod(a0 + 10);
+        }
+    }
+}
+
+final class B extends A {
+
+    private value_: int;
+    public subVoidMethodVoidParam(): void
+    {
+        this.value_ = 20;
+    }
+}
+
+abstract class C {
+    public abstract func(a: int, b: int): void;
+}
+
+class D extends C {
     private count_: int;
+    public override func(a: int, b: int): void {
+        this.count_ = (a + b) as int;
+    }
+
+    public getCount(): int
+    {
+        return this.count_;
+    }
+
+}
+
+class E extends D {
+    private count_: int;
+    public override func(a: int, b: int): void {
+        this.count_ = (a - b) as int;
+    }
+
+    public getCount(): int
+    {
+        return this.count_;
+    }
+
 }
