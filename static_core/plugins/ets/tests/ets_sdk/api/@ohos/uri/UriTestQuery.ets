@@ -45,12 +45,12 @@ function testUriUriEncodedQuery001() {
 
 function testUriUriEncodedQuery002() {
   let route = new uri.URI('https://www.test.com/search?');
-  assertEQ(route.encodedQuery, "");
+  assertEQ(route.encodedQuery, null);
 }
 
 function testUriUriEncodedQuery003() {
   let route = new uri.URI('https://www.test.com/');
-  assertEQ(route.encodedQuery, "");
+  assertEQ(route.encodedQuery, null);
 }
 
 function testUriUriEncodedQuery004() {

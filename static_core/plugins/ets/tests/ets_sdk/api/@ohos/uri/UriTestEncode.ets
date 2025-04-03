@@ -33,9 +33,9 @@ function testUriEncodedUserInfo003() {
 
 function testUriEncodedUserInfo004() {
     let route = new uri.URI('http://www.test.com');
-    assertEQ(route.encodedUserInfo, "");
+    assertEQ(route.encodedUserInfo, null);
     let mailRoute = new uri.URI('mailto:body');
-    assertEQ(mailRoute.encodedUserInfo, "");
+    assertEQ(mailRoute.encodedUserInfo, null);
 }
 
 function testUriEncodedPath001() {
@@ -50,9 +50,9 @@ function testUriEncodedPath002() {
 
 function testUriEncodedPath003() {
     let route = new uri.URI('http://www.test.com');
-    assertEQ(route.encodedPath, "");
+    assertEQ(route.encodedPath, null);
     let mailRoute = new uri.URI('mailto:body');
-    assertEQ(mailRoute.encodedUserInfo, "");
+    assertEQ(mailRoute.encodedUserInfo, null);
 }
 
 function testUriEncodedPath004() {
@@ -68,7 +68,7 @@ function testUriEncodedFragment001() {
 
 function testUriEncodedFragment002() {
     let route = new uri.URI('mailto:body#');
-    assertEQ(route.encodedFragment, "");
+    assertEQ(route.encodedFragment, null);
 }
 
 function testUriEncodedFragment003() {
@@ -78,7 +78,7 @@ function testUriEncodedFragment003() {
 
 function testUriEncodedFragment004() {
     let route = new uri.URI('mailto:body');
-    assertEQ(route.encodedFragment, "");
+    assertEQ(route.encodedFragment, null);
 }
 
 function testUriEncodedAuthority001() {
@@ -93,7 +93,7 @@ function testUriEncodedAuthority002() {
 
 function testUriEncodedAuthority003() {
     let route = new uri.URI('mailto:body#top');
-    assertEQ(route.encodedAuthority, "");
+    assertEQ(route.encodedAuthority, null);
 }
 
 function testUriEncodedAuthority004() {
