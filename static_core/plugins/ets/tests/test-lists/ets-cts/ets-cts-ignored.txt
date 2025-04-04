@@ -181,9 +181,6 @@
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_12.ets
 04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_13.ets
 
-#24418
-04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_14.ets
-
 #23983
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.ets
 
