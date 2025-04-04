@@ -25,6 +25,6 @@ function main(): void {
   let a: A = new A();
   let d: D = new D();
 
-  let xd = false ? a : d;
+  let x = false ? a : d;
   assertTrue( x instanceof A )
 }
