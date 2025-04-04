@@ -227,6 +227,11 @@ export final class DataView implements ArrayBufferView {
         let bits = Float.bitCastToInt(value);
         {%- elif bit == 64 and mode == "Float" %}
         let bits = Double.bitCastToLong(value);
+        {%- elif bit == 32 and mode == "Uint" %}
+        let bits = value;
+        if (bits == Long.MAX_VALUE || bits == Long.MIN_VALUE) {
+            bits = 0;
+        }
         {%- else %}
         let bits = value;
         {%- endif %}
@@ -241,6 +246,12 @@ export final class DataView implements ArrayBufferView {
         const val: {{type2name[bit]}} = value.getLong();
         {%- elif bit == 64 and mode == "Uint" %}
         const val: {{type2name[bit]}} = value.getLong();
+        {%- elif type2name[bit] == "int" %}
+        let temp: long = value as long;
+        if (temp == Long.MAX_VALUE || temp == Long.MIN_VALUE) {
+            temp = 0;
+        }
+        const val: {{type2name[bit]}} = temp as {{type2name[bit]}};
         {%- else %}
         const val: {{type2name[bit]}} = value as {{type2name[bit]}};
         {%- endif %}
