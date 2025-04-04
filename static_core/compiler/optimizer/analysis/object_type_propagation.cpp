@@ -149,6 +149,7 @@ public:
     static void VisitLoadArray(GraphVisitor *v, Inst *i);
     static void VisitLoadString(GraphVisitor *v, Inst *i);
     static void VisitLoadObject(GraphVisitor *v, Inst *i);
+    static void VisitLoadStatic(GraphVisitor *v, Inst *i);
     static void VisitCallStatic(GraphVisitor *v, Inst *i);
     static void VisitCallVirtual(GraphVisitor *v, Inst *i);
     static void VisitRefTypeCheck(GraphVisitor *v, Inst *i);
@@ -1229,6 +1230,27 @@ void TypePropagationVisitor::VisitLoadObject(GraphVisitor *v, Inst *i)
     }
     auto *self = static_cast<TypePropagationVisitor *>(v);
     auto inst = i->CastToLoadObject();
+    auto fieldId = inst->GetTypeId();
+    if (fieldId == 0) {
+        return;
+    }
+    auto runtime = self->GetGraph()->GetRuntime();
+    auto method = inst->GetMethod();
+    auto typeId = runtime->GetFieldValueTypeId(method, fieldId);
+    auto klass = runtime->GetClass(method, typeId);
+    if (klass != nullptr) {
+        auto isExact = runtime->GetClassType(method, typeId) == ClassType::FINAL_CLASS;
+        self->SetTypeInfo(inst, {klass, isExact});
+    }
+}
+
+void TypePropagationVisitor::VisitLoadStatic(GraphVisitor *v, Inst *i)
+{
+    if (i->GetType() != DataType::REFERENCE) {
+        return;
+    }
+    auto *self = static_cast<TypePropagationVisitor *>(v);
+    auto inst = i->CastToLoadStatic();
     auto fieldId = inst->GetTypeId();
     if (fieldId == 0) {
         return;
