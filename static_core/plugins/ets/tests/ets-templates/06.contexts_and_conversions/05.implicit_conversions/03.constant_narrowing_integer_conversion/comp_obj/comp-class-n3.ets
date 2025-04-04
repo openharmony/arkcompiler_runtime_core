@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,24 +15,24 @@
 {%- for c in cases %}
 
 /*---
-desc: Call context, constructor, constant narrowing integer conversion, implicit
+desc: Composite context, class field, constant narrowing integer conversion, implicit
+tags: [compile-only, negative]
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for v in c['values'] %}
 const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 {%- endfor %}
 
-class A {
-    public f: {{c.to_type}}
-    constructor(p: {{c.to_type}}) { this.f = p }
-}
+class A { fld: {{c.to_type}} }
 
 function main(): int {
 {%- for v in c['values'] %}
-    if (new A({{v.expr|safe}}).f != {{v.val}}) {  // expression
+    let d{{loop.index}}: A = { fld: {{v.expr|safe}} }
+    if (d{{loop.index}}.fld != {{v.val}}) {
         return 1
     }
-    if (new A(c{{loop.index}}).f != {{v.val}}) {  // constant
+    d{{loop.index}} = { fld: c{{loop.index}} }
+    if (d{{loop.index}}.fld != {{v.val}}) {
         return 1
     }
 {%- endfor %}
