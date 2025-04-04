@@ -1000,9 +1000,6 @@
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
 
-#23900
-07.expressions/20.unary_expressions/06.unary_minus/unary_minus_corner_0.ets
-
 #19951
 07.expressions/18.ensure-not-nullish_expression/null_check.ets
 07.expressions/23.shift_expressions/rshift_int_1.ets
