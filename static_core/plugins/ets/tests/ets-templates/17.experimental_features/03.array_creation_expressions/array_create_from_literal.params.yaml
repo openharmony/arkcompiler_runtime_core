@@ -11,11 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of valid interface members
-interface_members:
-  - "f: int;"
-  - "m(): int { return 5; }"
-  - "m(): int;"
-  - "m(value?: Number)"
-  - "m(value: Number| undefined)"
-  - "m(): Number| undefined"
+--- # List of literals
+literals:
+  - "byte"
+  - "short"
+  - "int"
+  - "number"
+  - "long"
+  - "float"
+  - "boolean"
+  - "char"
+
+  - "String"
+  - "object"
+  - "Number"
+  - "Boolean"
+  - "MyClass"
+  - "MyInterface"
+
