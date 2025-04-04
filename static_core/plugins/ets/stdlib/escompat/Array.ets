@@ -40,13 +40,15 @@ function normalizeIndex(idx: int, len: int): int {
 class ArrayKeysIterator<T> implements IterableIterator<number> {
     private parent: Array<T>
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: Array<T>) {
         this.parent = parent
     }
 
     override next(): IteratorResult<number> {
-        if (this.idx >= this.parent.actualLength) {
+        if (this.isDone || this.idx >= this.parent.actualLength) {
+            this.isDone = true
             return new IteratorResult<number>()
         }
         return new IteratorResult<number>(this.idx++ as number)
