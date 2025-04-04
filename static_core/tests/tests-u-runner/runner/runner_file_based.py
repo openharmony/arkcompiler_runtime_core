@@ -130,7 +130,7 @@ class RunnerFileBased(Runner):
         Runner.__init__(self, config, name)
         self.cmd_env = environ.copy()
 
-        self.coverage = LlvmCov(self.build_dir, self.work_dir)
+        self.coverage = LlvmCov(Path(self.build_dir), self.work_dir.coverage_dir)
 
         self.__set_test_list_options()
         self.binaries = panda_binaries(name, self.build_dir, self.config, self.conf_kind)
@@ -222,9 +222,14 @@ class RunnerFileBased(Runner):
 
     def create_coverage_html(self) -> None:
         Log.all(_LOGGER, "Create html report for coverage")
-        self.coverage.make_profdata_list_file()
-        self.coverage.merge_all_profdata_files()
-        self.coverage.llvm_cov_export_to_info_file()
+        if self.test_env.config.general.coverage.llvm_cov_report_by_components:
+            self.coverage.make_profdata_list_files_by_components()
+            self.coverage.merge_all_profdata_files_by_components()
+            self.coverage.llvm_cov_export_to_info_file_by_components()
+        else:
+            self.coverage.make_profdata_list_file()
+            self.coverage.merge_all_profdata_files()
+            self.coverage.llvm_cov_export_to_info_file()
         self.coverage.genhtml()
 
     def summarize(self) -> int:

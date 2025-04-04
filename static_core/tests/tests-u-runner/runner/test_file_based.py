@@ -101,8 +101,12 @@ class TestFileBased(Test):
         profraw_file, profdata_file = None, None
         if self.test_env.config.general.coverage.use_llvm_cov:
             params = deepcopy(params)
-            profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
+            if self.test_env.config.general.coverage.llvm_cov_report_by_components:
+                profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths(name)
+            else:
+                profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
             params.env['LLVM_PROFILE_FILE'] = profraw_file
+
         cmd = self.test_env.cmd_prefix + [params.executor]
         cmd.extend(params.flags)
 
