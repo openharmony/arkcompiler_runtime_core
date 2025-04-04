@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,27 @@
  */
 
 /*---
-desc: >-
-    11 Enumeration
-name: 11.enumeration
+desc: Issue 15910. Nullish parameter in lambda type
 tags: []
 ---*/
 
-enum ConstExpr {
-    A = Int.MAX_VALUE + 1,
-    B = 1 - 100,
+type TF = (value?: int) => void
+
+type ui = int | undefined
+
+
+function foo(bar: (value?: int) => void): void {
+}
+function boo(bar: (value: string|undefined) => void) {
+}
+function baz(bar: (value: ui) => void): void {
+}
+function ttf(bar: TF): void {
 }
 
-function main(): void {
-    assertEQ( ConstExpr.A.getValue(), Int.MAX_VALUE + 1)
-    assertEQ( ConstExpr.B.getValue(), -99)
+function main() {
+    foo(() => {})
+    boo(() => {})
+    baz(() => {})
+    ttf(() => {})
 }
