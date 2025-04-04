@@ -108,7 +108,8 @@ static_core/plugins/ets/verification/                    @igelhaus
 static_core/runtime/include/mem/                         ^dmitriitr @udav
 static_core/runtime/include/tooling/                     @ragnvald
 static_core/runtime/tests/tooling/                       @ragnvald
-static_core/plugins/ets/runtime/interop_js/              @nazarovkonstantin @vpukhov
+static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @udav @ipetrov ^shemetovphilip
+static_core/plugins/ets/runtime/interop_js/                                   @nazarovkonstantin @vpukhov
 static_core/plugins/ets/runtime/interop_js/*promise*                          ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/interop_js/sts_vm_interface_impl*             ^dmitriitr @udav ^ipetrov ^molotkovmikhail
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof1983
@@ -147,7 +148,7 @@ static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @k
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         ^dmitriitr @konstanting
 static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker
-static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav
+static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav ^shemetovphilip
 static_core/plugins/ets/stdlib/std/core/GC.sts                                ^dmitriitr @udav
 static_core/plugins/ets/stdlib/std/core/Method.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker
 static_core/plugins/ets/stdlib/std/core/Object.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker
@@ -164,6 +165,8 @@ static_core/plugins/ets/tests/ets_test_suite/atomics/                         @k
 static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.sts    @konstanting
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting
 static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
+static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @udav ^shemetovphilip
+static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @udav ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov
 static_core/plugins/ets/tests/interop_js/tests/                               ^igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
