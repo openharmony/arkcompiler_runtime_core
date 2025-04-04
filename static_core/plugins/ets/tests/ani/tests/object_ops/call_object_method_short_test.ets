@@ -14,13 +14,82 @@
  */
 
 class A {
-    public static new_A()
+    public static newA()
     {
         return new A();
     }
 
-    public short_method(a0: short, a1: short): short
+    public shortMethod(a0: short, a1: short): short
     {
         return a0 > a1 ? a0 : a1;
+    }
+
+    public shortMethodVoidParam(): short
+    {
+        return 5 as short;
+    }
+
+    public shortMethodMultipleParam(a0: int, a1: boolean, a2: float, a3: short, a4: short): short
+    {
+        if (a1) {
+            return (a3 + a4) as short;
+        } else if (a0 > a3) {
+            return a3;
+        } else {
+            return (a3 - a4) as short;
+        }
+    }
+
+    public nestedMethod(data1: short, data2: short): short
+    {
+        let method = (value1: short, value2: short): short => {
+            return (value1 + value2) as short;
+        }
+
+        return method(data1, data2);
+    }
+
+    public recursionMethod(a0: short): short
+    {
+        if (a0 > 100) {
+            return a0;
+        } else {
+            return this.recursionMethod((a0 + 10) as short);
+        }
+    }
+}
+
+final class B extends A {
+
+    public subIntMethodVoidParam(): short
+    {
+        return 8 as short;
+    }
+
+    public subMethodMultipleParam(a0: short, a1: boolean, a2:float, a3:short, a4:short): short
+    {
+        if (a1) {
+            return (a3 + a4) as short;
+        } else if (a0 > a3) {
+            return a3;
+        } else {
+            return (a3 - a4) as short;
+        }
+    }
+}
+
+abstract class C {
+    public abstract func(a: short, b: short): short;
+}
+
+class D extends C {
+    public override func(a: short, b: short): short {
+        return (a + b) as short;
+    }
+}
+
+class E extends D {
+    public override func(a: short, b: short): short {
+        return (a - b) as short;
     }
 }

@@ -16,21 +16,23 @@
 {% for c in cases %}
 
 /*---
-desc: 
-    in and out is a variance modifiers that specifies the variance of the type parameter.
-    Test of usage of modifiers separately. 
-    5.1.3 Type Parameter Variance
-name: 05.generics/01.type_parameters/03.type_parameter_variance/type_parameter_variance
-tags: []
-params: c
+desc: Test of invariant no type parameter modifier. 
 ---*/
 
-class A<{{c.decl[0]}}> {
-  {{c.decl[1]}}
+class A<T> {
+  c: T
+  constructor(p: T) { this.c = p }
+  f(p: T): T { return p }
+  f1(p: T): string { return "v = " + p }
+  f2(): T { return this.c }
 }
 
 function main(): void {
-  {{c.use}}
+  let arg: {{c.type}} = {{c.value}}
+  let a: A<{{c.type}}> = new A<{{c.type}}>(arg)
+  assertEQ(a.f(arg), {{c.value}})
+  assertEQ(a.f1(arg), {{c.value1}})
+  assertEQ(a.f2(), {{c.value}})
 }
 
 {% endfor %}

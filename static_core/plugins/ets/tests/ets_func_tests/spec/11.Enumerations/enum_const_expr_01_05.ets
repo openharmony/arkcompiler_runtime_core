@@ -21,8 +21,8 @@ tags: []
 ---*/
 
 enum ConstExpr {
-    A = Int.MAX_VALUE + 1;
-    B = 1 - 100;
+    A = Int.MAX_VALUE + 1,
+    B = 1 - 100,
 }
 
 function main(): void {

@@ -23,4 +23,56 @@ function sub(c0: char, c1: char): char {
     }
     return c as char;
 }
-};
+}
+
+function moduleFunction(value1: char, value2: char): char {
+    return value1 > value2 ? value1 : value2;
+}
+
+function moduleFunction(value1: char, value2: char, value3: char): char {
+    return value1 < value2 ? value1 : value3;
+}
+
+namespace A {
+    function charFunctionA(value1: char, value2: char): char {
+        return value1 > value2 ? value1 : value2;
+    }
+
+    function charFunctionA(value1: char, value2: char, value3: char): char {
+        return value1 > value2 ? value1 : value3;
+    }
+
+    function nestedFunction(value1: char, value2: char): char {
+        let lambdaFunction: (p1: char, p2: char) => char =
+            (param1: char, param2: char): char => {
+                return param1 > param2 ? param1 : param2;
+        };
+        return lambdaFunction(value1, value2);
+    }
+    
+    export function recursiveFunction(value: int): char {
+        if (value <= 0) {
+            return 'A';
+        }
+        if (value === 1) {
+            return 'Z';
+        }
+        return recursiveFunction(value - 1);
+    }
+
+    function calculateSum(value1: char, value2: char, value3: double, value4: int): char {
+        if (value3 === 1.0) {
+            return value2;
+        }
+        if (value4 === 1) {
+            return value1;
+        }
+        return value2;
+    }
+
+    namespace B {
+        function charFunctionB(value1: char, value2: char): char {
+            return value1 > value2 ? value1 : value2;
+        }
+    }
+}

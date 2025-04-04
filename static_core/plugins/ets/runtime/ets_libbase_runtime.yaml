@@ -1196,6 +1196,15 @@ intrinsics:
     codegen_func: CreateStringRepeat
     llvm_codegen_func: EmitStringRepeat
 
+  - name: StdCoreStringGet
+    space: ets
+    class_name: std.core.String
+    method_name: $_get
+    static: false
+    signature:
+      ret: u16
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreStringGet
 ##########################
 # std.core.StringBuilder #
 ##########################

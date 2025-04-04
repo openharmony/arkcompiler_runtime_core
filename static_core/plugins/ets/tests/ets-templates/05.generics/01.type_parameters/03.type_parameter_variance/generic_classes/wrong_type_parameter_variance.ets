@@ -16,17 +16,12 @@
 {% for c in cases %}
 
 /*---
-desc: 
-    in and out is a variance modifiers that specifies the variance of the type parameter.
-    Test of wrong usage of modifiers separately.
-    5.1.3 Type Parameter Variance 
-name: 05.generics/01.type_parameters/03.type_parameter_variance/wrong_type_parameter_variance
+desc: Test the compile-time error occures if type parameters with a varance modifier incorrectly used.
 tags: [compile-only, negative]
-params: c
 ---*/
 
-class A<{{c.decl[0]}}> {
-  {{c.decl[1]}}
+class A<{{c.param}}> {
+  {{c.expression}}
 }
 
 {% endfor %}

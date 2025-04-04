@@ -28,8 +28,8 @@ final class CallbackHolder {
         }
     }
 
-    public static createCallbackWithArg(cb: CallbackHolder): (arg: Object) => void {
-        return (arg: Object): void => {
+    public static createCallbackWithArg(cb: CallbackHolder): (arg: Object | undefined) => void {
+        return (arg: Object | undefined): void => {
             cb.invoke(arg)
         }
     }

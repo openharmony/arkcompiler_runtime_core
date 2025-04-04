@@ -21,3 +21,12 @@ desc:  {function: instance_{{.item.object_type}}_setget_{{.item.target_element_t
 {% include 'utils/test_escompat_dataview.j2' %}
 
 {% endfor %}
+
+{% for item in escompat_DataView_method %}
+/*---
+desc:  {function: instance_{{.item.object_type}}_{{.item.suffix}}}
+---*/
+
+{% include 'utils/test_escompat_dataview_method.j2' %}
+
+{% endfor %}
