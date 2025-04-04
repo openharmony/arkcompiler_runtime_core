@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 {% for c in cases %}
 
 /*---
-desc: Test the compile-time error occures if type parameters with a varance modifier incorrectly used.
+desc: Test the compile-time error occures if a function, methos or constructor type parameters have a varance modifier specified.
 tags: [compile-only, negative]
 ---*/
 
-class A<{{c.param}}> {
+interface I{{c.param}} {
   {{c.expression}}
 }
 
