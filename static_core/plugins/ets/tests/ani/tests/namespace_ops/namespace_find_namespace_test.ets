@@ -13,10 +13,46 @@
  * limitations under the License.
  */
 
-namespace anyns {
-    namespace rosen {
-        namespace test {
-            let x: int = 3;
+namespace test {
+    namespace A {
+        namespace B {
+            function intMethod(a0: int, a1: int): int
+            {
+                return 0;
+            }
+            namespace C {
+                function intMethod(a0: int, a1: int): int
+                {
+                    return 0;
+                }
+            }
+        }
+
+        namespace C {
+            namespace D {
+                function intMethod(a0: int, a1: int): int
+                {
+                    return 0;
+                }
+            }
+            function intMethod(a0: int, a1: int): int
+            {
+                return 0;
+            }
+        }
+    }
+
+    namespace D {
+        function intMethod(a0: int, a1: int): int
+        {
+            return 0;
+        }
+    }
+
+    namespace E {
+        function intMethod(a0: int, a1: int): int
+        {
+            return 0;
         }
     }
 }

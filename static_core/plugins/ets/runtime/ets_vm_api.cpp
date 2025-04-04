@@ -24,7 +24,7 @@
 static void LogPrint([[maybe_unused]] int id, int level, const char *component, [[maybe_unused]] const char *fmt,
                      const char *msg)
 {
-#ifdef PANDA_USE_OHOS_LOG
+#ifdef PANDA_OHOS_USE_INNER_HILOG
     constexpr static unsigned int ARK_DOMAIN = 0xD003F00;
     constexpr static auto TAG = "ArkEtsVm";
     constexpr static OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
@@ -67,7 +67,7 @@ static void LogPrint([[maybe_unused]] int id, int level, const char *component, 
         default:
             UNREACHABLE();
     }
-#endif  // PANDA_USE_OHOS_LOG
+#endif  // PANDA_OHOS_USE_INNER_HILOG
 }
 #else
 static void LogPrint([[maybe_unused]] int id, [[maybe_unused]] int level, [[maybe_unused]] const char *component,
@@ -98,7 +98,7 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
 #ifdef PANDA_JS_ETS_HYBRID_MODE
-    if (runtimeOptions.GetGcType("ets") != "g1-gc" || runtimeOptions.IsNoAsyncJit()) {
+    if (runtimeOptions.IsEnableXgc() && (runtimeOptions.GetGcType("ets") != "g1-gc" || runtimeOptions.IsNoAsyncJit())) {
         // XGC is not implemented for other GC types
         LOG(ERROR, RUNTIME) << "GC type must be g1-gc and no-async-jit option must be false";
         return false;

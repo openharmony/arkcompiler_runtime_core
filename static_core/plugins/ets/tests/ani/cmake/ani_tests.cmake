@@ -40,9 +40,16 @@ function(ani_add_gtest TARGET)
     endif()
     if(DEFINED ARG_ETS_SOURCES)
         set(TARGET_GTEST_PACKAGE ${TARGET}_gtest_package)
+        set(VERIFY_SOURCES true)
+        # NOTE(dslynko, #24335) Disable verifier on arm32 qemu due to flaky OOM
+        if(PANDA_TARGET_ARM32 AND PANDA_QEMU_BUILD)
+            set(VERIFY_SOURCES false)
+        endif()
+
         panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
             ETS_SOURCES ${ARG_ETS_SOURCES}
             ETS_CONFIG ${ARG_ETS_CONFIG}
+            VERIFY_SOURCES ${VERIFY_SOURCES}
         )
         set(ANI_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip")
     endif()

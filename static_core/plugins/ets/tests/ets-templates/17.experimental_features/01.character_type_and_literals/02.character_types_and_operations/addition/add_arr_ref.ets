@@ -16,7 +16,7 @@
 /*---
 desc: >-
     ArkTS provides a number of operators to act on character values:
-    Character operators that produce a value of type char.
+    Character operators are identical to integer operators, so produce a value of type int.
 ---*/
 
 const a: Char[] = new Char[1]
@@ -25,7 +25,7 @@ function main() {
     const v1 = new Char({{v.v1}})
     const v2 = new Char({{v.v2}})
 
-    a[0] = {{v.exp}}  // unboxing/boxing is expected here
-    assertEQ( a[0], {{v.r}} )
+    a[0] = ({{v.exp}}) as Char  // Explicit cast to Char is needed here
+    assertEQ(a[0], {{v.r}})
 }
 {%- endfor %}

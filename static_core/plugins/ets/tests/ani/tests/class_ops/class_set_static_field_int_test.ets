@@ -16,3 +16,11 @@ class TestSetInt {
     static int_value: int = 3;
     static string_value: string = "";
 }
+
+class TestSetIntA extends TestSetInt {
+    static int_value: int = 3;
+}
+
+final class TestSetIntFinal extends TestSetInt {
+    static int_value: int = 3;
+}

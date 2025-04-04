@@ -40,6 +40,10 @@ escompat/ArrayTest.ets
 # 17053 Cannot create array of nullish tuples
 #07.expressions/04.array_literal/array_literal_13.ets
 
+#24595
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_18.ets
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_19.ets
+
 # 17964 Segmentation fault with too many repeated calls
 17.experimental_features/15.coroutines/awaiting_coroutine/a_2.ets
 17.experimental_features/15.coroutines/awaiting_coroutine/a_4.ets

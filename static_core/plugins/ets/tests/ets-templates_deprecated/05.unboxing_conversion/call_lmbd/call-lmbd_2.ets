@@ -23,7 +23,7 @@ params: from {{c.from_type}} to {{c.to_type}}
 function main(): int {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    if (((p: {{c.to_type}}): {{c.to_type}} => { return p })(s{{loop.index}}) != {{t.val}}) {
+    if (((p: {{c.from_type}}): {{c.to_type}} => { return p })(s{{loop.index}}) != {{t.val}}) {
         return 1
     }
 {%- endfor %}

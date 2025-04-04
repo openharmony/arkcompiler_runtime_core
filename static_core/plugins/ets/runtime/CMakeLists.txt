@@ -76,6 +76,9 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/napi/ets_napi_native_interface.cpp
     ${ETS_EXT_SOURCES}/napi/ets_mangle.cpp
     ${ETS_EXT_SOURCES}/regexp/regexp_executor.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp_16.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp_8.cpp
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
@@ -134,6 +137,11 @@ elseif (PANDA_TARGET_AMD64)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/napi/arch/amd64/ets_async_entry_point_amd64.S
         ${ETS_EXT_SOURCES}/napi/arch/amd64/ets_napi_entry_point_amd64.S)
+endif()
+
+if (PANDA_TARGET_OHOS)
+    list (APPEND ETS_RUNTIME_SOURCES
+        ${ETS_EXT_SOURCES}/platform/ohos/logger.cpp)
 endif()
 
 panda_target_sources(arkruntime_obj PRIVATE ${ETS_RUNTIME_SOURCES})

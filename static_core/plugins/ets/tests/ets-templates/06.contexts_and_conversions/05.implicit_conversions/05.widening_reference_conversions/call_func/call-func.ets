@@ -17,6 +17,7 @@
 /*---
 desc: Call context, function, widening reference conversion, implicit
 params: from {{c.from_type}}
+tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 {%- for t in c['values'] %}

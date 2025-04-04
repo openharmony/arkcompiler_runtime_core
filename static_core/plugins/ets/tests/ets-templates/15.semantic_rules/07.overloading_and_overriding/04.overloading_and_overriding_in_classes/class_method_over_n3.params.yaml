@@ -137,8 +137,8 @@ cases:
           new Derived().foo(i);
           assertEQ( res, 21);
           new Derived().foo(new A());
-          assertEQ( res, 11);
-          Derived.foo(i);
+          assertEQ( res, 21);
+          Derived.foo(i as I);
           assertEQ( res, 22);
           Derived.foo(new A());
           assertEQ( res, 12);

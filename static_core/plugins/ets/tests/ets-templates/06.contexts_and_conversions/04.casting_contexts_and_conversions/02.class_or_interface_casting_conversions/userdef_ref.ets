@@ -18,6 +18,7 @@
 desc: >-
     A narrowing reference casting conversion converts an expression of
     a supertype (superclass or superinterface) to a subclass or subinterface.
+tags: [{{c.tags}}]
 ---*/
 
 {{c.defs}}

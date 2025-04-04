@@ -131,9 +131,11 @@ cases:
           - { type: "UT2", expr: "ut2", eq: "===" }
 
     - decl: |-
+          type TY1 = [string, boolean]
+          type TY2 = [number, Error]
           let t1: [string, boolean] = ["A", true]
           let t2: [number, Error] = [1.5, new Error()]
       values:
-          - { type: "[string, boolean]", expr: t1, eq: "===" }
-          - { type: "[number, Error]", expr: t2, eq: "===" }
-          - { type: "[number, Error]", expr: t2, eq: "===" }
+          - { type: "TY1", expr: "t1", eq: "===" }
+          - { type: "TY2", expr: "t2", eq: "===" }
+          - { type: "TY2", expr: "t2", eq: "===" }

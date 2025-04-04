@@ -21,7 +21,7 @@ function main(): void {
     try {
         const a: char = 1
 	    const b: char = 0
-	    const result: char = a / b
+	    const result: char = (a / b) as char
 	    assertTrue(false)
     } catch (e: ArithmeticError) {
     }

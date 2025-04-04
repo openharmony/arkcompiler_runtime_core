@@ -202,7 +202,7 @@ ALWAYS_INLINE inline bool CheckAccessorNameMatch(Span<const uint8_t> name, Span<
 
 ALWAYS_INLINE inline Field *LookupFieldByName(panda_file::File::StringData name, const ark::Class *klass)
 {
-    for (auto &f : klass->GetFields()) {
+    for (auto &f : klass->GetInstanceFields()) {
         if (name == f.GetName()) {
             return &f;
         }

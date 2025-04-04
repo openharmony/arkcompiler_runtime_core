@@ -623,10 +623,13 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
     */
     public static parseInt(s: String, r: double): double {
+        if (!Double.isFinite(r)) {
+            r = 0.0;
+        }
         if ((r < 2.0 || r > 36.0) && r != 0.0) {
             return NaN;
         } else {
-            return Double.parseIntCore(s, r as int);
+            return Double.parseIntCore(s.trim(), r as int);
         }
     }
 

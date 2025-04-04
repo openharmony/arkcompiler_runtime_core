@@ -18,6 +18,7 @@ desc: >-
     A runtime error (ClassCastError) occurs during these conversion
     if the type of a converted expression cannot be converted to the
     target type
+tags: [compile-only, negative]
 ---*/
 interface I {}
 interface J extends I {}

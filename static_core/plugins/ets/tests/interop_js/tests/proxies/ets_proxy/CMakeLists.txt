@@ -11,7 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js__test_ets_proxy
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__test_ets_proxy
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_proxy.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_proxy.ets
+    JS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_access_primitives.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_access_references.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_inheritance.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_proxy_objects.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/ets_proxy.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

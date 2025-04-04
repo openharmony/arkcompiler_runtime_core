@@ -432,7 +432,7 @@ static ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(
         ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         // No access to jsvalue after this line
         napi_status rc = napi_get_named_property(env, jsVal, name, &jsVal);
-        if (UNLIKELY(NapiThrownGeneric(rc))) {
+        if (UNLIKELY(rc == napi_pending_exception || NapiThrownGeneric(rc))) {
             return {};
         }
     }
@@ -452,7 +452,7 @@ template <typename T>
     ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
     // No access to jsvalue after this line
     napi_status rc = napi_set_named_property(env, jsVal, name, jsPropVal);
-    return !NapiThrownGeneric(rc);
+    return rc != napi_pending_exception && !NapiThrownGeneric(rc);
 }
 
 }  // namespace ark::ets::interop::js

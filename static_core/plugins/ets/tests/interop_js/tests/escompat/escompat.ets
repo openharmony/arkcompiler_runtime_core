@@ -55,9 +55,9 @@ function Array_TestJSSample(arr: Array<FooClass>): void {
 function Array_TestJSLength(arr: Array<FooClass>): void {
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // let len: int = arr.length();
-    // assert len == 2;
+    // assertTrue len == 2;
     // arr.push(new FooClass("two"));
-    // assert arr.length() == len + 1;
+    // assertTrue arr.length() == len + 1;
 }
 
 function Array_TestJSPop(arr: Array<FooClass>): void {
@@ -147,31 +147,31 @@ function Array_TestJSShift(arr: Array<FooClass>): void {
 function Array_TestJSWith(arr: Array<FooClass>): void {
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // let arr1: Array<FooClass> = arr.with(1, new FooClass("three"));
-    // assert arr1.at(1).toString() == "{Foo named three}";
+    // assertTrue arr1.at(1).toString() == "{Foo named three}";
 }
 
 function Array_TestJSSlice(arr: Array<FooClass>): void {
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
-    // assert (arr.slice(1) as Array<FooClass>).toString() == "{Foo named two}";
-    // assert (arr.slice(1, 2) as Array<FooClass>).toString() == "{Foo named two}";
+    // assertTrue (arr.slice(1) as Array<FooClass>).toString() == "{Foo named two}";
+    // assertTrue (arr.slice(1, 2) as Array<FooClass>).toString() == "{Foo named two}";
 }
 
 function Array_TestJSSplice(arr: Array<FooClass>): void {
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // arr.push(new FooClass("two"));
     // arr.splice(2, 1);
-    // assert arr.toString() == "{Foo named zero},{Foo named two}";
+    // assertTrue arr.toString() == "{Foo named zero},{Foo named two}";
     // arr.splice(1);
-    // assert arr.toString() == "{Foo named zero}";
+    // assertTrue arr.toString() == "{Foo named zero}";
 }
 
 function Array_TestJSToSpliced(arr: Array<FooClass>): void {
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // arr.push(new FooClass("two"));
     // let spliced = arr.toSpliced(1, 1);
-    // assert spliced.toString() == "{Foo named zero},{Foo named two}";
+    // assertTrue spliced.toString() == "{Foo named zero},{Foo named two}";
     // let spliced1 = arr.toSpliced(1);
-    // assert spliced1.toString() == "{Foo named zero}";
+    // assertTrue spliced1.toString() == "{Foo named zero}";
 }
 
 function Array_TestJSCopyWithin(arr: Array<FooClass>): void {
@@ -182,7 +182,7 @@ function Array_TestJSCopyWithin(arr: Array<FooClass>): void {
 
     // NOTE (oignatenko) uncomment below after interop will be supported for this method signature
     // arr.copyWithin(1);
-    // assert arr.toString() == "{Foo named zero},{Foo named zero},{Foo named one}";
+    // assertTrue arr.toString() == "{Foo named zero},{Foo named zero},{Foo named one}";
 }
 
 function Array_TestJSLastIndexOf(arr: Array<FooClass>): void {
@@ -192,14 +192,14 @@ function Array_TestJSLastIndexOf(arr: Array<FooClass>): void {
     assertEQ( arr.lastIndexOf(new FooClass("not in array"), 2.0), -1);
 
     // NOTE (oignatenko) uncomment below after interop will be supported for this method signature
-    // assert arr.lastIndexOf(arr.at(1) as FooClass) == 2;
-    // assert arr.lastIndexOf(new FooClass("not in array")) == -1;
+    // assertTrue arr.lastIndexOf(arr.at(1) as FooClass) == 2;
+    // assertTrue arr.lastIndexOf(new FooClass("not in array")) == -1;
 }
 
 function Array_TestJSToReversed(arr: Array<FooClass>): void {
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // let reversed_copy: Array<FooClass> = arr.toReversed() as Array<FooClass>;
-    // assert reversed_copy.toString() == "{Foo named one},{Foo named zero}";
+    // assertTrue reversed_copy.toString() == "{Foo named one},{Foo named zero}";
 }
 
 function Array_TestJSMap(arr: Array<FooClass>): void {
@@ -208,10 +208,10 @@ function Array_TestJSMap(arr: Array<FooClass>): void {
 
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // let mapped = arr.map(fn_map);
-    // assert mapped.toString() == "String,String";
+    // assertTrue mapped.toString() == "String,String";
     //
     // let mapped1 = arr.map(fn_map1);
-    // assert mapped1.toString() == "String1,String1";
+    // assertTrue mapped1.toString() == "String1,String1";
 }
 
 function Array_TestJSFlatMap(arr: Array<FooClass>): void {
@@ -220,10 +220,10 @@ function Array_TestJSFlatMap(arr: Array<FooClass>): void {
 
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
     // let mapped = arr.flatMap(fn_map);
-    // assert mapped.toString() == "String,String";
+    // assertTrue mapped.toString() == "String,String";
     //
     // let mapped1 = arr.flatMap(fn_map1);
-    // assert mapped1.toString() == "String1,String1";
+    // assertTrue mapped1.toString() == "String1,String1";
 }
 
 function Array_TestJSReduce(arr: Array<FooClass>): void {
@@ -288,9 +288,9 @@ function Array_TestJSFromAsync(arr: Array<FooClass>): void {
     let fn_map1: (v: FooClass) => String = (v: FooClass): String => { return "String1"; }
 
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
-    // Array.fromAsync(arr).then((array) => { assert array.at(0).toString() == "{Foo named zero}" });
-    // Array.fromAsync(arr, fn_map).then((array) => { assert array.at(0).toString() == "String" });
-    // Array.fromAsync(arr, fn_map1).then((array) => { assert array.at(0).toString() == "String1" });
+    // Array.fromAsync(arr).then((array) => { assertTrue array.at(0).toString() == "{Foo named zero}" });
+    // Array.fromAsync(arr, fn_map).then((array) => { assertTrue array.at(0).toString() == "String" });
+    // Array.fromAsync(arr, fn_map1).then((array) => { assertTrue array.at(0).toString() == "String1" });
 }
 
 function Array_CreateEtsSample(): Array<Object> {
@@ -315,22 +315,22 @@ function Boolean_CreateEtsSample(): Boolean {
 function Error_TestJSSample(v: Error): void {
     assertTrue((v as Object) instanceof Error);
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
-    // assert v.message.toString() == "foo";
-    // assert v.cause == v;
-    // assert v.stack.toString().includes("Error");
+    // assertTrue v.message.toString() == "foo";
+    // assertTrue v.cause == v;
+    // assertTrue v.stack.toString().includes("Error");
 }
 
 function Error_TestJSWithCause(v: Error): void {
     assertTrue((v as Object) instanceof Error);
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
-    // assert v.message.toString() == "message";
-    // assert v.cause.toString() == "cause";
-    // assert v.stack.toString().includes("Error");
+    // assertTrue v.message.toString() == "message";
+    // assertTrue v.cause.toString() == "cause";
+    // assertTrue v.stack.toString().includes("Error");
 }
 
 function Error_TestJSToString(v: Error): void {
     // NOTE (oignatenko) uncomment this after interop will be supported in this direction
-    // assert v.toString().includes(v.message.toString()));
+    // assertTrue v.toString().includes(v.message.toString()));
 }
 
 function Error_CreateEtsSample(): Error {

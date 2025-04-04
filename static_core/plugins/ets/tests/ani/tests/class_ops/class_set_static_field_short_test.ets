@@ -16,3 +16,11 @@ class TestSetShort {
     static short_value: short = 3;
     static string_value: string = "";
 }
+
+class TestSetShortA extends TestSetShort {
+    static short_value: short = 3;
+}
+
+final class TestSetShortFinal extends TestSetShort {
+    static short_value: short = 3;
+}

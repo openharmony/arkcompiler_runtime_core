@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath5)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath5)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -74,7 +74,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath5)
     }
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath6)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath6)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

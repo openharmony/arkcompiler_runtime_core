@@ -332,7 +332,7 @@ function gcJsruntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
         let fullGcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
-        // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
+        // We need to switch from main coroutine to coroutine created by FinalizationRegistry because
         // if main coro is executed first, the test will return false
         Coroutine.Schedule();
         GC.waitForFinishGC(fullGcId);

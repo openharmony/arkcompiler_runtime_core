@@ -19,6 +19,9 @@
 #include <vector>
 
 #include "ani.h"
+#ifdef PANDA_TARGET_OHOS
+#include "plugins/ets/runtime/platform/ohos/logger.h"
+#endif
 
 namespace ark::ets::ani {
 
@@ -60,7 +63,11 @@ public:
 
     LoggerCallback GetLoggerCallback()
     {
+#ifdef PANDA_TARGET_OHOS
+        return loggerCallback_ == nullptr ? ohos::DefaultLogger : loggerCallback_;
+#else
         return loggerCallback_;
+#endif
     }
 
 private:

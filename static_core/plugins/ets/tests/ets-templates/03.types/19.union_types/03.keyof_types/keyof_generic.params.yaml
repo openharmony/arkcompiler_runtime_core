@@ -14,8 +14,11 @@
 cases:
   - decl: |-
       class A<T> {}
+      let n: never
     check: |-
-      assertEQ(keyof A, never)
+      type t = keyof A<Number>
+      let a: t = n
+
   - decl: |-
       class A<T,V> {
         foo(i: T) {}
@@ -26,7 +29,12 @@ cases:
         jay<U>() {}
       }
     check: |-
-      assertEQ(keyof A, "bar"|"foo"|"jay")
+      type t = keyof A<Object,Map<Object,Number>>
+      let a: t = "bar"
+      a = "foo"
+      a = "jay"
+      assertEQ(typeof a, string)
+
   - decl: |-
       final class A<T,V> {
         foo(i: T) {}
@@ -37,20 +45,36 @@ cases:
         jay<U>() {}
       }
     check: |-
-      assertEQ(keyof A, "bar"|"foo"|"jay")
+      type t = keyof A<Array<Byte>,Set<String>>
+      let a: t = "bar"
+      a = "foo"
+      a = "jay"
+      assertEQ(typeof a, string)
+
   - decl: |-
       abstract class A<T,V> {
         foo(i: T) {}
         bar: V
         jay<U>() {}
       }
+      class B {}
     check: |-
-      assertEQ(keyof A, "bar"|"foo"|"jay")
+      type t = keyof A<B,int[]>
+      let a: t = "bar"
+      a = "foo"
+      a = "jay"
+      assertEQ(typeof a, string)
+
   - decl: |-
       interface I<T,V> {
         foo(i: T)
         bar: V
         jay<U>()
       }
+      enum NUM {A, B, C}
     check: |-
-      assertEQ(keyof I, "bar"|"foo"|"jay")
+      type t = keyof I<NUM,Boolean>
+      let a: t = "bar"
+      a = "foo"
+      a = "jay"
+      assertEQ(typeof a, string)

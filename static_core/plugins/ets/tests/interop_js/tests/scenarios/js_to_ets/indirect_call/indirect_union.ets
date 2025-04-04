@@ -18,7 +18,7 @@ function Test_indirect_call_type_union_call_arg_numeric(): boolean {
     const NUMERIC_VALUE: (number | string) = 1;
 
     let result: (number | string) = js.indirectCallUnion.call(null, NUMERIC_VALUE) as (number | string);
-    assert(typeof result == "number" && result as number == NUMERIC_VALUE);
+    assertTrue(typeof result == "number" && result as number == NUMERIC_VALUE);
 
     return true;
 }
@@ -27,7 +27,7 @@ function Test_indirect_call_type_union_call_arg_string(): boolean {
     const STRING_VALUE: (number | string) = '1';
 
     let result: (number | string) = js.indirectCallUnion.call(null, STRING_VALUE) as (number | string);
-    assert(typeof result == "string" && result as string == STRING_VALUE);
+    assertTrue(typeof result == "string" && result as string == STRING_VALUE);
 
     return true;
 }
@@ -36,7 +36,7 @@ function Test_indirect_call_type_union_apply_arg_numeric(): boolean {
     const NUMERIC_VALUE: (number | string) = 1;
 
     let result: (number | string) = js.indirectCallUnion.apply(null, [NUMERIC_VALUE]) as (number | string);
-    assert(typeof result == "number" && result as number == NUMERIC_VALUE);
+    assertTrue(typeof result == "number" && result as number == NUMERIC_VALUE);
 
     return true;
 }
@@ -45,7 +45,7 @@ function Test_indirect_call_type_union_apply_arg_string(): boolean {
     const STRING_VALUE: (number | string) = '1';
 
     let result: (number | string)  = js.indirectCallUnion.apply(null, [STRING_VALUE]) as (number | string);
-    assert(typeof result == "string" && result as string == STRING_VALUE);
+    assertTrue(typeof result == "string" && result as string == STRING_VALUE);
 
     return true;
 }
@@ -55,7 +55,7 @@ function Test_indirect_call_type_union_bind_with_arg_numeric(): boolean {
 
     let boundWithNumericArg = js.indirectCallUnion.bind(null, NUMERIC_VALUE);
     let result: (number | string) = boundWithNumericArg() as (number | string);
-    assert(typeof result == "number" && result as number == NUMERIC_VALUE);
+    assertTrue(typeof result == "number" && result as number == NUMERIC_VALUE);
 
     return true;
 }
@@ -65,7 +65,7 @@ function Test_indirect_call_type_union_bind_with_arg_string(): boolean {
 
     let boundWithStringArg = js.indirectCallUnion.bind(null, STRING_VALUE);
     let result: (number | string) = boundWithStringArg() as (number | string);
-    assert(typeof result == "string" && result as string == STRING_VALUE);
+    assertTrue(typeof result == "string" && result as string == STRING_VALUE);
 
     return true;
 }
@@ -75,7 +75,7 @@ function Test_indirect_call_type_union_bind_without_arg_numeric(): boolean {
 
     let boundWithoutArg = js.indirectCallUnion.bind(null);
     let result: (number | string) = boundWithoutArg(NUMERIC_VALUE) as (number | string);
-    assert(typeof result == "number" && result as number == NUMERIC_VALUE);
+    assertTrue(typeof result == "number" && result as number == NUMERIC_VALUE);
 
     return true;
 }
@@ -85,7 +85,7 @@ function Test_indirect_call_type_union_bind_without_arg_string(): boolean {
 
     let boundWithoutArg = js.indirectCallUnion.bind(null);
     let result: (number | string) = boundWithoutArg(STRING_VALUE) as (number | string);
-    assert(typeof result == "string" && result as string == STRING_VALUE);
+    assertTrue(typeof result == "string" && result as string == STRING_VALUE);
 
     return true;
 }

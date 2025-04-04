@@ -21,59 +21,96 @@ cases:
   - decl: |-
       class A {}
       class B extends A {}
+      let n: never
     check: |-
-      assertEQ( keyof A, never )
-      assertEQ( keyof A, keyof B )
+      type t1 = keyof A
+      type t2 = keyof B
+      let a: t1 = n
+      let b: t2 = a
+
   - decl: |-
       abstract class A {}
       class B extends A {}
+      let n: never
     check: |-
-      assertEQ( keyof A, never )
-      assertEQ( keyof A, keyof B )
+      type t1 = keyof A
+      type t2 = keyof B
+      let a: t1 = n
+      let b: t2 = a
+
   - decl: |-
       abstract class A {}
       abstract class B extends A {}
+      let n: never
     check: |-
-      assertEQ( keyof A, never )
-      assertEQ( keyof A, keyof B )
+      type t1 = keyof A
+      type t2 = keyof B
+      let a: t1 = n
+      let b: t2 = a
+
   - decl: |-
       class A {}
       final class B extends A {}
+      let n: never
     check: |-
-      assertEQ( keyof A, never )
-      assertEQ( keyof A, keyof B )
+      type t1 = keyof A
+      type t2 = keyof B
+      let a: t1 = n
+      let b: t2 = a
+
   - decl: |-
       abstract class A {}
       final class B extends A {}
+      let n: never
     check: |-
-      assertEQ( keyof A, never )
-      assertEQ( keyof A, keyof B )
+      type t1 = keyof A
+      type t2 = keyof B
+      let a: t1 = n
+      let b: t2 = a
+
   # Interfaces
   - decl: |-
       interface I {}
       interface II extends I {}
+      let n: never
     check: |-
-      assertEQ( keyof I, never )
-      assertEQ( keyof I, keyof II )
+      type t1 = keyof I
+      type t2 = keyof II
+      let a: t1 = n
+      let b: t2 = a
+
   - decl: |-
       interface I {
         foo: int
         jay()
       }
       interface II extends I {
-        bar: str
+        bar: string
         jay(i: number)
       }
     check: |-
-      assertEQ( keyof I, "foo" | "jay" )
-      assertEQ( keyof II, "bar" | "foo" | "jay" )
+      type t1 = keyof I
+      type t2 = keyof II
+  
+      let a: t1 = "foo"
+      let b: "foo" | "jay" = a
+      a = b
+  
+      let c: t2 = a
+      let d: "bar" | "foo" | "jay" = c
+      c = d
+
   # Interfaces + class
   - decl: |-
       interface I {}
       class A implements I {}
+      let n: never
     check: |-
-      assertEQ( keyof I, never )
-      assertEQ( keyof A, keyof I )
+      type t1 = keyof I
+      type t2 = keyof A
+      let a: t1 = n
+      let b: t2 = a
+
   - decl: |-
       interface I {
         foo: int
@@ -82,25 +119,43 @@ cases:
       class A implements I {
         bar() {}
         bar(i: int) {}
-        jay(i: number)
+        jay(i: number) {}
         raf = true
         foo = 1
       }
     check: |-
-      assertEQ( keyof I, "bar" | "foo" )
-      assertEQ( keyof A, "bar" | "foo" | "jay" | "raf" )
+      type t1 = keyof I
+      type t2 = keyof A
+      
+      let a: t1 = "foo"
+      let b: "foo" | "bar" = a
+      a = b
+      
+      let c: t2 = a
+      let d: "bar" | "foo" | "jay" | "raf" = c
+      c = d
+
   - decl: |-
       interface I {
         foo: int
         bar()
       }
       abstract class A implements I {
-        bar1()
+        abstract bar1()
         foo1: boolean
       }
     check: |-
-      assertEQ( keyof I, "bar" | "foo" )
-      assertEQ( keyof A, "bar" | "bar1" | "foo" | "foo1" )
+      type t1 = keyof I
+      type t2 = keyof A
+      
+      let a: t1 = "foo"
+      let b: "foo" | "bar" = a
+      a = b
+      
+      let c: t2 = a
+      let d: "bar" | "foo" | "foo1" | "bar1" = c
+      c = d
+
   - decl: |-
       interface I {
         foo: int
@@ -113,18 +168,34 @@ cases:
         foo = 2
       }
     check: |-
-      assertEQ( keyof I, "bar" | "foo" )
-      assertEQ( keyof A, "bar" | "bar1" | "foo" | "foo1" )
+      type t1 = keyof I
+      type t2 = keyof A
+      
+      let a: t1 = "foo"
+      let b: "foo" | "bar" = a
+      a = b
+      
+      let c: t2 = a
+      let d: "bar" | "foo" | "bar1" | "foo1" = c
+      c = d
+
 # empty interface|non-empty class
   - decl: |-
       interface I { }
       final class A implements I {
-        bar()
+        bar() {}
         foo = true
       }
+      let n: never
     check: |-
-      assertEQ( keyof I, never )
-      assertEQ( keyof A, "bar" | "foo" )
+      type t1 = keyof I
+      type t2 = keyof A
+      let a: t1 = n
+      
+      let b: t2 = "foo"
+      let c: "bar" | "foo" = b
+      b = c
+
   # empty class|non-empty interface
   - decl: |-
       interface I {
@@ -133,11 +204,8 @@ cases:
       }
       abstract class A implements I { }
     check: |-
-      assertEQ( keyof I, "bar" | "foo" )
-      assertEQ( keyof A, keyof I )
-
-
-
-      generic
-      module
-      getter/setter
+      type t1 = keyof I
+      type t2 = keyof A
+      let a: t1 = "foo"
+      let b: t2 = a
+      a = b

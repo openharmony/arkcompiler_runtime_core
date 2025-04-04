@@ -23,7 +23,8 @@ public:
     void SetUp() override
     {
         EtsInteropTest::SetUp();
-        LoadModuleAs("test_intrins", "index.js");
+        // Need this load, because test use propery that we set into gtest_env in call of this method.
+        LoadModuleAs("test_intrins", "index");
     }
 };
 

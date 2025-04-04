@@ -158,7 +158,9 @@ function testUnion() {
     assertEQ(typeof erase(v2), "number");
 }
 
-class A implements Function { }
+class A implements Function {
+    unsafeCall(...r: NullishType[]): NullishType { return null }
+}
 class B extends Numeric {
     public byteValue(): byte { return 1 };
     public intValue(): int { return 1 };

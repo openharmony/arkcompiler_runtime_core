@@ -13,42 +13,22 @@
  * limitations under the License.
  */
 
-#include "ani_gtest.h"
+#include "ets_interop_js_gtest.h"
 
-namespace ark::ets::ani::testing {
+namespace ark::ets::interop::js::testing {
 
-class BackTraceTest : public AniTest {};
+class BackTraceTest : public EtsInteropTest {};
 
 TEST_F(BackTraceTest, simple_call)
 {
-    ani_boolean unhandledError;
-    // Call native library constructor
-    auto funtRef = CallEtsFunction<ani_ref>("backtrace_test", "new_TestBacktrace");
-    ASSERT_EQ(env_->ExistUnhandledError(&unhandledError), ANI_OK);
-    ASSERT_EQ(unhandledError, ANI_FALSE) << "Cannot load native library";
-    // Call native method
-    auto success =
-        CallEtsFunction<ani_int>("backtrace_test", "TestBacktrace_entry_simple", static_cast<ani_object>(funtRef));
-    ASSERT_EQ(env_->ExistUnhandledError(&unhandledError), ANI_OK);
-    ASSERT_EQ(unhandledError, ANI_FALSE) << "Cannot call native method";
-    // Check result
+    auto success = CallEtsFunction<int>("Test", "TestBacktrace_entry_simple");
     ASSERT_EQ(success, 1);
 }
 
 TEST_F(BackTraceTest, complex_call)
 {
-    ani_boolean unhandledError;
-    // Call native library constructor
-    auto funtRef = CallEtsFunction<ani_ref>("backtrace_test", "new_TestBacktrace");
-    ASSERT_EQ(env_->ExistUnhandledError(&unhandledError), ANI_OK);
-    ASSERT_EQ(unhandledError, ANI_FALSE) << "Cannot load native library";
-    // Call native method
-    auto success =
-        CallEtsFunction<ani_int>("backtrace_test", "TestBacktrace_entry_complex", static_cast<ani_object>(funtRef));
-    ASSERT_EQ(env_->ExistUnhandledError(&unhandledError), ANI_OK);
-    ASSERT_EQ(unhandledError, ANI_FALSE) << "Cannot call native method";
-    // Check result
+    auto success = CallEtsFunction<int>("Test", "TestBacktrace_entry_complex");
     ASSERT_EQ(success, 1);
 }
 
-}  // namespace ark::ets::ani::testing
+}  // namespace ark::ets::interop::js::testing

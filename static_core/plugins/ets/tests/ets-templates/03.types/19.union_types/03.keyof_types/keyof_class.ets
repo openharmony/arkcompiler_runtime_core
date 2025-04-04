@@ -13,26 +13,41 @@
  * limitations under the License.
  */
 
-{% for case in cases %}
 {% for type in types %}
+{% for case in cases %}
 
 /*---
 desc: >-
     The keyword keyof is applied to the class or interface type (see Classes and Interfaces).
     The resultant new type is a union of names (as string literal types) of all accessible members of the class or interface type.
-    {{case.doc}} {{type}} : {{case.type}}
+tags: [{{case.tags}}]
 ---*/
 
 {{case.decl}}
 
 {{type}} A {
-  {{case.def}}
+    {{case.def|indent}}
 }
 
 function main() {
-   type t = keyof A
-   let a: t
-   assertEQ(typeof a, {{case.type}})
+    type t = keyof A
+    // It is allowed to assign variable value of union_1 to another variable of union_2 if
+    // union_2 contains or equal union_1.
+    // Cannot assign value of union_1 to union_2 otherwise.
+    // By assigning union1 to union2 and union2 back to union1 we`ll ensure they are same
+    // (until another option will be available here)
+    {% if "negative" in case.tags %}
+      let union: t = {{case.check[0]}}
+    {% else %}
+      let union1: {% for i in case.check %}{% if i != case.check[0] %}|{% endif %}{{i}}{% endfor %}{% if case.check[0] != "never" %} = {{case.check[0]}}{% endif %}
+      let union2: t = union1
+      {% if case.check[0] != "never" %}
+        {% for i in case.check %}{% if i != case.check[0] %}union2 = {{i}}{% endif %}
+        {% endfor %}
+        union1 = union2
+        assertEQ(typeof union2, string)
+      {% endif %}
+    {% endif %}
 }
 
 {% endfor %}

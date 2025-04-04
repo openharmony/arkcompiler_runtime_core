@@ -1,6 +1,7 @@
 {
   "cmake/third_party/icu/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/openssl/CMakeLists.txt": {"bc-40001": "*"},
+  "cmake/third_party/pcre2/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/securec/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/toolchain_websocket/CMakeLists.txt": {"bc-40001": "*"},
   "cmake/third_party/typescript/CMakeLists.txt": {"bc-40001": "*"},
@@ -81,6 +82,7 @@
   "plugins/ets/tests/integrational": "*",
   "plugins/ets/tests/interop_js/tests/constructor_as_arg/main.js": {"G.NAM.01": "*"},
   "plugins/ets/tests/interop_js/tests/optional_reference_type/optional_reference_type.ts": "*",
+  "plugins/ets/tests/interop_js/tests/test_callable/test_callable.ts": "*",
   "plugins/ets/tests/interop_js/tests/proxies/mem/proxy_reference_storage_2/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/timer/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/perf/CMakeLists.txt": {"bc-40001": "*"},

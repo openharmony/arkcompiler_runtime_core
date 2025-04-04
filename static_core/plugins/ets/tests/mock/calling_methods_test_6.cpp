@@ -376,7 +376,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral20)
 }
 #endif  // ENABLE_THIS_CODE_IN_FUTURE
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath14)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath14)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

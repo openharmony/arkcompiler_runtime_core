@@ -16,6 +16,7 @@
 /*---
 desc: Top-level declarations can be made exported by using a selective export directive.
 files: ['./ambient04/file.ets']
+tags: [compile-only, negative]
 ---*/
 
 import { default as ns, foo } from './ambient04/file.d.ets'

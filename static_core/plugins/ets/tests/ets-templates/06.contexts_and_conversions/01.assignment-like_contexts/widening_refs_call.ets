@@ -17,6 +17,7 @@
 /*---
 desc: Invocation contexts allow a widening reference conversion.
 params: Widening reference conversion from '{{c.fromtype}}' to '{{c.totype}}'
+tags: [{{c.tags}}]
 ---*/
 
 interface I {}

@@ -16,7 +16,7 @@
 /*---
 desc: >-
     ArkTS provides a number of operators to act on character values:
-    Character operators that produce a value of type char.
+    Character operators are identical to integer operators, so produce a value of type int.
 ---*/
 
 function decPre(p: Char): Char {
@@ -31,6 +31,6 @@ function decPost(p: Char): Char {
 function main() {
     const v1 = new Char({{v.v1}})
 
-    assertTrue( ({{v.exp}}) == {{v.res}} )
+    assertEQ(({{v.exp}}), {{v.res}})
 }
 {%- endfor %}

@@ -127,4 +127,38 @@ void ThrowNoInteropContextException()
     ThrowException(ctx, thread, descriptor, utf::CStringAsMutf8(msg.c_str()));
 }
 
+static bool GetPropertyStatusHandling([[maybe_unused]] napi_env env, napi_status rc)
+{
+#if !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)
+    if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+        ASSERT(NapiIsExceptionPending(env));
+        return false;
+    }
+#else
+    if (UNLIKELY(rc == napi_object_expected && !NapiIsExceptionPending(env))) {
+        InteropCtx::ThrowJSTypeError(env, "Cannot convert undefined or null to object");
+        return false;
+    }
+
+    if (UNLIKELY(rc == napi_pending_exception || NapiThrownGeneric(rc))) {
+        ASSERT(NapiIsExceptionPending(env));
+        return false;
+    }
+#endif
+    INTEROP_FATAL_IF(rc != napi_ok);
+    return true;
+}
+
+bool NapiGetProperty(napi_env env, napi_value object, napi_value key, napi_value *result)
+{
+    napi_status rc = napi_get_property(env, object, key, result);
+    return GetPropertyStatusHandling(env, rc);
+}
+
+bool NapiGetNamedProperty(napi_env env, napi_value object, const char *utf8name, napi_value *result)
+{
+    napi_status rc = napi_get_named_property(env, object, utf8name, result);
+    return GetPropertyStatusHandling(env, rc);
+}
+
 }  // namespace ark::ets::interop::js

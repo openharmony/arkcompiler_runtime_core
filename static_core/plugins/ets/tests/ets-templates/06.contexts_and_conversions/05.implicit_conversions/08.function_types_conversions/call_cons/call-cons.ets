@@ -18,6 +18,7 @@
 desc: >-
     Function types conversion is the conversion of one function type to another.
     Call context, constructor, function type conversion, implicit
+tags: [{{c.tags}}]
 ---*/
 {{c.decl}}
 

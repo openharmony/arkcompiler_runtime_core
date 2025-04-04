@@ -17,12 +17,29 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
-class ClassSetStaticFieldBooleanTest : public AniTest {};
+class ClassSetStaticFieldBooleanTest : public AniTest {
+public:
+    void CheckFieldValue(const char *className, const char *fieldName)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+        ani_static_field field {};
+        ASSERT_EQ(env_->Class_FindStaticField(cls, fieldName, &field), ANI_OK);
+        ASSERT_NE(field, nullptr);
+        ani_boolean result = ANI_TRUE;
+        ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &result), ANI_OK);
+        ASSERT_EQ(result, ANI_FALSE);
+        ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ANI_TRUE), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &result), ANI_OK);
+        ASSERT_EQ(result, ANI_TRUE);
+    }
+};
+
 TEST_F(ClassSetStaticFieldBooleanTest, set_boolean)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_boolean result = ANI_TRUE;
@@ -35,9 +52,9 @@ TEST_F(ClassSetStaticFieldBooleanTest, set_boolean)
 
 TEST_F(ClassSetStaticFieldBooleanTest, set_boolean_c_api)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_boolean result = ANI_TRUE;
@@ -50,9 +67,9 @@ TEST_F(ClassSetStaticFieldBooleanTest, set_boolean_c_api)
 
 TEST_F(ClassSetStaticFieldBooleanTest, set_invalid_field_type)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "string_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ANI_TRUE), ANI_INVALID_TYPE);
@@ -60,9 +77,9 @@ TEST_F(ClassSetStaticFieldBooleanTest, set_invalid_field_type)
 
 TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument2)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
-    ani_static_field field;
+    ani_static_field field {};
     ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
     ASSERT_NE(field, nullptr);
     ani_boolean result = ANI_TRUE;
@@ -73,9 +90,86 @@ TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument2)
 
 TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument3)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, nullptr, ANI_TRUE), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassSetStaticFieldBooleanTest, invalid_argument4)
+{
+    ani_class cls;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ani_static_field field;
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    ASSERT_EQ(env_->c_api->Class_SetStaticField_Boolean(nullptr, cls, field, ANI_TRUE), ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassSetStaticFieldBooleanTest, special_values)
+{
+    ani_class cls {};
+    ani_static_field field {};
+    ani_boolean single;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ani_boolean(0)), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, ANI_FALSE);
+
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ani_boolean(NULL)), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, ANI_FALSE);
+
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ani_boolean(!'s')), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, ANI_FALSE);
+
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ani_boolean(!0)), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, ANI_TRUE);
+
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, true), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, ANI_TRUE);
+
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, false), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, ANI_FALSE);
+}
+
+TEST_F(ClassSetStaticFieldBooleanTest, combination_test1)
+{
+    ani_class cls {};
+    ani_static_field field {};
+    ani_boolean single;
+    ASSERT_EQ(env_->FindClass("Lclass_set_static_field_boolean_test/TestSetBoolean;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "bool_value", &field), ANI_OK);
+    ASSERT_NE(field, nullptr);
+    const int32_t loopNum = 3;
+    for (int32_t i = 0; i < loopNum; i++) {
+        ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ANI_FALSE), ANI_OK);
+        ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+        ASSERT_EQ(single, ANI_FALSE);
+    }
+    ASSERT_EQ(env_->Class_SetStaticField_Boolean(cls, field, ANI_TRUE), ANI_OK);
+    ASSERT_EQ(env_->Class_GetStaticField_Boolean(cls, field, &single), ANI_OK);
+    ASSERT_EQ(single, ANI_TRUE);
+}
+
+TEST_F(ClassSetStaticFieldBooleanTest, combination_test2)
+{
+    CheckFieldValue("Lclass_set_static_field_boolean_test/TestSetBoolean;", "bool_value");
+}
+
+TEST_F(ClassSetStaticFieldBooleanTest, combination_test3)
+{
+    CheckFieldValue("Lclass_set_static_field_boolean_test/TestSetBooleanA;", "bool_value");
+}
+
+TEST_F(ClassSetStaticFieldBooleanTest, combination_test4)
+{
+    CheckFieldValue("Lclass_set_static_field_boolean_test/TestSetBooleanFinal;", "bool_value");
 }
 }  // namespace ark::ets::ani::testing
    // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)

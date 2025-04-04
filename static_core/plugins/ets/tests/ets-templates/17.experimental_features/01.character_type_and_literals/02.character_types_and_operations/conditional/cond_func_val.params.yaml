@@ -12,27 +12,32 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0020'
       v2: c'\u0021'
       exp: foo(true, v1, v2)
       r: c' '
 
+    # 1.
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: foo(false, v1, v2) + v
+      exp: (foo(false, v1, v2) +v1) as char
       r: c'A'
 
+    # 2.
     - v1: c'\u0020'
       v2: c'\u0021'
       exp: '" " + foo(false, v1, v2) + v1'
-      r: ' ! '
+      r: '" ! "'
 
+    # 3.
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: "c' ' + foo(false, v1, v2) + v1"
+      exp: "(c' ' + foo(false, v1, v2) + v1) as char"
       r: c'a'
 
+    # 4.
     - v1: c'\u0020'
       v2: c'\u0021'
-      exp: "c' ' + foo(false, v2 + v1, v2 - v1)"
+      exp: "(c' ' + foo(false, (v2 + v1) as char, (v2 - v1) as char)) as char"
       r: v2

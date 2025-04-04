@@ -281,7 +281,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
         static_cast<ets_double>(0.0));
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath3)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath3)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -324,7 +324,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath3)
     }
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath4)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
     {

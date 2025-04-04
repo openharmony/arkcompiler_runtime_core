@@ -21,7 +21,7 @@ namespace anyns {
         static val1: char = 'C';
         static val2: char = 2;
         public static add(): char {
-            sum = A.val1 + A.val2;
+            sum = A.val1 + A.val2 as char;
             return sum;
         }
     }

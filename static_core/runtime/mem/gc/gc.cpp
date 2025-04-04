@@ -534,7 +534,8 @@ void GC::PostponeGCStart()
 void GC::PostponeGCEnd()
 {
     ASSERT(IsPostponeGCSupported());
-    ASSERT(IsPostponeEnabled());
+    // Don't check IsPostponeEnabled because runtime can be created
+    // during app launch. In this case PostponeGCStart is not called.
     isPostponeEnabled_ = false;
     gcWorker_->OnPostponeGCEnd();
 }

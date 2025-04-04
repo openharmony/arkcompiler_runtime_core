@@ -56,14 +56,22 @@ p{{i + 1}}{% if not loop.last %}, {% endif %}
 {%- endfor %}
 {%- endmacro %}
 
+{%- macro listArgArrayLoads(to) -%}
+{% for i in range(to) -%}
+r[{{i}}]{% if not loop.last %}, {% endif %}
+{%- endfor %}
+{%- endmacro %}
+
 {%- macro invokeName(narg, suffix) %}invoke{{suffix}}{{narg}}{% endmacro %}
 
 type __T = object | null | undefined;
 
-export interface Function {}
+export interface Function {
+    unsafeCall(...r: __T[]): __T
+}
 
 export interface FunctionN<R> extends Function {
-    invokeN(...p: __T[]): R;
+    invokeN(...r: __T[]): R;
 }
 
 export interface __FunctionN extends FunctionN<__T> {}
@@ -93,15 +101,30 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
 {{ defineChainingHelper("Function", narg, narg) }} {}
 {{ defineLambdaHelper("LambdaR", "FunctionR", narg) }} {
     abstract {{invokeName(narg, "R")}}{{erasedSignature(narg, True)}};
+{%- if narg == 0 %}
+    final unsafeCall(...r: __T[]): __T {
+        return this.{{invokeName(narg, "R")}}(...r)
+    }
+{%- else %}
+    final unsafeCall(...r: __T[]): __T {
+        if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
+        return this.{{invokeName(narg, "R")}}({{listArgArrayLoads(narg)}}{{", " if narg != 0 }}
+            ...Runtime.removeFrontElementsStub(r, {{narg}}))
+    }
+{%- endif %}
 {%- for extNarg in range(narg + 1, maxarity + 1) %}
     final {{invokeName(extNarg, "R")}}{{erasedSignature(extNarg, True) }} {
         return this.{{invokeName(narg, "R")}}({{listArgs(0, narg)}}{{", " if narg != 0 }}
-            ...Runtime.prependRestArgumentsStub(r, [{{listArgs(narg, extNarg)}}]))
+            ...Runtime.addFrontElementsStub(r, [{{listArgs(narg, extNarg)}}]))
     }
 {%- endfor %}
 }
 {{ defineLambdaHelper("Lambda", "Function", narg) }} {
     abstract {{invokeName(narg)}}{{erasedSignature(narg)}};
+    final unsafeCall(...r: __T[]): __T {
+        if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
+        return this.{{invokeName(narg)}}({{listArgArrayLoads(narg)}})
+    }
 {%- for extNarg in range(narg + 1, maxarity + 1) %}
     final {{invokeName(extNarg)}} {{erasedSignature(extNarg, False)}} {
         return this.{{invokeName(narg)}}({{listArgs(0, narg)}})

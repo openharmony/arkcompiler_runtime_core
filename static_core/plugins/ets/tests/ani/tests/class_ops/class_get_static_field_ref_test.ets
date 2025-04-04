@@ -16,3 +16,13 @@ class TestRef {
     static int_value: int = 0;
     static string_value: String = "testString";
 }
+
+class TestRefA extends TestRef {
+    static int_value: int = 0;
+    static string_value: String = "testString";
+}
+
+final class TestRefFinal extends TestRef {
+    static int_value: int = 0;
+    static string_value: String = "testString";
+}

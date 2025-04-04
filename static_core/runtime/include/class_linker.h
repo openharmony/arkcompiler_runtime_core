@@ -358,6 +358,8 @@ private:
     std::optional<Span<Class *>> LoadInterfaces(panda_file::ClassDataAccessor *cda, ClassLinkerContext *context,
                                                 ClassLinkerErrorHandler *errorHandler);
 
+    void FreeITableAndInterfaces(ITable itable, Span<Class *> &interfaces);
+
     [[nodiscard]] bool LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler);
 
     [[nodiscard]] bool LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor,

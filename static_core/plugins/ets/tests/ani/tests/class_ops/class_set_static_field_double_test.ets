@@ -16,3 +16,11 @@ class TestSetDouble {
     static double_value: double = 18.0;
     static string_value: string = "";
 }
+
+class TestSetDoubleA extends TestSetDouble {
+    static double_value: double = 18.0;
+}
+
+final class TestSetDoubleFinal extends TestSetDouble {
+    static double_value: double = 18.0;
+}

@@ -378,7 +378,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
     auto coroutine = EtsCoroutine::GetCurrent();
     auto *coroManager = coroutine->GetCoroutineManager();
 
-    if (finRegLastIndex_ != 0) {
+    if (finRegLastIndex_ != 0 && UpdateFinRegCoroCountAndCheckIfCleanupNeeded()) {
         auto *objArray =
             EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
@@ -568,8 +568,10 @@ static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exceptio
         return EtsString::FromEtsObject(callRes)->ConvertToStringView(&strBuf);
     };
 
-    char const *dumperName = PlatformTypes(coro)->escompatError->IsAssignableFrom(cls) ? "<get>stack" : "toString";
-    ss << std::endl << performCall(cls->GetMethod(dumperName)).value_or("exception dump failed");
+    ss << std::endl << performCall(cls->GetMethod("toString")).value_or("invoke toString failed");
+    if (PlatformTypes(coro)->escompatError->IsAssignableFrom(cls)) {
+        ss << std::endl << performCall(cls->GetMethod("<get>stack")).value_or("exception dump failed");
+    }
 }
 
 void PandaEtsVM::HandleUncaughtException()

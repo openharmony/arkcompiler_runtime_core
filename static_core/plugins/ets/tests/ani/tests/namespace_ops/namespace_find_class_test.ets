@@ -12,13 +12,114 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-namespace anyns {
-    class testA {
-        x: int = 0;
+namespace test {
+    namespace A {
+        class B {
+            x: int = 0;
+            public intMethod(a0: int, a1: int): int
+            {
+                return 0;
+            }
+        }
     }
 
-    class testB {
-        y: int = 0;
+    namespace C {
+        class D {
+            x: int = 0;
+            public intMethod(a0: int, a1: int): int
+            {
+                return a0 + a1;
+            }
+        }
+
+        final class E {
+            x: int = 0;
+            public intMethod(a0: int, a1: int): int
+            {
+                return a0 + a1;
+            }
+        }
+
+        abstract class F {
+            public abstract Area(a0: int, a1: int) : int;
+        }
+
+        class G extends F {
+            private x: int = 0;
+
+            public Area(a0: int, a1: int) : int
+            {
+                return a0 + a1;
+            }
+            public methodA(a0: int, a1: int): int
+            {
+                return a0 + a1;
+            }
+
+            static methodB(a0: int, a1: int): int
+            {
+                return a0 + a1;
+            }
+        }
+
+        class H {
+        }
+    }
+}
+
+namespace I {
+    namespace A {
+        class B {
+            x: int = 0;
+            public intMethod(a0: int, a1: int): int
+            {
+                return a0 + a1;
+            }
+        }
+    }
+}
+
+class C {
+    x: int = 0;
+    public intMethod(a0: int, a1: int): int
+    {
+        return a0 + a1;
+    }
+}
+
+namespace J {
+    class C {
+        x: int = 0;
+        public intMethod(a0: int, a1: int): int
+        {
+            return a0 + a1;
+        }
+    }
+
+    class B extends C{
+
+    }
+
+    class A extends B {
+
+    }
+}
+
+namespace A {
+    class C {
+        x: int = 0;
+        public intMethod(a0: int, a1: int): int
+        {
+            return a0 + a1;
+        }
+    }
+    namespace B {
+        class C {
+            x: int = 0;
+            public intMethod(a0: int, a1: int): int
+            {
+                return a0 + a1;
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-.PHONY: clean
+.PHONY: clean vmb-build
 
 VMB = ./run-vmb.sh
 OUTDIR ?= $(HOME)/vmb-build
@@ -18,11 +18,13 @@ uninstall:
 dir:
 	mkdir -p $(OUTDIR)
 
-vmb: dir uninstall
+vmb-build: dir uninstall
 	rm -rf $(OUTDIR) || true
 	python3 -c 'import build' || python3 -m pip install build
 	python3 -m build --outdir=$(OUTDIR)
 	python3 -m pip install $(OUTDIR)/vmb-*-py3-none-any.whl
+
+vmb: vmb-build clean
 
 help:
 	$(VMB) help || true

@@ -17,6 +17,7 @@ limitations under the License.
 /*---
 desc: Type arguments
 params: constructor
+tags: [{{c.tags}}]
 ---*/
 
 interface I {}

@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-const { getTestClass } = require('ets_proxy.test.js');
+const {
+    getTestClass,
+} = require('ets_proxy.test.abc');
+
 const ReferencesAccess = getTestClass('ReferencesAccess');
 const ReferencesAccessStatic = getTestClass('ReferencesAccessStatic');
 const UClass1 = getTestClass('UClass1');
