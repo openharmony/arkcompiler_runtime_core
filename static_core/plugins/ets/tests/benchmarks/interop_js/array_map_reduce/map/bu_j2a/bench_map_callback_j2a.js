@@ -28,7 +28,7 @@ function mapCallbackJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LMapCallbackJ2a;');
+        const State = stsVm.getClass('Lbench_map_callback_j2a/MapCallbackJ2a;');
 
         const start = process.hrtime.bigint();
         this.bench = new State();

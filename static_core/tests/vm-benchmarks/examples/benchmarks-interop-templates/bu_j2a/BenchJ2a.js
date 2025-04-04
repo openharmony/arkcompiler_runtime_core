@@ -28,7 +28,7 @@ function benchJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LTestImport;');
+        const State = stsVm.getClass('LTestImport/TestImport;');
         this.bench = new State();
         this.bench.setup();
         return 0;

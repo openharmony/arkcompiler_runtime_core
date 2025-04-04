@@ -52,7 +52,7 @@ class Tool(ToolBase):
             # convert to string for JSON parse: '{"name1": "value1", "name2": "value2"}'
             # and names of the options should be without minus signs "name1" not "--name1"
             if not self.custom_opts or not self.custom_opts.get('ark'):
-                return '{}'
+                return '{"load-runtimes": "ets"}'
             ets_vm_opts: str = str(self.custom_opts.get('ark'))
             return ((ets_vm_opts.replace('[\'', '{\"').replace('\']', '\"}')
                     .replace('=', '\": \"').replace('\', \'', '\", \"'))

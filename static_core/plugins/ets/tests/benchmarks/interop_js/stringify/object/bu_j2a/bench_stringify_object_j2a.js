@@ -27,7 +27,7 @@ function stringifyObjectJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const Person = stsVm.getClass('LStringifyObjectJ2a;');
+        const Person = stsVm.getClass('Lbench_stringify_object_j2a/StringifyObjectJ2a;');
 
         this.obj = new Person();
 

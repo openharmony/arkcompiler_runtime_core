@@ -42,7 +42,7 @@ function conversionDecimalJ2a() {
 
         const data = generateNumber(seed);
         this.strNumber = data.toString(10);
-        const State = stsVm.getClass('LConversionDecimalJ2a;');
+        const State = stsVm.getClass('Lbench_conversion_decimal_j2a/ConversionDecimalJ2a;');
 
         this.bench = new State();
         this.bench.setup();

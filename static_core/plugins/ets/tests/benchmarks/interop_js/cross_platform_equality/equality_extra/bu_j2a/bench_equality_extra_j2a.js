@@ -32,7 +32,7 @@ function equalityExtraJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LEqualityExtraJ2a;');
+        const State = stsVm.getClass('Lbench_equality_extra_j2a/EqualityExtraJ2a;');
 
         this.foo = stsVm.getFunction('LETSGLOBAL;', 'foo');
         this.fooOther = stsVm.getFunction('LETSGLOBAL;', 'fooOther');

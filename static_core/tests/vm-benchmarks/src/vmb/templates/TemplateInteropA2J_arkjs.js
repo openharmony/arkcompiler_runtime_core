@@ -55,7 +55,7 @@ class Benchmark {
     }
 
     #prepare() {
-        const TestClass = this.#ark.getClass("L$STATE;");
+        const TestClass = this.#ark.getClass("L$STATE/$STATE;");
         this.#benchmark = new TestClass();
         this.#benchmark.setup();
     }

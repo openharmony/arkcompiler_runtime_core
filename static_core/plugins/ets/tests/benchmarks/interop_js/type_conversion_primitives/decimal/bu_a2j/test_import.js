@@ -18,4 +18,4 @@ function decimalStringToNumberToString(str) {
     return String(res);
 }
 
-exports.decimalStringToNumberToString = decimalStringToNumberToString;
+export let decimalStringToNumberToString = decimalStringToNumberToString;

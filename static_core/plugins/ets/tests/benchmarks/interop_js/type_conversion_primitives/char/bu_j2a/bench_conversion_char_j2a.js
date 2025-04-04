@@ -29,7 +29,7 @@ function conversionCharJ2a() {
         this.char = 'A';
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LConversionCharJ2a;');
+        const State = stsVm.getClass('Lbench_conversion_char_j2a/ConversionCharJ2a;');
 
         this.bench = new State();
         this.bench.setup();

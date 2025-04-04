@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 
-exports.jsVoid = (a, b) => {};
-exports.returnAnonymous = () => (a, b) => {};
+export let jsVoid = (a, b) => {};
+export let returnAnonymous = () => (a, b) => {};

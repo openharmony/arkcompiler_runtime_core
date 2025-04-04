@@ -30,7 +30,7 @@ function equalityObjectsJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LEqualityObjectsJ2a;');
+        const State = stsVm.getClass('Lbench_equality_objects_j2a/EqualityObjectsJ2a;');
 
         this.bench = new State();
 

@@ -43,7 +43,7 @@ function conversionHexJ2a() {
         const data = generateNumber(seed);
         this.hexString = data.toString(16);
 
-        const State = stsVm.getClass('LConversionHexJ2a;');
+        const State = stsVm.getClass('Lbench_conversion_hex_j2a/ConversionHexJ2a;');
 
         this.bench = new State();
         this.bench.setup();
