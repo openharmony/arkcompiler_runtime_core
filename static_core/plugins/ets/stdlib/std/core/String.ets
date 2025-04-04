@@ -1266,7 +1266,7 @@ export final class String extends Object implements Comparable<String>, JSONable
     }
 
     public padEnd(end: int, str: String): String {
-        if (this.getLength() >= end) {
+        if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
         let arr = new char[end];
@@ -1325,7 +1325,7 @@ export final class String extends Object implements Comparable<String>, JSONable
     }
 
     public padStart(end: int, str: String): String {
-        if (this.getLength() >= end) {
+        if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
         let arr: char[] = new char[end];
