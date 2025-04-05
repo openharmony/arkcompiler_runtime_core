@@ -246,3 +246,45 @@
         "m6": {"p1": 0, "p2": 0, "p3": 2147483647, "p4": 2147483648},
       },
   }
+
+- {
+    suffix: constructor,
+    buffer_size: 8,
+    object_type: DataView,
+    constructor_params: {"byteOffset": 1.1},
+    method_name: {"m1": "setUint16",},
+    method_params:
+      {
+        "p1": {"byteOffset": 0, "value": 922337203},
+      },
+    method_name2: {"m1": "getUint16"},
+    method_params2:
+      {
+        "p1": {"byteOffset": 0},
+      },
+    expected_test_result:
+      {
+        "m1": {"p1": 49075},
+      },
+  }
+
+- {
+    suffix: constructor,
+    buffer_size: 8,
+    object_type: DataView,
+    constructor_params: {"byteOffset": 1, "byteLength": 'undefined'},
+    method_name: {"m1": "setInt16",},
+    method_params:
+      {
+        "p1": {"byteOffset": 0, "value": 922337203},
+      },
+    method_name2: {"m1": "getInt16"},
+    method_params2:
+      {
+        "p1": {"byteOffset": 0},
+      },
+    expected_test_result:
+      {
+        "m1": {"p1": -16461},
+      },
+  }
