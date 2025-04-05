@@ -138,6 +138,8 @@ export final class Boolean extends Object implements Comparable<Boolean> {
             this.value = value.unboxed() != 0;
         } else if (value instanceof String) {
             this.value = value != "";
+        } else if (value instanceof Object) {
+            this.value = true;
         } else {
             this.value = false;
         }
