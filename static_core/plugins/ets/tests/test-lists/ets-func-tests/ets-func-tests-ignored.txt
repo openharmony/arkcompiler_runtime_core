@@ -223,8 +223,6 @@ spec/11.Enumerations/enum_const_expr_02_02.ets
 spec/11.Enumerations/enum_const_expr_02_03.ets
 regression/14654_0.ets
 
-#19956 enum issue
-spec/11.Enumerations/enum_trailing_comma_04.ets
 
 ### cannot create runtime (compound tests not supported) (Import-export)
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/05.default_import_binding/default_import_binding.ets
