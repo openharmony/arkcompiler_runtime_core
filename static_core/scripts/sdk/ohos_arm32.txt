@@ -1,4 +1,5 @@
 bin/ark
+bin/aspt_converter
 lib/libarkaotmanager.so
 lib/libarkassembler.so
 lib/libarkbase.so

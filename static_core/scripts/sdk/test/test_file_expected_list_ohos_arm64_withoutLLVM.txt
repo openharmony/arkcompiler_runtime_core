@@ -2,6 +2,7 @@ build-sdk/sdk/ohos_arm64
 build-sdk/sdk/ohos_arm64/bin
 build-sdk/sdk/ohos_arm64/bin/ark
 build-sdk/sdk/ohos_arm64/bin/ark_aot
+build-sdk/sdk/ohos_arm64/bin/aspt_converter
 build-sdk/sdk/ohos_arm64/include
 build-sdk/sdk/ohos_arm64/include/compiler
 build-sdk/sdk/ohos_arm64/include/libpandabase

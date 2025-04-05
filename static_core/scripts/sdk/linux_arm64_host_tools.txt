@@ -2,6 +2,7 @@ bin/ark
 bin/ark_aot
 bin/ark_disasm
 bin/ark_link
+bin/aspt_converter
 bin/es2panda
 bin/verifier
 lib/libarkaotmanager.so
