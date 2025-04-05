@@ -421,24 +421,6 @@ export function reduce<U = boolean>(self: boolean[], callbackfn: (previousValue:
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: boolean[]) => boolean): boolean {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: boolean = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -891,6 +873,24 @@ export function map(self: boolean[], callbackfn: (value: boolean, index: number,
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: boolean[]) => boolean): boolean {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: boolean = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
@@ -1381,24 +1381,6 @@ export function reduce<U = byte>(self: byte[], callbackfn: (previousValue: U, cu
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: byte[], callbackfn: (previousValue: byte, currentValue: byte, index: number, array: byte[]) => byte): byte {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: byte = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -1851,6 +1833,24 @@ export function map(self: byte[], callbackfn: (value: byte, index: number, array
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: byte[], callbackfn: (previousValue: byte, currentValue: byte, index: number, array: byte[]) => byte): byte {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: byte = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
@@ -2341,24 +2341,6 @@ export function reduce<U = short>(self: short[], callbackfn: (previousValue: U, 
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: short[], callbackfn: (previousValue: short, currentValue: short, index: number, array: short[]) => short): short {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: short = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -2811,6 +2793,24 @@ export function map(self: short[], callbackfn: (value: short, index: number, arr
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: short[], callbackfn: (previousValue: short, currentValue: short, index: number, array: short[]) => short): short {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: short = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
@@ -3301,24 +3301,6 @@ export function reduce<U = int>(self: int[], callbackfn: (previousValue: U, curr
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: int[], callbackfn: (previousValue: int, currentValue: int, index: number, array: int[]) => int): int {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: int = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -3771,6 +3753,24 @@ export function map(self: int[], callbackfn: (value: int, index: number, array: 
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: int[], callbackfn: (previousValue: int, currentValue: int, index: number, array: int[]) => int): int {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: int = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
@@ -4261,24 +4261,6 @@ export function reduce<U = long>(self: long[], callbackfn: (previousValue: U, cu
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: long[], callbackfn: (previousValue: long, currentValue: long, index: number, array: long[]) => long): long {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: long = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -4731,6 +4713,24 @@ export function map(self: long[], callbackfn: (value: long, index: number, array
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: long[], callbackfn: (previousValue: long, currentValue: long, index: number, array: long[]) => long): long {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: long = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
@@ -5221,24 +5221,6 @@ export function reduce<U = float>(self: float[], callbackfn: (previousValue: U, 
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: float[], callbackfn: (previousValue: float, currentValue: float, index: number, array: float[]) => float): float {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: float = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -5699,6 +5681,24 @@ export function map(self: float[], callbackfn: (value: float, index: number, arr
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: float[], callbackfn: (previousValue: float, currentValue: float, index: number, array: float[]) => float): float {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: float = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
@@ -6189,24 +6189,6 @@ export function reduce<U = double>(self: double[], callbackfn: (previousValue: U
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: double[], callbackfn: (previousValue: double, currentValue: double, index: number, array: double[]) => double): double {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: double = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -6667,6 +6649,24 @@ export function map(self: double[], callbackfn: (value: double, index: number, a
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: double[], callbackfn: (previousValue: double, currentValue: double, index: number, array: double[]) => double): double {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: double = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
@@ -7157,24 +7157,6 @@ export function reduce<U = char>(self: char[], callbackfn: (previousValue: U, cu
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-export function reduceRight(self: char[], callbackfn: (previousValue: char, currentValue: char, index: number, array: char[]) => char): char {
-    if (self.length == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: char = self[self.length - 1];
-    for (let i = self.length - 2; i >= 0; i--) {
-        acc = callbackfn(acc, self[i], i as number, self)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
@@ -7627,6 +7609,24 @@ export function map(self: char[], callbackfn: (value: char, index: number, array
         res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: char[], callbackfn: (previousValue: char, currentValue: char, index: number, array: char[]) => char): char {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: char = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc, self[i], i as number, self)
+    }
+    return acc
 }
 
 /**
