@@ -26,7 +26,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
     /** The original string that was matched against */
     readonly input: String
     /** result itself */
-    readonly result: String[]
+    public result: String[];
 
     // NOTE(shumilov-petr): Make nullable when #14813 will be fixed
     readonly indices: number[][]
@@ -57,6 +57,30 @@ export class RegExpExecArray /*extends Array<String>*/ {
 
     get length(): int {
         return this.result.length;
+    }
+
+    /**
+     * Removes and returns the last match result in the array.
+     * Simulates the behavior of Array.prototype.pop().
+     *
+     * @returns The last matched string if present; otherwise, undefined.
+     */
+    public pop(): String | undefined {
+        if (this.result.length === 0) {
+            return undefined;
+        }
+
+        const lastIndex = this.result.length - 1;
+        const last = this.result[lastIndex];
+
+        let newResult = new String[lastIndex];
+        for (let i = 0; i < lastIndex; i++) {
+            newResult[i] = this.result[i];
+        }
+
+        this.result = newResult;
+
+        return last;
     }
 
     constructor(index: int, input: String, result: String[], indices: number[][]) {
