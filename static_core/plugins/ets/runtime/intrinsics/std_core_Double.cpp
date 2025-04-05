@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,6 +212,16 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 
 EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
 {
+    // truncate the arg val
+    double digitAbs = std::isnan(d) ? 0 : d;
+    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
+    // Check range
+    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
+                          "toFixed argument must be between 0 and 100");
+        return nullptr;
+    }
+
     double objValue = helpers::GetStdDoubleArgument(obj);
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
@@ -227,17 +237,6 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
             return EtsString::CreateFromMUtf8("-Infinity");
         }
         return EtsString::CreateFromMUtf8("Infinity");
-    }
-
-    // truncate the arg val
-    double digitAbs = std::isnan(d) ? 0 : d;
-    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-    // Check range
-    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(),
-                          panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
-                          "toFixed argument must be between 0 and 100");
-        return nullptr;
     }
 
     return helpers::DoubleToFixed(objValue, static_cast<int>(digitAbs));
