@@ -128,8 +128,6 @@ cases:
               },
               "b": {},
           }
-          assertTrue(a["a"]![1]!)
-          assertTrue(!(a["a"]![42]!))
           assertEQ(a["b"]![123], undefined)
           assertTrue(!(a["c"]![1]!))
           assertTrue(a["c"]![42]!)

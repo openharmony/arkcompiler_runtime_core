@@ -751,9 +751,6 @@
 #15577 union type inference
 07.expressions/05.object_literal/01.object_literal_of_class_type/cl_2.ets
 
-#23022 RUNTIME_FAIL: E/runtime: Unhandled exception: std.core.NullPointerError
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_7.ets
-
 #20328 Unexpected CTE in Record indexing expression: Value is possibly nullish
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_6.ets
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_13.ets
