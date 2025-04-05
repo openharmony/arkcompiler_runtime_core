@@ -49,6 +49,7 @@ cases:
               : [Byte, Short, Int, Long, Float, Double, Boolean, Char] {
               return [p1, p2, p3, p4, p5, p6, p7, new Char(c'1')]
           }
+      tags: 'negative, compile-only'
     # 6
     - arg1: '(): void => {}'
       arg2: '(): Object|null => { return null }'
