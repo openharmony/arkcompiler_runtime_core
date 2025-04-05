@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_PANDA_VM_H
-#define PANDA_RUNTIME_PANDA_VM_H
+#ifndef PANDA_RUNTIME_PANDA_VM_H_
+#define PANDA_RUNTIME_PANDA_VM_H_
 
 #include "include/coretypes/string.h"
 #include "include/runtime_options.h"
-#include "runtime/include/app_state.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -229,18 +228,6 @@ public:
     void IterateOverMarkQueue(const std::function<void(ObjectHeader *)> &visitor);
     void ClearMarkQueue();
 
-    void UpdateAppState(AppState appState)
-    {
-        os::memory::LockHolder lh(appStateLock_);
-        appState_ = appState;
-    }
-
-    AppState GetAppState() const
-    {
-        os::memory::LockHolder lh(appStateLock_);
-        return appState_;
-    }
-
     // NOTE(konstanting): a potential candidate for moving out of the core part
     // Cleans up language-specific CFrame resources
     virtual void CleanupCompiledFrameResources([[maybe_unused]] Frame *frame) {}
@@ -277,10 +264,8 @@ private:
     // Intrusive GC test API
     PandaList<ObjectHeader *> markQueue_ GUARDED_BY(markQueueLock_);
     os::memory::Mutex markQueueLock_;
-    mutable os::memory::Mutex appStateLock_;
-    AppState appState_;
 };
 
 }  // namespace ark
 
-#endif  // PANDA_RUNTIME_PANDA_VM_H
+#endif  // PANDA_RUNTIME_PANDA_VM_H_

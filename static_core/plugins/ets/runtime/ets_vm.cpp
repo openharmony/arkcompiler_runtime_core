@@ -328,9 +328,6 @@ void PandaEtsVM::PostZygoteFork()
 
     compiler_->PostZygoteFork();
     mm_->PostZygoteFork();
-    // Postpone GC on application start-up
-    // Postpone GCEnd method should be called on start-up ending event
-    mm_->GetGC()->PostponeGCStart();
 }
 
 void PandaEtsVM::InitializeGC()

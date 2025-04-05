@@ -61,9 +61,6 @@ public:
      */
     bool AddTask(PandaUniquePtr<GCTask> task);
 
-    /// @brief Add all postponed tasks to gc queue
-    void OnPostponeGCEnd();
-
 private:
     static constexpr taskmanager::TaskProperties GC_WORKER_TASK_PROPERTIES = {
         taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
@@ -90,8 +87,6 @@ private:
     taskmanager::Task::RunnerCallback gcRunner_ {nullptr};
     std::atomic_bool needToFinish_ {false};
     os::memory::Mutex gcTaskRunMutex_;
-    os::memory::Mutex postponedTasksMutex_;
-    PandaQueue<PandaUniquePtr<GCTask>> postponedTasks_ GUARDED_BY(postponedTasksMutex_);
 };
 
 }  // namespace ark::mem
