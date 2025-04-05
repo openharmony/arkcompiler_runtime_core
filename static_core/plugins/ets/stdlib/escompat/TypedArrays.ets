@@ -845,7 +845,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length as int; ++i) {
+        for (let i = array.length - 1 as int; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v as byte)
         }
@@ -2822,7 +2822,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length as int; ++i) {
+        for (let i = array.length - 1 as int; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v as short)
         }
@@ -4776,7 +4776,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length as int; ++i) {
+        for (let i = array.length - 1 as int; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v as int)
         }
@@ -6752,7 +6752,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length as int; ++i) {
+        for (let i = array.length - 1 as int; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v.getLong())
         }
@@ -8720,7 +8720,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length as int; ++i) {
+        for (let i = array.length - 1 as int; i >= 0; --i) {
             this.$_set(insertPos + i, array[i] as float)
         }
     }
@@ -10587,7 +10587,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length as int; ++i) {
+        for (let i = array.length - 1 as int; i >= 0; --i) {
             this.$_set(insertPos + i, array[i] as double)
         }
     }

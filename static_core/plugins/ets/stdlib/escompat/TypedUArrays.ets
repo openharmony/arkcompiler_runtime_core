@@ -819,7 +819,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; i++) {
+        for (let i = array.length - 1; i >= 0; --i) {
             this.setUnsafeClamp(insertPos as int + i as int, array[i] as int)
         }
     }
@@ -2774,7 +2774,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; i++) {
+        for (let i = array.length - 1; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos as int + i as int, v as int)
         }
@@ -4731,7 +4731,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; i++) {
+        for (let i = array.length - 1; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos as int + i as int, v as int)
         }
@@ -6700,7 +6700,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; i++) {
+        for (let i = array.length - 1; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos as int + i as int, v as long)
         }
@@ -8694,7 +8694,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; i++) {
+        for (let i = array.length - 1; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos as int + i as int, v.getULong())
         }
