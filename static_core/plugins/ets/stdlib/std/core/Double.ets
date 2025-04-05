@@ -293,6 +293,10 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
         return Double.toString(this.value, r);
     }
 
+    public toString(d: Number): String {
+        return Double.toString(this.value, d as int);
+    }
+
     /**
      * Converts this object to a string
      *
