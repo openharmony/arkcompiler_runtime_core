@@ -24,7 +24,7 @@ interface A {
     return 5;
   }
 
-  public foo() { 
+  foo() {
     let x = this.bar();
   }
 }
