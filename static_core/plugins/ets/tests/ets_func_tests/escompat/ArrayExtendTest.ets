@@ -17,6 +17,7 @@ function main(): int {
     const suite = new ArkTestsuite("Array API tests for SDK");
     suite.addTest("Array extendTo with negative length ", testExtendToNegLength);
     suite.addTest("Array extendTo with positivie length ", testExtendToPosLength);
+    suite.addTest("Array extendTo incorrect length", testExtendToError);
     return suite.run();
 }
 
@@ -25,9 +26,11 @@ class TestData {
     static readonly arrayLength1: number = -1;
     static readonly initialValue1: number = -1;
     static readonly expected1 = Array.from<number>(TestData.src);
-    static readonly arrayLength2: number = 4;
+    static readonly arrayLength2: number = 5;
     static readonly initialValue2: number = -1;
-    static readonly expected2 = Array.of<number>(1, 2, 3, -1, -1, -1, -1);
+    static readonly expected2 = Array.of<number>(1, 2, 3, -1, -1);
+    static readonly arrayLength3: number = 2147483648;
+    static readonly initialValue3: number = -1;
 }
 
 function testExtendToNegLength() {
@@ -42,6 +45,14 @@ function testExtendToPosLength() {
     a.extendTo(TestData.arrayLength2, TestData.initialValue2);
     let result: boolean = equaled(TestData.expected2, a);
     assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
+}
+
+function testExtendToError() {
+    let a = Array.from<number>(TestData.src);
+    expectError(
+        () => { a.extendTo(TestData.arrayLength3, TestData.initialValue3) },
+        new RangeError("arrayLength must be <= int32 max")
+    )
 }
 
 function equaled(arr1:  Array<number>, arr2:  Array<number>): boolean {

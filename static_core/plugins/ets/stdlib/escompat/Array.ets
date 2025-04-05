@@ -156,20 +156,25 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Extends Array with new elements to specified length.
      *
-     * @param arrayLength amount of new added elements.
+     * @param arrayLength new length of the array.
      *
-     * @param initialValue initial value of new elements.
+     * @param initialValue initial value of added elements.
      *
      */
     public extendTo(arrayLength: number, initialValue: T): void {
-        if (arrayLength <= this.actualLength) {
+        if (arrayLength > Int.MAX_VALUE) {
+            throw new RangeError("arrayLength must be <= int32 max")
+        }
+        const len = arrayLength as int
+        const delta: int = len - this.actualLength
+        if (delta <= 0) {
             return
         }
-        this.ensureUnusedCapacity(arrayLength as int)
-        for (let i: int = 0; i < arrayLength; i++) {
+        this.ensureUnusedCapacity(delta)
+        for (let i: int = 0; i < delta; i++) {
             this.buffer[this.actualLength + i] = initialValue
         }
-        this.actualLength += arrayLength
+        this.actualLength = len
     }
 
     /**
