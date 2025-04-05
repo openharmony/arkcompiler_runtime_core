@@ -1237,10 +1237,10 @@
     param_init_data_types: {inputs: "int[]"},
     param_list: {inputs: '[0, 0]'},
 
-    method_return_type: char,
-    expected_test_data_item_type: char,
-    expected_data_type: "char[]",
-    expected_test_data: '[67 as char, 1050 as char]',
+    method_return_type: int,
+    expected_test_data_item_type: int,
+    expected_data_type: "int[]",
+    expected_test_data: '[67, 1050]',
     verify_test_result_function: comparePrimitiveValue
   }
 
