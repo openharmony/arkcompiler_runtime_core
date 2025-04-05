@@ -18,6 +18,10 @@ if (ark_standalone_build) {
   import("//build/ohos.gni")
 }
 
+config("ani_helpers_config") {
+  include_dirs = [ "./" ]
+}
+
 ohos_source_set("ani_helpers_static") {
   configs = [
     "$ark_root:ark_config",
@@ -36,6 +40,7 @@ ohos_source_set("ani_helpers_static") {
 }
 
 ohos_shared_library("ani_helpers") {
+  public_configs = [ ":ani_helpers_config" ]
   deps = [ ":ani_helpers_static" ]
   relative_install_dir = "ndk"
   part_name = ark_part_name
