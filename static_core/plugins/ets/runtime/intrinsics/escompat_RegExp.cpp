@@ -409,7 +409,7 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, 
     bool global = (flagsBits & RegExpParser::FLAG_GLOBAL) > 0;
     bool sticky = (flagsBits & RegExpParser::FLAG_STICKY) > 0;
     bool hasIndices = (flagsBits & RegExpParser::FLAG_HASINDICES) > 0;
-    if (!global && !sticky) {
+    if ((!global && !sticky) || lastIdx < 0) {
         lastIdx = 0;
     }
     EtsInt strLen = strHandle->GetLength();
