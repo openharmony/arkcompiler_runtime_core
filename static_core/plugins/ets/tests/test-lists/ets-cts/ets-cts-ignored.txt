@@ -456,11 +456,6 @@
 #24031 not implemented
 07.expressions/01.evaluation_of_expressions/heap_pollution.ets
 
-#24033
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.ets
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_3.ets
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_6.ets
-
 #24641
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
 
