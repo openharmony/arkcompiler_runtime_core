@@ -95,6 +95,6 @@ cases:
         class B {
             static foo(array: readonly int[]) {}
         }
-        function foo(array?: readonly Array<number>, i: int) { }
-        function foo(array?: readonly number[], i: int) { }
+        function foo(i: int, array?: readonly Array<number>) { }
+        function foo(i: int, array?: readonly number[]) { }
       check: |-
