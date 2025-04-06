@@ -1573,8 +1573,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const sepReal = sep === undefined ? "," : sep!
         // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
         const first_el = this.$_get_unsafe(0)
-        let first_str = ""
-        if (first_el !== undefined && first_el !== null) {
+        let first_str = "undefined"
+        if (first_el !== undefined) {
             first_str = new String(first_el)
         }
         let sb = new StringBuilder(first_str)
@@ -1582,10 +1582,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             const tmp = this.$_get_unsafe(i)
             sb.append(sepReal);
             // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
-            if (tmp !== undefined && tmp !== null) {
+            if (tmp !== undefined) {
                 sb.append(new String(tmp))
             } else {
-                sb.append("")
+                sb.append("undefined")
             }
         }
 
