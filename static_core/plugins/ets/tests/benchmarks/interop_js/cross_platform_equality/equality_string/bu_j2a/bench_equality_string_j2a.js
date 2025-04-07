@@ -30,7 +30,7 @@ function equalityStringJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LEqualityStringJ2a;');
+        const State = stsVm.getClass('Lbench_equality_string_j2a/EqualityStringJ2a;');
 
         this.bench = new State();
 

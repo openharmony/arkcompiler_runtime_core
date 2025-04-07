@@ -41,23 +41,31 @@ def make_arktsconfig(configpath: Union[str, Path],
     template = Template(
         load_file(tpl_path)).substitute(ROOT=str(ark_root))
     parsed_template = json.loads(template)
-    if len(extra_paths) > 0:
-        paths: dict = {}
-        dynamic_paths: dict = {}
-        for path in extra_paths:
-            lib_name = Path(path).stem
-            is_compilable = Path(path).suffix == '.ets' or Path(path).is_dir()
-            paths[lib_name] = [path]
-            if not is_compilable:
-                dynamic_paths[path] = {'language': 'js'}
-                parsed_template['compilerOptions']['paths'] = {
-                    **parsed_template['compilerOptions']['paths'],
-                    **paths
-                    }
-                parsed_template['compilerOptions']['dynamicPaths'] = {
-                    **parsed_template['compilerOptions']['dynamicPaths'],
-                    **dynamic_paths
-                    }
+    if len(extra_paths) < 1:
+        with create_file(configpath) as f:
+            f.write(json.dumps(parsed_template))
+        return
+
+    paths: dict = {}
+    dynamic_paths: dict = {}
+    for path in extra_paths:
+        lib_name = Path(path).stem
+        is_compilable = Path(path).suffix == '.ets' or Path(path).is_dir()
+        paths[lib_name] = [path]
+        if is_compilable:
+            continue
+
+        key: str = path.replace("/", "_").replace(".", "_")
+        dynamic_paths[key] = {'language': 'js', 'declPath': path, 'ohmUrl': path}
+        parsed_template['compilerOptions']['paths'] = {
+            **parsed_template['compilerOptions']['paths'],
+            **paths
+            }
+        parsed_template['compilerOptions']['dynamicPaths'] = {
+            **parsed_template['compilerOptions']['dynamicPaths'],
+            **dynamic_paths
+            }
+
     with create_file(configpath) as f:
         f.write(json.dumps(parsed_template))
 

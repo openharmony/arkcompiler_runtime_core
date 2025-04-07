@@ -18,4 +18,4 @@ function hexStringToNumberToString(str) {
     return String(res);
 }
 
-exports.hexStringToNumberToString = hexStringToNumberToString;
+export let hexStringToNumberToString = hexStringToNumberToString;

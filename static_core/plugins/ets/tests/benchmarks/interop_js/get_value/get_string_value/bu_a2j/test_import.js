@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-exports.jsString = 'Test';
+export let jsString = 'Test';

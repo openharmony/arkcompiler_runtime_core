@@ -27,7 +27,7 @@ function classInitByRestJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        this.UnlimitedArguments = stsVm.getClass('LUnlimitedArguments;');
+        this.UnlimitedArguments = stsVm.getClass('Lbench_unlimited_arguments/UnlimitedArguments;');
 
         return 0;
     };

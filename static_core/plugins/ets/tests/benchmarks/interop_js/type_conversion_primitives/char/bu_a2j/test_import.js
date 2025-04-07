@@ -18,4 +18,4 @@ function charToNumberToString(chr) {
     return String(res);
 }
 
-exports.charToNumberToString = charToNumberToString;
+export let charToNumberToString = charToNumberToString;

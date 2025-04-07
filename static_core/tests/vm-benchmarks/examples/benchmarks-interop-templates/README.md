@@ -13,17 +13,21 @@ If needed, see also [vm-benchmarks/readme.md](../../readme.md) for more details 
 
 ## Sanity check run
 
+Note `-wi=1 -mi=1` parameters below mean minimal number of iterations to execute and is intended only as a smoke test verifying that code can run. For realistic benchmarks, customise these values or remove them to use defaults.
+
 ```
 cd $PANDA_ROOT/tests/vm-benchmarks
 # assume PANDA and VMB are built and installed per interop.readme.md
 export PANDA_BUILD=$PANDA_ROOT/build
 export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
 vmb all -p arkts_node_interop_host --aot-skip-libs -v debug \
+  -wi=1 -mi=1 \
   --ark-custom-option=--gc-trigger-type=heap-trigger \
   --ark-custom-option=--compiler-enable-jit=true \
   --ark-custom-option=--run-gc-in-place=false \
   --ark-custom-option=--log-components=ets_interop_js \
   --ark-custom-option=--load-runtimes=ets \
+  --exclude-list $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates/exclude-interop-benchmarks-examples.txt 
   $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates
 ```
 
@@ -53,10 +57,12 @@ cd $PANDA_ROOT/tests/vm-benchmarks
 export PANDA_BUILD=$PANDA_ROOT/build
 export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
 vmb all -p arkts_arkjs_interop_host --aot-skip-libs -v debug \
+  -wi=1 -mi=1 \
   --ark-custom-option=--gc-trigger-type=heap-trigger \
   --ark-custom-option=--compiler-enable-jit=true \
   --ark-custom-option=--run-gc-in-place=false \
   --ark-custom-option=--log-components=ets_interop_js \
   --ark-custom-option=--load-runtimes=ets \
+  --exclude-list $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates/exclude-interop-benchmarks-examples.txt 
   $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates
 ```

@@ -22,6 +22,7 @@ import { jsNumber } from 'test_import';
 class BenchA2j {
 
     /**
+     * NOTE #23757 recover use of second param here: 1000
      * @Param 100, 1000
      */
     size: int;
@@ -37,7 +38,7 @@ class BenchA2j {
      * @Benchmark
      */
     public someTest(): number {
-        return jsNumber;
+        return jsNumber; // NOTE #23757 recover use of jsNumber here
     }
 
     /**

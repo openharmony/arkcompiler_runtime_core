@@ -17,4 +17,4 @@ function sumFunction(acc, curr) {
     return acc + curr;
 }
 
-exports.sumFunction = sumFunction;
+export let sumFunction = sumFunction;

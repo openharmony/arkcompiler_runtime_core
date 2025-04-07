@@ -17,4 +17,4 @@ function addPrefix(text) {
     return '_' + text;
 }
 
-exports.addPrefix = addPrefix;
+export let addPrefix = addPrefix;

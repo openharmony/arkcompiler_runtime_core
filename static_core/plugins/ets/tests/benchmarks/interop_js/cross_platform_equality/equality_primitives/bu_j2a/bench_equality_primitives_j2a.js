@@ -30,7 +30,7 @@ function equalityPrimitivesJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LEqualityPrimitivesA2j;');
+        const State = stsVm.getClass('Lbench_equality_primitives_j2a/EqualityPrimitivesJ2a;');
 
         this.bench = new State();
 

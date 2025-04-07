@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-exports.jsBoolean = true;
-exports.jsNull = null;
-exports.jsUndefined = undefined;
-exports.jsBigint = 1234567890123456789012345678901234567890n;
+export let jsBoolean = true;
+export let jsNull = null;
+export let jsUndefined = undefined;
+export let jsBigint = 1234567890123456789012345678901234567890n;

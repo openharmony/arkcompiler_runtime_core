@@ -18,4 +18,4 @@ function binaryStringToNumberToString(bin) {
     return String(res);
 }
 
-exports.binaryStringToNumberToString = binaryStringToNumberToString;
+export let binaryStringToNumberToString = binaryStringToNumberToString;

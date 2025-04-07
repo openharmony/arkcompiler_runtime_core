@@ -18,4 +18,4 @@ function octalStringToNumberToString(str) {
     return String(res);
 }
 
-exports.octalStringToNumberToString = octalStringToNumberToString;
+export let octalStringToNumberToString = octalStringToNumberToString;

@@ -41,7 +41,7 @@ function conversionBinaryJ2a() {
 
         const data = generateNumber(seed);
         this.binaryString = data.toString(2);
-        const State = stsVm.getClass('LConversionBinaryJ2a;');
+        const State = stsVm.getClass('Lbench_conversion_binary_j2a/ConversionBinaryJ2a;');
 
         this.bench = new State();
         this.bench.setup();

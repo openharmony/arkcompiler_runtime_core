@@ -21,7 +21,7 @@ class Test {
    }
 }
 
-export class EqualityPrimitivesA2j {
+export class EqualityPrimitivesJ2a {
    etsBigInt = 1n;
    etsBool = true;
    etsNull = null;

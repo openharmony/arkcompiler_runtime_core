@@ -30,7 +30,7 @@ function equalityNumericJ2a() {
         console.log('Starting...');
         let stsVm = initEtsVm();
 
-        const State = stsVm.getClass('LEqualityNumericJ2a;');
+        const State = stsVm.getClass('Lbench_equality_numeric_j2a/EqualityNumericJ2a;');
 
         this.bench = new State();
 

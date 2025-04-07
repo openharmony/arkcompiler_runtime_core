@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-exports.promise = () => {
+export let promise = () => {
     return new Promise((resolve) => resolve(1));
 };
