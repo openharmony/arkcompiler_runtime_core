@@ -17,7 +17,7 @@
 desc: >-
     11 Enumeration
 name: 11.enumeration
-tags: []
+tags: [negative, compile-only]
 ---*/
 
 enum EmptyEnum {
