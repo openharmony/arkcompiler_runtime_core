@@ -953,12 +953,6 @@
 #23051 Reference comparison
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
-#23977
-07.expressions/30.conditional_expressions/conditional_expression_object_2.ets
-07.expressions/30.conditional_expressions/conditional_expression_object_3.ets
-07.expressions/30.conditional_expressions/conditional_expression_object_4.ets
-07.expressions/30.conditional_expressions/conditional_expression_object_5.ets
-
 #23976
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_1.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.ets
