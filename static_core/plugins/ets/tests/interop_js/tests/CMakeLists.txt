@@ -13,7 +13,6 @@
 
 set(DISABLES_TESTS
     standalone_function
-    static_enum
 )
 
 set(TESTS_EXECUTED_WITH_NODEJS
