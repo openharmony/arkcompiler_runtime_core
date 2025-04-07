@@ -861,9 +861,6 @@
 07.expressions/06.spread_expression/spex_lmbd_29.ets
 07.expressions/06.spread_expression/spex_lmbd_30.ets
 
-#24039
-07.expressions/08.this_expression/this_in_interface_method.ets
-
 #24042
 07.expressions/08.this_expression/this_in_lambda.ets
 07.expressions/08.this_expression/this_in_lambda_negative.ets
