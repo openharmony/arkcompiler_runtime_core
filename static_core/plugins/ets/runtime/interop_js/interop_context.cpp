@@ -77,6 +77,28 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
     return klass;
 }
 
+#if defined(PANDA_TARGET_OHOS)
+static void AppStateCallback(int state, int64_t timeStamp)
+{
+    auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
+    auto *pandaVm = Runtime::GetCurrent()->GetPandaVM();
+    pandaVm->UpdateAppState(appState);
+    if (UNLIKELY(static_cast<AppState::State>(state) == AppState::State::COLD_START_FINISHED)) {
+        pandaVm->GetGC()->PostponeGCEnd();
+    }
+}
+#endif  // PANDA_TARGET_OHOS
+
+static bool RegisterAppStateCallback([[maybe_unused]] napi_env env)
+{
+#if defined(PANDA_TARGET_OHOS)
+    auto status = napi_register_appstate_callback(env, AppStateCallback);
+    return status == napi_ok;
+#else
+    return true;
+#endif
+}
+
 static bool RegisterTimerModule(napi_env jsEnv)
 {
     ani_vm *vm = nullptr;
@@ -651,7 +673,8 @@ static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *m
 {
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
     auto gcType = mainCoro->GetVM()->GetGC()->GetType();
-    if (Runtime::GetOptions().IsEnableXgc() && (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {
+    if ((Runtime::GetOptions().GetXgcTriggerType() != "never") &&
+        (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {
         // XGC is not implemented for other GC types
         LOG(ERROR, RUNTIME) << "XGC requires GC type to be g1-gc and no-async-jit option must be false";
         return false;
@@ -719,6 +742,10 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
     // The TimerModule should be bound to the exact JsEnv
     if (!RegisterTimerModule(InteropCtx::Current()->GetJSEnv())) {
         // throw some errors
+    }
+    if (!RegisterAppStateCallback(InteropCtx::Current()->GetJSEnv())) {
+        INTEROP_LOG(ERROR) << "RegisterAppStateCallback failed";
+        return false;
     }
 
     // In the hybrid mode with JSVM=leading VM, we are binding the EtsVM lifetime to the JSVM's env lifetime

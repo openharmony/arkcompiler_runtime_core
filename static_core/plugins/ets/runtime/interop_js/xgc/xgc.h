@@ -41,6 +41,14 @@ public:
     NO_MOVE_SEMANTIC(XGC);
     ~XGC() override = default;
 
+    /// @enum represents XGC trigger policy types
+    enum class TriggerPolicy : uint8_t {
+        INVALID,  // Invalid trigger, it should not be used
+        DEFAULT,  // Default trigger
+        FORCE,    // Run on each allocation
+        NEVER,    // Never trigger XGC (disable)
+    };
+
     /**
      * Create instance of XGC if it was not created before. Runtime should be existed before the XGC creation
      * @param mainCoro main coroutine
@@ -109,6 +117,9 @@ private:
     XGC(PandaEtsVM *vm, STSVMInterfaceImpl *stsVmIface, ets_proxy::SharedReferenceStorage *storage);
     static XGC *instance_;
 
+    /// @return true if need to trigger XGC by policy and special conditions, false - otherwise
+    bool NeedToTriggerXGC(const mem::GC *gc) const;
+
     /// @return new target threshold storage size for XGC trigger
     size_t ComputeNewSize();
 
@@ -157,8 +168,6 @@ private:
     std::atomic_bool isXGcInProgress_ {false};
     bool remarkFinished_ {false};  // GUARDED_BY(mutatorLock)
 
-    bool enableXgc_ {false};
-
     /// Trigger specific fields ///
 
     size_t beforeGCStorageSize_ {0U};
@@ -166,7 +175,7 @@ private:
     const size_t increaseThresholdPercent_ {0U};
     // We can load a value of the variable from several threads, so need to use atomic
     std::atomic<size_t> targetThreasholdSize_ {0U};
-    const bool gcForceXgcEnabled_ {false};
+    const TriggerPolicy treiggerPolicy_ {TriggerPolicy::INVALID};
 };
 
 }  // namespace ark::ets::interop::js

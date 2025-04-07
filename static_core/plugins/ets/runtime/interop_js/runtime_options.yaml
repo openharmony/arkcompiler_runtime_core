@@ -22,9 +22,13 @@ options:
   default: 20
   description: Percent for XGC threshold increasing
 
-- name: enable-xgc
+- name: xgc-trigger-type
   lang:
     - ets
-  type: bool
-  default: true
-  description: Enable XGC
+  type: std::string
+  default: default
+  possible_values:
+    - default
+    - force
+    - never
+  description: Set XGC trigger policy
