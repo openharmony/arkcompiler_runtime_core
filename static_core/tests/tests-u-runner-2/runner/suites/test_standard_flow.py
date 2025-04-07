@@ -154,7 +154,15 @@ class TestStandardFlow(Test):
 
     def do_run(self) -> 'TestStandardFlow':
         for test in self.dependent_tests:
-            test.do_run()
+            dependent_result = test.do_run()
+            self.reproduce += dependent_result.reproduce
+            simple_failed = not dependent_result.passed
+            negative_compile = dependent_result.passed and dependent_result.is_negative_compile
+            if simple_failed or negative_compile:
+                self.passed = dependent_result.passed
+                self.report = dependent_result.report
+                self.fail_kind = dependent_result.fail_kind
+                return self
 
         for step in self.test_env.config.workflow.steps:
             if step.executable_path is not None:

@@ -15,7 +15,9 @@
 
 /*---
 tags: [not-a-test, compile-only]
+files: [./file_A.ets]
 ---*/
+
 package pkg_prot;
 
 class B extends A {

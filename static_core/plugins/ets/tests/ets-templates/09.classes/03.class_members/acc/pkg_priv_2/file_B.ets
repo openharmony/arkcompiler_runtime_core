@@ -14,7 +14,7 @@
  */
 
 /*---
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
 ---*/
 package pkg_priv;
 

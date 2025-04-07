@@ -15,6 +15,7 @@
 
 /*---
 tags: [not-a-test, compile-only]
+files: [../pkg_int_A1/file_A.ets]
 ---*/
 package pkg_B2;
 
