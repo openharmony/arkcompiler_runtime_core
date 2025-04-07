@@ -20,8 +20,7 @@ desc: ArrayIndexOutOfBoundsError is thrown by an array access expression
 ---*/
 
 function main(): int {
-  let v: byte[][][] = new byte[10][][];
-  v[0] = new byte[10][];
+  let v: byte[][][] = new byte[10][10][10];
   let a = 1;
   let b = 1;
 
@@ -31,7 +30,7 @@ function main(): int {
     return 0;
   } catch (e: ArrayIndexOutOfBoundsError) {
     return 1;
-  } catch {
+  } catch (e) {
     return 1;
   }
 }
