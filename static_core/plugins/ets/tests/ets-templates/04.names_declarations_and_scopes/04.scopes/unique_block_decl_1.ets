@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-{% for un in unique_decl %}
-
 /*---
-desc: A name must be unique in its declaration space
+desc: A name must be unique in its block space
 tags: [negative, compile-only]
 ---*/
 
-{{un}}
-{{un}}
-
-{% endfor %}
+{
+  let x = 0;
+  let x = 0;
+}

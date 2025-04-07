@@ -22,5 +22,3 @@ class A {
   x: int;
   x: int;
 }
-
-function main(): void {}
