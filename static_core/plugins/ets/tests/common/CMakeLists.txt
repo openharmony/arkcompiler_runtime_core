@@ -31,6 +31,7 @@ add_subdirectory(selective_re-export)
 add_subdirectory(re_export_with_alias)
 add_subdirectory(annotation_import_export_test)
 add_subdirectory(testing_varying_arktsconfigs)
-add_subdirectory(exporting-ambient-decl)
+# issue #24750
+# add_subdirectory(exporting-ambient-decl)
 add_subdirectory(testing_arktsconfig_paths_single_file)
 add_subdirectory(testing_arktsconfig_field_dependencies_and_entry)

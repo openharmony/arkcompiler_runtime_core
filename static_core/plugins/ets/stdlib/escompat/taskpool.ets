@@ -839,7 +839,7 @@ export namespace taskpool {
      * @returns Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<NullishType>> {
-        const tasksCount: long = group.tasks.length as int;
+        let tasksCount = group.tasks.length as int;
         if (tasksCount == 0) {
             return Promise.resolve<Array<NullishType>>(new Array<NullishType>());
         }

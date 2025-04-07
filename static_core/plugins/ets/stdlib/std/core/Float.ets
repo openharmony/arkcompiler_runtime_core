@@ -80,7 +80,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
     /**
      * Minimal value that this type can have as a float
      */
-    public static readonly MIN_VALUE: float = 1.4e-45;
+    public static readonly MIN_VALUE: float = 1.4e-45 as float;
 
     /**
      * Maximal value that this type can have as a float
