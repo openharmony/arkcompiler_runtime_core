@@ -60,6 +60,9 @@
 #23975
 03.types/17.tuple_types/tt2_31.ets
 
+#24779
+03.types/18.function_types/incorrect_function_name_8.ets
+
 #23696 Readonly arrays and readonly tuples not supported
 03.types/19.union_types/01.union_types_normalization/norm_29.ets
 03.types/19.union_types/01.union_types_normalization/norm_30.ets
@@ -119,24 +122,15 @@
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_8.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_9.ets
 
-
-
-#22857
-03.types/19.union_types/ut_7.ets
-
-#24420
-03.types/19.union_types/ut_34.ets
-
 #24598
 03.types/19.union_types/03.keyof_types/keyof_class_15.ets
 03.types/19.union_types/03.keyof_types/keyof_class_41.ets
 03.types/19.union_types/03.keyof_types/keyof_class_67.ets
 
-#21833 null-safety violations,  null stored to the Int[]
-03.types/20.nullish_types/array_nullable_types_5.ets
+#24420
+03.types/19.union_types/ut_34.ets
 
 #22987 es2panda aborts when name of the declaration clashes with the predefined type or standard library entity name.
-04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n8.ets
 04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n10.ets
 
 #23802
@@ -183,9 +177,6 @@
 
 #23983
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.ets
-
-#23982
-04.names_declarations_and_scopes/08.function_declarations/09.function_overload_signatures/overload.ets
 
 #23364 Does not work for primitives and enum
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_9.ets
@@ -323,7 +314,7 @@
 #14962
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/interface_args_12.ets
 
-#15709
+#24648
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.ets
 
 #23754
@@ -422,10 +413,6 @@
 #24021
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.ets
 
-#23986
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_5.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_obj/comp-obj-lit_6.ets
-
 #23987
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec2.ets
 06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/spec5b.ets
@@ -474,7 +461,7 @@
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_3.ets
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_6.ets
 
-#23902
+#24641
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
 
 #24035
@@ -664,12 +651,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_13.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_13.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_12.ets
-
-#19096
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.ets
-
-#23766
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.ets
 
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_n_0.ets
@@ -898,8 +879,6 @@
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_21.ets
 
 #23997
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_19.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_23.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_24.ets
 
@@ -913,16 +892,14 @@
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_6.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
-07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_8.ets
 
+#23062
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
+
 #23725
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_2.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.ets
 
 #14001 Type number cannot be used as an index type
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_access6.ets
@@ -967,13 +944,13 @@
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/cte_3.ets
 
 #18386 Reference equality based on actual char type fails
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_1.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_1.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_2.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_1.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_1.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_2.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq1_1.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq2_2.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_1.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_2.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_2.ets
 
 #23051 Reference comparison
@@ -1109,10 +1086,6 @@
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_8.ets
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_9.ets
 
-#23060 native accessors
-09.classes/07.accessor_declarations/getter_native_modifier.ets
-09.classes/07.accessor_declarations/setter_native_modifier.ets
-
 #24022 missing CTE for uninitialized static field
 09.classes/08.class_initializer/class_initializer_ensure_fields_initialized.ets
 09.classes/08.class_initializer/class_initializer_ensure_fields_initialized_1.ets
@@ -1146,9 +1119,6 @@
 #22788 ES2PANDA_FAIL - fails of negative, compile-only
 09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.ets
 
-#23530
-10.interfaces/05.interface_properties/external_interface_with_property_1.ets
-
 #16840
 10.interfaces/04.interface_members/methods_overriding.ets
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
@@ -1156,6 +1126,9 @@
 
 #21888 no support for package initializer
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
+
+#24511
+13.compilation_units/08.namespace_declarations/simple_spec4_3.ets
 
 #23856
 13.compilation_units/09.export_directives/01.selective_export_directive/t01/c.ets
@@ -1265,9 +1238,6 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_8.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_10.ets
 
-#24128
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_1.ets
-
 #24129
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_1.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_3.ets
@@ -1342,7 +1312,7 @@
 17.experimental_features/03.array_creation_expressions/expr_n_11.ets
 17.experimental_features/03.array_creation_expressions/expr_n_12.ets
 
-#24221
+#22816
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
 
 #14563 Verifier failure on unboxing in array dimension expression
@@ -1422,6 +1392,8 @@
 #24123
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_8.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_6.ets
+
+#24289
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_10.ets
 
 #23049
@@ -1508,6 +1480,3 @@
 
 #23710
 18.annotations/02.using_annotations/using_annotations_n_10.ets
-
-#22969
-18.annotations/05.standard_annotations/01.retention_annotation/retention_annotation_6.ets

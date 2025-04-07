@@ -1,9 +1,6 @@
 #24352
 algorithms/SampleAppTest.ets
 
-#23211 Fails on CI
-escompat/ProcessTest.sts
-
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
