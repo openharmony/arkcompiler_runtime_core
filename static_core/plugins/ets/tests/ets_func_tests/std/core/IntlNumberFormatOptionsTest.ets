@@ -17,7 +17,6 @@ function main(): int {
     const suite = new ArkTestsuite("Intl. Interfaces NumberFormatOptions and ResolvedNumberFormatOptions, class NumberFormatPart");
     suite.addTest("NumberFormatOptions check interface", testNumberFormatOptions);
     suite.addTest("ResolvedNumberFormatOptions check interface", testResolvedNumberFormatOptions);
-    suite.addTest("NumberFormatPart check class", testResolvedNumberFormatOptions);
     return suite.run();
 }
 
@@ -72,13 +71,4 @@ function testResolvedNumberFormatOptions() {
     assertTrue(x.unit == undefined);
     assertTrue(x.unitDisplay == undefined);
     assertTrue(x.useGrouping == false);
-}
-
-function testNumberFormatPart() {
-    // TS requires to define the following properties
-    let x: Intl.NumberFormatPart = {
-        type: "integer", value: "123"
-    };
-    assertTrue(x.type == "integer");
-    assertTrue(x.value == "123");
 }
