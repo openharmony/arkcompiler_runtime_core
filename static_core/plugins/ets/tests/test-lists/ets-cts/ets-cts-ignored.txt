@@ -60,9 +60,6 @@
 #23975
 03.types/17.tuple_types/tt2_31.ets
 
-#24779
-03.types/18.function_types/incorrect_function_name_8.ets
-
 #23696 Readonly arrays and readonly tuples not supported
 03.types/19.union_types/01.union_types_normalization/norm_29.ets
 03.types/19.union_types/01.union_types_normalization/norm_30.ets
@@ -253,20 +250,6 @@
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_27.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_34.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_35.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_38.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_39.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_40.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_41.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_42.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_43.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_44.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_45.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_46.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_47.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_54.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_55.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_56.ets
-05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_57.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_6.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_7.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_8.ets
@@ -342,7 +325,6 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_4.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_5.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_6.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_7.ets
 
 #24056
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.ets
@@ -450,16 +432,8 @@
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/ase1.ets
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 
-#23590
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_1.ets
-
 #24031 not implemented
 07.expressions/01.evaluation_of_expressions/heap_pollution.ets
-
-#24033
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.ets
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_3.ets
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_6.ets
 
 #24641
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
@@ -881,7 +855,6 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_4.ets
 07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.ets
-07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_6.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_22.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_8.ets
