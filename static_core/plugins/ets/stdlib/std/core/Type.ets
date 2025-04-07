@@ -271,6 +271,11 @@ export abstract class Type extends Object {
         }
     }
 
+    public static from<T>(): Type {
+        //should never be executed since FE lowering this
+        throw new AssertionError("Type.from call will be casted by frontend")
+    }
+
     /**
      * Returns Type of value
      *
