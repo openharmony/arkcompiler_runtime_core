@@ -992,9 +992,6 @@
 #24126 es2panda aborts on for-of over a union type array
 08.statements/09.for_of_statements/for_of_28.ets
 
-#22513
-08.statements/12.return_statements/return_4.ets
-
 #23978
 08.statements/14.throw_statements/throw_neg2.ets
 
