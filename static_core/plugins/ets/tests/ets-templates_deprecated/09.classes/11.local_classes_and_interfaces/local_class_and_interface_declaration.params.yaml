@@ -513,7 +513,7 @@ cases:
                 i: int;
               }
               class C implements I {
-                i 4;
+                i = 4;
               }
               return new C().i;
             }
