@@ -1181,8 +1181,8 @@ export final class String extends Object implements Comparable<String>, JSONable
     /*
      * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
      */
-    public charCodeAt(index: int): char {
-        return this.charAt(index) as char;
+    public charCodeAt(index: int): int {
+        return this.charAt(index) as int;
     }
 
     /**
