@@ -2426,7 +2426,7 @@ intrinsics:
     method_name: registerInstance
     static: true
     signature:
-      ret: void
+      ret: i32
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdFinalizationRegistryRegisterInstance
 

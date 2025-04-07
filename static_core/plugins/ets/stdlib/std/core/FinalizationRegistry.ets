@@ -43,19 +43,22 @@ export final class FinalizationRegistry<T> {
     private freeidx: int = -1;
     private static finalizationRegistryLock = new Mutex();
     private mutex = new Mutex();
+    private launchMode: int;
 
     private static readonly FIRST_SIZE = 32;
 
-    private static execCleanup(array: (WeakRef<FinalizationRegistry<T>> | undefined)[]): void {
+    private static execCleanup(array: (WeakRef<FinalizationRegistry<T>> | undefined)[], launchmode: int): void {
         FinalizationRegistry.finalizationRegistryLock.lock();
         try {
             for (let i = 0; i < array.length; i++) {
                 if (array[i]?.deref() !== undefined) {
-                    try {
-                        FinalizationRegistry.finalizationRegistryLock.unlock();
-                        array[i]!.deref()!.cleanup();
-                    } finally {
-                        FinalizationRegistry.finalizationRegistryLock.lock();
+                    if (array[i]!.deref()!.launchMode == launchmode) {
+                        try {
+                            FinalizationRegistry.finalizationRegistryLock.unlock();
+                            array[i]!.deref()!.cleanup();
+                        } finally {
+                            FinalizationRegistry.finalizationRegistryLock.lock();
+                        }
                     }
                 } else {
                     array[i] = undefined;
@@ -132,7 +135,7 @@ export final class FinalizationRegistry<T> {
         this.init_arrays(FinalizationRegistry.FIRST_SIZE);
         this.callback = callback;
         FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
-            FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
+            this.launchMode = FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
         });
     }
 
@@ -257,7 +260,7 @@ export final class FinalizationRegistry<T> {
         this.callback_arguments[index] = cbArg;
     }
 
-    private static native registerInstance(object: Object): void;
+    private static native registerInstance(object: Object): int;
     private static native finishCleanup(): void;
 
 }

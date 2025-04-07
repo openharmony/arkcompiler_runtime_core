@@ -380,9 +380,10 @@ void PandaEtsVM::HandleGCRoutineInMutator()
             EtsObjectArray::FromCoreType(GetGlobalObjectStorage()->Get(registeredFinalizationRegistryInstancesRef_));
         auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
         Method *cleanup = PlatformTypes(this)->coreFinalizationRegistryExecCleanup->GetPandaMethod();
-        auto args = PandaVector<Value> {Value(objArray->GetCoreType())};
-        [[maybe_unused]] bool launchResult =
-            coroManager->Launch(event, cleanup, std::move(args), CoroutineLaunchMode::SAME_WORKER);
+        auto launchMode =
+            coroManager->IsMainWorker(coroutine) ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
+        auto args = PandaVector<Value> {Value(objArray->GetCoreType()), Value(static_cast<uint32_t>(launchMode))};
+        [[maybe_unused]] bool launchResult = coroManager->Launch(event, cleanup, std::move(args), launchMode);
         ASSERT(launchResult);
     }
     coroutine->GetPandaVM()->CleanFinalizableReferenceList();

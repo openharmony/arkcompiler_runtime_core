@@ -22,11 +22,14 @@ namespace ark::ets::intrinsics {
  * The function register FinalizationRegistry instance in ETS VM.
  * @param instance - FinalizationRegistry class instance needed to register for managing by GC.
  */
-extern "C" void StdFinalizationRegistryRegisterInstance(EtsObject *instance)
+extern "C" EtsInt StdFinalizationRegistryRegisterInstance(EtsObject *instance)
 {
-    ManagedThread *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
-    static_cast<PandaEtsVM *>(thread->GetVM())->RegisterFinalizationRegistryInstance(instance);
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    coro->GetPandaVM()->RegisterFinalizationRegistryInstance(instance);
+    auto launchMode = coro->GetCoroutineManager()->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER
+                                                                      : CoroutineLaunchMode::DEFAULT;
+    return static_cast<EtsInt>(launchMode);
 }
 
 extern "C" void StdFinalizationRegistryFinishCleanup()
