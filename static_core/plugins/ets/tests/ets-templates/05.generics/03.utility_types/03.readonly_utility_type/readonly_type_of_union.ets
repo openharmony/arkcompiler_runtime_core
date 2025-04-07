@@ -44,5 +44,5 @@ function foo(i: Readonly<A|C>) {
 }
 
 function main() {
-  assertTrue( foo( {i: 1.7, j: "str"} ) == 3 )
+  assertTrue( foo( {i: 1.7, j: "str"} as A ) == 3 )
 }
