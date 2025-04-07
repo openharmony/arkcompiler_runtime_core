@@ -14,24 +14,91 @@
  */
 
 class TestClass {
-    static sum(a0: int, a1: int): int {
+
+    static callJsBuiltinTest(): int {
         let global = JSRuntime.getGlobal();
         if (!global){
             console.log("No global");
+            return 1;
         }
 
         try {
             let f1: JSValue = (x: JSValue) => { JSRuntime.getGlobal().value1 = 1;};
-            let f2: JSValue = (x: JSValue) => { for (let i = 0; i < 1000000; ++i);  JSRuntime.getGlobal().value2 = 2;};
+            let f2: JSValue = (x: JSValue) => { JSRuntime.getGlobal().value2 = 2;};
             JSRuntime.getPropertyJSValue(JSRuntime.getGlobal(), 'Promise').resolve().then(f1);
             JSRuntime.getPropertyJSValue(JSRuntime.getGlobal(), 'Promise').resolve().then(f2);
         }
         catch (e) {
-            console.log("Function failed");
+            console.log("Builtin function failed");
+            return 1;
         }
 
-        assertEQ(JSRuntime.getGlobal().value1  as int, 1);
-        assertEQ(JSRuntime.getGlobal().value2 as int, 2);
-        return a0 + a1;
+
+        try {
+            assertEQ(JSRuntime.getGlobal().value1  as int, 1);
+            assertEQ(JSRuntime.getGlobal().value2 as int, 2);
+        }
+        catch(e) {
+            console.log("Failed to modify values");
+            return 1;
+        }
+
+        return 0;
+    }
+
+    static loadJsModuleTest(): int {
+        let module = JSRuntime.loadModule("./attach_thread_test_helpers_js");
+        if (module == undefined) {
+            console.log("Failed to load module");
+            return 1;
+        }
+
+        return 0;
+    }
+
+    static callJsFunctionTest(): int {
+        let module = JSRuntime.loadModule("./attach_thread_test_helpers_js");
+        let val = JSRuntime.getPropertyJSValue(module, 'returnTwo')();
+        try {
+            assertEQ(val as int, 2);
+        }
+        catch(e) {
+            console.log("callJsFunctionTest failed");
+            return 1;
+        }
+
+        return 0;
+    }    
+
+    static callJsAsyncFunctionTest(): int {
+        return TestClass.callJsAsyncFunction('simpleAsync');
+    }
+
+    static callJsAsyncFunctionWithAwaitTest(): int {
+        return TestClass.callJsAsyncFunction('asyncWithAwait');
+    }
+
+    private static callJsAsyncFunction(funcName: string): int {
+        let module = JSRuntime.loadModule("./attach_thread_test_helpers_js");
+
+        let modified = false;
+
+        let p = JSRuntime.getPropertyJSValue(module, funcName)() as Promise<Object>;
+        let p1 = p.then((x:Object): void => {
+            modified = true;
+        });
+
+        await p1;
+
+        try {
+            let value = JSRuntime.getPropertyJSValue(JSRuntime.getGlobal(), 'value') as int;
+            assertEQ(value, 7);
+            assertEQ(modified, true);
+        }
+        catch(e) {
+            console.log("Value modifications failed");
+            return 1;
+        }
+        return 0;
     }
 }
