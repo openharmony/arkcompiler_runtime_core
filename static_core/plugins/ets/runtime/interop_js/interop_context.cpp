@@ -77,6 +77,28 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
     return klass;
 }
 
+#if defined(PANDA_TARGET_OHOS)
+static void AppStateCallback(int state, int64_t timeStamp)
+{
+    auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
+    auto *pandaVm = EtsCoroutine::GetCurrent()->GetPandaVM();
+    pandaVm->UpdateAppState(appState);
+    if (UNLIKELY(static_cast<AppState::State>(state) == AppState::State::COLD_START_FINISHED)) {
+        pandaVm->GetGC()->PostponeGCEnd();
+    }
+}
+#endif  // PANDA_TARGET_OHOS
+
+static bool RegisterAppStateCallback([[maybe_unused]] napi_env env)
+{
+#if defined(PANDA_TARGET_OHOS)
+    auto status = napi_register_appstate_callback(env, AppStateCallback);
+    return status == napi_ok;
+#else
+    return true;
+#endif
+}
+
 static bool RegisterTimerModule(napi_env jsEnv)
 {
     ani_vm *vm = nullptr;
@@ -719,6 +741,10 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
     // The TimerModule should be bound to the exact JsEnv
     if (!RegisterTimerModule(InteropCtx::Current()->GetJSEnv())) {
         // throw some errors
+    }
+    if (!RegisterAppStateCallback(InteropCtx::Current()->GetJSEnv())) {
+        INTEROP_LOG(ERROR) << "RegisterAppStateCallback failed";
+        return false;
     }
 
     // In the hybrid mode with JSVM=leading VM, we are binding the EtsVM lifetime to the JSVM's env lifetime
