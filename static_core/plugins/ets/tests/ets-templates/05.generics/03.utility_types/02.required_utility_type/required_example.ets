@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,26 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+
 /*---
-desc: >-
-    Using interface with method as T for Required<T>.
-    Method is implemented during the initialization.
-tags: [compile-only, negative]
+desc: Type Required<T> is opposite to Partial<T>, and constructs a type with all properties of T set to required (i.e., not optional)
+tags: [compile-only]
 ---*/
 
-interface I {
-  i: number = 0
-  foo(): void
+interface Issue {
+  title?: string
+  description?: string
 }
 
-function foo(i: Required<I>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  return v;
-}
-
-function main() {
-  assertTrue( foo( {i: 1.9, foo() {}} ) == 1 )
-}
+let c: Required<Issue> = { title: "aa", description: "bb" }

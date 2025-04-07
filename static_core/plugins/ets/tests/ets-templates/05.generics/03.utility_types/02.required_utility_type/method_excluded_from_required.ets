@@ -13,27 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
+
 /*---
 desc: >-
-    Using interface with method as T for Partial<T>.
-    Optional feature is not about methods.
-    There is interface method implemented.
-tags: [compile-only, negative]
+    No method (not even any getter or setter) of T is part of the Required<T> type.
+tags: [compile-only,negative]
 ---*/
 
-interface I {
-  i: number = 0
-  foo(): void
-}
-
-function foo(i: Partial<I>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  return v;
-}
+{{c.decl}}
 
 function main() {
-  assertTrue(foo( {i: 1.9, foo(){}} ) == 1 )
+  {{c.check}}
 }
+
+{% endfor %}

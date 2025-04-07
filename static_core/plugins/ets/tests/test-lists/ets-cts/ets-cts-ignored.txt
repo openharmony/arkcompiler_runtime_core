@@ -344,26 +344,29 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_6.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_7.ets
 
+#24169
+05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_10.ets
+
 #24056
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.ets
 
 #23714
-05.generics/03.utility_types/02.required_utility_type/required_compatibility_1.ets
-05.generics/03.utility_types/02.required_utility_type/required_compatibility_0.ets
-05.generics/03.utility_types/02.required_utility_type/required_abstract.ets
-05.generics/03.utility_types/01.partial_utility_type/partial_generic.ets
-05.generics/03.utility_types/02.required_utility_type/required_module_implements_0.ets
+05.generics/03.utility_types/02.required_utility_type/required_compatibility_neg_1.ets
 
-#23804
-05.generics/03.utility_types/02.required_utility_type/required_method_1.ets
+#24165
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_0.ets
+
+#24168 no methods should be inherited using required utility type
+05.generics/03.utility_types/02.required_utility_type/method_excluded_from_required_0.ets
 
 #24083
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_0.ets
-05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_1.ets
 
 #20368: union of Readonly compilation failure
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_0.ets
-05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union.ets
+
+#24167 no methods should be inherited using readonly utility type
+05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_0.ets
 
 #20330 Compiler doesn't respect type argument for Array<T>
 05.generics/03.utility_types/04.record_utility_type/rec_3.ets

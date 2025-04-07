@@ -17,21 +17,21 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Calling function using Object with unacceptable parameters
+desc: variables of Partial<T> are to be initialized with valid object literals.
         - {{t}}, {{c.doc}}
 tags: [compile-only, negative]
 ---*/
 
 {{t}} C {
-  j: int = 0;
+  j: int {% if t != interface %} = 0 {% endif %}
 }
 
-function foo(i: Partial<C>) {
+function foo() {
   return -1
 }
 
 function main() {
-  assertTrue( foo( {{c.argument}} ) == 1 )
+    let i: Partial<C> = {{c.argument}}
 }
 
 {% endfor %}

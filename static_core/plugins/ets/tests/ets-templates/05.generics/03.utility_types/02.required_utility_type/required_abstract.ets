@@ -14,10 +14,8 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-    In type Required<T>, T must be a class or an interface type.
-    Type T is not compatible (see Type Compatibility) with Required<T>,
-    and variables of Required<T> are to be initialized with valid object literals
+desc: Type T is not compatible (see Type Compatibility) with Required<T>
+tags: [compile-only, negative]
 ---*/
 
 abstract class A {
@@ -27,5 +25,5 @@ abstract class A {
 
 function main() {
   let a: Required<A> = {i: 1.9, j: "some str"}
-  assertTrue( !(a instanceof A) )
+  let b: A = a
 }

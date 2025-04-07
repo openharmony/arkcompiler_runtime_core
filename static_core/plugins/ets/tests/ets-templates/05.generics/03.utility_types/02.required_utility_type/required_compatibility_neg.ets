@@ -13,27 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for t in types %}
+
 /*---
-desc: >-
-    Using abstract class with abstract method as T for Partial<T>.
-    Optional feature is not about methods.
-    No method of T is part of the Partial<T> type
-tags: [compile-only]
+desc: Type T is not compatible (see Type Compatibility) with Required<T>, and variables of Required<T> are to be
+      initialized with valid object literals.
 ---*/
 
-abstract class AC {
-  i?: number = 0
-  abstract foo()
-}
-
-function foo(i: Partial<AC>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  return v;
+{{t}} A {
+  i?: number
+  j?: string
 }
 
 function main() {
-  foo( {i: 1.9} )
+  let a: Required<A> = {i: 1.9, j: "some str"}
+  let b: A = a
 }
+
+{% endfor %}

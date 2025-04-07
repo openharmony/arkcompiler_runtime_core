@@ -13,27 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
+
 /*---
-desc: >-
-    Type Partial<T> constructs a type with all properties of T set to optional.
-    T must be a class or an interface type.
-    Static field cannot be initialized in the such case.
-tags: [compile-only, negative]
+desc: |-
+    Type Partial<T> with static fields.
+    {{c.doc}}
+tags: [{{c.tags}}]
 ---*/
 
-class A {
-  static i: int = 0
-  j: string = ""
-}
-
-function foo(i: Partial<A>) {
-  let v: int = 0;
-  if(i.j != undefined) {
-    v += 2;
-  }
-  return v;
-}
+{{c.decl}}
 
 function main() {
-  foo({i: 1.9, j: "some str"})
+  {{c.check}}
 }
+
+{% endfor %}

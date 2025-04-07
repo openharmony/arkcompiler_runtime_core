@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,27 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
 
 /*---
 desc: >-
-    Using abstract class with abstract method as T for Required<T>.
-    There is no abstract method implemented at all.
-tags: [compile-only, negative]
+    Type Required<T> is opposite to Partial<T>, and constructs a type with all properties of T set to required (i.e.,
+    not optional). T must be a class or an interface type.
 ---*/
 
-abstract class AC {
-  i?: number = 0
-  abstract foo()
-}
-
-function foo(i: Required<AC>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  return v;
-}
+{{c.decl}}
 
 function main() {
-  foo( {i: 1.9} )
+  {{c.check}}
 }
+
+{% endfor %}
