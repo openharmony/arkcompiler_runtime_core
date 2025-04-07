@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: check addition of two bytes
-tags: [compile-only, negative]
 ---*/
 
 function main() {
