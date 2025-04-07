@@ -24,11 +24,11 @@ interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
     get length(): number;
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param k the key to find in the HashMap/class
      *
-     * @returns value if assosiated with key presents.
+     * @returns value if associated with key presents.
      */
     get(key: K): V | undefined;
 
@@ -78,11 +78,11 @@ export class HashMap<K, V> implements ReadonlyHashMap<K, V> {
     }
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param k the key to find in the HashMap/class
      *
-     * @returns value if assosiated with key presents.
+     * @returns value if associated with key presents.
      */
     get(key: K): V | undefined {
         if (!this.buckets.has(key)) {
