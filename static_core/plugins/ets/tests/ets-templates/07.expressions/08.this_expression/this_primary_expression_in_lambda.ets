@@ -16,15 +16,12 @@
 /*---
 desc: This reference on object.
 assert: The value denoted by this in a lambda body and in the surrounding context is the same.
-tags: [compile-only]
 ---*/
 
-type func = (y: int): int;
-
-class A {
-  public x: int;
-
-  public foo() { 
+type func = (a: A) => int;
+class A {  
+  public x = 1;
+  public foo() {     	
     let bar: func = (a: A): int => { return this.x; };
     return bar(this);
   }
