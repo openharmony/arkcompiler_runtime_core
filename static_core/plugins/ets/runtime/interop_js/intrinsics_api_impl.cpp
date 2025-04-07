@@ -962,8 +962,10 @@ void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
         return res;
     }
     // start slowpath
+    HandleScope<ObjectHeader *> scope(coro);
+    VMHandle<ObjectHeader> handle(coro, ref);
     auto refconv = JSRefConvertResolve(ctx, klass);
-    auto res = refconv->Wrap(ctx, EtsObject::FromCoreType(ref));
+    auto res = refconv->Wrap(ctx, EtsObject::FromCoreType(handle.GetPtr()));
     if (UNLIKELY(res == nullptr)) {
         ctx->ForwardJSException(coro);
     }

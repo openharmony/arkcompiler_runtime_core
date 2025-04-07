@@ -975,6 +975,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         this.set(arr, 0 as int)
     }
 
+    public native set(array: {{N}}Array): void
+
+    public native set(array: {{N}}Array, offset: number): void
+
     /**
      * Copies elements from an ArrayLike object to the {{N}}Array.
      *

@@ -833,6 +833,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         this.set(arr, 0 as int)
     }
 
+    public native set(array: Int8Array): void
+
+    public native set(array: Int8Array, offset: number): void
+
     /**
      * Copies elements from an ArrayLike object to the Int8Array.
      *
@@ -2810,6 +2814,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         this.set(arr, 0 as int)
     }
 
+    public native set(array: Int16Array): void
+
+    public native set(array: Int16Array, offset: number): void
+
     /**
      * Copies elements from an ArrayLike object to the Int16Array.
      *
@@ -4763,6 +4771,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: int[]): void {
         this.set(arr, 0 as int)
     }
+
+    public native set(array: Int32Array): void
+
+    public native set(array: Int32Array, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the Int32Array.
@@ -6740,6 +6752,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         this.set(arr, 0 as int)
     }
 
+    public native set(array: BigInt64Array): void
+
+    public native set(array: BigInt64Array, offset: number): void
+
     /**
      * Copies elements from an ArrayLike object to the BigInt64Array.
      *
@@ -8708,6 +8724,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         this.set(arr, 0 as int)
     }
 
+    public native set(array: Float32Array): void
+
+    public native set(array: Float32Array, offset: number): void
+
     /**
      * Copies elements from an ArrayLike object to the Float32Array.
      *
@@ -10574,6 +10594,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: double[]): void {
         this.set(arr, 0 as int)
     }
+
+    public native set(array: Float64Array): void
+
+    public native set(array: Float64Array, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the Float64Array.

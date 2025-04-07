@@ -18,72 +18,157 @@
 #include "cross_values.h"
 
 namespace ark::ets::intrinsics {
-extern "C" void EtsEscompatInt8ArraySetInt(ObjectHeader *obj, EtsInt pos, EtsInt val)
+template <typename T>
+static void *GetNativeData(T *array)
 {
-    auto typedArray = ToUintPtr(obj);
-    auto length = *reinterpret_cast<EtsInt *>(typedArray + ark::cross_values::GetInt8ArrayLengthOffset(RUNTIME_ARCH));
-    if (pos < 0 || pos >= length) {
+    if (!array->IsArrayBufferBacked()) {
+        return static_cast<EtsEscompatSharedArrayBuffer *>(&*array->GetBuffer())
+            ->GetSharedMemory()
+            ->GetData()
+            ->GetData<void>();
+    }
+
+    auto *arrayBuffer = static_cast<EtsEscompatArrayBuffer *>(&*array->GetBuffer());
+    if (UNLIKELY(arrayBuffer->WasDetached())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        PandaEtsVM::GetCurrent()->GetLanguageContext();
-        ThrowException(ctx, coro, utf::CStringAsMutf8("Lstd/core/RangeError;"), utf::CStringAsMutf8("invalid index"));
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "ArrayBuffer was detached");
+        return nullptr;
+    }
+
+    return arrayBuffer->GetData();
+}
+
+extern "C" void EtsEscompatInt8ArraySetInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsInt val)
+{
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
         return;
     }
-    auto arrayBufferBacked = *reinterpret_cast<EtsBoolean *>(
-        typedArray + ark::cross_values::GetInt8ArrayArrayBufferBackedOffset(RUNTIME_ARCH));
-    auto buffer = ToUintPtr(ToVoidPtr(*reinterpret_cast<ObjectPointerType *>(
-        typedArray + ark::cross_values::GetInt8ArrayBufferOffset(RUNTIME_ARCH))));
-    auto byteOffset =
-        *reinterpret_cast<EtsDouble *>(typedArray + ark::cross_values::GetInt8ArrayByteOffsetOffset(RUNTIME_ARCH));
 
-    if (arrayBufferBacked != 0) {
-        auto *arrayBuffer = reinterpret_cast<EtsEscompatArrayBuffer *>(buffer);
-        ObjectAccessor::SetPrimitive(arrayBuffer->GetData(), pos * sizeof(EtsByte) + static_cast<EtsInt>(byteOffset),
-                                     static_cast<EtsByte>(val));
-    } else {
-        auto sharedMemory = ToUintPtr(ToVoidPtr(*reinterpret_cast<ObjectPointerType *>(
-            buffer + ark::cross_values::GetSharedArrayBufferSharedMemoryOffset(RUNTIME_ARCH))));
-        auto *data = ToVoidPtr(*reinterpret_cast<ObjectPointerType *>(
-            sharedMemory + ark::cross_values::GetSharedMemoryDataOffset(RUNTIME_ARCH)));
-        ObjectAccessor::SetPrimitive(data, coretypes::Array::GetDataOffset() + pos * sizeof(EtsByte) + byteOffset,
-                                     static_cast<EtsByte>(val));
-    }
-}
-
-extern "C" void EtsEscompatInt8ArraySetByte(ObjectHeader *obj, EtsInt pos, EtsByte val)
-{
-    EtsEscompatInt8ArraySetInt(obj, pos, val);
-}
-
-extern "C" EtsDouble EtsEscompatInt8ArrayGet(ObjectHeader *obj, EtsInt pos)
-{
-    auto typedArray = ToUintPtr(obj);
-    auto length = *reinterpret_cast<EtsInt *>(typedArray + ark::cross_values::GetInt8ArrayLengthOffset(RUNTIME_ARCH));
-    if (pos < 0 || pos >= length) {
+    if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        PandaEtsVM::GetCurrent()->GetLanguageContext();
-        ThrowException(ctx, coro, utf::CStringAsMutf8("Lstd/core/RangeError;"), utf::CStringAsMutf8("invalid index"));
+        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
+        return;
+    }
+    ObjectAccessor::SetPrimitive(data, pos * sizeof(EtsByte) + static_cast<EtsInt>(thisArray->GetByteOffset()),
+                                 static_cast<EtsByte>(val));
+}
+
+extern "C" void EtsEscompatInt8ArraySetByte(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsByte val)
+{
+    EtsEscompatInt8ArraySetInt(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatInt8ArrayGet(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
+{
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
         return 0;
     }
-    auto arrayBufferBacked = *reinterpret_cast<EtsBoolean *>(
-        typedArray + ark::cross_values::GetInt8ArrayArrayBufferBackedOffset(RUNTIME_ARCH));
-    auto buffer = ToUintPtr(ToVoidPtr(*reinterpret_cast<ObjectPointerType *>(
-        typedArray + ark::cross_values::GetInt8ArrayBufferOffset(RUNTIME_ARCH))));
-    auto byteOffset =
-        *reinterpret_cast<EtsDouble *>(typedArray + ark::cross_values::GetInt8ArrayByteOffsetOffset(RUNTIME_ARCH));
 
-    if (arrayBufferBacked != 0) {
-        auto *arrayBuffer = reinterpret_cast<EtsEscompatArrayBuffer *>(buffer);
-        return ObjectAccessor::GetPrimitive<EtsByte>(arrayBuffer->GetData(),
-                                                     pos * sizeof(EtsByte) + static_cast<EtsInt>(byteOffset));
+    if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
+        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
+        return 0;
+    }
+    return ObjectAccessor::GetPrimitive<EtsByte>(data, pos * sizeof(EtsByte) +
+                                                           static_cast<EtsInt>(thisArray->GetByteOffset()));
+}
+
+template <typename T>
+static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, T *srcArray, EtsInt pos)
+{
+    auto *dstData = GetNativeData(thisArray);
+    if (UNLIKELY(dstData == nullptr)) {
+        return;
+    }
+    auto *srcData = GetNativeData(srcArray);
+    if (UNLIKELY(srcData == nullptr)) {
+        return;
     }
 
-    auto sharedMemory = ToUintPtr(ToVoidPtr(*reinterpret_cast<ObjectPointerType *>(
-        buffer + ark::cross_values::GetSharedArrayBufferSharedMemoryOffset(RUNTIME_ARCH))));
-    auto *data = ToVoidPtr(*reinterpret_cast<ObjectPointerType *>(
-        sharedMemory + ark::cross_values::GetSharedMemoryDataOffset(RUNTIME_ARCH)));
-    return ObjectAccessor::GetPrimitive<EtsByte>(data, coretypes::Array::GetDataOffset() + pos * sizeof(EtsByte) +
-                                                           byteOffset);
+    using ElementType = typename T::ElementType;
+    if (UNLIKELY(pos < 0 || pos + srcArray->GetLengthInt() > thisArray->GetLengthInt())) {
+        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
+        return;
+    }
+    auto *dst = ToVoidPtr(ToUintPtr(dstData) + thisArray->GetByteOffset() + pos * sizeof(ElementType));
+    auto *src = ToVoidPtr(ToUintPtr(srcData) + srcArray->GetByteOffset());
+    [[maybe_unused]] auto error = memmove_s(dst, (thisArray->GetLengthInt() - pos) * sizeof(ElementType), src,
+                                            srcArray->GetLengthInt() * sizeof(ElementType));
+    ASSERT(error == EOK);
+}
+
+extern "C" void EtsEscompatInt8ArraySetValues(ark::ets::EtsEscompatInt8Array *thisArray,
+                                              ark::ets::EtsEscompatInt8Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatInt8ArraySetValuesWithOffset(ark::ets::EtsEscompatInt8Array *thisArray,
+                                                        ark::ets::EtsEscompatInt8Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatInt16ArraySetValues(ark::ets::EtsEscompatInt16Array *thisArray,
+                                               ark::ets::EtsEscompatInt16Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatInt16ArraySetValuesWithOffset(ark::ets::EtsEscompatInt16Array *thisArray,
+                                                         ark::ets::EtsEscompatInt16Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatInt32ArraySetValues(ark::ets::EtsEscompatInt32Array *thisArray,
+                                               ark::ets::EtsEscompatInt32Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatInt32ArraySetValuesWithOffset(ark::ets::EtsEscompatInt32Array *thisArray,
+                                                         ark::ets::EtsEscompatInt32Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatBigInt64ArraySetValues(ark::ets::EtsEscompatBigInt64Array *thisArray,
+                                                  ark::ets::EtsEscompatBigInt64Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatBigInt64ArraySetValuesWithOffset(ark::ets::EtsEscompatBigInt64Array *thisArray,
+                                                            ark::ets::EtsEscompatBigInt64Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatFloat32ArraySetValues(ark::ets::EtsEscompatFloat32Array *thisArray,
+                                                 ark::ets::EtsEscompatFloat32Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatFloat32ArraySetValuesWithOffset(ark::ets::EtsEscompatFloat32Array *thisArray,
+                                                           ark::ets::EtsEscompatFloat32Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatFloat64ArraySetValues(ark::ets::EtsEscompatFloat64Array *thisArray,
+                                                 ark::ets::EtsEscompatFloat64Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatFloat64ArraySetValuesWithOffset(ark::ets::EtsEscompatFloat64Array *thisArray,
+                                                           ark::ets::EtsEscompatFloat64Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 }  // namespace ark::ets::intrinsics
