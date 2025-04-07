@@ -1,4 +1,4 @@
-#FailKind.SEGFAULT_FAIL - 55 tests:
+#FailKind.SEGFAULT_FAIL - 53 tests:
 arkui/dollar_dollar_13.ets
 regression/11979-interface-attr-init-010.ets
 regression/11979-interface-attr-init-011.ets
@@ -26,26 +26,21 @@ spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_00.ets
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_01.ets
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_03.ets
 spec/05.Generics/issue15380_0.ets
-spec/07.expressions/7.32.Lambda_Expressions/callRegularLambdaWithAsyncOverload.ets
 spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_02.ets
 spec/07.expressions/7.5.Object_Literal/issue14680.ets
 spec/07.expressions/7.5.Object_Literal/issue14687.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
-spec/11.Enumerations/enum_const_expr_01_05.ets
 spec/11.Enumerations/enum_trailing_comma_04.ets
 spec/11.Enumerations/issue14636.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/06.import_path/import_path_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/non_linux_path_separators.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/export.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/import.ets
-spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/reexport.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/02.export_type_directives/export_type_directive_01.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_from_incorrect_path.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder_2.ets
 spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_1.ets
+spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-with-not-user-type_0.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-with-not-user-type_1.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-with-not-user-type_2.ets
@@ -58,10 +53,10 @@ std/core/std_core_char_static_Char_isWhiteSpace.ets
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 #FailKind.ABORT_FAIL - 1 tests:
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/method_overload6.ets
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
-#FailKind.TSC_FAIL - 582 tests:
+#FailKind.TSC_FAIL - 590 tests:
 algorithms/SampleAppTest.ets
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
@@ -124,6 +119,7 @@ escompat/escompat_Math_Math.tanh_double.ets
 escompat/escompat_Math_Math.trunc_double.ets
 regression/13734_0.ets
 regression/15114.ets
+regression/15869_0.ets
 regression/Issue20610.ets
 regression/default_interface_method.ets
 regression/verify_generics.ets
@@ -164,9 +160,13 @@ spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_000
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0004.ets
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0005.ets
 spec/10.Interfaces/method_overiding_0001.ets
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/export.ets
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/import.ets
+spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/import_reexported_namespace/reexport.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files.ets
 spec/13.Compilation_Units_Packages_and_Modules/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/clashing_reexports.ets
+spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_directive_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_incorrect.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_03.ets
@@ -183,7 +183,6 @@ spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink_2.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-class-extends-struct.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_1.ets
-spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_n_01.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0000.ets
@@ -245,13 +244,12 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_PollTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PushTest_Stress.ets
-std/core/CollatorTest.ets
 std/core/DateTimeFormatTest.ets
 std/core/IntlDateFormatTest.ets
 std/core/IntlDateTimeStyleFormatTest.ets
-std/core/IntlPluralRulesTest.ets
 std/core/IntlLocaleTest.ets
 std/core/IntlLocaleTest2.ets
+std/core/IntlPluralRulesTest.ets
 std/core/Object.ets
 std/core/TypeClassTypeTest.ets
 std/core/TypeCreateClassTest.ets
@@ -372,14 +370,15 @@ std/core/std_core_double_instance_Double_toString_002.ets
 std/core/std_core_double_instance_Double_unboxed.ets
 std/core/std_core_double_static_Double_isFinite.ets
 std/core/std_core_double_static_Double_isInteger.ets
-std/core/std_core_double_static_Double_isInteger_007.ets
+std/core/std_core_double_static_Double_isInteger_008.ets
 std/core/std_core_double_static_Double_isNaN.ets
-std/core/std_core_double_static_Double_isNaN_008.ets
+std/core/std_core_double_static_Double_isNaN_009.ets
 std/core/std_core_double_static_Double_isSafeInteger.ets
 std/core/std_core_double_static_Double_parseFloat.ets
 std/core/std_core_double_static_Double_parseFloat_005.ets
 std/core/std_core_double_static_Double_parseInt.ets
 std/core/std_core_double_static_Double_parseInt_006.ets
+std/core/std_core_double_static_Double_parseInt_007.ets
 std/core/std_core_double_static_Double_valueOf.ets
 std/core/std_core_float_instance_Float_$_hashCode.ets
 std/core/std_core_float_instance_Float_add.ets
