@@ -25,6 +25,7 @@ namespace ark::ets::stdlib::intl {
 icu::UnicodeString AniToUnicodeStr(ani_env *env, ani_string aniStr);
 ani_string StdStrToAni(ani_env *env, const std::string &str);
 ani_string UnicodeToAniStr(ani_env *env, icu::UnicodeString &ustr);
+icu::UnicodeString StdStrToUnicode(const std::string &str);
 
 }  // namespace ark::ets::stdlib::intl
 

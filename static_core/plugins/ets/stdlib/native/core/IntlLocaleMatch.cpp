@@ -23,8 +23,10 @@
 #include <cassert>
 #include <cstddef>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <array>
+#include <set>
 
 namespace ark::ets::stdlib {
 
@@ -68,6 +70,18 @@ icu::LocaleMatcher BuildLocaleMatcher(UErrorCode &success)
     return builder.build(success);
 }
 
+icu::Locale GetLocale(ani_env *env, std::string &locTag)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    icu::Locale locale = icu::Locale::forLanguageTag(icu::StringPiece(locTag.c_str()), status);
+    if (UNLIKELY(U_FAILURE(status))) {
+        const auto errorMessage = std::string("Language tag '").append(locTag).append("' is invalid or not supported");
+        ThrowNewError(env, "Lstd/core/RuntimeException;", errorMessage.c_str(), "Lstd/core/String;:V");
+        return nullptr;
+    }
+    return locale;
+}
+
 ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class klass, ani_string locale)
 {
     UErrorCode success = U_ZERO_ERROR;
@@ -79,6 +93,17 @@ ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class kla
         ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
         return nullptr;
     }
+
+    auto l = std::make_unique<icu::Locale>(locTag.c_str());
+    std::set<std::string> unicodeExtensions;
+    l->getUnicodeKeywords<std::string>(
+        std::insert_iterator<decltype(unicodeExtensions)>(unicodeExtensions, unicodeExtensions.begin()), success);
+
+    for (const auto &extension : unicodeExtensions) {
+        auto val = l->getUnicodeKeywordValue<std::string>(icu::StringPiece(extension.c_str()), success);
+        str.append("-u-").append(extension).append("-").append(val);
+    }
+
     return intl::StdStrToAni(env, str);
 }
 
