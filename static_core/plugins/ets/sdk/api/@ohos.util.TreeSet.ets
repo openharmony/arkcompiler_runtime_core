@@ -152,7 +152,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @param key: the key of the element which will be get the higher value
      *
-     * @returns the higher value of the given key's element if exists
+     * @returns the higher value of the given key's element if exists or undefined
      */
     getHigherValue(key: T): T | undefined {
         return this.treeMap.getHigherKey(key);
@@ -172,7 +172,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @param key:the key of the element which will be get the lower value
      *
-     * @returns the lower value of the given key's element if exists
+     * @returns the lower value of the given key's element if exists or undefined
      */
     getLowerValue(key: T): T | undefined {
         return this.treeMap.getLowerKey(key);

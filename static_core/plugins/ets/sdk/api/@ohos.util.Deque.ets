@@ -207,6 +207,42 @@ export class Deque<T> implements Iterable<T> {
         this.capacity = newCap;
         this.buffer = newBuffer;
     }
+
+    /**
+     * Gets the element at the specified index.
+     *
+     * @param index - The index of the element to retrieve.
+     *
+     * @returns The element at the specified index.
+     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
+     */
+    public $_get(index: number): T {
+        if (index >= this.length || index < 0) {
+            throw new BusinessError(`The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`, OutOfBoundsErrorCodeId);
+        }
+
+        return this.buffer[this.getRealIndex(index)];
+    }
+
+    /**
+     * Sets the element at the specified index.
+     *
+     * @param index - The index of the element to set.
+     *
+     * @param val - The value to set at the specified index.
+     * @throws { BusinessError } 10200001 - The value of "index" is out of range. It must be >= 0 && <= 2147483647.
+     */
+    public $_set(index: number, val: T): void {
+        if (index >= this.length || index < 0) {
+            throw new BusinessError(`The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`, OutOfBoundsErrorCodeId);
+        }
+
+        this.buffer[this.getRealIndex(index)] = val;
+    }
+
+    private getRealIndex(index: number): number {
+        return (this.front + index) % this.capacity;
+    }
 }
 
 class DequeValuesIterator_T<T> implements IterableIterator<T> {
