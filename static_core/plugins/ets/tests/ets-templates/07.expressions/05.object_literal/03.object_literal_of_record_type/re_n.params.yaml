@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,10 +10,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 cases:
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record< "1"|"2"|"3"|"4"|"5", number> = {
               "1": 1,
               "2": 2,
@@ -23,7 +23,8 @@ cases:
               "6": 6
           } // CTE, extra key "6"
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record< "1"|"2"|"3"|"4"|"5", number> = {
               "1": 1,
               "2": 2,
@@ -31,106 +32,145 @@ cases:
               "4": 4,
           } // CTE, missing key "5"
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<string, number> = {
               "1": 1,
               "2": 2,
               null: 3,
           } // CTE, wrong key
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<string, number> = {
               "1": 1,
               "2": 2,
               undefined: 3,
           } // CTE, wrong key
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<string, number> = {
               1: 1,
               "a": 2,
           } // CTE, wrong key type
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number, number> = {
               1: 1,
               "a": 2,
           } // CTE, wrong key type
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number | boolean, number> = {
               1: 1,
               true: 2,
           } // CTE, wrong key type, boolean is not allowed
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<Error, string> = {} // CTE, wrong key type, Error is not allowed
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number, number> = {
               1: 1,
               2: "x",
           } // CTE, wrong value type
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number, string> = {
               1: "1",
               2: "x",
               3: null,
           } // CTE, wrong value type
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number, string> = {
               1: "1",
               2: "x",
               3: undefined,
           } // CTE, wrong value type
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<string, number> = {
               "1": 1,
               "1": 2,
               "2": 3,
           } // CTE, duplicate key
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number, number> = {
               1: 1,
               1: 2,
               2: 3,
           } // CTE, duplicate key
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number, number> = {
               1: 1,
               2: 3,
           }
           let b = a["1"]  // CTE, wrong key type
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<string, number> = {
               "1": 1,
               "2": 3,
           }
           let b = a[1]  // CTE, wrong key type
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<number | "10" | "2", string> = {
               1: "Jan",
               2: "Feb",
               "10": "Dec",
           }  // CTE, missing required key
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<"10" | "1", string> = {
               "1": "Jan",
               "10": "Dec",
           }
           let b = a["2"]  // CTE, wrong key
 
-    - use: |-
+    - tags: ['compile-only', 'negative']
+      use: |-
           let a: Record<"10" | "1", string> = {
               "1": "Jan",
               "10": "Dec",
           }
           let b = a[2]  // CTE, wrong key
+
+    - tags: ['negative']
+      use: |-
+          // string to Record
+          let a: Record<string, Record<number, boolean>> = {
+              "c": { 1: false,
+                     42: true,
+              },
+              "b": {},
+          }
+          assertTrue(a["a"]![1]!)
+
+    - tags: ['negative']
+      use: |-
+          // string to Record
+          let a: Record<string, Record<number, boolean>> = {
+              "c": { 1: false,
+                     42: true,
+              },
+              "b": {},
+          }
+          assertTrue(!(a["a"]![42]!))
+          
