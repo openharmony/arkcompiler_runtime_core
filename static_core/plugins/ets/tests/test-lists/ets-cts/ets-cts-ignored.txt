@@ -673,9 +673,6 @@
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_6.ets
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_8.ets
 
-#22253
-09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.ets
-
 #23238 Method returning 'this' returns wrong instance
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.ets
 
@@ -752,9 +749,6 @@
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_12.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_18.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_37.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_0.ets
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_2.ets
 
 #23200: Verifier fails on some interface overloading and overriding cases
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/two_interfaces_0.ets
@@ -816,7 +810,6 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_3.ets
 
 #24017
-15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload_1.ets
 
 #24428
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc2.ets
