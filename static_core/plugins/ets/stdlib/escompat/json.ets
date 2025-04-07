@@ -577,6 +577,8 @@ class JSONWriter {
             this.buffer.append("undefined")
         } else if (obj instanceof String) {
             this.buffer.append(JSON.stringify(obj as String))
+        } else if (obj instanceof RegExpExecArray) {
+            this.buffer.append(JSON.stringify((obj as RegExpExecArray).result))
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
@@ -1185,7 +1187,7 @@ class JSONValueParser {
         if (this.reviver != undefined) {
             setClassFieldFn = (classVal: ClassValue, fieldName: string, fieldVal: NullishType): void => {
                 const revivedVal = this.reviver!(fieldName, fieldVal)
-        
+
                 // setFieldByName doesn't allow null/undefined values
                 if (revivedVal != null) {
                     classVal.setFieldByName(fieldName, Value.of(revivedVal))
