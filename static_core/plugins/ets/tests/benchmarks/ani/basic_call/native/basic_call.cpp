@@ -13,106 +13,108 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/runtime/napi/ets_napi.h"
-#include <ostream>
+#include "plugins/ets/runtime/ani/ani.h"
+#include <iostream>
+#include <array>
 
 extern "C" {
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_string ETS_CALL basic_call_s(EtsEnv *env, [[maybe_unused]] ets_class self, [[maybe_unused]] ets_int a,
-                                            [[maybe_unused]] ets_string b, [[maybe_unused]] ets_long c,
-                                            [[maybe_unused]] ets_object d)
+ani_string basic_call_s(ani_env *env, [[maybe_unused]] ani_class self, [[maybe_unused]] ani_long a,
+                        [[maybe_unused]] ani_string b, [[maybe_unused]] ani_object c)
 {
     return b;
 }
 
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_long ETS_CALL basic_call_sc([[maybe_unused]] ets_int a, [[maybe_unused]] ets_int b,
-                                           [[maybe_unused]] ets_long c, [[maybe_unused]] ets_long d)
+ani_long basic_call_sc([[maybe_unused]] ani_long a, [[maybe_unused]] ani_int b, [[maybe_unused]] ani_long c)
 {
-    return d;
+    return c;
 }
 
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_string ETS_CALL basic_call_sf(EtsEnv *env, [[maybe_unused]] ets_class, [[maybe_unused]] ets_int a,
-                                             [[maybe_unused]] ets_string b, [[maybe_unused]] ets_long c,
-                                             [[maybe_unused]] ets_object d)
+ani_string basic_call_sf(ani_env *env, [[maybe_unused]] ani_class, [[maybe_unused]] ani_long a,
+                         [[maybe_unused]] ani_string b, [[maybe_unused]] ani_object c)
 {
     return b;
 }
 
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_string ETS_CALL basic_call_v(EtsEnv *env, [[maybe_unused]] ets_object, [[maybe_unused]] ets_int a,
-                                            [[maybe_unused]] ets_string b, [[maybe_unused]] ets_long c,
-                                            [[maybe_unused]] ets_object d)
+ani_string basic_call_v(ani_env *env, [[maybe_unused]] ani_object, [[maybe_unused]] ani_long a,
+                        [[maybe_unused]] ani_string b, [[maybe_unused]] ani_object c)
 {
     return b;
 }
 
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_string ETS_CALL basic_call_vf(EtsEnv *env, [[maybe_unused]] ets_object, [[maybe_unused]] ets_int a,
-                                             [[maybe_unused]] ets_string b, [[maybe_unused]] ets_long c,
-                                             [[maybe_unused]] ets_object d)
+ani_string basic_call_vf(ani_env *env, [[maybe_unused]] ani_object, [[maybe_unused]] ani_long a,
+                         [[maybe_unused]] ani_string b, [[maybe_unused]] ani_object c)
 {
     return b;
 }
 
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_string ETS_CALL basic_call_v_final(EtsEnv *env, [[maybe_unused]] ets_object, [[maybe_unused]] ets_int a,
-                                                  [[maybe_unused]] ets_string b, [[maybe_unused]] ets_long c,
-                                                  [[maybe_unused]] ets_object d)
+ani_string basic_call_v_final(ani_env *env, [[maybe_unused]] ani_object, [[maybe_unused]] ani_long a,
+                              [[maybe_unused]] ani_string b, [[maybe_unused]] ani_object c)
 {
     return b;
 }
 
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_string ETS_CALL basic_call_vf_final(EtsEnv *env, [[maybe_unused]] ets_object, [[maybe_unused]] ets_int a,
-                                                   [[maybe_unused]] ets_string b, [[maybe_unused]] ets_long c,
-                                                   [[maybe_unused]] ets_object d)
+ani_string basic_call_vf_final(ani_env *env, [[maybe_unused]] ani_object, [[maybe_unused]] ani_long a,
+                               [[maybe_unused]] ani_string b, [[maybe_unused]] ani_object c)
 {
     return b;
 }
 
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-ETS_EXPORT ets_long ETS_CALL basic_call_baseline(EtsEnv *env, [[maybe_unused]] ets_class)
+ani_long basic_call_baseline(ani_env *env, [[maybe_unused]] ani_class)
 {
     return 1;
 }
 
-// NOLINTNEXTLINE(modernize-avoid-c-arrays)
-static EtsNativeMethod gMethods[] = {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_s", "ILstd/core/String;JLstd/core/Object;:Lstd/core/String;", reinterpret_cast<void *>(basic_call_s)},
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_sc", "IIJJ:J", reinterpret_cast<void *>(basic_call_sc)},
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_sf", "ILstd/core/String;JLstd/core/Object;:Lstd/core/String;",
-     reinterpret_cast<void *>(basic_call_sf)},
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_v", "ILstd/core/String;JLstd/core/Object;:Lstd/core/String;", reinterpret_cast<void *>(basic_call_v)},
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_vf", "ILstd/core/String;JLstd/core/Object;:Lstd/core/String;",
-     reinterpret_cast<void *>(basic_call_vf)},
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_v_final", "ILstd/core/String;JLstd/core/Object;:Lstd/core/String;",
-     reinterpret_cast<void *>(basic_call_v_final)},
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_vf_final", "ILstd/core/String;JLstd/core/Object;:Lstd/core/String;",
-     reinterpret_cast<void *>(basic_call_vf_final)},
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    {"basic_call_baseline", ":J", reinterpret_cast<void *>(basic_call_baseline)},
-};
-
-ETS_EXPORT ets_int ETS_CALL EtsNapiOnLoad(EtsEnv *env)
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    ets_class clazz = env->FindClass("BasicCall");
-    if (clazz == nullptr) {
-        return -1;
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        std::cout << "Wrong version of ANI!\n";
+        return ANI_ERROR;
     }
-    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-    if (env->RegisterNatives(clazz, gMethods, sizeof(gMethods) / sizeof(gMethods[0])) < 0) {
-        return -1;
+    ani_class cls;
+    if (ANI_OK != env->FindClass("LBasicCall;", &cls)) {
+        std::cout << "Class BasicCall not found!\n";
+        return ANI_ERROR;
     }
-    return ETS_NAPI_VERSION_1_0;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    std::array<ani_native_function, 8U> methods = {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_s", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+                             reinterpret_cast<void *>(basic_call_s)},
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_sc", "JIJ:J", reinterpret_cast<void *>(basic_call_sc)},
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_sf", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+                             reinterpret_cast<void *>(basic_call_sf)},
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_v", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+                             reinterpret_cast<void *>(basic_call_v)},
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_vf", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+                             reinterpret_cast<void *>(basic_call_vf)},
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_v_final", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+                             reinterpret_cast<void *>(basic_call_v_final)},
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_vf_final", "JLstd/core/String;Lstd/core/Object;:Lstd/core/String;",
+                             reinterpret_cast<void *>(basic_call_vf_final)},
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+        ani_native_function {"basic_call_baseline", ":J", reinterpret_cast<void *>(basic_call_baseline)},
+    };
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        std::cout << "Binding native methods failed!\n";
+        return ANI_ERROR;
+    }
+    *result = ANI_VERSION_1;
+    return ANI_OK;
 }
 
 // NOLINTEND(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
