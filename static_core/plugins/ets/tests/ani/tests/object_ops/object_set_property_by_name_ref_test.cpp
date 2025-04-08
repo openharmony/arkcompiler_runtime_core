@@ -105,9 +105,6 @@ TEST_F(ObjectSetPropertyByNameRefTest, set_field_property_invalid_type)
     ani_object car = NewCar();
     ani_string string {};
 
-    std::string_view utf8string = "12345";
-    ASSERT_EQ(env_->String_NewUTF8(utf8string.data(), utf8string.size(), &string), ANI_OK);
-
     ASSERT_EQ(env_->Object_SetPropertyByName_Ref(car, "manufacturer", string), ANI_INVALID_TYPE);
 }
 
@@ -115,9 +112,6 @@ TEST_F(ObjectSetPropertyByNameRefTest, set_setter_property_invalid_type)
 {
     ani_object car = NewCar();
     ani_string string {};
-
-    std::string_view utf8string = "12345";
-    ASSERT_EQ(env_->String_NewUTF8(utf8string.data(), utf8string.size(), &string), ANI_OK);
 
     ASSERT_EQ(env_->Object_SetPropertyByName_Ref(car, "model", string), ANI_INVALID_TYPE);
 }
