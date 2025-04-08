@@ -55,6 +55,10 @@ export class RegExpExecArray /*extends Array<String>*/ {
         return this.get(index as int);
     }
 
+    public $_get(index: number): String {
+        return this.get(index as int);
+    }
+
     get length(): int {
         return this.result.length;
     }
@@ -704,7 +708,7 @@ export class RegExp extends Object {
         this.pattern_ = pattern
         this.flags_ = flags === undefined ? "" : flags!
         this.source_ = RegExp.escapePattern(pattern)
-        this.flags_ = Array.from(this.flags_.split("")).sort().join("") 
+        this.flags_ = Array.from(this.flags_.split("")).sort().join("")
     }
 
     /**

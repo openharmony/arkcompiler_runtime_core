@@ -106,6 +106,16 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
         }
     }
 
+    for (let i = 0; i < actual.length; i++ ) {
+        if (!actual[i].equals(expected[i])) {
+            console.println ("check index : " + i);
+            console.println("content of result array from actual is not equals to expected");
+            console.println("actual  : " + actual[i]);
+            console.println("expected : " + expected[i]);
+            return 1;
+        }
+    }
+
     for (let i = 0; i < actual.indices.length; i++) {
         let actInd = (Value.of(actual.indices) as ArrayValue).getElement(i).getData() as number[]
         let expInd = (Value.of(expected.indices) as ArrayValue).getElement(i).getData() as number[]
