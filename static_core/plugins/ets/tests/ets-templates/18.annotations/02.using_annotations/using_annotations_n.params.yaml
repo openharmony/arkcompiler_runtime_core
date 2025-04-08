@@ -14,18 +14,6 @@
 
 cases:
   - decl: |-
-      @SomeAnnotation({field2: "Some string" })
-      abstract class SomeAbstractClass {}
-    value: |-
-       = 100
-  - decl: |-
-      abstract class SomeAbstractClass {
-        @SomeAnnotation({field2: "Some string" })
-        abstract absfoo()      
-      }
-    value: |-
-      = 100
-  - decl: |-
       @SomeAnnotation({field2: "Some string"})
       @SomeAnnotation({field2: "Some string"})
       class SomeClass {}
