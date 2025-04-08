@@ -32,9 +32,9 @@ function testSupportedLocalesOf() {
     let localeList: string[] = [ru_RU, zh_CN, en_US];
     let expected: string[] = [ru_RU, zh_CN, en_US];
     let result: string[] = Intl.NumberFormat.supportedLocalesOf(localeList);
-    assertTrue(expected[0] == result[0], "Error. Got: " + result[0] + ". Expected: " + expected[0]);
-    assertTrue(expected[1] == result[1], "Error. Got: " + result[1] + ". Expected: " + expected[1]);
-    assertTrue(expected[2] == result[2], "Error. Got: " + result[2] + ". Expected: " + expected[2]);
+    assertEQ(expected[0], result[0], "Error. Got: " + result[0] + ". Expected: " + expected[0]);
+    assertEQ(expected[1], result[1], "Error. Got: " + result[1] + ". Expected: " + expected[1]);
+    assertEQ(expected[2], result[2], "Error. Got: " + result[2] + ". Expected: " + expected[2]);
 }
 
 function testSupportedLocalesOfEmpty() {
@@ -75,15 +75,15 @@ function testResolvedOptionsDecimal() {
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    assertTrue(getOptions.locale == "de", "Error. Got: " + s);
-    assertTrue(getOptions.numberingSystem == "latn", "Error. Got: " + s);
-    assertTrue(getOptions.style == "decimal", "Error. Got: " + s);
-    assertTrue(getOptions.minimumIntegerDigits == 1, "Error. Got: " + s);
-    assertTrue(getOptions.minimumFractionDigits == 0, "Error. Got: " + s);
-    assertTrue(getOptions.maximumFractionDigits == 3, "Error. Got: " + s);
-    assertTrue(getOptions.useGrouping == false, "Error. Got: " + s);
-    assertTrue(getOptions.notation == "standard", "Error. Got: " + s);
-    assertTrue(getOptions.signDisplay == "auto", "Error. Got: " + s);
+    assertEQ(getOptions.locale, "de", "Error. Got: " + s);
+    assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
+    assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
+    assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
+    assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
+    assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
+    assertEQ(getOptions.useGrouping, false, "Error. Got: " + s);
+    assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
+    assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
 
 function testResolvedOptionsPercent() {
@@ -92,15 +92,15 @@ function testResolvedOptionsPercent() {
     }
     let getOptions = new Intl.NumberFormat("de", options).resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    assertTrue(getOptions.locale == "de", "Error. Got: " + s);
-    assertTrue(getOptions.numberingSystem == "latn", "Error. Got: " + s);
-    assertTrue(getOptions.style == "percent", "Error. Got: " + s);
-    assertTrue(getOptions.minimumIntegerDigits == 1, "Error. Got: " + s);
-    assertTrue(getOptions.minimumFractionDigits == 0, "Error. Got: " + s);
-    assertTrue(getOptions.maximumFractionDigits == 0, "Error. Got: " + s);
-    assertTrue(getOptions.useGrouping == true, "Error. Got: " + s)
-    assertTrue(getOptions.notation == "standard", "Error. Got: " + s);
-    assertTrue(getOptions.signDisplay == "auto", "Error. Got: " + s);
+    assertEQ(getOptions.locale, "de", "Error. Got: " + s);
+    assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
+    assertEQ(getOptions.style, "percent", "Error. Got: " + s);
+    assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
+    assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
+    assertEQ(getOptions.maximumFractionDigits, 0.0, "Error. Got: " + s);
+    assertEQ(getOptions.useGrouping, true, "Error. Got: " + s)
+    assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
+    assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
 
 function testResolvedOptionsCurrency() {
@@ -109,18 +109,18 @@ function testResolvedOptionsCurrency() {
     }
     let getOptions = new Intl.NumberFormat("zh", options).resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    assertTrue(getOptions.locale == "zh", "Error. Got: " + s);
-    assertTrue(getOptions.numberingSystem == "latn", "Error. Got: " + s);
-    assertTrue(getOptions.style == "currency", "Error. Got: " + s);
-    assertTrue(getOptions.currency == "CNY", "Error. Got: " + s);
-    assertTrue(getOptions.currencyDisplay == "symbol", "Error. Got: " + s);
-    assertTrue(getOptions.currencySign == "standard", "Error. Got: " + s);
-    assertTrue(getOptions.minimumIntegerDigits == 1, "Error. Got: " + s);
-    assertTrue(getOptions.minimumFractionDigits == 2, "Error. Got: " + s);
-    assertTrue(getOptions.maximumFractionDigits == 2, "Error. Got: " + s);
-    assertTrue(getOptions.useGrouping == true, "Error. Got: " + s);
-    assertTrue(getOptions.notation == "standard", "Error. Got: " + s);
-    assertTrue(getOptions.signDisplay == "auto", "Error. Got: " + s);
+    assertEQ(getOptions.locale, "zh", "Error. Got: " + s);
+    assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
+    assertEQ(getOptions.style, "currency", "Error. Got: " + s);
+    assertEQ(getOptions.currency, "CNY", "Error. Got: " + s);
+    assertEQ(getOptions.currencyDisplay, "symbol", "Error. Got: " + s);
+    assertEQ(getOptions.currencySign, "standard", "Error. Got: " + s);
+    assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
+    assertEQ(getOptions.minimumFractionDigits, 2.0, "Error. Got: " + s);
+    assertEQ(getOptions.maximumFractionDigits, 2.0, "Error. Got: " + s);
+    assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
+    assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
+    assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
 
 function equaledResolvedNumberFormatOptions(a: Intl.ResolvedNumberFormatOptions, b: Intl.ResolvedNumberFormatOptions): boolean {
