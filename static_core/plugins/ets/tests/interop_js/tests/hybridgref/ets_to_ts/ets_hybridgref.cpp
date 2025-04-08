@@ -103,8 +103,6 @@ TEST_F(HybridGrefPrimitiveEtsToTsTest, hybridgref_create_from_ani_invalid_args)
 
     ani_env *env = nullptr;
     ASSERT_TRUE(GetAniEnv(&env));
-    ASSERT_TRUE(hybridgref_create_from_ani(env, nullptr, &ref));
-
     ASSERT_FALSE(hybridgref_create_from_ani(env, reinterpret_cast<ani_ref>(DUMMY_NATIVE_POINTER), nullptr));
 }
 

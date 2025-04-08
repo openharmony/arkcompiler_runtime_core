@@ -29,8 +29,10 @@ TEST_F(ArrayGetSetTest, GetTest)
 
     ani_size arrSize = 5U;
 
+    ani_ref undefined {};
+    ASSERT_EQ(env_->GetUndefined(&undefined), ANI_OK);
     ani_array array {};
-    ASSERT_EQ(env_->Array_New(arrSize, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New(arrSize, undefined, &array), ANI_OK);
     ani_ref val {};
     for (ani_size it = 0; it < arrSize; ++it) {
         ASSERT_EQ(env_->Array_Get(array, it, &val), ANI_OK);
@@ -72,8 +74,10 @@ TEST_F(ArrayGetSetTest, SetTest)
 
     ani_object boxedInt {};
 
+    ani_ref undefined {};
+    ASSERT_EQ(env_->GetUndefined(&undefined), ANI_OK);
     ani_array array {};
-    ASSERT_EQ(env_->Array_New(arrSize, nullptr, &array), ANI_OK);
+    ASSERT_EQ(env_->Array_New(arrSize, undefined, &array), ANI_OK);
     ani_ref val {};
     for (ani_size it = 0; it < arrSize; ++it) {
         env_->Object_New(intClass, intCtor, &boxedInt, it);
@@ -111,6 +115,7 @@ TEST_F(ArrayGetSetTest, GetSetInvalidArgsTest)
     ASSERT_EQ(env_->Array_New(0U, nullptr, &array), ANI_OK);
     ASSERT_EQ(env_->Array_Get(array, 0, nullptr), ANI_INVALID_ARGS);
 
+    ASSERT_EQ(env_->GetUndefined(&res), ANI_OK);
     ASSERT_EQ(env_->Array_Set(array, 0, res), ANI_OUT_OF_RANGE);
     ASSERT_EQ(env_->Array_Get(array, 0, &res), ANI_OUT_OF_RANGE);
 }

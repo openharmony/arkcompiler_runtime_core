@@ -647,8 +647,10 @@ static ani_array FormatToPartsImpl(ani_env *env, ani_object self, ani_double tim
     ani_method fmtPartImplCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(fmtPartImplCls, "<ctor>", DTF_PART_IMPL_CTOR_SIGNATURE, &fmtPartImplCtor));
 
+    ani_ref undefined {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_array formattedDateParts {};
-    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), nullptr, &formattedDateParts));
+    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), undefined, &formattedDateParts));
 
     for (size_t partIdx = 0; partIdx < parts.size(); partIdx++) {
         const auto &part = parts[partIdx];
@@ -862,7 +864,6 @@ static ani_array FormatRangeToPartsImpl(ani_env *env, ani_object self, ani_doubl
     int32_t prevPartEndIdx = 0;
     int32_t prevSpanEndIdx = 0;
     const UStr partLiteralType = DTF_PART_LITERAL_TYPE;
-    const UStr partSourceShared = DTRF_PART_SOURCE_SHARED;
 
     while (formattedIntervalVal->nextPosition(partPos, status) == TRUE) {
         if (U_FAILURE(status) == TRUE) {
@@ -876,7 +877,7 @@ static ani_array FormatRangeToPartsImpl(ani_env *env, ani_object self, ani_doubl
                 UStr literalValue;
                 formattedInterval.extractBetween(prevSpanEndIdx, partPos.getStart(), literalValue);
 
-                parts.emplace_back(partLiteralType, literalValue, partSourceShared);
+                parts.emplace_back(partLiteralType, literalValue, DTRF_PART_SOURCE_SHARED);
             }
 
             prevSpanEndIdx = partPos.getLimit(), prevPartEndIdx = partPos.getStart();
@@ -900,8 +901,10 @@ static ani_array FormatRangeToPartsImpl(ani_env *env, ani_object self, ani_doubl
         }
     }
 
+    ani_ref undefined {};
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
     ani_array partsArr {};
-    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), nullptr, &partsArr));
+    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), undefined, &partsArr));
 
     FillDateTimeRangeFormatPartArray(env, partsArr, parts);
 
