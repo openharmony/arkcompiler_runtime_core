@@ -1259,14 +1259,13 @@ NO_UB_SANITIZE static ani_status Array_New_Ref(ani_env *env, ani_type type, ani_
     CHECK_ENV(env);
     ANI_CHECK_RETURN_IF_GT(length, std::numeric_limits<uint32_t>::max(), ANI_INVALID_ARGS);
     CHECK_PTR_ARG(type);
-    CHECK_PTR_ARG(initialElement);
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
     EtsClass *internalClass = s.ToInternalType(type);
     EtsObjectArray *internalArray = EtsObjectArray::Create(internalClass, static_cast<uint32_t>(length));
     ANI_CHECK_RETURN_IF_EQ(internalArray, nullptr, ANI_OUT_OF_MEMORY);
-    if (length != 0 || !IsUndefined(initialElement)) {
+    if (initialElement != nullptr) {
         EtsObject *obj = s.ToInternalType(initialElement);
         for (ani_size i = 0; i < length; i++) {
             internalArray->Set(static_cast<uint32_t>(i), obj);
@@ -1281,7 +1280,6 @@ NO_UB_SANITIZE static ani_status Array_Set_Ref(ani_env *env, ani_array_ref array
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(array);
-    CHECK_PTR_ARG(ref);
 
     ScopedManagedCodeFix s(env);
     EtsObject *objArray = s.ToInternalType(reinterpret_cast<ani_object>(array));
@@ -3268,7 +3266,6 @@ NO_UB_SANITIZE static ani_status Object_SetPropertyByName_Ref(ani_env *env, ani_
     CHECK_ENV(env);
     CHECK_PTR_ARG(object);
     CHECK_PTR_ARG(name);
-    CHECK_PTR_ARG(value);
 
     return DoSetPropertyByName(env, object, name, value);
 }
@@ -3490,7 +3487,6 @@ NO_UB_SANITIZE static ani_status Reference_IsNull(ani_env *env, ani_ref ref, ani
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
     // Fast path
@@ -3509,7 +3505,6 @@ NO_UB_SANITIZE static ani_status Reference_IsUndefined(ani_env *env, ani_ref ref
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
     *result = IsUndefined(ref) ? ANI_TRUE : ANI_FALSE;
@@ -3521,7 +3516,6 @@ NO_UB_SANITIZE static ani_status Reference_IsNullishValue(ani_env *env, ani_ref 
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
     // Fast path
@@ -3540,8 +3534,6 @@ NO_UB_SANITIZE static ani_status Reference_Equals(ani_env *env, ani_ref ref0, an
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref0);
-    CHECK_PTR_ARG(ref1);
     CHECK_PTR_ARG(result);
 
     // Fast path
@@ -3561,8 +3553,6 @@ NO_UB_SANITIZE static ani_status Reference_StrictEquals(ani_env *env, ani_ref re
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref0);
-    CHECK_PTR_ARG(ref1);
     CHECK_PTR_ARG(result);
 
     // Fast path
@@ -5644,7 +5634,6 @@ NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref re
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
@@ -5656,7 +5645,6 @@ NO_UB_SANITIZE static ani_status GlobalReference_Delete(ani_env *env, ani_ref gr
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(gref);
 
     ScopedManagedCodeFix s(env);
     return s.DelGlobalRef(gref);
@@ -5667,7 +5655,6 @@ NO_UB_SANITIZE static ani_status WeakReference_Create(ani_env *env, ani_ref ref,
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
@@ -5799,7 +5786,6 @@ NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(ani_env *env, ani_ref r
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
@@ -6092,8 +6078,6 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(ani_env *env, ani_resol
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(resolver);
-    CHECK_PTR_ARG(resolution);
 
     ScopedManagedCodeFix s(env);
     EtsPromise *promise = s.ToInternalType(resolver);
@@ -6110,8 +6094,6 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Reject(ani_env *env, ani_resolv
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
-    CHECK_PTR_ARG(resolver);
-    CHECK_PTR_ARG(rejection);
 
     ScopedManagedCodeFix s(env);
     EtsPromise *promise = s.ToInternalType(resolver);

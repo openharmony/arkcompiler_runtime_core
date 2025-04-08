@@ -55,21 +55,26 @@ TEST_F(ArrayNewRefTest, NewObjectArrayTest)
     ASSERT_EQ(env_->FindClass("Lstd/core/String;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    ani_ref undefinedRef = nullptr;
-    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
-
     // Test zero length
     ani_array_ref zeroLengthArray = nullptr;
-    ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, undefinedRef, &zeroLengthArray), ANI_OK);
+    ASSERT_EQ(env_->Array_New_Ref(cls, ZERO, nullptr, &zeroLengthArray), ANI_OK);
     ASSERT_NE(zeroLengthArray, nullptr);
     ani_size zeroLengthSize = 0;
     ASSERT_EQ(env_->Array_GetLength(zeroLengthArray, &zeroLengthSize), ANI_OK);
     ASSERT_EQ(zeroLengthSize, ZERO);
 
     ani_array_ref array = nullptr;
+
+    // Test creating array with null initial element
+    ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_5, nullptr, &array), ANI_OK);
+    ASSERT_NE(array, nullptr);
     ani_size size = 0;
+    ASSERT_EQ(env_->Array_GetLength(array, &size), ANI_OK);
+    ASSERT_EQ(size, LENGTH_5);
 
     // Test creating array with undefined initial element
+    ani_ref undefinedRef = nullptr;
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
     ASSERT_EQ(env_->Array_New_Ref(cls, LENGTH_5, undefinedRef, &array), ANI_OK);
     ASSERT_NE(array, nullptr);
     ASSERT_EQ(env_->Array_GetLength(array, &size), ANI_OK);
