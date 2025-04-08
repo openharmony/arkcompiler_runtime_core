@@ -15,11 +15,10 @@
 
 /*---
 desc: Conversion from a union type to a wider union type
-tags: [compile-only, negative]
 ---*/
 
 function main() {
     let u1: string | number | boolean = 666
     let u2: string | number = 666
-    u2 = u1 // compile-time error as type of u1 is not compatible with type of u2
+    u2 = u1
 }

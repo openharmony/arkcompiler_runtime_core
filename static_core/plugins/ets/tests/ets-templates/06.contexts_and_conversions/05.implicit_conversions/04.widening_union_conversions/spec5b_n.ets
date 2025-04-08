@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 /*---
 desc: Conversion from a union type to a wider union type.
+tags: [compile-only, negative]
 ---*/
 
 class Base {}
@@ -22,7 +23,8 @@ class Derived1 extends Base {}
 class Derived2 extends Base {}
 
 function main() {
-    let u4: Base | Derived1 | Derived2 = new Derived2()
+    let u4: Base | Derived1 | Derived2 = new Base()
     let u5: Derived1 | Derived2 = new Derived2()
-    u5 = u4
+    u5 = u4 // compile-time error as Base is not compatible with both
+            // Derived1 and Derived2
 }
