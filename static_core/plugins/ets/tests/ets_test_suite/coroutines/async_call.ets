@@ -184,6 +184,17 @@ async function arm64_large(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int,
     return null;
 }
 
+async function crasher(): Promise<Int> {
+    return await Promise.resolve(1);
+}
+
+// check async/await in global context
+try {
+    let x = crasher();
+} catch (e) {
+    assertTrue(e instanceof InvalidCoroutineOperationError);
+}
+
 function main(): void {
     prepare();
     let p = foo();

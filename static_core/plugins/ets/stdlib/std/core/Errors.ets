@@ -207,6 +207,15 @@ export class CoroutinesLimitExceedError extends Error {
     }
 }
 
+/**
+ * @class Represents the error that is thrown when a requested coroutine operation is invalid in the current context.
+ */
+export class InvalidCoroutineOperationError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("InvalidCoroutineOperationError", message, options)
+    }
+}
+
 export class ArgumentsUnderapplicationError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("ArgumentsUnderapplicationError", message, options)
