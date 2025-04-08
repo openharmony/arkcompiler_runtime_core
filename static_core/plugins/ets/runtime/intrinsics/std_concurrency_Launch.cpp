@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_coroutine.h"
-
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "runtime/include/runtime.h"
 #include "source_lang_enum.h"
 #include "types/ets_array.h"
@@ -92,6 +92,11 @@ EtsJob *EtsMlaunchInternalNative(EtsObject *func, EtsArray *arr)
     if (func == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
+        return nullptr;
+    }
+    if (coro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+                          "Cannot launch coroutines in the current context!");
         return nullptr;
     }
 

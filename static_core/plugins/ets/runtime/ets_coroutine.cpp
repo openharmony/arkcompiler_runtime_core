@@ -188,6 +188,9 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
     }
     if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
         retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
+        if (retObject == nullptr) {
+            LOG(INFO, COROUTINES) << "Coroutine " << GetName() << " completion by a promise retval went wrong";
+        }
     }
     intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject);
 }
