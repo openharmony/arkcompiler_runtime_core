@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "runtime/arch/helpers.h"
 #include "runtime/include/managed_thread.h"
@@ -411,6 +412,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
                                           uint8_t *stackArgs)
 {
     PandaEtsVM *vm = currentCoro->GetPandaVM();
+    auto *coroManager = currentCoro->GetCoroutineManager();
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     Method *impl = etsClassLinker->GetAsyncImplMethod(method, currentCoro);
     if (impl == nullptr) {
@@ -419,6 +421,11 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         return 0;
     }
     ASSERT(!currentCoro->HasPendingException());
+    if (coroManager->IsCoroutineSwitchDisabled()) {
+        ThrowEtsException(currentCoro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+                          "Cannot call async in the current context!");
+        return 0;
+    }
 
     PandaVector<Value> args;
     args.reserve(method->GetNumArgs());
@@ -451,15 +458,12 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         ThrowOutOfMemoryError(currentCoro, "Cannot allocate Promise");
         return 0;
     }
-    auto *coroManager = currentCoro->GetCoroutineManager();
     auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
 
-    auto *cm = currentCoro->GetCoroutineManager();
-
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-    bool launchResult = cm->LaunchImmediately(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER);
+    bool launchResult = coroManager->LaunchImmediately(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER);
     if (UNLIKELY(!launchResult)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
