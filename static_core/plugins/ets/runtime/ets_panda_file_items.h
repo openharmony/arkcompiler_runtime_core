@@ -123,6 +123,7 @@ static constexpr std::string_view LINKER_VERIFICATION_ERROR            = "Lstd/c
 static constexpr std::string_view NULL_POINTER_ERROR                   = "Lstd/core/NullPointerError;";
 static constexpr std::string_view OUT_OF_MEMORY_ERROR                  = "Lstd/core/OutOfMemoryError;";
 static constexpr std::string_view RANGE_ERROR                          = "Lstd/core/RangeError;";
+static constexpr std::string_view TYPE_ERROR                           = "Lescompat/TypeError;";
 // remove or make an Error
 static constexpr std::string_view RUNTIME_EXCEPTION                    = "Lstd/core/RuntimeException;";
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";

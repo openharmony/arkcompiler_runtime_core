@@ -75,6 +75,24 @@ coretypes:
 - managed_class: escompat.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
+- managed_class: escompat.Int8Array
+  mirror_class: ark::ets::EtsEscompatInt8Array
+
+- managed_class: escompat.Int16Array
+  mirror_class: ark::ets::EtsEscompatInt16Array
+
+- managed_class: escompat.Int32Array
+  mirror_class: ark::ets::EtsEscompatInt32Array
+
+- managed_class: escompat.BigInt64Array
+  mirror_class: ark::ets::EtsEscompatBigInt64Array
+
+- managed_class: escompat.Float32Array
+  mirror_class: ark::ets::EtsEscompatFloat32Array
+
+- managed_class: escompat.Float64Array
+  mirror_class: ark::ets::EtsEscompatFloat64Array
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -1660,6 +1678,126 @@ intrinsics:
       ret: f64
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayGet
+
+  - name: Int8ArraySetValues
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int8Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValues
+
+  - name: Int8ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int8Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesWithOffset
+
+  - name: Int16ArraySetValues
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int16Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValues
+
+  - name: Int16ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int16Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesWithOffset
+
+  - name: Int32ArraySetValues
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int32Array]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValues
+
+  - name: Int32ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Int32Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesWithOffset
+
+  - name: BigInt64ArraySetValues
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigInt64Array]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValues
+
+  - name: BigInt64ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigInt64Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesWithOffset
+
+  - name: Float32ArraySetValues
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float32Array]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValues
+
+  - name: Float32ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float32Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesWithOffset
+
+  - name: Float64ArraySetValues
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float64Array]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValues
+
+  - name: Float64ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Float64Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesWithOffset
 
 ########################
 # escompat.taskpool #
