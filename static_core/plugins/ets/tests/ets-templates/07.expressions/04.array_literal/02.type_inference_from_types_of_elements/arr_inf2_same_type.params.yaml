@@ -44,10 +44,10 @@ cases:
 
     # array of strings
     - val: "['a', 'b', 'c']"
-      type: "('a'|'b'|'c')[]"
+      type: "string[]"
 
     - val: "[['a'], ['b'], ['c']]"
-      type: "('a'|'b'|'c')[][]"
+      type: "string[][]"
 
     - decl: |-
           let a: string = 'a'
