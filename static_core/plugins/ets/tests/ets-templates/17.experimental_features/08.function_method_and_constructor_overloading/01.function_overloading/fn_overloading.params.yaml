@@ -43,7 +43,7 @@ cases:
   - { type: 'Byte[]', val: '[new Byte()]', res: 121 }
   - { type: 'Char[]', val: 'new Char[1]', res: 123 }
   - { type: 'Int[]', val: 'new Int[200]', res: 124 }
-  - { type: 'Object[][][]', val: 'new String[1][][]', res: 132 }
+  - { type: 'Object[][][]', val: 'new String[1][1][1]', res: 132 }
   - {
       type: 'Boolean[]',
       val: '[new Boolean(), new Boolean(), new Boolean()]',

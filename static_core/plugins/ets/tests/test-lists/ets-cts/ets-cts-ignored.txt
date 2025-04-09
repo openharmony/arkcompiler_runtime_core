@@ -1273,9 +1273,6 @@
 #15484 Type conversions are not supported in for-of statement
 17.experimental_features/07.statements/01.for-of_type_annotation/for_of_15.ets
 
-#23984
-17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading_30.ets
-
 #15767 Cannot select the right method among overloaded ones
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_3.ets
 
