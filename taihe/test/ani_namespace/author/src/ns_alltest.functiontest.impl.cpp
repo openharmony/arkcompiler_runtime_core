@@ -16,79 +16,94 @@
 
 #include <iostream>
 
-#include "core/array.hpp"
-#include "core/map.hpp"
-#include "core/optional.hpp"
-#include "core/runtime.hpp"
-#include "core/string.hpp"
 #include "ns_alltest.functiontest.Color.proj.0.hpp"
 #include "ns_alltest.functiontest.Data.proj.1.hpp"
+#include "taihe/array.hpp"
+#include "taihe/map.hpp"
+#include "taihe/optional.hpp"
+#include "taihe/runtime.hpp"
+#include "taihe/string.hpp"
 
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
-class testNameSpace {
+int testEnum_ {3};
+int testInter_ {2};
+int testInt_add10_ {10};
+int testInt_add100_ {100};
+int testInt_add5_ {5};
+
+class TestNameSpace {
     string testStr_ {"testNameSpace"};
 
 public:
-    void baseFunctionTest43()
+    void BaseFunctionTest43()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t baseFunctionTest44(int8_t param1)
+
+    int8_t BaseFunctionTest44(int8_t param1)
     {
         // 检查结果是否超出 int8_t 的范围
-        int32_t result = static_cast<int32_t>(param1) + 100;
+        int32_t result = static_cast<int32_t>(param1) + testInt_add100_;
         if (result > INT8_MAX || result < INT8_MIN) {
-            taihe::core::set_error("baseFunctionTest44: result exceeds int8_t range");
+            taihe::set_error("BaseFunctionTest44: result exceeds int8_t range");
         }
         // 返回结果
         return static_cast<int8_t>(result);
     }
-    int16_t baseFunctionTest45(int16_t param1)
+
+    int16_t BaseFunctionTest45(int16_t param1)
     {
         // 检查结果是否超出 int16_t 的范围
-        int32_t result = static_cast<int32_t>(param1) * 100;
+        int32_t result = static_cast<int32_t>(param1) * testInt_add100_;
         if (result > INT16_MAX || result < INT16_MIN) {
-            taihe::core::set_error("baseFunctionTest45: result exceeds int16_t range");
+            taihe::set_error("BaseFunctionTest45: result exceeds int16_t range");
         }
         // 返回结果
         return static_cast<int16_t>(result);
     }
-    int32_t baseFunctionTest46(int32_t param1)
+
+    int32_t BaseFunctionTest46(int32_t param1)
     {
         // 检查结果是否超出 int32_t 的范围
-        int64_t result = static_cast<int64_t>(param1) * 100;
+        int64_t result = static_cast<int64_t>(param1) * testInt_add100_;
         std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
         if (result > INT32_MAX || result < INT32_MIN) {
-            taihe::core::set_error("baseFunctionTest18: result exceeds int32_t range");
+            taihe::set_error("BaseFunctionTest18: result exceeds int32_t range");
         }
         // 返回结果
         return static_cast<int32_t>(result);
     }
-    int64_t baseFunctionTest47(int64_t param1)
+
+    int64_t BaseFunctionTest47(int64_t param1)
     {
         // 检查结果是否超出 int64_t 的范围
-        int64_t result = param1 * 100;
+        int64_t result = param1 * testInt_add100_;
         std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
         if (result > INT64_MAX || result < INT64_MIN) {
-            taihe::core::set_error("baseFunctionTest19: result exceeds int64_t range");
+            taihe::set_error("BaseFunctionTest19: result exceeds int64_t range");
         }
         // 返回结果
         return static_cast<int64_t>(result);
     }
-    float baseFunctionTest48(float param1)
+
+    float BaseFunctionTest48(float param1)
     {
         return param1 - 10;
     }
-    double baseFunctionTest49(double param1)
+
+    double BaseFunctionTest49(double param1)
     {
-        return param1 - 100;
+        return param1 - testInt_add100_;
     }
-    string baseFunctionTest50(string_view param1)
+
+    string BaseFunctionTest50(string_view param1)
     {
-        return std::string(param1) + "baseFunctionTest50";
+        return std::string(param1) + "BaseFunctionTest50";
     }
-    bool baseFunctionTest51(bool param1)
+
+    bool BaseFunctionTest51(bool param1)
     {
         if (param1) {
             return false;
@@ -96,22 +111,24 @@ public:
             return true;
         }
     }
-    array<uint8_t> baseFunctionTest52(array_view<uint8_t> param1)
+
+    array<uint8_t> BaseFunctionTest52(array_view<uint8_t> param1)
     {
         array<uint8_t> result = array<uint8_t>::make(param1.size());
         for (int i = 0; i < param1.size(); i++) {
-            result[i] = param1[i] + 10;
+            result[i] = param1[i] + testInt_add10_;
         }
         return result;
     }
-    optional<int8_t> baseFunctionTest53(optional_view<int8_t> param1)
+
+    optional<int8_t> BaseFunctionTest53(optional_view<int8_t> param1)
     {
         if (param1) {
             // 检查结果是否超出 int8_t 的范围
-            int32_t result = static_cast<int32_t>(*param1) - 100;
+            int32_t result = static_cast<int32_t>(*param1) - testInt_add100_;
             std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
             if (result > INT8_MAX || result < INT8_MIN) {
-                taihe::core::set_error("baseFunctionTest53: result exceeds int8_t range");
+                taihe::set_error("BaseFunctionTest53: result exceeds int8_t range");
             }
             // 返回结果
             return optional<int8_t>::make(result);
@@ -120,14 +137,15 @@ public:
             return optional<int8_t>(nullptr);
         }
     }
-    optional<int32_t> baseFunctionTest54(optional_view<int32_t> param1)
+
+    optional<int32_t> BaseFunctionTest54(optional_view<int32_t> param1)
     {
         if (param1) {
             // 检查结果是否超出 int32_t 的范围
-            int32_t result = static_cast<int32_t>(*param1) - 100;
+            int32_t result = static_cast<int32_t>(*param1) - testInt_add100_;
             std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
             if (result > INT32_MAX || result < INT32_MIN) {
-                taihe::core::set_error("baseFunctionTest54: result exceeds int32_t range");
+                taihe::set_error("BaseFunctionTest54: result exceeds int32_t range");
             }
             // 返回结果
             return optional<int32_t>::make(result);
@@ -136,298 +154,578 @@ public:
             return optional<int32_t>(nullptr);
         }
     }
-    map<int16_t, ::ns_alltest::functiontest::Data> baseFunctionTest55(
+
+    map<int16_t, ::ns_alltest::functiontest::Data> BaseFunctionTest55(
         map_view<int16_t, ::ns_alltest::functiontest::Data> param1)
     {
         map<int16_t, ::ns_alltest::functiontest::Data> m;
-        // for (int i = 0; i < param1.size(); ++i) {
-        //     m.emplace(i, param1);
-        // }
-        // return m;
+        for (auto const &[key, value] : param1) {
+            m.emplace(key, value);
+        }
         return m;
     }
-    int64_t baseFunctionTest56(int32_t param1)
+
+    int64_t BaseFunctionTest56(int32_t param1)
     {
-        int64_t result = static_cast<int64_t>(param1) * 100;
+        int64_t result = static_cast<int64_t>(param1) * testInt_add100_;
         return result;
     }
-    int32_t baseFunctionTest57(int8_t param1)
+
+    int32_t BaseFunctionTest57(int8_t param1)
     {
-        int32_t result = static_cast<int32_t>(param1) * 100;
+        int32_t result = static_cast<int32_t>(param1) * testInt_add100_;
         return result;
     }
+
     string getTestStr()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " " << testStr_ << std::endl;
         return testStr_;
     }
-    ::ns_alltest::functiontest::ErrorResponse baseFunctionTest58(bool param1)
+
+    ::ns_alltest::functiontest::ErrorResponse BaseFunctionTest58(bool param1)
     {
         if (param1) {
             return {param1, 10000, "test58"};
         } else {
-            return {false, 100, std::string("test581")};
+            return {false, static_cast<int16_t>(testInt_add100_), std::string("test581")};
         }
     }
 };
 
-class testInterfacePerformance1 {
+class TestInterfacePerformance1 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance2 {
+
+class TestInterfacePerformance2 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance3 {
+
+class TestInterfacePerformance3 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance4 {
+
+class TestInterfacePerformance4 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance5 {
+
+class TestInterfacePerformance5 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance6 {
+
+class TestInterfacePerformance6 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance7 {
+
+class TestInterfacePerformance7 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance8 {
+
+class TestInterfacePerformance8 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance9 {
+
+class TestInterfacePerformance9 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance10 {
+
+class TestInterfacePerformance10 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance11 {
+
+class TestInterfacePerformance11 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance12 {
+
+class TestInterfacePerformance12 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance13 {
+
+class TestInterfacePerformance13 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance14 {
+
+class TestInterfacePerformance14 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance15 {
+
+class TestInterfacePerformance15 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance16 {
+
+class TestInterfacePerformance16 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance17 {
+
+class TestInterfacePerformance17 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance18 {
+
+class TestInterfacePerformance18 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance19 {
+
+class TestInterfacePerformance19 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-class testInterfacePerformance20 {
+
+class TestInterfacePerformance20 {
+    int testInt_add5_ {5};
+    int testInt_add10_ {10};
+
 public:
-    void basePerformanceFunctionTest1()
+    void BasePerformanceFunctionTest1()
     {
         std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
     }
-    int8_t basePerformanceFunctionTest2(int8_t param1)
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
     {
-        return (param1 + 5) / 10;
+        return (param1 + testInt_add5_) / testInt_add10_;
     }
 };
-void baseFunctionTest1()
+
+class TestInterfacePerformance21 {
+public:
+    TestInterfacePerformance21()
+    {
+        // Don't forget to implement the constructor.
+    }
+
+    int32_t geti32_test()
+    {
+        return INT32_MAX;
+    }
+
+    ::ns_alltest::functiontest::Data getStruct_test()
+    {
+        return {"testStruct", false, INT32_MIN};
+    }
+
+    int8_t BasePerformanceFunctionTest2(int8_t param1)
+    {
+        // 检查结果是否超出 int8_t 的范围
+        int32_t result = static_cast<int32_t>(param1) + testInt_add100_;
+        if (result > INT8_MAX || result < INT8_MIN) {
+            taihe::set_error("BasePerformanceFunctionTest2: result exceeds int8_t range");
+        }
+        // 返回结果
+        return static_cast<int8_t>(result);
+    }
+
+    int8_t geti8_test_attribute()
+    {
+        return INT8_MAX;
+    }
+
+    int16_t geti16_test_attribute()
+    {
+        return INT16_MAX;
+    }
+
+    int32_t geti32_test_attribute()
+    {
+        return INT32_MAX;
+    }
+
+    int64_t geti64_test_attribute()
+    {
+        return INT64_MAX;
+    }
+
+    float getf32_test_attribute()
+    {
+        return 3.14;
+    }
+
+    double getf64_test_attribute()
+    {
+        return -1.23;
+    }
+
+    string getStr_test_attribute()
+    {
+        return "TESTSTR";
+    }
+
+    bool getbool_test_attribute()
+    {
+        return false;
+    }
+
+    array<uint8_t> get_ArrayBuffer_test_attribute()
+    {
+        array<uint8_t> result = array<uint8_t>::make(testInt_add10_);
+        std::fill(result.begin(), result.end(), testInt_add10_);
+        return result;
+    }
+
+    optional<int32_t> getOptional_test_attribute()
+    {
+        int32_t result = 1000 + testInt_add10_;
+        if (result > INT32_MAX || result < INT32_MIN) {
+            taihe::set_error("getOptional_test_attribute: result exceeds int32_t range");
+        }
+        return optional<int32_t>::make(result);
+    }
+
+    map<int32_t, ::ns_alltest::functiontest::Data> getRecord_test_attribute()
+    {
+        map<int32_t, ::ns_alltest::functiontest::Data> result;
+        ::ns_alltest::functiontest::Data p1 {
+            .data1 = "one",
+            .data2 = true,
+            .data3 = 100,
+        };
+        result.emplace(100, p1);
+        ::ns_alltest::functiontest::Data p2 {
+            .data1 = "two",
+            .data2 = false,
+            .data3 = 101,
+        };
+        result.emplace(101, p2);
+        return result;
+    }
+
+    ::ns_alltest::functiontest::TestUnionName getUnion_test_attribute()
+    {
+        return ::ns_alltest::functiontest::TestUnionName::make_value1(testInt_add100_);
+    }
+
+    array<bool> getArray_test_attribute()
+    {
+        return array<bool>::make(1, true);
+    }
+
+    ::ns_alltest::functiontest::Color getEnum_test_attribute()
+    {
+        return ::ns_alltest::functiontest::Color::key_t::GREEN;
+    }
+};
+
+class IbaseInterface1 {
+public:
+    IbaseInterface1()
+    {
+        // Don't forget to implement the constructor.
+    }
+
+    int32_t BaseTest()
+    {
+        return INT32_MIN;
+    }
+};
+
+class IbaseInterface2 {
+public:
+    IbaseInterface2()
+    {
+        // Don't forget to implement the constructor.
+    }
+
+    string BaseTest1()
+    {
+        return "TestInterface";
+    }
+
+    int32_t BaseTest()
+    {
+        return INT32_MIN;
+    }
+};
+
+class IbaseInterface3 {
+public:
+    IbaseInterface3()
+    {
+        // Don't forget to implement the constructor.
+    }
+
+    bool BaseTest2()
+    {
+        return true;
+    }
+
+    int32_t BaseTest()
+    {
+        return INT32_MAX;
+    }
+};
+
+void BaseFunctionTest1()
 {
     std::cout << "NameSpaceImpl: " << __func__ << " is true " << std::endl;
 }
-void baseFunctionTest2(int8_t param1)
+
+void BaseFunctionTest2(int8_t param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << (int)param1 << std::endl;
 }
-void baseFunctionTest3(int16_t param1)
+
+void BaseFunctionTest3(int16_t param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
-void baseFunctionTest4(int32_t param1)
+
+void BaseFunctionTest4(int32_t param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
-void baseFunctionTest5(int64_t param1)
+
+void BaseFunctionTest5(int64_t param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
-void baseFunctionTest6(float param1)
+
+void BaseFunctionTest6(float param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
-void baseFunctionTest7(double param1)
+
+void BaseFunctionTest7(double param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
-void baseFunctionTest8(string_view param1)
+
+void BaseFunctionTest8(string_view param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
-void baseFunctionTest9(bool param1)
+
+void BaseFunctionTest9(bool param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
-void baseFunctionTest10(array_view<int8_t> param1)
+
+void BaseFunctionTest10(array_view<int8_t> param1)
 {
     // 输出 param1 的内容
     std::cout << "NameSpaceImpl: " << __func__ << " param1 ";
@@ -436,7 +734,8 @@ void baseFunctionTest10(array_view<int8_t> param1)
     }
     std::cout << std::endl;
 }
-void baseFunctionTest11(array_view<int16_t> param1)
+
+void BaseFunctionTest11(array_view<int16_t> param1)
 {
     // 输出 param1 的内容
     std::cout << "NameSpaceImpl: " << __func__ << " param1 ";
@@ -445,7 +744,8 @@ void baseFunctionTest11(array_view<int16_t> param1)
     }
     std::cout << std::endl;
 }
-void baseFunctionTest12(optional_view<int16_t> param1)
+
+void BaseFunctionTest12(optional_view<int16_t> param1)
 {
     if (param1) {
         std::cout << "NameSpaceImpl: " << __func__ << " param1 " << *param1 << std::endl;
@@ -453,7 +753,8 @@ void baseFunctionTest12(optional_view<int16_t> param1)
         std::cout << "NameSpaceImpl: " << __func__ << " param1 is null" << std::endl;
     }
 }
-void baseFunctionTest13(optional_view<int64_t> param1)
+
+void BaseFunctionTest13(optional_view<int64_t> param1)
 {
     if (param1) {
         std::cout << "NameSpaceImpl: " << __func__ << " param1 " << *param1 << std::endl;
@@ -461,7 +762,8 @@ void baseFunctionTest13(optional_view<int64_t> param1)
         std::cout << "NameSpaceImpl: " << __func__ << " param1 is null" << std::endl;
     }
 }
-void baseFunctionTest14(array_view<uint8_t> param1)
+
+void BaseFunctionTest14(array_view<uint8_t> param1)
 {
     // 输出 param1 的内容
     std::cout << "NameSpaceImpl: " << __func__ << " param1 ";
@@ -470,76 +772,82 @@ void baseFunctionTest14(array_view<uint8_t> param1)
     }
     std::cout << std::endl;
 }
-void baseFunctionTest15(map_view<string, int32_t> param1)
+
+void BaseFunctionTest15(map_view<string, int32_t> param1)
 {
-    // std::cout << "NameSpaceImpl: " << __func__ << " param1 contents:" <<
-    // std::endl;
-    // // 遍历 map_view 并输出 key 和 value
-    // for (const auto& pair : param1) {
-    //     std::cout << "  Key: " << pair.first << ", Value: " << pair.second <<
-    //     std::endl;
-    // }
-    std::cout << "NameSpaceImpl: " << __func__ << " param1 is null" << std::endl;
+    std::cout << "NameSpaceImpl: " << __func__ << " param1 contents:" << std::endl;
+    // 遍历 map_view 并输出 key 和 value
+    for (auto const &pair : param1) {
+        std::cout << "  Key: " << pair.first << ", Value: " << pair.second << std::endl;
+    }
 }
-int8_t baseFunctionTest16(int8_t param1)
+
+int8_t BaseFunctionTest16(int8_t param1)
 {
     // 检查结果是否超出 int8_t 的范围
-    int32_t result = param1 + 10;
+    int32_t result = param1 + testInt_add10_;
     if (result > INT8_MAX || result < INT8_MIN) {
-        taihe::core::set_error("baseFunctionTest16: result exceeds int8_t range");
+        taihe::set_error("BaseFunctionTest16: result exceeds int8_t range");
     }
     // 返回结果
     return static_cast<int8_t>(result);
 }
-int16_t baseFunctionTest17(int16_t param1)
+
+int16_t BaseFunctionTest17(int16_t param1)
 {
     // 检查结果是否超出 int16_t 的范围
-    int32_t result = param1 * 10;
+    int32_t result = param1 * testInt_add10_;
     if (result > INT16_MAX || result < INT16_MIN) {
-        taihe::core::set_error("baseFunctionTest17: result exceeds int16_t range");
+        taihe::set_error("BaseFunctionTest17: result exceeds int16_t range");
     }
     // 返回结果
     return static_cast<int16_t>(result);
 }
-int32_t baseFunctionTest18(int32_t param1)
+
+int32_t BaseFunctionTest18(int32_t param1)
 {
     // 检查结果是否超出 int32_t 的范围
-    int64_t result = static_cast<int64_t>(param1) * 100;
+    int64_t result = static_cast<int64_t>(param1) * testInt_add100_;
     std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
     if (result > INT32_MAX || result < INT32_MIN) {
-        taihe::core::set_error("baseFunctionTest18: result exceeds int32_t range");
+        taihe::set_error("BaseFunctionTest18: result exceeds int32_t range");
     }
     // 返回结果
     return static_cast<int32_t>(result);
 }
-int64_t baseFunctionTest19(int64_t param1)
+
+int64_t BaseFunctionTest19(int64_t param1)
 {
     // 检查结果是否超出 int64_t 的范围
-    int64_t result = param1 * 10;
+    int64_t result = param1 * testInt_add10_;
     std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
     if (result > INT64_MAX || result < INT64_MIN) {
-        taihe::core::set_error("baseFunctionTest19: result exceeds int64_t range");
+        taihe::set_error("BaseFunctionTest19: result exceeds int64_t range");
     }
     // 返回结果
     return static_cast<int64_t>(result);
 }
-float baseFunctionTest20(float param1)
+
+float BaseFunctionTest20(float param1)
 {
-    return param1 + 100;
+    return param1 + testInt_add100_;
 }
-double baseFunctionTest21(double param1)
+
+double BaseFunctionTest21(double param1)
 {
     return param1 + 1.01;
 }
-string baseFunctionTest22(string_view param1)
+
+string BaseFunctionTest22(string_view param1)
 {
-    if (param1 == "baseFunctionTest22") {
+    if (param1 == "BaseFunctionTest22") {
         return std::string(param1) + "hello ani";
     } else {
         return param1;
     }
 }
-bool baseFunctionTest23(bool param1)
+
+bool BaseFunctionTest23(bool param1)
 {
     if (param1) {
         return false;
@@ -547,32 +855,34 @@ bool baseFunctionTest23(bool param1)
         return true;
     }
 }
-array<int8_t> baseFunctionTest24(array_view<int8_t> param1)
+
+array<int8_t> BaseFunctionTest24(array_view<int8_t> param1)
 {
     array<int8_t> result = array<int8_t>::make(param1.size());
     for (int i = 0; i < param1.size(); i++) {
-        result[i] = param1[i] * 2;
+        result[i] = param1[i] * testInter_;
     }
     return result;
 }
-array<int16_t> baseFunctionTest25(array_view<int16_t> param1)
+
+array<int16_t> BaseFunctionTest25(array_view<int16_t> param1)
 {
     array<int16_t> result = array<int16_t>::make(param1.size());
     for (int i = 0; i < param1.size(); i++) {
-        result[i] = param1[i] + 2;
+        result[i] = param1[i] + testInter_;
     }
     return result;
 }
-optional<int16_t> baseFunctionTest26(optional_view<int16_t> param1)
+
+optional<int16_t> BaseFunctionTest26(optional_view<int16_t> param1)
 {
     if (param1) {
         // 检查结果是否超出 int16_t 的范围
-        // int32_t result = param1+10;
         std::cout << "NameSpaceImpl: " << __func__ << " param1 " << *param1 << std::endl;
-        int32_t result = static_cast<int32_t>(*param1) + 10;
+        int32_t result = static_cast<int32_t>(*param1) + testInt_add10_;
         std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
         if (result > INT16_MAX || result < INT16_MIN) {
-            taihe::core::set_error("baseFunctionTest26: result exceeds int16_t range");
+            taihe::set_error("BaseFunctionTest26: result exceeds int16_t range");
         }
         // 返回结果
         return optional<int16_t>::make(result);
@@ -581,14 +891,15 @@ optional<int16_t> baseFunctionTest26(optional_view<int16_t> param1)
         return optional<int16_t>(nullptr);
     }
 }
-optional<int64_t> baseFunctionTest27(optional_view<int64_t> param1)
+
+optional<int64_t> BaseFunctionTest27(optional_view<int64_t> param1)
 {
     if (param1) {
         // 检查结果是否超出 int64_t 的范围
         std::cout << "NameSpaceImpl: " << __func__ << " param1 " << *param1 << std::endl;
-        int64_t result = *param1 + 10;
+        int64_t result = *param1 + testInt_add10_;
         if (result > INT64_MAX || result < INT64_MIN) {
-            taihe::core::set_error("baseFunctionTest27: result exceeds int16_t range");
+            taihe::set_error("BaseFunctionTest27: result exceeds int16_t range");
         }
         // 返回结果
         return optional<int64_t>::make(result);
@@ -597,35 +908,36 @@ optional<int64_t> baseFunctionTest27(optional_view<int64_t> param1)
         return optional<int64_t>(nullptr);
     }
 }
-array<uint8_t> baseFunctionTest28(array_view<uint8_t> param1)
+
+array<uint8_t> BaseFunctionTest28(array_view<uint8_t> param1)
 {
     array<uint8_t> result = array<uint8_t>::make(param1.size());
     for (int i = 0; i < param1.size(); i++) {
-        result[i] = param1[i] * 10;
+        result[i] = param1[i] * testInt_add10_;
     }
     return result;
 }
-map<string, int32_t> baseFunctionTest29(map_view<string, int32_t> param1)
+
+map<string, int32_t> BaseFunctionTest29(map_view<string, int32_t> param1)
 {
     map<string, int32_t> m;
     for (int i = 0; i < param1.size(); ++i) {
-        m.emplace("test" + std::to_string(i), 10 + i);
+        m.emplace("test" + std::to_string(i), testInt_add10_ + i);
     }
     return m;
 }
 
-::ns_alltest::functiontest::Color baseFunctionTest30(::ns_alltest::functiontest::Color param1)
+::ns_alltest::functiontest::Color BaseFunctionTest30(::ns_alltest::functiontest::Color param1)
 {
-    return (::ns_alltest::functiontest::Color::key_t)(((int)param1.get_key() + 1) % 3);
+    return (::ns_alltest::functiontest::Color::key_t)(((int)param1.get_key() + 1) % testEnum_);
 }
 
-void baseFunctionTest31(::ns_alltest::functiontest::Color param1)
+void BaseFunctionTest31(::ns_alltest::functiontest::Color param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << std::endl;
 }
 
-int16_t baseFunctionTest32(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5, double param6,
-                           string_view param7, bool param8, array_view<int16_t> param9, array_view<int64_t> param10)
+int16_t BaseFunctionTest32(int8_t param1, int16_t param2, int32_t param3, int64_t param4, bool param8)
 {
     if (param8) {
         return param2;
@@ -633,8 +945,8 @@ int16_t baseFunctionTest32(int8_t param1, int16_t param2, int32_t param3, int64_
         return static_cast<int16_t>(param1);
     }
 }
-int32_t baseFunctionTest33(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5, double param6,
-                           string_view param7, bool param8, array_view<int8_t> param9, array_view<int32_t> param10)
+
+int32_t BaseFunctionTest33(int8_t param1, int16_t param2, int32_t param3, int64_t param4, bool param8)
 {
     if (param8) {
         return param3;
@@ -642,8 +954,8 @@ int32_t baseFunctionTest33(int8_t param1, int16_t param2, int32_t param3, int64_
         return static_cast<int32_t>(param2);
     }
 }
-int64_t baseFunctionTest34(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5, double param6,
-                           string_view param7, bool param8, array_view<string> param9, array_view<int64_t> param10)
+
+int64_t BaseFunctionTest34(int8_t param1, int16_t param2, int32_t param3, int64_t param4, bool param8)
 {
     if (param8) {
         return param4;
@@ -651,8 +963,8 @@ int64_t baseFunctionTest34(int8_t param1, int16_t param2, int32_t param3, int64_
         return static_cast<int64_t>(param2);
     }
 }
-int8_t baseFunctionTest35(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5, double param6,
-                          string_view param7, bool param8, array_view<bool> param9, array_view<int64_t> param10)
+
+int8_t BaseFunctionTest35(int8_t param1, int16_t param2, int32_t param3, int64_t param4, bool param8)
 {
     if (param8) {
         return static_cast<int8_t>(param1);
@@ -660,14 +972,14 @@ int8_t baseFunctionTest35(int8_t param1, int16_t param2, int32_t param3, int64_t
         return static_cast<int8_t>(param2);
     }
 }
-array<int32_t> baseFunctionTest36(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5,
-                                  double param6, string_view param7, bool param8, array_view<int8_t> param9,
+
+array<int32_t> BaseFunctionTest36(int8_t param1, int16_t param2, bool param8, array_view<int8_t> param9,
                                   array_view<int64_t> param10)
 {
     if (param8) {
         array<int32_t> result = array<int32_t>::make(param9.size());
         for (int i = 0; i < param9.size(); i++) {
-            result[i] = param9[i] + param1 + param2 + param3;
+            result[i] = param9[i] + param1 + param2;
         }
         return result;
     } else {
@@ -678,8 +990,8 @@ array<int32_t> baseFunctionTest36(int8_t param1, int16_t param2, int32_t param3,
         return result;
     }
 }
-array<int64_t> baseFunctionTest37(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5,
-                                  double param6, string_view param7, bool param8, array_view<int32_t> param9,
+
+array<int64_t> BaseFunctionTest37(int8_t param1, int16_t param2, int32_t param3, bool param8,
                                   array_view<int64_t> param10)
 {
     if (param8) {
@@ -691,219 +1003,278 @@ array<int64_t> baseFunctionTest37(int8_t param1, int16_t param2, int32_t param3,
     } else {
         array<int64_t> result = array<int64_t>::make(param10.size());
         for (int i = 0; i < param10.size(); i++) {
-            result[i] = param10[i] * 10;
+            result[i] = param10[i] * testInt_add10_;
         }
         return result;
     }
 }
-string baseFunctionTest38(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5, double param6,
-                          string_view param7, bool param8, array_view<int8_t> param9, array_view<int16_t> param10)
+
+string BaseFunctionTest38(int8_t param1, string_view param7, bool param8, array_view<int8_t> param9,
+                          array_view<int16_t> param10)
 {
     if (param8) {
-        return std::string(param7) + std::to_string(param1) + std::to_string(param2) + std::to_string(param3) +
-               std::to_string(param4);
+        return std::string(param7) + std::to_string(param1);
     } else {
         return std::string(param7) + std::to_string(param9[0]) + std::to_string(param10[0]);
     }
 }
-bool baseFunctionTest39(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5, double param6,
-                        string_view param7, bool param8, array_view<bool> param9, array_view<int32_t> param10)
+
+bool BaseFunctionTest39(int16_t param2, string_view param7, bool param8, array_view<bool> param9,
+                        array_view<int32_t> param10)
 {
-    if (param2 == 100) {
+    if (param2 == testInt_add100_) {
         return param8;
     } else {
         return false;
     }
 }
-array<int8_t> baseFunctionTest40(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5,
-                                 double param6, string_view param7, bool param8, array_view<int8_t> param9,
+
+array<int8_t> BaseFunctionTest40(double param6, string_view param7, bool param8, array_view<int8_t> param9,
                                  array_view<uint8_t> param10)
 {
     if (param8) {
         array<int8_t> result = array<int8_t>::make(param9.size());
         for (int i = 0; i < param9.size(); i++) {
-            result[i] = param9[i] * 2;
+            result[i] = param9[i] * testInter_;
         }
         return result;
     } else {
         array<int8_t> result = array<int8_t>::make(param9.size());
         for (int i = 0; i < param9.size(); i++) {
-            result[i] = param9[i] + 10;
+            result[i] = param9[i] + testInt_add10_;
         }
         return result;
     }
 }
-void baseFunctionTest41(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5, double param6,
-                        string_view param7, bool param8, array_view<int16_t> param9, array_view<int64_t> param10)
+
+void BaseFunctionTest41(int8_t param1, int16_t param2, int32_t param3, int64_t param4, float param5)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << " param2 " << param2 << " param3 " << param3
               << " param4 " << param4 << std::endl;
 }
-int32_t baseFunctionTest42_int(int32_t param1, int16_t param2)
+
+int32_t BaseFunctionTest42_int(int32_t param1, int16_t param2)
 {
     std::cout << "NameSpaceImpl: " << __func__ << " param1 " << param1 << " param2 " << param2 << std::endl;
     int64_t result = static_cast<int64_t>(param1) + static_cast<int64_t>(param2);
     std::cout << "NameSpaceImpl: " << __func__ << " result " << result << std::endl;
     if (result > INT32_MAX || result < INT32_MIN) {
-        taihe::core::set_error("baseFunctionTest42_int: result exceeds int32_t range");
+        taihe::set_error("BaseFunctionTest42_int: result exceeds int32_t range");
     }
     // 返回结果
     return static_cast<int32_t>(result);
 }
-int32_t baseFunctionTest42_container(optional_view<int32_t> param1, map_view<string, int32_t> param2)
+
+int32_t BaseFunctionTest42_container(optional_view<int32_t> param1, map_view<string, int32_t> param2)
 {
     if (param1) {
-        return *param1 + 10;
+        return *param1 + testInt_add10_;
     } else {
         std::cout << "NameSpaceImpl: " << __func__ << " param1 is null" << std::endl;
         return INT32_MIN;
     }
 }
-int32_t baseFunctionTest42_void()
+
+int32_t BaseFunctionTest42_void()
 {
     return INT32_MAX;
 }
 
-void baseFunctionTest42_struct(::ns_alltest::functiontest::Data const &param1)
+void BaseFunctionTest42_struct(::ns_alltest::functiontest::Data const &param1)
 {
     std::cout << "NameSpaceImpl: " << __func__ << "data1: " << param1.data1 << std::endl;
     std::cout << "NameSpaceImpl: " << __func__ << "data2: " << param1.data2 << std::endl;
     std::cout << "NameSpaceImpl: " << __func__ << "data3: " << param1.data3 << std::endl;
 }
 
-::ns_alltest::functiontest::testNameSpace get_interface_NameSpace()
+void BaseFunctionTest59(map_view<string, string> param1)
 {
-    return make_holder<testNameSpace, ::ns_alltest::functiontest::testNameSpace>();
+    std::cout << "Using begin() and end() for traversal:" << std::endl;
+    for (auto it = param1.begin(); it != param1.end(); ++it) {
+        auto const &[key, value] = *it;
+        std::cout << "Key: " << key << ", Value: " << value << std::endl;
+    }
 }
 
-::ns_alltest::functiontest::testInterfacePerformance1 get_interface_performance1()
+bool BaseFunctionTest60(map_view<int64_t, bool> param1)
 {
-    return make_holder<testInterfacePerformance1, ::ns_alltest::functiontest::testInterfacePerformance1>();
+    for (auto const &pair : param1) {
+        if (pair.first <= 0) {
+            return false;
+        }
+    }
+    return true;
 }
-::ns_alltest::functiontest::testInterfacePerformance2 get_interface_performance2()
+
+::ns_alltest::functiontest::TestNameSpace get_interface_NameSpace()
 {
-    return make_holder<testInterfacePerformance2, ::ns_alltest::functiontest::testInterfacePerformance2>();
+    return make_holder<TestNameSpace, ::ns_alltest::functiontest::TestNameSpace>();
 }
-::ns_alltest::functiontest::testInterfacePerformance3 get_interface_performance3()
+
+::ns_alltest::functiontest::TestInterfacePerformance1 get_interface_performance1()
 {
-    return make_holder<testInterfacePerformance3, ::ns_alltest::functiontest::testInterfacePerformance3>();
+    return make_holder<TestInterfacePerformance1, ::ns_alltest::functiontest::TestInterfacePerformance1>();
 }
-::ns_alltest::functiontest::testInterfacePerformance4 get_interface_performance4()
+
+::ns_alltest::functiontest::TestInterfacePerformance2 get_interface_performance2()
 {
-    return make_holder<testInterfacePerformance4, ::ns_alltest::functiontest::testInterfacePerformance4>();
+    return make_holder<TestInterfacePerformance2, ::ns_alltest::functiontest::TestInterfacePerformance2>();
 }
-::ns_alltest::functiontest::testInterfacePerformance5 get_interface_performance5()
+
+::ns_alltest::functiontest::TestInterfacePerformance3 get_interface_performance3()
 {
-    return make_holder<testInterfacePerformance5, ::ns_alltest::functiontest::testInterfacePerformance5>();
+    return make_holder<TestInterfacePerformance3, ::ns_alltest::functiontest::TestInterfacePerformance3>();
 }
-::ns_alltest::functiontest::testInterfacePerformance6 get_interface_performance6()
+
+::ns_alltest::functiontest::TestInterfacePerformance4 get_interface_performance4()
 {
-    return make_holder<testInterfacePerformance6, ::ns_alltest::functiontest::testInterfacePerformance6>();
+    return make_holder<TestInterfacePerformance4, ::ns_alltest::functiontest::TestInterfacePerformance4>();
 }
-::ns_alltest::functiontest::testInterfacePerformance7 get_interface_performance7()
+
+::ns_alltest::functiontest::TestInterfacePerformance5 get_interface_performance5()
 {
-    return make_holder<testInterfacePerformance7, ::ns_alltest::functiontest::testInterfacePerformance7>();
+    return make_holder<TestInterfacePerformance5, ::ns_alltest::functiontest::TestInterfacePerformance5>();
 }
-::ns_alltest::functiontest::testInterfacePerformance8 get_interface_performance8()
+
+::ns_alltest::functiontest::TestInterfacePerformance6 get_interface_performance6()
 {
-    return make_holder<testInterfacePerformance8, ::ns_alltest::functiontest::testInterfacePerformance8>();
+    return make_holder<TestInterfacePerformance6, ::ns_alltest::functiontest::TestInterfacePerformance6>();
 }
-::ns_alltest::functiontest::testInterfacePerformance9 get_interface_performance9()
+
+::ns_alltest::functiontest::TestInterfacePerformance7 get_interface_performance7()
 {
-    return make_holder<testInterfacePerformance9, ::ns_alltest::functiontest::testInterfacePerformance9>();
+    return make_holder<TestInterfacePerformance7, ::ns_alltest::functiontest::TestInterfacePerformance7>();
 }
-::ns_alltest::functiontest::testInterfacePerformance10 get_interface_performance10()
+
+::ns_alltest::functiontest::TestInterfacePerformance8 get_interface_performance8()
 {
-    return make_holder<testInterfacePerformance10, ::ns_alltest::functiontest::testInterfacePerformance10>();
+    return make_holder<TestInterfacePerformance8, ::ns_alltest::functiontest::TestInterfacePerformance8>();
 }
-::ns_alltest::functiontest::testInterfacePerformance11 get_interface_performance11()
+
+::ns_alltest::functiontest::TestInterfacePerformance9 get_interface_performance9()
 {
-    return make_holder<testInterfacePerformance11, ::ns_alltest::functiontest::testInterfacePerformance11>();
+    return make_holder<TestInterfacePerformance9, ::ns_alltest::functiontest::TestInterfacePerformance9>();
 }
-::ns_alltest::functiontest::testInterfacePerformance12 get_interface_performance12()
+
+::ns_alltest::functiontest::TestInterfacePerformance10 get_interface_performance10()
 {
-    return make_holder<testInterfacePerformance12, ::ns_alltest::functiontest::testInterfacePerformance12>();
+    return make_holder<TestInterfacePerformance10, ::ns_alltest::functiontest::TestInterfacePerformance10>();
 }
-::ns_alltest::functiontest::testInterfacePerformance13 get_interface_performance13()
+
+::ns_alltest::functiontest::TestInterfacePerformance11 get_interface_performance11()
 {
-    return make_holder<testInterfacePerformance13, ::ns_alltest::functiontest::testInterfacePerformance13>();
+    return make_holder<TestInterfacePerformance11, ::ns_alltest::functiontest::TestInterfacePerformance11>();
 }
-::ns_alltest::functiontest::testInterfacePerformance14 get_interface_performance14()
+
+::ns_alltest::functiontest::TestInterfacePerformance12 get_interface_performance12()
 {
-    return make_holder<testInterfacePerformance14, ::ns_alltest::functiontest::testInterfacePerformance14>();
+    return make_holder<TestInterfacePerformance12, ::ns_alltest::functiontest::TestInterfacePerformance12>();
 }
-::ns_alltest::functiontest::testInterfacePerformance15 get_interface_performance15()
+
+::ns_alltest::functiontest::TestInterfacePerformance13 get_interface_performance13()
 {
-    return make_holder<testInterfacePerformance15, ::ns_alltest::functiontest::testInterfacePerformance15>();
+    return make_holder<TestInterfacePerformance13, ::ns_alltest::functiontest::TestInterfacePerformance13>();
 }
-::ns_alltest::functiontest::testInterfacePerformance16 get_interface_performance16()
+
+::ns_alltest::functiontest::TestInterfacePerformance14 get_interface_performance14()
 {
-    return make_holder<testInterfacePerformance16, ::ns_alltest::functiontest::testInterfacePerformance16>();
+    return make_holder<TestInterfacePerformance14, ::ns_alltest::functiontest::TestInterfacePerformance14>();
 }
-::ns_alltest::functiontest::testInterfacePerformance17 get_interface_performance17()
+
+::ns_alltest::functiontest::TestInterfacePerformance15 get_interface_performance15()
 {
-    return make_holder<testInterfacePerformance17, ::ns_alltest::functiontest::testInterfacePerformance17>();
+    return make_holder<TestInterfacePerformance15, ::ns_alltest::functiontest::TestInterfacePerformance15>();
 }
-::ns_alltest::functiontest::testInterfacePerformance18 get_interface_performance18()
+
+::ns_alltest::functiontest::TestInterfacePerformance16 get_interface_performance16()
 {
-    return make_holder<testInterfacePerformance18, ::ns_alltest::functiontest::testInterfacePerformance18>();
+    return make_holder<TestInterfacePerformance16, ::ns_alltest::functiontest::TestInterfacePerformance16>();
 }
-::ns_alltest::functiontest::testInterfacePerformance19 get_interface_performance19()
+
+::ns_alltest::functiontest::TestInterfacePerformance17 get_interface_performance17()
 {
-    return make_holder<testInterfacePerformance19, ::ns_alltest::functiontest::testInterfacePerformance19>();
+    return make_holder<TestInterfacePerformance17, ::ns_alltest::functiontest::TestInterfacePerformance17>();
 }
-::ns_alltest::functiontest::testInterfacePerformance20 get_interface_performance20()
+
+::ns_alltest::functiontest::TestInterfacePerformance18 get_interface_performance18()
 {
-    return make_holder<testInterfacePerformance20, ::ns_alltest::functiontest::testInterfacePerformance20>();
+    return make_holder<TestInterfacePerformance18, ::ns_alltest::functiontest::TestInterfacePerformance18>();
+}
+
+::ns_alltest::functiontest::TestInterfacePerformance19 get_interface_performance19()
+{
+    return make_holder<TestInterfacePerformance19, ::ns_alltest::functiontest::TestInterfacePerformance19>();
+}
+
+::ns_alltest::functiontest::TestInterfacePerformance20 get_interface_performance20()
+{
+    return make_holder<TestInterfacePerformance20, ::ns_alltest::functiontest::TestInterfacePerformance20>();
+}
+
+::ns_alltest::functiontest::TestInterfacePerformance21 get_interface_performance21()
+{
+    return make_holder<TestInterfacePerformance21, ::ns_alltest::functiontest::TestInterfacePerformance21>();
+}
+
+::ns_alltest::functiontest::IbaseInterface2 get_interface_IbaseInterface2()
+{
+    return make_holder<IbaseInterface2, ::ns_alltest::functiontest::IbaseInterface2>();
+}
+
+::ns_alltest::functiontest::IbaseInterface3 get_interface_IbaseInterface3()
+{
+    return make_holder<IbaseInterface3, ::ns_alltest::functiontest::IbaseInterface3>();
 }
 
 }  // namespace
 
-TH_EXPORT_CPP_API_baseFunctionTest1(baseFunctionTest1);
-TH_EXPORT_CPP_API_baseFunctionTest2(baseFunctionTest2);
-TH_EXPORT_CPP_API_baseFunctionTest3(baseFunctionTest3);
-TH_EXPORT_CPP_API_baseFunctionTest4(baseFunctionTest4);
-TH_EXPORT_CPP_API_baseFunctionTest5(baseFunctionTest5);
-TH_EXPORT_CPP_API_baseFunctionTest6(baseFunctionTest6);
-TH_EXPORT_CPP_API_baseFunctionTest7(baseFunctionTest7);
-TH_EXPORT_CPP_API_baseFunctionTest8(baseFunctionTest8);
-TH_EXPORT_CPP_API_baseFunctionTest9(baseFunctionTest9);
-TH_EXPORT_CPP_API_baseFunctionTest10(baseFunctionTest10);
-TH_EXPORT_CPP_API_baseFunctionTest11(baseFunctionTest11);
-TH_EXPORT_CPP_API_baseFunctionTest12(baseFunctionTest12);
-TH_EXPORT_CPP_API_baseFunctionTest13(baseFunctionTest13);
-TH_EXPORT_CPP_API_baseFunctionTest14(baseFunctionTest14);
-TH_EXPORT_CPP_API_baseFunctionTest15(baseFunctionTest15);
-TH_EXPORT_CPP_API_baseFunctionTest16(baseFunctionTest16);
-TH_EXPORT_CPP_API_baseFunctionTest17(baseFunctionTest17);
-TH_EXPORT_CPP_API_baseFunctionTest18(baseFunctionTest18);
-TH_EXPORT_CPP_API_baseFunctionTest19(baseFunctionTest19);
-TH_EXPORT_CPP_API_baseFunctionTest20(baseFunctionTest20);
-TH_EXPORT_CPP_API_baseFunctionTest21(baseFunctionTest21);
-TH_EXPORT_CPP_API_baseFunctionTest22(baseFunctionTest22);
-TH_EXPORT_CPP_API_baseFunctionTest23(baseFunctionTest23);
-TH_EXPORT_CPP_API_baseFunctionTest24(baseFunctionTest24);
-TH_EXPORT_CPP_API_baseFunctionTest25(baseFunctionTest25);
-TH_EXPORT_CPP_API_baseFunctionTest26(baseFunctionTest26);
-TH_EXPORT_CPP_API_baseFunctionTest27(baseFunctionTest27);
-TH_EXPORT_CPP_API_baseFunctionTest28(baseFunctionTest28);
-TH_EXPORT_CPP_API_baseFunctionTest29(baseFunctionTest29);
-TH_EXPORT_CPP_API_baseFunctionTest30(baseFunctionTest30);
-TH_EXPORT_CPP_API_baseFunctionTest31(baseFunctionTest31);
-TH_EXPORT_CPP_API_baseFunctionTest32(baseFunctionTest32);
-TH_EXPORT_CPP_API_baseFunctionTest33(baseFunctionTest33);
-TH_EXPORT_CPP_API_baseFunctionTest34(baseFunctionTest34);
-TH_EXPORT_CPP_API_baseFunctionTest35(baseFunctionTest35);
-TH_EXPORT_CPP_API_baseFunctionTest36(baseFunctionTest36);
-TH_EXPORT_CPP_API_baseFunctionTest37(baseFunctionTest37);
-TH_EXPORT_CPP_API_baseFunctionTest38(baseFunctionTest38);
-TH_EXPORT_CPP_API_baseFunctionTest39(baseFunctionTest39);
-TH_EXPORT_CPP_API_baseFunctionTest40(baseFunctionTest40);
-TH_EXPORT_CPP_API_baseFunctionTest41(baseFunctionTest41);
-TH_EXPORT_CPP_API_baseFunctionTest42_int(baseFunctionTest42_int);
-TH_EXPORT_CPP_API_baseFunctionTest42_container(baseFunctionTest42_container);
-TH_EXPORT_CPP_API_baseFunctionTest42_void(baseFunctionTest42_void);
-TH_EXPORT_CPP_API_baseFunctionTest42_struct(baseFunctionTest42_struct);
+TH_EXPORT_CPP_API_BaseFunctionTest1(BaseFunctionTest1);
+TH_EXPORT_CPP_API_BaseFunctionTest2(BaseFunctionTest2);
+TH_EXPORT_CPP_API_BaseFunctionTest3(BaseFunctionTest3);
+TH_EXPORT_CPP_API_BaseFunctionTest4(BaseFunctionTest4);
+TH_EXPORT_CPP_API_BaseFunctionTest5(BaseFunctionTest5);
+TH_EXPORT_CPP_API_BaseFunctionTest6(BaseFunctionTest6);
+TH_EXPORT_CPP_API_BaseFunctionTest7(BaseFunctionTest7);
+TH_EXPORT_CPP_API_BaseFunctionTest8(BaseFunctionTest8);
+TH_EXPORT_CPP_API_BaseFunctionTest9(BaseFunctionTest9);
+TH_EXPORT_CPP_API_BaseFunctionTest10(BaseFunctionTest10);
+TH_EXPORT_CPP_API_BaseFunctionTest11(BaseFunctionTest11);
+TH_EXPORT_CPP_API_BaseFunctionTest12(BaseFunctionTest12);
+TH_EXPORT_CPP_API_BaseFunctionTest13(BaseFunctionTest13);
+TH_EXPORT_CPP_API_BaseFunctionTest14(BaseFunctionTest14);
+TH_EXPORT_CPP_API_BaseFunctionTest15(BaseFunctionTest15);
+TH_EXPORT_CPP_API_BaseFunctionTest16(BaseFunctionTest16);
+TH_EXPORT_CPP_API_BaseFunctionTest17(BaseFunctionTest17);
+TH_EXPORT_CPP_API_BaseFunctionTest18(BaseFunctionTest18);
+TH_EXPORT_CPP_API_BaseFunctionTest19(BaseFunctionTest19);
+TH_EXPORT_CPP_API_BaseFunctionTest20(BaseFunctionTest20);
+TH_EXPORT_CPP_API_BaseFunctionTest21(BaseFunctionTest21);
+TH_EXPORT_CPP_API_BaseFunctionTest22(BaseFunctionTest22);
+TH_EXPORT_CPP_API_BaseFunctionTest23(BaseFunctionTest23);
+TH_EXPORT_CPP_API_BaseFunctionTest24(BaseFunctionTest24);
+TH_EXPORT_CPP_API_BaseFunctionTest25(BaseFunctionTest25);
+TH_EXPORT_CPP_API_BaseFunctionTest26(BaseFunctionTest26);
+TH_EXPORT_CPP_API_BaseFunctionTest27(BaseFunctionTest27);
+TH_EXPORT_CPP_API_BaseFunctionTest28(BaseFunctionTest28);
+TH_EXPORT_CPP_API_BaseFunctionTest29(BaseFunctionTest29);
+TH_EXPORT_CPP_API_BaseFunctionTest30(BaseFunctionTest30);
+TH_EXPORT_CPP_API_BaseFunctionTest31(BaseFunctionTest31);
+TH_EXPORT_CPP_API_BaseFunctionTest32(BaseFunctionTest32);
+TH_EXPORT_CPP_API_BaseFunctionTest33(BaseFunctionTest33);
+TH_EXPORT_CPP_API_BaseFunctionTest34(BaseFunctionTest34);
+TH_EXPORT_CPP_API_BaseFunctionTest35(BaseFunctionTest35);
+TH_EXPORT_CPP_API_BaseFunctionTest36(BaseFunctionTest36);
+TH_EXPORT_CPP_API_BaseFunctionTest37(BaseFunctionTest37);
+TH_EXPORT_CPP_API_BaseFunctionTest38(BaseFunctionTest38);
+TH_EXPORT_CPP_API_BaseFunctionTest39(BaseFunctionTest39);
+TH_EXPORT_CPP_API_BaseFunctionTest40(BaseFunctionTest40);
+TH_EXPORT_CPP_API_BaseFunctionTest41(BaseFunctionTest41);
+TH_EXPORT_CPP_API_BaseFunctionTest42_int(BaseFunctionTest42_int);
+TH_EXPORT_CPP_API_BaseFunctionTest42_container(BaseFunctionTest42_container);
+TH_EXPORT_CPP_API_BaseFunctionTest42_void(BaseFunctionTest42_void);
+TH_EXPORT_CPP_API_BaseFunctionTest42_struct(BaseFunctionTest42_struct);
+TH_EXPORT_CPP_API_BaseFunctionTest59(BaseFunctionTest59);
+TH_EXPORT_CPP_API_BaseFunctionTest60(BaseFunctionTest60);
 TH_EXPORT_CPP_API_get_interface_NameSpace(get_interface_NameSpace);
 TH_EXPORT_CPP_API_get_interface_performance1(get_interface_performance1);
 TH_EXPORT_CPP_API_get_interface_performance2(get_interface_performance2);
@@ -925,3 +1296,6 @@ TH_EXPORT_CPP_API_get_interface_performance17(get_interface_performance17);
 TH_EXPORT_CPP_API_get_interface_performance18(get_interface_performance18);
 TH_EXPORT_CPP_API_get_interface_performance19(get_interface_performance19);
 TH_EXPORT_CPP_API_get_interface_performance20(get_interface_performance20);
+TH_EXPORT_CPP_API_get_interface_performance21(get_interface_performance21);
+TH_EXPORT_CPP_API_get_interface_IbaseInterface2(get_interface_IbaseInterface2);
+TH_EXPORT_CPP_API_get_interface_IbaseInterface3(get_interface_IbaseInterface3);

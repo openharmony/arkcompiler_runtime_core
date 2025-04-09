@@ -15,18 +15,18 @@
 #include <cstdint>
 #include <iostream>
 
-#include "core/array.hpp"
 #include "huks.impl.hpp"
 #include "stdexcept"
+#include "taihe/array.hpp"
 
-using namespace taihe::core;
+using namespace taihe;
 
 std::string dataAsString(array_view<uint8_t> data)
 {
     std::string res;
     for (int i = 0; i < data.size(); i++) {
         uint8_t c = static_cast<uint8_t>(data[i]);
-        static constexpr const char *const TEST_STR = "0123456789abcdef";
+        static constexpr char const *const TEST_STR = "0123456789abcdef";
         res += TEST_STR[data[i] / 16];
         res += TEST_STR[data[i] % 16];
     }
@@ -76,104 +76,129 @@ namespace {
     };
     return huksResult;
 }
+
 void generateKeyItem(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function generateKeyItem Not implemented");
 }
+
 ::huks::HuksResult deleteKey(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function deleteKey Not implemented");
 }
+
 void deleteKeyItem(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function deleteKeyItem Not implemented");
 }
+
 ::huks::HuksResult importKey(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function importKey Not implemented");
 }
+
 void importKeyItem(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function importKeyItem Not implemented");
 }
+
 void importWrappedKeyItem(string_view keyAlias, string_view wrappingKeyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function importWrappedKeyItem Not implemented");
 }
+
 ::huks::HuksResult exportKey(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function exportKey Not implemented");
 }
+
 ::huks::HuksReturnResult exportKeyItem(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function exportKeyItem Not implemented");
 }
+
 ::huks::HuksResult getKeyProperties(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function getKeyProperties Not implemented");
 }
+
 ::huks::HuksReturnResult getKeyItemProperties(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function getKeyItemProperties Not implemented");
 }
+
 bool isKeyExist(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function isKeyExist Not implemented");
 }
+
 bool isKeyItemExist(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function isKeyItemExist Not implemented");
 }
+
 bool hasKeyItem(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function hasKeyItem Not implemented");
 }
+
 ::huks::HuksHandle init(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function init Not implemented");
 }
+
 ::huks::HuksSessionHandle initSession(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function initSession Not implemented");
 }
+
 ::huks::HuksResult update(double handle, optional_view<array<uint8_t>> token, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function update Not implemented");
 }
+
 ::huks::HuksReturnResult updateSession(double handle, ::huks::HuksOptions const &options,
                                        optional_view<array<uint8_t>> token)
 {
     throw std::runtime_error("Function updateSession Not implemented");
 }
+
 ::huks::HuksResult finish(double handle, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function finish Not implemented");
 }
+
 ::huks::HuksReturnResult finishSession(double handle, ::huks::HuksOptions const &options,
                                        optional_view<array<uint8_t>> token)
 {
     throw std::runtime_error("Function finishSession Not implemented");
 }
+
 ::huks::HuksResult abort(double handle, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function abort Not implemented");
 }
+
 void abortSession(double handle, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function abortSession Not implemented");
 }
+
 ::huks::HuksReturnResult attestKeyItem(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function attestKeyItem Not implemented");
 }
+
 ::huks::HuksReturnResult anonAttestKeyItem(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function anonAttestKeyItem Not implemented");
 }
+
 string getSdkVersion(::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function getSdkVersion Not implemented");
 }
+
 ::huks::HuksListAliasesReturnResult listAliases(::huks::HuksOptions const &options)
 {
     throw std::runtime_error("Function listAliases Not implemented");

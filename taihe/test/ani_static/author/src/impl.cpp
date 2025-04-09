@@ -15,13 +15,13 @@
 #include <cstdint>
 #include <iostream>
 
-#include "core/runtime.hpp"
 #include "staticTest.impl.hpp"
+#include "taihe/runtime.hpp"
 
 int32_t add_impl(int32_t a, int32_t b)
 {
     if (a == 0) {
-        taihe::core::set_error("some error happen in add impl");
+        taihe::set_error("some error happen in add impl");
         return b;
     } else {
         std::cout << "add impl " << a + b << std::endl;
@@ -33,40 +33,52 @@ int32_t sum_impl(int32_t a, int32_t b)
 {
     return a * b;
 }
+
 struct AuthorIBase {
-    taihe::core::string name;
-    AuthorIBase(taihe::core::string_view name) : name(name) {}
-    AuthorIBase(taihe::core::string_view name, taihe::core::string_view t) : name(t) {}
+    taihe::string name;
+
+    AuthorIBase(taihe::string_view name) : name(name) {}
+
+    AuthorIBase(taihe::string_view name, taihe::string_view t) : name(t) {}
+
     ~AuthorIBase() {}
-    taihe::core::string get()
+
+    taihe::string get()
     {
         return name;
     }
-    void set(taihe::core::string_view a)
+
+    void set(taihe::string_view a)
     {
         this->name = a;
         return;
     }
 };
-::staticTest::IBase getIBase_impl(taihe::core::string_view name)
+
+::staticTest::IBase getIBase_impl(taihe::string_view name)
 {
-    return taihe::core::make_holder<AuthorIBase, ::staticTest::IBase>(name);
+    return taihe::make_holder<AuthorIBase, ::staticTest::IBase>(name);
 }
-::staticTest::IBase getIBase_test_impl(taihe::core::string_view name, taihe::core::string_view t)
+
+::staticTest::IBase getIBase_test_impl(taihe::string_view name, taihe::string_view t)
 {
-    return taihe::core::make_holder<AuthorIBase, ::staticTest::IBase>(name, t);
+    return taihe::make_holder<AuthorIBase, ::staticTest::IBase>(name, t);
 }
 
 class ITest {
 public:
     ITest() : name("hello ITest") {}
+
     ~ITest() {}
-    taihe::core::string name;
-    taihe::core::string get()
+
+    taihe::string name;
+
+    taihe::string get()
     {
         return name;
     }
-    void set(taihe::core::string_view a)
+
+    void set(taihe::string_view a)
     {
         this->name = a;
         return;
@@ -77,9 +89,10 @@ int32_t static_func(int32_t a, int32_t b)
 {
     return a + b;
 }
+
 ::staticTest::ITest ctor_func()
 {
-    return taihe::core::make_holder<ITest, ::staticTest::ITest>();
+    return taihe::make_holder<ITest, ::staticTest::ITest>();
 }
 
 TH_EXPORT_CPP_API_addSync(add_impl);

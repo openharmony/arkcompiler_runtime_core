@@ -14,83 +14,95 @@
  */
 #include "void_func.mytest.impl.hpp"
 
-#include "core/optional.hpp"
-#include "core/string.hpp"
 #include "stdexcept"
+#include "taihe/optional.hpp"
+#include "taihe/string.hpp"
 #include "void_func.mytest.BarTest.proj.0.hpp"
 // Please delete <stdexcept> include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
-void myfunc1()
+void Myfunc1()
 {
-    std::cout << "myfunc1 is true " << std::endl;
+    std::cout << "Myfunc1 is true " << std::endl;
 }
-void myfunc2(int8_t option1, int16_t option2)
+
+void Myfunc2(int8_t option1, int16_t option2)
 {
-    std::cout << "myfunc2 is option1  " << (int)option1 << std::endl;
-    std::cout << "myfunc2 is option2  " << option2 << std::endl;
+    std::cout << "Myfunc2 is option1  " << (int)option1 << std::endl;
+    std::cout << "Myfunc2 is option2  " << option2 << std::endl;
 }
-void myfunc3(int32_t option1, bool option2)
-{
-    if (option2) {
-        std::cout << "myfunc3 is option1  " << option1 << std::endl;
-        std::cout << "myfunc3 is option2  " << option2 << std::endl;
-    } else {
-        std::cout << "myfunc3 is option1  " << option1 << std::endl;
-        std::cout << "myfunc3 is option2  " << option2 << std::endl;
-    }
-}
-void myfunc4(int32_t option1, int64_t option2)
-{
-    std::cout << "myfunc4 is option1  " << option1 << std::endl;
-    std::cout << "myfunc4 is option2  " << option2 << std::endl;
-}
-void myfunc5(int32_t option1, string_view option2)
-{
-    std::cout << "myfunc5 is option1  " << option1 << std::endl;
-    std::cout << "myfunc5 is option2  " << option2 << std::endl;
-}
-void myfunc6(int64_t option1, bool option2)
+
+void Myfunc3(int32_t option1, bool option2)
 {
     if (option2) {
-        std::cout << "myfunc6 is option1  " << option1 << std::endl;
-        std::cout << "myfunc6 is option2  " << option2 << std::endl;
+        std::cout << "Myfunc3 is option1  " << option1 << std::endl;
+        std::cout << "Myfunc3 is option2  " << option2 << std::endl;
     } else {
-        std::cout << "myfunc6 is option1  " << option1 << std::endl;
-        std::cout << "myfunc6 is option2  " << option2 << std::endl;
+        std::cout << "Myfunc3 is option1  " << option1 << std::endl;
+        std::cout << "Myfunc3 is option2  " << option2 << std::endl;
     }
 }
-void myfunc7(int64_t option1, float option2)
+
+void Myfunc4(int32_t option1, int64_t option2)
 {
-    std::cout << "myfunc7 is option1  " << option1 << std::endl;
-    std::cout << "myfunc7 is option2  " << option2 << std::endl;
+    std::cout << "Myfunc4 is option1  " << option1 << std::endl;
+    std::cout << "Myfunc4 is option2  " << option2 << std::endl;
 }
-void myfunc8(int64_t option1, double option2)
+
+void Myfunc5(int32_t option1, string_view option2)
 {
-    std::cout << "myfunc8 is option1  " << option1 << std::endl;
-    std::cout << "myfunc8 is option2  " << option2 << std::endl;
+    std::cout << "Myfunc5 is option1  " << option1 << std::endl;
+    std::cout << "Myfunc5 is option2  " << option2 << std::endl;
 }
-void myfunc9(float option1, bool option2)
+
+void Myfunc6(int64_t option1, bool option2)
 {
     if (option2) {
-        std::cout << "myfunc9 is option1  " << option1 << std::endl;
-        std::cout << "myfunc9 is option2  " << option2 << std::endl;
+        std::cout << "Myfunc6 is option1  " << option1 << std::endl;
+        std::cout << "Myfunc6 is option2  " << option2 << std::endl;
     } else {
-        std::cout << "myfunc9 is option1  " << option1 << std::endl;
-        std::cout << "myfunc9 is option2  " << option2 << std::endl;
+        std::cout << "Myfunc6 is option1  " << option1 << std::endl;
+        std::cout << "Myfunc6 is option2  " << option2 << std::endl;
     }
 }
-void myfunc10(float option1, string_view option2)
+
+void Myfunc7(int64_t option1, float option2)
 {
-    std::cout << "myfunc10 is option1  " << option1 << std::endl;
-    std::cout << "myfunc10 is option2  " << option2 << std::endl;
+    std::cout << "Myfunc7 is option1  " << option1 << std::endl;
+    std::cout << "Myfunc7 is option2  " << option2 << std::endl;
 }
-void myfunc11(double option1, string_view option2)
+
+void Myfunc8(int64_t option1, double option2)
 {
-    std::cout << "myfunc11 is option1  " << option1 << std::endl;
-    std::cout << "myfunc11 is option2  " << option2 << std::endl;
+    std::cout << "Myfunc8 is option1  " << option1 << std::endl;
+    std::cout << "Myfunc8 is option2  " << option2 << std::endl;
 }
-void myfunc12(optional_view<int32_t> option1, optional_view<int64_t> option2)
+
+void Myfunc9(float option1, bool option2)
+{
+    if (option2) {
+        std::cout << "Myfunc9 is option1  " << option1 << std::endl;
+        std::cout << "Myfunc9 is option2  " << option2 << std::endl;
+    } else {
+        std::cout << "Myfunc9 is option1  " << option1 << std::endl;
+        std::cout << "Myfunc9 is option2  " << option2 << std::endl;
+    }
+}
+
+void Myfunc10(float option1, string_view option2)
+{
+    std::cout << "Myfunc10 is option1  " << option1 << std::endl;
+    std::cout << "Myfunc10 is option2  " << option2 << std::endl;
+}
+
+void Myfunc11(double option1, string_view option2)
+{
+    std::cout << "Myfunc11 is option1  " << option1 << std::endl;
+    std::cout << "Myfunc11 is option2  " << option2 << std::endl;
+}
+
+void Myfunc12(optional_view<int32_t> option1, optional_view<int64_t> option2)
 {
     if (option1) {
         std::cout << *option1 << std::endl;
@@ -100,7 +112,8 @@ void myfunc12(optional_view<int32_t> option1, optional_view<int64_t> option2)
         std::cout << "Null" << std::endl;
     }
 }
-void myfunc13(optional_view<float> option1, optional_view<double> option2)
+
+void Myfunc13(optional_view<float> option1, optional_view<double> option2)
 {
     if (option1) {
         std::cout << *option1 << std::endl;
@@ -110,7 +123,8 @@ void myfunc13(optional_view<float> option1, optional_view<double> option2)
         std::cout << "Null" << std::endl;
     }
 }
-void myfunc14(optional_view<string> option1, optional_view<bool> option2)
+
+void Myfunc14(optional_view<string> option1, optional_view<bool> option2)
 {
     if (option1) {
         std::cout << *option1 << std::endl;
@@ -120,7 +134,8 @@ void myfunc14(optional_view<string> option1, optional_view<bool> option2)
         std::cout << "Null" << std::endl;
     }
 }
-void myfunc15(optional_view<int16_t> option1, optional_view<int64_t> option2)
+
+void Myfunc15(optional_view<int16_t> option1, optional_view<int64_t> option2)
 {
     if (option1) {
         std::cout << *option1 << std::endl;
@@ -130,7 +145,8 @@ void myfunc15(optional_view<int16_t> option1, optional_view<int64_t> option2)
         std::cout << "Null" << std::endl;
     }
 }
-void myfunc16(optional_view<int16_t> option1, ::void_func::mytest::BarTest const &option2)
+
+void Myfunc16(optional_view<int16_t> option1, ::void_func::mytest::BarTest const &option2)
 {
     switch (option2.get_key()) {
         case ::void_func::mytest::BarTest::key_t::A:
@@ -145,19 +161,20 @@ void myfunc16(optional_view<int16_t> option1, ::void_func::mytest::BarTest const
     }
 }
 }  // namespace
-TH_EXPORT_CPP_API_myfunc1(myfunc1);
-TH_EXPORT_CPP_API_myfunc2(myfunc2);
-TH_EXPORT_CPP_API_myfunc3(myfunc3);
-TH_EXPORT_CPP_API_myfunc4(myfunc4);
-TH_EXPORT_CPP_API_myfunc5(myfunc5);
-TH_EXPORT_CPP_API_myfunc6(myfunc6);
-TH_EXPORT_CPP_API_myfunc7(myfunc7);
-TH_EXPORT_CPP_API_myfunc8(myfunc8);
-TH_EXPORT_CPP_API_myfunc9(myfunc9);
-TH_EXPORT_CPP_API_myfunc10(myfunc10);
-TH_EXPORT_CPP_API_myfunc11(myfunc11);
-TH_EXPORT_CPP_API_myfunc12(myfunc12);
-TH_EXPORT_CPP_API_myfunc13(myfunc13);
-TH_EXPORT_CPP_API_myfunc14(myfunc14);
-TH_EXPORT_CPP_API_myfunc15(myfunc15);
-TH_EXPORT_CPP_API_myfunc16(myfunc16);
+
+TH_EXPORT_CPP_API_Myfunc1(Myfunc1);
+TH_EXPORT_CPP_API_Myfunc2(Myfunc2);
+TH_EXPORT_CPP_API_Myfunc3(Myfunc3);
+TH_EXPORT_CPP_API_Myfunc4(Myfunc4);
+TH_EXPORT_CPP_API_Myfunc5(Myfunc5);
+TH_EXPORT_CPP_API_Myfunc6(Myfunc6);
+TH_EXPORT_CPP_API_Myfunc7(Myfunc7);
+TH_EXPORT_CPP_API_Myfunc8(Myfunc8);
+TH_EXPORT_CPP_API_Myfunc9(Myfunc9);
+TH_EXPORT_CPP_API_Myfunc10(Myfunc10);
+TH_EXPORT_CPP_API_Myfunc11(Myfunc11);
+TH_EXPORT_CPP_API_Myfunc12(Myfunc12);
+TH_EXPORT_CPP_API_Myfunc13(Myfunc13);
+TH_EXPORT_CPP_API_Myfunc14(Myfunc14);
+TH_EXPORT_CPP_API_Myfunc15(Myfunc15);
+TH_EXPORT_CPP_API_Myfunc16(Myfunc16);

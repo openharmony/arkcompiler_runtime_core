@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/string.hpp"
 #include "inject_test.Foo.proj.2.hpp"
 #include "inject_test.impl.hpp"
 #include "stdexcept"
+#include "taihe/string.hpp"
 // Please delete <stdexcept> include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 
 class Foo {

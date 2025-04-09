@@ -122,7 +122,7 @@ class CppImplSourcesGenerator:
             self.tm, f"temp/{pkg_cpp_impl_info.source}", False
         )
         pkg_cpp_impl_target.include(pkg_cpp_impl_info.header)
-        pkg_cpp_impl_target.include("core/runtime.hpp")
+        pkg_cpp_impl_target.include("taihe/runtime.hpp")
         pkg_cpp_impl_target.include("stdexcept")
         self.gen_using_namespace(pkg_cpp_impl_target)
         self.gen_anonymous_namespace_block(
@@ -140,7 +140,7 @@ class CppImplSourcesGenerator:
         pkg_cpp_impl_target: COutputBuffer,
     ):
         pkg_cpp_impl_target.writeln(
-            f"using namespace taihe::core;",
+            f"using namespace taihe;",
         )
 
     def gen_func(
@@ -240,12 +240,12 @@ class CppImplSourcesGenerator:
         self,
         input_str: str,
     ) -> str:
-        prefix = "::taihe::core::"
+        prefix = "::taihe::"
         if input_str.startswith(prefix):
             input_str = input_str[len(prefix) :]
-        input_str = re.sub(r"<\s*::taihe::core::", "<", input_str)
-        input_str = re.sub(r",\s*::taihe::core::", ", ", input_str)
-        input_str = re.sub(r"\(\s*::taihe::core::", "(", input_str)
+        input_str = re.sub(r"<\s*::taihe::", "<", input_str)
+        input_str = re.sub(r",\s*::taihe::", ", ", input_str)
+        input_str = re.sub(r"\(\s*::taihe::", "(", input_str)
         return input_str
 
     def gen_func_macro(

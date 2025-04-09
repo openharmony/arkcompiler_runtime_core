@@ -82,6 +82,8 @@ def link(output_file, *input_files, shared, link_options):
 
 def compile_abc(output_dir, input_dir, panda_home):
     output_files = []
+    if not input_dir.exists() or not input_dir.is_dir():
+        return output_files
     for input_file in input_dir.iterdir():
         name = input_file.name
         if name.endswith(".ets"):
@@ -151,7 +153,7 @@ def download_panda_vm(extract_dir: Path):
     username = "koala-pub"
     password = "y3t!n0therP"
 
-    url = "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/sdk-1.5.0-dev.25175.tgz"
+    url = "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/sdk-1.5.0-dev.25736.tgz"
     target_file = extract_dir / url.split("/")[-1]
     version_file = extract_dir / "version.txt"
     version = target_file.stem
@@ -162,13 +164,15 @@ def download_panda_vm(extract_dir: Path):
         print("Complete the download and extract.")
 
 
-def create_arktsconfig(panda_home, build_author_generated_dir):
+def create_arktsconfig(panda_home, author_generated_dir, build_author_generated_dir, sys_user_ets_dir):
     config_content = {
         "compilerOptions": {
             "baseUrl": str(panda_home),
             "paths": {
                 "std": [str(panda_home / "../ets/stdlib/std")],
                 "escompat": [str(panda_home / "../ets/stdlib/escompat")],
+                "@generated": [str(author_generated_dir)],
+                "@system": [str(sys_user_ets_dir)],
             },
         }
     }
@@ -190,7 +194,7 @@ def main(
     user_link_options: list[str],
     run_args: list[str],
 ):
-    target_path = Path(target_dir)
+    target_path = Path(target_dir).resolve()
 
     idl_dir = target_path / "idl"
 
@@ -200,6 +204,8 @@ def main(
     author_generated_dir = target_path / "author_generated"
     author_generated_include_dir = author_generated_dir / "include"
     author_generated_src_dir = author_generated_dir / "src"
+
+    sys_user_dir = target_path / "system"
 
     user_dir = target_path / "user"
     user_include_dir = user_dir / "include"
@@ -244,15 +250,18 @@ def main(
     ).run()
     print("Done.")
 
+    genereted_dir = BASEDIR / author_generated_dir
+    sys_user_ets_dir = BASEDIR / target_path / "system"
+
     if generate_and_compile_ani:
-        extract_dir = BASEDIR / ".panda_vm"
+        extract_dir = (BASEDIR / "../.panda_vm").resolve()
         extract_dir.mkdir(exist_ok=True)
         download_panda_vm(extract_dir)
 
         panda_home = extract_dir / "package/linux_host_tools"
         create_directory(build_author_generated_dir)
 
-        create_arktsconfig(panda_home, build_author_generated_dir)
+        create_arktsconfig(panda_home, genereted_dir, build_author_generated_dir, sys_user_ets_dir)
 
         panda_include = panda_home / "../ohos_arm64/include/plugins/ets/runtime/ani"
         lib_name = target_path.absolute().name
@@ -294,6 +303,7 @@ def main(
                 panda_home,
             ),
             *compile_abc(build_author_generated_dir, user_dir, panda_home),
+            *compile_abc(build_author_generated_dir, sys_user_dir, panda_home),
             panda_home=panda_home,
         )
 

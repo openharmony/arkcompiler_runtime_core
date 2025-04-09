@@ -15,18 +15,18 @@
 #pragma once
 
 #include <taihe/array.abi.h>
+#include <taihe/common.hpp>
 
 #include <array>
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
 #include <stdexcept>
-#include <taihe/common.hpp>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-namespace taihe::core {
+namespace taihe {
 template <typename cpp_owner_t>
 struct array_view;
 
@@ -206,6 +206,7 @@ protected:
 };
 
 struct copy_data_t {};
+
 struct move_data_t {};
 
 template <typename cpp_owner_t>
@@ -234,7 +235,7 @@ struct array : public array_view<cpp_owner_t> {
         std::uninitialized_default_construct_n(this->m_data, size);
     }
 
-    array(size_type size, const cpp_owner_t &value)
+    array(size_type size, cpp_owner_t const &value)
         : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
         std::uninitialized_fill_n(this->m_data, size, value);
@@ -245,7 +246,7 @@ struct array : public array_view<cpp_owner_t> {
         return array(size);
     }
 
-    static array make(size_type size, const cpp_owner_t &value)
+    static array make(size_type size, cpp_owner_t const &value)
     {
         return array(size, value);
     }
@@ -320,4 +321,4 @@ template <typename cpp_owner_t>
 struct as_param<array<cpp_owner_t>> {
     using type = array_view<cpp_owner_t>;
 };
-}  // namespace taihe::core
+}  // namespace taihe

@@ -12,15 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/string.hpp"
+#include "taihe/string.hpp"
 
-#include "core/array.hpp"
 #include "stdexcept"
 #include "string_op.PlayString.proj.2.hpp"
 #include "string_op.StringPair.proj.1.hpp"
 #include "string_op.impl.hpp"
+#include "taihe/array.hpp"
 // Please delete <stdexcept> include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 class PlayString {
     string name_ {"PlayString"};
@@ -38,19 +39,23 @@ public:
         }
         return res;
     }
+
     string getName()
     {
         return name_;
     }
+
     void setName(string_view name)
     {
         name_ = name;
     }
 };
+
 string concatString(string_view a, string_view b)
 {
     return concat(a, b);
 }
+
 string makeString(string_view a, int32_t b)
 {
     string result = "";
@@ -59,6 +64,7 @@ string makeString(string_view a, int32_t b)
     }
     return result;
 }
+
 ::string_op::StringPair split(string_view a, int32_t n)
 {
     int32_t l = a.size();
@@ -74,6 +80,7 @@ string makeString(string_view a, int32_t b)
         substr(a, n, l - n),
     };
 }
+
 array<string> split2(string_view a, int32_t n)
 {
     int32_t l = a.size();
@@ -89,26 +96,32 @@ array<string> split2(string_view a, int32_t n)
     result[1] = substr(a, n, l - n);
     return result;
 }
+
 int32_t to_i32(string_view a)
 {
     return std::atoi(a.c_str());
 }
+
 string from_i32(int32_t a)
 {
     return to_string(a);
 }
+
 ::string_op::PlayString makePlayStringIface()
 {
     return make_holder<PlayString, ::string_op::PlayString>();
 }
+
 float to_f32(string_view a)
 {
     return std::atof(a.c_str());
 }
+
 string from_f32(float a)
 {
     return to_string(a);
 }
+
 string concatString2(string_view s, int32_t n, array_view<string> sArr, bool b, array_view<uint8_t> buffer)
 {
     string result = "";
@@ -126,6 +139,7 @@ string concatString2(string_view s, int32_t n, array_view<string> sArr, bool b, 
     return result;
 }
 }  // namespace
+
 TH_EXPORT_CPP_API_concatString(concatString);
 TH_EXPORT_CPP_API_makeString(makeString);
 TH_EXPORT_CPP_API_split(split);

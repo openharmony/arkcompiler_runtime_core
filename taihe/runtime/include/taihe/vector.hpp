@@ -14,13 +14,14 @@
  */
 #pragma once
 
-#include <algorithm>
 #include <taihe/common.hpp>
+
+#include <algorithm>
 #include <utility>
 
 #define VEC_GROWTH_FACTOR 2
 
-namespace taihe::core {
+namespace taihe {
 template <typename T>
 struct vector_view;
 
@@ -33,11 +34,11 @@ public:
     using value_type = T;
     using size_type = std::size_t;
     using reference = T &;
-    using const_reference = const T &;
+    using const_reference = T const &;
     using pointer = T *;
-    using const_pointer = const T *;
+    using const_pointer = T const *;
     using iterator = T *;
-    using const_iterator = const T *;
+    using const_iterator = T const *;
 
     void reserve(std::size_t cap) const
     {
@@ -109,14 +110,14 @@ protected:
         std::size_t cap;
         T *buffer;
         std::size_t len;
-    } *m_handle;
+    } * m_handle;
 
     explicit vector_view(data_t *handle) : m_handle(handle) {}
 
     friend struct vector<T>;
 
-    friend bool taihe::core::same_impl(adl_helper_t, vector_view lhs, vector_view rhs);
-    friend std::size_t taihe::core::hash_impl(adl_helper_t, vector_view val);
+    friend bool taihe::same_impl(adl_helper_t, vector_view lhs, vector_view rhs);
+    friend std::size_t taihe::hash_impl(adl_helper_t, vector_view val);
 };
 
 template <typename T>
@@ -137,14 +138,14 @@ struct vector : vector_view<T> {
         other.m_handle = nullptr;
     }
 
-    vector(const vector<T> &other) : vector(other.m_handle)
+    vector(vector<T> const &other) : vector(other.m_handle)
     {
         if (m_handle) {
             tref_inc(&m_handle->count);
         }
     }
 
-    vector(const vector_view<T> &other) : vector(other.m_handle)
+    vector(vector_view<T> const &other) : vector(other.m_handle)
     {
         if (m_handle) {
             tref_inc(&m_handle->count);
@@ -196,7 +197,7 @@ template <typename T>
 struct as_param<vector<T>> {
     using type = vector_view<T>;
 };
-}  // namespace taihe::core
+}  // namespace taihe
 
 #ifdef VEC_GROWTH_FACTOR
 #undef VEC_GROWTH_FACTOR

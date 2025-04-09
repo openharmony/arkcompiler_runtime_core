@@ -15,11 +15,12 @@
 #pragma once
 
 #include <taihe/common.hpp>
+
 #include <utility>
 
 #define MAP_GROWTH_FACTOR 2
 
-namespace taihe::core {
+namespace taihe {
 template <typename K, typename V>
 struct map_view;
 
@@ -38,7 +39,7 @@ struct map_view {
             item_t *current = m_handle->bucket[i];
             while (current) {
                 item_t *next = current->next;
-                std::size_t index = taihe::core::hash(current->key) % cap;
+                std::size_t index = taihe::hash(current->key) % cap;
                 current->next = bucket[index];
                 bucket[index] = current;
                 current = next;
@@ -74,10 +75,10 @@ struct map_view {
     template <bool cover = false, typename... Args>
     V *emplace(as_param_t<K> key, Args &&...args) const
     {
-        std::size_t index = taihe::core::hash(key) % m_handle->cap;
+        std::size_t index = taihe::hash(key) % m_handle->cap;
         item_t *current = m_handle->bucket[index];
         while (current) {
-            if (taihe::core::same(current->key, key)) {
+            if (taihe::same(current->key, key)) {
                 if (cover) {
                     current->val = V {std::forward<Args>(args)...};
                 }
@@ -101,10 +102,10 @@ struct map_view {
 
     V *find(as_param_t<K> key) const
     {
-        std::size_t index = taihe::core::hash(key) % m_handle->cap;
+        std::size_t index = taihe::hash(key) % m_handle->cap;
         item_t *current = m_handle->bucket[index];
         while (current) {
-            if (taihe::core::same(current->key, key)) {
+            if (taihe::same(current->key, key)) {
                 return &current->val;
             }
             current = current->next;
@@ -114,10 +115,10 @@ struct map_view {
 
     bool erase(as_param_t<K> key) const
     {
-        std::size_t index = taihe::core::hash(key) % m_handle->cap;
+        std::size_t index = taihe::hash(key) % m_handle->cap;
         item_t **current_ptr = &m_handle->bucket[index];
         while (*current_ptr) {
-            if (taihe::core::same((*current_ptr)->key, key)) {
+            if (taihe::same((*current_ptr)->key, key)) {
                 item_t *current = *current_ptr;
                 *current_ptr = (*current_ptr)->next;
                 delete current;
@@ -162,7 +163,7 @@ struct map_view {
 
     struct iterator {
         using iterator_category = std::forward_iterator_tag;
-        using value_type = std::pair<const K &, V &>;
+        using value_type = std::pair<K const &, V &>;
         using difference_type = std::ptrdiff_t;
         using pointer = value_type *;
         using reference = value_type &;
@@ -198,12 +199,12 @@ struct map_view {
             return tmp;
         }
 
-        bool operator==(const iterator &other) const
+        bool operator==(iterator const &other) const
         {
             return current == other.current;
         }
 
-        bool operator!=(const iterator &other) const
+        bool operator!=(iterator const &other) const
         {
             return !(*this == other);
         }
@@ -217,7 +218,7 @@ struct map_view {
 
     struct const_iterator {
         using iterator_category = std::forward_iterator_tag;
-        using value_type = std::pair<const K &, const V &>;
+        using value_type = std::pair<K const &, V const &>;
         using difference_type = std::ptrdiff_t;
         using pointer = value_type *;
         using reference = value_type &;
@@ -253,12 +254,12 @@ struct map_view {
             return tmp;
         }
 
-        bool operator==(const const_iterator &other) const
+        bool operator==(const_iterator const &other) const
         {
             return current == other.current;
         }
 
-        bool operator!=(const const_iterator &other) const
+        bool operator!=(const_iterator const &other) const
         {
             return !(*this == other);
         }
@@ -316,14 +317,14 @@ private:
         std::size_t cap;
         item_t **bucket;
         std::size_t size;
-    } *m_handle;
+    } * m_handle;
 
     explicit map_view(data_t *handle) : m_handle(handle) {}
 
     friend struct map<K, V>;
 
-    friend bool taihe::core::same_impl(adl_helper_t, map_view lhs, map_view rhs);
-    friend std::size_t taihe::core::hash_impl(adl_helper_t, map_view val);
+    friend bool taihe::same_impl(adl_helper_t, map_view lhs, map_view rhs);
+    friend std::size_t taihe::hash_impl(adl_helper_t, map_view val);
 };
 
 template <typename K, typename V>
@@ -405,7 +406,7 @@ template <typename K, typename V>
 struct as_param<map<K, V>> {
     using type = map_view<K, V>;
 };
-}  // namespace taihe::core
+}  // namespace taihe
 
 #ifdef MAP_GROWTH_FACTOR
 #undef MAP_GROWTH_FACTOR

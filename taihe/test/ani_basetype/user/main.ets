@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as base_test from "../author_generated/base_test";
+import * as base_test from "@generated/base_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_basetype");
 

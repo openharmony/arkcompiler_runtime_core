@@ -14,7 +14,7 @@
  */
 #include "ani_test.impl.hpp"
 
-using namespace taihe::core;
+using namespace taihe;
 using namespace ani_test;
 
 namespace {
@@ -31,7 +31,7 @@ void showData(Data const &s)
 {
     std::cout << "src: " << s.src << std::endl;
     std::cout << "dest: " << s.dest << std::endl;
-    for (const auto &s : s.files) {
+    for (auto const &s : s.files) {
         std::cout << "file: " << s.c_str() << std::endl;
     }
 }
@@ -98,19 +98,23 @@ array<Foo> makeFoo(array_view<string> list)
 {
     struct AuthorFoo {
         string name;
+
         AuthorFoo(string_view name) : name(name)
         {
             std::cout << "AuthorFoo(" << this->name << ") is constructing" << std::endl;
         }
+
         ~AuthorFoo()
         {
             std::cout << "AuthorFoo(" << this->name << ") is destructing" << std::endl;
         }
+
         void bar()
         {
             std::cout << "AuthorFoo(" << this->name << ") is calling bar()" << std::endl;
         }
     };
+
     std::vector<Foo> vec;
     for (string_view name : list) {
         vec.push_back(make_holder<AuthorFoo, Foo>(name));

@@ -12,133 +12,144 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as namespace2Test from "../author_generated/my_ns";
-import * as namespaceTest from "../author_generated/ns_alltest";
+import * as namespace2Test from "@generated/my_ns";
+import * as namespaceTest from "@generated/ns_alltest";
+import * as System from "std/core/System";
 
 loadLibrary("ani_namespace");
 
-let nameInterfaceTest: namespaceTest.functiontest.testNameSpace =
+let nameInterfaceTest: namespaceTest.functiontest.TestNameSpace =
     namespaceTest.functiontest.get_interface_NameSpace();
 let testInterfacePerformance1:
-    namespaceTest.functiontest.testInterfacePerformance1 =
+    namespaceTest.functiontest.TestInterfacePerformance1 =
     namespaceTest.functiontest.get_interface_performance1();
 let testInterfacePerformance2:
-    namespaceTest.functiontest.testInterfacePerformance2 =
+    namespaceTest.functiontest.TestInterfacePerformance2 =
     namespaceTest.functiontest.get_interface_performance2();
 let testInterfacePerformance3:
-    namespaceTest.functiontest.testInterfacePerformance3 =
+    namespaceTest.functiontest.TestInterfacePerformance3 =
     namespaceTest.functiontest.get_interface_performance3();
 let testInterfacePerformance4:
-    namespaceTest.functiontest.testInterfacePerformance4 =
+    namespaceTest.functiontest.TestInterfacePerformance4 =
     namespaceTest.functiontest.get_interface_performance4();
 let testInterfacePerformance5:
-    namespaceTest.functiontest.testInterfacePerformance5 =
+    namespaceTest.functiontest.TestInterfacePerformance5 =
     namespaceTest.functiontest.get_interface_performance5();
 let testInterfacePerformance6:
-    namespaceTest.functiontest.testInterfacePerformance6 =
+    namespaceTest.functiontest.TestInterfacePerformance6 =
     namespaceTest.functiontest.get_interface_performance6();
 let testInterfacePerformance7:
-    namespaceTest.functiontest.testInterfacePerformance7 =
+    namespaceTest.functiontest.TestInterfacePerformance7 =
     namespaceTest.functiontest.get_interface_performance7();
 let testInterfacePerformance8:
-    namespaceTest.functiontest.testInterfacePerformance8 =
+    namespaceTest.functiontest.TestInterfacePerformance8 =
     namespaceTest.functiontest.get_interface_performance8();
 let testInterfacePerformance9:
-    namespaceTest.functiontest.testInterfacePerformance9 =
+    namespaceTest.functiontest.TestInterfacePerformance9 =
     namespaceTest.functiontest.get_interface_performance9();
 let testInterfacePerformance10:
-    namespaceTest.functiontest.testInterfacePerformance10 =
+    namespaceTest.functiontest.TestInterfacePerformance10 =
     namespaceTest.functiontest.get_interface_performance10();
 let testInterfacePerformance11:
-    namespaceTest.functiontest.testInterfacePerformance11 =
+    namespaceTest.functiontest.TestInterfacePerformance11 =
     namespaceTest.functiontest.get_interface_performance11();
 let testInterfacePerformance12:
-    namespaceTest.functiontest.testInterfacePerformance12 =
+    namespaceTest.functiontest.TestInterfacePerformance12 =
     namespaceTest.functiontest.get_interface_performance12();
 let testInterfacePerformance13:
-    namespaceTest.functiontest.testInterfacePerformance13 =
+    namespaceTest.functiontest.TestInterfacePerformance13 =
     namespaceTest.functiontest.get_interface_performance13();
 let testInterfacePerformance14:
-    namespaceTest.functiontest.testInterfacePerformance14 =
+    namespaceTest.functiontest.TestInterfacePerformance14 =
     namespaceTest.functiontest.get_interface_performance14();
 let testInterfacePerformance15:
-    namespaceTest.functiontest.testInterfacePerformance15 =
+    namespaceTest.functiontest.TestInterfacePerformance15 =
     namespaceTest.functiontest.get_interface_performance15();
 let testInterfacePerformance16:
-    namespaceTest.functiontest.testInterfacePerformance16 =
+    namespaceTest.functiontest.TestInterfacePerformance16 =
     namespaceTest.functiontest.get_interface_performance16();
 let testInterfacePerformance17:
-    namespaceTest.functiontest.testInterfacePerformance17 =
+    namespaceTest.functiontest.TestInterfacePerformance17 =
     namespaceTest.functiontest.get_interface_performance17();
 let testInterfacePerformance18:
-    namespaceTest.functiontest.testInterfacePerformance18 =
+    namespaceTest.functiontest.TestInterfacePerformance18 =
     namespaceTest.functiontest.get_interface_performance18();
 let testInterfacePerformance19:
-    namespaceTest.functiontest.testInterfacePerformance19 =
+    namespaceTest.functiontest.TestInterfacePerformance19 =
     namespaceTest.functiontest.get_interface_performance19();
 let testInterfacePerformance20:
-    namespaceTest.functiontest.testInterfacePerformance20 =
+    namespaceTest.functiontest.TestInterfacePerformance20 =
     namespaceTest.functiontest.get_interface_performance20();
+let testInterfacePerformance21:
+    namespaceTest.functiontest.TestInterfacePerformance21 =
+    namespaceTest.functiontest.get_interface_performance21();
+
+let testIbaseInterface2: namespaceTest.functiontest.IbaseInterface2 =
+    namespaceTest.functiontest.get_interface_IbaseInterface2();
+
+let testIbaseInterface3: namespaceTest.functiontest.IbaseInterface3 =
+    namespaceTest.functiontest.get_interface_IbaseInterface3();
+
 function testCasebaseFunctionTest1() {
-    namespaceTest.functiontest.baseFunctionTest1()
+    namespaceTest.functiontest.BaseFunctionTest1()
 }
 
 function testCasebaseFunctionTest2() {
-    namespaceTest.functiontest.baseFunctionTest2(127 as byte)
+    namespaceTest.functiontest.BaseFunctionTest2(127 as byte)
 }
 
 function testCasebaseFunctionTest3() {
-    namespaceTest.functiontest.baseFunctionTest3(255 as short)
+    namespaceTest.functiontest.BaseFunctionTest3(255 as short)
 }
 
 function testCasebaseFunctionTest4() {
-    namespaceTest.functiontest.baseFunctionTest4(2147483647)
+    namespaceTest.functiontest.BaseFunctionTest4(2147483647)
 }
 
 function testCasebaseFunctionTest5() {
-    namespaceTest.functiontest.baseFunctionTest5(9223372036854775807)
+    namespaceTest.functiontest.BaseFunctionTest5(9223372036854775807)
 }
 
 function testCasebaseFunctionTest6() {
-    namespaceTest.functiontest.baseFunctionTest6(3.1415 as float)
+    namespaceTest.functiontest.BaseFunctionTest6(3.1415 as float)
 }
 
 function testCasebaseFunctionTest7() {
-    namespaceTest.functiontest.baseFunctionTest7(3.1415125)
+    namespaceTest.functiontest.BaseFunctionTest7(3.1415125)
 }
 
 function testCasebaseFunctionTest8() {
-    namespaceTest.functiontest.baseFunctionTest8("baseFunctionTest8!@#$%%^&*()")
+    namespaceTest.functiontest.BaseFunctionTest8("baseFunctionTest8!@#$%%^&*()")
 }
 
 function testCasebaseFunctionTest9() {
-    namespaceTest.functiontest.baseFunctionTest9(false)
+    namespaceTest.functiontest.BaseFunctionTest9(false)
 }
 
 function testCasebaseFunctionTest10() {
     let byteArray: byte[] = [1, 127, -120, 0, 100];
-    namespaceTest.functiontest.baseFunctionTest10(byteArray)
+    namespaceTest.functiontest.BaseFunctionTest10(byteArray)
 }
 
 function testCasebaseFunctionTest11() {
     let shortArray: short[] = [32767, -32768, 122, 50, 10086];
-    namespaceTest.functiontest.baseFunctionTest11(shortArray)
+    namespaceTest.functiontest.BaseFunctionTest11(shortArray)
 }
 
 function testCasebaseFunctionTest12() {
-    namespaceTest.functiontest.baseFunctionTest12(255 as short)
+    namespaceTest.functiontest.BaseFunctionTest12(255 as short)
 }
 
 function testCasebaseFunctionTest12_1() {
-    namespaceTest.functiontest.baseFunctionTest12(undefined)
+    namespaceTest.functiontest.BaseFunctionTest12(undefined)
 }
 
 function testCasebaseFunctionTest13() {
-    namespaceTest.functiontest.baseFunctionTest13(9223372036854775807)
+    namespaceTest.functiontest.BaseFunctionTest13(9223372036854775807)
 }
 
 function testCasebaseFunctionTest13_1() {
-    namespaceTest.functiontest.baseFunctionTest13(undefined)
+    namespaceTest.functiontest.BaseFunctionTest13(undefined)
 }
 
 function testCasebaseFunctionTest14() {
@@ -147,7 +158,7 @@ function testCasebaseFunctionTest14() {
     for (let i = 0; i < numbersU8.length; i++) {
         arrbuf1.set(i, numbersU8[i]);
     }
-    namespaceTest.functiontest.baseFunctionTest14(arrbuf1)
+    namespaceTest.functiontest.BaseFunctionTest14(arrbuf1)
 }
 
 function testCasebaseFunctionTest15() {
@@ -157,95 +168,95 @@ function testCasebaseFunctionTest15() {
         "test3": 2,
         "test4": 3,
     };
-    namespaceTest.functiontest.baseFunctionTest15(record)
+    namespaceTest.functiontest.BaseFunctionTest15(record)
 }
 
 function testCasebaseFunctionTest16() {
-    let res = namespaceTest.functiontest.baseFunctionTest16(110 as byte);
+    let res = namespaceTest.functiontest.BaseFunctionTest16(110 as byte);
     assertEQ(res, 120)
 }
 
 function testCasebaseFunctionTest16_1() {
     try {
-        let res = namespaceTest.functiontest.baseFunctionTest16(127 as byte);
+        let res = namespaceTest.functiontest.BaseFunctionTest16(127 as byte);
     } catch (e) {
         assertEQ(
             e.toString(),
-            "Error: baseFunctionTest16: result exceeds int8_t range")
+            "Error: BaseFunctionTest16: result exceeds int8_t range")
     }
 }
 
 function testCasebaseFunctionTest17() {
-    let res = namespaceTest.functiontest.baseFunctionTest17(3270 as short);
+    let res = namespaceTest.functiontest.BaseFunctionTest17(3270 as short);
     assertEQ(res, 32700)
 }
 
 function testCasebaseFunctionTest17_1() {
     try {
-        let res = namespaceTest.functiontest.baseFunctionTest17(32767 as short);
+        let res = namespaceTest.functiontest.BaseFunctionTest17(32767 as short);
     } catch (e) {
         assertEQ(
             e.toString(),
-            "Error: baseFunctionTest17: result exceeds int16_t range")
+            "Error: BaseFunctionTest17: result exceeds int16_t range")
     }
 }
 
 function testCasebaseFunctionTest18() {
-    let res = namespaceTest.functiontest.baseFunctionTest18(21474836);
+    let res = namespaceTest.functiontest.BaseFunctionTest18(21474836);
     assertEQ(res, 2147483600)
 }
 
 function testCasebaseFunctionTest18_1() {
     try {
-        let res = namespaceTest.functiontest.baseFunctionTest18(21474837);
+        let res = namespaceTest.functiontest.BaseFunctionTest18(21474837);
     } catch (e) {
         console.log("testCasebaseFunctionTest18_1 error ", e.toString())
         assertEQ(
             e.toString(),
-            "Error: baseFunctionTest18: result exceeds int32_t range")
+            "Error: BaseFunctionTest18: result exceeds int32_t range")
     }
 }
 
 function testCasebaseFunctionTest19() {
-    let res = namespaceTest.functiontest.baseFunctionTest19(92233720368547758);
+    let res = namespaceTest.functiontest.BaseFunctionTest19(92233720368547758);
     assertEQ(res, 922337203685477580)
 }
 
 function testCasebaseFunctionTest20() {
-    let res = namespaceTest.functiontest.baseFunctionTest20(3.14 as float);
+    let res = namespaceTest.functiontest.BaseFunctionTest20(3.14 as float);
     assertEQ(res, 103.14 as float)
 }
 
 function testCasebaseFunctionTest21() {
-    let res = namespaceTest.functiontest.baseFunctionTest21(1);
+    let res = namespaceTest.functiontest.BaseFunctionTest21(1);
     assertEQ(res, 2.01)
 }
 
 function testCasebaseFunctionTest22() {
     let res =
-        namespaceTest.functiontest.baseFunctionTest22("baseFunctionTest22");
-    assertEQ(res, "baseFunctionTest22hello ani")
+        namespaceTest.functiontest.BaseFunctionTest22("BaseFunctionTest22");
+    assertEQ(res, "BaseFunctionTest22hello ani")
 }
 
 function testCasebaseFunctionTest22_1() {
     let res =
-        namespaceTest.functiontest.baseFunctionTest22("baseFunctionTest22——1");
+        namespaceTest.functiontest.BaseFunctionTest22("baseFunctionTest22——1");
     assertEQ(res, "baseFunctionTest22——1")
 }
 
 function testCasebaseFunctionTest23() {
-    let res = namespaceTest.functiontest.baseFunctionTest23(true);
+    let res = namespaceTest.functiontest.BaseFunctionTest23(true);
     assertEQ(res, false)
 }
 
 function testCasebaseFunctionTest23_1() {
-    let res = namespaceTest.functiontest.baseFunctionTest23(false);
+    let res = namespaceTest.functiontest.BaseFunctionTest23(false);
     assertEQ(res, true)
 }
 
 function testCasebaseFunctionTest24() {
     let byteArray: byte[] = [1, 2, 3, 4, 5];
-    let res = namespaceTest.functiontest.baseFunctionTest24(byteArray);
+    let res: byte[] = namespaceTest.functiontest.BaseFunctionTest24(byteArray);
     let temp: byte[] = [2, 4, 6, 8, 10];
     for (let i = 0; i < res.length; i++) {
         assertEQ(res[i], temp[i])
@@ -254,7 +265,7 @@ function testCasebaseFunctionTest24() {
 
 function testCasebaseFunctionTest25() {
     let shortArray: short[] = [1, 2, 3, 4, 5];
-    let res = namespaceTest.functiontest.baseFunctionTest25(shortArray);
+    let res = namespaceTest.functiontest.BaseFunctionTest25(shortArray);
     let temp: byte[] = [3, 4, 5, 6, 7];
     for (let i = 0; i < res.length; i++) {
         assertEQ(res[i], temp[i])
@@ -262,22 +273,22 @@ function testCasebaseFunctionTest25() {
 }
 
 function testCasebaseFunctionTest26() {
-    let res = namespaceTest.functiontest.baseFunctionTest26(3276 as short);
+    let res = namespaceTest.functiontest.BaseFunctionTest26(3276 as short);
     assertEQ(res, 3286)
 }
 
 function testCasebaseFunctionTest26_1() {
-    let res = namespaceTest.functiontest.baseFunctionTest26(undefined);
+    let res = namespaceTest.functiontest.BaseFunctionTest26(undefined);
     assertEQ(res, undefined)
 }
 
 function testCasebaseFunctionTest27() {
-    let res = namespaceTest.functiontest.baseFunctionTest27(922337203685477580);
+    let res = namespaceTest.functiontest.BaseFunctionTest27(922337203685477580);
     assertEQ(res, 922337203685477590)
 }
 
 function testCasebaseFunctionTest27_1() {
-    let res = namespaceTest.functiontest.baseFunctionTest27(undefined);
+    let res = namespaceTest.functiontest.BaseFunctionTest27(undefined);
     assertEQ(res, undefined)
 }
 
@@ -287,7 +298,7 @@ function testCasebaseFunctionTest28() {
     for (let i = 0; i < numbersU8.length; i++) {
         arrbuf1.set(i, numbersU8[i]);
     }
-    let res = namespaceTest.functiontest.baseFunctionTest28(arrbuf1);
+    let res = namespaceTest.functiontest.BaseFunctionTest28(arrbuf1);
     console.log("testCasebaseFunctionTest28 length: " + res.getByteLength());
     console.log("testCasebaseFunctionTest28 : " + res);
     assertEQ(res.getByteLength(), 5)
@@ -310,7 +321,7 @@ function testCasebaseFunctionTest29() {
         "test1": 11,
         "test2": 12,
     };
-    let res = namespaceTest.functiontest.baseFunctionTest29(myRecord);
+    let res = namespaceTest.functiontest.BaseFunctionTest29(myRecord);
     console.log("testCasebaseFunctionTest29 ", res);
     console.log("testCasebaseFunctionTest29 test0 ", res["test0"]);
     assertEQ(res["test0"], resultRecord["test0"]);
@@ -320,91 +331,61 @@ function testCasebaseFunctionTest29() {
 
 function testCasebaseFunctionTest30() {
     let color = namespaceTest.functiontest.Color.BLUE;
-    let res = namespaceTest.functiontest.baseFunctionTest30(color);
+    let res = namespaceTest.functiontest.BaseFunctionTest30(color);
     console.log("testCasebaseFunctionTest30 ", res)
     assertEQ(res, namespaceTest.functiontest.Color.RED)
 }
 
 function testCasebaseFunctionTest31() {
     let color = namespaceTest.functiontest.Color.RED;
-    namespaceTest.functiontest.baseFunctionTest31(color);
+    namespaceTest.functiontest.BaseFunctionTest31(color);
 }
 
 function testCasebaseFunctionTest32() {
-    let int16Array: short[] = [121, 100, 32767, -32768, 0];
-    let int64Array: long[] =
-        [9223372036854775807, -100, 121, -2147483648, -9223372036854775808];
-    let res = namespaceTest.functiontest.baseFunctionTest32(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        true, int16Array, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest32(
+        127 as byte, 100 as short, 256, 10000, true);
     assertEQ(res, 100)
 }
 
 function testCasebaseFunctionTest32_1() {
-    let int16Array: short[] = [121, 100, 32767, -32768, 0];
-    let int64Array: long[] =
-        [9223372036854775807, -100, 121, -2147483648, -9223372036854775808];
-    let res = namespaceTest.functiontest.baseFunctionTest32(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, int16Array, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest32(
+        127 as byte, 100 as short, 256, 10000, false);
     assertEQ(res, 127)
 }
 
 function testCasebaseFunctionTest33() {
-    let byteArray: byte[] = [1, 2, 3, 4, 5];
-    let intArray: int[] = [922337, -100, 121, -2147483648, -92233720];
-    let res = namespaceTest.functiontest.baseFunctionTest33(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        true, byteArray, intArray);
+    let res = namespaceTest.functiontest.BaseFunctionTest33(
+        127 as byte, 100 as short, 256, 10000, true);
     assertEQ(res, 256)
 }
 
 function testCasebaseFunctionTest33_1() {
-    let byteArray: byte[] = [1, 2, 3, 4, 5];
-    let intArray: int[] = [922337, -100, 121, -2147483648, -92233720];
-    let res = namespaceTest.functiontest.baseFunctionTest33(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, byteArray, intArray);
+    let res = namespaceTest.functiontest.BaseFunctionTest33(
+        127 as byte, 100 as short, 256, 10000, false);
     assertEQ(res, 100)
 }
 
 function testCasebaseFunctionTest34() {
-    let strArray: string[] = ["test1", "test2", "test3", "test4", "test5"];
-    let int64Array: long[] =
-        [9223372036854775807, -100, 121, -2147483648, -9223372036854775808];
-    let res = namespaceTest.functiontest.baseFunctionTest34(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        true, strArray, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest34(
+        127 as byte, 100 as short, 256, 10000, true);
     assertEQ(res, 10000)
 }
 
 function testCasebaseFunctionTest34_1() {
-    let strArray: string[] = ["test1", "test2", "test3", "test4", "test5"];
-    let int64Array: long[] =
-        [9223372036854775807, -100, 121, -2147483648, -9223372036854775808];
-    let res = namespaceTest.functiontest.baseFunctionTest34(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, strArray, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest34(
+        127 as byte, 100 as short, 256, 10000, false);
     assertEQ(res, 100)
 }
 
 function testCasebaseFunctionTest35() {
-    let boolArray: boolean[] = [true, false, true, false, true];
-    let int64Array: long[] =
-        [9223372036854775807, -100, 121, -2147483648, -9223372036854775808];
-    let res = namespaceTest.functiontest.baseFunctionTest35(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        true, boolArray, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest35(
+        127 as byte, 100 as short, 256, 10000, true);
     assertEQ(res, 127)
 }
 
 function testCasebaseFunctionTest35_1() {
-    let boolArray: boolean[] = [true, false, true, false, true];
-    let int64Array: long[] =
-        [9223372036854775807, -100, 121, -2147483648, -9223372036854775808];
-    let res = namespaceTest.functiontest.baseFunctionTest35(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, boolArray, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest35(
+        127 as byte, 100 as short, 256, 10000, false);
     assertEQ(res, 100)
 }
 
@@ -412,11 +393,10 @@ function testCasebaseFunctionTest36() {
     let int8Array: byte[] = [1, 2, 3, 4, 5];
     let int64Array: long[] =
         [9223372036854775807, -100, 121, -2147483648, -9223372036854775808];
-    let res = namespaceTest.functiontest.baseFunctionTest36(
-        10 as byte, 11 as short, 12, 10000, 3.14 as float, -2.0002, "test1",
-        true, int8Array, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest36(
+        10 as byte, 11 as short, true, int8Array, int64Array);
     assertEQ(res.length, int8Array.length)
-    let tempResult: int[] = [34, 35, 36, 37, 38];
+    let tempResult: int[] = [22, 23, 24, 25, 26];
     for (let i: int = 0; i < res.length; i++) {
         assertEQ(res[i], tempResult[i])
     }
@@ -425,9 +405,8 @@ function testCasebaseFunctionTest36() {
 function testCasebaseFunctionTest36_1() {
     let int8Array: byte[] = [1, 2, 3, 4, 5];
     let int64Array: long[] = [100, -100, 200, -300, -400];
-    let res = namespaceTest.functiontest.baseFunctionTest36(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, int8Array, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest36(
+        127 as byte, 100 as short, false, int8Array, int64Array);
     assertEQ(res.length, int64Array.length)
     for (let i: int = 0; i < res.length; i++) {
         assertEQ(res[i], int64Array[i])
@@ -437,9 +416,8 @@ function testCasebaseFunctionTest36_1() {
 function testCasebaseFunctionTest37() {
     let intArray: int[] = [922337, -100, 121, -2147483648, -92233720];
     let int64Array: long[] = [100, -100, 121, -200, 0];
-    let res = namespaceTest.functiontest.baseFunctionTest37(
-        10 as byte, 11 as short, 12, 10000, 3.14 as float, -2.0002, "test1",
-        true, intArray, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest37(
+        10 as byte, 11 as short, 12, true, int64Array);
     assertEQ(res.length, int64Array.length)
     let tempResult: int[] = [133, -67, 154, -167, 33];
     for (let i: int = 0; i < res.length; i++) {
@@ -450,9 +428,8 @@ function testCasebaseFunctionTest37() {
 function testCasebaseFunctionTest37_1() {
     let intArray: int[] = [922337, -100, 121, -2147483648, -92233720];
     let int64Array: long[] = [100, -100, 200, -300, -400];
-    let res = namespaceTest.functiontest.baseFunctionTest37(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, intArray, int64Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest37(
+        127 as byte, 100 as short, 256, false, int64Array);
     assertEQ(res.length, int64Array.length)
     for (let i: int = 0; i < res.length; i++) {
         assertEQ(res[i], int64Array[i] * 10)
@@ -462,36 +439,32 @@ function testCasebaseFunctionTest37_1() {
 function testCasebaseFunctionTest38() {
     let byteArray: byte[] = [1, 2, 3, 4, 5];
     let int16Array: short[] = [100, -100, 121, -200, -500];
-    let res = namespaceTest.functiontest.baseFunctionTest38(
-        10 as byte, 11 as short, 12, 10000, 3.14 as float, -2.0002, "test1",
-        true, byteArray, int16Array);
-    assertEQ(res, "test110111210000")
+    let res = namespaceTest.functiontest.BaseFunctionTest38(
+        10 as byte, "test1", true, byteArray, int16Array);
+    assertEQ(res, "test110")
 }
 
 function testCasebaseFunctionTest38_1() {
     let byteArray: byte[] = [1, 2, 3, 4, 5];
     let int16Array: short[] = [100, -100, 121, -200, -500];
-    let res = namespaceTest.functiontest.baseFunctionTest38(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, byteArray, int16Array);
+    let res = namespaceTest.functiontest.BaseFunctionTest38(
+        127 as byte, "test1", false, byteArray, int16Array);
     assertEQ(res, "test11100")
 }
 
 function testCasebaseFunctionTest39() {
     let boolArray: boolean[] = [true, false, true, false, true];
     let intArray: int[] = [922337, -100, 121, -2147483648, -92233720];
-    let res = namespaceTest.functiontest.baseFunctionTest39(
-        10 as byte, 11 as short, 12, 10000, 3.14 as float, -2.0002, "test1",
-        true, boolArray, intArray);
+    let res = namespaceTest.functiontest.BaseFunctionTest39(
+        11 as short, "test1", true, boolArray, intArray);
     assertEQ(res, false)
 }
 
 function testCasebaseFunctionTest39_1() {
     let boolArray: boolean[] = [true, false, true, false, true];
     let intArray: int[] = [922337, -100, 121, -2147483648, -92233720];
-    let res = namespaceTest.functiontest.baseFunctionTest39(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, boolArray, intArray);
+    let res = namespaceTest.functiontest.BaseFunctionTest39(
+        100 as short, "test1", false, boolArray, intArray);
     assertEQ(res, false)
 }
 
@@ -502,9 +475,8 @@ function testCasebaseFunctionTest40() {
     for (let i = 0; i < numbersU8.length; i++) {
         arrbuf1.set(i, numbersU8[i])
     }
-    let res = namespaceTest.functiontest.baseFunctionTest40(
-        10 as byte, 11 as short, 12, 10000, 3.14 as float, -2.0002, "test1",
-        true, byteArray, arrbuf1);
+    let res = namespaceTest.functiontest.BaseFunctionTest40(
+        -2.0002, "test1", true, byteArray, arrbuf1);
     assertEQ(res.length, byteArray.length)
     for (let i: int = 0; i < res.length; i++) {
         assertEQ(res[i], byteArray[i] * 2)
@@ -518,9 +490,8 @@ function testCasebaseFunctionTest40_1() {
     for (let i = 0; i < numbersU8.length; i++) {
         arrbuf1.set(i, numbersU8[i])
     }
-    let res = namespaceTest.functiontest.baseFunctionTest40(
-        127 as byte, 100 as short, 256, 10000, 3.14 as float, -2.0002, "test1",
-        false, byteArray, arrbuf1);
+    let res = namespaceTest.functiontest.BaseFunctionTest40(
+        -2.0002, "test1", false, byteArray, arrbuf1);
     assertEQ(res.length, byteArray.length)
     for (let i: int = 0; i < res.length; i++) {
         assertEQ(res[i], byteArray[i] + 10)
@@ -528,28 +499,24 @@ function testCasebaseFunctionTest40_1() {
 }
 
 function testCasebaseFunctionTest41() {
-    let int16Array: short[] = [121, 100, 32767, -32768, 0];
-    let int64Array: long[] =
-        [100, -100, 9223372036854775807, -300, -9223372036854775808];
-    namespaceTest.functiontest.baseFunctionTest41(
-        10 as byte, 11 as short, 12, 10000, 3.14 as float, -2.0002, "test41",
-        true, int16Array, int64Array);
+    namespaceTest.functiontest.BaseFunctionTest41(
+        10 as byte, 11 as short, 12, 10000, 3.14 as float);
 }
 function testCasebaseFunctionTest42() {
     let res =
-        namespaceTest.functiontest.baseFunctionTest42(10000, 256 as short);
+        namespaceTest.functiontest.BaseFunctionTest42(10000, 256 as short);
     assertEQ(res, 10256)
 }
 
 function testCasebaseFunctionTest42_1() {
     try {
-        let res = namespaceTest.functiontest.baseFunctionTest42(
+        let res = namespaceTest.functiontest.BaseFunctionTest42(
             2147483647, 256 as short);
     } catch (e) {
         console.log("testCasebaseFunctionTest42_1 e ", e.toString())
         assertEQ(
             e.toString(),
-            "Error: baseFunctionTest42_int: result exceeds int32_t range")
+            "Error: BaseFunctionTest42_int: result exceeds int32_t range")
     }
 }
 
@@ -559,7 +526,7 @@ function testCasebaseFunctionTest43() {
         "test2": 1,
         "test3": 2,
     };
-    let res = namespaceTest.functiontest.baseFunctionTest42(10000, record);
+    let res = namespaceTest.functiontest.BaseFunctionTest42(10000, record);
     assertEQ(res, 10010)
 }
 
@@ -569,69 +536,69 @@ function testCasebaseFunctionTest43_1() {
         "test2": 1,
         "test3": 2,
     };
-    let res = namespaceTest.functiontest.baseFunctionTest42(undefined, record);
+    let res = namespaceTest.functiontest.BaseFunctionTest42(undefined, record);
     assertEQ(res, -2147483648)
 }
 
 function testCasebaseFunctionTest44() {
-    let res = namespaceTest.functiontest.baseFunctionTest42();
+    let res = namespaceTest.functiontest.BaseFunctionTest42();
     assertEQ(res, 2147483647)
 }
 
 function testCasebaseFunctionTest45() {
     const testData: namespaceTest.functiontest
         .Data = {data1: "baseFunctionTest42", data2: true, data3: 2147483647};
-    namespaceTest.functiontest.baseFunctionTest42(testData);
+    namespaceTest.functiontest.BaseFunctionTest42(testData);
 }
 
 
 function testCasebaseFunctionTest46() {
-    nameInterfaceTest.baseFunctionTest43();
+    nameInterfaceTest.BaseFunctionTest43();
 }
 
 function testCasebaseFunctionTest47() {
-    let res = nameInterfaceTest.baseFunctionTest44(-10 as byte);
+    let res = nameInterfaceTest.BaseFunctionTest44(-10 as byte);
     assertEQ(res, 90)
 }
 
 function testCasebaseFunctionTest48() {
-    let res = nameInterfaceTest.baseFunctionTest45(320 as short);
+    let res = nameInterfaceTest.BaseFunctionTest45(320 as short);
     assertEQ(res, 32000)
 }
 
 function testCasebaseFunctionTest49() {
-    let res = nameInterfaceTest.baseFunctionTest46(2147483);
+    let res = nameInterfaceTest.BaseFunctionTest46(2147483);
     assertEQ(res, 214748300)
 }
 
 function testCasebaseFunctionTest50() {
-    let res = nameInterfaceTest.baseFunctionTest47(9223372036854775);
+    let res = nameInterfaceTest.BaseFunctionTest47(9223372036854775);
     assertEQ(res, 922337203685477500)
 }
 
 function testCasebaseFunctionTest51() {
-    let res = nameInterfaceTest.baseFunctionTest48(100.123 as float);
+    let res = nameInterfaceTest.BaseFunctionTest48(100.123 as float);
     assertEQ(res, 90.123 as float)
 }
 
 function testCasebaseFunctionTest52() {
-    let res = nameInterfaceTest.baseFunctionTest49(200.66);
+    let res = nameInterfaceTest.BaseFunctionTest49(200.66);
     assertEQ(res, 100.66)
 }
 
 function testCasebaseFunctionTest53() {
     let res =
-        nameInterfaceTest.baseFunctionTest50("testCasebaseFunctionTest53");
-    assertEQ(res, "testCasebaseFunctionTest53baseFunctionTest50")
+        nameInterfaceTest.BaseFunctionTest50("testCasebaseFunctionTest53");
+    assertEQ(res, "testCasebaseFunctionTest53BaseFunctionTest50")
 }
 
 function testCasebaseFunctionTest54() {
-    let res = nameInterfaceTest.baseFunctionTest51(true);
+    let res = nameInterfaceTest.BaseFunctionTest51(true);
     assertEQ(res, false)
 }
 
 function testCasebaseFunctionTest54_1() {
-    let res = nameInterfaceTest.baseFunctionTest51(false);
+    let res = nameInterfaceTest.BaseFunctionTest51(false);
     assertEQ(res, true)
 }
 
@@ -641,7 +608,7 @@ function testCasebaseFunctionTest55() {
     for (let i = 0; i < numbersU8.length; i++) {
         arrbuf1.set(i, numbersU8[i]);
     }
-    let res = nameInterfaceTest.baseFunctionTest52(arrbuf1);
+    let res = nameInterfaceTest.BaseFunctionTest52(arrbuf1);
     assertEQ(res.getByteLength(), 5)
     for (let i = 0; i < res.getByteLength(); i++) {
         console.log(
@@ -651,22 +618,22 @@ function testCasebaseFunctionTest55() {
 }
 
 function testCasebaseFunctionTest56() {
-    let res = nameInterfaceTest.baseFunctionTest53(101 as byte);
+    let res = nameInterfaceTest.BaseFunctionTest53(101 as byte);
     assertEQ(res, 1)
 }
 
 function testCasebaseFunctionTest56_1() {
-    let res = nameInterfaceTest.baseFunctionTest53(undefined);
+    let res = nameInterfaceTest.BaseFunctionTest53(undefined);
     assertEQ(res, undefined)
 }
 
 function testCasebaseFunctionTest57() {
-    let res = nameInterfaceTest.baseFunctionTest54(2147483647);
+    let res = nameInterfaceTest.BaseFunctionTest54(2147483647);
     assertEQ(res, 2147483547)
 }
 
 function testCasebaseFunctionTest57_1() {
-    let res = nameInterfaceTest.baseFunctionTest54(undefined);
+    let res = nameInterfaceTest.BaseFunctionTest54(undefined);
     assertEQ(res, undefined)
 }
 
@@ -691,18 +658,18 @@ function testCasebaseFunctionTest57_1() {
 //     101: testData2,
 //     102: testData3,
 //     };
-//     let res = nameInterfaceTest.baseFunctionTest55(myRecord);
+//     let res = nameInterfaceTest.BaseFunctionTest55(myRecord);
 //     console.log("testCasebaseFunctionTest58 ",res)
 //     assertEQ(res,2147483547)
 // }
 
 function testCasebaseFunctionTest59() {
-    let res = nameInterfaceTest.baseFunctionTest56(100);
+    let res = nameInterfaceTest.BaseFunctionTest56(100);
     assertEQ(res, 10000)
 }
 
 function testCasebaseFunctionTest60() {
-    let res = nameInterfaceTest.baseFunctionTest57(127 as byte);
+    let res = nameInterfaceTest.BaseFunctionTest57(127 as byte);
     assertEQ(res, 12700)
 }
 
@@ -712,218 +679,409 @@ function testCasebaseFunctionTest61() {
 }
 
 function testCasebaseFunctionTest62() {
-    let res = nameInterfaceTest.baseFunctionTest58(true);
+    let res = nameInterfaceTest.BaseFunctionTest58(true);
     assertEQ(res.success, true)
     assertEQ(res.errorCode, 10000)
     assertEQ(res.errorMessage, "test58")
 }
 
 function testCasebaseFunctionTest62_1() {
-    let res = nameInterfaceTest.baseFunctionTest58(false);
+    let res = nameInterfaceTest.BaseFunctionTest58(false);
     assertEQ(res.success, false)
     assertEQ(res.errorCode, 100)
     assertEQ(res.errorMessage, "test581")
 }
 
-
-function testInter1basePerformanceFunctionTest1() {
-    testInterfacePerformance1.basePerformanceFunctionTest1();
+function testCasebaseFunctionTest63() {
+    let record: Record<string, string> = {
+        "test1": "test123!@#$%",
+        "test2": "test123^&*()",
+        "test3": "test123_+{}[]",
+        "test4": "test123;':<>?`",
+    };
+    namespaceTest.functiontest.BaseFunctionTest59(record);
 }
 
-function testInter1basePerformanceFunctionTest2() {
+
+function testCasebaseFunctionTest64() {
+    let record: Record<long, boolean> = {
+        9223372036854775807: false,
+        10: true,
+        20: false,
+        30: true,
+    };
+    let res = namespaceTest.functiontest.BaseFunctionTest60(record);
+    assertEQ(res, true)
+}
+
+function testCasebaseFunctionTest64_1() {
+    let record: Record<long, boolean> = {
+        [-100]: false,
+        10: true,
+        20: false,
+        30: true,
+    };
+    let res = namespaceTest.functiontest.BaseFunctionTest60(record);
+    assertEQ(res, false)
+}
+
+
+function testCasebaseFunctionTest64_2() {
+    let record: Record<long, boolean> = {
+        50: false,
+        10: true,
+        20: false,
+        0: true,
+    };
+    let res = namespaceTest.functiontest.BaseFunctionTest60(record);
+    assertEQ(res, false)
+}
+
+
+function testInter1BasePerformanceFunctionTest1() {
+    testInterfacePerformance1.BasePerformanceFunctionTest1();
+}
+
+function testInter1BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance1.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance1.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter2basePerformanceFunctionTest1() {
-    testInterfacePerformance2.basePerformanceFunctionTest1();
+function testInter2BasePerformanceFunctionTest1() {
+    testInterfacePerformance2.BasePerformanceFunctionTest1();
 }
 
-function testInter2basePerformanceFunctionTest2() {
+function testInter2BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance2.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance2.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter3basePerformanceFunctionTest1() {
-    testInterfacePerformance3.basePerformanceFunctionTest1();
+function testInter3BasePerformanceFunctionTest1() {
+    testInterfacePerformance3.BasePerformanceFunctionTest1();
 }
 
-function testInter3basePerformanceFunctionTest2() {
+function testInter3BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance3.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance3.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter4basePerformanceFunctionTest1() {
-    testInterfacePerformance4.basePerformanceFunctionTest1();
+function testInter4BasePerformanceFunctionTest1() {
+    testInterfacePerformance4.BasePerformanceFunctionTest1();
 }
 
-function testInter4basePerformanceFunctionTest2() {
+function testInter4BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance4.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance4.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
-function testInter5basePerformanceFunctionTest1() {
-    testInterfacePerformance5.basePerformanceFunctionTest1();
+function testInter5BasePerformanceFunctionTest1() {
+    testInterfacePerformance5.BasePerformanceFunctionTest1();
 }
 
-function testInter5basePerformanceFunctionTest2() {
+function testInter5BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance5.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-
-function testInter6basePerformanceFunctionTest1() {
-    testInterfacePerformance6.basePerformanceFunctionTest1();
-}
-
-function testInter6basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance6.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-function testInter7basePerformanceFunctionTest1() {
-    testInterfacePerformance7.basePerformanceFunctionTest1();
-}
-
-function testInter7basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance7.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance5.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter8basePerformanceFunctionTest1() {
-    testInterfacePerformance8.basePerformanceFunctionTest1();
+function testInter6BasePerformanceFunctionTest1() {
+    testInterfacePerformance6.BasePerformanceFunctionTest1();
 }
 
-function testInter8basePerformanceFunctionTest2() {
+function testInter6BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance8.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance6.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
-function testInter9basePerformanceFunctionTest1() {
-    testInterfacePerformance9.basePerformanceFunctionTest1();
+function testInter7BasePerformanceFunctionTest1() {
+    testInterfacePerformance7.BasePerformanceFunctionTest1();
 }
 
-function testInter9basePerformanceFunctionTest2() {
+function testInter7BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance9.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-function testInter10basePerformanceFunctionTest1() {
-    testInterfacePerformance10.basePerformanceFunctionTest1();
-}
-
-function testInter10basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance10.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-function testInter11basePerformanceFunctionTest1() {
-    testInterfacePerformance11.basePerformanceFunctionTest1();
-}
-
-function testInter11basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance11.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-function testInter12basePerformanceFunctionTest1() {
-    testInterfacePerformance12.basePerformanceFunctionTest1();
-}
-
-function testInter12basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance12.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-function testInter13basePerformanceFunctionTest1() {
-    testInterfacePerformance13.basePerformanceFunctionTest1();
-}
-
-function testInter13basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance13.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance7.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter14basePerformanceFunctionTest1() {
-    testInterfacePerformance14.basePerformanceFunctionTest1();
+function testInter8BasePerformanceFunctionTest1() {
+    testInterfacePerformance8.BasePerformanceFunctionTest1();
 }
 
-function testInter14basePerformanceFunctionTest2() {
+function testInter8BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance14.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance8.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter9BasePerformanceFunctionTest1() {
+    testInterfacePerformance9.BasePerformanceFunctionTest1();
+}
+
+function testInter9BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance9.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter10BasePerformanceFunctionTest1() {
+    testInterfacePerformance10.BasePerformanceFunctionTest1();
+}
+
+function testInter10BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance10.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter11BasePerformanceFunctionTest1() {
+    testInterfacePerformance11.BasePerformanceFunctionTest1();
+}
+
+function testInter11BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance11.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter12BasePerformanceFunctionTest1() {
+    testInterfacePerformance12.BasePerformanceFunctionTest1();
+}
+
+function testInter12BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance12.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter13BasePerformanceFunctionTest1() {
+    testInterfacePerformance13.BasePerformanceFunctionTest1();
+}
+
+function testInter13BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance13.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter15basePerformanceFunctionTest1() {
-    testInterfacePerformance15.basePerformanceFunctionTest1();
+function testInter14BasePerformanceFunctionTest1() {
+    testInterfacePerformance14.BasePerformanceFunctionTest1();
 }
 
-function testInter15basePerformanceFunctionTest2() {
+function testInter14BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance15.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance14.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter16basePerformanceFunctionTest1() {
-    testInterfacePerformance16.basePerformanceFunctionTest1();
+function testInter15BasePerformanceFunctionTest1() {
+    testInterfacePerformance15.BasePerformanceFunctionTest1();
 }
 
-function testInter16basePerformanceFunctionTest2() {
+function testInter15BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance16.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-function testInter17basePerformanceFunctionTest1() {
-    testInterfacePerformance17.basePerformanceFunctionTest1();
-}
-
-function testInter17basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance17.basePerformanceFunctionTest2(95 as byte);
-    assertEQ(res, 10)
-}
-function testInter18basePerformanceFunctionTest1() {
-    testInterfacePerformance18.basePerformanceFunctionTest1();
-}
-
-function testInter18basePerformanceFunctionTest2() {
-    let res =
-        testInterfacePerformance18.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance15.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter19basePerformanceFunctionTest1() {
-    testInterfacePerformance19.basePerformanceFunctionTest1();
+function testInter16BasePerformanceFunctionTest1() {
+    testInterfacePerformance16.BasePerformanceFunctionTest1();
 }
 
-function testInter19basePerformanceFunctionTest2() {
+function testInter16BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance19.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance16.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter17BasePerformanceFunctionTest1() {
+    testInterfacePerformance17.BasePerformanceFunctionTest1();
+}
+
+function testInter17BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance17.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter18BasePerformanceFunctionTest1() {
+    testInterfacePerformance18.BasePerformanceFunctionTest1();
+}
+
+function testInter18BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance18.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
-function testInter20basePerformanceFunctionTest1() {
-    testInterfacePerformance20.basePerformanceFunctionTest1();
+function testInter19BasePerformanceFunctionTest1() {
+    testInterfacePerformance19.BasePerformanceFunctionTest1();
 }
 
-function testInter20basePerformanceFunctionTest2() {
+function testInter19BasePerformanceFunctionTest2() {
     let res =
-        testInterfacePerformance20.basePerformanceFunctionTest2(95 as byte);
+        testInterfacePerformance19.BasePerformanceFunctionTest2(95 as byte);
     assertEQ(res, 10)
 }
 
+function testInter20BasePerformanceFunctionTest1() {
+    testInterfacePerformance20.BasePerformanceFunctionTest1();
+}
+
+function testInter20BasePerformanceFunctionTest2() {
+    let res =
+        testInterfacePerformance20.BasePerformanceFunctionTest2(95 as byte);
+    assertEQ(res, 10)
+}
+function testInter21BasePerformanceFunctionTest1() {
+    let res = testInterfacePerformance21.i32_test;
+    assertEQ(res, 2147483647)
+}
+function testInter21BasePerformanceFunctionTest2() {
+    let res = testInterfacePerformance21.struct_test;
+    assertEQ(res.data1, "testStruct")
+    assertEQ(res.data2, false)
+    assertEQ(res.data3, -2147483648)
+}
+function testInter21BasePerformanceFunctionTest3() {
+    let res =
+        testInterfacePerformance21.BasePerformanceFunctionTest2(10 as byte);
+    assertEQ(res, 110 as byte)
+}
+
+function testInter21BasePerformanceFunctionTest4() {
+    let res: byte = testInterfacePerformance21.i8_test_attribute;
+    assertEQ(res, 127)
+}
+
+function testInter21BasePerformanceFunctionTest5() {
+    let res: short = testInterfacePerformance21.i16_test_attribute;
+    assertEQ(res, 32767)
+}
+
+function testInter21BasePerformanceFunctionTest6() {
+    let res: int = testInterfacePerformance21.i32_test_attribute;
+    assertEQ(res, 2147483647)
+}
+
+function testInter21BasePerformanceFunctionTest7() {
+    let res: long = testInterfacePerformance21.i64_test_attribute;
+    assertEQ(res, 9223372036854775807)
+}
+
+function testInter21BasePerformanceFunctionTest8() {
+    let res: float = testInterfacePerformance21.f32_test_attribute;
+    assertEQ(res, 3.14 as float)
+}
+function testInter21BasePerformanceFunctionTest9() {
+    let res: double = testInterfacePerformance21.f64_test_attribute;
+    assertEQ(res, -1.23)
+}
+
+function testInter21BasePerformanceFunctionTest10() {
+    let res: string = testInterfacePerformance21.str_test_attribute;
+    assertEQ(res, "TESTSTR")
+}
+
+function testInter21BasePerformanceFunctionTest11() {
+    let res: boolean = testInterfacePerformance21.bool_test_attribute;
+    assertEQ(res, false)
+}
+
+function testInter21BasePerformanceFunctionTest12() {
+    let res: ArrayBuffer =
+        testInterfacePerformance21._ArrayBuffer_test_attribute;
+    assertEQ(res.getByteLength(), 10)
+    for (let i = 0; i < res.getByteLength(); i++) {
+        assertEQ(res.at(i), 10)
+    }
+}
+function testInter21BasePerformanceFunctionTest13() {
+    let res: int|undefined = testInterfacePerformance21.optional_test_attribute;
+    assertEQ(res, 1010)
+}
+
+function testInter21BasePerformanceFunctionTest14() {
+    let res: Record<int, namespaceTest.functiontest.Data> =
+        testInterfacePerformance21.record_test_attribute;
+    console.log("testInter21BasePerformanceFunctionTest14 ", res)
+    if (res[100]) {
+        const item = res[100];
+        assertEQ(item?.data1, "one");
+        assertEQ(item?.data2, true);
+        assertEQ(item?.data3, 100);
+    }
+    else {
+        assert false;
+    }
+    if (res[101]) {
+        const item = res[101];
+        assertEQ(item?.data1, "two");
+        assertEQ(item?.data2, false);
+        assertEQ(item?.data3, 101);
+    } else {
+        assert false;
+    }
+}
+
+function testInter21BasePerformanceFunctionTest15() {
+    let res: namespaceTest.functiontest.TestUnionName =
+        testInterfacePerformance21.union_test_attribute;
+    console.log("testInter21BasePerformanceFunctionTest15 ", res)
+    assertEQ(res, 100)
+}
+
+function testInter21BasePerformanceFunctionTest16() {
+    let res: boolean[] = testInterfacePerformance21.array_test_attribute;
+    console.log("testInter21BasePerformanceFunctionTest16 ", res)
+    assertEQ(res.length, 1)
+    assertEQ(res[0], true)
+}
+
+function testInter21BasePerformanceFunctionTest17() {
+    let color = namespaceTest.functiontest.Color.GREEN;
+    let res: namespaceTest.functiontest.Color =
+        testInterfacePerformance21.enum_test_attribute;
+    assertEQ(res, color)
+}
+
+function testCaseIbaseInterface1() {
+    let res = testIbaseInterface2.BaseTest();
+    assertEQ(res, -2147483648)
+}
+
+
+function testCaseIbaseInterface2() {
+    let res = testIbaseInterface2.BaseTest1();
+    assertEQ(res, "TestInterface")
+}
+function testCaseIbaseInterface3() {
+    let res = testIbaseInterface3.BaseTest();
+    assertEQ(res, 2147483647)
+}
+
+
+function testCaseIbaseInterface4() {
+    let res = testIbaseInterface3.BaseTest2();
+    assertEQ(res, true)
+}
+
+function testCaseConstant1() {
+    const res = namespaceTest.functiontest.CONSTANT_I8_001;
+    assertEQ(res, 127)
+}
+
+function testCaseConstant2() {
+    const res = namespaceTest.functiontest.CONSTANT_I8_002;
+    assertEQ(res, -128)
+}
+
+function testCaseConstant3() {
+    const res = namespaceTest.functiontest.CONSTANT_I32_001;
+    assertEQ(res, 2147483647)
+}
 // namespace2
 function primitives_noreturn() {
-    namespace2Test.outer.inner.primitives_noreturn(
+    namespace2Test.outer.inner.Primitives_noreturn(
         1 as int, 2 as double, true, "hello", 3 as byte)
 }
 function primitives_return() {
-    let res = namespace2Test.outer.inner.primitives_return(
+    let res = namespace2Test.outer.inner.Primitives_return(
         1 as int, 2 as double, true, "hello", 3 as byte)
     console.log(res);
 }
@@ -935,9 +1093,9 @@ function containers_noreturn() {
     let arrf32: float[] = [1.1, 1.2, 1.3];
     let arrf64: double[] = [1.123, 2.123, 3.123];
 
-    namespace2Test.outer.inner.containers_noreturn(
+    namespace2Test.outer.inner.Containers_noreturn(
         arri8, arri16, arrf32, arrf64, "union_string")
-    namespace2Test.outer.inner.containers_noreturn(
+    namespace2Test.outer.inner.Containers_noreturn(
         arri8, arri16, arrf32, arrf64, 1 as byte)
 }
 function containers_return() {
@@ -947,9 +1105,9 @@ function containers_return() {
     let arrf32: float[] = [1.1, 1.2, 1.3];
     let arrf64: double[] = [1.123, 2.123, 3.123];
 
-    let res1 = namespace2Test.outer.inner.containers_return(
+    let res1 = namespace2Test.outer.inner.Containers_return(
         arri8, arri16, arrf32, arrf64, "union_string")
-    let res2 = namespace2Test.outer.inner.containers_return(
+    let res2 = namespace2Test.outer.inner.Containers_return(
         arri8, arri16, arrf32, arrf64, 1 as byte)
     console.log(res1 + " " + res2)
 }
@@ -960,7 +1118,7 @@ function enum_noreturn() {
     let color4 = namespace2Test.outer.inner.Color.green;
     let color5 = namespace2Test.outer.inner.Color.black;
 
-    namespace2Test.outer.inner.enum_noreturn(
+    namespace2Test.outer.inner.Enum_noreturn(
         color1, color2, color3, color4, color5)
 }
 function enum_return() {
@@ -970,7 +1128,7 @@ function enum_return() {
     let color4 = namespace2Test.outer.inner.Color.green;
     let color5 = namespace2Test.outer.inner.Color.black;
 
-    let res = namespace2Test.outer.inner.enum_return(
+    let res = namespace2Test.outer.inner.Enum_return(
         color1, color2, color3, color4, color5)
     console.log(res)
 }
@@ -979,53 +1137,53 @@ let instance: namespace2Test.outer.inner.TestInterface =
     namespace2Test.outer.inner.get_interface();
 
 function interface_noparam_noreturn() {
-    instance.noparam_noreturn()
+    instance.Noparam_noreturn()
 }
 
 function interface_primitives_noreturn() {
-    instance.primitives_noreturn(1 as byte)
+    instance.Primitives_noreturn(1 as byte)
 }
 function interface_primitives_noreturn1() {
-    instance.primitives_noreturn1(12 as short)
+    instance.Primitives_noreturn1(12 as short)
 }
 function interface_primitives_noreturn2() {
-    instance.primitives_noreturn2(123 as int)
+    instance.Primitives_noreturn2(123 as int)
 }
 function interface_primitives_noreturn3() {
-    instance.primitives_noreturn3(1.1 as float)
+    instance.Primitives_noreturn3(1.1 as float)
 }
 function interface_primitives_noreturn4() {
-    instance.primitives_noreturn4(1.1234 as double)
+    instance.Primitives_noreturn4(1.1234 as double)
 }
 function interface_primitives_noreturn5() {
-    instance.primitives_noreturn5(true)
+    instance.Primitives_noreturn5(true)
 }
 function interface_primitives_noreturn6() {
-    instance.primitives_noreturn6("hello")
+    instance.Primitives_noreturn6("hello")
 }
 function interface_primitives_noreturn7() {
-    instance.primitives_noreturn7(1234)
+    instance.Primitives_noreturn7(1234)
 }
 
 function interface_primitives_return() {
-    instance.primitives_return(123 as int)
+    instance.Primitives_return(123 as int)
 }
 function interface_containers_noreturn1() {
     let arri8: byte[] = [1, 2, 3, 4, 5];
-    instance.containers_noreturn1(arri8)
+    instance.Containers_noreturn1(arri8)
 }
 function interface_containers_noreturn2() {
-    instance.containers_noreturn2("union string")
-    instance.containers_noreturn2(1 as byte)
+    instance.Containers_noreturn2("union string")
+    instance.Containers_noreturn2(1 as byte)
 }
 function interface_containers_noreturn3() {
     let numbersU8: byte[] = [1, 2, 3, 4, 5];
     let arrbuf1: ArrayBuffer = new ArrayBuffer(numbersU8.length);
-    instance.containers_noreturn3(arrbuf1)
+    instance.Containers_noreturn3(arrbuf1)
 }
 function interface_containers_noreturn4() {
     let color1 = namespace2Test.outer.inner.Color.red;
-    instance.containers_noreturn4(color1)
+    instance.Containers_noreturn4(color1)
 }
 function interface_containers_noreturn5() {
     let record: Record<string, int> = {
@@ -1034,122 +1192,122 @@ function interface_containers_noreturn5() {
         "test3": 2,
         "test4": 3,
     };
-    instance.containers_noreturn5(record)
+    instance.Containers_noreturn5(record)
 }
 
 
 
 function interface_containers_return() {
-    let res = instance.containers_return(123 as byte)
+    let res = instance.Containers_return(123 as byte)
     console.log(res)
 }
 
 function interface_ErrorResponse() {
     let _struct: namespace2Test.outer.inner.ErrorResponse =
-        instance.func_ErrorResponse()
+        instance.Func_ErrorResponse()
 }
 
 function overload1() {
-    instance.overloadFunc(1 as byte, 2 as byte)
+    instance.OverloadFunc(1 as byte, 2 as byte)
 }
 function overload2() {
     let arri8: byte[] = [1, 2, 3, 4, 5];
     let numbersU8: byte[] = [1, 2, 3, 4, 5];
     let arrbuf1: ArrayBuffer = new ArrayBuffer(numbersU8.length);
-    let s = instance.overloadFunc(arri8, arrbuf1)
+    let s = instance.OverloadFunc(arri8, arrbuf1)
     console.log(s)
 }
 function overload3() {
-    instance.overloadFunc()
+    instance.OverloadFunc()
 }
 function overload4() {
     let mystruct: namespace2Test.outer.inner.Mystruct = {
         _string: "hello",
         _i8: 1 as byte
     };
-    instance.overloadFunc(mystruct)
+    instance.OverloadFunc(mystruct)
 }
 
 function ns_5() {
-    namespace2Test.test1.test2.test3.test4.test5.funtest1(
+    namespace2Test.test1.test2.test3.test4.test5.Funtest1(
         123 as int, 1.234 as double)
 }
 
 function test20interface() {
-    let instance_1: namespace2Test.outer.inner.test1 =
+    let instance_1: namespace2Test.outer.inner.Test1 =
         namespace2Test.outer.inner.get_interface_1();
-    let instance_20: namespace2Test.outer.inner.test20 =
+    let instance_20: namespace2Test.outer.inner.Test20 =
         namespace2Test.outer.inner.get_interface_20();
-    instance_1.fun1()
-    instance_20.fun2()
+    instance_1.Fun1()
+    instance_20.Fun2()
 }
 
 // attribute
 function testattributeString() {
-    let name = namespace2Test.outer.inner.printTestInterfaceName(instance)
+    let name = namespace2Test.outer.inner.PrintTestInterfaceName(instance)
     console.log("instance.name is " + name)
     assertEQ(name, "String")
 }
 function testattributei8() {
-    let i8 = namespace2Test.outer.inner.printTestInterfaceNumberi8(instance)
+    let i8 = namespace2Test.outer.inner.PrintTestInterfaceNumberi8(instance)
     console.log("instance.i8 is " + i8)
     assertEQ(i8, -128)
 }
 function testattributei16() {
-    let i16 = namespace2Test.outer.inner.printTestInterfaceNumberi16(instance)
+    let i16 = namespace2Test.outer.inner.PrintTestInterfaceNumberi16(instance)
     console.log("instance.i16 is " + i16)
     assertEQ(i16, -32768)
 }
 function testattributei32() {
-    let i32 = namespace2Test.outer.inner.printTestInterfaceNumberi32(instance)
+    let i32 = namespace2Test.outer.inner.PrintTestInterfaceNumberi32(instance)
     console.log("instance.i32 is " + i32)
     assertEQ(i32, -2147483648)
 }
 function testattributei64() {
-    let i64 = namespace2Test.outer.inner.printTestInterfaceNumberi64(instance)
+    let i64 = namespace2Test.outer.inner.PrintTestInterfaceNumberi64(instance)
     console.log("instance.i64 is " + i64)
     assertEQ(i64, 1000 as long)
 }
 function testattributef32() {
-    let f32 = namespace2Test.outer.inner.printTestInterfaceNumberf32(instance)
+    let f32 = namespace2Test.outer.inner.PrintTestInterfaceNumberf32(instance)
     console.log("instance.f32 is " + f32)
     assertEQ(f32, 3.1415927 as float)
 }
 function testattributef64() {
-    let f64 = namespace2Test.outer.inner.printTestInterfaceNumberf64(instance)
+    let f64 = namespace2Test.outer.inner.PrintTestInterfaceNumberf64(instance)
     console.log("instance.f64 is " + f64)
     assertEQ(f64, 3.141592653589793)
 }
 function testattributebool() {
-    let b = namespace2Test.outer.inner.printTestInterfacebool(instance)
+    let b = namespace2Test.outer.inner.PrintTestInterfacebool(instance)
     assertEQ(b, true)
 }
 function testattributeArrayBuffer() {
-    namespace2Test.outer.inner.printTestInterfaceArraybuffer(instance)
+    namespace2Test.outer.inner.PrintTestInterfaceArraybuffer(instance)
 }
 function testattributeArray() {
-    namespace2Test.outer.inner.printTestInterfaceArray(instance)
+    namespace2Test.outer.inner.PrintTestInterfaceArray(instance)
 }
 function testattributeUnion() {
-    namespace2Test.outer.inner.printTestInterfaceUnion(instance)
+    namespace2Test.outer.inner.PrintTestInterfaceUnion(instance)
 }
 function testattributeRecord() {
-    namespace2Test.outer.inner.printTestInterfaceRecord(instance)
+    namespace2Test.outer.inner.PrintTestInterfaceRecord(instance)
 }
 function testattributeEnum() {
-    namespace2Test.outer.inner.printTestInterfaceEnum(instance)
+    namespace2Test.outer.inner.PrintTestInterfaceEnum(instance)
 }
 
 function testinheritance() {
-    let instancetestA: namespace2Test.outer.inner.testA =
+    let instancetestA: namespace2Test.outer.inner.TestA =
         namespace2Test.outer.inner.get_interface_A()
-    instancetestA.fun1()
-    let instancetestB: namespace2Test.outer.inner.testB =
+    instancetestA.Fun1()
+    let instancetestB: namespace2Test.outer.inner.TestB =
         namespace2Test.outer.inner.get_interface_B()
-    instancetestB.fun2()
-    let instancetestC: namespace2Test.outer.inner.testC =
+    instancetestB.Fun2()
+    let instancetestC: namespace2Test.outer.inner.TestC =
         namespace2Test.outer.inner.get_interface_C()
-    instancetestC.fun3()
+    instancetestC.Fun3()
 }
 
 function main() {
@@ -1201,11 +1359,11 @@ function main() {
     suite.addTest(
         "interface_primitives_noreturn7", interface_primitives_noreturn7)
 
-    suite.addTest("test20interface", test20interface)
-    suite.addTest("ns_5", ns_5)
+    suite.addTest("test20interface", test20interface);
+    suite.addTest("ns_5", ns_5);
 
-    suite.addTest("testattributeString", testattributeString)
-    suite.addTest("testattributei8", testattributei8)
+    suite.addTest("testattributeString", testattributeString);
+    suite.addTest("testattributei8", testattributei8);
     suite.addTest("testattributei16", testattributei16);
     suite.addTest("testattributei32", testattributei32);
     suite.addTest("testattributei64", testattributei64);
@@ -1220,289 +1378,359 @@ function main() {
     suite.addTest("testinheritance", testinheritance);
 
     // namespace1
-    suite.addTest("check testCasebaseFunctionTest1", testCasebaseFunctionTest1)
-    suite.addTest("check testCasebaseFunctionTest2", testCasebaseFunctionTest2)
-    suite.addTest("check testCasebaseFunctionTest3", testCasebaseFunctionTest3)
-    suite.addTest("check testCasebaseFunctionTest4", testCasebaseFunctionTest4)
-    suite.addTest("check testCasebaseFunctionTest5", testCasebaseFunctionTest5)
-    suite.addTest("check testCasebaseFunctionTest6", testCasebaseFunctionTest6)
-    suite.addTest("check testCasebaseFunctionTest7", testCasebaseFunctionTest7)
-    suite.addTest("check testCasebaseFunctionTest8", testCasebaseFunctionTest8)
-    suite.addTest("check testCasebaseFunctionTest9", testCasebaseFunctionTest9)
+    suite.addTest("check testCasebaseFunctionTest1", testCasebaseFunctionTest1);
+    suite.addTest("check testCasebaseFunctionTest2", testCasebaseFunctionTest2);
+    suite.addTest("check testCasebaseFunctionTest3", testCasebaseFunctionTest3);
+    suite.addTest("check testCasebaseFunctionTest4", testCasebaseFunctionTest4);
+    suite.addTest("check testCasebaseFunctionTest5", testCasebaseFunctionTest5);
+    suite.addTest("check testCasebaseFunctionTest6", testCasebaseFunctionTest6);
+    suite.addTest("check testCasebaseFunctionTest7", testCasebaseFunctionTest7);
+    suite.addTest("check testCasebaseFunctionTest8", testCasebaseFunctionTest8);
+    suite.addTest("check testCasebaseFunctionTest9", testCasebaseFunctionTest9);
     suite.addTest(
-        "check testCasebaseFunctionTest10", testCasebaseFunctionTest10)
+        "check testCasebaseFunctionTest10", testCasebaseFunctionTest10);
     suite.addTest(
-        "check testCasebaseFunctionTest11", testCasebaseFunctionTest11)
+        "check testCasebaseFunctionTest11", testCasebaseFunctionTest11);
     suite.addTest(
-        "check testCasebaseFunctionTest12", testCasebaseFunctionTest12)
+        "check testCasebaseFunctionTest12", testCasebaseFunctionTest12);
     suite.addTest(
-        "check testCasebaseFunctionTest12_1", testCasebaseFunctionTest12_1)
+        "check testCasebaseFunctionTest12_1", testCasebaseFunctionTest12_1);
     suite.addTest(
-        "check testCasebaseFunctionTest13", testCasebaseFunctionTest13)
+        "check testCasebaseFunctionTest13", testCasebaseFunctionTest13);
     suite.addTest(
-        "check testCasebaseFunctionTest13_1", testCasebaseFunctionTest13_1)
+        "check testCasebaseFunctionTest13_1", testCasebaseFunctionTest13_1);
     suite.addTest(
-        "check testCasebaseFunctionTest14", testCasebaseFunctionTest14)
+        "check testCasebaseFunctionTest14", testCasebaseFunctionTest14);
     suite.addTest(
-        "check testCasebaseFunctionTest15", testCasebaseFunctionTest15)
+        "check testCasebaseFunctionTest15", testCasebaseFunctionTest15);
     suite.addTest(
-        "check testCasebaseFunctionTest16", testCasebaseFunctionTest16)
+        "check testCasebaseFunctionTest16", testCasebaseFunctionTest16);
     suite.addTest(
-        "check testCasebaseFunctionTest16_1", testCasebaseFunctionTest16_1)
+        "check testCasebaseFunctionTest16_1", testCasebaseFunctionTest16_1);
     suite.addTest(
-        "check testCasebaseFunctionTest17", testCasebaseFunctionTest17)
+        "check testCasebaseFunctionTest17", testCasebaseFunctionTest17);
     suite.addTest(
-        "check testCasebaseFunctionTest17_1", testCasebaseFunctionTest17_1)
+        "check testCasebaseFunctionTest17_1", testCasebaseFunctionTest17_1);
     suite.addTest(
-        "check testCasebaseFunctionTest18", testCasebaseFunctionTest18)
+        "check testCasebaseFunctionTest18", testCasebaseFunctionTest18);
     suite.addTest(
-        "check testCasebaseFunctionTest18_1", testCasebaseFunctionTest18_1)
+        "check testCasebaseFunctionTest18_1", testCasebaseFunctionTest18_1);
     suite.addTest(
-        "check testCasebaseFunctionTest19", testCasebaseFunctionTest19)
+        "check testCasebaseFunctionTest19", testCasebaseFunctionTest19);
     suite.addTest(
-        "check testCasebaseFunctionTest20", testCasebaseFunctionTest20)
+        "check testCasebaseFunctionTest20", testCasebaseFunctionTest20);
     suite.addTest(
-        "check testCasebaseFunctionTest21", testCasebaseFunctionTest21)
+        "check testCasebaseFunctionTest21", testCasebaseFunctionTest21);
     suite.addTest(
-        "check testCasebaseFunctionTest22", testCasebaseFunctionTest22)
+        "check testCasebaseFunctionTest22", testCasebaseFunctionTest22);
     suite.addTest(
-        "check testCasebaseFunctionTest22_1", testCasebaseFunctionTest22_1)
+        "check testCasebaseFunctionTest22_1", testCasebaseFunctionTest22_1);
     suite.addTest(
-        "check testCasebaseFunctionTest23", testCasebaseFunctionTest23)
+        "check testCasebaseFunctionTest23", testCasebaseFunctionTest23);
     suite.addTest(
-        "check testCasebaseFunctionTest23_1", testCasebaseFunctionTest23_1)
+        "check testCasebaseFunctionTest23_1", testCasebaseFunctionTest23_1);
     suite.addTest(
-        "check testCasebaseFunctionTest24", testCasebaseFunctionTest24)
+        "check testCasebaseFunctionTest24", testCasebaseFunctionTest24);
     suite.addTest(
-        "check testCasebaseFunctionTest25", testCasebaseFunctionTest25)
+        "check testCasebaseFunctionTest25", testCasebaseFunctionTest25);
     suite.addTest(
-        "check testCasebaseFunctionTest26", testCasebaseFunctionTest26)
+        "check testCasebaseFunctionTest26", testCasebaseFunctionTest26);
     suite.addTest(
-        "check testCasebaseFunctionTest26_1", testCasebaseFunctionTest26_1)
+        "check testCasebaseFunctionTest26_1", testCasebaseFunctionTest26_1);
     suite.addTest(
-        "check testCasebaseFunctionTest27", testCasebaseFunctionTest27)
+        "check testCasebaseFunctionTest27", testCasebaseFunctionTest27);
     suite.addTest(
-        "check testCasebaseFunctionTest27_1", testCasebaseFunctionTest27_1)
+        "check testCasebaseFunctionTest27_1", testCasebaseFunctionTest27_1);
     suite.addTest(
-        "check testCasebaseFunctionTest28", testCasebaseFunctionTest28)
+        "check testCasebaseFunctionTest28", testCasebaseFunctionTest28);
     suite.addTest(
-        "check testCasebaseFunctionTest29", testCasebaseFunctionTest29)
+        "check testCasebaseFunctionTest29", testCasebaseFunctionTest29);
     suite.addTest(
-        "check testCasebaseFunctionTest30", testCasebaseFunctionTest30)
+        "check testCasebaseFunctionTest30", testCasebaseFunctionTest30);
     suite.addTest(
-        "check testCasebaseFunctionTest31", testCasebaseFunctionTest31)
+        "check testCasebaseFunctionTest31", testCasebaseFunctionTest31);
     suite.addTest(
-        "check testCasebaseFunctionTest32", testCasebaseFunctionTest32)
+        "check testCasebaseFunctionTest32", testCasebaseFunctionTest32);
     suite.addTest(
-        "check testCasebaseFunctionTest32_1", testCasebaseFunctionTest32_1)
+        "check testCasebaseFunctionTest32_1", testCasebaseFunctionTest32_1);
     suite.addTest(
-        "check testCasebaseFunctionTest33", testCasebaseFunctionTest33)
+        "check testCasebaseFunctionTest33", testCasebaseFunctionTest33);
     suite.addTest(
-        "check testCasebaseFunctionTest33_1", testCasebaseFunctionTest33_1)
+        "check testCasebaseFunctionTest33_1", testCasebaseFunctionTest33_1);
     suite.addTest(
-        "check testCasebaseFunctionTest34", testCasebaseFunctionTest34)
+        "check testCasebaseFunctionTest34", testCasebaseFunctionTest34);
     suite.addTest(
-        "check testCasebaseFunctionTest34_1", testCasebaseFunctionTest34_1)
+        "check testCasebaseFunctionTest34_1", testCasebaseFunctionTest34_1);
     suite.addTest(
-        "check testCasebaseFunctionTest35", testCasebaseFunctionTest35)
+        "check testCasebaseFunctionTest35", testCasebaseFunctionTest35);
     suite.addTest(
-        "check testCasebaseFunctionTest35_1", testCasebaseFunctionTest35_1)
+        "check testCasebaseFunctionTest35_1", testCasebaseFunctionTest35_1);
     suite.addTest(
-        "check testCasebaseFunctionTest36", testCasebaseFunctionTest36)
+        "check testCasebaseFunctionTest36", testCasebaseFunctionTest36);
     suite.addTest(
-        "check testCasebaseFunctionTest36_1", testCasebaseFunctionTest36_1)
+        "check testCasebaseFunctionTest36_1", testCasebaseFunctionTest36_1);
     suite.addTest(
-        "check testCasebaseFunctionTest37", testCasebaseFunctionTest37)
+        "check testCasebaseFunctionTest37", testCasebaseFunctionTest37);
     suite.addTest(
-        "check testCasebaseFunctionTest37_1", testCasebaseFunctionTest37_1)
+        "check testCasebaseFunctionTest37_1", testCasebaseFunctionTest37_1);
     suite.addTest(
-        "check testCasebaseFunctionTest38", testCasebaseFunctionTest38)
+        "check testCasebaseFunctionTest38", testCasebaseFunctionTest38);
     suite.addTest(
-        "check testCasebaseFunctionTest38_1", testCasebaseFunctionTest38_1)
+        "check testCasebaseFunctionTest38_1", testCasebaseFunctionTest38_1);
     suite.addTest(
-        "check testCasebaseFunctionTest39", testCasebaseFunctionTest39)
+        "check testCasebaseFunctionTest39", testCasebaseFunctionTest39);
     suite.addTest(
-        "check testCasebaseFunctionTest39_1", testCasebaseFunctionTest39_1)
+        "check testCasebaseFunctionTest39_1", testCasebaseFunctionTest39_1);
     suite.addTest(
-        "check testCasebaseFunctionTest40", testCasebaseFunctionTest40)
+        "check testCasebaseFunctionTest40", testCasebaseFunctionTest40);
     suite.addTest(
-        "check testCasebaseFunctionTest40_1", testCasebaseFunctionTest40_1)
+        "check testCasebaseFunctionTest40_1", testCasebaseFunctionTest40_1);
     suite.addTest(
-        "check testCasebaseFunctionTest41", testCasebaseFunctionTest41)
+        "check testCasebaseFunctionTest41", testCasebaseFunctionTest41);
     suite.addTest(
-        "check testCasebaseFunctionTest42", testCasebaseFunctionTest42)
+        "check testCasebaseFunctionTest42", testCasebaseFunctionTest42);
     suite.addTest(
-        "check testCasebaseFunctionTest42_1", testCasebaseFunctionTest42_1)
+        "check testCasebaseFunctionTest42_1", testCasebaseFunctionTest42_1);
     suite.addTest(
-        "check testCasebaseFunctionTest43", testCasebaseFunctionTest43)
+        "check testCasebaseFunctionTest43", testCasebaseFunctionTest43);
     suite.addTest(
-        "check testCasebaseFunctionTest43_1", testCasebaseFunctionTest43_1)
+        "check testCasebaseFunctionTest43_1", testCasebaseFunctionTest43_1);
     suite.addTest(
-        "check testCasebaseFunctionTest44", testCasebaseFunctionTest44)
+        "check testCasebaseFunctionTest44", testCasebaseFunctionTest44);
     suite.addTest(
-        "check testCasebaseFunctionTest45", testCasebaseFunctionTest45)
+        "check testCasebaseFunctionTest45", testCasebaseFunctionTest45);
     suite.addTest(
-        "check testCasebaseFunctionTest46", testCasebaseFunctionTest46)
+        "check testCasebaseFunctionTest46", testCasebaseFunctionTest46);
     suite.addTest(
-        "check testCasebaseFunctionTest47", testCasebaseFunctionTest47)
+        "check testCasebaseFunctionTest47", testCasebaseFunctionTest47);
     suite.addTest(
-        "check testCasebaseFunctionTest48", testCasebaseFunctionTest48)
+        "check testCasebaseFunctionTest48", testCasebaseFunctionTest48);
     suite.addTest(
-        "check testCasebaseFunctionTest49", testCasebaseFunctionTest49)
+        "check testCasebaseFunctionTest49", testCasebaseFunctionTest49);
     suite.addTest(
-        "check testCasebaseFunctionTest50", testCasebaseFunctionTest50)
+        "check testCasebaseFunctionTest50", testCasebaseFunctionTest50);
     suite.addTest(
-        "check testCasebaseFunctionTest51", testCasebaseFunctionTest51)
+        "check testCasebaseFunctionTest51", testCasebaseFunctionTest51);
     suite.addTest(
-        "check testCasebaseFunctionTest52", testCasebaseFunctionTest52)
+        "check testCasebaseFunctionTest52", testCasebaseFunctionTest52);
     suite.addTest(
-        "check testCasebaseFunctionTest53", testCasebaseFunctionTest53)
+        "check testCasebaseFunctionTest53", testCasebaseFunctionTest53);
     suite.addTest(
-        "check testCasebaseFunctionTest54", testCasebaseFunctionTest54)
+        "check testCasebaseFunctionTest54", testCasebaseFunctionTest54);
     suite.addTest(
-        "check testCasebaseFunctionTest54_1", testCasebaseFunctionTest54_1)
+        "check testCasebaseFunctionTest54_1", testCasebaseFunctionTest54_1);
     suite.addTest(
-        "check testCasebaseFunctionTest55", testCasebaseFunctionTest55)
+        "check testCasebaseFunctionTest55", testCasebaseFunctionTest55);
     suite.addTest(
-        "check testCasebaseFunctionTest56", testCasebaseFunctionTest56)
+        "check testCasebaseFunctionTest56", testCasebaseFunctionTest56);
     suite.addTest(
-        "check testCasebaseFunctionTest56_1", testCasebaseFunctionTest56_1)
+        "check testCasebaseFunctionTest56_1", testCasebaseFunctionTest56_1);
     suite.addTest(
-        "check testCasebaseFunctionTest57", testCasebaseFunctionTest57)
+        "check testCasebaseFunctionTest57", testCasebaseFunctionTest57);
     suite.addTest(
-        "check testCasebaseFunctionTest57_1", testCasebaseFunctionTest57_1)
+        "check testCasebaseFunctionTest57_1", testCasebaseFunctionTest57_1);
     // suite.addTest("check testCasebaseFunctionTest58",
-    // testCasebaseFunctionTest58)
+    // testCasebaseFunctionTest58);
     suite.addTest(
-        "check testCasebaseFunctionTest59", testCasebaseFunctionTest59)
+        "check testCasebaseFunctionTest59", testCasebaseFunctionTest59);
     suite.addTest(
-        "check testCasebaseFunctionTest60", testCasebaseFunctionTest60)
+        "check testCasebaseFunctionTest60", testCasebaseFunctionTest60);
     suite.addTest(
-        "check testCasebaseFunctionTest61", testCasebaseFunctionTest61)
+        "check testCasebaseFunctionTest61", testCasebaseFunctionTest61);
     suite.addTest(
-        "check testCasebaseFunctionTest62", testCasebaseFunctionTest62)
+        "check testCasebaseFunctionTest62", testCasebaseFunctionTest62);
     suite.addTest(
-        "check testCasebaseFunctionTest62_1", testCasebaseFunctionTest62_1)
+        "check testCasebaseFunctionTest62_1", testCasebaseFunctionTest62_1);
+    suite.addTest(
+        "check testCasebaseFunctionTest63", testCasebaseFunctionTest63);
+    suite.addTest(
+        "check testCasebaseFunctionTest64", testCasebaseFunctionTest64);
+    suite.addTest(
+        "check testCasebaseFunctionTest64_1", testCasebaseFunctionTest64_1);
+    suite.addTest(
+        "check testCasebaseFunctionTest64_2", testCasebaseFunctionTest64_2);
     // performance
     suite.addTest(
-        "check testInter1basePerformanceFunctionTest1",
-        testInter1basePerformanceFunctionTest1)
+        "check testInter1BasePerformanceFunctionTest1",
+        testInter1BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter1basePerformanceFunctionTest2",
-        testInter1basePerformanceFunctionTest2)
+        "check testInter1BasePerformanceFunctionTest2",
+        testInter1BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter2basePerformanceFunctionTest1",
-        testInter2basePerformanceFunctionTest1)
+        "check testInter2BasePerformanceFunctionTest1",
+        testInter2BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter2basePerformanceFunctionTest2",
-        testInter2basePerformanceFunctionTest2)
+        "check testInter2BasePerformanceFunctionTest2",
+        testInter2BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter3basePerformanceFunctionTest1",
-        testInter3basePerformanceFunctionTest1)
+        "check testInter3BasePerformanceFunctionTest1",
+        testInter3BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter3basePerformanceFunctionTest2",
-        testInter3basePerformanceFunctionTest2)
+        "check testInter3BasePerformanceFunctionTest2",
+        testInter3BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter4basePerformanceFunctionTest1",
-        testInter4basePerformanceFunctionTest1)
+        "check testInter4BasePerformanceFunctionTest1",
+        testInter4BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter4basePerformanceFunctionTest2",
-        testInter4basePerformanceFunctionTest2)
+        "check testInter4BasePerformanceFunctionTest2",
+        testInter4BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter5basePerformanceFunctionTest1",
-        testInter5basePerformanceFunctionTest1)
+        "check testInter5BasePerformanceFunctionTest1",
+        testInter5BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter5basePerformanceFunctionTest2",
-        testInter5basePerformanceFunctionTest2)
+        "check testInter5BasePerformanceFunctionTest2",
+        testInter5BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter6basePerformanceFunctionTest1",
-        testInter6basePerformanceFunctionTest1)
+        "check testInter6BasePerformanceFunctionTest1",
+        testInter6BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter6basePerformanceFunctionTest2",
-        testInter6basePerformanceFunctionTest2)
+        "check testInter6BasePerformanceFunctionTest2",
+        testInter6BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter7basePerformanceFunctionTest1",
-        testInter7basePerformanceFunctionTest1)
+        "check testInter7BasePerformanceFunctionTest1",
+        testInter7BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter7basePerformanceFunctionTest2",
-        testInter7basePerformanceFunctionTest2)
+        "check testInter7BasePerformanceFunctionTest2",
+        testInter7BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter8basePerformanceFunctionTest1",
-        testInter8basePerformanceFunctionTest1)
+        "check testInter8BasePerformanceFunctionTest1",
+        testInter8BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter8basePerformanceFunctionTest2",
-        testInter8basePerformanceFunctionTest2)
+        "check testInter8BasePerformanceFunctionTest2",
+        testInter8BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter9basePerformanceFunctionTest1",
-        testInter9basePerformanceFunctionTest1)
+        "check testInter9BasePerformanceFunctionTest1",
+        testInter9BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter9basePerformanceFunctionTest2",
-        testInter9basePerformanceFunctionTest2)
+        "check testInter9BasePerformanceFunctionTest2",
+        testInter9BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter10basePerformanceFunctionTest1",
-        testInter10basePerformanceFunctionTest1)
+        "check testInter10BasePerformanceFunctionTest1",
+        testInter10BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter10basePerformanceFunctionTest2",
-        testInter10basePerformanceFunctionTest2)
+        "check testInter10BasePerformanceFunctionTest2",
+        testInter10BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter11basePerformanceFunctionTest1",
-        testInter11basePerformanceFunctionTest1)
+        "check testInter11BasePerformanceFunctionTest1",
+        testInter11BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter11basePerformanceFunctionTest2",
-        testInter11basePerformanceFunctionTest2)
+        "check testInter11BasePerformanceFunctionTest2",
+        testInter11BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter12basePerformanceFunctionTest1",
-        testInter12basePerformanceFunctionTest1)
+        "check testInter12BasePerformanceFunctionTest1",
+        testInter12BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter12basePerformanceFunctionTest2",
-        testInter12basePerformanceFunctionTest2)
+        "check testInter12BasePerformanceFunctionTest2",
+        testInter12BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter13basePerformanceFunctionTest1",
-        testInter13basePerformanceFunctionTest1)
+        "check testInter13BasePerformanceFunctionTest1",
+        testInter13BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter13basePerformanceFunctionTest2",
-        testInter13basePerformanceFunctionTest2)
+        "check testInter13BasePerformanceFunctionTest2",
+        testInter13BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter14basePerformanceFunctionTest1",
-        testInter14basePerformanceFunctionTest1)
+        "check testInter14BasePerformanceFunctionTest1",
+        testInter14BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter14basePerformanceFunctionTest2",
-        testInter14basePerformanceFunctionTest2)
+        "check testInter14BasePerformanceFunctionTest2",
+        testInter14BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter15basePerformanceFunctionTest1",
-        testInter15basePerformanceFunctionTest1)
+        "check testInter15BasePerformanceFunctionTest1",
+        testInter15BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter15basePerformanceFunctionTest2",
-        testInter15basePerformanceFunctionTest2)
+        "check testInter15BasePerformanceFunctionTest2",
+        testInter15BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter16basePerformanceFunctionTest1",
-        testInter16basePerformanceFunctionTest1)
+        "check testInter16BasePerformanceFunctionTest1",
+        testInter16BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter16basePerformanceFunctionTest2",
-        testInter16basePerformanceFunctionTest2)
+        "check testInter16BasePerformanceFunctionTest2",
+        testInter16BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter17basePerformanceFunctionTest1",
-        testInter17basePerformanceFunctionTest1)
+        "check testInter17BasePerformanceFunctionTest1",
+        testInter17BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter17basePerformanceFunctionTest2",
-        testInter17basePerformanceFunctionTest2)
+        "check testInter17BasePerformanceFunctionTest2",
+        testInter17BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter18basePerformanceFunctionTest1",
-        testInter18basePerformanceFunctionTest1)
+        "check testInter18BasePerformanceFunctionTest1",
+        testInter18BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter18basePerformanceFunctionTest2",
-        testInter18basePerformanceFunctionTest2)
+        "check testInter18BasePerformanceFunctionTest2",
+        testInter18BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter19basePerformanceFunctionTest1",
-        testInter19basePerformanceFunctionTest1)
+        "check testInter19BasePerformanceFunctionTest1",
+        testInter19BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter19basePerformanceFunctionTest2",
-        testInter19basePerformanceFunctionTest2)
+        "check testInter19BasePerformanceFunctionTest2",
+        testInter19BasePerformanceFunctionTest2);
     suite.addTest(
-        "check testInter20basePerformanceFunctionTest1",
-        testInter20basePerformanceFunctionTest1)
+        "check testInter20BasePerformanceFunctionTest1",
+        testInter20BasePerformanceFunctionTest1);
     suite.addTest(
-        "check testInter20basePerformanceFunctionTest2",
-        testInter20basePerformanceFunctionTest2)
-    suite.run()
+        "check testInter20BasePerformanceFunctionTest2",
+        testInter20BasePerformanceFunctionTest2);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest1",
+        testInter21BasePerformanceFunctionTest1);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest2",
+        testInter21BasePerformanceFunctionTest2);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest3",
+        testInter21BasePerformanceFunctionTest3);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest4",
+        testInter21BasePerformanceFunctionTest4);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest5",
+        testInter21BasePerformanceFunctionTest5);
+
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest6",
+        testInter21BasePerformanceFunctionTest6);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest7",
+        testInter21BasePerformanceFunctionTest7);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest8",
+        testInter21BasePerformanceFunctionTest8);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest9",
+        testInter21BasePerformanceFunctionTest9);
+
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest10",
+        testInter21BasePerformanceFunctionTest10);
+
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest11",
+        testInter21BasePerformanceFunctionTest11);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest12",
+        testInter21BasePerformanceFunctionTest12);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest13",
+        testInter21BasePerformanceFunctionTest13);
+
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest14",
+        testInter21BasePerformanceFunctionTest14);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest15",
+        testInter21BasePerformanceFunctionTest15);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest16",
+        testInter21BasePerformanceFunctionTest16);
+    suite.addTest(
+        "check testInter21BasePerformanceFunctionTest17",
+        testInter21BasePerformanceFunctionTest17);
+    suite.addTest("check testCaseIbaseInterface1", testCaseIbaseInterface1);
+    suite.addTest("check testCaseIbaseInterface2", testCaseIbaseInterface2);
+    suite.addTest("check testCaseIbaseInterface3", testCaseIbaseInterface3);
+    suite.addTest("check testCaseIbaseInterface4", testCaseIbaseInterface4);
+    suite.addTest("check testCaseConstant1", testCaseConstant1);
+    suite.addTest("check testCaseConstant2", testCaseConstant2);
+    suite.addTest("check testCaseConstant3", testCaseConstant3);
+    System.exit(suite.run());
 }

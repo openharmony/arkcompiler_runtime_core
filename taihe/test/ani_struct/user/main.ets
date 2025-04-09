@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as StructTest from "../author_generated/struct_test";
+import * as StructTest from "@generated/struct_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_struct");
 

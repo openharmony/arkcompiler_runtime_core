@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 #pragma once
+
+#include <taihe/common.h>
+
 #include <stddef.h>
 #include <stdint.h>
-
-#include "common.h"
 
 /////////////////////////////////////////
 // Private ABI: Don't use in your code //
@@ -78,7 +79,7 @@ TH_EXPORT char *tstr_initialize(struct TString *tstr_ptr, uint32_t capacity);
 //
 // # Notes
 // - The returned TString must be freed using `tstr_drop`.
-TH_EXPORT struct TString tstr_new(const char *buf TH_NONNULL, size_t len);
+TH_EXPORT struct TString tstr_new(char const *buf TH_NONNULL, size_t len);
 
 // Creates a TString from an existing string.
 //
@@ -95,7 +96,7 @@ TH_EXPORT struct TString tstr_new(const char *buf TH_NONNULL, size_t len);
 // - `NULL`, if the string is not null-terminated, or the length is too large.
 //    In this case, the original `tstr` is still uninitialized and should not be
 //    used.
-TH_EXPORT struct TString tstr_new_ref(const char *buf TH_NONNULL, size_t len);
+TH_EXPORT struct TString tstr_new_ref(char const *buf TH_NONNULL, size_t len);
 
 // Frees a TString, releasing allocated memory if applicable.
 //

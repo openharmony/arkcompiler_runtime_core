@@ -20,19 +20,19 @@ enum BarTest: u8 {
   C = 3,
 }
 
-function myfunc1(): void;
-function myfunc2(option1:i8,option2:i16): void;
-function myfunc3(option1:i32,option2:bool):void;
-function myfunc4(option1:i32,option2:i64):void;
-function myfunc5(option1:i32,option2:String):void;
-function myfunc6(option1:i64,option2:bool):void;
-function myfunc7(option1:i64,option2:f32):void;
-function myfunc8(option1:i64,option2:f64):void;
-function myfunc9(option1:f32,option2:bool):void;
-function myfunc10(option1:f32,option2:String):void;
-function myfunc11(option1:f64,option2:String):void;
-function myfunc12(option1:Optional<i32>,option2:Optional<i64>):void;
-function myfunc13(option1:Optional<f32>,option2:Optional<f64>):void;
-function myfunc14(option1:Optional<String>,option2:Optional<bool>):void;
-function myfunc15(option1:Optional<i16>,option2:Optional<i64>):void;
-function myfunc16(option1:Optional<i16>,option2:BarTest):void;
+function Myfunc1(): void;
+function Myfunc2(option1:i8,option2:i16): void;
+function Myfunc3(option1:i32,option2:bool):void;
+function Myfunc4(option1:i32,option2:i64):void;
+function Myfunc5(option1:i32,option2:String):void;
+function Myfunc6(option1:i64,option2:bool):void;
+function Myfunc7(option1:i64,option2:f32):void;
+function Myfunc8(option1:i64,option2:f64):void;
+function Myfunc9(option1:f32,option2:bool):void;
+function Myfunc10(option1:f32,option2:String):void;
+function Myfunc11(option1:f64,option2:String):void;
+function Myfunc12(option1:Optional<i32>,option2:Optional<i64>):void;
+function Myfunc13(option1:Optional<f32>,option2:Optional<f64>):void;
+function Myfunc14(option1:Optional<String>,option2:Optional<bool>):void;
+function Myfunc15(option1:Optional<i16>,option2:Optional<i64>):void;
+function Myfunc16(option1:Optional<i16>,option2:BarTest):void;

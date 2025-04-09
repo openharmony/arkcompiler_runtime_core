@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as lib from "../author_generated/callbackTest";
+import * as lib from "@generated/callbackTest";
+import * as System from "std/core/System";
 
 loadLibrary("ani_callback");
 
@@ -64,5 +65,5 @@ function main() {
     suite.addTest("test string return value", test_string_return_value);
     suite.addTest("test struct input", test_struct_input);
 
-    suite.run();
+    System.exit(suite.run());
 }

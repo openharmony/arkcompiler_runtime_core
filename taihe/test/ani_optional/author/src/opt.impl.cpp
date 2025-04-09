@@ -16,12 +16,13 @@
 
 #include <iostream>
 
-#include "core/array.hpp"
-#include "core/optional.hpp"
-#include "core/string.hpp"
 #include "opt.ReturnResult.proj.1.hpp"
+#include "taihe/array.hpp"
+#include "taihe/optional.hpp"
+#include "taihe/string.hpp"
 
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 void showOptionalInt(optional_view<int32_t> x)
 {
@@ -31,6 +32,7 @@ void showOptionalInt(optional_view<int32_t> x)
         std::cout << "Null" << std::endl;
     }
 }
+
 optional<int32_t> makeOptionalInt(bool b)
 {
     if (b) {
@@ -39,6 +41,7 @@ optional<int32_t> makeOptionalInt(bool b)
         return optional<int32_t>(nullptr);
     }
 }
+
 optional<array<int32_t>> makeOptionalArray(bool b, int32_t val, int32_t num)
 {
     if (b) {
@@ -47,6 +50,7 @@ optional<array<int32_t>> makeOptionalArray(bool b, int32_t val, int32_t num)
         return optional<array<int32_t>>(nullptr);
     }
 }
+
 optional<string> sendReturnResult(::opt::ReturnResult const &result)
 {
     if (result.results) {
@@ -60,6 +64,7 @@ optional<string> sendReturnResult(::opt::ReturnResult const &result)
     }
 }
 }  // namespace
+
 TH_EXPORT_CPP_API_showOptionalInt(showOptionalInt);
 TH_EXPORT_CPP_API_makeOptionalInt(makeOptionalInt);
 TH_EXPORT_CPP_API_makeOptionalArray(makeOptionalArray);

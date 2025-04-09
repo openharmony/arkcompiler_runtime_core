@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as lib from "../author_generated/staticTest";
+import * as lib from "@generated/staticTest";
+import * as System from "std/core/System";
 loadLibrary("ani_static");
 
 function test_sumSync() {
@@ -44,5 +45,5 @@ function main() {
     suite.addTest("test new class", test_new_class);
     suite.addTest("test new class with two args", test_new_class_with_two_args);
 
-    suite.run();
+    System.exit(suite.run());
 }

@@ -16,7 +16,8 @@
 
 #include "stdexcept"
 // Please delete this include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 
 string concatStruct(::struct_test::Data const &data)

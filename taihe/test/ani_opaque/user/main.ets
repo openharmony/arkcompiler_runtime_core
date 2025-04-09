@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as test from "../author_generated/opaque_test";
+import * as test from "@generated/opaque_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_opaque");
 
@@ -65,5 +66,5 @@ function main() {
     suite.addTest("test get_object", test_get_object);
     suite.addTest("test get_objects", test_get_objects);
 
-    suite.run();
+    System.exit(suite.run());
 }

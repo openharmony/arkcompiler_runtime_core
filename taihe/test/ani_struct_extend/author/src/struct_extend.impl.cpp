@@ -16,7 +16,6 @@
 
 #include <iostream>
 
-#include "core/runtime.hpp"
 #include "stdexcept"
 #include "struct_extend.A.proj.1.hpp"
 #include "struct_extend.B.proj.1.hpp"
@@ -26,7 +25,9 @@
 #include "struct_extend.E.proj.1.hpp"
 #include "struct_extend.F.proj.1.hpp"
 #include "struct_extend.G.proj.1.hpp"
-using namespace taihe::core;
+#include "taihe/runtime.hpp"
+using namespace taihe;
+
 namespace {
 class Bar {
 public:
@@ -35,10 +36,12 @@ public:
         this->e_.d.param4 = e.d.param4;
         this->e_.param5 = e.param5;
     }
+
     ::struct_extend::E getE()
     {
         return e_;
     }
+
     void setE(::struct_extend::E const &e)
     {
         this->e_.d.param4 = e.d.param4;
@@ -48,70 +51,86 @@ public:
 private:
     ::struct_extend::E e_;
 };
+
 void check_A(::struct_extend::A const &i)
 {
     std::cout << i.param1 << std::endl;
 }
+
 ::struct_extend::A create_A()
 {
     return {1};
 }
+
 void check_B(::struct_extend::B const &i)
 {
     std::cout << i.a.param1 << std::endl;
     std::cout << i.param2 << std::endl;
 }
+
 ::struct_extend::B create_B()
 {
     return {{1}, 2};
 }
+
 void check_C(::struct_extend::C const &i)
 {
     std::cout << i.b.a.param1 << std::endl;
     std::cout << i.b.param2 << std::endl;
     std::cout << i.param3 << std::endl;
 }
+
 ::struct_extend::C create_C()
 {
     return {{{1}, 2}, 3};
 }
+
 void check_D(::struct_extend::D const &i)
 {
     std::cout << i.param4 << std::endl;
 }
+
 ::struct_extend::D create_D()
 {
     return {4};
 }
+
 void check_E(::struct_extend::E const &i)
 {
     std::cout << i.d.param4 << std::endl;
     std::cout << i.param5 << std::endl;
 }
+
 ::struct_extend::E create_E()
 {
     return {{4}, 5};
 }
+
 ::struct_extend::Bar getBar(::struct_extend::E const &e)
 {
     return make_holder<Bar, ::struct_extend::Bar>(e);
 }
+
 bool check_Bar(::struct_extend::weak::Bar bar)
 {
     return true;
 }
+
 bool check_F(::struct_extend::F const &f)
 {
     return true;
 }
+
 bool check_G(::struct_extend::G const &g)
 {
     return true;
 }
+
 ::struct_extend::Bar create_Bar(::struct_extend::E const &e)
 {
     return make_holder<Bar, ::struct_extend::Bar>(e);
 }
+
 ::struct_extend::F create_F(::struct_extend::E const &e)
 {
     ::struct_extend::F f {
@@ -119,6 +138,7 @@ bool check_G(::struct_extend::G const &g)
     };
     return f;
 }
+
 ::struct_extend::G create_G(::struct_extend::E const &e)
 {
     ::struct_extend::G g {
@@ -128,6 +148,7 @@ bool check_G(::struct_extend::G const &g)
     return g;
 }
 }  // namespace
+
 TH_EXPORT_CPP_API_check_A(check_A);
 TH_EXPORT_CPP_API_create_A(create_A);
 TH_EXPORT_CPP_API_check_B(check_B);
