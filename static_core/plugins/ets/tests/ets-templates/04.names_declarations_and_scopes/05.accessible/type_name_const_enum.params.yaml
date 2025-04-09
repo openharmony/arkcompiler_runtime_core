@@ -18,5 +18,5 @@ cases:
       const a: T = Colors.Blue;
     check: |-
       function main() {
-          assertTrue(foo(a) == 23);
+          assertEQ(foo(a), 23);
       }

@@ -19,7 +19,7 @@ cases:
     check: |-
       function main() {
           let a: T = 0x80 as byte; // -128
-          assertTrue(foo(a) == 0x80 as byte);
+          assertEQ(foo(a), 0x80 as byte);
       }
 
   - decl: |-
@@ -27,7 +27,7 @@ cases:
     check: |-
       function main() {
           let a: T = 0x7FFF as short; // 32767
-          assertTrue(foo(a) == 0x7FFF as short);
+          assertEQ(foo(a), 0x7FFF as short);
       }
 
   - decl: |-
@@ -35,7 +35,7 @@ cases:
     check: |-
       function main() {
           let a: T = 127 as int;
-          assertTrue(foo(a) == 127 as int);
+          assertEQ(foo(a), 127 as int);
       }
 
   - decl: |-
@@ -43,7 +43,7 @@ cases:
     check: |-
       function main() {
          let a: T = 127 as long;
-         assertTrue(foo(a) == 127 as long);
+         assertEQ(foo(a), 127 as long);
       }
 
   - decl: |-
@@ -51,7 +51,7 @@ cases:
     check: |-
       function main() {
           let a: T = -0.0 as float;
-          assertTrue(foo(a) == -0.0 as float);
+          assertEQ(foo(a), -0.0 as float);
       }
 
   - decl: |-
@@ -59,7 +59,7 @@ cases:
     check: |-
       function main() {
           let a: T = -0.0 as double;
-          assertTrue(foo(a) == -0.0 as double); // double is an alias to number
+          assertEQ(foo(a), -0.0 as double); // double is an alias to number
       }
 
   - decl: |-
@@ -67,7 +67,7 @@ cases:
     check: |-
       function main() {
           let a: T = -0.0 as number;
-          assertTrue(foo(a) == -0.0 as number);
+          assertEQ(foo(a), -0.0 as number);
       }
 
   - decl: |-
@@ -75,7 +75,7 @@ cases:
     check: |-
       function main() {
           let a: T = c'a';
-          assertTrue(foo(a) == c'a');
+          assertEQ(foo(a), c'a');
       }
 
   - decl: |-
@@ -83,7 +83,7 @@ cases:
     check: |-
       function main() {
           let a: T = true;
-          assertTrue(foo(a) == true);
+          assertEQ(foo(a), true);
       }
 
   # Boxed
@@ -92,7 +92,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Byte(0x7F as byte);
-          assertTrue(foo(a).unboxed() == 0x7F as byte);
+          assertEQ(foo(a).unboxed(), 0x7F as byte);
       }
 
   - decl: |-
@@ -100,7 +100,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Short(2 as short);
-          assertTrue(foo(a).unboxed() == 2 as short);
+          assertEQ(foo(a).unboxed(), 2 as short);
       }
 
   - decl: |-
@@ -108,7 +108,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Int(3 as int);
-          assertTrue(foo(a).unboxed() == 3 as int);
+          assertEQ(foo(a).unboxed(), 3 as int);
       }
 
   - decl: |-
@@ -116,7 +116,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Long(4 as long);
-          assertTrue(foo(a).unboxed() == 4 as long);
+          assertEQ(foo(a).unboxed(), 4 as long);
       }
 
   - decl: |-
@@ -124,7 +124,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Float(0.1 as float);
-          assertTrue(foo(a).unboxed() == 0.1 as float);
+          assertEQ(foo(a).unboxed(), 0.1 as float);
       }
 
   - decl: |-
@@ -132,7 +132,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Double(0.1 as double);
-          assertTrue(foo(a).unboxed() == 0.1 as double); // Double is an alias to Number
+          assertEQ(foo(a).unboxed(), 0.1 as double); // Double is an alias to Number
       }
 
   - decl: |-
@@ -140,7 +140,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Number(0.1 as number);
-          assertTrue(foo(a).unboxed() == 0.1 as number);
+          assertEQ(foo(a).unboxed(), 0.1 as number);
       }
 
   - decl: |-
@@ -148,7 +148,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Char(c'b');
-          assertTrue(foo(a).unboxed() == c'b');
+          assertEQ(foo(a).unboxed(), c'b');
       }
 
   - decl: |-
@@ -156,7 +156,7 @@ cases:
     check: |-
       function main() {
           let a: T = "some string";
-          assertTrue(foo(a) == "some string"); // string is an alias to String
+          assertEQ(foo(a), "some string"); // string is an alias to String
       }
 
   - decl: |-
@@ -164,7 +164,7 @@ cases:
     check: |-
       function main() {
           let a: T = new String("some string");
-          assertTrue(foo(a) == "some string");
+          assertEQ(foo(a), "some string");
       }
 
   - decl: |-
@@ -172,7 +172,7 @@ cases:
     check: |-
       function main() {
           let a: T = new Boolean(false);
-          assertTrue(foo(a).unboxed() == false);
+          assertEQ(foo(a).unboxed(), false);
       }
 
     # Custom
@@ -182,9 +182,9 @@ cases:
       function main() {
           let a: T = [1, -2];
           let b = foo(a);
-          assertTrue(a.length == b.length);
-          assertTrue(a[0] == b[0]);
-          assertTrue(a[1] == b[1]);
+          assertEQ(a.length, b.length);
+          assertEQ(a[0], b[0]);
+          assertEQ(a[1], b[1]);
       }
 
   - decl: |-
@@ -193,11 +193,11 @@ cases:
       function main() {
           let a: T = [[new Int(1)], [new Int(-2)]];
           let b = foo(a);
-          assertTrue(a.length == b.length);
-          assertTrue(a[0].length == b[0].length);
-          assertTrue(a[1].length == b[1].length);
-          assertTrue(a[0][0].unboxed() == b[0][0].unboxed());
-          assertTrue(a[1][0].unboxed() == b[1][0].unboxed());
+          assertEQ(a.length, b.length);
+          assertEQ(a[0].length, b[0].length);
+          assertEQ(a[1].length, b[1].length);
+          assertEQ(a[0][0].unboxed(), b[0][0].unboxed());
+          assertEQ(a[1][0].unboxed(), b[1][0].unboxed());
       }
 
   - decl: |-
@@ -206,7 +206,7 @@ cases:
     check: |-
       function main() {
           let a: T = Colors.Blue;
-          assertTrue(foo(a) == Colors.Blue);
+          assertEQ(foo(a), Colors.Blue);
       }
 
   - decl: |-
@@ -216,7 +216,7 @@ cases:
           let a: T = ["str", 1.4];
           let b = foo(a);
           assertTrue(b instanceof T)
-          assertTrue(a == b)
+          assertEQ(a, b)
       }
 
   - decl: |-
