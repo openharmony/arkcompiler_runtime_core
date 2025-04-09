@@ -37,5 +37,6 @@ export namespace Intl {
     export type RelativeTimeFormatUnitSingular =  "year" | "quarter" | "month" | "week" | "day" | "hour" | "minute" | "second"
     export type UnicodeBCP47LocaleIdentifier = string;
     export type DateTimeFormatPartTypes = "day" | "dayPeriod" | "era" | "fractionalSecond" | "hour" | "literal" | "minute" | "month" | "second" | "timeZoneName" | "unknown" | "weekday" | "year";
+    export type DateTimeRangeFormatPartSource = "startRange" | "endRange" | "shared"
 
 }

@@ -45,8 +45,8 @@ export namespace Intl {
         value: string;
     }
 
-    export interface DateTimeRangeFormatPart {
-        source: "startRange" | "endRange" | "shared"
+    export interface DateTimeRangeFormatPart extends DateTimeFormatPart {
+        source: DateTimeRangeFormatPartSource
     }
 
 }

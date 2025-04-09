@@ -26,39 +26,17 @@ function initFormatResults(): void {
         return
     }
 
-    addDateFormatResult(
-            new Date("2023-10-05T15:10:20.300Z"), 
-            "de-DE", 
-            {year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: UTC}, 
-            "5. Oktober 2023 um 15:10")
+    const testDate = new Date("2023-10-05T15:10:20.300Z")
 
-    addDateFormatResult(
-            new Date("2023-10-05T15:10:20.300Z"), 
-            "en-LR", 
-            {year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: UTC},
-            "5 October 2023 at 03:10 pm")
+    const detailedOptions: Intl.DateTimeFormatOptions = {year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: UTC}
+    addDateFormatResult(testDate, "de-DE", detailedOptions, "5. Oktober 2023 um 15:10")
+    addDateFormatResult(testDate, "en-LR", detailedOptions, "5 October 2023 at 03:10 pm")
 
-    addDateFormatResult(
-            new Date("2023-10-05T15:10:20.300Z"), 
-            "de-DE", 
-            {year: "2-digit", month: "short", day: "numeric"}, 
-            "5. Okt. 23")
-    addDateFormatResult(
-            new Date("2023-10-05T15:10:20.300Z"), 
-            "de-DE", 
-            {year: "2-digit", month: "narrow", day: "numeric"}, 
-            "5. O 23")
-    addDateFormatResult(
-            new Date("2023-10-05T15:10:20.300Z"), 
-            "de-DE", 
-            {year: "2-digit", month: "2-digit", day: "numeric"}, 
-            "5.10.23")
+    addDateFormatResult(testDate, "de-DE", {year: "2-digit", month: "short", day: "numeric"}, "5. Okt. 23")
+    addDateFormatResult(testDate, "de-DE", {year: "2-digit", month: "narrow", day: "numeric"}, "5. O 23")
+    addDateFormatResult(testDate, "de-DE", {year: "2-digit", month: "2-digit", day: "numeric"}, "5.10.23")
 
-    addDateFormatResult(
-            new Date("2023-10-05T15:10:20.300Z"),
-            "de-DE", 
-            {year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: UTC}, 
-            "05.10.23, 15:10")
+    addDateFormatResult(testDate, "de-DE", {year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: UTC}, "05.10.23, 15:10")
 }
 
 function dateFormatWithLocaleAndOptions(): void {
@@ -103,6 +81,15 @@ function dateFormatWithInvalidTimeZone(): void {
     }, "Invalid time zone specified: invalid")
 }
 
+function dateFormatWithoutParameters(): void {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit" }
+    const formatter = new Intl.DateTimeFormat("en-US", options)
+
+    const expected = formatter.format(Date.now())
+    const actual = formatter.format()
+    assertEQ(expected, actual)
+}
+
 function main(): int {
     initFormatResults()
 
@@ -112,6 +99,7 @@ function main(): int {
     suite.addTest("date format with default locale", dateFormatWithDefaultLocale)
     suite.addTest("date format with custom locale and default options", dateFormatWithCustomLocaleAndDefaultOptions)
     suite.addTest("date format with custom locale and options containing invalid time zone", dateFormatWithInvalidTimeZone)
+    suite.addTest("format w/o parameters", dateFormatWithoutParameters)
 
     return suite.run()
 }

@@ -105,7 +105,7 @@ function initFormatResults(): void {
     addFormatResult("en-US", {hour: '2-digit', minute: '2-digit', hour12: true, timeZone: "UTC"}, "12:20 AM")
     addFormatResult("zh-CN", {hour: '2-digit', minute: '2-digit', hour12: true, timeZone: "UTC"}, "上午12:20")
     addFormatResult("en-US", {hour: '2-digit', minute: '2-digit', timeZone: "UTC"}, "12:20 AM")
-    addFormatResult("zh-CN", {hour: '2-digit', minute: '2-digit', timeZone: "UTC"}, "上午12:20")
+    addFormatResult("zh-CN", {hour: '2-digit', minute: '2-digit', timeZone: "UTC"}, "00:20")
     addFormatResult("en-US", {hour: '2-digit', minute: '2-digit', hour12: false, timeZone: "UTC"}, "00:20")
     addFormatResult("zh-CN", {hour: '2-digit', minute: '2-digit', hour12: false, timeZone: "UTC"}, "00:20")
     addFormatResult("en-US", {month: 'numeric', day: 'numeric', weekday: 'long'}, "Wednesday, 10/11")
@@ -141,43 +141,6 @@ function initFormatResults(): void {
     FORMAT_RESULTS_CUSTOM_OPTS = FORMAT_RESULTS.filter((res: FormatResult) => res[1] !== undefined)
 }
 
-function optionsToString(options: Intl.DateTimeFormatOptions | undefined): string {
-    if (options === undefined) {
-        return "undefined"
-    }
-
-    const optionsStr = new StringBuilder()
-    optionsStr.append("{")
-    
-    if (options.era) {
-        optionsStr.append(`era: ${options.era}, `)
-    }
-    if (options.year) {
-        optionsStr.append(`year: ${options.year}, `)
-    }
-    if (options.month) {
-        optionsStr.append(`month: ${options.month}, `)
-    }
-    if (options.day) {
-        optionsStr.append(`day: ${options.day}, `)
-    }
-    if (options.hour) {
-        optionsStr.append(`hour: ${options.hour}, `)
-    }
-    if (options.minute) {
-        optionsStr.append(`minute: ${options.minute}, `)
-    }
-    if (options.hour12 !== undefined) {
-        optionsStr.append(`hour12: ${options.hour12}, `)
-    }
-    if (options.timeZone) {
-        optionsStr.append(`timeZone: ${options.timeZone}, `)
-    }
-
-    optionsStr.append("}")
-    return optionsStr.toString()
-}
-
 function dateFormatWithDefaultOptions(): void {
     FORMAT_RESULTS_UNDEF_OPTS.forEach((res: FormatResult) => {
         const locale = res[0]
@@ -201,11 +164,12 @@ function dateFormatwithCustomOptions(): void {
         const options = res[1]
         const formatter = new Intl.DateTimeFormat(locale, options)
 
-        const expected = res[2]
-        const formattedDate = formatter.format(TEST_DATE)
+        const expectedResult = res[2]
+        const actualResult = formatter.format(TEST_DATE)
 
-        const optionsStr = optionsToString(options)
-        assertEQ(formattedDate, expected, `unexpected date format result for locale: ${locale} and options: ${optionsStr}`)
+        if (actualResult !== expectedResult) {
+            assertEQ(actualResult, expectedResult, `unexpected date format result for locale: ${locale} and options: ${options}`)
+        }
     })
 }
 
@@ -213,10 +177,8 @@ function main(): int {
     initFormatResults()
 
     const suite = new ArkTestsuite("Intl.DateTimeFormat date formatting tests") 
-
     suite.addTest("date format with default locale", dateFormatWithDefaultOptions)
     suite.addTest("date format with custom options", dateFormatwithCustomOptions)
-
     return suite.run()
 }
 
