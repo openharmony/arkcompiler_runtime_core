@@ -635,7 +635,7 @@ export final class BigInt {
 
     public operatorLeftShift(other: BigInt): BigInt {
         if (other.negative()) {
-            throw new Error("BigInt: left shift against negative number")
+            return this.operatorRightShift(other.negate())
         }
 
         // we can't shift more than container can hold
@@ -658,7 +658,7 @@ export final class BigInt {
 
     public operatorRightShift(other: BigInt): BigInt {
         if (other.negative()) {
-            throw new Error("BigInt: left shift against negative number")
+            return this.operatorLeftShift(other.negate())
         }
 
         if (other.isZero()) {
