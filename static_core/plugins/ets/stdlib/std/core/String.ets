@@ -364,6 +364,24 @@ export final class String extends Object implements Comparable<String>, JSONable
     public native localeCompare(another: String, locale: String | undefined): number;
 
     /**
+     * Comparison between this String and another one based on locale and options.
+     * The result is -1 if this string sorts before the another string,
+     * 0 if they are equal, and 1 otherwise.
+     *
+     * @param another String to compare with
+     * @param locale String representing the BCP47 language tag
+     * @param options Intl.CollatorOptions contains comparison options
+     *
+     * @throws RangeError if the locale tag is invalid or not found
+     * @throws NullPointerError if another or locale is undefined
+     *
+     * @returns the comparison result
+     */
+    public localeCompare(another: String, locale: string | string[], options: Intl.CollatorOptions): number {
+        return new Intl.Collator(locale, options).compare(this, another);
+    }
+
+    /**
      * Comparison between this String and another one based on default
      * host locale. The result is -1 if this string sorts before the
      * another string, 0 if they are equal, and 1 otherwise.
