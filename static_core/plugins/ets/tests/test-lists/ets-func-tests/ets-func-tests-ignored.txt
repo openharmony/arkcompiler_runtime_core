@@ -7,13 +7,6 @@ koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 #24358 Koala related issues
 koala-related-benchmarks/arkts-phase1.ets
 
-#23827 Type violation in type erasure
-regression/12581_box_type_array_Boolean_array.ets
-regression/12581_box_type_array_Byte_array.ets
-regression/12581_box_type_array_Int_array.ets
-regression/12581_box_type_array_Short_array.ets
-regression/12581_box_type_array_Long_array.ets
-
 #19807
 regression/12581_custom_class_Engine_array.ets
 
