@@ -24,11 +24,6 @@
 #23596
 03.types/06.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.ets
 
-#24030
-03.types/08.type_object/class_methods_0.ets
-03.types/08.type_object/class_methods_2.ets
-03.types/08.type_object/class_methods_3.ets
-
 #24351
 03.types/15.literal_types/overriding_literal_types_0.ets
 03.types/15.literal_types/overriding_literal_types_1.ets
