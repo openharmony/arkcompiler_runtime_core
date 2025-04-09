@@ -1009,6 +1009,12 @@
 #22788 ES2PANDA_FAIL - fails of negative, compile-only
 09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.ets
 
+#24685
+10.interfaces/03.interface_body/issue24865.ets
+
+#23530
+10.interfaces/05.interface_properties/external_interface_with_property_1.ets
+
 #16840
 10.interfaces/04.interface_members/methods_overriding.ets
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets

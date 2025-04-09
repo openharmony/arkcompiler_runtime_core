@@ -35,6 +35,21 @@ function_decls:
       call: |-
           foo(bar);
 
+    # Case for issue 14702 Subtyping with functions requires explicit conversion
+    - decl: |-
+        function bar(): String { return "Bar" }
+        function foo(a: () => Object): void { let xx = a() }
+      call: |-
+        foo(bar);
+
+  # Case for issue 14702 Subtyping with functions requires explicit conversion
+    - decl: |-
+        type TFunc = () => Object
+        function bar(): String { return "Bar" }
+        function foo(a: TFunc): void { let xx = a() }
+      call: |-
+        foo(bar);
+
     # reference type param, void return
     - decl: |-
           function foo(a: Long) {}
