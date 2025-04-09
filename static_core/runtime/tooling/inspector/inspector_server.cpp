@@ -34,6 +34,7 @@
 #include "json_serialization/jrpc_error.h"
 #include "types/custom_url_breakpoint_response.h"
 #include "types/debugger_evaluation_request.h"
+#include "types/debugger_call_function_on_request.h"
 #include "types/location.h"
 #include "types/numeric_id.h"
 #include "types/possible_breakpoints_response.h"
@@ -685,6 +686,55 @@ void InspectorServer::OnCallDebuggerEvaluateOnCallFrame(
     // clang-format on
 }
 
+void InspectorServer::OnCallDebuggerCallFunctionOn(
+    std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler)
+{
+    // clang-format off
+    server_.OnCall("Debugger.callFunctionOn",
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
+            auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+
+            auto optRequest = DebuggerCallFunctionOnRequest::FromJson(params);
+            if (!optRequest) {
+                LOG(INFO, DEBUGGER) << optRequest.Error();
+                return Unexpected(JRPCError(std::move(optRequest.Error()), ErrorCode::PARSE_ERROR));
+            }
+
+            auto optResult = handler(thread, optRequest->GetFunctionDeclaration(), optRequest->GetCallFrameId());
+            if (!optResult) {
+                std::stringstream ss;
+                ss << "Evaluation failed: " << optResult.Error();
+                auto msg = ss.str();
+                LOG(DEBUG, DEBUGGER) << msg;
+                return Unexpected(JRPCError(std::move(msg), ErrorCode::INTERNAL_ERROR));
+            }
+
+            return std::unique_ptr<JsonSerializable>(std::make_unique<EvaluationResult>(std::move(*optResult)));
+        });
+    // clang-format on
+}
+
+void InspectorServer::OnCallDebuggerSetMixedDebugEnabled(std::function<void(PtThread, bool)> &&handler)
+{
+    // clang-format off
+    server_.OnCall("Debugger.setMixedDebugEnabled",
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
+            bool mixedDebugEnabled;
+            if (auto prop = params.GetValue<JsonObject::BoolT>("mixedDebugEnabled")) {
+                mixedDebugEnabled = *prop;
+            } else {
+                std::string_view msg = "No 'active' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_PARAMS));
+            }
+
+            auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+            handler(thread, mixedDebugEnabled);
+            return std::unique_ptr<JsonSerializable>();
+        });
+    // clang-format on
+}
+
 void InspectorServer::OnCallDebuggerDisable(std::function<void(PtThread)> &&handler)
 {
     server_.OnCall("Debugger.disable", [this, handler = std::move(handler)](auto &sessionId, auto &) {
@@ -697,6 +747,60 @@ void InspectorServer::OnCallDebuggerDisable(std::function<void(PtThread)> &&hand
 void InspectorServer::OnCallDebuggerClientDisconnect(std::function<void(PtThread)> &&handler)
 {
     server_.OnCall("Debugger.clientDisconnect", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallDebuggerSetAsyncCallStackDepth(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.setAsyncCallStackDepth", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallDebuggerSetBlackboxPatterns(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.setBlackboxPatterns", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallDebuggerSmartStepInto(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.smartStepInto", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallDebuggerDropFrame(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.dropFrame", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallDebuggerSetNativeRange(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.setNativeRange", [this, handler = std::move(handler)](auto &sessionId, auto &) {
+        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        handler(thread);
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallDebuggerReplyNativeCalling(std::function<void(PtThread)> &&handler)
+{
+    server_.OnCall("Debugger.replyNativeCalling", [this, handler = std::move(handler)](auto &sessionId, auto &) {
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
         handler(thread);
         return std::unique_ptr<JsonSerializable>();

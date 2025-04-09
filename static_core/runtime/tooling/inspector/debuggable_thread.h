@@ -88,6 +88,9 @@ public:
     // Enables or disables skipping all pauses
     void SetSkipAllPauses(bool skip);
 
+    // Enables or disables mixdebug && mixstack
+    void SetMixedDebugEnabled(bool mixedDebugEnabled);
+
     /**
      * @brief Set a breakpoint with optional condition.
      * @param locations to set breakpoint at, all will have the same BreakpointId.

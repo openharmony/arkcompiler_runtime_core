@@ -34,6 +34,7 @@ set(ARKINSPECTOR_ROOTS
     thread_state.cpp
     types/custom_url_breakpoint_response.cpp
     types/debugger_evaluation_request.cpp
+    types/debugger_call_function_on_request.cpp
     types/exception_details.cpp
     types/location.cpp
     types/remote_object.cpp

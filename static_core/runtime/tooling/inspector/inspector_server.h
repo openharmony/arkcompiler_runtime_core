@@ -84,6 +84,9 @@ public:
     void OnCallDebuggerRemoveBreakpointsByUrl(std::function<void(PtThread, SourceFileFilter)> &&handler);
     void OnCallDebuggerRestartFrame(std::function<void(PtThread, FrameId)> &&handler);
     void OnCallDebuggerResume(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSetAsyncCallStackDepth(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSetBlackboxPatterns(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSmartStepInto(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHandler> &&handler);
     void OnCallDebuggerSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler);
     void OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler);
@@ -97,7 +100,12 @@ public:
         std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler);
     void OnCallDebuggerClientDisconnect(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerDisable(std::function<void(PtThread)> &&handler);
-
+    void OnCallDebuggerDropFrame(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSetNativeRange(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerReplyNativeCalling(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerCallFunctionOn(
+        std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler);
+    void OnCallDebuggerSetMixedDebugEnabled(std::function<void(PtThread, bool)> &&handler);
     void OnCallRuntimeEnable(std::function<void(PtThread)> &&handler);
     void OnCallRuntimeGetProperties(
         std::function<std::vector<PropertyDescriptor>(PtThread, RemoteObjectId, bool)> &&handler);

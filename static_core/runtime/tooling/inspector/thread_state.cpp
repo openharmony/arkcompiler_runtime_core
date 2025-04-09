@@ -43,6 +43,7 @@ void ThreadState::Reset()
     methodEntered_ = false;
     breakpointsActive_ = true;
     skipAllPauses_ = false;
+    mixedDebugEnabled_ = false;
     nextBreakpointId_ = 0;
     breakpointLocations_.clear();
     breakpointConditions_.Clear();
@@ -107,6 +108,12 @@ void ThreadState::SetBreakpointsActive(bool active)
 void ThreadState::SetSkipAllPauses(bool skip)
 {
     skipAllPauses_ = skip;
+}
+
+// NOTE(fangting, #25108): implement "NativeOut" events when in mixed debug mode
+void ThreadState::SetMixedDebugEnabled(bool mixedDebugEnabled)
+{
+    mixedDebugEnabled_ = mixedDebugEnabled;
 }
 
 BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition)
