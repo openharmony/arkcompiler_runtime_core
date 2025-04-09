@@ -15,6 +15,7 @@
 
 #include <string>
 
+#include "ani.h"
 #include "ets_runtime_interface.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -191,6 +192,11 @@ bool EtsRuntimeInterface::IsMethodStringBuilderToString(MethodPtr method) const
 bool EtsRuntimeInterface::IsMethodStringBuilderAppend(MethodPtr method) const
 {
     return GetMethodFullName(method, false) == "std.core.StringBuilder::append";
+}
+
+bool EtsRuntimeInterface::IsMethodInModuleScope(MethodPtr method) const
+{
+    return static_cast<EtsMethod *>(method)->GetClass()->IsModule();
 }
 
 bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
@@ -409,11 +415,6 @@ bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
 uint64_t EtsRuntimeInterface::GetDeprecatedNativeApiMask() const
 {
     return ACC_DEPRECATED_NATIVE_API;
-}
-
-uint64_t EtsRuntimeInterface::GetNativeApiStaticFunctionMask() const
-{
-    return ACC_FUNCTION;
 }
 
 uint32_t EtsRuntimeInterface::GetRuntimeClassOffset(Arch arch) const

@@ -126,8 +126,7 @@ void Codegen::EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, [[maybe_unused]] 
     if (GetRuntime()->CanNativeMethodUseObjects(inst->GetCallMethod())) {
         tmpReg.ChangeType(INT32_TYPE);
         encoder->EncodeLdr(tmpReg, false, MemRef(methodReg, GetRuntime()->GetAccessFlagsOffset(GetArch())));
-        auto unsupportedMask =
-            GetRuntime()->GetDeprecatedNativeApiMask() | GetRuntime()->GetNativeApiStaticFunctionMask();
+        auto unsupportedMask = GetRuntime()->GetDeprecatedNativeApiMask();
         encoder->EncodeAnd(tmpReg, tmpReg, Imm(unsupportedMask));
         encoder->EncodeJump(failLabel, tmpReg, Condition::NE);
     }

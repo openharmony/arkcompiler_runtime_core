@@ -43,6 +43,7 @@ public:
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
     bool IsMethodStringBuilderToString(MethodPtr method) const override;
     bool IsMethodStringBuilderAppend(MethodPtr method) const override;
+    bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;
     uint32_t GetClassOffsetObjectsArray(MethodPtr method) const override;
     uint32_t GetClassOffsetObject(MethodPtr method) const override;
@@ -67,7 +68,6 @@ public:
     void *GetDoubleToStringCache() const override;
     bool IsNativeMethodOptimizationEnabled() const override;
     uint64_t GetDeprecatedNativeApiMask() const override;
-    uint64_t GetNativeApiStaticFunctionMask() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
