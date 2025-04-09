@@ -712,3 +712,69 @@ function runQuickNative(): int {
     }
     return res;
 }
+
+native function generalModuleLevelFunc(i0: int): int;
+
+@ani.unsafe.Quick
+native function quickModuleLevelFunc(i0: int): int;
+
+function testNativeQuick(): boolean {
+    return quickModuleLevelFunc(0) == 0;
+}
+
+function testNativeGeneral(): boolean {
+    return generalModuleLevelFunc(0) == 0;
+}
+
+//! CHECKER       ANI module call optimization failure, JIT
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options:  "--compiler-hotness-threshold=0 --compiler-regex='quick_native.ETSGLOBAL::testNative.*'", entry: "quick_native.ETSGLOBAL::runModuleLevelTest"
+//! METHOD        "quick_native.ETSGLOBAL::testNativeQuick"
+//! PASS_AFTER    "IrBuilder"
+//! INST_COUNT    /CallStatic.*quickModuleLevelFunc.*/, 1
+//! PASS_AFTER    "NativeCallOptimization"
+//! INST_NOT      /Intrinsic\.CompilerGetNativeMethod/
+//! INST_NOT      /CallStatic\.Inlined.*quickModuleLevelFunc/
+//! INST_NOT      /Intrinsic\.CompilerGetNativeMethodManagedClass/
+//! INST_NOT      /Intrinsic\.CompilerGetMethodNativePointer/
+//! INST_NOT      /Intrinsic\.CompilerGetNativeApiEnv/
+//! INST_NOT      /Intrinsic\.CompilerBeginNativeMethod/
+//! INST_NOT      /WrapObjectNative/
+//! INST_NOT      /CallNative.*quickModuleLevelFunc/
+//! INST_NOT      /Intrinsic\.CompilerEndNativeMethodPrim/
+//! INST_NOT      /ReturnInlined/
+//! INST_NOT      /Intrinsic\.CompilerCheckNativeException/
+//! METHOD        "quick_native.ETSGLOBAL::testNativeGeneral"
+//! PASS_AFTER    "IrBuilder"
+//! INST_COUNT    /CallStatic.*generalModuleLevelFunc.*/, 1
+//! PASS_AFTER    "NativeCallOptimization"
+//! INST_NOT      /Intrinsic\.CompilerGetNativeMethod/
+//! INST_NOT      /CallStatic\.Inlined.*testNativeGeneral/
+//! INST_NOT      /Intrinsic\.CompilerGetNativeMethodManagedClass/
+//! INST_NOT      /Intrinsic\.CompilerGetMethodNativePointer/
+//! INST_NOT      /Intrinsic\.CompilerGetNativeApiEnv/
+//! INST_NOT      /Intrinsic\.CompilerBeginNativeMethod/
+//! INST_NOT      /WrapObjectNative/
+//! INST_NOT      /CallNative.*testNativeGeneral/
+//! INST_NOT      /Intrinsic\.CompilerEndNativeMethodObj/
+//! INST_NOT      /ReturnInlined/
+//! INST_NOT      /Intrinsic\.CompilerCheckNativeException/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testNativeQuick,NOT_SUPPORTED_NATIVE/
+//! EVENT_NOT     /DeoptimizationReason,quick_native.ETSGLOBAL::testNativeGeneral,NOT_SUPPORTED_NATIVE/
+
+function runModuleLevelTest(): int {
+
+    loadLibrary("checked_test_quick_native");
+    
+    if (!testNativeQuick()) {
+        console.log('testNativeQuick failed!');
+        return 1;
+    }
+
+    if (!testNativeGeneral()) {
+        console.log('testNativeGeneral failed!');
+        return 2;
+    }
+
+    return 0;
+}

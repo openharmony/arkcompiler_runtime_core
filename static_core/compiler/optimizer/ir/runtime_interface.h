@@ -335,6 +335,11 @@ public:
         return false;
     }
 
+    virtual bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual bool IsNecessarySwitchThreadState([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -361,11 +366,6 @@ public:
     }
 
     virtual uint64_t GetDeprecatedNativeApiMask() const
-    {
-        return 0U;
-    }
-
-    virtual uint64_t GetNativeApiStaticFunctionMask() const
     {
         return 0U;
     }
