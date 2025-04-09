@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,11 @@ EtsString *StdCoreDoubleToString(double number, int radix)
     return cache->GetOrCache(EtsCoroutine::GetCurrent(), number);
 }
 
+bool IsNegativeNan(double x)
+{
+    return std::isnan(x) && std::signbit(x);
+}
+
 EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
 {
     ASSERT(obj != nullptr && locale != nullptr);
@@ -76,8 +81,8 @@ EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
     }
 
     double objValue = helpers::GetStdDoubleArgument(obj);
-    if (std::isnan(objValue)) {
-        return EtsString::CreateFromMUtf8("NaN");
+    if (IsNegativeNan(objValue)) {
+        objValue = std::numeric_limits<double>::quiet_NaN();
     }
 
     icu::number::LocalizedNumberFormatter locNumFmt = icu::number::NumberFormatter::withLocale(loc);
