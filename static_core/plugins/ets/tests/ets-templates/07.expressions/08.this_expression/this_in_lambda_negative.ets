@@ -16,15 +16,16 @@
 /*---
 desc: Keyword this in lambda.
 assert: It may be used in a lambda expression only if it is allowed in the context in which the lambda expression appears.
-tags: [negative]
+tags: [compile-only,negative]
 ---*/
 
-type func = (x: int): int;
-let y: int = 6;
+type func = () => int;
+let y = 6;	
+class A { 
+  bar: func = (): int => { return this.y; };
+}
 
-function main(): void {
-
-  let bar: func = (x: int): int => { return this.y; };
-
-  assertEQ( bar(), 6 );
+function main(): void{
+  let instance: A = new A();
+  assertEQ(instance.bar(), 6 );
 }

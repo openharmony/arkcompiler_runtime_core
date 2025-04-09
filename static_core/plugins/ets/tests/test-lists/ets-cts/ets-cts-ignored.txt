@@ -844,11 +844,6 @@
 07.expressions/06.spread_expression/spex_lmbd_29.ets
 07.expressions/06.spread_expression/spex_lmbd_30.ets
 
-#24042
-07.expressions/08.this_expression/this_in_lambda.ets
-07.expressions/08.this_expression/this_in_lambda_negative.ets
-07.expressions/08.this_expression/this_primary_expression_in_lambda.ets
-
 #24405: Verifier fails on some interface overloading and overriding cases
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.ets
 
