@@ -43,6 +43,7 @@ constexpr std::string_view DISABLE_OBFUSCATION = "disableObfuscation";
 constexpr std::string_view ENABLE_EXPORT_OBFUSCATION = "enableExportObfuscation";
 constexpr std::string_view ENABLE_REMOVE_LOG = "enableRemoveLog";
 constexpr std::string_view ENABLE_DECORATOR_OBFUSCATION = "enableDecoratorObfuscation";
+constexpr std::string_view COMPACT = "compact";
 constexpr std::string_view PRINT_NAME_CACHE = "printNameCache";
 constexpr std::string_view APPLY_NAME_CACHE = "applyNameCache";
 constexpr std::string_view RESERVED_NAMES = "reservedNames";
@@ -150,6 +151,7 @@ void ParseObfuscationConfigFile(const std::string &content, panda::guard::Obfusc
     obfRule->enableExportObfuscation = panda::guard::JsonUtil::GetBoolValue(rulesObj, ENABLE_EXPORT_OBFUSCATION);
     obfRule->enableRemoveLog = panda::guard::JsonUtil::GetBoolValue(rulesObj, ENABLE_REMOVE_LOG);
     obfRule->enableDecorator = panda::guard::JsonUtil::GetBoolValue(rulesObj, ENABLE_DECORATOR_OBFUSCATION);
+    obfRule->enableCompact = panda::guard::JsonUtil::GetBoolValue(rulesObj, COMPACT);
     obfRule->printNameCache = panda::guard::JsonUtil::GetStringValue(rulesObj, PRINT_NAME_CACHE);
     obfRule->applyNameCache = panda::guard::JsonUtil::GetStringValue(rulesObj, APPLY_NAME_CACHE);
     obfRule->reservedNames = panda::guard::JsonUtil::GetArrayStringValue(rulesObj, RESERVED_NAMES);
@@ -332,6 +334,11 @@ bool panda::guard::GuardOptions::IsRemoveLogObfEnabled() const
 bool panda::guard::GuardOptions::IsDecoratorObfEnabled() const
 {
     return obfConfig_.obfuscationRules.enableDecorator;
+}
+
+bool panda::guard::GuardOptions::IsCompactObfEnabled() const
+{
+    return obfConfig_.obfuscationRules.enableCompact;
 }
 
 const std::string &panda::guard::GuardOptions::GetPrintNameCache() const

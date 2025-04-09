@@ -86,6 +86,11 @@ public:
     void RemoveConsoleLog();
 
     /**
+     * when the compact obfuscation option is enabled, uniformly change the line number to 1
+     */
+    void RemoveLineNumber();
+
+    /**
      * Fill instruction with specified sequence number
      * @param index instruction number
      * @param instInfo instruction to be filled in
