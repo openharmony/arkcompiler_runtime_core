@@ -45,10 +45,46 @@ function testDouble(): int {
         test((JSON.parse<Object>("-2.72182", doubleType) as Double).unboxed() == -2.72182, "Double(-2.72182)")
 }
 
+function testStringWithEscape01(): int {
+    let stringType = Type.of(new String() as Object)
+    let s = 'a\\\b\\c\\\\d'
+    let s1 = '"a\\\\\\b\\\\c\\\\\\\\d"'
+    let msg = 'String(a\\\b\\c\\\\d)'
+    return test(JSON.stringify(s) == s1, msg) +
+        test(JSON.parse<Object>(s1, stringType) as String == s, msg)
+}
+
+function testStringWithEscape02(): int {
+    let stringType = Type.of(new String() as Object)
+    let s = '\"-\\-\/-\b-\f-\n-\r-\t'
+    let s1 = '"\\"-\\\\-/-\\b-\\f-\\n-\\r-\\t"'
+    let msg = 'String(\"-\\-\/-\b-\f-\n-\r-\t)'
+    return test(JSON.stringify(s) == s1, msg) +
+        test(JSON.parse<Object>(s1, stringType) as String == s, msg)
+}
+
 function testString(): int {
     let stringType = Type.of(new String() as Object)
     return test(JSON.parse<Object>("\"Gracias\"", stringType) as String == "Gracias", "String(Gracias)") +
         test(JSON.parse<Object>("\"\"", stringType) as String == "", "String()")
+}
+
+function testString02(): int {
+    let stringType = Type.of(new String() as Object)
+    let s = 'a/b//c///d////f'
+    let s1 = '"a/b//c///d////f"'
+    let msg = 'String(a/b//c///d////f)'
+    return test(JSON.stringify(s) == s1, msg) +
+        test(JSON.parse<Object>(s1, stringType) as String == s, msg)
+}
+
+function testString03(): int {
+    let stringType = Type.of(new String() as Object)
+    let s = 'https://p3-sign'
+    let s1 = '"https://p3-sign"'
+    let msg = 'String(https://p3-sign)'
+    return test(JSON.stringify(s) == s1, msg) +
+        test(JSON.parse<Object>(s1, stringType) as String == s, msg)
 }
 
 function equalObjectArrays(a: Object[], b: Object[]): boolean {
@@ -437,7 +473,11 @@ function main(): int {
     failures += testNull()
     failures += testBoolean()
     failures += testDouble()
+    failures += testStringWithEscape01()
+    failures += testStringWithEscape02()
     failures += testString()
+    failures += testString02()
+    failures += testString03()
     failures += testArrayBooleanParse()
     failures += testArrayBooleanStringify()
     failures += testArrayDouble()

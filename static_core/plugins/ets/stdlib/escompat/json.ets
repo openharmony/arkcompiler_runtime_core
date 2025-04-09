@@ -129,8 +129,8 @@ export class JSON {
         return "false"
     }
 
-    private static readonly ESCAPED_CHARS: char[] = [c'\"', c'\\', c'\/', c'\b', c'\f', c'\n', c'\r', c'\t']
-    private static readonly NON_ESCAPED_CHARS: char[] = [c'"', c'\\', c'/', c'b', c'f', c'n', c'r', c't']
+    private static readonly ESCAPED_CHARS: char[] = [c'\"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
+    private static readonly NON_ESCAPED_CHARS: char[] = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
     private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
     /**
@@ -1083,7 +1083,7 @@ export class JSONParser {
                     throw new SyntaxError("Bad escape sequence \\" + this.curChar + " at " + this.getCurPosDescr())
                 }
             }
-            hasMetEscape = this.curChar == c'\\'
+            hasMetEscape = hasMetEscape ? false : this.curChar == c'\\'
         }
         if (this.curChar == JSONString.END_CHAR) {
             res.value = resBuilder.toString()
