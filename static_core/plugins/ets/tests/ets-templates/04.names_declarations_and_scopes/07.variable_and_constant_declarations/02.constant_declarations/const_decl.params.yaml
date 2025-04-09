@@ -28,9 +28,13 @@ cases:
   - use: 'let a:int; const b = a; a = 2;'
     assert: b == 0
 
-  - decl: 'let a: Object|null;'
+  - decl: 'let a: Object|null = null'
     use: const b = a;
     assert: b == null
+
+  - decl: 'let a: Object|undefined'
+    use: const b = a;
+    assert: b == undefined
 
   - use: 'let a:int = 42; const b:long = a * 2;'
     assert: b == 84 as long

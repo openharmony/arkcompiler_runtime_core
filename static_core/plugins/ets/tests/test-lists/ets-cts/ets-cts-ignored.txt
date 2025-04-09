@@ -134,17 +134,14 @@
 04.names_declarations_and_scopes/04.scopes/type_param_interface.ets
 
 #24109
-04.names_declarations_and_scopes/05.accesible/type_name_const_enum.ets
-04.names_declarations_and_scopes/05.accesible/type_name_variable_enum.ets
+04.names_declarations_and_scopes/05.accessible/type_name_const_enum.ets
+04.names_declarations_and_scopes/05.accessible/type_name_variable_enum.ets
 
 #24110
-04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_23.ets
+04.names_declarations_and_scopes/05.accessible/type_name_interface_prop_23.ets
 
 #23065
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_7.ets
-
-#24399 null-safety violations, value was not initialized
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_5.ets
 
 #24000 ES2PANDA_NEG_FAIL
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.ets
