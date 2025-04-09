@@ -17,13 +17,13 @@ declare class C {
     b: number;
     static c: string;
     static d: string;
-    protected e: Map<JSValue, JSValue>;
+    protected e: Map<ESObject, ESObject>;
     protected static f: Map<string, string>;
     j(): number;
     k(): number;
     static l(): string;
     static m(): string;
-    protected o(): Map<JSValue, JSValue>;
+    protected o(): Map<ESObject, ESObject>;
     protected static p(): Map<string, string>;
 }
 declare class Singleton {

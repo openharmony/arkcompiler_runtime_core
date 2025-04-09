@@ -12,10 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Example1 = ESObject;
-interface Animal {
-    live(): void;
+import { C1 } from './include/lib';
+export type CustomPromise<T> = ESObject;
+export declare class Animal {
+    move(): void;
 }
-interface Dog extends Animal {
-    woof(): void;
+export declare class Dog extends Animal {
+    bark(): void;
 }
+export declare class test extends C1 {
+    penWidth: number;
+}
+export type testPromise = ESObject;
+export interface Shape {
+    color: string;
+}
+export interface PenStroke {
+    penWidth: number;
+}
+export interface Square extends Shape, PenStroke {
+    sideLength: number;
+}
+export type SquareTest = ESObject;

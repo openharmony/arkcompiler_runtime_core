@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type N = JSValue;
-declare const test11: JSValue;
-declare const key: JSValue;
+type N = ESObject;
+declare const test11: ESObject;
+declare const key: ESObject;
 declare class A {
     x: number;
     y: number;

@@ -12,10 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type Example1 = ESObject;
-interface Animal {
-    live(): void;
+
+export { ESObject, Class, MethodType, NormalClass };
+
+class ESObject {
+  method1(): void {}
 }
-interface Dog extends Animal {
-    woof(): void;
+
+class Class {
+  method2(): void {}
+}
+
+class MethodType {
+  method3(): void {}
+}
+
+class NormalClass {
+  method4(): void {}
+  Class: Class;
+  AGE: NormalClass;
 }

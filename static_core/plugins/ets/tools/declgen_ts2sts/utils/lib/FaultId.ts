@@ -126,6 +126,16 @@ export enum FaultID {
   DuplicatedEnum,
   NoPrivateMember,
   NoETSKeyword,
+  CallorOptionFuncs,
+  NoETSKeywordInExport,
+  NoETSKeywordInImport,
+  DefaultExport,
+  InstanceType,
+  NoEmptyImport,
+  NoEmptyExport,
+  TypeGeneric,
+  LimitExtends,
+  PropertyAccessExpression,
   // this should always be last enum
   LAST_ID
 }

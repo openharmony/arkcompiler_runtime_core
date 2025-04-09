@@ -17,7 +17,14 @@ import * as ts from 'typescript';
 
 import { FaultID } from '../utils/lib/FaultId';
 import { visitVisitResult } from './utils/ASTHelpers';
-import { JSValue, KitPrefix, ETSKeyword } from '../utils/lib/TypeUtils';
+import { 
+  ETSKeyword,
+  FINAL_CLASS,
+  JSValue, 
+  KitPrefix, 
+  UtilityTypes, 
+  SpecificTypes
+} from '../utils/lib/TypeUtils';
 
 export class Autofixer {
   private readonly typeChecker: ts.TypeChecker;
@@ -38,7 +45,8 @@ export class Autofixer {
       [
         this[FaultID.PrivateIdentifier].bind(this), 
         this[FaultID.NoInitializer].bind(this),
-        this[FaultID.NoETSKeyword].bind(this)
+        this[FaultID.NoETSKeyword].bind(this),
+        this[FaultID.PropertyAccessExpression].bind(this)
       ]
     ],
     [
@@ -48,7 +56,8 @@ export class Autofixer {
         this[FaultID.LimitImport].bind(this),
         this[FaultID.DuplicatedDeclaration].bind(this),
         this[FaultID.DuplicatedEnum].bind(this),
-        this[FaultID.EnumWithMixedType].bind(this)
+        this[FaultID.EnumWithMixedType].bind(this),
+        this[FaultID.LimitExtends].bind(this)
       ]
     ],
     [ts.SyntaxKind.LiteralType, [this[FaultID.NumbericLiteral].bind(this)]],
@@ -58,7 +67,8 @@ export class Autofixer {
         this[FaultID.StringTypeAlias].bind(this),
         this[FaultID.IndexAccessType].bind(this),
         this[FaultID.ConditionalTypes].bind(this),
-        this[FaultID.TypeQuery].bind(this)
+        this[FaultID.TypeQuery].bind(this),
+        this[FaultID.TypeGeneric].bind(this)
       ]
     ],
     [ts.SyntaxKind.ModuleDeclaration, [this[FaultID.Module].bind(this)]],
@@ -76,19 +86,26 @@ export class Autofixer {
     [ts.SyntaxKind.UnknownKeyword, [this[FaultID.UnknownToJSValue].bind(this)]],
     [
       ts.SyntaxKind.InterfaceDeclaration, 
-      [this[FaultID.NoETSKeyword].bind(this), this[FaultID.DefaultImport].bind(this)]
+      [
+        this[FaultID.NoETSKeyword].bind(this),
+        this[FaultID.DefaultExport].bind(this),
+        this[FaultID.CallorOptionFuncs].bind(this),
+      ]
     ],
     [ts.SyntaxKind.Identifier, [this[FaultID.WrapperToPrimitive].bind(this)]],
     [ts.SyntaxKind.SymbolKeyword, [this[FaultID.SymbolToJSValue].bind(this)]],
     [ts.SyntaxKind.IntersectionType, [this[FaultID.IntersectionTypeJSValue].bind(this)]],
-    [ts.SyntaxKind.TypeReference, [this[FaultID.ObjectParametersToJSValue].bind(this)]],
+    [
+      ts.SyntaxKind.TypeReference, 
+      [this[FaultID.ObjectParametersToJSValue].bind(this), this[FaultID.InstanceType].bind(this)]
+    ],
     [ts.SyntaxKind.VariableStatement, [this[FaultID.StringLiteralType].bind(this)]],
     [
       ts.SyntaxKind.FunctionDeclaration,
       [
         this[FaultID.GeneratorFunction].bind(this), 
         this[FaultID.ObjectBindingParams].bind(this),
-        this[FaultID.DefaultImport].bind(this)
+        this[FaultID.DefaultExport].bind(this)
       ]
     ],
     [ts.SyntaxKind.TypeQuery, [this[FaultID.TypeQuery].bind(this)]],
@@ -97,11 +114,16 @@ export class Autofixer {
       ts.SyntaxKind.ClassDeclaration, 
       [
         this[FaultID.NoPrivateMember].bind(this), 
-        this[FaultID.DefaultImport].bind(this),
+        this[FaultID.DefaultExport].bind(this),
         this[FaultID.NoETSKeyword].bind(this)
       ]
     ],
-    [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]]
+    [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
+    [ts.SyntaxKind.ImportDeclaration, [this[FaultID.NoEmptyImport].bind(this)]],
+    [ts.SyntaxKind.ImportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
+    [ts.SyntaxKind.ExportDeclaration, [this[FaultID.NoEmptyExport].bind(this)]],
+    [ts.SyntaxKind.ExportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
+    [ts.SyntaxKind.MappedType, [this[FaultID.MappedType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -492,6 +514,7 @@ export class Autofixer {
         switch (typeName.text) {
           case 'Object':
           case 'Function':
+          case 'Resource':
             return ts.factory.createTypeReferenceNode(JSValue, undefined);
           default:
             return node;
@@ -697,25 +720,41 @@ export class Autofixer {
       } else {
         return this.context.factory.createTypeReferenceNode(JSValue, undefined);
       }
-    } else if (ts.isTypeAliasDeclaration(node) && (node.type !== undefined && ts.isTypeReferenceNode(node.type))) {
-      const referenceNode = node.type as ts.TypeReferenceNode;
-      let updateReferenceNode = false;
-      referenceNode.forEachChild(child => {
-        if (ts.isTypeReferenceNode(child)) {
-          const identifier = child.typeName as ts.Identifier;
-          updateReferenceNode = (identifier !== undefined && identifier.text === JSValue);
-        }
-      });
-   
-      if (updateReferenceNode) {
-        updateReferenceNode = false;
-        return ts.factory.createTypeAliasDeclaration(
-          node.modifiers,
-          node.name,
-          undefined,
-          ts.factory.createTypeReferenceNode(JSValue)
-        );
+    }
+
+    return node;
+  }
+
+  /**
+ * Rule: `arkts-no-instance-type`
+ */
+  private [FaultID.InstanceType](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * For InstanceType, convert them to JSValue
+     */
+    if (ts.isTypeReferenceNode(node) && node.typeName !== undefined) {
+      const referenceNode = node.typeName as ts.Identifier;
+      if (referenceNode.text === 'InstanceType') {
+        return ts.factory.createTypeReferenceNode(JSValue);
       }
+    }
+
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-mappedtype`
+   */
+  private [FaultID.MappedType](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * For mapped types, convert them to JSValue
+     */
+    if (ts.isMappedTypeNode(node)) {
+      return ts.factory.createTypeReferenceNode(JSValue);
     }
 
     return node;
@@ -744,7 +783,6 @@ export class Autofixer {
    * Rule: `arkts-no-initializer`
    */
   private [FaultID.NoInitializer](node: ts.Node): ts.VisitResult<ts.Node> {
-    
     /**
      * For member variables with initial assignment, convert literals to their corresponding data types.
      */
@@ -768,7 +806,7 @@ export class Autofixer {
 
     return node;
   }
-  
+
   /*
    * Rule: `For enums with heterogeneous types, convert them to JSValue`
    */
@@ -802,7 +840,15 @@ export class Autofixer {
     return node;
   }
 
+  /**
+   * Rule: `arkts-no-duplicated-enum`
+   */
   private [FaultID.DuplicatedEnum](node: ts.Node): ts.VisitResult<ts.Node> {
+
+    /**
+     * For duplicated enums, convert them to one enum
+     */
+    
     const statements: ts.Statement[] = [];
     const interfaceDeclarations: ts.InterfaceDeclaration[] = [];
     const classDeclarations: ts.ClassDeclaration[] = [];
@@ -848,7 +894,7 @@ export class Autofixer {
     return node;
   }
 
-    /**
+  /**
    * Rule: `arkts-no-private-members`
    */
   private [FaultID.NoPrivateMember](node: ts.Node): ts.VisitResult<ts.Node> {
@@ -897,7 +943,9 @@ export class Autofixer {
       ts.isClassDeclaration(node) ||
       ts.isInterfaceDeclaration(node) ||
       ts.isMethodDeclaration(node) ||
-      ts.isPropertyDeclaration(node)
+      ts.isPropertyDeclaration(node) ||
+      ts.isImportSpecifier(node) ||
+      ts.isExportSpecifier(node)
     ) {
       return restrictIdentifierName(node);
     }
@@ -907,13 +955,193 @@ export class Autofixer {
   /**
    * Rule: `arkts-ESObject-to-object-type`
    */
-    private [FaultID.DefaultImport](node: ts.Node): ts.VisitResult<ts.Node> {
-      if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)) {
-        return exportDefaultAssignment(node,this.context);
+  private [FaultID.DefaultExport](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)) {
+      return exportDefaultAssignment(node,this.context);
+    }
+  
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-call-signature-or-optional-methods`
+   */
+  private [FaultID.CallorOptionFuncs](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * Convert interfaces with call signatures or optional methods to JSValue
+     */
+
+    if (ts.isInterfaceDeclaration(node)) {
+      for (const member of node.members) {
+        if (ts.isCallSignatureDeclaration(member) || (ts.isMethodSignature(member) && member.questionToken)) {
+          const typeAliasDeclaration = ts.factory.createTypeAliasDeclaration(
+          node.modifiers,
+          node.name,
+          node.typeParameters,
+          ts.factory.createTypeReferenceNode(JSValue)
+          );
+
+          return typeAliasDeclaration;
+        }
+      }
+    }
+    
+    return node;
+  }
+
+  /*
+   * Rule: `arkts-no-type-generic`
+   */
+  private [FaultID.TypeGeneric](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * Generic type alias mapped to JSValue in arkts1.2
+     */
+
+    if (ts.isTypeAliasDeclaration(node)) {
+      const shouldReplace = [
+        (checkNode: ts.Node): boolean => {
+          return SpecificTypes.includes(ts.SyntaxKind[checkNode.kind]);
+        },
+        (checkNode: ts.Node): boolean => {
+          return (
+            ts.isTypeReferenceNode(checkNode) &&
+            ts.isIdentifier(checkNode.typeName) &&
+            UtilityTypes.includes(checkNode.typeName.text)
+          );
+        }
+      ].some((check) => {
+        return check(node.type);
+      });
+      if (shouldReplace) {
+        return ts.factory.createTypeAliasDeclaration(
+          node.modifiers,
+          node.name,
+          node.typeParameters,
+          ts.factory.createTypeReferenceNode(JSValue, undefined)
+        );
+      }
+    }
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-empty-export`
+   */
+  private [FaultID.NoEmptyExport](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * Remove empty export statements
+     */
+
+    if (ts.isExportDeclaration(node)) {
+      const exportClause = node.exportClause;
+      if (exportClause && ts.isNamedExports(exportClause)) {
+        if (exportClause.elements.length === 0) {
+          // If the named exports are empty, return undefined to remove this export statement
+          return undefined;
+        }
+      }
+    }
+    
+    return node;
+  }
+
+  /*
+   * Rule: `arkts-no-limit-extends`
+   */
+  private [FaultID.LimitExtends](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * If some classes inherit from special classes or interfaces, 
+     * these classes will be directly removed from the declaration file.
+     */
+
+    if (ts.isSourceFile(node)) {
+      const importDeclarations: ts.ImportDeclaration[] = [];
+      const classDeclarations: ts.ClassDeclaration[] = [];
+      const interfaceDeclarations: ts.InterfaceDeclaration[] = [];
+      const statements: ts.Statement[] = [];
+      for (const stmt of node.statements) {
+        if (ts.isImportDeclaration(stmt)) {
+          importDeclarations.push(stmt);
+        } else if (ts.isInterfaceDeclaration(stmt)) {
+          interfaceDeclarations.push(stmt);
+        } else if (ts.isClassDeclaration(stmt)) {
+          classDeclarations.push(stmt);
+        } else {
+          statements.push(stmt);
+        }
+      }
+
+      const importSpecifierNames = getImportSpecifierNames(importDeclarations);
+
+      return this.context.factory.updateSourceFile(node, [
+        ...importDeclarations,
+        ...statements,
+        ...tranClassDeclarationList(classDeclarations, this.context, importSpecifierNames),
+        ...tranInterfaceDeclarationList(interfaceDeclarations, this.context, importSpecifierNames)])
+    }
+
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-empty-import`
+   */
+  private [FaultID.NoEmptyImport](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * Remove empty import statements
+     */
+
+    if (ts.isImportDeclaration(node)) {
+      const importClause = node.importClause;
+      if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+        if (importClause.namedBindings.elements.length === 0) {
+          // If the named imports are empty, return undefined to remove this import statement
+          return undefined;
+        }
+      }
+    }
+
+    return node;
+  }
+
+  /*
+   * Rule: `arkts-no-property-access-expression`
+   */
+  private [FaultID.PropertyAccessExpression](node: ts.Node): ts.VisitResult<ts.Node> {
+
+    /**
+     * Property access expression convert to specific type 
+     */
+
+    if (ts.isPropertyDeclaration(node)) {
+      const initializer = node.initializer;
+      if (!initializer || initializer.kind !== ts.SyntaxKind.PropertyAccessExpression) {
+        return node;
       }
   
-      return node;
+      const updatedInitializer = updatePropertyAccessExpression(initializer as ts.PropertyAccessExpression, this.context);
+      if (updatedInitializer) {
+        return this.context.factory.updatePropertyDeclaration(
+          node,
+          node.modifiers,
+          node.name,
+          node.questionToken,
+          updatedInitializer,
+          undefined
+        );
+      }
     }
+  
+    return node;
+  }
 }
 
 /**
@@ -1708,12 +1936,31 @@ function findSameInterfaceOrClassOrEnumList(
 }
 
 function restrictIdentifierName(
-  node: ts.PropertyDeclaration | ts.MethodDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration
+  node: ts.PropertyDeclaration | ts.MethodDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration | ts.ImportSpecifier | ts.ExportSpecifier
 ): ts.VisitResult<ts.Node> {
-  const restrictedNames = ETSKeyword;
+  const restrictedNames: ReadonlySet<string>= new Set(ETSKeyword);
+
+  if (
+    ts.isPropertyDeclaration(node) 
+    || ts.isMethodDeclaration(node) 
+    || ts.isClassDeclaration(node) 
+    || ts.isInterfaceDeclaration(node)
+    || ts.isImportSpecifier(node) 
+    || ts.isExportSpecifier(node)
+  ) {
+    return restrictDeclarationName(node, restrictedNames);
+  }
+
+  return node;
+}
+
+function restrictDeclarationName(
+  node: ts.PropertyDeclaration | ts.MethodDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration | ts.ImportSpecifier | ts.ExportSpecifier,
+  restrictedNames: ReadonlySet<string>
+): ts.VisitResult<ts.Node> {
   const name = node.name;
 
-  if (name && ts.isIdentifier(name) && restrictedNames.includes(name.text)) {
+  if (name && ts.isIdentifier(name) && restrictedNames.has(name.text)) {
     return undefined;
   }
 
@@ -1806,3 +2053,136 @@ function updateInterfaceDeclarationWithModifiers(
   );
 }
 
+function tranDeclarationList<T extends ts.ClassDeclaration | ts.InterfaceDeclaration>(
+  declarations: T[],
+  context: ts.TransformationContext,
+  promises: string[]
+): T[] {
+  return declarations.map((decl) => {
+    const heritageClause = decl.heritageClauses?.find((clause) => clause.token === ts.SyntaxKind.ExtendsKeyword);
+    const expressions = expressionList(heritageClause?.types);
+
+    if (shouldCreateTypeAlias(decl, expressions, promises)) {
+      return createTypeAliasForClass(decl, context) as T;
+    } else {
+      return decl;
+    }
+  });
+}
+
+function shouldCreateTypeAlias<T extends ts.ClassDeclaration | ts.InterfaceDeclaration>(
+  decl: T,
+  expressions: string[],
+  promises: string[]
+): boolean {
+  if (ts.isInterfaceDeclaration(decl) && decl.typeParameters && decl.typeParameters.length > 0) {
+    return true;
+  }
+
+  return expressions.some(className => FINAL_CLASS.includes(className)) &&
+         !promises.some(promise => expressions.includes(promise));
+}
+
+function tranClassDeclarationList(
+  classDeclarations: ts.ClassDeclaration[],
+  context: ts.TransformationContext,
+  promises: string[]
+): ts.ClassDeclaration[] {
+  return tranDeclarationList(classDeclarations, context, promises);
+}
+
+function createTypeAliasForClass(
+  decl: ts.ClassDeclaration | ts.InterfaceDeclaration,
+  context: ts.TransformationContext
+): ts.TypeAliasDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration {
+  if (decl.modifiers !== undefined && decl.name !== undefined) {
+    return context.factory.createTypeAliasDeclaration(
+      filterModifiers(decl.modifiers as ts.NodeArray<ts.Modifier>),
+      decl.name,
+      decl.typeParameters,
+      context.factory.createTypeReferenceNode(JSValue)
+    );
+  } else {
+    return decl;
+  }
+}
+
+function filterModifiers(modifiers: ts.NodeArray<ts.Modifier>): ts.NodeArray<ts.Modifier> | undefined {
+  const filteredModifiers = modifiers.filter(mod => mod.kind !== undefined && mod.kind !== ts.SyntaxKind.DeclareKeyword);
+  return filteredModifiers.length > 0 ?
+    ts.factory.createNodeArray(filteredModifiers, modifiers.hasTrailingComma) :
+    undefined;
+}
+
+function tranInterfaceDeclarationList(
+  interfaceDeclarations: ts.InterfaceDeclaration[],
+  context: ts.TransformationContext,
+  promises: string[]
+): ts.InterfaceDeclaration[] {
+  return tranDeclarationList(interfaceDeclarations, context, promises);
+}
+
+function expressionList(typeArguments?: readonly ts.ExpressionWithTypeArguments[]): string[] {
+  let expressions: string[] = [];
+  if (typeArguments !== undefined && typeArguments.length > 0) {
+    for (const arg of typeArguments) {
+      if (arg.expression !== undefined && ts.isIdentifier(arg.expression)) {
+        expressions.push(arg.expression.text);
+      }
+    }
+  }
+  return expressions;
+}
+
+function isFinalClassImport(element: ts.ImportSpecifier): boolean {
+  return FINAL_CLASS.includes(element.name.text);
+}
+
+function collectFinalClassImports(namedImports: ts.NamedImports, promises: string[]): void {
+  namedImports.elements.forEach((element) => {
+    if (ts.isImportSpecifier(element) && isFinalClassImport(element)) {
+      promises.push(element.name.text);
+    }
+  });
+}
+
+function getImportSpecifierNames(importSpecifierNodes: ts.ImportDeclaration[]): string[] {
+  const promises: string[] = [];
+
+  importSpecifierNodes.forEach((item) => {
+    if (ts.isImportDeclaration(item)) {
+      const namedImports = item.importClause?.namedBindings as ts.NamedImports | undefined;
+      if (namedImports !== undefined && ts.isNamedImports(namedImports)) {
+        collectFinalClassImports(namedImports, promises);
+      }
+    }
+  });
+
+  return promises;
+}
+
+function updatePropertyAccessExpression(node: ts.PropertyAccessExpression, context: ts.TransformationContext): ts.TypeNode | undefined {
+  let identifiers: ts.Identifier[] = [];
+  if (ts.isPropertyAccessExpression(node.expression)) {
+    identifiers = [
+      node.expression.expression,
+      node.expression.name
+    ] as ts.Identifier[];
+  } else {
+    identifiers = [node.expression] as ts.Identifier[];
+  }
+  if (identifiers.length > 1) {
+    return context.factory.createTypeReferenceNode(
+      context.factory.createQualifiedName(
+        identifiers[0],
+        identifiers[1]
+      )
+    );
+  } else if (identifiers.length === 1) {
+    return context.factory.createTypeReferenceNode(
+      identifiers[0]
+    );
+  }
+
+  return undefined;
+}

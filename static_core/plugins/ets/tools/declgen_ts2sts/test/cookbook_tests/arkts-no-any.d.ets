@@ -12,6 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let cat: JSValue;
-export declare const dog: JSValue;
-export declare function foo(d: JSValue): JSValue;
+export declare let cat: ESObject;
+export declare const dog: ESObject;
+export declare function foo(d: ESObject): ESObject;
