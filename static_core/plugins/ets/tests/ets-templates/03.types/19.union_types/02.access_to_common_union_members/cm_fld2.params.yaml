@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -127,22 +127,22 @@ cases:
     - decl: |-
           // classes, fields of union type
           class A {
-              private fld: number|null|string = 99.0
+              private fld: string|number|undefined = 99.0
           }
           class B {
               private fld: number = 99.0
           }
           class AA extends A {
-              fld: number|null|string = 42.0
+              fld: string|number|undefined = 42.0
           }
           class BB extends B {
-              fld: 'a'|null|string|number|never
+              fld: 'a'|string|number|undefined
           }
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
           assertEQ(u1.fld, 42.0)
-          assertEQ(u2.fld, null)
+          assertEQ(u2.fld, undefined)
 
     - decl: |-
           // classes, fields of array type
