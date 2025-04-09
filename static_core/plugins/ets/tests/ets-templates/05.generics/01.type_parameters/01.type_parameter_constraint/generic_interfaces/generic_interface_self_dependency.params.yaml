@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,13 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
----
-cases:
-  - T = SomeType, T = OtherType
-  - T, T = SomeType
-  - T = SomeType, U
-  - T = 10
-  - T = true
-  - T = Base<T>
-  - T1, T2 = SomeType, T3
-  - T1 = T2, T2 = T1
+--- # Self dependency tests
+self_dependency:
+  - T extends T
+  - U<T extends T>
+  - U<W<T extends T>>
+  - U<U<T extends T>>
+  - T extends U, U extends T
+  - T extends U, U extends W, W extends T

@@ -16,10 +16,9 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: |-
-    Type parameters of generic types can have defaults, and optional type parameters are also supported. This situation
+    Type parameters of generic types can have defaults. This situation
     allows dropping a type argument when a particular type of instantiation is used.
 tags: [compile-only]
-params: c
 ---*/
 
 class SomeType {}
