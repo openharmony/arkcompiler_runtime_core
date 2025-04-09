@@ -701,6 +701,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
     */
     public native toExponential(d: double): String;
+    public native toExponentialWithNoDigit(): String;
 
     /**
      * toExponential() returns std.core.String representing the underlying double in exponential notation
@@ -709,7 +710,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
     */
     public toExponential(): String {
-        return this.toExponential(0);
+        return this.toExponentialWithNoDigit();
     }
 
     /**
