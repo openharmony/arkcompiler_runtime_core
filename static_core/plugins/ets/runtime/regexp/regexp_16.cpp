@@ -71,6 +71,11 @@ ark::RegExpMatchResult<PandaString> RegExp16::Execute(Pcre2Obj re, const uint16_
     result.index = ovector[0];
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     result.endIndex = ovector[1];
+    int groupCount = pcre2_get_ovector_count(matchData);
+    while (static_cast<int>(result.captures.size()) < groupCount) {
+        result.captures.push_back({false, PandaString()});
+        result.indices.push_back({0, 0});
+    }
     pcre2_match_data_free(matchData);
     return result;
 }

@@ -115,6 +115,21 @@ function test6(): int {
     return checkTestResult(actual, longstring + longstring)
 }
 
+function test7(): int {
+    let failure = 0
+    let str1 = "foo"
+    let str2 = "•foo"
+
+    failure += checkTestResult(str1.replace(new RegExp("(f)|(g)"), "$2"), "oo")
+    failure += checkTestResult(str1.replace(new RegExp("(f)|(g)"), "$1"), "foo")
+    failure += checkTestResult(str1.replace(new RegExp("(q)|(z)"), "$2"), "foo")
+    failure += checkTestResult(str2.replace(new RegExp("(f)|(g)"), "$2"), "•oo")
+    failure += checkTestResult(str2.replace(new RegExp("(f)|(g)"), "$1"), "•foo")
+    failure += checkTestResult(str2.replace(new RegExp("(q)|(z)"), "$2"), "•foo")
+
+    return failure
+}
+
 function main(): int {
     let str = "xaxbxcx"
     let failure = 0
@@ -124,6 +139,7 @@ function main(): int {
     failure += test4(str)
     failure += test5("abcd")
     // failure += test6()
+    failure += test7()
     console.println(failure)
     return failure
 }
