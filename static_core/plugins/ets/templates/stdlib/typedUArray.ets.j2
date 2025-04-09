@@ -968,7 +968,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; i++) {
+        for (let i = array.length - 1; i >= 0; --i) {
         {%- if element.get('name') != 'Uint8Clamped' %}
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos as int + i as int, {{fromElementCompat % 'v'}})

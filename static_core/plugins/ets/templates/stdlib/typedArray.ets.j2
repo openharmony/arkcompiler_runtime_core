@@ -991,7 +991,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length as int; ++i) {
+        for (let i = array.length - 1 as int; i >= 0; --i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v{{fromElementCompat}})
