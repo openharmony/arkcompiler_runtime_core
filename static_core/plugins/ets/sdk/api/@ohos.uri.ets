@@ -342,6 +342,103 @@ export namespace uri {
       let thisSsp: string = this.uriEntry.getSsp();
       return this.dealDecode(thisSsp);
     }
+
+    set scheme(input: string | null) {
+      if (input === null || input.length === 0) {
+        return;
+      }
+      this.uriEntry.setScheme(input);
+    }
+
+    set path(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setPath(encodeURI(input));
+    }
+
+    /**
+     * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
+     */
+    set ssp(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setSsp(encodeURI(input))
+    }
+
+    set authority(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setAuthority(encodeURI(input))
+    }
+
+    set userInfo(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setUserInfo(encodeURIComponent(input));
+    }
+
+    set query(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setQuery(encodeURIComponent(input));
+    }
+
+    set fragment(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setFragment(encodeURIComponent(input));
+    }
+
+    set encodedUserInfo(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setUserInfo(input);
+    }
+
+    set encodedPath(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setPath(input);
+    }
+
+    set encodedQuery(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setQuery(input);
+    }
+
+    set encodedFragment(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setFragment(input);
+    }
+
+    set encodedAuthority(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setAuthority(input);
+    }
+
+    /**
+     * NOTE(zhangziye):#25267 Unable to use different getter/setter signature 
+     */
+    set encodedSSP(input: string | null) {
+      if (input === null) {
+        return;
+      }
+      this.uriEntry.setSsp(input);
+    }
   }
 
   function toAscllString(uriStr: string): string {
@@ -509,7 +606,7 @@ export namespace uri {
 
     private analysisHost(isLawfulPort: boolean) {
       // find ipv4 or ipv6 or host
-      if (this.data[0] == c'[') {
+      if (this.data.length > 0 && this.data[0] == c'[') {
         if (this.data[this.data.length - 1] == c']') {
           // IPV6
           if (!isLawfulPort) {
@@ -892,6 +989,209 @@ export namespace uri {
 
     clearQuery() {
       return this.buildUriString("clearquery", "");
+    }
+
+    setScheme(scheme: string): void {
+      let code = scheme.charCodeAt(0);
+      if (code >= 0 && code < MAX_BIT_SIZE &&
+        !UriRule.ruleAlpha[code]) {
+        this.errStr = "Scheme the first character must be a letter.";
+        return;
+      }
+      let temp: string = "";
+      const pos: number = scheme.indexOf(':');
+      if (pos !== -1) {
+        temp = scheme.substring(0, pos);
+      } else {
+        temp = scheme;
+      }
+
+      if (!this.checkCharacter(temp, UriRule.ruleScheme, false)) {
+        this.errStr = "Scheme does not conform to the rule.";
+        return;
+      }
+      this.uriData.scheme = temp;
+      this.inputUri = this.updateToString();
+    }
+
+    setAuthority(authorityStr: string): void {
+      // Reset values
+      this.uriData.port = -1;
+      this.uriData.host = "";
+      this.uriData.userInfo = "";
+      this.uriData.authority = authorityStr;
+      this.data = authorityStr;
+
+      // Find UserInfo
+      const atPos = this.data.indexOf('@');
+      if (atPos !== -1) {
+        const userStr = this.data.substring(0, atPos);
+        this.data = this.data.substring(atPos + 1);
+
+        if (!this.checkCharacter(userStr, UriRule.ruleUserInfo, true)) {
+          this.errStr = "userInfo does not conform to the rule";
+          return;
+        }
+        this.uriData.userInfo = userStr;
+      }
+
+      let isLawfulPort = true;
+      // Find port
+      const colonPos = this.data.lastIndexOf(':');
+      if (colonPos !== -1) {
+        const bracketPos = this.data.lastIndexOf(']');
+        if (bracketPos === -1 || colonPos > bracketPos) {
+          isLawfulPort = this.analysisPort(colonPos);
+        }
+        if (this.errStr) {
+          return;
+        }
+      }
+      this.analysisHost(isLawfulPort);
+      this.updateSsp();
+      this.inputUri = this.updateToString();
+    }
+
+    setSsp(sspStr: string): void {
+      // Reset all relevant fields
+      this.uriData.authority = "";
+      this.uriData.port = -1;
+      this.uriData.host = "";
+      this.uriData.userInfo = "";
+      this.uriData.query = "";
+      this.uriData.path = "";
+      this.uriData.SchemeSpecificPart = "";
+      this.data = sspStr;
+
+      // Handle query part
+      const queryPos = this.data.indexOf('?');
+      if (queryPos !== -1) {
+        this.analysisQuery(queryPos);
+      }
+
+      // Handle path and host parts
+      const doubleSlashPos = this.data.indexOf('//');
+      if (doubleSlashPos !== -1 && doubleSlashPos === 0) {
+        this.assignSchemeSpecificPart();
+        this.data = this.data.substring(2); // Skip the '//'
+        this.analysisHostAndPath();
+      } else if (this.data[0] === c'/') {
+        this.uriData.path = this.data;
+        this.assignSchemeSpecificPart();
+        this.data = "";
+      } else {
+        this.assignSchemeSpecificPart();
+        this.uriData.path = "";
+        this.uriData.query = "";
+        this.data = "";
+      }
+      this.inputUri = this.updateToString();
+    }
+
+    setUserInfo(userInfo: string): void {
+      if (!this.uriData.host || !this.checkCharacter(userInfo, UriRule.ruleUserInfo, true)) {
+        this.errStr = "userInfo does not conform to the rule";
+        return;
+      }
+      this.uriData.userInfo = userInfo;
+      this.updateAuthority();
+      this.updateSsp();
+      this.inputUri = this.updateToString();
+    }
+
+    setPath(pathStr: string): void {
+      if (!this.checkCharacter(pathStr, UriRule.rulePath, true)) {
+        this.errStr = "pathStr does not conform to the rule";
+        return;
+      }
+      this.uriData.path = pathStr;
+      this.updateSsp();
+      this.inputUri = this.updateToString();
+    }
+
+    setQuery(queryStr: string): void {
+      if (!this.checkCharacter(queryStr, UriRule.ruleUrlc, true)) {
+        this.errStr = "QueryStr does not conform to the rule";
+        return;
+      }
+      this.uriData.query = queryStr;
+      this.updateSsp();
+      this.inputUri = this.updateToString();
+    }
+
+    setFragment(fragmentStr: string): void {
+      if (!this.checkCharacter(fragmentStr, UriRule.ruleUrlc, true)) {
+        this.errStr = "Fragment does not conform to the rule";
+        return;
+      }
+      this.uriData.fragment = fragmentStr;
+      this.inputUri = this.updateToString();
+    }
+
+    private updateAuthority(): void {
+      let temp = this.uriData.userInfo;
+      if (this.uriData.userInfo) {
+        temp += "@";
+      }
+      temp += this.uriData.host;
+      if (this.uriData.port !== -1) {
+        temp += `:${this.uriData.port}`;
+      }
+      this.uriData.authority = temp;
+    }
+
+    private updateSsp(): void {
+      let temp = "";
+      if (this.uriData.authority) {
+        temp += `//${this.uriData.authority}`;
+      }
+      if (this.uriData.path) {
+        temp += this.uriData.path.startsWith('/')
+          ? this.uriData.path
+          : `/${this.uriData.path}`;
+      }
+      if (this.uriData.query) {
+        temp += `?${this.uriData.query}`;
+      }
+      this.uriData.SchemeSpecificPart = temp;
+    }
+
+    private updateToString(): string {
+      let uriStr = "";
+      let addQuery = false;
+      if (this.uriData.scheme) {
+        uriStr += this.uriData.scheme + ":";
+      }
+      if (!this.uriData.path) {
+        uriStr += this.uriData.SchemeSpecificPart;
+        addQuery = true;
+      } else {
+        if (this.uriData.host) {
+          uriStr += "//";
+          if (this.uriData.userInfo) {
+            uriStr += this.uriData.userInfo + "@";
+          }
+          uriStr += this.uriData.host;
+          if (this.uriData.port !== -1) {
+            uriStr += ":" + this.uriData.port;
+          }
+        } else if (this.uriData.authority) {
+          uriStr += "//" + this.uriData.authority;
+        }
+        if (this.uriData.path) {
+          uriStr += this.uriData.path.startsWith('/')
+            ? this.uriData.path
+            : "/" + this.uriData.path;
+        }
+      }
+      if (this.uriData.query && !addQuery) {
+        uriStr += "?" + this.uriData.query;
+      }
+
+      if (this.uriData.fragment) {
+        uriStr += "#" + this.uriData.fragment;
+      }
+      return uriStr;
     }
   }
 
