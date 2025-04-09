@@ -57,3 +57,11 @@ function getFooCls1(name: String): FooCls;
 function getFooCls2(name: String, test: String): FooCls;
 
 function makeFoo(): Foo;
+
+@static("FooCls")
+@get("static_property")
+function getStaticProperty(): i32;
+
+@static("FooCls")
+@set("static_property")
+function setStaticProperty(a: i32): void;

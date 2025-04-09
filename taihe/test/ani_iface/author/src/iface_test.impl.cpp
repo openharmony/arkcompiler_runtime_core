@@ -14,11 +14,12 @@
  */
 #include "iface_test.impl.hpp"
 
-#include "core/string.hpp"
 #include "iface_test.Foo.proj.2.hpp"
 #include "stdexcept"
+#include "taihe/string.hpp"
 // Please delete <stdexcept> include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 
 class Foo {
@@ -29,11 +30,13 @@ public:
     {
         std::cout << "Fooimpl: " << __func__ << std::endl;
     }
+
     string getName()
     {
         std::cout << "Fooimpl: " << __func__ << " " << name_ << std::endl;
         return name_;
     }
+
     void setName(string_view name)
     {
         std::cout << "Fooimpl: " << __func__ << " " << name << std::endl;
@@ -46,6 +49,7 @@ public:
     std::cout << __func__ << std::endl;
     return make_holder<Foo, ::iface_test::Foo>();
 }
+
 string printFooName(::iface_test::weak::Foo foo)
 {
     auto name = foo->getName();

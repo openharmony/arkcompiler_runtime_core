@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <core/runtime.hpp>
+#include <taihe/runtime.hpp>
 
-namespace taihe::core {
+namespace taihe {
 __thread ani_env *cur_env;
 
 void set_env(ani_env *env)
@@ -27,10 +27,10 @@ ani_env *get_env()
     return cur_env;
 }
 
-void ani_set_error(ani_env *env, taihe::core::string_view msg)
+void ani_set_error(ani_env *env, taihe::string_view msg)
 {
     ani_class errCls;
-    const char *className = "Lescompat/Error;";
+    char const *className = "Lescompat/Error;";
     if (ANI_OK != env->FindClass(className, &errCls)) {
         std::cerr << "Not found '" << className << std::endl;
         return;
@@ -53,9 +53,9 @@ void ani_set_error(ani_env *env, taihe::core::string_view msg)
     env->ThrowError(static_cast<ani_error>(errObj));
 }
 
-void set_error(taihe::core::string_view msg)
+void set_error(taihe::string_view msg)
 {
     ani_env *env = get_env();
     ani_set_error(env, msg);
 }
-}  // namespace taihe::core
+}  // namespace taihe

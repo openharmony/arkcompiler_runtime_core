@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as test from "../author_generated/inject_test";
+import * as test from "@generated/inject_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_inject");
 

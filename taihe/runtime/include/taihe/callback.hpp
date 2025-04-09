@@ -15,9 +15,10 @@
 #pragma once
 
 #include <taihe/common.hpp>
+
 #include <type_traits>
 
-namespace taihe::core {
+namespace taihe {
 template <typename Signature>
 struct callback_view;
 
@@ -146,4 +147,4 @@ template <typename Return, typename... Params>
 struct as_param<callback<Return(Params...)>> {
     using type = callback_view<Return(Params...)>;
 };
-}  // namespace taihe::core
+}  // namespace taihe

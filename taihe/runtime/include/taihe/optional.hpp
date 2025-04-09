@@ -15,16 +15,16 @@
 #pragma once
 
 #include <taihe/optional.abi.h>
+#include <taihe/common.hpp>
 
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <taihe/common.hpp>
 #include <utility>
 
-namespace taihe::core {
+namespace taihe {
 template <typename cpp_owner_t>
 struct optional_view;
 
@@ -142,4 +142,4 @@ template <typename cpp_owner_t>
 struct as_param<optional<cpp_owner_t>> {
     using type = optional_view<cpp_owner_t>;
 };
-}  // namespace taihe::core
+}  // namespace taihe

@@ -15,6 +15,7 @@
 #pragma once
 
 #include <taihe/string.abi.h>
+#include <taihe/common.hpp>
 
 #include <charconv>
 #include <cstddef>
@@ -24,10 +25,9 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <taihe/common.hpp>
 #include <utility>
 
-namespace taihe::core {
+namespace taihe {
 struct string_view;
 struct string;
 
@@ -41,9 +41,9 @@ struct string_view {
 
     explicit string_view(struct TString handle) : m_handle(handle) {}
 
-    string_view(const char *value TH_NONNULL) : string_view(tstr_new_ref(value, strlen(value))) {}
+    string_view(char const *value TH_NONNULL) : string_view(tstr_new_ref(value, strlen(value))) {}
 
-    string_view(const char *value TH_NONNULL, size_type size) : string_view(tstr_new_ref(value, size)) {}
+    string_view(char const *value TH_NONNULL, size_type size) : string_view(tstr_new_ref(value, size)) {}
 
     string_view(std::initializer_list<char> value) : string_view(value.begin(), static_cast<uint32_t>(value.size())) {}
 
@@ -153,9 +153,9 @@ protected:
 struct string : public string_view {
     explicit string(struct TString handle) : string_view(handle) {}
 
-    string(const char *value TH_NONNULL) : string(tstr_new(value, std::strlen(value))) {}
+    string(char const *value TH_NONNULL) : string(tstr_new(value, std::strlen(value))) {}
 
-    string(const char *value TH_NONNULL, size_type size) : string(tstr_new(value, size)) {}
+    string(char const *value TH_NONNULL, size_type size) : string(tstr_new(value, size)) {}
 
     string(std::initializer_list<char> value) : string(value.begin(), static_cast<uint32_t>(value.size())) {}
 
@@ -296,4 +296,4 @@ template <>
 struct as_param<string> {
     using type = string_view;
 };
-}  // namespace taihe::core
+}  // namespace taihe

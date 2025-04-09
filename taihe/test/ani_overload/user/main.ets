@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as test_overload from "../author_generated/overload";
-import * as OverloadTest from "../author_generated/overload_test";
+import * as test_overload from "@generated/overload";
+import * as OverloadTest from "@generated/overload_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_overload");
 
@@ -39,7 +40,7 @@ function test_Foo_bar_string(foo: OverloadTest.Foo) {
 }
 // 测试 byte (i8)
 function testByte() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, 5 as byte);
     assertEQ(res, 5);
@@ -47,7 +48,7 @@ function testByte() {
 
 // 测试 short (i16)
 function testShort() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(42 as short, 42 as short);
     assertEQ(res, 42);
@@ -55,7 +56,7 @@ function testShort() {
 
 // 测试 int (i32)
 function testInt() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(1000 as int, 1000 as int);
     assertEQ(res, 1000);
@@ -63,7 +64,7 @@ function testInt() {
 
 // 测试 long (i64)
 function testLong() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(1000000 as long, 1000000 as long);
     assertEQ(res, 1000000);
@@ -71,7 +72,7 @@ function testLong() {
 
 // 测试 float (f32)
 function testFloat() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(3.14 as float, 3.14 as float);
     assertEQ(res, 3.14 as float);
@@ -79,7 +80,7 @@ function testFloat() {
 
 // 测试 double (f64)
 function testDouble() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(2.71828 as double, 2.71828 as double);
     assertEQ(res, 2.71828);
@@ -87,7 +88,7 @@ function testDouble() {
 
 // 测试 String
 function testString() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc("123", "123");
     assertEQ(res, "123");
@@ -95,21 +96,21 @@ function testString() {
 
 // 测试 i8 与 i16
 function testByte_Short() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, 42 as short);
     assertEQ(res, 5);
 }
 // 测试 i8 与 f32
 function testByte_Float() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, 3.14 as float);
     assertEQ(res, 5);
 }
 // 测试i8 与String
 function testByte_String() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, "123");
     assertEQ(res, 5);
@@ -118,7 +119,7 @@ function testByte_String() {
 // 测试传入enum类型
 function test_enum() {
     let color = test_overload.Color.red;
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(color);
     assertEQ(res, 1 as int);
@@ -130,7 +131,7 @@ function test_struct() {
         testNum: 2147483647,
         testStr: "path/to/source"
     };
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(mystruct)
     assertEQ(res, "path/to/source")
@@ -140,61 +141,61 @@ function test_struct() {
 
 // 测试5param
 function test_5param() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(
         1 as byte, 1 as short, 1 as int, 1.1 as float, 1.123 as double);
 }
 function test_5param2() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(true, "hello", 1 as byte, 1 as short, 1 as int);
 }
 function test_5param3() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(1 as float, 1 as double, true, "hello", 1 as byte);
 }
 function test_5param4() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(
         "1 as byte", 1 as short, 1 as int, 1.1 as float, true);
 }
 function test_5param5() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc("1 as byte", "1 as short", "1 as int", true, false);
 }
 
 function test_5param6() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(
         10 as short, 20 as int, 3.0 as float, 4.0 as double, true);
 }
 
 function test_5param7() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc("hello", 1 as byte, 2 as short, 3.0 as float, false);
 }
 
 function test_5param8() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(true, 5 as byte, 10 as int, 2.5 as double, "world");
 }
 
 function test_5param9() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(
         3.14 as double, false, "test", 100 as short, 200 as int);
 }
 
 function test_5param10() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     instance.overloadFunc(
         42 as byte, 1.5 as float, true, "example", 1000 as int);
@@ -203,7 +204,7 @@ function test_5param10() {
 
 // 测试10param
 function test_10param() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let arri8: byte[] = [1, 2, 3];
     let arri16: short[] = [1, 2, 3, 4];
@@ -215,7 +216,7 @@ function test_10param() {
 
 // 测试10param1
 function test_10param1() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let arri8: byte[] = [1, 2, 3];
     let mystruct: test_overload.Mystruct = {
@@ -230,7 +231,7 @@ function test_10param1() {
 
 // 测试10param2
 function test_10param2() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let arri8: byte[] = [1, 2, 3];
     let arri16: short[] = [1, 2, 3, 4];
@@ -252,7 +253,7 @@ function test_10param2() {
 
 // 测试10param3
 function test_10param3() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let arri8: byte[] = [1, 2, 3];
     let mystruct: test_overload.Mystruct = {
@@ -273,7 +274,7 @@ function test_10param3() {
 }
 // 测试10param4
 function test_10param4() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let arri8: byte[] = [1, 2, 3];
     let mystruct: test_overload.Mystruct = {
@@ -297,7 +298,7 @@ function test_10param4() {
 
 // 测试重载函数传入两个不同数据类型的数组
 function test_Array() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface()
 
     let numbers: int[] = [1, 2, 3, 4, 5];
@@ -309,7 +310,7 @@ function test_Array() {
 }
 
 function test_buffer() {
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface()
     let numbersU8: byte[] = [1, 2, 3, 4, 5];
     let arrbuf1: ArrayBuffer = new ArrayBuffer(numbersU8.length);
@@ -326,7 +327,7 @@ function test_enum_record() {
         "english": 85 as short,
         "science": 95 as short,
     };
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface()
     let color = test_overload.Color.red;
     // instance.overloadFunc((test_overload.Color)color , studentScores)
@@ -338,7 +339,7 @@ function test_array_record() {
         "english": 85 as short,
         "science": 95 as short,
     };
-    let instance: test_overload.overloadInterface =
+    let instance: test_overload.OverloadInterface =
         test_overload.get_interface()
     let numbers: int[] = [1, 2, 3, 4, 5];
     instance.overloadFunc(numbers, studentScores)
@@ -394,5 +395,5 @@ function main() {
     suite.addTest("testByte_10param2", test_10param2);
     suite.addTest("testByte_10param3", test_10param3);
     suite.addTest("testByte_10param4", test_10param4);
-    suite.run();
+    System.exit(suite.run());
 }

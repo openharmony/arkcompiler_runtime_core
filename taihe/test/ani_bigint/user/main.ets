@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as bigint_test from "../author_generated/bigint_test";
+import * as bigint_test from "@generated/bigint_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_bigint");
 
@@ -25,7 +26,7 @@ function main() {
     suite.addTest("testBigint04", testBigint04);
     suite.addTest("testBigint05", testBigint05);
     suite.addTest("testBigint06", testBigint06);
-    suite.run();
+    System.exit(suite.run());
     console.info("bigint_test run end...");
 }
 

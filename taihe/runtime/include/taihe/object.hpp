@@ -15,18 +15,18 @@
 #pragma once
 
 #include <taihe/object.abi.h>
+#include <taihe/common.hpp>
 
 #include <array>
 #include <exception>
 #include <stdexcept>
-#include <taihe/common.hpp>
 #include <type_traits>
 
 //////////////////////
 // Raw Data Handler //
 //////////////////////
 
-namespace taihe::core {
+namespace taihe {
 struct data_view;
 struct data_holder;
 
@@ -69,13 +69,13 @@ inline std::size_t hash_impl(adl_helper_t, data_view val)
 {
     return reinterpret_cast<std::size_t>(val.data_ptr);
 }
-}  // namespace taihe::core
+}  // namespace taihe
 
 ///////////////////////////////////////
 // Specific Impl Type Object Handler //
 ///////////////////////////////////////
 
-namespace taihe::core {
+namespace taihe {
 template <typename Impl>
 struct data_block_impl : DataBlockHead, Impl {
     template <typename... Args>
@@ -86,19 +86,19 @@ struct data_block_impl : DataBlockHead, Impl {
 };
 
 template <typename Impl, typename... Args>
-static DataBlockHead *new_data_ptr(TypeInfo const *rtti_ptr, Args &&...args)
+inline DataBlockHead *new_data_ptr(TypeInfo const *rtti_ptr, Args &&...args)
 {
     return new data_block_impl<Impl>(rtti_ptr, std::forward<Args>(args)...);
 }
 
 template <typename Impl>
-void del_data_ptr(struct DataBlockHead *data_ptr)
+inline void del_data_ptr(struct DataBlockHead *data_ptr)
 {
     delete static_cast<data_block_impl<Impl> *>(data_ptr);
 }
 
 template <typename Impl>
-Impl *cast_data_ptr(struct DataBlockHead *data_ptr)
+inline Impl *cast_data_ptr(struct DataBlockHead *data_ptr)
 {
     return static_cast<Impl *>(static_cast<data_block_impl<Impl> *>(data_ptr));
 }
@@ -283,4 +283,4 @@ inline auto into_holder(Impl &&impl)
 {
     return impl_holder<Impl, InterfaceHolders...>::make(std::forward<Impl>(impl));
 }
-}  // namespace taihe::core
+}  // namespace taihe

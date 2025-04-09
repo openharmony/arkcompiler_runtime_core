@@ -650,6 +650,20 @@ class STSCodeGenerator:
                         f"    }});\n"
                         f"}}\n"
                     )
+            # getter
+            if get_name := func_ani_info.get_name:
+                target.write(
+                    f"static get {get_name}({sts_real_params_str}): {sts_return_ty_name} {{\n"
+                    f"    return {sts_native_call};\n"
+                    f"}}\n"
+                )
+            # setter
+            if set_name := func_ani_info.set_name:
+                target.write(
+                    f"static set {set_name}({sts_real_params_str}) {{\n"
+                    f"    return {sts_native_call};\n"
+                    f"}}\n"
+                )
 
     def gen_native_methods(
         self,

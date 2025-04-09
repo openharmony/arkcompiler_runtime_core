@@ -15,12 +15,12 @@
 #include <iostream>
 #include <maythrow.impl.hpp>
 
-#include "core/runtime.hpp"
+#include "taihe/runtime.hpp"
 
 int32_t maythrow_impl(int32_t a)
 {
     if (a == 0) {
-        taihe::core::set_error("some error happen");
+        taihe::set_error("some error happen");
         return -1;
     } else {
         return a + 10;

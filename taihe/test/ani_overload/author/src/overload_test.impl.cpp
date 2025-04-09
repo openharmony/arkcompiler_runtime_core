@@ -16,10 +16,11 @@
 
 #include <iostream>
 
-#include "core/string.hpp"
 #include "stdexcept"
+#include "taihe/string.hpp"
 // Please delete <stdexcept> include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 
 class Foo {
@@ -28,6 +29,7 @@ public:
     {
         return a;
     }
+
     string bar_str(string_view a)
     {
         return a;
@@ -38,10 +40,12 @@ int32_t add_int(int32_t a, int32_t b)
 {
     return a + b;
 }
+
 string add_str(string_view a, string_view b)
 {
     return concat(a, b);
 }
+
 ::overload_test::Foo makeFoo()
 {
     return make_holder<Foo, ::overload_test::Foo>();

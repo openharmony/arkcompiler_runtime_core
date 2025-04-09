@@ -36,7 +36,7 @@
 #endif
 #endif
 
-namespace taihe::core {
+namespace taihe {
 template <typename cpp_t, typename = void>
 struct as_abi;
 
@@ -109,7 +109,8 @@ inline cpp_t from_abi(as_abi_t<cpp_t> abi_val)
 ///////////////
 
 template <auto tag>
-struct static_tag_t {};
+struct static_tag_t {
+};
 
 template <auto tag>
 constexpr static_tag_t<tag> static_tag = {};
@@ -145,4 +146,4 @@ inline bool same_impl(adl_helper_t, T lhs, T rhs)
 {
     return lhs == rhs;
 }
-}  // namespace taihe::core
+}  // namespace taihe

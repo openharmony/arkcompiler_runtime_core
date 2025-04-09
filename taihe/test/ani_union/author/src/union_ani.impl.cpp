@@ -14,11 +14,12 @@
  */
 #include "union_ani.impl.hpp"
 
-#include "core/runtime.hpp"
-#include "core/string.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
+#include "taihe/string.hpp"
 #include "union_ani.MyUnion.proj.1.hpp"
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 string printInnerUnion(::union_ani::InnerUnion const &data)
 {
@@ -34,6 +35,7 @@ string printInnerUnion(::union_ani::InnerUnion const &data)
             return "u";
     }
 }
+
 string printMyUnion(::union_ani::MyUnion const &data)
 {
     switch (data.get_tag()) {
@@ -44,6 +46,7 @@ string printMyUnion(::union_ani::MyUnion const &data)
             return "f";
     }
 }
+
 ::union_ani::MyUnion makeMyUnion(string_view kind)
 {
     if (kind == "s") {
@@ -59,5 +62,6 @@ string printMyUnion(::union_ani::MyUnion const &data)
     return ::union_ani::MyUnion::make_innerValue(::union_ani::InnerUnion::make_undefinedValue());
 }
 }  // namespace
+
 TH_EXPORT_CPP_API_printMyUnion(printMyUnion);
 TH_EXPORT_CPP_API_makeMyUnion(makeMyUnion);

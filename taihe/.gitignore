@@ -27,9 +27,11 @@ compiler/taihe/parse/antlr
 .coverage
 .coverage.*
 
-compiler/.panda_vm
 
-hw_exported/
+# Internal caches
+/.panda_vm
+/hw_exported
+/dist
 
 # Generated directories
 **/*generated

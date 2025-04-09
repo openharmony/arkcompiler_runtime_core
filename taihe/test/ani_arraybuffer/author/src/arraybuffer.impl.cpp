@@ -19,141 +19,163 @@
 #include <numeric>
 #include <vector>
 // Please delete <stdexcept> include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 uint8_t SumArrayU8(array_view<uint8_t> nums)
 {
     return std::accumulate(nums.begin(), nums.end(), 0);
 }
+
 array<uint8_t> GetArrayBuffer(uint8_t nums)
 {
     array<uint8_t> result = array<uint8_t>::make(nums);
     std::fill(result.begin(), result.end(), nums);
     return result;
 }
+
 array<uint8_t> DoubleArrayBuffer(array_view<uint8_t> nums)
 {
     array<uint8_t> result = array<uint8_t>::make(nums.size());
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (int i = 0; i < nums.size(); i++) {
         result[i] = nums[i] * mulTwo;
     }
     return result;
 }
+
 int8_t SumArrayI8(array_view<int8_t> nums)
 {
     return std::accumulate(nums.begin(), nums.end(), 0);
 }
+
 array<int8_t> GetArrayI8(int8_t nums)
 {
     array<int8_t> result = array<int8_t>::make(nums);
     std::fill(result.begin(), result.end(), nums);
     return result;
 }
+
 array<int8_t> DoubleI8(array_view<int8_t> nums)
 {
     array<int8_t> result = array<int8_t>::make(nums.size());
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (int i = 0; i < nums.size(); i++) {
         result[i] = nums[i] * mulTwo;
     }
     return result;
 }
+
 int16_t SumArrayI16(array_view<int16_t> nums)
 {
     return std::accumulate(nums.begin(), nums.end(), 0);
 }
+
 array<int16_t> GetArrayI16(int16_t nums)
 {
     array<int16_t> result = array<int16_t>::make(nums);
     std::fill(result.begin(), result.end(), nums);
     return result;
 }
+
 array<int16_t> DoubleI16(array_view<int16_t> nums)
 {
     array<int16_t> result = array<int16_t>::make(nums.size());
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (int i = 0; i < nums.size(); i++) {
         result[i] = nums[i] * mulTwo;
     }
     return result;
 }
+
 int32_t SumArrayI32(array_view<int32_t> nums)
 {
     return std::accumulate(nums.begin(), nums.end(), 0);
 }
+
 array<int32_t> GetArrayI32(int32_t nums)
 {
     array<int32_t> result = array<int32_t>::make(nums);
     std::fill(result.begin(), result.end(), nums);
     return result;
 }
+
 array<int32_t> DoubleI32(array_view<int32_t> nums)
 {
     array<int32_t> result = array<int32_t>::make(nums.size());
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (int i = 0; i < nums.size(); i++) {
         result[i] = nums[i] * mulTwo;
     }
     return result;
 }
+
 int64_t SumArrayI64(array_view<int64_t> nums)
 {
     return std::accumulate(nums.begin(), nums.end(), 0);
 }
+
 array<int64_t> GetArrayI64(int64_t nums)
 {
     array<int64_t> result = array<int64_t>::make(nums);
     std::fill(result.begin(), result.end(), nums);
     return result;
 }
+
 array<int64_t> DoubleI64(array_view<int64_t> nums)
 {
     array<int64_t> result = array<int64_t>::make(nums.size());
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (int i = 0; i < nums.size(); i++) {
         result[i] = nums[i] * mulTwo;
     }
     return result;
 }
+
 float SumArrayF32(array_view<float> nums)
 {
     return std::accumulate(nums.begin(), nums.end(), 0);
 }
+
 array<float> GetArrayF32(float nums)
 {
     array<float> result = array<float>::make(nums);
     std::fill(result.begin(), result.end(), nums);
     return result;
 }
+
 array<float> DoubleF32(array_view<float> nums)
 {
     array<float> result = array<float>::make(nums.size());
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (int i = 0; i < nums.size(); i++) {
         result[i] = nums[i] * mulTwo;
     }
     return result;
 }
+
 double SumArrayF64(array_view<double> nums)
 {
     return std::accumulate(nums.begin(), nums.end(), 0);
 }
+
 array<double> GetArrayF64(double nums)
 {
     array<double> result = array<double>::make(nums);
     std::fill(result.begin(), result.end(), nums);
     return result;
 }
+
 array<double> DoubleF64(array_view<double> nums)
 {
     array<double> result = array<double>::make(nums.size());
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (int i = 0; i < nums.size(); i++) {
         result[i] = nums[i] * mulTwo;
     }
     return result;
 }
+
 array<uint8_t> DoubleBufferToInt8Array(array_view<uint8_t> nums)
 {
     if (nums.size() % sizeof(int8_t) != 0) {
@@ -163,13 +185,14 @@ array<uint8_t> DoubleBufferToInt8Array(array_view<uint8_t> nums)
     int8_t *src = reinterpret_cast<int8_t *>(nums.data());
     int8_t *dst = reinterpret_cast<int8_t *>(result.data());
     size_t count = nums.size() / sizeof(int8_t);
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (size_t i = 0; i < count; ++i) {
         dst[i] = src[i] * mulTwo;
     }
 
     return result;
 }
+
 array<uint8_t> DoubleBufferToInt16Array(array_view<uint8_t> nums)
 {
     if (nums.size() % sizeof(int16_t) != 0) {
@@ -179,13 +202,14 @@ array<uint8_t> DoubleBufferToInt16Array(array_view<uint8_t> nums)
     int16_t *src = reinterpret_cast<int16_t *>(nums.data());
     int16_t *dst = reinterpret_cast<int16_t *>(result.data());
     size_t count = nums.size() / sizeof(int16_t);
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (size_t i = 0; i < count; ++i) {
         dst[i] = src[i] * mulTwo;
     }
 
     return result;
 }
+
 array<uint8_t> DoubleBufferToInt32Array(array_view<uint8_t> nums)
 {
     if (nums.size() % sizeof(int32_t) != 0) {
@@ -195,13 +219,14 @@ array<uint8_t> DoubleBufferToInt32Array(array_view<uint8_t> nums)
     int32_t *src = reinterpret_cast<int32_t *>(nums.data());
     int32_t *dst = reinterpret_cast<int32_t *>(result.data());
     size_t count = nums.size() / sizeof(int32_t);
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (size_t i = 0; i < count; ++i) {
         dst[i] = src[i] * mulTwo;
     }
 
     return result;
 }
+
 array<uint8_t> DoubleBufferToUint16Array(array_view<uint8_t> nums)
 {
     if (nums.size() % sizeof(uint16_t) != 0) {
@@ -211,13 +236,14 @@ array<uint8_t> DoubleBufferToUint16Array(array_view<uint8_t> nums)
     uint16_t *src = reinterpret_cast<uint16_t *>(nums.data());
     uint16_t *dst = reinterpret_cast<uint16_t *>(result.data());
     size_t count = nums.size() / sizeof(uint16_t);
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (size_t i = 0; i < count; ++i) {
         dst[i] = src[i] * mulTwo;
     }
 
     return result;
 }
+
 array<uint8_t> DoubleBufferToUint32Array(array_view<uint8_t> nums)
 {
     if (nums.size() % sizeof(uint32_t) != 0) {
@@ -227,7 +253,7 @@ array<uint8_t> DoubleBufferToUint32Array(array_view<uint8_t> nums)
     uint32_t *src = reinterpret_cast<uint32_t *>(nums.data());
     uint32_t *dst = reinterpret_cast<uint32_t *>(result.data());
     size_t count = nums.size() / sizeof(uint32_t);
-    constexpr const int32_t mulTwo = 2;
+    constexpr int32_t const mulTwo = 2;
     for (size_t i = 0; i < count; ++i) {
         dst[i] = src[i] * mulTwo;
     }

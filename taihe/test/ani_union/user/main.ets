@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as UnionTest1 from "../author_generated/test_union";
-import * as UnionTest from "../author_generated/union_ani";
+import * as UnionTest1 from "@generated/test_union";
+import * as UnionTest from "@generated/union_ani";
+import * as System from "std/core/System";
 
 loadLibrary("ani_union");
 
@@ -254,11 +255,8 @@ function test_interface_Union_enum_map4() {
         "math": 123.45 as float,
         "english": 57.89 as float
     };
-    console.log(1)
     let instance: UnionTest1.MyInterface = UnionTest1.get_interface();
-    console.log(2)
     instance.func_color_map_value5(studentScores);
-    console.log(3)
 }
 
 function test_interface_Union_enum_map5() {
@@ -680,5 +678,5 @@ function main() {
     suite.addTest(
         "test_interface_Union_array_map9", test_interface_Union_array_map9);
 
-    suite.run();
+    System.exit(suite.run());
 }

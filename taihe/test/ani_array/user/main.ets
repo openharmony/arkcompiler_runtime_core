@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as ArrayTest from "../author_generated/array_test";
+import * as ArrayTest from "@generated/array_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_array");
 
@@ -158,5 +159,5 @@ function main() {
     suite.addTest("changeStructArray", changeStructArray)
     suite.addTest("fetchBinaryData", fetchBinaryData)
     suite.addTest("makeStructArrayArray", makeStructArrayArray)
-    suite.run()
+    System.exit(suite.run())
 }

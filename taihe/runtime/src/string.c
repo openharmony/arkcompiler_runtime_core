@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <taihe/common.h>
+#include <taihe/string.abi.h>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <taihe/common.h>
-#include <taihe/string.abi.h>
 
 // Converts a TString into its corresponding heap-allocated TStringData
 // structure.
@@ -42,7 +43,7 @@ char *tstr_initialize(struct TString *tstr_ptr, uint32_t capacity)
     return sh->buffer;
 }
 
-struct TString tstr_new(const char *value TH_NONNULL, size_t len)
+struct TString tstr_new(char const *value TH_NONNULL, size_t len)
 {
     struct TString tstr;
     char *buf = tstr_initialize(&tstr, len + 1);
@@ -52,7 +53,7 @@ struct TString tstr_new(const char *value TH_NONNULL, size_t len)
     return tstr;
 }
 
-struct TString tstr_new_ref(const char *buf TH_NONNULL, size_t len)
+struct TString tstr_new_ref(char const *buf TH_NONNULL, size_t len)
 {
     struct TString tstr;
     tstr.flags = TSTRING_REF;

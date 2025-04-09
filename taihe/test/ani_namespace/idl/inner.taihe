@@ -37,51 +37,51 @@ struct ErrorResponse {
     errorMessage: String;
 }
 
-function primitives_noreturn(a: i32, b: f64, c: bool, d: String, e: i8): void;
-function primitives_return(a: i32, b: f64, c: bool, d: String, e: i8): String;
+function Primitives_noreturn(a: i32, b: f64, c: bool, d: String, e: i8): void;
+function Primitives_return(a: i32, b: f64, c: bool, d: String, e: i8): String;
 
-function containers_noreturn(a: Array<i8>, b: Array<i16>, c: Array<f32>, d: Array<f64>, e: union_primitive): void;
-function containers_return(a: Array<i8>, b: Array<i16>, c: Array<f32>, d: Array<f64>, e: union_primitive): String;
+function Containers_noreturn(a: Array<i8>, b: Array<i16>, c: Array<f32>, d: Array<f64>, e: union_primitive): void;
+function Containers_return(a: Array<i8>, b: Array<i16>, c: Array<f32>, d: Array<f64>, e: union_primitive): String;
 
-function enum_noreturn(a: Color, b : Color, c : Color, d : Color, e : Color): void;
-function enum_return(a: Color, b : Color, c : Color, d : Color, e : Color): String;
+function Enum_noreturn(a: Color, b : Color, c : Color, d : Color, e : Color): void;
+function Enum_return(a: Color, b : Color, c : Color, d : Color, e : Color): String;
 
 interface TestInterface{
-    noparam_noreturn(): void;
+    Noparam_noreturn(): void;
 
-    primitives_noreturn(a: i8): void;
-    primitives_noreturn1(a: i16): void;
-    primitives_noreturn2(a: i32): void;
-    primitives_noreturn3(a: f32): void;
-    primitives_noreturn4(a: f64): void;
-    primitives_noreturn5(a: bool): void;
-    primitives_noreturn6(a: String): void;
-    primitives_noreturn7(a: i64): void;
+    Primitives_noreturn(a: i8): void;
+    Primitives_noreturn1(a: i16): void;
+    Primitives_noreturn2(a: i32): void;
+    Primitives_noreturn3(a: f32): void;
+    Primitives_noreturn4(a: f64): void;
+    Primitives_noreturn5(a: bool): void;
+    Primitives_noreturn6(a: String): void;
+    Primitives_noreturn7(a: i64): void;
     
 
-    primitives_return(a: i32): i32;
-    containers_noreturn1(a: Array<i8>): void;
-    containers_noreturn2(a: union_primitive): void;
-    containers_noreturn3(a: Array<u8>): void;
-    containers_noreturn4(a: Color): void;
-    containers_noreturn5(a: Map<String, i32>): void;
+    Primitives_return(a: i32): i32;
+    Containers_noreturn1(a: Array<i8>): void;
+    Containers_noreturn2(a: union_primitive): void;
+    Containers_noreturn3(a: Array<u8>): void;
+    Containers_noreturn4(a: Color): void;
+    Containers_noreturn5(a: Map<String, i32>): void;
 
 
-    containers_return(a: union_primitive): String;
+    Containers_return(a: union_primitive): String;
 
-    func_ErrorResponse(): ErrorResponse;
+    Func_ErrorResponse(): ErrorResponse;
 
-    @overload("overloadFunc")
-    overloadFunc_i8(a: i8, b: i8): void;
+    @overload("OverloadFunc")
+    OverloadFunc_i8(a: i8, b: i8): void;
 
-    @overload("overloadFunc")
-    overloadFunc_i16(a: Array<i8>, b: Array<u8>): String;
+    @overload("OverloadFunc")
+    OverloadFunc_i16(a: Array<i8>, b: Array<u8>): String;
 
-    @overload("overloadFunc")
-    overloadFunc_i32(): void;
+    @overload("OverloadFunc")
+    OverloadFunc_i32(): void;
 
-    @overload("overloadFunc")
-    overloadFunc_f32(a: Mystruct): Mystruct;
+    @overload("OverloadFunc")
+    OverloadFunc_f32(a: Mystruct): Mystruct;
 
     @get getName(): String;
     @get geti8(): i8;
@@ -99,138 +99,136 @@ interface TestInterface{
 
 }
 
-interface test1 {
+interface Test1 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Ttest2 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test3 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test4 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test5 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test6 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test7 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test8 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test9 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test10 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test11 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test12 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test13 {
+    Fun1(): void;
+    Fun2(): void;
+}
+
+interface Test14 {
     fun1(): void;
     fun2(): void;
 }
 
-interface test2 {
-    fun1(): void;
-    fun2(): void;
+interface Test15 {
+    Fun1(): void;
+    Fun2(): void;
 }
 
-interface test3 {
-    fun1(): void;
-    fun2(): void;
+interface Test16 {
+    Fun1(): void;
+    Fun2(): void;
 }
 
-interface test4 {
-    fun1(): void;
-    fun2(): void;
+interface Test17 {
+    Fun1(): void;
+    Fun2(): void;
 }
 
-interface test5 {
-    fun1(): void;
-    fun2(): void;
+interface Test18 {
+    Fun1(): void;
+    Fun2(): void;
 }
 
-interface test6 {
-    fun1(): void;
-    fun2(): void;
+interface Test19 {
+    Fun1(): void;
+    Fun2(): void;
 }
 
-interface test7 {
-    fun1(): void;
-    fun2(): void;
+interface Test20 {
+    Fun1(): void;
+    Fun2(): void;
 }
 
-interface test8 {
-    fun1(): void;
-    fun2(): void;
+interface TestA {
+    Fun1(): String;
 }
-
-interface test9 {
-    fun1(): void;
-    fun2(): void;
+interface TestB : TestA {
+    Fun2(): String;
 }
-
-interface test10 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test11 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test12 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test13 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test14 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test15 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test16 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test17 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test18 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test19 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface test20 {
-    fun1(): void;
-    fun2(): void;
-}
-
-interface testA {
-    fun1(): String;
-}
-interface testB : testA {
-    fun2(): String;
-}
-interface testC : testA{
-    fun3(): String;
+interface TestC : TestA{
+    Fun3(): String;
 }
 
 
 function get_interface(): TestInterface;
-function printTestInterfaceName(testiface: TestInterface): String;
-function printTestInterfaceNumberi8(testiface: TestInterface): i8;
-function printTestInterfaceNumberi16(testiface: TestInterface): i16;
-function printTestInterfaceNumberi32(testiface: TestInterface): i32;
-function printTestInterfaceNumberi64(testiface: TestInterface): i64;
-function printTestInterfaceNumberf32(testiface: TestInterface): f32;
-function printTestInterfaceNumberf64(testiface: TestInterface): f64;
-function printTestInterfacebool(testiface: TestInterface): bool;
-function printTestInterfaceArraybuffer(testiface: TestInterface): Array<u8>;
+function PrintTestInterfaceName(testiface: TestInterface): String;
+function PrintTestInterfaceNumberi8(testiface: TestInterface): i8;
+function PrintTestInterfaceNumberi16(testiface: TestInterface): i16;
+function PrintTestInterfaceNumberi32(testiface: TestInterface): i32;
+function PrintTestInterfaceNumberi64(testiface: TestInterface): i64;
+function PrintTestInterfaceNumberf32(testiface: TestInterface): f32;
+function PrintTestInterfaceNumberf64(testiface: TestInterface): f64;
+function PrintTestInterfacebool(testiface: TestInterface): bool;
+function PrintTestInterfaceArraybuffer(testiface: TestInterface): Array<u8>;
 
-function printTestInterfaceArray(testiface: TestInterface): Array<i8>;
-function printTestInterfaceUnion(testiface: TestInterface): union_primitive;
-function printTestInterfaceRecord(testiface: TestInterface): Map<String, i8>;
-function printTestInterfaceEnum(testiface: TestInterface): Color;
+function PrintTestInterfaceArray(testiface: TestInterface): Array<i8>;
+function PrintTestInterfaceUnion(testiface: TestInterface): union_primitive;
+function PrintTestInterfaceRecord(testiface: TestInterface): Map<String, i8>;
+function PrintTestInterfaceEnum(testiface: TestInterface): Color;
 
-function get_interface_1(): test1;
-function get_interface_20(): test20;
+function get_interface_1(): Test1;
+function get_interface_20(): Test20;
 
-function get_interface_A(): testA;
-function get_interface_B(): testB;
-function get_interface_C(): testC;
-
-
+function get_interface_A(): TestA;
+function get_interface_B(): TestB;
+function get_interface_C(): TestC;

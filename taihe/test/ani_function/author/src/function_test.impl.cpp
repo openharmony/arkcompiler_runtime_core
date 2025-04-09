@@ -14,13 +14,14 @@
  */
 #include "function_test.impl.hpp"
 
-#include "core/optional.hpp"
-#include "core/string.hpp"
 #include "function_test.Foo.proj.2.hpp"
 #include "function_test.MyUnion.proj.1.hpp"
 #include "stdexcept"
+#include "taihe/optional.hpp"
+#include "taihe/string.hpp"
 // Please delete <stdexcept> include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 class Foo {
 public:
@@ -28,14 +29,17 @@ public:
     {
         std::cout << "call bar" << std::endl;
     }
+
     void bar_int(int32_t a)
     {
         std::cout << "call bar_int a is :" << a << std::endl;
     }
+
     void bar_str(string_view a)
     {
         std::cout << "call bar_str a is :" << std::string(a) << std::endl;
     }
+
     void bar_union(string_view a, ::function_test::MyUnion const &b)
     {
         std::cout << "call bar_union a is :" << std::string(a) << std::endl;
@@ -48,6 +52,7 @@ public:
                 std::cout << "i: " << b.get_iValue_ref() << std::endl;
         }
     }
+
     void bar_union_opt(string_view a, optional_view<string> name)
     {
         std::cout << "call bar_union a is :" << std::string(a) << *name << std::endl;
@@ -57,19 +62,23 @@ public:
     {
         f();
     }
+
     void test_cb_i(callback_view<void(int32_t)> f)
     {
         f(1);
     }
+
     void test_cb_s(callback_view<void(string_view, bool)> f)
     {
         f("hello", true);
     }
+
     string test_cb_rs(callback_view<int64_t(int64_t)> f)
     {
         int64_t out = f(444);
         return std::to_string(out);
     }
+
     int32_t addSync(int32_t a, int32_t b)
     {
         std::cout << "call addSync a and b is" << std::to_string(a) << std::to_string(b) << std::endl;
@@ -84,25 +93,42 @@ public:
         return "zhangsan";
     }
 };
+
 int32_t static_func_add(int32_t a, int32_t b)
 {
     return a + b;
 }
+
 int32_t static_func_sub(int32_t a, int32_t b)
 {
     return a - b;
 }
+
 ::function_test::FooCls getFooCls1(string_view name)
 {
     return make_holder<FooCls, ::function_test::FooCls>();
 }
+
 ::function_test::FooCls getFooCls2(string_view name, string_view test)
 {
     return make_holder<FooCls, ::function_test::FooCls>();
 }
+
 ::function_test::Foo makeFoo()
 {
     return make_holder<Foo, ::function_test::Foo>();
+}
+
+static int32_t static_property = 0;
+
+int32_t getStaticProperty()
+{
+    return static_property;
+}
+
+void setStaticProperty(int32_t a)
+{
+    static_property = a;
 }
 }  // namespace
 
@@ -111,3 +137,6 @@ TH_EXPORT_CPP_API_static_func_sub(static_func_sub);
 TH_EXPORT_CPP_API_getFooCls1(getFooCls1);
 TH_EXPORT_CPP_API_getFooCls2(getFooCls2);
 TH_EXPORT_CPP_API_makeFoo(makeFoo);
+
+TH_EXPORT_CPP_API_setStaticProperty(setStaticProperty);
+TH_EXPORT_CPP_API_getStaticProperty(getStaticProperty);

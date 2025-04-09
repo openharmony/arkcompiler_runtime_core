@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as async_test from "../author_generated/async_test";
+import * as async_test from "@generated/async_test";
+import * as System from "std/core/System";
 loadLibrary("ani_async");
 
 function main() {

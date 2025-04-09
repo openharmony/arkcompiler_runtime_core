@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as EnumTest from "../author_generated/enum_test";
+import * as EnumTest from "@generated/enum_test";
+import * as System from "std/core/System";
 
 loadLibrary("ani_enum");
 
@@ -67,5 +68,5 @@ function main() {
     suite.addTest("weekday Enum Input Test", weekdayEnumInputTest)
     suite.addTest("weekday Enum Ouput Test", weekdayEnumOuputTest)
 
-    suite.run();
+    System.exit(suite.run());
 }

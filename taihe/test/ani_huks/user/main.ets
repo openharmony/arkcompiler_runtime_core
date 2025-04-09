@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as huks from "../author_generated/huks";
+import * as huks from "@generated/huks";
+import * as System from "std/core/System";
 
 loadLibrary("ani_huks");
 

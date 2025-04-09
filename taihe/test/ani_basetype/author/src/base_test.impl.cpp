@@ -14,52 +14,62 @@
  */
 #include "base_test.impl.hpp"
 
-#include "core/runtime.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
 // Please delete this include when you implement
-using namespace taihe::core;
+using namespace taihe;
+
 namespace {
 
 int8_t AddI8(int8_t a, int8_t b)
 {
     return a + b;
 }
+
 int16_t SubI16(int16_t a, int16_t b)
 {
     return a - b;
 }
+
 int32_t MulI32(int32_t a, int32_t b)
 {
     return a * b;
 }
+
 int64_t DivI64(int64_t a, int64_t b)
 {
     if (b == 0) {
-        taihe::core::set_error("some error happen");
+        taihe::set_error("some error happen");
         return -1;
     }
     return a / b;
 }
+
 float AddF32(float a, float b)
 {
     return a + b;
 }
+
 float SubF32(float a, float b)
 {
     return a - b;
 }
+
 double AddF64(float a, double b)
 {
     return a + b;
 }
+
 double SubF64(float a, double b)
 {
     return a - b;
 }
+
 double MulF64(float a, float b)
 {
     return a * b;
 }
+
 bool Check(bool a, bool b)
 {
     if (a && b) {
@@ -67,10 +77,12 @@ bool Check(bool a, bool b)
     }
     return false;
 }
+
 string Concatx(string_view a, string_view b)
 {
-    return taihe::core::concat(a, b);
+    return taihe::concat(a, b);
 }
+
 string Splitx(string_view a, int32_t n)
 {
     int32_t size = a.size();
@@ -79,15 +91,17 @@ string Splitx(string_view a, int32_t n)
     } else if (n < 0) {
         n = 0;
     }
-    return taihe::core::substr(a, 0, n);
+    return taihe::substr(a, 0, n);
 }
+
 int32_t ToI32(string_view a)
 {
     return std::atoi(a.c_str());
 }
+
 string FromI32(int32_t a)
 {
-    return taihe::core::to_string(a);
+    return taihe::to_string(a);
 }
 }  // namespace
 
