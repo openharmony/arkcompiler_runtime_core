@@ -74,9 +74,15 @@ private:
     void Continue(PtThread thread);
     void Disable(PtThread thread);
     void ClientDisconnect(PtThread thread);
-
+    void SetAsyncCallStackDepth(PtThread thread);
+    void SetBlackboxPatterns(PtThread thread);
+    void SmartStepInto(PtThread thread);
+    void DropFrame(PtThread thread);
+    void SetNativeRange(PtThread thread);
+    void ReplyNativeCalling(PtThread thread);
     void SetBreakpointsActive(PtThread thread, bool active);
     void SetSkipAllPauses(PtThread thread, bool skip);
+    void SetMixedDebugEnabled(PtThread thread, bool mixedDebugEnabled);
     std::set<size_t> GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
                                             bool restrictToFunction);
     std::optional<BreakpointId> SetBreakpoint(PtThread thread,
