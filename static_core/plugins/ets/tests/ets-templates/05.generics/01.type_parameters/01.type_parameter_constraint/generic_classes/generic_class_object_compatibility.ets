@@ -17,8 +17,8 @@
 
 /*---
 desc: >-
-    If constraint is declared, then the type parameter is not compatible with Object, and has no
-    methods or fields available for use.
+    If no constraint is specified, then type parameter is not compatible with Object,
+    and has no methods or fields available for use.
     Lack of constraint effectively means extends Object|null|undefined.
     If the constraint S is a non-nullish type (see Nullish Types), then T is also non-nullish.
     {{case.doc}}

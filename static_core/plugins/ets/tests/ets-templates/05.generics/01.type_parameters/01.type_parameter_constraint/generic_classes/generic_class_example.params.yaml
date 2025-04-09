@@ -11,21 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Type constraints for generic parameters
-constraints:
-  - type: X extends Object, Z extends int
-    use: Object, int
-    decl: let a = new Object()
-    arg: a, 1 as int
-    res: a
-
-  - type: X extends Object, Z extends int[]
-    use: Object, int[]
-    decl: let a = new Object()
-    arg: a, [1 as int]
-    res: a
-
-  - type: X extends int, Z extends Object
-    use: int, Object
-    arg: 2 as int, new Object()
-    res: 2 as int
+---
+cases:
+  - decl: let x = new G<Base>
+  - decl: let x = new G<Derived>
+  - decl: let x = new G<Sometype>
+    tags: compile-only, negative
+  - decl: let h1 = new H<Base>
+  - decl: let h2 = new H<Derived>
+  - decl: let h3 = new H<SomeType>
+  - decl: let h4 = new H<Object>
+    tags: compile-only, negative
+  - decl: let e1 = new Exotic<"aa">
+  - decl: let e2 = new Exotic<"cc">
+    tags: compile-only, negative
+  - decl: let b1 = new B<'f1'>
+  - decl: let b2 = new B<'f0'>
+    tags: compile-only, negative
+  - decl: let b3 = new B<keyof A>

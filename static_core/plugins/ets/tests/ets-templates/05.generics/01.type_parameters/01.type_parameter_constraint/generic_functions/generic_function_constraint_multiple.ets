@@ -25,7 +25,7 @@ params: >
 
 {{c.decl}}
 
-function foo<X extends {{c.type}}>(i: X, j: Z): X { return i };
+function foo<{{c.type}}>(i: X, j: Z): X { return i };
 
 function main(): void {
   assertEQ( foo<{{c.use}}>({{c.arg}}), {{c.res}} )

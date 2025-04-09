@@ -28,7 +28,7 @@ params: >
 {{c.decl}}
 
 class Point {
-  {{mm}} foo<X extends {{c.type}}>(i: X, j: Z) { return i};
+  {{mm}} foo<{{c.type}}>(i: X, j: Z) { return i};
 }
 
 function main(): void {
