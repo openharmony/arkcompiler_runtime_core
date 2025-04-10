@@ -18,7 +18,7 @@ package std.containers;
 /**
  * Node for a tree
  */
-export class Node<K extends Comparable<Object>, V> {
+class Node<K extends Comparable<Object>, V> {
     left: Node<K, V> | null;
     key: K;
     value: V;
