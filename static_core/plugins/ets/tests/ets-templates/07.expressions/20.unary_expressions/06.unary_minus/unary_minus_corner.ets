@@ -22,7 +22,11 @@ params: {{un.origin}} => {{un.dest}}
 
 function main(): void {
   let a = {{un.origin}};
+  {% if un.ne %}
+  assertNE(-a, {{un.dest}});
+  {% else %}
   assertEQ(-a, {{un.dest}});
+  {% endif %}
 }
 
 {% endfor %}
