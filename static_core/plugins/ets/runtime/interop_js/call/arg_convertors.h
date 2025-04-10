@@ -244,9 +244,7 @@ template <typename FRead>
         return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
     }
     // start slowpath
-    auto coro = EtsCoroutine::GetCurrent();
-    HandleScope<ObjectHeader *> scope(coro);
-    VMHandle<ObjectHeader> handle(coro, ref);
+    VMHandle<ObjectHeader> handle(EtsCoroutine::GetCurrent(), ref);
     auto refconv = JSRefConvertResolve(ctx, klass);
     return setResult(refconv->Wrap(ctx, EtsObject::FromCoreType(handle.GetPtr())));
 }

@@ -180,6 +180,8 @@ ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall
     auto const numNonRest = numArgs_ - (isVarArgs ? 1 : 0);
     auto jsargs = ctx_->GetTempArgs<napi_value>(numNonRest);
 
+    // scope is required to ConvertRefArgToJS
+    HandleScope<ObjectHeader *> scope(coro_);
     for (uint32_t argIdx = 0; argIdx < numNonRest; ++argIdx, protoReader_.Advance()) {
         if (UNLIKELY(!ConvertArgToJS(ctx_, protoReader_, &jsargs[argIdx], readVal))) {
             return std::nullopt;
