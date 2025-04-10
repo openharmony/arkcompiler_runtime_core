@@ -17,7 +17,7 @@
 
 import logging
 import json
-from typing import List, Iterable, Set, Optional
+from typing import List, Iterable, Set, Optional, Dict, Any
 from pathlib import Path
 from shutil import rmtree
 from string import Template
@@ -163,14 +163,23 @@ class BenchGenerator:
         return False
 
     @staticmethod
-    def check_native(full: Path, dest: Path) -> bool:
+    def check_native(full: Path, dest: Path, values: Dict[str, Any]) -> bool:
         """Check 'native' near the source and link to destdir."""
         native = full.parent.joinpath('native')
-        if native.is_dir():
-            log.trace('Native: %s', native)
-            force_link(dest.joinpath('native'), native)
-            return True
-        return False
+        if not native.is_dir():
+            return False
+        log.debug('Native: %s', native)
+        dest_dir = dest.joinpath('native')
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        for f in native.glob('*'):
+            if f.is_file():
+                dest_file = dest_dir.joinpath(f.name)
+                with open(f, 'r', encoding='utf-8') as t:
+                    native_tpl = t.read()
+                tpl = Template(native_tpl)
+                with create_file(dest_file) as d:
+                    d.write(tpl.substitute(values))
+        return True
 
     @staticmethod
     def write_config(bench_dir: Path, values: TemplateVars):
@@ -209,14 +218,14 @@ class BenchGenerator:
             lang_impl, values.imports, bench_dir, src)
         values.common = BenchGenerator.check_common_files(
             src.full, lang_impl.short_name)
+        tpl_values = asdict(values)
         # create links to extra dirs if any
         custom_values = {
             'resources': BenchGenerator.check_resources(
                 src.full, lang_impl.short_name, bench_dir),
             'native': BenchGenerator.check_native(
-                src.full, bench_dir)
+                src.full, bench_dir, tpl_values)
         }
-        tpl_values = asdict(values)
         tpl_values.update(
             lang_impl.get_custom_fields(tpl_values, custom_values))
         # fill template with values

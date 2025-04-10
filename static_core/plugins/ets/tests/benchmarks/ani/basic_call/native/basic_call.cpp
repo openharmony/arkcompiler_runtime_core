@@ -80,7 +80,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     ani_class cls;
-    if (ANI_OK != env->FindClass("LBasicCall;", &cls)) {
+    if (ANI_OK != env->FindClass("L$bench_name/BasicCall;", &cls)) {
         std::cout << "Class BasicCall not found!\n";
         return ANI_ERROR;
     }
