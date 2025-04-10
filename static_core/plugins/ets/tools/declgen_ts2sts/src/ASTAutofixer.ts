@@ -23,7 +23,8 @@ import {
   JSValue, 
   KitPrefix, 
   UtilityTypes, 
-  SpecificTypes
+  SpecificTypes,
+  BuiltInType
 } from '../utils/lib/TypeUtils';
 
 export class Autofixer {
@@ -97,7 +98,11 @@ export class Autofixer {
     [ts.SyntaxKind.IntersectionType, [this[FaultID.IntersectionTypeJSValue].bind(this)]],
     [
       ts.SyntaxKind.TypeReference, 
-      [this[FaultID.ObjectParametersToJSValue].bind(this), this[FaultID.InstanceType].bind(this)]
+      [
+        this[FaultID.ObjectParametersToJSValue].bind(this),
+        this[FaultID.InstanceType].bind(this),
+        this[FaultID.NoBuiltInType].bind(this)
+      ]
     ],
     [ts.SyntaxKind.VariableStatement, [this[FaultID.StringLiteralType].bind(this)]],
     [
@@ -1140,6 +1145,31 @@ export class Autofixer {
       }
     }
   
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-built-in-type`
+   */
+  private [FaultID.NoBuiltInType](node: ts.Node): ts.VisitResult<ts.Node> {
+    void this;
+
+    /**
+     * Built in types will convert to ESObject
+     */
+
+    if (ts.isTypeReferenceNode(node)) {
+      const typeName = node.typeName;
+      if (ts.isIdentifier(typeName) && BuiltInType.includes(typeName.text)) {
+        const newTypeNode = ts.factory.createTypeReferenceNode(JSValue, undefined);
+        return ts.factory.updateTypeReferenceNode(
+          node,
+          newTypeNode.typeName,
+          newTypeNode.typeArguments
+        );
+      }
+    }
+
     return node;
   }
 }
