@@ -14,7 +14,10 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Class level scope, mixed access
+desc: >-
+    Class level scope, mixed access
+    A name declared inside a class (class level scope) is accessible (see Accessible) in the class and sometimes,
+    depending on the access modifier (see Access Modifiers), outside the class, or by means of a derived class.
 ---*/
 
 let x = -10

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,27 +17,11 @@ limitations under the License.
 desc: >-
   The scope of a type parameter name in a class or interface declaration is
   that entire declaration, excluding static member declarations.
+tags: [compile-only, negative]
 ---*/
 
-let T: String = "str"
-
 class C<T extends Number> {
-    fld: T
-    constructor(i: T) {
-        this.fld = i
+    static {
+        t: T = new Number()
     }
-    public foo(p: T): T {
-        let i: T = p
-        return i;
-    }
-}
-
-function main(): void {
-    let c: C<Number> = new C<Number>(1.0);
-
-    assertEQ( c.foo(2.0), 2.0 )
-    assertEQ( c.fld, 1.0 )
-
-    // module level scope is not affected
-    assertEQ( T, "str" )
 }

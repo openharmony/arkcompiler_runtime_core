@@ -19,8 +19,6 @@ tags: [negative, compile-only]
 ---*/
 
 interface A {
-  x: int = 0;
-  x: int = 0;
+  x: int;
+  x: float;
 }
-
-function main(): void {}

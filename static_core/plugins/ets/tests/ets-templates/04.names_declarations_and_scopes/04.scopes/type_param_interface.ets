@@ -19,42 +19,44 @@ desc: >-
   that entire declaration, excluding static member declarations.
 ---*/
 
-let T: Number = 1.0
+let T: String = "str"
 
 interface I<T extends Number> {
+    f: T
+
     // abstract method
-    foo(p: T): T;
+    foo(p: T): T
 
     // default method
     bar(p: T): T {
-        return p * 4.0;
+        let i: T = p
+        return i
     }
-
-    // static method
-    static baz(): Number {
-        return T * 10.0;
+    jay(): T {
+        return this.bar(this.f)
     }
 }
 
 class C<T extends Number> implements I<T> {
-    fld1: T;
-    fld2: T;
+    f: T
 
+    constructor(f: T) {
+        this.f = f
+    }
     // overridden interface method
     public override foo(p: T): T {
-        this.fld1 = p;
-        this.fld2 = this.fld1 * 2;
-        return this.fld2;
+        this.f = this.bar(p)
+        return this.f
     }
 }
 
 function main(): void {
-    let c: C<Number> = new C<Number>();
-
-    assertEQ( c.foo(2.0), 4.0 )
-    assertEQ( c.bar(2.0), 8.0 )
-    assertEQ( I.baz()< 10.0 )
+    let c: C<Number> = new C<Number>( 1 );
+    assertEQ( c.f, 1)
+    assertEQ( c.foo(3.0), 3.0 )
+    assertEQ( c.bar(4.0), 4.0 )
+    assertEQ( c.jay(), 3.0 )
 
     // module level scope is not affected
-    assertEQ( T, 1.0 )
+    assertEQ( T, "str" )
 }

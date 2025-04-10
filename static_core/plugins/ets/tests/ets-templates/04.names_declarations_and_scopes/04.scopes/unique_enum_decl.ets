@@ -19,5 +19,3 @@ tags: [negative, compile-only]
 ---*/
 
 enum En {V1, V1}
-
-function main(): void {}

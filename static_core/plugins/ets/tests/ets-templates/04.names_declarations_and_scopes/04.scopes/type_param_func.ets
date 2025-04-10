@@ -16,22 +16,22 @@ limitations under the License.
 /*---
 desc: >-
   The scope of a type parameter name in a function declaration is that entire declaration (function parameter scope).
-tags:
-- compile-only
-- negative
 ---*/
 
-let T = 1
+let T: Number = 1.0
 
 function foo<T extends Number>(p: T): T {
-    let x: T = p;
-    let res: T = x * 2; // CTE: arithmetic is not applicable to type parameters
-    return res;
+    let x: T
+    {
+        let c: T = p
+        x = c
+    }
+    return x
 }
 
 function main(): void {
-    assertEQ( foo<Number>(new Number(2.0)), 4.0 )
+    assertEQ( foo<Number>(new Number(2.0)), 2.0 )
 
     // module level scope is not affected
-    assertTrue( T == 1 )
+    assertTrue( T == 1.0 )
 }
