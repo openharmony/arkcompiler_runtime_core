@@ -150,7 +150,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             self.diag.emit(PackageNotExistError(d.symbol, loc=d.loc))
             return
 
-        d.resolved_pkg = pkg
+        d.maybe_resolved_pkg = pkg
 
     @override
     def visit_decl_ref_decl(self, d: DeclarationRefDecl) -> None:
@@ -160,7 +160,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
 
         self.handle_decl(d.pkg_ref)
 
-        pkg = d.pkg_ref.resolved_pkg
+        pkg = d.pkg_ref.maybe_resolved_pkg
 
         if pkg is None:
             # No need to repeatedly throw exceptions
@@ -172,7 +172,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             self.diag.emit(DeclNotExistError(d.symbol, loc=d.loc))
             return
 
-        d.resolved_decl = decl
+        d.maybe_resolved_decl = decl
 
     @override
     def visit_long_type_ref_decl(self, d: LongTypeRefDecl) -> None:
@@ -188,7 +188,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             return
 
         # Then find the corresponding type declaration from the package
-        pkg = pkg_import.pkg_ref.resolved_pkg
+        pkg = pkg_import.pkg_ref.maybe_resolved_pkg
 
         if pkg is None:
             # No need to repeatedly throw exceptions
@@ -204,7 +204,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             self.diag.emit(NotATypeError(d.symbol, loc=d.loc))
             return
 
-        d.resolved_ty = decl.as_type()
+        d.maybe_resolved_ty = decl.as_type()
 
     @override
     def visit_short_type_ref_decl(self, d: ShortTypeRefDecl) -> None:
@@ -216,7 +216,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
         decl = BUILTIN_TYPES.get(d.symbol)
 
         if decl:
-            d.resolved_ty = decl
+            d.maybe_resolved_ty = decl
             return
 
         # Find types declared in the current package
@@ -227,7 +227,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
                 self.diag.emit(NotATypeError(d.symbol, loc=d.loc))
                 return
 
-            d.resolved_ty = decl.as_type()
+            d.maybe_resolved_ty = decl.as_type()
             return
 
         # Look for imported type declarations
@@ -237,7 +237,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             self.diag.emit(DeclarationNotInScopeError(d.symbol, loc=d.loc))
             return
 
-        decl = decl_import.decl_ref.resolved_decl
+        decl = decl_import.decl_ref.maybe_resolved_decl
 
         if decl is None:
             # No need to repeatedly throw exceptions
@@ -247,7 +247,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             self.diag.emit(NotATypeError(d.symbol, loc=d.loc))
             return
 
-        d.resolved_ty = decl.as_type()
+        d.maybe_resolved_ty = decl.as_type()
 
     @override
     def visit_generic_type_ref_decl(self, d: GenericTypeRefDecl) -> None:
@@ -259,7 +259,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
 
         args_ty: list[Type] = []
         for arg_ty_ref in d.args_ty_ref:
-            arg_ty = arg_ty_ref.resolved_ty
+            arg_ty = arg_ty_ref.maybe_resolved_ty
             if arg_ty is None:
                 # No need to repeatedly throw exceptions
                 return
@@ -274,7 +274,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
             return
 
         try:
-            d.resolved_ty = generic(*args_ty)
+            d.maybe_resolved_ty = generic(*args_ty)
         except TypeError:
             self.diag.emit(GenericArgumentsError(d.unresolved_repr, loc=d.loc))
 
@@ -287,7 +287,7 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
         super().visit_callback_type_ref_decl(d)
 
         if d.return_ty_ref:
-            return_ty = d.return_ty_ref.resolved_ty
+            return_ty = d.return_ty_ref.maybe_resolved_ty
             if return_ty is None:
                 # No need to repeatedly throw exceptions
                 return
@@ -296,13 +296,13 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
 
         params_ty: list[Type] = []
         for param in d.params:
-            arg_ty = param.ty_ref.resolved_ty
+            arg_ty = param.ty_ref.maybe_resolved_ty
             if arg_ty is None:
                 # No need to repeatedly throw exceptions
                 return
             params_ty.append(arg_ty)
 
-        d.resolved_ty = CallbackType(return_ty, tuple(params_ty))
+        d.maybe_resolved_ty = CallbackType(return_ty, tuple(params_ty))
 
 
 class _CheckFieldNameCollisionErrorPass(RecursiveDeclVisitor):
@@ -351,7 +351,6 @@ class _CheckFieldNameCollisionErrorPass(RecursiveDeclVisitor):
     def check_collision_helper(self, children: Iterable[NamedDecl]):
         names = {}
         for f in children:
-            assert f.name
             if (prev := names.setdefault(f.name, f)) != f:
                 self.diag.emit(DeclRedefError(prev, f))
 
@@ -374,7 +373,7 @@ class _CheckEnumTypePass(RecursiveDeclVisitor):
                     self.diag.emit(EnumValueError(item, d))
             return
 
-        if d.ty_ref.resolved_ty is None:
+        if d.ty_ref.maybe_resolved_ty is None:
             return
 
         table: dict[Type, tuple[Any, Any, Any]] = {
@@ -439,7 +438,8 @@ class _CheckEnumTypePass(RecursiveDeclVisitor):
                 lambda item: item.name,
             ),
         }
-        if (lambda_pair := table.get(d.ty_ref.resolved_ty)) is None:  # pyre-ignore
+        # pyre-ignore
+        if (lambda_pair := table.get(d.ty_ref.maybe_resolved_ty)) is None:
             self.diag.emit(TypeUsageError(d.ty_ref))  # pyre-ignore
             return
         valid, next, default = lambda_pair
@@ -482,7 +482,7 @@ class _CheckRecursiveInclusionPass(RecursiveDeclVisitor):
         parent_iface_list = self.type_table.setdefault(d, [])
         parent_iface_dict: dict[IfaceDecl, IfaceParentDecl] = {}
         for parent in d.parents:
-            if (parent_ty := parent.ty_ref.resolved_ty) is None:
+            if (parent_ty := parent.ty_ref.maybe_resolved_ty) is None:
                 continue
             if not isinstance(parent_ty, UserType):
                 self.diag.emit(TypeUsageError(parent.ty_ref))
@@ -505,7 +505,7 @@ class _CheckRecursiveInclusionPass(RecursiveDeclVisitor):
     def visit_struct_decl(self, d: StructDecl) -> None:
         type_list = self.type_table.setdefault(d, [])
         for f in d.fields:
-            if isinstance(ty := f.ty_ref.resolved_ty, UserType):
+            if isinstance(ty := f.ty_ref.maybe_resolved_ty, UserType):
                 type_list.append(((d, f.ty_ref), ty.ty_decl))
 
     def visit_union_decl(self, d: UnionDecl) -> None:
@@ -513,7 +513,7 @@ class _CheckRecursiveInclusionPass(RecursiveDeclVisitor):
         for i in d.fields:
             if i.ty_ref is None:
                 continue
-            if isinstance(ty := i.ty_ref.resolved_ty, UserType):
+            if isinstance(ty := i.ty_ref.maybe_resolved_ty, UserType):
                 type_list.append(((d, i.ty_ref), ty.ty_decl))
 
 

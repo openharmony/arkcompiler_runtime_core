@@ -12,11 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test5namespace3.impl.hpp"
-
-#include "stdexcept"
-// Please delete <stdexcept> include when you implement
-using namespace taihe;
-
-namespace {
+interface Foo {
+    addCallback(callback: () => void): void;
 }
+
+function makeFoo(): Foo;

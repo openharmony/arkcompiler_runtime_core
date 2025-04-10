@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as System from "std/core/System";
-
 import * as OptTest from "@generated/opt";
 import * as optionalTest from "@generated/optional";
+import * as System from "std/core/System";
 
 loadLibrary("ani_optional");
 

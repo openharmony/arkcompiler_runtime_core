@@ -76,22 +76,19 @@ class IndentManager:
 class STSOutputBuffer(OutputBase[[]]):
     """Represents a general target file."""
 
+    @override
     def __init__(self):
         super().__init__()
         self.indent_manager = IndentManager()
         self.code = StringIO()
-        self.import_list = []
+        self.import_dict: dict[str, str] = {}
 
     @override
     def save_as(self, file_path: Path):
         if not path.exists(file_path.parent):
             makedirs(file_path.parent, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as dst:
-            import_dict = {
-                import_name: module_name
-                for module_name, import_name in self.import_list
-            }
-            for import_name, module_name in import_dict.items():
+            for import_name, module_name in self.import_dict.items():
                 dst.write(f'import * as {import_name} from "./{module_name}";\n')
             dst.write(self.code.getvalue())
 
@@ -110,13 +107,14 @@ class STSOutputBuffer(OutputBase[[]]):
         for code in codes:
             self.code.write(self.indent_manager.current + code + "\n")
 
-    def imports(self, import_list: list[tuple[str, str]]):
-        self.import_list.extend(import_list)
+    def imports(self, import_dict: dict[str, str]):
+        self.import_dict.update(import_dict)
 
 
 class COutputBuffer(OutputBase[[bool]]):
     """Represents a C or C++ target file."""
 
+    @override
     def __init__(self, is_header: bool):
         super().__init__(is_header)
         self.is_header = is_header

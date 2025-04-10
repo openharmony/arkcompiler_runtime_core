@@ -46,6 +46,8 @@ compiler/taihe/parse/antlr
 *.vcxproj.filters
 *.sln
 
+.panda_vm/
+
 # Visual Studio Code files and folder
 .vscode/
 

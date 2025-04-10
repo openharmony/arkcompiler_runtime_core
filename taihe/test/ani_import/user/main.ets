@@ -19,4 +19,8 @@ import * as System from "std/core/System";
 
 loadLibrary("ani_import");
 
-function main() {}
+function main() {
+    // Intentially left blank.
+    // Rationale: the test focuses on compilation.
+    // A successful compilation indicates that the test case is passed.
+}

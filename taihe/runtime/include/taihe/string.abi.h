@@ -142,10 +142,8 @@ TH_EXPORT struct TString tstr_concat(struct TString left, struct TString right);
 // - `len`: The length of the substring to extract.
 //
 // # Returns
-// - A new TString containing the extracted substring.
+// - A TString reference of the extracted substring.
 //
 // # Notes
-// - The resulting TString object is a substring of `s` starting from `pos` with
-// a length of `len`.
-// - Remember to call `tstr_drop` after use to manage memory correctly.
+// - Calling this function returns an unowned string reference (string_view).
 TH_EXPORT struct TString tstr_substr(struct TString tstr, size_t pos, size_t len);

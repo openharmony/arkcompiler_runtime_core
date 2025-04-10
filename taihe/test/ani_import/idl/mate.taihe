@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-from mate.bar use BarType;
+from mate.bar use BarType as MyBar;
 
 union MateType {
     sValue: String;
@@ -20,4 +20,4 @@ union MateType {
     xValue;
 }
 
-function testBar(bar: BarType): void;
+function testBar(bar: MyBar): void;

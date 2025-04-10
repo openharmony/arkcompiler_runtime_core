@@ -59,13 +59,15 @@ class _PrettyPrinter(RecursiveDeclVisitor):
         self.buffer.write(self.indent_manager.current + content + "\n")
 
     def get_type_ref_decl(self, d: TypeRefDecl) -> str:
+        if not d.is_resolved:
+            return d.unresolved_repr
         real_type = (
-            "<error type>" if not d.resolved_ty else d.resolved_ty.representation
+            d.maybe_resolved_ty.representation
+            if d.maybe_resolved_ty
+            else "<error type>"
         )
         return (
             f"{d.unresolved_repr} {AnsiStyle.GREEN}/* {real_type} */{AnsiStyle.RESET}"
-            if d.is_resolved
-            else d.unresolved_repr
         )
 
     def get_package_ref_decl(self, d: PackageRefDecl) -> str:

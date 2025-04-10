@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 #include "mate.impl.hpp"
-
-#include "mate.bar.BarType.proj.1.hpp"
+#include "mate.proj.hpp"
 #include "stdexcept"
-// Please delete <stdexcept> include when you implement
+#include "taihe/runtime.hpp"
+
 using namespace taihe;
+using namespace mate;
 
 namespace {
-void testBar(::mate::bar::BarType const &bar)
+// To be implemented.
+
+void testBar(bar::BarType const &bar)
 {
-    throw std::runtime_error("Function testBar Not implemented");
+    TH_THROW(std::runtime_error, "testBar not implemented");
 }
 }  // namespace
 

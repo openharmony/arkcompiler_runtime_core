@@ -44,15 +44,15 @@ class Type(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def representation(self) -> str: 
-        ...
+    def representation(self) -> str:
+        """Return the representation of the type."""
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__qualname__} {self.representation}>"
 
     @abstractmethod
-    def _accept(self, v: "TypeVisitor") -> Any: 
-        ...
+    def _accept(self, v: "TypeVisitor") -> Any:
+        """Accept a visitor."""
 
 
 ##################

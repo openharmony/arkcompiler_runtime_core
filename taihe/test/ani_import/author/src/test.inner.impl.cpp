@@ -12,5 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@!namespace("my_ns", "test1.test2.test3")
+#include "test.inner.impl.hpp"
+#include "stdexcept"
+#include "taihe/runtime.hpp"
+#include "test.inner.proj.hpp"
 
+using namespace taihe;
+using namespace test::inner;
+
+namespace {
+// To be implemented.
+}  // namespace

@@ -148,6 +148,11 @@ public:
     return make_holder<ExampleInterface, ::optional::ExampleInterface>();
 }
 
+// string printFooName(::optional::weak::ExampleInterface param) {
+//     auto name = foo->getName();
+//     std::cout << __func__ << ": " << name << std::endl;
+//     return name;
+// }
 void printTestInterfaceName(::optional::weak::ExampleInterface testiface)
 {
     auto res = testiface->getName();

@@ -27,7 +27,6 @@ function BaseDFunc(testBoolean : String): bool;
 function BaseEFunc(b:Foo):String;
 function BaseHFunc(a:i32,b:i64):String;
 function BaseIFunc(a:f64,b:f32):String;
-function BaseFFunc(a:i16,b:f32):String;
 function BaseFunc1(b:f32):f32;
 function BaseFunc2(b:f32):void;
 function BaseFunc3(a:f32,b:f64):f64;
@@ -60,8 +59,6 @@ enum Bar:i8 {
   GREEN = 1,
   BLUE = 2,
 }
-
-function BaseFunc25(option1:Optional<i16>,option2:Bar):void;
 
 interface PrimitivesVoid {
   TestBaseFunc1():void;

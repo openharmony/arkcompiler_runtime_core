@@ -161,8 +161,8 @@ class TypeUsageError(DiagError):
 
     def __init__(self, ty_ref: "TypeRefDecl"):
         super().__init__(loc=ty_ref.loc)
-        assert ty_ref.resolved_ty
-        self.ty = ty_ref.resolved_ty
+        assert ty_ref.maybe_resolved_ty
+        self.ty = ty_ref.maybe_resolved_ty
 
     @property
     @override
@@ -186,8 +186,8 @@ class EnumValueError(DiagError):
         if self.enum.ty_ref is None:
             type_repr = "empty"
         else:
-            assert self.enum.ty_ref.resolved_ty
-            type_repr = self.enum.ty_ref.resolved_ty.representation
+            assert self.enum.ty_ref.maybe_resolved_ty
+            type_repr = self.enum.ty_ref.maybe_resolved_ty.representation
         return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({type_repr})"
 
 

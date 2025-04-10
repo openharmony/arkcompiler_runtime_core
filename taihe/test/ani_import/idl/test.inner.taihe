@@ -12,11 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test5namespace.impl.hpp"
+@!namespace("@ohos.test", "inner")
 
-#include "stdexcept"
-// Please delete <stdexcept> include when you implement
-using namespace taihe;
-
-namespace {
-}
+struct MyStruct {}

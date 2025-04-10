@@ -15,7 +15,7 @@
 name = "taihe"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["The Taihe Authors <asanrocks@outlook.com>"]
 include = [
     "taihe/parse/antlr/*",
 ]

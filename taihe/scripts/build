@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,43 +42,71 @@ build-compiler() {
     popd 2>/dev/null
 
     echo "Copying the compiler wrapper"
-    local taihec="$BIN_DIR/taihec"
-    cat >"$taihec" <<'EOF'
-#!/usr/bin/bash -eu
+
+    local prog="$BIN_DIR/taihec"
+    cat >"$prog" <<'EOF'
+#!/bin/bash -eu
 
 export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"
 export PYTHONPATH="${TAIHE_ROOT}/lib/taihe/compiler:${TAIHE_ROOT}/lib/taihe/compiler/lib:${PYTHONPATH:-}"
 
-exec python3 -m taihe "$@"
+exec python3 -m taihe.cli.compiler "$@"
 EOF
-    chmod 0755 "$taihec"
+    chmod 0755 "$prog"
+
+    local prog="$BIN_DIR/taihe-tryit"
+    cat >"$prog" <<'EOF'
+#!/bin/bash -eu
+
+export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"
+export PYTHONPATH="${TAIHE_ROOT}/lib/taihe/compiler:${TAIHE_ROOT}/lib/taihe/compiler/lib:${PYTHONPATH:-}"
+
+exec python3 -c 'from taihe.cli.tryit import *; main(BuildConfig(for_distribution=True));' "$@"
+EOF
+    chmod 0755 "$prog"
+
+}
+
+copy-documentation() {
+    cp -r cookbook "$DOC_DIR"
+}
+
+write-version() {
+    local GIT_COMMIT=$(git rev-parse HEAD)
+    local GIT_MESSAGE=$(git log -1 --pretty=%B | head -n 1)
+    local BUILD_DATE=$(date +"%Y-%m-%d %H:%M:%S")
+    {
+        echo "Version       : $VERSION"
+        echo "Last Commit   : $GIT_COMMIT"
+        echo "Commit Message: $GIT_MESSAGE"
+        echo "Build Date    : $BUILD_DATE"
+    } > "$DIST/version.txt"
 }
 
 main() {
     init_shell_options
     chdir_root
 
-    # Use clang by default. Will be picked by other build tools.
-    export CC="${CC:-clang}"
-    export CXX="${CXX:-clang++}"
-    echo "Toolchain: CC=$CC CXX=$CXX"
+    # Global variable
+    VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "TRUNK-$(git rev-parse --short=8 HEAD)")
+    echo "Version $VERSION"
 
     echo "Setting up the directories"
-    DIST="$PWD/dist"
+    DIST="$PWD/dist/taihe"
+
     LIB_DIR="$DIST/lib/taihe"
     BIN_DIR="$DIST/bin"
     INCLUDE_DIR="$DIST/include"
     SRC_DIR="$DIST/src/taihe/runtime"
-    mkdir -p "$DIST" "$LIB_DIR" "$BIN_DIR" "$INCLUDE_DIR" "$SRC_DIR"
-
-    GIT_COMMIT=$(git rev-parse HEAD)
-    BUILD_DATE=$(date +"%Y-%m-%d %H:%M:%S")
-    echo "Version: $GIT_COMMIT" > "$DIST/version.txt"
-    echo "Build Date: $BUILD_DATE" >> "$DIST/version.txt"
+    DOC_DIR="$DIST/share/doc/taihe"
+    mkdir -p "$DIST" "$LIB_DIR" "$BIN_DIR" "$INCLUDE_DIR" "$SRC_DIR" "$DOC_DIR"
 
     # Do the job
     copy-runtime
+    copy-documentation
+    write-version
     build-compiler
+    tar -z -c -f "taihe-$VERSION-$(date +"%Y%m%d").tar.gz" -C "$DIST/.." .
 }
 
 main

@@ -295,18 +295,6 @@ function baseFunc24_3() {
     test_primitives.BaseFunc24(32767 as short, undefined)
 }
 
-function baseFunc25() {
-    test_primitives.BaseFunc25(32767 as short, test_primitives.Bar.GREEN)
-}
-
-function baseFunc25_1() {
-    test_primitives.BaseFunc25(32767 as short, test_primitives.Bar.BLUE)
-}
-
-function baseFunc25_2() {
-    test_primitives.BaseFunc25(32767 as short, test_primitives.Bar.RED)
-}
-
 function testCaseBaseFunc1() {
     primitivesTest.TestBaseFunc1()
 }

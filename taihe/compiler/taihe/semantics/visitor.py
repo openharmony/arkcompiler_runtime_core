@@ -30,7 +30,6 @@ from typing import Generic, Optional, TypeVar
 from typing_extensions import override
 
 from taihe.semantics.declarations import (
-    AttrItemDecl,
     CallbackTypeRefDecl,
     Decl,
     DeclarationImportDecl,
@@ -300,11 +299,6 @@ class DeclVisitor(Generic[T]):
     def visit_package_group(self, g: PackageGroup) -> T:
         raise NotImplementedError
 
-    ### Attribute ###
-
-    def visit_attr_item_decl(self, d: AttrItemDecl) -> T:
-        return self.visit_decl(d)
-
 
 class RecursiveDeclVisitor(DeclVisitor[None]):
     """A visitor that recursively traverses all declarations and their sub-declarations.
@@ -502,9 +496,3 @@ class RecursiveDeclVisitor(DeclVisitor[None]):
     def visit_package_group(self, g: PackageGroup) -> None:
         for i in g.packages:
             self.handle_decl(i)
-
-    ### Attribute ###
-
-    @override
-    def visit_attr_item_decl(self, d: AttrItemDecl) -> None:
-        return self.visit_decl(d)

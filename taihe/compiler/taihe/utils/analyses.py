@@ -20,9 +20,9 @@ avoiding redundant computation or memory usage.
 from abc import ABC, abstractmethod
 from collections.abc import Hashable
 from dataclasses import dataclass
-from typing import Generic, NoReturn, TypeVar
+from typing import Generic, NoReturn, ParamSpec, TypeVar
 
-P = TypeVar("P", bound=Hashable)
+P = ParamSpec("P")
 A = TypeVar("A", bound="AbstractAnalysis")
 
 
@@ -31,7 +31,8 @@ class CacheKey:
     """Represents a unique key for identifying cached analysis instances."""
 
     analysis_type: type["AbstractAnalysis"]
-    arg: Hashable
+    args: tuple[Hashable, ...]
+    kwargs: tuple[tuple[str, Hashable], ...]
 
 
 class AbstractAnalysis(ABC, Generic[P]):
@@ -46,14 +47,24 @@ class AbstractAnalysis(ABC, Generic[P]):
             f"Cannot instantiate {cls.__name__}. Use `{cls.__name__}.get` instead."
         )
 
-    @abstractmethod
-    def __init__(self, am: "AnalysisManager", arg: P) -> None:
+    @abstractmethod  # pyre-ignore
+    def __init__(
+        self,
+        am: "AnalysisManager",
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> None:
         """Initialize analysis with hashable argument."""
 
     @classmethod
-    def get(cls: type[A], am: "AnalysisManager", arg: P) -> A:
+    def get(
+        cls: type[A],  # pyre-ignore
+        am: "AnalysisManager",
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> A:
         """Get or create a cached analysis instance."""
-        return am.get_or_create(cls, arg)
+        return am.get_or_create(cls, *args, **kwargs)
 
 
 class AnalysisManager:
@@ -62,16 +73,16 @@ class AnalysisManager:
     def __init__(self) -> None:
         self._cache: dict[CacheKey, AbstractAnalysis] = {}
 
-    def get_or_create(self, analysis_type: type[A], arg: Hashable) -> A:
+    def get_or_create(self, analysis_type: type[A], *args, **kwargs) -> A:
         """Get existing analysis or create new one if not cached."""
-        key = CacheKey(analysis_type, arg)
+        key = CacheKey(analysis_type, tuple(args), tuple(sorted(kwargs.items())))
 
         if cached := self._cache.get(key):
             assert isinstance(cached, analysis_type)
             return cached
 
         new_instance = object.__new__(analysis_type)
-        new_instance.__init__(self, arg)
+        new_instance.__init__(self, *args, **kwargs)
         self._cache[key] = new_instance
         return new_instance
 

@@ -13,32 +13,37 @@
  * limitations under the License.
  */
 #include "nova.impl.hpp"
-
-#include "mate.bar.BarType.proj.1.hpp"
-#include "nova.NovaType.proj.2.hpp"
-#include "pura.PuraType.proj.0.hpp"
+#include "nova.proj.hpp"
 #include "stdexcept"
-// Please delete <stdexcept> include when you implement
+#include "taihe/runtime.hpp"
+
 using namespace taihe;
+using namespace nova;
 
 namespace {
-class NovaType {
+// To be implemented.
+
+class NovaTypeImpl {
 public:
+    NovaTypeImpl()
+    {
+        // Don't forget to implement the constructor.
+    }
 };
 
 void testBar(::mate::bar::BarType const &bar)
 {
-    throw std::runtime_error("Function testBar Not implemented");
+    TH_THROW(std::runtime_error, "testBar not implemented");
 }
 
 void testPura(::pura::PuraType pura)
 {
-    throw std::runtime_error("Function testPura Not implemented");
+    TH_THROW(std::runtime_error, "testPura not implemented");
 }
 
-void testNova(::nova::weak::NovaType nova)
+void testNova(weak::NovaType nova)
 {
-    throw std::runtime_error("Function testNova Not implemented");
+    TH_THROW(std::runtime_error, "testNova not implemented");
 }
 }  // namespace
 

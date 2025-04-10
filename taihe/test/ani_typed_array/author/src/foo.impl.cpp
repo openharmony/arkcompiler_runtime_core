@@ -12,11 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-struct Data {
-  a: String;
-  b: String;
-  c: i32;
+#include "foo.impl.hpp"
+#include "stdexcept"
+#include "taihe/array.hpp"
+#include "taihe/runtime.hpp"
+using namespace taihe;
+
+namespace {
+void inArrayBuffer(array_view<uint16_t> v)
+{
+    std::cout << "inArrayBuffer:" << std::endl;
+    int i = 0;
+    for (auto x : v) {
+        std::cout << "v[" << i << "] = " << x << std::endl;
+    }
 }
 
-function concatStruct(data: Data): String;
-function makeStruct(a: String, b: String, c: i32): Data;
+array<uint16_t> outArrayBuffer()
+{
+    return {0, 1, 2, 3};
+}
+}  // namespace
+
+TH_EXPORT_CPP_API_inArrayBuffer(inArrayBuffer);
+TH_EXPORT_CPP_API_outArrayBuffer(outArrayBuffer);

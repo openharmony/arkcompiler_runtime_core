@@ -12,11 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test5namespace2.impl.hpp"
+@!typed_array
 
-#include "stdexcept"
-// Please delete <stdexcept> include when you implement
-using namespace taihe;
-
-namespace {
-}
+function inUint16Array(v: Array<u16>): void;
+function outUint16Array(): Array<u16>;

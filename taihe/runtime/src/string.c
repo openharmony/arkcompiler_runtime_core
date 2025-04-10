@@ -104,11 +104,5 @@ struct TString tstr_substr(struct TString tstr, size_t pos, size_t len)
     } else if (pos + len > tstr.length) {
         len = tstr.length - pos;
     }
-    struct TString rstr;
-    char *buf = tstr_initialize(&rstr, len + 1);
-    memcpy(buf, tstr.ptr + pos, sizeof(char) * len);
-    buf += len;
-    *buf = '\0';
-    rstr.length = len;
-    return rstr;
+    return tstr_new_ref(tstr.ptr + pos, len);
 }

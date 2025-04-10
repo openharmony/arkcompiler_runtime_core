@@ -18,8 +18,8 @@ import * as System from "std/core/System";
 
 loadLibrary("ani_union");
 
-function test_printMyUnion_with_undefined() {
-    let res = UnionTest.printMyUnion(undefined);
+function test_printMyUnion_with_null() {
+    let res = UnionTest.printMyUnion(null);
     assertEQ(res, "u")
 }
 
@@ -59,9 +59,9 @@ function test_makeMyUnion_pair() {
     }
 }
 
-function test_makeMyUnion_undefined() {
+function test_makeMyUnion_null() {
     const result = UnionTest.makeMyUnion("u");
-    assertEQ(result, undefined);
+    assertEQ(result, null);
 }
 
 function test_primitives() {
@@ -540,8 +540,7 @@ function main() {
     console.log("##############start#############");
     const suite = new ArkTestsuite("UnionTest Tests");
 
-    suite.addTest(
-        "test printMyUnion with undefined", test_printMyUnion_with_undefined);
+    suite.addTest("test printMyUnion with null", test_printMyUnion_with_null);
     suite.addTest(
         "test printMyUnion with string", test_printMyUnion_with_string);
     suite.addTest(
@@ -550,7 +549,7 @@ function main() {
     suite.addTest("test makeMyUnion string", test_makeMyUnion_string);
     suite.addTest("test makeMyUnion number", test_makeMyUnion_number);
     suite.addTest("test makeMyUnion pair", test_makeMyUnion_pair);
-    suite.addTest("test makeMyUnion undefined", test_makeMyUnion_undefined);
+    suite.addTest("test makeMyUnion null", test_makeMyUnion_null);
 
     suite.addTest(
         "test_interface_Union_primitives1", test_interface_Union_primitives1);

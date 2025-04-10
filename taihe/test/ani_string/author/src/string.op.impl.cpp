@@ -35,7 +35,7 @@ public:
         }
         string res {};
         for (int32_t i = n1; i <= n2; i++) {
-            res = concat(res, nums[i]);
+            res = res + nums[i];
         }
         return res;
     }
@@ -53,14 +53,14 @@ public:
 
 string concatString(string_view a, string_view b)
 {
-    return concat(a, b);
+    return a + b;
 }
 
 string makeString(string_view a, int32_t b)
 {
     string result = "";
     while (b-- > 0) {
-        result = concat(result, a);
+        result = result + a;
     }
     return result;
 }
@@ -76,8 +76,8 @@ string makeString(string_view a, int32_t b)
         n = n + l;
     }
     return {
-        substr(a, 0, n),
-        substr(a, n, l - n),
+        a.substr(0, n),
+        a.substr(n, l - n),
     };
 }
 
@@ -91,10 +91,7 @@ array<string> split2(string_view a, int32_t n)
     } else if (n < 0) {
         n = n + l;
     }
-    auto result = array<string>::make(2, "");
-    result[0] = substr(a, 0, n);
-    result[1] = substr(a, n, l - n);
-    return result;
+    return {a.substr(0, n), a.substr(n, l - n)};
 }
 
 int32_t to_i32(string_view a)
@@ -126,14 +123,14 @@ string concatString2(string_view s, int32_t n, array_view<string> sArr, bool b, 
 {
     string result = "";
     for (auto i = 0; i < n; i++) {
-        result = concat(result, s);
+        result = result + s;
     }
     if (b) {
         for (auto c : sArr) {
-            result = concat(result, c);
+            result = result + c;
         }
         for (auto j : buffer) {
-            result = concat(result, to_string(j));
+            result = result + to_string(j);
         }
     }
     return result;
