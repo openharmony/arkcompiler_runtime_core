@@ -22,8 +22,8 @@ function addFormatRangeToPartsResult(locale: string | undefined, options: Intl.D
     FORMAT_RESULTS.push(res)
 }
 
-const RANGE_START = new Date("2024-10-11T10:20:30.444")
-const RANGE_END = new Date("2024-10-12T20:30:50.444")
+const RANGE_START = new Date("2024-10-11T10:20:30.444Z")
+const RANGE_END = new Date("2024-10-12T20:30:50.444Z")
 
 class RPart implements Intl.DateTimeRangeFormatPart {
     private _type: Intl.DateTimeFormatPartTypes
@@ -85,7 +85,7 @@ function initFormatResults(): void {
         RPart("year", "2024", "endRange")
     ]
 
-    addFormatRangeToPartsResult("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }, resultUS)
+    addFormatRangeToPartsResult("en-US", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" }, resultUS)
 
     const resultCN = [
         RPart("year", "2024", "startRange"), RPart("literal", "/", "startRange"), 
@@ -96,7 +96,7 @@ function initFormatResults(): void {
         RPart("day", "12", "endRange")
     ]
 
-    addFormatRangeToPartsResult("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }, resultCN)
+    addFormatRangeToPartsResult("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" }, resultCN)
 }
 
 function verifyResults(actual: Intl.DateTimeRangeFormatPart[], expected: Intl.DateTimeRangeFormatPart[]): boolean {
