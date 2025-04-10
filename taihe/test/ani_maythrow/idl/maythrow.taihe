@@ -13,3 +13,14 @@
  * limitations under the License.
  */
 function maythrow(a: i32): i32;
+
+struct Data {
+    src: String;
+    dest: f64;
+    files: Array<String>;
+}
+function getDataMaythrow(): Data;
+
+function noReturnMaythrow(): void;
+
+function noReturnBusinessError(): void;

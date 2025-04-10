@@ -46,7 +46,7 @@ struct array_view {
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    array_view(pointer data, size_type size) noexcept : m_data(data), m_size(size) {}  // main constructor
+    array_view(pointer data, size_type size) noexcept : m_size(size), m_data(data) {}  // main constructor
 
     template <typename C>
     array_view(std::initializer_list<C> value) noexcept

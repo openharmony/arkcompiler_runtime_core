@@ -13,24 +13,32 @@
  * limitations under the License.
  */
 #include "pura.impl.hpp"
-
-#include "mate.bar.BarType.proj.1.hpp"
-#include "nova.NovaType.proj.2.hpp"
+#include "pura.proj.hpp"
 #include "stdexcept"
-// Please delete <stdexcept> include when you implement
+#include "taihe/runtime.hpp"
+
 using namespace taihe;
+using namespace pura;
 
 namespace {
+// To be implemented.
+
 void testBar(::mate::bar::BarType const &bar)
 {
-    throw std::runtime_error("Function testBar Not implemented");
+    TH_THROW(std::runtime_error, "testBar not implemented");
 }
 
 void testNova(::nova::weak::NovaType nove)
 {
-    throw std::runtime_error("Function testNova Not implemented");
+    TH_THROW(std::runtime_error, "testNova not implemented");
+}
+
+void testMyStruct(::test::inner::MyStruct const &s)
+{
+    TH_THROW(std::runtime_error, "testMyStruct not implemented");
 }
 }  // namespace
 
 TH_EXPORT_CPP_API_testBar(testBar);
 TH_EXPORT_CPP_API_testNova(testNova);
+TH_EXPORT_CPP_API_testMyStruct(testMyStruct);

@@ -12,4 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@!namespace("my_ns", "outer")
+export class BusinessError<T = void> extends Error {
+    code: number;
+    data?: T;
+
+    constructor() {
+        super();
+        this.code = 0;
+    }
+
+    constructor(code: number, error: Error) {
+        super(error.name, error.message, new ErrorOptions(error.cause));
+        this.code = code;
+    }
+
+    constructor(code: number, data: T, error: Error) {
+        super(error.name, error.message, new ErrorOptions(error.cause));
+        this.code = code;
+        this.data = data;
+    }
+}

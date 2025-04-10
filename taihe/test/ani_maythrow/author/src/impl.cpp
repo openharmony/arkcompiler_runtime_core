@@ -27,4 +27,27 @@ int32_t maythrow_impl(int32_t a)
     }
 }
 
+maythrow::Data getDataMaythrow()
+{
+    taihe::set_error("error in getDataMaythrow");
+    return {
+        taihe::string("C++ Object"),
+        (float)1.0,
+        {"data.obj", "file.txt"},
+    };
+}
+
+void noReturnMaythrow()
+{
+    taihe::set_error("error in noReturnMaythrow");
+}
+
+void noReturnBusinessError()
+{
+    taihe::set_business_error(5, "error in noReturnBusinessError");
+}
+
 TH_EXPORT_CPP_API_maythrow(maythrow_impl);
+TH_EXPORT_CPP_API_getDataMaythrow(getDataMaythrow);
+TH_EXPORT_CPP_API_noReturnMaythrow(noReturnMaythrow);
+TH_EXPORT_CPP_API_noReturnBusinessError(noReturnBusinessError);

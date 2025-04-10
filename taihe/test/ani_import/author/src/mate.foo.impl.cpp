@@ -13,28 +13,29 @@
  * limitations under the License.
  */
 #include "mate.foo.impl.hpp"
-
-#include "mate.MateType.proj.1.hpp"
-#include "nova.NovaType.proj.2.hpp"
-#include "pura.PuraType.proj.0.hpp"
+#include "mate.foo.proj.hpp"
 #include "stdexcept"
-// Please delete <stdexcept> include when you implement
+#include "taihe/runtime.hpp"
+
 using namespace taihe;
+using namespace mate::foo;
 
 namespace {
+// To be implemented.
+
 void testMate(::mate::MateType const &mate)
 {
-    throw std::runtime_error("Function testMate Not implemented");
+    TH_THROW(std::runtime_error, "testMate not implemented");
 }
 
 void testNova(::nova::weak::NovaType nova)
 {
-    throw std::runtime_error("Function testNova Not implemented");
+    TH_THROW(std::runtime_error, "testNova not implemented");
 }
 
 void testPura(::pura::PuraType pura)
 {
-    throw std::runtime_error("Function testPura Not implemented");
+    TH_THROW(std::runtime_error, "testPura not implemented");
 }
 }  // namespace
 

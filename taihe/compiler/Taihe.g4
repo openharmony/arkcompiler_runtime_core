@@ -19,7 +19,7 @@ grammar Taihe;
 /////////////
 
 spec
-    : (UseLst_uses += use | SpecFieldLst_fields += specField | ScopeAttrLst_attrs += scopeAttr)*
+    : (UseLst_uses += use | SpecFieldLst_fields += specField | ScopeAttrLst_inner_attrs += scopeAttr)*
       EOF
     ;
 
@@ -45,54 +45,54 @@ declAliasPair
     ;
 
 specField
-    : (DeclAttrLst_declattrs += declAttr)*
+    : (DeclAttrLst_forward_attrs += declAttr)*
       KW_ENUM TOKEN_name = ID (COLON TypeOpt_enum_ty = type)?
       LEFT_BRACE (EnumItemLst_fields += enumItem (COMMA EnumItemLst_fields += enumItem)* COMMA?)? RIGHT_BRACE # enum
-    | (DeclAttrLst_declattrs += declAttr)*
+    | (DeclAttrLst_forward_attrs += declAttr)*
       KW_STRUCT TOKEN_name = ID
-      LEFT_BRACE (StructFieldLst_fields += structField | ScopeAttrLst_scopeattrs += scopeAttr)* RIGHT_BRACE # struct
-    | (DeclAttrLst_declattrs += declAttr)*
+      LEFT_BRACE (StructFieldLst_fields += structField | ScopeAttrLst_inner_attrs += scopeAttr)* RIGHT_BRACE # struct
+    | (DeclAttrLst_forward_attrs += declAttr)*
       KW_UNION TOKEN_name = ID
-      LEFT_BRACE (UnionFieldLst_fields += unionField | ScopeAttrLst_scopeattrs += scopeAttr)* RIGHT_BRACE # union
-    | (DeclAttrLst_declattrs += declAttr)*
+      LEFT_BRACE (UnionFieldLst_fields += unionField | ScopeAttrLst_inner_attrs += scopeAttr)* RIGHT_BRACE # union
+    | (DeclAttrLst_forward_attrs += declAttr)*
       KW_INTERFACE TOKEN_name = ID
       (COLON InterfaceParentLst_extends += interfaceParent (COMMA InterfaceParentLst_extends += interfaceParent)* COMMA?)?
-      LEFT_BRACE (InterfaceFieldLst_fields += interfaceField | ScopeAttrLst_scopeattrs += scopeAttr)* RIGHT_BRACE # interface
-    | (DeclAttrLst_attrs += declAttr)*
+      LEFT_BRACE (InterfaceFieldLst_fields += interfaceField | ScopeAttrLst_inner_attrs += scopeAttr)* RIGHT_BRACE # interface
+    | (DeclAttrLst_forward_attrs += declAttr)*
       KW_FUNCTION TOKEN_name = ID
       LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS (COLON (TypeOpt_return_ty = type | KW_VOID))? SEMICOLON # globalFunction
     ;
 
 enumItem
-    : (DeclAttrLst_attrs += declAttr)*
+    : (DeclAttrLst_forward_attrs += declAttr)*
       TOKEN_name = ID (ASSIGN_TO AttrValOpt_val = attrVal)? # enumProperty
     ;
 
 structField
-    : (DeclAttrLst_attrs += declAttr)*
+    : (DeclAttrLst_forward_attrs += declAttr)*
       TOKEN_name = ID
       COLON Type_ty = type SEMICOLON # structProperty
     ;
 
 unionField
-    : (DeclAttrLst_attrs += declAttr)*
+    : (DeclAttrLst_forward_attrs += declAttr)*
       TOKEN_name = ID
       (COLON TypeOpt_ty = type)? SEMICOLON # unionProperty
     ;
 
 interfaceField
-    : (DeclAttrLst_attrs += declAttr)*
+    : (DeclAttrLst_forward_attrs += declAttr)*
       TOKEN_name = ID
       LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS (COLON (TypeOpt_return_ty = type | KW_VOID))? SEMICOLON # interfaceFunction
     ;
 
 interfaceParent
-    : (DeclAttrLst_attrs += declAttr)*
+    : (DeclAttrLst_forward_attrs += declAttr)*
       Type_ty = type
     ;
 
 parameter
-    : (DeclAttrLst_attrs += declAttr)*
+    : (DeclAttrLst_forward_attrs += declAttr)*
       TOKEN_name = ID COLON Type_ty = type
     ;
 

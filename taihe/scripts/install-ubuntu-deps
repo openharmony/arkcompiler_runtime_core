@@ -17,7 +17,6 @@ set -eu
 set -o pipefail
 
 # Global variables
-LOGFILE="/var/log/mirror-update.log"
 SOURCES_LIST="/etc/apt/sources.list"
 BACKUP_FILE="/etc/apt/sources.list.backup"
 
@@ -32,7 +31,6 @@ log() {
     shift
     local message="$@"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "[$timestamp] [$level] $message" | tee -a "$LOGFILE"
 }
 
 # Check if root
@@ -205,38 +203,58 @@ main_install_packages() {
     apt install --yes python3 pip virtualenv clang antlr4
 }
 
-main() {
-    main_update_apt_mirror
-    main_install_packages
-
-    update_pip_mirror
+setup_compiler_env() {
+    local script_dir=$1
 
     log "INFO" "Setting up venv"
-    virtualenv compiler/.venv
-    source compiler/.venv/bin/activate
+    virtualenv "${script_dir}/../compiler/.venv"
+    source "${script_dir}/../compiler/.venv/bin/activate"
 
     log "INFO" "Setting up poetry"
     pip install poetry
     poetry config virtualenvs.in-project true
-    (cd compiler && poetry install)
+    (cd "${script_dir}/../compiler" && poetry install)
 
     log "INFO" "Generating antlr4 grammar"
-    (cd compiler && ./generate-grammar)
+    (cd "${script_dir}/../compiler" && ./generate-grammar)
 
     log "INFO" "Completed!"
     echo "Hint: run the following command to begin:"
-    echo "  source ./compiler/.venv/bin/activate"
-    echo "  ./compiler/run-test test/string"
+    
+    echo "  source ${script_dir}/../compiler/.venv/bin/activate"
+    echo "  ${script_dir}/../compiler/run-test ${script_dir}/../test/ani_array -ani"
+}
+
+main() {
+    script_dir=$(realpath "$(dirname "$0")")
+
+    case "${1:-}" in
+        update_apt_mirror)
+            main_update_apt_mirror
+            ;;
+        install_pkg)
+            main_install_packages
+            ;;
+        update_pip_mirror)
+            update_pip_mirror
+            ;;
+        setup_compiler_env)
+            setup_compiler_env "$script_dir"
+            ;;
+        *)
+            sudo "$0" update_apt_mirror
+            sudo "$0" install_pkg
+            "$0" update_pip_mirror
+            "$0" setup_compiler_env "$script_dir"
+            exit 1
+            ;;
+    esac
 }
 
 # Set up trap for cleanup
 trap cleanup EXIT
 
-# Initialize log file
-touch "$LOGFILE"
-chmod 644 "$LOGFILE"
-
 # Run main function
-main
+main "$@"
 
 exit 0

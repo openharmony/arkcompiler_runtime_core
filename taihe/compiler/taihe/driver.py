@@ -36,6 +36,9 @@ from taihe.codegen.cpp_impl_generator import (
     CppImplHeadersGenerator,
     CppImplSourcesGenerator,
 )
+from taihe.codegen.cpp_user_generator import (
+    CppUserHeadersGenerator,
+)
 from taihe.codegen.sts_generator import (
     STSCodeGenerator,
 )
@@ -46,10 +49,10 @@ from taihe.parse.convert import (
     normalize_pkg_name,
 )
 from taihe.semantics.analysis import analyze_semantics
-from taihe.semantics.declarations import PackageGroup
+from taihe.semantics.declarations import AttrItemDecl, PackageGroup
 from taihe.semantics.format import pretty_print
 from taihe.utils.analyses import AnalysisManager
-from taihe.utils.diagnostics import DiagnosticsManager, Level
+from taihe.utils.diagnostics import DiagnosticsManager
 from taihe.utils.exceptions import AdhocNote
 from taihe.utils.outputs import OutputManager
 from taihe.utils.sources import SourceFile, SourceLocation, SourceManager
@@ -77,8 +80,10 @@ class CompilerInvocation:
     gen_user: bool = False
     gen_ani: bool = False
     gen_c_impl: bool = False
+    gen_cpp_impl: bool = True
 
     debug: bool = False
+    sts_keep_name: bool = False
 
 
 class CompilerInstance:
@@ -166,12 +171,11 @@ class CompilerInstance:
     def validate(self):
         analyze_semantics(self.package_group, self.diagnostics_manager)
 
-    def show(self):
         if self.invocation.debug:
             pretty_print(self.package_group, sys.stdout)
 
     def generate(self):
-        if self.diagnostics_manager.current_max_level() >= Level.ERROR:
+        if self.diagnostics_manager.has_errors():
             return
 
         if not self.invocation.out_dir:
@@ -187,10 +191,22 @@ class CompilerInstance:
             ABISourcesGenerator(self.target_manager, self.analysis_manager).generate(
                 self.package_group
             )
-            CppImplHeadersGenerator(
-                self.target_manager, self.analysis_manager
-            ).generate(self.package_group)
-            CppImplSourcesGenerator(
+            if self.invocation.gen_cpp_impl:
+                CppImplHeadersGenerator(
+                    self.target_manager, self.analysis_manager
+                ).generate(self.package_group)
+                CppImplSourcesGenerator(
+                    self.target_manager, self.analysis_manager
+                ).generate(self.package_group)
+            if self.invocation.gen_c_impl:
+                CImplHeadersGenerator(
+                    self.target_manager, self.analysis_manager
+                ).generate(self.package_group)
+                CImplSourcesGenerator(
+                    self.target_manager, self.analysis_manager
+                ).generate(self.package_group)
+        if self.invocation.gen_user or self.invocation.gen_ani:
+            CppUserHeadersGenerator(
                 self.target_manager, self.analysis_manager
             ).generate(self.package_group)
         if self.invocation.gen_ani:
@@ -200,19 +216,24 @@ class CompilerInstance:
             STSCodeGenerator(self.target_manager, self.analysis_manager).generate(
                 self.package_group
             )
-        if self.invocation.gen_c_impl:
-            CImplHeadersGenerator(self.target_manager, self.analysis_manager).generate(
-                self.package_group
-            )
-            CImplSourcesGenerator(self.target_manager, self.analysis_manager).generate(
-                self.package_group
-            )
 
         self.target_manager.output_to(self.invocation.out_dir)
 
+    def add_pkg_attr(self):
+        if not self.invocation.sts_keep_name:
+            return
+        for pkg in self.package_group.packages:
+            if not pkg.get_attr_item("sts_keep_name"):
+                d = AttrItemDecl(None, "sts_keep_name", ())
+                pkg.add_attr(d)
+
     def run(self):
+        self.diagnostics_manager.reset_max_level()
+
         self.scan()
         self.parse()
         self.validate()
-        self.show()
+        self.add_pkg_attr()
         self.generate()
+
+        return not self.diagnostics_manager.has_errors()

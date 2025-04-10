@@ -43,7 +43,7 @@ int32_t add_int(int32_t a, int32_t b)
 
 string add_str(string_view a, string_view b)
 {
-    return concat(a, b);
+    return a + b;
 }
 
 ::overload_test::Foo makeFoo()

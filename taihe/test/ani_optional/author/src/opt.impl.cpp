@@ -56,7 +56,7 @@ optional<string> sendReturnResult(::opt::ReturnResult const &result)
     if (result.results) {
         string ret = "";
         for (auto str : *result.results) {
-            ret = concat(ret, str);
+            ret = ret + str;
         }
         return optional<string>::make(ret);
     } else {

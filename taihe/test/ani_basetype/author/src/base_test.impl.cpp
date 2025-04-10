@@ -80,7 +80,7 @@ bool Check(bool a, bool b)
 
 string Concatx(string_view a, string_view b)
 {
-    return taihe::concat(a, b);
+    return a + b;
 }
 
 string Splitx(string_view a, int32_t n)
@@ -91,7 +91,7 @@ string Splitx(string_view a, int32_t n)
     } else if (n < 0) {
         n = 0;
     }
-    return taihe::substr(a, 0, n);
+    return a.substr(0, n);
 }
 
 int32_t ToI32(string_view a)

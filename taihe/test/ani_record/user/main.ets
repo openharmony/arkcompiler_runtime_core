@@ -36,11 +36,11 @@ function getCpuSize() {
 }
 
 function getASize() {
-    // test function getASize(r: Record<int, NullishType>): int
+    // test function getASize(r: Record<int, Object>): int
     let a = new A();
     let b = new A();
     let c = new A();
-    let As: Record<int, NullishType> = {
+    let As: Record<int, Object> = {
         0: a,
         1: b,
         2: c,
@@ -354,9 +354,9 @@ function testMapfunc20() {
     assertEQ(result, true);
 }
 
-// function mapfunc21(m: Record<string, NullishType>): boolean
+// function mapfunc21(m: Record<string, Object>): boolean
 function testMapfunc21() {
-    let testData: Record<string, NullishType> = {"key1": null, "key2": null};
+    let testData: Record<string, Object> = {"key1": "val1", "key2": "val2"};
     let result: boolean = record_test.Mapfunc21(testData);
     assertEQ(result, true);
 }
@@ -521,9 +521,9 @@ function testMapfunc45() {
     assertEQ(result.has("key1"), true);
 }
 
-// function mapfunc46(): Record<string, NullishType>
+// function mapfunc46(): Record<string, Object>
 function testMapfunc46() {
-    let result: Record<string, NullishType> = record_test.Mapfunc46();
+    let result: Record<string, Object> = record_test.Mapfunc46();
     assertEQ(result.has("key1"), true);
 }
 

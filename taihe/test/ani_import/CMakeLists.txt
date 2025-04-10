@@ -18,12 +18,14 @@ set(IDL_FILES
     "${CMAKE_CURRENT_LIST_DIR}/idl/nova.taihe"
     "${CMAKE_CURRENT_LIST_DIR}/idl/pura.baz.taihe"
     "${CMAKE_CURRENT_LIST_DIR}/idl/pura.taihe"
+    "${CMAKE_CURRENT_LIST_DIR}/idl/test.inner.taihe"
 )
 
 set(GEN_ETS_FILES
     "mate.ets"
     "nova.ets"
     "pura.ets"
+    "@ohos.test.ets"
 )
 
 set(USER_ETS_FILES

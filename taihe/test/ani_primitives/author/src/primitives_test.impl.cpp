@@ -166,8 +166,8 @@ public:
 
     void TestBaseFunc16(int8_t option1, int16_t option2)
     {
-        std::cout << "TestBaseFunc16 is option1  " << static_cast<int>option1 << std::endl; // code style
-        std::cout << "TestBaseFunc16 is option2  " << static_cast<int>option2 << std::endl; // code style
+        std::cout << "TestBaseFunc16 is option1  " << (int)option1 << std::endl;
+        std::cout << "TestBaseFunc16 is option2  " << (int)option2 << std::endl;
     }
 
     void TestBaseFunc17(array_view<int32_t> option1, array_view<int8_t> option2)
@@ -182,7 +182,7 @@ public:
         // 输出 option2 的内容
         std::cout << "TestBaseFunc17 option2: ";
         for (int8_t value : option2) {
-            std::cout << static_cast<int>value << " ";
+            std::cout << (int)value << " ";
         }
         std::cout << std::endl;
     }
@@ -337,7 +337,7 @@ public:
 
     void TestBaseIntegerFunc3(int8_t option1, int16_t option2)
     {
-        std::cout << "TestBaseIntegerFunc3 is option1  " << static_cast<int>option1 << std::endl;// code style fixed
+        std::cout << "TestBaseIntegerFunc3 is option1  " << (int)option1 << std::endl;
         std::cout << "TestBaseIntegerFunc3 is option2  " << option2 << std::endl;
     }
 
@@ -363,7 +363,7 @@ public:
                 "out of range The i32 maximum value is 2147483647 and minnum values "
                 "is -2147483648");
         }
-        std::cout << "TestBaseIntegerFunc7 is option1  " << static_cast<int>option1 << std::endl;
+        std::cout << "TestBaseIntegerFunc7 is option1  " << (int)option1 << std::endl;
         std::cout << "TestBaseIntegerFunc7 is option2  " << option2 << std::endl;
     }
 

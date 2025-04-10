@@ -14,6 +14,7 @@
  */
 from mate.bar use BarType;
 from nova use NovaType;
+from test.inner use MyStruct;
 
 enum PuraType: i32 {
     A = 1,
@@ -22,3 +23,5 @@ enum PuraType: i32 {
 
 function testBar(bar: BarType): void;
 function testNova(nove: NovaType): void;
+
+function testMyStruct(s: MyStruct): void;
