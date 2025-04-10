@@ -34,3 +34,14 @@ cases:
     - decl: |-
           function foo(e?: string = 'abc') {} // CTE, ambiguity
       call: foo()
+
+    - decl: |-
+        // omitting different arguments
+        function foo(a: int = 1, b: int = 2, c: int = 3): int {
+          return a + b + c
+        }
+      call: |-
+        assertEQ( foo(, 11), 15 )
+        assertEQ( foo(,, 11), 14 )
+        assertEQ( foo(11,, 11), 24 )
+        assertEQ( foo(,,), 6 )
