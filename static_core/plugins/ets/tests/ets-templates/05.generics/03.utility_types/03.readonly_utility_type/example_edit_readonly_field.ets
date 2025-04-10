@@ -15,23 +15,17 @@ limitations under the License.
 
 /*---
 desc: >-
-    Using abstract class with abstract method as T for Required<T>.
-    Abstract method is implemented during the initialization.
+    Type Readonly<T> constructs a type with all properties of T set to readonly. It means that the properties of the
+    constructed value cannot be reassigned.
+tags: [compile-only, negative]
 ---*/
 
-abstract class AC {
-  i?: number = 0
-  abstract foo():void
+interface Issue {
+  title: string
 }
 
-function foo(i: Required<AC>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  return v;
-}
+const myIssue: Readonly<Issue> = {
+  title: "One"
+};
 
-function main() {
-  assertTrue( foo( {i: 1.9, foo() {}} ) == 1 )
-}
+myIssue.title = "Two" // compile-time error: readonly property

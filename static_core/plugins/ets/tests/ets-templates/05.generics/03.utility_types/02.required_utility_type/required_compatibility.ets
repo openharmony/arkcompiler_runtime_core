@@ -27,7 +27,6 @@ desc: Type T is not compatible (see Type Compatibility) with Required<T>, and va
 
 function main() {
   let a: Required<A> = {i: 1.9, j: "some str"}
-  assertTrue( !(a instanceof A) )
   assertTrue( a.i == 1.9 )
   assertTrue( a.j == "some str" )
 }

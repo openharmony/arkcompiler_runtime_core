@@ -14,38 +14,24 @@ limitations under the License.
 ---*/
 
 {% for c in cases %}
+{% for t in types %}
 
 /*---
 desc:  No method (including any getter or setter) of T is part of the Required<T> type.
-tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
+tags: [compile-only, negative]
 ---*/
 
-let z: int = 0;
-
-class C {
+{{t}} C {
   _i?: number
-  _j?: string
-  set i(i: number) { z += 1; this._i = i; }
-  get i(): number|undefined { z += 10; return this._i; }
-  set j(j: string) { z += 5; this._j = j; }
-  get j(): string|undefined { z += 50; return this._j; }
-}
-
-function foo(i: Required<C>) {
-  let v: int = 0;
-  if(i.j != undefined) {
-    v += 1;
-  }
-  if(i.i != 0) {
-    v += 2;
-  }
-  return v;
+  set i(i: number|undefined) { this._i = i; }
+  get i(): number|undefined { return this._i; }
 }
 
 function main() {
-  z = 0;
-  assertTrue( foo( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
+  let a: Required<C> = {_i: 1.9}
+  // a call to getter/setter i should result in CTE
+  {{c}}
 }
 
+{% endfor %}
 {% endfor %}

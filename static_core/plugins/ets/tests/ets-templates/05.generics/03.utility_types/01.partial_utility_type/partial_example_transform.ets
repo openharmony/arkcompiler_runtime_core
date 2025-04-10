@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,22 +14,26 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Type Partial<T> constructs a type with all properties of T set to optional. T must be a class or an interface type.
+desc: >-
+    In the example above, type Partial<Issue> is transformed to a distinct but analogous type as follows:
+    interface SomeName {
+      title?: string
+      description?: string
+    }
 ---*/
 
-class A {
-  static i: int = 0
-  j: string = ""
+interface Issue {
+  title: string
+  description: string
 }
 
-function foo(i: Partial<A>) {
-  let v: int = 0;
-  if(i.j != undefined) {
-    v += 1;
+function process(issue: Partial<Issue>) {
+  if (issue.title != undefined) {
+    return 0
   }
-  return v;
+  return 1
 }
 
 function main() {
-  assertTrue(foo({j: "some str"}) == 1)
+  assertEQ(process({title: "aa"}), 0) // description is undefined
 }

@@ -15,9 +15,10 @@ limitations under the License.
 
 /*---
 desc: >-
-    In type Partial<T>, T must be a class or an interface type.
-    Type T is not compatible (see Type Compatibility) with Partial<T>,
-    and variables of Partial<T> are to be initialized with valid object literals
+    Type Partial<T> constructs a type with all properties of T set to optional.
+    T must be a class or an interface type.
+    Type T is not compatible (see Type Compatibility) with Partial<T>
+tags: [compile-only,negative]
 ---*/
 
 abstract class A {
@@ -27,5 +28,5 @@ abstract class A {
 
 function main() {
   let a: Partial<A> = {i: 1.9, j: "some str"}
-  assertTrue( !(a instanceof A) )
+  let b: A = a
 }

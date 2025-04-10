@@ -19,6 +19,7 @@ limitations under the License.
 /*---
 desc: Type T is not compatible with Partial<T> (see Type Compatibility), and variables of Partial<T> are to be
       initialized with valid object literals.
+tags: [compile-only,negative]
 ---*/
 
 {{t}} A {
@@ -28,7 +29,7 @@ desc: Type T is not compatible with Partial<T> (see Type Compatibility), and var
 
 function main() {
   let a: Partial<A> = {{c}}
-  assertTrue( !(a instanceof A) )
+  let b: A = a
 }
 
 {% endfor %}

@@ -15,24 +15,16 @@ limitations under the License.
 
 /*---
 desc: >-
-    Using interface with method as T for Required<T>.
-    Method is not implemented.
-tags: [compile-only, negative]
+    Type T is assignable (see Assignability) to Readonly<T>, and allows assignments as a consequence:
 ---*/
 
-interface I {
-  i: number = 0
-  foo()
-}
-
-function foo(i: Required<I>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  return v;
+class A {
+  f1: string = ""
+  f2: number = 1
+  f3: boolean = true
 }
 
 function main() {
-  foo( {i: 1.9} )
+  let x = new A()
+  let y: Readonly<A> = x // OK
 }

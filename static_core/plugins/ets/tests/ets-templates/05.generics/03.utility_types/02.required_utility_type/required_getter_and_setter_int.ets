@@ -13,57 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+
 {% for c in cases %}
 
 /*---
 desc:  No method (including any getter or setter) of T is part of the Required<T> type.
-tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
 ---*/
 
-let z: int = 0;
-
 interface I {
-  i?: number;
-  j?: string;
-}
-
-class C implements I {
-  private _i?:number = 0;
-  private _j?:string = "";
-  set i(i: number|undefined) { z += 1; this._i = i; }
-  get i(): number|undefined { z += 10; return this._i; }
-  set j(j: string|undefined) { z += 5; this._j = j; }
-  get j(): string|undefined { z += 50; return this._j; }
-}
-
-function fooI(i: Required<I>) {
-  let v: int = 0;
-  if(i.j != undefined) {
-    v += 1;
-  }
-  if(i.i != 0) {
-    v += 2;
-  }
-  return v;
-}
-
-function fooC(i: Required<I>) {
-  let v: int = 0;
-  if(i.j != undefined) {
-    v += 1;
-  }
-  if(i.i != 0) {
-    v += 2;
-  }
-  return v;
+  set i(i: number|undefined)
+  get i(): number|undefined
 }
 
 function main() {
-  z = 0;
-  assertTrue( fooC( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
-  assertTrue( fooI( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
+  let a: Required<I> = {i: 1.9}
+  {{c}}
 }
 
 {% endfor %}

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,27 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
+
 /*---
-desc: >-
-    Using interface with method as T for Partial<T>.
-    Optional feature is not about methods.
-    There is no interface method implemented at all.
-tags: [compile-only, negative]
+desc: No method (not even any getter or setter) of T is part of the Partial<T> type.
+tags: [compile-only,negative]
 ---*/
 
-interface I {
-  i: number = 0
-  foo()
-}
-
-function foo(i: Partial<I>) {
-  let v: int = 0;
-  if(i.i != 0) {
-    v += 1;
-  }
-  return v;
-}
+{{c.decl}}
 
 function main() {
-  foo( {i: 1.9} )
+  {{c.check}}
 }
+
+{% endfor %}

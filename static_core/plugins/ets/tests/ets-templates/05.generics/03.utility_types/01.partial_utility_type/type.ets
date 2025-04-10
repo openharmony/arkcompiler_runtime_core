@@ -21,8 +21,8 @@ desc: Using custom type of Partial<T>
 ---*/
 
 {{t}} A {
-  i: number {% if t == "class" %} = 0 {% endif %};
-  j: string {% if t == "class" %} = "" {% endif %};
+  i: number {% if t != "interface" %} = 0 {% endif %}
+  j: string {% if t != "interface" %} = "" {% endif %}
 }
 
 type T = Partial<A>
