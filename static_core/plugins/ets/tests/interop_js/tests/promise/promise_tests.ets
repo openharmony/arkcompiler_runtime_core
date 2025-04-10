@@ -747,6 +747,20 @@ function testPromiseRaceRejected(): void {
     });
 }
 
+function testPromiseThenOnRejection(): void {
+    globalTest = new Test();
+    Promise.reject<Error>(new Error("test")).then<void, string>(
+    (value: Object): void => {
+        globalTest!.fail();
+    }, (error: Error): string => {
+        return "correct flow";
+    }).then<string, void>((value: Object): void => {
+        globalTest!.success();
+    }, (error: Error): void => {
+        globalTest!.fail();
+    });
+}
+
 let promiseFixture: Promise<void>|null = null;
 
 function getPromise(): Promise<void> {
