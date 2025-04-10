@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ani/ani.h"
+#include "ani.h"
 #include <gtest/gtest.h>
 #include <array>
 
@@ -29,14 +29,15 @@ static void TestCheck1(ani_env *env)
     ani_double p2 = 6.0;
 
     ani_module module;
-    ASSERT_EQ(env->FindModule("Lexample_lib;", &module), ANI_OK);
-
+    ASSERT_EQ(env->FindModule("example_lib", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
+
     ani_function fn;
-    ASSERT_EQ(env->Module_FindFunction(module, "exampleFunction", "DD:D", &fn), ANI_OK);
+    ASSERT_EQ(env->Module_FindFunction(module, "exampleFunction", "dd:d", &fn), ANI_OK);
+    ASSERT_NE(fn, nullptr);
 
     ani_double res;
-    env->Function_Call_Double(fn, &res, p1, p2);
+    ASSERT_EQ(env->Function_Call_Double(fn, &res, p1, p2), ANI_OK);
     ASSERT_EQ(res, p1 + p2);
 }
 
@@ -46,14 +47,15 @@ static void TestCheck2(ani_env *env)
     ani_long p2 = -123;
 
     ani_module module;
-    ASSERT_EQ(env->FindModule("Lexample_lib;", &module), ANI_OK);
-
+    ASSERT_EQ(env->FindModule("example_lib", &module), ANI_OK);
     ASSERT_NE(module, nullptr);
+
     ani_function fn;
-    ASSERT_EQ(env->Module_FindFunction(module, "nativeExampleFunction", "JJ:J", &fn), ANI_OK);
+    ASSERT_EQ(env->Module_FindFunction(module, "nativeExampleFunction", "ll:l", &fn), ANI_OK);
+    ASSERT_NE(fn, nullptr);
 
     ani_long res;
-    env->Function_Call_Long(fn, &res, p1, p2);
+    ASSERT_EQ(env->Function_Call_Long(fn, &res, p1, p2), ANI_OK);
     ASSERT_EQ(res, p1 * p2);
 }
 
@@ -65,25 +67,36 @@ static void TestCheck3()
     // Get ANI API
     ani_size nrVMs;
     ASSERT_EQ(ANI_GetCreatedVMs(&vm, 1, &nrVMs), ANI_OK);
+    ASSERT_EQ(nrVMs, 1);
+
     ASSERT_EQ(vm->GetEnv(ANI_VERSION_1, &env), ANI_OK);
+    ASSERT_NE(env, nullptr);
+
     uint32_t aniVersin;
     ASSERT_EQ(env->GetVersion(&aniVersin), ANI_OK);
     ASSERT_TRUE(aniVersin == ANI_VERSION_1) << "Incorrect ani version";
 
-    ani_class cls;
     // Locate the class "Lexample_lib/Aaa;" in the environment
-    ASSERT_EQ(env->FindClass("Lexample_lib/Aaa;", &cls), ANI_OK);
+    ani_module module;
+    ASSERT_EQ(env->FindModule("example_lib", &module), ANI_OK);
+    ASSERT_NE(module, nullptr);
+
+    ani_class cls;
+    ASSERT_EQ(env->Module_FindClass(module, "Aaa", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
     // Emulate the allocation of instance of the class
     ani_static_method newMethod;
-    ASSERT_EQ(env->Class_FindStaticMethod(cls, "new_Aaa", ":Lexample_lib/Aaa;", &newMethod), ANI_OK);
+    ASSERT_EQ(env->Class_FindStaticMethod(cls, "new_Aaa", ":C{example_lib.Aaa}", &newMethod), ANI_OK);
+    ASSERT_NE(newMethod, nullptr);
+
     ani_ref ref;
     ASSERT_EQ(env->Class_CallStaticMethod_Ref(cls, newMethod, &ref), ANI_OK);
+    ASSERT_NE(ref, nullptr);
 
-    ani_method method;
     // Retrieve a method named "boolean_method" with signature "II:Z"
-    ASSERT_EQ(env->Class_FindMethod(cls, "boolean_method", "II:Z", &method), ANI_OK);
+    ani_method method;
+    ASSERT_EQ(env->Class_FindMethod(cls, "boolean_method", "ii:z", &method), ANI_OK);
     ASSERT_NE(method, nullptr);
 
     auto object = static_cast<ani_object>(ref);
@@ -93,10 +106,10 @@ static void TestCheck3()
     args[0].i = arg1;
     args[1].i = arg2;
 
-    ani_boolean res;
     // Call the method and verify the return value
+    ani_boolean res;
     ASSERT_EQ(env->Object_CallMethod_Boolean_A(object, method, &res, args), ANI_OK);
-    ASSERT_EQ(res, false);
+    ASSERT_EQ(res, ANI_FALSE);
 }
 
 static ani_long NativeTestFunc([[maybe_unused]] ani_env *env, ani_long param)
@@ -106,11 +119,6 @@ static ani_long NativeTestFunc([[maybe_unused]] ani_env *env, ani_long param)
     TestCheck3();
     return param;
 }
-
-static std::array g_gMethods = {
-    ani_native_function {"nativeExampleFunction", "JJ:J", reinterpret_cast<void *>(NativeFuncExample)},
-    ani_native_function {"nativeTestFunction", "J:J", reinterpret_cast<void *>(NativeTestFunc)},
-};
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -124,7 +132,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     };
 
     ani_module module;
-    if (env->FindModule("Lexample_lib;", &module) != ANI_OK) {
+    if (env->FindModule("example_lib", &module) != ANI_OK) {
         std::cerr << "Cannot find module!" << std::endl;
         return ANI_ERROR;
     }
