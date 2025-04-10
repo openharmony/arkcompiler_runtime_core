@@ -1,4 +1,8 @@
-#FailKind.SEGFAULT_FAIL - 53 tests:
+#FailKind.ABORT_FAIL - 3 tests:
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
+spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
+spec/10.Interfaces/method_overload6.ets
+#FailKind.DECLGEN_ETS2TS_FAIL - 53 tests:
 arkui/dollar_dollar_13.ets
 regression/11979-interface-attr-init-010.ets
 regression/11979-interface-attr-init-011.ets
@@ -52,11 +56,7 @@ std/core/std_core_char_instance_Char_isWhiteSpace.ets
 std/core/std_core_char_static_Char_isWhiteSpace.ets
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
-#FailKind.ABORT_FAIL - 3 tests:
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
-spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
-spec/10.Interfaces/method_overload6.ets
-#FailKind.TSC_FAIL - 150 tests:
+#FailKind.TSC_FAIL - 158 tests:
 algorithms/SampleAppTest.ets
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
@@ -180,9 +180,6 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_PollTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PushTest_Stress.ets
-std/core/DateTimeFormatTest.ets
-std/core/IntlDateFormatTest.ets
-std/core/IntlDateTimeStyleFormatTest.ets
 std/core/IntlLocaleTest.ets
 std/core/IntlLocaleTest2.ets
 std/core/IntlPluralRulesTest.ets
@@ -197,6 +194,17 @@ std/core/TypeMethodInvoke.ets
 std/core/TypeMethodResolveConstructor.ets
 std/core/TypeMethodResolveConstructorFew.ets
 std/core/TypeMethodTest.ets
+std/core/dateformat/DateTimeFormatTest.ets
+std/core/dateformat/IntlDateFormatCNOptionsYear2DigitTest.ets
+std/core/dateformat/IntlDateFormatCNOptionsYearNumericTest.ets
+std/core/dateformat/IntlDateFormatOptionsYear2DigitTest.ets
+std/core/dateformat/IntlDateFormatOptionsYearNumericTest.ets
+std/core/dateformat/IntlDateFormatRangeOptionsTest.ets
+std/core/dateformat/IntlDateFormatRangeToPartsOptionsTest.ets
+std/core/dateformat/IntlDateFormatTest.ets
+std/core/dateformat/IntlDateFormatToPartsOptionsTest.ets
+std/core/dateformat/IntlDateTimeFormatStyleTest.ets
+std/core/dateformat/IntlTimeFormatOptionsTest.ets
 std/core/std_core_constructor_StringBuilder_constructor.ets
 std/core/std_core_constructor_StringBuilder_constructor_001.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append.ets
