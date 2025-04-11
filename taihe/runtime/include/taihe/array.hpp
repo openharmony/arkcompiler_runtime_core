@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_ARRAY_HPP
+#define TAIHE_ARRAY_HPP
 
 #include <taihe/array.abi.h>
 #include <taihe/common.hpp>
@@ -26,6 +27,9 @@
 #include <utility>
 #include <vector>
 
+// This file is used as a standard library and needs to be easy to use.
+// The rule that single-parameter constructors need to be explicit does not apply.
+// NOLINTBEGIN
 namespace taihe {
 template <typename cpp_owner_t>
 struct array_view;
@@ -322,3 +326,6 @@ struct as_param<array<cpp_owner_t>> {
     using type = array_view<cpp_owner_t>;
 };
 }  // namespace taihe
+// NOLINTEND
+
+#endif // TAIHE_ARRAY_HPP

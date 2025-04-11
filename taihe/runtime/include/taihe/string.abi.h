@@ -12,16 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_STRING_ABI_H
+#define TAIHE_STRING_ABI_H
 
 #include <taihe/common.h>
 
 #include <stddef.h>
 #include <stdint.h>
 
-/////////////////////////////////////////
-// Private ABI: Don't use in your code //
-/////////////////////////////////////////
+// Private ABI: Don't use in your code
 
 enum TStringFlags {
     TSTRING_REF = 1,
@@ -38,9 +37,7 @@ struct TStringData {
     char buffer[];
 };
 
-//////////////////
-// Public C API //
-//////////////////
+// Public C API
 
 // Returns the buffer of the TString.
 TH_INLINE const char *tstr_buf(struct TString tstr)
@@ -55,40 +52,32 @@ TH_INLINE size_t tstr_len(struct TString tstr)
 }
 
 // Allocates memory and initializes a TString with a given capacity.
-//
 // # Arguments
 // - `tstr_ptr`: Pointer to an uninitialized TString structure.
 // - `capacity`: The desired capacity of the string buffer.
-//
 // # Returns
 // - Pointer to the allocated buffer.
-//
 // # Notes
 // - The caller is responsible for setting the string length.
 // - Reference count is set to 1 after called.
 TH_EXPORT char *tstr_initialize(struct TString *tstr_ptr, uint32_t capacity);
 
 // Creates a new heap-allocated TString by copying an existing string.
-//
 // # Arguments
 // - `buf`: A null-terminated string (must not be null).
 // - `len`: The length of the string.
-//
 // # Returns
 // - A new TString containing a copy of `buf`.
-//
 // # Notes
 // - The returned TString must be freed using `tstr_drop`.
 TH_EXPORT struct TString tstr_new(char const *buf TH_NONNULL, size_t len);
 
 // Creates a TString from an existing string.
-//
 // # Arguments
 // - `buf`: a null-terminated string. Null pointer is invalid.
 // - `len`: the length of the string.
 // - `tstr`: pointer to an uninitialized TString. Do not pass an
 //    already-initialized TString here.
-//
 // # Returns
 // - `tstr`, if the string is created successfully. The caller must ensure the
 //    string buffer and the returned TString remain unchanged during the whole
@@ -99,22 +88,17 @@ TH_EXPORT struct TString tstr_new(char const *buf TH_NONNULL, size_t len);
 TH_EXPORT struct TString tstr_new_ref(char const *buf TH_NONNULL, size_t len);
 
 // Frees a TString, releasing allocated memory if applicable.
-//
 // # Arguments
 // - `tstr`: The TString to be freed.
-//
 // # Notes
 // - The TString should not be accessed after calling this function.
 TH_EXPORT void tstr_drop(struct TString tstr);
 
 // Creates a duplicate of a TString.
-//
 // # Arguments
 // - `tstr`: The TString to be copied.
-//
 // # Returns
 // - A new TString that is either a reference or a deep copy.
-//
 // # Notes
 // - If `tstr` is heap-allocated, its reference count is incremented.
 // - If `tstr` is a reference, a new heap-allocated copy is created.
@@ -122,10 +106,8 @@ TH_EXPORT void tstr_drop(struct TString tstr);
 TH_EXPORT struct TString tstr_dup(struct TString tstr);
 
 // Concatenates two TString objects.
-//
 // # Returns
 // - A new TString containing the concatenation of `left` and `right`.
-//
 // # Notes
 // - The resulting TString object contains the concatenation of `left` and
 // `right`.
@@ -134,16 +116,15 @@ TH_EXPORT struct TString tstr_dup(struct TString tstr);
 TH_EXPORT struct TString tstr_concat(struct TString left, struct TString right);
 
 // Extracts a substring from a TString object.
-//
 // # Parameters
 // - `s`: The source TString object to extract the substring from.
 // - `pos`: The starting position of the substring within the source TString
 // object.
 // - `len`: The length of the substring to extract.
-//
 // # Returns
 // - A TString reference of the extracted substring.
-//
 // # Notes
 // - Calling this function returns an unowned string reference (string_view).
 TH_EXPORT struct TString tstr_substr(struct TString tstr, size_t pos, size_t len);
+
+#endif // TAIHE_STRING_ABI_H
