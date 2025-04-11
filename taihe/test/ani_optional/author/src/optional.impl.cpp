@@ -107,17 +107,20 @@ public:
 
     taihe::optional<int16_t> geti16()
     {
-        return taihe::optional<int16_t>::make(100);
+        const int16_t geti16_value = 100;
+        return taihe::optional<int16_t>::make(geti16_value);
     }
 
     taihe::optional<int32_t> geti32()
     {
-        return taihe::optional<int32_t>::make(1024);  // 默认返回0
+        const int32_t geti32_value = 1024;
+        return taihe::optional<int32_t>::make(geti32_value);  // 默认返回0
     }
 
     taihe::optional<int64_t> geti64()
     {
-        return taihe::optional<int64_t>::make(999999);  // 默认返回0
+        const int64_t geti64_value = 999999;
+        return taihe::optional<int64_t>::make(geti64_value);  // 默认返回0
     }
 
     taihe::optional<float> getf32()
@@ -148,11 +151,6 @@ public:
     return make_holder<ExampleInterface, ::optional::ExampleInterface>();
 }
 
-// string printFooName(::optional::weak::ExampleInterface param) {
-//     auto name = foo->getName();
-//     std::cout << __func__ << ": " << name << std::endl;
-//     return name;
-// }
 void printTestInterfaceName(::optional::weak::ExampleInterface testiface)
 {
     auto res = testiface->getName();
@@ -214,6 +212,8 @@ void printTestInterfaceArraybuffer(::optional::weak::ExampleInterface testiface)
 }
 }  // namespace
 
+// The macros used below are automatically generated code
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_get_interface(get_interface) TH_EXPORT_CPP_API_printTestInterfaceName(printTestInterfaceName);
 TH_EXPORT_CPP_API_printTestInterfaceNumberi8(printTestInterfaceNumberi8);
 TH_EXPORT_CPP_API_printTestInterfaceNumberi16(printTestInterfaceNumberi16);
@@ -223,3 +223,4 @@ TH_EXPORT_CPP_API_printTestInterfaceNumberf32(printTestInterfaceNumberf32);
 TH_EXPORT_CPP_API_printTestInterfaceNumberf64(printTestInterfaceNumberf64);
 TH_EXPORT_CPP_API_printTestInterfacebool(printTestInterfacebool);
 TH_EXPORT_CPP_API_printTestInterfaceArraybuffer(printTestInterfaceArraybuffer);
+// NOLINTEND
