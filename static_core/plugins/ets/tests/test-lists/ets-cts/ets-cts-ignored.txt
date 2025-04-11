@@ -756,9 +756,6 @@
 07.expressions/06.spread_expression/spex_lmbd_37.ets
 07.expressions/06.spread_expression/spex_meth_37.ets
 
-#24414
-07.expressions/06.spread_expression/spex_42.ets
-
 #20371 Unexpected Type Error on string array
 07.expressions/06.spread_expression/spex_const_31.ets
 07.expressions/06.spread_expression/spex_func_31.ets
