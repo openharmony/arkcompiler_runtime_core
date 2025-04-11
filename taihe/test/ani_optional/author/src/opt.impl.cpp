@@ -36,7 +36,8 @@ void showOptionalInt(optional_view<int32_t> x)
 optional<int32_t> makeOptionalInt(bool b)
 {
     if (b) {
-        return optional<int32_t>::make(10);
+        const int optionalMakeValue = 10;
+        return optional<int32_t>::make(optionalMakeValue);
     } else {
         return optional<int32_t>(nullptr);
     }
@@ -65,7 +66,10 @@ optional<string> sendReturnResult(::opt::ReturnResult const &result)
 }
 }  // namespace
 
+// The macros used below are automatically generated code
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_showOptionalInt(showOptionalInt);
 TH_EXPORT_CPP_API_makeOptionalInt(makeOptionalInt);
 TH_EXPORT_CPP_API_makeOptionalArray(makeOptionalArray);
 TH_EXPORT_CPP_API_sendReturnResult(sendReturnResult);
+// NOLINTEND

@@ -90,7 +90,8 @@ public:
 
     float BaseFunctionTest48(float param1)
     {
-        return param1 - 10;
+        const int baseFunctionTest48Value = 10;
+        return param1 - baseFunctionTest48Value;
     }
 
     double BaseFunctionTest49(double param1)
@@ -563,12 +564,14 @@ public:
 
     float getf32_test_attribute()
     {
-        return 3.14;
+        const float getf32TestAttributeRes = 3.14;
+        return getf32TestAttributeRes;
     }
 
     double getf64_test_attribute()
     {
-        return -1.23;
+        const double getf64TestAttributeRes = -1.23;
+        return getf64TestAttributeRes;
     }
 
     string getStr_test_attribute()
@@ -605,13 +608,15 @@ public:
             .data2 = true,
             .data3 = 100,
         };
-        result.emplace(100, p1);
+        const int32_t getRecordTestAttributeKey1 = 100;
+        result.emplace(getRecordTestAttributeKey1, p1);
         ::ns_alltest::functiontest::Data p2 {
             .data1 = "two",
             .data2 = false,
             .data3 = 101,
         };
-        result.emplace(101, p2);
+        const int32_t getRecordTestAttributeKey2 = 101;
+        result.emplace(getRecordTestAttributeKey2, p2);
         return result;
     }
 
@@ -730,7 +735,7 @@ void BaseFunctionTest10(array_view<int8_t> param1)
     // 输出 param1 的内容
     std::cout << "NameSpaceImpl: " << __func__ << " param1 ";
     for (int8_t value : param1) {
-        std::cout << (int)value << " ";
+        std::cout << static_cast<int>(value) << " ";
     }
     std::cout << std::endl;
 }
@@ -835,7 +840,8 @@ float BaseFunctionTest20(float param1)
 
 double BaseFunctionTest21(double param1)
 {
-    return param1 + 1.01;
+    const double baseFunctionTest21Value = 1.01;
+    return param1 + baseFunctionTest21Value;
 }
 
 string BaseFunctionTest22(string_view param1)
@@ -1228,6 +1234,8 @@ bool BaseFunctionTest60(map_view<int64_t, bool> param1)
 
 }  // namespace
 
+// The macros used below are automatically generated code
+// NOLINTBEGIN()
 TH_EXPORT_CPP_API_BaseFunctionTest1(BaseFunctionTest1);
 TH_EXPORT_CPP_API_BaseFunctionTest2(BaseFunctionTest2);
 TH_EXPORT_CPP_API_BaseFunctionTest3(BaseFunctionTest3);
@@ -1299,3 +1307,4 @@ TH_EXPORT_CPP_API_get_interface_performance20(get_interface_performance20);
 TH_EXPORT_CPP_API_get_interface_performance21(get_interface_performance21);
 TH_EXPORT_CPP_API_get_interface_IbaseInterface2(get_interface_IbaseInterface2);
 TH_EXPORT_CPP_API_get_interface_IbaseInterface3(get_interface_IbaseInterface3);
+// NOLINTEND

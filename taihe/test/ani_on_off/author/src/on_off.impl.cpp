@@ -106,6 +106,8 @@ void offFooStatic(callback_view<void()> a)
 }
 }  // namespace
 
+// The macros used below are automatically generated code
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_getIBase(getIBase);
 TH_EXPORT_CPP_API_onFoo(onFoo);
 TH_EXPORT_CPP_API_onBar(onBar);
@@ -115,3 +117,4 @@ TH_EXPORT_CPP_API_offBar(offBar);
 TH_EXPORT_CPP_API_offBaz(offBaz);
 TH_EXPORT_CPP_API_onFooStatic(onFooStatic);
 TH_EXPORT_CPP_API_offFooStatic(offFooStatic);
+// NOLINTEND
