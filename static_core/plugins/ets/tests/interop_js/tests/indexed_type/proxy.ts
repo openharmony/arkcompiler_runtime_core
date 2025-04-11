@@ -12,6 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export function createProxy(target, handler) {
+export function createProxy<T extends object>(target: T, handler: ProxyHandler<T>): T {
 	return new Proxy(target, handler);
 }

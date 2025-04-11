@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { string, number, bool, arr, obj, tuple, public_static_getter_class_value } from './constant';
+import { string, number, bool, arr, obj, tuple, PUBLIC_STATIC_GETTER_CLASS_VALUE } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
 const checkArray = (arg) => arg instanceof Array;
@@ -54,15 +54,15 @@ function checkClassGetterClassValueTuple() {
 }
 
 function checkClassStaticGetterSetter() {
-	StaticClass.value = public_static_getter_class_value;
-	ASSERT_TRUE(StaticClass.value === public_static_getter_class_value);
+	StaticClass.value = PUBLIC_STATIC_GETTER_CLASS_VALUE;
+	ASSERT_TRUE(StaticClass.value === PUBLIC_STATIC_GETTER_CLASS_VALUE);
 }
 
 function checkClassStaticPublicField() {
 	const GClass = new StaticPublicFieldClass(string);
 	ASSERT_TRUE(GClass.value === string);
-	StaticPublicFieldClass.value = public_static_getter_class_value;
-	ASSERT_TRUE(StaticPublicFieldClass.value === public_static_getter_class_value);
+	StaticPublicFieldClass.value = PUBLIC_STATIC_GETTER_CLASS_VALUE;
+	ASSERT_TRUE(StaticPublicFieldClass.value === PUBLIC_STATIC_GETTER_CLASS_VALUE);
 }
 
 

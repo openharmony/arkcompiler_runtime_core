@@ -203,6 +203,6 @@ static napi_value Init(napi_env env, napi_value exports)
     return exports;
 }
 
-}  // namespace ark::ets::interop::js::helper
-
 NAPI_MODULE(INTEROP_TEST_HELPER, ark::ets::interop::js::helper::Init)
+
+}  // namespace ark::ets::interop::js::helper

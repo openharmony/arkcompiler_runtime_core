@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { public_getter_class_value } from './constant';
+import { PUBLIC_GETTER_CLASS_VALUE } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
 const PublicGetterClass = etsVm.getClass('Lgetter/test/PublicGetterClass;');
@@ -23,7 +23,7 @@ const createSubsetByValueGetterClassFromEts = etsVm.getFunction('Lgetter/test/ET
 
 function checkSubsetByValueGetterClass() {
 	const GClass = new SubsetByValueClass(new PublicGetterClass().value);
-	ASSERT_TRUE(GClass.value === public_getter_class_value);
+	ASSERT_TRUE(GClass.value === PUBLIC_GETTER_CLASS_VALUE);
 }
 
 function checkSubsetByValueGetteralueClass() {
@@ -38,7 +38,7 @@ function checkCreateSubsetByValueGetteralueClassFromEts() {
 
 function checkCreateSubsetByValueGettervClassFromEts() {
 	const GClass = createSubsetByValueGetterClassFromEts();
-	ASSERT_TRUE(GClass.value === public_getter_class_value);
+	ASSERT_TRUE(GClass.value === PUBLIC_GETTER_CLASS_VALUE);
 }
 
 checkSubsetByValueGetterClass();

@@ -27,20 +27,19 @@ export class CustomArrayIterTest {
         return this.counter;
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): Iterator<number> {
         let idx = 0;
         const items = this.items;
-        let customArrayIterTest = this;
 
         return {
-            next(): IteratorResult<number> {
+            next: (): IteratorResult<number> => {
                 if (idx < items.length) {
-                    customArrayIterTest.counter++;
+                    this.counter++;
                     return { value: items[idx++], done: false };
                 } else {
                     return { value: undefined, done: true };
                 }
             }
-        }
+        };
     };
 }

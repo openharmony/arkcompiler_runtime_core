@@ -26,7 +26,7 @@ const err = etsVm.getClass('Lerror/test/ETSGLOBAL;').err;
 
 function testError(): boolean {
     let res: boolean;
-    res = (err instanceof Error) && (err.message == ErrMsg);
+    res = (err instanceof Error) && (err.message === ErrMsg);
     return res;
 }
 
@@ -37,7 +37,7 @@ function testThrowError(): boolean {
         res = false;
     } catch (error) {
         let e: Error = error as Error;
-        res = (error instanceof Error) && (e.message == ErrorMessage);
+        res = (error instanceof Error) && (e.message === ErrorMessage);
     }
     return res;
 }
@@ -49,8 +49,8 @@ function testCustomThrowError(): boolean {
         res = false;
     } catch (error) {
         let e: Error = error as Error;
-        res = (error instanceof Error) && (e.message == CustomErrorMessage) &&
-              (e.code == CustomErrorCode);
+        res = (error instanceof Error) && (e.message === CustomErrorMessage) &&
+              (e.code === CustomErrorCode);
     }
     return res;
 }
