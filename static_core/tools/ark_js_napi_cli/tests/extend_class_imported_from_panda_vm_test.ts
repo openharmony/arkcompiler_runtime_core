@@ -31,7 +31,7 @@ function main(): void {
     }
     for (let i = 0; i < 100000; i++) {
         let customObj = new JsDerivedClass();
-        if(i % 100 === 0) {
+        if (i % 100 === 0) {
             print(i);
         }
         if (i % 10000 === 0) {
