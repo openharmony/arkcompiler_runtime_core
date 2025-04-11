@@ -100,6 +100,7 @@ extern "C" ani_status ANI_CreateVM(const ani_options *options, uint32_t version,
     return ANI_OK;
 }
 
+// CC-OFFNXT(G.FUN.02-CPP) project code stytle
 extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLength, ani_size *result)
 {
     ANI_DEBUG_TRACE(env);
