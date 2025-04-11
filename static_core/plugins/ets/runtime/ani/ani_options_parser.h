@@ -67,6 +67,7 @@ private:
     ErrorMsg RunCompilerOptionsParser(const std::vector<std::string> &args);
     std::unique_ptr<Option> ParseExtendedOption(std::string_view name, std::string_view value, const ani_option *opt);
     ErrorMsg ParseExtOptions(OptionsMap extOptionsMap);
+    void PrepareEtsVmOptions();
 
     ANIOptions aniOptions_;
 

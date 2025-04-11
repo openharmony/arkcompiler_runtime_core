@@ -20,6 +20,12 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ani/ani_options.cpp
     ${ETS_EXT_SOURCES}/ani/ani_options_parser.cpp
     ${ETS_EXT_SOURCES}/ani/ani_vm_api.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/ani_verifier.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/env_ani_verifier.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/types/venv.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/verify_ani_checker.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/verify_ani_interaction_api.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/verify_ani_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_annotation.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_context.cpp

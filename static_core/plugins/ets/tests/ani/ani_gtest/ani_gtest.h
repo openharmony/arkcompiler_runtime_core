@@ -154,6 +154,25 @@ public:
         return klass->IsInitialized();
     }
 
+    void ThrowError()
+    {
+        ani_ref undef {};
+        ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
+
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass("escompat.Error", &cls), ANI_OK);
+        ani_method ctor {};
+        ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
+
+        ani_object err {};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ASSERT_EQ(env_->Object_New(cls, ctor, &err, undef, undef), ANI_OK);
+        ASSERT_EQ(env_->ThrowError(static_cast<ani_error>(err)), ANI_OK);
+
+        ASSERT_EQ(env_->Reference_Delete(err), ANI_OK);
+        ASSERT_EQ(env_->Reference_Delete(undef), ANI_OK);
+    }
+
 protected:
     virtual std::vector<ani_option> GetExtraAniOptions()
     {

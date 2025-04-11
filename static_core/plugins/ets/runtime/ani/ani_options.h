@@ -33,6 +33,7 @@ class ANIOptions final {
 public:
     enum class OptionKey {
         LOGGER,
+        VERIFY_ANI,
 #ifdef PANDA_ETS_INTEROP_JS
         INTEROP,
 #endif  // PANDA_ETS_INTEROP_JS
@@ -46,6 +47,12 @@ public:
     Expected<bool, std::string> SetOption(std::string_view key, std::string_view value, void *extra);
 
     LoggerCallback GetLoggerCallback() const;
+
+    bool IsVerifyANI() const
+    {
+        const OptionValue *v = GetValue(OptionKey::VERIFY_ANI);
+        return v != nullptr ? std::get<0>(v->value) : false;
+    }
 
 #ifdef PANDA_ETS_INTEROP_JS
     bool IsInteropMode() const

@@ -15,17 +15,26 @@
 
 #include "plugins/ets/runtime/ets_stdlib_cache.h"
 #include "utils/logger.h"
-#include "plugins/ets/runtime/ets_platform_types.h"
-#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets {
 
-template <typename Type>
-static void GetGlobalRef(ani_env *env, EtsClass *cls, Type *result)
+static void GetGlobalRef(ani_env *env, const char *classDescriptor, ani_class *result)
 {
-    ani::ScopedManagedCodeFix s(env);
-    ani_status status = s.AddGlobalRef(cls->AsObject(), reinterpret_cast<ani_ref *>(result));
-    LOG_IF(status != ANI_OK, FATAL, ANI) << "Cannot create global reference to class: name=" << cls->GetDescriptor()
+    ani_class cls;
+    ani_status status = env->FindClass(classDescriptor, &cls);
+    LOG_IF(status != ANI_OK, FATAL, ANI) << "Cannot find class: name=" << classDescriptor << " status=" << status;
+    status = env->GlobalReference_Create(cls, reinterpret_cast<ani_ref *>(result));
+    LOG_IF(status != ANI_OK, FATAL, ANI) << "Cannot create global reference to class: name=" << classDescriptor
+                                         << " status=" << status;
+}
+
+static void GetGlobalRef(ani_env *env, const char *moduleDescriptor, ani_module *result)
+{
+    ani_module m;
+    ani_status status = env->FindModule(moduleDescriptor, &m);
+    LOG_IF(status != ANI_OK, FATAL, ANI) << "Cannot find module: name=" << moduleDescriptor << " status=" << status;
+    status = env->GlobalReference_Create(m, reinterpret_cast<ani_ref *>(result));
+    LOG_IF(status != ANI_OK, FATAL, ANI) << "Cannot create global reference to module: name=" << moduleDescriptor
                                          << " status=" << status;
 }
 
@@ -36,7 +45,7 @@ static void CacheMethod(ani_env *env, ani_class cls, const char *methodName, con
     if (*result == nullptr) {
         LOG(FATAL, ANI) << "Cannot find method: name =" << methodName;
     }
-};
+}
 
 static void CacheVariable(ani_env *env, ani_module module, const char *varName, ani_variable *result)
 {
@@ -45,19 +54,18 @@ static void CacheVariable(ani_env *env, ani_module module, const char *varName, 
     if (*result == nullptr) {
         LOG(FATAL, ANI) << "Cannot find variable: name =" << varName;
     }
-};
+}
 
 PandaUniquePtr<StdlibCache> CreateStdLibCache(ani_env *env)
 {
-    const EtsPlatformTypes *types = PlatformTypes();
     auto stdlibCache = MakePandaUnique<StdlibCache>();
 
     // Cache modules
-    GetGlobalRef(env, types->core, &stdlibCache->std_core);
+    GetGlobalRef(env, "std.core", &stdlibCache->std_core);
 
     // Cache classes
-    GetGlobalRef(env, types->coreStringBuilder, &stdlibCache->std_core_String_Builder);
-    GetGlobalRef(env, types->coreConsole, &stdlibCache->std_core_Console);
+    GetGlobalRef(env, "std.core.StringBuilder", &stdlibCache->std_core_String_Builder);
+    GetGlobalRef(env, "std.core.Console", &stdlibCache->std_core_Console);
 
     // Cache methods
     CacheMethod(env, stdlibCache->std_core_Console, "error",

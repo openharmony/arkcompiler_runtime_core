@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ani_gtest.h"
+#include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"

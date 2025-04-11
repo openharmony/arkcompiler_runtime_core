@@ -15,6 +15,7 @@
 
 #include "runtime/include/managed_thread.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
+#include "plugins/ets/runtime/ani/verify/verify_ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -47,6 +48,11 @@ PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
 PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
     : ani_env {ani::GetInteractionAPI()}, coroutine_(coroutine), referenceStorage_(std::move(referenceStorage))
 {
+    if (coroutine->GetPandaVM()->IsVerifyANI()) {
+        ani::verify::ANIVerifier *verifier = GetEtsVM()->GetANIVerifier();
+        envANIVerifier_ = MakePandaUnique<ani::verify::EnvANIVerifier>(verifier, c_api);
+        c_api = ani::verify::GetVerifyInteractionAPI();
+    }
 }
 
 PandaEtsVM *PandaEtsNapiEnv::GetEtsVM() const

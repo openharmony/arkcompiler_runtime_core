@@ -17,6 +17,7 @@
 
 #include "compiler/compiler_options.h"
 #include "plugins/ets/compiler/product_options.h"
+#include "plugins/ets/runtime/ets_vm_options.h"
 #include "plugins/ets/runtime/product_options.h"
 
 namespace ark::ets::ani {
@@ -122,7 +123,12 @@ OptionsParser::ErrorMsg OptionsParser::Parse(const ani_options *options)
         }
         extOptionsMap[op->name] = std::move(op);
     }
-    return ParseExtOptions(std::move(extOptionsMap));
+    ErrorMsg errorMsg = ParseExtOptions(std::move(extOptionsMap));
+    if (errorMsg) {
+        return errorMsg;
+    }
+    PrepareEtsVmOptions();
+    return {};
 }
 
 OptionsParser::ErrorMsg OptionsParser::ParseExtOptions(OptionsMap extOptionsMap)
@@ -232,6 +238,11 @@ OptionsParser::ErrorMsg OptionsParser::RunOptionsParser(PandArgParser &parser, c
         return errorMessage;
     }
     return {};
+}
+
+void OptionsParser::PrepareEtsVmOptions()
+{
+    SetEtsVmOptions(runtimeOptions_, std::make_unique<EtsVmOptions>(aniOptions_.IsVerifyANI()));
 }
 
 }  // namespace ark::ets::ani

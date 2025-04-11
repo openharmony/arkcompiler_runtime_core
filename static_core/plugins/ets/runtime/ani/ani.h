@@ -305,12 +305,12 @@ struct __ani_interaction_api {
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class of the object to create.
-     * @param[in] method The constructor method to invoke.
-     * @param[in] ... Variadic arguments to pass to the constructor method.
+     * @param[in] ctor The constructor method to invoke.
      * @param[out] result A pointer to store the object return value.
+     * @param[in] ... Variadic arguments to pass to the constructor method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Object_New)(ani_env *env, ani_class cls, ani_method method, ani_object *result, ...);
+    ani_status (*Object_New)(ani_env *env, ani_class cls, ani_method ctor, ani_object *result, ...);
 
     /**
      * @brief Creates a new object of a specified class using a constructor method (array-based).
@@ -320,13 +320,12 @@ struct __ani_interaction_api {
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class of the object to create.
-     * @param[in] method The constructor method to invoke.
-     * @param[in] args An array of arguments to pass to the constructor method.
+     * @param[in] ctor The constructor method to invoke.
      * @param[out] result A pointer to store the object return value.
+     * @param[in] args An array of arguments to pass to the constructor method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Object_New_A)(ani_env *env, ani_class cls, ani_method method, ani_object *result,
-                               const ani_value *args);
+    ani_status (*Object_New_A)(ani_env *env, ani_class cls, ani_method ctor, ani_object *result, const ani_value *args);
 
     /**
      * @brief Creates a new object of a specified class using a constructor method (variadic arguments).
@@ -336,12 +335,12 @@ struct __ani_interaction_api {
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class of the object to create.
-     * @param[in] method The constructor method to invoke.
-     * @param[in] args A `va_list` of arguments to pass to the constructor method.
+     * @param[in] ctor The constructor method to invoke.
      * @param[out] result A pointer to store the object return value.
+     * @param[in] args A `va_list` of arguments to pass to the constructor method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Object_New_V)(ani_env *env, ani_class cls, ani_method method, ani_object *result, va_list args);
+    ani_status (*Object_New_V)(ani_env *env, ani_class cls, ani_method ctor, ani_object *result, va_list args);
 
     /**
      * @brief Retrieves the type of a given object.
@@ -546,10 +545,10 @@ struct __ani_interaction_api {
      * This function deletes a specified local reference to free up resources.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to be deleted.
+     * @param[in] lref The local reference to be deleted.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Reference_Delete)(ani_env *env, ani_ref ref);
+    ani_status (*Reference_Delete)(ani_env *env, ani_ref lref);
 
     /**
      * @brief Ensures enough local references are available.
@@ -6268,21 +6267,21 @@ struct __ani_env {
     {
         return c_api->GetVM(this, result);
     }
-    ani_status Object_New(ani_class cls, ani_method method, ani_object *result, ...)
+    ani_status Object_New(ani_class cls, ani_method ctor, ani_object *result, ...)
     {
         va_list args;
         va_start(args, result);
-        ani_status status = c_api->Object_New_V(this, cls, method, result, args);
+        ani_status status = c_api->Object_New_V(this, cls, ctor, result, args);
         va_end(args);
         return status;
     }
-    ani_status Object_New_A(ani_class cls, ani_method method, ani_object *result, const ani_value *args)
+    ani_status Object_New_A(ani_class cls, ani_method ctor, ani_object *result, const ani_value *args)
     {
-        return c_api->Object_New_A(this, cls, method, result, args);
+        return c_api->Object_New_A(this, cls, ctor, result, args);
     }
-    ani_status Object_New_V(ani_class cls, ani_method method, ani_object *result, va_list args)
+    ani_status Object_New_V(ani_class cls, ani_method ctor, ani_object *result, va_list args)
     {
-        return c_api->Object_New_V(this, cls, method, result, args);
+        return c_api->Object_New_V(this, cls, ctor, result, args);
     }
     ani_status Object_GetType(ani_object object, ani_type *result)
     {
@@ -6346,9 +6345,9 @@ struct __ani_env {
     {
         return c_api->Class_BindNativeMethods(this, cls, methods, nr_methods);
     }
-    ani_status Reference_Delete(ani_ref ref)
+    ani_status Reference_Delete(ani_ref lref)
     {
-        return c_api->Reference_Delete(this, ref);
+        return c_api->Reference_Delete(this, lref);
     }
     ani_status EnsureEnoughReferences(ani_size nr_refs)
     {
@@ -8176,9 +8175,9 @@ struct __ani_env {
     {
         return c_api->GlobalReference_Create(this, ref, result);
     }
-    ani_status GlobalReference_Delete(ani_ref ref)
+    ani_status GlobalReference_Delete(ani_ref gref)
     {
-        return c_api->GlobalReference_Delete(this, ref);
+        return c_api->GlobalReference_Delete(this, gref);
     }
     ani_status WeakReference_Create(ani_ref ref, ani_wref *result)
     {

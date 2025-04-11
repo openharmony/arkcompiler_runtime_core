@@ -173,6 +173,16 @@ public:
         }
     }
 
+    void SetLangExtensionOptions(panda_file::SourceLang lang, std::shared_ptr<void> langExtensionOption)
+    {
+        langExtensionOptions_[ark::panda_file::GetLangArrIndex(lang)] = std::move(langExtensionOption);
+    }
+
+    const void *GetLangExtensionOptions(panda_file::SourceLang lang) const
+    {
+        return langExtensionOptions_[ark::panda_file::GetLangArrIndex(lang)].get();
+    }
+
 private:
     // Fix default value for possible missing plugins.
     void CheckAndFixIntrinsicSpaces()
@@ -201,6 +211,7 @@ private:
     void *unwindstack_ {nullptr};
     void *crashConnect_ {nullptr};
     bool verifyRuntimeLibraries_ {false};
+    std::array<std::shared_ptr<void>, panda_file::LANG_COUNT> langExtensionOptions_ {};
 };
 }  // namespace ark
 

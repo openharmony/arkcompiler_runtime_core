@@ -14,7 +14,7 @@
  */
 
 #include <atomic>
-#include "ani_gtest.h"
+#include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/runtime.h"
 

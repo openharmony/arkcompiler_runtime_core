@@ -25,6 +25,7 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
+#include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ani/ani_type_info.h"
@@ -48,9 +49,15 @@
 #define CHECK_PTR_ARG(arg) ANI_CHECK_RETURN_IF_EQ(arg, nullptr, ANI_INVALID_ARGS)
 
 // CC-OFFNXT(G.PRE.02) should be with define
+#define CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env)              \
+    do {                                                        \
+        ANI_CHECK_RETURN_IF_EQ(env, nullptr, ANI_INVALID_ARGS); \
+    } while (false)
+
+// CC-OFFNXT(G.PRE.02) should be with define
 #define CHECK_ENV(env)                                                                           \
     do {                                                                                         \
-        ANI_CHECK_RETURN_IF_EQ(env, nullptr, ANI_INVALID_ARGS);                                  \
+        CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);                                              \
         bool hasPendingException = ::ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException(); \
         ANI_CHECK_RETURN_IF_EQ(hasPendingException, true, ANI_PENDING_ERROR);                    \
     } while (false)
@@ -67,96 +74,6 @@ using TypeId = panda_file::Type::TypeId;
 static inline bool IsUndefined(ani_ref ref)
 {
     return ManagedCodeAccessor::IsUndefined(ref);
-}
-
-static inline ani_field ToAniField(EtsField *field)
-{
-    ASSERT(field != nullptr);
-    ASSERT(!field->IsStatic());
-    return reinterpret_cast<ani_field>(field);
-}
-
-static inline EtsField *ToInternalField(ani_field field)
-{
-    auto *f = reinterpret_cast<EtsField *>(field);
-    ASSERT(f != nullptr);
-    ASSERT(!f->IsStatic());
-    return f;
-}
-
-static inline ani_static_field ToAniStaticField(EtsField *field)
-{
-    ASSERT(field != nullptr);
-    ASSERT(field->IsStatic());
-    return reinterpret_cast<ani_static_field>(field);
-}
-
-[[maybe_unused]] static inline EtsField *ToInternalField(ani_static_field field)
-{
-    auto *f = reinterpret_cast<EtsField *>(field);
-    ASSERT(f->IsStatic());
-    return f;
-}
-
-static inline ani_variable ToAniVariable(EtsVariable *variable)
-{
-    return reinterpret_cast<ani_variable>(variable);
-}
-
-static inline EtsVariable *ToInternalVariable(ani_variable variable)
-{
-    return reinterpret_cast<EtsVariable *>(variable);
-}
-
-static inline EtsMethod *ToInternalMethod(ani_method method)
-{
-    auto *m = reinterpret_cast<EtsMethod *>(method);
-    ASSERT(m != nullptr);
-    ASSERT(!m->IsStatic());
-    ASSERT(!m->IsFunction());
-    return m;
-}
-
-static inline ani_method ToAniMethod(EtsMethod *method)
-{
-    ASSERT(method != nullptr);
-    ASSERT(!method->IsStatic());
-    ASSERT(!method->IsFunction());
-    return reinterpret_cast<ani_method>(method);
-}
-
-static inline EtsMethod *ToInternalMethod(ani_static_method method)
-{
-    auto *m = reinterpret_cast<EtsMethod *>(method);
-    ASSERT(m != nullptr);
-    ASSERT(m->IsStatic());
-    ASSERT(!m->IsFunction());
-    return m;
-}
-
-static inline ani_static_method ToAniStaticMethod(EtsMethod *method)
-{
-    ASSERT(method != nullptr);
-    ASSERT(method->IsStatic());
-    ASSERT(!method->IsFunction());
-    return reinterpret_cast<ani_static_method>(method);
-}
-
-static inline EtsMethod *ToInternalFunction(ani_function fn)
-{
-    auto *m = reinterpret_cast<EtsMethod *>(fn);
-    ASSERT(m != nullptr);
-    ASSERT(m->IsStatic());
-    ASSERT(m->IsFunction());
-    return m;
-}
-
-static inline ani_function ToAniFunction(EtsMethod *method)
-{
-    ASSERT(method != nullptr);
-    ASSERT(method->IsStatic());
-    ASSERT(method->IsFunction());
-    return reinterpret_cast<ani_function>(method);
 }
 
 static void CheckStaticMethodReturnType(ani_static_method method, EtsType type)
@@ -822,30 +739,30 @@ static ani_status DoNewObject(ani_env *env, ani_class cls, ani_method method, an
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_New_A(ani_env *env, ani_class cls, ani_method method, ani_object *result,
+NO_UB_SANITIZE static ani_status Object_New_A(ani_env *env, ani_class cls, ani_method ctor, ani_object *result,
                                               const ani_value *args)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(cls);
-    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(ctor);
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    return DoNewObject(env, cls, method, result, args);
+    return DoNewObject(env, cls, ctor, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_New_V(ani_env *env, ani_class cls, ani_method method, ani_object *result,
+NO_UB_SANITIZE static ani_status Object_New_V(ani_env *env, ani_class cls, ani_method ctor, ani_object *result,
                                               va_list args)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
     CHECK_PTR_ARG(cls);
-    CHECK_PTR_ARG(method);
+    CHECK_PTR_ARG(ctor);
     CHECK_PTR_ARG(result);
 
-    return DoNewObject(env, cls, method, result, args);
+    return DoNewObject(env, cls, ctor, result, args);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -866,11 +783,11 @@ NO_UB_SANITIZE static ani_status Object_GetType(ani_env *env, ani_object object,
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Object_New(ani_env *env, ani_class cls, ani_method method, ani_object *result, ...)
+NO_UB_SANITIZE static ani_status Object_New(ani_env *env, ani_class cls, ani_method ctor, ani_object *result, ...)
 {
     va_list args;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(args, result);
-    ani_status status = Object_New_V(env, cls, method, result, args);
+    ani_status status = Object_New_V(env, cls, ctor, result, args);
     va_end(args);
     return status;
 }
@@ -2162,13 +2079,13 @@ NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(ani_env *env, ani
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Reference_Delete(ani_env *env, ani_ref ref)
+NO_UB_SANITIZE static ani_status Reference_Delete(ani_env *env, ani_ref lref)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);
 
     ScopedManagedCodeFix s(env);
-    return s.DelLocalRef(ref);
+    return s.DelLocalRef(lref);
 }
 
 template <typename T>
