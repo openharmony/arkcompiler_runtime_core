@@ -526,7 +526,6 @@
 07.expressions/06.spread_expression/spex_meth_45.ets
 
 #24408 Fails on spread expression with tuple, tuples in rest parameters not supported
-07.expressions/06.spread_expression/spex_func_46.ets
 07.expressions/06.spread_expression/spex_lmbd_32.ets
 07.expressions/06.spread_expression/spex_lmbd_33.ets
 07.expressions/06.spread_expression/spex_lmbd_34.ets
