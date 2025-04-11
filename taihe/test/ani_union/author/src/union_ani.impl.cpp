@@ -49,6 +49,7 @@ string printMyUnion(::union_ani::MyUnion const &data)
 
 ::union_ani::MyUnion makeMyUnion(string_view kind)
 {
+    const float testFloat = 123.0f;
     if (kind == "s") {
         return ::union_ani::MyUnion::make_innerValue(::union_ani::InnerUnion::make_stringValue("string"));
     }
@@ -57,11 +58,14 @@ string printMyUnion(::union_ani::MyUnion const &data)
         return ::union_ani::MyUnion::make_innerValue(::union_ani::InnerUnion::make_pairValue(pair));
     }
     if (kind == "f") {
-        return ::union_ani::MyUnion::make_floatValue(123);
+        return ::union_ani::MyUnion::make_floatValue(testFloat);
     }
     return ::union_ani::MyUnion::make_innerValue(::union_ani::InnerUnion::make_undefinedValue());
 }
 }  // namespace
 
+// because these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_printMyUnion(printMyUnion);
 TH_EXPORT_CPP_API_makeMyUnion(makeMyUnion);
+// NOLINTEND

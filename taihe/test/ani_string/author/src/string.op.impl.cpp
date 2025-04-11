@@ -137,6 +137,8 @@ string concatString2(string_view s, int32_t n, array_view<string> sArr, bool b, 
 }
 }  // namespace
 
+// because these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_concatString(concatString);
 TH_EXPORT_CPP_API_makeString(makeString);
 TH_EXPORT_CPP_API_split(split);
@@ -147,3 +149,4 @@ TH_EXPORT_CPP_API_makePlayStringIface(makePlayStringIface);
 TH_EXPORT_CPP_API_to_f32(to_f32);
 TH_EXPORT_CPP_API_from_f32(from_f32);
 TH_EXPORT_CPP_API_concatString2(concatString2);
+// NOLINTEND

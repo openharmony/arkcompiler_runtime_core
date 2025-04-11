@@ -536,8 +536,10 @@ map<string, array<string>> Mapfunc40()
 
 map<string, record_test::TypeUnion> Mapfunc41()
 {
+    int32_t const value = 123;
+
     map<string, record_test::TypeUnion> result;
-    result.emplace("key1", record_test::TypeUnion::make_a(123));
+    result.emplace("key1", record_test::TypeUnion::make_a(value));
     result.emplace("key2", record_test::TypeUnion::make_b(true));
     result.emplace("key3", record_test::TypeUnion::make_c("value"));
     return result;
@@ -683,6 +685,8 @@ map<string, map<string, string>> Mapfunc51(optional_view<map<string, string>> op
 
 }  // namespace
 
+// because these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_MakeCpu(MakeCpu);
 TH_EXPORT_CPP_API_GetCpuSize(GetCpuSize);
 TH_EXPORT_CPP_API_GetASize(GetASize);
@@ -744,3 +748,4 @@ TH_EXPORT_CPP_API_Mapfunc48(Mapfunc48);
 TH_EXPORT_CPP_API_Mapfunc49(Mapfunc49);
 TH_EXPORT_CPP_API_Mapfunc50(Mapfunc50);
 TH_EXPORT_CPP_API_Mapfunc51(Mapfunc51);
+// NOLINTEND
