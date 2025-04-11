@@ -14,8 +14,8 @@
  */
 
 import {
-	public_getter_class_value,
-	public_getter_override_class_value
+	PUBLIC_GETTER_CLASS_VALUE,
+	PUBLIC_GETTER_OVERRIDE_CLASS_VALUE
  } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
@@ -37,22 +37,22 @@ function checkCreatePublicGetterClassalueFromEts() {
 
 function checkPublicGetterClass() {
 	const GClass = new PublicGetterClass();
-	ASSERT_TRUE(GClass.value === public_getter_class_value);
+	ASSERT_TRUE(GClass.value === PUBLIC_GETTER_CLASS_VALUE);
 }
 
 function checkCreatePublicGetterClassFromEts() {
 	const GClass = createPublicGetterClassFromEts();
-	ASSERT_TRUE(GClass.value === public_getter_class_value);
+	ASSERT_TRUE(GClass.value === PUBLIC_GETTER_CLASS_VALUE);
 }
 
 function checkPublicGetterOverrideClass() {
 	const GClass = new PublicGetterOverrideClass();
-	ASSERT_TRUE(GClass.value === public_getter_override_class_value);
+	ASSERT_TRUE(GClass.value === PUBLIC_GETTER_OVERRIDE_CLASS_VALUE);
 }
 
 function checkCreatePublicGetterOverrideClassFromEts() {
 	const GClass = createPublicGetterOverrideClassFromEts();
-	ASSERT_TRUE(GClass.value === public_getter_override_class_value);
+	ASSERT_TRUE(GClass.value === PUBLIC_GETTER_OVERRIDE_CLASS_VALUE);
 }
 
 

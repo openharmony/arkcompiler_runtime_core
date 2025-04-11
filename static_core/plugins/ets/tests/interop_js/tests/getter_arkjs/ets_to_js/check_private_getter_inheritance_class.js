@@ -14,8 +14,8 @@
  */
 
 import {
-	private_getter_class_value,
-	private_getter_override_class_value
+	PRIVATE_GETTER_CLASS_VALUE,
+	PRIVATE_GETTER_OVERRIDE_CLASS_VALUE
 } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
@@ -37,22 +37,22 @@ function checkCreatePrivateGetterClassInheritanceFromalueEts() {
 
 function checkPrivateGetterClassInheritance() {
 	const GClass = new PrivateGetterInheritanceClass();
-	ASSERT_TRUE(GClass.value === private_getter_class_value);
+	ASSERT_TRUE(GClass.value === PRIVATE_GETTER_CLASS_VALUE);
 }
 
 function checkCreatePrivateetterClassInheritanceFromEts() {
 	const GClass = createPrivateGetterInheritanceClassFromEts();
-	ASSERT_TRUE(GClass.value === private_getter_class_value);
+	ASSERT_TRUE(GClass.value === PRIVATE_GETTER_CLASS_VALUE);
 }
 
 function checkPrivateGetterClassOverride() {
 	const GClass = new PrivateGetterOverrideClass();
-	ASSERT_TRUE(GClass.value === private_getter_override_class_value);
+	ASSERT_TRUE(GClass.value === PRIVATE_GETTER_OVERRIDE_CLASS_VALUE);
 }
 
 function checkCreatePrivateetterClassOverrideFromEts() {
 	const GClass = createPrivateGetterOverrideClassFromEts();
-	ASSERT_TRUE(GClass.value === private_getter_override_class_value);
+	ASSERT_TRUE(GClass.value === PRIVATE_GETTER_OVERRIDE_CLASS_VALUE);
 }
 
 checkPrivateGetterClassInheritancealue();

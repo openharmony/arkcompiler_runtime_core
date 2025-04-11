@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-function callback_ets_function_js(callback_handler: (x: number) => number): number {
+function callbackEtsFunctionJs(callback_handler: (x: number) => number): number {
     return callback_handler(0x55aa);
 }
 
-function main() {
+function main(): void {
     let etsVm = globalThis.gtest.etsVm;
 
     // emulate import
     let ets_global = etsVm.getClass('Lets_functions/ETSGLOBAL;');
-    ets_global.callback_ets_function_js = callback_ets_function_js;
+    ets_global.callback_ets_function_js = callbackEtsFunctionJs;
 
     let testCallBackEtsFunctionLambda = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'testCallBackEtsFunctionLambda');
     let call_back_res = testCallBackEtsFunctionLambda();
-    ASSERT_TRUE(call_back_res == 0x55ab);
+    ASSERT_TRUE(call_back_res === 0x55ab);
 
     let testCallBackEtsFunctionLambdaCapture = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'testCallBackEtsFunctionLambdaCapture');
     call_back_res = testCallBackEtsFunctionLambdaCapture();
-    ASSERT_TRUE(call_back_res == 0x55ab);
+    ASSERT_TRUE(call_back_res === 0x55ab);
 
     let testCallBackEtsFunctionOuter = etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'testCallBackEtsFunctionOuter');
     call_back_res = testCallBackEtsFunctionOuter();
-    ASSERT_TRUE(call_back_res == 0x55ab);
+    ASSERT_TRUE(call_back_res === 0x55ab);
 }
 
 main();

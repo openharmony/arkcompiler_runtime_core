@@ -189,8 +189,8 @@ private:
 
 TestGCListener TestModule::gcListener;
 
-}  // namespace ark::ets::interop::js
-
 NAPI_MODULE(TEST_MODULE, ark::ets::interop::js::TestModule::Init)
+
+}  // namespace ark::ets::interop::js
 
 #endif  // MARK_TEST_UTILS_H

@@ -16,17 +16,17 @@
 package getter.test;
 
 import {
-    public_getter_class_value,
-    public_getter_override_class_value,
-    protected_getter_class_value,
-    protected_getter_override_class_value,
-    private_getter_class_value,
-    private_getter_override_class_value,
-    public_static_getter_class_value
+    PUBLIC_GETTER_CLASS_VALUE,
+    PUBLIC_GETTER_OVERRIDE_CLASS_VALUE,
+    PROTECTED_GETTER_CLASS_VALUE,
+    PROTECTED_GETTER_OVERRIDE_CLASS_VALUE,
+    PRIVATE_GETTER_CLASS_VALUE,
+    PRIVATE_GETTER_OVERRIDE_CLASS_VALUE,
+    PUBLIC_STATIC_GETTER_CLASS_VALUE
 } from 'constant_js'
 
 class PublicGetterClass {
-    _value = public_getter_class_value;
+    _value = PUBLIC_GETTER_CLASS_VALUE;
 
     get value(): string {
         return this._value;
@@ -39,7 +39,7 @@ function create_public_getter_class_from_ets(): PublicGetterClass {
 
 class PublicGetterOverrideClass extends PublicGetterClass {
     public get value(): string {
-        return public_getter_override_class_value;
+        return PUBLIC_GETTER_OVERRIDE_CLASS_VALUE;
     }
 }
 
@@ -48,7 +48,7 @@ function create_public_getter_override_class_from_ets(): PublicGetterOverrideCla
 }
 
 class ProtectedGetterOrigenClass {
-    protected _value = protected_getter_class_value;
+    protected _value = PROTECTED_GETTER_CLASS_VALUE;
 
     public get value(): string {
         return this._value;
@@ -67,7 +67,7 @@ function create_protected_getter_inheritance_class_from_ets(): ProtectedGetterIn
 
 class ProtectedGetterOverrideClass extends ProtectedGetterOrigenClass {
     public get value(): string {
-        return protected_getter_override_class_value;
+        return PROTECTED_GETTER_OVERRIDE_CLASS_VALUE;
     }
 }
 
@@ -76,7 +76,7 @@ function create_protected_getter_override_class_from_ets(): ProtectedGetterOverr
 }
 
 class PrivateGetterClass {
-    private _value = private_getter_class_value;
+    private _value = PRIVATE_GETTER_CLASS_VALUE;
 
     public get value(): string {
         return this._value;
@@ -95,7 +95,7 @@ function create_private_getter_inheritance_class_from_ets(): PrivateGetterInheri
 
 class PrivateGetterOverrideClass extends PrivateGetterClass {
     public get value(): string {
-        return private_getter_override_class_value;
+        return PRIVATE_GETTER_OVERRIDE_CLASS_VALUE;
     }
 }
 

@@ -14,5 +14,8 @@
  */
 
 #include "test_module_ea_coro.h"
+namespace ark::ets::interop::js::testing {
 
 NAPI_MODULE(TEST_MODULE, ark::ets::interop::js::testing::TestModule::Init);
+
+}  // namespace ark::ets::interop::js::testing

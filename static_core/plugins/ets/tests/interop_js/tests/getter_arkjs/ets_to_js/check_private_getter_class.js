@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { private_getter_class_value } from './constant';
+import { PRIVATE_GETTER_CLASS_VALUE } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
 const PrivateGetterClass = etsVm.getClass('Lgetter/test/PrivateGetterClass;');
@@ -32,12 +32,12 @@ function checkCreatePrivateGetterClassalueFromEts() {
 
 function checkPrivateGetterClass() {
 	const GClass = new PrivateGetterClass();
-	ASSERT_TRUE(GClass.value === private_getter_class_value);
+	ASSERT_TRUE(GClass.value === PRIVATE_GETTER_CLASS_VALUE);
 }
 
 function checkCreatePrivateGetterlassFromEts() {
 	const GClass = createPrivateGetterClassFromEts();
-	ASSERT_TRUE(GClass.value === private_getter_class_value);
+	ASSERT_TRUE(GClass.value === PRIVATE_GETTER_CLASS_VALUE);
 }
 
 checkrPivateGetterClassalue();

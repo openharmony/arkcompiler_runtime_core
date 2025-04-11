@@ -43,157 +43,157 @@ const getNullPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getNullPrimitive');
 const getUndefinedPrimitive = etsVm.getFunction('LETSGLOBAL;', 'getUndefinedPrimitive');
 
 
-function testGetBooleanPrimitive() {
+function testGetBooleanPrimitive(): void {
     let val = getBooleanPrimitive();
     ASSERT_TRUE(typeof val === 'boolean');
     ASSERT_TRUE(val === true);
 }
 
-function testGetBooleanBoxed() {
+function testGetBooleanBoxed(): void {
     let val = getBooleanBoxed();
     ASSERT_TRUE(typeof val === 'boolean');
     ASSERT_TRUE(val === true);
 }
 
-function testGetBytePrimitive() {
+function testGetBytePrimitive(): void {
     let val = getBytePrimitive();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetByteBoxed() {
+function testGetByteBoxed(): void {
     let val = getByteBoxed();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetShortPrimitive() {
+function testGetShortPrimitive(): void {
     let val = getShortPrimitive();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetShortBoxed() {
+function testGetShortBoxed(): void {
     let val = getShortBoxed();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetIntPrimitive() {
+function testGetIntPrimitive(): void {
     let val = getIntPrimitive();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetIntBoxed() {
+function testGetIntBoxed(): void {
     let val = getIntBoxed();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetLongPrimitive() {
+function testGetLongPrimitive(): void {
     let val = getLongPrimitive();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetLongBoxed() {
+function testGetLongBoxed(): void {
     let val = getLongBoxed();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetFloatPrimitive() {
+function testGetFloatPrimitive(): void {
     let val = getFloatPrimitive();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetFloatBoxed() {
+function testGetFloatBoxed(): void {
     let val = getFloatBoxed();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetNumberPrimitive() {
+function testGetNumberPrimitive(): void {
     let val = getNumberPrimitive();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetNumberBoxed() {
+function testGetNumberBoxed(): void {
     let val = getNumberBoxed();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetDoublePrimitive() {
+function testGetDoublePrimitive(): void {
     let val = getDoublePrimitive();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetDoubleBoxed() {
+function testGetDoubleBoxed(): void {
     let val = getDoubleBoxed();
     ASSERT_TRUE(typeof val === 'number');
     ASSERT_TRUE(val === 1);
 }
 
-function testGetStringPrimitive() {
+function testGetStringPrimitive(): void {
     let val = getStringPrimitive();
     ASSERT_TRUE(typeof val === 'string');
     ASSERT_TRUE(val === '1');
 }
 
-function testGetStringBoxed() {
+function testGetStringBoxed(): void {
     let val = getStringBoxed();
     ASSERT_TRUE(typeof val === 'string');
     ASSERT_TRUE(val === '1');
 }
 
-function testGetCharPrimitive() {
+function testGetCharPrimitive(): void {
     let val = getCharPrimitive();
     ASSERT_TRUE(typeof val === 'string');
     ASSERT_TRUE(val === '1');
 }
 
-function testGetCharPrimitiveNumber() {
+function testGetCharPrimitiveNumber(): void {
     let val = getCharPrimitiveNumber();
     ASSERT_TRUE(typeof val === 'string');
     ASSERT_TRUE(val === '1');
 }
 
-function testGetCharBoxed() {
+function testGetCharBoxed(): void {
     let val = getCharBoxed();
     ASSERT_TRUE(typeof val === 'string');
     ASSERT_TRUE(val === '1');
 }
 
-function testGetCharBoxedNumber() {
+function testGetCharBoxedNumber(): void {
     let val = getCharBoxedNumber();
     ASSERT_TRUE(typeof val === 'string');
     ASSERT_TRUE(val === '1');
 }
 
-function testGetBigIntPrimitive() {
+function testGetBigIntPrimitive(): void {
     let val = getBigIntPrimitive();
     ASSERT_TRUE(typeof val === 'bigint');
     ASSERT_TRUE(val === 1n);
 }
 
-function testGetBigIntBoxed() {
+function testGetBigIntBoxed(): void {
     let val = getBigIntBoxed();
     ASSERT_TRUE(typeof val === 'bigint');
     ASSERT_TRUE(val === 1n);
 }
 
-function testGetNullPrimitive() {
+function testGetNullPrimitive(): void {
     let val = getNullPrimitive();
     ASSERT_TRUE(typeof val === 'object');
     ASSERT_TRUE(val === null);
 }
 
-function testGetUndefinedPrimitive() {
+function testGetUndefinedPrimitive(): void {
     let val = getUndefinedPrimitive();
     ASSERT_TRUE(typeof val === 'undefined');
     ASSERT_TRUE(val === undefined);
