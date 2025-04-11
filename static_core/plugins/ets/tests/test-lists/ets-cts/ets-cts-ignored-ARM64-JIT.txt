@@ -1,3 +1,6 @@
+#24930 ABORT_FAIL
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
+
 #24304 ABORT_FAIL
 20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_0.ets
 20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_1.ets
