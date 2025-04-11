@@ -1083,7 +1083,7 @@ export class JSONParser {
                     throw new SyntaxError("Bad escape sequence \\" + this.curChar + " at " + this.getCurPosDescr())
                 }
             }
-            hasMetEscape = this.curChar == c'\\'
+            hasMetEscape = hasMetEscape ? false : this.curChar == c'\\'
         }
         if (this.curChar == JSONString.END_CHAR) {
             res.value = resBuilder.toString()
