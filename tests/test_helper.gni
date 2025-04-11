@@ -14,7 +14,7 @@
 import("//arkcompiler/runtime_core/ark_root.gni")
 import("$build_root/test.gni")
 
-module_output_path = "arkcompiler/runtime_core"
+module_output_path = "runtime_core/runtime_core"
 
 template("host_unittest_action") {
   _target_name_ = "${target_name}"
