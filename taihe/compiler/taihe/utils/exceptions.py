@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -161,7 +163,6 @@ class TypeUsageError(DiagError):
 
     def __init__(self, ty_ref: "TypeRefDecl"):
         super().__init__(loc=ty_ref.loc)
-        assert ty_ref.maybe_resolved_ty
         self.ty = ty_ref.maybe_resolved_ty
 
     @property
@@ -186,7 +187,6 @@ class EnumValueError(DiagError):
         if self.enum.ty_ref is None:
             type_repr = "empty"
         else:
-            assert self.enum.ty_ref.maybe_resolved_ty
             type_repr = self.enum.ty_ref.maybe_resolved_ty.representation
         return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({type_repr})"
 

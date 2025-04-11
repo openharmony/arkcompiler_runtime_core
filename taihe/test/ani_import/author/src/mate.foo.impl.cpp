@@ -38,7 +38,9 @@ void testPura(::pura::PuraType pura)
     TH_THROW(std::runtime_error, "testPura not implemented");
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_testMate(testMate);
 TH_EXPORT_CPP_API_testNova(testNova);
 TH_EXPORT_CPP_API_testPura(testPura);
+// NOLINTEND

@@ -21,19 +21,20 @@
 
 using namespace taihe;
 
+namespace {
 std::string dataAsString(array_view<uint8_t> data)
 {
     std::string res;
+    int tempnum = 16;
     for (int i = 0; i < data.size(); i++) {
         uint8_t c = static_cast<uint8_t>(data[i]);
         static constexpr char const *const TEST_STR = "0123456789abcdef";
-        res += TEST_STR[data[i] / 16];
-        res += TEST_STR[data[i] % 16];
+        res += TEST_STR[data[i] / tempnum];
+        res += TEST_STR[data[i] % tempnum];
     }
     return res;
 }
 
-namespace {
 ::huks::HuksResult generateKey(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     std::cout << "keyAlias: " << keyAlias << std::endl;
@@ -204,7 +205,8 @@ string getSdkVersion(::huks::HuksOptions const &options)
     throw std::runtime_error("Function listAliases Not implemented");
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_generateKey(generateKey);
 TH_EXPORT_CPP_API_generateKeyItem(generateKeyItem);
 TH_EXPORT_CPP_API_deleteKey(deleteKey);
@@ -231,3 +233,4 @@ TH_EXPORT_CPP_API_attestKeyItem(attestKeyItem);
 TH_EXPORT_CPP_API_anonAttestKeyItem(anonAttestKeyItem);
 TH_EXPORT_CPP_API_getSdkVersion(getSdkVersion);
 TH_EXPORT_CPP_API_listAliases(listAliases);
+// NOLINTEND

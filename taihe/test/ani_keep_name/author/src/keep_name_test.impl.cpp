@@ -85,7 +85,9 @@ string PrintFooName(::keep_name_test::weak::Foo foo)
 }
 
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_GetFooIface(GetFooIface);
 TH_EXPORT_CPP_API_PrintFooName(PrintFooName);
 TH_EXPORT_CPP_API_GetIBase(GetIBase);
+// NOLINTEND

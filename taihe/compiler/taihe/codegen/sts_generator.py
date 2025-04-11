@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -365,7 +367,6 @@ class STSCodeGenerator:
         parents = []
         for parent in struct_ani_info.sts_parents:
             parent_ty = parent.ty_ref.resolved_ty
-            assert isinstance(parent_ty, StructType)
             parent_ani_info = StructANIInfo.get(self.am, parent_ty.ty_decl)
             parents.append(parent_ani_info.sts_type_name)
         extends_str = " extends " + ", ".join(parents) if parents else ""
@@ -393,7 +394,6 @@ class STSCodeGenerator:
             parents = []
             for parent in struct_ani_info.sts_parents:
                 parent_ty = parent.ty_ref.resolved_ty
-                assert isinstance(parent_ty, StructType)
                 parent_ani_info = StructANIInfo.get(self.am, parent_ty.ty_decl)
                 parents.append(parent_ani_info.sts_type_name)
             implements_str = " implements " + ", ".join(parents) if parents else ""
@@ -448,7 +448,6 @@ class STSCodeGenerator:
         parents = []
         for parent in iface.parents:
             ty = parent.ty_ref.resolved_ty
-            assert isinstance(ty, IfaceType)
             parent_ani_info = IfaceANIInfo.get(self.am, ty.ty_decl)
             parents.append(parent_ani_info.sts_type_name)
         extends_str = " extends " + ", ".join(parents) if parents else ""
@@ -554,7 +553,6 @@ class STSCodeGenerator:
             parents = []
             for parent in iface.parents:
                 ty = parent.ty_ref.resolved_ty
-                assert isinstance(ty, IfaceType)
                 parent_ani_info = IfaceANIInfo.get(self.am, ty.ty_decl)
                 parents.append(parent_ani_info.sts_type_name)
             implements_str = " implements " + ", ".join(parents) if parents else ""

@@ -17,13 +17,15 @@
 
 #include "taihe/runtime.hpp"
 
+namespace {
 int32_t maythrow_impl(int32_t a)
 {
     if (a == 0) {
         taihe::set_error("some error happen");
         return -1;
     } else {
-        return a + 10;
+        int tempnum = 10;
+        return a + tempnum;
     }
 }
 
@@ -44,10 +46,14 @@ void noReturnMaythrow()
 
 void noReturnBusinessError()
 {
-    taihe::set_business_error(5, "error in noReturnBusinessError");
+    int errorcode = 5;
+    taihe::set_business_error(errorcode, "error in noReturnBusinessError");
 }
-
+}  // namespace
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_maythrow(maythrow_impl);
 TH_EXPORT_CPP_API_getDataMaythrow(getDataMaythrow);
 TH_EXPORT_CPP_API_noReturnMaythrow(noReturnMaythrow);
 TH_EXPORT_CPP_API_noReturnBusinessError(noReturnBusinessError);
+// NOLINTEND

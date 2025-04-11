@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -127,7 +129,6 @@ class DeclWithParent(Decl, Generic[T], metaclass=ABCMeta):
     @property
     @override
     def parent_pkg(self) -> "PackageDecl":
-        assert self.node_parent
         return self.node_parent.parent_pkg
 
 
@@ -140,7 +141,6 @@ class NamedDeclWithParent(NamedDecl, Generic[T], metaclass=ABCMeta):
     @property
     @override
     def parent_pkg(self) -> "PackageDecl":
-        assert self.node_parent
         return self.node_parent.parent_pkg
 
 
@@ -170,7 +170,6 @@ class TypeRefDecl(DeclWithParent[Decl], metaclass=ABCMeta):
 
     @property
     def resolved_ty(self):
-        assert self.maybe_resolved_ty
         return self.maybe_resolved_ty
 
     def __init__(
@@ -333,7 +332,6 @@ class PackageRefDecl(DeclWithParent[Decl]):
 
     @property
     def resolved_pkg(self):
-        assert self.maybe_resolved_pkg
         return self.maybe_resolved_pkg
 
     def __init__(
@@ -364,7 +362,6 @@ class DeclarationRefDecl(DeclWithParent[Decl]):
 
     @property
     def resolved_decl(self):
-        assert self.maybe_resolved_decl
         return self.maybe_resolved_decl
 
     def __init__(
@@ -507,7 +504,6 @@ class EnumItemDecl(NamedDeclWithParent["EnumDecl"]):
 
     @property
     def parent_enum(self) -> "EnumDecl":
-        assert self.node_parent
         return self.node_parent
 
 
@@ -537,7 +533,6 @@ class UnionFieldDecl(NamedDeclWithParent["UnionDecl"]):
 
     @property
     def parent_union(self) -> "UnionDecl":
-        assert self.node_parent
         return self.node_parent
 
 
@@ -565,7 +560,6 @@ class StructFieldDecl(NamedDeclWithParent["StructDecl"]):
 
     @property
     def parent_struct(self) -> "StructDecl":
-        assert self.node_parent
         return self.node_parent
 
 
@@ -592,7 +586,6 @@ class IfaceParentDecl(DeclWithParent["IfaceDecl"]):
 
     @property
     def parent_iface(self) -> "IfaceDecl":
-        assert self.node_parent
         return self.node_parent
 
 
@@ -628,7 +621,6 @@ class IfaceMethodDecl(NamedDeclWithParent["IfaceDecl"]):
 
     @property
     def parent_iface(self) -> "IfaceDecl":
-        assert self.node_parent
         return self.node_parent
 
 

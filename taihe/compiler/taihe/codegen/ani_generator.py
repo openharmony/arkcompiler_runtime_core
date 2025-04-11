@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,7 +100,6 @@ class ANIType:
 
     @property
     def array(self) -> "ANIArrayType":
-        assert self.base.inner_array
         return self.base.inner_array
 
 
@@ -265,9 +266,8 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
             (self.sts_func_name,) = overload_attr.args
 
         elif on_off_attr := f.get_attr_item("on_off"):
-            assert f.name.startswith(
-                ("on", "off", "On", "Off")
-            ), f'{f.loc}: @on_off method name must start with "on" or "off"'
+            if not f.name.startswith(("on", "off", "On", "Off")):
+                raise ValueError(f'{f.loc}: @on_off method name must start with "on" or "off"')
 
             if f.name.startswith(("on", "On")):
                 if not on_off_attr.args:
@@ -286,32 +286,36 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
                 self.on_off_type = ("off", type_name)
 
         elif get_attr := f.get_attr_item("get"):
-            assert len(f.params) == 0, f"{f.loc}: @get method should take no parameters"
-            assert f.return_ty_ref, f"{f.loc}: @get method cannot return void"
-            assert (
-                self.sts_static_scope
-            ), f"{f.loc}: @get of global functions must be used together with @static"
+            if len(f.params) != 0:
+                raise ValueError(f"{f.loc}: @get method should take no parameters")
+
+            if not f.return_ty_ref:
+                raise ValueError(f"{f.loc}: @get method cannot return void")
+
+            if not self.sts_static_scope:
+                raise ValueError(f"{f.loc}: @get of global functions must be used together with @static")
 
             if not get_attr.args:
-                assert f.name.startswith(
-                    ("get", "Get")
-                ), f'{f.loc}: @get method name must start with "get" if the property name is omitted'
+                if not f.name.startswith(("get", "Get")):
+                    raise ValueError(f'{f.loc}: @get method name must start with "get" if property name is omitted')
                 get_name = f.name[3:]
                 self.get_name = get_name[0].lower() + get_name[1:]
             else:
                 (self.get_name,) = get_attr.args
 
         elif set_attr := f.get_attr_item("set"):
-            assert len(f.params) == 1, f"{f.loc}: @set method should have one parameter"
-            assert f.return_ty_ref is None, f"{f.loc}: @set method should return void"
-            assert (
-                self.sts_static_scope
-            ), f"{f.loc}: @set of global functions must be used together with @static"
+            if len(f.params) != 1:
+                raise ValueError(f"{f.loc}: @set method should have one parameter")
+
+            if f.return_ty_ref is not None:
+                raise ValueError(f"{f.loc}: @set method should return void")
+
+            if not self.sts_static_scope:
+                raise ValueError(f"{f.loc}: @set of global functions must be used together with @static")
 
             if not set_attr.args:
-                assert f.name.startswith(
-                    ("set", "Set")
-                ), f'{f.loc}: @set method name must start with "set" if the property name is omitted'
+                if not f.name.startswith(("set", "Set")):
+                    raise ValueError(f'{f.loc}: @set method name must start with "set" if the property name is omitted')
                 set_name = f.name[3:]
                 self.set_name = set_name[0].lower() + set_name[1:]
             else:
@@ -361,9 +365,8 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
             (self.ani_method_name,) = overload_attr.args
 
         elif on_off_attr := f.get_attr_item("on_off"):
-            assert f.name.startswith(
-                ("on", "off", "On", "Off")
-            ), f'{f.loc}: @on_off method name must start with "on" or "off"'
+            if not f.name.startswith(("on", "off", "On", "Off")):
+                raise ValueError(f'{f.loc}: @on_off method name must start with "on" or "off"')
 
             if f.name.startswith(("on", "On")):
                 if not on_off_attr.args:
@@ -384,13 +387,15 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
                 self.ani_method_name = "off"
 
         elif get_attr := f.get_attr_item("get"):
-            assert len(f.params) == 0, f"{f.loc}: @get method should take no parameters"
-            assert f.return_ty_ref, f"{f.loc}: @get method cannot return void"
+            if len(f.params) != 0:
+                raise ValueError(f"{f.loc}: @get method should take no parameters")
+
+            if not f.return_ty_ref:
+                raise ValueError(f"{f.loc}: @get method cannot return void")
 
             if not get_attr.args:
-                assert f.name.startswith(
-                    ("get", "Get")
-                ), f'{f.loc}: @get method name must start with "get" if the property name is omitted'
+                if not f.name.startswith(("get", "Get")):
+                    raise ValueError(f'{f.loc}: @get method name must start with "get" if the property name is omitted')
                 get_name = f.name[3:]
                 self.get_name = get_name[0].lower() + get_name[1:]
             else:
@@ -398,13 +403,15 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
             self.ani_method_name = f"<get>{self.get_name}"
 
         elif set_attr := f.get_attr_item("set"):
-            assert len(f.params) == 1, f"{f.loc}: @set method should have one parameter"
-            assert f.return_ty_ref is None, f"{f.loc}: @set method should return void"
+            if len(f.params) != 1:
+                raise ValueError(f"{f.loc}: @set method should have one parameter")
+
+            if f.return_ty_ref is not None:
+                raise ValueError(f"{f.loc}: @set method should return void")
 
             if not set_attr.args:
-                assert f.name.startswith(
-                    ("set", "Set")
-                ), f'{f.loc}: @set method name must start with "set" if the property name is omitted'
+                if not f.name.startswith(("set", "Set")):
+                    raise ValueError(f'{f.loc}: @set method name must start with "set" if the property name is omitted')
                 set_name = f.name[3:]
                 self.set_name = set_name[0].lower() + set_name[1:]
             else:
@@ -511,13 +518,11 @@ class StructANIInfo(AbstractAnalysis[StructDecl]):
         for field in d.fields:
             if field.get_attr_item("extends"):
                 ty = field.ty_ref.resolved_ty
-                assert isinstance(
-                    ty, StructType
-                ), f"{field.loc}: @extends expects a struct type field"
+                if not isinstance(ty, StructType):
+                    raise ValueError(f"{field.loc}: @extends expects a struct type field")
                 parent_ani_info = StructANIInfo.get(am, ty.ty_decl)
-                assert (
-                    not parent_ani_info.is_class()
-                ), f"{field.loc}: cannot extend an @class struct"
+                if parent_ani_info.is_class():
+                    raise ValueError(f"{field.loc}: cannot extend an @class struct")
                 self.sts_parents.append(field)
                 self.sts_final_fields.extend(
                     [field, *parts] for parts in parent_ani_info.sts_final_fields
@@ -562,11 +567,9 @@ class IfaceANIInfo(AbstractAnalysis[IfaceDecl]):
 
         for parent in d.parents:
             ty = parent.ty_ref.resolved_ty
-            assert isinstance(ty, IfaceType)
             parent_ani_info = IfaceANIInfo.get(am, ty.ty_decl)
-            assert (
-                not parent_ani_info.is_class()
-            ), f"{parent.loc}: cannot extend an @class interface"
+            if parent_ani_info.is_class():
+                raise ValueError(f"{parent.loc}: cannot extend an @class interface")
 
     def is_class(self):
         return self.sts_type_name == self.sts_impl_name
@@ -1187,7 +1190,6 @@ class TypedArrayTypeANIInfo(
 ):
     def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: ArrayType):
         super().__init__(am, pkg, t)
-        assert isinstance(t.item_ty, ScalarType)
         sts_type = {
             F32: "Float32Array",
             F64: "Float64Array",
