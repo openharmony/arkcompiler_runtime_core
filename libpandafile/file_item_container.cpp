@@ -185,12 +185,23 @@ ForeignClassItem *ItemContainer::GetOrCreateForeignClassItem(const std::string &
 
 StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
 {
-    auto it = class_map_.find(str);
-    if (it != class_map_.cend()) {
-        return it->second->GetNameItem();
-    }
-
     return GetOrInsert<StringItem>(string_map_, items_, items_end_, str, false, str, this);
+}
+
+StringItem *ItemContainer::GetStringItem(const std::string &str) const
+{
+    auto it1 = string_map_.find(str);
+    if (it1 != string_map_.cend()) {
+        auto *item = it1->second;
+        if (item->IsForeign() == false) {
+            return static_cast<StringItem *>(item);
+        }
+
+        UNREACHABLE();
+        return nullptr;
+    }
+    UNREACHABLE();
+    return nullptr;
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
