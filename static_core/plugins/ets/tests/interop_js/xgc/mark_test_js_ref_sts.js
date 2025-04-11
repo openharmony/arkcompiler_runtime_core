@@ -14,15 +14,15 @@
  */
 const { init, triggerXGC, checkXRefsNumber, validationXGCResult } = require('./mark_test_utils.js');
 
-let g_obj = Promise.resolve();
-let g_inlineObj = Promise.resolve();
-let g_etsVm;
+let gObj = Promise.resolve();
+let gInlineObj = Promise.resolve();
+let gEtsVm;
 
 // clear the cross-reference objects that are referenced by the active objects
 function clearActiveRef() {
-    g_obj = Promise.resolve();
-    g_inlineObj = Promise.resolve();
-    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    gObj = Promise.resolve();
+    gInlineObj = Promise.resolve();
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -40,10 +40,10 @@ function clearRefStorage() {
 function createJsObject(isRootRef1, isRootRef2) {
     let obj = Promise.resolve();
     if (isRootRef1) {
-        g_obj.ref = obj;
+        gObj.ref = obj;
     }
     if (isRootRef2) {
-        obj.ref = g_inlineObj;
+        obj.ref = gInlineObj;
     }
     return obj;
 }
@@ -58,11 +58,11 @@ function createJsObject(isRootRef1, isRootRef2) {
  */
 function proxyStsObjectTest(isRootRef1, isRootRef2, isRootRef3, isRootRef4) {
     let obj = createJsObject(isRootRef1, isRootRef2);
-    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
     obj.p = createStsObject(isRootRef3, isRootRef4);
 }
 
-g_etsVm = init('mark_test_js_ref_sts_module', 'xgc_tests.abc');
+gEtsVm = init('mark_test_js_ref_sts_module', 'xgc_tests.abc');
 
 proxyStsObjectTest(false, false, false, false);
 validationXGCResult(0, 1, 0, 0);

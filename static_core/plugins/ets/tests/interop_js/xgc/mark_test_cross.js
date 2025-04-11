@@ -14,9 +14,9 @@
  */
 const { init, triggerXGC, checkXRefsNumber, validationXGCResult } = require('./mark_test_utils.js');
 
-let g_obj = Promise.resolve();
-let g_redundantNum = 0;
-let g_etsVm;
+let gObj = Promise.resolve();
+let gRedundantNum = 0;
+let gEtsVm;
 
 class Result {
     constructor() {
@@ -51,8 +51,8 @@ class Result {
 }
 
 function clearActiveRef() {
-    g_obj = Promise.resolve();
-    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    gObj = Promise.resolve();
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -80,9 +80,9 @@ function createRecursiveJsObject(num) {
  * js obj -> js pobj -> sts obj -> sts pobj -> js obj
  */
 function createCrossRefNode(obj, isRootRef2) {
-    let res = createRecursiveJsObject(g_redundantNum);
-    const proxyJsObjectWithReturnValue = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
-    obj.ref = proxyJsObjectWithReturnValue(res.headJsObj, g_redundantNum, isRootRef2, false);
+    let res = createRecursiveJsObject(gRedundantNum);
+    const proxyJsObjectWithReturnValue = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
+    obj.ref = proxyJsObjectWithReturnValue(res.headJsObj, gRedundantNum, isRootRef2, false);
     return res.tailJsObj;
 }
 
@@ -103,7 +103,7 @@ function createCrossRef(crossNum, isRootRef1, isRootRef2) {
     }
     let head = Promise.resolve();
     if (isRootRef1) {
-        g_obj.ref = head;
+        gObj.ref = head;
     }
     let temp = head;
     for (let i = 0; i < crossNum; i++) {
@@ -158,7 +158,7 @@ function createCrossRefTest2(num, isRootRef1, isRootRef2) {
 }
 
 // Initialize the runtime
-g_etsVm = init('mark_test_cross_module', 'xgc_tests.abc');
+gEtsVm = init('mark_test_cross_module', 'xgc_tests.abc');
 
 let res = createCrossRefTest1(10, false, false);
 validationXGCResult(res.beforeJsNum, res.beforeStsNum, res.afterJsNum, res.afterStsNum);
