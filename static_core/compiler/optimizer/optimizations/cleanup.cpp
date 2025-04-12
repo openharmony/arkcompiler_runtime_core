@@ -27,8 +27,9 @@ namespace ark::compiler {
 
 bool Cleanup::CanBeMerged(BasicBlock *bb)
 {
-    // TryCatchResolving for JIT mode needs separate CatchBegin with CatchPhis blocks
-    if (!GetGraph()->IsBytecodeOptimizer() && !GetGraph()->IsAotMode() && bb->IsCatchBegin()) {
+    // TryCatchResolving with profile data needs separate CatchBegin with CatchPhis blocks
+    if (!GetGraph()->IsBytecodeOptimizer() &&
+        (!GetGraph()->IsAotMode() || GetGraph()->GetAotData()->HasProfileData()) && bb->IsCatchBegin()) {
         return false;
     }
     return bb->GetSuccsBlocks().size() == 1 && bb->GetSuccessor(0)->GetPredsBlocks().size() == 1 &&

@@ -24,7 +24,7 @@
 //! INST         "DeoptimizeIf"
 
 //! CHECKER      Try Catch Resolving AOT IfImm is not replaced by DeoptimizeIf
-//! SKIP_IF       @architecture == "arm32"
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex=ets_try_catch15.ETSGLOBAL::__noinline__test"
 //! METHOD       "ets_try_catch15.ETSGLOBAL::__noinline__test"
 //! PASS_AFTER   "Inline"
@@ -32,6 +32,17 @@
 //! PASS_AFTER   "TryCatchResolving"
 //! INST         "Throw"
 //! INST_NOT     "DeoptimizeIf"
+
+//! CHECKER      Try Catch Resolving AOT+PGO both IfImms are replaced by DeoptimizeIf because first stmt in try-block is SaveState (SaveState+LoadAndInitClass is not optimized into LoadImmediate)
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PGO_PROF entry: "ets_try_catch15.ETSGLOBAL::main"
+//! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch15.ETSGLOBAL::__noinline__test"
+//! METHOD       "ets_try_catch15.ETSGLOBAL::__noinline__test"
+//! PASS_AFTER   "Inline"
+//! INST_COUNT   "Throw", 2
+//! PASS_AFTER   "TryCatchResolving"
+//! INST_NOT     "Throw"
+//! INST         "DeoptimizeIf"
 
 class Ex extends Exception {}
 let ex: Ex = new Ex()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,6 +118,16 @@ public:
         return *intfInlineCacheIndex_;
     }
 
+    bool HasProfileData() const
+    {
+        return hasProfileData_;
+    }
+
+    void SetHasProfileData(bool hasProfileData)
+    {
+        hasProfileData_ = hasProfileData;
+    }
+
 private:
     inline int32_t GetSlotId() const;
 
@@ -133,6 +143,7 @@ private:
     std::map<std::pair<const File *, uint64_t>, int32_t> *gotIntfInlineCache_;
     std::map<std::pair<const File *, uint64_t>, int32_t> *gotCommon_;
     bool useCha_ {false};
+    bool hasProfileData_ {false};
 };
 }  // namespace ark::compiler
 
