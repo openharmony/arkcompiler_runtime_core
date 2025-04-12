@@ -30,36 +30,45 @@ TEST_F(ObjectGetFieldByNameRefTest, get_field)
 {
     ani_object animal = NewAnimal();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetFieldByName_Ref(animal, "name", &nameRef), ANI_OK);
 
     auto name = static_cast<ani_string>(nameRef);
     std::array<char, 6U> buffer {};
-    ani_size nameSize;
+    ani_size nameSize = 0;
     ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, 3U, buffer.data(), buffer.size(), &nameSize), ANI_OK);
     ASSERT_EQ(nameSize, 3U);
     ASSERT_STREQ(buffer.data(), "Cat");
+}
+
+TEST_F(ObjectGetFieldByNameRefTest, invalid_env)
+{
+    ani_object animal = NewAnimal();
+
+    ani_ref nameRef {};
+    ASSERT_EQ(env_->c_api->Object_GetFieldByName_Ref(nullptr, animal, "name", &nameRef), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectGetFieldByNameRefTest, not_found)
 {
     ani_object animal = NewAnimal();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetFieldByName_Ref(animal, "x", &nameRef), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetFieldByName_Ref(animal, "", &nameRef), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetFieldByNameRefTest, invalid_type)
 {
     ani_object animal = NewAnimal();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetFieldByName_Ref(animal, "age", &nameRef), ANI_INVALID_TYPE);
 }
 
 TEST_F(ObjectGetFieldByNameRefTest, invalid_object)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetFieldByName_Ref(nullptr, "x", &nameRef), ANI_INVALID_ARGS);
 }
 
@@ -67,7 +76,7 @@ TEST_F(ObjectGetFieldByNameRefTest, invalid_name)
 {
     ani_object animal = NewAnimal();
 
-    ani_ref nameRef;
+    ani_ref nameRef {};
     ASSERT_EQ(env_->Object_GetFieldByName_Ref(animal, nullptr, &nameRef), ANI_INVALID_ARGS);
 }
 

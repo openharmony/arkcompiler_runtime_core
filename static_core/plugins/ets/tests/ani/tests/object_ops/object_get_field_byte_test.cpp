@@ -51,6 +51,17 @@ TEST_F(ObjectGetFieldByteTest, get_field_byte)
     ASSERT_EQ(age, 24L);
 }
 
+TEST_F(ObjectGetFieldByteTest, get_field_byte_invalid_env)
+{
+    ani_object sarah {};
+    ani_field field {};
+    ani_field fieldAge {};
+    GetTestData(&sarah, &field, &fieldAge);
+
+    ani_byte age {};
+    ASSERT_EQ(env_->c_api->Object_GetField_Byte(nullptr, sarah, fieldAge, &age), ANI_INVALID_ARGS);
+}
+
 TEST_F(ObjectGetFieldByteTest, get_field_byte_invalid_field_type)
 {
     ani_object sarah {};

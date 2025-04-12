@@ -38,30 +38,82 @@ public:
     }
 };
 
+TEST_F(ObjectSetPropertyByNameShortTest, set_field)
+{
+    ani_object car = NewCar();
+
+    ani_short highPerformance = 0U;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, 0U);
+
+    const ani_short value = 0;
+    const ani_short value1 = 1;
+    ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "highPerformance", value), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "highPerformance", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value);
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "ecoFriendly", value1), ANI_OK);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "ecoFriendly", &highPerformance), ANI_OK);
+    ASSERT_EQ(highPerformance, value1);
+}
+
 TEST_F(ObjectSetPropertyByNameShortTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_short highPerformance;
+    ani_short highPerformance = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "highPerformance", &highPerformance), ANI_OK);
     ASSERT_EQ(highPerformance, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "highPerformance", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "highPerformance", &highPerformance), ANI_OK);
-    ASSERT_EQ(highPerformance, 1U);
+    const int32_t loopCount = 3;
+    const ani_short value = -32768;
+    const ani_short value1 = 32767;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "highPerformance", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "highPerformance", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, value1);
+    }
 }
 
 TEST_F(ObjectSetPropertyByNameShortTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_short ecoFriendly;
+    ani_short ecoFriendly = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "ecoFriendly", &ecoFriendly), ANI_OK);
     ASSERT_EQ(ecoFriendly, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "ecoFriendly", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    ASSERT_EQ(ecoFriendly, 1U);
+    const int32_t loopCount = 3;
+    const ani_short value = -32768;
+    const ani_short value1 = 32767;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "ecoFriendly", value), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value);
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "ecoFriendly", value1), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Short(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, value1);
+    }
+}
+
+TEST_F(ObjectSetPropertyByNameShortTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Short(nullptr, car, "ecoFriendly", 1U), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectSetPropertyByNameShortTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "ecoFriendlyA", 1U), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Short(car, "", 1U), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetPropertyByNameShortTest, invalid_argument)
@@ -90,7 +142,7 @@ TEST_F(ObjectSetPropertyByNameShortTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_short prop;
+    ani_short prop = 0U;
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(c1, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);
 
@@ -103,7 +155,7 @@ TEST_F(ObjectSetPropertyByNameShortTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_short prop;
+    ani_short prop = 0U;
     ASSERT_EQ(env_->Object_SetPropertyByName_Short(c2, "prop", 0U), ANI_OK);
     ASSERT_EQ(env_->Object_GetPropertyByName_Short(c2, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);

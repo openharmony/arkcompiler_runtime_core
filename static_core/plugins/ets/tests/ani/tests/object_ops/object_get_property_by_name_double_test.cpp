@@ -30,7 +30,7 @@ TEST_F(ObjectGetPropertyByNameDoubleTest, get_field_property)
 {
     ani_object car = NewCar();
 
-    ani_double length;
+    ani_double length = 0.0;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "length", &length), ANI_OK);
     ASSERT_EQ(length, 4275.0F);
 }
@@ -39,16 +39,33 @@ TEST_F(ObjectGetPropertyByNameDoubleTest, get_getter_property)
 {
     ani_object car = NewCar();
 
-    ani_double year;
+    ani_double year = 0.0;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "year", &year), ANI_OK);
     ASSERT_EQ(year, 1989.0F);
+}
+
+TEST_F(ObjectGetPropertyByNameDoubleTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ani_double year = 0.0;
+    ASSERT_EQ(env_->c_api->Object_GetPropertyByName_Double(nullptr, car, "year", &year), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectGetPropertyByNameDoubleTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ani_double year = 0.0;
+    ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "yearA", &year), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "", &year), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectGetPropertyByNameDoubleTest, invalid_argument)
 {
     ani_object car = NewCar();
 
-    ani_double length;
+    ani_double length = 0.0;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(nullptr, "length", &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, nullptr, &length), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "length", nullptr), ANI_INVALID_ARGS);
@@ -58,7 +75,7 @@ TEST_F(ObjectGetPropertyByNameDoubleTest, get_field_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_double manufacturer;
+    ani_double manufacturer = 0.0;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "manufacturer", &manufacturer), ANI_INVALID_TYPE);
 }
 
@@ -66,7 +83,7 @@ TEST_F(ObjectGetPropertyByNameDoubleTest, get_getter_property_invalid_type)
 {
     ani_object car = NewCar();
 
-    ani_double model;
+    ani_double model = 0.0;
     ASSERT_EQ(env_->Object_GetPropertyByName_Double(car, "model", &model), ANI_INVALID_TYPE);
 }
 

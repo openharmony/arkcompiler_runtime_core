@@ -37,34 +37,47 @@ public:
 
 TEST_F(ObjectSetFieldByNameRefTest, set_field)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     auto strLen = CreateAniString("example", nameRef);
 
     ani_object animal = NewAnimal();
-    ASSERT_EQ(env_->Object_SetFieldByName_Ref(animal, "name", nameRef), ANI_OK);
+    const int32_t loopCount = 3;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetFieldByName_Ref(animal, "name", nameRef), ANI_OK);
 
-    ASSERT_EQ(env_->Object_GetFieldByName_Ref(animal, "name", &nameRef), ANI_OK);
-    auto name = static_cast<ani_string>(nameRef);
-    const uint32_t size = 15;
-    std::array<char, size> buffer {};
-    ani_size nameSize;
-    ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, strLen, buffer.data(), buffer.size(), &nameSize), ANI_OK);
-    ASSERT_EQ(nameSize, strLen);
-    ASSERT_STREQ(buffer.data(), "example");
+        ASSERT_EQ(env_->Object_GetFieldByName_Ref(animal, "name", &nameRef), ANI_OK);
+        auto name = static_cast<ani_string>(nameRef);
+        const uint32_t size = 15;
+        std::array<char, size> buffer {};
+        ani_size nameSize;
+        ASSERT_EQ(env_->String_GetUTF8SubString(name, 0U, strLen, buffer.data(), buffer.size(), &nameSize), ANI_OK);
+        ASSERT_EQ(nameSize, strLen);
+        ASSERT_STREQ(buffer.data(), "example");
+    }
+}
+
+TEST_F(ObjectSetFieldByNameRefTest, invalid_env)
+{
+    ani_ref nameRef {};
+    ani_object animal = NewAnimal();
+    CreateAniString("example", nameRef);
+
+    ASSERT_EQ(env_->c_api->Object_SetFieldByName_Ref(nullptr, animal, "x", nameRef), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectSetFieldByNameRefTest, not_found_name)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     CreateAniString("example", nameRef);
 
     ani_object animal = NewAnimal();
     ASSERT_EQ(env_->Object_SetFieldByName_Ref(animal, "x", nameRef), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetFieldByName_Ref(animal, "", nameRef), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetFieldByNameRefTest, invalid_type)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     CreateAniString("example", nameRef);
 
     ani_object animal = NewAnimal();
@@ -73,7 +86,7 @@ TEST_F(ObjectSetFieldByNameRefTest, invalid_type)
 
 TEST_F(ObjectSetFieldByNameRefTest, invalid_object)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     CreateAniString("example", nameRef);
 
     ASSERT_EQ(env_->Object_SetFieldByName_Ref(nullptr, "x", nameRef), ANI_INVALID_ARGS);
@@ -81,7 +94,7 @@ TEST_F(ObjectSetFieldByNameRefTest, invalid_object)
 
 TEST_F(ObjectSetFieldByNameRefTest, invalid_name)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     CreateAniString("example", nameRef);
 
     ani_object animal = NewAnimal();
@@ -90,7 +103,7 @@ TEST_F(ObjectSetFieldByNameRefTest, invalid_name)
 
 TEST_F(ObjectSetFieldByNameRefTest, invalid_value)
 {
-    ani_ref nameRef;
+    ani_ref nameRef {};
     CreateAniString("example", nameRef);
 
     ani_object animal = NewAnimal();

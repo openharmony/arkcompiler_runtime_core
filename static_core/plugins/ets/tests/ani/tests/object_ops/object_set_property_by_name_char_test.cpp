@@ -42,26 +42,56 @@ TEST_F(ObjectSetPropertyByNameCharTest, set_field_property)
 {
     ani_object car = NewCar();
 
-    ani_char highPerformance;
+    ani_char highPerformance = '\0';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "highPerformance", &highPerformance), ANI_OK);
     ASSERT_EQ(highPerformance, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "highPerformance", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "highPerformance", &highPerformance), ANI_OK);
-    ASSERT_EQ(highPerformance, 1U);
+    const int32_t loopCount = 3;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "highPerformance", 'a'), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, 'a');
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "highPerformance", 'b'), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "highPerformance", &highPerformance), ANI_OK);
+        ASSERT_EQ(highPerformance, 'b');
+    }
 }
 
 TEST_F(ObjectSetPropertyByNameCharTest, set_setter_property)
 {
     ani_object car = NewCar();
 
-    ani_char ecoFriendly;
+    ani_char ecoFriendly = '\0';
+
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "ecoFriendly", &ecoFriendly), ANI_OK);
     ASSERT_EQ(ecoFriendly, 0U);
 
-    ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "ecoFriendly", 1U), ANI_OK);
-    ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "ecoFriendly", &ecoFriendly), ANI_OK);
-    ASSERT_EQ(ecoFriendly, 1U);
+    const int32_t loopCount = 3;
+    for (int32_t i = 1; i <= loopCount; i++) {
+        ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "ecoFriendly", 'a'), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, 'a');
+
+        ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "ecoFriendly", 'b'), ANI_OK);
+        ASSERT_EQ(env_->Object_GetPropertyByName_Char(car, "ecoFriendly", &ecoFriendly), ANI_OK);
+        ASSERT_EQ(ecoFriendly, 'b');
+    }
+}
+
+TEST_F(ObjectSetPropertyByNameCharTest, invalid_env)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->c_api->Object_SetPropertyByName_Char(nullptr, car, "ecoFriendly", 1U), ANI_INVALID_ARGS);
+}
+
+TEST_F(ObjectSetPropertyByNameCharTest, invalid_parameter)
+{
+    ani_object car = NewCar();
+
+    ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "ecoFriendlyA", 1U), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Char(car, "", 1U), ANI_NOT_FOUND);
 }
 
 TEST_F(ObjectSetPropertyByNameCharTest, invalid_argument)
@@ -90,7 +120,7 @@ TEST_F(ObjectSetPropertyByNameCharTest, set_interface_field)
 {
     ani_object c1 = NewC1();
 
-    ani_char prop;
+    ani_char prop = '\0';
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(c1, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);
 
@@ -103,7 +133,7 @@ TEST_F(ObjectSetPropertyByNameCharTest, set_interface_property)
 {
     ani_object c2 = NewC2();
 
-    ani_char prop;
+    ani_char prop = '\0';
     ASSERT_EQ(env_->Object_SetPropertyByName_Char(c2, "prop", 0U), ANI_OK);
     ASSERT_EQ(env_->Object_GetPropertyByName_Char(c2, "prop", &prop), ANI_OK);
     ASSERT_EQ(prop, 0U);
