@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_COMMON_HPP
+#define TAIHE_COMMON_HPP
 
 #include <taihe/common.h>
 
@@ -21,9 +22,13 @@
 #include <unordered_set>
 #include <utility>
 
+// This file is used as a standard library and needs to be easy to use.
+// The length limit of functional macros and internal function name does not apply.
+// NOLINTBEGIN
+
 #ifdef __cplusplus
 #ifdef __EXCEPTIONS
-#define TH_THROW(error_type, message) throw error_type(message);
+#define TH_THROW(error_type, message) throw error_type(message)
 #else
 #define TH_THROW(error_type, message)                                    \
     do {                                                                 \
@@ -104,9 +109,7 @@ inline cpp_t from_abi(as_abi_t<cpp_t> abi_val)
     return reinterpret_cast<cpp_t>(*abi_val);
 }
 
-///////////////
-// enum tags //
-///////////////
+// enum tags
 
 template <auto tag>
 struct static_tag_t {
@@ -115,9 +118,7 @@ struct static_tag_t {
 template <auto tag>
 constexpr static_tag_t<tag> static_tag = {};
 
-/////////////////////////
-// hash and comparison //
-/////////////////////////
+// hash and comparison
 
 struct adl_helper_t {};
 
@@ -147,3 +148,7 @@ inline bool same_impl(adl_helper_t, T lhs, T rhs)
     return lhs == rhs;
 }
 }  // namespace taihe
+
+// NOLINTEND
+
+#endif // TAIHE_COMMON_HPP

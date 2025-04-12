@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_MAP_HPP
+#define TAIHE_MAP_HPP
 
 #include <taihe/common.hpp>
 
@@ -20,6 +21,9 @@
 
 #define MAP_GROWTH_FACTOR 2
 
+// This file is used as a standard library and needs to be easy to use.
+// The rule that single-parameter constructors need to be explicit does not apply.
+// NOLINTBEGIN
 namespace taihe {
 template <typename K, typename V>
 struct map_view;
@@ -307,7 +311,7 @@ private:
         std::size_t cap;
         item_t **bucket;
         std::size_t size;
-    } * m_handle;
+    } *m_handle;
 
     explicit map_view(data_t *handle) : m_handle(handle) {}
 
@@ -397,7 +401,10 @@ struct as_param<map<K, V>> {
     using type = map_view<K, V>;
 };
 }  // namespace taihe
+// NOLINTEND
 
 #ifdef MAP_GROWTH_FACTOR
 #undef MAP_GROWTH_FACTOR
-#endif
+#endif // MAP_GROWTH_FACTOR
+
+#endif // TAIHE_MAP_HPP

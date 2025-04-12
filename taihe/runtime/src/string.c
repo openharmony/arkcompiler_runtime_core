@@ -21,7 +21,6 @@
 
 // Converts a TString into its corresponding heap-allocated TStringData
 // structure.
-//
 // # Returns
 // - A pointer to the TStringData structure if the TString is heap-allocated.
 // - `NULL` if the TString is a reference (TSTRING_REF is set).

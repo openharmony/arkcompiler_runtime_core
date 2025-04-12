@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_VECTOR_HPP
+#define TAIHE_VECTOR_HPP
 
 #include <taihe/common.hpp>
 
@@ -21,6 +22,9 @@
 
 #define VEC_GROWTH_FACTOR 2
 
+// This file is used as a standard library and needs to be easy to use.
+// The rule that single-parameter constructors need to be explicit does not apply.
+// NOLINTBEGIN
 namespace taihe {
 template <typename T>
 struct vector_view;
@@ -128,7 +132,7 @@ protected:
         std::size_t cap;
         T *buffer;
         std::size_t len;
-    } * m_handle;
+    } *m_handle;
 
     explicit vector_view(data_t *handle) : m_handle(handle) {}
 
@@ -216,7 +220,10 @@ struct as_param<vector<T>> {
     using type = vector_view<T>;
 };
 }  // namespace taihe
+// NOLINTEND
 
 #ifdef VEC_GROWTH_FACTOR
 #undef VEC_GROWTH_FACTOR
-#endif
+#endif // VEC_GROWTH_FACTOR
+
+#endif // TAIHE_VECTOR_HPP
