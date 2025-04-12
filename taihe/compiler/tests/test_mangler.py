@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,10 +31,8 @@ def test_name_mangler():
         try:
             mangled = encode(segments, kind)
             decoded = decode(mangled)
-            assert decoded == (
-                segments,
-                kind,
-            ), f"Failed roundtrip: {segments} -> {mangled} -> {decoded}"
+            if decoded != (segments, kind):
+                raise ValueError(f"Failed roundtrip: {segments} -> {mangled} -> {decoded}")
             print(f"Success: {segments} -> {mangled} -> {decoded}")
         except Exception as e:
             print(f"Error testing {segments}: {e!s}")

@@ -28,5 +28,7 @@ void testBar(bar::BarType const &bar)
     TH_THROW(std::runtime_error, "testBar not implemented");
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_testBar(testBar);
+// NOLINTEND

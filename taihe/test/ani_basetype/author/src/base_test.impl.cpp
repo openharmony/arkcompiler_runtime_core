@@ -104,7 +104,8 @@ string FromI32(int32_t a)
     return taihe::to_string(a);
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_AddI8(AddI8);
 TH_EXPORT_CPP_API_SubI16(SubI16);
 TH_EXPORT_CPP_API_MulI32(MulI32);
@@ -119,3 +120,4 @@ TH_EXPORT_CPP_API_Concatx(Concatx);
 TH_EXPORT_CPP_API_Splitx(Splitx);
 TH_EXPORT_CPP_API_ToI32(ToI32);
 TH_EXPORT_CPP_API_FromI32(FromI32);
+// NOLINTEND

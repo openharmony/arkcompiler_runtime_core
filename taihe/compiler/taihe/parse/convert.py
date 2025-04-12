@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -146,7 +148,6 @@ class ExprEvaluator(Visitor):
 
     @override
     def visit_unary_bool_expr(self, node: ast.UnaryBoolExpr) -> bool:
-        assert node.op.text == "!"
         return not self.visit(node.expr)
 
     @override

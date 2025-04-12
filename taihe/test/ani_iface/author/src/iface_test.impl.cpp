@@ -58,6 +58,8 @@ string printFooName(::iface_test::weak::Foo foo)
 }
 
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_getFooIface(getFooIface);
 TH_EXPORT_CPP_API_printFooName(printFooName);
+// NOLINTEND

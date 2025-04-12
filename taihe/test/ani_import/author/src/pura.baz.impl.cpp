@@ -33,6 +33,8 @@ void testBaz(BazType const &baz)
     TH_THROW(std::runtime_error, "testBaz not implemented");
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_testFoo(testFoo);
 TH_EXPORT_CPP_API_testBaz(testBaz);
+// NOLINTEND

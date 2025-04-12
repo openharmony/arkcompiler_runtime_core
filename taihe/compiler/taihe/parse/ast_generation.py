@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -118,7 +120,8 @@ def visit(node_kind: str, ctx, pos_dict: dict) -> Any:
             attr_kind_name, attr_name = attr_full_name.split("_", 1)
             kwargs[attr_name] = visit(attr_kind_name, attr_ctx, pos_dict)
     real_kind = ctx.__class__.__name__[:-7]
-    assert issubkind(real_kind, node_kind)
+    if not issubkind(real_kind, node_kind):
+        raise ValueError(f"{real_kind} is not a subkind of {node_kind}")
     return getattr(TaiheAST, real_kind)(**kwargs)
 
 

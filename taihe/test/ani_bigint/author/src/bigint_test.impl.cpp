@@ -54,10 +54,12 @@ double BigInt06(double a, array_view<int64_t> b)
     return a;
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_BigInt01(BigInt01);
 TH_EXPORT_CPP_API_BigInt02(BigInt02);
 TH_EXPORT_CPP_API_BigInt03(BigInt03);
 TH_EXPORT_CPP_API_BigInt04(BigInt04);
 TH_EXPORT_CPP_API_BigInt05(BigInt05);
 TH_EXPORT_CPP_API_BigInt06(BigInt06);
+// NOLINTEND

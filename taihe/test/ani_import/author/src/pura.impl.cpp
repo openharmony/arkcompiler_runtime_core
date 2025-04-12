@@ -38,7 +38,9 @@ void testMyStruct(::test::inner::MyStruct const &s)
     TH_THROW(std::runtime_error, "testMyStruct not implemented");
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_testBar(testBar);
 TH_EXPORT_CPP_API_testNova(testNova);
 TH_EXPORT_CPP_API_testMyStruct(testMyStruct);
+// NOLINTEND

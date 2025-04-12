@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -145,7 +147,6 @@ class IfaceABIInfo(AbstractAnalysis[IfaceDecl]):
         self.ancestors = [d]
         for extend in d.parents:
             ty = extend.ty_ref.resolved_ty
-            assert isinstance(ty, IfaceType)
             extend_abi_info = IfaceABIInfo.get(am, ty.ty_decl)
             self.ancestors.extend(extend_abi_info.ancestors)
         for i, ancestor in enumerate(self.ancestors):

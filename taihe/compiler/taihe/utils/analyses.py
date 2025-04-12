@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,7 +80,6 @@ class AnalysisManager:
         key = CacheKey(analysis_type, tuple(args), tuple(sorted(kwargs.items())))
 
         if cached := self._cache.get(key):
-            assert isinstance(cached, analysis_type)
             return cached
 
         new_instance = object.__new__(analysis_type)

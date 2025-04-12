@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -174,7 +176,6 @@ class OutputManager:
     ) -> T:
         """Get or create an output instance by filename."""
         if target := self.targets.get(filename):
-            assert isinstance(target, cls)
             return target
 
         target = cls(*args, **kwargs)
