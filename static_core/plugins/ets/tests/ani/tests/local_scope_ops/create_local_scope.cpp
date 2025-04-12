@@ -15,7 +15,7 @@
 
 #include "ani_gtest.h"
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
 class CreateLocalScopeTest : public AniTest {};
@@ -350,41 +350,162 @@ TEST_F(CreateLocalScopeTest, scope_test1)
     ASSERT_EQ(size, TEST_STRING.size());
 }
 
-TEST_F(CreateLocalScopeTest, scope_test2)
+static void CheckReferenceEquality(ani_env *env, ani_ref lhs, ani_ref rhs)
 {
-    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
-    ani_ref objectRef {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRef)),
-              ANI_OK);
-
-    ani_ref result {};
-    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
-
     ani_boolean isEquals = ANI_FALSE;
-    ASSERT_EQ(env_->Reference_Equals(objectRef, result, &isEquals), ANI_OK);
+    ASSERT_EQ(env->Reference_Equals(lhs, rhs, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
 
     isEquals = ANI_FALSE;
-    ASSERT_EQ(env_->Reference_StrictEquals(objectRef, result, &isEquals), ANI_OK);
+    ASSERT_EQ(env->Reference_StrictEquals(lhs, rhs, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
 }
 
-TEST_F(CreateLocalScopeTest, scope_test3)
+TEST_F(CreateLocalScopeTest, scope_test2)
 {
+    ani_string stringRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &stringRef), ANI_OK);
+
     ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
 
+    auto identityRef = CallEtsFunction<ani_ref>("create_local_scope", "identity", stringRef);
+    CheckReferenceEquality(env_, stringRef, identityRef);
+
+    ani_ref escapedRef {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(identityRef, &escapedRef), ANI_OK);
+
+    CheckReferenceEquality(env_, stringRef, escapedRef);
+}
+
+TEST_F(CreateLocalScopeTest, scope_test4)
+{
     ASSERT_EQ(env_->CreateLocalScope(REF_NUM), ANI_OK);
 
-    ani_ref objectRefA {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), reinterpret_cast<ani_string *>(&objectRefA)),
-              ANI_OK);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
 
-    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+    ani_string objectRefA {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRefA), ANI_OK);
+
+    ani_string objectRefB {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRefB), ANI_OK);
 
     ani_ref result {};
     ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRefA, &result), ANI_OK);
+    ASSERT_NE(result, nullptr);
+
+    const uint32_t bufferSize = 100U;
+    char utfBuffer[bufferSize] = {};
+    ani_size actualSize = 0U;
+    ani_status status = env_->String_GetUTF8SubString(reinterpret_cast<ani_string>(result), 0U, TEST_STRING.size(),
+                                                      utfBuffer, bufferSize, &actualSize);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(actualSize, TEST_STRING.size());
+    ASSERT_STREQ(utfBuffer, TEST_STRING.data());
+
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, scope_test5)
+{
+    ASSERT_EQ(env_->CreateLocalScope(REF_NUM), ANI_OK);
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lcreate_local_scope/Student;", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "I:V", &ctor), ANI_OK);
+    ASSERT_NE(ctor, nullptr);
+
+    ani_object objectA {};
+    const ani_int age = 12;
+    ASSERT_EQ(env_->Object_New(cls, ctor, &objectA, age), ANI_OK);
+    ASSERT_NE(objectA, nullptr);
+
+    ani_string str {};
+    std::string name = "Tom";
+    ASSERT_EQ(env_->String_NewUTF8(name.data(), name.size(), &str), ANI_OK);
+    ASSERT_NE(str, nullptr);
+    ASSERT_EQ(env_->Object_SetPropertyByName_Ref(objectA, "name", str), ANI_OK);
+
+    ani_ref nameValue {};
+    ASSERT_EQ(env_->Object_CallMethodByName_Ref(objectA, "getName", nullptr, &nameValue), ANI_OK);
+    ASSERT_NE(nameValue, nullptr);
+
+    ani_ref escapedValue {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(nameValue, &escapedValue), ANI_OK);
+    ASSERT_NE(escapedValue, nullptr);
+
+    std::string resString {};
+    GetStdString(env_, reinterpret_cast<ani_string>(escapedValue), resString);
+    ASSERT_STREQ(resString.data(), name.c_str());
+
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test4)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+
+    ani_ref nullRef;
+    ASSERT_EQ(env_->GetNull(&nullRef), ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(nullRef, &result), ANI_OK);
+
+    ani_boolean isNull = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_IsNull(result, &isNull), ANI_OK);
+    ASSERT_EQ(isNull, ANI_TRUE);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_test5)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+
+    ani_ref undefinedRef {};
+    ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
+
+    ani_ref result {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(undefinedRef, &result), ANI_OK);
+
+    ani_boolean isUndefined = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_IsUndefined(result, &isUndefined), ANI_OK);
+    ASSERT_EQ(isUndefined, ANI_TRUE);
+}
+
+TEST_F(CreateLocalScopeTest, create_local_scope_invalid_env)
+{
+    ASSERT_EQ(env_->c_api->CreateLocalScope(nullptr, SPECIFIED_CAPACITY), ANI_INVALID_ARGS);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_local_scope_invalid_env)
+{
+    ASSERT_EQ(env_->c_api->DestroyLocalScope(nullptr), ANI_INVALID_ARGS);
+}
+
+TEST_F(CreateLocalScopeTest, create_escape_local_scope_invalid_env)
+{
+    ASSERT_EQ(env_->c_api->CreateEscapeLocalScope(nullptr, SPECIFIED_CAPACITY), ANI_INVALID_ARGS);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_invalid_env)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
+    ani_ref result {};
+    ASSERT_EQ(env_->c_api->DestroyEscapeLocalScope(nullptr, objectRef, &result), ANI_INVALID_ARGS);
+}
+
+TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_invalid_result)
+{
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+    ani_string objectRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, nullptr), ANI_INVALID_ARGS);
 }
 
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
