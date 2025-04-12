@@ -66,11 +66,11 @@ function checkLongBoxed(val: Long) {
 }
 
 function checkFloat(val: float) {
-    assertTrue(val == 1)
+     assertTrue(val == 2.1f)
 }
 
 function checkFloatBoxed(val: Float) {
-    assertTrue(val == 1)
+    assertTrue(val == 2.1f)
 }
 
 function checkFloatOverflow(val: float, oriVal: number) {
