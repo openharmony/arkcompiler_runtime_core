@@ -230,10 +230,6 @@ JSCONVERT_UNWRAP(StdlibFloat)
     double val;
     NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
     auto fval = static_cast<EtsFloat>(val);
-    if (fval != val) {
-        TypeCheckFailed();
-        return {};
-    }
     return EtsBoxPrimitive<EtsFloat>::Create(EtsCoroutine::GetCurrent(), fval);
 }
 

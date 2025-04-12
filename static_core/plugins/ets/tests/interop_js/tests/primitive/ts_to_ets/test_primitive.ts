@@ -128,7 +128,7 @@ function testCheckLong() {
 }
 
 function testCheckFloat() {
-    let val = 1;
+    let val = 2.1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
     checkFloat(val);
