@@ -233,7 +233,7 @@ export function escape(str: string): string {
         const c = (d as int) & 0xffff
         assertLE(0, c)
         assertEQ(hexChars.length, 16)
-        if (c >= c'a' && c <= c'z' || c >= c'A' && c <= c'Z' || c >= c'0' && c <= c'9' || c >= 42 && c <= 47 && c != 44 || c == c'\\' || c == c'_' || c == c'@') {
+        if (c >= c'a' && c <= c'z' || c >= c'A' && c <= c'Z' || c >= c'0' && c <= c'9' || c >= 42 && c <= 47 && c != 44 || c == c'_' || c == c'@') {
             ret.append(c as char)
         } else {
             encodeCharAsHex(ret, c)
