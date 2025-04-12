@@ -22,11 +22,16 @@ function main(): int {
     suite.addTest("Test XmlPullParser with TagValueCallback with supportDocType", testWithTagValueCb)
     suite.addTest("Test XmlPullParser with TagValueCallback with ignoreNamespace", testWithTagValueCbWithIgnoreNS)
     suite.addTest("Test XmlPullParser with TagValueCallback with supportDocType and ignoreNamespace", testWithTagValueCbWithSupportDocTypeAndIgnoreNS)
-    suite.addTest("Test XmlPullParser with AttributeValueCallback", testWithAttributeValueCb)
-    suite.addTest("Test XmlPullParser with AttributeValueCallback with supportDocType and ignoreNamespace", testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS)
     suite.addTest("Test XmlPullParser with TokenValueCallback with supportDocType and ignoreNamespace", testWithTokenValueCb)
-    suite.addTest("Test XmlPullParser with TokenValueCallback with supportDocType", testWithTokenValueCbWithNamespace)
-    suite.addTest("Test XmlPullParser parse invalid XML", testParseError)
+    suite.addTest("Test XmlPullParser replace xml special chars", testReplaceXmlSpecChars)
+    suite.addTest("Test XmlPullParser CDATA section", testCDATA)
+    suite.addTest("Test XmlPullParser isEmptyElementTag", testIsEmptyElementTag)
+    suite.addTest("Test XmlPullParser getText", testGetText)
+    suite.addTest("Test XmlPullParser getPrefix", testGetPrefix)
+    suite.addTest("Test XmlPullParser getNamespace", testGetNamespace)
+    suite.addTest("Test XmlPullParser name:value tag pair", testTagValue)
+    suite.addTest("Testing XML isWhitespace with valid whitespace.", testXmlIsWhitespace0001)
+
     return suite.run()
 }
 
@@ -49,7 +54,7 @@ function rawStringToBuffer( str: string ) : ArrayBuffer {
 }
 
 function processStr(str: string): string {
-    return str.replace(new RegExp("[\r\n\s]","g"), "")
+    return str.replace(new RegExp("[\r\n]","g"), "")
 }
 
 function testWithTagValueCb() {
@@ -77,31 +82,13 @@ function testWithTagValueCb() {
 
     parser.parse(options)
 
-    const res : ReadonlyArray<string> = Array.of<string>(
-        "{  : <?xml verion=\"1.0\" encoding=\"utf-8\"?> }",
-        "{  : <?go there?> }",
-        "{  : <!--Hello, World!--> }",
-        "{  : <!ENTITY foo \"baa\"> }",
-        "{  : <!DOCTYPE note [<!ENTITY foo \"baa\">]> }",
-        "{  : <![CDATA[function matchwo(a,6){return 1}]]> }",
-        "{ company : John &amp Han }",
-        "{ title : Happy }",
-        "{ title : Happy }",
-        "{ todo : Work }",
-        "{ todo : Play }",
-        "{ b :  }",
-        "{ a : <b/> }",
-        "{ td : Apple }",
-        "{ td : Banana }",
-        "{ tr : <h:td>Apple</h:td> <h:td>Banana</h:td>  }",
-        "{ table :  <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr> }",
-        "{ note : <![CDATA[function matchwo(a,6){return 1}]]><!--Hello, World!--> <company>John &amp Han</company> \
-<title>Happy</title><title>Happy</title> <todo>Work</todo> <todo>Play</todo> <?go there?><a><b/></a> \
-<h:table xmln:h=\"http://www.w3.org/TR/html4/\"> <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr></h:table> }",
-        "{  :  }"
-)
-    let result = res.join("; ") + "; "
-    assertEQ(processStr(g_testStr), processStr(result))
+    const res = '{  :  note [ foo "baa"] }; {  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1} }; \
+{  : Hello, World! }; { company :  }; {  : John &amp Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; \
+{ title :  }; {  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; \
+{ todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { table :  }; { tr :  }; { td :  }; {  : Apples }; \
+{ td :  }; { td :  }; {  : Bananas }; { td :  }; { tr :  }; { table :  }; { note :  }; '
+
+    assertEQ(processStr(g_testStr), processStr(res))
 }
 
 function testWithTagValueCbWithIgnoreNS() {
@@ -129,27 +116,12 @@ function testWithTagValueCbWithIgnoreNS() {
 
     parser.parse(options)
 
-    const res : ReadonlyArray<string> = Array.of<string>(
-        "{  : <?xml verion=\"1.0\" encoding=\"utf-8\"?> }",
-        "{  : <?go there?> }",
-        "{  : <!--Hello, World!--> }",
-        "{  : <!ENTITY foo \"baa\"> }",
-        "{  : <![CDATA[function matchwo(a,6){return 1;}]]> }",
-        "{ company : John &amp; Han }",
-        "{ title : Happy }",
-        "{ title : Happy }",
-        "{ todo : Work }",
-        "{ todo : Play }",
-        "{ b :  }",
-        "{ a : <b/> }",
-        "{ h:td : Apple }",
-        "{ h:td : Banana }",
-        "{ h:tr : <h:td>Apple</h:td> <h:td>Banana</h:td>  }",
-        "{ h:table :  <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr> }",
-        "{ note : <![CDATA[function matchwo(a,6){return 1;}]]><!--Hello, World!--> <company>John &amp; Han</company> <title>Happy</title><title>Happy</title> <todo>Work</todo> <todo>Play</todo> <?go there?><a><b/></a> <h:table xmln:h=\"http://www.w3.org/TR/html4/\"> <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr></h:table> }",
-        "{  :  }")
-    let result = res.join("; ") + "; "
-    assertEQ(processStr(g_testStr), processStr(result))
+    const res = '{  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1;} }; {  : Hello, World! }; \
+{ company :  }; {  : John & Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; { title :  }; \
+{  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; { todo :  }; \
+{  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; { h:td :  }; \
+{ h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
+    assertEQ(processStr(g_testStr), processStr(res))
 }
 
 function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
@@ -178,90 +150,13 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 
     parser.parse(options)
 
-    const res : ReadonlyArray<string> = Array.of<string>(
-        "{  : <?xml verion=\"1.0\" encoding=\"utf-8\"?> }",
-        "{  : <?go there?> }",
-        "{  : <!--Hello, World!--> }",
-        "{  : <!ENTITY foo \"baa\"> }",
-        "{  : <!DOCTYPE note [<!ENTITY foo \"baa\">]> }",
-        "{  : <![CDATA[function matchwo(a,6){return 1;}]]> }",
-        "{ company : John &amp; Hans }", 
-        "{ title : Happy }",
-        "{ title : Happy }",
-        "{ todo : Work }",
-        "{ todo : Play }",
-        "{ b :  }",
-        "{ a : <b/> }",
-        "{ h:td : Apple }",
-        "{ h:td : Banana }",
-        "{ h:tr : <h:td>Apple</h:td> <h:td>Banana</h:td>  }",
-        "{ h:table :  <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr> }",
-        "{ note : <![CDATA[function matchwo(a,6){return 1;}]]><!--Hello, World!--> <company>John &amp; Han</company> \
-<title>Happy</title><title>Happy</title> <todo>Work</todo> <todo>Play</todo> <?go there?><a><b/></a> \
-<h:table xmln:h=\"http://www.w3.org/TR/html4/\"> <h:tr><h:td>Apple</h:td> <h:td>Banana</h:td> </h:tr></h:table> }",
-        "{  :  }")
-    let result = res.join("; ") + "; "
-    assertEQ(processStr(g_testStr), processStr(result))
-}
+    const res = '{  :  note [ foo "baa"] }; {  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1;} }; \
+{  : Hello, World! }; { company :  }; {  : John & Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; \
+{ title :  }; {  : Happy }; { title :  }; { todo :  }; {  : Work }; { todo :  }; { todo :  }; {  : Play }; \
+{ todo :  }; {  : go there }; { a :  }; { b :  }; { b :  }; { a :  }; { h:table :  }; { h:tr :  }; { h:td :  }; {  : Apples }; \
+{ h:td :  }; { h:td :  }; {  : Bananas }; { h:td :  }; { h:tr :  }; { h:table :  }; { note :  }; '
 
-function testWithAttributeValueCb() {
-    const str : ReadonlyArray<string> = Array.of<string>(
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?><!DOCTYPE note [\n<!ENTITY foo \"baa\">]>",
-    "<note importance=\"high\" logged=\"true\">",
-    "    <![CDATA[\r\nfunction matchwo(a,6)\r\n{\r\nreturn 1;\r\n}\r\n]]>",
-    "    <!--Hello, World!-->    <company>John &amp; Hans</company>    <title>Happy</title>",
-    "    <title>Happy</title>    <todo>Work</todo>    <todo>Play</todo>    <?go there?>",
-    "    <a><b/></a>    <h:table xmlns:h=\"http://www.w3.org/TR/html4/\">        <h:tr>",
-    "            <h:td>Apples</h:td>            <h:td>Bananas</h:td>        </h:tr>",
-    "    </h:table></note>")
-
-    let strXml = str.join("")
-    let data = rawStringToBuffer(strXml)
-
-    let parser = new xml.XmlPullParser(data, "utf-8")
-
-    let g_testStr = ''
-    let cb = (name: string, value: string): boolean => { 
-        g_testStr += "{ " + name + " : " + value + " }; "
-        return true 
-    }
-
-    let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
-
-    parser.parse(options)
-
-    const expected = "{ 1.0 : verion }; { utf-8 : encoding }; { http://www.w3.org/TR/html4/ : xmlns:h }; { high : importance }; { true : logged }; "
-    assertEQ(processStr(g_testStr), processStr(expected))
-}
-
-function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
-    const str : ReadonlyArray<string> = Array.of<string>(
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?><!DOCTYPE note [\n<!ENTITY foo \"baa\">]>",
-    "<note importance=\"high\" logged=\"true\">",
-    "    <![CDATA[\r\nfunction matchwo(a,6)\r\n{\r\nreturn 1;\r\n}\r\n]]>",
-    "    <!--Hello, World!-->    <company>John &amp; Hans</company>    <title>Happy</title>",
-    "    <title>Happy</title>    <todo>Work</todo>    <todo>Play</todo>    <?go there?>",
-    "    <a><b/></a>    <h:table xmlns:h=\"http://www.w3.org/TR/html4/\">        <h:tr>",
-    "            <h:td>Apples</h:td>            <h:td>Bananas</h:td>        </h:tr>",
-    "    </h:table></note>")
-
-    let strXml = str.join("")
-    let data = rawStringToBuffer(strXml)
-
-    let parser = new xml.XmlPullParser(data, "utf-8")
-
-    let g_testStr = ''
-    let cb = (name: string, value: string): boolean => { 
-        g_testStr += "{ " + name + " : " + value + " }; "
-        return true 
-    }
-
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
-
-    parser.parse(options)
-
-    const expected = "{ 1.0 : verion }; { utf-8 : encoding }; { http://www.w3.org/TR/html4/ : xmlns:h }; { high : importance }; { true : logged }; "
-    assertEQ(processStr(g_testStr), processStr(expected));
+    assertEQ(processStr(g_testStr), processStr(res))
 }
 
 function eventName(type: xml.EventType): string {
@@ -319,90 +214,318 @@ function testWithTokenValueCb() {
 
     parser.parse(options)
 
-    const expected : ReadonlyArray<string> = Array.of<string>( 
-    "{ START_DOCUMENT : { depth : 0}; { columnNumber : 0}; { lineNumber : 0}; { attributeCount : 2}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : }; { prefix : }; { text : <?xml verion=\"1.0\" encoding=\"utf-8\"?>} };",
-    "{ COMMENT : { depth : 0}; { columnNumber : 3}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : }; { prefix : }; { text : <!--Hello, World!-->} };",
-    "{ CDSECT : { depth : 0}; { columnNumber : 75}; { lineNumber : 0}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : }; { prefix : }; { text : <![CDATA[function matchwo(a,6){return 1;}]]>} };",
-    "{ START_TAG : { depth : 3}; { columnNumber : 24}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : company}; { prefix : }; { text : John &amp; Han} };",
-    "{ TEXT : { depth : 4}; { columnNumber : 33}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : company}; { prefix : }; { text : John &amp; Han} };",
-    "{ END_TAG : { depth : 3}; { columnNumber : 48}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : true}; { namepace : }; { name : /company}; { prefix : }; { text : } };",
-    "{ START_TAG : { depth : 3}; { columnNumber : 59}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : title}; { prefix : }; { text : Happy} };",
-    "{ TEXT : { depth : 4}; { columnNumber : 66}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : title}; { prefix : }; { text : Happy} };",
-    "{ END_TAG : { depth : 3}; { columnNumber : 71}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : true}; { namepace : }; { name : /title}; { prefix : }; { text : } };",
-    "{ START_TAG : { depth : 1}; { columnNumber : 0}; { lineNumber : 0}; { attributeCount : 2}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : note}; { prefix : }; { text : <![CDATA[function matchwo(a,6){return 1;}]]><!--Hello, World!--> <company>John &amp; Han</company> <title>Happy</title>} };",
-    "{ TEXT : { depth : 2}; { columnNumber : 36}; { lineNumber : 0}; { attributeCount : 2}; { iEmptyElementTag : fale}; { iWhitepace : fale}; { namepace : }; { name : note}; { prefix : }; { text : <![CDATA[function matchwo(a,6){return 1;}]]><!--Hello, World!--> <company>John &amp; Han</company> <title>Happy</title>} };",
-    "{ END_TAG : { depth : 1}; { columnNumber : 40}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : true}; { namepace : }; { name : /note}; { prefix : }; { text : } };",
-    "{ END_DOCUMENT : { depth : 0}; { columnNumber : 86}; { lineNumber : 5}; { attributeCount : 0}; { iEmptyElementTag : fale}; { iWhitepace : true}; { namepace : }; { name : }; { prefix : }; { text : } }; ")
+    const expected = '{ START_DOCUMENT : { depth : 0}; { columnNumber : 1}; { lineNumber : 1}; { attributeCount : 2}; \
+{ isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; { name : }; { prefix : }; \
+{ text : xml version="1.0" encoding="utf-8"} }; { START_TAG : { depth : 1}; { columnNumber : 77}; { lineNumber : 1}; \
+{ attributeCount : 2}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : note}; { prefix : }; \
+{ text : } }; { CDSECT : { depth : 1}; { columnNumber : 78}; { lineNumber : 1}; { attributeCount : 0}; \
+{ isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; { name : }; { prefix : }; \
+{ text : function matchwo(a,6){return 1;}} }; { COMMENT : { depth : 1}; { columnNumber : 6}; \
+{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; \
+{ name : }; { prefix : }; { text : Hello, World!} }; { START_TAG : { depth : 2}; { columnNumber : 35}; { lineNumber : 6}; \
+{ attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : company}; { prefix : }; \
+{ text : } }; { TEXT : { depth : 2}; { columnNumber : 50}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; \
+{ isWhitespace : false}; { namespace : }; { name : }; { prefix : }; { text : John & Hans} }; { END_TAG : { depth : 1}; \
+{ columnNumber : 60}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; \
+{ namespace : }; { name : company}; { prefix : }; { text : } }; { START_TAG : { depth : 2}; { columnNumber : 68}; \
+{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : title}; \
+{ prefix : }; { text : } }; { TEXT : { depth : 2}; { columnNumber : 73}; { lineNumber : 6}; { attributeCount : 0}; \
+{ isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; { name : }; { prefix : }; { text : Happy} }; \
+{ END_TAG : { depth : 1}; { columnNumber : 81}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; \
+{ isWhitespace : true}; { namespace : }; { name : title}; { prefix : }; { text : } }; { END_TAG : { depth : 1}; \
+{ columnNumber : 88}; { lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; \
+{ namespace : }; { name : note}; { prefix : }; { text : } }; { END_DOCUMENT : { depth : 0}; { columnNumber : 88}; \
+{ lineNumber : 6}; { attributeCount : 0}; { isEmptyElementTag : false}; { isWhitespace : true}; { namespace : }; { name : }; \
+{ prefix : }; { text : } }; '
 
-    assertEQ(processStr(g_testStr), processStr(expected.join(" ")))
+    assertEQ(processStr(g_testStr), processStr(expected))
 }
 
-function testWithTokenValueCbWithNamespace() {
+// testParseXml013
+function testReplaceXmlSpecChars() {
     const str : ReadonlyArray<string> = Array.of<string>(
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?><!DOCTYPE note [\n<!ENTITY foo \"baa\">]>",
-    "<note importance=\"high\" logged=\"true\">",
-    "    <![CDATA[\r\nfunction matchwo(a,6)\r\n{\r\nreturn 1;\r\n}\r\n]]>",
-    "    <!--Hello, World!-->    <company>John &amp; Hans</company>    <title>Happy</title>",
-    "    <title>Happy</title>    <todo>Work</todo>    <todo>Play</todo>    <?go there?>",
-    "    <a><b/></a>    <h:table xmlns:h=\"http://www.w3.org/TR/html4/\">        <h:tr>",
-    "            <h:td>Apples</h:td>            <h:td>Bananas</h:td>        </h:tr>",
-    "    </h:table></note>")
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+    "<note importance='hi&amp;gh' logged='&lt;true'>",
+    "    <title>Hello&gt;World&apos;</title>",
+    "    <todo>Wo&quot;rk</todo>",
+    "</note>")
 
-    let strXml = str.join("")
-    let data = rawStringToBuffer(strXml)
-
-    let parser = new xml.XmlPullParser(data, "utf-8")
-
-    let g_testStr = ''
-    let cb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
-        if (eventType as int === xml.EventType.TEXT as int) {
-            g_testStr += "{ " + eventName(eventType) + " : " + " name = " + value.getName() + 
-            " ns = " + value.getNamespace() + " pr = " + value.getPrefix() + " }; "
+    let textStr = ''
+    let tokenCb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
+        if (eventType === xml.EventType.TEXT) {
+            textStr += value.getText()
         }
         return true
     }
 
-    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tokenValueCallbackFunction": cb}
-
-    parser.parse(options)
-
-    const expected : ReadonlyArray<string> = Array.of<string>( 
-        "{ TEXT :  name = company n =  pr =  };",
-        "{ TEXT :  name = title n =  pr =  };",
-        "{ TEXT :  name = title n =  pr =  };",
-        "{ TEXT :  name = todo n =  pr =  };",
-        "{ TEXT :  name = todo n =  pr =  };",
-        "{ TEXT :  name = a n =  pr =  };",
-        "{ TEXT :  name = td n = http://www.w3.org/TR/html4/ pr = h };",
-        "{ TEXT :  name = td n = http://www.w3.org/TR/html4/ pr = h };",
-        "{ TEXT :  name = tr n = http://www.w3.org/TR/html4/ pr = h };",
-        "{ TEXT :  name = table n = http://www.w3.org/TR/html4/ pr = h };",
-        "{ TEXT :  name = note n =  pr =  }; "
-    )
-    assertEQ(processStr(g_testStr), processStr(expected.join(" ")))
-}
-
-function testParseError() {
-    const str : ReadonlyArray<string> = Array.of<string>(
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?><!DOCTYPE note [\n<!ENTITY foo \"baa\">]>",
-    "    <![CDATA[\r\nfunction matchwo(a,6)\r\n{\r\nreturn 1;\r\n}\r\n]]>",
-    "    <!--Hello, World!-->    <company>John &amp; Hans</company>    <title>Happy</title>",
-    "    <title>Happy</title>    <todo>Work</todo>    <todo>Play</todo>    <?go there?>",
-    "    <a><b/></a>    <h:table xmlns:h=\"http://www.w3.org/TR/html4/\">        <h:tr>",
-    "            <h:td>Apples</h:td>            <h:td>Bananas</h:td>        </h:tr>",
-    "    </h:table>")
+    let attStr = ''
+    let attrCb = (name: string, value: string): boolean => { 
+        attStr += "{ " + name + " : " + value + " }; "
+        return true 
+    }
 
     let strXml = str.join("")
     let data = rawStringToBuffer(strXml)
-
     let parser = new xml.XmlPullParser(data, "utf-8")
-    let assertOccured = false
-    try {
-        parser.parse({} as xml.ParseOptions)
-    }
-    catch(e) {
-        assertOccured = true
-    }
-    assertTrue(assertOccured)
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb, "attributeValueCallbackFunction": attrCb}
+    parser.parse(options)
+
+    let expectedTextStr = 'Hello>World\'Wo"rk'
+    let expectedAttrStr = "{ importance : hi&gh }; { logged : <true }; "
+
+    assertEQ(attStr, expectedAttrStr)
+    assertEQ(textStr, expectedTextStr)
 }
+
+// testParse012
+function testCDATA() {
+    const str : ReadonlyArray<string> = Array.of<string>(
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+    "<note importance='high' logged='true'",
+    "    <title>Hello\nWorld</title>",
+    "    <todo>Work\n</todo>",
+    "    <mess><![CDATA[This is a \n CDATA section]]></mess>",
+    "</note>")
+
+    let textStr = ''
+    let tokenCb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
+        if ((eventType === xml.EventType.TEXT) || (eventType === xml.EventType.CDSECT)) {
+            textStr += value.getText() + " "
+        }
+        return true
+    }
+
+    let strXml = str.join("")
+    let data = rawStringToBuffer(strXml)
+    let parser = new xml.XmlPullParser(data, "utf-8")
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
+    parser.parse(options)
+
+    let expectedTextStr = 'Hello\nWorld Work\n This is a \n CDATA section '
+
+    assertEQ(textStr, expectedTextStr)
+}
+
+// testParseXml010
+function testIsEmptyElementTag() {
+    const str : ReadonlyArray<string> = Array.of<string>(
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+    "<note importance='high'>",
+    "<title/>",
+    "<todo>Work</todo>",
+    "<todo/>",
+    "</note>")
+
+    let textStr = ''
+    let oldStr = ''
+    let tokenCb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
+        if ((eventType === xml.EventType.START_TAG)) {
+            textStr += "{ " + value.getName() + " : " + value.isEmptyElementTag() + " }; "
+            oldStr += "key:" + eventType + " value:" + value.isEmptyElementTag() + " "
+        }
+        return true
+    }
+
+    let strXml = str.join("")
+    let data = rawStringToBuffer(strXml)
+    let parser = new xml.XmlPullParser(data, "utf-8")
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
+    parser.parse(options)
+
+    let expectedTextStr = '{ note : false }; { title : true }; { todo : false }; { todo : true }; '
+
+    assertEQ(textStr, expectedTextStr)
+
+    const expectedOld = 'key:2 value:false key:2 value:true key:2 value:false key:2 value:true '
+    assertEQ(expectedOld, oldStr)
+}
+
+// testParseXml009
+function testGetText() {
+    const str : ReadonlyArray<string> = Array.of<string>(
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+    "<note importance='high'>",
+    "<title>Happy</title>",
+    "<todo>Work</todo>",
+    "<todo>Play</todo>",
+    "</note>")
+
+    let textStr = ''
+    let oldStr = ''
+    let tokenCb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
+        if ((eventType === xml.EventType.TEXT)) {
+            textStr += "{ " + value.getName() + " : " + value.getText() + " }; "
+            oldStr += "key:" + eventType + " value:" + value.getText() + " "
+        }
+        return true
+    }
+
+    let strXml = str.join("")
+    let data = rawStringToBuffer(strXml)
+    let parser = new xml.XmlPullParser(data, "utf-8")
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
+    parser.parse(options)
+
+    let expectedTextStr = '{  : Happy }; {  : Work }; {  : Play }; '
+
+    assertEQ(textStr, expectedTextStr)
+
+    let expectedOld = "key:4 value:Happy key:4 value:Work key:4 value:Play "
+    assertEQ(oldStr, expectedOld)
+}
+
+// testParseXml008
+function testGetPrefix() {
+    const str : ReadonlyArray<string> = Array.of<string>(
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+    "<note importance='high'>",
+    "<h:table xmlns:h='html4'>",
+    "<h:tr><h:td>Bananas</h:td> </h:tr>",
+    "</h:table>",
+    "</note>")
+
+    let textStr = ''
+    let oldStr = ''
+    let tokenCb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
+        if ((eventType === xml.EventType.START_TAG) || (eventType === xml.EventType.END_TAG)) {
+            textStr += "{ " + value.getName() + " : " + value.getPrefix() + " }; "
+            oldStr += "key:" + eventType + " value:" + value.getPrefix() + " "
+        }
+        return true
+    }
+
+    let strXml = str.join("")
+    let data = rawStringToBuffer(strXml)
+    let parser = new xml.XmlPullParser(data, "utf-8")
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tokenValueCallbackFunction": tokenCb}
+    parser.parse(options)
+
+    let expectedTextStr = '{ note :  }; { table : h }; { tr : h }; { td : h }; { td : h }; { tr : h }; { table : h }; { note :  }; '
+
+    assertEQ(textStr, expectedTextStr)
+
+    let oldExpected = "key:2 value: key:2 value:h key:2 value:h key:2 value:h " +
+    "key:3 value:h key:3 value:h key:3 value:h key:3 value: "
+    assertEQ(oldExpected, oldStr)
+}
+
+// testParseXml007
+function testGetNamespace() {
+    const str : ReadonlyArray<string> = Array.of<string>(
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+    "<note importance='high'>",
+    "<h:table xmlns:h='html4'>",
+    "<h:tr><h:td>Bananas</h:td> </h:tr>",
+    "</h:table>",
+    "</note>")
+
+    let textStr = ''
+    let oldStr = ''
+    let tokenCb = (eventType: xml.EventType, value: xml.ParseInfo) => { 
+        if ((eventType === xml.EventType.START_TAG) || (eventType === xml.EventType.END_TAG)) {
+            textStr += "{ " + value.getName() + " : " + value.getNamespace() + " }; "
+            oldStr += "key:" + eventType + " value:" + value.getNamespace() + " "
+        }
+        return true
+    }
+
+    let strXml = str.join("")
+    let data = rawStringToBuffer(strXml)
+    let parser = new xml.XmlPullParser(data, "utf-8")
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tokenValueCallbackFunction": tokenCb}
+    parser.parse(options)
+
+    let expectedTextStr = '{ note :  }; { table : html4 }; { tr : html4 }; { td : html4 }; { td : html4 }; { tr : html4 }; { table : html4 }; { note :  }; '
+
+    assertEQ(textStr, expectedTextStr)
+
+    let oldExpected = "key:2 value: key:2 value:html4 key:2 value:html4 key:2 value:html4 " +
+    "key:3 value:html4 key:3 value:html4 key:3 value:html4 key:3 value: "
+    assertEQ(oldStr, oldExpected)
+}
+
+// testParseXml002
+function testTagValue() {
+    const str : ReadonlyArray<string> = Array.of<string>(
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+    "<note importance='heigh' logged='true'>",
+    "    <![CDATA[function \n matchwo(a,6)]]>",
+    "    <!--Hello, World!-->",
+    "    <company>John &amp; Hans</company>",
+    "    <title>Happy</title>",
+    "    <lens>Play</lens>",
+    "    <?go there?>",
+    "</note>")
+
+    let textStr = ''
+    let oldTextStr = ''
+    let tagCb = (name: string, value: string) => { 
+        textStr += "{ " + name + " : " + value + " }; "
+        oldTextStr += name + value
+        return true
+    }
+
+    let strXml = str.join("")
+    let data = rawStringToBuffer(strXml)
+    let parser = new xml.XmlPullParser(data, "utf-8")
+    let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": tagCb}
+    parser.parse(options)
+
+    let expectedTextStr = '{ note :  }; {  :      }; {  : function \n matchwo(a,6) }; {  :      }; {  : Hello, World! }; \
+{  :      }; { company :  }; {  : John & Hans }; { company :  }; {  :      }; { title :  }; {  : Happy }; { title :  }; \
+{  :      }; { lens :  }; {  : Play }; { lens :  }; {  :      }; {  : go there }; { note :  }; '
+
+    assertEQ(textStr, expectedTextStr)
+
+    let oldExpectedStr = 'note    function \n matchwo(a,6)    Hello, World!    companyJohn & Hanscompany\
+    titleHappytitle    lensPlaylens    go therenote'
+    assertEQ(oldTextStr, oldExpectedStr)
+}
+
+let testXml =
+  "<?xml version='1.0' encoding=\"utf-8\"?><!DOCTYPE example [<!ENTITY exampleEntity 'some entity'>]>\
+  <!-- XMLjghk --><example><!-- fghj -->\
+  <startDocument><startTag><element><!-- yesdryug -->\
+  <tagName>tfyugyi</tagName><!-- xtgh --><content>ydtyfugihj</content>" +
+    "<!-- CDATAguhi -->" +
+    "<cdata><![CDATA[fyghjk]]></cdata>" +
+    "<!-- ugh -->" +
+    "<?processingInstruction example='cfgvhj'?>" +
+    "<!-- gvhblkm -->" +
+    "<entityReference>&exampleEntity;</entityReference>" +
+    "<!-- fcguhjk -->" +
+    "<whitespace>     </whitespace>" +
+    "</element>" +
+    "<!-- ufyui -->" +
+    "</startTag>" +
+    "</startDocument>" +
+    "<!-- ufygo -->" +
+    "<endDocument/>" +
+    "</example>";
+
+    function testXmlIsWhitespace0001() {
+        try {
+            let strXml =
+              '<?xml version="1.0" encoding="utf-8"?>' +
+                '<note importance="high" logged="true">' +
+                '<title> </title>' +
+                '</note>';
+            
+            let parser = new xml.XmlPullParser(rawStringToBuffer(strXml));
+            let str = "";
+            const func = (key: xml.EventType, value: xml.ParseInfo) => {
+                str += 'key:' + key + ' value:' + value.isWhitespace() + ' ';
+                return true;
+            }
+            let options: xml.ParseOptions = {
+                supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
+            }
+            parser.parse(options);
+            assertTrue(str.includes("key:2 value:true"))
+        } catch (err) {
+            const TAG = 'testXmlIsWhitespace0001';
+            console.error(`${TAG} failed, error: ${err}`);
+            assertTrue(false)
+        }
+    }
 
