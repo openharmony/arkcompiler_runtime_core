@@ -28,5 +28,7 @@ void testFoo(::mate::foo::FooType const &foo)
     TH_THROW(std::runtime_error, "testFoo not implemented");
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_testFoo(testFoo);
+// NOLINTEND

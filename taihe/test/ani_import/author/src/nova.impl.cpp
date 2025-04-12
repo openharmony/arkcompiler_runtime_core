@@ -46,7 +46,9 @@ void testNova(weak::NovaType nova)
     TH_THROW(std::runtime_error, "testNova not implemented");
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_testBar(testBar);
 TH_EXPORT_CPP_API_testPura(testPura);
 TH_EXPORT_CPP_API_testNova(testNova);
+// NOLINTEND

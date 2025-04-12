@@ -61,8 +61,10 @@ void showEnumWeekday(::enum_test::Weekday day)
     std::cout << dayStr << std::endl;
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_nextEnum(nextEnum);
 TH_EXPORT_CPP_API_showEnum(showEnum);
 TH_EXPORT_CPP_API_nextEnumWeekday(nextEnumWeekday);
 TH_EXPORT_CPP_API_showEnumWeekday(showEnumWeekday);
+// NOLINTEND

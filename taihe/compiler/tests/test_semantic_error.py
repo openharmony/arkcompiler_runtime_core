@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,9 +82,8 @@ class SemanticTestCompilerInstance:
         self.validate()
 
     def assert_has_error(self, error_type: type[DiagBase]):
-        assert any(
-            isinstance(err, error_type) for err in self.diagnostics_manager.errors
-        )
+        if not any(isinstance(err, error_type) for err in self.diagnostics_manager.errors):
+            raise ValueError("No errors of the specified type found in diagnostics.")
 
 
 def test_package_not_exist():

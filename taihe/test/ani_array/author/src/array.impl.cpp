@@ -118,7 +118,8 @@ array<array<::array_test::Data>> makeStructArrayArray(string_view a, string_view
     return array<array<::array_test::Data>>::make(num2, arr);
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_sumArray(sumArray);
 TH_EXPORT_CPP_API_getArrayValue(getArrayValue);
 TH_EXPORT_CPP_API_toStingArray(toStingArray);
@@ -132,3 +133,4 @@ TH_EXPORT_CPP_API_changeRecordArray(changeRecordArray);
 TH_EXPORT_CPP_API_changeStructArray(changeStructArray);
 TH_EXPORT_CPP_API_fetchBinaryDataSync(fetchBinaryDataSync);
 TH_EXPORT_CPP_API_makeStructArrayArray(makeStructArrayArray);
+// NOLINTEND

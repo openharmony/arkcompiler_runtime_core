@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -118,12 +120,10 @@ class _ResolveImportsPass(RecursiveDeclVisitor):
 
     @property
     def pkg(self) -> PackageDecl:
-        assert self._current_pkg
         return self._current_pkg
 
     @property
     def pkg_group(self) -> PackageGroup:
-        assert self._current_pkg_group
         return self._current_pkg_group
 
     @override

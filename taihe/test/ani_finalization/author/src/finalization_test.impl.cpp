@@ -57,5 +57,7 @@ Foo makeFoo()
     return make_holder<FooImpl, Foo>();
 }
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_makeFoo(makeFoo);
+// NOLINTEND

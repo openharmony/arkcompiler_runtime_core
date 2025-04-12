@@ -158,15 +158,19 @@ public:
 
     array<uint8_t> getArraybuffer()
     {
-        array<uint8_t> result = array<uint8_t>::make(5);
-        std::fill(result.begin(), result.end(), 3);
+        int len = 5;
+        int member = 3;
+        array<uint8_t> result = array<uint8_t>::make(len);
+        std::fill(result.begin(), result.end(), member);
         return result;
     }
 
     array<int8_t> getArray()
     {
-        array<int8_t> result = array<int8_t>::make(5);
-        std::fill(result.begin(), result.end(), 3);
+        int len = 5;
+        int member = 3;
+        array<int8_t> result = array<int8_t>::make(len);
+        std::fill(result.begin(), result.end(), member);
         return result;
     }
 
@@ -178,9 +182,12 @@ public:
     map<string, int8_t> getrecord()
     {
         map<string, int8_t> m;
-        m.emplace("key1", static_cast<int8_t>(1));
-        m.emplace("key2", static_cast<int8_t>(2));
-        m.emplace("key3", static_cast<int8_t>(3));
+        int key1num = 1;
+        int key2num = 2;
+        int key3num = 3;
+        m.emplace("key1", static_cast<int8_t>(key1num));
+        m.emplace("key2", static_cast<int8_t>(key2num));
+        m.emplace("key3", static_cast<int8_t>(key3num));
         return m;
     }
 
@@ -529,7 +536,8 @@ map<string, int8_t> PrintTestInterfaceRecord(::inner::weak::TestInterface testif
 }
 
 }  // namespace
-
+// The macros used below are automatically generated code.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_Primitives_noreturn(Primitives_noreturn);
 TH_EXPORT_CPP_API_Primitives_return(Primitives_return);
 TH_EXPORT_CPP_API_Containers_noreturn(Containers_noreturn);
@@ -555,3 +563,4 @@ TH_EXPORT_CPP_API_get_interface_20(get_interface_20);
 TH_EXPORT_CPP_API_get_interface_A(get_interface_A);
 TH_EXPORT_CPP_API_get_interface_B(get_interface_B);
 TH_EXPORT_CPP_API_get_interface_C(get_interface_C);
+// NOLINTEND
