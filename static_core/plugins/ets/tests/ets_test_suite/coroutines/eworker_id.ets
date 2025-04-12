@@ -17,18 +17,18 @@ let mainId = CoroutineExtras.getWorkerId();
 
 function main() {
     let w = new EAWorker();
-    let p1 = w.run(() => {
+    let p1 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
         assertNE(runId, mainId);
         return runId;
     });
-    let p2 = w.run(() => {
+    let p2 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
         assertNE(runId, mainId);
         return runId;
     });
-    w.stop();
-    let runId1 = await p1;
-    let runId2 = await p2;
+    w.join();
+    let runId1 = p1.Await();
+    let runId2 = p2.Await();
     assertEQ(runId1, runId2);
 }

@@ -367,3 +367,10 @@ add_ets_coroutines_test(FILE await_migrate.ets
                         WORKERS "AUTO"
                         MODE "INT"
 )
+
+add_ets_coroutines_test(FILE job_test.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+)

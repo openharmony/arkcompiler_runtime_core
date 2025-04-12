@@ -17,8 +17,11 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_job.h"
+#include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "runtime/include/object_header.h"
 #include "types/ets_object.h"
 
 namespace ark::ets::intrinsics {
@@ -47,6 +50,49 @@ EtsObject *EtsAwaitJob(EtsJob *job)
     auto *exc = jobHandle->GetValue(currentCoro);
     currentCoro->SetException(exc->GetCoreType());
     return nullptr;
+}
+
+void EtsFinishJob(EtsJob *job, EtsObject *value)
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    if (job == nullptr) {
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, coro);
+        return;
+    }
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsJob> hjob(coro, job);
+    EtsHandle<EtsObject> hvalue(coro, value);
+    EtsMutex::LockHolder lh(hjob);
+    if (!hjob->IsRunning()) {
+        return;
+    }
+    hjob->Finish(coro, hvalue.GetPtr());
+}
+
+void EtsFailJob(EtsJob *job, EtsObject *error)
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    if (job == nullptr) {
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        ThrowNullPointerException(ctx, coro);
+        return;
+    }
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsJob> hjob(coro, job);
+    EtsHandle<EtsObject> herror(coro, error);
+
+    EtsClassLinker *classLinker = coro->GetPandaVM()->GetClassLinker();
+    auto *errorClass = classLinker->GetClass(panda_file_items::class_descriptors::ERROR.data());
+    if (!herror->IsInstanceOf(errorClass)) {
+        ThrowRuntimeException("fail() argument is not an Error object");
+        return;
+    }
+
+    if (!hjob->IsRunning()) {
+        return;
+    }
+    hjob->Fail(coro, herror.GetPtr());
 }
 }
 }  // namespace ark::ets::intrinsics
