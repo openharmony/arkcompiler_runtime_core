@@ -15,17 +15,23 @@ set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_inte
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/tests/checked/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/checked/arktsconfig.in.json ${ETS_CONFIG})
 
-
-
 add_custom_target(ets_interop_js_checked_tests COMMENT "Run ets_interop_js checked tests")
 add_dependencies(ets_tests ets_interop_js_checked_tests)
 add_dependencies(ets_interop_tests ets_interop_js_checked_tests)
 
 function(panda_ets_interop_js_checked_test)
-    cmake_parse_arguments(ARG "" "FILE" "" ${ARGN})
+    cmake_parse_arguments(
+        ARG
+        "COMPILATION_JS_WITH_CJS_ON"
+        "FILE"
+        "JS_SOURCES;TS_SOURCES;DYNAMIC_ABC_OUTPUT_DIR"
+        ${ARGN}
+    )
+
     if (NOT DEFINED ARG_FILE)
         message(FATAL_ERROR "Mandatory FILE argument is not defined.")
     endif()
+
     get_filename_component(TARGET "${ARG_FILE}" NAME_WE)
     set(TARGET "interop_${TARGET}.checked")
 
@@ -40,6 +46,29 @@ function(panda_ets_interop_js_checked_test)
         ETS_VERIFICATOR_ERRORS ${ETS_VERIFICATOR_ERRORS}
     )
 
+    set(JS_COMPILATION_OPTIONS --module --merge-abc)
+    if(ARG_COMPILATION_JS_WITH_CJS_ON)
+        set(JS_COMPILATION_OPTIONS --commonjs)
+    endif()
+
+    set(ALL_DYNAMIC_SOURCES)
+
+    if(DEFINED ARG_JS_SOURCES)
+        list(APPEND ALL_DYNAMIC_SOURCES ${ARG_JS_SOURCES})
+    endif()
+
+    if(DEFINED ARG_TS_SOURCES)
+        list(APPEND ALL_DYNAMIC_SOURCES ${ARG_TS_SOURCES})
+    endif()
+
+    if(ALL_DYNAMIC_SOURCES)
+        set(COMPILE_OPTIONS SOURCES ${ALL_DYNAMIC_SOURCES} COMPILE_OPTION ${JS_COMPILATION_OPTIONS})
+        if (DEFINED ARG_DYNAMIC_ABC_OUTPUT_DIR)
+            list(APPEND COMPILE_OPTIONS ${COMPILE_OPTIONS} OUTPUT_DIR ${ARG_DYNAMIC_ABC_OUTPUT_DIR})
+        endif()
+        compile_dynamic_file(${TARGET}_dynamic_modules ${COMPILE_OPTIONS})
+    endif()
+
     set(CHECKER "${PANDA_ROOT}/tests/checked/checker.rb")
 
     if (PANDA_TARGET_AMD64)
@@ -51,15 +80,48 @@ function(panda_ets_interop_js_checked_test)
     endif()
 
     set(JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_checked_test.js)
-    set(ARK_ETS_INTEROP_JS_PACKAGE_PATH ${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip)
-    set(RUN_COMMAND
-                "/usr/bin/env" "MODULE_PATH=${CMAKE_BINARY_DIR}/lib/module"
-                "NODE_PATH=${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated"
-                "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
-                "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
-                ${NODE_BINARY} ${JS_LAUNCHER})
+    get_filename_component(LAUNCHER_CLEAR_NAME ${JS_LAUNCHER} NAME_WLE)
+
+    set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
+    compile_dynamic_file(${TARGET}_js_launcher
+        SOURCES ${JS_LAUNCHER}
+        OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME}
+        COMPILE_OPTION ${JS_COMPILATION_OPTIONS}
+    )
+
     set(TEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}")
     file(MAKE_DIRECTORY "${TEST_DIR}")
+
+    # Make symbolic links to convinient work with requireNapiPreview
+    set(SO_FILES_LINK_PATH "${TEST_DIR}/module/")
+    set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi_arkjsvm.so")
+    set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/libinterop_test_helper.so")
+
+    add_custom_target(${TARGET}_create_symlinks
+        COMMAND mkdir -p ${SO_FILES_LINK_PATH}
+                && ln -sf ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE} -t ${SO_FILES_LINK_PATH}
+        DEPENDS ets_interop_js_napi_arkjsvm ${INTEROP_HELPER_LIB_SOURCE}
+    )
+
+    set(ARK_ETS_INTEROP_JS_PACKAGE_PATH ${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip)
+    set(CUSTOM_PRERUN_ENVIRONMENT
+        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
+        "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
+        "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+    )
+
+    set(RUN_COMMAND
+        "/usr/bin/env"
+        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
+        "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
+        "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+        ${ARK_JS_NAPI_CLI}
+        --stub-file=${ARK_JS_STUB_FILE}
+        --enable-force-gc=false
+        --entry-point=${LAUNCHER_CLEAR_NAME}
+        ${${COMPILED_LAUNCHER_NAME}}
+    )
+
     SET(OPTIONS "--run-gc-in-place")
     set(PAOC_OPTIONS ${OPTIONS} "--load-runtimes=ets" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
     # interop check tests don't remove --ets-unnamed because it will be removed in another pr
@@ -74,22 +136,34 @@ function(panda_ets_interop_js_checked_test)
     endif()
 
     add_custom_target(${TARGET}
-        COMMAND ${CHECKER} --source ${ARG_FILE}
-                        --panda \"${RUN_COMMAND}\"
-                        --paoc $<TARGET_FILE:ark_aot>
-                        --frontend ${es2panda_bin}
-                        --run-prefix \"${PANDA_RUN_PREFIX}\"
-                        --test-file ${ARK_ETS_INTEROP_JS_PACKAGE_PATH}
-                        --panda-options \"${OPTIONS}\"
-                        --paoc-options \"${PAOC_OPTIONS}\"
-                        --frontend-options \"${ES2PANDA_OPTIONS}\"
-                        --command-token \"//!\"
-                        --arch ${ARCHITECTURE}
-                        ${WITH_LLVM}
-                        ${RELEASE_OPT}
-        WORKING_DIRECTORY ${TEST_DIR}
         COMMENT "Running ${TARGET} checked test"
-        DEPENDS ${JS_LAUNCHER} ${TARGET_TEST_PACKAGE} ets_interop_js_napi ${ETS_CONFIG})
+        WORKING_DIRECTORY ${TEST_DIR}
+        COMMAND
+            ${CHECKER}
+            --source ${ARG_FILE}
+            --panda \"${RUN_COMMAND}\"
+            --paoc $<TARGET_FILE:ark_aot>
+            --frontend ${es2panda_bin}
+            --run-prefix \"${PANDA_RUN_PREFIX}\"
+            --test-file ${ARK_ETS_INTEROP_JS_PACKAGE_PATH}
+            --panda-options \"${OPTIONS}\"
+            --paoc-options \"${PAOC_OPTIONS}\"
+            --frontend-options \"${ES2PANDA_OPTIONS}\"
+            --command-token \"//!\"
+            --arch ${ARCHITECTURE}
+            ${WITH_LLVM}
+            ${RELEASE_OPT}
+        DEPENDS
+            ${TARGET}_js_launcher
+            ${TARGET}_create_symlinks
+            ${TARGET_TEST_PACKAGE}
+            ets_interop_js_napi_arkjsvm
+            ${ETS_CONFIG}
+    )
+
+    if(DEFINED ARG_JS_SOURCES OR ARG_TS_SOURCES)
+        add_dependencies(${TARGET} ${TARGET}_dynamic_modules)
+    endif()
 
     add_dependencies(ets_interop_js_checked_tests ${TARGET})
     add_dependencies(ets_checked_tests ${TARGET})

@@ -11,26 +11,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
+panda_ets_interop_js_checked_test(
+    FILE ${CMAKE_CURRENT_LIST_DIR}/example/strings.ets
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/example/strings.js
+)
 
-panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/example/strings.ets)
-panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/js_call/js_call.ets)
-panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/obj_call/obj_call.ets)
-panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/../class_operations/class_operations_frontend.ets)
-panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/merge_local_scopes/merge_local_scopes.ets)
-panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/peepholes/peepholes.ets)
-panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/qualified_call/qualified_call.ets)
+panda_ets_interop_js_checked_test(
+    FILE ${CMAKE_CURRENT_LIST_DIR}/js_call/js_call.ets
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/js_call/js_call.js
+)
+
+panda_ets_interop_js_checked_test(
+    FILE ${CMAKE_CURRENT_LIST_DIR}/obj_call/obj_call.ets
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/obj_call/obj_call.js
+)
+
+panda_ets_interop_js_checked_test(
+    FILE ${CMAKE_CURRENT_LIST_DIR}/../class_operations/class_operations_frontend.ets
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../class_operations/module.ts
+)
+
+panda_ets_interop_js_checked_test(
+    FILE ${CMAKE_CURRENT_LIST_DIR}/merge_local_scopes/merge_local_scopes.ets
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/js_call/js_call.js
+)
+
+panda_ets_interop_js_checked_test(
+    FILE ${CMAKE_CURRENT_LIST_DIR}/peepholes/peepholes.ets
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/js_call/js_call.js
+)
+
+panda_ets_interop_js_checked_test(
+    FILE ${CMAKE_CURRENT_LIST_DIR}/qualified_call/qualified_call.ets
+    JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/qualified_call/qualified_call.js
+)
 
 set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated")
 
-gen_file(TARGET frontend_test_number_subtypes_gen_ets
-    TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes/ts_to_sts_frontend/number_subtypes_frontend.ets.erb
-    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets
-    REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes/number_subtypes.rb
+panda_ets_interop_js_checked_test(
+    FILE ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets
+    TS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../class_operations/module.ts
 )
-
-panda_ets_interop_js_checked_test(FILE ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets)
 
 gen_file(TARGET test_convert_gen_ets
     TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/convert/convert.ets.erb
@@ -42,6 +63,10 @@ gen_file(TARGET test_convert_gen_js
     OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/convert.js
     REQUIRES ${CMAKE_CURRENT_LIST_DIR}/convert/convert.rb
 )
-panda_ets_interop_js_checked_test(FILE ${INTEROP_TESTS_GENERATED_DIR}/convert.ets)
+panda_ets_interop_js_checked_test(
+    FILE ${INTEROP_TESTS_GENERATED_DIR}/convert.ets
+    JS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/convert.js
+    DYNAMIC_ABC_OUTPUT_DIR ${INTEROP_TESTS_GENERATED_DIR}
+)
 add_dependencies(interop_convert.checked test_convert_gen_ets)
 add_dependencies(interop_convert.checked test_convert_gen_js)

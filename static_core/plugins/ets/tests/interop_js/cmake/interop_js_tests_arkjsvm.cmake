@@ -46,13 +46,17 @@ function(compile_dynamic_file TARGET)
         get_filename_component(CLEAR_NAME ${DYNAMIC_SOURCE} NAME_WLE)
 
         # determine output path of abc file
-        get_filename_component(DIR_NAME "${DYNAMIC_SOURCE}" DIRECTORY)
-        if (NOT ${DIR_NAME} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-            # in this case source file in in subdirectory
-            string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" DIR_NAME "${DIR_NAME}")
-            set(CUR_OUTPUT_ABC ${BUILD_DIR}/${DIR_NAME}/${CLEAR_NAME}.abc)
-        else()
+        if (DEFINED ARG_OUTPUT_DIR)
             set(CUR_OUTPUT_ABC ${BUILD_DIR}/${CLEAR_NAME}.abc)
+        else()
+            get_filename_component(DIR_NAME "${DYNAMIC_SOURCE}" DIRECTORY)
+            if (NOT ${DIR_NAME} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+                # in this case source file in in subdirectory
+                string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" DIR_NAME "${DIR_NAME}")
+                set(CUR_OUTPUT_ABC ${BUILD_DIR}/${DIR_NAME}/${CLEAR_NAME}.abc)
+            else()
+                set(CUR_OUTPUT_ABC ${BUILD_DIR}/${CLEAR_NAME}.abc)
+            endif()
         endif()
 
         list(APPEND ABC_FILES ${CUR_OUTPUT_ABC})
@@ -173,7 +177,7 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     cmake_parse_arguments(
         ARG
         "COMPILATION_JS_WITH_CJS_ON"
-        "JS_LAUNCHER;ETS_CONFIG"
+        "JS_LAUNCHER;ETS_CONFIG;DYNAMIC_ABC_OUTPUT_DIR;"
         "ETS_SOURCES;JS_SOURCES;ABC_FILE;LAUNCHER_ARGS;"
         ${ARGN}
     )
@@ -196,18 +200,19 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     endif()
 
     if(DEFINED ARG_JS_SOURCES)
-        compile_dynamic_file(${TARGET}_js_modules
-            SOURCES ${ARG_JS_SOURCES}
-            COMPILE_OPTION ${JS_COMPILATION_OPTIONS}
-        )
+        set(COMPILE_OPTIONS SOURCES ${ARG_JS_SOURCES} COMPILE_OPTION ${JS_COMPILATION_OPTIONS})
+        if (DEFINED ARG_DYNAMIC_ABC_OUTPUT_DIR)
+            list(APPEND COMPILE_OPTIONS ${COMPILE_OPTIONS} OUTPUT_DIR ${ARG_DYNAMIC_ABC_OUTPUT_DIR})
+        endif()
+        compile_dynamic_file(${TARGET}_js_modules ${COMPILE_OPTIONS})
     endif()
 
     set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
-    compile_dynamic_file(${TARGET}_js_launcher
-        SOURCES ${ARG_JS_LAUNCHER}
-        OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME}
-        COMPILE_OPTION ${JS_COMPILATION_OPTIONS}
-    )
+    set(COMPILE_OPTIONS SOURCES ${ARG_JS_LAUNCHER} OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME} COMPILE_OPTION ${JS_COMPILATION_OPTIONS})
+    if (DEFINED ARG_DYNAMIC_ABC_OUTPUT_DIR)
+        list(APPEND COMPILE_OPTIONS ${COMPILE_OPTIONS} OUTPUT_DIR ${ARG_DYNAMIC_ABC_OUTPUT_DIR})
+    endif()
+    compile_dynamic_file(${TARGET}_js_launcher ${COMPILE_OPTIONS})
 
     # Make symbolic links to convinient work with requireNapiPreview
     set(SO_FILES_LINK_PATH "${CMAKE_CURRENT_BINARY_DIR}/module/")
