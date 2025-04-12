@@ -51,6 +51,24 @@ function testString(): int {
         test(JSON.parse<Object>("\"\"", stringType) as String == "", "String()")
 }
 
+function testString02(): int {
+    let stringType = Type.of(new String() as Object)
+    let s = 'a/b//c///d////f'
+    let s1 = '"a/b//c///d////f"'
+    let msg = 'String(a/b//c///d////f)'
+    return test(JSON.stringify(s) == s1, msg) +
+        test(JSON.parse<Object>(s1, stringType) as String == s, msg)
+}
+
+function testString03(): int {
+    let stringType = Type.of(new String() as Object)
+    let s = 'https://p3-sign'
+    let s1 = '"https://p3-sign"'
+    let msg = 'String(https://p3-sign)'
+    return test(JSON.stringify(s) == s1, msg) +
+        test(JSON.parse<Object>(s1, stringType) as String == s, msg)
+}
+
 function equalObjectArrays(a: Object[], b: Object[]): boolean {
     if (a.length != b.length) {
         return false
@@ -438,6 +456,8 @@ function main(): int {
     failures += testBoolean()
     failures += testDouble()
     failures += testString()
+    failures += testString02()
+    failures += testString03()
     failures += testArrayBooleanParse()
     failures += testArrayBooleanStringify()
     failures += testArrayDouble()
