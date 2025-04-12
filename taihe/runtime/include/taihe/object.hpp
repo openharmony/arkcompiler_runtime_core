@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_OBJECT_HPP
+#define TAIHE_OBJECT_HPP
 
 #include <taihe/object.abi.h>
 #include <taihe/common.hpp>
@@ -21,6 +22,10 @@
 #include <exception>
 #include <stdexcept>
 #include <type_traits>
+
+// This file is used as a standard library and needs to be easy to use.
+// The rule that single-parameter constructors need to be explicit does not apply.
+// NOLINTBEGIN
 
 //////////////////////
 // Raw Data Handler //
@@ -284,3 +289,6 @@ inline auto into_holder(Impl &&impl)
     return impl_holder<Impl, InterfaceHolders...>::make(std::forward<Impl>(impl));
 }
 }  // namespace taihe
+// NOLINTEND
+
+#endif // TAIHE_OBJECT_HPP

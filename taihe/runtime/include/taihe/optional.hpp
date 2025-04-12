@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_OPTIONAL_HPP
+#define TAIHE_OPTIONAL_HPP
 
 #include <taihe/optional.abi.h>
 #include <taihe/common.hpp>
@@ -24,6 +25,9 @@
 #include <stdexcept>
 #include <utility>
 
+// This file is used as a standard library and needs to be easy to use.
+// The rule that single-parameter constructors need to be explicit does not apply.
+// NOLINTBEGIN
 namespace taihe {
 template <typename cpp_owner_t>
 struct optional_view;
@@ -143,3 +147,6 @@ struct as_param<optional<cpp_owner_t>> {
     using type = optional_view<cpp_owner_t>;
 };
 }  // namespace taihe
+// NOLINTEND
+
+#endif // TAIHE_OPTIONAL_HPP

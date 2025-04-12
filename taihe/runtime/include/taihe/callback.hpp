@@ -12,12 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_CALLBACK_HPP
+#define TAIHE_CALLBACK_HPP
 
 #include <taihe/common.hpp>
 
 #include <type_traits>
 
+// This file is used as a standard library and needs to be easy to use.
+// The rule that single-parameter constructors need to be explicit does not apply.
+// NOLINTBEGIN
 namespace taihe {
 template <typename Signature>
 struct callback_view;
@@ -148,3 +152,6 @@ struct as_param<callback<Return(Params...)>> {
     using type = callback_view<Return(Params...)>;
 };
 }  // namespace taihe
+// NOLINTEND
+
+#endif // TAIHE_CALLBACK_HPP

@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_RUNTIME_HPP
+#define TAIHE_RUNTIME_HPP
 
 #include <taihe/string.hpp>
 
@@ -26,3 +27,5 @@ void set_error(taihe::string_view msg);
 void reset_error();
 bool has_error();
 }  // namespace taihe
+
+#endif // TAIHE_RUNTIME_HPP

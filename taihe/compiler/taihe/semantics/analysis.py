@@ -442,12 +442,12 @@ class _CheckEnumTypePass(RecursiveDeclVisitor):
         if (lambda_pair := table.get(d.ty_ref.maybe_resolved_ty)) is None:
             self.diag.emit(TypeUsageError(d.ty_ref))  # pyre-ignore
             return
-        valid, next, default = lambda_pair
+        valid, increment, default = lambda_pair
 
         prev = None
         for item in d.items:
             if item.value is None:
-                item.value = default(item) if prev is None else next(prev, item)
+                item.value = default(item) if prev is None else increment(prev, item)
             if not valid(item.value):
                 self.diag.emit(EnumValueError(item, d))
                 prev = None

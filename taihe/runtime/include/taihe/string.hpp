@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_STRING_HPP
+#define TAIHE_STRING_HPP
 
 #include <taihe/string.abi.h>
 #include <taihe/common.hpp>
@@ -27,6 +28,9 @@
 #include <string_view>
 #include <utility>
 
+// This file is used as a standard library and needs to be easy to use.
+// The rule that single-parameter constructors need to be explicit does not apply.
+// NOLINTBEGIN
 namespace taihe {
 struct string_view;
 struct string;
@@ -257,8 +261,7 @@ template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 inline string to_string(T value)
 {
     char buffer[32];
-    std::to_chars_result result;
-    result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+    std::to_chars_result result = std::to_chars(std::begin(buffer), std::end(buffer), value);
     if (result.ec != std::errc {}) {
         TH_THROW(std::runtime_error, "Conversion to char failed");
     }
@@ -270,8 +273,8 @@ template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
 inline string to_string(T value)
 {
     char buffer[32];
-    std::to_chars_result result;
-    result = std::to_chars(std::begin(buffer), std::end(buffer), value, std::chars_format::general);
+    std::to_chars_result result = std::to_chars(std::begin(buffer),
+        std::end(buffer), value, std::chars_format::general);
     if (result.ec != std::errc {}) {
         TH_THROW(std::runtime_error, "Conversion to char failed");
     }
@@ -314,3 +317,6 @@ struct as_param<string> {
     using type = string_view;
 };
 }  // namespace taihe
+// NOLINTEND
+
+#endif // TAIHE_STRING_HPP

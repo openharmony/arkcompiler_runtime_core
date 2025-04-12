@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_ARRAY_ABI_H
+#define TAIHE_ARRAY_ABI_H
 
 #include <taihe/common.h>
 
@@ -20,3 +21,5 @@ struct TArray {
     size_t m_size;
     void *m_data;
 };
+
+#endif // TAIHE_ARRAY_ABI_H

@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef TAIHE_OBJECT_ABI_H
+#define TAIHE_OBJECT_ABI_H
 
 #include <taihe/common.h>
 
@@ -23,7 +24,6 @@ struct DataBlockHead;
 
 // IdMapItem
 // Represents an ID mapping item containing an ID and a vtable pointer.
-//
 // # Members
 // - `id`: A constant pointer representing the interface ID.
 // - `vtbl_ptr`: A pointer to the virtual table associated with the ID.
@@ -35,7 +35,6 @@ struct IdMapItem {
 // TypeInfo
 // Represents metadata information for a type, including version, length, and
 // function pointers.
-//
 // # Members
 // - `version`: A 64-bit unsigned integer representing the version of the type
 // information.
@@ -59,28 +58,25 @@ struct DataBlockHead {
 };
 
 // Initializes the TObject with the given runtime typeinfo.
-//
 // # Arguments
 // - `data_ptr`: The data pointer.
 // - `rtti_ptr`: The runtime typeinfo pointer.
 TH_EXPORT void tobj_init(struct DataBlockHead *data_ptr, struct TypeInfo const *rtti_ptr);
 
 // Increments the reference count of the given TObject.
-//
 // # Arguments
 // - `data_ptr`: The data pointer.
-//
 // # Returns
 // - The new data pointer.
 TH_EXPORT struct DataBlockHead *tobj_dup(struct DataBlockHead *data_ptr);
 
 // Decrements the reference count of the given TObject. If the reference count
 // reaches zero, the object is destroyed.
-//
 // # Arguments
 // - `tobj`: The data pointer.
-//
 // # Returns
 // - This function does not return a value. It may result in the destruction of
 // the TObject if the reference count reaches zero.
 TH_EXPORT void tobj_drop(struct DataBlockHead *data_ptr);
+
+#endif // TAIHE_OBJECT_ABI_H
