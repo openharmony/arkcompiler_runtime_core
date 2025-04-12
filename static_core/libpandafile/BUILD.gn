@@ -142,15 +142,15 @@ ohos_source_set("libarktsfile_frontend_set_static") {
   external_deps = [ sdk_libc_secshared_dep ]
 
   if (!ark_standalone_build) {
-    public_external_deps = [
-      "zlib:libz",
-      "zlib:shared_libz",
-    ]
+    public_external_deps = [ "zlib:libz" ]
+    if (!is_mac) {
+      public_external_deps += [ "zlib:shared_libz" ]
+    }
   } else {
-    external_deps += [
-      "zlib:libz",
-      "zlib:shared_libz",
-    ]
+    external_deps += [ "zlib:libz" ]
+    if (!is_mac) {
+      external_deps += [ "zlib:shared_libz" ]
+    }
   }
 
   part_name = ark_part_name

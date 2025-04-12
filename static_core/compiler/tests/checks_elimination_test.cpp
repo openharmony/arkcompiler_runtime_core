@@ -5437,12 +5437,12 @@ TEST_F(ChecksEliminationTest, OverflowCheckOptimize)
         BASIC_BLOCK(3U, -1L)
         {
             INST(16U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({1U, 2U});
-            INST(17U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW).Inputs(16U);  // must overflow
+            INST(17U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW_TYPE).Inputs(16U);  // must overflow
         }
         BASIC_BLOCK(4U, -1L)
         {
             INST(18U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({1U, 2U});
-            INST(19U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW).Inputs(18U);  // must overflow
+            INST(19U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW_TYPE).Inputs(18U);  // must overflow
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, GetGraph()));
@@ -5657,7 +5657,7 @@ TEST_F(ChecksEliminationTest, NegOverflowAndZeroCheck1)
             BASIC_BLOCK(2U, -1L)
             {
                 INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-                INST(6U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW).Inputs(5U);
+                INST(6U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW_TYPE).Inputs(5U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));

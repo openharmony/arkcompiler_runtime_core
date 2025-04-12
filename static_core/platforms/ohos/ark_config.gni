@@ -15,7 +15,7 @@ default_ark_enabled_plugins = [ "ets" ]
 platform_libs = []
 platform_ldflags = []
 platform_include_dirs = []
-if (current_toolchain == host_toolchain) {
+if (current_toolchain == host_toolchain && !is_mac) {
   platform_ldflags = [ "-static-libstdc++" ]
 }
 use_pbqp = false

@@ -38,9 +38,15 @@ bool InAllocatedCodeRange(uintptr_t pc);
 #define CONTEXT_FP uc_->uc_mcontext.arm_fp  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_LR uc_->uc_mcontext.arm_lr  // NOLINT(cppcoreguidelines-macro-usage)
 #elif defined(PANDA_TARGET_ARM64)
+#ifdef __linux__
 #define CONTEXT_PC uc_->uc_mcontext.pc        // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_FP uc_->uc_mcontext.regs[29]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_LR uc_->uc_mcontext.regs[30]  // NOLINT(cppcoreguidelines-macro-usage)
+#else
+#define CONTEXT_PC uc_->uc_mcontext->__ss.__pc  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_FP uc_->uc_mcontext->__ss.__fp  // NOLINT(cppcoreguidelines-macro-usage)
+#define CONTEXT_LR uc_->uc_mcontext->__ss.__lr  // NOLINT(cppcoreguidelines-macro-usage)
+#endif
 #elif defined(PANDA_TARGET_AMD64)
 #define CONTEXT_PC uc_->uc_mcontext.gregs[REG_RIP]  // NOLINT(cppcoreguidelines-macro-usage)
 #define CONTEXT_SP uc_->uc_mcontext.gregs[REG_RSP]  // NOLINT(cppcoreguidelines-macro-usage)
@@ -68,8 +74,12 @@ public:
     uintptr_t GetSP()
     {
 #if defined(PANDA_TARGET_ARM64)
+#ifdef __APPLE__
+        return uc_->uc_mcontext->__ss.__sp;
+#else
         auto sc = reinterpret_cast<struct sigcontext *>(&uc_->uc_mcontext);
         return sc->sp;
+#endif
 #else
         return CONTEXT_SP;
 #endif

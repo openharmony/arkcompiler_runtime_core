@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,11 @@ class SPMCLockFreeQueue {
     static_assert(ark::helpers::math::IsPowerOfTwo(QUEUE_NODE_SIZE));
     static constexpr size_t QUEUE_NODE_MASK = QUEUE_NODE_SIZE - 1U;
     static_assert(QUEUE_NODE_MASK > 0);
+#ifdef __APPLE__
+    static constexpr size_t QUEUE_NODE_SHIFT = ark::helpers::math::GetIntLog2(static_cast<uint64_t>(QUEUE_NODE_SIZE));
+#else
     static constexpr size_t QUEUE_NODE_SHIFT = ark::helpers::math::GetIntLog2(QUEUE_NODE_SIZE);
+#endif
 
     static constexpr size_t CONSUMER_MAX_COUNT = 1UL << 5U;
     static constexpr size_t DELETE_TRIGGER_PUSH_COUNT = QUEUE_NODE_SIZE;
