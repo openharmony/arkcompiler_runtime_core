@@ -32,14 +32,14 @@ function main(): int {
     concurrentHashMapTestsuite.addTest("entriesTest_001", () =>
     {
         let concurrentHashMapNull: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        let iterEntries: IterableIterator<[number, string]> = concurrentHashMapNull.entries();
+        let iterEntries: IterableIterator<[Number, string]> = concurrentHashMapNull.entries();
         assertEQ(iterEntries.next().value, undefined);
         assertEQ(iterEntries.next().value, undefined);
     });
     concurrentHashMapTestsuite.addTest("entriesTest_002", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
-        let iterEntries: IterableIterator<[number, string]> = concurrentHashMap.entries();
+        let iterEntries: IterableIterator<[Number, string]> = concurrentHashMap.entries();
         let str = "";
         for (let i: int = 0; i < 10; i++) {
             str += iterEntries.next().value!.toString();
@@ -53,7 +53,7 @@ function main(): int {
     concurrentHashMapTestsuite.addTest("entriesTest_003", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        let iterEntries: IterableIterator<[number, string]> = concurrentHashMap.entries();
+        let iterEntries: IterableIterator<[Number, string]> = concurrentHashMap.entries();
         assertEQ(iterEntries.next().value, undefined);
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrKeys[i], arrValues[i]);

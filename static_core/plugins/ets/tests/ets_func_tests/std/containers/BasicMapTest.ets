@@ -189,7 +189,7 @@ function createMapAddClearAndGetKeys(): int {
 function createMapAndGetEntries(): int {
     let map: Map<char, double> = new Map<char, double>()
     let entries = map.entries()
-    return getIteratorLen<[char, double]>(entries)
+    return getIteratorLen<[Char, Double]>(entries)
 }
 
 function createMapAddAndGetEntries(): int {
@@ -200,7 +200,7 @@ function createMapAddAndGetEntries(): int {
 
     let entries = map.entries()
 
-    let result = getIteratorLen<[char, double]>(entries) == 3 ? 0 : 1
+    let result = getIteratorLen<[Char, Double]>(entries) == 3 ? 0 : 1
     return result
 }
 
@@ -213,7 +213,7 @@ function createMapAddRemoveAndGetEntries(): int {
     map.delete(c'b')
     let entries = map.entries()
 
-    let result = getIteratorLen<[char, double]>(entries) == 2 ? 0 : 1
+    let result = getIteratorLen<[Char, Double]>(entries) == 2 ? 0 : 1
     return result
 }
 
@@ -225,7 +225,7 @@ function createMapAddClearAndGetEntries(): int {
     map.clear()
     let entries = map.entries()
 
-    return getIteratorLen<[char, double]>(entries)
+    return getIteratorLen<[Char, Double]>(entries)
 }
 
 function createMapAddAndRemove(): int {

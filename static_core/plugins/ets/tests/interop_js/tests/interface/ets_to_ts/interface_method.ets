@@ -63,12 +63,12 @@ function create_interface_class_union_type_method(): UnionTypeMethodClass {
 //   return new LiteralValueMethodClass();
 // }
 
-interface Tuple {
+interface TupleT {
   get(arg: [int, string]): [int, string];
 }
 
 
-class TupleTypeMethodClass implements Tuple {
+class TupleTypeMethodClass implements TupleT {
   get(arg: [int, string]): [int, string]{
     return arg;
   }

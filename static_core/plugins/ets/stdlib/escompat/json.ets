@@ -579,6 +579,8 @@ class JSONWriter {
             this.buffer.append(JSON.stringify(obj as String))
         } else if (obj instanceof RegExpExecArray) {
             this.buffer.append(JSON.stringify((obj as RegExpExecArray).result))
+        } else if(obj instanceof Tuple) {
+            this.writeTupleValue(obj);
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
@@ -598,6 +600,72 @@ class JSONWriter {
                 throw new AssertionError("Unsupported object type: " + objType)
             }
         }
+    }
+
+    private writeTupleValue(obj: Object) {
+        const currentBuffer = this.buffer
+        this.buffer = new StringBuilder("[")
+
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
+        }
+
+        const objType = Type.of(obj) as ClassType
+
+        const writableFields = this.getWritableFields(objType, Value.of(obj) as ClassValue)
+
+        let fieldDumped = false
+        if (writableFields.length > 0) {
+            this.path.add(obj)
+            fieldDumped = this.writeTupleElements(writableFields)
+            this.path.delete(obj)
+        }
+
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
+        this.buffer.append("]")
+
+        if (fieldDumped) {
+            currentBuffer.append(this.buffer.toString())
+        } else {
+            currentBuffer.append("[]")
+        }
+
+        this.buffer = currentBuffer
+    }
+
+    private writeTupleElements(tupleFields: Array<[Field, Value]>): boolean {
+        const FIELD_VALUE = 1
+
+        let fieldDumped = false
+        for (let fieldIdx = 0; fieldIdx < tupleFields.length; fieldIdx++) {
+            const objToDump = tupleFields[fieldIdx][FIELD_VALUE].getData();
+            if (objToDump !== undefined) {
+                if (fieldDumped) {
+                    this.buffer.append(",")
+                    if (this.useIndent) {
+                        this.buffer.append("\n")
+                    }
+                } else {
+                    fieldDumped = true
+                }
+
+                this.writePadding()
+
+                if (this.useIndent) {
+                    this.buffer.append(" ")
+                }
+
+                this.writeObject(objToDump)
+            }
+        }
+
+        return fieldDumped
     }
 
     private writeClassValue(obj: Object, objType: ClassType): void {

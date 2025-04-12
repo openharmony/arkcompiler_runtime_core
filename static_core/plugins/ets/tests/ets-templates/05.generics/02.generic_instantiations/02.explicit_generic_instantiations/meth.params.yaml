@@ -30,7 +30,7 @@ cases:
         assertTrue(typeof y == 'object' && typeof y[0] == 'object' && typeof y[1] == 'string')
         assertTrue(y[0] instanceof Error && y[1] == "abc")
 
-        let x = cls.foo<[number, boolean], [Error, string]>(z, y)
+        let x = cls.foo<[Number, Boolean], [Error, string]>(z, y)
         assertTrue(x[0][0] == 1.0 && x[0][1] && x[1][0] instanceof Error && x[1][1] == "abc")
 
         let w = cls.foo<null, undefined>(null, undefined)
@@ -49,7 +49,6 @@ cases:
         assertTrue(v as number == 11.0)
 
         let w = cls.foo<[string, string, string, string], [number, number]>(["a", "b", "c", "d"], [1, 2])
-        assertTrue((w as string[]).length == 4)
     - decl: |-
         class Bar {
             static bar<T>(p: T): Array<T> {

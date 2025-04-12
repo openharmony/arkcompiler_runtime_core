@@ -112,6 +112,8 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     escompatSharedMemory = findType(SHARED_MEMORY);
     interopJSValue = findType(JS_VALUE);
 
+    coreTupleN = findType(TUPLEN);
+
     coreFinalizableWeakRef = findType(FINALIZABLE_WEAK_REF);
     coreFinalizationRegistry = findType(FINALIZATION_REGISTRY);
     coreFinalizationRegistryExecCleanup = FindMethod(coreFinalizationRegistry, "execCleanup", "[Lstd/core/WeakRef;I:V");

@@ -22,7 +22,7 @@ function main(): int {
 
     failures += test(testIteratorWithEmptyReadonlyMap(),"Test Iterator With Empty ReadonlyMap");
     failures += test(testIteratorWithNonEmptyReadonlyMap(), "Test Iterator With Non Empty ReadonlyMap");
-    
+
     return test(failures, "All tests run");
 }
 
@@ -44,22 +44,22 @@ function testIteratorWithNonEmptyMap(): int {
     map.set("key1", 1);
     map.set("key2", 2);
     const iterator = map.$_iterator();
-    
+
     let v = iterator.next();
-    if (v.done || (v.value as [string, number])[0] != "key1" || (v.value as [string, number])[1] != 1) {
+    if (v.done || (v.value as [string, Number])[0] != "key1" || (v.value as [string, Number])[1] != 1) {
         return RESULT_FAILURE ;
     }
 
     v = iterator.next();
-    if (v.done || (v.value as [string, number])[0] != "key2" || (v.value as [string, number])[1] != 2) {
+    if (v.done || (v.value as [string, Number])[0] != "key2" || (v.value as [string, Number])[1] != 2) {
         return RESULT_FAILURE ;
     }
-    
+
     v = iterator.next();
     if (!v.done) {
         return RESULT_FAILURE ;
     }
-    
+
     return RESULT_SUCCESS ;
 }
 
@@ -67,24 +67,24 @@ function testIteratorBoundaryConditions(): int {
     const map = new Map<String, Number>();
     map.set("key1", 1);
     const iterator = map.$_iterator();
-    
+
     let v = iterator.next();
-    if (v.done || (v.value as [string, number])[0] != "key1" || (v.value as [string, number])[1] != 1) {
+    if (v.done || (v.value as [string, Number])[0] != "key1" || (v.value as [string, Number])[1] != 1) {
         return RESULT_FAILURE ;
     }
-    
+
     v = iterator.next();
     if (!v.done) {
         return RESULT_FAILURE ;
     }
-    
+
     // Calling next() again after iteration is done
-    /* issue number 18321, when the iterator has reached the end, and then called next() on it, v.done returns false. 
+    /* issue number 18321, when the iterator has reached the end, and then called next() on it, v.done returns false.
     v = iterator.next();
     if (!v.done) {
         return RESULT_FAILURE;
     }*/
-    
+
     return RESULT_SUCCESS ;
 }
 
@@ -107,17 +107,17 @@ function testIteratorWithNonEmptyReadonlyMap(): int {
     const iterator = map.$_iterator();
 
     let v = iterator.next();
-    if (v.done || (v.value as [string, number])[0]  != 'one' || (v.value as [string, number])[1]  != 1) {
+    if (v.done || (v.value as [string, Number])[0]  != 'one' || (v.value as [string, Number])[1]  != 1) {
         return RESULT_FAILURE;
     }
 
     v = iterator.next();
-    if (v.done || (v.value as [string, number])[0]  != 'two' || (v.value as [string, number])[1]  != 2) {
+    if (v.done || (v.value as [string, Number])[0]  != 'two' || (v.value as [string, Number])[1]  != 2) {
         return RESULT_FAILURE;
     }
 
     v = iterator.next();
-    if (v.done || (v.value as [string, number])[0]  != 'three' || (v.value as [string, number])[1]  != 3) {
+    if (v.done || (v.value as [string, Number])[0]  != 'three' || (v.value as [string, Number])[1]  != 3) {
         return RESULT_FAILURE;
     }
 

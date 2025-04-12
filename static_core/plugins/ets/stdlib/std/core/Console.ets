@@ -984,6 +984,9 @@ class DataFrame {
                     if (fieldName.startsWith("gensym%%")) {
                         fieldName = `Field${i}`;
                     }
+                    if (obj instanceof Tuple){
+                        fieldName = `${i}`;
+                    }
                     mapping.set(
                         fieldName,
                         arrayValue.getField(i).toPrint(10)

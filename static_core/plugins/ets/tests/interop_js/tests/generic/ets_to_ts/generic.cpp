@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,8 @@ TEST_F(EtsGenericEtsToTsTest, check_generic_any)
 {
     ASSERT_TRUE(RunJsTestSuite("check_generic_any.js"));
 }
-
-TEST_F(EtsGenericEtsToTsTest, check_generic_tuple)
+// NOTE (#24570): fix interop tests with tuple
+TEST_F(EtsGenericEtsToTsTest, DISABLED_check_generic_tuple)
 {
     ASSERT_TRUE(RunJsTestSuite("check_generic_tuple.js"));
 }

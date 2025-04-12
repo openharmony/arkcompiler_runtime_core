@@ -93,16 +93,16 @@ class SetterAnyType<T> {
    }
 }
 
-type Tuple = [number, string];
+type TupleT = [number, string];
 
 class TupleSet {
-   private _value: Tuple = [0, ""];
+   private _value: TupleT = [0, ""];
 
-   public set value(arg: Tuple) {
+   public set value(arg: TupleT) {
       this._value = arg;
    }
 
-   public get value(): Tuple {
+   public get value(): TupleT {
       return this._value;
    }
 }

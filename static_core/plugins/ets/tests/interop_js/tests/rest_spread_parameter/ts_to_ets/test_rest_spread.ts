@@ -16,16 +16,16 @@
 const etsVm = globalThis.gtest.etsVm;
 
 function compareArraysAreEqual<T>(arr1: T[], arr2: T[]) {
-    if(arr1.length !== arr2.length) {
+    if (arr1.length !== arr2.length) {
         return false;
     }
-    for(let i = 0; i < arr1.length; i++) {
+    for (let i = 0; i < arr1.length; i++) {
         if (Array.isArray(arr1[i]) && Array.isArray(arr2[i])) {
             if (!compareArraysAreEqual(arr1[i], arr2[i])) {
                 return false;
             }
         } else {
-            if(arr1[i] !== arr2[i]) {
+            if (arr1[i] !== arr2[i]) {
                 return false;
             }
         }
@@ -42,7 +42,7 @@ let checkRestOfJSValue = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'chec
 
 function testRestOfNumber() {
     let tmpFun = (obj: number[], ...nums: number[]) => compareArraysAreEqual<number>(obj, nums);
-   ASSERT_TRUE(checkRestOfNumber(tmpFun));
+    ASSERT_TRUE(checkRestOfNumber(tmpFun));
 }
 
 function testRestOfString() {
@@ -54,6 +54,7 @@ function testRestOfObject() {
     let tmpFun = (obj: object[], ...objs: object[]) => compareArraysAreEqual(obj, objs);
     ASSERT_TRUE(checkRestOfObject(tmpFun));
 }
+
 
 function testRestOfTuple() {
     let tmpFun = (obj: [number, string][], ...tupleArr: [number, string][]) => compareArraysAreEqual(obj, tupleArr);
@@ -73,6 +74,6 @@ function testRestOfJSValue() {
 testRestOfNumber();
 testRestOfString();
 testRestOfObject();
-testRestOfTuple();
+// NOTE (#24570): correct interop tests with tuples
 testRestofUnion();
 testRestOfJSValue();

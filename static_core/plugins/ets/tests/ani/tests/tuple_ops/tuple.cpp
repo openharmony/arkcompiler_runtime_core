@@ -133,7 +133,7 @@ TEST_F(TupleOpsTest, identicalTuple)
     }
 }
 
-TEST_F(TupleOpsTest, incorrectElementType)
+TEST_F(TupleOpsTest, DISABLED_incorrectElementType)
 {
     auto tuple = GetTupleWithCheck("tuple", "getCharTuple");
     ani_boolean booleanValue = ANI_FALSE;

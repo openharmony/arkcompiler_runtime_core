@@ -60,6 +60,8 @@ public:
 
     EtsClass *interopJSValue;
 
+    EtsClass *coreTupleN;
+
     EtsClass *coreFinalizableWeakRef;
     EtsClass *coreFinalizationRegistry;
     EtsMethod *coreFinalizationRegistryExecCleanup;

@@ -30,12 +30,12 @@ function main(): int {
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_002", () =>
     {
-        let array = Array<[number, string]>(10);
+        let array = Array<[Number, string]>(10);
         for (let i = 0; i < 10; i++) {
-            let arrKV: [number, string] = [arrKeys[i], arrValues[i]]
+            let arrKV: [Number, string] = [arrKeys[i], arrValues[i]]
             array[i] = arrKV;
         }
-        let arrayLike = array as ArrayLike<[number, string]>;
+        let arrayLike = array as ArrayLike<[Number, string]>;
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(arrayLike);
         assertEQ(concurrentHashMap.size, 10);
         for (let i = 0; i < 10; i++) {
@@ -44,9 +44,9 @@ function main(): int {
     });
     concurrentHashMapOneTestsuite.addTest("constructorTest_003", () =>
     {
-        let arr: Array<[number, string]> = new Array<[number, string]>(10);
+        let arr: Array<[Number, string]> = new Array<[Number, string]>(10);
         for (let i: int = 0; i < 10 ; i++) {
-            let arrKV: [number, string] = [arrKeys[i], arrValues[i]]
+            let arrKV: [Number, string] = [arrKeys[i], arrValues[i]]
             arr[i] = arrKV;
         }
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(arr);

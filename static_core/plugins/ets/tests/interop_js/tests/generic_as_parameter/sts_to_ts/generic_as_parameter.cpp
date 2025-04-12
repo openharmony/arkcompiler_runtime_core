@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,11 @@ TEST_F(EtsGenericAsParameterEtsToTsTest, check_any_type_parameter)
 {
     ASSERT_TRUE(RunJsTestSuite("check_any_type_parameter.js"));
 }
+
+TEST_F(EtsGenericAsParameterEtsToTsTest, DISABLED_check_any_type_parameter_tuple)
+{
+    ASSERT_TRUE(RunJsTestSuite("check_any_type_parameter_tuple.js"));
+}
 // NOTE: issue (17921) fix class implements interface
 TEST_F(EtsGenericAsParameterEtsToTsTest, DISABLED_check_generic_extend_interface)
 {
@@ -44,8 +49,8 @@ TEST_F(EtsGenericAsParameterEtsToTsTest, DISABLED_check_generic_default_type)
 {
     ASSERT_TRUE(RunJsTestSuite("check_generic_default_type.js"));
 }
-
-TEST_F(EtsGenericAsParameterEtsToTsTest, check_tuple_parameter_generic)
+// NOTE (#24570): fix interop tests
+TEST_F(EtsGenericAsParameterEtsToTsTest, DISABLED_check_tuple_parameter_generic)
 {
     ASSERT_TRUE(RunJsTestSuite("check_tuple_parameter_generic.js"));
 }

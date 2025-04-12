@@ -123,7 +123,7 @@ function testIteratorWithEmpty() {
         elem = TestData.testNumber1;
     }
     let iter = plainArray.$_iterator();
-    let temp: IteratorResult<[number, string]> = iter.next();
+    let temp: IteratorResult<[Number, string]> = iter.next();
     while (!temp.done) {
         elem = TestData.testNumber1;
     }
@@ -141,7 +141,7 @@ function testIteratorWithNonEmpty() {
         assertEQ(item[0], plainArray.getKeyAt(elem1++), "The key should be same");
     }
     let iter = plainArray.$_iterator();
-    let temp: IteratorResult<[number, string]> = iter.next();
+    let temp: IteratorResult<[Number, string]> = iter.next();
     let elem2: number = 0;
     while (!temp.done) {
         assertEQ(temp.value![TestData.testInt1], plainArray.getValueAt(elem2), "The value should be same");

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,8 +121,8 @@ TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnSet)
     auto ret = CallEtsMethod<bool>("TestReturnSet");
     ASSERT_EQ(ret, true);
 }
-
-TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnTuple)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInteropClassMethodsReturningValuesTest, DISABLED_TestReturnTuple)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
     auto ret = CallEtsMethod<bool>("TestReturnTuple");

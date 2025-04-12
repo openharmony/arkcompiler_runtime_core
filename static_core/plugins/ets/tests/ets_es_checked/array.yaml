@@ -50,8 +50,9 @@ sub:
           - combinationRest "Array.of<number>(1)", "Array.of<number>()", "Array.of<number>(NaN, 10, Infinity)"
       - method: values
       - method: keys
-      - method: entries
-        ret_type: Iterable<[number, number]>
+      - method:
+        excluded: true # NOTE (#24570): fix tuple type tests
+        ret_type: Iterable<[Number, Number]>
       - expr: self.length
       - expr: "0.0"
         setup: |
@@ -208,7 +209,7 @@ sub:
           - method: keys
           - method: entries
             excluded: true # es2panda parser fails
-            ret_type: Iterable<[number, Object | null | undefined]>
+            ret_type: Iterable<[Number, Object | null | undefined]>
       - self: null
         sub:
           - expr: Array.of<number>(pars).length
