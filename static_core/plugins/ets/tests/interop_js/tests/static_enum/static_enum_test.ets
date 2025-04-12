@@ -23,18 +23,7 @@ enum Color {
     BLUE = 5
 }
 
-enum Direction {
-    Up = -1,
-    Down = 1
-}
-
-function test1(): int {
-    return (Direction.Up + Direction.Down) as int
-}
-
-function test2(): boolean {
-    if(Color.RED = 1 && Color.Blue = 5) {
-        return true
-    }
-    return false
+enum Level {
+    DEBUG = 'Debug',
+    RELEASE = 'Release'
 }

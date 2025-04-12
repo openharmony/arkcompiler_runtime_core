@@ -29,8 +29,8 @@ TEST_F(EtsConversionTypesEtsToJsTest, check_conversion_int)
 {
     ASSERT_TRUE(RunJsTestSuite("check_conversion_int.js"));
 }
-// NOTE(srokashevich): enable after fix #21057
-TEST_F(EtsConversionTypesEtsToJsTest, DISABLED_check_conversion_string)
+
+TEST_F(EtsConversionTypesEtsToJsTest, check_conversion_string)
 {
     ASSERT_TRUE(RunJsTestSuite("check_conversion_string.js"));
 }
