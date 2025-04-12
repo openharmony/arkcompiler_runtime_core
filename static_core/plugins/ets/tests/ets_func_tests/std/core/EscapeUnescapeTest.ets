@@ -16,7 +16,7 @@
 function main(): int {
     let failures = 0;
 
-    failures += testEscapeId("azAZ123@\\*_+-./_")
+    failures += testEscapeId("azAZ123@*_+-./_")
 
     failures += testUnescapeId("abc123")
     failures += testUnescapeId("")
@@ -24,8 +24,10 @@ function main(): int {
     failures += testUnescapeId("%u6fg123%6pf")
     failures += testUnescapeId('%6A', 'j')
     failures += testUnescapeId('%6a', 'j')
+    failures += testUnescapeId('%5C', '\\')
 
     failures += testInverse("^")
+    failures += testInverse("\\")
     failures += testInverse("!@#$%^&*()-=_+1234567890%%%")
     failures += testInverse("äöü")
     failures += test(unescape("%E4%F6%FC") == "äöü", "äöü failed, got " + unescape("%E4%F6%FC"))
