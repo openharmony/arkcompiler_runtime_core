@@ -416,6 +416,76 @@ TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_011)
     ASSERT_EQ(env_->Object_CallMethodByName_Short_A(obj, "shortByNameMethod", "SS:S", &sum, args2), ANI_OK);
     ASSERT_EQ(sum, value3 + value2);
 }
+
+TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_012)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+
+    ani_short res {};
+    ASSERT_EQ(
+        env_->c_api->Object_CallMethodByName_Short(nullptr, object, "shortByNameMethod", "SS:S", &res, VAL1, VAL2),
+        ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Object_CallMethodByName_Short_A(nullptr, object, "shortByNameMethod", "SS:S", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(nullptr, "shortByNameMethod", "SS:S", &res, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(nullptr, "shortByNameMethod", "SS:S", &res, args),
+              ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, nullptr, "SS:S", &res, VAL1, VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, nullptr, "SS:S", &res, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", nullptr, &res, VAL1, VAL2), ANI_OK);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, "shortByNameMethod", nullptr, &res, args), ANI_OK);
+
+    ASSERT_EQ(env_->Object_CallMethodByName_Short(object, "shortByNameMethod", "SS:S", nullptr, VAL1, VAL2),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, "shortByNameMethod", "SS:S", nullptr, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_013)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+
+    ani_short res {};
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Short(object, methodName.data(), "SS:S", &res, VAL1, VAL2),
+                  ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, methodName.data(), "SS:S", &res, args), ANI_NOT_FOUND);
+    }
+}
+
+TEST_F(CallObjectMethodShortByNameTest, object_call_method_by_name_short_014)
+{
+    ani_object object {};
+    GetMethodData(&object);
+
+    ani_value args[2U];
+    args[0U].s = VAL1;
+    args[1U].s = VAL2;
+
+    ani_short res {};
+    const std::array<std::string_view, 4U> invalidMethodNames = {{"", "测试emoji🙂🙂", "\n\r\t", "\x01\x02\x03"}};
+
+    for (const auto &methodName : invalidMethodNames) {
+        ASSERT_EQ(env_->Object_CallMethodByName_Short(object, methodName.data(), "", &res, VAL1, VAL2), ANI_NOT_FOUND);
+        ASSERT_EQ(env_->Object_CallMethodByName_Short_A(object, methodName.data(), "", &res, args), ANI_NOT_FOUND);
+    }
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
