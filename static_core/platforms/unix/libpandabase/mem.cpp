@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,10 @@
 #include <limits>
 #include <sys/mman.h>
 #include <unistd.h>
+
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#endif
 
 #include <type_traits>
 
@@ -147,8 +151,14 @@ uint32_t GetPageSize()
 static size_t GetCacheLineSizeFromOs()
 {
 #if !defined(__MUSL__)
+#ifdef __linux__
     // NOLINTNEXTLINE(google-runtime-int)
     long sz = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+#else
+    long sz = 0;
+    size_t length = sizeof(sz);
+    sysctlbyname("hw.l1cachesize", &sz, &length, NULL, 0);
+#endif
     LOG_IF(sz <= 0, FATAL, RUNTIME) << "Can't get cache line size from OS";
     return static_cast<uint32_t>(sz);
 #else

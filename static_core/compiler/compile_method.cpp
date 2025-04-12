@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -325,11 +325,17 @@ void CompileInGraph(RuntimeInterface *runtime, bool isDynamic, Arch arch, Compil
     LOG(INFO, COMPILER) << "Compile method" << (isOsr ? "(OSR)" : "") << ": " << methodName << " ("
                         << runtime->GetFileName(method) << ')';
 
+#ifdef __APPLE__
+    LOG(DEBUG, COMPILER) << "Compilation unsupported for this platform!";
+    CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
+    return;
+#else
     if (arch == Arch::NONE || !BackendSupport(arch)) {
         LOG(DEBUG, COMPILER) << "Compilation unsupported for this platform!";
         CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
         return;
     }
+#endif
 
     auto *allocator = taskCtx.GetAllocator();
     auto *localAllocator = taskCtx.GetLocalAllocator();
