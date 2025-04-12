@@ -656,7 +656,7 @@ cases:
                   return p[0] == p[1]
               }
           }
-          let obj = new A<Long, Error>
+          let obj = new Z<Long, Error>
       use: |-
           // use generics
           let a1: [A<Long>, B<Error>] = [new A<Long>, new B<Error>]

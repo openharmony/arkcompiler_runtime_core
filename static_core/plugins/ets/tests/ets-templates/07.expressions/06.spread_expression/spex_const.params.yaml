@@ -699,7 +699,7 @@ cases:
       use: |-
           // use generics
           let a1: [A<Long>, B<Error>] = [new A<Long>, new B<Error>]
-          assertTrue(new A<Long, Error>(...a1).fld == false)
+          assertTrue(new Z<Long, Error>(...a1).fld == false)
 
     - decl: |-
           let a2: [int, int] = [6, 5]
