@@ -34,9 +34,6 @@ escompat/ArrayTest.ets
 # Aborts with ERRNO: 11 (Resource temporarily unavailable)
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_23.ets
 
-# 22848
-08.statements/08.for_statements/for_loop_parameters_12.ets
-
 # 17053 Cannot create array of nullish tuples
 #07.expressions/04.array_literal/array_literal_13.ets
 

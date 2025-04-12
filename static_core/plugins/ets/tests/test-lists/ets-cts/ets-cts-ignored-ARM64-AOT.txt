@@ -1,6 +1,3 @@
-#22848
-08.statements/08.for_statements/for_loop_parameters_12.ets
-
 #17881 Skip these, because the run fails if multiple files are connected. The connection is necessary, because of the export tests.
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class.ets
 13.compilation_units/03.import_directives/05.type_import_binding/type_binding_class_alias.ets
