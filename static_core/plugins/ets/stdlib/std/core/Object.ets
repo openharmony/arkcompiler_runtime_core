@@ -374,9 +374,6 @@ export class Object {
         if (t instanceof StringType || t instanceof ArrayType) {
             const keys = Object.keys(o)
             const len = keys.length
-            if (len == 0) {
-                return new string[0]
-            }
             let res = new string[len + 1]
             for (let i = 0; i < len; i++) {
                 res[i] = keys[i]
