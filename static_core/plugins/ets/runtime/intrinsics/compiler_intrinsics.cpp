@@ -330,24 +330,6 @@ extern "C" void CompilerEtsStObjByNameObj(ark::Method *method, int32_t id, uint3
     CompilerEtsStObjByNameRef(method, id, pc, obj, storeValue);
 }
 
-extern "C" void CompilerEtsCallByNameShort()
-{
-    // NOTE issue(21892) support callbyname
-    UNREACHABLE();
-}
-
-extern "C" void CompilerEtsCallByName()
-{
-    // NOTE issue(21892) support callbyname
-    UNREACHABLE();
-}
-
-extern "C" void CompilerEtsCallByNameRange()
-{
-    // NOTE issue(21892) support callbyname
-    UNREACHABLE();
-}
-
 extern "C" uint8_t CompilerEtsEquals(ObjectHeader *obj1, ObjectHeader *obj2)
 {
     auto coro = EtsCoroutine::GetCurrent();

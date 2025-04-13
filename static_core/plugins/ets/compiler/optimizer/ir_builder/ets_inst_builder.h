@@ -29,6 +29,7 @@ template <bool IS_ABC_KIT = false>
 IntrinsicInst *CreateStObjByNameIntrinsic(size_t pc, compiler::DataType::Type type);
 template <bool IS_ABC_KIT = false>
 void BuildStObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
+template <bool IS_RANGE>
 void BuildCallByName(const BytecodeInstruction *bcInst);
 virtual void BuildIsNullValue(const BytecodeInstruction *bcInst);
 template <bool IS_STRICT = false>

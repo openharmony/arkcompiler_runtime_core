@@ -32,7 +32,8 @@
       BuildStObjByName<false>(instruction, <%= get_type(inst.type(0)) %>);
     }
     % when "CALL"
-    BuildCallByName(instruction);
+    %   is_range = inst.opcode.include? 'range'
+    BuildCallByName<<%= is_range ? 'true' : 'false' %>>(instruction);
     % when "LDNULLVALUE"
     UpdateDefinitionAcc(graph_->GetOrCreateUniqueObjectInst());
     % when "MOVNULLVALUE"

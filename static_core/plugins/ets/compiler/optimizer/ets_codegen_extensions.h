@@ -20,6 +20,8 @@ bool LaunchCallCodegen(CallInst *inst);
 // CC-OFFNXT(G.NAM.01) false positive
 void PrepareForCallLaunchVirtual(CallInst *callInst, RuntimeInterface::MethodPtr method, Reg &thisReg, Reg &param0);
 
+bool ResolveCallByNameCodegen(ResolveVirtualInst *resolver);
+
 void EtsGetNativeMethod(IntrinsicInst *inst, Reg dst, SRCREGS &src);
 void EtsGetNativeMethodManagedClass(IntrinsicInst *inst, Reg dst, SRCREGS &src);
 void EtsGetMethodNativePointer(IntrinsicInst *inst, Reg dst, SRCREGS &src);

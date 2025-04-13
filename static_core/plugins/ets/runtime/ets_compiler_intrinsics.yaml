@@ -154,36 +154,6 @@ intrinsics:
     clear_flags: [  ]
     peephole_func: PeepholeStObjByName
 
-  - name: CompilerEtsCallByNameShort
-    space: ets
-    compiler_only: true
-    static: true
-    signature:
-      ret: void
-      args: [  ]
-    impl: ark::ets::intrinsics::CompilerEtsCallByNameShort
-    clear_flags: [  ]
-
-  - name: CompilerEtsCallByName
-    space: ets
-    compiler_only: true
-    static: true
-    signature:
-      ret: void
-      args: [  ]
-    impl: ark::ets::intrinsics::CompilerEtsCallByName
-    clear_flags: [  ]
-
-  - name: CompilerEtsCallByNameRange
-    space: ets
-    compiler_only: true
-    static: true
-    signature:
-      ret: void
-      args: [  ]
-    impl: ark::ets::intrinsics::CompilerEtsCallByNameRange
-    clear_flags: [  ]
-
   - name: CompilerEtsEquals
     space: ets
     compiler_only: true
