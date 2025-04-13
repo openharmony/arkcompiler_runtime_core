@@ -18,6 +18,7 @@ constraints:
     p: new Int()
   - type: Int | Double
     use: Double
+    p: new Double()
   - type: '"a" | "b"'
     use: '"a"'
     p: '"a"'

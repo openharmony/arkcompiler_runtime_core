@@ -19,7 +19,6 @@ desc: |-
     Type parameters of generic types can have defaults, and optional type parameters are also supported. This situation
     allows dropping a type argument when a particular type of instantiation is used.
 tags: [compile-only]
-params: c
 ---*/
 
 class Consumer<T> {

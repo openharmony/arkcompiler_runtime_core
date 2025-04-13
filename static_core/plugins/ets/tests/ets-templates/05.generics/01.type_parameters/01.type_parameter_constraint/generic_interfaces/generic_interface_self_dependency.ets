@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,21 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
+{% for sd in self_dependency %}
+
 /*---
-desc: |-
-    A compile-time error occurs if
-        - a type parameter without a default type follows a type parameter
-        with a default value in the declaration of a generic type.
-        - Type parameter default refers to a type parameter defined after the current type parameter.
-    Also covered some wrong declarations where the default parameter is not a type.
+desc: A compile-time error occurs if a type parameter in the type parameter section depends on itself.
 tags: [compile-only, negative]
-params: {{c}}
+params: >
+  {{sd}}
 ---*/
 
-class SomeType {}
-class OtherType {}
+interface X<{{sd}}> {}
 
-class Base<{{c}}> {}
+function main(): void {}
 
 {% endfor %}

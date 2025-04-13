@@ -17,9 +17,8 @@
 
 /*---
 desc: >-
-    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter.
-    A constraint of any type parameter can follow the keyword extends. The constraint is denoted as any type.
-tags: [compile-only{% if c.tags == "negative" %},negative{% endif %}]
+    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter after
+    the keyword extends. A constraint can have the form of any type.
 params: >
   {{c.type}}
 ---*/
@@ -27,9 +26,7 @@ params: >
 {{c.decl}}
 
 function foo<X extends {{c.type}}>(p: X): X { return p };
-{% if c.tags != "negative" %}
 function main(): void {
   assertEQ( foo<{{c.use}}>({{c.p}}), {{c.p}} )
 }
-{% endif %}
 {% endfor %}

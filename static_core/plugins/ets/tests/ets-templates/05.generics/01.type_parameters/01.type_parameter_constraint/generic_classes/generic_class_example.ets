@@ -3,9 +3,9 @@
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 * http://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,26 +13,32 @@
 * limitations under the License.
 ---*/
 
-{% for mm in abstr_or_native_method_modifiers %}
-{% for c in constraints %}
+{% for case in cases %}
 
 /*---
 desc: >-
-    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter after
-    the keyword extends. A constraint can have the form of any type.
-    {{c.doc}}
-tags: [compile-only]
-params: >
-  {{mm}} , {{c}}
+    If no constraint is declared, then the type parameter is not compatible with Object
+    If type parameter T has type constraint S, then the
+    actual type of the generic instantiation must be assignable to S (see Assignability).
+tags: [{{case.tags}}]
 ---*/
 
-{% if "Color" in c.type %}
-enum Color { Red, Green, Blue}
-{% endif %}
+class Base {}
+class Derived extends Base { }
+class SomeType { }
 
-abstract class Point {
-	{{mm}} foo<X extends {{c.type}}>(): void;
+class G<T extends Base> { }
+class H<T extends Base|SomeType> {}
+class Exotic<T extends "aa"| "bb"> {}
+
+class A {
+  f1: number = 0
+  f2: string = ""
+  f3: boolean = false
 }
 
-{% endfor %}
+class B <T extends keyof A> {}
+
+{{case.decl}}
+
 {% endfor %}
