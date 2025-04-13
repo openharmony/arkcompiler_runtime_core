@@ -5,4 +5,6 @@
 
 #18386
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_2.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_6.ets
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_7.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq1_2.ets

@@ -17,22 +17,32 @@
 /*---
 desc: A value of type Object can be compared to a value of any reference type.
 ---*/
-function eq<P>(p: P, q: Object): boolean {
-    return p == q
+
+function eq<P>(p: P, q: Object, ps: string, qs: string): string {
+    if (p == q && q == p) {
+        return ''
+    } else {
+        return '\n' + ps + ' == ' + qs + ', expected true, got false'
+    }
 }
-function ne<P>(p: P, q: Object): boolean {
-    return p != q
+function ne<P>(p: P, q: Object, ps: string, qs: string): string {
+    if (p != q || q != p) {
+        return '\n' + ps + ' != ' + qs + ', expected false, got true'
+    } else {
+        return ''
+    }
 }
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+    let failed: string = ''
 {%- for p in c['case1'] %}
 {%- for q in c['case2'] %}
-    if (!eq<{{c.type}}>({{p}}, {{q}})) return 1
-    if (ne<{{c.type}}>({{p}}, {{q}})) return 1
+    failed += eq<{{c.type}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
+    failed += ne<{{c.type}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
 {%- endfor %}
 {%- endfor %}
-    return 0
+    assertTrue(failed == '', 'Failed operations: ' + failed)
 }
 {%- endfor %}
