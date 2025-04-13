@@ -15,6 +15,7 @@
 
 export const JSValue: string = 'ESObject';
 export const KitPrefix: string[] = [];
+export const BuiltInType:  string[] = ['Symbol'];
 export const ETSKeyword: string[] = ['Class', 'ESObject', 'MethodType'];
 export const UtilityTypes = [
     'Capitalize',

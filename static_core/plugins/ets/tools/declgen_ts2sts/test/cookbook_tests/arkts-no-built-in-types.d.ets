@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {ESObject, Class, MethodType} from "./include/KeywordClass";
-import { NormalClass } from "./include/lib";
-export class Test{
-    ESObject: ESObject;
-    Class: Class;
-    MethodType: MethodType;
-    NormalClass: NormalClass;
-    b: NormalClass;
-}
+export declare let sym1: ESObject;
+export declare const sym2: ESObject;
+export declare const Direction: ESObject;
+export declare const map: Map<ESObject, string>;
+export declare const sym5: ESObject;
+export declare function getSymbol(): ESObject;
+export declare const mySym: ESObject;
+export declare function printSymbol(value: ESObject): void;
+export type SymbolAlias = ESObject;
+export declare const sym6: SymbolAlias;
+export declare const obj3: ESObject;
