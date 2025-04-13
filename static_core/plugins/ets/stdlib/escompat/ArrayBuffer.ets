@@ -93,8 +93,8 @@ export class ArrayBuffer extends Buffer
      */
     public static isView(obj: Object): boolean
     {
-        //TODO(ivan-tyulyandin): add DataView and unsigned TypedArray API when it will be implemented
-        return ( obj instanceof Int8Array
+        return ( obj instanceof DataView
+            || obj instanceof Int8Array
             || obj instanceof Int16Array
             || obj instanceof Int32Array
             || obj instanceof BigInt64Array
