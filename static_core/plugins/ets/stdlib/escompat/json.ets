@@ -218,7 +218,6 @@ export class JSON {
                 obj: NullishType,
                 replacer: ((key: string, value: NullishType) => NullishType) | undefined | null,
                 space?: string | number): string {
-
         const replacerOpt: ((key: string, value: NullishType) => NullishType) | undefined = (replacer === null) ? undefined : replacer
 
         if (space instanceof String || space === undefined) {
@@ -441,6 +440,38 @@ export class JSON {
             s.append(d[last_elem])
         }
         s.append(']')
+        return s.toString()
+    }
+
+    public static stringify(d: Array<Number>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(JSON.stringify(d[i]));
+            s.append(",");
+        }
+        if (d.length > 0) {
+            s.append(JSON.stringify(d[last_elem]));
+        }
+        s.append(']');
+        return s.toString()
+    }
+
+    public static stringify(d: ArrayLike<Number>): String {
+        let s = new StringBuilder("{")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append("\""+JSON.stringify(i)+"\"");
+            s.append(":");
+            s.append(JSON.stringify(d[i]));
+            s.append(",");
+        }
+        if (d.length > 0) {
+            s.append("\""+JSON.stringify(last_elem)+"\"");
+            s.append(":");
+            s.append(JSON.stringify(d[last_elem]));
+        }
+        s.append('}');
         return s.toString()
     }
 
