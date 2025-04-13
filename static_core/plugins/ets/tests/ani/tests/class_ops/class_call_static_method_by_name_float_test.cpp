@@ -22,6 +22,8 @@ class ClassCallStaticMethodByNameFloatTest : public AniTest {
 public:
     static constexpr ani_float FLOAT_VAL1 = 1.5F;
     static constexpr ani_float FLOAT_VAL2 = 2.5F;
+    static constexpr ani_int VAL3 = 5;
+    static constexpr ani_int VAL4 = 6;
     static constexpr size_t ARG_COUNT = 2U;
 
     void GetMethodData(ani_class *clsResult)
@@ -37,6 +39,24 @@ public:
         va_start(args, value);
         ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_V(cls, name, "FF:F", value, args), ANI_OK);
         va_end(args);
+    }
+
+    void TestCombineScene(const char *className, const char *methodName, ani_float expectedValue)
+    {
+        ani_class cls {};
+        ASSERT_EQ(env_->FindClass(className, &cls), ANI_OK);
+
+        ani_float value = 0.0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, methodName, "FF:F", &value, FLOAT_VAL1, FLOAT_VAL2),
+                  ANI_OK);
+        ASSERT_EQ(value, expectedValue);
+
+        ani_value args[2U];
+        args[0U].f = FLOAT_VAL1;
+        args[1U].f = FLOAT_VAL2;
+        ani_float valueA = 0.0;
+        ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, methodName, "FF:F", &valueA, args), ANI_OK);
+        ASSERT_EQ(valueA, expectedValue);
     }
 };
 
@@ -92,6 +112,9 @@ TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_nu
               ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "sum_not_exist", nullptr, &sum, FLOAT_VAL1, FLOAT_VAL2),
               ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "", nullptr, &sum, FLOAT_VAL1, FLOAT_VAL2), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "\n", nullptr, &sum, FLOAT_VAL1, FLOAT_VAL2),
+              ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_null_result)
@@ -125,6 +148,8 @@ TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_A_
     ani_float sum {};
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, nullptr, nullptr, &sum, args), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "sum_not_exist", nullptr, &sum, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "", nullptr, &sum, args), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "\n", nullptr, &sum, args), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_A_null_result)
@@ -246,6 +271,128 @@ TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_co
     ani_float valueV = 0.0F;
     TestFuncV(cls, "funcA", &valueV, FLOAT_VAL1, FLOAT_VAL2);
     ASSERT_EQ(valueV, FLOAT_VAL2 - FLOAT_VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_null_env)
+{
+    ani_class cls {};
+    GetMethodData(&cls);
+
+    ani_float value = 0.0;
+    ASSERT_EQ(
+        env_->c_api->Class_CallStaticMethodByName_Float(nullptr, cls, "or", nullptr, &value, FLOAT_VAL1, FLOAT_VAL2),
+        ANI_INVALID_ARGS);
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ASSERT_EQ(env_->c_api->Class_CallStaticMethodByName_Float_A(nullptr, cls, "or", nullptr, &value, args),
+              ANI_INVALID_ARGS);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_5)
+{
+    ani_class clsA {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_float_test/A;", &clsA), ANI_OK);
+    ani_class clsB {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_float_test/B;", &clsB), ANI_OK);
+
+    ani_float valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(clsA, "funcA", "FF:F", &valueA, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL1 + FLOAT_VAL2);
+
+    ani_float valueB = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(clsB, "funcB", "FF:F", &valueB, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ASSERT_EQ(valueB, FLOAT_VAL2 - FLOAT_VAL1);
+
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ani_float valueAA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(clsA, "funcA", "FF:F", &valueAA, args), ANI_OK);
+    ASSERT_EQ(valueAA, FLOAT_VAL1 + FLOAT_VAL2);
+    ani_float valueBA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(clsB, "funcB", "FF:F", &valueBA, args), ANI_OK);
+    ASSERT_EQ(valueBA, FLOAT_VAL2 - FLOAT_VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_float_test/A;", &cls), ANI_OK);
+    ani_float value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "funcA", "FF:F", &value, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ASSERT_EQ(value, FLOAT_VAL1 + FLOAT_VAL2);
+
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ani_float valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "funcA", "FF:F", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL1 + FLOAT_VAL2);
+
+    ani_int value2 = 0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Int(cls, "funcA", "II:I", &value2, VAL3, VAL4), ANI_OK);
+    ASSERT_EQ(value2, VAL3 + VAL4);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_7)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_float_test/A;", "funcB", FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_8)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_float_test/C;", "funcA", FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_9)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_float_test/D;", "funcA", FLOAT_VAL2 - FLOAT_VAL1);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_10)
+{
+    TestCombineScene("Lclass_call_static_method_by_name_float_test/E;", "funcA", FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_11)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_float_test/F;", &cls), ANI_OK);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Void(cls, "increment", nullptr, FLOAT_VAL1, FLOAT_VAL2), ANI_OK);
+    ani_float value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "getCount", nullptr, &value), ANI_OK);
+    ASSERT_EQ(value, FLOAT_VAL1 + FLOAT_VAL2);
+
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ani_float valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "getCount", nullptr, &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL1 + FLOAT_VAL2);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_combine_scenes_12)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("Lclass_call_static_method_by_name_float_test/G;", &cls), ANI_OK);
+    ani_float value = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "publicMethod", "FF:F", &value, FLOAT_VAL1, FLOAT_VAL2),
+              ANI_OK);
+    ASSERT_EQ(value, FLOAT_VAL1 + FLOAT_VAL2);
+    ASSERT_EQ(
+        env_->Class_CallStaticMethodByName_Float(cls, "callPrivateMethod", "FF:F", &value, FLOAT_VAL1, FLOAT_VAL2),
+        ANI_OK);
+    ASSERT_EQ(value, FLOAT_VAL2 - FLOAT_VAL1);
+
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+    ani_float valueA = 0.0;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "publicMethod", "FF:F", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL1 + FLOAT_VAL2);
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "callPrivateMethod", "FF:F", &valueA, args), ANI_OK);
+    ASSERT_EQ(valueA, FLOAT_VAL2 - FLOAT_VAL1);
 }
 }  // namespace ark::ets::ani::testing
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
