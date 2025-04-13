@@ -110,9 +110,6 @@
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.ets
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_1.ets
 
-#24001
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_8.ets
-
 #23643
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_12.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_13.ets
