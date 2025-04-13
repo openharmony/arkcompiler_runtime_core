@@ -182,6 +182,8 @@ napi_value CallETSHandler::HandleImpl()
     protoReader_.Reset();
     napi_value jsRes;
     auto readVal = [&etsRes](auto typeTag) { return etsRes.GetAs<typename decltype(typeTag)::type>(); };
+    // scope is required to ConvertRefArgToJS
+    HandleScope<ObjectHeader *> scope(coro_);
     if (UNLIKELY(!ConvertArgToJS(ctx_, protoReader_, &jsRes, readVal))) {
         return ForwardException(ctx_, coro_);
     }
