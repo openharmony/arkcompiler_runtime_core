@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -22,13 +22,13 @@ class PromiseRejectTest : public AniTest {};
 
 TEST_F(PromiseRejectTest, ResolvePromise)
 {
-    ani_object promise;
-    ani_resolver resolver;
+    ani_object promise {};
+    ani_resolver resolver {};
 
     ASSERT_EQ(env_->Promise_New(&resolver, &promise), ANI_OK);
 
     std::string rejected = "rejected";
-    ani_string rejection;
+    ani_string rejection = nullptr;
     ASSERT_EQ(env_->String_NewUTF8(rejected.c_str(), rejected.size(), &rejection), ANI_OK);
 
     ASSERT_EQ(env_->PromiseResolver_Reject(resolver, reinterpret_cast<ani_error>(rejection)), ANI_OK);
@@ -36,4 +36,16 @@ TEST_F(PromiseRejectTest, ResolvePromise)
     ASSERT_EQ(CallEtsFunction<ani_boolean>("promise_reject_test", "checkReject", promise, rejection), ANI_TRUE);
 }
 
+TEST_F(PromiseRejectTest, InvalidArgument1)
+{
+    ani_resolver resolver {};
+    ani_error error {};
+    ASSERT_EQ(env_->c_api->PromiseResolver_Reject(nullptr, resolver, error), ANI_INVALID_ARGS);
+}
+
+TEST_F(PromiseRejectTest, InvalidArgument2)
+{
+    ani_error error {};
+    ASSERT_EQ(env_->PromiseResolver_Reject(nullptr, error), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing

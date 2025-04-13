@@ -50,6 +50,76 @@ TEST_F(StringGetUtf8StringTest, StringGetUtf8_BasicString)
     ASSERT_STREQ(utfBuffer, "example");
 }
 
+TEST_F(StringGetUtf8StringTest, StringGetUtf8_EmptyString)
+{
+    // NOLINTNEXTLINE(readability-redundant-string-init)
+    const std::string example {""};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const uint32_t bufferSize = 10U;
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
+    ani_size result = 0U;
+    status = env_->String_GetUTF8(string, utfBuffer, bufferSize, &result);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(result, example.size());
+    ASSERT_STREQ(utfBuffer, "");
+}
+
+TEST_F(StringGetUtf8StringTest, StringGetUtf8_EmptyBuffer)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const uint32_t bufferSize = 1U;
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
+    ani_size result = 0U;
+    status = env_->String_GetUTF8(string, utfBuffer, bufferSize, &result);
+    ASSERT_EQ(status, ANI_BUFFER_TO_SMALL);
+}
+
+TEST_F(StringGetUtf8StringTest, StringGetUtf8_SpecialBuffer)
+{
+    const std::string example {"h\ni\r\\!"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const uint32_t bufferSize = 10U;
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
+    ani_size result = 0U;
+    status = env_->String_GetUTF8(string, utfBuffer, bufferSize, &result);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(result, example.size());
+    ASSERT_STREQ(utfBuffer, "h\ni\r\\!");
+}
+
+TEST_F(StringGetUtf8StringTest, StringGetUtf8_BufferSizeZero)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const uint32_t bufferSize = 1U;
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
+    ani_size result = 0U;
+    status = env_->String_GetUTF8(string, utfBuffer, 0U, &result);
+    ASSERT_EQ(status, ANI_BUFFER_TO_SMALL);
+}
+
+TEST_F(StringGetUtf8StringTest, StringGetUtf8_NullEnv)
+{
+    const std::string example {"example"};
+    ani_string string = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), example.size(), &string);
+    ASSERT_EQ(status, ANI_OK);
+    const uint32_t bufferSize = 10U;
+    char utfBuffer[bufferSize] = {0U};  // NOLINT(modernize-avoid-c-arrays)
+    ani_size result = 0U;
+    status = env_->c_api->String_GetUTF8(nullptr, string, utfBuffer, bufferSize, &result);
+    ASSERT_EQ(status, ANI_INVALID_ARGS);
+}
+
 TEST_F(StringGetUtf8StringTest, StringGetUtf8_NullString)
 {
     const uint32_t bufferSize = 100U;
