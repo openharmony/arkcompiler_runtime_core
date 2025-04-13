@@ -32,12 +32,12 @@ function testInvoke() {
 }
 
 function testInvokeCurrencyStyleError() {
-    let expectedError = new RangeError("Currency code is required with currency style");
+    let expectedError = new RangeError("Style is currency but currency is undefined");
     expectError((): void throws => { Intl.NumberFormat.$_invoke("en-EN", { style: "currency" } as Intl.NumberFormatOptions) }, expectedError);
 }
 
 function testInvokeUnitStyleError() {
-    let expectedError = new RangeError("Unit code is required with unit style");
+    let expectedError = new RangeError("Style is unit but unit is undefined");
     expectError((): void throws => { Intl.NumberFormat.$_invoke("en-EN", { style: "unit" } as Intl.NumberFormatOptions) }, expectedError);
 }
 
@@ -46,15 +46,15 @@ function testInvokeUndefinedLocale() {
     assertTrue(numberFormat != undefined && numberFormat != null);
     let getOptions = numberFormat.resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    assertTrue(getOptions.locale == intlBestFitLocale(""), "Error. Got: " + s);
-    assertTrue(getOptions.numberingSystem == "latn", "Error. Got: " + s);
-    assertTrue(getOptions.style == "decimal", "Error. Got: " + s);
-    assertTrue(getOptions.minimumIntegerDigits == 1, "Error. Got: " + s);
-    assertTrue(getOptions.minimumFractionDigits == 0, "Error. Got: " + s);
-    assertTrue(getOptions.maximumFractionDigits == 3, "Error. Got: " + s);
-    assertTrue(getOptions.useGrouping == false, "Error. Got: " + s);
-    assertTrue(getOptions.notation == "standard", "Error. Got: " + s);
-    assertTrue(getOptions.signDisplay == "auto", "Error. Got: " + s);
+    assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
+    assertEQ(getOptions.numberingSystem,"latn", "Error. Got: " + s);
+    assertEQ(getOptions.style,"decimal", "Error. Got: " + s);
+    assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
+    assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
+    assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
+    assertEQ(getOptions.useGrouping, false, "Error. Got: " + s);
+    assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
+    assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
 
 function testInvokeUndefinedLocaleUndefinedOptions() {
@@ -62,22 +62,19 @@ function testInvokeUndefinedLocaleUndefinedOptions() {
     assertTrue(numberFormat != undefined && numberFormat != null);
     let getOptions = numberFormat.resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    assertTrue(getOptions.locale == intlBestFitLocale(""), "Error. Got: " + s);
-    assertTrue(getOptions.numberingSystem == "latn", "Error. Got: " + s);
-    assertTrue(getOptions.style == "decimal", "Error. Got: " + s);
-    assertTrue(getOptions.minimumIntegerDigits == 1, "Error. Got: " + s);
-    assertTrue(getOptions.minimumFractionDigits == 0, "Error. Got: " + s);
-    assertTrue(getOptions.maximumFractionDigits == 3, "Error. Got: " + s);
-    assertTrue(getOptions.useGrouping == false, "Error. Got: " + s);
-    assertTrue(getOptions.notation == "standard", "Error. Got: " + s);
-    assertTrue(getOptions.signDisplay == "auto", "Error. Got: " + s);
+    assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
+    assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
+    assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
+    assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
+    assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
+    assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
+    assertEQ(getOptions.useGrouping, false, "Error. Got: " + s);
+    assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
+    assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
 
 function equaledNumberFormats(a: Intl.NumberFormat, b: Intl.NumberFormat, value: number | bigint): boolean {
-    if (a.format(value) != b.format(value)) {
-        return false;
-    }
-    return true;
+    return a.format(value) == b.format(value);
 }
 
 function printResolvedOptions(options: Intl.ResolvedNumberFormatOptions): string {

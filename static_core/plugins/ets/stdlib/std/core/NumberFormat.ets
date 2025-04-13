@@ -40,55 +40,57 @@ export namespace Intl {
 
     function checkOptions(options: NumberFormatOptions) {
         if ((options.currency != undefined) && !RefCurrenciesMap.has(options.currency!.toUpperCase())) {
-            throw new RangeError("currency value is out of range")
+            throw new RangeError("Invalid currency")
         }
 
         if ((options.unit != undefined) && !RefUnitsMap.has(options.unit!)) {
-            throw new RangeError("unit value is out of range")
+            throw new RangeError("Invalid unit")
         }
 
         if (options.style != undefined) {
             if ((options.style! == "unit") && (options.unit == undefined)) {
-                throw new RangeError("Unit code is required with unit style")
+                throw new RangeError("Style is unit but unit is undefined")
             }
             if ((options.style! == "currency") && (options.currency == undefined)) {
-                throw new RangeError("Currency code is required with currency style")
+                throw new RangeError("Style is currency but currency is undefined")
             }
         }
 
         if (options.maximumFractionDigits != undefined) {
             if (!(options.maximumFractionDigits! >= 0 && options.maximumFractionDigits! <= 100)) {
-                throw new RangeError("maximumFractionDigits value is out of range")
+                throw new RangeError("Invalid maximumFractionDigits")
             }
             if (options.minimumFractionDigits != undefined) {
                 if (options.maximumFractionDigits! < options.minimumFractionDigits!) {
-                    throw new RangeError("maximumFractionDigits value is out of range")
+                    throw new RangeError("Invalid maximumFractionDigits")
                 }
             }
         }
         if ((options.minimumFractionDigits != undefined)
             && !(options.minimumFractionDigits! >= 0 && options.minimumFractionDigits! <= 100)) {
-            throw new RangeError("minimumFractionDigits value is out of range")
+            throw new RangeError("Invalid minimumFractionDigits")
         }
 
         if (options.maximumSignificantDigits != undefined) {
             if (!(options.maximumSignificantDigits! >= 1 && options.maximumSignificantDigits! <= 21)) {
-                throw new RangeError("maximumSignificantDigits value is out of range")
+                throw new RangeError("Invalid maximumSignificantDigits")
             }
             if (options.minimumFractionDigits != undefined) {
                 if (options.maximumSignificantDigits! < options.minimumSignificantDigits!) {
-                    throw new RangeError("maximumSignificantDigits value is out of range")
+                    throw new RangeError("Invalid maximumSignificantDigits")
                 }
             }
         }
-        if ((options.minimumSignificantDigits != undefined)
-            && !(options.minimumSignificantDigits! >= 1 && options.minimumSignificantDigits! <= 21)) {
-            throw new RangeError("minimumSignificantDigits value is out of range")
+        if ((options.minimumSignificantDigits != undefined) && !(options.minimumSignificantDigits! >= 1 && options.minimumSignificantDigits! <= 21)) {
+            throw new RangeError("Invalid minimumSignificantDigits")
         }
 
-        if ((options.minimumIntegerDigits != undefined)
-            && !(options.minimumIntegerDigits! >= 1 && options.minimumIntegerDigits! <= 21)) {
-            throw new RangeError("minimumIntegerDigits value is out of range")
+        if ((options.minimumIntegerDigits != undefined) && !(options.minimumIntegerDigits! >= 1 && options.minimumIntegerDigits! <= 21)) {
+            throw new RangeError("Invalid minimumIntegerDigits")
+        }
+
+        if (options.notation == "compact" && options.compactDisplay == undefined) {
+            throw new RangeError("Notaion is compact but compactDisplay is undefined")
         }
     }
 
@@ -101,34 +103,19 @@ export namespace Intl {
         *
         * @param options options
         */
-        public constructor(locales?: string | string[], options?: NumberFormatOptions) {
-            // Set default fields for decimal style
-            this.options = { locale: intlBestFitLocale(""),
-                numberingSystem: "latn",  // NOTE (ilyakorobkov): to define this field call Intl.supportedValuesOf() when it will be added
-                style: "decimal",
-                minimumIntegerDigits: 1,
-                maximumFractionDigits: 3,
-                minimumFractionDigits: 0,
-                useGrouping: false,
-                notation: "standard",
-                signDisplay: "auto"
-            } as ResolvedNumberFormatOptions
+        public constructor(locales?: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[], options?: NumberFormatOptions) {
+            // Set new options or default decimal style
+            this.options = NumberFormat.assignOptionsDefault(options)
 
-            let locMatcher = "best fit"
-            if (options != undefined) {
-                if (options.localeMatcher != undefined) {
-                    locMatcher = options.localeMatcher!
-                }
-            }
-            let loc: Array<string>
             if (locales == undefined) {
                 if (options != undefined) {
                     throw new Error("Incorrect locale information provided")
                 }
             } else {
-                if (locales! instanceof string)
+                let loc: Array<string>
+                if (locales! instanceof string) {
                     loc = Array.of<string>(locales! as string)
-                else {
+                } else {
                     loc = Array.from<string>(locales! as string[])
                 }
                 if (loc.includes("") && options != undefined) {
@@ -136,75 +123,88 @@ export namespace Intl {
                 }
             }
 
+            let locMatcher = options?.localeMatcher ?? "best fit"
             this.options.locale = locMatcher == "lookup" ? intlLookUpLocale(locales ?? "") : intlBestFitLocale(locales ?? "")
-
             if (options != undefined) {
-                checkOptions(options!)
-                this.options.compactDisplay = options!.compactDisplay
-                this.options.currency = options!.currency
-                this.options.currencyDisplay = options!.currencyDisplay
-                this.options.currencySign = options!.currencySign
-                if (options!.maximumFractionDigits != undefined) {
-                    this.options.maximumFractionDigits = options!.maximumFractionDigits!
-                }
-                this.options.maximumSignificantDigits = options!.maximumSignificantDigits
-                if (options!.minimumFractionDigits != undefined) {
-                    this.options.minimumFractionDigits = options!.minimumFractionDigits!
-                }
-                if (options!.minimumIntegerDigits != undefined) {
-                    this.options.minimumIntegerDigits = options!.minimumIntegerDigits!
-                }
-                this.options.minimumSignificantDigits = options!.minimumSignificantDigits
-                if (options!.notation != undefined) {
-                    this.options.notation = options!.notation!
-                }
-                if (options!.signDisplay != undefined) {
-                    this.options.signDisplay = options!.signDisplay!
-                }
-                if (options!.useGrouping != undefined) {
-                    this.options.useGrouping = options!.useGrouping!
-                }
-                this.options.unit = options!.unit
-                this.options.unitDisplay = options!.unitDisplay
-
-                if (options!.style != undefined) {
-                    this.options.style = options!.style!
+                let localOptions: Intl.NumberFormatOptions = options!; // Used to reduce amount of calls options!
+                checkOptions(localOptions)
+                if (localOptions.style != undefined) {
+                    this.options.style = localOptions.style!
 
                     // Set Default fields for percent style
                     if (this.options.style == "percent") {
-                        if (options!.maximumFractionDigits == undefined) {
+                        if (localOptions.maximumFractionDigits == undefined) {
                             this.options.maximumFractionDigits = 0
                         }
-                        if (options!.minimumFractionDigits == undefined) {
+                        if (localOptions.minimumFractionDigits == undefined) {
                             this.options.minimumFractionDigits = 0
                         }
-                        if (options!.useGrouping == undefined) {
+                        if (localOptions.useGrouping == undefined) {
                             this.options.useGrouping = true
                         }
-                        this.options.numberingSystem = "latn" // NOTE (ilyakorobkov): to define this field call Intl.supportedValuesOf() when it will be added
                     }
 
                     // Set Default fields for currency style
                     if (this.options.style == "currency") {
-                        if (options!.currencySign == undefined) {
+                        if (localOptions.currencySign == undefined) {
                             this.options.currencySign = "standard";
                         }
-                        if (options!.currencyDisplay == undefined) {
+                        if (localOptions.currencyDisplay == undefined) {
                             this.options.currencyDisplay = "symbol";
                         }
-                        if (options!.minimumFractionDigits == undefined) {
+                        if (localOptions.minimumFractionDigits == undefined) {
                             this.options.minimumFractionDigits = 2;
                         }
-                        if (options!.maximumFractionDigits ==  undefined) {
+                        if (localOptions.maximumFractionDigits ==  undefined) {
                             this.options.maximumFractionDigits = 2;
                         }
-                        if (options!.useGrouping == undefined) {
+                        if (localOptions.useGrouping == undefined) {
                             this.options.useGrouping = true
                         }
-                        this.options.numberingSystem = "latn" // NOTE (ilyakorobkov): to define this field call Intl.supportedValuesOf() when it will be added
                     }
                 }
             }
+            this.options.numberingSystem = "latn" // NOTE (ilyakorobkov): to define this field needs to fix issue #24827
+            this.minFracStr = Number.toString(this.options.minimumFractionDigits)
+            this.maxFracStr = Number.toString(this.options.maximumFractionDigits)
+            this.minSignStr = this.options.minimumSignificantDigits != undefined ? Number.toString(this.options.minimumSignificantDigits!) : ""
+            this.maxSignStr = this.options.maximumSignificantDigits != undefined ? Number.toString(this.options.maximumSignificantDigits!) : ""
+            this.minIntStr = Number.toString(this.options.minimumIntegerDigits)
+            if (this.options.useGrouping) {
+                this.useGroupingStr = "true"
+            } else {
+                this.useGroupingStr = "false"
+                if (options == undefined) {
+                    this.useGroupingStr = ""
+                } else {
+                    if (options!.useGrouping == undefined) {
+                        this.useGroupingStr = ""
+                    }
+                }
+            }
+        }
+
+        private static assignOptionsDefault(options?: NumberFormatOptions) {
+            let newOptions = new ResolvedNumberFormatOptions
+            // Set new options or default decimal style
+            newOptions.compactDisplay = options?.compactDisplay ?? undefined
+            newOptions.currencySign = options?.currencySign ?? undefined
+            newOptions.currency = options?.currency ?? undefined
+            newOptions.currencyDisplay = options?.currencyDisplay ?? undefined
+            newOptions.locale = intlBestFitLocale(options?.localeMatcher ?? "")
+            newOptions.maximumFractionDigits = options?.maximumFractionDigits ?? 3
+            newOptions.minimumFractionDigits = options?.minimumFractionDigits ?? 0
+            newOptions.minimumIntegerDigits = options?.minimumIntegerDigits ?? 1
+            newOptions.maximumSignificantDigits = options?.maximumSignificantDigits ?? undefined
+            newOptions.minimumSignificantDigits = options?.minimumSignificantDigits ?? undefined
+            newOptions.notation = options?.notation ?? "standard"
+            newOptions.numberingSystem = "latn" // NOTE (ilyakorobkov): to define this field needs to fix issue #24827
+            newOptions.signDisplay = options?.signDisplay ?? "auto"
+            newOptions.style = options?.style ?? "decimal"
+            newOptions.unit = options?.unit ?? undefined
+            newOptions.unitDisplay = options?.unitDisplay ?? undefined
+            newOptions.useGrouping = options?.useGrouping ?? false
+            return newOptions
         }
 
         /**
@@ -228,7 +228,7 @@ export namespace Intl {
         * @returns string representing the given number formatted according to the locale and formatting options of this Intl.NumberFormat object.
         */
         public format(value: number): string {
-            return NumberFormat.formatDouble(this.options.locale, value);
+            return this.formatDouble(value);
         }
 
         /**
@@ -240,9 +240,9 @@ export namespace Intl {
         */
         public format(value: number | bigint): string {
             if (value instanceof BigInt) {
-                return NumberFormat.formatDecStr(this.options.locale, value.toString());
+                return this.formatDecStr(value.toString());
             }
-            return NumberFormat.formatDouble(this.options.locale, value);
+            return this.formatDouble(value);
         }
 
         /**
@@ -271,13 +271,13 @@ export namespace Intl {
             }
 
             if (!isStartBigInt && !isEndBigInt) {
-                return NumberFormat.formatRangeDoubleDouble(this.options.locale, start as double, end as double);
+                return this.formatRangeDoubleDouble(start as double, end as double);
             } else if (!isStartBigInt && isEndBigInt) {
-                return NumberFormat.formatRangeDoubleDecStr(this.options.locale, start as double, (end as BigInt).toString());
+                return this.formatRangeDoubleDecStr(start as double, (end as BigInt).toString());
             } else if (isStartBigInt && !isEndBigInt) {
-                return NumberFormat.formatRangeDecStrDouble(this.options.locale, (start as BigInt).toString(), end as double);
+                return this.formatRangeDecStrDouble((start as BigInt).toString(), end as double);
             }
-            return NumberFormat.formatRangeDecStrDecStr(this.options.locale, (start as BigInt).toString(), (end as BigInt).toString());
+            return this.formatRangeDecStrDecStr((start as BigInt).toString(), (end as BigInt).toString());
         }
 
         /**
@@ -287,7 +287,7 @@ export namespace Intl {
         * @return resolved options
         */
         public resolvedOptions(): ResolvedNumberFormatOptions {
-            return this.options;
+            return this.options
         }
 
         /**
@@ -300,12 +300,10 @@ export namespace Intl {
         * @return supported locales
         */
         static supportedLocalesOf(locales: string | string[], options?: NumberFormatOptions): string[] {
-            let locMatcher = "best fit"
             if (options != undefined) {
-                if (options.localeMatcher != undefined) {
-                    locMatcher = options.localeMatcher!
-                }
+                checkOptions(options!)
             }
+            let locMatcher = options?.localeMatcher ?? "best fit"
             let loc: Array<string>
             if (locales! instanceof string)
                 loc = Array.of<string>(locales! as string)
@@ -329,13 +327,19 @@ export namespace Intl {
         }
 
         private readonly options: ResolvedNumberFormatOptions
+        private readonly minFracStr: string;
+        private readonly maxFracStr: string;
+        private readonly minSignStr: string;
+        private readonly maxSignStr: string;
+        private readonly minIntStr: string;
+        private readonly useGroupingStr: string;
 
-        private static native formatDouble(locale: string, value: double): string;
-        private static native formatDecStr(locale: string, value: string): string;
-        private static native formatRangeDoubleDouble(locale: string, start: number, end: number): string;
-        private static native formatRangeDoubleDecStr(locale: string, start: number, end: string): string;
-        private static native formatRangeDecStrDouble(locale: string, start: string, end: number): string;
-        private static native formatRangeDecStrDecStr(locale: string, start: string, end: string): string;
+        private native formatDouble(value: double): string;
+        private native formatDecStr(value: string): string;
+        private native formatRangeDoubleDouble(start: number, end: number): string;
+        private native formatRangeDoubleDecStr(start: number, end: string): string;
+        private native formatRangeDecStrDouble(start: string, end: number): string;
+        private native formatRangeDecStrDecStr(start: string, end: string): string;
     }
 
     export class NumberRangeFormatPart {
@@ -369,7 +373,7 @@ export namespace Intl {
         useGrouping?: boolean;
     }
 
-    // NOTE(ilyakorobkov) replace class with interface after fix issues #22050, #24106
+    // NOTE(ilyakorobkov) replace class with interface after fix issue #22050, #24106
     export class ResolvedNumberFormatOptions {
         compactDisplay?: "short" | "long"
         currencySign?: "standard" | "accounting"

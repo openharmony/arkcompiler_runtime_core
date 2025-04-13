@@ -35,7 +35,7 @@ icu::number::LocalizedNumberFormatter &IntlFormattersCache::NumFmtsCacheInvalida
         if (it == cache_.end()) {
             EraseRandFmtsGroupByEraseRatio();
             // Create new number formatter, number range formatter is empty
-            // Number range formatter will be created via call RangeIntlFormattersCacheInvalidation
+            // Number range formatter will be created via call NumRangeFmtsCacheInvalidation
             auto *ptr = new icu::number::LocalizedNumberFormatter(icu::number::NumberFormatter::withLocale(loc));
             NumberFormatters f;
             f.numFmt.reset(ptr);

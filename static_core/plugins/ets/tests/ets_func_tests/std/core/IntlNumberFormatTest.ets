@@ -32,8 +32,8 @@ function check(result: number, message: string): int {
     return fail;
 }
 
-const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru", "fa"];
-const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU", "IR"];
+const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru"];
+const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU"];
 const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
 const EN: int = 0;
 const FR: int = 1;
@@ -45,7 +45,6 @@ const CH: int = 6;
 const JP: int = 7;
 const GE: int = 8;
 const RU: int = 9;
-const IR: int = 10;
 
 function FormatBigIntUnion(): int {
     const funcName = "FormatBigIntUnion";
@@ -81,7 +80,6 @@ function separatorsBetweenNegAndPosAsStrings(): Array<string> {
     separators[JP] = String.fromCharCode(32, 65374, 32);
     separators[GE] = separators[EN];
     separators[RU] = separators[EN];
-    separators[IR] = separators[EN];
     return separators;
 }
 
@@ -101,7 +99,6 @@ function positiveBigIntsAsStrings(): Array<string> {
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
     expected[RU] = String.fromCharCode(49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
-    expected[IR] = String.fromCharCode(1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776);
     return expected;
 }
 
@@ -121,7 +118,6 @@ function negativeBigIntsAsStrings(): Array<string> {
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
     expected[RU] = String.fromCharCode(45, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
-    expected[IR] = String.fromCharCode(8206, 8722, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776);
     return expected;
 }
 

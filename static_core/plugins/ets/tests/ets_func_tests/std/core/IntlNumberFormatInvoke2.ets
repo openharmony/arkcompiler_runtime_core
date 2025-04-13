@@ -34,12 +34,12 @@ function testInvokeOutOfRangeMaxFracDigits() {
         maximumFractionDigits: 5,
         minimumFractionDigits: 3
     }
-    let expectedError = new RangeError("maximumFractionDigits value is out of range");
+    let expectedError = new RangeError("Invalid maximumFractionDigits");
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options1) }, expectedError);
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options2) }, expectedError);
     let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
-    assertTrue(getOptions.minimumFractionDigits == 3);
-    assertTrue(getOptions.maximumFractionDigits == 5);
+    assertEQ(getOptions.minimumFractionDigits, 3.0);
+    assertEQ(getOptions.maximumFractionDigits, 5.0);
     assertTrue(getOptions.maximumFractionDigits > getOptions.minimumFractionDigits);
 }
 
@@ -50,7 +50,7 @@ function testInvokeOutOfRangeMinFracDigits() {
     let options2: Intl.NumberFormatOptions = {
         minimumFractionDigits: -1
     }
-    let expectedError = new RangeError("minimumFractionDigits value is out of range");
+    let expectedError = new RangeError("Invalid minimumFractionDigits");
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options1) }, expectedError);
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options2) }, expectedError);
 }
@@ -66,12 +66,12 @@ function testInvokeOutOfRangeMaxSignDigits() {
         maximumSignificantDigits: 18,
         minimumSignificantDigits: 17
     }
-    let expectedError = new RangeError("maximumSignificantDigits value is out of range");
+    let expectedError = new RangeError("Invalid maximumSignificantDigits");
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options1) }, expectedError);
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options2) }, expectedError);
     let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
-    assertTrue(getOptions.maximumSignificantDigits! == 18);
-    assertTrue(getOptions.minimumSignificantDigits! == 17);
+    assertEQ(getOptions.maximumSignificantDigits!, 18.0);
+    assertEQ(getOptions.minimumSignificantDigits!, 17.0);
     assertTrue(getOptions.maximumSignificantDigits! > getOptions.minimumSignificantDigits!);
 }
 
@@ -83,7 +83,7 @@ function testInvokeOutOfRangeMinSignDigits() {
         minimumSignificantDigits: 0
     }
 
-    let expectedError = new RangeError("minimumSignificantDigits value is out of range");
+    let expectedError = new RangeError("Invalid minimumSignificantDigits");
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options1) },
         expectedError);
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options2) },
@@ -100,17 +100,14 @@ function testInvokeOutOfRangeMinIntDigits() {
     let options3: Intl.NumberFormatOptions = {
         minimumIntegerDigits: 15
     }
-    let expectedError = new RangeError("minimumIntegerDigits value is out of range");
+    let expectedError = new RangeError("Invalid minimumIntegerDigits");
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options1) }, expectedError);
     expectError((): void throws => { Intl.NumberFormat.$_invoke("zh", options2) }, expectedError);
     let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
-    assertTrue(getOptions.minimumIntegerDigits == 15);
+    assertEQ(getOptions.minimumIntegerDigits, 15.0);
 }
 
 function equaledNumberFormats(a: Intl.NumberFormat, b: Intl.NumberFormat, value: number | bigint): boolean {
-    if (a.format(value) != b.format(value)) {
-        return false;
-    }
-    return true;
+    return a.format(value) == b.format(value);
 }
 
