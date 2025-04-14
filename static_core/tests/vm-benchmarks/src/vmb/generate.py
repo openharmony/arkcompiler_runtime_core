@@ -343,7 +343,7 @@ def generate_mode(mode: str, lang: str,
 
 
 def create_interop_runner(generator: BenchGenerator, variant: TemplateVars, bu: BenchUnit, arkjs_suffix: str = ''):
-    runner_template = generator.get_template('TemplateInteropA2J' + arkjs_suffix + '.js')
+    runner_template = generator.get_template('TemplateInteropA2J' + arkjs_suffix + '.tpl_js')
     runner_js = runner_template.substitute({'METHOD': variant.method_name,
                                             'STATE': variant.state_name,
                                             'NAME': variant.bench_name})
@@ -383,11 +383,11 @@ def generate_main_interop(generator: BenchGenerator, arkjs_suffix: str = '') -> 
                          out='.ets',
                          link_to_src=False), arkjs_suffix=arkjs_suffix)
     bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='TemplateInteropJ2A' + arkjs_suffix + '.js',
+                         template='TemplateInteropJ2A' + arkjs_suffix + '.tpl_js',
                          out='.js',
                          link_to_src=False))
     bus += generate_mode('bu_j2j', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='Template.js',
+                         template='Template.tpl_js',
                          out='.js',
                          link_to_src=False))
     log.passed('Generated %d bench units', len(bus))
