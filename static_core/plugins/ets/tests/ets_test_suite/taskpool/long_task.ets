@@ -26,6 +26,60 @@ function sum(a: int, b: int): int {
     return a + b;
 }
 
+function delayWithYield(duration: int): void {
+    let t = Date.now();
+    while ((Date.now() - t) < duration) {}
+    Coroutine.Schedule();
+}
+
+function launchImpl(func: () => NullishType): Promise<NullishType> {
+    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+        func
+    );
+    return new Promise<NullishType>((resolve, reject) => {
+        try {
+            let res = job.Await();
+            resolve(res);
+        } catch(e) {
+            reject(e);
+        }
+    });
+}
+
+function testDelayFunc(): NullishType {
+    let task = new taskpool.LongTask(sumFunc);
+    let res = await taskpool.executeDelayed(10.0, task);
+    expectError(() => {
+        taskpool.execute(task);
+    }, new Error("taskpool:: The long task can only be executed once"));
+    return res;
+}
+
+function executeDelayedTest(): void {
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    try {
+        let res = await launchImpl(testDelayFunc);
+        assertEQ(res, 30);
+    } catch(e: Error) {
+        // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
+        assertEQ(e instanceof StackOverflowError, true);
+    }
+    let task = new taskpool.LongTask(sum, 10, 80);
+    await taskpool.execute(task);
+    expectError(() => {
+        taskpool.executeDelayed(10.0, task);
+    }, new Error("taskpool:: Multiple executions of LongTask are not supported in the executeDelayed"));
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
+}
+
+function executePeriodicallyTest(): void {
+    let task1 = new taskpool.LongTask(sumFunc);
+    await taskpool.execute(task1);
+    expectError(() => {
+        taskpool.executePeriodically(100.0, task1);
+    }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
+}
+
 function main(): int {
     let longTaskTestsuite = new ArkTestsuite("taskpool.LongTask");
     longTaskTestsuite.addTest("ExecuteTest", () =>
@@ -47,5 +101,9 @@ function main(): int {
         let res = await taskpool.execute(task);
         assertEQ(res, 300);
     });
-    return longTaskTestsuite.run();
+    longTaskTestsuite.addTest("ExecuteDelayedTest", executeDelayedTest);
+    longTaskTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);
+    let res = longTaskTestsuite.run();
+    CoroutineExtras.stopTaskpool();
+    return res;
 }

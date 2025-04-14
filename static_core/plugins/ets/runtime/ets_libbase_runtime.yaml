@@ -3928,6 +3928,26 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemScaleWorkersPool
 
+  - name: StdCoroutineStopTaskpool
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: stopTaskpool
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::StdSystemStopTaskpool
+
+  - name: StdCoroutineIncreaseTaskpoolWorkersToN
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: increaseTaskpoolWorkersToN
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemIncreaseTaskpoolWorkersToN
+
   - name: StdAtomicFlagSet
     space: ets
     class_name: std.debug.concurrency.AtomicFlag

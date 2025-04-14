@@ -125,14 +125,14 @@ function scheduleAJCoroutine(): boolean {
     return counter == 12 && call();
 }
 
-function launchCallWithoutAwait(): Promise<boolean> {
-    return taskpool.execute(call) as Promise<boolean>;
+function launchCallWithoutAwait(): Job<boolean> {
+    return launch<boolean, ()=>boolean>(call) as Job<boolean>;
 }
 
 // recursive launch
 function recursiveLaunch(): boolean {
-    let res : Promise<Promise<boolean>> = taskpool.execute(launchCallWithoutAwait) as Promise<Promise<boolean>>;
-    return await res;
+    let res : Job<Job<boolean>> = launch<Job<boolean>, ()=>Job<boolean>>(launchCallWithoutAwait) as Job<Job<boolean>>;
+    return res.Await().Await();
 }
 
 async function callAsync(): Promise<boolean> {
@@ -154,17 +154,17 @@ function launchAsyncFunctions(): Promise<boolean> {
 }
 
 function ACoroutineCallAsyncFunctions(): boolean {
-    let res : Promise<Promise<boolean>> = taskpool.execute(launchAsyncFunctions) as Promise<Promise<boolean>>
-    return await res;
+    let res : Job<Promise<boolean>> = launch<Promise<boolean>, ()=>Promise<boolean>>(launchAsyncFunctions) as Job<Promise<boolean>>
+    return await res.Await();
 }
 
-async function asyncFunctionLaunchCall(): Promise<boolean> {
-    return taskpool.execute(call) as Promise<boolean>;
+async function asyncFunctionLaunchCall() {
+    return launch<boolean, ()=>boolean>(call);
 }
 
 function asyncFunctionLaunchACoroutine(): boolean {
-    let res : Promise<boolean> = asyncFunctionLaunchCall();
-    return await res;
+    let res : Promise<Job<boolean>> = asyncFunctionLaunchCall();
+    return (await res).Await();
 }
 
 // oom
