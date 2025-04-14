@@ -542,7 +542,7 @@ static DeoptimizeType GetDeoptimizationType(Inst *inst)
         case Opcode::ZeroCheck:
             return DeoptimizeType::ZERO_CHECK;
         case Opcode::SubOverflowCheck:
-            return DeoptimizeType::OVERFLOW_TYPE;
+            return DeoptimizeType::OVERFLOW;
         case Opcode::CheckCast:
             return DeoptimizeType::CHECK_CAST;
         case Opcode::RefTypeCheck:

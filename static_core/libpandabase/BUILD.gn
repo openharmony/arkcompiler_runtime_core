@@ -23,11 +23,7 @@ if (ark_standalone_build) {
 ohos_static_library("libarktsbase_package") {
   deps = []
   if (enable_static_vm) {
-    if (is_mac) {
-      deps += [ ":libarktsbase_frontend_static" ]
-    } else {
-      deps += [ ":libarktsbase" ]
-    }
+    deps += [ ":libarktsbase" ]
   }
 
   part_name = ark_part_name
@@ -163,7 +159,7 @@ if (is_debug) {
   libarkbase_sources += [ "$ark_root/libpandabase/utils/debug.cpp" ]
 }
 
-if (current_cpu == "arm64" && !is_mac && target_os != "ios") {
+if (current_cpu == "arm64") {
   libarkbase_sources +=
       [ "$ark_root/libpandabase/arch/aarch64/cpu_features.cpp" ]
 } else {

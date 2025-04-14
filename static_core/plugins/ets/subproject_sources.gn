@@ -29,7 +29,9 @@ srcs_compiler = [
 
 srcs_abc2program = [ "abc2program/abc2program_ets_plugin.cpp" ]
 
-srcs_compiler += [ "compiler/codegen_intrinsics_ets.cpp" ]
+if (!is_mac) {
+  srcs_compiler += [ "compiler/codegen_intrinsics_ets.cpp" ]
+}
 
 srcs_disassembler = [ "disassembler/disasm_ets_plugin.cpp" ]
 

@@ -2329,7 +2329,7 @@ void EncodeVisitor::VisitAddOverflowCheck(GraphVisitor *visitor, Inst *inst)
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(0).GetInst()->GetType()));
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(1).GetInst()->GetType()));
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW_TYPE);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto src0 = Reg(inst->GetSrcReg(0), INT32_TYPE);
     auto src1 = Reg(inst->GetSrcReg(1), INT32_TYPE);
@@ -2354,7 +2354,7 @@ void EncodeVisitor::VisitSubOverflowCheck(GraphVisitor *visitor, Inst *inst)
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(0).GetInst()->GetType()));
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(1).GetInst()->GetType()));
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW_TYPE);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto src0 = Reg(inst->GetSrcReg(0), INT32_TYPE);
     auto src1 = Reg(inst->GetSrcReg(1), INT32_TYPE);
@@ -2365,7 +2365,7 @@ void EncodeVisitor::VisitNegOverflowAndZeroCheck(GraphVisitor *visitor, Inst *in
 {
     ASSERT(DataType::IsTypeNumeric(inst->GetInput(0).GetInst()->GetType()));
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW_TYPE);
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::OVERFLOW);
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto src = Reg(inst->GetSrcReg(0), INT32_TYPE);
     enc->GetEncoder()->EncodeNegOverflowAndZero(slowPath->GetLabel(), dst, src);
