@@ -411,4 +411,71 @@ TYPED_ARRAY_REVERSE_CALL_DECL(UInt16)
 TYPED_ARRAY_REVERSE_CALL_DECL(UInt32)
 TYPED_ARRAY_REVERSE_CALL_DECL(BigUInt64)
 
+int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
+{
+    if (idx < -arrayLength) {
+        return 0;
+    }
+    if (idx < 0) {
+        return arrayLength + idx;
+    }
+    if (idx > arrayLength) {
+        return arrayLength;
+    }
+    return idx;
+}
+
+template <typename T>
+T *EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start, EtsInt end)
+{
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
+        return nullptr;
+    }
+
+    auto arrayLength = thisArray->GetLengthInt();
+    target = NormalizeIndex(target, arrayLength);
+    start = NormalizeIndex(start, arrayLength);
+    end = NormalizeIndex(end, arrayLength);
+
+    int32_t count = end - start;
+    if (count > (arrayLength - target)) {
+        count = arrayLength - target;
+    }
+    if (count <= 0) {
+        return thisArray;
+    }
+
+    using ElementType = typename T::ElementType;
+    auto *targetAddress = ToVoidPtr(ToUintPtr(data) + thisArray->GetByteOffset() + target * sizeof(ElementType));
+    auto *startAddress = ToVoidPtr(ToUintPtr(data) + thisArray->GetByteOffset() + start * sizeof(ElementType));
+    [[maybe_unused]] auto error = memmove_s(targetAddress, (arrayLength - start) * sizeof(ElementType), startAddress,
+                                            count * sizeof(ElementType));
+    ASSERT(error == EOK);
+    return thisArray;
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ETS_ESCOMPAT_COPY_WITHIN(Type)                                                          \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                         \
+    extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArrayCopyWithin(          \
+        ark::ets::EtsEscompat##Type##Array *thisArray, EtsInt target, EtsInt start, EtsInt end) \
+    {                                                                                           \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                  \
+        return EtsEscompatTypedArrayCopyWithinImpl(thisArray, target, start, end);              \
+    }  // namespace ark::ets::intrinsics
+
+ETS_ESCOMPAT_COPY_WITHIN(Int8)
+ETS_ESCOMPAT_COPY_WITHIN(Int16)
+ETS_ESCOMPAT_COPY_WITHIN(Int32)
+ETS_ESCOMPAT_COPY_WITHIN(BigInt64)
+ETS_ESCOMPAT_COPY_WITHIN(Float32)
+ETS_ESCOMPAT_COPY_WITHIN(Float64)
+ETS_ESCOMPAT_COPY_WITHIN(UInt8)
+ETS_ESCOMPAT_COPY_WITHIN(UInt16)
+ETS_ESCOMPAT_COPY_WITHIN(UInt32)
+ETS_ESCOMPAT_COPY_WITHIN(BigUInt64)
+ETS_ESCOMPAT_COPY_WITHIN(UInt8Clamped)
+
+#undef ETS_ESCOMPAT_COPY_WITHIN
 }  // namespace ark::ets::intrinsics
