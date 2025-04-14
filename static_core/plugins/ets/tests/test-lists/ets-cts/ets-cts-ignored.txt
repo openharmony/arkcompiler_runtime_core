@@ -59,18 +59,7 @@
 
 #23823
 03.types/19.union_types/02.access_to_common_union_members/cm_fld2_11.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_0.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_1.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_fld3_11.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_12.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_2.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_4.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_5.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_6.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_7.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_8.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_9.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_fld3_10.ets
 
 #20935 Runtime aborts on access to common field with generics
 03.types/19.union_types/02.access_to_common_union_members/cm_fld1_11.ets
