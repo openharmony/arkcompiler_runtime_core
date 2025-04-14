@@ -16,7 +16,7 @@ import {
     LinearLayout
 } from './layout'
 
-@interface CallSiteReplacement {
+@interface __$$ETS_ANNOTATION$$__CallSiteReplacement {
     targetClass: string;
     methodName: string;
 }

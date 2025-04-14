@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-@interface EtsStringAnno {
+@interface __$$ETS_ANNOTATION$$__EtsStringAnno {
     a: string = "string";
 }
 

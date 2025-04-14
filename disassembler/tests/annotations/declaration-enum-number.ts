@@ -18,11 +18,11 @@ const enum E {
     B = 314
 } 
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     // No initializer with underlying type number
     a: E = new Number(0) as number;
 }
 
-@interface Anno2 {
+@interface __$$ETS_ANNOTATION$$__Anno2 {
     a: E = 42;
 }

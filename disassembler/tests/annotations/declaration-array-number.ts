@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     a: number[];
 }
 
-@interface Anno2 {
+@interface __$$ETS_ANNOTATION$$__Anno2 {
     a: number[] = new Array<number>();
 }
 
-@interface Anno3 {
+@interface __$$ETS_ANNOTATION$$__Anno3 {
     a: number[] = [1, -2, 3];
 }

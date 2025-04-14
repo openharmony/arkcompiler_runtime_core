@@ -14,15 +14,15 @@
  */
 
 const enum E {
-    A = "Hello",
-    B = "world!"
+    A = 'Hello',
+    B = 'world!'
 } 
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     // No initializer with underlying type string
     a: E;
 }
 
-@interface Anno2 {
-    a: E = "Hello";
+@interface __$$ETS_ANNOTATION$$__Anno2 {
+    a: E = 'Hello';
 }

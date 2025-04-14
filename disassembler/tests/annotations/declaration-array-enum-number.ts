@@ -18,16 +18,16 @@ const enum E {
     B = -314
 } 
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     // without initializer in .ets source code with underlying number type
     a: E[] = new Array<E>(0);
 }
 
-@interface Anno2 {
+@interface __$$ETS_ANNOTATION$$__Anno2 {
     // with empty array initializer in .ets source code with underlying number type
     a: E[] = new Array<E>(1);
 }
 
-@interface Anno3 {
+@interface __$$ETS_ANNOTATION$$__Anno3 {
     a: E[] = [42, -314, 42];
 }

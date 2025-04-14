@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: string[][][];
 }
 
-@__$$ETS_ANNOTATION$$__Anno({a: [[["Hello", "world", "!"]]]})
+@__$$ETS_ANNOTATION$$__Anno({a: [[['Hello', 'world', '!']]]})
 class A {
     @__$$ETS_ANNOTATION$$__Anno({a: [[new Array<string>()]]})
     foo() {}

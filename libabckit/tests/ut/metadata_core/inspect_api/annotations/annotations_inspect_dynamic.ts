@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: number = 3
     b: number[] = [13, 9]
     d: boolean = false

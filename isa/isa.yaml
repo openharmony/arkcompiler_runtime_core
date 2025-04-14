@@ -112,7 +112,8 @@ version: 13.0.1.0
 # 0 is default value, alaways reflects to the newest version.
 # Due to historical reasons, bytecode version is upgraded to 13.0.1.0 in API18.
 api_version_map: [[0, 13.0.1.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.6.0], [13, 12.0.6.0],
-                  [14, 12.0.6.0], [15, 12.0.6.0], [16, 12.0.6.0], [17, 12.0.6.0], [18, 13.0.1.0]]
+                  [14, 12.0.6.0], [15, 12.0.6.0], [16, 12.0.6.0], [17, 12.0.6.0], [18, 13.0.1.0], [19, 13.0.1.0],
+                  [20, 13.0.1.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.

@@ -169,19 +169,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_boolean, Test
     InitDisasm(FILE_DECLARATION_3D_ARRAY_BOOLEAN);
 
     ValidateRecord("declaration-3d-array-boolean.Anno1", R"(
-        .record declaration-3d-array-boolean.Anno1 {
+        .language ECMAScript.record declaration-3d-array-boolean.Anno1 {
             u1[][][] a
         }
     )");
 
     ValidateRecord("declaration-3d-array-boolean.Anno2", R"(
-        .record declaration-3d-array-boolean.Anno2 {
+        .language ECMAScript.record declaration-3d-array-boolean.Anno2 {
             u1[][][] a = [[[]]]
         }
     )");
 
     ValidateRecord("declaration-3d-array-boolean.Anno3", R"(
-        .record declaration-3d-array-boolean.Anno3 {
+        .language ECMAScript.record declaration-3d-array-boolean.Anno3 {
             u1[][][] a = [[[1, 0], [1, 0]]]
         }
     )");
@@ -198,19 +198,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_enum_number, 
     InitDisasm(FILE_DECLARATION_3D_ARRAY_ENUM_NUMBER);
 
     ValidateRecord("declaration-3d-array-enum-number.Anno1", R"(
-        .record declaration-3d-array-enum-number.Anno1 {
+        .language ECMAScript.record declaration-3d-array-enum-number.Anno1 {
             f64[][][] a
         }
     )");
 
     ValidateRecord("declaration-3d-array-enum-number.Anno2", R"(
-        .record declaration-3d-array-enum-number.Anno2 {
+        .language ECMAScript.record declaration-3d-array-enum-number.Anno2 {
             f64[][][] a = [[[]]]
         }
     )");
 
     ValidateRecord("declaration-3d-array-enum-number.Anno3", R"(
-        .record declaration-3d-array-enum-number.Anno3 {
+        .language ECMAScript.record declaration-3d-array-enum-number.Anno3 {
             f64[][][] a = [[[42, -314, 42]]]
         }
     )");
@@ -227,25 +227,25 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_enum_string, 
     InitDisasm(FILE_DECLARATION_3D_ARRAY_ENUM_STRING);
 
     ValidateRecord("declaration-3d-array-enum-string.Anno1", R"(
-        .record declaration-3d-array-enum-string.Anno1 {
+        .language ECMAScript.record declaration-3d-array-enum-string.Anno1 {
             panda.String[][][] a
         }
     )");
 
     ValidateRecord("declaration-3d-array-enum-string.Anno2", R"(
-        .record declaration-3d-array-enum-string.Anno2 {
+        .language ECMAScript.record declaration-3d-array-enum-string.Anno2 {
             panda.String[][][] a = [[[]]]
         }
     )");
 
     ValidateRecord("declaration-3d-array-enum-string.Anno3", R"(
-        .record declaration-3d-array-enum-string.Anno3 {
+        .language ECMAScript.record declaration-3d-array-enum-string.Anno3 {
             panda.String[][][] a = [[["Hello", "world!", "Hello"]]]
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 }
 
@@ -260,19 +260,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_number, TestS
     InitDisasm(FILE_DECLARATION_3D_ARRAY_NUMBER);
 
     ValidateRecord("declaration-3d-array-number.Anno1", R"(
-        .record declaration-3d-array-number.Anno1 {
+        .language ECMAScript.record declaration-3d-array-number.Anno1 {
             f64[][][] a
         }
     )");
 
     ValidateRecord("declaration-3d-array-number.Anno2", R"(
-        .record declaration-3d-array-number.Anno2 {
+        .language ECMAScript.record declaration-3d-array-number.Anno2 {
             f64[][][] a = [[[]]]
         }
     )");
 
     ValidateRecord("declaration-3d-array-number.Anno3", R"(
-        .record declaration-3d-array-number.Anno3 {
+        .language ECMAScript.record declaration-3d-array-number.Anno3 {
             f64[][][] a = [[[1, -2, 3], [4, -5, 6]]]
         }
     )");
@@ -289,25 +289,25 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_string, TestS
     InitDisasm(FILE_DECLARATION_3D_ARRAY_STRING);
 
     ValidateRecord("declaration-3d-array-string.Anno1", R"(
-        .record declaration-3d-array-string.Anno1 {
+        .language ECMAScript.record declaration-3d-array-string.Anno1 {
             panda.String[][][] a
         }
     )");
 
     ValidateRecord("declaration-3d-array-string.Anno2", R"(
-        .record declaration-3d-array-string.Anno2 {
+        .language ECMAScript.record declaration-3d-array-string.Anno2 {
             panda.String[][][] a = [[[]]]
         }
     )");
 
     ValidateRecord("declaration-3d-array-string.Anno3", R"(
-        .record declaration-3d-array-string.Anno3 {
+        .language ECMAScript.record declaration-3d-array-string.Anno3 {
             panda.String[][][] a = [[["hello", "world"], ["hello", "world"]]]
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 }
 
@@ -322,19 +322,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_boolean, TestSiz
     InitDisasm(FILE_DECLARATION_ARRAY_BOOLEAN);
 
     ValidateRecord("declaration-array-boolean.Anno1", R"(
-        .record declaration-array-boolean.Anno1 {
+        .language ECMAScript.record declaration-array-boolean.Anno1 {
             u1[] a
         }
     )");
 
     ValidateRecord("declaration-array-boolean.Anno2", R"(
-        .record declaration-array-boolean.Anno2 {
+        .language ECMAScript.record declaration-array-boolean.Anno2 {
             u1[] a = []
         }
     )");
 
     ValidateRecord("declaration-array-boolean.Anno3", R"(
-        .record declaration-array-boolean.Anno3 {
+        .language ECMAScript.record declaration-array-boolean.Anno3 {
             u1[] a = [1, 0, 1]
         }
     )");
@@ -351,19 +351,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_enum_number, Tes
     InitDisasm(FILE_DECLARATION_ARRAY_ENUM_NUMBER);
 
     ValidateRecord("declaration-array-enum-number.Anno1", R"(
-        .record declaration-array-enum-number.Anno1 {
+        .language ECMAScript.record declaration-array-enum-number.Anno1 {
             f64[] a
         }
     )");
 
     ValidateRecord("declaration-array-enum-number.Anno2", R"(
-        .record declaration-array-enum-number.Anno2 {
+        .language ECMAScript.record declaration-array-enum-number.Anno2 {
             f64[] a = []
         }
     )");
 
     ValidateRecord("declaration-array-enum-number.Anno3", R"(
-        .record declaration-array-enum-number.Anno3 {
+        .language ECMAScript.record declaration-array-enum-number.Anno3 {
             f64[] a = [42, -314, 42]
         }
     )");
@@ -380,25 +380,25 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_enum_string, Tes
     InitDisasm(FILE_DECLARATION_ARRAY_ENUM_STRING);
 
     ValidateRecord("declaration-array-enum-string.Anno1", R"(
-        .record declaration-array-enum-string.Anno1 {
+        .language ECMAScript.record declaration-array-enum-string.Anno1 {
             panda.String[] a
         }
     )");
 
     ValidateRecord("declaration-array-enum-string.Anno2", R"(
-        .record declaration-array-enum-string.Anno2 {
+        .language ECMAScript.record declaration-array-enum-string.Anno2 {
             panda.String[] a = []
         }
     )");
 
     ValidateRecord("declaration-array-enum-string.Anno3", R"(
-        .record declaration-array-enum-string.Anno3 {
+        .language ECMAScript.record declaration-array-enum-string.Anno3 {
             panda.String[] a = ["Hello", "world!", "Hello"]
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 }
 
@@ -413,19 +413,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_number, TestSize
     InitDisasm(FILE_DECLARATION_ARRAY_NUMBER);
 
     ValidateRecord("declaration-array-number.Anno1", R"(
-        .record declaration-array-number.Anno1 {
+        .language ECMAScript.record declaration-array-number.Anno1 {
             f64[] a
         }
     )");
 
     ValidateRecord("declaration-array-number.Anno2", R"(
-        .record declaration-array-number.Anno2 {
+        .language ECMAScript.record declaration-array-number.Anno2 {
             f64[] a = []
         }
     )");
 
     ValidateRecord("declaration-array-number.Anno3", R"(
-        .record declaration-array-number.Anno3 {
+        .language ECMAScript.record declaration-array-number.Anno3 {
             f64[] a = [1, -2, 3]
         }
     )");
@@ -442,25 +442,25 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_string, TestSize
     InitDisasm(FILE_DECLARATION_ARRAY_STRING);
 
     ValidateRecord("declaration-array-string.Anno1", R"(
-        .record declaration-array-string.Anno1 {
+        .language ECMAScript.record declaration-array-string.Anno1 {
             panda.String[] a
         }
     )");
 
     ValidateRecord("declaration-array-string.Anno2", R"(
-        .record declaration-array-string.Anno2 {
+        .language ECMAScript.record declaration-array-string.Anno2 {
             panda.String[] a = []
         }
     )");
 
     ValidateRecord("declaration-array-string.Anno3", R"(
-        .record declaration-array-string.Anno3 {
+        .language ECMAScript.record declaration-array-string.Anno3 {
             panda.String[] a = ["Hello", "world", "!"]
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 }
 
@@ -475,13 +475,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_boolean, TestSize.Leve
     InitDisasm(FILE_DECLARATION_BOOLEAN);
 
     ValidateRecord("declaration-boolean.Anno1", R"(
-        .record declaration-boolean.Anno1 {
+        .language ECMAScript.record declaration-boolean.Anno1 {
             u1 a
         }
     )");
 
     ValidateRecord("declaration-boolean.Anno2", R"(
-        .record declaration-boolean.Anno2 {
+        .language ECMAScript.record declaration-boolean.Anno2 {
             u1 a = 1
         }
     )");
@@ -498,7 +498,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_combination, TestSize.
     InitDisasm(FILE_DECLARATION_COMBINATION);
 
     ValidateRecord("declaration-combination.Anno", R"(
-        .record declaration-combination.Anno {
+        .language ECMAScript.record declaration-combination.Anno {
             f64 a
             f64[] b = [13, -10]
             panda.String c
@@ -513,7 +513,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_combination, TestSize.
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 }
 
@@ -528,7 +528,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_empty, TestSize.Level1
     InitDisasm(FILE_DECLARATION_EMPTY);
 
     ValidateRecord("declaration-empty.Anno", R"(
-        .record declaration-empty.Anno {
+        .language ECMAScript.record declaration-empty.Anno {
         }
     )");
 }
@@ -544,13 +544,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_enum_number, TestSize.
     InitDisasm(FILE_DECLARATION_ENUM_NUMBER);
 
     ValidateRecord("declaration-enum-number.Anno1", R"(
-        .record declaration-enum-number.Anno1 {
+        .language ECMAScript.record declaration-enum-number.Anno1 {
             f64 a
         }
     )");
 
     ValidateRecord("declaration-enum-number.Anno2", R"(
-        .record declaration-enum-number.Anno2 {
+        .language ECMAScript.record declaration-enum-number.Anno2 {
             f64 a = 42
         }
     )");
@@ -567,19 +567,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_enum_string, TestSize.
     InitDisasm(FILE_DECLARATION_ENUM_STRING);
 
     ValidateRecord("declaration-enum-string.Anno1", R"(
-        .record declaration-enum-string.Anno1 {
+        .language ECMAScript.record declaration-enum-string.Anno1 {
             panda.String a
         }
     )");
 
     ValidateRecord("declaration-enum-string.Anno2", R"(
-        .record declaration-enum-string.Anno2 {
+        .language ECMAScript.record declaration-enum-string.Anno2 {
             panda.String a = "Hello"
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 }
 
@@ -594,19 +594,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_number, TestSize.Level
     InitDisasm(FILE_DECLARATION_NUMBER);
 
     ValidateRecord("declaration-number.Anno1", R"(
-        .record declaration-number.Anno1 {
+        .language ECMAScript.record declaration-number.Anno1 {
             f64 a
         }
     )");
 
     ValidateRecord("declaration-number.Anno2", R"(
-        .record declaration-number.Anno2 {
+        .language ECMAScript.record declaration-number.Anno2 {
             f64 a = 42
         }
     )");
 
     ValidateRecord("declaration-number.Anno3", R"(
-        .record declaration-number.Anno3 {
+        .language ECMAScript.record declaration-number.Anno3 {
             f64 a = -314
         }
     )");
@@ -623,19 +623,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_string, TestSize.Level
     InitDisasm(FILE_DECLARATION_STRING);
 
     ValidateRecord("declaration-string.Anno1", R"(
-        .record declaration-string.Anno1 {
+        .language ECMAScript.record declaration-string.Anno1 {
             panda.String a
         }
     )");
 
     ValidateRecord("declaration-string.Anno2", R"(
-        .record declaration-string.Anno2 {
+        .language ECMAScript.record declaration-string.Anno2 {
             panda.String a = "Hello world!"
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 }
 
@@ -650,7 +650,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_boolean
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_BOOLEAN);
 
     ValidateRecord("declaration-usage-3d-array-boolean.Anno", R"(
-        .record declaration-usage-3d-array-boolean.Anno {
+        .language ECMAScript.record declaration-usage-3d-array-boolean.Anno {
             u1[][][] a
         }
     )");
@@ -679,7 +679,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_enum_nu
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_ENUM_NUMBER);
 
     ValidateRecord("declaration-usage-3d-array-enum-number.Anno", R"(
-        .record declaration-usage-3d-array-enum-number.Anno {
+        .language ECMAScript.record declaration-usage-3d-array-enum-number.Anno {
             f64[][][] a
         }
     )");
@@ -708,13 +708,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_enum_st
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_ENUM_STRING);
 
     ValidateRecord("declaration-usage-3d-array-enum-string.Anno", R"(
-        .record declaration-usage-3d-array-enum-string.Anno {
+        .language ECMAScript.record declaration-usage-3d-array-enum-string.Anno {
             panda.String[][][] a
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 
     ValidateMethodAnnotation("declaration-usage-3d-array-enum-string.#~A=#A",
@@ -741,7 +741,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_number,
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_NUMBER);
 
     ValidateRecord("declaration-usage-3d-array-number.Anno", R"(
-        .record declaration-usage-3d-array-number.Anno {
+        .language ECMAScript.record declaration-usage-3d-array-number.Anno {
             f64[][][] a
         }
     )");
@@ -770,13 +770,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_string,
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_STRING);
 
     ValidateRecord("declaration-usage-3d-array-string.Anno", R"(
-        .record declaration-usage-3d-array-string.Anno {
+        .language ECMAScript.record declaration-usage-3d-array-string.Anno {
             panda.String[][][] a
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 
     ValidateMethodAnnotation("declaration-usage-3d-array-string.#~A=#A",
@@ -803,7 +803,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_boolean, T
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_BOOLEAN);
 
     ValidateRecord("declaration-usage-array-boolean.Anno", R"(
-        .record declaration-usage-array-boolean.Anno {
+        .language ECMAScript.record declaration-usage-array-boolean.Anno {
             u1[] a
         }
     )");
@@ -832,7 +832,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_enum_numbe
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_ENUM_NUMBER);
 
     ValidateRecord("declaration-usage-array-enum-number.Anno", R"(
-        .record declaration-usage-array-enum-number.Anno {
+        .language ECMAScript.record declaration-usage-array-enum-number.Anno {
             f64[] a
         }
     )");
@@ -861,13 +861,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_enum_strin
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_ENUM_STRING);
 
     ValidateRecord("declaration-usage-array-enum-string.Anno", R"(
-        .record declaration-usage-array-enum-string.Anno {
+        .language ECMAScript.record declaration-usage-array-enum-string.Anno {
             panda.String[] a
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 
     ValidateMethodAnnotation("declaration-usage-array-enum-string.#~A=#A",
@@ -894,7 +894,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_number, Te
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_NUMBER);
 
     ValidateRecord("declaration-usage-array-number.Anno", R"(
-        .record declaration-usage-array-number.Anno {
+        .language ECMAScript.record declaration-usage-array-number.Anno {
             f64[] a
         }
     )");
@@ -921,13 +921,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_string, Te
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_STRING);
 
     ValidateRecord("declaration-usage-array-string.Anno", R"(
-        .record declaration-usage-array-string.Anno {
+        .language ECMAScript.record declaration-usage-array-string.Anno {
             panda.String[] a
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 
     ValidateMethodAnnotation("declaration-usage-array-string.#~A=#A", "Ldeclaration-usage-array-string.Anno", R"(
@@ -952,7 +952,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_boolean, TestSiz
     InitDisasm(FILE_DECLARATION_USAGE_BOOLEAN);
 
     ValidateRecord("declaration-usage-boolean.Anno", R"(
-        .record declaration-usage-boolean.Anno {
+        .language ECMAScript.record declaration-usage-boolean.Anno {
             u1 a
         }
     )");
@@ -979,7 +979,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_combination, Tes
     InitDisasm(FILE_DECLARATION_USAGE_COMBINATION);
 
     ValidateRecord("declaration-usage-combination.Anno", R"(
-        .record declaration-usage-combination.Anno {
+        .language ECMAScript.record declaration-usage-combination.Anno {
             f64 a
             f64[] b = [13, -10]
             panda.String c
@@ -1035,7 +1035,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_empty, TestSize.
     InitDisasm(FILE_DECLARATION_USAGE_EMPTY);
 
     ValidateRecord("declaration-usage-empty.Anno", R"(
-        .record declaration-usage-empty.Anno {
+        .language ECMAScript.record declaration-usage-empty.Anno {
         }
     )");
 
@@ -1063,7 +1063,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_enum_number, Tes
     InitDisasm(FILE_DECLARATION_USAGE_ENUM_NUMBER);
 
     ValidateRecord("declaration-usage-enum-number.Anno", R"(
-        .record declaration-usage-enum-number.Anno {
+        .language ECMAScript.record declaration-usage-enum-number.Anno {
             f64 a
         }
     )");
@@ -1090,13 +1090,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_enum_string, Tes
     InitDisasm(FILE_DECLARATION_USAGE_ENUM_STRING);
 
     ValidateRecord("declaration-usage-enum-string.Anno", R"(
-        .record declaration-usage-enum-string.Anno {
+        .language ECMAScript.record declaration-usage-enum-string.Anno {
             panda.String a
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 
     ValidateMethodAnnotation("declaration-usage-enum-string.#~A=#A", "Ldeclaration-usage-enum-string.Anno", R"(
@@ -1121,7 +1121,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_number, TestSize
     InitDisasm(FILE_DECLARATION_USAGE_NUMBER);
 
     ValidateRecord("declaration-usage-number.Anno", R"(
-        .record declaration-usage-number.Anno {
+        .language ECMAScript.record declaration-usage-number.Anno {
             f64 a
         }
     )");
@@ -1148,13 +1148,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_string, TestSize
     InitDisasm(FILE_DECLARATION_USAGE_STRING);
 
     ValidateRecord("declaration-usage-string.Anno", R"(
-        .record declaration-usage-string.Anno {
+        .language ECMAScript.record declaration-usage-string.Anno {
             panda.String a
         }
     )");
 
     ValidateRecord("panda.String", R"(
-        .record panda.String <external>
+        .language ECMAScript.record panda.String <external>
     )");
 
     ValidateMethodAnnotation("declaration-usage-string.#~A=#A", "Ldeclaration-usage-string.Anno", R"(
@@ -1179,12 +1179,12 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_export, TestSize.Level1)
     InitDisasm(FILE_EXPORT);
 
     ValidateRecord("export.Anno1", R"(
-        .record export.Anno1 {
+        .language ECMAScript.record export.Anno1 {
         }
     )");
 
     ValidateRecord("export.Anno2", R"(
-        .record export.Anno2 {
+        .language ECMAScript.record export.Anno2 {
             f64 a = 0
         }
     )");
@@ -1209,19 +1209,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_import_qualified, TestSize.Level1)
     InitDisasm(FILE_IMPORT_QUALIFIED);
 
     ValidateRecord("import-qualified.Namespace1.Anno", R"(
-        .record import-qualified.Namespace1.Anno <external>
+        .language ECMAScript.record import-qualified.Namespace1.Anno <external>
     )");
 
     ValidateRecord("import-qualified.Namespace1.Anno1", R"(
-        .record import-qualified.Namespace1.Anno1 <external>
+        .language ECMAScript.record import-qualified.Namespace1.Anno1 <external>
     )");
 
     ValidateRecord("import-qualified.Namespace1.Namespace2.Namespace3.Anno2", R"(
-        .record import-qualified.Namespace1.Namespace2.Namespace3.Anno2 <external>
+        .language ECMAScript.record import-qualified.Namespace1.Namespace2.Namespace3.Anno2 <external>
     )");
 
     ValidateRecord("import-qualified.Namespace1.Namespace2.Namespace3.Anno3", R"(
-        .record import-qualified.Namespace1.Namespace2.Namespace3.Anno3 <external>
+        .language ECMAScript.record import-qualified.Namespace1.Namespace2.Namespace3.Anno3 <external>
     )");
 
     ValidateMethodAnnotation("import-qualified.#~A=#A", "Limport-qualified.Namespace1.Anno", R"(
@@ -1260,11 +1260,11 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_import_unqualified, TestSize.Level
     InitDisasm(FILE_IMPORT_UNQUALIFIED);
 
     ValidateRecord("import-unqualified.Anno1", R"(
-        .record import-unqualified.Anno1 <external>
+        .language ECMAScript.record import-unqualified.Anno1 <external>
     )");
 
     ValidateRecord("import-unqualified.Anno2", R"(
-        .record import-unqualified.Anno2 <external>
+        .language ECMAScript.record import-unqualified.Anno2 <external>
     )");
 
     ValidateMethodAnnotation("import-unqualified.#~A=#A", "Limport-unqualified.Anno1", R"(
@@ -1297,19 +1297,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_multiple_annotations, TestSize.Lev
     InitDisasm(FILE_MULTIPLE_ANNOTATIONS);
 
     ValidateRecord("multiple-annotations.Anno1", R"(
-        .record multiple-annotations.Anno1 {
+        .language ECMAScript.record multiple-annotations.Anno1 {
             f64 a = 1
         }
     )");
 
     ValidateRecord("multiple-annotations.Anno2", R"(
-        .record multiple-annotations.Anno2 {
+        .language ECMAScript.record multiple-annotations.Anno2 {
             panda.String b = "string"
         }
     )");
 
     ValidateRecord("multiple-annotations.Anno3", R"(
-        .record multiple-annotations.Anno3 {
+        .language ECMAScript.record multiple-annotations.Anno3 {
             u1[] c = [1, 0]
         }
     )");

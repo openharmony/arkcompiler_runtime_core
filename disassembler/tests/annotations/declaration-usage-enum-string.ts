@@ -14,16 +14,16 @@
  */
 
 const enum E {
-    A = "Hello",
-    B = "world"
+    A = 'Hello',
+    B = 'world'
 }
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: E;
 }
 
-@__$$ETS_ANNOTATION$$__Anno({a : "Hello"})
+@__$$ETS_ANNOTATION$$__Anno({a : 'Hello'})
 class A {
-    @__$$ETS_ANNOTATION$$__Anno({a : "world"})
+    @__$$ETS_ANNOTATION$$__Anno({a : 'world'})
     foo() {}
 }
