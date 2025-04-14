@@ -163,45 +163,50 @@ static icu::DateFormat::EStyle ToICUDateTimeStyle(ani_env *env, ani_string style
     return icu::DateFormat::NONE;
 }
 
+static std::unique_ptr<icu::UnicodeString> UnicodeStringFromAniString(ani_env *env, ani_string str)
+{
+    ani_boolean strUndef = ANI_FALSE;
+    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(str, &strUndef));
+
+    if (strUndef == ANI_TRUE) {
+        return nullptr;
+    }
+
+    ASSERT(str != nullptr);
+
+    ani_size strSize = 0;
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16Size(str, &strSize));
+
+    std::vector<uint16_t> strBuf(strSize + 1);
+
+    ani_size charsCount = 0;
+    ANI_FATAL_IF_ERROR(env->String_GetUTF16(str, strBuf.data(), strBuf.size(), &charsCount));
+    ASSERT(charsCount == strSize);
+
+    return std::make_unique<icu::UnicodeString>(strBuf.data(), strSize);
+}
+
 static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateFormat, ani_object options)
 {
     ani_ref timeZoneRef = nullptr;
     ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone", &timeZoneRef));
 
-    ani_boolean timeZoneUndefined = ANI_FALSE;
-    ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(timeZoneRef, &timeZoneUndefined));
-
-    if (timeZoneUndefined == ANI_TRUE) {
+    auto timeZone = static_cast<ani_string>(timeZoneRef);
+    std::unique_ptr<icu::UnicodeString> timeZoneId = UnicodeStringFromAniString(env, timeZone);
+    if (!timeZoneId) {
         return ANI_OK;
     }
 
-    auto timeZone = static_cast<ani_string>(timeZoneRef);
-    ASSERT(timeZone != nullptr);
-
-    ani_size timeZoneStrSize = 0;
-    ANI_FATAL_IF_ERROR(env->String_GetUTF16Size(timeZone, &timeZoneStrSize));
-
-    ani_size copiedCharsCount = 0;
-    std::vector<uint16_t> timeZoneStr(timeZoneStrSize + 1);
-
-    ANI_FATAL_IF_ERROR(env->String_GetUTF16(timeZone, timeZoneStr.data(), timeZoneStr.size(), &copiedCharsCount));
-    ASSERT(copiedCharsCount == timeZoneStrSize);
-
-    icu::UnicodeString timeZoneId(timeZoneStr.data(), timeZoneStrSize);
-    std::unique_ptr<icu::TimeZone> icuTimeZone(icu::TimeZone::createTimeZone(timeZoneId));
-
-    if (*icuTimeZone == icu::TimeZone::getUnknown()) {
+    std::unique_ptr<icu::TimeZone> formatTimeZone(icu::TimeZone::createTimeZone(*timeZoneId));
+    if (*formatTimeZone == icu::TimeZone::getUnknown()) {
         std::string invalidTimeZoneId;
-        timeZoneId.toUTF8String(invalidTimeZoneId);
+        timeZoneId->toUTF8String(invalidTimeZoneId);
 
-        std::string errorMessage = "Invalid time zone specified: ";
-        errorMessage += invalidTimeZoneId;
-
-        ThrowRangeError(env, errorMessage);
+        ThrowRangeError(env, "Invalid time zone specified: " + invalidTimeZoneId);
         return ANI_PENDING_ERROR;
     }
 
-    dateFormat->adoptTimeZone(icuTimeZone.release());
+    dateFormat->adoptTimeZone(formatTimeZone.release());
 
     return ANI_OK;
 }
@@ -533,6 +538,7 @@ static ani_object DateTimeFormatGetOptions(ani_env *env, ani_object self)
 {
     ani_ref optionsRef = nullptr;
     ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(self, "options", &optionsRef));
+    ASSERT(optionsRef != nullptr);
 
     return static_cast<ani_object>(optionsRef);
 }
@@ -558,11 +564,6 @@ static std::unique_ptr<icu::UnicodeString> DateTimeFormatGetPatternSkeleton(ani_
 
 static std::unique_ptr<icu::DateFormat> CreateICUDateFormat(ani_env *env, ani_object self)
 {
-    ani_object options = DateTimeFormatGetOptions(env, self);
-    if (options == nullptr) {
-        return nullptr;
-    }
-
     std::unique_ptr<icu::Locale> icuLocale = ToICULocale(env, self);
     if (!icuLocale) {
         return nullptr;
@@ -573,6 +574,7 @@ static std::unique_ptr<icu::DateFormat> CreateICUDateFormat(ani_env *env, ani_ob
         return nullptr;
     }
 
+    ani_object options = DateTimeFormatGetOptions(env, self);
     ani_status aniStatus = ConfigureLocaleOptions(env, icuLocale.get(), options);
     if (aniStatus != ANI_OK) {
         return nullptr;
@@ -773,6 +775,31 @@ static void FillDateTimeRangeFormatPartArray(ani_env *env, ani_array_ref partsAr
     }
 }
 
+static ani_status DateIntervalFormatSetTimeZone(ani_env *env, icu::DateIntervalFormat *format, ani_object options)
+{
+    ani_ref timeZoneRef = nullptr;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone", &timeZoneRef));
+
+    auto timeZone = static_cast<ani_string>(timeZoneRef);
+    std::unique_ptr<icu::UnicodeString> timeZoneId = UnicodeStringFromAniString(env, timeZone);
+    if (!timeZoneId) {
+        return ANI_OK;
+    }
+
+    std::unique_ptr<icu::TimeZone> formatTimeZone(icu::TimeZone::createTimeZone(*timeZoneId));
+    if (*formatTimeZone == icu::TimeZone::getUnknown()) {
+        std::string invalidTimeZoneId;
+        timeZoneId->toUTF8String(invalidTimeZoneId);
+
+        ThrowRangeError(env, "Invalid time zone specified: " + invalidTimeZoneId);
+        return ANI_PENDING_ERROR;
+    }
+
+    format->adoptTimeZone(formatTimeZone.release());
+
+    return ANI_OK;
+}
+
 static std::unique_ptr<icu::FormattedDateInterval> FormatDateInterval(ani_env *env, ani_object self, ani_double start,
                                                                       ani_double end)
 {
@@ -798,6 +825,9 @@ static std::unique_ptr<icu::FormattedDateInterval> FormatDateInterval(ani_env *e
     if (U_FAILURE(status) == TRUE) {
         return ThrowInternalError(env, std::string("Failed to create DateIntervalFormat: ") + u_errorName(status));
     }
+
+    ani_object options = DateTimeFormatGetOptions(env, self);
+    DateIntervalFormatSetTimeZone(env, intervalFmt.get(), options);
 
     auto interval = std::make_unique<icu::DateInterval>(start, end);
 
