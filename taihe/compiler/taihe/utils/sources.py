@@ -36,7 +36,8 @@ class SourceBase(ABC):
         ...
 
     @abstractmethod
-    def read(self) -> list[str]: ...
+    def read(self) -> list[str]: 
+        ...
 
 
 @dataclass(frozen=True)
