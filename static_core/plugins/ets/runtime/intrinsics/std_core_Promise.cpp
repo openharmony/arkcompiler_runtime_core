@@ -165,6 +165,11 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
         ThrowNullPointerException(ctx, currentCoro);
         return nullptr;
     }
+    if (currentCoro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
+        ThrowEtsException(currentCoro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+                          "Cannot await in the current context!");
+        return nullptr;
+    }
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
 

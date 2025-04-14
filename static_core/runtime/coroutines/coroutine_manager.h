@@ -255,6 +255,9 @@ public:
      * If an attempt to switch the active coroutine is performed when coroutine switch is disabled, the exact actions
      * are defined by the concrete CoroutineManager implementation (they could include no-op, program halt or something
      * else).
+     *
+     * NOTE(konstanting): consider extending this interface to allow for disabling the individual coroutine
+     * operations, like CoroutineOperation::LAUNCH, AWAIT, SCHEDULE, ALL
      */
     virtual void DisableCoroutineSwitch() = 0;
     /// Enable coroutine switch for the current worker.
