@@ -785,21 +785,11 @@
 09.classes/06.method_declarations/03.abstract_methods/instance_method_overridden_by_abstract.ets
 09.classes/06.method_declarations/06.overriding_methods/overriding_by_instance_methods/abstract_method_overridden_by_instance.ets
 
-#22252
-09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_08.ets
-
 #22253
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.ets
 
 #23238 Method returning 'this' returns wrong instance
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.ets
-
-#23239 Methods returning 'this' have wrong return types
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_1.ets
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_3.ets
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_4.ets
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_8.ets
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_n_9.ets
 
 #24022 missing CTE for uninitialized static field
 09.classes/08.class_initializer/class_initializer_ensure_fields_initialized.ets
