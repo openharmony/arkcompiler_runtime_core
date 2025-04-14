@@ -29,7 +29,8 @@ cases:
           assertEQ( foo(new Number()), "N" )
 
 
-    - decl: |-
+    - tags: negative, compile-only
+      decl: |-
           type UT = 1 | 2 | 3 | number  // normalized to Number
           function foo(p: Number|null): string {
               return "NN"
@@ -42,7 +43,8 @@ cases:
           assertEQ( foo(new Number()), "UT" )
 
 
-    - decl: |-
+    - tags: negative, compile-only    
+      decl: |-
           type UT = 1 | 2 | 3 | number  // normalized to Number
           function foo(p: Number|null): string {
               return "NN"
@@ -506,4 +508,3 @@ cases:
           // select function without boxing/unboxing and without undefined parameter
           assertEQ( foo(0.0), "n" )
           assertEQ( foo(new Number()), "N" )
-
