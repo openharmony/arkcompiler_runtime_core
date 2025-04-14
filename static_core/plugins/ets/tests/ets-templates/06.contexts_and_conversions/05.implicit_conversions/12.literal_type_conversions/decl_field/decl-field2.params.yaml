@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,40 +14,49 @@
 ---
 cases:
     - to_type: 'null'
-      values:
-          - { type: 'null', expr: 'null' }
+      from_type: 'null'
+      expr: 'null'
 
     - to_type: 'null'
       tags: 'compile-only, negative'
-      values:
-          - { type: 'string|boolean|null', expr: 'null' }
+      from_type: 'string|boolean|null'
+      expr: 'null'
 
     - to_type: 'undefined'
-      values:
-          - { type: 'undefined', expr: 'undefined' }
+      from_type: 'undefined'
+      expr: 'undefined'
 
     - to_type: 'undefined'
       tags: 'compile-only, negative'
-      values:
-          - { type: 'number|undefined', expr: 'undefined' }
+      from_type: 'number|undefined'
+      expr: 'undefined'
 
     - to_type: string
-      values:
-          - { type: '""', expr: '""' }
-          - { type: '" "', expr: '" "' }
-          - { type: '"\u0000"', expr: '"\u0000"' }
-          - { type: '"abc def"', expr: '"abc def"' }
+      from_type: '""'
+      expr: '""'
+
+    - to_type: string
+      from_type: '" "'
+      expr: '" "'
+
+    - to_type: string
+      from_type: '"\u0000"'
+      expr: '"\u0000"'
+
+    - to_type: string
+      from_type: '"abc def"'
+      expr: '"abc def"'
 
     - to_type: '"abc"'
       tags: 'compile-only, negative'
-      values:
-          - { type: 'string', expr: '"abc"' }
+      from_type: 'string'
+      expr: '"abc"'
 
     - to_type: string|number|boolean|null|undefined
-      values:
-          - { type: '"abc-def"', expr: '"abc-def"' }
+      from_type: '"abc-def"'
+      expr: '"abc-def"'
 
     - to_type: '"abc"'
       tags: 'compile-only, negative'
-      values:
-          - { type: string|number|boolean|null|undefined, expr: '"abc"' }
+      from_type: string|number|boolean|null|undefined
+      expr: '"abc"'
