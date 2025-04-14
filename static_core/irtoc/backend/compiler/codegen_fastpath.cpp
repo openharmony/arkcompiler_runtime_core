@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -292,13 +292,10 @@ void CodegenFastPath::EmitMarkWordIntrinsic(IntrinsicInst *inst, Reg dst, SRCREG
 {
     auto intrinsic = inst->GetIntrinsicId();
     if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE) {
-        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
         GetEncoder()->EncodeLdrExclusive(dst, src[0], true);
     } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_STORE_RELEASE_MARK_WORD_EXCLUSIVE) {
-        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
         GetEncoder()->EncodeStrExclusive(dst, src[SECOND_OPERAND], src[0], true);
     } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_COMPARE_AND_SET_MARK_WORD) {
-        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
         GetEncoder()->EncodeCompareAndSwap(dst, src[0], src[SECOND_OPERAND], src[THIRD_OPERAND]);
     } else {
         UNREACHABLE();

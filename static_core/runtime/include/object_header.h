@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,6 +130,16 @@ public:
     static constexpr size_t GetClassOffset()
     {
         return MEMBER_OFFSET(ObjectHeader, classWord_);
+    }
+
+    // Mask to get class word from register:
+    // * 64-bit system, 64-bit class word: 0xFFFFFFFFFFFFFFFF
+    // * 64-bit system, 32-bit class word: 0x00000000FFFFFFFF
+    // * 32-bit system, 32-bit class word: 0xFFFFFFFF
+    // * 32-bit system, 16-bit class word: 0x0000FFFF
+    static constexpr size_t GetClassMask()
+    {
+        return std::numeric_limits<size_t>::max() >> (ClassHelper::POINTER_SIZE - OBJECT_POINTER_SIZE) * BITS_PER_BYTE;
     }
 
     static constexpr size_t GetMarkWordOffset()
@@ -318,8 +328,8 @@ private:
     uint32_t GetHashCodeMTMulti();
     size_t ObjectSizeDyn(BaseClass *baseKlass) const;
     size_t ObjectSizeStatic(BaseClass *baseKlass) const;
-    MarkWord::MarkWordSize markWord_;
     ClassHelper::ClassWordSize classWord_;
+    MarkWord::MarkWordSize markWord_;
 
     /**
      * Allocates memory for the Object. No ctor is called.
@@ -331,7 +341,7 @@ private:
     static ObjectHeader *CreateObject(ManagedThread *thread, BaseClass *klass, bool nonMovable);
 };
 
-constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 4U;
+constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
 static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());
 
 }  // namespace ark
