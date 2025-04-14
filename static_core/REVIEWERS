@@ -84,6 +84,7 @@ static_core/tests/test-lists/                            ^amate ^sergeyandreev @
 static_core/tests/tests-u-runner/                        ^amate @sergeyandreev @anton-sysoev @dreamdoomwalker
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/tests/vm-benchmarks/                         @mr_aramis @giteeman46 ^Prof1983
+static_core/tools/ark_js_napi_cli/                       @nazarovkonstantin @ipetrov ^rokashevichsvetlana ^kurnevichstanislav
 static_core/libpandabase/tests/genmc/                    @udav
 static_core/libpandabase/tests/ringbuf/                  @udav
 static_core/libpandabase/tests/taskmanager/              @udav @molotkovmikhail
@@ -169,6 +170,7 @@ static_core/plugins/ets/tests/ets_test_suite/gc/*finalization*                @u
 static_core/plugins/ets/tests/ets_test_suite/gc/*finreg*                      @udav ^shemetovphilip
 static_core/plugins/ets/tests/ets_test_suite/taskpool/                        ^konstanting @ipetrov
 static_core/plugins/ets/tests/interop_js/tests/                               ^igelhaus @nazarovkonstantin ^ignatenkooleg ^rokashevichsvetlana ^kurnevichstanislav
+static_core/plugins/ets/tests/interop_js/xgc/                                 @ipetrov ^udav
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @ragnvald
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting ^udav
