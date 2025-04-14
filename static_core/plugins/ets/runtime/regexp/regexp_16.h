@@ -26,8 +26,8 @@ using Pcre2Obj = void *;
 class RegExp16 {
 public:
     static Pcre2Obj CreatePcre2Object(const uint16_t *pattern, uint32_t flags);
-    static ark::RegExpMatchResult<PandaString> Execute(Pcre2Obj re, const uint16_t *str, int len,
-                                                       const int startOffset);
+    static RegExpExecResult Execute(Pcre2Obj re, const uint16_t *str, int len, const int startOffset);
+    static void ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data);
     static void FreePcre2Object(Pcre2Obj re);
 };
 
