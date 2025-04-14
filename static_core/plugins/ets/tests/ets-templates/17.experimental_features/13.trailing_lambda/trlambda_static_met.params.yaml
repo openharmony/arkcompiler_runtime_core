@@ -45,7 +45,7 @@ cases:
           assertEQ( A.globl, 13.0 )
 
           A.foo(10.0)
-          assertEQ( A.global, 23.0 )
+          assertEQ( A.globl, 23.0 )
 
     # trailing lambda cases
     - decl: |-
@@ -80,7 +80,7 @@ cases:
           assertEQ( A.globl, 13.0 )
 
           A.foo(10.0)
-          assertEQ( A.global, 23.0 )
+          assertEQ( A.globl, 23.0 )
 
     # regular lambda cases with extra block afterwards
     - decl: |-
