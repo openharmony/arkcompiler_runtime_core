@@ -59,20 +59,40 @@ function main(): int {
     printTestVerdict(testResult, "test10 input")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$_"), "abc123.456def")
+    printTestVerdict(testResult, "test10 $_")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.lastMatch, "123.456")
     printTestVerdict(testResult, "test10 lastMatch")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$&"), "123.456")
+    printTestVerdict(testResult, "test10 $&")
     failCounter += testResult
 
     testResult = checkTestResult(RegExp.lastParen, "456")
     printTestVerdict(testResult, "test10 lastParen")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$+"), "456")
+    printTestVerdict(testResult, "test10 $+")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.leftContext, "abc")
     printTestVerdict(testResult, "test10 leftContext")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$`"), "abc")
+    printTestVerdict(testResult, "test10 $`")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.rightContext, "def")
     printTestVerdict(testResult, "test10 rightContext")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$'"), "def")
+    printTestVerdict(testResult, "test10 $'")
     failCounter += testResult
 
     regExpObj10.exec("ghi789.012jkl");
@@ -116,20 +136,40 @@ function main(): int {
     printTestVerdict(testResult, "test40 lastMatch")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$&"), "789.012")
+    printTestVerdict(testResult, "test40 $&")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.input, "ghi789.012jkl")
     printTestVerdict(testResult, "test40 input")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$_"), "ghi789.012jkl")
+    printTestVerdict(testResult, "test40 $_")
     failCounter += testResult
 
     testResult = checkTestResult(RegExp.lastParen, "012")
     printTestVerdict(testResult, "test40 lastParen")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$+"), "012")
+    printTestVerdict(testResult, "test40 $+")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.leftContext, "ghi")
     printTestVerdict(testResult, "test40 leftContext")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$`"), "ghi")
+    printTestVerdict(testResult, "test40 $`")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.rightContext, "jkl")
     printTestVerdict(testResult, "test40 rightContext")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$'"), "jkl")
+    printTestVerdict(testResult, "test40 $'")
     failCounter += testResult
 
     "abc123.456def".replace(regExpObj10, "whocares");
@@ -173,20 +213,40 @@ function main(): int {
     printTestVerdict(testResult, "test20 input")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$_"), "abc123.456def")
+    printTestVerdict(testResult, "test20 $_")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.lastMatch, "123.456")
     printTestVerdict(testResult, "test20 lastMatch")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$&"), "123.456")
+    printTestVerdict(testResult, "test20 $&")
     failCounter += testResult
 
     testResult = checkTestResult(RegExp.lastParen, "456")
     printTestVerdict(testResult, "test20 lastParen")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$+"), "456")
+    printTestVerdict(testResult, "test20 $+")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.leftContext, "abc")
     printTestVerdict(testResult, "test20 leftContext")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$`"), "abc")
+    printTestVerdict(testResult, "test20 $`")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.rightContext, "def")
     printTestVerdict(testResult, "test20 rightContext")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$'"), "def")
+    printTestVerdict(testResult, "test20 $'")
     failCounter += testResult
 
     "ghi789.012jkl".replace(regExpObj10, "whocares");
@@ -230,20 +290,40 @@ function main(): int {
     printTestVerdict(testResult, "test30 lastMatch")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$&"), "789.012")
+    printTestVerdict(testResult, "test30 $&")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.input, "ghi789.012jkl")
     printTestVerdict(testResult, "test30 input")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$_"), "ghi789.012jkl")
+    printTestVerdict(testResult, "test30 $_")
     failCounter += testResult
 
     testResult = checkTestResult(RegExp.lastParen, "012")
     printTestVerdict(testResult, "test30 lastParen")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$+"), "012")
+    printTestVerdict(testResult, "test30 $+")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.leftContext, "ghi")
     printTestVerdict(testResult, "test30 leftContext")
     failCounter += testResult
 
+    testResult = checkTestResult(RegExp.$_get("$`"), "ghi")
+    printTestVerdict(testResult, "test30 $`")
+    failCounter += testResult
+
     testResult = checkTestResult(RegExp.rightContext, "jkl")
     printTestVerdict(testResult, "test30 rightContext")
+    failCounter += testResult
+
+    testResult = checkTestResult(RegExp.$_get("$'"), "jkl")
+    printTestVerdict(testResult, "test30 $'")
     failCounter += testResult
 
     let regExpObj40 = new RegExp("^([a-z]+): (.*)")

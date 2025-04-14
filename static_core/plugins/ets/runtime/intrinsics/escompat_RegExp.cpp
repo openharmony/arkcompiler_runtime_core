@@ -34,7 +34,6 @@
 namespace ark::ets::intrinsics {
 using RegExpParser = ark::RegExpParser;
 using RegExpExecutor = ark::ets::RegExpExecutor;
-using RegExpMatchResult = ark::RegExpMatchResult<PandaString>;
 using Array = ark::coretypes::Array;
 
 namespace {
@@ -56,8 +55,9 @@ constexpr const char *RESULT_CLASS_NAME = "Lescompat/RegExpExecArray;";
 constexpr const char *INDEX_FIELD_NAME = "index";
 constexpr const char *INPUT_FIELD_NAME = "input";
 constexpr const char *INDICES_FIELD_NAME = "indices";
-constexpr const char *RESULT_FIELD_NAME = "result";
+constexpr const char *RESULT_FIELD_NAME = "result_";
 constexpr const char *IS_CORRECT_FIELD_NAME = "isCorrect";
+constexpr const char *GROUPS_FIELD_NAME = "groupsRaw_";
 
 constexpr const uint32_t INDICES_DIMENSIONS_NUM = 2;
 
@@ -251,8 +251,8 @@ PandaVector<uint8_t> ExtractString(EtsString *from, const bool asUtf16)
     return result;
 }
 
-RegExpMatchResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputStrObj, EtsInt lastIndex,
-                          bool hasIndices)
+RegExpExecResult Execute(EtsString *pattern, EtsString *flags, EtsString *inputStrObj, EtsInt lastIndex,
+                         bool hasIndices)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -271,7 +271,7 @@ RegExpMatchResult Execute(EtsString *pattern, EtsString *flags, EtsString *input
     auto patternStr = ExtractString(patternHandle.GetPtr(), isUtf16);
     auto compiled = re.Compile(patternStr, isUtf16);
     if (!compiled) {
-        RegExpMatchResult badResult;
+        RegExpExecResult badResult;
         badResult.isSuccess = false;
         return badResult;
     }
@@ -386,6 +386,22 @@ void SetLastIndexField(EtsObject *regexp, EtsField *lastIndexField, bool global,
     regexp->SetFieldPrimitive<EtsDouble>(lastIndexField, value);
 }
 
+void SetGroupsField(EtsObject *regexpExecArrayObj, const std::map<PandaString, std::pair<int32_t, int32_t>> &groups)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> regexpExecArray(coroutine, regexpExecArrayObj->GetCoreType());
+    EtsClass *resultClass = regexpExecArray->GetClass();
+    auto *groupsField = resultClass->GetDeclaredFieldIDByName(GROUPS_FIELD_NAME);
+    PandaString data;
+    for (const auto &[key, value] : groups) {
+        data += key + "," + ToPandaString(value.first) + "," + ToPandaString(value.second) + ";";
+    }
+
+    EtsString *groupsStr = EtsString::CreateFromMUtf8(data.c_str(), data.size());
+    regexpExecArray->SetFieldObject(groupsField, groupsStr->AsObject());
+}
+
 extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, EtsString *flagsStr, EtsString *str)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
@@ -397,8 +413,8 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, 
     VMHandle<EtsString> pattern(coroutine, patternStr->GetCoreType());
     VMHandle<EtsString> flags(coroutine, flagsStr->GetCoreType());
     VMHandle<EtsString> strHandle(coroutine, str->GetCoreType());
-    auto *regexpExecArrayClass = classLinker->GetClass(RESULT_CLASS_NAME);
-    VMHandle<EtsObject> regexpExecArrayObject(coroutine, EtsObject::Create(regexpExecArrayClass)->GetCoreType());
+    auto *regexpResultArrayClass = classLinker->GetClass(RESULT_CLASS_NAME);
+    VMHandle<EtsObject> regexpExecArrayObject(coroutine, EtsObject::Create(regexpResultArrayClass)->GetCoreType());
 
     auto *regexpClass = regexp->GetClass();
 
@@ -436,6 +452,7 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *patternStr, 
     SetSuccessfulMatchLegacyProperties(regexpClass, regexpExecArrayObject.GetPtr(), strHandle.GetPtr(),
                                        execResult.index);
     SetIndicesField(regexpExecArrayObject.GetPtr(), execResult.indices, hasIndices);
+    SetGroupsField(regexpExecArrayObject.GetPtr(), execResult.namedGroups);
     return regexpExecArrayObject.GetPtr();
 }
 }  // namespace ark::ets::intrinsics

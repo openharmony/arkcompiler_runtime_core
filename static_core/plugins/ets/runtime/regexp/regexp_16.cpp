@@ -24,6 +24,8 @@
 namespace ark::ets {
 
 constexpr int PCRE2_MATCH_DATA_UNIT_WIDTH = 2;
+constexpr int PCRE2_CHARACTER_WIDTH = 2;
+constexpr int PCRE2_GROUPS_NAME_ENTRY_SHIFT = 4;
 
 Pcre2Obj RegExp16::CreatePcre2Object(const uint16_t *patternStr, uint32_t flags)
 {
@@ -34,7 +36,7 @@ Pcre2Obj RegExp16::CreatePcre2Object(const uint16_t *patternStr, uint32_t flags)
     return reinterpret_cast<Pcre2Obj>(re);
 }
 
-ark::RegExpMatchResult<PandaString> RegExp16::Execute(Pcre2Obj re, const uint16_t *str, int len, const int startOffset)
+RegExpExecResult RegExp16::Execute(Pcre2Obj re, const uint16_t *str, int len, const int startOffset)
 {
     auto *expr = reinterpret_cast<pcre2_code *>(re);
     auto *matchData = pcre2_match_data_create_from_pattern(expr, nullptr);
@@ -43,7 +45,7 @@ ark::RegExpMatchResult<PandaString> RegExp16::Execute(Pcre2Obj re, const uint16_
     auto resultCount = pcre2_match(expr, str, len, startOffset, 0, matchData, nullptr);
     auto *ovector = pcre2_get_ovector_pointer(matchData);
 
-    RegExpMatchResult<PandaString> result;
+    RegExpExecResult result;
     result.isWide = true;
     if (resultCount < 0) {
         result.isSuccess = false;
@@ -58,10 +60,17 @@ ark::RegExpMatchResult<PandaString> RegExp16::Execute(Pcre2Obj re, const uint16_
         const auto substringEnd = ovector[i + 1];
         indices.emplace_back(
             std::make_pair(static_cast<uint32_t>(substringStart), static_cast<uint32_t>(substringEnd)));
-        PandaString res;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        res = PandaString(reinterpret_cast<const char *>(str + substringStart), (substringEnd - substringStart) * 2);
+        auto res = PandaString(reinterpret_cast<const char *>(str + substringStart),
+                               (substringEnd - substringStart) * PCRE2_CHARACTER_WIDTH);
         captures.push_back({true, res});
+    }
+
+    int nameCount;
+    pcre2_pattern_info(expr, PCRE2_INFO_NAMECOUNT, &nameCount);
+
+    if (nameCount > 0) {
+        RegExp16::ExtractGroups(re, nameCount, result, reinterpret_cast<void *>(ovector));
     }
 
     result.isSuccess = true;
@@ -78,6 +87,45 @@ ark::RegExpMatchResult<PandaString> RegExp16::Execute(Pcre2Obj re, const uint16_
     }
     pcre2_match_data_free(matchData);
     return result;
+}
+
+void RegExp16::ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data)
+{
+    PCRE2_SPTR nameTable;
+    PCRE2_SPTR tabPtr;
+    int nameEntrySize;
+
+    auto *expr = reinterpret_cast<pcre2_code *>(expression);
+    auto *ovector = reinterpret_cast<PCRE2_SIZE *>(data);
+
+    pcre2_pattern_info(expr, PCRE2_INFO_NAMETABLE, &nameTable);
+    pcre2_pattern_info(expr, PCRE2_INFO_NAMEENTRYSIZE, &nameEntrySize);
+
+    tabPtr = nameTable;
+    for (int currentNameId = 0; currentNameId < count; currentNameId++) {
+        auto n = static_cast<int32_t>(tabPtr[0]);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto index = static_cast<int32_t>(ovector[PCRE2_CHARACTER_WIDTH * n]);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto endIndex = static_cast<int32_t>(ovector[PCRE2_CHARACTER_WIDTH * n + 1]);
+        auto tabConstCharPtr = reinterpret_cast<const char *>(tabPtr + 1);
+        size_t size = nameEntrySize * PCRE2_CHARACTER_WIDTH - PCRE2_GROUPS_NAME_ENTRY_SHIFT;
+        while (size > 0) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (static_cast<uint8_t>(*(tabConstCharPtr + size - PCRE2_CHARACTER_WIDTH)) != 0) {
+                break;
+            }
+            size -= PCRE2_CHARACTER_WIDTH;
+        }
+        auto key16 = PandaString(tabConstCharPtr, size);
+        PandaString key;
+        key.reserve(key16.size() / PCRE2_CHARACTER_WIDTH);
+        for (size_t i = 0; i < key16.size(); i += PCRE2_CHARACTER_WIDTH) {
+            key += key16[i];
+        }
+        result.namedGroups[key] = {index, endIndex};
+        tabPtr += nameEntrySize;
+    }
 }
 
 void RegExp16::FreePcre2Object(Pcre2Obj re)

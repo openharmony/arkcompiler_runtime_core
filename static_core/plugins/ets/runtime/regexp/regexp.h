@@ -21,15 +21,13 @@
 
 namespace ark::ets {
 
-using RegExpMatchResult = ark::RegExpMatchResult<PandaString>;
-
 class pcre2_code;
 
 class EtsRegExp {
 public:
     void SetFlags(EtsString *flagsStr);
     bool Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16);
-    RegExpMatchResult Execute(const PandaVector<uint8_t> &str, const int len, const int startOffset);
+    RegExpExecResult Execute(const PandaVector<uint8_t> &str, const int len, const int startOffset);
     void Destroy();
 
     bool IsUtf16() const

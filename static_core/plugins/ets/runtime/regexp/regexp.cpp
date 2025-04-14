@@ -77,10 +77,9 @@ bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16)
     return re_ != nullptr;
 }
 
-ark::RegExpMatchResult<PandaString> EtsRegExp::Execute(const PandaVector<uint8_t> &str, const int len,
-                                                       const int startOffset)
+RegExpExecResult EtsRegExp::Execute(const PandaVector<uint8_t> &str, const int len, const int startOffset)
 {
-    ark::RegExpMatchResult<PandaString> result;
+    RegExpExecResult result;
     if (utf16_) {
         result = RegExp16::Execute(re_, reinterpret_cast<const uint16_t *>(str.data()), len, startOffset);
     } else {
