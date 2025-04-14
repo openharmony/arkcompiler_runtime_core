@@ -23,6 +23,7 @@
 #include "plugins/ets/stdlib/native/core/IntlLocale.h"
 #include "plugins/ets/stdlib/native/core/IntlPluralRules.h"
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormat.h"
+#include "plugins/ets/stdlib/native/core/IntlListFormat.h"
 
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "ani/ani.h"
@@ -42,6 +43,7 @@ ani_status InitCoreIntl(ani_env *env)
     err = err == ANI_OK ? RegisterIntlPluralRules(env) : err;
     err = err == ANI_OK ? RegisterIntlDateTimeFormatMethods(env) : err;
     err = err == ANI_OK ? RegisterIntlSegmenter(env) : err;
+    err = err == ANI_OK ? RegisterIntlListFormat(env) : err;
     return err;
 }
 
