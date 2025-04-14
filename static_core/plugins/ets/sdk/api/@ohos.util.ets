@@ -74,6 +74,9 @@ export namespace util {
 
             if (mime) {
                 encoded = encoded.replace(new RegExp(`(.{${Base64Helper.LINE_BREAK_FREQUENCY}})`, "g"), "$1\r\n");
+                if (!encoded.endsWith("\r\n")) {
+                    encoded += "\r\n";
+                }
             }
             return encoded;
         }
