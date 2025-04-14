@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,10 +147,10 @@ String *String::CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Length, con
 }
 
 /* static */
-String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length, const LanguageContext &ctx,
-                                PandaVM *vm, bool movable, bool pinned)
+String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length, bool canBeCompressed,
+                                const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned)
 {
-    bool canBeCompressed = CanBeCompressed(utf16Data, utf16Length);
+    ASSERT(canBeCompressed == CanBeCompressed(utf16Data, utf16Length));
     auto string = AllocStringObject(utf16Length, canBeCompressed, ctx, vm, movable, pinned);
     if (string == nullptr) {
         return nullptr;
@@ -168,6 +168,14 @@ String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
     // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
     return string;
+}
+
+/* static */
+String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length, const LanguageContext &ctx,
+                                PandaVM *vm, bool movable, bool pinned)
+{
+    bool compressable = CanBeCompressed(utf16Data, utf16Length);
+    return CreateFromUtf16(utf16Data, utf16Length, compressable, ctx, vm, movable, pinned);
 }
 
 /* static */

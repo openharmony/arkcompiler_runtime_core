@@ -17,7 +17,7 @@ add_subdirectory(jitinterface)
 
 function(panda_add_checked_test_ets)
     set(prefix ARG)
-    set(options SUPPORT_RELEASE JITINTERFACE NATIVE BOOT)
+    set(options SUPPORT_RELEASE JITINTERFACE NATIVE BOOT BOOT_SELF)
     set(singleValues NAME FILE LIBCORE OPT_LEVEL)
     set(multiValues AUX_FILES EXT_FILES)
     cmake_parse_arguments(${prefix} "${options}" "${singleValues}" "${multiValues}" ${ARGN})
@@ -81,6 +81,9 @@ function(panda_add_checked_test_ets)
     endif()
 
     set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
+    if (ARG_BOOT_SELF)
+        set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc:../test.abc)
+    endif()
 
     set(OPTIONS "--load-runtimes=ets" "--run-gc-in-place" "--coroutine-workers-count=1" "--boot-panda-files=${BOOT_PANDA_FILES}")
     set(ES2PANDA_OPTIONS --thread=0 --extension=ets)
@@ -324,3 +327,4 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_object
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_static_const_folding.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lower_boxed_boolean.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_doubled_xor.ets OPT_LEVEL 0)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/unsafe_memory.ets NATIVE BOOT_SELF SUPPORT_RELEASE)

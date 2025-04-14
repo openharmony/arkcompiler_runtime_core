@@ -24,6 +24,13 @@ void BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::
 void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::Inst *value,
                                  ark::compiler::DataType::Type type, bool accRead);
 void BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
+void BuildInt8ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildInt8ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+template <bool LOAD>
+void BuildUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildUnsafeLoadIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildUnsafeStoreIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildStringSizeInBytes(const BytecodeInstruction *bcInst, bool accRead);
 // CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
 std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedArrayLoadDataAndOffset(
     const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);

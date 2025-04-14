@@ -58,6 +58,10 @@ public:
                                                    bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
+                                                    bool canBeCompressed, const LanguageContext &ctx, PandaVM *vm,
+                                                    bool movable = true, bool pinned = false);
+
+    PANDA_PUBLIC_API static String *CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
                                                     const LanguageContext &ctx, PandaVM *vm, bool movable = true,
                                                     bool pinned = false);
 

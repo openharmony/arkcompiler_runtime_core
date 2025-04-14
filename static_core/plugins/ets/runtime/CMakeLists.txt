@@ -72,6 +72,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/unsafe_memory.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/array_buffer_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp

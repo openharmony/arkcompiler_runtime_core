@@ -110,6 +110,12 @@ public:
         return *currentDefs_;
     }
 
+    bool IsInBootContext()
+    {
+        auto method = static_cast<ark::Method *>(GetGraph()->GetMethod());
+        return method->GetClass()->GetLoadContext()->IsBootContext();
+    }
+
     void AddCatchPhiInputs(const ArenaUnorderedSet<BasicBlock *> &catchHandlers, const InstVector &defs,
                            Inst *throwableInst);
 

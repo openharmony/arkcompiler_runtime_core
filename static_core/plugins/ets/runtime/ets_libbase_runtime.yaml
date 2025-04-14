@@ -2896,6 +2896,254 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreDoubleToFloat
     safe_intrinsic: true
 
+##############
+# std.core.unsafeMemory #
+##############
+  - name: UnsafeMemoryWriteInt8
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeInt8
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - i8
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteInt8
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteInt16
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeInt16
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - i16
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteInt16
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteInt32
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeInt32
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - i32
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteInt32
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteInt64
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeInt64
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteInt64
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteBoolean
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeBoolean
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - u1
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteBoolean
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteFloat32
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeFloat32
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - f32
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteFloat32
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteFloat64
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeFloat64
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - f64
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteFloat64
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteNumber
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeNumber
+    static: true
+    signature:
+      ret: void
+      args:
+         - i64
+         - f64
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteFloat64
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryWriteString
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: writeString
+    static: true
+    signature:
+      ret: i32
+      args:
+         - i64
+         - std.core.String
+    impl: ark::ets::intrinsics::UnsafeMemoryWriteString
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateWriteString
+    llvm_codegen_func: EmitWriteString
+    need_param_locations: true
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadBoolean
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readBoolean
+    static: true
+    signature:
+      ret: u1
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadBoolean
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadInt8
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readInt8
+    static: true
+    signature:
+      ret: i8
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadInt8
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadInt16
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readInt16
+    static: true
+    signature:
+      ret: i16
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadInt16
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadInt32
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readInt32
+    static: true
+    signature:
+      ret: i32
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadInt32
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadInt64
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readInt64
+    static: true
+    signature:
+      ret: i64
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadInt64
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadFloat32
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readFloat32
+    static: true
+    signature:
+      ret: f32
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadFloat32
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadFloat64
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readFloat64
+    static: true
+    signature:
+      ret: f64
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadFloat64
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadNumber
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readNumber
+    static: true
+    signature:
+      ret: f64
+      args:
+         - i64
+    impl: ark::ets::intrinsics::UnsafeMemoryReadNumber
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
+  - name: UnsafeMemoryReadString
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: readString
+    static: true
+    signature:
+      ret: std.core.String
+      args:
+         - i64
+         - i32
+    impl: ark::ets::intrinsics::UnsafeMemoryReadString
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateReadString
+    llvm_codegen_func: EmitReadString
+    need_param_locations: true
+
+  - name: UnsafeMemoryGetStringSizeInBytes
+    space: ets
+    class_name: std.core.unsafeMemory
+    method_name: getStringSizeInBytes
+    static: true
+    signature:
+      ret: i32
+      args:
+         - std.core.String
+    impl: ark::ets::intrinsics::UnsafeMemoryStringGetSizeInBytes
+    clear_flags: [ runtime_call, require_state, can_throw, heap_inv ]
+
 ############
 # std.core #
 ############
@@ -3062,6 +3310,7 @@ intrinsics:
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
     need_param_locations: true
+
 
 ############
 # std.core #
