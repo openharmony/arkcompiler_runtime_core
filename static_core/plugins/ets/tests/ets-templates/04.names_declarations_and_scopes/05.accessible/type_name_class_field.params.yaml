@@ -21,11 +21,11 @@ cases:
         static sfoo: T = 0x79 as byte;
     check: |-
         function main() {
-            assertTrue(A.sfoo == 0x79 as byte);
+            assertEQ(A.sfoo, 0x79 as byte);
             let a: A = new A();
-            assertTrue(a.foo == 0x80 as byte);
-            assertTrue(a.bar(A.sfoo) == 0x79 as byte);
-            assertTrue(A.sbar(a.foo) == 0x80 as byte);
+            assertEQ(a.foo, 0x80 as byte);
+            assertEQ(a.bar(A.sfoo), 0x79 as byte);
+            assertEQ(A.sbar(a.foo), 0x80 as byte);
         }
 
   - decl: |-
@@ -35,11 +35,11 @@ cases:
         static sfoo: T = 0x7FFF as short;
     check: |-
         function main() {
-            assertTrue(A.sfoo == 0x7FFF as short);
+            assertEQ(A.sfoo, 0x7FFF as short);
             let a: A = new A();
-            assertTrue(a.foo == 0x7FFF as short);
-            assertTrue(a.bar(a.foo) == 0x7FFF as short);
-            assertTrue(A.sbar(a.foo) == 0x7FFF as short);
+            assertEQ(a.foo, 0x7FFF as short);
+            assertEQ(a.bar(a.foo), 0x7FFF as short);
+            assertEQ(A.sbar(a.foo), 0x7FFF as short);
         }
 
   - decl: |-
@@ -49,11 +49,11 @@ cases:
         static sfoo: T = 127 as int;
     check: |-
         function main() {
-            assertTrue(A.sfoo == 127 as int);
+            assertEQ(A.sfoo, 127 as int);
             let a: A = new A();
-            assertTrue(a.foo == 127 as int);
-            assertTrue(a.bar(a.foo) == 127 as int);
-            assertTrue(A.sbar(a.foo) == 127 as int);
+            assertEQ(a.foo, 127 as int);
+            assertEQ(a.bar(a.foo), 127 as int);
+            assertEQ(A.sbar(a.foo), 127 as int);
         }
 
   - decl: |-
@@ -63,11 +63,11 @@ cases:
         static sfoo: T = 127 as long;
     check: |-
         function main() {
-            assertTrue(A.sfoo == 127 as long);
+            assertEQ(A.sfoo, 127 as long);
             let a: A = new A();
-            assertTrue(a.foo == 127 as long);
-            assertTrue(a.bar(a.foo) == 127 as long);
-            assertTrue(A.sbar(a.foo) == 127 as long);
+            assertEQ(a.foo, 127 as long);
+            assertEQ(a.bar(a.foo), 127 as long);
+            assertEQ(A.sbar(a.foo), 127 as long);
         }
 
   - decl: |-
@@ -77,11 +77,11 @@ cases:
         static sfoo: T = +0.0 as float;
     check: |-
         function main() {
-            assertTrue(A.sfoo == +0.0 as float);
+            assertEQ(A.sfoo, +0.0 as float);
             let a: A = new A();
-            assertTrue(a.foo == +0.0 as float);
-            assertTrue(a.bar(a.foo) == +0.0 as float);
-            assertTrue(A.sbar(a.foo) == +0.0 as float);
+            assertEQ(a.foo, +0.0 as float);
+            assertEQ(a.bar(a.foo), +0.0 as float);
+            assertEQ(A.sbar(a.foo), +0.0 as float);
         }
 
   - decl: |-
@@ -91,11 +91,11 @@ cases:
         static sfoo: T = +0.0 as double;
     check: |-
         function main() {
-            assertTrue(A.sfoo == +0.0 as double);
+            assertEQ(A.sfoo, +0.0 as double);
             let a: A = new A();
-            assertTrue(a.foo == +0.0 as double);
-            assertTrue(a.bar(a.foo) == +0.0 as double);
-            assertTrue(A.sbar(a.foo) == +0.0 as double);
+            assertEQ(a.foo, +0.0 as double);
+            assertEQ(a.bar(a.foo), +0.0 as double);
+            assertEQ(A.sbar(a.foo), +0.0 as double);
         }
 
   - decl: |-
@@ -105,11 +105,11 @@ cases:
         static sfoo: T = +0.0 as number;
     check: |-
         function main() {
-            assertTrue(A.sfoo == +0.0 as number);
+            assertEQ(A.sfoo, +0.0 as number);
             let a: A = new A();
-            assertTrue(a.foo == +0.0 as number);
-            assertTrue(a.bar(a.foo) == +0.0 as number);
-            assertTrue(A.sbar(a.foo) == +0.0 as number);
+            assertEQ(a.foo, +0.0 as number);
+            assertEQ(a.bar(a.foo), +0.0 as number);
+            assertEQ(A.sbar(a.foo), +0.0 as number);
         }
 
   - decl: |-
@@ -119,11 +119,11 @@ cases:
         static sfoo: T = c'a';
     check: |-
         function main() {
-            assertTrue(A.sfoo == c'a');
+            assertEQ(A.sfoo, c'a');
             let a: A = new A();
-            assertTrue(a.foo == c'a');
-            assertTrue(a.bar(a.foo) == c'a');
-            assertTrue(A.sbar(a.foo) == c'a');
+            assertEQ(a.foo, c'a');
+            assertEQ(a.bar(a.foo), c'a');
+            assertEQ(A.sbar(a.foo), c'a');
         }
 
   - decl: |-
@@ -133,11 +133,11 @@ cases:
         static sfoo: T = false;
     check: |-
         function main() {
-            assertTrue(A.sfoo == false);
+            assertEQ(A.sfoo, false);
             let a: A = new A();
-            assertTrue(a.foo == false);
-            assertTrue(a.bar(a.foo) == false);
-            assertTrue(A.sbar(a.foo) == false);
+            assertEQ(a.foo, false);
+            assertEQ(a.bar(a.foo), false);
+            assertEQ(A.sbar(a.foo), false);
         }
 
   # Boxed
@@ -148,11 +148,11 @@ cases:
         static sfoo: T = new Byte(0x7F as byte);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == 0x7F as byte);
+            assertEQ(A.sfoo.unboxed(), 0x7F as byte);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == 0x7F as byte);
-            assertTrue(a.bar(a.foo).unboxed() == 0x7F as byte);
-            assertTrue(A.sbar(a.foo).unboxed() == 0x7F as byte);
+            assertEQ(a.foo.unboxed(), 0x7F as byte);
+            assertEQ(a.bar(a.foo).unboxed(), 0x7F as byte);
+            assertEQ(A.sbar(a.foo).unboxed(), 0x7F as byte);
         }
 
   - decl: |-
@@ -162,11 +162,11 @@ cases:
         static sfoo: T = new Short(2 as short);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == 2 as short);
+            assertEQ(A.sfoo.unboxed(), 2 as short);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == 2 as short);
-            assertTrue(a.bar(a.foo).unboxed() == 2 as short);
-            assertTrue(A.sbar(a.foo).unboxed() == 2 as short);
+            assertEQ(a.foo.unboxed(), 2 as short);
+            assertEQ(a.bar(a.foo).unboxed(), 2 as short);
+            assertEQ(A.sbar(a.foo).unboxed(), 2 as short);
         }
 
   - decl: |-
@@ -176,11 +176,11 @@ cases:
         static sfoo: T = new Int(3 as int);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == 3 as int);
+            assertEQ(A.sfoo.unboxed(), 3 as int);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == 3 as int);
-            assertTrue(a.bar(a.foo).unboxed() == 3 as int);
-            assertTrue(A.sbar(a.foo).unboxed() == 3 as int);
+            assertEQ(a.foo.unboxed(), 3 as int);
+            assertEQ(a.bar(a.foo).unboxed(), 3 as int);
+            assertEQ(A.sbar(a.foo).unboxed(), 3 as int);
         }
 
   - decl: |-
@@ -190,11 +190,11 @@ cases:
         static sfoo: T = new Long(4 as long);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == 4 as long);
+            assertEQ(A.sfoo.unboxed(), 4 as long);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == 4 as long);
-            assertTrue(a.bar(a.foo).unboxed() == 4 as long);
-            assertTrue(A.sbar(a.foo).unboxed() == 4 as long);
+            assertEQ(a.foo.unboxed(), 4 as long);
+            assertEQ(a.bar(a.foo).unboxed(), 4 as long);
+            assertEQ(A.sbar(a.foo).unboxed(), 4 as long);
         }
 
   - decl: |-
@@ -204,11 +204,11 @@ cases:
         static sfoo: T = new Float(0.1 as float);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == 0.1 as float);
+            assertEQ(A.sfoo.unboxed(), 0.1 as float);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == 0.1 as float);
-            assertTrue(a.bar(a.foo).unboxed() == 0.1 as float);
-            assertTrue(A.sbar(a.foo).unboxed() == 0.1 as float);
+            assertEQ(a.foo.unboxed(), 0.1 as float);
+            assertEQ(a.bar(a.foo).unboxed(), 0.1 as float);
+            assertEQ(A.sbar(a.foo).unboxed(), 0.1 as float);
         }
 
   - decl: |-
@@ -218,11 +218,11 @@ cases:
         static sfoo: T = new Double(0.1 as double);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == 0.1 as double);
+            assertEQ(A.sfoo.unboxed(), 0.1 as double);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == 0.1 as double);
-            assertTrue(a.bar(a.foo).unboxed() == 0.1 as double);
-            assertTrue(A.sbar(a.foo).unboxed() == 0.1 as double);
+            assertEQ(a.foo.unboxed(), 0.1 as double);
+            assertEQ(a.bar(a.foo).unboxed(), 0.1 as double);
+            assertEQ(A.sbar(a.foo).unboxed(), 0.1 as double);
         }
 
   - decl: |-
@@ -232,11 +232,11 @@ cases:
         static sfoo: T = new Number(0.1 as number);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == 0.1 as number);
+            assertEQ(A.sfoo.unboxed(), 0.1 as number);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == 0.1 as number);
-            assertTrue(a.bar(a.foo).unboxed() == 0.1 as number);
-            assertTrue(A.sbar(a.foo).unboxed() == 0.1 as number);
+            assertEQ(a.foo.unboxed(), 0.1 as number);
+            assertEQ(a.bar(a.foo).unboxed(), 0.1 as number);
+            assertEQ(A.sbar(a.foo).unboxed(), 0.1 as number);
         }
 
   - decl: |-
@@ -246,11 +246,11 @@ cases:
         static sfoo: T = new Char(c'b');
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == c'b');
+            assertEQ(A.sfoo.unboxed(), c'b');
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == c'b');
-            assertTrue(a.bar(a.foo).unboxed() == c'b');
-            assertTrue(A.sbar(a.foo).unboxed() == c'b');
+            assertEQ(a.foo.unboxed(), c'b');
+            assertEQ(a.bar(a.foo).unboxed(), c'b');
+            assertEQ(A.sbar(a.foo).unboxed(), c'b');
         }
 
   - decl: |-
@@ -260,11 +260,11 @@ cases:
         static sfoo: T = "some string";
     check: |-
         function main() {
-            assertTrue(A.sfoo == "some string");
+            assertEQ(A.sfoo, "some string");
             let a: A = new A();
-            assertTrue(a.foo == "some string");
-            assertTrue(a.bar(a.foo) == "some string");
-            assertTrue(A.sbar(a.foo) == "some string");
+            assertEQ(a.foo, "some string");
+            assertEQ(a.bar(a.foo), "some string");
+            assertEQ(A.sbar(a.foo), "some string");
         }
 
   - decl: |-
@@ -274,11 +274,11 @@ cases:
         static sfoo: T = new String("some string");
     check: |-
         function main() {
-            assertTrue(A.sfoo == "some string");
+            assertEQ(A.sfoo, "some string");
             let a: A = new A();
-            assertTrue(a.foo == "some string");
-            assertTrue(a.bar(a.foo) == "some string");
-            assertTrue(A.sbar(a.foo) == "some string");
+            assertEQ(a.foo, "some string");
+            assertEQ(a.bar(a.foo), "some string");
+            assertEQ(A.sbar(a.foo), "some string");
         }
 
   - decl: |-
@@ -288,11 +288,11 @@ cases:
         static sfoo: T = new Boolean(true);
     check: |-
         function main() {
-            assertTrue(A.sfoo.unboxed() == true);
+            assertEQ(A.sfoo.unboxed(), true);
             let a: A = new A();
-            assertTrue(a.foo.unboxed() == false);
-            assertTrue(a.bar(A.sfoo).unboxed() == true);
-            assertTrue(A.sbar(a.foo).unboxed() == false);
+            assertEQ(a.foo.unboxed(), false);
+            assertEQ(a.bar(A.sfoo).unboxed(), true);
+            assertEQ(A.sbar(a.foo).unboxed(), false);
         }
 
     # Custom
@@ -303,19 +303,19 @@ cases:
       static sfoo: T = [2, -3];
     check: |-
       function main() {
-          assertTrue(A.sfoo.length == 2);
-          assertTrue(A.sfoo[0] == 2);
-          assertTrue(A.sfoo[1] == -3);
+          assertEQ(A.sfoo.length, 2);
+          assertEQ(A.sfoo[0], 2);
+          assertEQ(A.sfoo[1], -3);
           let a: A = new A();
-          assertTrue(a.foo.length == 2);
-          assertTrue(a.foo[0] == 1);
-          assertTrue(a.foo[1] == -2);
-          assertTrue(a.bar(A.sfoo).length == 2);
-          assertTrue(a.bar(A.sfoo)[0] == 2);
-          assertTrue(a.bar(A.sfoo)[1] == -3);
-          assertTrue(A.sbar(a.foo).length == 2);
-          assertTrue(A.sbar(a.foo)[0] == 1);
-          assertTrue(A.sbar(a.foo)[1] == -2);
+          assertEQ(a.foo.length, 2);
+          assertEQ(a.foo[0], 1);
+          assertEQ(a.foo[1], -2);
+          assertEQ(a.bar(A.sfoo).length, 2);
+          assertEQ(a.bar(A.sfoo)[0], 2);
+          assertEQ(a.bar(A.sfoo)[1], -3);
+          assertEQ(A.sbar(a.foo).length, 2);
+          assertEQ(A.sbar(a.foo)[0], 1);
+          assertEQ(A.sbar(a.foo)[1], -2);
       }
 
   - decl: |-
@@ -325,34 +325,34 @@ cases:
       static sfoo: T = [[new Int(2), new Int(4)], [new Int(-5)]];
     check: |-
       function main() {
-          assertTrue(A.sfoo.length == 2);
-          assertTrue(A.sfoo[0].length == 2);
-          assertTrue(A.sfoo[1].length == 1);
-          assertTrue(A.sfoo[0][0] == 2);
-          assertTrue(A.sfoo[0][1] == 4);
-          assertTrue(A.sfoo[1][0] == -5);
+          assertEQ(A.sfoo.length, 2);
+          assertEQ(A.sfoo[0].length, 2);
+          assertEQ(A.sfoo[1].length, 1);
+          assertEQ(A.sfoo[0][0], 2);
+          assertEQ(A.sfoo[0][1], 4);
+          assertEQ(A.sfoo[1][0], -5);
           let a: A = new A();
 
-          assertTrue(a.foo.length == 2);
-          assertTrue(a.foo[0].length == 1);
-          assertTrue(a.foo[1].length == 2);
-          assertTrue(a.foo[0][0] == 1);
-          assertTrue(a.foo[1][0] == -2);
-          assertTrue(a.foo[1][1] == 3);
+          assertEQ(a.foo.length, 2);
+          assertEQ(a.foo[0].length, 1);
+          assertEQ(a.foo[1].length, 2);
+          assertEQ(a.foo[0][0], 1);
+          assertEQ(a.foo[1][0], -2);
+          assertEQ(a.foo[1][1], 3);
 
-          assertTrue(a.bar(A.sfoo).length == 2);
-          assertTrue(a.bar(A.sfoo)[0].length == 2);
-          assertTrue(a.bar(A.sfoo)[1].length == 1);
-          assertTrue(a.bar(A.sfoo)[0][0] == 2);
-          assertTrue(a.bar(A.sfoo)[0][1] == 4);
-          assertTrue(a.bar(A.sfoo)[1][0] == -5);
+          assertEQ(a.bar(A.sfoo).length, 2);
+          assertEQ(a.bar(A.sfoo)[0].length, 2);
+          assertEQ(a.bar(A.sfoo)[1].length, 1);
+          assertEQ(a.bar(A.sfoo)[0][0], 2);
+          assertEQ(a.bar(A.sfoo)[0][1], 4);
+          assertEQ(a.bar(A.sfoo)[1][0], -5);
 
-          assertTrue(A.sbar(a.foo).length == 2);
-          assertTrue(A.sbar(a.foo)[0].length == 1);
-          assertTrue(A.sbar(a.foo)[1].length == 2);
-          assertTrue(A.sbar(a.foo)[0][0] == 1);
-          assertTrue(A.sbar(a.foo)[1][0] == -2);
-          assertTrue(A.sbar(a.foo)[1][1] == 3);
+          assertEQ(A.sbar(a.foo).length, 2);
+          assertEQ(A.sbar(a.foo)[0].length, 1);
+          assertEQ(A.sbar(a.foo)[1].length, 2);
+          assertEQ(A.sbar(a.foo)[0][0], 1);
+          assertEQ(A.sbar(a.foo)[1][0], -2);
+          assertEQ(A.sbar(a.foo)[1][1], 3);
       }
 
   - decl: |-
@@ -363,11 +363,11 @@ cases:
       static sfoo: T = Colors.Red;
     check: |-
       function main() {
-          assertTrue(A.sfoo == Colors.Red);
+          assertEQ(A.sfoo, Colors.Red);
           let a: A = new A();
-          assertTrue(a.foo == Colors.Blue);
-          assertTrue(a.bar(A.sfoo) == Colors.Red);
-          assertTrue(A.sbar(a.foo) == Colors.Blue);
+          assertEQ(a.foo, Colors.Blue);
+          assertEQ(a.bar(A.sfoo), Colors.Red);
+          assertEQ(A.sbar(a.foo), Colors.Blue);
       }
 
   - decl: |-
@@ -382,14 +382,14 @@ cases:
     check: |-
       function main() {
           assertTrue(A.sfoo instanceof S);
-          assertTrue(A.sfoo[0] == 4.1);
-          assertTrue(A.sfoo[1] == "rts");
+          assertEQ(A.sfoo[0], 4.1);
+          assertEQ(A.sfoo[1], "rts");
           let a: A = new A();
           assertTrue(a.foo instanceof T);
-          assertTrue(a.foo[0] == "str");
-          assertTrue(a.foo[1] == 1.4);
-          assertTrue(a.bar2(A.sfoo)[0] == 4.1);
-          assertTrue(a.bar2(A.sfoo)[1] == "rts");
-          assertTrue(A.sbar(a.foo)[0] == "str");
-          assertTrue(A.sbar(a.foo)[1] == 1.4);
+          assertEQ(a.foo[0], "str");
+          assertEQ(a.foo[1], 1.4);
+          assertEQ(a.bar2(A.sfoo)[0], 4.1);
+          assertEQ(a.bar2(A.sfoo)[1], "rts");
+          assertEQ(A.sbar(a.foo)[0], "str");
+          assertEQ(A.sbar(a.foo)[1], 1.4);
       }
