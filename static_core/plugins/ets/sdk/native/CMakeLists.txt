@@ -18,6 +18,9 @@ project(plugin_ets_sdk_native)
 set(ETS_SDK_NATIVE_SRC
     main.cpp
     api/Util.cpp
+    api/ani_textencoder.cpp
+    api/ani_textencoder_helper.cpp
+    api/ani_textdecoder.cpp
 )
 
 set(ETS_SDK_SO_LOC "${PANDA_BINARY_ROOT}/lib")
@@ -26,6 +29,7 @@ panda_add_library(ets_sdk_native SHARED ${ETS_SDK_NATIVE_SRC})
 panda_target_sources(ets_sdk_native PRIVATE ${ETS_SDK_NATIVE_SRC})
 set_target_properties(ets_sdk_native PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${ETS_SDK_SO_LOC})
 panda_target_link_libraries(ets_sdk_native arkruntime)
+panda_target_include_directories(ets_sdk_native PRIVATE ${PANDA_ROOT}/plugins/ets/sdk/native/)
 panda_target_include_directories(ets_sdk_native PRIVATE ${PANDA_ROOT}/plugins/ets/runtime/ani/)
 
 add_dependencies(ets_sdk_prereqs ets_sdk_native)
