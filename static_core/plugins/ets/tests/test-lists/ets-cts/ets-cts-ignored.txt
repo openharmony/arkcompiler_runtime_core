@@ -13,10 +13,6 @@
 02.lexical_elements/07.keywords/types_20.ets
 02.lexical_elements/07.keywords/types_24.ets
 
-#24028 not implemented
-03.types/01.predefined_types/class_types_declaration_2.ets
-03.types/03.using_types/array_value_types_declaration_18.ets
-
 #23596
 03.types/06.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.ets
 
@@ -73,7 +69,6 @@
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_0.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_11.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_3.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_4.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_11.ets
 
@@ -175,10 +170,6 @@
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_5.ets
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_6.ets
 
-#20215 es2panda aborts on function types in generic type arguments
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_1.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_1.ets
-
 #20213 Generic instantiation depends on arguments order
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_n_3.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_n_3.ets
@@ -194,9 +185,6 @@
 
 #24169
 05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_10.ets
-
-#24056
-05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.ets
 
 #23714
 05.generics/03.utility_types/02.required_utility_type/required_compatibility_neg_1.ets
@@ -239,10 +227,6 @@
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_7.ets
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_8.ets
 
-#23603
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/union_type_from_object_0.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/union_type_from_object_1.ets
-
 #18118 No ClassCastError on casting to a wrong function type
 06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/cce_5.ets
 
@@ -281,14 +265,17 @@
 #24745
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/ase1.ets
 
-#24031 not implemented
-07.expressions/01.evaluation_of_expressions/heap_pollution.ets
+#24930
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 
 #24641
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
 
 #24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
+
+#24031 not implemented
+07.expressions/01.evaluation_of_expressions/heap_pollution.ets
 
 #22791 FixedArray and Array<T> support is not implemented yet
 07.expressions/04.array_literal/01.type_inference_from_context/spec-ex9.ets
@@ -301,8 +288,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_26.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_14.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_14.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_12.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_0.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_1.ets
@@ -442,25 +427,7 @@
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_26.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_27.ets
 
-#23521 Tuple couldn't be converted when use tuple of tuples
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_7.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_8.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_7.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_8.ets
-
 #23525 Tuple literal type cannot be detected from context
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_0.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_1.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_2.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_3.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_4.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_9.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_10.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_11.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_12.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_12.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_13.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_13.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_12.ets
@@ -473,36 +440,21 @@
 07.expressions/04.array_literal/arr_n_2.ets
 07.expressions/04.array_literal/arr_n_3.ets
 
-#23528 Cannot detect type of array literal from array elements (union case)
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_10.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_11.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_12.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_13.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_14.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_17.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_9.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_8.ets
-
 #23529 es2panda doesn't support type detection as number[] when all elements are numeric
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_16.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_17.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_18.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_19.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_20.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_21.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_22.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_23.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_24.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_25.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_26.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_27.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_28.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_16.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_17.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_18.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_19.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_20.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_21.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_22.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_23.ets
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_24.ets
@@ -568,13 +520,8 @@
 07.expressions/06.spread_expression/spex_27.ets
 
 #24006 Array literal type inference needs to be improved
-07.expressions/06.spread_expression/spex_36.ets
-07.expressions/06.spread_expression/spex_38.ets
-07.expressions/06.spread_expression/spex_const_37.ets
-07.expressions/06.spread_expression/spex_func_37.ets
 07.expressions/06.spread_expression/spex_lmbd_35.ets
 07.expressions/06.spread_expression/spex_lmbd_37.ets
-07.expressions/06.spread_expression/spex_meth_37.ets
 
 #24414
 07.expressions/06.spread_expression/spex_42.ets
@@ -593,8 +540,6 @@
 07.expressions/06.spread_expression/spex_meth_45.ets
 
 #24408 Fails on spread expression with tuple, tuples in rest parameters not supported
-07.expressions/06.spread_expression/spex_const_35.ets
-07.expressions/06.spread_expression/spex_func_35.ets
 07.expressions/06.spread_expression/spex_func_46.ets
 07.expressions/06.spread_expression/spex_lmbd_32.ets
 07.expressions/06.spread_expression/spex_lmbd_33.ets
@@ -608,7 +553,6 @@
 07.expressions/06.spread_expression/spex_lmbd_44.ets
 07.expressions/06.spread_expression/spex_lmbd_46.ets
 07.expressions/06.spread_expression/spex_lmbd_47.ets
-07.expressions/06.spread_expression/spex_meth_35.ets
 
 #20376 No support for spread arguments in lambda
 07.expressions/06.spread_expression/spex_lmbd_2.ets
