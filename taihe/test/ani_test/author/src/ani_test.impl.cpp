@@ -38,12 +38,19 @@ void showData(Data const &s)
 
 Union makeUnion(int32_t v)
 {
+    const int32_t case1Key = 1;
+    const int32_t case2Key = 2;
+    const int32_t case3Key = 3;
+
+    const int32_t case1Value = 100;
+    const float case2Value = 0.5;
+
     switch (v) {
-        case 1:
-            return Union::make_iValue(100);
-        case 2:
-            return Union::make_fValue(0.5);
-        case 3:
+        case case1Key:
+            return Union::make_iValue(case1Value);
+        case case2Key:
+            return Union::make_fValue(case2Value);
+        case case3Key:
             return Union::make_sValue("Hello from C++!");
         default:
             return Union::make_empty();
@@ -130,6 +137,8 @@ void callBar(array_view<Foo> arr)
 }
 }  // namespace
 
+// because these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_makeData(makeData);
 TH_EXPORT_CPP_API_showData(showData);
 TH_EXPORT_CPP_API_makeUnion(makeUnion);
@@ -140,3 +149,4 @@ TH_EXPORT_CPP_API_showArrayInt(showArrayInt);
 TH_EXPORT_CPP_API_makeArrayInt(makeArrayInt);
 TH_EXPORT_CPP_API_makeFoo(makeFoo);
 TH_EXPORT_CPP_API_callBar(callBar);
+// NOLINTEND

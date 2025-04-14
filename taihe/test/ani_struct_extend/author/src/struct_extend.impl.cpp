@@ -31,7 +31,7 @@ using namespace taihe;
 namespace {
 class Bar {
 public:
-    Bar(::struct_extend::E const &e)
+    explicit Bar(::struct_extend::E const &e)
     {
         this->e_.d.param4 = e.d.param4;
         this->e_.param5 = e.param5;
@@ -149,6 +149,8 @@ bool check_G(::struct_extend::G const &g)
 }
 }  // namespace
 
+// because these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_check_A(check_A);
 TH_EXPORT_CPP_API_create_A(create_A);
 TH_EXPORT_CPP_API_check_B(check_B);
@@ -166,3 +168,4 @@ TH_EXPORT_CPP_API_check_G(check_G);
 TH_EXPORT_CPP_API_create_Bar(create_Bar);
 TH_EXPORT_CPP_API_create_F(create_F);
 TH_EXPORT_CPP_API_create_G(create_G);
+// NOLINTEND

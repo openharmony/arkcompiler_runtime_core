@@ -34,5 +34,8 @@ array<uint16_t> outUint16Array()
 }
 }  // namespace
 
+// because these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_inUint16Array(inUint16Array);
 TH_EXPORT_CPP_API_outUint16Array(outUint16Array);
+// NOLINTEND
