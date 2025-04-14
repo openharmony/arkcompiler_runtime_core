@@ -92,7 +92,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                     promise.doResolve<U>(onFulfilled(this.value as T));
                 } else {
                     if (onRejected) {
-                        promise.rejectImpl(onRejected(this.value));
+                        promise.doResolve<E>(onRejected(this.value));
                     } else {
                         promise.rejectImpl(this.value);
                     }
