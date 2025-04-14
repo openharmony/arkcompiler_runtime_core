@@ -17,7 +17,7 @@ import {
     TsExport
 } from './cpp_test_dynamic_js.js'
 
-@interface MyAnnoName {
+@interface __$$ETS_ANNOTATION$$__MyAnnoName {
     a: number = 3
     b: number[] = [13, 9]
     d: boolean = false

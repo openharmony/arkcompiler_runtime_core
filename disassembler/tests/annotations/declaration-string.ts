@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     a: string;
 }
 
-@interface Anno2 {
+@interface __$$ETS_ANNOTATION$$__Anno2 {
     a: string = "Hello world!";
 }

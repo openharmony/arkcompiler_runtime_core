@@ -18,7 +18,7 @@ const enum E {
     B = "world"
 }
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: E[][][] = [[new Array<E>(2)]];
 }
 
