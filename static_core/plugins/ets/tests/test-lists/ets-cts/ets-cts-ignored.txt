@@ -926,6 +926,8 @@
 #24108
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_7.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_8.ets
+
+#25078 runtime fails with miltiple override error
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_10.ets
 
 #24129
