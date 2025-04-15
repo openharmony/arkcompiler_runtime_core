@@ -627,6 +627,10 @@ class JSONWriter {
             this.buffer.append(JSON.stringify((obj as RegExpExecArray).result))
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
+        } else if (obj instanceof Record) {
+            this.writeRecord(obj as Object as Record<string, NullishType>);
+        } else if (obj instanceof Map) {
+            this.buffer.append("{}")
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
@@ -715,6 +719,27 @@ class JSONWriter {
         }
 
         return fieldDumped
+    }
+
+    private writeRecord(rec: Record<string, NullishType>): void {
+        this.buffer.append("{");
+        this.checkReferencesCycle(rec);
+        this.path.add(rec);
+        let isFirst = true;
+        for (let key of rec.keys()) {
+            if (rec[key] !== undefined) {
+                if (!isFirst) {
+                    this.buffer.append(",");
+                } else {
+                    isFirst = false;
+                }
+                this.buffer.append(JSON.stringify(key as String));
+                this.buffer.append(":");
+                this.writeObject(rec[key]);
+            }
+        }
+        this.path.delete(rec);
+        this.buffer.append("}");
     }
 
     private writeClassValue(obj: Object, objType: ClassType): void {
