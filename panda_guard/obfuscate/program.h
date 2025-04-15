@@ -37,6 +37,8 @@ private:
 
     void RemoveConsoleLog();
 
+    void RemoveLineNumber();
+
     void UpdateReference();
 
 public:

@@ -245,24 +245,29 @@ void panda::guard::Function::InitBaseInfo()
     this->obfName_ = this->name_;
     this->regsNum_ = func.regs_num;
 
-    size_t startLineIndex = 0;
-    while (startLineIndex < func.ins.size()) {
-        const size_t lineNumber = func.ins[startLineIndex].ins_debug.line_number;
-        if (lineNumber < MAX_LINE_NUMBER) {
-            this->startLine_ = lineNumber;
-            break;
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsCompactObfEnabled()) {
+        this->startLine_ = 1;
+        this->endLine_ = 1;
+    } else {
+        size_t startLineIndex = 0;
+        while (startLineIndex < func.ins.size()) {
+            const size_t lineNumber = func.ins[startLineIndex].ins_debug.line_number;
+            if (lineNumber < MAX_LINE_NUMBER) {
+                this->startLine_ = lineNumber;
+                break;
+            }
+            startLineIndex++;
         }
-        startLineIndex++;
-    }
 
-    size_t endLineIndex = func.ins.size() - 1;
-    while (endLineIndex >= startLineIndex) {
-        const size_t lineNumber = func.ins[endLineIndex].ins_debug.line_number;
-        if (lineNumber < MAX_LINE_NUMBER) {
-            this->endLine_ = lineNumber + 1;
-            break;
+        size_t endLineIndex = func.ins.size() - 1;
+        while (endLineIndex >= startLineIndex) {
+            const size_t lineNumber = func.ins[endLineIndex].ins_debug.line_number;
+            if (lineNumber < MAX_LINE_NUMBER) {
+                this->endLine_ = lineNumber + 1;
+                break;
+            }
+            endLineIndex--;
         }
-        endLineIndex--;
     }
 }
 
@@ -384,6 +389,13 @@ void panda::guard::Function::RemoveConsoleLog()
             }
         }
         insList.erase(insList.begin() + start, insList.begin() + end);
+    }
+}
+
+void panda::guard::Function::RemoveLineNumber()
+{
+    for (auto &inst : this->GetOriginFunction().ins) {
+        inst.ins_debug.line_number = 1;
     }
 }
 

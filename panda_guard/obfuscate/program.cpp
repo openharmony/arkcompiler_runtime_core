@@ -101,6 +101,15 @@ void panda::guard::Program::RemoveConsoleLog()
     this->EnumerateFunctions([](Function &function) { function.RemoveConsoleLog(); });
 }
 
+void panda::guard::Program::RemoveLineNumber()
+{
+    if (!GuardContext::GetInstance()->GetGuardOptions()->IsCompactObfEnabled()) {
+        return;
+    }
+
+    this->EnumerateFunctions([](Function &function) { function.RemoveLineNumber(); });
+}
+
 void panda::guard::Program::Obfuscate()
 {
     LOG(INFO, PANDAGUARD) << TAG << "===== program obfuscate start =====";
@@ -112,6 +121,8 @@ void panda::guard::Program::Obfuscate()
     this->UpdateReference();
 
     this->RemoveConsoleLog();
+
+    this->RemoveLineNumber();
 
     LOG(INFO, PANDAGUARD) << TAG << "===== program obfuscate end =====";
 }
