@@ -29,7 +29,7 @@ cases:
       function main() {
           type A = int;
           let a: A = -3;
-          assertTrue(a == -3);
+          assertEQ(a, -3);
       }
 
   - decl: |-
@@ -51,7 +51,7 @@ cases:
           return a;
       }
       function main() {
-          assertTrue(foo(3) == 4);
+          assertEQ(foo(3), 4);
       }
 
   - decl: |-

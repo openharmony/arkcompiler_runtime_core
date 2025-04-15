@@ -18,5 +18,5 @@ cases:
     check: |-
         function main() {
             let a: T = Colors.Blue;
-            assertTrue(foo(a) == 23);
+            assertEQ(foo(a), 23);
         }
