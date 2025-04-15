@@ -56,9 +56,9 @@ enum class CoroutineLaunchMode {
 /// @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types.
 enum class CoroutineSchedulingPolicy {
     /// choose the least busy worker
-    DEFAULT,
+    ANY_WORKER,
     /**
-     * same as default but exclude the main worker from available hosts on launch and
+     * same as any_worker but exclude the main worker from available hosts on launch and
      * disallow non_main -> main transitions on migration
      */
     NON_MAIN_WORKER
@@ -298,7 +298,7 @@ private:
     CoroutineFactory coFactory_ = nullptr;
 
     mutable os::memory::Mutex policyLock_;
-    CoroutineSchedulingPolicy schedulingPolicy_ GUARDED_BY(policyLock_) = CoroutineSchedulingPolicy::DEFAULT;
+    CoroutineSchedulingPolicy schedulingPolicy_ GUARDED_BY(policyLock_) = CoroutineSchedulingPolicy::NON_MAIN_WORKER;
 
     // coroutine id management
     os::memory::Mutex idsLock_;

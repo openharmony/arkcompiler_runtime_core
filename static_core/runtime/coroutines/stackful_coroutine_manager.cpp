@@ -596,7 +596,7 @@ stackful_coroutines::AffinityMask StackfulCoroutineManager::CalcAffinityMaskFrom
             break;
         }
         default:
-        case CoroutineSchedulingPolicy::DEFAULT:
+        case CoroutineSchedulingPolicy::ANY_WORKER:
             break;
     }
     return mask.to_ullong();
