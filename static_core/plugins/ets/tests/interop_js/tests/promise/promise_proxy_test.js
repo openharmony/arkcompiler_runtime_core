@@ -27,6 +27,7 @@ function runTest(test) {
         'load-runtimes': 'ets',
         'compiler-enable-jit': 'false',
         'coroutine-enable-external-scheduling': 'true',
+        'xgc-trigger-type': 'never',
     };
     if (!etsVm.createRuntime(etsOpts)) {
         throw Error('Cannot create ETS runtime');
