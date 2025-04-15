@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,33 +13,13 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-
-let RESULT = 10 as long
-
-let arr: BigInt64Array
-
 function main() {
-    let buf = new SharedArrayBuffer(8);
-    arr = new BigInt64Array(buf, 0, 1);
+    let arr: BigInt64Array = new BigInt64Array(2)
+    Atomics.add(arr, 1, new BigInt(24))
+    let res = Atomics.load(arr, 1).getLong()
+    assertEQ(res, 24)
 
-    launch<Int, () => Int>(incrementer)
-
-    while (Atomics.load(arr, 0).getLong() != RESULT) {
-        wait()
-    }
-}
-
-function incrementer(): Int {
-    Atomics.store(arr, 0, new BigInt(RESULT))
-
-    return 1
-}
-
-function wait(): int {
-    let i = 1
-    for (let j = 0; j < 10000; j++) {
-        i += j
-    }
-    return i
+    let arrInt32: Int32Array = new Int32Array(3)
+    Atomics.add(arrInt32, 2, 88)
+    assertEQ(Atomics.load(arrInt32, 2), 88)
 }

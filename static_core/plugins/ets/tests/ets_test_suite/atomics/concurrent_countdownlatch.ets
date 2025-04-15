@@ -48,11 +48,11 @@ function main() {
     for (let i = 0; i < N; i++) {
         launch<Int, () => Int>(task_2)
     }
-    let cur_64: long = Atomics.load(bytearr_i64, 0) as long
+    let cur_64: long = Atomics.load(bytearr_i64, 0).getLong()
     while (cur_64 != N) {
         L.log("waiting, finished tasks: " + cur_64)
         Atomics.wait(arr_2, 0, cur_64)
-        cur_64 = Atomics.load(bytearr_i64, 0) as long
+        cur_64 = Atomics.load(bytearr_i64, 0).getLong()
     }
     L.log("all tasks have finished")
 }
@@ -69,7 +69,7 @@ function task_1(): Int {
 function task_2(): Int {
     heavyComputation()
     L.log("Task finished. Notifying")
-    Atomics.add(bytearr_i64, 0, 1 as long)
+    Atomics.add(bytearr_i64, 0, new BigInt(1))
     Atomics.notify(arr_2, 0)
     
     return 1

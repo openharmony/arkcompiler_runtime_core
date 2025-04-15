@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,123 +48,105 @@ namespace ark::ets::intrinsics {
 #define SHARED_MEMORY_ADD(type, postfix)                                                      \
     extern "C" type SharedMemoryAdd##postfix(EtsSharedMemory *mem, int32_t index, type value) \
     {                                                                                         \
-        auto add = [value](type oldValue) { return oldValue + value; };                       \
-        auto result = mem->ReadModifyWrite<type>(index, add);                                 \
+        auto result = mem->GetAndAdd<type>(index, value);                                     \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                \
-        return result.first;                                                                  \
+        return result;                                                                        \
     }
 
-#define SHARED_MEMORY_AND_SIGNED(type, postfix)                                                   \
-    extern "C" type SharedMemoryAnd##postfix(EtsSharedMemory *mem, int32_t index, type value)     \
-    {                                                                                             \
-        auto bitwiseAnd = [value](type oldValue) {                                                \
-            /* CC-OFFNXT(G.PRE.05) function gen */                                                \
-            return static_cast<type>((bit_cast<u##type>(oldValue)) & (bit_cast<u##type>(value))); \
-        };                                                                                        \
-        auto result = mem->ReadModifyWrite<type>(index, bitwiseAnd);                              \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                    \
-        return result.first;                                                                      \
+#define SHARED_MEMORY_AND_SIGNED(type, postfix)                                               \
+    extern "C" type SharedMemoryAnd##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                         \
+        auto result = mem->GetAndBitwiseAnd<type>(index, value);                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                \
+        return result;                                                                        \
     }
 
-#define SHARED_MEMORY_AND_UNSIGNED(type, postfix)                                                     \
-    extern "C" type SharedMemoryAnd##postfix(EtsSharedMemory *mem, int32_t index, type value)         \
-    {                                                                                                 \
-        auto bitwiseAnd = [value](type oldValue) { return static_cast<type>((oldValue) & (value)); }; \
-        auto result = mem->ReadModifyWrite<type>(index, bitwiseAnd);                                  \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                        \
-        return result.first;                                                                          \
+#define SHARED_MEMORY_AND_UNSIGNED(type, postfix)                                             \
+    extern "C" type SharedMemoryAnd##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                         \
+        auto result = mem->GetAndBitwiseAnd<type>(index, value);                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                \
+        return result;                                                                        \
     }
 
 #define SHARED_MEMORY_COMPARE_EXCHANGE(type, postfix)                                                             \
     extern "C" type SharedMemoryCompareExchange##postfix(EtsSharedMemory *mem, int32_t index, type expectedValue, \
                                                          type replacementValue)                                   \
     {                                                                                                             \
-        auto compareExchange = [expectedValue, replacementValue](type oldValue) {                                 \
-            /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
-            return oldValue == expectedValue ? replacementValue : oldValue;                                       \
-        };                                                                                                        \
-        auto result = mem->ReadModifyWrite<type>(index, compareExchange);                                         \
+        auto result = mem->CompareAndExchangeElement<type>(index, expectedValue, replacementValue, true);         \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                                    \
-        return result.first;                                                                                      \
+        return result.second;                                                                                     \
     }
 
 #define SHARED_MEMORY_EXCHANGE(type, postfix)                                                      \
     extern "C" type SharedMemoryExchange##postfix(EtsSharedMemory *mem, int32_t index, type value) \
     {                                                                                              \
-        auto exchange = [value]([[maybe_unused]] type oldValue) { return value; };                 \
-        auto result = mem->ReadModifyWrite<type>(index, exchange);                                 \
+        auto result = mem->ExchangeElement<type>(index, value);                                    \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                     \
-        return result.first;                                                                       \
+        return result;                                                                             \
     }
 
 #define SHARED_MEMORY_LOAD(type, postfix)                                          \
     extern "C" type SharedMemoryLoad##postfix(EtsSharedMemory *mem, int32_t index) \
     {                                                                              \
-        auto load = [](type value) { return value; };                              \
-        auto result = mem->ReadModifyWrite<type>(index, load);                     \
+        auto result = mem->GetVolatileElement<type>(index);                        \
         /* CC-OFFNXT(G.PRE.05) function gen */                                     \
-        return result.first;                                                       \
+        return result;                                                             \
     }
 
 // CC-OFFNXT(G.PRE.05) function gen
-#define SHARED_MEMORY_OR_SIGNED(type, postfix)                                                    \
-    extern "C" type SharedMemoryOr##postfix(EtsSharedMemory *mem, int32_t index, type value)      \
-    {                                                                                             \
-        auto orBitwise = [value](type oldValue) {                                                 \
-            /* CC-OFFNXT(G.PRE.05) function gen */                                                \
-            return static_cast<type>((bit_cast<u##type>(oldValue)) | (bit_cast<u##type>(value))); \
-        };                                                                                        \
-        auto result = mem->ReadModifyWrite<type>(index, orBitwise);                               \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                    \
-        return result.first;                                                                      \
+#define SHARED_MEMORY_OR_SIGNED(type, postfix)                                               \
+    extern "C" type SharedMemoryOr##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                        \
+        auto result = mem->GetAndBitwiseOr<type>(index, value);                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                               \
+        return result;                                                                       \
     }
 
-#define SHARED_MEMORY_OR_UNSIGNED(type, postfix)                                                     \
-    extern "C" type SharedMemoryOr##postfix(EtsSharedMemory *mem, int32_t index, type value)         \
-    {                                                                                                \
-        auto orBitwise = [value](type oldValue) { return static_cast<type>((oldValue) | (value)); }; \
-        auto result = mem->ReadModifyWrite<type>(index, orBitwise);                                  \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                       \
-        return result.first;                                                                         \
+#define SHARED_MEMORY_OR_UNSIGNED(type, postfix)                                             \
+    extern "C" type SharedMemoryOr##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                        \
+        auto result = mem->GetAndBitwiseOr<type>(index, value);                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                               \
+        return result;                                                                       \
     }
 
-#define SHARED_MEMORY_STORE(type, postfix)                                                      \
-    extern "C" type SharedMemoryStore##postfix(EtsSharedMemory *mem, int32_t index, type value) \
-    {                                                                                           \
-        auto store = [value]([[maybe_unused]] type oldValue) { return value; };                 \
-        auto result = mem->ReadModifyWrite<type>(index, store);                                 \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                  \
-        return result.second;                                                                   \
+// CC-OFFNXT(G.PRE.06) code generation
+#define SHARED_MEMORY_STORE(type, postfix)                                                                \
+    extern "C" type SharedMemoryStore##postfix(EtsSharedMemory *mem, int32_t index, type value)           \
+    {                                                                                                     \
+        type oldVal;                                                                                      \
+        bool stored = false;                                                                              \
+        do {                                                                                              \
+            oldVal = mem->GetElement<type>(index);                                                        \
+            std::tie(stored, oldVal) = mem->CompareAndExchangeElement<type>(index, oldVal, value, false); \
+        } while (!stored);                                                                                \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
+        return oldVal;                                                                                    \
     }
 
 #define SHARED_MEMORY_SUB(type, postfix)                                                      \
     extern "C" type SharedMemorySub##postfix(EtsSharedMemory *mem, int32_t index, type value) \
     {                                                                                         \
-        auto add = [value](type oldValue) { return oldValue - value; };                       \
-        auto result = mem->ReadModifyWrite<type>(index, add);                                 \
+        auto result = mem->GetAndSub<type>(index, value);                                     \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                \
-        return result.first;                                                                  \
+        return result;                                                                        \
     }
 
-#define SHARED_MEMORY_XOR_SIGNED(type, postfix)                                                   \
-    extern "C" type SharedMemoryXor##postfix(EtsSharedMemory *mem, int32_t index, type value)     \
-    {                                                                                             \
-        auto xorBitwise = [value](type oldValue) {                                                \
-            /* CC-OFFNXT(G.PRE.05) function gen */                                                \
-            return static_cast<type>((bit_cast<u##type>(oldValue)) ^ (bit_cast<u##type>(value))); \
-        };                                                                                        \
-        auto result = mem->ReadModifyWrite<type>(index, xorBitwise);                              \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                    \
-        return result.first;                                                                      \
+#define SHARED_MEMORY_XOR_SIGNED(type, postfix)                                               \
+    extern "C" type SharedMemoryXor##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                         \
+        auto result = mem->GetAndBitwiseOr<type>(index, value);                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                \
+        return result;                                                                        \
     }
 
-#define SHARED_MEMORY_XOR_UNSIGNED(type, postfix)                                                     \
-    extern "C" type SharedMemoryXor##postfix(EtsSharedMemory *mem, int32_t index, type value)         \
-    {                                                                                                 \
-        auto xorBitwise = [value](type oldValue) { return static_cast<type>((oldValue) ^ (value)); }; \
-        auto result = mem->ReadModifyWrite<type>(index, xorBitwise);                                  \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                        \
-        return result.first;                                                                          \
+#define SHARED_MEMORY_XOR_UNSIGNED(type, postfix)                                             \
+    extern "C" type SharedMemoryXor##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                         \
+        auto result = mem->GetAndBitwiseOr<type>(index, value);                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                \
+        return result;                                                                        \
     }
 
 #define FOR_ALL_TYPES(sharedMemoryMethod)                                                                     \

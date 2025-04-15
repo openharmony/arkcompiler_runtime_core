@@ -344,6 +344,14 @@ private:
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 0U;
 static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());
 
+// NOLINTBEGIN(readability-identifier-naming)
+template <class T>
+using is_object = std::bool_constant<std::is_pointer_v<T> && std::is_base_of_v<ObjectHeader, std::remove_pointer_t<T>>>;
+
+template <class T>
+constexpr bool is_object_v = is_object<T>::value;
+// NOLINTEND(readability-identifier-naming)
+
 }  // namespace ark
 
 #endif  // PANDA_RUNTIME_OBJECT_HEADER_H_

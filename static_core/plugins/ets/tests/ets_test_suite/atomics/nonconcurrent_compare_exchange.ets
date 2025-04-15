@@ -31,8 +31,8 @@ function main() {
     assertEQ(Atomics.load(arr, 0), 99)
 
     for (let i = 1; i < 100; i++) {
-        let old = Atomics.compareExchange(arr_2, 0, i - 1, i)
+        let old = Atomics.compareExchange(arr_2, 0, new BigInt(i - 1), new BigInt(i)).getLong()
         assertEQ(old, i - 1)
     }
-    assertEQ(Atomics.load(arr_2, 0), 99)
+    assertEQ(Atomics.load(arr_2, 0).getLong(), 99)
 }

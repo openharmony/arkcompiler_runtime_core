@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,24 @@ public:
     T GetElement(uint32_t index);
     template <typename T>
     void SetElement(uint32_t index, T element);
+    template <typename T>
+    T GetVolatileElement(uint32_t index);
+    template <typename T>
+    void SetVolatileElement(uint32_t index, T element);
+    template <typename T>
+    std::pair<bool, T> CompareAndExchangeElement(uint32_t index, T oldElement, T newElement, bool strong);
+    template <typename T>
+    T ExchangeElement(uint32_t index, T element);
+    template <typename T>
+    T GetAndAdd(uint32_t index, T element);
+    template <typename T>
+    T GetAndSub(uint32_t index, T element);
+    template <typename T>
+    T GetAndBitwiseOr(uint32_t index, T element);
+    template <typename T>
+    T GetAndBitwiseAnd(uint32_t index, T element);
+    template <typename T>
+    T GetAndBitwiseXor(uint32_t index, T element);
 
     template <typename T, typename F>
     std::pair<T, T> ReadModifyWrite(int32_t index, const F &f);
