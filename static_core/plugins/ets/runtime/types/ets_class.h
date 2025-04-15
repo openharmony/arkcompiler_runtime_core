@@ -100,7 +100,7 @@ public:
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature);
 
     PANDA_PUBLIC_API EtsMethod *GetMethod(const char *name);
-    PANDA_PUBLIC_API EtsMethod *GetMethod(const char *name, const char *signature);
+    PANDA_PUBLIC_API EtsMethod *GetMethod(const char *name, const char *signature, bool isANIFormat = false);
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const PandaString &name, const PandaString &signature)
     {

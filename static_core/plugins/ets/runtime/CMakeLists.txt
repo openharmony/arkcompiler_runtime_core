@@ -15,6 +15,7 @@ set(ETS_EXT_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/runtime)
 
 set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ani/ani_interaction_api.cpp
+    ${ETS_EXT_SOURCES}/ani/ani_mangle.cpp
     ${ETS_EXT_SOURCES}/ani/ani_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_annotation.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp

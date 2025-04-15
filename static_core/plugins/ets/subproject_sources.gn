@@ -85,6 +85,7 @@ arkcompiler_deps += [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h
 
 srcs_runtime = [
   "runtime/ani/ani_interaction_api.cpp",
+  "runtime/ani/ani_mangle.cpp",
   "runtime/ani/ani_vm_api.cpp",
   "runtime/ets_annotation.cpp",
   "runtime/ets_class_linker.cpp",
