@@ -10,6 +10,9 @@ koala-related-benchmarks/arkts-phase1.ets
 #19807
 regression/12581_custom_class_Engine_array.ets
 
+#25112
+regression/25112.ets
+
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_8.ets
