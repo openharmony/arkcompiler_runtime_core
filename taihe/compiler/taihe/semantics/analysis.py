@@ -103,7 +103,7 @@ def _check_decl_confilct_with_namespace(
 
     for p in pg.packages:
         for d in p.decls.values():
-            name = p.name + "." + d.name
+            name = '%s.%s' % (p.name, d.name)
             if name in namespaces:
                 diag.emit(SymbolConflictWithNamespaceError(d, p))
 
