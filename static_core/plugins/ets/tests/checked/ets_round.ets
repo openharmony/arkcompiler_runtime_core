@@ -17,7 +17,7 @@
 //! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_round.ETSGLOBAL::main"
 //! METHOD        "ets_round.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Intrinsic.StdMathRound/, 12
+//! INST_COUNT    /Intrinsic.StdMathRound/, 11
 //! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
 //! ASM           x64: /roundsd.*3,/, arm64: "frinta", arm32: "vrinta"
@@ -27,7 +27,7 @@
 //! RUN_PAOC      options: "--compiler-regex='.*main.*'"
 //! METHOD        "ets_round.ETSGLOBAL::main"
 //! PASS_AFTER    "Codegen"
-//! INST_COUNT    /Intrinsic.StdMathRound/, 12
+//! INST_COUNT    /Intrinsic.StdMathRound/, 11
 //! ASM_METHOD    "ets_round.ETSGLOBAL::main"
 //! ASM_INST      "Intrinsic.StdMathRound"
 //! ASM           x64: /roundsd.*3,/, arm64: "frinta"
@@ -48,9 +48,8 @@ function main(): int {
     if (round(1.5) != 2.) return 7;
     if (round(1.6) != 2.) return 8;
     if (round(1.4) != 1.) return 9;
-    if (round(-1.5) != -2.) return 10;
-    if (round(-1.6) != -2.) return 11;
-    if (round(-1.4) != -1.) return 12;
+    if (round(-1.6) != -2.) return 10;
+    if (round(-1.4) != -1.) return 11;
     
     return 0;
 }

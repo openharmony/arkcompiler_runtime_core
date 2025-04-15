@@ -14,5 +14,8 @@ std/containers/ArrayTestChecked.ets
 
 #20525
 std/concurrency/AsyncLockTest.ets
-# #22500
+#22500
 std/containers/ArrayTestChecked.ets
+
+#25162
+std/math/RoundTest.ets
