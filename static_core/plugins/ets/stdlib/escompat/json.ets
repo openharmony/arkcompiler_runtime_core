@@ -557,6 +557,8 @@ class JSONWriter {
     // NOTE(cheezzario) replace with Type.for<JSValue>() when it will be implemented
     private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as JSValue[]) as ArrayType).getElementType()
     private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
+    private static readonly ESCOMPAT_SET_TYPE = Type.of(new Set<Object>())
+    private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => {}))
 
     private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
     private readonly fieldsFilter: string[]
@@ -623,6 +625,9 @@ class JSONWriter {
                 this.writeArrayValue(Value.of(obj) as ArrayValue, objType as ArrayType)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
                 this.writeEscompatArray(obj as Array<Object>)
+            } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
+                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName()) {
+                this.buffer.append("{}")
             } else if (objType instanceof ClassType) {
                 this.writeClassValue(obj, objType as ClassType)
             } else if (objType instanceof LambdaType) {
