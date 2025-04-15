@@ -490,6 +490,11 @@ export class RegExp extends Object {
     public native compile(): RegExp;
 
     /**
+     * Parse a regular expression
+     */
+    public native static parse(pattern: String): String | undefined;
+
+    /**
      * Recompiles a regular expression with new source and flags after the RegExp object has already been created
      *
      * @param pattern the text of the regular expression
@@ -816,6 +821,7 @@ export class RegExp extends Object {
      * @param flags description of flags to be used
      */
     private init(pattern: String, flags?: String) {
+        this.regexp_parser(pattern)
         this.pattern_ = pattern
         this.flags_ = flags === undefined ? "" : flags!
         this.source_ = RegExp.escapePattern(pattern)
@@ -831,5 +837,12 @@ export class RegExp extends Object {
      */
     private init(regexp: RegExp, flags?: String) {
         this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
+    }
+
+    internal regexp_parser(pattern: String): void {
+        let err: String | undefined = RegExp.parse(pattern)
+        if (err != undefined) {
+            throw new SyntaxError(err as String)
+        }
     }
 }

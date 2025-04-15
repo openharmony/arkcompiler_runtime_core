@@ -159,6 +159,19 @@ extern "C" EtsObject *EscompatRegExpCompile(EtsObject *regexpObj)
     return regexp.GetPtr();
 }
 
+extern "C" EtsString *EscompatRegExpParse(EtsString *pattern)
+{
+    RegExpParser parse = RegExpParser();
+    auto patternstr = ark::PandaStringToStd(pattern->GetUtf8());
+    parse.Init(const_cast<char *>(reinterpret_cast<const char *>(patternstr.c_str())), patternstr.length(), 0);
+    parse.Parse();
+    if (parse.IsError()) {
+        auto errormsg = ark::PandaStringToStd(parse.GetErrorMsg());
+        return EtsString::CreateFromMUtf8(errormsg.c_str(), errormsg.length());
+    }
+    return nullptr;
+}
+
 void SetSuccessfulMatchLegacyProperties(EtsClass *type, const EtsObject *regexpExecArrayObj, EtsString *inputStrObj,
                                         uint32_t index)
 {
