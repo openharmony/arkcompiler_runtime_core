@@ -41,7 +41,7 @@ constexpr uint8_t UTF16_BYTE5_ZONE2_BYTE1_NEEDED_BITS = 0x3;
 constexpr size_t UTF16_WIDTH = 2;
 constexpr uint8_t DIRECT_UNICODE_BYTES = 4U;
 
-bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16)
+bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16, const int len)
 {
     utf16_ |= isUtf16;
     uint32_t flags = 0U;
@@ -69,10 +69,18 @@ bool EtsRegExp::Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16)
                           "invalid regular expression (failed to parse unicode)");
         return false;
     }
+    int length = len;
+    if (preparedPattern.size() != pattern.size()) {
+        if (utf16_) {
+            length = preparedPattern.size() / UTF16_WIDTH - 1;
+        } else {
+            length = preparedPattern.size() - 1;
+        }
+    }
     if (utf16_) {
-        re_ = RegExp16::CreatePcre2Object(reinterpret_cast<const uint16_t *>(preparedPattern.data()), flags);
+        re_ = RegExp16::CreatePcre2Object(reinterpret_cast<const uint16_t *>(preparedPattern.data()), flags, length);
     } else {
-        re_ = RegExp8::CreatePcre2Object(preparedPattern.data(), flags);
+        re_ = RegExp8::CreatePcre2Object(preparedPattern.data(), flags, length);
     }
     return re_ != nullptr;
 }
