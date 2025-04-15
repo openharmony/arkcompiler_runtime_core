@@ -45,7 +45,7 @@ const checkNull = etsVm.getFunction('LETSGLOBAL;', 'checkNull');
 const checkUndefined = etsVm.getFunction('LETSGLOBAL;', 'checkUndefined');
 
 
-function testCheckBoolean() {
+function testCheckBoolean(): void {
     let val = true;
     let valBoxed = Boolean(val);
     let valObject = new Boolean(val);
@@ -59,7 +59,7 @@ function testCheckBoolean() {
     ASSERT_THROWS(TypeError, () => checkBooleanBoxed(1));
 }
 
-function testCheckByte() {
+function testCheckByte(): void {
     let val = 1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
@@ -77,7 +77,7 @@ function testCheckByte() {
     ASSERT_THROWS(TypeError, () => checkByteBoxed('1'));
 }
 
-function testCheckShort() {
+function testCheckShort(): void {
     let val = 1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
@@ -95,7 +95,7 @@ function testCheckShort() {
     ASSERT_THROWS(TypeError, () => checkShortBoxed('1'));
 }
 
-function testCheckInt() {
+function testCheckInt(): void {
     let val = 1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
@@ -113,7 +113,7 @@ function testCheckInt() {
     ASSERT_THROWS(TypeError, () => checkIntBoxed('1'));
 }
 
-function testCheckLong() {
+function testCheckLong(): void {
     let val = 1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
@@ -127,7 +127,7 @@ function testCheckLong() {
     ASSERT_THROWS(TypeError, () => checkLongBoxed('1'));
 }
 
-function testCheckFloat() {
+function testCheckFloat(): void {
     let val = 2.1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
@@ -143,7 +143,7 @@ function testCheckFloat() {
     ASSERT_THROWS(TypeError, () => checkFloatBoxed('1'));
 }
 
-function testCheckDouble() {
+function testCheckDouble(): void {
     let val = 1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
@@ -157,7 +157,7 @@ function testCheckDouble() {
     ASSERT_THROWS(TypeError, () => checkDoubleBoxed('1'));
 }
 
-function testCheckNumber() {
+function testCheckNumber(): void {
     let val = 1;
     let valBoxed = Number(val);
     let valObject = new Number(val);
@@ -171,7 +171,7 @@ function testCheckNumber() {
     ASSERT_THROWS(TypeError, () => checkNumberBoxed('1'));
 }
 
-function testCheckChar() {
+function testCheckChar(): void {
     let val = '1';
     let valBoxed = String(val);
     let valObject = new String(val);
@@ -194,7 +194,7 @@ function testCheckChar() {
     ASSERT_THROWS(TypeError, () => checkCharBoxed(65536));
 }
 
-function testCheckString() {
+function testCheckString(): void {
     let val = '1';
     let valBoxed = String(val);
     let valObject = new String(val);
@@ -208,7 +208,7 @@ function testCheckString() {
     ASSERT_THROWS(TypeError, () => checkStringBoxed(1));
 }
 
-function testCheckBigint() {
+function testCheckBigint(): void {
     let val = 1n;
     let valBoxed = BigInt(val);
     checkBigint(val);
@@ -219,7 +219,7 @@ function testCheckBigint() {
     ASSERT_THROWS(TypeError, () => checkBigintBoxed(1));
 }
 
-function testNullAndUndefined() {
+function testNullAndUndefined(): void {
     ASSERT_TRUE(checkNull(null) === true);
     ASSERT_TRUE(checkNull(undefined) === false);
     ASSERT_TRUE(checkNull(1) === false);

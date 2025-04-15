@@ -20,19 +20,19 @@ let checkRestOfString = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'check
 let checkRestOfTuple = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfTuple');
 let checkRestofUnion = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestofUnion');
 
-function testRestOfNumber() {
+function testRestOfNumber(): void {
     ASSERT_TRUE(checkRestOfNumber([1, 2, 3], 1, 2, 3));
 }
 
-function testRestOfString() {
+function testRestOfString(): void {
     ASSERT_TRUE(checkRestOfString(['a', 'b', 'c'], 'a', 'b', 'c'));
 }
 
-function testRestOfTuple() {
+function testRestOfTuple(): void {
     ASSERT_TRUE(checkRestOfTuple([[11, 'aa'], [22, 'bb'], [33, 'cc']], [11, 'aa'], [22, 'bb'], [33, 'cc']));
 }
 
-function testRestofUnion() {
+function testRestofUnion(): void {
     ASSERT_TRUE(checkRestofUnion([2, 3, true, 'a', 'b'], 2, 3, true, 'a', 'b'));
 }
 

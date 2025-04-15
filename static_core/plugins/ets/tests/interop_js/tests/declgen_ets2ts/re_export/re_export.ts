@@ -28,6 +28,6 @@ export function main(): void {
 }
 
 function testImports(): void {
-	assertEq(Foo1(), "export Foo1");
-	assertEq(Foo2(), "export Foo2");
+	assertEq(Foo1(), 'export Foo1');
+	assertEq(Foo2(), 'export Foo2');
 }

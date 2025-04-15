@@ -33,7 +33,7 @@ const INSERT_STRING3: string = '3333';
 const INSERT_BOOLEAN1: boolean = true;
 const INSERT_BOOLEAN2: boolean = false;
 
-function testCheckNumberArray() {
+function testCheckNumberArray(): void {
     ASSERT_TRUE(numArr[0] === 1 && numArr[1] === 3);
     numArr[2] = INSERT_NUMBER1;
     numArr.push(INSERT_NUMBER2);
@@ -42,7 +42,7 @@ function testCheckNumberArray() {
     ASSERT_TRUE(numArr instanceof Array);
 }
 
-function testChecStringArray() {
+function testChecStringArray(): void {
     ASSERT_TRUE(strArr[0] === '3' && strArr[2] === '1');
     strArr[2] = INSERT_STRING1;
     strArr.push(INSERT_STRING2);
@@ -51,7 +51,7 @@ function testChecStringArray() {
     ASSERT_TRUE(strArr instanceof Array);
 }
 
-function testCheckBooleanArray() {
+function testCheckBooleanArray(): void {
     ASSERT_TRUE(booArr[0] === true && booArr[1] === false);
     booArr[1] = INSERT_BOOLEAN1;
     booArr.push(INSERT_BOOLEAN2);

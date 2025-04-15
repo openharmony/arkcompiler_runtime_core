@@ -17,23 +17,23 @@ function plus_one(x: number): number {
     return x + 1;
 }
 
-function main() {
+function main(): void {
     let etsVm = globalThis.gtest.etsVm;
 
     let callback_js_function_ets = etsVm.getFunction('Lets_function/ETSGLOBAL;', 'callback_js_function_ets');
 
     // test lambda function
     let call_back_res = callback_js_function_ets((val: number) => val + 1);
-    ASSERT_TRUE(call_back_res == 0x55ab);
+    ASSERT_TRUE(call_back_res === 0x55ab);
 
     // test lambda function with capture
     let bias = 1;
     call_back_res = callback_js_function_ets((val: number) => val + bias);
-    ASSERT_TRUE(call_back_res == 0x55ab);
+    ASSERT_TRUE(call_back_res === 0x55ab);
 
     // test normal function
     call_back_res = callback_js_function_ets(plus_one);
-    ASSERT_TRUE(call_back_res == 0x55ab);
+    ASSERT_TRUE(call_back_res === 0x55ab);
 }
 
 main();

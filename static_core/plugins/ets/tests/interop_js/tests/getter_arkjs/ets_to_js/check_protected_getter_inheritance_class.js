@@ -14,8 +14,8 @@
  */
 
 import {
-	protected_getter_class_value,
-	protected_getter_override_class_value
+	PROTECTED_GETTER_CLASS_VALUE,
+	PROTECTED_GETTER_OVERRIDE_CLASS_VALUE
  } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
@@ -32,7 +32,7 @@ function checkProtectedGetterInheritanceClassalue() {
 
 function checkProtectedGetterInheritanceClass() {
 	const GClass = new ProtectedGetterInheritanceClass();
-	ASSERT_TRUE(GClass.value === protected_getter_class_value);
+	ASSERT_TRUE(GClass.value === PROTECTED_GETTER_CLASS_VALUE);
 }
 
 function checkCreateProtectedetterInheritanceClassFromEts() {
@@ -42,17 +42,17 @@ function checkCreateProtectedetterInheritanceClassFromEts() {
 
 function checkCreateProtectedGetterInheritanceClassFromEts() {
 	const GClass = createProtectedGetterInheritanceClassFromEts();
-	ASSERT_TRUE(GClass.value === protected_getter_class_value);
+	ASSERT_TRUE(GClass.value === PROTECTED_GETTER_CLASS_VALUE);
 }
 
 function checkProtectedGetterOverrideClass() {
 	const GClass = new ProtectedGetterOverrideClass();
-	ASSERT_TRUE(GClass.value === protected_getter_override_class_value);
+	ASSERT_TRUE(GClass.value === PROTECTED_GETTER_OVERRIDE_CLASS_VALUE);
 }
 
 function checkCreateProtectedetterOverrideClassFromEts() {
 	const GClass = createProtectedGetterOverrideClassFromEts();
-	ASSERT_TRUE(GClass.value === protected_getter_override_class_value);
+	ASSERT_TRUE(GClass.value === PROTECTED_GETTER_OVERRIDE_CLASS_VALUE);
 }
 
 checkProtectedGetterInheritanceClassalue();

@@ -15,7 +15,7 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-function compareArraysAreEqual<T>(arr1: T[], arr2: T[]) {
+function compareArraysAreEqual<T>(arr1: T[], arr2: T[]): boolean {
     if (arr1.length !== arr2.length) {
         return false;
     }
@@ -40,34 +40,41 @@ let checkRestOfTuple = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkR
 let checkRestofUnion = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestofUnion');
 let checkRestOfJSValue = etsVm.getFunction('Lrest_spread/test/ETSGLOBAL;', 'checkRestOfJSValue');
 
-function testRestOfNumber() {
-    let tmpFun = (obj: number[], ...nums: number[]) => compareArraysAreEqual<number>(obj, nums);
+function testRestOfNumber(): void {
+    let tmpFun: (obj: number[], ...nums: number[]) => boolean = 
+        (obj: number[], ...nums: number[]): boolean => compareArraysAreEqual<number>(obj, nums);
     ASSERT_TRUE(checkRestOfNumber(tmpFun));
 }
 
-function testRestOfString() {
-    let tmpFun = (obj: string[], ...strs: string[]) => compareArraysAreEqual(obj, strs);
+function testRestOfString(): void {
+    let tmpFun: (obj: string[], ...strs: string[]) => boolean = 
+        (obj: string[], ...strs: string[]): boolean => compareArraysAreEqual<string>(obj, strs);
     ASSERT_TRUE(checkRestOfString(tmpFun));
 }
 
-function testRestOfObject() {
-    let tmpFun = (obj: object[], ...objs: object[]) => compareArraysAreEqual(obj, objs);
+function testRestOfObject(): void {
+    let tmpFun: (obj: object[], ...objs: object[]) => boolean = 
+        (obj: object[], ...objs: object[]): boolean => compareArraysAreEqual<object>(obj, objs);
     ASSERT_TRUE(checkRestOfObject(tmpFun));
 }
 
-
-function testRestOfTuple() {
-    let tmpFun = (obj: [number, string][], ...tupleArr: [number, string][]) => compareArraysAreEqual(obj, tupleArr);
+function testRestOfTuple(): void {
+    let tmpFun: (obj: [number, string][], ...tupleArr: [number, string][]) => boolean = 
+        (obj: [number, string][], ...tupleArr: [number, string][]): boolean => 
+            compareArraysAreEqual<[number, string]>(obj, tupleArr);
     ASSERT_TRUE(checkRestOfTuple(tmpFun));
 }
 
-function testRestofUnion() {
-    let tmpFun = (obj: (number | string | boolean)[], ...unionArr: (number | string | boolean)[]) => compareArraysAreEqual(obj, unionArr);
+function testRestofUnion(): void {
+    let tmpFun: (obj: (number | string | boolean)[], ...unionArr: (number | string | boolean)[]) => boolean = 
+        (obj: (number | string | boolean)[], ...unionArr: (number | string | boolean)[]): boolean => 
+            compareArraysAreEqual<number | string | boolean>(obj, unionArr);
     ASSERT_TRUE(checkRestofUnion(tmpFun));
 }
 
-function testRestOfJSValue() {
-    let tmpFun = (obj: object[], ...jsvalArr: object[]) => compareArraysAreEqual(obj, jsvalArr);
+function testRestOfJSValue(): void {
+    let tmpFun: (obj: object[], ...jsvalArr: object[]) => boolean  =
+        (obj: object[], ...jsvalArr: object[]) => compareArraysAreEqual(obj, jsvalArr);
     ASSERT_TRUE(checkRestOfJSValue(tmpFun));
 }
 

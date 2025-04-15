@@ -21,6 +21,9 @@
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/thread.h"
 
+extern "C" {
+namespace ark::ets::interop::js::testing {
+
 constexpr uint32_t HEX = 16;
 
 static uintptr_t FindMapbase(uintptr_t addr)
@@ -151,3 +154,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     *result = ANI_VERSION_1;
     return ANI_OK;
 }
+
+}  // namespace ark::ets::interop::js::testing
+
+}  // extern "C"

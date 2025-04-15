@@ -84,6 +84,7 @@ public:
         return exports;
     }
 };
-}  // namespace ark::ets::interop::js
 
 NAPI_MODULE(TEST_MODULE, ark::ets::interop::js::TestModule::Init)
+
+}  // namespace ark::ets::interop::js
