@@ -36,6 +36,7 @@ set(SOURCES
     tooling/tools.cpp
     tooling/sampler/sampling_profiler.cpp
     tooling/sampler/sample_writer.cpp
+    tooling/sampler/samples_record.cpp
     tooling/sampler/thread_communicator.cpp
     tooling/sampler/stack_walker_base.cpp
     tooling/sampler/lock_free_queue.cpp

@@ -365,10 +365,13 @@ bool Runtime::Create(const RuntimeOptions &options)
     instance_->GetNotificationManager()->VmInitializationEvent(thread);
     instance_->GetNotificationManager()->ThreadStartEvent(thread);
 
-    if (options_.IsSamplingProfilerEnable()) {
+    if (options_.IsSamplingProfilerCreate()) {
         instance_->GetTools().CreateSamplingProfiler();
-        instance_->GetTools().StartSamplingProfiler(options_.GetSamplingProfilerOutputFile(),
-                                                    options_.GetSamplingProfilerInterval());
+        if (options_.IsSamplingProfilerStartupRun()) {
+            instance_->GetTools().StartSamplingProfiler(
+                std::make_unique<tooling::sampler::FileStreamWriter>(options_.GetSamplingProfilerOutputFile().c_str()),
+                options_.GetSamplingProfilerInterval());
+        }
     }
 
     return true;
@@ -437,8 +440,9 @@ bool Runtime::Destroy()
         instance_->GetPandaVM()->BeforeShutdown();
     }
 
-    if (instance_->GetOptions().IsSamplingProfilerEnable()) {
+    if (instance_->GetOptions().IsSamplingProfilerCreate()) {
         instance_->GetTools().StopSamplingProfiler();
+        instance_->GetTools().DestroySamplingProfiler();
     }
 
     // when signal start, but no signal stop tracing, should stop it

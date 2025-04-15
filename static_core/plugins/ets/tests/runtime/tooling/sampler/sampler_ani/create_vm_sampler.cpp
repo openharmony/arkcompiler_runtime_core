@@ -66,9 +66,11 @@ public:
         std::vector<ani_option> options;
         bootFileString_ = BuildOptionString();
         ani_option bootFileOption = {bootFileString_.c_str(), nullptr};
-        ani_option samplerEnable = {"--ext:sampling-profiler-enable", nullptr};
+        ani_option samplerCreate = {"--ext:sampling-profiler-create", nullptr};
+        ani_option samplerEnable = {"--ext:sampling-profiler-startup-run", nullptr};
         ani_option workersType = {"--ext:workers-type=threadpool", nullptr};
         options.push_back(bootFileOption);
+        options.push_back(samplerCreate);
         options.push_back(samplerEnable);
         options.push_back(workersType);
 

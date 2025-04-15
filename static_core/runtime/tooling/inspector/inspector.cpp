@@ -26,6 +26,7 @@
 
 #include "error.h"
 #include "evaluation/base64.h"
+#include "sampler/sampling_profiler.h"
 #include "types/remote_object.h"
 #include "types/scope.h"
 
@@ -660,6 +661,53 @@ void Inspector::ReplyNativeCalling(PtThread thread)
     Continue(thread);
 }
 
+void Inspector::ProfilerSetSamplingInterval(int32_t interval)
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+    samplingInterval_ = interval;
+}
+
+Expected<bool, std::string> Inspector::ProfilerStart()
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return Unexpected(std::string("Fatal, VM is dead"));
+    }
+    if (cpuProfilerStarted_) {
+        return Unexpected(std::string("Fatal, profiling operation is already running."));
+    }
+    cpuProfilerStarted_ = true;
+    profileInfoBuffer_ = std::make_shared<sampler::SamplesRecord>();
+    profileInfoBuffer_->SetThreadStartTime(sampler::Sampler::GetMicrosecondsTimeStamp());
+    Runtime::GetCurrent()->GetTools().StartSamplingProfiler(
+        std::make_unique<sampler::InspectorStreamWriter>(profileInfoBuffer_), samplingInterval_);
+    return true;
+}
+
+Expected<Profile, std::string> Inspector::ProfilerStop()
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return Unexpected(std::string("Fatal, VM is dead"));
+    }
+
+    if (!cpuProfilerStarted_) {
+        return Unexpected(std::string("Fatal, profiler inactive"));
+    }
+
+    Runtime::GetCurrent()->GetTools().StopSamplingProfiler();
+    auto profileInfoPtr = profileInfoBuffer_->GetAllThreadsProfileInfos();
+    if (!profileInfoPtr) {
+        return Unexpected(std::string("Fatal, profiler info is empty"));
+    }
+    profileInfoBuffer_.reset();
+    cpuProfilerStarted_ = false;
+    return Profile(std::move(profileInfoPtr));
+}
+
 void Inspector::RegisterMethodHandlers()
 {
     // NOLINTBEGIN(modernize-avoid-bind)
@@ -697,6 +745,11 @@ void Inspector::RegisterMethodHandlers()
     inspectorServer_.OnCallRuntimeGetProperties(std::bind(&Inspector::GetProperties, this, _1, _2, _3));
     inspectorServer_.OnCallRuntimeRunIfWaitingForDebugger(std::bind(&Inspector::RunIfWaitingForDebugger, this, _1));
     inspectorServer_.OnCallRuntimeEvaluate(std::bind(&Inspector::Evaluate, this, _1, _2, 0));
+    inspectorServer_.OnCallProfilerEnable();
+    inspectorServer_.OnCallProfilerDisable();
+    inspectorServer_.OnCallProfilerSetSamplingInterval(std::bind(&Inspector::ProfilerSetSamplingInterval, this, _1));
+    inspectorServer_.OnCallProfilerStart(std::bind(&Inspector::ProfilerStart, this));
+    inspectorServer_.OnCallProfilerStop(std::bind(&Inspector::ProfilerStop, this));
     // NOLINTEND(modernize-avoid-bind)
 }
 }  // namespace ark::tooling::inspector

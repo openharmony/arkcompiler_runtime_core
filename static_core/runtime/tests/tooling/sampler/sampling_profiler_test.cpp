@@ -41,6 +41,7 @@ inline std::string Separator()
 static const char *g_profilerFilename = "profiler_result.aspt";
 static const char *g_pandaFileName = "sampling_profiler_test_ark_asm.abc";
 static constexpr size_t TEST_CYCLE_THRESHOLD = 100;
+static const std::shared_ptr<SamplesRecord> G_SAMPLES_RECORD = std::make_shared<SamplesRecord>();
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class SamplerTest : public testing::Test {
@@ -139,12 +140,12 @@ TEST_F(SamplerTest, SamplerInitTest)
     ASSERT_EQ(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), false);
 
-    ASSERT_EQ(sp->Start(g_profilerFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
-    ASSERT_EQ(sp->Start(g_profilerFilename), false);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), false);
 
     sp->Stop();
     ASSERT_EQ(ExtractListenerTid(sp), 0);
@@ -152,7 +153,41 @@ TEST_F(SamplerTest, SamplerInitTest)
     ASSERT_EQ(ExtractIsActive(sp), false);
 
     // Second run
-    ASSERT_EQ(sp->Start(g_profilerFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), true);
+    ASSERT_NE(ExtractListenerTid(sp), 0);
+    ASSERT_NE(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), true);
+
+    sp->Stop();
+    ASSERT_EQ(ExtractListenerTid(sp), 0);
+    ASSERT_EQ(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), false);
+    Sampler::Destroy(sp);
+}
+
+TEST_F(SamplerTest, InspectorSamplerInitTest)
+{
+    auto *sp = Sampler::Create();
+    ASSERT_NE(sp, nullptr);
+
+    ASSERT_EQ(ExtractListenerTid(sp), 0);
+    ASSERT_EQ(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), false);
+
+    ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), true);
+    ASSERT_NE(ExtractListenerTid(sp), 0);
+    ASSERT_NE(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), true);
+
+    ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), false);
+
+    sp->Stop();
+    ASSERT_EQ(ExtractListenerTid(sp), 0);
+    ASSERT_EQ(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), false);
+
+    // Second run
+    ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
@@ -212,7 +247,48 @@ TEST_F(SamplerTest, SamplerEventThreadNotificationTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    ASSERT_EQ(sp->Start(g_profilerFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), true);
+    ASSERT_NE(ExtractListenerTid(sp), 0);
+    ASSERT_NE(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), true);
+
+    ASSERT_FALSE(ExtractManagedThreads(sp).empty());
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
+
+    std::atomic<bool> syncFlag1 = false;
+    std::atomic<bool> syncFlag2 = false;
+    std::atomic<bool> syncFlag3 = false;
+    std::thread managedThread1(RunManagedThread, &syncFlag1);
+    std::thread managedThread2(RunManagedThread, &syncFlag2);
+    std::thread managedThread3(RunManagedThread, &syncFlag3);
+
+    while (!syncFlag1 || !syncFlag2 || !syncFlag3) {
+        ;
+    }
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
+
+    syncFlag1 = false;
+    syncFlag2 = false;
+    syncFlag3 = false;
+    managedThread1.join();
+    managedThread2.join();
+    managedThread3.join();
+
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
+
+    sp->Stop();
+    ASSERT_EQ(ExtractListenerTid(sp), 0);
+    ASSERT_EQ(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), false);
+    Sampler::Destroy(sp);
+}
+
+TEST_F(SamplerTest, InspectorSamplerEventThreadNotificationTest)
+{
+    auto *sp = Sampler::Create();
+    ASSERT_NE(sp, nullptr);
+
+    ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
@@ -254,7 +330,50 @@ TEST_F(SamplerTest, SamplerCheckThreadIdTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    ASSERT_EQ(sp->Start(g_profilerFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), true);
+    ASSERT_NE(ExtractListenerTid(sp), 0);
+    ASSERT_NE(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), true);
+
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
+
+    std::atomic<bool> syncFlag1 = false;
+    os::thread::ThreadId mtId = 0;
+    std::thread managedThread1(RunManagedThreadAndSaveThreadId, &syncFlag1, &mtId);
+
+    while (!syncFlag1) {
+        ;
+    }
+    // only one additional managed thread must be running
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 2UL);
+    bool isPassed = false;
+
+    for (const auto &elem : ExtractManagedThreads(sp)) {
+        if (elem == mtId) {
+            isPassed = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(isPassed);
+
+    syncFlag1 = false;
+    managedThread1.join();
+
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
+
+    sp->Stop();
+    ASSERT_EQ(ExtractListenerTid(sp), 0);
+    ASSERT_EQ(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), false);
+    Sampler::Destroy(sp);
+}
+
+TEST_F(SamplerTest, InspectorSamplerCheckThreadIdTest)
+{
+    auto *sp = Sampler::Create();
+    ASSERT_NE(sp, nullptr);
+
+    ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
@@ -309,7 +428,46 @@ TEST_F(SamplerTest, SamplerCollectThreadTest)
         ;
     }
 
-    ASSERT_EQ(sp->Start(g_profilerFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), true);
+    ASSERT_NE(ExtractListenerTid(sp), 0);
+    ASSERT_NE(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), true);
+
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
+
+    syncFlag1 = false;
+    syncFlag2 = false;
+    syncFlag3 = false;
+    managedThread1.join();
+    managedThread2.join();
+    managedThread3.join();
+
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
+
+    sp->Stop();
+    ASSERT_EQ(ExtractListenerTid(sp), 0);
+    ASSERT_EQ(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), false);
+    Sampler::Destroy(sp);
+}
+
+TEST_F(SamplerTest, InspectorSamplerCollectThreadTest)
+{
+    auto *sp = Sampler::Create();
+    ASSERT_NE(sp, nullptr);
+
+    std::atomic<bool> syncFlag1 = false;
+    std::atomic<bool> syncFlag2 = false;
+    std::atomic<bool> syncFlag3 = false;
+    std::thread managedThread1(RunManagedThread, &syncFlag1);
+    std::thread managedThread2(RunManagedThread, &syncFlag2);
+    std::thread managedThread3(RunManagedThread, &syncFlag3);
+
+    while (!syncFlag1 || !syncFlag2 || !syncFlag3) {
+        ;
+    }
+
+    ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
@@ -348,7 +506,52 @@ TEST_F(SamplerTest, SamplerCollectNativeThreadTest)
         ;
     }
 
-    ASSERT_EQ(sp->Start(g_profilerFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), true);
+    ASSERT_NE(ExtractListenerTid(sp), 0);
+    ASSERT_NE(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), true);
+
+    // two additional threads must be running - a managed and a native one
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 3UL);
+    std::thread nativeThread3(RunNativeThread, &syncFlag3);
+    while (!syncFlag3) {
+        ;
+    }
+
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
+
+    syncFlag1 = false;
+    syncFlag2 = false;
+    syncFlag3 = false;
+    managedThread1.join();
+    nativeThread2.join();
+    nativeThread3.join();
+
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
+
+    sp->Stop();
+    ASSERT_EQ(ExtractListenerTid(sp), 0);
+    ASSERT_EQ(ExtractSamplerTid(sp), 0);
+    ASSERT_EQ(ExtractIsActive(sp), false);
+    Sampler::Destroy(sp);
+}
+
+TEST_F(SamplerTest, InspectorSamplerCollectNativeThreadTest)
+{
+    auto *sp = Sampler::Create();
+    ASSERT_NE(sp, nullptr);
+
+    std::atomic<bool> syncFlag1 = false;
+    std::atomic<bool> syncFlag2 = false;
+    std::atomic<bool> syncFlag3 = false;
+    std::thread managedThread1(RunManagedThread, &syncFlag1);
+    std::thread nativeThread2(RunNativeThread, &syncFlag2);
+
+    while (!syncFlag1 || !syncFlag2) {
+        ;
+    }
+
+    ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
@@ -383,7 +586,20 @@ TEST_F(SamplerTest, SamplerPipesTest)
 {
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    sp->Start(g_profilerFilename);
+    sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename));
+
+    ASSERT_NE(ExtractPipes(sp)[ThreadCommunicator::PIPE_READ_ID], 0);
+    ASSERT_NE(ExtractPipes(sp)[ThreadCommunicator::PIPE_WRITE_ID], 0);
+
+    sp->Stop();
+    Sampler::Destroy(sp);
+}
+
+TEST_F(SamplerTest, InspectorSamplerPipesTest)
+{
+    auto *sp = Sampler::Create();
+    ASSERT_NE(sp, nullptr);
+    sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD));
 
     ASSERT_NE(ExtractPipes(sp)[ThreadCommunicator::PIPE_READ_ID], 0);
     ASSERT_NE(ExtractPipes(sp)[ThreadCommunicator::PIPE_WRITE_ID], 0);
@@ -400,7 +616,21 @@ TEST_F(SamplerTest, ProfilerRestartStressTest)
     ASSERT_NE(sp, nullptr);
 
     for (uint32_t i = 0; i < CURRENT_TEST_THRESHOLD; i++) {
-        ASSERT_EQ(sp->Start(g_profilerFilename), true);
+        ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(g_profilerFilename)), true);
+        sp->Stop();
+    }
+
+    Sampler::Destroy(sp);
+}
+
+TEST_F(SamplerTest, InspectorProfilerRestartStressTest)
+{
+    constexpr size_t CURRENT_TEST_THRESHOLD = TEST_CYCLE_THRESHOLD / 10;
+    auto *sp = Sampler::Create();
+    ASSERT_NE(sp, nullptr);
+
+    for (uint32_t i = 0; i < CURRENT_TEST_THRESHOLD; i++) {
+        ASSERT_EQ(sp->Start(std::make_unique<InspectorStreamWriter>(G_SAMPLES_RECORD)), true);
         sp->Stop();
     }
 
@@ -462,7 +692,7 @@ TEST_F(SamplerTest, StreamWriterReaderTest)
     SampleInfo sampleInput;
 
     {
-        StreamWriter writer(streamTestFilename);
+        FileStreamWriter writer(streamTestFilename);
         FullfillFakeSample(&sampleInput);
 
         writer.WriteSample(sampleInput);
@@ -475,6 +705,27 @@ TEST_F(SamplerTest, StreamWriterReaderTest)
     ASSERT_FALSE(reader.GetNextModule(nullptr));
 }
 
+TEST_F(SamplerTest, InspectorStreamWriterReaderTest)
+{
+    const std::shared_ptr<SamplesRecord> samplesRecord = std::make_shared<SamplesRecord>();
+    SampleInfo sampleInput;
+
+    {
+        InspectorStreamWriter writer(samplesRecord);
+        FullfillFakeSample(&sampleInput);
+
+        writer.WriteSample(sampleInput);
+    }
+
+    auto allThreadsProfileInfos = samplesRecord->GetAllThreadsProfileInfos();
+    ASSERT_NE(allThreadsProfileInfos, nullptr);
+    ASSERT_EQ(allThreadsProfileInfos->size(), 1);
+    ASSERT_NE((*allThreadsProfileInfos)[0]->nodeCount, 0);
+    ASSERT_EQ((*allThreadsProfileInfos)[0]->startTime, 0);
+    ASSERT_EQ((*allThreadsProfileInfos)[0]->stopTime, 0);
+    ASSERT_EQ((*allThreadsProfileInfos)[0]->tid, GetThreadId());
+}
+
 // Testing reader and writer by writing and reading from .aspt lots of samples
 TEST_F(SamplerTest, StreamWriterReaderLotsSamplesTest)
 {
@@ -484,7 +735,7 @@ TEST_F(SamplerTest, StreamWriterReaderLotsSamplesTest)
     SampleInfo sampleInput;
 
     {
-        StreamWriter writer(streamTestFilename);
+        FileStreamWriter writer(streamTestFilename);
         FullfillFakeSample(&sampleInput);
 
         for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
@@ -501,6 +752,31 @@ TEST_F(SamplerTest, StreamWriterReaderLotsSamplesTest)
     ASSERT_FALSE(reader.GetNextModule(nullptr));
 }
 
+TEST_F(SamplerTest, InspectorStreamWriterReaderLotsSamplesTest)
+{
+    constexpr size_t CURRENT_TEST_THRESHOLD = TEST_CYCLE_THRESHOLD * 100;
+    const std::shared_ptr<SamplesRecord> samplesRecord = std::make_shared<SamplesRecord>();
+    SampleInfo sampleInput;
+
+    {
+        InspectorStreamWriter writer(samplesRecord);
+        FullfillFakeSample(&sampleInput);
+
+        for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
+            writer.WriteSample(sampleInput);
+        }
+    }
+
+    auto allThreadsProfileInfos = samplesRecord->GetAllThreadsProfileInfos();
+    ASSERT_NE(allThreadsProfileInfos, nullptr);
+    ASSERT_EQ(allThreadsProfileInfos->size(), 1);
+    ASSERT_NE((*allThreadsProfileInfos)[0]->nodeCount, 0);
+    ASSERT_EQ((*allThreadsProfileInfos)[0]->startTime, 0);
+    ASSERT_EQ((*allThreadsProfileInfos)[0]->stopTime, 0);
+    ASSERT_EQ((*allThreadsProfileInfos)[0]->tid, GetThreadId());
+    ASSERT_EQ((*allThreadsProfileInfos)[0]->timeDeltas.size(), CURRENT_TEST_THRESHOLD);
+}
+
 // Testing reader and writer by writing and reading from .aspt one module
 TEST_F(SamplerTest, ModuleWriterReaderTest)
 {
@@ -509,7 +785,7 @@ TEST_F(SamplerTest, ModuleWriterReaderTest)
     FileInfo moduleOutput = {};
 
     {
-        StreamWriter writer(streamTestFilename);
+        FileStreamWriter writer(streamTestFilename);
         writer.WriteModule(moduleInput);
     }
 
@@ -529,7 +805,7 @@ TEST_F(SamplerTest, ModuleWriterReaderLotsModulesTest)
     FileInfo moduleOutput = {};
 
     {
-        StreamWriter writer(streamTestFilename);
+        FileStreamWriter writer(streamTestFilename);
         for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
             writer.WriteModule(moduleInput);
         }
@@ -555,7 +831,7 @@ TEST_F(SamplerTest, WriterReaderLotsRowsModulesAndSamplesTest)
     SampleInfo sampleInput;
 
     {
-        StreamWriter writer(streamTestFilename);
+        FileStreamWriter writer(streamTestFilename);
         FullfillFakeSample(&sampleInput);
         for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
             writer.WriteModule(moduleInput);
@@ -584,7 +860,7 @@ TEST_F(SamplerTest, ListenerWriteFakeSampleTest)
     const char *streamTestFilename = "listener_write_fake_sample_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(streamTestFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(streamTestFilename)), true);
 
     SampleInfo sampleOutput;
     SampleInfo sampleInput;
@@ -615,7 +891,7 @@ TEST_F(SamplerTest, ListenerWriteLotsFakeSampleTest)
     const char *streamTestFilename = "listener_write_lots_fake_sample_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(streamTestFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(streamTestFilename)), true);
 
     SampleInfo sampleOutput;
     SampleInfo sampleInput;
@@ -649,7 +925,7 @@ TEST_F(SamplerTest, CollectPandaFilesTest)
     const char *streamTestFilename = "collect_panda_file_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(streamTestFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(streamTestFilename)), true);
     sp->Stop();
 
     FileInfo moduleInfo;
@@ -670,7 +946,7 @@ TEST_F(SamplerTest, WriteModuleEventTest)
     const char *streamTestFilename = "collect_panda_file_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(streamTestFilename), true);
+    ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(streamTestFilename)), true);
 
     auto execPath = ark::os::file::File::GetExecutablePath();
     std::string pandafile =
@@ -708,7 +984,7 @@ TEST_F(SamplerTest, ProfilerSamplerSignalHandlerTest)
     {
         auto *sp = Sampler::Create();
         ASSERT_NE(sp, nullptr);
-        ASSERT_EQ(sp->Start(streamTestFilename), true);
+        ASSERT_EQ(sp->Start(std::make_unique<FileStreamWriter>(streamTestFilename)), true);
 
         {
             ASSERT_TRUE(Runtime::GetCurrent()->Execute("_GLOBAL::main", {}));

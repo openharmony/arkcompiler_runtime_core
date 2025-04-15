@@ -27,6 +27,7 @@
 
 #include "runtime/tooling/sampler/sample_info.h"
 #include "runtime/tooling/sampler/sample_writer.h"
+#include "runtime/tooling/sampler/samples_record.h"
 #include "runtime/tooling/sampler/thread_communicator.h"
 #include "runtime/tooling/sampler/lock_free_queue.h"
 
@@ -84,21 +85,22 @@ public:
         return isSegvHandlerEnable_;
     }
 
-    PANDA_PUBLIC_API bool Start(const char *filename);
-    PANDA_PUBLIC_API void Stop();
+    PANDA_PUBLIC_API bool Start(std::unique_ptr<StreamWriter> &&writer);
+    PANDA_PUBLIC_API bool Stop();
 
     // Events: Notify profiler that managed thread created or finished
     void ThreadStart(ManagedThread *managedThread) override;
     void ThreadEnd(ManagedThread *managedThread) override;
     void LoadModule(std::string_view name) override;
+    static PANDA_PUBLIC_API uint64_t GetMicrosecondsTimeStamp();
 
     static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
 
 private:
-    Sampler();
+    explicit Sampler();
 
     void SamplerThreadEntry();
-    void ListenerThreadEntry(std::string outputFile);
+    void ListenerThreadEntry(std::unique_ptr<StreamWriter> writerPtr);
 
     void AddThreadHandle(ManagedThread *thread);
     void EraseThreadHandle(ManagedThread *thread);

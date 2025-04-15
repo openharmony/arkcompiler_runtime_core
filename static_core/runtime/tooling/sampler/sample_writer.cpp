@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 
 namespace ark::tooling::sampler {
 
-void StreamWriter::WriteSample(const SampleInfo &sample) const
+void FileStreamWriter::WriteSample(const SampleInfo &sample) const
 {
     ASSERT(writeStreamPtr_ != nullptr);
     ASSERT(sample.stackInfo.managedStackSize <= SampleInfo::StackInfo::MAX_STACK_DEPTH);
@@ -41,7 +41,7 @@ void StreamWriter::WriteSample(const SampleInfo &sample) const
                            sample.stackInfo.managedStackSize * sizeof(SampleInfo::ManagedStackFrameId));
 }
 
-void StreamWriter::WriteModule(const FileInfo &moduleInfo)
+void FileStreamWriter::WriteModule(const FileInfo &moduleInfo)
 {
     ASSERT(writeStreamPtr_ != nullptr);
     static_assert(sizeof(MODULE_INDICATOR_VALUE) == sizeof(uintptr_t));

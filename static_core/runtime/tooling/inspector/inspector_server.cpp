@@ -894,6 +894,65 @@ void InspectorServer::OnCallRuntimeEvaluate(
     // clang-format on
 }
 
+void InspectorServer::OnCallProfilerEnable()
+{
+    server_.OnCall("Profiler.enable", [](auto &, auto &) { return std::unique_ptr<JsonSerializable>(); });
+}
+
+void InspectorServer::OnCallProfilerDisable()
+{
+    server_.OnCall("Profiler.disable", [](auto &, auto &) { return std::unique_ptr<JsonSerializable>(); });
+}
+
+void InspectorServer::OnCallProfilerSetSamplingInterval(std::function<void(int32_t)> &&handler)
+{
+    // clang-format off
+    server_.OnCall("Profiler.setSamplingInterval",
+        [handler = std::move(handler)](auto &, const JsonObject &params) -> Server::MethodResponse {
+            int32_t interval = 0;
+            if (auto prop = params.GetValue<JsonObject::NumT>("interval")) {
+                interval = *prop;
+                handler(interval);
+            } else {
+                std::string_view msg = "No 'interval' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INTERNAL_ERROR));
+            }
+            return std::unique_ptr<JsonSerializable>();
+        });
+    // clang-format on
+}
+
+void InspectorServer::OnCallProfilerStart(std::function<Expected<bool, std::string>()> &&handler)
+{
+    server_.OnCall("Profiler.start", [handler = std::move(handler)](auto &, auto &) -> Server::MethodResponse {
+        auto optResult = handler();
+        if (!optResult) {
+            std::stringstream ss;
+            ss << "Profiler failed: " << optResult.Error();
+            auto msg = ss.str();
+            LOG(DEBUG, DEBUGGER) << msg;
+            return Unexpected(JRPCError(std::move(msg), ErrorCode::INTERNAL_ERROR));
+        }
+        return std::unique_ptr<JsonSerializable>();
+    });
+}
+
+void InspectorServer::OnCallProfilerStop(std::function<Expected<Profile, std::string>()> &&handler)
+{
+    server_.OnCall("Profiler.stop", [handler = std::move(handler)](auto &, auto &) -> Server::MethodResponse {
+        auto optResult = handler();
+        if (!optResult) {
+            std::stringstream ss;
+            ss << "Profiler failed: " << optResult.Error();
+            auto msg = ss.str();
+            LOG(DEBUG, DEBUGGER) << msg;
+            return Unexpected(JRPCError(std::move(msg), ErrorCode::INTERNAL_ERROR));
+        }
+        return std::unique_ptr<JsonSerializable>(std::make_unique<Profile>(std::move(*optResult)));
+    });
+}
+
 void InspectorServer::SendTargetAttachedToTarget(const std::string &sessionId)
 {
     server_.Call("Target.attachedToTarget", [&sessionId](auto &params) {
