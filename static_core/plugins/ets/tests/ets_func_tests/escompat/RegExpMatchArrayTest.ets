@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("RegExpExecArray pop() Tests");
+    const suite = new ArkTestsuite("RegExpMatchArray pop() Tests");
 
     suite.addTest("pop() returns the last element", testPopReturnsLast);
     suite.addTest("pop() reduces length", testPopReducesLength);
@@ -30,7 +30,7 @@ function main(): int {
  * Test: pop() should return the last element in result array.
  */
 function testPopReturnsLast(): void {
-    let match = new RegExpExecArray(0, "abc", ["a", "b", "c"]);
+    let match = new RegExpMatchArray(0, "abc", ["a", "b", "c"]);
     let popped = match.pop();
     assertEQ(popped, "c", "testPopReturnsLast");
 }
@@ -39,7 +39,7 @@ function testPopReturnsLast(): void {
  * Test: pop() should reduce result array length.
  */
 function testPopReducesLength(): void {
-    let match = new RegExpExecArray(0, "abc", ["a", "b", "c"]);
+    let match = new RegExpMatchArray(0, "abc", ["a", "b", "c"]);
     match.pop();
     assertEQ(match.result.length, 2, "testPopReducesLength");
 }
@@ -48,7 +48,7 @@ function testPopReducesLength(): void {
  * Test: multiple pop() calls should remove elements in reverse order.
  */
 function testPopMultipleTimes(): void {
-    let match = new RegExpExecArray(0, "abc", ["x", "y", "z"]);
+    let match = new RegExpMatchArray(0, "abc", ["x", "y", "z"]);
     assertEQ(match.pop(), "z", "testPopMultipleTimes step 1");
     assertEQ(match.pop(), "y", "testPopMultipleTimes step 2");
     assertEQ(match.pop(), "x", "testPopMultipleTimes step 3");
@@ -58,7 +58,7 @@ function testPopMultipleTimes(): void {
  * Test: pop() on empty result should return undefined.
  */
 function testPopEmptyReturnsUndefined(): void {
-    let match = new RegExpExecArray(0, "abc", []);
+    let match = new RegExpMatchArray(0, "abc", []);
     let popped = match.pop();
     assertEQ(popped, undefined, "testPopEmptyReturnsUndefined");
 }
@@ -67,7 +67,7 @@ function testPopEmptyReturnsUndefined(): void {
  * Test: $_get test.
  */
 function testGet(): void {
-    let match = new RegExpExecArray(0, "abc", ["x", "y", "z"]);
+    let match = new RegExpMatchArray(0, "abc", ["x", "y", "z"]);
 
     assertEQ(match[0], "x", "testGet, int index, step 1");
     assertEQ(match[0 as number], "x", "testGet, number index, step 1");
@@ -86,7 +86,7 @@ function testGet(): void {
  * Test: $_set test.
  */
 function testSet(): void {
-    let match = new RegExpExecArray(0, "abc", ["x", "y", "z"]);
+    let match = new RegExpMatchArray(0, "abc", ["x", "y", "z"]);
 
     match[0] = "x1"
     assertEQ(match[0], "x1", "testSet, int index, step 1");
