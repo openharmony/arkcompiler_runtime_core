@@ -64,6 +64,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/ets_object_state_table.h"
+#include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
 namespace ark::ets {
 class DoubleToStringCache;
@@ -217,6 +218,11 @@ public:
         return coroutineManager_;
     }
 
+    FinalizationRegistryManager *GetFinalizationRegistryManager() const
+    {
+        return finalizationRegistryManager_;
+    }
+
     CoroutineManager *GetCoroutineManager() const
     {
         return static_cast<CoroutineManager *>(GetThreadManager());
@@ -255,8 +261,6 @@ public:
         return static_cast<PandaEtsVM *>(vm);
     }
 
-    void RegisterFinalizationRegistryInstance(EtsObject *instance);
-
     [[noreturn]] static void Abort(const char *message = nullptr);
 
     std::mt19937 &GetRandomEngine()
@@ -268,13 +272,6 @@ public:
     bool IsStaticProfileEnabled() const override
     {
         return true;
-    }
-
-    void FinalizationRegistryCoroutineExecuted()
-    {
-        // // Atomic with acq_rel order reason: other threads should see correct value
-        [[maybe_unused]] uint32_t oldCnt = finRegCleanupCoroCount_.fetch_sub(1, std::memory_order_acq_rel);
-        ASSERT(oldCnt > 0);
     }
 
     void CleanupCompiledFrameResources(Frame *frame) override
@@ -398,23 +395,6 @@ private:
 
     static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine);
 
-    /// @brief Increase number of cleanup coroutines and check if not exceeds limit
-    bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
-    {
-        // Limit of cleanup coroutines count
-        constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;
-        // Atomic with acquire order reason: getting correct value
-        uint32_t cnt = finRegCleanupCoroCount_.load(std::memory_order_acquire);
-        uint32_t oldCnt = cnt;
-        // Atomic with acq_rel order reason: sync for counter
-        while (cnt < MAX_FINREG_CLEANUP_COROS &&
-               !finRegCleanupCoroCount_.compare_exchange_weak(cnt, cnt + 1U, std::memory_order_acq_rel,
-                                                              std::memory_order_acquire)) {
-            oldCnt = cnt;
-        }
-        return oldCnt < MAX_FINREG_CLEANUP_COROS;
-    }
-
     void InitializeRandomEngine()
     {
         ASSERT(!randomEngine_);
@@ -433,6 +413,7 @@ private:
     CompilerInterface *compiler_ {nullptr};
     StringTable *stringTable_ {nullptr};
     MonitorPool *monitorPool_ {nullptr};
+    FinalizationRegistryManager *finalizationRegistryManager_ {nullptr};
     CoroutineManager *coroutineManager_ {nullptr};
     mem::Reference *oomObjRef_ {nullptr};
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
@@ -440,9 +421,6 @@ private:
     mem::Reference *finalizableWeakRefList_ {nullptr};
     os::memory::Mutex finalizableWeakRefListLock_;
     NativeLibraryProvider nativeLibraryProvider_;
-    size_t finRegLastIndex_ {0};
-    std::atomic<uint32_t> finRegCleanupCoroCount_ {0};
-    mem::Reference *registeredFinalizationRegistryInstancesRef_ {nullptr};
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
     os::memory::Mutex rootProviderlock_;
     PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);
