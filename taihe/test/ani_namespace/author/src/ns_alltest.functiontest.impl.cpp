@@ -692,7 +692,7 @@ void BaseFunctionTest1()
 
 void BaseFunctionTest2(int8_t param1)
 {
-    std::cout << "NameSpaceImpl: " << __func__ << " param1 " << (int)param1 << std::endl;
+    std::cout << "NameSpaceImpl: " << __func__ << " param1 " << static_cast<int>(param1) << std::endl;
 }
 
 void BaseFunctionTest3(int16_t param1)
@@ -1235,7 +1235,7 @@ bool BaseFunctionTest60(map_view<int64_t, bool> param1)
 }  // namespace
 
 // The macros used below are automatically generated code
-// NOLINTBEGIN()
+// NOLINTBEGIN
 TH_EXPORT_CPP_API_BaseFunctionTest1(BaseFunctionTest1);
 TH_EXPORT_CPP_API_BaseFunctionTest2(BaseFunctionTest2);
 TH_EXPORT_CPP_API_BaseFunctionTest3(BaseFunctionTest3);
