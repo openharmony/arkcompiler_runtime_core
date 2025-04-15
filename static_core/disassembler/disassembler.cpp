@@ -1613,12 +1613,14 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
         ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
     } else if (f.type.GetId() == panda_file::Type::TypeId::U8) {
         ss << " = 0x" << std::hex << static_cast<uint32_t>(f.metadata->GetValue().value().GetValue<uint8_t>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::I8) {
+        ss << " = 0x" << std::hex << static_cast<int32_t>(f.metadata->GetValue().value().GetValue<int8_t>());
     } else if (f.type.GetId() == panda_file::Type::TypeId::F64) {
         ss << " = " << static_cast<double>(f.metadata->GetValue().value().GetValue<double>());
     } else if (f.type.GetId() == panda_file::Type::TypeId::U1) {
         ss << " = " << static_cast<bool>(f.metadata->GetValue().value().GetValue<bool>());
     } else if (f.type.GetId() == panda_file::Type::TypeId::I32) {
-        ss << " = " << static_cast<bool>(f.metadata->GetValue().value().GetValue<int>());
+        ss << " = " << f.metadata->GetValue().value().GetValue<int>();
     } else if (f.type.GetId() == panda_file::Type::TypeId::REFERENCE && f.type.GetName() == "std/core/String") {
         ss << " = \"" << static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()) << "\"";
     } else if (f.type.GetRank() > 0) {

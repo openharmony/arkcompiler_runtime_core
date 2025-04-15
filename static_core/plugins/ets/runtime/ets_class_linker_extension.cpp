@@ -598,6 +598,10 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
         c->SetValueTyped();
     });
     CacheClass(FUNCTION, [](auto *c) { c->SetFunction(); });
+    CacheClass(BASE_ENUM, [](auto *c) {
+        c->SetEtsEnum();
+        c->SetValueTyped();
+    });
 
     CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
         c->SetFinalizeReference();
