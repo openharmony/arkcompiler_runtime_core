@@ -441,10 +441,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_assn_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_assn_28.ets
 
-#23520 Cannot detect type of object literal (class composite) in tuple
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_5.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_5.ets
-
 #23453 Cannot cast array literal to union of arrays
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_26.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_27.ets
