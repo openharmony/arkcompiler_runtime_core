@@ -245,7 +245,8 @@ endfunction()
 
 add_subdirectory(async)
 add_subdirectory(classes)
-add_subdirectory(enums)
+# NOTE: Need to support new enum implementation in declgen 
+# add_subdirectory(enums)
 add_subdirectory(fields)
 add_subdirectory(functions)
 add_subdirectory(generics)

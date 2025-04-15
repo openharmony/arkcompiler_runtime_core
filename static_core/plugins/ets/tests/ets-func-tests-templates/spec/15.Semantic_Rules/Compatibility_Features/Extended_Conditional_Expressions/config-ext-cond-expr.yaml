@@ -32,7 +32,7 @@ expression_list:
   - 'string:"Hello World":Long:28'
   - 'string:"Hello World":Float:1.0'
   - 'string:"Hello World":Double:28'
-  - 'string:"Hello World":Colors:Colors.Red'
+  - 'string:"Hello World":Colors:Colors.Yellow'
   - 'string:"Hello World":Object:new Object()'
   - 'string:"Hello World":Object | null | undefined:new Object()'
   - 'string:"Hello World":Object | null:new Object()'
