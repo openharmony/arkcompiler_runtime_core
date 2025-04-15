@@ -19,6 +19,7 @@ function main(): int {
     // set
     failures += test(reflectSetClass(), "Reflect.set on class type");
     failures += test(reflectSetArray(), "Reflect.set on array type");
+    failures += test(reflectSetTypeConvert(), "Reflect.set convert type");
 
     return test(failures, "All tests run");
 }
@@ -40,6 +41,14 @@ class Point3D extends Point2D {
         super(x_, y_)
         this.z = z_
     }
+}
+
+class C {
+    public p1:number = 0;
+    public p2:float = 0.0;
+    public p3:long = 0;
+    public p4:int = 0;
+    public p5:short = 0;
 }
 
 function arraysAreEqual(a: string[], b: string[]): boolean {
@@ -70,6 +79,55 @@ function reflectSetClass(): int {
 
     result += (Reflect.set(p, "axisnum", 10 as number) == false) ? 0 : 1
     result += (Reflect.set(p, "x", "string") == false) ? 0 : 1
+
+    return result
+}
+
+function reflectSetTypeConvert(): int {
+    let result: int = 0
+
+    let sample = new C();
+
+    let a: byte = 1;
+    let b: short = 2;
+    let c: int  = 3;
+    let d: long = 4;
+    let e: float = 5.0;
+
+    Reflect.set(sample, 'p1', a);
+    result += (sample.p1 == a) ? 0  : 1
+    Reflect.set(sample, 'p1', b);
+    result += (sample.p1 == b) ? 0  : 1
+    Reflect.set(sample, 'p1', c);
+    result += (sample.p1 == c) ? 0  : 1
+    Reflect.set(sample, 'p1', d);
+    result += (sample.p1 == d) ? 0  : 1
+    Reflect.set(sample, 'p1', e);
+    result += (sample.p1 == e) ? 0  : 1
+
+    Reflect.set(sample, 'p2', a);
+    result += (sample.p2 == a) ? 0  : 1
+    Reflect.set(sample, 'p2', b);
+    result += (sample.p2 == b) ? 0  : 1
+    Reflect.set(sample, 'p2', c);
+    result += (sample.p2 == c) ? 0  : 1
+    Reflect.set(sample, 'p2', d);
+    result += (sample.p2 == d) ? 0  : 1
+
+    Reflect.set(sample, 'p3', a);
+    result += (sample.p3 == a) ? 0  : 1
+    Reflect.set(sample, 'p3', b);
+    result += (sample.p3 == b) ? 0  : 1
+    Reflect.set(sample, 'p3', c);
+    result += (sample.p3 == c) ? 0  : 1
+
+    Reflect.set(sample, 'p4', a);
+    result += (sample.p4 == a) ? 0  : 1
+    Reflect.set(sample, 'p4', b);
+    result += (sample.p4 == b) ? 0  : 1
+
+    Reflect.set(sample, 'p5', a);
+    result += (sample.p5 == a) ? 0  : 1
 
     return result
 }

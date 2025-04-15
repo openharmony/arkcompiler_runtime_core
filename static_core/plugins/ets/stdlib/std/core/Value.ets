@@ -441,6 +441,40 @@ export final class ClassValue extends Value {
             ValueAPISetFieldByNameObject(this.data, name, val.getData()!)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
             ValueAPISetFieldByNameObject(this.data, name, (val as LambdaValue).getData()!)
+        } else if (ft instanceof DoubleType && val instanceof ByteValue) {
+            ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
+        } else if (ft instanceof DoubleType && val instanceof ShortValue) {
+            ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
+        } else if (ft instanceof DoubleType && val instanceof IntValue) {
+            ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
+        } else if (ft instanceof DoubleType && val instanceof LongValue) {
+            ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
+        } else if (ft instanceof DoubleType && val instanceof FloatValue) {
+            ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
+        } else if (ft instanceof FloatType && val instanceof ByteValue) {
+            ValueAPISetFieldByNameFloat(this.data, name, val.getValueData())
+        } else if (ft instanceof FloatType && val instanceof ShortValue) {
+            ValueAPISetFieldByNameFloat(this.data, name, val.getValueData())
+        } else if (ft instanceof FloatType && val instanceof IntValue) {
+            ValueAPISetFieldByNameFloat(this.data, name, val.getValueData())
+        } else if (ft instanceof FloatType && val instanceof LongValue) {
+            ValueAPISetFieldByNameFloat(this.data, name, val.getValueData())
+        } else if (ft instanceof LongType && val instanceof ByteValue) {
+            ValueAPISetFieldByNameLong(this.data, name, val.getValueData())
+        } else if (ft instanceof LongType && val instanceof ShortValue) {
+            ValueAPISetFieldByNameLong(this.data, name, val.getValueData())
+        } else if (ft instanceof LongType && val instanceof IntValue) {
+            ValueAPISetFieldByNameLong(this.data, name, val.getValueData())
+        } else if (ft instanceof LongType && val instanceof ByteValue) {
+            ValueAPISetFieldByNameLong(this.data, name, val.getValueData())
+        } else if (ft instanceof LongType && val instanceof ShortValue) {
+            ValueAPISetFieldByNameLong(this.data, name, val.getValueData())
+        } else if (ft instanceof IntType && val instanceof ByteValue) {
+            ValueAPISetFieldByNameInt(this.data, name, val.getValueData())
+        } else if (ft instanceof IntType && val instanceof ShortValue) {
+            ValueAPISetFieldByNameInt(this.data, name, val.getValueData())
+        } else if (ft instanceof ShortType && val instanceof ByteValue) {
+            ValueAPISetFieldByNameShort(this.data, name, val.getValueData())
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
