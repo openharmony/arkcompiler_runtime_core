@@ -900,16 +900,7 @@
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_3.ets
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_4.ets
 
-#24002 ES2PANDA_NEG_FAIL
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_1.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_2.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_3.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_4.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_5.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_6.ets
-17.experimental_features/03.array_creation_expressions/expr_n_10.ets
-17.experimental_features/03.array_creation_expressions/expr_n_11.ets
+#25070 ES2PANDA_NEG_FAIL
 17.experimental_features/03.array_creation_expressions/expr_n_12.ets
 
 #22816
