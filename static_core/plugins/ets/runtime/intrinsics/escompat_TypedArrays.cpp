@@ -19,6 +19,7 @@
 #include "cross_values.h"
 
 namespace ark::ets::intrinsics {
+
 template <typename T>
 static void *GetNativeData(T *array)
 {
@@ -471,4 +472,93 @@ ETS_ESCOMPAT_COPY_WITHIN(BigUInt64)
 ETS_ESCOMPAT_COPY_WITHIN(UInt8Clamped)
 
 #undef ETS_ESCOMPAT_COPY_WITHIN
+
+template <typename T>
+T *EtsEscompatTypedArraySort(T *thisArray)
+{
+    using ElementType = typename T::ElementType;
+
+    auto nBytes = static_cast<size_t>(thisArray->GetByteLength());
+    ASSERT(nBytes == (static_cast<size_t>(thisArray->GetLengthInt()) * sizeof(ElementType)));
+    // If it's an empty or one-element array then nothing to sort.
+    if (UNLIKELY(nBytes <= sizeof(ElementType))) {
+        return thisArray;
+    }
+
+    auto *arrayBuffer = static_cast<EtsEscompatArrayBuffer *>(&*thisArray->GetBuffer());
+    if (UNLIKELY(arrayBuffer->WasDetached())) {
+        auto coro = EtsCoroutine::GetCurrent();
+        [[maybe_unused]] EtsHandleScope scope(coro);
+        EtsHandle<EtsObject> handle(coro, thisArray);
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "ArrayBuffer was detached");
+        return static_cast<T *>(handle.GetPtr());
+    }
+    void *dataPtr = arrayBuffer->GetData();
+    ASSERT(dataPtr != nullptr);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    Span<EtsByte> data(static_cast<EtsByte *>(dataPtr) + static_cast<size_t>(thisArray->GetByteOffset()), nBytes);
+    std::sort(reinterpret_cast<typename T::ElementType *>(data.begin()),
+              reinterpret_cast<typename T::ElementType *>(data.end()));
+    return thisArray;
+}
+
+extern "C" ark::ets::EtsEscompatInt8Array *EtsEscompatInt8ArraySort(ark::ets::EtsEscompatInt8Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatInt16Array *EtsEscompatInt16ArraySort(ark::ets::EtsEscompatInt16Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatInt32Array *EtsEscompatInt32ArraySort(ark::ets::EtsEscompatInt32Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatBigInt64Array *EtsEscompatBigInt64ArraySort(
+    ark::ets::EtsEscompatBigInt64Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatFloat32Array *EtsEscompatFloat32ArraySort(ark::ets::EtsEscompatFloat32Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatFloat64Array *EtsEscompatFloat64ArraySort(ark::ets::EtsEscompatFloat64Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatUInt8ClampedArray *EtsEscompatUInt8ClampedArraySort(
+    ark::ets::EtsEscompatUInt8ClampedArray *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatUInt8Array *EtsEscompatUInt8ArraySort(ark::ets::EtsEscompatUInt8Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatUInt16Array *EtsEscompatUInt16ArraySort(ark::ets::EtsEscompatUInt16Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatUInt32Array *EtsEscompatUInt32ArraySort(ark::ets::EtsEscompatUInt32Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
+extern "C" ark::ets::EtsEscompatBigUInt64Array *EtsEscompatBigUInt64ArraySort(
+    ark::ets::EtsEscompatBigUInt64Array *thisArray)
+{
+    return EtsEscompatTypedArraySort(thisArray);
+}
+
 }  // namespace ark::ets::intrinsics

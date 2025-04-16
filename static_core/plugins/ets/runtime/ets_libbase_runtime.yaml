@@ -84,14 +84,26 @@ coretypes:
 - managed_class: escompat.Int8Array
   mirror_class: ark::ets::EtsEscompatInt8Array
 
+- managed_class: escompat.Uint8Array
+  mirror_class: ark::ets::EtsEscompatUInt8Array
+
 - managed_class: escompat.Int16Array
   mirror_class: ark::ets::EtsEscompatInt16Array
+
+- managed_class: escompat.Uint16Array
+  mirror_class: ark::ets::EtsEscompatUInt16Array
 
 - managed_class: escompat.Int32Array
   mirror_class: ark::ets::EtsEscompatInt32Array
 
+- managed_class: escompat.Uint32Array
+  mirror_class: ark::ets::EtsEscompatUInt32Array
+
 - managed_class: escompat.BigInt64Array
   mirror_class: ark::ets::EtsEscompatBigInt64Array
+
+- managed_class: escompat.BigUint64Array
+  mirror_class: ark::ets::EtsEscompatBigUInt64Array
 
 - managed_class: escompat.Float32Array
   mirror_class: ark::ets::EtsEscompatFloat32Array
@@ -1724,6 +1736,16 @@ intrinsics:
       args: [escompat.Int8Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesWithOffset
 
+  - name: Int8ArraySort
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Int8Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySort
+
   - name: Int16ArraySetInt
     space: ets
     class_name: escompat.Int16Array
@@ -1774,6 +1796,26 @@ intrinsics:
       args: [escompat.Int16Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesWithOffset
 
+  - name: Int16ArraySort
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Int16Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySort
+
+  - name: Uint16ArraySort
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Uint16Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySort
+
   - name: Int32ArraySetInt
     space: ets
     class_name: escompat.Int32Array
@@ -1813,6 +1855,26 @@ intrinsics:
       ret: void
       args: [escompat.Int32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesWithOffset
+
+  - name: Int32ArraySort
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Int32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySort
+
+  - name: Uint32ArraySort
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Uint32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySort
 
   - name: BigInt64ArraySetLong
     space: ets
@@ -1854,6 +1916,26 @@ intrinsics:
       args: [escompat.BigInt64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesWithOffset
 
+  - name: BigInt64ArraySort
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.BigInt64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySort
+
+  - name: BigUint64ArraySort
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.BigUint64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySort
+
   - name: Float32ArraySetFloat
     space: ets
     class_name: escompat.Float32Array
@@ -1893,6 +1975,16 @@ intrinsics:
       ret: void
       args: [escompat.Float32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesWithOffset
+
+  - name: Float32ArraySort
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Float32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySort
 
   - name: Float64ArraySetDouble
     space: ets
@@ -1934,6 +2026,16 @@ intrinsics:
       args: [escompat.Float64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesWithOffset
 
+  - name: Float64ArraySort
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Float64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySort
+
   - name: UInt8ClampedArraySetInt
     space: ets
     class_name: escompat.Uint8ClampedArray
@@ -1974,6 +2076,16 @@ intrinsics:
       args: [escompat.Uint8ClampedArray, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetValuesWithOffset
 
+  - name: Uint8ClampedArraySort
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Uint8ClampedArray
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySort
+
   - name: UInt8ArraySetInt
     space: ets
     class_name: escompat.Uint8Array
@@ -2013,6 +2125,16 @@ intrinsics:
       ret: void
       args: [escompat.Uint8Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValuesWithOffset
+
+  - name: Uint8ArraySort
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Uint8Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySort
 
   - name: UInt16ArraySetInt
     space: ets
@@ -4161,15 +4283,15 @@ intrinsics:
 # std.core.Runtime #
 ####################
 
-  - name: StdRuntimeGetPlatformIsLittleEndian
+  - name: StdIsLittleEndianPlatform
     space: ets
-    class_name: escompat.ETSGLOBAL
-    method_name: RuntimeGetPlatformIsLittleEndian
+    class_name: std.core.Runtime
+    method_name: isLittleEndianPlatform
     static: true
     signature:
       ret: u1
       args: [  ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeGetPlatformIsLittleEndian
+    impl: ark::ets::intrinsics::StdCoreRuntimeIsLittleEndianPlatform
     clear_flags: [ ]
 
   - name: StdCoreRuntimeIsSameReference

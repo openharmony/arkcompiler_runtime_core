@@ -24,7 +24,7 @@ static {
     uriArrayComponent = fillInCommonURI();
     NaN = Double.NaN;
     Infinity = Double.POSITIVE_INFINITY;
-    IS_LITTLE_ENDIAN = RuntimeGetPlatformIsLittleEndian()
+    IS_LITTLE_ENDIAN = Runtime.isLittleEndianPlatform()
     MAX_REGULAR_INTEGER = new BigInt(Number.MAX_SAFE_INTEGER)
 
     FAST_TO_STRING_HANDLER_MAP = () => {

@@ -124,6 +124,13 @@ export final class Runtime {
     }
 
     /**
+     * Check if it is a little-endian platform
+     *
+     * @returns true - little-endian, false - otherwise
+     */
+    public native static isLittleEndianPlatform(): boolean;
+
+    /**
      * Checks if two references point to a same object/value.
      *
      * @param o1 first object to compare

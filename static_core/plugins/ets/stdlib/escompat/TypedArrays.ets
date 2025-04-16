@@ -1514,30 +1514,34 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         return this.findLast(newF) as number
     }
 
-    // NOTE (kprokopenko): this may be not skipped
+    /**
+     * Sorts in-place by numeric value in ascending order.
+     *
+     * @returns sorted Int8Array
+     */
+    public native sort(): this;
+
     /**
      * Sorts in-place
      *
      * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
-     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int8Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
+        if (compareFn == undefined) {
+            this.sort()
+            return this
+        }
         let arr: FixedArray<byte> = new byte[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         let cmp = (l: byte, r: byte): number => {
-                return (l - r) as number
-            }
-        if (compareFn != undefined) {
-            cmp = (l: byte, r: byte): number => {
-                const result = compareFn!(l as number, r as number)
-                return result
-            }
+            const result = compareFn!(l as number, r as number)
+            return result
         }
         sort(arr, cmp)
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -3370,30 +3374,34 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         return this.findLast(newF) as number
     }
 
-    // NOTE (kprokopenko): this may be not skipped
+    /**
+     * Sorts in-place by numeric value in ascending order.
+     *
+     * @returns sorted Int16Array
+     */
+    public native sort(): this;
+
     /**
      * Sorts in-place
      *
      * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
-     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int16Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
+        if (compareFn == undefined) {
+            this.sort()
+            return this
+        }
         let arr: FixedArray<short> = new short[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         let cmp = (l: short, r: short): number => {
-                return (l - r) as number
-            }
-        if (compareFn != undefined) {
-            cmp = (l: short, r: short): number => {
-                const result = compareFn!(l as number, r as number)
-                return result
-            }
+            const result = compareFn!(l as number, r as number)
+            return result
         }
         sort(arr, cmp)
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -5193,30 +5201,34 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         return this.findLast(newF) as number
     }
 
-    // NOTE (kprokopenko): this may be not skipped
+    /**
+     * Sorts in-place by numeric value in ascending order.
+     *
+     * @returns sorted Int32Array
+     */
+    public native sort(): this;
+
     /**
      * Sorts in-place
      *
      * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
-     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int32Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
+        if (compareFn == undefined) {
+            this.sort()
+            return this
+        }
         let arr: FixedArray<int> = new int[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         let cmp = (l: int, r: int): number => {
-                return (l - r) as number
-            }
-        if (compareFn != undefined) {
-            cmp = (l: int, r: int): number => {
-                const result = compareFn!(l as number, r as number)
-                return result
-            }
+            const result = compareFn!(l as number, r as number)
+            return result
         }
         sort(arr, cmp)
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -7030,33 +7042,37 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         return new BigInt(this.findLast(newF))
     }
 
-    // NOTE (kprokopenko): this may be not skipped
+    /**
+     * Sorts in-place by numeric value in ascending order.
+     *
+     * @returns sorted BigInt64Array
+     */
+    public native sort(): this;
+
     /**
      * Sorts in-place
      *
      * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
-     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted BigInt64Array
      */
     public sort(compareFn?: (a: BigInt, b: BigInt) => number | BigInt): this {
+        if (compareFn == undefined) {
+            this.sort()
+            return this
+        }
         let arr: FixedArray<long> = new long[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         let cmp = (l: long, r: long): number => {
-                return (l - r) as number
-            }
-        if (compareFn != undefined) {
-            cmp = (l: long, r: long): number => {
-                const result = compareFn!(new BigInt(l), new BigInt(r))
-                if (result instanceof BigInt) {
-                    return (result as BigInt).getLong()
-                } else {
-                    return result as number
-                }
+            const result = compareFn!(new BigInt(l), new BigInt(r))
+            if (result instanceof BigInt) {
+                return (result as BigInt).getLong()
+            } else {
+                return result as number
             }
         }
         sort(arr, cmp)
@@ -8855,30 +8871,34 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         return this.findLast(newF) as number
     }
 
-    // NOTE (kprokopenko): this may be not skipped
+    /**
+     * Sorts in-place by numeric value in ascending order.
+     *
+     * @returns sorted Float32Array
+     */
+    public native sort(): this;
+
     /**
      * Sorts in-place
      *
      * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
-     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Float32Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
+        if (compareFn == undefined) {
+            this.sort()
+            return this
+        }
         let arr: FixedArray<float> = new float[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         let cmp = (l: float, r: float): number => {
-                return (l - r) as number
-            }
-        if (compareFn != undefined) {
-            cmp = (l: float, r: float): number => {
-                const result = compareFn!(l as number, r as number)
-                return result
-            }
+            const result = compareFn!(l as number, r as number)
+            return result
         }
         sort(arr, cmp)
         for (let i = 0; i < this.lengthInt; ++i) {
@@ -10544,30 +10564,34 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         return this.findLast(newF) as number
     }
 
-    // NOTE (kprokopenko): this may be not skipped
+    /**
+     * Sorts in-place by numeric value in ascending order.
+     *
+     * @returns sorted Float64Array
+     */
+    public native sort(): this;
+
     /**
      * Sorts in-place
      *
      * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
-     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Float64Array
      */
     public sort(compareFn?: (a: number, b: number) => number): this {
+        if (compareFn == undefined) {
+            this.sort()
+            return this
+        }
         let arr: FixedArray<double> = new double[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         let cmp = (l: double, r: double): number => {
-                return (l - r) as number
-            }
-        if (compareFn != undefined) {
-            cmp = (l: double, r: double): number => {
-                const result = compareFn!(l as number, r as number)
-                return result
-            }
+            const result = compareFn!(l as number, r as number)
+            return result
         }
         sort(arr, cmp)
         for (let i = 0; i < this.lengthInt; ++i) {

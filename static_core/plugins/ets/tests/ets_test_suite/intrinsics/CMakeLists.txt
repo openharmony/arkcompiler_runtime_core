@@ -12,6 +12,12 @@
 # limitations under the License.
 
 set(intrinsics_tests
+    bigint64array_sort
+    float32array_sort
+    float64array_sort
+    int8array_sort
+    int16array_sort
+    int32array_sort
     isNaN
     isFinite
     isInteger
@@ -44,6 +50,11 @@ set(intrinsics_tests
     trunc
     stringbuilder_oom
     stringbuilder
+    uint8array_sort
+    uint8clampedarray_sort
+    uint16array_sort
+    uint32array_sort
+    biguint64array_sort
 )
 
 if (NOT PANDA_TARGET_ARM32)

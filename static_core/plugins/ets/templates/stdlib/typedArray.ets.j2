@@ -1728,14 +1728,19 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return {{castToEl % 'this.findLast(newF)'}}
     }
 
-    // NOTE (kprokopenko): this may be not skipped
+    /**
+     * Sorts in-place by numeric value in ascending order.
+     *
+     * @returns sorted {{N}}Array
+     */
+    public native sort(): this;
+
     /**
      * Sorts in-place
      *
      * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
-     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted {{N}}Array
      */
@@ -1745,26 +1750,25 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     {%- set sortCompareFnRetTy = 'number' %}
     {%- endif %}
     public sort(compareFn?: (a: {{elType}}, b: {{elType}}) => {{sortCompareFnRetTy}}): this {
+        if (compareFn == undefined) {
+            this.sort()
+            return this
+        }
         let arr: FixedArray<{{T}}> = new {{T}}[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         let cmp = (l: {{T}}, r: {{T}}): number => {
-                return (l - r) as number
+            const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+            {%- if N == 'BigInt64' %}
+            if (result instanceof BigInt) {
+                return (result as BigInt).getLong()
+            } else {
+                return result as number
             }
-        if (compareFn != undefined) {
-            cmp = (l: {{T}}, r: {{T}}): number => {
-                const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
-                {%- if N == 'BigInt64' %}
-                if (result instanceof BigInt) {
-                    return (result as BigInt).getLong()
-                } else {
-                    return result as number
-                }
-                {%- else %}
-                return result
-                {%- endif %}
-            }
+            {%- else %}
+            return result
+            {%- endif %}
         }
         sort(arr, cmp)
         for (let i = 0; i < this.lengthInt; ++i) {
