@@ -25,9 +25,6 @@ bool IsETSIntrinsic(ark::compiler::RuntimeInterface::IntrinsicId intrinsicId)
         case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_<%= name %>_BY_NAME_I64:
         case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_<%= name %>_BY_NAME_I32:
 % end
-        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_CALL_BY_NAME_SHORT:
-        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_CALL_BY_NAME:
-        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_CALL_BY_NAME_RANGE:
             return true;
         default:
             return false;

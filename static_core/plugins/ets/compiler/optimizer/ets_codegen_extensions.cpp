@@ -257,4 +257,22 @@ void Codegen::EtsWrapObjectNative(WrapObjectNativeInst *wrapObject)
     // don't apply stack ref mask, since it is empty
     ASSERT(GetRuntime()->GetStackReferenceMask() == 0U);
 }
+
+bool Codegen::ResolveCallByNameCodegen(ResolveVirtualInst *resolver)
+{
+    SCOPED_DISASM_STR(this, "Create runtime call to resolve a call by name");
+    ASSERT(resolver->GetOpcode() == Opcode::ResolveByName);
+    ASSERT(resolver->GetCallMethod() != nullptr);
+
+    auto methodReg = ConvertRegister(resolver->GetDstReg(), resolver->GetType());
+    auto objectReg = ConvertRegister(resolver->GetSrcReg(0), DataType::REFERENCE);
+    ScopedTmpReg tmpMethodReg(GetEncoder());
+    LoadMethod(tmpMethodReg);
+
+    CallRuntime(resolver, EntrypointId::RESOLVE_CALL_BY_NAME, tmpMethodReg, {}, tmpMethodReg, objectReg,
+                TypedImm(resolver->GetCallMethodId()));
+    GetEncoder()->EncodeMov(methodReg, tmpMethodReg);
+    return true;
+}
+
 }  // namespace ark::compiler

@@ -74,6 +74,7 @@ public:
     static void VisitLiveOut(GraphVisitor *visitor, Inst *inst);
     static void VisitMultiArray(GraphVisitor *visitor, Inst *inst);
     static void VisitStoreStatic(GraphVisitor *visitor, Inst *inst);
+    static void VisitResolveByName(GraphVisitor *visitor, Inst *inst);
 
     void ProcessManagedCall(Inst *inst, ParameterInfo *pinfo = nullptr);
     void ProcessManagedCallStackRange(Inst *inst, size_t rangeStart, ParameterInfo *pinfo = nullptr);

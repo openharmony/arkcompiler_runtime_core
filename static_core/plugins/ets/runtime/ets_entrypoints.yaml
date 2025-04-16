@@ -810,3 +810,13 @@
   signature:
     - ark::ObjectHeader*
     - ark::mem::Reference*
+
+- name: ResolveCallByName
+  entrypoint: ResolveCallByNameEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - uintptr_t
+  - const ark::Method*
+  - ark::ObjectHeader*
+  - size_t

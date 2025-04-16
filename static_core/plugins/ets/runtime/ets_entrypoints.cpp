@@ -31,6 +31,7 @@
 #include "runtime/interpreter/vregister_iterator.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
+#include "runtime/include/class_linker-inl.h"
 
 namespace ark::ets {
 
@@ -248,6 +249,33 @@ extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint3
     LookUpException<false>(klass, rawField);
 }
 
+extern "C" Method *LookupMethodByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeader *obj, uint32_t id,
+                                                Method *caller, const uint8_t *pc)
+{
+    auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Method *metaMethod = classLinker->GetMethod(*caller, caller->GetClass()->ResolveMethodIndex(id));
+    if (UNLIKELY(metaMethod == nullptr)) {
+        HandlePendingException();
+        return nullptr;
+    }
+    ETSStubCacheInfo cacheInfo {entry, caller, pc};
+    return GetMethodByName(currentCoro, cacheInfo, metaMethod, current);
+}
+
+extern "C" void ThrowEtsExceptionNoSuchMethodEntrypoint(ObjectHeader *obj, uint32_t id, Method *caller)
+{
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto rawMethod = classLinker->GetMethod(*caller, caller->GetClass()->ResolveMethodIndex(id));
+    if (UNLIKELY(rawMethod == nullptr)) {
+        HandlePendingException();
+    }
+    LookUpException(klass, rawMethod);
+}
+
 extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v)
 {
     ASSERT(sb != nullptr);
@@ -424,6 +452,24 @@ extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::mem::Reference *ref)
 
     storage->PopLocalEtsFrame(nullptr);
     return ret;
+}
+
+extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Method *caller, ObjectHeader *obj,
+                                                                     size_t calleeId)
+{
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
+    auto rawMethod = classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
+    if (LIKELY(rawMethod != nullptr)) {
+        auto *resolved = ResolveCompatibleVMethod(currentCoro, klass, rawMethod);
+        ASSERT(resolved != nullptr);
+        return reinterpret_cast<uintptr_t>(resolved);
+    }
+
+    HandlePendingException();
+    UNREACHABLE();
 }
 
 }  // namespace ark::ets

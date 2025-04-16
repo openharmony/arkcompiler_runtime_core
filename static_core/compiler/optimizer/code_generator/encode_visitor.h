@@ -364,6 +364,8 @@ protected:
     static void VisitCallIndirect(GraphVisitor *visitor, Inst *inst);
     static void VisitCall(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitResolveByName(GraphVisitor *visitor, Inst *inst);
+
     // Dyn inst.
     static void VisitCompareAnyType(GraphVisitor *visitor, Inst *inst);
     static void VisitGetAnyTypeName(GraphVisitor *visitor, Inst *inst);
