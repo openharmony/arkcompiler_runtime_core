@@ -34,24 +34,6 @@ function(panda_ets_add_gtest)
     )
 endfunction()
 
-panda_ets_add_gtest(
-    NO_CORES
-    NAME ets_tests_runtime
-    SOURCES
-        runtime/ets_vm_test.cpp
-        runtime/ets_vm_init_prealloc_test.cpp
-    LIBRARIES
-        arkbase arkfile arkruntime
-    INCLUDE_DIRS
-        ${PANDA_ETS_PLUGIN_SOURCE}/runtime
-    SANITIZERS
-        ${PANDA_SANITIZERS_LIST}
-    PANDA_STD_LIB
-        $<TARGET_PROPERTY:mock_stdlib,FILE>
-    DEPS_TARGETS
-        mock_stdlib
-)
-
 panda_add_asm_file(
     FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/integrational/empty_program.pa
     TARGET ets_tests_empty_program

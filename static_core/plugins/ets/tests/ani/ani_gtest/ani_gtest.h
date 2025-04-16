@@ -191,42 +191,50 @@ private:
         DoCallFunction(result, aniFn, std::forward<Args>(args)...);
     }
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
     template <typename R, typename... Args>
     void DoCallFunction(std::optional<R> *result, ani_function fn, Args &&...args)
     {
-        [[maybe_unused]] std::conditional_t<std::is_same_v<R, void>, std::nullopt_t, R> value {};
-        // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+        std::conditional_t<std::is_same_v<R, void>, std::nullopt_t, R> value {};
+        ani_status status;
+
         if constexpr (std::is_same_v<R, ani_boolean>) {
-            ASSERT_EQ(env_->Function_Call_Boolean(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Boolean(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, ani_byte>) {
-            ASSERT_EQ(env_->Function_Call_Byte(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Byte(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, ani_char>) {
-            ASSERT_EQ(env_->Function_Call_Char(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Char(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, ani_short>) {
-            ASSERT_EQ(env_->Function_Call_Short(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Short(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, ani_int>) {
-            ASSERT_EQ(env_->Function_Call_Int(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Int(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, ani_long>) {
-            ASSERT_EQ(env_->Function_Call_Long(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Long(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, ani_float>) {
-            ASSERT_EQ(env_->Function_Call_Float(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Float(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, ani_double>) {
-            ASSERT_EQ(env_->Function_Call_Double(fn, &value, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Double(fn, &value, std::forward<Args>(args)...);
         } else if constexpr (std::is_same_v<R, void>) {
-            ASSERT_EQ(env_->Function_Call_Void(fn, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Void(fn, std::forward<Args>(args)...);
             value = std::nullopt;
         } else if constexpr (std::is_same_v<R, ani_ref> || std::is_same_v<R, ani_tuple_value> ||
                              std::is_same_v<R, ani_object>) {
             ani_ref resultRef {};
-            ASSERT_EQ(env_->Function_Call_Ref(fn, &resultRef, std::forward<Args>(args)...), ANI_OK);
+            status = env_->Function_Call_Ref(fn, &resultRef, std::forward<Args>(args)...);
             value = static_cast<R>(resultRef);
         } else {
             enum { INCORRECT_TEMPLATE_TYPE = false };
             static_assert(INCORRECT_TEMPLATE_TYPE, "Incorrect template type");
         }
+
+        if (status == ANI_PENDING_ERROR) {
+            ASSERT_EQ(env_->DescribeError(), ANI_OK);
+        }
+        ASSERT_EQ(status, ANI_OK);
+
         result->emplace(value);
-        // NOLINTEND(cppcoreguidelines-pro-type-vararg)
     }
+    // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
 protected:
     ani_env *env_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)

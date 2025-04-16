@@ -109,6 +109,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     coreException = findType(EXCEPTION);
     escompatError = findType(ERROR);
+    coreOutOfMemoryError = findType(OUT_OF_MEMORY_ERROR);
     escompatArrayBuffer = findType(ARRAY_BUFFER);
     coreStringBuilder = findType(STRING_BUILDER);
     containersArrayAsListInt = findType(ARRAY_AS_LIST_INT);
@@ -122,6 +123,8 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     interopJSValue = findType(JS_VALUE);
 
     coreTupleN = findType(TUPLEN);
+
+    coreStackTraceElement = findType(STACK_TRACE_ELEMENT);
 
     coreFinalizableWeakRef = findType(FINALIZABLE_WEAK_REF);
     coreFinalizationRegistry = findType(FINALIZATION_REGISTRY);
