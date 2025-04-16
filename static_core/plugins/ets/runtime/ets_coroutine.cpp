@@ -183,7 +183,7 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
         ClearException();
         LOG(INFO, COROUTINES) << "Coroutine " << GetName()
                               << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
-        intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc));
+        intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc), ToEtsBoolean(false));
         return;
     }
     if (retObject != nullptr && retObject->IsInstanceOf(PlatformTypes(this)->corePromise)) {
@@ -192,7 +192,7 @@ void EtsCoroutine::RequestPromiseCompletion(mem::Reference *promiseRef, Value re
             LOG(INFO, COROUTINES) << "Coroutine " << GetName() << " completion by a promise retval went wrong";
         }
     }
-    intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject);
+    intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject, ToEtsBoolean(false));
 }
 
 EtsObject *EtsCoroutine::GetValueFromPromiseSync(EtsPromise *promise)

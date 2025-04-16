@@ -2634,7 +2634,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [std.core.Object]
+      args: [std.core.Object, u1]
     impl: ark::ets::intrinsics::EtsPromiseResolve
 
   - name: StdPromiseReject
@@ -2644,7 +2644,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [std.core.Object]
+      args: [std.core.Object, u1]
     impl: ark::ets::intrinsics::EtsPromiseReject
 
   - name: StdPromiseSubmitCallback

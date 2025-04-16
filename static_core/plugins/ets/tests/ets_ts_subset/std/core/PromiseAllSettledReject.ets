@@ -29,7 +29,7 @@ Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<st
         console.log("Test failed. Expected all elements has status 'rejected'.");
         return;
     }
-    if ((values[0] as PromiseRejectedResult).reason != "abc") {
+    if ((values[0] as PromiseRejectedResult).reason != "xyz") {
         console.log("Test failed. Unexpected reason of the first elements.");
         return;
     }

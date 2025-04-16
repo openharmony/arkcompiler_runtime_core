@@ -124,9 +124,11 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
         auto jsval = JSValue::Create(coro, ctx, value);
 
         if (isResolved) {
-            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
+            ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject(),
+                                                    ark::ets::ToEtsBoolean(false));
         } else {
-            ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), jsval->AsObject());
+            ark::ets::intrinsics::EtsPromiseReject(promiseHandle.GetPtr(), jsval->AsObject(),
+                                                   ark::ets::ToEtsBoolean(false));
         }
     }
 
