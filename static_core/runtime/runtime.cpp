@@ -365,10 +365,10 @@ bool Runtime::Create(const RuntimeOptions &options)
     instance_->GetNotificationManager()->VmInitializationEvent(thread);
     instance_->GetNotificationManager()->ThreadStartEvent(thread);
 
-    if (options.IsSamplingProfilerEnable()) {
+    if (options_.IsSamplingProfilerEnable()) {
         instance_->GetTools().CreateSamplingProfiler();
-        instance_->GetTools().StartSamplingProfiler(options.GetSamplingProfilerOutputFile(),
-                                                    options.GetSamplingProfilerInterval());
+        instance_->GetTools().StartSamplingProfiler(options_.GetSamplingProfilerOutputFile(),
+                                                    options_.GetSamplingProfilerInterval());
     }
 
     return true;

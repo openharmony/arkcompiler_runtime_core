@@ -15,6 +15,8 @@ if (PANDA_TARGET_ARM32 OR PANDA_QEMU_BUILD)
     return()
 endif()
 
+add_subdirectory(sampler_ani)
+
 add_custom_target(sampler_test_suite COMMENT "Running sampler etsnapi tests")
 
 if(CMAKE_CROSSCOMPILING)
