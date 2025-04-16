@@ -15,7 +15,7 @@
 {%- for c in cases %}
 
 /*---
-desc: Different imported functions have the same name but different signatures.
+desc: Different imported functions have the same name and similar parameters types, like int and Int, char and Char.
 tags: [{{c.tags}}]
 ---*/
 

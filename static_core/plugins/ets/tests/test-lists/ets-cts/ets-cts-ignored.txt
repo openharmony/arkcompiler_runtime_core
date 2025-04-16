@@ -1007,33 +1007,24 @@
 17.experimental_features/17.packages/02.package_initializer/p4/init4_1.ets
 17.experimental_features/17.packages/02.package_initializer/p6/init6_1.ets
 
-#24118
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_5.ets
+#21301 ETSFunction has in AssemblyType only identifier name and number parameters + rest/not rest
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_5.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_0.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_1.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_10.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_11.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_6.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_12.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_13.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_14.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_15.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_16.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_17.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_18.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_2.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_20.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_3.ets
+
+#21301 Not work overloading with tuple parameter, different tuples have the similar assambly signature, mangling is necessary
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_4.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_5.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_6.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_7.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_8.ets
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_9.ets
+
+#21301 Not work overloading with union parameter, different union have the similar assambly signature, mangling is necessary
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.ets
+
+#24469 Incorrect resolving overloading with array literal
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_3.ets
 
 #23995 not yet implemented
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex1.ets
