@@ -382,9 +382,6 @@
 07.expressions/06.spread_expression/spex_lmbd_29.ets
 07.expressions/06.spread_expression/spex_lmbd_30.ets
 
-#24405: Verifier fails on some interface overloading and overriding cases
-07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.ets
-
 #23996
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_18.ets

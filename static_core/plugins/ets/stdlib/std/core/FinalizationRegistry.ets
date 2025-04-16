@@ -154,7 +154,7 @@ export final class FinalizationRegistry<T> {
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
         let refObject = new WeakRef<Object>(object);
-        let refToken?: WeakRef<Object> | undefined = undefined;
+        let refToken: WeakRef<Object> | undefined;
         if (token != undefined) {
             refToken = new WeakRef<Object>(token);
         }
