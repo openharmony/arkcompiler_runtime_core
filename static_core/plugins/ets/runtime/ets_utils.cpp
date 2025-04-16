@@ -40,7 +40,7 @@ bool IsEtsGlobalClassName(const std::string &descriptor)
 
 void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)
 {
-    EtsMethod *invoke = lambda->GetClass()->GetMethod(INVOKE_METHOD_NAME);
+    EtsMethod *invoke = lambda->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
     if (invoke == nullptr) {
         LOG(FATAL, RUNTIME) << "No method '$_invoke' found";
         return;

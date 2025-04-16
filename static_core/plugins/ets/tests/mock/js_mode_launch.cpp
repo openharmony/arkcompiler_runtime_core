@@ -52,7 +52,7 @@ protected:
         EtsClassLinker *etsClassLinker = coroutine->GetPandaVM()->GetClassLinker();
         EtsClass *global = etsClassLinker->GetClass("Ljs_mode_launch/JSCoroutine;");
         ASSERT_NE(nullptr, global);
-        EtsMethod *getCoroIdMethod = global->GetMethod("getCoroutineId");
+        EtsMethod *getCoroIdMethod = global->GetStaticMethod("getCoroutineId", nullptr);
         ASSERT_NE(nullptr, getCoroIdMethod);
         ASSERT_TRUE(getCoroIdMethod->IsNative());
         getCoroIdMethod->RegisterNativeDeprecated(reinterpret_cast<void *>(GetCoroId));

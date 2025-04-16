@@ -59,7 +59,9 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     // Launch callback in its own coroutine
     auto *coroManager = coro->GetCoroutineManager();
     auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
-    auto *method = EtsMethod::ToRuntimeMethod(callback->GetClass()->GetMethod(INVOKE_METHOD_NAME));
+
+    EtsMethod *etsmethod = callback->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
+    auto *method = EtsMethod::ToRuntimeMethod(etsmethod);
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
     [[maybe_unused]] bool launchResult = coroManager->Launch(event, method, std::move(args), launchMode);

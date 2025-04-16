@@ -28,6 +28,8 @@
 #include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/types/ets_method_signature.h"
+#include "utils/utf.h"
 
 namespace ark::ets {
 
@@ -99,8 +101,22 @@ public:
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature);
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature);
 
-    PANDA_PUBLIC_API EtsMethod *GetMethod(const char *name);
-    PANDA_PUBLIC_API EtsMethod *GetMethod(const char *name, const char *signature, bool isANIFormat = false);
+    PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature, bool isANIFormat = false) const
+    {
+        if (signature == nullptr) {
+            return GetMethodInternal<FindFilter::STATIC>(name);
+        }
+        return GetMethodInternal<FindFilter::STATIC>(name, signature, isANIFormat);
+    }
+
+    PANDA_PUBLIC_API EtsMethod *GetInstanceMethod(const char *name, const char *signature,
+                                                  bool isANIFormat = false) const
+    {
+        if (signature == nullptr) {
+            return GetMethodInternal<FindFilter::INSTANCE>(name);
+        }
+        return GetMethodInternal<FindFilter::INSTANCE>(name, signature, isANIFormat);
+    }
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const PandaString &name, const PandaString &signature)
     {
@@ -108,11 +124,6 @@ public:
     }
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const Method::Proto &proto) const;
-
-    EtsMethod *GetMethod(const PandaString &name, const PandaString &signature)
-    {
-        return GetMethod(name.c_str(), signature.c_str());
-    }
 
     EtsMethod *GetMethodByIndex(uint32_t i);
 
@@ -496,6 +507,64 @@ public:
     }
 
 private:
+    enum class FindFilter { STATIC, INSTANCE };
+
+    template <FindFilter FILTER>
+    EtsMethod *GetMethodInternal(const char *name) const
+    {
+        const auto *coreName = utf::CStringAsMutf8(name);
+
+        Method *coreMethod = nullptr;
+        auto *runtimeClass = GetRuntimeClass();
+        if (IsInterface()) {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticInterfaceMethod(coreName);
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualInterfaceMethod(coreName);
+            }
+        } else {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticClassMethod(coreName);
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualClassMethod(coreName);
+            }
+        }
+        return reinterpret_cast<EtsMethod *>(coreMethod);
+    }
+
+    template <FindFilter FILTER>
+    EtsMethod *GetMethodInternal(const char *name, const char *signature, bool isANIFormat) const
+    {
+        EtsMethodSignature methodSignature(signature, isANIFormat);
+        if (!methodSignature.IsValid()) {
+            LOG(ERROR, ETS_NAPI) << "Wrong method signature:" << signature;
+            return nullptr;
+        }
+
+        const auto *coreName = utf::CStringAsMutf8(name);
+
+        Method *coreMethod = nullptr;
+        auto *runtimeClass = GetRuntimeClass();
+        if (IsInterface()) {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticInterfaceMethod(coreName, methodSignature.GetProto());
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualInterfaceMethod(coreName, methodSignature.GetProto());
+            }
+        } else {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticClassMethod(coreName, methodSignature.GetProto());
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualClassMethod(coreName, methodSignature.GetProto());
+            }
+        }
+        return reinterpret_cast<EtsMethod *>(coreMethod);
+    }
+
     ObjectHeader *GetObjectHeader()
     {
         return &header_;

@@ -190,7 +190,7 @@ Class *EtsClassLinkerContext::LoadClass(const uint8_t *descriptor, [[maybe_unuse
     const auto *runtimeLinker = GetRuntimeLinker();
     std::array args {Value(runtimeLinker->GetCoreType()), Value(etsClsName->GetCoreType()), Value(ETS_TRUE)};
 
-    auto *loadClass = runtimeLinker->GetClass()->GetMethod("loadClass", "Lstd/core/String;Z:Lstd/core/Class;");
+    auto *loadClass = runtimeLinker->GetClass()->GetInstanceMethod("loadClass", "Lstd/core/String;Z:Lstd/core/Class;");
     ASSERT(loadClass != nullptr);
     auto res = loadClass->GetPandaMethod()->Invoke(coro, args.data());
     if (!coro->HasPendingException()) {

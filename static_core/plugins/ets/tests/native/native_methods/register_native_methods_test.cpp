@@ -49,7 +49,7 @@ ets_boolean Func0(EtsEnv *env, [[maybe_unused]] ets_int param)
     EtsClass *klass = s.ToInternalType(cls);
     ASSERT(klass);
 
-    EtsMethod *method = klass->GetMethod(FAST_NATIVE_METHOD_NAME);
+    EtsMethod *method = klass->GetStaticMethod(FAST_NATIVE_METHOD_NAME, nullptr);
     ASSERT(method);
 
     return static_cast<ets_boolean>(method->IsFastNative());
