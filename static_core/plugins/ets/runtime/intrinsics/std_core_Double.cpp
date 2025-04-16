@@ -64,40 +64,6 @@ bool IsNegativeNan(double x)
     return std::isnan(x) && std::signbit(x);
 }
 
-EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
-{
-    ASSERT(obj != nullptr && locale != nullptr);
-    icu::Locale loc;
-    UErrorCode status = U_ZERO_ERROR;
-    PandaVector<uint8_t> buf;
-    std::string_view locTag = locale->ConvertToStringView(&buf);
-    icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
-    loc = icu::Locale::forLanguageTag(sp, status);
-
-    if (UNLIKELY(U_FAILURE(status))) {
-        std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
-        return nullptr;
-    }
-
-    double objValue = helpers::GetStdDoubleArgument(obj);
-    if (IsNegativeNan(objValue)) {
-        objValue = std::numeric_limits<double>::quiet_NaN();
-    }
-
-    icu::number::LocalizedNumberFormatter locNumFmt = icu::number::NumberFormatter::withLocale(loc);
-    icu::number::FormattedNumber fmtNum = locNumFmt.formatDouble(objValue, status);
-
-    if (UNLIKELY(U_FAILURE(status))) {
-        std::string message = "Unable to convert " + std::to_string(objValue) + " to locale " + std::string(locTag);
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RUNTIME_EXCEPTION, message);
-        return nullptr;
-    }
-
-    icu::UnicodeString uniStr = fmtNum.toString(status);
-    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(uniStr.getBuffer()), uniStr.length());
-}
-
 double StdCoreDoubleParseFloat(EtsString *s)
 {
     return ParseFloat(s, helpers::flags::IGNORE_TRAILING);

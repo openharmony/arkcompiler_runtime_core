@@ -22,22 +22,49 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstring>
 #include <string>
 #include <array>
 
 namespace ark::ets::stdlib {
 
+std::string GetDefaultLocaleTag()
+{
+    icu::Locale defaultLocale;
+
+    const char *defaultLocaleName = defaultLocale.getName();
+    if (strcmp(defaultLocaleName, "en_US_POSIX") == 0 || strcmp(defaultLocaleName, "c") == 0) {
+        return "en-US";
+    }
+
+    if (defaultLocale.isBogus() == TRUE) {
+        return "und";
+    }
+
+    UErrorCode error = U_ZERO_ERROR;
+    auto defaultLocaleTag = defaultLocale.toLanguageTag<std::string>(error);
+    ANI_FATAL_IF(U_FAILURE(error));
+
+    return defaultLocaleTag;
+}
+
 icu::LocaleMatcher BuildLocaleMatcher(UErrorCode &success)
 {
-    int32_t count;
-    const icu::Locale *availableLocales = icu::Locale::getAvailableLocales(count);
-    icu::Locale defaultLocale = icu::Locale::getDefault();
+    UErrorCode error = U_ZERO_ERROR;
+
+    const icu::Locale defaultLocale = icu::Locale::forLanguageTag(GetDefaultLocaleTag(), error);
+    ANI_FATAL_IF(U_FAILURE(error));
+
     icu::LocaleMatcher::Builder builder;
     builder.setDefaultLocale(&defaultLocale);
+
+    int32_t count;
+    const icu::Locale *availableLocales = icu::Locale::getAvailableLocales(count);
     for (int32_t i = 0; i < count; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         builder.addSupportedLocale(availableLocales[i]);
     }
+
     return builder.build(success);
 }
 

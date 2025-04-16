@@ -13,26 +13,22 @@
  * limitations under the License.
  */
 
-package std.core;
+function testBigIntToLocaleString(): void {
+    const langTag = "zh-CN"
+    const options: BigIntToLocaleStringOptions = { useGrouping: false }
 
-export namespace Intl {
+    const locale = new Intl.Locale(langTag)
+    const num: bigint = 45678n
 
-    export interface BigIntToLocaleStringOptions {
-        compactDisplay?: string;
-        currency?: string;
-        currencyDisplay?: string;
-        localeMatcher?: string;
-        maximumFractionDigits?: number;
-        maximumSignificantDigits?: number;
-        minimumFractionDigits?: number;
-        minimumIntegerDigits?: number;
-        minimumSignificantDigits?: number;
-        notation?: string;
-        numberingSystem?: string;
-        style?: string;
-        unit?: string;
-        unitDisplay?: string;
-        useGrouping?: boolean;
-    }
+    assertEQ(num.toLocaleString(langTag, options), "45678")
+    assertEQ(num.toLocaleString(locale, options), "45678")
 
+    assertEQ(num.toLocaleString(langTag), "45,678")
+    assertEQ(num.toLocaleString(locale), "45,678")
+}
+
+function main(): int {
+    const suite = new ArkTestsuite("BigInt")
+    suite.addTest("toLocaleString", testBigIntToLocaleString)
+    return suite.run()
 }
