@@ -305,8 +305,8 @@ EtsClassWrapper *EtsClassWrapper::Get(InteropCtx *ctx, EtsClass *etsClass)
     ASSERT(!etsClass->IsPrimitive() && etsClass->GetComponentType() == nullptr);
     ASSERT(ctx->GetRefConvertCache()->Lookup(etsClass->GetRuntimeClass()) == nullptr);
 
-    if (IsStdClass(etsClass) &&
-        !etsClass->IsInterface()) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
+    if (IsStdClass(etsClass) && !etsClass->IsInterface() &&
+        !etsClass->IsEtsEnum()) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
         ctx->Fatal(std::string("ets_proxy requested for ") + etsClass->GetDescriptor() + " must add or forbid");
     }
     ASSERT(!js_proxy::JSProxy::IsProxyClass((etsClass->GetRuntimeClass())));

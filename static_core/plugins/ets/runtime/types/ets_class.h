@@ -428,6 +428,7 @@ public:
     void SetNullValue();
     void SetBoxed();
     void SetFunction();
+    void SetEtsEnum();
     void SetBigInt();
 
     [[nodiscard]] bool IsWeakReference() const
@@ -464,6 +465,11 @@ public:
     [[nodiscard]] bool IsFunction() const
     {
         return (GetFlags() & IS_FUNCTION) != 0;
+    }
+
+    [[nodiscard]] bool IsEtsEnum() const
+    {
+        return (GetFlags() & IS_ETS_ENUM) != 0;
     }
 
     [[nodiscard]] bool IsBigInt() const
@@ -594,6 +600,8 @@ private:
     constexpr static uint32_t IS_BIGINT = 1U << 23U;
     // Class is Module
     constexpr static uint32_t IS_MODULE = 1U << 24U;
+    // Class is enum
+    constexpr static uint32_t IS_ETS_ENUM = 1U << 25U;
 
     ark::ObjectHeader header_;  // EtsObject
 

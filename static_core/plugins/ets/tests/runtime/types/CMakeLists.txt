@@ -54,6 +54,7 @@ panda_ets_add_gtest(
         ets_abc_runtime_linker_test.cpp
         ets_typeapi_test.cpp
         typed_arrays_test.cpp
+        ets_base_enum_test.cpp
     LIBRARIES
         arkassembler
         arkruntime

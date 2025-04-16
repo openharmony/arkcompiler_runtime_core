@@ -141,11 +141,11 @@ function testEnum() {
     assertEQ(typeof dir, "number");
     assertEQ(typeof status, "string");
     // The enum is wrapped as an object type when calling erase
-    assertEQ(typeof erase(dir), "object");
-    assertEQ(typeof erase(status), "object");
+    assertEQ(typeof erase(dir), "number");
+    assertEQ(typeof erase(status), "string");
     assertEQ(typeof foo(dir), "number");
     // The union type will convert all its members into object
-    assertEQ(typeof foo2(dir), "object");
+    assertEQ(typeof foo2(dir), "number");
 }
 
 let v1: string | number | boolean = "abc";

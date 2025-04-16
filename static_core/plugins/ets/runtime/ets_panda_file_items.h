@@ -111,6 +111,8 @@ static constexpr std::string_view TUPLE14                              = "Lstd/c
 static constexpr std::string_view TUPLE15                              = "Lstd/core/Tuple15;";
 static constexpr std::string_view TUPLE16                              = "Lstd/core/Tuple16;";
 static constexpr std::string_view TUPLEN                               = "Lstd/core/TupleN;";
+// Base type for all enums
+static constexpr std::string_view BASE_ENUM                            = "Lstd/core/BaseEnum;";
 
 // core-defined error classes
 static constexpr std::string_view ABC_FILE_NOT_FOUND_ERROR             = "Lstd/core/AbcFileNotFoundError;";

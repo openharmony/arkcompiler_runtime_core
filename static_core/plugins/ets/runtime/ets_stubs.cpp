@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
+#include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
@@ -113,6 +114,17 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
         auto num2 = GetBoxedNumericValue<EtsDouble>(ptypes, obj2);
         return num2.has_value() && num2.value() == num1.value();
     }
+    if (cls1->IsEtsEnum()) {
+        if (UNLIKELY(!cls2->IsEtsEnum())) {
+            return false;
+        }
+        auto *value1 = EtsBaseEnum::FromEtsObject(obj1)->GetValue();
+        auto *value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+        if (UNLIKELY(value1->GetClass()->IsEtsEnum() || value2->GetClass()->IsEtsEnum())) {
+            return false;
+        }
+        return EtsReferenceEquals(coro, value1, value2);
+    }
     UNREACHABLE();
 }
 
@@ -148,6 +160,15 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
     if (cls->IsBigInt()) {
         return EtsString::CreateFromMUtf8("bigint");
     }
+    if (cls->IsEtsEnum()) {
+        auto *value = EtsBaseEnum::FromEtsObject(obj)->GetValue();
+        if (UNLIKELY(value->GetClass()->IsEtsEnum())) {
+            // This situation is unexpected from language point of view. If BaseEnum object is contained
+            // as value of enum, then it's treated as object
+            return EtsString::CreateFromMUtf8("object");
+        }
+        return EtsGetTypeof(coro, EtsBaseEnum::FromEtsObject(obj)->GetValue());
+    }
 
     ASSERT(cls->IsBoxed());
 
@@ -174,6 +195,15 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
     }
     if (cls->IsBigInt()) {
         return EtsBigInt::FromEtsObject(obj)->GetSign() != 0;
+    }
+    if (cls->IsEtsEnum()) {
+        auto *value = EtsBaseEnum::FromEtsObject(obj)->GetValue();
+        if (UNLIKELY(value->GetClass()->IsEtsEnum())) {
+            // This situation is unexpected from language point of view. If BaseEnum object is contained
+            // as value of enum, then it's treated as object
+            return true;
+        }
+        return EtsGetIstrue(coro, value);
     }
 
     ASSERT(cls->IsBoxed());

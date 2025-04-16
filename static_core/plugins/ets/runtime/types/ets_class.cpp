@@ -395,6 +395,11 @@ void EtsClass::SetFunction()
     flags_ = flags_ | IS_FUNCTION;
     ASSERT(IsFunction());
 }
+void EtsClass::SetEtsEnum()
+{
+    flags_ = flags_ | IS_ETS_ENUM;
+    ASSERT(IsEtsEnum());
+}
 void EtsClass::SetBigInt()
 {
     flags_ = flags_ | IS_BIGINT;
@@ -431,10 +436,13 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (superClass != nullptr) {
         static constexpr uint32_t COPIED_MASK = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
         flags |= superClass->GetFlags() & COPIED_MASK;
-        ASSERT(!superClass->IsValueTyped());
+        ASSERT(!superClass->IsValueTyped() || superClass->IsEtsEnum());
     }
     if (UNLIKELY(HasFunctionTypeInSuperClasses(this))) {
         flags |= IS_FUNCTION;
+    }
+    if (UNLIKELY(GetBase() != nullptr && GetBase()->IsEtsEnum())) {
+        flags |= (IS_ETS_ENUM | IS_VALUE_TYPED);
     }
 
     auto *runtimeClass = GetRuntimeClass();

@@ -34,7 +34,24 @@ function foo(n: number): Klass | undefined {
     return new Klass(n);
 }
 
-enum Color { Red, Green, Blue }
+enum Color {
+    Red,
+    Green,
+    Blue = 2147483647,
+    Yellow = -2147483648,
+}
+
+enum Color64 {
+    Red,
+    Green,
+    Blue = 9223372036854775807,
+    Yellow = -9223372036854775808,
+}
+
+enum ColorString {
+    Red = "",
+    Green = "Green"
+}
 
 function testNormal() {
     assertTrue(!istrue(new Byte(0 as byte)));
@@ -62,7 +79,16 @@ function testNormal() {
     assertTrue(istrue(new bigint(1)));
     assertTrue(!istrue(foo(0)));
     assertTrue(istrue(foo(1)));
-    assertTrue(istrue(Color.Red));
+    assertTrue(!istrue(Color.Red));
+    assertTrue(istrue(Color.Green));
+    assertTrue(istrue(Color.Blue));
+    assertTrue(istrue(Color.Yellow));
+    assertTrue(!istrue(Color64.Red));
+    assertTrue(istrue(Color64.Green));
+    assertTrue(istrue(Color64.Blue));
+    assertTrue(istrue(Color64.Yellow));
+    assertTrue(!istrue(ColorString.Red));
+    assertTrue(istrue(ColorString.Green));
     let a: bigint | null = 0n;
     assertTrue(istrue(!a));
 }
@@ -93,7 +119,16 @@ function testErase() {
     assertTrue(istrue(erase(new bigint(1))));
     assertTrue(!istrue(erase(foo(0))));
     assertTrue(istrue(erase(foo(1))));
-    assertTrue(istrue(erase(Color.Red)));
+    assertTrue(!istrue(erase(Color.Red)));
+    assertTrue(istrue(erase(Color.Green)));
+    assertTrue(istrue(erase(Color.Blue)));
+    assertTrue(istrue(erase(Color.Yellow)));
+    assertTrue(!istrue(erase(Color64.Red)));
+    assertTrue(istrue(erase(Color64.Green)));
+    assertTrue(istrue(erase(Color64.Blue)));
+    assertTrue(istrue(erase(Color64.Yellow)));
+    assertTrue(!istrue(erase(ColorString.Red)));
+    assertTrue(istrue(erase(ColorString.Green)));
     let a: bigint | null = 0n;
     assertTrue(istrue(erase(!a)));
 }
