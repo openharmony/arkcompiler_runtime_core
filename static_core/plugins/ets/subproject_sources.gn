@@ -195,6 +195,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlDateTimeFormat.cpp",
   "stdlib/native/core/IntlListFormat.cpp",
   "stdlib/native/core/IntlRelativeTimeFormat.cpp",
+  "stdlib/native/core/IntlLanguageTag.cpp",
 ]
 
 if (is_ohos) {

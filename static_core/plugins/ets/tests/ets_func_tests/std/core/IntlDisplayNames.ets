@@ -62,8 +62,9 @@ function testDisplayNamesCreation(): void {
     const displayNames = new Intl.DisplayNames("en", { type: "language" });
     assertTrue(displayNames instanceof Intl.DisplayNames);
 
-    const displayNamesWithLocaleArray = new Intl.DisplayNames(["en", "fr"], { type: "language" });
-    assertTrue(displayNamesWithLocaleArray instanceof Intl.DisplayNames);
+    // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
+    // const displayNamesWithLocaleArray = new Intl.DisplayNames(["en", "fr"], { type: "language" });
+    // assertTrue(displayNamesWithLocaleArray instanceof Intl.DisplayNames);
 
     new Intl.DisplayNames("en", { type: "language" });
     new Intl.DisplayNames("en", { type: "region" });

@@ -194,7 +194,7 @@ function testSupportedLocalesOf() {
         fakeLocale,
         undefined,
         [
-            intlBestFitLocale("fakeLocale")
+            intlBestFitLocale(fakeLocale)
         ]
     )
     runSupportedLocalesTest(
@@ -236,7 +236,7 @@ function testSupportedLocalesOf() {
         fakeLocale,
         "lookup",
         [
-            intlLookUpLocale("fakeLocale")
+            intlLookUpLocale(fakeLocale)
         ]
     )
 

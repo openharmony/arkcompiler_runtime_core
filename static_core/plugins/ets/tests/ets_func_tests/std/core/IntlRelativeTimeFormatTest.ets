@@ -103,7 +103,7 @@ function testSupportedLocalesOf() {
         fakeLocale,
         undefined,
         [
-            intlBestFitLocale("fakeLocale")
+            intlBestFitLocale(fakeLocale)
         ]
     )
     runSupportedLocalesStringTest(
