@@ -92,6 +92,8 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         fmethod_overloaded
         fmethod_overloaded_2
         hello_world
+        mix
+        sys
     )
     set(STS_TESTS_OUTPUT_SUBDIRS "")
     foreach(STS_TEST ${STS_TESTS})
@@ -120,6 +122,10 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         fmethod_overloaded_2/3.ets
         fmethod_overloaded_2/4.ets
         hello_world/1.ets
+        mix/1.ets
+        mix/2.ets
+        sys/1.ets
+        sys/2.ets
     )
     set(STS_TESTS_TARGETS "")
     foreach(STS_SOURCE ${STS_TESTS_SOURCES})
