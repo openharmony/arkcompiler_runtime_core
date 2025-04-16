@@ -43,6 +43,7 @@
 #include "runtime/coroutines/threaded_coroutine_manager.h"
 #include "runtime/mem/lock_config_helper.h"
 #include "plugins/ets/stdlib/native/init_native_methods.h"
+#include "plugins/ets/runtime/types/ets_error.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
@@ -217,7 +218,7 @@ PandaEtsVM *PandaEtsVM::GetCurrent()
     return static_cast<PandaEtsVM *>(Thread::GetCurrent()->GetVM());
 }
 
-static void PreallocSpecialReference(PandaEtsVM *vm, mem::Reference *&ref, const char *desc, bool nonMovable = false)
+static mem::Reference *PreallocSpecialReference(PandaEtsVM *vm, const char *desc, bool nonMovable = false)
 {
     EtsClass *cls = vm->GetClassLinker()->GetClass(desc);
     if (cls == nullptr) {
@@ -227,7 +228,20 @@ static void PreallocSpecialReference(PandaEtsVM *vm, mem::Reference *&ref, const
     if (obj == nullptr) {
         LOG(FATAL, RUNTIME) << "Cannot preallocate a special object " << desc;
     }
-    ref = vm->GetGlobalObjectStorage()->Add(obj->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
+    return vm->GetGlobalObjectStorage()->Add(obj->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
+}
+
+static mem::Reference *PreallocOOMError(PandaEtsVM *vm)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    auto *oom = EtsOutOfMemoryError::Create(coro);
+    if (oom == nullptr) {
+        LOG(FATAL, RUNTIME) << "Cannot preallocate OOM error";
+    }
+
+    return vm->GetGlobalObjectStorage()->Add(oom->AsObject()->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
 }
 
 bool PandaEtsVM::Initialize()
@@ -246,22 +260,25 @@ bool PandaEtsVM::Initialize()
         // NOLINTNEXTLINE(google-build-using-namespace)
         using namespace panda_file_items::class_descriptors;
 
-        PreallocSpecialReference(this, oomObjRef_, OUT_OF_MEMORY_ERROR.data());
-        PreallocSpecialReference(this, nullValueRef_, NULL_VALUE.data(), true);
-        PreallocSpecialReference(this, finalizableWeakRefList_, FINALIZABLE_WEAK_REF.data());
+        ASSERT(Thread::GetCurrent() != nullptr);
+        ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
+        auto *coro = EtsCoroutine::GetCurrent();
 
-        if (Thread::GetCurrent() != nullptr) {
-            ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
-            auto *coro = EtsCoroutine::GetCurrent();
-            coro->SetupNullValue(GetNullValue());
-            coro->GetLocalStorage().Set<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR>(
-                ToUintPtr(classLinker_->GetEtsClassLinkerExtension()->GetPlatformTypes()));
-            ASSERT(PlatformTypes(coro) != nullptr);
+        coro->GetLocalStorage().Set<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR>(
+            ToUintPtr(classLinker_->GetEtsClassLinkerExtension()->GetPlatformTypes()));
+        ASSERT(PlatformTypes(coro) != nullptr);
 
-            doubleToStringCache_ = DoubleToStringCache::Create(coro);
-            floatToStringCache_ = FloatToStringCache::Create(coro);
-            longToStringCache_ = LongToStringCache::Create(coro);
-        }
+        // Should be invoked after PlatformTypes is initialized in coroutine.
+        oomObjRef_ = PreallocOOMError(this);
+        nullValueRef_ = PreallocSpecialReference(this, NULL_VALUE.data(), true);
+        finalizableWeakRefList_ = PreallocSpecialReference(this, FINALIZABLE_WEAK_REF.data());
+
+        coro->SetupNullValue(GetNullValue());
+
+        doubleToStringCache_ = DoubleToStringCache::Create(coro);
+        floatToStringCache_ = FloatToStringCache::Create(coro);
+        longToStringCache_ = LongToStringCache::Create(coro);
+
         referenceProcessor_->Initialize();
     }
     [[maybe_unused]] bool cachesCreated =

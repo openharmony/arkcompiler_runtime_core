@@ -75,6 +75,9 @@ coretypes:
 - managed_class: std.core.CondVar
   mirror_class: ark::ets::EtsCondVar
 
+- managed_class: std.core.OutOfMemoryError
+  mirror_class: ark::ets::EtsOutOfMemoryError
+
 - managed_class: escompat.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
@@ -607,7 +610,7 @@ intrinsics:
       args:
       - std.core.String
     impl: ark::ets::intrinsics::StdConsolePrintString
-    
+
   - name: StdConsolePrintStringError
     space: ets
     class_name: std.core.Console
@@ -618,7 +621,7 @@ intrinsics:
       args:
       - std.core.String
     impl: ark::ets::intrinsics::StdConsolePrintStringError
-  
+
   - name: StdConsolePrintU1
     space: ets
     class_name: std.core.Console
@@ -629,7 +632,7 @@ intrinsics:
       args:
       - u1
     impl: ark::ets::intrinsics::StdConsolePrintBool
-  
+
   - name: StdConsolePrintU1Error
     space: ets
     class_name: std.core.Console
@@ -640,7 +643,7 @@ intrinsics:
       args:
       - u1
     impl: ark::ets::intrinsics::StdConsolePrintBoolError
-  
+
   - name: StdConsolePrintI8
     space: ets
     class_name: std.core.Console
@@ -651,7 +654,7 @@ intrinsics:
       args:
       - i8
     impl: ark::ets::intrinsics::StdConsolePrintI8
-  
+
   - name: StdConsolePrintI8Error
     space: ets
     class_name: std.core.Console
@@ -662,7 +665,7 @@ intrinsics:
       args:
       - i8
     impl: ark::ets::intrinsics::StdConsolePrintI8Error
-  
+
   - name: StdConsolePrintI16
     space: ets
     class_name: std.core.Console
@@ -673,7 +676,7 @@ intrinsics:
       args:
       - i16
     impl: ark::ets::intrinsics::StdConsolePrintI16
-  
+
   - name: StdConsolePrintI16Error
     space: ets
     class_name: std.core.Console
@@ -684,7 +687,7 @@ intrinsics:
       args:
       - i16
     impl: ark::ets::intrinsics::StdConsolePrintI16Error
-  
+
   - name: StdConsolePrintU16
     space: ets
     class_name: std.core.Console
@@ -695,7 +698,7 @@ intrinsics:
       args:
       - u16
     impl: ark::ets::intrinsics::StdConsolePrintChar
-  
+
   - name: StdConsolePrintU16Error
     space: ets
     class_name: std.core.Console
@@ -706,7 +709,7 @@ intrinsics:
       args:
       - u16
     impl: ark::ets::intrinsics::StdConsolePrintCharError
-  
+
   - name: StdConsolePrintI32
     space: ets
     class_name: std.core.Console
@@ -717,7 +720,7 @@ intrinsics:
       args:
       - i32
     impl: ark::ets::intrinsics::StdConsolePrintI32
-  
+
   - name: StdConsolePrintI32Error
     space: ets
     class_name: std.core.Console
@@ -728,7 +731,7 @@ intrinsics:
       args:
       - i32
     impl: ark::ets::intrinsics::StdConsolePrintI32Error
-  
+
   - name: StdConsolePrintI64
     space: ets
     class_name: std.core.Console
@@ -739,7 +742,7 @@ intrinsics:
       args:
       - i64
     impl: ark::ets::intrinsics::StdConsolePrintI64
-  
+
   - name: StdConsolePrintI64Error
     space: ets
     class_name: std.core.Console
@@ -750,7 +753,7 @@ intrinsics:
       args:
       - i64
     impl: ark::ets::intrinsics::StdConsolePrintI64Error
-  
+
   - name: StdConsolePrintln
     space: ets
     class_name: std.core.Console
@@ -760,7 +763,7 @@ intrinsics:
       ret: void
       args: []
     impl: ark::ets::intrinsics::StdConsolePrintln
-  
+
   - name: StdConsolePrintlnError
     space: ets
     class_name: std.core.Console
@@ -1621,7 +1624,7 @@ intrinsics:
       ret: escompat.ArrayBuffer
       args: [escompat.ArrayBuffer, i32, i32]
     impl: ark::ets::intrinsics::EtsArrayBufferFromBufferSlice
-  
+
   - name: EtsStringBytesLength
     space: ets
     class_name: escompat.ArrayBuffer
@@ -1631,7 +1634,7 @@ intrinsics:
       ret: i32
       args: [std.core.String, std.core.String]
     impl: ark::ets::intrinsics::EtsStringBytesLength
-  
+
   - name: EtsArrayBufferToString
     space: ets
     class_name: escompat.ArrayBuffer
@@ -1839,7 +1842,7 @@ intrinsics:
       args: []
     impl: ark::intrinsics::NanoTime
     clear_flags: [ require_state, runtime_call, can_throw ]
-  
+
   - name: StdTimeChronoGetCpuTime
     space: ets
     class_name: std.time.Chrono

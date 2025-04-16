@@ -26,7 +26,7 @@ namespace ark::ets::test {
 class EtsNapiTestBaseClass : public testing::Test {
 public:
     template <typename R, typename... Args>
-    void CallEtsFuntion(R *ret, std::string_view className, std::string_view methodName, Args &&...args)
+    void CallEtsFunction(R *ret, std::string_view className, std::string_view methodName, Args &&...args)
     {
         std::string etsGlobalName(std::string(className) + "/ETSGLOBAL");
         ets_class cls = env_->FindClass(etsGlobalName.data());
@@ -76,7 +76,7 @@ protected:
         };
         // clang-format on
 
-        abcPath_ = std::getenv("ARK_ETS_GTEST_ABC_PATH");
+        abcPath_ = std::getenv("ANI_GTEST_ABC_PATH");
         if (abcPath_ != nullptr) {
             optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, abcPath_});
         }

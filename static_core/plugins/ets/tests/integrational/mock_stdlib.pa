@@ -22,6 +22,7 @@
 .record std.core.DoubleToStringCacheElement
 .record std.core.FloatToStringCacheElement
 .record std.core.LongToStringCacheElement
+.record std.core.StackTraceElement
 
 .record std.core.FinalizableWeakRef {
     std.core.Object referent
