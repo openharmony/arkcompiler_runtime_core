@@ -273,7 +273,7 @@ function groupsTest(): void {
                 } else {
                     let groups: Record<String, String | undefined> = res!.groups!
                     for (let g of groups!.keys()) {
-                        ans += g + ':' + groups!.get(g) + ','
+                        ans += g + ':' + groups![g] + ','
                     }
                 }
             }

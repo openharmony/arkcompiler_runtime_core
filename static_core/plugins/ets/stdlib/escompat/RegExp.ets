@@ -63,7 +63,7 @@ export class RegExpExecArray /*extends Array<String>*/ {
      *
      * @returns resulting string
      */
-    public get(index: int): String {
+    public $_get(index: int): String {
         return this.result_[index]
     }
 
@@ -74,12 +74,30 @@ export class RegExpExecArray /*extends Array<String>*/ {
      *
      * @returns resulting string
      */
-    public get(index: number): String {
-        return this.get(index as int);
+    public $_get(index: number): String {
+        return this.$_get(index as int);
     }
 
-    public $_get(index: number): String {
-        return this.get(index as int);
+    /**
+     * Sets value by index
+     *
+     * @param index
+     *
+     * @param val
+     */
+    public $_set(index: int, val: String) {
+        this.result_[index] = val
+    }
+
+    /**
+     * Sets value by index
+     *
+     * @param index
+     *
+     * @param val
+     */
+    public $_set(index: number, val: String) {
+        return this.$_set(index as int, val);
     }
 
     get length(): int {
@@ -203,7 +221,7 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
         if (match == null) {
             return new IteratorResult<RegExpMatchArray>()
         }
-        let matchStr = match.get(0)
+        let matchStr = match.$_get(0)
         if (matchStr == "") {
             let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
             this.regexp.lastIndex = nextIndex
@@ -556,7 +574,7 @@ export class RegExp extends Object {
             if (!this.global) {
                 break;
             }
-            let matchStr = result.get(0)
+            let matchStr = result.$_get(0)
             if (matchStr == "") {
                 let thisIndex = this.lastIndex
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
@@ -569,12 +587,12 @@ export class RegExp extends Object {
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
-            let matched = result.get(0);
+            let matched = result.$_get(0);
             let matchLength = matched.getLength();
             let position = max(min(result.index, lengthS), 0) as int;
             let captures = new UndefinableStringArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
-                let capN = result.get(n);
+                let capN = result.$_get(n);
                 captures.pushBack(capN)
             }
             let namedCaptures: Object | undefined = result.groups;
@@ -605,7 +623,7 @@ export class RegExp extends Object {
             if (!this.global) {
                 break;
             }
-            let matchStr = result.get(0)
+            let matchStr = result.$_get(0)
             if (matchStr == "") {
                 let thisIndex = this.lastIndex
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
@@ -618,12 +636,12 @@ export class RegExp extends Object {
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
-            let matched = result.get(0);
+            let matched = result.$_get(0);
             let matchLength = matched.getLength();
             let position = max(min(result.index, lengthS), 0) as int;
             let args = new UndefinableObjectArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
-                let capN = result.get(n);
+                let capN = result.$_get(n);
                 args.pushBack(capN)
             }
             let namedCaptures: NullishType = /*result.groups*/ undefined;
@@ -685,7 +703,7 @@ export class RegExp extends Object {
                     lastStart = separatorRight
                     let numberOfCaptures = z.length;
                     for (let i = 1; i < numberOfCaptures; ++i) {
-                        let nextCapture = z.get(i);
+                        let nextCapture = z.$_get(i);
                         splittedStrings.pushBack(nextCapture)
                         if (splittedStrings.size() == lim) {
                             return splittedStrings.toArray() as String[]
@@ -716,7 +734,7 @@ export class RegExp extends Object {
                 return new RegExpMatchArray(-1, "", matches.toArray() as String[])
             }
             else {
-                let matchStr = result.get(0)
+                let matchStr = result.$_get(0)
                 matches.pushBack(matchStr)
                 if (matchStr == "") {
                     this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
