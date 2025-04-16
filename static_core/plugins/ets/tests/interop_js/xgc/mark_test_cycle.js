@@ -14,14 +14,14 @@
  */
 const { init, triggerXGC, checkXRefsNumber, validationXGCResult } = require('./mark_test_utils.js');
 
-let g_obj = Promise.resolve();
-let g_inlineObj = Promise.resolve();
-let g_etsVm;
+let gObj = Promise.resolve();
+let gInlineObj = Promise.resolve();
+let gEtsVm;
 
 function clearActiveRef() {
-    g_obj = Promise.resolve();
-    g_inlineObj = Promise.resolve();
-    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    gObj = Promise.resolve();
+    gInlineObj = Promise.resolve();
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -49,19 +49,19 @@ function clearRefStorage() {
  */
 function cycleTest(isRootRef1, isRootRef2, isRootRef3, isRootRef4) {
     let obj = Promise.resolve();
-    const cycle = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'cycle');
+    const cycle = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'cycle');
     if (isRootRef2) {
-        obj.ref = g_inlineObj;
-        g_inlineObj.ref = cycle(obj, isRootRef4, isRootRef3);
+        obj.ref = gInlineObj;
+        gInlineObj.ref = cycle(obj, isRootRef4, isRootRef3);
     } else {
         obj.ref = cycle(obj, isRootRef4, isRootRef3);
     }
     if (isRootRef1) {
-        g_obj.ref = obj;
+        gObj.ref = obj;
     }
 }
 
-g_etsVm = init('mark_test_cycle_module', 'xgc_tests.abc');
+gEtsVm = init('mark_test_cycle_module', 'xgc_tests.abc');
 
 cycleTest(false, false, false, false);
 validationXGCResult(1, 1, 0, 0);

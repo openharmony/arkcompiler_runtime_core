@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let g_etsVm;
-let g_testModule;
+let gEtsVm;
+let gTestModule;
 
 function init(module, stsFile) {
-    g_etsVm = requireNapiPreview('ets_interop_js_napi', true);
-    g_testModule = requireNapiPreview(module, true);
+    gEtsVm = requireNapiPreview('ets_interop_js_napi', true);
+    gTestModule = requireNapiPreview(module, true);
 
-    const etsVmRes = g_etsVm.createRuntime({
+    const etsVmRes = gEtsVm.createRuntime({
         'load-runtimes': 'ets',
         'log-components': 'ets_interop_js',
         'boot-panda-files': 'etsstdlib.abc:' + stsFile,
@@ -34,17 +34,17 @@ function init(module, stsFile) {
     } else {
         print('ETS runtime created');
     }
-    g_testModule.setup();
-    return g_etsVm;
+    gTestModule.setup();
+    return gEtsVm;
 }
 
 function triggerXGC() {
-    const xgc = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'xgc');
+    const xgc = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'xgc');
     xgc();
 }
 
 function checkXRefsNumber(jsNum, stsNum) {
-    g_testModule.checkXRefsNumber(jsNum, stsNum);
+    gTestModule.checkXRefsNumber(jsNum, stsNum);
 }
 
 function validationXGCResult(beforeJsNum, beforeStsNum, afterJsNum, afterStsNum) {
