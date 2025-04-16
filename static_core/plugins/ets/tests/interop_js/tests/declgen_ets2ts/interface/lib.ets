@@ -13,24 +13,39 @@
  * limitations under the License.
  */
 
-export namespace A {
-  export let v1 = 1;
-  export namespace B {
-    export let v2 = 2;
-    export namespace C {
-      export let v3 = 3;
-    }
-  }
+export interface Iface {
+  n: number
+  s() : string
 }
 
-export declare namespace X1 {
-    function foo1(): void;
+export interface Iface2 {
+  foo1() : void
 }
 
-export namespace X {
-  export function foo(): void { console.log("Hi") }
+export interface Iface3 {
+  foo2(...nums: number[]) : void
 }
 
-export namespace myNamespace {
-  export enum nsEnum { White, Blue = 2, Red = 2 }
+export @interface Position {}
+
+export function foo3(a : Array<string>) {
+  console.log(a[0])
+}
+export class C {
+  static foo3(a : Array<string>) { console.log(a[0]) }
+  bar(a : Array<string>) { console.log(a[0]) }
+}
+export interface Iface4 {
+  foo3(a : Array<string>) : void
+}
+
+export interface I {
+  s: string
+}
+
+export interface Iface5 {
+  foo5() : void
+}
+export function foo6(iface5 : Iface5) {
+  console.log(iface5 instanceof Iface5) // true
 }
