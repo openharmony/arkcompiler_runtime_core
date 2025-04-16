@@ -83,8 +83,17 @@ static void AppStateCallback(int state, int64_t timeStamp)
     auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
     auto *pandaVm = Runtime::GetCurrent()->GetPandaVM();
     pandaVm->UpdateAppState(appState);
-    if (UNLIKELY(static_cast<AppState::State>(state) == AppState::State::COLD_START_FINISHED)) {
-        pandaVm->GetGC()->PostponeGCEnd();
+    switch (static_cast<AppState::State>(state)) {
+        case AppState::State::SENSITIVE_START:
+            pandaVm->GetGC()->PostponeGCStart();
+            break;
+        case AppState::State::SENSITIVE_END:
+            [[fallthrough]];
+        case AppState::State::COLD_START_FINISHED:
+            pandaVm->GetGC()->PostponeGCEnd();
+            break;
+        default:
+            break;
     }
 }
 #endif  // PANDA_TARGET_OHOS
