@@ -136,6 +136,7 @@ export enum FaultID {
   TypeGeneric,
   LimitExtends,
   PropertyAccessExpression,
+  NoBuiltInType,
   // this should always be last enum
   LAST_ID
 }
