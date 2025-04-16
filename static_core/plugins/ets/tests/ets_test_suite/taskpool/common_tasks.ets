@@ -93,7 +93,7 @@ function main(): int {
         assertEQ(info.taskInfos[0].state as int, taskpool.State.RUNNING as int);
         assertEQ(info.taskInfos[0].name, "task_name");
         assertEQ(await p, "result");
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_DEFAULT);
+        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     });
     commonTaskSuite.addTest("OneTaskExecutionTest", () =>
     {
@@ -225,7 +225,7 @@ function main(): int {
         // Check isCanceled from taskpool
         assertEQ(isCanceled.get(), true);
         expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_DEFAULT);
+        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     });
     commonTaskSuite.addTest("CancelNonExecutingTaskTest", (): void throws =>
     {
@@ -333,7 +333,7 @@ function main(): int {
                 taskpool.cancel(task2);
             }
         }, new Error("taskpool:: task is not executed or has been executed"));
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_DEFAULT);
+        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     });
     commonTaskSuite.addTest("DependentTasksTest", (): void throws =>
     {

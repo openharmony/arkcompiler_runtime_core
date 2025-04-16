@@ -129,7 +129,7 @@ extern "C" void StdSystemScheduleCoroutine()
 extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
 {
     constexpr auto POLICIES_MAPPING =
-        std::array {CoroutineSchedulingPolicy::DEFAULT, CoroutineSchedulingPolicy::NON_MAIN_WORKER};
+        std::array {CoroutineSchedulingPolicy::ANY_WORKER, CoroutineSchedulingPolicy::NON_MAIN_WORKER};
     ASSERT((policy >= 0) && (static_cast<size_t>(policy) < POLICIES_MAPPING.size()));
     CoroutineSchedulingPolicy newPolicy = POLICIES_MAPPING[policy];
 
