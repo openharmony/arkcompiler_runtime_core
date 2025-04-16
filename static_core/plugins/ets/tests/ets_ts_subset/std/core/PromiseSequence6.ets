@@ -27,8 +27,8 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 }
 
 let sequence = new Array<number>();
-let reject: ((err: Object) => void)|null = null;
-let p = new Promise<number>((_: (v: number) => void, _reject: (error: Object) => void) => {
+let reject: ((err: Error) => void)|null = null;
+let p = new Promise<number>((_: (v: number) => void, _reject: (error: Error) => void) => {
     reject = _reject;
 });
 
@@ -38,7 +38,7 @@ reject!(new Error("abc"));
 p.then<void, void>((valule: number): void => {
     console.log("Test failed. The promise should not be resolved.")
     throw new Error("Test failed");
-}, (err: Object): void => {
+}, (err: Error): void => {
     sequence.push(3);
     checkSequence(sequence, 3);
 });
@@ -47,7 +47,7 @@ Promise.resolve().then<void>((): void => {
     p.then<void, void>((valule: number): void => {
         console.log("Test failed. The promise should not be resolved.")
         throw new Error("Test failed");
-    }, (err: Object): void => {
+    }, (err: Error): void => {
         sequence.push(5);
         checkSequence(sequence, 5);
         console.log("Test passed.");

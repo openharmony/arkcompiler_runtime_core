@@ -15,7 +15,7 @@
 
 let resolve: ((value: Object) => void)|null = null;
 let value = new Object();
-let p1 = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Object) => void) => {
+let p1 = new Promise<Object>((_resolve: (v: Object) => void) => {
     resolve = _resolve;
 });
 let p2 = Promise.resolve<Object>(p1);
@@ -29,7 +29,7 @@ p2.then<void, void>((v: Object): void => {
         return;
     }
     console.log("Test passed.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     console.log("Test failed. The promise should be rejected.");
 });
 

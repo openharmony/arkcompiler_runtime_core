@@ -39,7 +39,7 @@ function launchImpl(func: () => NullishType): Promise<NullishType> {
         try {
             let res = job.Await();
             resolve(res);
-        } catch(e) {
+        } catch(e: Error) {
             reject(e);
         }
     });

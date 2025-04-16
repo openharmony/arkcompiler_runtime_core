@@ -40,7 +40,7 @@ let error = new Error();
 
 Promise.all<Object>(new MyIterable<Object>(error)).then<void, void>((value: Array<Object>): void => {
     console.log("Test failed. The promise should not be resolved.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     if (err != error) {
         console.log("Test failed. The promise should be rejected by the Error.");
         return;

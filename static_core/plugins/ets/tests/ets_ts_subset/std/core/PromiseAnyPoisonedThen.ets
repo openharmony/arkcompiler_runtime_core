@@ -17,7 +17,7 @@ class Thenable implements PromiseLike<string> {
         this.error = error;
     }
 
-    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         throw this.error;
     }
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 class Resolve implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<U>((): U|PromiseLike<U> => {
             return onFulfilled!("abc");
         })
@@ -21,10 +21,10 @@ class Resolve implements PromiseLike<string> {
 }
 
 class LateReject implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<U>((): U|PromiseLike<U> => {
             let v = onFulfilled!("def");
-            onRejected!("xyz");
+            onRejected!(new Error("xyz"));
             return v;
         });
     }

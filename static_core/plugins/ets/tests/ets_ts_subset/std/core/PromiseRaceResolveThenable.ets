@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 class Thenable implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         return new Promise<U>((resolve: (val: U|PromiseLike<U>) => void): void => {
             resolve(onFulfilled!("abc"));
         })
@@ -27,6 +27,6 @@ Promise.race([thenable]).then<void, void>((value: string): void => {
         return;
     }
     console.log("Test passed.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
 });

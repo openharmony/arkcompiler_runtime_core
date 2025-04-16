@@ -34,7 +34,7 @@ p.finally((): void => {
 }).then<void>((): void => {
     console.log("Test failed. The promise should be rejected.");
     throw new Error("Test failed");
-}).catch<void>((err: Object): void => {
+}).catch<void>((err: Error): void => {
     sequence.push(2);
 }).then<void>((): void => {
     checkSequence(sequence, 2);

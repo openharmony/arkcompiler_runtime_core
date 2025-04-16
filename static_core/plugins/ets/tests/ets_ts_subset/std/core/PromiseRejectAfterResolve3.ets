@@ -14,8 +14,8 @@
  */
 
 let error = new Error("abc");
-let reject: ((err: Object) => void)|null = null;
-let p1 = new Promise<string>((_: (value: string) => void, _reject: (err: Object) => void): void => {
+let reject: ((err: Error) => void)|null = null;
+let p1 = new Promise<string>((_: (value: string) => void, _reject: (err: Error) => void): void => {
     reject = _reject;
 });
 let p2 = Promise.resolve<Object>(p1);
@@ -25,7 +25,7 @@ if (p1 !== p2) {
 
 p2.then<void, void>((value: Object): void => {
     console.log("Test failed. Expected the promise p2 to be rejected.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     if (err !== error) {
         console.log("Test failed. Expetec the promise is rejected by the provided value.");
     } else {
