@@ -121,10 +121,7 @@ export class Error {
     * @returns result of the conversion
     */
     override toString(): String {
-        if (this.message != "") {
-            return this.name + ": " + this.message;
-        }
-        return this.name;
+        return this.name + ((this.name !== "" && this.message)? ": " + this.message: this.message);
     }
 
     /**
