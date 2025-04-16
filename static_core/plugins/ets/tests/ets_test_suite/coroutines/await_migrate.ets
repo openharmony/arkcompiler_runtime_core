@@ -51,5 +51,5 @@ function main() {
     checkLaunchMigration();
     let res: boolean = isLaunchMigrated.get();
     assertEQ(res, true);
-    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_DEFAULT);
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }

@@ -22,7 +22,7 @@ function main() {
     CoroutineExtras.scaleWorkersPool(-1);
     assertNE(mainId, workerId);
 
-    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_DEFAULT);
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     workerId = await launch () => { return CoroutineExtras.getWorkerId(); }();
     assertEQ(mainId, workerId);
 }
