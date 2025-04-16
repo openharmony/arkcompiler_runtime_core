@@ -1564,7 +1564,7 @@ intrinsics:
   - name: EscompatArrayBufferAt
     space: ets
     class_name: escompat.ArrayBuffer
-    method_name: at
+    method_name: atImpl
     static: false
     signature:
       ret: i8
@@ -1574,7 +1574,7 @@ intrinsics:
   - name: EscompatArrayBufferSet
     space: ets
     class_name: escompat.ArrayBuffer
-    method_name: set
+    method_name: setImpl
     static: false
     signature:
       ret: void
