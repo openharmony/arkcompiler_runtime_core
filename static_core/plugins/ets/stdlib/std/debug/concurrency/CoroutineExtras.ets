@@ -16,7 +16,7 @@
 package std.debug.concurrency;
 
 export final class CoroutineExtras {
-    public static POLICY_DEFAULT = 0;
+    public static POLICY_ANY = 0;
     public static POLICY_NON_MAIN = 1;
 
     // returns coroutine worker id, which is the same for coros which are running within the same worker thread
