@@ -1,21 +1,9 @@
-#24419
-03.types/19.union_types/ut_9.ets
+#25109
+03.types/19.union_types/02.access_to_common_union_members/cm_meth1_3.ets
 
-#17445
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/comp_arr/comp-arr-wd_6.ets
-
-#24559
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/call_cons/call-cons-un_6.ets
-06.contexts_and_conversions/05.implicit_conversions/04.widening_union_conversions/decl_field/decl-field-un_6.ets
-
-#24568
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_12.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_decl_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_call_12.ets
-
-#24930
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
+#20935
+03.types/19.union_types/02.access_to_common_union_members/cm_meth2_4.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_meth3_8.ets
 
 #24004 ASSERTION FAILED: ic != nullptr
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
