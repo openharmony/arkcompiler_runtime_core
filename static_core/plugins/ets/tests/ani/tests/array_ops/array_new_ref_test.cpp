@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArrayNewRefTest : public AniGTestArrayOps {
+class ArrayNewRefTest : public ArrayHelperTest {
 public:
     static constexpr const ani_size ZERO = 0;
 

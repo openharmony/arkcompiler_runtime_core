@@ -32,7 +32,7 @@ namespace ark::ets::intrinsics {
 EtsObject *EtsEscompatArrayGet(ObjectHeader *arrayHeader, int32_t index)
 {
     ASSERT(arrayHeader != nullptr);
-    auto *array = EtsArrayObject<EtsObject>::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
     auto actualLength = array->GetActualLength();
     if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
@@ -45,7 +45,7 @@ EtsObject *EtsEscompatArrayGet(ObjectHeader *arrayHeader, int32_t index)
 void EtsEscompatArraySet(ObjectHeader *arrayHeader, int32_t index, EtsObject *value)
 {
     ASSERT(arrayHeader != nullptr);
-    auto *array = EtsArrayObject<EtsObject>::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
     auto actualLength = array->GetActualLength();
     if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
@@ -454,7 +454,7 @@ static uint32_t NormalizeIndex(int32_t idx, int64_t len)
 extern "C" ObjectHeader *EtsEscompatArrayFill(ObjectHeader *arrayHeader, EtsObject *value, int32_t start, int32_t end)
 {
     ASSERT(arrayHeader != nullptr);
-    auto *array = EtsArrayObject<EtsObject>::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto *array = EtsEscompatArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
     auto actualLength = static_cast<int64_t>(array->GetActualLength());
     auto startInd = NormalizeIndex(start, actualLength);
     auto endInd = NormalizeIndex(end, actualLength);

@@ -519,9 +519,9 @@ ani_object GetNumberFormatRangePart(ani_env *env, ani_string ty, ani_string valu
 }
 
 template <typename T>
-ani_array_ref IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] T value)
+ani_array IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] T value)
 {
-    ani_array_ref resultArray;
+    ani_array resultArray;
     ParsedOptions options;
     ParseOptions(env, self, options);
 
@@ -548,24 +548,21 @@ ani_array_ref IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [
         resultParts.push_back(partObj);
     }
 
-    ani_class numberFormatPartClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/NumberFormatPart;", &numberFormatPartClass));
     ani_ref undefined;
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(numberFormatPartClass, resultParts.size(), undefined, &resultArray));
-
+    ANI_FATAL_IF_ERROR(env->Array_New(resultParts.size(), undefined, &resultArray));
     for (size_t i = 0; i < resultParts.size(); ++i) {
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(resultArray, i, resultParts[i]));
+        ANI_FATAL_IF_ERROR(env->Array_Set(resultArray, i, resultParts[i]));
     }
 
     return resultArray;
 }
 
-ani_array_ref IcuFormatToRangeParts(ani_env *env, [[maybe_unused]] ani_object self,
-                                    [[maybe_unused]] const icu::Formattable &startFrmtbl,
-                                    [[maybe_unused]] const icu::Formattable &endFrmtbl)
+ani_array IcuFormatToRangeParts(ani_env *env, [[maybe_unused]] ani_object self,
+                                [[maybe_unused]] const icu::Formattable &startFrmtbl,
+                                [[maybe_unused]] const icu::Formattable &endFrmtbl)
 {
-    ani_array_ref resultArray;
+    ani_array resultArray;
 
     ParsedOptions options;
     ParseOptions(env, self, options);
@@ -585,18 +582,16 @@ ani_array_ref IcuFormatToRangeParts(ani_env *env, [[maybe_unused]] ani_object se
 
     std::vector<NumberFormatPart> parts = ExtractParts(env, formatted, true);
 
-    ani_class numberRangeFormatPartClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/NumberRangeFormatPart;", &numberRangeFormatPartClass));
     ani_ref undefined;
     ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
-    ANI_FATAL_IF_ERROR(env->Array_New_Ref(numberRangeFormatPartClass, parts.size(), undefined, &resultArray));
+    ANI_FATAL_IF_ERROR(env->Array_New(parts.size(), undefined, &resultArray));
 
     for (size_t i = 0; i < parts.size(); ++i) {
         auto typeString = CreateUtf8String(env, parts[i].type.c_str(), parts[i].type.size());
         auto valueString = CreateUtf8String(env, parts[i].value.c_str(), parts[i].value.size());
         auto sourceString = CreateUtf8String(env, parts[i].source.c_str(), parts[i].source.size());
         auto part = GetNumberFormatRangePart(env, typeString, valueString, sourceString);
-        ANI_FATAL_IF_ERROR(env->Array_Set_Ref(resultArray, i, part));
+        ANI_FATAL_IF_ERROR(env->Array_Set(resultArray, i, part));
     }
 
     return resultArray;
@@ -622,40 +617,40 @@ ani_string IcuFormatRangeDecStrDecStr(ani_env *env, ani_object self, ani_string 
     return IcuFormatRange(env, self, StrToFormattable(env, startValue), StrToFormattable(env, endValue));
 }
 
-ani_array_ref IcuFormatToPartsDouble(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] ani_double value)
+ani_array IcuFormatToPartsDouble(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] ani_double value)
 {
     return IcuFormatToParts<ani_double>(env, self, value);
 }
 
-ani_array_ref IcuFormatToPartsDecStr(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] ani_string value)
+ani_array IcuFormatToPartsDecStr(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] ani_string value)
 {
     return IcuFormatToParts<std::string>(env, self, ConvertFromAniString(env, value));
 }
 
-ani_array_ref IcuFormatToRangePartsDoubleDouble(ani_env *env, [[maybe_unused]] ani_object self,
-                                                [[maybe_unused]] ani_double startValue,
-                                                [[maybe_unused]] ani_double endValue)
+ani_array IcuFormatToRangePartsDoubleDouble(ani_env *env, [[maybe_unused]] ani_object self,
+                                            [[maybe_unused]] ani_double startValue,
+                                            [[maybe_unused]] ani_double endValue)
 {
     return IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue), DoubleToFormattable(env, endValue));
 }
 
-ani_array_ref IcuFormatToRangePartsDoubleDecStr(ani_env *env, [[maybe_unused]] ani_object self,
-                                                [[maybe_unused]] ani_double startValue,
-                                                [[maybe_unused]] ani_string endValue)
+ani_array IcuFormatToRangePartsDoubleDecStr(ani_env *env, [[maybe_unused]] ani_object self,
+                                            [[maybe_unused]] ani_double startValue,
+                                            [[maybe_unused]] ani_string endValue)
 {
     return IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue), StrToFormattable(env, endValue));
 }
 
-ani_array_ref IcuFormatToRangePartsDecStrDouble(ani_env *env, [[maybe_unused]] ani_object self,
-                                                [[maybe_unused]] ani_string startValue,
-                                                [[maybe_unused]] ani_double endValue)
+ani_array IcuFormatToRangePartsDecStrDouble(ani_env *env, [[maybe_unused]] ani_object self,
+                                            [[maybe_unused]] ani_string startValue,
+                                            [[maybe_unused]] ani_double endValue)
 {
     return IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), DoubleToFormattable(env, endValue));
 }
 
-ani_array_ref IcuFormatToRangePartsDecStrDecStr(ani_env *env, [[maybe_unused]] ani_object self,
-                                                [[maybe_unused]] ani_string startValue,
-                                                [[maybe_unused]] ani_string endValue)
+ani_array IcuFormatToRangePartsDecStrDecStr(ani_env *env, [[maybe_unused]] ani_object self,
+                                            [[maybe_unused]] ani_string startValue,
+                                            [[maybe_unused]] ani_string endValue)
 {
     return IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), StrToFormattable(env, endValue));
 }
@@ -714,20 +709,17 @@ ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
                              reinterpret_cast<void *>(IcuFormatRangeDecStrDouble)},
         ani_native_function {"formatRangeDecStrDecStr", "Lstd/core/String;Lstd/core/String;:Lstd/core/String;",
                              reinterpret_cast<void *>(IcuFormatRangeDecStrDecStr)},
-        ani_native_function {"formatToPartsDouble", "D:[Lstd/core/Intl/NumberFormatPart;",
+        ani_native_function {"formatToPartsDouble", "D:Lescompat/Array;",
                              reinterpret_cast<void *>(IcuFormatToPartsDouble)},
-        ani_native_function {"formatToPartsDecStr", "Lstd/core/String;:[Lstd/core/Intl/NumberFormatPart;",
+        ani_native_function {"formatToPartsDecStr", "Lstd/core/String;:Lescompat/Array;",
                              reinterpret_cast<void *>(IcuFormatToPartsDecStr)},
-        ani_native_function {"formatToRangePartsDoubleDouble", "DD:[Lstd/core/Intl/NumberRangeFormatPart;",
+        ani_native_function {"formatToRangePartsDoubleDouble", "DD:Lescompat/Array;",
                              reinterpret_cast<void *>(IcuFormatToRangePartsDoubleDouble)},
-        ani_native_function {"formatToRangePartsDoubleDecStr",
-                             "DLstd/core/String;:[Lstd/core/Intl/NumberRangeFormatPart;",
+        ani_native_function {"formatToRangePartsDoubleDecStr", "DLstd/core/String;:Lescompat/Array;",
                              reinterpret_cast<void *>(IcuFormatToRangePartsDoubleDecStr)},
-        ani_native_function {"formatToRangePartsDecStrDouble",
-                             "Lstd/core/String;D:[Lstd/core/Intl/NumberRangeFormatPart;",
+        ani_native_function {"formatToRangePartsDecStrDouble", "Lstd/core/String;D:Lescompat/Array;",
                              reinterpret_cast<void *>(IcuFormatToRangePartsDecStrDouble)},
-        ani_native_function {"formatToRangePartsDecStrDecStr",
-                             "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/NumberRangeFormatPart;",
+        ani_native_function {"formatToRangePartsDecStrDecStr", "Lstd/core/String;Lstd/core/String;:Lescompat/Array;",
                              reinterpret_cast<void *>(IcuFormatToRangePartsDecStrDecStr)},
         ani_native_function {"isUnitCorrect", "Lstd/core/String;:Z", reinterpret_cast<void *>(IsIcuUnitCorrect)},
         ani_native_function {"currencyDigits", "Lstd/core/String;:D", reinterpret_cast<void *>(IcuCurrencyDigits)}};

@@ -28,7 +28,7 @@ ani_status RegisterIntlLocaleMatch(ani_env *env);
 
 ani_string StdCoreIntlBestFitLocale(ani_env *env, ani_class klass, ani_array_ref locales);
 
-ani_string StdCoreIntlLookupLocale(ani_env *env, ani_class klass, ani_array_ref locales);
+ani_string StdCoreIntlLookupLocale(ani_env *env, ani_class klass, ani_array locales);
 
 ani_array_ref StdCoreIntlBestFitLocales(ani_env *env, ani_class klass, ani_array_ref locales);
 

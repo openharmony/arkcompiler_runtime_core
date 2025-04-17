@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetGetRegionCharTest : public AniGTestArrayOps {};
+class ArraySetGetRegionCharTest : public ArrayHelperTest {};
 
 TEST_F(ArraySetGetRegionCharTest, SetCharArrayRegionErrorTests)
 {
@@ -46,7 +46,7 @@ TEST_F(ArraySetGetRegionCharTest, GetCharArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionCharTest, SetCharFixedArrayRegionErrorTests)
 {
     ani_array_char array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, reinterpret_cast<ani_fixedarray_char *>(&array)), ANI_OK);
     ani_char nativeBuffer[LENGTH_10] = {0};
     const ani_size offset1 = -1;
     ASSERT_EQ(env_->Array_SetRegion_Char(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -57,7 +57,7 @@ TEST_F(ArraySetGetRegionCharTest, SetCharFixedArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionCharTest, GetCharFixedArrayRegionErrorTests)
 {
     ani_array_char array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, reinterpret_cast<ani_fixedarray_char *>(&array)), ANI_OK);
     ani_char nativeBuffer[LENGTH_5] = {0};
     ASSERT_EQ(env_->Array_GetRegion_Char(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Char(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -88,7 +88,7 @@ TEST_F(ArraySetGetRegionCharTest, SetRegionCharTest)
 TEST_F(ArraySetGetRegionCharTest, SetRegionCharChangeTest)
 {
     ani_array_char array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, reinterpret_cast<ani_fixedarray_char *>(&array)), ANI_OK);
 
     const auto changedArray =
         static_cast<ani_array_char>(CallEtsFunction<ani_ref>("array_region_char_test", "changeArray", array));
@@ -123,7 +123,7 @@ TEST_F(ArraySetGetRegionCharTest, GetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionCharTest, SetSpecialValueToArrayTest)
 {
     ani_array_char array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_10, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_10, reinterpret_cast<ani_fixedarray_char *>(&array)), ANI_OK);
 
     const std::array<ani_char, LENGTH_10> nativeBuffer = {'a', '0', '\n', '\r', '\t', '\b', '\a', '\v', '\f', '\0'};
     ASSERT_EQ(env_->Array_SetRegion_Char(array, OFFSET_0, LENGTH_10, nativeBuffer.data()), ANI_OK);
@@ -145,7 +145,7 @@ TEST_F(ArraySetGetRegionCharTest, SetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionCharTest, SetGetUnionToArrayTest)
 {
     ani_array_char array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, reinterpret_cast<ani_fixedarray_char *>(&array)), ANI_OK);
 
     std::array<ani_char, LENGTH_5> nativeBuffer = {'a', 'b', 'c', 'd', 'e'};
     ASSERT_EQ(env_->Array_SetRegion_Char(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);
@@ -178,7 +178,7 @@ TEST_F(ArraySetGetRegionCharTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionCharTest, SetGetStabilityToArrayTest)
 {
     ani_array_char array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Char(LENGTH_5, reinterpret_cast<ani_fixedarray_char *>(&array)), ANI_OK);
 
     std::array<ani_char, LENGTH_5> nativeBuffer = {'a', 'b', 'c', 'd', 'e'};
     std::array<ani_char, LENGTH_5> nativeBuffer2 = {};

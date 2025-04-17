@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetGetRegionIntTest : public AniGTestArrayOps {
+class ArraySetGetRegionIntTest : public ArrayHelperTest {
 protected:
     static constexpr ani_int TEST_VALUE1 = 1;
     static constexpr ani_int TEST_VALUE2 = 2;
@@ -61,7 +61,7 @@ TEST_F(ArraySetGetRegionIntTest, GetIntArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionIntTest, SetIntFixedArrayRegionErrorTests)
 {
     ani_array_int array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, reinterpret_cast<ani_fixedarray_int *>(&array)), ANI_OK);
     ani_int nativeBuffer[LENGTH_10] = {0};
     const ani_size offset1 = -1;
     ASSERT_EQ(env_->Array_SetRegion_Int(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -72,7 +72,7 @@ TEST_F(ArraySetGetRegionIntTest, SetIntFixedArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionIntTest, GetIntFixedArrayRegionErrorTests)
 {
     ani_array_int array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, reinterpret_cast<ani_fixedarray_int *>(&array)), ANI_OK);
     ani_int nativeBuffer[LENGTH_10] = {0};
     ASSERT_EQ(env_->Array_GetRegion_Int(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Int(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -165,7 +165,7 @@ TEST_F(ArraySetGetRegionIntTest, GetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionIntTest, SetSpecialValueToArrayTest)
 {
     ani_array_int array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, reinterpret_cast<ani_fixedarray_int *>(&array)), ANI_OK);
 
     const std::array<ani_int, LENGTH_5> nativeBuffer = {-2147483648, 2147483647, 0, -1, 1};
     ASSERT_EQ(env_->Array_SetRegion_Int(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);
@@ -184,7 +184,7 @@ TEST_F(ArraySetGetRegionIntTest, SetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionIntTest, SetGetUnionToArrayTest)
 {
     ani_array_int array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, reinterpret_cast<ani_fixedarray_int *>(&array)), ANI_OK);
 
     std::array<ani_int, LENGTH_5> nativeBuffer = {TEST_VALUE1, TEST_VALUE2, TEST_VALUE3, TEST_VALUE4, TEST_VALUE5};
     ASSERT_EQ(env_->Array_SetRegion_Int(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);
@@ -218,7 +218,7 @@ TEST_F(ArraySetGetRegionIntTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionIntTest, SetGetStabilityToArrayTest)
 {
     ani_array_int array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH_5, reinterpret_cast<ani_fixedarray_int *>(&array)), ANI_OK);
 
     std::array<ani_int, LENGTH_5> nativeBuffer = {TEST_VALUE1, TEST_VALUE2, TEST_VALUE3, TEST_VALUE4, TEST_VALUE5};
     std::array<ani_int, LENGTH_5> nativeBuffer2 = {};

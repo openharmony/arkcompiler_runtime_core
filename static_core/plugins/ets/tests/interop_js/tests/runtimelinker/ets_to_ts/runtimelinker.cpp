@@ -49,12 +49,10 @@ void SetRuntimeLinker(ani_env *env, const std::string &modulePath)
 
     ani_string aniStr {};
     env->String_NewUTF8(modulePath.c_str(), modulePath.size(), &aniStr);
-    ani_class stringCls {};
-    env->FindClass("std.core.String", &stringCls);
 
-    ani_array_ref refArray;
-    env->Array_New_Ref(stringCls, 1, undefinedRef, &refArray);
-    env->Array_Set_Ref(refArray, 0, aniStr);
+    ani_array refArray;
+    env->Array_New(1, undefinedRef, &refArray);
+    env->Array_Set(refArray, 0, aniStr);
 
     std::string clsDescriptor = "std.core.AbcRuntimeLinker";
     ani_class cls {};

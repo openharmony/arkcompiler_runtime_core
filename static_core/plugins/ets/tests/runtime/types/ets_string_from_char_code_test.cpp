@@ -68,7 +68,7 @@ public:
     EtsString *CreateNewStringFromCharCodes(DoubleIter first, DoubleIter last)
     {
         using CharCodeArray = EtsString::CharCodeArray;
-        using CharCode = std::remove_pointer_t<CharCodeArray::ValueType>;
+        using CharCode = EtsBoxPrimitive<EtsDouble>;
         EtsClass *klass = CharCode::GetEtsBoxClass(coroutine_);
         ASSERT(klass != nullptr);
         CharCodeArray *charCodeArray = CharCodeArray::Create(klass, std::distance(first, last));

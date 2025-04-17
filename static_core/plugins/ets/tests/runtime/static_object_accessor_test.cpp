@@ -110,7 +110,7 @@ public:
     template <typename T, typename BoxType>
     void CheckSetAndGetElementByIdx(T val)
     {
-        auto *array = EtsArrayObject<BoxType>::Create(ARRAY_LENGTH);
+        auto *array = EtsEscompatArray::Create(ARRAY_LENGTH);
         auto *baseObject = reinterpret_cast<panda::BaseObject *>(array);
         ASSERT_NE(baseObject, nullptr);
         StaticObjectAccessor staticObjectAccessor;
@@ -265,7 +265,7 @@ TEST_F(StaticObjectAccessorTest, SetAndGetElementByIdx1)
 {
     EtsClass *klass = GetTestClass("Triangle");
     ASSERT_NE(klass, nullptr);
-    auto *array = EtsArrayObject<EtsObject>::Create(ARRAY_LENGTH);
+    auto *array = EtsEscompatArray::Create(ARRAY_LENGTH);
     ASSERT_NE(array, nullptr);
     auto obj = EtsObject::Create(klass);
     auto *coro = EtsCoroutine::GetCurrent();

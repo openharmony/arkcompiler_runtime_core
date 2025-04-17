@@ -35,19 +35,17 @@
 namespace ark::ets {
 
 namespace test {
-template <class ElementType>
-class EtsArrayObjectMembers;
+class EtsEscompatArrayMembers;
 }  // namespace test
 
 // Mirror class for Array<T> from ETS stdlib
-template <class ElementType>
-class EtsArrayObject : public EtsObject {
+class EtsEscompatArray : public EtsObject {
 public:
-    EtsArrayObject() = delete;
-    ~EtsArrayObject() = delete;
+    EtsEscompatArray() = delete;
+    ~EtsEscompatArray() = delete;
 
-    NO_COPY_SEMANTIC(EtsArrayObject);
-    NO_MOVE_SEMANTIC(EtsArrayObject);
+    NO_COPY_SEMANTIC(EtsEscompatArray);
+    NO_MOVE_SEMANTIC(EtsEscompatArray);
 
     EtsObject *AsObject()
     {
@@ -59,64 +57,58 @@ public:
         return this;
     }
 
-    static EtsArrayObject *FromEtsObject(EtsObject *etsObj)
+    static EtsEscompatArray *FromEtsObject(EtsObject *etsObj)
     {
-        return reinterpret_cast<EtsArrayObject *>(etsObj);
+        return reinterpret_cast<EtsEscompatArray *>(etsObj);
     }
 
-    EtsTypedObjectArray<ElementType> *GetData()
+    EtsObjectArray *GetData()
     {
-        return reinterpret_cast<EtsTypedObjectArray<ElementType> *>(GetFieldObject(GetBufferOffset()));
+        auto *buff = ObjectAccessor::GetObject(this, GetBufferOffset());
+        return EtsObjectArray::FromCoreType(buff);
     }
 
     uint32_t GetActualLength()
     {
-        return helpers::ToUnsigned(GetFieldPrimitive<EtsInt>(GetActualLengthOffset()));
+        return actualLength_;
     }
 
     static constexpr size_t GetBufferOffset()
     {
-        return MEMBER_OFFSET(EtsArrayObject, buffer_);
+        return MEMBER_OFFSET(EtsEscompatArray, buffer_);
     }
 
     static constexpr size_t GetActualLengthOffset()
     {
-        return MEMBER_OFFSET(EtsArrayObject, actualLength_);
+        return MEMBER_OFFSET(EtsEscompatArray, actualLength_);
     }
 
-    static EtsArrayObject *Create(size_t length)
+    static EtsEscompatArray *Create(size_t length)
     {
         auto *coro = EtsCoroutine::GetCurrent();
         ASSERT(coro->HasPendingException() == false);
 
         EtsHandleScope scope(coro);
 
-        const EtsPlatformTypes *platformTypes = PlatformTypes(coro->GetPandaVM());
+        const EtsPlatformTypes *platformTypes = PlatformTypes();
+
+        // Create escompat array
         EtsClass *klass = platformTypes->escompatArray;
-        EtsHandle<EtsArrayObject> arrayHandle(coro, FromEtsObject(EtsObject::Create(klass)));
+        EtsHandle<EtsEscompatArray> arrayHandle(coro, FromEtsObject(EtsObject::Create(klass)));
 
-        auto *ctor = klass->GetDirectMethod(coro->GetLanguageContext().GetCtorName(), "I:V");
-        ASSERT(ctor != nullptr);
+        // Create fixed array, field of escompat
+        EtsClass *cls = platformTypes->coreObject;
+        auto buffer = EtsObjectArray::Create(cls, length);
+        ObjectAccessor::SetObject(coro, arrayHandle.GetPtr(), GetBufferOffset(), buffer->GetCoreType());
 
-        std::array args {Value(arrayHandle->GetCoreType()), Value(length)};
-        ctor->GetPandaMethod()->InvokeVoid(coro, args.data());
-
-        if (UNLIKELY(coro->HasPendingException())) {
-            if (coro->GetPandaVM()->GetOOMErrorObject() == nullptr ||
-                (coro->GetException()->ClassAddr<Class>() ==
-                 coro->GetPandaVM()->GetOOMErrorObject()->ClassAddr<Class>())) {
-                coro->ClearException();
-                return nullptr;
-            }
-            // We do not expect any other exception than OOM
-            UNREACHABLE();
-        }
+        // Set length
+        arrayHandle->actualLength_ = length;
 
         return arrayHandle.GetPtr();
     }
 
     /// @return Returns a status code of bool indicating success or failure.
-    bool SetRef(size_t index, ElementType *ref)
+    bool SetRef(size_t index, EtsObject *ref)
     {
         if (index >= GetActualLength()) {
             return false;
@@ -127,7 +119,7 @@ public:
     }
 
     /// @return Returns a status code of bool indicating success or failure.
-    bool GetRef(size_t index, ElementType **ref)
+    bool GetRef(size_t index, EtsObject **ref)
     {
         ASSERT(ref != nullptr);
         if (index >= GetActualLength()) {
@@ -138,21 +130,41 @@ public:
         return true;
     }
 
+    void Push(EtsObject *ref)
+    {
+        auto *coro = EtsCoroutine::GetCurrent();
+        ASSERT(coro->HasPendingException() == false);
+
+        EtsHandleScope scope(coro);
+
+        auto *pushMethod = PlatformTypes()->escompatArrayPush;
+        ASSERT(pushMethod != nullptr);
+
+        std::array args {Value(GetCoreType()), Value(ref->GetCoreType())};
+        pushMethod->GetPandaMethod()->Invoke(coro, args.data());
+    }
+
+    EtsObject *Pop()
+    {
+        auto *coro = EtsCoroutine::GetCurrent();
+        ASSERT(coro->HasPendingException() == false);
+
+        EtsHandleScope scope(coro);
+
+        auto *popMethod = PlatformTypes()->escompatArrayPop;
+        ASSERT(popMethod != nullptr);
+
+        std::array args {Value(GetCoreType())};
+        auto res = popMethod->GetPandaMethod()->Invoke(coro, args.data());
+        return FromCoreType(res.GetAs<ObjectHeader *>());
+    }
+
 private:
-    ObjectPointer<EtsTypedObjectArray<ElementType>> buffer_;
+    ObjectPointer<EtsObjectArray> buffer_;
     EtsInt actualLength_;
 
-    friend class test::EtsArrayObjectMembers<ElementType>;
+    friend class test::EtsEscompatArrayMembers;
 };
-
-using EtsBoxedBooleanArray = EtsArrayObject<EtsBoxPrimitive<EtsBoolean>>;
-using EtsBoxedByteArray = EtsArrayObject<EtsBoxPrimitive<EtsByte>>;
-using EtsBoxedCharArray = EtsArrayObject<EtsBoxPrimitive<EtsChar>>;
-using EtsBoxedShortArray = EtsArrayObject<EtsBoxPrimitive<EtsShort>>;
-using EtsBoxedIntArray = EtsArrayObject<EtsBoxPrimitive<EtsInt>>;
-using EtsBoxedLongArray = EtsArrayObject<EtsBoxPrimitive<EtsLong>>;
-using EtsBoxedFloatArray = EtsArrayObject<EtsBoxPrimitive<EtsFloat>>;
-using EtsBoxedDoubleArray = EtsArrayObject<EtsBoxPrimitive<EtsDouble>>;
 
 }  // namespace ark::ets
 

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetGetRegionBooleanTest : public AniGTestArrayOps {};
+class ArraySetGetRegionBooleanTest : public ArrayHelperTest {};
 
 TEST_F(ArraySetGetRegionBooleanTest, SetBooleanArrayRegionErrorTests)
 {
@@ -46,7 +46,7 @@ TEST_F(ArraySetGetRegionBooleanTest, GetBooleanArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionBooleanTest, SetBooleanFixedArrayRegionErrorTests)
 {
     ani_array_boolean array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
     ani_boolean nativeBuffer[LENGTH_10] = {ANI_FALSE};
     const ani_size offset1 = -1;
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -57,7 +57,7 @@ TEST_F(ArraySetGetRegionBooleanTest, SetBooleanFixedArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionBooleanTest, GetBooleanFixedArrayRegionErrorTests)
 {
     ani_array_boolean array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
     ani_boolean nativeBuffer[LENGTH_10] = {ANI_TRUE};
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Boolean(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -137,7 +137,7 @@ TEST_F(ArraySetGetRegionBooleanTest, CheckChangeFromApiRegionBooleanTest)
 TEST_F(ArraySetGetRegionBooleanTest, SetGetUnionToArrayTest)
 {
     ani_array_boolean array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
 
     std::array<ani_boolean, LENGTH_5> nativeBuffer = {ANI_TRUE, ANI_FALSE, ANI_TRUE, ANI_FALSE, ANI_TRUE};
     ASSERT_EQ(env_->Array_SetRegion_Boolean(array, OFFSET_0, LENGTH_5, nativeBuffer.data()), ANI_OK);
@@ -171,7 +171,7 @@ TEST_F(ArraySetGetRegionBooleanTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionBooleanTest, SetGetStabilityToArrayTest)
 {
     ani_array_boolean array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Boolean(LENGTH_5, reinterpret_cast<ani_fixedarray_boolean *>(&array)), ANI_OK);
 
     std::array<ani_boolean, LENGTH_5> nativeBuffer = {ANI_TRUE, ANI_FALSE, ANI_TRUE, ANI_FALSE, ANI_TRUE};
     std::array<ani_boolean, LENGTH_5> nativeBuffer2 = {ANI_FALSE};

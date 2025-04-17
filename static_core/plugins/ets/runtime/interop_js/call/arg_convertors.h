@@ -191,8 +191,8 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
         ASSERT(protoReader.GetClass() == ctx->GetArrayClass());
         const size_t numRestParams = jsargv.size();
 
-        EtsArrayObject<EtsObject> *objArr = EtsArrayObject<EtsObject>::Create(numRestParams);
-        VMHandle<EtsArrayObject<EtsObject>> restArgsArray(coro, objArr->GetCoreType());
+        EtsEscompatArray *objArr = EtsEscompatArray::Create(numRestParams);
+        VMHandle<EtsEscompatArray> restArgsArray(coro, objArr->GetCoreType());
         for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
             auto jsVal = jsargv[restArgIdx];
             auto store = [restArgIdx, &restArgsArray](ObjectHeader *val) {

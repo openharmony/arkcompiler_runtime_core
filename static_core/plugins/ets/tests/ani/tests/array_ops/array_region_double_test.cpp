@@ -14,13 +14,13 @@
  */
 
 #include "ani.h"
-#include "ani_gtest_array_ops.h"
+#include "array_gtest_helper.h"
 #include <iostream>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
 namespace ark::ets::ani::testing {
 
-class ArraySetGetRegionDoubleTest : public AniGTestArrayOps {
+class ArraySetGetRegionDoubleTest : public ArrayHelperTest {
 protected:
     static constexpr double TEST_VALUE_1 = 1.0;
     static constexpr double TEST_VALUE_2 = 2.0;
@@ -62,7 +62,7 @@ TEST_F(ArraySetGetRegionDoubleTest, GetDoubleArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionDoubleTest, SetDoubleFixedArrayRegionErrorTests)
 {
     ani_array_double array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, reinterpret_cast<ani_fixedarray_double *>(&array)), ANI_OK);
     ani_double nativeBuffer[LENGTH_5] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
     const ani_size offset1 = -1;
     ASSERT_EQ(env_->Array_SetRegion_Double(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -73,7 +73,7 @@ TEST_F(ArraySetGetRegionDoubleTest, SetDoubleFixedArrayRegionErrorTests)
 TEST_F(ArraySetGetRegionDoubleTest, GetDoubleFixedArrayRegionErrorTests)
 {
     ani_array_double array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, reinterpret_cast<ani_fixedarray_double *>(&array)), ANI_OK);
     ani_double nativeBuffer[LENGTH_10] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
     ASSERT_EQ(env_->Array_GetRegion_Double(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Double(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
@@ -172,7 +172,7 @@ TEST_F(ArraySetGetRegionDoubleTest, GetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionDoubleTest, SetSpecialValueToArrayTest)
 {
     ani_array_double array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_6, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_6, reinterpret_cast<ani_fixedarray_double *>(&array)), ANI_OK);
 
     ani_double max = std::numeric_limits<double>::max();
     ani_double minPositive = std::numeric_limits<double>::min();
@@ -193,7 +193,7 @@ TEST_F(ArraySetGetRegionDoubleTest, SetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionDoubleTest, SetGetUnionToArrayTest)
 {
     ani_array_double array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, reinterpret_cast<ani_fixedarray_double *>(&array)), ANI_OK);
 
     std::array<ani_double, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                      TEST_VALUE_5};
@@ -228,7 +228,7 @@ TEST_F(ArraySetGetRegionDoubleTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionDoubleTest, SetGetStabilityToArrayTest)
 {
     ani_array_double array = nullptr;
-    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Double(LENGTH_5, reinterpret_cast<ani_fixedarray_double *>(&array)), ANI_OK);
 
     std::array<ani_double, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                      TEST_VALUE_5};

@@ -194,8 +194,8 @@ static void ReadChildProcessStdOut(ani_env *env, ani_object child)
             ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "outFd", -1));
         }
 
-        ANI_FATAL_IF_ERROR(env->Array_SetRegion_Byte(reinterpret_cast<ani_array_byte>(outBuffer), outBytesRead,
-                                                     bytesRead, buffer.data()));
+        ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Byte(reinterpret_cast<ani_fixedarray_byte>(outBuffer),
+                                                          outBytesRead, bytesRead, buffer.data()));
         ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "outBytesRead", outBytesRead + bytesRead));
     }
 }
@@ -248,8 +248,8 @@ static void ReadChildProcessStdErr(ani_env *env, ani_object child)
             ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "errorFd", -1));
         }
 
-        ANI_FATAL_IF_ERROR(env->Array_SetRegion_Byte(reinterpret_cast<ani_array_byte>(errBuffer), errBytesRead,
-                                                     bytesRead, buffer.data()));
+        ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Byte(reinterpret_cast<ani_fixedarray_byte>(errBuffer),
+                                                          errBytesRead, bytesRead, buffer.data()));
         ANI_FATAL_IF_ERROR(env->Object_SetField_Int(child, errBytesReadId, errBytesRead + bytesRead));
     }
 }
@@ -463,20 +463,31 @@ static ani_double GetEgid([[maybe_unused]] ani_env *env)
     return ark::os::thread::GetEgid();
 }
 
-static ani_array_double GetGroupIDs(ani_env *env)
+static ani_array GetGroupIDs(ani_env *env)
 {
     auto groups = ark::os::thread::GetGroups();
     auto groupIds = std::vector<ani_double>(groups.begin(), groups.end());
 
-    ani_array_double result;
-    ANI_FATAL_IF_ERROR(env->Array_New_Double(groups.size(), &result));
+    ani_array result;
+    ANI_FATAL_IF_ERROR(env->Array_New(groups.size(), nullptr, &result));
 
     if (groups.empty()) {
         ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to get process groups", "Lstd/core/String;:V");
         return result;
     }
 
-    ANI_FATAL_IF_ERROR(env->Array_SetRegion_Double(result, 0, groups.size(), groupIds.data()));
+    ani_class doubleClass {};
+    ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Double;", &doubleClass));
+
+    ani_method doubleCtor;
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleCtor));
+
+    for (size_t i = 0; i < groups.size(); ++i) {
+        ani_object boxedDouble {};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ANI_FATAL_IF_ERROR(env->Object_New(doubleClass, doubleCtor, &boxedDouble, groupIds[i]));
+        ANI_FATAL_IF_ERROR(env->Array_Set(result, i, boxedDouble));
+    }
 
     return result;
 }
@@ -550,7 +561,7 @@ void RegisterProcessNativeMethods(ani_env *env)
         ani_native_function {"euid", ":D", reinterpret_cast<void *>(GetEuid)},
         ani_native_function {"gid", ":D", reinterpret_cast<void *>(GetGid)},
         ani_native_function {"egid", ":D", reinterpret_cast<void *>(GetEgid)},
-        ani_native_function {"groups", ":[D", reinterpret_cast<void *>(GetGroupIDs)},
+        ani_native_function {"groups", ":Lescompat/Array;", reinterpret_cast<void *>(GetGroupIDs)},
         ani_native_function {"is64Bit", ":Z", reinterpret_cast<void *>(Is64BitProcess)},
         ani_native_function {"getStartRealtime", ":D", reinterpret_cast<void *>(GetProcessStartRealTime)},
         ani_native_function {"getPastCpuTime", ":D", reinterpret_cast<void *>(GetProcessPastCpuTime)},
