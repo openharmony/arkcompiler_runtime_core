@@ -24,5 +24,20 @@ function main(): int {
     failure += ((new Boolean(undefined)).valueOf() == false) ? 0 : 1
     failure += ((new Boolean(false)).valueOf() == false) ? 0 : 1
     failure += ((new Boolean(true)).valueOf() == true) ? 0 : 1
+
+    const suite = new ArkTestsuite("Boolean API test for SDK");
+    suite.addTest("Boolean constructor", testBooleanConstructor);
+    failure += suite.run();
+
     return failure;
+}
+
+class TestData {
+    static readonly a: boolean = new Boolean(new Object());
+    static readonly expected: boolean = true;
+}
+
+function testBooleanConstructor() {
+    let a = TestData.a;
+    assertEQ(TestData.expected, a);
 }
