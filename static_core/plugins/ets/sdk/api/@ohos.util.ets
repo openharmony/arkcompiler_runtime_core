@@ -13,9 +13,212 @@
  * limitations under the License.
  */
 
-package api;
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const percentRate = 100;
+
+function createBusinessError(code: number, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
 
 export namespace util {
+
+    export class LRUCache<K, V> {
+        private cache: Map<K, V>;
+        // Default current size
+        private maxSize: number;
+        // Default maximum size
+        private putCount: long = 0;
+        private createCount: long = 0;
+        private evictionCount: long = 0;
+        private hitCount: long = 0;
+        private missCount: long = 0;
+
+        get length(): number {
+            return this.cache.size;
+        }
+
+        public constructor(capacity?: number) {
+            if (capacity == undefined) {
+                this.maxSize = 64;
+            } else {
+                if (this.checkCapacityIsIllegal(capacity)) {
+                    throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${capacity} must be small integer`)
+                }
+                this.maxSize = capacity;
+            }
+            this.cache = new Map<K, V>();
+        }
+
+        private checkCapacityIsIllegal(capacity: number): boolean {
+            return (capacity > Int.MAX_VALUE || capacity <= 0 || (capacity % 1) != 0);
+        }
+
+        private getLRUKey(): K {
+            return this.cache.keys().next().value as K;
+        }
+
+        private getLRUValue(): V {
+            return this.cache.values().next().value as V;
+        }
+
+        private reduceCapacity(newCapacity: number): void {
+            while (this.cache.keys().next() && this.cache.size > newCapacity) {
+                let lruKey = this.getLRUKey();
+                this.afterRemoval(true, lruKey, this.getLRUValue(), undefined);
+                this.cache.delete(lruKey);
+                this.evictionCount++;
+            }
+        }
+
+        protected afterRemoval(isEvict: boolean, key: K | undefined, value: V | undefined,
+            newValue: V | undefined): void {
+        }
+
+        public updateCapacity(newCapacity: number): void {
+            if (this.checkCapacityIsIllegal(newCapacity)) {
+                throw createBusinessError(TypeErrorCodeId, `Parameter error. The type of ${newCapacity} must be small integer`)
+            } else if (this.cache.size > newCapacity) {
+                this.reduceCapacity(newCapacity);
+            }
+            this.maxSize = newCapacity;
+        }
+
+        public getCapacity(): number {
+            return this.maxSize;
+        }
+
+        public clear(): void {
+            this.cache.forEach((v, k) => {
+                this.afterRemoval(false, k, v, undefined);
+            })
+            this.cache.clear();
+        }
+
+        public isEmpty(): boolean {
+            return (this.cache.size == 0);
+        }
+
+        public put(key: K, value: V): V | undefined {
+            let valueBefore: V | undefined = undefined;
+            this.putCount++;
+            if (this.cache.has(key)) {
+                valueBefore = this.cache.get(key);
+                this.cache.delete(key);
+                this.afterRemoval(false, key, valueBefore, value);
+            }
+            this.cache.set(key, value);
+            if (this.cache.size > this.maxSize) {
+                this.reduceCapacity(this.maxSize);
+            }
+            return valueBefore;
+        }
+
+        override toString(): String {
+            let peek: number = 0;
+            let hitRate: number = 0;
+            peek = this.hitCount + this.missCount;
+            if (peek != 0) {
+                // The value is 100 times larger
+                hitRate = percentRate * this.hitCount / peek;
+            }
+            return 'LRUCache[ maxSize = ' + this.maxSize + ', hits = ' + this.hitCount +
+                ', misses = ' + this.missCount + ', hitRate = ' + hitRate + '% ]';
+        }
+
+        public getCreateCount(): number {
+            return this.createCount as number;
+        }
+
+        public getMissCount(): number {
+            return this.missCount as number;
+        }
+
+        public getRemovalCount(): number {
+            return this.evictionCount as number;
+        }
+
+        public getMatchCount(): number {
+            return this.hitCount as number;
+        }
+
+        public getPutCount(): number {
+            return this.putCount as number;
+        }
+
+        public $_iterator(): IterableIterator<[K, V]> {
+            return this.cache.entries();
+        }
+
+        public entries(): IterableIterator<[K, V]> {
+            return this.cache.entries();
+        }
+
+        public keys(): Array<K> {
+            let arr = Array.from<K>(this.cache.keys());
+            return arr;
+        }
+
+        public values(): Array<V> {
+            let arr = Array.from<V>(this.cache.values());
+            return arr;
+        }
+
+        public remove(key: K): V | undefined {
+            if (this.cache.has(key)) {
+                let former: V | undefined = this.cache.get(key);
+                this.cache.delete(key);
+                if (former != undefined) {
+                    this.afterRemoval(false, key, former, undefined);
+                    return former;
+                }
+            }
+            return undefined;
+        }
+
+        public get(key: K): V | undefined {
+            if (this.cache.has(key)) {
+                return this.containsInner(key);
+            }
+            this.missCount++;
+            let createValue: V | undefined = this.createDefault(key);
+            if (createValue == undefined) {
+                return undefined;
+            } else {
+                this.put(key, createValue);
+                this.createCount++;
+                return createValue;
+            }
+
+        }
+
+        protected createDefault(key: K): V | undefined {
+            return undefined;
+        }
+
+        private containsInner(key: K): V | undefined {
+            this.hitCount++;
+            let value: V | undefined = this.cache.get(key);
+            this.cache.delete(key);
+            this.cache.set(key, value as V);
+            return value;
+        }
+
+        public contains(key: K): boolean {
+            if (this.cache.has(key)) {
+                this.containsInner(key);
+                return true;
+            }
+            this.missCount++;
+            return false;
+        }
+    }
+
     export enum Type {
         BASIC,
         MIME,
@@ -36,7 +239,7 @@ export namespace util {
         private static readonly BASE64_MASK = 0x3F;
         private static readonly LINE_BREAK_FREQUENCY = 76;
 
-        constructor() {}
+        constructor() { }
 
         /**
          * Encodes the given byte array into a Base64 string.
@@ -251,7 +454,7 @@ export namespace util {
             return s.replaceAll("%%", "%")
         }
 
-        while((i = (ss = s.substring(preI, s.length)).search("%") as int) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
+        while ((i = (ss = s.substring(preI, s.length)).search("%") as int) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
             res.append(s.substring(preI, preI + i))
             let flagIndex = preI + i + 1
             //NOTE(ivan-tyulyandin): has to be string due to internal issue 21459
@@ -267,7 +470,7 @@ export namespace util {
             preI += i + 2
         }
         if (preI < s.length) {
-            res.append(s.substring(preI,s.length))
+            res.append(s.substring(preI, s.length))
         }
         let strArgsList = UtilHelper.joinLastArgs(argCounter, ...args)
         let resStr = res.toString()
@@ -280,7 +483,7 @@ export namespace util {
     }
 
     export interface ScopeComparable<T> {
-        
+
         /**
         * The comparison function is used by the scope.
         *
@@ -377,7 +580,7 @@ export namespace util {
         * @returns { ScopeHelper } Returns the smallest range that includes the current range and the given lower and upper bounds.
         */
         expand(lowerObj: T, upperObj: T): ScopeHelper<T> {
-            let lowerLimit = this._lowerLimit.compareTo(lowerObj) ? lowerObj : this._lowerLimit 
+            let lowerLimit = this._lowerLimit.compareTo(lowerObj) ? lowerObj : this._lowerLimit
             let upperLimit = this._upperLimit.compareTo(upperObj) ? this._upperLimit : upperObj
             return new ScopeHelper<T>(lowerLimit, upperLimit)
         }
@@ -539,7 +742,7 @@ export namespace util {
             let tempString: string = encoding.toLowerCase();
             let flag: boolean = TextEncoder.checkEncodingFormat(tempString);
             if (!flag) {
-                throw new BusinessError(`Wrong encoding format, the current '${encoding}' format is not support.`);
+                throw createBusinessError(TypeErrorCodeId, `Wrong encoding format, the current '${encoding}' format is not support.`)
             }
             this.encoding_ = tempString;
         }
@@ -592,5 +795,287 @@ export namespace util {
         private static native doEncodeInfoUint8Array(
             input: string, inputEncoding: string, destArray: Uint8Array): EncodeIntoUint8ArrayInfo;
     }
+
+    export class UtilHelper {
+
+        static {
+            loadLibrary("ets_sdk_native")
+        }
+
+        static native generateRandomUUID(entropyCache: boolean): string
+
+    internal static objectToString(obj: Object, full: boolean = false): string {
+            return (new UtilHelper).stringifyObject(obj, '\n', 1, full)
+        }
+
+        private static isNullObject(obj: NullishType): boolean {
+            return (obj == undefined) || (obj == null)
+        }
+
+        private static isFunction(obj: Object): boolean {
+            return (typeof obj === 'function')
+        }
+
+        private static isObject(obj: Object): boolean {
+            return (typeof obj === 'object')
+        }
+
+        private static isString(obj: Object): boolean {
+            return (typeof obj === 'string')
+        }
+
+        private static isArray(obj: Object): boolean {
+            return obj instanceof Array
+        }
+
+        private stringifySubObject(delimiter: string, subObj: NullishType, subObjName: string, depth: number, full: boolean = false): string {
+
+            if (UtilHelper.isNullObject(subObj)) {
+                return UtilHelper.nullObjectDescription(subObjName) + ',' + delimiter
+            }
+
+            let strB = new StringBuilder
+
+            if (UtilHelper.isArray(subObj!)) {
+                strB.append(subObjName + ':' + delimiter + UtilHelper.arrayToString(delimiter + '  ', subObj! as Array<Object>, depth, full))
+            } else if (UtilHelper.isObject(subObj!)) {
+                strB.append(this.subObjectDescription(subObj!, subObjName, this.isCircular(subObj!), delimiter, depth))
+            } else if (UtilHelper.isFunction(subObj!)) {
+                strB.append(UtilHelper.functionDescription(subObj!, delimiter, true, full))
+            } else {
+                strB.append(UtilHelper.simpleObjectDescription(subObj!, subObjName, true))
+            }
+            this.objects.add(subObj!)
+
+            strB.append(',' + delimiter)
+            return strB.toString()
+        }
+
+        private objectDescription(obj: Object, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+
+            let strB = new StringBuilder('{ ')
+            let isComplexObject: boolean = false
+
+            for (const objEntry of Object.entries(obj)) {
+                if (!objEntry) {
+                    continue
+                }
+                isComplexObject = true
+                strB.append(this.stringifySubObject(delimiter, objEntry[1], objEntry[0], depth, full))
+            }
+
+            if (!isComplexObject) {
+                return JSON.stringify(obj)
+            }
+
+            return strB.toString().slice(0, - delimiter.length - 1) + ' }'
+        }
+
+        private subObjectDescription(obj: Object, objName: string, isCircular: boolean, delimiter: string, depth: number): string {
+            if (isCircular) {
+                return objName + ': [Circular]' + delimiter
+            }
+            return objName + ':' + delimiter + this.stringifyObject(obj, delimiter + '  ', depth + 1, true)
+        }
+
+        private objects = new Set<Object>
+
+        private isCircular(obj: NullishType): boolean {
+            if (obj == null) {
+                return false
+            }
+
+            return this.objects.has(obj)
+        }
+
+        private static nullObjectDescription(objName: string = ''): string {
+            return ((objName != '') ? objName + ': ' : '') + null
+        }
+
+        private static simpleObjectDescription(obj: Object, objName: string = '', isSub: boolean = false): string {
+            let quotesStr = UtilHelper.isString(obj) ? '\'' : ''
+            return (isSub ? objName + ': ' : '') + quotesStr + obj + quotesStr
+        }
+
+        private stringifyObject(obj: NullishType, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
+
+            if (UtilHelper.isNullObject(obj)) {
+                return UtilHelper.nullObjectDescription()
+            }
+
+            this.objects.add(obj!)
+            let strB = new StringBuilder
+            if (UtilHelper.isArray(obj!)) {
+                strB.append(UtilHelper.arrayToString(delimiter, obj! as Array<Object>, depth, full))
+            } else if (UtilHelper.isFunction(obj!)) {
+                strB.append(UtilHelper.functionDescription(obj!, delimiter, false, full))
+                if (!full) {
+                    strB = (new StringBuilder).append('{ ').append(strB.toString()).append(' }')
+                }
+            } else if (UtilHelper.isObject(obj!)) {
+                strB.append(this.objectDescription(obj!, delimiter, depth, full))
+            } else {
+                strB.append(UtilHelper.simpleObjectDescription(obj!, ''))
+            }
+            return strB.toString()
+        }
+
+        private static arrayToString(delimiter: string, arr: Array<Object>, depth: number, full: boolean = false): string {
+            return ('[ ' + UtilHelper.arrayToStringImpl(delimiter, arr, depth, full) + (full ? ('[length]: ' + arr.length) : '') + ' ]')
+        }
+
+        private static functionDescription(obj: Object, delimiter: string = '\n', isSub: boolean = false, full: boolean = false, inArray: boolean = false): string {
+            let strB = new StringBuilder
+            let functionName = UtilHelper.getName(obj)
+            strB.append((isSub && functionName !== '') ? (functionName + ':' + delimiter) : '');
+
+            let baseFunctionStr = '[Function: ' + functionName + ']'
+
+            if (full) {
+                let end = delimiter + (inArray || isSub) ? '  ' : '';
+                let length = UtilHelper.getLength(obj)
+                strB.append('{ ' + baseFunctionStr + end +
+                    '[length]: ' + (length ? length : 0) + ',' + end +
+                    '[name] :\'' + functionName + '\',' + end +
+                    '[prototype]: ' + functionName + ' { [constructor]: [Circular] } }')
+            } else {
+                strB.append(baseFunctionStr)
+            }
+
+            return strB.toString()
+        }
+
+        private static arrayToStringImpl(delimiter: string, arr: Array<Object>, depth: number, full: boolean = false): string {
+            if (!arr.length) {
+                return ''
+            }
+
+            let arrayDelimiter: string = ', '
+
+            for (let item of arr) {
+                if (!UtilHelper.isNullObject(item) && (UtilHelper.isFunction(item) || UtilHelper.isObject(item) && depth <= 2)) {
+                    arrayDelimiter += delimiter
+                    break
+                }
+            }
+
+            let strB = new StringBuilder
+            for (let item of arr) {
+                if (UtilHelper.isObject(item)) {
+                    strB.append((new UtilHelper).stringifyObject(item, delimiter + '  ', depth + 1, full))
+                } else if (UtilHelper.isFunction(item)) {
+                    strB.append(UtilHelper.functionDescription(item, delimiter, false, full, true))
+                } else {
+                    strB.append(UtilHelper.simpleObjectDescription(item, full ? UtilHelper.getName(item) : ''))
+                }
+                strB.append(arrayDelimiter)
+            }
+
+            return strB.toString().slice(0, -arrayDelimiter.length)
+        }
+
+        private static getName(obj: Object): string {
+            let subObj = UtilHelper.getValue("name", obj)
+            return subObj ? subObj! as string : 'null'
+        }
+
+        private static getLength(obj: Object): int {
+            let subObj = UtilHelper.getValue("length", obj)
+            return subObj ? subObj! as int : 0
+        }
+
+        private static getValue(key: string, obj: Object): NullishType {
+            if (!obj) {
+                return null
+            }
+            for (const objEntry of Object.entries(obj)) {
+                if (!objEntry) {
+                    continue
+                }
+                if ((!objEntry[0]) && (objEntry[0] == key)) {
+                    return objEntry[1]
+                }
+            }
+            return null
+        }
+
+        /**
+          * Remove html tag, css, js of html string to extract the contents
+          * @param {String} html
+          * @return {String} contents of the html
+          */
+        static extractContents(html: string): string {
+            return html
+                .replace(new RegExp("(\n|\r|\t)", "gm"), '') // remove linebreaks
+                .replace(new RegExp("<(style|script|link|noscript).*?>.*?<\/(style|script|link|noscript)>", "g"), '') // remove css, js blocks
+                .replace(new RegExp("<!--.*?-->", "g"), '') // remove comments
+                .replace(new RegExp("<.*?>", "g"), '') // remove tags
+                .replace(new RegExp("[\s\!\@\#\$\%\^\&\*\(\)\_\+\-\=\{\}\[\]\:\"\;\'\<\>\?\,\.\/\|\\\`\~]+", "g"), '') // remove Chars
+                .trim()
+        }
+
+        static processArg(flag: string, arg: Object): string {
+            // %c: CSS. This specifier is ignored and will skip any CSS passed in.
+            if (flag == "c" && (arg instanceof String)) {
+                return UtilHelper.extractContents(arg as string)
+            } else if (flag == "s" && !(arg instanceof BigInt)) {
+                if (arg instanceof BigInt || arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return arg as string
+            } else if (flag == "d") {
+                if (arg instanceof BigInt || arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return "" + new Number(arg.toString())
+            } else if (flag == "i") {
+                if (arg instanceof BigInt || arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return "" + parseInt(arg as string, 10)
+            }
+            else if (flag == "f") {
+                if (arg instanceof Char) {
+                    throw new Error("invalid flag " + flag + " for arg " + arg as string)
+                }
+                return "" + parseFloat(arg as string)
+            } else if (flag == "j") {
+                let res = ""
+                try {
+                    res = JSON.stringify(arg)
+                }
+                catch (error) {
+                    if (typeof arg === "object") {
+                        return UtilHelper.objectToString(arg)
+                    } else {
+                        throw new Error("error parse json")
+                    }
+                }
+
+                return res
+            } else if (flag == "o") {
+                // Object. A string representation of an object
+                // Similar to util.inspect() with options { showHidden: true, showProxy: true }
+                return UtilHelper.objectToString(arg, true)
+            } else if (flag == "O") {
+                // Object. A string representation of an object
+                // Similar to util.inspect() without options
+                return UtilHelper.objectToString(arg)
+            }
+
+            return "%" + flag
+        }
+
+        static joinLastArgs(index: int, ...args: Object[]): string {
+            let sb = new StringBuilder
+            for (let i = index; i < args.length; ++i) {
+                sb.append(" ")
+                sb.append(args[i])
+            }
+            let res = sb.toString()
+            return res
+        }
+
+    }  // class UtilHelper
 }
 

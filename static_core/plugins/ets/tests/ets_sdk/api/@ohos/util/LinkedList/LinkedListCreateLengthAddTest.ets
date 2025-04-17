@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LinkedList} from 'api';
+import {LinkedList} from "@ohos.util.LinkedList";
 
 function main() {
     const suite = new ArkTestsuite("LinkedList Create, Length, and Add API tests");

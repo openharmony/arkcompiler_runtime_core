@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { uri, BusinessError } from "api"
+import { uri } from "@ohos.uri";
+import { BusinessError } from "@ohos.base";
 
 function testUriConstruction001() {
   try {
@@ -402,7 +403,7 @@ function main(): int {
   suite.addTest("testUriConstruction029", testUriConstruction029);
   suite.addTest("testUriConstruction030", testUriConstruction030);
   suite.addTest("testUriConstruction031", testUriConstruction031);
-  
+
   //passed
   return suite.run();
 }

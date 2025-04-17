@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-package api;
-
-
 export class ArrayList<T> implements Iterable<T> {
     private readonly DEFAULT_CAPACITY = 8;
     private capacity: int = this.DEFAULT_CAPACITY;

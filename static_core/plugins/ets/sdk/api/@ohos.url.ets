@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
-package api;
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const SyntaxErrorCodeId: number = 10200002;
+
+function createBusinessError(code: number, message:string){
+    let err = new BusinessError();
+    err.code = code;
+    err.name='BusinessError';
+    err.message = message;
+    return err;
+}
 
 export namespace url {
 
@@ -1640,16 +1651,13 @@ export namespace url {
             } else {
                 if (typeof inputBase == 'string') {
                     let inputBaseStr = inputBase as string;
-                    if (inputBaseStr.length == 0) {
-                        throw new Error(`Parameter error. The type of ${inputBaseStr} must be string.`);
-                    }
                     nativeUrl = URL.parseBaseInput(fixIllegalString(inputUrl), fixIllegalString(inputBaseStr));
                 } else {
                     nativeUrl = URL.parseBaseUrl(fixIllegalString(inputUrl), inputBase as URL);
                 }
             }
             if (nativeUrl.urlInner.flags[0]) {
-                throw new BusinessError('Syntax Error. Invalid Url string.', SyntaxErrorCodeId);
+                throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
             }
             setEncodedData(nativeUrl, nativeUrl.urlInner);
             return nativeUrl;
@@ -1807,7 +1815,7 @@ export namespace url {
             if (!this.urlInner.flags[0]) {
                 setEncodedData(this, this.urlInner);
             } else {
-                throw new BusinessError('Syntax Error. Invalid Url string.', SyntaxErrorCodeId);
+                throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid Url string.');
             }
         }
 
@@ -2226,7 +2234,7 @@ export namespace url {
         } else if (input instanceof Record) {
             return parseParamFromRecord(input as Record<string, string>)
         } else {
-            throw new BusinessError('Syntax Error. Invalid input type.', SyntaxErrorCodeId);
+            throw createBusinessError(SyntaxErrorCodeId,'Syntax Error. Invalid input type.');
         }
     }
 
@@ -2235,7 +2243,7 @@ export namespace url {
         if (input.length == 0) {
             return result;
         } else if (input[0][0] == undefined || input[0][1] == undefined) {
-            throw new BusinessError('BusinessError: Parameter error. The type of input must be string[][].', SyntaxErrorCodeId);
+            throw createBusinessError(SyntaxErrorCodeId,'Parameter error. The type of input must be string[][].');
         }
 
         for (let it of input) {

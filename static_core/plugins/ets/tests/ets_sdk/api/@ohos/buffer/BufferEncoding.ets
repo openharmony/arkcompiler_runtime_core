@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {buffer} from "api/@ohos.buffer.ets"
+import buffer from "@ohos.buffer"
 
 type ExpectedBufferEncoding =
     'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' |

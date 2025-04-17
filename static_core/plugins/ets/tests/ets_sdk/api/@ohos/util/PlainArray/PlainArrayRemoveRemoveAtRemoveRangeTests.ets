@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { PlainArray } from "api";
+import { PlainArray } from "@ohos.util.PlainArray";
 
 function main(): int {
     const suite = new ArkTestsuite("PlainArray API tests");

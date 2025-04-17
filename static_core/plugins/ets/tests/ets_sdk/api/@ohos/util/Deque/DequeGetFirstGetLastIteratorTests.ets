@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Deque} from "api"
+import Deque from "@ohos.util.Deque";
 
 function main(): int {
     const suite = new ArkTestsuite("Deque API tests");

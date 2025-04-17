@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LightWeightSet} from "api"
+import {LightWeightSet} from "@ohos.util.LightWeightSet";
 
 const success = 0;
 const fail = 1;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {HashSet} from "api"
+import {HashSet} from "@ohos.util.HashSet";
 
 const success = 0;
 const fail = 1;

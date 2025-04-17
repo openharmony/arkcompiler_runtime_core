@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { uri, BusinessError } from "api"
+import {uri} from "@ohos.uri";
+import { BusinessError } from "@ohos.base";
 
 function testUriGetLastSegment001() {
   let route = new uri.URI('content://com.test.uri/files/image.jpg');

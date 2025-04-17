@@ -24,6 +24,11 @@ namespace ark::ets::sdk::util {
 ANI_EXPORT ani_string ETSApiUtilHelperGenerateRandomUUID(ani_env *env, [[maybe_unused]] ani_class klass,
                                                          ani_boolean entropyCache);
 
+ANI_EXPORT void ThrowNewError(ani_env *env, std::string_view classDescriptor, std::string_view msg,
+                              const char *ctorSignature = nullptr);
+
+ANI_EXPORT ani_string CreateUtf8String(ani_env *env, const char *data, ani_size size);
+ANI_EXPORT ani_string CreateUtf16String(ani_env *env, const uint16_t *data, ani_size size);
 }  // namespace ark::ets::sdk::util
 }
 

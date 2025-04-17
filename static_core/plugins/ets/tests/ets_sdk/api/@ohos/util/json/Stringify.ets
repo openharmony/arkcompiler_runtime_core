@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {json} from "api"
+import {json} from "@ohos.util.json";
 
 class SubObj {
     s: string = "qwerty"

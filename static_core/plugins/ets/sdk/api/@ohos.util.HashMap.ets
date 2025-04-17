@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package api;
-
 interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the HashMap
@@ -61,7 +59,7 @@ interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
     entries(): IterableIterator<[K, V]>;
 }
 
-export class HashMap<K, V> implements ReadonlyHashMap<K, V> {
+export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
     private buckets: Map<K, V>;
 
     constructor() {
