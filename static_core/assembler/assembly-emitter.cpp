@@ -1734,17 +1734,18 @@ void AsmEmitter::EmitDebugInfo(ItemContainer *items, const Program &program, con
         auto &rec = program.recordTable.find(recordName)->second;
         recordSourceFile = rec.sourceFile;
     }
-
     if (!func.sourceFile.empty() && func.sourceFile != recordSourceFile) {
-        if (!func.sourceCode.empty()) {
-            auto *sourceCodeItem = items->GetOrCreateStringItem(func.sourceCode);
-            ASSERT(sourceCodeItem->GetOffset() != 0);
-            lineNumberProgram->EmitSetSourceCode(constantPool, sourceCodeItem);
-        }
         auto *sourceFileItem = items->GetOrCreateStringItem(func.sourceFile);
         ASSERT(sourceFileItem->GetOffset() != 0);
         lineNumberProgram->EmitSetFile(constantPool, sourceFileItem);
     }
+
+    if (!func.sourceCode.empty()) {
+        auto *sourceCodeItem = items->GetOrCreateStringItem(func.sourceCode);
+        ASSERT(sourceCodeItem->GetOffset() != 0);
+        lineNumberProgram->EmitSetSourceCode(constantPool, sourceCodeItem);
+    }
+
     func.BuildLineNumberProgram(debugInfo, *bytes, items, constantPool, emitDebugInfo);
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -198,7 +198,7 @@ async def test_inline_breakpoints(
             _ = await client.run_if_waiting_for_debugger()
             for br in meta.breakpoints:
                 await client.set_breakpoint_by_url(
-                    url=str(script_file.source_file),
+                    url=script_file.source_file.name,
                     line_number=br.line_number,
                 )
 
