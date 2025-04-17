@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { uri, BusinessError } from "api"
-
+import {uri} from "@ohos.uri";
+import { BusinessError } from "@ohos.base";
 
 function testUriCreateFromParts001() {
   let route = uri.URI.createFromParts("http", "", "fragment");

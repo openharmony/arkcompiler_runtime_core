@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { uri } from "api"
+import {uri} from "@ohos.uri";
 
 function testAttributeNull() {
   let gaogao = new uri.URI('/16.9.5.4:99');

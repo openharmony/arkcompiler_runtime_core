@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Stack} from "api"
+import {Stack} from "@ohos.util.Stack";
 
 function main() {
     const suite = new ArkTestsuite("Stack API tests");

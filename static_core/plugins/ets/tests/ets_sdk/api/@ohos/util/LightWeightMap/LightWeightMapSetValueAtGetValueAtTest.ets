@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {LightWeightMap} from "api"
+import LightWeightMap from "@ohos.util.LightWeightMap";
 
 const success = 0;
 const fail = 1;

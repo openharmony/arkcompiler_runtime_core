@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package api;
-
 export interface ReadonlyTreeMap<K, V> extends Iterable<[K, V]> {
     /**
      * Return the number of elements in the TreeMap
@@ -125,7 +123,7 @@ final class EmptyTreeMapIterator<R> implements IterableIterator<R> {
 
 type comparator<K> = (firstValue: K, secondValue: K) => boolean;
 
-export class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
+export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
     private rootEntry: TreeMapEntry<K, V> | undefined = undefined;
     private comparator: comparator<K>;
     private elementNum: int = 0;

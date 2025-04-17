@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {TreeSet} from "api"
+import {TreeSet} from "@ohos.util.TreeSet";
 
 const success = 0;
 const fail = 1;

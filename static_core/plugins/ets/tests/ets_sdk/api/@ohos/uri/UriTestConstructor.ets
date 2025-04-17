@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { uri, BusinessError } from "api"
+import {uri} from "@ohos.uri";
 
 function ConstructorTest001() {
   let uri = new uri.UriEntry("http://username:password@www.baidu.com:99/path/path?query#fagment");

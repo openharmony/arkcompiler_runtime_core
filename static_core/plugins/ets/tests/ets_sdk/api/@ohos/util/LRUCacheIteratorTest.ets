@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { util, BusinessError } from "api"
+import {util} from "@ohos.util"
 
 const success = 0
 const fail = 1

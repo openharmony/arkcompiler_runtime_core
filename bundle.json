@@ -31,9 +31,12 @@
                 "zlib",
                 "icu",
                 "vixl",
+                "c_utils",
+                "openssl",
                 "libuv"
             ],
             "third_party": [
+                "openssl",
                 "musl",
                 "pcre2"
             ]

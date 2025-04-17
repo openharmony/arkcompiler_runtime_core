@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-package api;
-
-
 export class Stack<T> implements Iterable<T> {
     private buffer: Array<T>;
 

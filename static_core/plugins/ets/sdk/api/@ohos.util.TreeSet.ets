@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package api;
+import TreeMap from '@ohos.util.TreeMap';
 
 export interface ReadonlyTreeSet<T> extends Iterable<T> {
     /**

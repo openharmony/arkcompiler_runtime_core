@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {xml} from "api/@ohos.xml.ets"
-import {xml} from "api/XmlParseHelper.ets"
-import { BusinessError } from "api"
+import {xml} from "@ohos.xml"
+import { BusinessError } from "@ohos.base";
 
 
 function main(): int {
