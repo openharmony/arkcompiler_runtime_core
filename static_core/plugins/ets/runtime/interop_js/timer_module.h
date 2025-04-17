@@ -71,6 +71,7 @@ private:
     static napi_env jsEnv_;
     static std::unordered_map<uint32_t, uv_timer_t *> timers_;
     static uint32_t nextTimerId_;
+    static const ani_int MIN_INTERVAL_MS = 1;
 };
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TIMER_MODULE_H
