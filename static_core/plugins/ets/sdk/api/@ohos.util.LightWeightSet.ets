@@ -86,6 +86,9 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * @returns true if the value was added, false otherwise
      */
     add(value: T): boolean {
+        if (this.buckets.hasKey(value)) {
+            return false;
+        }
         this.buckets.set(value, value);
         return true;
     }
@@ -163,10 +166,11 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
      * @returns true if all values were added, false otherwise
      */
     addAll(set: LightWeightSet<T>): boolean {
+        let result: boolean = false;
         set.forEach((value: T): void => {
-            this.add(value);
+            result |= this.add(value);
         });
-        return true;
+        return result;
     }
 
     /**
