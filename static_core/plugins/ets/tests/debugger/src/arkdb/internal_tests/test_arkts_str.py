@@ -63,6 +63,7 @@ function main(): int {
             a = arkts_str(vars["a"])
             await walker.log_layout("%s", a)
 
+            assert len(cap.stdout) > 0
             with expect.warning():
                 assert a == cap.stdout[-1]
             walker.stop()
