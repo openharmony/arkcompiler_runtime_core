@@ -40,7 +40,7 @@ class TestData {
     static readonly testString2: string = "";
     static readonly testString4: string = "%";
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
-    static readonly arrayResult9 = `{"DEFAULT_CAPACITY":8,"capacity":8,"buffer":["string","","%"]}`;
+    static readonly arrayResult9 = `{"DEFAULT_CAPACITY":10,"capacity":10,"buffer":["string","","%"]}`;
 }
 
 function testCreateSingleTypeInstance() {

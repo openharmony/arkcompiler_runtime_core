@@ -41,7 +41,7 @@ class TestData {
     static readonly testNumber2: number = 2;
     static readonly testNumber3: number = 3;
     static readonly testNumber6: number = 6;
-    static readonly testNumber8: number = 8;
+    static readonly testNumber10: number = 10;
     static readonly testNumber12: number = 12;
     static readonly testNumber18: number = 18;
     static readonly testNumber1w: number = 10000;
@@ -54,7 +54,7 @@ class TestData {
     static readonly testObject2 = [0, 1, 2, undefined];
     static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
     static readonly result1: Number[] = [5, 4, 3, 2, 1];
-    static readonly arrayResult8 = `{"DEFAULT_CAPACITY":8,"capacity":8,"buffer":["string",1,` +
+    static readonly arrayResult8 = `{"DEFAULT_CAPACITY":10,"capacity":10,"buffer":["string",1,` +
         `{"age":10,"name":"zhang"},null,null,true,[0,1,2,null]]}`;
 }
 
@@ -71,7 +71,7 @@ function testIncreaseCapacityToBiggerValue() {
     }
     let cap2: number = arrayList.getCapacity();
     initializeArrayList(arrayList, TestData.forNumber);
-    assertEQ(cap, TestData.testNumber8, "Initial ArrayList capacity should be 8");
+    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     assertEQ(cap1, TestData.testNumber12, "ArrayList capacity should be 12 after increaseCapacityTo");
     assertEQ(cap2, TestData.testNumber12, "ArrayList capacity should remain 12 after adding elements");
     assertEQ(arrayList.getCapacity(), TestData.testNumber18,
@@ -89,8 +89,8 @@ function testIncreaseCapacityToSmallerValue() {
     }
     let cap: number = arrayList.getCapacity();
     arrayList.increaseCapacityTo(TestData.testNumber2);
-    assertEQ(cap, TestData.testNumber8, "Initial ArrayList capacity should be 8");
-    assertEQ(arrayList.getCapacity(), TestData.testNumber8,
+    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
+    assertEQ(arrayList.getCapacity(), TestData.testNumber10,
         "ArrayList capacity should remain unchanged when increasing to a smaller value");
 }
 
@@ -101,7 +101,7 @@ function testTrimToCurrentLength() {
     }
     let cap: number = arrayList.getCapacity();
     arrayList.trimToCurrentLength();
-    assertEQ(cap, TestData.testNumber8, "Initial ArrayList capacity should be 8");
+    assertEQ(cap, TestData.testNumber10, "Initial ArrayList capacity should be 10");
     assertEQ(arrayList.getCapacity(), arrayList.length, "ArrayList capacity should be trimmed to current length");
 }
 
@@ -153,7 +153,7 @@ function testAPIComposition() {
 
     arrayList.subArrayList(TestData.testNumber1, TestData.testNumber3);
     arrayList.clone();
-    assertEQ(arrayList.getCapacity(), TestData.testNumber8, "ArrayList capacity should be updated correctly");
+    assertEQ(arrayList.getCapacity(), TestData.testNumber10, "ArrayList capacity should be updated correctly");
     arrayList.increaseCapacityTo(TestData.testNumber12);
     assertEQ(arrayList.getCapacity(), TestData.testNumber12, "ArrayList capacity should be updated correctly");
     arrayList.trimToCurrentLength();
