@@ -1286,12 +1286,6 @@
 17.experimental_features/13.trailing_lambda/trlambda_met_8.ets
 17.experimental_features/13.trailing_lambda/trlambda_static_met_8.ets
 
-#19807
-17.experimental_features/13.trailing_lambda/trlambda_met_1.ets
-17.experimental_features/13.trailing_lambda/trlambda_met_3.ets
-17.experimental_features/13.trailing_lambda/trlambda_static_met_1.ets
-17.experimental_features/13.trailing_lambda/trlambda_static_met_3.ets
-
 #21834 overloads for |undefined are not available
 17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading2_2.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_12.ets
