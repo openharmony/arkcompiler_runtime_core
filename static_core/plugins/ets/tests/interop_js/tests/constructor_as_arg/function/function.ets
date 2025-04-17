@@ -20,76 +20,76 @@ import {
     ChildClass,
     AnonymousClass,
     IIFEClass,
-    createClassFunction,
-    createClassArrowFunction,
+    CreateClassFunction,
+    CreateClassArrowFunction,
     checkInstance,
 } from "main_js"
 
 
 function checkCreateClassFunctionMain(): boolean {
-    const TSClass = createClassFunction(MainClass, tsInt);
+    const TSClass = CreateClassFunction(MainClass, tsInt);
 
     return checkInstance(MainClass, TSClass) as boolean
         && TSClass._value as int == tsInt as int;
 }
 
 function checkCreateClassFunctionParent(): boolean {
-    const TSClass = createClassFunction(ParentClass, MainClass);
+    const TSClass = CreateClassFunction(ParentClass, MainClass);
 
     return checkInstance(ParentClass, TSClass) as boolean
         && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkCreateClassFunctionChild(): boolean {
-    const TSClass = createClassFunction(ChildClass, MainClass);
+    const TSClass = CreateClassFunction(ChildClass, MainClass);
 
     return checkInstance(ChildClass, TSClass) as boolean
         && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkCreateClassFunctionAnonymous(): boolean {
-    const TSClass = createClassFunction(AnonymousClass, tsInt);
+    const TSClass = CreateClassFunction(AnonymousClass, tsInt);
     return checkInstance(AnonymousClass, TSClass) as boolean
         && TSClass._value as int == tsInt as int;
 }
 
 function checkCreateClassFunctionIIFE(): boolean {
-    const TSClass = createClassFunction(IIFEClass, tsInt);
+    const TSClass = CreateClassFunction(IIFEClass, tsInt);
 
     return checkInstance(IIFEClass, TSClass) as boolean
         && TSClass._value as int == tsInt as int;
 }
 
 function checkCreateClassArrowFunctionMain(): boolean {
-    const TSClass = createClassArrowFunction(MainClass, tsInt);
+    const TSClass = CreateClassArrowFunction(MainClass, tsInt);
 
     return checkInstance(MainClass, TSClass) as boolean
         && TSClass._value as int == tsInt as int;
 }
 
 function checkCreateClassArrowFunctionParent(): boolean {
-    const TSClass = createClassArrowFunction(ParentClass, MainClass);
+    const TSClass = CreateClassArrowFunction(ParentClass, MainClass);
 
     return checkInstance(ParentClass, TSClass) as boolean
         && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkCreateClassArrowFunctionChild(): boolean {
-    const TSClass = createClassArrowFunction(ChildClass, MainClass);
+    const TSClass = CreateClassArrowFunction(ChildClass, MainClass);
 
     return checkInstance(ChildClass, TSClass) as boolean
         && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkCreateClassArrowFunctionAnonymous(): boolean {
-    const TSClass = createClassArrowFunction(AnonymousClass, tsInt);
+    const TSClass = CreateClassArrowFunction(AnonymousClass, tsInt);
 
     return checkInstance(AnonymousClass, TSClass) as boolean
         && TSClass._value as int == tsInt as int;
 }
 
 function checkCreateClassArrowFunctionIIFE(): boolean {
-    const TSClass = createClassArrowFunction(IIFEClass, tsInt);
+    const TSClass = CreateClassArrowFunction(IIFEClass, tsInt);
 
     return checkInstance(IIFEClass, TSClass) as boolean
         && TSClass._value as int == tsInt as int;

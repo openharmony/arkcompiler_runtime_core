@@ -13,57 +13,49 @@
  * limitations under the License.
  */
 
-export let nop: () => void = function (): void {};
+export let nop = function (): void {};
 
-export let identity: <T>(v: T) => T = function <T>(v: T): T {
+export let identity = function (v): typeof v {
 	return v;
 };
 
-export let stringifyValue: (v: any) => string = function (v: any): string {
+export let stringifyValue = function (v): string {
 	return typeof v + ':' + v;
 };
 
-export let stringifyArgs: (...args: any[]) => string = function (...args: any[]): string {
+export let stringifyArgs = function (...args): string {
 	return args.toString();
 };
 
-export let setProtoConstructor: (v: any) => Function = function (v: any): Function {
+export let setProtoConstructor = function (v): () => void {
 	return Object.getPrototypeOf(v).constructor;
 };
 
-export let applyArgs: <T>(fn: (...args: any[]) => T, ...args: any[]) => T = function <T>(
-    fn: (...args: any[]) => T,
-    ...args: any[]
-): T {
-    return fn(...args);
+export let applyArgs = function (fn, ...args): number {
+	return fn(...args);
 };
 
-export let throwValue: (v: any) => never = function (v: any): never {
+export let throwValue = function (v): void {
 	throw v;
 };
 
-export let log: (...args: any[]) => void = function (...args: any[]): void {
-	console.log(`${args.join(' ')}`);
+export let log = function (...args): void {
+	print(`${args.join(' ')}`);
 };
 
-export let getProp: <T, K extends keyof T>(v: T, p: K) => T[K] = function <T, K extends keyof T>(
-	v: T,
-	p: K
-): T[K] {
+export let getProp = function (v, p): number {
 	return v[p];
 };
 
-export let sum: (a: number, b: number) => number = function (a: number, b: number): number {
+export let sum = function (a, b): number {
 	return a + b;
 };
 
-export let makeCar: (v: string) => void = function (v) {
+export let makeCar = function (v): void {
 	this.color = v;
 };
 
-export let makeTestProxy: (this: { foo?: any }) => void = function (
-    this: { foo?: any }
-): void {
+export let makeTestProxy = function (): void {
 	Object.defineProperty(this, 'foo', {
 		get: function (): never {
 			throw Error('get exception');
