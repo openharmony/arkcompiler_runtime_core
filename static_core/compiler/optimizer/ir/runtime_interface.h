@@ -1642,7 +1642,7 @@ enum class DeoptimizeType : uint8_t {
     NEGATIVE_CHECK,
     CHECK_CAST,
     ANY_TYPE_CHECK,
-    OVERFLOW,
+    OVERFLOW_TYPE,
     HOLE,
     NOT_NUMBER,
     NOT_SUPPORTED_NATIVE,

@@ -6824,7 +6824,7 @@ public:
             case Opcode::AddOverflowCheck:
             case Opcode::SubOverflowCheck:
             case Opcode::NegOverflowAndZeroCheck:
-                SetDeoptimizeType(DeoptimizeType::OVERFLOW);
+                SetDeoptimizeType(DeoptimizeType::OVERFLOW_TYPE);
                 break;
             case Opcode::DeoptimizeIf:
                 SetDeoptimizeType(static_cast<DeoptimizeTypeMixin *>(inst)->GetDeoptimizeType());
