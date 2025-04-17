@@ -111,10 +111,10 @@
 #23065
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_7.ets
 
-#24000 ES2PANDA_NEG_FAIL
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_3.ets
+#24781
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.ets
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.assignability_with_initializer/initializer_compatibility_n_8.ets
+
+#24782
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.ets
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_1.ets
 
