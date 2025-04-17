@@ -1,9 +1,18 @@
 #25109
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_3.ets
 
+#25167
+03.types/19.union_types/02.access_to_common_union_members/cm_meth2_10.ets
+
 #20935
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_4.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_8.ets
+
+#25236
+03.types/19.union_types/02.access_to_common_union_members/cm_meth3_4.ets
+
+#25189
+03.types/19.union_types/02.access_to_common_union_members/cm_meth3_10.ets
 
 #24004 ASSERTION FAILED: ic != nullptr
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
