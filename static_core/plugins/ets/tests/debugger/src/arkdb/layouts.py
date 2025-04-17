@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Iterable, List, Optional, Set
+from typing import Iterable, List, Set
 
 import trio
 from rich import box
@@ -57,8 +57,8 @@ async def _add_rows(table: Table, scope: Scope):
 
 async def frame_layout(
     frame: Frame,
-    scopes: Optional[Set[str]] = None,
-    skip_scopes: Sequence[str] = (),
+    scopes: Set[str] | None = None,
+    skip_scopes: Sequence[str] | None = None,
 ) -> RenderableType:
     table = Table(
         Column("name"),
@@ -71,6 +71,9 @@ async def frame_layout(
         table.add_row("this", Pretty(await this.mirror_value(depth=DEFAULT_DEPTH)))
     else:
         await trio.lowlevel.checkpoint()
+    # NOTE(dslynko, #22497): now global scope is ignored by default, because it enumerates all classes from boot.
+    # Need to enable enumerating globals after debugger server enumerates only non-boot classes.
+    skip_scopes = skip_scopes if skip_scopes is not None else ("global",)
     for scope in frame.scopes():
         if (scopes is None or scope.data.type_ in scopes) and (scope.data.type_ not in skip_scopes):
             await _add_rows(table, scope)
@@ -90,8 +93,8 @@ async def frame_layout(
 
 async def frames_layout(
     call_frames: Iterable[Frame],
-    scopes: Optional[Set[str]] = None,
-    skip_scopes: Sequence[str] = (),
+    scopes: Set[str] | None = None,
+    skip_scopes: Sequence[str] | None = None,
 ) -> List[RenderableType]:
 
     await trio.lowlevel.checkpoint()
@@ -101,8 +104,8 @@ async def frames_layout(
 async def paused_layout(
     paused: Paused,
     url: Path,
-    scopes: Optional[Set[str]] = None,
-    skip_scopes: Sequence[str] = (),
+    scopes: Set[str] | None = None,
+    skip_scopes: Sequence[str] | None = None,
 ) -> RenderableType:
     frames = await frames_layout(paused.frames(), scopes=scopes, skip_scopes=skip_scopes)
     highlight_lines = [f.location.line_number for f in paused.data.call_frames]

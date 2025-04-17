@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -270,7 +270,7 @@ class Runtime:
             command.append(f"--debugger-library-path={str(o.debugger_library_path)}")
             command.extend([f"--log-debug={c}" for c in o.log_debug])
         command.append(str(module.entry_abc))
-        command.append(entry_point)
+        command.append(f"{module.entry_abc.stem}.{entry_point}")
 
         send_stdout, receive_stdout = open_memory_channels()
         send_stderr, receive_stderr = open_memory_channels()

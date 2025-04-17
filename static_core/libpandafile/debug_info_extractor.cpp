@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,9 +157,19 @@ public:
         return state_->GetFile();
     }
 
+    bool HasFile() const
+    {
+        return state_->HasFile();
+    }
+
     const uint8_t *GetSourceCode() const
     {
         return state_->GetSourceCode();
+    }
+
+    bool HasSourceCode() const
+    {
+        return state_->HasSourceCode();
     }
 
 private:
@@ -244,8 +254,8 @@ void DebugInfoExtractor::Extract(const File *pf)
             programProcessor.Process();
 
             File::EntityId methodId = mda.GetMethodId();
-            const char *sourceFile = utf::Mutf8AsCString(handler.GetFile());
-            const char *sourceCode = utf::Mutf8AsCString(handler.GetSourceCode());
+            const char *sourceFile = handler.HasFile() ? utf::Mutf8AsCString(handler.GetFile()) : "";
+            const char *sourceCode = handler.HasSourceCode() ? utf::Mutf8AsCString(handler.GetSourceCode()) : "";
             methods_.emplace(methodId, MethodDebugInfo {sourceFile, sourceCode, methodId, handler.GetLineNumberTable(),
                                                         handler.GetLocalVariableTable(), std::move(paramInfo),
                                                         handler.GetColumnNumberTable()});

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -88,7 +88,8 @@ async def test_this_in_lambda_and_class(
             case "ctor" | "foo1" | "foo" | "lambda":
                 with expect.error():
                     assert this is not None
-                    assert type(this).__name__ == "A"
+                    # Fully-qualified name of class
+                    assert type(this).__name__ == "test_string.A"
             case "main":
                 with expect.error():
                     assert this == mirror_undefined()
