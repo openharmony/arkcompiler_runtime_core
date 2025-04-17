@@ -284,6 +284,8 @@ class Args(argparse.Namespace):
         mode = ToolMode(self.get('mode'))
         if ToolMode.AOT == mode:
             flags |= OptFlags.AOT
+        elif ToolMode.AOTPGO == mode:
+            flags |= OptFlags.AOTPGO
         elif ToolMode.LLVMAOT == mode:
             flags |= OptFlags.AOT | OptFlags.LLVMAOT
         elif ToolMode.INT == mode:
