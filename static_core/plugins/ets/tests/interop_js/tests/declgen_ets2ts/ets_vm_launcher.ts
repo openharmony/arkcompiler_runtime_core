@@ -48,4 +48,6 @@ if (!etsVm.createRuntime(etsOpts)) {
 	throw new Error('Cannot create ETS runtime');
 }
 
+/* CC-OFFNXT(no_explicit_any) std lib */
+// Handle comment directive '@ts-nocheck'
 (globalThis as any).Panda = etsVm;

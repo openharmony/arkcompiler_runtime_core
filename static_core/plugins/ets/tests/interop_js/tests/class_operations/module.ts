@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-export function evaluateNumber(v0, v1) {
+export function evaluateNumber(v0, v1): number {
 	return v0 + v1;
 }
 
-export function doNothing() {
+export function doNothing(): void {
 	print('Hello from empty function');
 }
 
-export function evaluateObject(obj) {
+export function evaluateObject(obj): ExampleClass {
 	return new ExampleClass(obj.v0 + obj.v1, obj.v0 + obj.v1);
 }
 
@@ -39,11 +39,11 @@ export class ExampleClass {
 		this.v1 = v1;
 	}
 
-	static evaluateNumber(v2, v3) {
+	static evaluateNumber(v2, v3): number {
 		return v2 + v3;
 	}
 
-	static evaluateArray(arr, size) {
+	static evaluateArray(arr, size): number[] {
 		let result = [];
 		for (let i = 0; i < size; i++) {
 			result[i] = arr[i] + i * i;
@@ -51,24 +51,24 @@ export class ExampleClass {
 		return result;
 	}
 
-	instanceEvaluateNumber() {
+	instanceEvaluateNumber(): number {
 		// without 'this' also not working
 		return this.v0 + this.v1;
 	}
 
-	evaluateObject(obj) {
+	evaluateObject(obj): ExampleClass {
 		return new ExampleClass(obj.v0 + this.v1, this.v0 + obj.v1);
 	}
 
-	getV0() {
+	getV0(): number {
 		return this.v0;
 	}
 
-	getV1() {
+	getV1(): number {
 		return this.v1;
 	}
 
-	static emptyMethod() {
+	static emptyMethod(): void {
 		print('Hello from empty method');
 	}
 }
@@ -79,7 +79,7 @@ export class ClassWithEmptyConstructor {
 		this.v1 = 42;
 	}
 
-	verifyProperties(v0Expected, v1Expected) {
+	verifyProperties(v0Expected, v1Expected): number {
 		if (this.v0 === v0Expected && this.v1 === v1Expected) {
 			return 0;
 		} else {
@@ -87,11 +87,11 @@ export class ClassWithEmptyConstructor {
 		}
 	}
 
-	getV0() {
+	getV0(): number {
 		return this.v0;
 	}
 
-	getV1() {
+	getV1(): number {
 		return this.v1;
 	}
 }
