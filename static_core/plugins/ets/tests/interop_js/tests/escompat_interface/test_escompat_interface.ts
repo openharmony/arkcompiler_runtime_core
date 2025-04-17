@@ -23,14 +23,14 @@ const error = new Error();
 const tsConcatArray1 = [1, 2, 3, 4];
 const tsConcatArray2 = [5, 6, 7, 8];
 
-function testEsCompatIfaceInEts() {
+function testEsCompatIfaceInEts(): void {
   // Invoke method with escompat interface as parameter in ets, but take TS object as argument
-  ASSERT_EQ(arrayConcat(tsConcatArray1, tsConcatArray2).toString(), "1,2,3,4,5,6,7,8");
+  ASSERT_EQ(arrayConcat(tsConcatArray1, tsConcatArray2).toString(), '1,2,3,4,5,6,7,8');
 }
 
-function testEsCompatIfaceInTs() {
+function testEsCompatIfaceInTs(): void {
   // Invoke method with escompat interface as parameter in ts
-  ASSERT_EQ(etsConcatArray1.concat(etsConcatArray2).toString(), "1,2,3,4,5,6,7,8");
+  ASSERT_EQ(etsConcatArray1.concat(etsConcatArray2).toString(), '1,2,3,4,5,6,7,8');
   let error = undefined;
   try {
     // Invoke method with escompat interface as parameter in ts with wrong argument type
@@ -41,5 +41,5 @@ function testEsCompatIfaceInTs() {
   ASSERT_TRUE(error !== undefined);
 }
 
-testEsCompatIfaceInEts()
-testEsCompatIfaceInTs()
+testEsCompatIfaceInEts();
+testEsCompatIfaceInTs();

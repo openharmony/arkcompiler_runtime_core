@@ -53,15 +53,15 @@ export class User {
     }
 }
 
-export function InsertArray(num: boolean) {
-    return arrObj.push(num);
+export function InsertArray(num: boolean): void {
+    arrObj.push(num);
 }
 
 export function GetArrLength(): number {
     return arrObj.length;
 }
 
-export function SetArrLength(len: number) {
+export function SetArrLength(len: number): void {
     arrObj.length = len;
 }
 

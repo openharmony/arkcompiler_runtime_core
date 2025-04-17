@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { protected_getter_class_value } from './constant';
+import { PROTECTED_GETTER_CLASS_VALUE } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
 const ProtectedGetterOrigenClass = etsVm.getClass('Lgetter/test/ProtectedGetterOrigenClass;');
@@ -32,12 +32,12 @@ function checkCreateProtectedGetterClassalueFromEts() {
 
 function checkProtectedGetterClass() {
 	const GClass = new ProtectedGetterOrigenClass();
-	ASSERT_TRUE(GClass.value === protected_getter_class_value);
+	ASSERT_TRUE(GClass.value === PROTECTED_GETTER_CLASS_VALUE);
 }
 
 function checkCreateProtectedGetterClassromEts() {
 	const GClass = createProtectedGetterOrigenClassFromEts();
-	ASSERT_TRUE(GClass.value === protected_getter_class_value);
+	ASSERT_TRUE(GClass.value === PROTECTED_GETTER_CLASS_VALUE);
 }
 
 checkProtectedGetterClassalue();
