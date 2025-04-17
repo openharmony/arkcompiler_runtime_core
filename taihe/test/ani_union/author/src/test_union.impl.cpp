@@ -251,7 +251,7 @@ public:
         int const i32_value = 123;
         if (kind == "i16") {
             return ::test_union::union_primitive_2_3::make_i16Value(i16_value);
-        } else { // if kind == "i32"
+        } else {
             return ::test_union::union_primitive_2_3::make_i32Value(i32_value);
         }
     }
@@ -262,7 +262,7 @@ public:
         float const f32_value = 1.1f;
         if (kind == "i32") {
             return ::test_union::union_primitive_2_4::make_i32Value(i32_value);
-        } else { // if (kind == "f32")
+        } else {
             return ::test_union::union_primitive_2_4::make_f32Value(f32_value);
         }
     }
@@ -273,7 +273,7 @@ public:
         double const f64_value = 1.234;
         if (kind == "f32") {
             return ::test_union::union_primitive_2_5::make_f32Value(f32_value);
-        } else { // if (kind == "f64")
+        } else {
             return ::test_union::union_primitive_2_5::make_f64Value(f64_value);
         }
     }
@@ -282,7 +282,7 @@ public:
     {
         if (kind == "s") {
             return ::test_union::union_primitive_2_6::make_sValue("hello");
-        } else { // if (kind == "b")
+        } else {
             return ::test_union::union_primitive_2_6::make_bValue(true);
         }
     }
@@ -291,7 +291,7 @@ public:
     {
         if (kind == "b") {
             return ::test_union::union_primitive_2_7::make_bValue(true);
-        } else { // if (kind == "i8")
+        } else {
             int8_t const i8_value = 1;
             return ::test_union::union_primitive_2_7::make_i8Value(i8_value);
         }
@@ -301,7 +301,7 @@ public:
     {
         if (kind == "b") {
             return ::test_union::union_primitive_2_8::make_bValue(true);
-        } else { // if (kind == "b1")
+        } else {
             return ::test_union::union_primitive_2_8::make_b1Value(false);
         }
     }
@@ -310,7 +310,7 @@ public:
     {
         if (kind == "s") {
             return ::test_union::union_primitive_2_9::make_sValue("hello");
-        } else { // if (kind == "s1")
+        } else {
             return ::test_union::union_primitive_2_9::make_s1Value("world");
         }
     }
@@ -329,7 +329,7 @@ public:
         }
         if (kind == "c") {
             return ::test_union::union_mix_5::make_enumValue((::test_union::Color::key_t)((int)(1)));
-        } else { // if (kind == "arr")
+        } else {
             int const arr_size = 5;
             int const arr_num = 3;
             array<int32_t> result = array<int32_t>::make(arr_size);

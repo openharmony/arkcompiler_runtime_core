@@ -104,9 +104,36 @@ void offFooStatic(callback_view<void()> a)
     a();
     std::cout << "offFooStatic" << std::endl;
 }
+
+void onFuncI(callback_view<void(int32_t)> a)
+{
+    int const i = 1;
+    a(i);
+    std::cout << "onFunI" << std::endl;
+}
+
+void onFuncB(callback_view<void(bool)> a)
+{
+    a(true);
+    std::cout << "onFunB" << std::endl;
+}
+
+void offFuncI(callback_view<void(int32_t)> a)
+{
+    int const i = 1;
+    a(i);
+    std::cout << "offFunI" << std::endl;
+}
+
+void offFuncB(callback_view<void(bool)> a)
+{
+    a(true);
+    std::cout << "offFunB" << std::endl;
+}
+
 }  // namespace
 
-// The macros used below are automatically generated code
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_getIBase(getIBase);
 TH_EXPORT_CPP_API_onFoo(onFoo);
@@ -117,4 +144,8 @@ TH_EXPORT_CPP_API_offBar(offBar);
 TH_EXPORT_CPP_API_offBaz(offBaz);
 TH_EXPORT_CPP_API_onFooStatic(onFooStatic);
 TH_EXPORT_CPP_API_offFooStatic(offFooStatic);
+TH_EXPORT_CPP_API_onFuncI(onFuncI);
+TH_EXPORT_CPP_API_onFuncB(onFuncB);
+TH_EXPORT_CPP_API_offFuncI(offFuncI);
+TH_EXPORT_CPP_API_offFuncB(offFuncB);
 // NOLINTEND

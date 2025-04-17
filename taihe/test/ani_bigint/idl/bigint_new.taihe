@@ -12,7 +12,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@!typed_array
-
-function inUint16Array(v: Array<u16>): void;
-function outUint16Array(): Array<u16>;
+function processBigInt(a: @bigint Array<u64>): @bigint Array<u64>;

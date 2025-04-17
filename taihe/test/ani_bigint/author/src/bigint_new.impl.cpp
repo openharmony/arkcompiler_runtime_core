@@ -12,30 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "foo.impl.hpp"
+#include "bigint_new.impl.hpp"
+#include <cstdint>
+#include "bigint_new.proj.hpp"
 #include "stdexcept"
-#include "taihe/array.hpp"
 #include "taihe/runtime.hpp"
+
+#include <iostream>
+
 using namespace taihe;
 
 namespace {
-void inArrayBuffer(array_view<uint16_t> v)
-{
-    std::cout << "inArrayBuffer:" << std::endl;
-    int i = 0;
-    for (auto x : v) {
-        std::cout << "v[" << i << "] = " << x << std::endl;
-    }
-}
+// To be implemented.
 
-array<uint16_t> outArrayBuffer()
+array<uint64_t> processBigInt(array_view<uint64_t> a)
 {
-    return {0, 1, 2, 3};
+    array<uint64_t> res(a.size() + 1);
+    res[0] = 0;
+    for (int i = 0; i < a.size(); i++) {
+        res[i + 1] = a[i];
+        std::cerr << "arr[" << i << "] = " << a[i] << std::endl;
+    }
+    return res;
 }
 }  // namespace
 
 // because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
-TH_EXPORT_CPP_API_inArrayBuffer(inArrayBuffer);
-TH_EXPORT_CPP_API_outArrayBuffer(outArrayBuffer);
+TH_EXPORT_CPP_API_processBigInt(processBigInt);
 // NOLINTEND

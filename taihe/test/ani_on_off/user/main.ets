@@ -145,6 +145,50 @@ function basecls_static_off() {
     }
 }
 
+function toplevelFuncIOn() {
+    // toplevel func on
+    try {
+        on_off_test.on("funcI", (arg0: int): void => {
+            console.log("void input void output callback!");
+        })
+    } catch (error) {
+        console.error("main finsih test ERROR ", error)
+    }
+}
+
+function toplevelFuncBOn() {
+    // toplevel func on
+    try {
+        on_off_test.on("funcB", (arg0: boolean): void => {
+            console.log("void input void output callback!");
+        })
+    } catch (error) {
+        console.error("main finsih test ERROR ", error)
+    }
+}
+
+function toplevelFuncIOff() {
+    // toplevel func off
+    try {
+        on_off_test.off("funcI", (arg0: int): void => {
+            console.log("void input void output callback!");
+        })
+    } catch (error) {
+        console.error("main finsih test ERROR ", error)
+    }
+}
+
+function toplevelFuncBOff() {
+    // toplevel func off
+    try {
+        on_off_test.off("funcB", (arg0: boolean): void => {
+            console.log("void input void output callback!");
+        })
+    } catch (error) {
+        console.error("main finsih test ERROR ", error)
+    }
+}
+
 function main() {
     const suite = new ArkTestsuite("on off testcase")
 
@@ -160,5 +204,9 @@ function main() {
     suite.addTest("undefined_off", undefined_off)
     suite.addTest("basecls_static_on", basecls_static_on)
     suite.addTest("basecls_static_off", basecls_static_off)
+    suite.addTest("toplevelFuncIOn", toplevelFuncIOn)
+    suite.addTest("toplevelFuncBOn", toplevelFuncBOn)
+    suite.addTest("toplevelFuncIOff", toplevelFuncIOff)
+    suite.addTest("toplevelFuncBOff", toplevelFuncBOff)
     System.exit(suite.run())
 }

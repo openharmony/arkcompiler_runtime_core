@@ -36,7 +36,7 @@ void showOptionalInt(optional_view<int32_t> x)
 optional<int32_t> makeOptionalInt(bool b)
 {
     if (b) {
-        const int optionalMakeValue = 10;
+        int const optionalMakeValue = 10;
         return optional<int32_t>::make(optionalMakeValue);
     } else {
         return optional<int32_t>(nullptr);
@@ -66,7 +66,7 @@ optional<string> sendReturnResult(::opt::ReturnResult const &result)
 }
 }  // namespace
 
-// The macros used below are automatically generated code
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_showOptionalInt(showOptionalInt);
 TH_EXPORT_CPP_API_makeOptionalInt(makeOptionalInt);

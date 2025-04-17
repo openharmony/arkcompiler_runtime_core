@@ -15,7 +15,6 @@
 
 """Convert AST to IR."""
 
-from codecs import decode
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
@@ -112,8 +111,8 @@ class ExprEvaluator(Visitor):
     @override
     def visit_literal_bool_expr(self, node: ast.LiteralBoolExpr) -> bool:
         return {
-            "TRUE": True,
-            "FALSE": False,
+            "true": True,
+            "false": False,
         }[node.val.text]
 
     @override
@@ -148,6 +147,7 @@ class ExprEvaluator(Visitor):
 
     @override
     def visit_unary_bool_expr(self, node: ast.UnaryBoolExpr) -> bool:
+        pass
         return not self.visit(node.expr)
 
     @override
@@ -278,19 +278,15 @@ class ExprEvaluator(Visitor):
 
     @override
     def visit_literal_string_expr(self, node: ast.LiteralStringExpr) -> str:
-        return "".join(
-            decode(
-                (
-                    val.text[3:-3]
-                    if len(val.text) > 2
-                    and val.text.startswith('"""')
-                    and val.text.endswith('"""')
-                    else val.text[1:-1]
-                ),
-                "unicode-escape",
-            )
-            for val in node.vals
-        )
+        return node.val.text[1:-1].encode("utf-8").decode("unicode_escape")
+
+    @override
+    def visit_literal_doc_string_expr(self, node: ast.LiteralDocStringExpr) -> str:
+        return node.val.text[3:-3]
+
+    @override
+    def visit_binary_string_expr(self, node: ast.BinaryStringExpr) -> str:
+        return self.visit(node.left) + self.visit(node.right)
 
 
 class AstConverter(ExprEvaluator):
@@ -320,23 +316,22 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_long_type(self, node: ast.LongType) -> LongTypeRefDecl:
-        loc = self.loc(node)
-        pkname = pkg2str(node.pkg_name)
-        symbol = str(node.decl_name)
-        return LongTypeRefDecl(loc, pkname, symbol)
+        d = LongTypeRefDecl(self.loc(node), pkg2str(node.pkg_name), str(node.decl_name))
+        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        return d
 
     @override
     def visit_short_type(self, node: ast.ShortType) -> ShortTypeRefDecl:
-        loc = self.loc(node)
-        symbol = str(node.decl_name)
-        return ShortTypeRefDecl(loc, symbol)
+        d = ShortTypeRefDecl(self.loc(node), str(node.decl_name))
+        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        return d
 
     @override
     def visit_generic_type(self, node: ast.GenericType) -> GenericTypeRefDecl:
-        loc = self.loc(node)
-        symbol = str(node.decl_name)
-        args = [self.visit(arg) for arg in node.args]
-        return GenericTypeRefDecl(loc, symbol, args)
+        d = GenericTypeRefDecl(self.loc(node), str(node.decl_name))
+        self.diag.for_each(node.args, lambda a: d.add_arg_ty_ref(self.visit(a)))
+        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
+        return d
 
     @override
     def visit_callback_type(self, node: ast.CallbackType) -> CallbackTypeRefDecl:
@@ -345,6 +340,7 @@ class AstConverter(ExprEvaluator):
         else:
             d = CallbackTypeRefDecl(self.loc(node))
         self.diag.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
+        self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     # Uses
@@ -408,10 +404,7 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_enum(self, node: ast.Enum) -> EnumDecl:
-        if ty := node.enum_ty:
-            d = EnumDecl(self.loc(node.name), str(node.name), self.visit(ty))
-        else:
-            d = EnumDecl(self.loc(node.name), str(node.name))
+        d = EnumDecl(self.loc(node.name), str(node.name), self.visit(node.enum_ty))
         self.diag.for_each(node.fields, lambda a: d.add_item(self.visit(a)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d

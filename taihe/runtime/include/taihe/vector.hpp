@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_VECTOR_HPP
-#define TAIHE_VECTOR_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_
+#define RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_
+// NOLINTBEGIN
 
 #include <taihe/common.hpp>
 
@@ -22,9 +23,6 @@
 
 #define VEC_GROWTH_FACTOR 2
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename T>
 struct vector_view;
@@ -220,10 +218,9 @@ struct as_param<vector<T>> {
     using type = vector_view<T>;
 };
 }  // namespace taihe
-// NOLINTEND
 
 #ifdef VEC_GROWTH_FACTOR
 #undef VEC_GROWTH_FACTOR
-#endif // VEC_GROWTH_FACTOR
-
-#endif // TAIHE_VECTOR_HPP
+#endif
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_VECTOR_HPP_

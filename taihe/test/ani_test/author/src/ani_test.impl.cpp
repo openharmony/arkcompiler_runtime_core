@@ -38,12 +38,12 @@ void showData(Data const &s)
 
 Union makeUnion(int32_t v)
 {
-    const int32_t case1Key = 1;
-    const int32_t case2Key = 2;
-    const int32_t case3Key = 3;
+    int32_t const case1Key = 1;
+    int32_t const case2Key = 2;
+    int32_t const case3Key = 3;
 
-    const int32_t case1Value = 100;
-    const float case2Value = 0.5;
+    int32_t const case1Value = 100;
+    float const case2Value = 0.5f;
 
     switch (v) {
         case case1Key:
@@ -82,7 +82,7 @@ void showOptionalInt(optional_view<int32_t> x)
 optional<int32_t> makeOptionalInt(bool b)
 {
     if (b) {
-        const int32_t optionalIntValue = 10;
+        int32_t const optionalIntValue = 10;
         return optional<int32_t>::make(optionalIntValue);
     } else {
         return optional<int32_t>(nullptr);

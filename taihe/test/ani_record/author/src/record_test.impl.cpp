@@ -101,7 +101,7 @@ map<string, string> CreateStringString(int32_t a)
 map<string, int32_t> GetMapfromArray(array_view<::record_test::Data> d)
 {
     map<string, int32_t> m;
-    for (int i = 0; i < d.size(); ++i) {
+    for (std::size_t i = 0; i < d.size(); ++i) {
         m.emplace(d[i].a, d[i].b);
     }
     return m;
@@ -537,7 +537,6 @@ map<string, array<string>> Mapfunc40()
 map<string, record_test::TypeUnion> Mapfunc41()
 {
     int32_t const value = 123;
-
     map<string, record_test::TypeUnion> result;
     result.emplace("key1", record_test::TypeUnion::make_a(value));
     result.emplace("key2", record_test::TypeUnion::make_b(true));

@@ -49,7 +49,7 @@ string printMyUnion(::union_ani::MyUnion const &data)
 
 ::union_ani::MyUnion makeMyUnion(string_view kind)
 {
-    const float testFloat = 123.0f;
+    float const testFloat = 123.0f;
     if (kind == "s") {
         return ::union_ani::MyUnion::make_innerValue(::union_ani::InnerUnion::make_stringValue("string"));
     }

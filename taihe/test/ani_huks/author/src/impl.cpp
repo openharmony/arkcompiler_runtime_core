@@ -25,7 +25,7 @@ namespace {
 std::string dataAsString(array_view<uint8_t> data)
 {
     std::string res;
-    int tempnum = 16;
+    int const tempnum = 16;
     for (int i = 0; i < data.size(); i++) {
         uint8_t c = static_cast<uint8_t>(data[i]);
         static constexpr char const *const TEST_STR = "0123456789abcdef";
@@ -34,7 +34,9 @@ std::string dataAsString(array_view<uint8_t> data)
     }
     return res;
 }
+}  // namespace
 
+namespace {
 ::huks::HuksResult generateKey(string_view keyAlias, ::huks::HuksOptions const &options)
 {
     std::cout << "keyAlias: " << keyAlias << std::endl;
@@ -205,7 +207,8 @@ string getSdkVersion(::huks::HuksOptions const &options)
     throw std::runtime_error("Function listAliases Not implemented");
 }
 }  // namespace
-// The macros used below are automatically generated code.
+
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_generateKey(generateKey);
 TH_EXPORT_CPP_API_generateKeyItem(generateKeyItem);

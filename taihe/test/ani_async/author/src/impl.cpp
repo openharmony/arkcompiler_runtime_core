@@ -74,7 +74,8 @@ void PrintSync()
     std::cout << "print Sync" << std::endl;
 }
 }  // namespace
-// The macros used below are automatically generated code.
+
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_addSync(add_impl);
 TH_EXPORT_CPP_API_getIBase(getIBase_impl);

@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_OBJECT_HPP
-#define TAIHE_OBJECT_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_OBJECT_HPP_
+#define RUNTIME_INCLUDE_TAIHE_OBJECT_HPP_
+// NOLINTBEGIN
 
 #include <taihe/object.abi.h>
 #include <taihe/common.hpp>
@@ -23,13 +24,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
-
-//////////////////////
 // Raw Data Handler //
-//////////////////////
 
 namespace taihe {
 struct data_view;
@@ -76,15 +71,15 @@ inline std::size_t hash_impl(adl_helper_t, data_view val)
 }
 }  // namespace taihe
 
-///////////////////////////////////////
 // Specific Impl Type Object Handler //
-///////////////////////////////////////
 
 namespace taihe {
 template <typename Impl>
-struct data_block_impl : DataBlockHead, Impl {
+struct data_block_impl : DataBlockHead {
+    Impl impl;
+
     template <typename... Args>
-    data_block_impl(TypeInfo const *rtti_ptr, Args &&...args) : Impl(std::forward<Args>(args)...)
+    data_block_impl(TypeInfo const *rtti_ptr, Args &&...args) : impl(std::forward<Args>(args)...)
     {
         tobj_init(this, rtti_ptr);
     }
@@ -105,7 +100,7 @@ inline void del_data_ptr(struct DataBlockHead *data_ptr)
 template <typename Impl>
 inline Impl *cast_data_ptr(struct DataBlockHead *data_ptr)
 {
-    return static_cast<Impl *>(static_cast<data_block_impl<Impl> *>(data_ptr));
+    return &static_cast<data_block_impl<Impl> *>(data_ptr)->impl;
 }
 
 template <typename Impl, typename... InterfaceHolders>
@@ -290,5 +285,4 @@ inline auto into_holder(Impl &&impl)
 }
 }  // namespace taihe
 // NOLINTEND
-
-#endif // TAIHE_OBJECT_HPP
+#endif  // RUNTIME_INCLUDE_TAIHE_OBJECT_HPP_

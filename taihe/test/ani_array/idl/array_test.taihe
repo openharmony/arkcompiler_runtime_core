@@ -27,7 +27,7 @@ enum Color: String {
 }
 function makeEnumArray(value: Color, num: i32): Array<Color>;
 
-function makeRecordArray(key: String, val: i64, num: i32): Array<Map<String, i64>>;
+function makeRecordArray(key: String, val: i64, num: i32): Array<@record Map<String, i64>>;
 
 struct Data {
     a: String;
@@ -37,7 +37,7 @@ struct Data {
 function makeStructArray(a: String, b: String, c: i32, num: i32): Array<Data>;
 function makeIntArray2(value: Array<i32>, num: i32): Array<Array<i32>>;
 function changeEnumArray(value: Array<Color>, color: Color): Array<Color>;
-function changeRecordArray(value: Array<Map<String, i64>>, k: String, v: i64): Array<Map<String, i64>>;
+function changeRecordArray(value: Array<@record Map<String, i64>>, k: String, v: i64): Array<@record Map<String, i64>>;
 function changeStructArray(value: Array<Data>, a: String, b: String, c: i32): Array<Data>;
 @gen_async("fetchBinaryData")
 @gen_promise("fetchBinaryData")

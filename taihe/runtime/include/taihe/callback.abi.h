@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_CALLBACK_ABI_H
-#define TAIHE_CALLBACK_ABI_H
+#ifndef RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_
 
 #include <taihe/common.h>
 
@@ -32,5 +32,4 @@ TH_EXPORT void tcallback_init(struct TCallbackData *data_ptr, void *func, void (
 TH_EXPORT struct TCallbackData *tcallback_dup(struct TCallbackData *data_ptr);
 
 TH_EXPORT void tcallback_drop(struct TCallbackData *data_ptr);
-
-#endif // TAIHE_CALLBACK_ABI_H
+#endif  // RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_

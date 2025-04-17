@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_OBJECT_ABI_H
-#define TAIHE_OBJECT_ABI_H
+#ifndef RUNTIME_INCLUDE_TAIHE_OBJECT_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_OBJECT_ABI_H_
 
 #include <taihe/common.h>
 
@@ -78,5 +78,4 @@ TH_EXPORT struct DataBlockHead *tobj_dup(struct DataBlockHead *data_ptr);
 // - This function does not return a value. It may result in the destruction of
 // the TObject if the reference count reaches zero.
 TH_EXPORT void tobj_drop(struct DataBlockHead *data_ptr);
-
-#endif // TAIHE_OBJECT_ABI_H
+#endif  // RUNTIME_INCLUDE_TAIHE_OBJECT_ABI_H_

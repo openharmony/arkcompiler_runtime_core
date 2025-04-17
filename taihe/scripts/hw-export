@@ -14,7 +14,7 @@
 
 
 from pathlib import Path
-import re
+from dataclasses import dataclass
 import shutil
 import subprocess
 
@@ -170,7 +170,7 @@ UseTab:          Never
 """
 
 
-def should_ignore(file: str) -> bool:
+def check_should_ignore(file: str) -> bool:
     if file == ".clang-format":
         return True
 
@@ -179,11 +179,15 @@ def should_ignore(file: str) -> bool:
 
     if file.startswith(".githooks") or file.startswith(".github"):
         return True
-    
+
     if file.startswith(("cookbook/", "docs/")):
         return True
-    
-    if file.startswith("test/") and not file.startswith("test/ani_"):
+
+    if (
+        file.startswith("test/")
+        and not file.startswith("test/ani_")
+        and not file == "test/CMakeLists.txt"
+    ):
         return True
 
     return False
@@ -209,19 +213,41 @@ def format_code(text: str, clang_format_path: Path, assume_filename: str) -> str
     return process.stdout
 
 
-def process_python_code(text: str) -> str:
-    def adjust_indent(match):
-        line = match.group(1)
-        indent = re.match(r"^(\s*)", line).group(1)
-        return f"{line}{indent}    ..."
+def py_move_ellipsis(text: str) -> str:
+    result = []
+    for line in text.splitlines():
+        if line.rstrip().endswith(": ..."):
+            count = len(line) - len(line.lstrip())
+            result.append(line.rstrip()[:-4])
+            result.append(" " * count + "    ...")
+        else:
+            result.append(line)
+    return "\n".join(result)
 
-    text = re.sub(
-        r"(\n\s*def\s+\w+\s*\(.*\)\s*->\s*\w+:\s*)\.\.\.",
-        adjust_indent,
-        text,
-    )
 
-    return text
+def py_remove_asserts(text: str) -> str:
+    @dataclass
+    class AssertBlock:
+        indent: int
+        inner_count: int = 0
+
+    result = []
+    assert_block: AssertBlock | None = None
+    for line in text.splitlines():
+        indent = len(line) - len(line.lstrip())
+        if assert_block is not None:
+            if indent == assert_block.indent:
+                if assert_block.inner_count == 0:
+                    result.append(line)
+                assert_block = None
+            else:
+                assert_block.inner_count += 1
+        elif line.lstrip().startswith("assert "):
+            assert_block = AssertBlock(indent=indent)
+            result.append(" " * indent + "pass")
+        else:
+            result.append(line)
+    return "\n".join(result)
 
 
 def add_c_style_copyright(text: str) -> str:
@@ -239,13 +265,74 @@ def add_sh_style_copyright(text: str) -> str:
     return "".join(line + "\n" for line in lines)
 
 
+def add_python_encoding_header(text: str) -> str:
+    lines = text.splitlines()
+
+    header = ["# coding=utf-8", "#"]
+
+    # 如果已有 encoding 声明，就不重复加
+    if any("coding=" in line for line in lines[:2]):
+        return text
+
+    # 保持 shebang 在第一行
+    if lines and lines[0].startswith("#!"):
+        return "\n".join([lines[0]] + header + lines[1:]) + "\n"
+    else:
+        return "\n".join(header + lines) + "\n"
+
+
+def add_shebang(text: str) -> str:
+    lines = text.splitlines()
+    header = ["#!/bin/bash"]
+    if lines and lines[0].startswith("#!"):
+        return text
+    else:
+        return "\n".join(header + lines) + "\n"
+
+
 def is_text_file(file: Path):
     try:
         with open(file, "r", encoding="utf-8") as f:
             f.read(1024)
-        return True  # 可以作为UTF-8解码，可能是文本文件
+        return True  # 可以作为 UTF-8 解码，可能是文本文件
     except UnicodeDecodeError:
-        return False  # 不能作为UTF-8解码，可能是二进制文件
+        return False  # 不能作为 UTF-8 解码，可能是二进制文件
+
+
+def convert_to_include_guard(text: str, filename: str) -> str:
+    should_nolint = filename.endswith(".hpp") or filename.endswith("common.h")
+
+    lines = text.splitlines()
+
+    should_add_include_guard = any(line.strip() == "#pragma once" for line in lines)
+
+    # 删除已存在的 #pragma once
+    lines = text.splitlines()
+    filtered_lines = [line for line in lines if not line.strip() == "#pragma once"]
+
+    # 生成 include guard 宏名
+    guard_name = filename.upper().replace(".", "_").replace("/", "_").replace("\\", "_")
+    guard_name = f"{guard_name}_"
+
+    # 添加 include guard
+    begin_guard_lines = []
+    if should_add_include_guard:
+        begin_guard_lines.append(f"#ifndef {guard_name}")
+        begin_guard_lines.append(f"#define {guard_name}")
+    if should_nolint:
+        begin_guard_lines.append("// NOLINTBEGIN")
+
+    end_guard_lines = []
+    if should_nolint:
+        end_guard_lines.append("// NOLINTEND")
+    if should_add_include_guard:
+        end_guard_lines.append(f"#endif  // {guard_name}")
+
+    return "\n".join(begin_guard_lines + filtered_lines + end_guard_lines)
+
+
+def remove_single_line_comments(text: str) -> str:
+    return "\n".join(line for line in text.splitlines() if set(line.strip()) != {"/"})
 
 
 def process_file(
@@ -266,6 +353,25 @@ def process_file(
     with open(input_path, "r") as input:
         text = input.read()
 
+    # 对于 C/C++ 源文件和头文件，删除单行注释
+    if file.endswith((".c", ".cpp", ".h", ".hpp")):
+        text = remove_single_line_comments(text)
+
+    # 转换 #pragma once 为 include guard
+    if file.endswith((".h", ".hpp", ".c", ".cpp")):
+        text = convert_to_include_guard(text, file)
+
+    if file.endswith((".md", ".json", ".pyre_configuration", ".watchmanconfig")):
+        pass
+    elif file.endswith((".taihe", ".cpp", ".c", ".hpp", ".h", ".ets", ".ts", ".g4")):
+        text = add_c_style_copyright(text)
+    else:
+        text = add_sh_style_copyright(text)
+        if file.endswith((".py")):
+            text = add_python_encoding_header(text)
+        elif file.endswith(("common_lib.sh")):
+            text = add_shebang(text)
+
     if file.endswith(".c"):
         text = format_code(text, clang_format_path, "text.c")
     if file.endswith(".cpp"):
@@ -277,14 +383,8 @@ def process_file(
     elif file.endswith((".ts", ".ets")):
         text = format_code(text, clang_format_path, "text.js")
     if file.endswith(".py"):
-        text = process_python_code(text)
-
-    if file.endswith((".md", ".json", ".pyre_configuration", ".watchmanconfig")):
-        pass
-    elif file.endswith((".taihe", ".cpp", ".c", ".hpp", ".h", ".ets", ".ts", ".g4")):
-        text = add_c_style_copyright(text)
-    else:
-        text = add_sh_style_copyright(text)
+        text = py_move_ellipsis(text)
+        text = py_remove_asserts(text)
 
     with open(output_path, "w") as output:
         output.write(text)
@@ -323,7 +423,7 @@ def main() -> None:
         file.write(SH_COPYRIGHT + CLANG_FORMAT_STYLE)
 
     for file in file_list:
-        if should_ignore(file):
+        if check_should_ignore(file):
             continue
         process_file(input_dir, output_dir, file, clang_format_path)
 

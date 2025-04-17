@@ -102,35 +102,38 @@ public:
 
     taihe::optional<int8_t> geti8()
     {
-        return taihe::optional<int8_t>::make(1);
+        int8_t const geti8Value = 1;
+        return taihe::optional<int8_t>::make(geti8Value);
     }
 
     taihe::optional<int16_t> geti16()
     {
-        const int16_t geti16_value = 100;
-        return taihe::optional<int16_t>::make(geti16_value);
+        int16_t const geti16Value = 100;
+        return taihe::optional<int16_t>::make(geti16Value);
     }
 
     taihe::optional<int32_t> geti32()
     {
-        const int32_t geti32_value = 1024;
-        return taihe::optional<int32_t>::make(geti32_value);  // 默认返回0
+        int32_t const geti32Value = 1024;
+        return taihe::optional<int32_t>::make(geti32Value);  // 默认返回0
     }
 
     taihe::optional<int64_t> geti64()
     {
-        const int64_t geti64_value = 999999;
-        return taihe::optional<int64_t>::make(geti64_value);  // 默认返回0
+        int64_t const geti64Value = 999999;
+        return taihe::optional<int64_t>::make(geti64Value);  // 默认返回0
     }
 
     taihe::optional<float> getf32()
     {
-        return taihe::optional<float>::make(0.0f);
+        float const getf32Value = 0.0f;
+        return taihe::optional<float>::make(getf32Value);
     }
 
     taihe::optional<double> getf64()
     {
-        return taihe::optional<double>::make(0.0);
+        double const getf64Value = 0.0;
+        return taihe::optional<double>::make(getf64Value);
     }
 
     taihe::optional<bool> getbool()
@@ -140,9 +143,9 @@ public:
 
     taihe::optional<array<uint8_t>> getArraybuffer()
     {
-        int arr_size = 10;
-        int arr_num = 6;
-        return taihe::optional<array<uint8_t>>::make(array<uint8_t>::make(arr_size, arr_num));
+        int const arrSize = 10;
+        int const arrNum = 6;
+        return taihe::optional<array<uint8_t>>::make(array<uint8_t>::make(arrSize, arrNum));
     }
 };
 
@@ -212,9 +215,10 @@ void printTestInterfaceArraybuffer(::optional::weak::ExampleInterface testiface)
 }
 }  // namespace
 
-// The macros used below are automatically generated code
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
-TH_EXPORT_CPP_API_get_interface(get_interface) TH_EXPORT_CPP_API_printTestInterfaceName(printTestInterfaceName);
+TH_EXPORT_CPP_API_get_interface(get_interface);
+TH_EXPORT_CPP_API_printTestInterfaceName(printTestInterfaceName);
 TH_EXPORT_CPP_API_printTestInterfaceNumberi8(printTestInterfaceNumberi8);
 TH_EXPORT_CPP_API_printTestInterfaceNumberi16(printTestInterfaceNumberi16);
 TH_EXPORT_CPP_API_printTestInterfaceNumberi32(printTestInterfaceNumberi32);

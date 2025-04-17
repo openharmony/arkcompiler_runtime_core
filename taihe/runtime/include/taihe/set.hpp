@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_SET_HPP
-#define TAIHE_SET_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_SET_HPP_
+#define RUNTIME_INCLUDE_TAIHE_SET_HPP_
+// NOLINTBEGIN
 
 #include <taihe/common.hpp>
 
@@ -21,9 +22,6 @@
 
 #define SET_GROWTH_FACTOR 2
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename K>
 struct set_view;
@@ -335,10 +333,9 @@ struct as_param<set<K>> {
     using type = set_view<K>;
 };
 }  // namespace taihe
-// NOLINTEND
 
 #ifdef SET_GROWTH_FACTOR
 #undef SET_GROWTH_FACTOR
-#endif // SET_GROWTH_FACTOR
-
-#endif // TAIHE_SET_HPP
+#endif
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_SET_HPP_

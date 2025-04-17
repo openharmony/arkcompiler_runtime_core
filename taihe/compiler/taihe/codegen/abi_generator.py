@@ -30,17 +30,6 @@ from taihe.semantics.declarations import (
     UnionDecl,
 )
 from taihe.semantics.types import (
-    BOOL,
-    F32,
-    F64,
-    I8,
-    I16,
-    I32,
-    I64,
-    U8,
-    U16,
-    U32,
-    U64,
     ArrayType,
     CallbackType,
     EnumType,
@@ -48,6 +37,7 @@ from taihe.semantics.types import (
     MapType,
     OpaqueType,
     OptionalType,
+    ScalarKind,
     ScalarType,
     SetType,
     StringType,
@@ -147,6 +137,7 @@ class IfaceABIInfo(AbstractAnalysis[IfaceDecl]):
         self.ancestors = [d]
         for extend in d.parents:
             ty = extend.ty_ref.resolved_ty
+            pass
             extend_abi_info = IfaceABIInfo.get(am, ty.ty_decl)
             self.ancestors.extend(extend_abi_info.ancestors)
         for i, ancestor in enumerate(self.ancestors):
@@ -220,18 +211,18 @@ class ScalarTypeABIInfo(AbstractAnalysis[ScalarType], AbstractTypeABIInfo):
     def __init__(self, am: AnalysisManager, t: ScalarType):
         super().__init__(am, t)
         res = {
-            BOOL: "bool",
-            F32: "float",
-            F64: "double",
-            I8: "int8_t",
-            I16: "int16_t",
-            I32: "int32_t",
-            I64: "int64_t",
-            U8: "uint8_t",
-            U16: "uint16_t",
-            U32: "uint32_t",
-            U64: "uint64_t",
-        }.get(t)
+            ScalarKind.BOOL: "bool",
+            ScalarKind.F32: "float",
+            ScalarKind.F64: "double",
+            ScalarKind.I8: "int8_t",
+            ScalarKind.I16: "int16_t",
+            ScalarKind.I32: "int32_t",
+            ScalarKind.I64: "int64_t",
+            ScalarKind.U8: "uint8_t",
+            ScalarKind.U16: "uint16_t",
+            ScalarKind.U32: "uint32_t",
+            ScalarKind.U64: "uint64_t",
+        }.get(t.kind)
         if res is None:
             raise ValueError
         self.decl_headers = []
