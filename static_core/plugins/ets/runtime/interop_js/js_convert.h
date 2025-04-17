@@ -307,9 +307,8 @@ JSCONVERT_WRAP(Promise)
     NAPI_CHECK_FATAL(napi_create_promise(env, &deferred, &jsPromise));
 
     hpromise->Lock();
-    uint32_t state = hpromise->GetState();
     // NOTE(alimovilya, #23064) This if should be removed. Only else branch should remain.
-    if (state != EtsPromise::STATE_PENDING) {  // it will never get PENDING again
+    if (!hpromise->IsPending() && !hpromise->IsLinked()) {  // it will never get PENDING again
         EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
         napi_value completionValue;
         if (value.GetPtr() == nullptr) {
