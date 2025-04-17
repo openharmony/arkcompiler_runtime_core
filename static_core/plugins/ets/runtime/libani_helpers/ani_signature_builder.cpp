@@ -55,8 +55,10 @@ Type::Type(std::unique_ptr<Type::Impl> impl) : impl_(std::move(impl)) {}
 
 Type::~Type() = default;
 
+// CC-OFFNXT(G.FUN.02-CPP) different coedcheck for .h and .cpp
 Type::Type(const Type &other) : impl_(other.impl_ ? std::make_unique<Type::Impl>(*other.impl_) : nullptr) {}
 
+// CC-OFFNXT(G.FUN.02-CPP) different coedcheck for .h and .cpp
 Type &Type::operator=(const Type &other)
 {
     if (this != &other) {
@@ -98,8 +100,10 @@ Module::Module(std::unique_ptr<Module::Impl> impl) : impl_(std::move(impl)) {}
 
 Module::~Module() = default;
 
+// CC-OFFNXT(G.FUN.02-CPP) different coedcheck for .h and .cpp
 Module::Module(const Module &other) : impl_(other.impl_ ? std::make_unique<Module::Impl>(*other.impl_) : nullptr) {}
 
+// CC-OFFNXT(G.FUN.02-CPP) different coedcheck for .h and .cpp
 Module &Module::operator=(const Module &other)
 {
     if (this != &other) {
@@ -138,11 +142,12 @@ Namespace::Namespace(std::unique_ptr<Namespace::Impl> impl) : impl_(std::move(im
 
 Namespace::~Namespace() = default;
 
+// CC-OFFNXT(G.FUN.02-CPP) different coedcheck for .h and .cpp
 Namespace::Namespace(const Namespace &other)
     : impl_(other.impl_ ? std::make_unique<Namespace::Impl>(*other.impl_) : nullptr)
 {
 }
-
+// CC-OFFNXT(G.FUN.02-CPP) different coedcheck for .h and .cpp
 Namespace &Namespace::operator=(const Namespace &other)
 {
     if (this != &other) {

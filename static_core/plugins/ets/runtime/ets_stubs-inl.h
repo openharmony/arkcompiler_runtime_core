@@ -360,7 +360,7 @@ ALWAYS_INLINE inline Method *ResolveCompatibleVMethodInClass(EtsCoroutine *coro,
     auto linker = Runtime::GetCurrent()->GetClassLinker();
 
     // CC-OFFNXT(C_RULE_ID_POINTER_DECLARE_FOLLOW_NAME) project code style
-    // CC-OFFNXT(G.FMT.14-CPP) project code style
+    // CC-OFFNXT(G.FMT.14-CPP,G.FMT.10-CPP) project code style
     auto lookupFromIndex = [coro, linker, klass, lookupTarget](size_t from) -> Method * {
         auto methods = klass->GetVTable();
         for (size_t idx = from; idx < methods.size(); ++idx) {
