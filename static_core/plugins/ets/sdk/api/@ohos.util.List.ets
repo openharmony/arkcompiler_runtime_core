@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package api;
+import { LinkedList, ListNode } from './@ohos.util.LinkedList';
 
 export class List<T> implements Iterable<T> {
     private buffer: LinkedList<T>;

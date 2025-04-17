@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-package api;
-
 /**
  * Represents a node in the linked list.
  */
-final class ListNode<T> {
+export final class ListNode<T> {
     element: T;
     prev?: ListNode<T>;
     next?: ListNode<T>;
@@ -57,7 +55,7 @@ final class LinkedListIterator_T<T> implements IterableIterator<T> {
  */
 export class LinkedList<T> implements Iterable<T> {
     private elementNum: number;
-    internal head?: ListNode<T>;
+    head?: ListNode<T>;
     private tail?: ListNode<T>;
 
     public constructor() {

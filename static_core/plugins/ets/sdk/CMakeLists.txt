@@ -28,6 +28,25 @@ add_dependencies(ets_sdk_prereqs ark_link)
 # Note(ivan-tyulyandin): provide script to collect all ets files in build time on each rerun, issue #21800
 set(SDK_SRCS
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.buffer.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.uri.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.url.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.ArrayList.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.Deque.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.HashMap.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.HashSet.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.json.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.LightWeightMap.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.LightWeightSet.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.LinkedList.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.List.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.PlainArray.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.Queue.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.Stack.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.TreeMap.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.TreeSet.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.xml.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.base.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.math.Decimal.ets"
 )
 

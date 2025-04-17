@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {util} from "api/@ohos.util.ets";
+import {util} from "@ohos.util";
 
 function NumberEqual(resStr:number, expect:number)
 {

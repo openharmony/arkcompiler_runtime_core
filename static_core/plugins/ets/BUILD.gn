@@ -85,25 +85,94 @@ if (!(ark_standalone_build ||
     deps = [ ":etsstdlib_bootabc_etc" ]
   }
 
-  ohos_prebuilt_etc("ets2abc_commonsdk_etc") {
-    source = "$target_out_dir/etssdk.abc"
+  ohos_prebuilt_etc("ets2abc_commonsdk_api_etc") {
+    source = "$target_out_dir/ets2abc_commonsdk_api.abc"
     module_install_dir = "framework"
     subsystem_name = "arkcompiler"
     part_name = "runtime_core"
-    deps = [ ":ets2abc_commonsdk" ]
+    deps = [ ":ets2abc_commonsdk_api" ]
   }
 
-  generate_static_abc("ets2abc_commonsdk") {
-    arktsconfig = "$ark_root/plugins/ets/sdk/arktsconfig.json"
-    dst_file = "$target_out_dir/etssdk.abc"
-    out_puts = [ "$target_out_dir/etssdk.abc" ]
-    cache_path = "$target_out_dir/cache"
+  generate_static_abc("ets2abc_commonsdk_api") {
+    base_url = "./sdk/api"
+    files = [
+      "./sdk/api/@ohos.buffer.ets",
+      "./sdk/api/@ohos.uri.ets",
+      "./sdk/api/@ohos.url.ets",
+      "./sdk/api/@ohos.util.ArrayList.ets",
+      "./sdk/api/@ohos.util.Deque.ets",
+      "./sdk/api/@ohos.util.HashMap.ets",
+      "./sdk/api/@ohos.util.HashSet.ets",
+      "./sdk/api/@ohos.util.json.ets",
+      "./sdk/api/@ohos.util.LightWeightMap.ets",
+      "./sdk/api/@ohos.util.LightWeightSet.ets",
+      "./sdk/api/@ohos.util.LinkedList.ets",
+      "./sdk/api/@ohos.util.List.ets",
+      "./sdk/api/@ohos.util.PlainArray.ets",
+      "./sdk/api/@ohos.util.Queue.ets",
+      "./sdk/api/@ohos.util.Stack.ets",
+      "./sdk/api/@ohos.util.ets",
+      "./sdk/api/@ohos.util.TreeMap.ets",
+      "./sdk/api/@ohos.util.TreeSet.ets",
+      "./sdk/api/@ohos.xml.ets",
+    ]
     is_boot_abc = "True"
-    device_dst_file = "/system/framework/etssdk.abc"
+    device_dst_file = "/system/framework/ets2abc_commonsdk_api.abc"
   }
 
+  ohos_prebuilt_etc("ets2abc_commonsdk_arkts_etc") {
+    source = "$target_out_dir/ets2abc_commonsdk_arkts.abc"
+    module_install_dir = "framework"
+    subsystem_name = "arkcompiler"
+    part_name = "runtime_core"
+    deps = [ ":ets2abc_commonsdk_arkts" ]
+  }
+
+  generate_static_abc("ets2abc_commonsdk_arkts") {
+    base_url = "./sdk/arkts"
+    files = [ "./sdk/arkts/@arkts.math.Decimal.ets" ]
+    is_boot_abc = "True"
+    device_dst_file = "/system/framework/ets2abc_commonsdk_arkts.abc"
+  }
+
+  ohos_shared_library("ets_sdk_native") {
+    include_dirs = [
+      "$ark_root/plugins/ets",
+      "$ark_root/plugins/ets/runtime",
+      "$ark_root/plugins/ets/runtime/ani",
+      "$ark_root/plugins/ets/runtime/napi",
+      "$ark_root/plugins/ets/sdk",
+      "$ark_root/plugins/ets/sdk/native",
+    ]
+    sources = [
+      "$ark_root/plugins/ets/sdk/native/api/Util.cpp",
+      "$ark_root/plugins/ets/sdk/native/api/ani_textdecoder.cpp",
+      "$ark_root/plugins/ets/sdk/native/api/ani_textencoder.cpp",
+      "$ark_root/plugins/ets/sdk/native/api/ani_textencoder_helper.cpp",
+      "$ark_root/plugins/ets/sdk/native/main.cpp",
+      "$ark_root/plugins/ets/stdlib/native/core/stdlib_ani_helpers.cpp",
+    ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "openssl:libcrypto_shared",
+      icuuc_dep,
+    ]
+    deps = [
+      "$ark_root/libpandabase:libarktsbase_static",
+      "$ark_root/plugins/ets/runtime/ani:ani",
+    ]
+    subsystem_name = "arkcompiler"
+    part_name = "runtime_core"
+    output_extension = "so"
+  }
   group("commonsdk_packages") {
-    deps = [ ":ets2abc_commonsdk_etc" ]
+    deps = [
+      ":ets2abc_commonsdk_api_etc",
+      ":ets2abc_commonsdk_arkts_etc",
+      ":ets_sdk_native",
+    ]
   }
 }
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {json} from "api"
+import {json} from "@ohos.util.json";
 
 function main() {
     testStringifyParseBigInt()

@@ -13,7 +13,5 @@
  * limitations under the License.
  */
 
-package arkts;
-
 export type Rounding = number
 export type Modulo = number

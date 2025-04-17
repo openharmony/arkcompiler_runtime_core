@@ -13,8 +13,19 @@
  * limitations under the License.
  */
 
-package api;
+import { BusinessError } from "@ohos.base";
 
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+const IncorrectBufferSizeId: number = 10200009;
+
+function createBusinessError(code: number, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
 
 function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
     if (value instanceof Uint8Array) {
@@ -27,7 +38,7 @@ function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
  * Namespace containing Buffer implementation and related utilities
  * for handling binary data and various encoding operations.
  */
-export namespace buffer {
+export default namespace buffer {
 
     /**
      * Supported character encodings for Buffer operations
@@ -150,7 +161,7 @@ export namespace buffer {
             case "ArrayBuffer":
                 return (doc as ArrayBuffer).getByteLength();
         }
-        throw new BusinessError("Invalid type", TypeErrorCodeId);
+        throw createBusinessError(TypeErrorCodeId, "Invalid type")
     }
 
     /**
@@ -171,7 +182,7 @@ export namespace buffer {
     ): Buffer
     {
         if (size < 0) {
-            throw new BusinessError('Parameter error: size must be a non-negative number.', TypeErrorCodeId);
+            throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
         }
         const buffer = new Buffer(new ArrayBuffer(size));
         const resolvedEncoding = encoding ?? "utf-8";
@@ -194,7 +205,7 @@ export namespace buffer {
      */
     export function allocUninitializedFromPool(size: number): Buffer {
         if (size < 0) {
-            throw new BusinessError('Parameter error: size must be a non-negative number.', TypeErrorCodeId);
+            throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
         }
         return new Buffer(new ArrayBuffer(size));
     }
@@ -210,7 +221,7 @@ export namespace buffer {
      */
     export function allocUninitialized(size: number): Buffer {
         if (size < 0) {
-            throw new BusinessError('Parameter error: size must be a non-negative number.', TypeErrorCodeId);
+            throw createBusinessError(TypeErrorCodeId, 'Parameter error: size must be a non-negative number.')
         }
         return new Buffer(new ArrayBuffer(size));
     }
@@ -260,8 +271,8 @@ export namespace buffer {
         const length = totalLength ?? resolvedList.reduce(
             (acc: number, item: ArrayBuffer): number => acc + item.byteLength, 0);
         if (length < 0 || length > U32_MAX) {
-            throw new BusinessError(`The value of "length" is out of range.
-It must be >= 0 and <= uint32 max. Received value is: ${length}`, OutOfBoundsErrorCodeId);
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range.
+It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         }
         const listOfBytes = new Array<byte>();
         for (const item of resolvedList) {
@@ -619,16 +630,16 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`, OutOfBoundsErr
             const resolvedSourceEnd = (sourceEnd ?? this.length) as int;
 
             if (resolvedTargetStart < 0) {
-                throw new BusinessError(`The value of "targetStart" is out of range. It must be >= 0.
-Received value is: ${resolvedTargetStart}`, OutOfBoundsErrorCodeId);
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "targetStart" is out of range. It must be >= 0.
+Received value is: ${resolvedTargetStart}`)
             }
             if (resolvedSourceStart < 0) {
-                throw new BusinessError(`The value of "sourceStart" is out of range. It must be >= 0.
-Received value is: ${resolvedSourceStart}`, OutOfBoundsErrorCodeId);
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceStart" is out of range. It must be >= 0.
+Received value is: ${resolvedSourceStart}`)
             }
             if (resolvedSourceEnd < 0) {
-                throw new BusinessError(`The value of "sourceEnd" is out of range. It must be >= 0.
-Received value is: ${resolvedSourceEnd}`, OutOfBoundsErrorCodeId);
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "sourceEnd" is out of range. It must be >= 0.
+Received value is: ${resolvedSourceEnd}`)
             }
 
             const sourceSlice = resolvedSource.slice(resolvedSourceStart,
@@ -683,12 +694,12 @@ Received value is: ${resolvedSourceEnd}`, OutOfBoundsErrorCodeId);
             const resolvedEnd = end ?? this.length;
 
             if (offset < 0) {
-                throw new BusinessError(`The value of "offset" is out of range. It must be >= 0.
-Received value is: ${offset}`, OutOfBoundsErrorCodeId);
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. It must be >= 0.
+Received value is: ${offset}`)
             }
             if (resolvedEnd < 0 || resolvedEnd > this.length) {
-                throw new BusinessError(`The value of "end" is out of range. It must be >= 0 and <= ${this.length}.
-Received value is: ${resolvedEnd}`, OutOfBoundsErrorCodeId);
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "end" is out of range. It must be >= 0 and <= ${this.length}.
+Received value is: ${resolvedEnd}`)
             }
 
             let klass: string = "string";
@@ -737,8 +748,8 @@ Received value is: ${resolvedEnd}`, OutOfBoundsErrorCodeId);
                     }
                     return this;
                 default:
-                    throw new BusinessError(`Parameter error: value must be a string, Buffer, Uint8Array, or number.
-Received value is: ${value}`, TypeErrorCodeId);
+                    throw createBusinessError(TypeErrorCodeId, `Parameter error: value must be a string, Buffer, Uint8Array, or number.
+Received value is: ${value}`)
             }
         }
 
@@ -813,7 +824,7 @@ Received value is: ${value}`, TypeErrorCodeId);
          */
         public swap16(): Buffer {
             if (this.length % 2 != 0) {
-                throw new BusinessError('The buffer size must be a multiple of 16-bits', IncorrectBufferSizeId);
+                throw createBusinessError(IncorrectBufferSizeId, 'The buffer size must be a multiple of 16-bits')
             }
             for (let i = 0; i < this.length; i += 2) {
                 const a = this.buffer.at(i);
@@ -831,7 +842,7 @@ Received value is: ${value}`, TypeErrorCodeId);
          */
         public swap32(): Buffer {
             if (this.length % 4 != 0) {
-                throw new BusinessError('The buffer size must be a multiple of 32-bits', IncorrectBufferSizeId);
+                throw createBusinessError(IncorrectBufferSizeId, 'The buffer size must be a multiple of 32-bits')
             }
             for (let i = 0; i < this.length; i += 4) {
                 const a = this.buffer.at(i);
@@ -852,7 +863,7 @@ Received value is: ${value}`, TypeErrorCodeId);
          */
         public swap64(): Buffer {
             if (this.length % 8 != 0) {
-                throw new BusinessError('The buffer size must be a multiple of 64-bits', IncorrectBufferSizeId);
+                throw createBusinessError(IncorrectBufferSizeId, 'The buffer size must be a multiple of 64-bits')
             }
             for (let i = 0; i < this.length; i += 8) {
                 const a = this.buffer.at(i);

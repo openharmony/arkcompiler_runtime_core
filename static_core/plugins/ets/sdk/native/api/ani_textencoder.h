@@ -15,7 +15,6 @@
 
 #ifndef ANI_TEXTENCODER_H
 #define ANI_TEXTENCODER_H
-
 #include <ani.h>
 #include <string>
 #include <string_view>

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Queue} from "api"
+import {Queue} from "@ohos.util.Queue";
 
 function main() {
     const suite = new ArkTestsuite("Queue API tests");

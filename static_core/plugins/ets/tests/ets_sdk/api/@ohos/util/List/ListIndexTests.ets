@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {List} from 'api';
+import { List } from '@ohos.util.List';
 
 function main() {
     const suite = new ArkTestsuite("List API tests");

@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-import {Deque, BusinessError, OutOfBoundsErrorCodeId} from "api"
+import Deque from "@ohos.util.Deque";
+import { BusinessError } from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
     const suite = new ArkTestsuite("Deque API tests");

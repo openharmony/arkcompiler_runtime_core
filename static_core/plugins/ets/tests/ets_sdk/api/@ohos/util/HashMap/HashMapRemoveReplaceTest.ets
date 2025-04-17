@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {HashMap} from "api"
+import HashMap from "@ohos.util.HashMap";
 
 const success = 0;
 const fail = 1;
