@@ -13,30 +13,9 @@
  * limitations under the License.
  */
 
-class Cls {
-    static func_s(i: int): int {
-        return i + i;
-    }
-
-    final func_f(i: int): int {
-        return i + i;
-    }
-
-    func_i(i: int): int {
-        return i + i;
-    }
-}
-
-let show = (str: string): string => {
-    return "Hi," + str;
-}
-
-function foo(x: string) : string {
-    let b: string = "Function foo was called"
-    return b + x;
-}
-
-function bar(y: number) : string {
-    let b: string = "Function bar was called"
-    return b + y;
+function test(): int {
+  let i1: int = 1;
+  let i2: int = 2;
+  let i3: int = 3;
+  return i1 + i2 + i3;
 }
