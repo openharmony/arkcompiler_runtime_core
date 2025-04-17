@@ -127,7 +127,10 @@ ets_int TimerModule::StartTimer(ani_env *env, ani_object funcObject, ani_int del
     timers_[timerId] = timer;
 
     uv_update_time(loop);
-    uv_timer_start(timer, TimerCallback, delayMs, !static_cast<bool>(oneShotTimer) ? delayMs : 0);
+    ani_int intervalMs = !static_cast<bool>(oneShotTimer)
+                             ? (delayMs > TimerModule::MIN_INTERVAL_MS ? delayMs : TimerModule::MIN_INTERVAL_MS)
+                             : 0;
+    uv_timer_start(timer, TimerCallback, delayMs, intervalMs);
     uv_async_send(&loop->wq_async);
     return timerId;
 }
