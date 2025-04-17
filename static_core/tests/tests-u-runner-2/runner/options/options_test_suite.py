@@ -58,14 +58,14 @@ class TestSuiteOptions(IOptions):
     __DEFAULT_WITH_JS = False
     __WORK_DIR = "work-dir"
 
-    def __init__(self, args: dict[str, Any], parent: IOptions):
+    def __init__(self, args: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(None)
         self.__name: str = cast(str, args[self.__TEST_SUITE])
         if not isinstance(parent, GeneralOptions):
             raise InvalidConfiguration(
                 "Incorrect configuration: test suite parent is not GeneralOptions")
         self._parent: GeneralOptions = parent
-        self.__parameters: dict[str, Any] = self.__process_parameters(args)
+        self.__parameters: dict[str, Any] = self.__process_parameters(args) # type: ignore[explicit-any]
         self.__data = args[f"{self.__name}.data"]
         self.__default_list_root: Path = self._parent.static_core_root / 'tests' / 'tests-u-runner' / 'test-lists'
         self.__list_root: str | None = self.__data[self.__LIST_ROOT] \
@@ -131,15 +131,15 @@ class TestSuiteOptions(IOptions):
     @staticmethod
     def __fill_collection(content: dict) -> dict:
         for _, prop_value in content.items():
-            TestSuiteOptions.__fill_collection_props(prop_value)
+            if isinstance(prop_value, dict):
+                TestSuiteOptions.__fill_collection_props(prop_value)
         return content
 
     @staticmethod
-    def __fill_collection_props(prop_value: Any) -> None:
-        if isinstance(prop_value, dict):
-            for sub_key, sub_value in prop_value.items():
-                if isinstance(sub_value, list):
-                    prop_value[sub_key] = " ".join(sub_value)
+    def __fill_collection_props(prop_value: dict) -> None:
+        for sub_key, sub_value in prop_value.items():
+            if isinstance(sub_value, list):
+                prop_value[sub_key] = " ".join(sub_value)
 
     @cached_property
     def suite_name(self) -> str:
@@ -162,7 +162,7 @@ class TestSuiteOptions(IOptions):
         return str(self.__parameters.get(self.__FILTER, self.__DEFAULT_FILTER))
 
     @cached_property
-    def parameters(self) -> dict[str, Any]:
+    def parameters(self) -> dict[str, Any]: # type: ignore[explicit-any]
         return self.__parameters
 
     def extension(self, collection: CollectionsOptions | None = None) -> str:
@@ -174,7 +174,7 @@ class TestSuiteOptions(IOptions):
     def load_runtimes(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__LOAD_RUNTIMES, self.__DEFAULT_LOAD_RUNTIMES, collection))
 
-    def get_parameter(self, key: str, default: Any | None = None,
+    def get_parameter(self, key: str, default: Any | None = None,   # type: ignore[explicit-any]
                       collection: CollectionsOptions | None = None) -> Any | None:
         if collection is not None:
             value = collection.get_parameter(key, None)
@@ -216,8 +216,8 @@ class TestSuiteOptions(IOptions):
                 if new_coll_value != coll_value:
                     collection.parameters[coll_param] = new_coll_value
 
-    def __process_parameters(self, args: dict[str, Any]) -> dict[str, Any]:
-        result: dict[str, Any] = {}
+    def __process_parameters(self, args: dict[str, Any]) -> dict[str, Any]:  # type: ignore[explicit-any]
+        result: dict[str, Any] = {}  # type: ignore[explicit-any]
         for param_name, param_value in args.items():
             if param_name.startswith(f"{self.__name}.{self.__PARAMETERS}."):
                 param_name = convert_underscore(param_name[(len(self.__name) + len(self.__PARAMETERS) + 2):])

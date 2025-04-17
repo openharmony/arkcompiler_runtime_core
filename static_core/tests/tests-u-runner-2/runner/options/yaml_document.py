@@ -30,16 +30,16 @@ class YamlDocument:
 
     def __init__(self) -> None:
         super().__init__()
-        self._document: dict[str, Any] | None = None
+        self._document: dict[str, Any] | None = None  # type: ignore[explicit-any]
         self._warnings: list[str] = []
 
     @staticmethod
-    def load(config_path: Path) -> dict[str, Any]:
+    def load(config_path: Path) -> dict[str, Any]:  # type: ignore[explicit-any]
         with open(config_path, encoding="utf-8") as stream:
-            data: dict[str, Any] = yaml.safe_load(stream)
+            data: dict[str, Any] = yaml.safe_load(stream)   # type: ignore[explicit-any]
             return data
 
     @staticmethod
-    def save(config_path: str, data: dict[str, Any]) -> None:
+    def save(config_path: str, data: dict[str, Any]) -> None:   # type: ignore[explicit-any]
         data_to_save = yaml.dump(data, indent=4)
         utils.write_2_file(config_path, data_to_save)

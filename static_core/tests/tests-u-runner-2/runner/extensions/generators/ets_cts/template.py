@@ -18,7 +18,6 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import yaml
 from jinja2 import Environment, TemplateSyntaxError, select_autoescape
@@ -40,12 +39,12 @@ COPYRIGHT_PATH = ROOT_PATH / "copyright.txt"
 
 @dataclass
 class Meta:
-    config: dict[str, Any]
+    config: dict[str, str]
     code: str
 
 
 class Template:
-    def __init__(self, test_path: Path, params: dict[str, Any]) -> None:
+    def __init__(self, test_path: Path, params: dict[str, list]) -> None:
         self.test_path = str(test_path)
         self.text = read_file(test_path)
         self.__params = params
@@ -107,9 +106,9 @@ class Template:
         inside_content, outside_content = self.__get_in_out_content(test_text, META_START_STRING, META_END_STRING)
         return Meta(config=self.__parse_yaml(inside_content), code=outside_content)
 
-    def __parse_yaml(self, text: str) -> dict[str, Any]:
+    def __parse_yaml(self, text: str) -> dict[str, str]:
         try:
-            result: dict[str, Any] = yaml.safe_load(text)
+            result: dict[str, str] = yaml.safe_load(text)
         except Exception as exc:
             raise InvalidFileFormatException(message=f"Could not load YAML in test params: {exc!s}",
                                              filepath=self.test_path) from exc

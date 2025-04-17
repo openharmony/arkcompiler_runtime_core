@@ -21,11 +21,12 @@ from typing import Any, TypeVar
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 
-MethodType = Any
+MethodType = Any    # type: ignore[explicit-any]
 CLASSTYPE = TypeVar("CLASSTYPE", bound='object')
 
 
-def compare_dicts(test_case: unittest.TestCase, actual_dict: dict[str, Any], expected_dict: dict[str, Any]) -> None:
+def compare_dicts(test_case: unittest.TestCase, actual_dict: dict[str, Any], # type: ignore[explicit-any]
+                  expected_dict: dict[str, Any]) -> None:
     test_case.assertEqual(len(actual_dict), len(expected_dict),
                           f"Actual dict: {actual_dict.keys()}, Expected dict: {expected_dict.keys()}")
     for key in actual_dict:
@@ -53,7 +54,7 @@ def compare_dicts(test_case: unittest.TestCase, actual_dict: dict[str, Any], exp
                 f"actual value = {actual_value}. Expected to be equal")
 
 
-def try_to_cast_one_type(value1: str, value2: Any) -> int | bool | str:
+def try_to_cast_one_type(value1: str, value2: Any) -> int | bool | str: # type: ignore[explicit-any]
     if isinstance(value2, int):
         return int(value1)
     if isinstance(value2, bool):

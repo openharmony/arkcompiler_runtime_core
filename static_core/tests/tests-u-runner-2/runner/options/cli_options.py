@@ -18,6 +18,7 @@ import argparse
 import sys
 from glob import glob
 from pathlib import Path
+from typing import cast
 
 from runner import utils
 from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, InvalidConfiguration
@@ -228,7 +229,7 @@ class CliOptions:
             raise FileNotFoundException(message) from exc
         if (cfg_type := data.get(self.__CFG_TYPE)) in self.data:
             raise InvalidConfiguration(f"{cfg_name} redefines {cfg_type} config.")
-        cli_params = data.get(self.__CFG_PARAMETERS, {})
+        cli_params = cast(dict, data.get(self.__CFG_PARAMETERS, {}))
 
         self.data[str(cfg_type)] = cfg_name
         self.data[f"{cfg_name}.path"] = cfg_path

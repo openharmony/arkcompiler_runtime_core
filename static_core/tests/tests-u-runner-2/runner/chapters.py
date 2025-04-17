@@ -19,7 +19,6 @@ import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from runner.common_exceptions import CyclicDependencyChapterException, IncorrectFileFormatChapterException
 from runner.logger import Log
@@ -44,10 +43,10 @@ class Chapters:
     @staticmethod
     def __parse(chapters_file: Path) -> dict[str, Chapter]:
         result: dict[str, Chapter] = {}
-        yaml_header: dict[str, Any] = YamlDocument.load(chapters_file)
+        yaml_header: dict[str, list] = YamlDocument.load(chapters_file)
         if not yaml_header or not isinstance(yaml_header, dict):
             raise IncorrectFileFormatChapterException(chapters_file)
-        yaml_chapters: list[Any] | None = yaml_header.get('chapters')
+        yaml_chapters: list[dict] | None = yaml_header.get('chapters')
         if not yaml_chapters or not isinstance(yaml_chapters, list):
             raise IncorrectFileFormatChapterException(chapters_file)
         for yaml_chapter in yaml_chapters:

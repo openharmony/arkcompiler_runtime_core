@@ -28,13 +28,13 @@ _LOGGER = Log.get_logger(__file__)
 class IOptions(ABC):  # noqa: B024
     _parent: Optional['IOptions'] = None
 
-    def __init__(self, params: dict[str, Any] | None = None):
+    def __init__(self, params: dict[str, Any] | None = None):   # type: ignore[explicit-any]
         if params:
             for key, value in params.items():
                 setattr(self, convert_minus(key), value)
 
     @staticmethod
-    def __get_value_from_steps(value: list[Any], parts: list[str]) -> Any | None:
+    def __get_value_from_steps(value: list[Any], parts: list[str]) -> Any | None:  # type: ignore[explicit-any]
         for item in value:
             if hasattr(item, 'name') and item.name == parts[1]:
                 new_value = item.get_value(parts[2:])
@@ -47,13 +47,13 @@ class IOptions(ABC):  # noqa: B024
         attrs = [n for n in attrs if self.__is_property(n)]
         return attrs
 
-    def values(self) -> list[tuple[str, Any]]:
+    def values(self) -> list[tuple[str, Any]]:   # type: ignore[explicit-any]
         return [(attr, getattr(self, attr)) for attr in self.properties()]
 
     def parent(self) -> Optional['IOptions']:
         return self._parent
 
-    def get_value(self, option: str | list[str]) -> Any | None:
+    def get_value(self, option: str | list[str]) -> Any | None:   # type: ignore[explicit-any]
         if isinstance(option, str):
             parts = option.split(".")
         else:
@@ -69,8 +69,8 @@ class IOptions(ABC):  # noqa: B024
     def get_command_line(self) -> str:
         return ""
 
-    def to_dict(self) -> dict[str, Any]:
-        result: dict[str, Any] = {}
+    def to_dict(self) -> dict[str, Any]:        # type: ignore[explicit-any]
+        result: dict[str, Any] = {}     # type: ignore[explicit-any]
         for attr, value in self.values():
             if isinstance(value, IOptions):
                 result[attr] = value.to_dict()
@@ -90,7 +90,7 @@ class IOptions(ABC):  # noqa: B024
                 result += [f"{indent_str}{convert_underscore(prop_name)}: {prop_value!s}"]
         return "\n".join(result)
 
-    def __get_value_from_parameters(self, parts: list[str]) -> Any | None:
+    def __get_value_from_parameters(self, parts: list[str]) -> Any | None:      # type: ignore[explicit-any]
         parameters = "parameters"
         if parameters in self.properties():
             params = getattr(self, parameters).items()
@@ -99,12 +99,12 @@ class IOptions(ABC):  # noqa: B024
                 return value
         return None
 
-    def __get_value_from_properties(self, parts: list[str]) -> Any | None:
+    def __get_value_from_properties(self, parts: list[str]) -> Any | None:  # type: ignore[explicit-any]
         if parts and parts[0] in self.properties():
             return self.__get_value_from_property(parts)
         return None
 
-    def __get_value_from_property(self, parts: list[str]) -> Any | None:
+    def __get_value_from_property(self, parts: list[str]) -> Any | None:   # type: ignore[explicit-any]
         value = getattr(self, parts[0])
         if len(parts) == 1:
             return value

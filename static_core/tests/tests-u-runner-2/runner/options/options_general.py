@@ -57,9 +57,9 @@ class GeneralOptions(IOptions):
     __QEMU = "qemu"
     __REPORT_DIR = "report-dir"
 
-    def __init__(self, data: dict[str, Any], parent: IOptions):
+    def __init__(self, data: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(data)
-        self.__parameters: dict[str, Any] = {}
+        self.__parameters: dict[str, Any] = {}  # type: ignore[explicit-any]
         self._parent = parent
         for param_name, param_value in data.items():
             if param_name.startswith(self.__CFG_RUNNER):

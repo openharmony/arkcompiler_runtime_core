@@ -16,7 +16,6 @@
 #
 
 from pathlib import Path
-from typing import Any
 
 from runner.sts_utils.test_parameters import parse_yaml
 
@@ -29,8 +28,8 @@ class Params:
         param_name = f"{bench_name}{PARAM_SUFFIX}{YAML_EXTENSIONS}"
         self.__param_path = input_path.parent / param_name
 
-    def generate(self) -> dict[str, Any]:
+    def generate(self) -> dict[str, list]:
         if not self.__param_path.exists():
             return {}
-        params: dict[str, Any] = parse_yaml(str(self.__param_path))
+        params: dict[str, list] = parse_yaml(str(self.__param_path))
         return params

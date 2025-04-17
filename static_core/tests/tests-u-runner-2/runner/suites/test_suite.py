@@ -23,7 +23,7 @@ from functools import cached_property
 from glob import glob
 from os import path
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from runner.chapters import Chapters
 from runner.common_exceptions import FileNotFoundException, InvalidConfiguration, TestNotExistException
@@ -415,8 +415,8 @@ class TestSuite:
             _LOGGER.all(f"\t{test}")
             self.ignored_tests.remove(test)
 
-    def __get_collections_parameters(self) -> dict[str, dict[str, Any]]:
-        result: dict[str, dict[str, Any]] = {}
+    def __get_collections_parameters(self) -> dict[str, dict[str, list | str]]:
+        result: dict[str, dict[str, list | str]] = {}
         for collection in self.__test_env.config.test_suite.collections:
             result[collection.name] = collection.parameters
         return result

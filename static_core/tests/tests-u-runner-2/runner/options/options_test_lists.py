@@ -40,7 +40,7 @@ class TestListsOptions(IOptions):
     __TEST_LIST_OS = "test-list-os"
     __TEST_LIST_BUILD = "test-list-build"
 
-    def __init__(self, parameters: dict[str, Any]):
+    def __init__(self, parameters: dict[str, Any]): # type: ignore[explicit-any]
         super().__init__(parameters)
         self.__parameters = parameters
 

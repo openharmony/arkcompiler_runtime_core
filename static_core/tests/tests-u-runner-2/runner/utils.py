@@ -192,7 +192,7 @@ def iter_files(dirpath: Path | str, allowed_ext: list[str]) -> Iterator[tuple[st
             yield name, path_value
 
 
-def is_type_of(value: Any, type_: str) -> bool:
+def is_type_of(value: Any, type_: str) -> bool:     # type: ignore[explicit-any]
     return str(type(value)).find(type_) > 0
 
 
@@ -358,7 +358,7 @@ def get_config_test_suite_folder() -> Path:
     return get_config_folder().joinpath("test-suites")
 
 
-def load_config(config_path: str | None) -> dict[str, Any]:
+def load_config(config_path: str | None) -> dict[str, str | dict]:
     __cfg_type = "type"
     config_from_file = {}
     if config_path is not None:
@@ -374,7 +374,7 @@ def load_config(config_path: str | None) -> dict[str, Any]:
     return config_from_file
 
 
-def to_bool(value: Any) -> bool:
+def to_bool(value: Any) -> bool:    # type: ignore[explicit-any]
     if isinstance(value, bool):
         return value
     if isinstance(value, str) and str(value).lower() in ("true", "false"):
@@ -403,7 +403,7 @@ def get_test_id(file: Path, start_directory: Path) -> str:
     return str(relpath)
 
 
-def prepend_list(pre_list: list[Any], post_list: list[Any]) -> list[Any]:
+def prepend_list(pre_list: list, post_list: list) -> list:
     result = pre_list[:]
     result.extend(post_list)
     return result

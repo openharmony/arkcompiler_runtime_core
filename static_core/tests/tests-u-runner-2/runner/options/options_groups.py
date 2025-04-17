@@ -35,7 +35,7 @@ class GroupsOptions(IOptions):
     __DEFAULT_CHAPTERS_FILE = "chapters.yaml"
     __CHAPTERS_DELIMITER = ";"
 
-    def __init__(self, parameters: dict[str, Any]):
+    def __init__(self, parameters: dict[str, Any]):  # type: ignore[explicit-any]
         super().__init__()
         self.__parameters = parameters
 

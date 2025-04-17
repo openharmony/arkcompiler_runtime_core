@@ -16,7 +16,7 @@
 #
 
 from enum import Enum
-from typing import Any, NoReturn, TypeVar
+from typing import NoReturn, TypeVar
 
 from runner.common_exceptions import IncorrectEnumValue
 
@@ -39,10 +39,10 @@ class BaseEnum(Enum):
         return None
 
     @classmethod
-    def values(cls: type[EnumT]) -> list[Any]:
+    def values(cls: type[EnumT]) -> list[str]:
         member_map = "_member_map_"
         if hasattr(cls, member_map):
-            return [cls[attr].value for attr in getattr(cls, member_map)]
+            return [str(cls[attr].value) for attr in getattr(cls, member_map)]
         return []
 
     @classmethod

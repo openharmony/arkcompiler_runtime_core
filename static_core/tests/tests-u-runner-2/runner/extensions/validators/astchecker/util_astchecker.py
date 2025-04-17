@@ -22,7 +22,7 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from runner.common_exceptions import RunnerException
 from runner.logger import Log
@@ -68,7 +68,9 @@ class UtilASTChecker:
         def __repr__(self) -> str:
             return f'TestCase({self.name}, {self.line}:{self.col}, {self.test_type}, {self.checks}, {self.error_file})'
 
-        def __eq__(self, other: Any) -> bool:
+        def __eq__(self, other: object) -> bool:
+            if not isinstance(other, UtilASTChecker._TestCase):
+                return NotImplemented
             return bool(self.name == other.name and self.line == other.line and self.col == other.col
                         and self.test_type == other.test_type and self.checks == other.checks
                         and self.error_file == other.error_file)
