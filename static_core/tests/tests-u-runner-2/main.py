@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,19 +20,19 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 import pytz
 from dotenv import load_dotenv
 
-from runner.common_exceptions import InvalidConfiguration
+from runner.common_exceptions import InvalidConfiguration, RunnerException
 from runner.enum_types.verbose_format import VerboseKind
 from runner.logger import Log
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.runner_base import Runner
 from runner.suites.runner_standard_flow import RunnerStandardFlow
-from runner.utils import pretty_divider, check_obligatory_env
+from runner.utils import check_obligatory_env, pretty_divider
 
 
 def main() -> None:
@@ -53,7 +53,7 @@ def main() -> None:
     failed_tests = 0
     try:
         failed_tests = main_cycle(config, logger)
-    except Exception:
+    except RunnerException:
         logger.logger.critical(traceback.format_exc())
     finally:
         sys.exit(0 if failed_tests == 0 else 1)
@@ -120,7 +120,7 @@ def load_environment() -> None:
     os.environ['URUNNER_PATH'] = str(Path(__file__).parent)
 
 
-def load_config(args: Dict[str, Any]) -> Log:
+def load_config(args: dict[str, Any]) -> Log:
     runner_verbose = "runner.verbose"
     test_suite_const = "test-suite"
 
@@ -128,7 +128,7 @@ def load_config(args: Dict[str, Any]) -> Log:
     if test_suite_const not in args:
         raise InvalidConfiguration(f"Incorrect configuration: cannot file element '{test_suite_const}'")
     test_suite = args[test_suite_const]
-    work_dir = os.path.join(str(os.getenv("WORK_DIR")), test_suite)
+    work_dir = Path(os.getenv("WORK_DIR"), test_suite)
 
     return Log.setup(verbose, work_dir)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,66 +16,81 @@
 #
 
 from pathlib import Path
-from typing import Union
 
 
-class DownloadException(Exception):
+class RunnerException(Exception):
     pass
 
 
-class UnzipException(Exception):
+class DownloadException(RunnerException):
     pass
 
 
-class InvalidConfiguration(Exception):
+class UnzipException(RunnerException):
     pass
 
 
-class ParameterNotFound(Exception):
+class InvalidConfiguration(RunnerException):
     pass
 
 
-class MacroNotExpanded(Exception):
+class ParameterNotFound(RunnerException):
     pass
 
 
-class RunnerCustomSchemeException(Exception):
+class MacroNotExpanded(RunnerException):
     pass
 
 
-class TestNotExistException(Exception):
+class RunnerCustomSchemeException(RunnerException):
     pass
 
 
-class StepUtilsException(Exception):
+class TestNotExistException(RunnerException):
     pass
 
 
-class MalformedStepConfigurationException(Exception):
+class StepUtilsException(RunnerException):
+    pass
+
+
+class MalformedStepConfigurationException(RunnerException):
     def __init__(self, message: str) -> None:
         self.full_message = f"Malformed configuration file: {message}"
-        Exception.__init__(self, self.full_message)
+        super().__init__(self, self.full_message)
 
 
-class IncorrectEnumValue(Exception):
+class IncorrectEnumValue(RunnerException):
     pass
 
 
-class IncorrectFileFormatChapterException(Exception):
-    def __init__(self, chapters_name: Union[str, Path]) -> None:
+class IncorrectFileFormatChapterException(RunnerException):
+    def __init__(self, chapters_name: str | Path) -> None:
         message = f"Incorrect file format: {chapters_name}"
-        Exception.__init__(self, message)
+        super().__init__(self, message)
 
 
-class CyclicDependencyChapterException(Exception):
+class CyclicDependencyChapterException(RunnerException):
     def __init__(self, item: str) -> None:
         message = f"Cyclic dependency: {item}"
-        Exception.__init__(self, message)
+        super().__init__(self, message)
 
 
-class UnknownException(Exception):
+class UnknownException(RunnerException):
     pass
 
 
-class SetupException(Exception):
+class SetupException(RunnerException):
+    pass
+
+
+class FileNotFoundException(RunnerException):
+    pass
+
+
+class YamlException(RunnerException):
+    pass
+
+
+class TimeoutException(RunnerException):
     pass

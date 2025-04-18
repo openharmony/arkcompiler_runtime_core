@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@
 
 import argparse
 from functools import cached_property
-from typing import Dict, Optional, Any
+from typing import Any
 
-from runner.enum_types.configuration_kind import ArchitectureKind, SanitizerKind, OSKind, BuildTypeKind
+from runner.enum_types.configuration_kind import ArchitectureKind, BuildTypeKind, OSKind, SanitizerKind
 from runner.options.options import IOptions
 
 
@@ -40,7 +40,7 @@ class TestListsOptions(IOptions):
     __TEST_LIST_OS = "test-list-os"
     __TEST_LIST_BUILD = "test-list-build"
 
-    def __init__(self, parameters: Dict[str, Any]):
+    def __init__(self, parameters: dict[str, Any]):
         super().__init__(parameters)
         self.__parameters = parameters
 
@@ -109,12 +109,12 @@ class TestListsOptions(IOptions):
         return BuildTypeKind(self.__parameters[self.__TEST_LIST_BUILD])
 
     @cached_property
-    def explicit_file(self) -> Optional[str]:
+    def explicit_file(self) -> str | None:
         value = self.__parameters[self.__TEST_FILE]
         return str(value) if value is not None else value
 
     @cached_property
-    def explicit_list(self) -> Optional[str]:
+    def explicit_list(self) -> str | None:
         value = self.__parameters[self.__TEST_LIST]
         return str(value) if value is not None else value
 

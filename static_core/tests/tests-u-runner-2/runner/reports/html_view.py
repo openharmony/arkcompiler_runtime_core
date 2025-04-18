@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from datetime import datetime
 from os import path
 from pathlib import Path
-from typing import List, Dict, Tuple
 
 import pytz
 
@@ -47,9 +45,9 @@ class HtmlView:
         self.__config = config
         self.__summary = summary
 
-    def create_html_index(self, fail_lists: Dict[str, List[Test]], timestamp: int) -> None:
+    def create_html_index(self, fail_lists: dict[str, list[Test]], timestamp: int) -> None:
         report_file = path.join(path.dirname(path.abspath(__file__)), "index_template.html")
-        with open(report_file, "r", encoding="utf-8") as file_pointer:
+        with open(report_file, encoding="utf-8") as file_pointer:
             report = file_pointer.read()
 
         report = report.replace(INDEX_TITLE, f"Summary for {self.__summary.name} {datetime.now(pytz.UTC)}")
@@ -65,9 +63,9 @@ class HtmlView:
         report_path = self.__report_root / f"{self.__summary.name}.report-{timestamp}.html"
         write_2_file(report_path, report)
 
-    def __get_failed_tests_report(self, fail_lists: Dict[str, List[Test]]) -> str:
+    def __get_failed_tests_report(self, fail_lists: dict[str, list[Test]]) -> str:
         _new = "new"
-        failed_tests: List[Tuple[str, str]] = []
+        failed_tests: list[tuple[str, str]] = []
         for kind in fail_lists:
             for test in fail_lists[kind]:
                 report_path = test.reports[ReportFormat.HTML][len(str(self.__report_root)) + 1:]

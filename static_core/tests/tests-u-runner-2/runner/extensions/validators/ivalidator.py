@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 #
 
 from abc import ABC
-from typing import Dict, Callable, Optional
+from collections.abc import Callable
 
 # Signature:
 # test: TestStandardFlow - what test is running
@@ -27,11 +27,11 @@ from typing import Dict, Callable, Optional
 ValidatorFunction = Callable[[object, str, str, str, int], bool]
 
 
-class IValidator(ABC):
-    __validators: Dict[str, ValidatorFunction] = {}
+class IValidator(ABC):  # noqa: B024
+    __validators: dict[str, ValidatorFunction] = {}  # noqa: RUF012
 
     @property
-    def validators(self) -> Dict[str, ValidatorFunction]:
+    def validators(self) -> dict[str, ValidatorFunction]:
         return self.__validators
 
     def add(self, step_name: str, function: ValidatorFunction) -> None:
@@ -40,5 +40,5 @@ class IValidator(ABC):
     def has_step(self, step_name: str) -> bool:
         return step_name in self.__validators
 
-    def get_validator(self, step_name: str) -> Optional[ValidatorFunction]:
+    def get_validator(self, step_name: str) -> ValidatorFunction | None:
         return self.__validators.get(step_name)

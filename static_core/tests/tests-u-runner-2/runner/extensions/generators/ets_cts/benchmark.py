@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #
 # Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
 #
 
 from pathlib import Path
-from typing import List
 
 from runner import common_exceptions
 from runner.extensions.generators.ets_cts.params import Params
@@ -37,7 +36,7 @@ class Benchmark:
         self.__out_extension = out_extension
         self.__full_name = test_full_name[:-len(self.__template_extension)]
 
-    def generate(self) -> List[str]:
+    def generate(self) -> list[str]:
         _LOGGER.all(f"Generating test: {self.__name}")
         name_without_ext = self.__input.stem
         params = Params(self.__input, name_without_ext).generate()
