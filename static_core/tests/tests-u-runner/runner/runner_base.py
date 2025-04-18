@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -293,12 +293,13 @@ class Runner(ABC):
                 self.load_ignored_tests()
             if not path.exists(directory):
                 directory = str(path.normpath(path.join(self.test_root, directory)))
-            test_files.extend(self.__load_test_files(directory, extension))
+            test_files.extend(self.__load_test_files(directory, extension))  # type: ignore
 
         self._search_both_excluded_and_ignored_tests()
         self._search_not_used_ignored(test_files)
 
-        all_tests = {self.create_test(path.normpath(test), flags, test in self.ignored_tests) for test in test_files}
+        all_tests = {self.create_test(path.normpath(test), flags, test in self.ignored_tests)  # type: ignore
+                     for test in test_files}
         not_tests = {t for t in all_tests if isinstance(t, TestETS) and not t.is_valid_test}
         valid_tests = all_tests - not_tests
 
