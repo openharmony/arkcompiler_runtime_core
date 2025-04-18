@@ -14,135 +14,117 @@
 ---
 cases:
   - defs: |-
-      class Ex extends Exception {}
+      class Err extends Error {}
     use: |-
-      let p: Object = new Ex();
+      let p: Object = new Err();
       try {
-          if (t1 != t2) throw p as Exception;
-          return 1;
-      } catch (e: Ex) {
-          // ok, expected
-          return 0;
+          if (t1 != t2) throw p as Error;
       } catch (e) {
-          assertTrue( false, "Unexpected catch clause" )
+          assertTrue( e instanceof Err )
+          return
       }
-      return 1;
+      assertTrue(false, "No expected error")
 
   - defs: |-
       interface Ie {}
-      class Ex extends Exception implements Ie {}
+      class Err extends Error implements Ie {}
     use: |-
-      let p: Ie = new Ex();
+      let p: Ie = new Err();
       try {
-          if (t1 != t2) throw p as Exception;
-          return 1;
-      } catch (e: Ex) {
-          // ok, expected
-          return 0;
+          if (t1 != t2) throw p as Error;
       } catch (e) {
-          assertTrue( false, "Unexpected catch clause" )
+          assertTrue( e instanceof Ie )
+          return
       }
-      return 1;
+      assertTrue(false, "No expected error")
 
   - defs: |-
-      class Ex extends Exception {}
+      class Err extends Error {}
     use: |-
       try {
-          if (t1 != t2) throw new Ex();
-          return 1;
+          if (t1 != t2) throw new Err();
       } catch (e) {
-          // ok, expected
-          return 0;
+          assertTrue( e instanceof Err )
+          return
       }
+      assertTrue(false, "No expected error")
 
   - defs: |-
-      class Ex extends Exception {}
-    use: |-
-      try {
-          if (t1 != t2) throw new Ex();
-          return 1;
-      } catch (e: NullPointerError) {
-          return 1;
-      } catch (e: Ex) {
-          // ok, expected
-          return 0;
-      } catch (e) {
-          return 1;
-      }
-
-  - defs: |-
-      class Ex extends Exception {}
+      class Err extends Error {}
     use: |-
       let v = 0;
       try {
           try {
-              if (t1 != t2) throw new Ex();
-              return 1;
-          } catch (e: NullPointerError) {
-              return 1;
-          } catch (e: Exception) {
-              // ok, expected
-              v++;
-              throw e;
+              if (t1 != t2) throw new Err();
+          } catch (e) {
+              if (e instanceof Err) {
+                  v++;
+                  throw e;
+              }
           }
-      } catch (e: NullPointerError) {
-          return 1;
-      } catch (e: Ex) {
-          // ok, expected
-          v++;
       } catch (e) {
-          return 1;
+          if (e instanceof Err) {
+              v++
+          }
       }
-      if (v == 2) {
-          return 0;
-      }
-      return 1;
+      assertEQ(v, 2)
 
   - defs: |-
-      class Ex extends Exception {}
-      let e: Ex = new Ex();
-      function foo(): void throws {
+      class Err extends Error {}
+      let err: Err = new Err();
+
+      function foo(): void {
           try {
               bar();
-          } catch (f: Exception) {
-              throw f;
-          } catch (f: Error) {
-              return;
+          } catch (f) {
+              throw f
           }
-      }
-      function bar(): void throws {
-          try {
-              throw e;
-          } catch (p: Ex) {
-              throw p;
-          } catch (p) {
-              return;
-          }
-      }
-    use: |-
-      try {
-          foo();
-          return 1;
-      } catch (e: Error) {
-          return 1;
-      } catch (e: Ex) {
-          // ok, expected
-          return 0;
-      } catch (e) {
-          return 1;
       }
 
-  - defs: |-
-      class A extends Exception {}
-    use: |-
-      let p: A|null = new A();
-      try {
-          throw p;
-      } catch (e: Error) {
-          return 1;
-      } catch (e: A) {
-          // ok, expected
-          return 0;
-      } catch (e) {
-          return 1;
+      function bar(): void {
+          try {
+              if (t1 != t2) throw err;
+          } catch (p) {
+              throw p;
+          }
       }
+    use: |-
+      try {
+          foo()
+      } catch (e) {
+          assertEQ(e, err)
+          return
+      }
+      assertTrue(false, "No expected error")
+
+  - defs: |-
+      class A extends Error {}
+      let p: A|null = new A();
+    use: |-
+      try {
+          if (t1 != t2) throw p!;
+      } catch (e) {
+          assertEQ(e, p)
+          return
+      }
+      assertTrue(false, "No expected error")
+
+  - defs: |-
+      class Err extends Error {}
+      let err: Err = new Err();
+
+      function foo() {
+          try {
+              if (t1 != t2) throw err
+          } catch (f) {
+              throw f
+          }
+      }
+    use: |-
+      try {
+          foo()
+      } catch (e) {
+          assertEQ(e, err)
+          return
+      }
+      assertTrue(false, "No expected error")

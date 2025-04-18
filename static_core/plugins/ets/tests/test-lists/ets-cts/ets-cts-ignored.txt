@@ -158,7 +158,7 @@
 #18115 CTE on a union type variable in instanceof
 06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/un2_0.ets
 
-#22339
+#25224
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_2.ets
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_3.ets
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_4.ets
@@ -221,11 +221,6 @@
 
 #23450 Cannot determine type of array literal in call context
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_call_28.ets
-
-#23369 Specification example in 7.4.1 doesn't compile
-07.expressions/04.array_literal/01.type_inference_from_context/spec-ex6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_decl_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_assn_28.ets
 
 #23453 Cannot cast array literal to union of arrays
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_27.ets
@@ -352,27 +347,6 @@
 
 #19951
 07.expressions/18.ensure-not-nullish_expression/null_check.ets
-07.expressions/23.shift_expressions/rshift_int_1.ets
-07.expressions/23.shift_expressions/shift_int_0.ets
-07.expressions/23.shift_expressions/shift_int_1.ets
-07.expressions/23.shift_expressions/shift_int_2.ets
-07.expressions/23.shift_expressions/shift_int_3.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_44.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_45.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_46.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_47.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_48.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_49.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_50.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_51.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_60.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_61.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_62.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_63.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_68.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_69.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_70.ets
-07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_71.ets
 
 #18843 type compatability
 07.expressions/25.equality_expressions/01.numerical_equality_operators/char_eq_n_2.ets
@@ -423,8 +397,9 @@
 08.statements/11.continue_statements/continue_for_of3l.ets
 08.statements/11.continue_statements/continue_for_of5l.ets
 
-#23978
-08.statements/14.throw_statements/throw_neg2.ets
+#25341
+08.statements/14.throw_statements/throw_4.ets
+08.statements/14.throw_statements/throw_6.ets
 
 #23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets
