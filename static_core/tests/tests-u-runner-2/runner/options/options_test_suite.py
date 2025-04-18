@@ -53,7 +53,7 @@ class TestSuiteOptions(IOptions):
     __REPEATS = "repeats"
     __DEFAULT_REPEATS = 1
     __REPEATS_BY_TIME = "repeats-by-time"
-    __DEFAULT_REPEATS_BY_TIME = None
+    __DEFAULT_REPEATS_BY_TIME = 0
     __WITH_JS = "with-js"
     __DEFAULT_WITH_JS = False
     __WORK_DIR = "work-dir"
@@ -155,8 +155,8 @@ class TestSuiteOptions(IOptions):
         return int(self.__parameters.get(self.__REPEATS, self.__DEFAULT_REPEATS))
 
     @cached_property
-    def repeats_by_time(self) -> Optional[int]:
-        return self.__parameters.get(self.__REPEATS_BY_TIME, self.__DEFAULT_REPEATS_BY_TIME)
+    def repeats_by_time(self) -> int:
+        return cast(int, self.__parameters.get(self.__REPEATS_BY_TIME, self.__DEFAULT_REPEATS_BY_TIME))
 
     @cached_property
     def filter(self) -> str:

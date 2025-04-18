@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+#
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -53,7 +53,7 @@ class RunnerJSTest262(RunnerJS):
         self.test_env.util = self.util
 
         if self.config.general.bco:
-            self.bco_list = correct_path(self.list_root, f"{self.ignored_name_prefix}skiplist-bco.txt")
+            self.bco_list = correct_path(self.list_root, f"{self.ignored_name_prefix}skiplist-bco.txt") # type: ignore
             self.bco_tests = self.load_tests_from_lists([self.bco_list])
 
         self.add_directories([TestDirectory(self.test_root, "js", [])])
