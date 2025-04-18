@@ -73,6 +73,10 @@ class LongToStringCache;
 class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
 
+using WalkEventLoopCallback = std::function<void(void *, void *)>;
+
+enum class EventLoopRunMode : int { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
+
 class PandaEtsVM final : public PandaVM, public EtsVM, public ani_vm {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     static Expected<PandaEtsVM *, PandaString> Create(Runtime *runtime, const RuntimeOptions &options);
@@ -347,7 +351,7 @@ public:
         return callbackPosterFactory_->CreatePoster();
     }
 
-    using RunEventLoopFunction = std::function<void()>;
+    using RunEventLoopFunction = std::function<void(EventLoopRunMode)>;
 
     void SetRunEventLoopFunction(RunEventLoopFunction &&cb)
     {
@@ -355,10 +359,24 @@ public:
         runEventLoop_ = std::move(cb);
     }
 
-    void RunEventLoop()
+    void RunEventLoop(EventLoopRunMode mode)
     {
         if (runEventLoop_) {
-            runEventLoop_();
+            runEventLoop_(mode);
+        }
+    }
+
+    using WalkEventLoopFunction = std::function<void(WalkEventLoopCallback &, void *)>;
+    void SetWalkEventLoopFunction(WalkEventLoopFunction &&cb)
+    {
+        ASSERT(!walkEventLoop_);
+        walkEventLoop_ = std::move(cb);
+    }
+
+    void WalkEventLoop(WalkEventLoopCallback &callback, void *args)
+    {
+        if (walkEventLoop_) {
+            walkEventLoop_(callback, args);
         }
     }
 
@@ -435,6 +453,7 @@ private:
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;
+    WalkEventLoopFunction walkEventLoop_ = nullptr;
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

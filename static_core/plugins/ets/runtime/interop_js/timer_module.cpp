@@ -71,6 +71,10 @@ __attribute__((weak)) int uv_run([[maybe_unused]] uv_loop_t *loop, [[maybe_unuse
 {
     return -1;
 }
+__attribute__((weak)) void uv_walk([[maybe_unused]] uv_loop_t *loop, [[maybe_unused]] uv_walk_cb walk_cb,
+                                   [[maybe_unused]] void *arg)
+{
+}
 }
 // NOLINTEND(readability-identifier-naming)
 #endif /* !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE) */
