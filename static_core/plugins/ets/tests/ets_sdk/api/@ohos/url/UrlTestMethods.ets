@@ -419,6 +419,60 @@ function testUrlToString009() {
 	assertEQ(result, "https://192.95645654354.8.f/")
 }
 
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_17700
+* @tc.name: testUrlToString010
+* @tc.desc:  Returns the serialized URL as a string.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlToString010() {
+	let params = url.URL.parseURL('coap://?key=value#hash')
+	let result = params.toString()
+	assertEQ(result, "coap://?key=value#hash")
+}
+
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_17800
+* @tc.name: testUrlToString011
+* @tc.desc:  Returns the serialized URL as a string.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlToString011() {
+	let params = url.URL.parseURL('upcad://akls/casd/saqe/ss/?dalks=ccc')
+	let result = params.toString()
+	assertEQ(result, "upcad://akls/casd/saqe/ss/?dalks=ccc")
+}
+
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_17900
+* @tc.name: testUrlToString012
+* @tc.desc:  Returns the serialized URL as a string.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlToString012() {
+    let str = "ftp:!\"#%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ \\[]"
+        + "^_`abcdefghijklmnopqrstuvwxyz{|}~€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸"
+        + "¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
+	let params = url.URL.parseURL(str);
+	let result = params.toString();
+    const urlEncode = "ftp://!%22/#%&'()*+,-./0123456789:;%3C=%3E?@ABCDEFGHIJKLMNOPQRSTUVWXYZ%20%5C[]%5E_"
+        + "`abcdefghijklmnopqrstuvwxyz{|}~%E2%82%AC%E2%80%9A%C6%92%E2%80%9E%E2%80%A6%E2%80%A0%E2%80%A1"
+        + "%CB%86%E2%80%B0%C5%A0%E2%80%B9%C5%92%C5%BD%E2%80%98%E2%80%99%E2%80%9C%E2%80%9D%E2%80%A2%E2"
+        + "%80%93%E2%80%94%CB%9C%E2%84%A2%C5%A1%E2%80%BA%C5%93%C5%BE%C5%B8%C2%A1%C2%A2%C2%A3%C2%A4%C2"
+        + "%A5%C2%A6%C2%A7%C2%A8%C2%A9%C2%AA%C2%AB%C2%AC%C2%AD%C2%AE%C2%AF%C2%B0%C2%B1%C2%B2%C2%B3%C2"
+        + "%B4%C2%B5%C2%B6%C2%B7%C2%B8%C2%B9%C2%BA%C2%BB%C2%BC%C2%BD%C2%BE%C2%BF%C3%80%C3%81%C3%82%C3"
+        + "%83%C3%84%C3%85%C3%86%C3%87%C3%88%C3%89%C3%8A%C3%8B%C3%8C%C3%8D%C3%8E%C3%8F%C3%90%C3%91%C3"
+        + "%92%C3%93%C3%94%C3%95%C3%96%C3%97%C3%98%C3%99%C3%9A%C3%9B%C3%9C%C3%9D%C3%9E%C3%9F%C3%A0%C3"
+        + "%A1%C3%A2%C3%A3%C3%A4%C3%A5%C3%A6%C3%A7%C3%A8%C3%A9%C3%AA%C3%AB%C3%AC%C3%AD%C3%AE%C3%AF%C3"
+        + "%B0%C3%B1%C3%B2%C3%B3%C3%B4%C3%B5%C3%B6%C3%B7%C3%B8%C3%B9%C3%BA%C3%BB%C3%BC%C3%BD%C3%BE%C3%BF";
+	assertEQ(result, urlEncode);
+}
 
 function main(): int {
 	let suite = new ArkTestsuite("URL UT tests");
@@ -447,7 +501,9 @@ function main(): int {
 	suite.addTest("testUrlToString007", testUrlToString007);
 	suite.addTest("testUrlToString008", testUrlToString008);
 	suite.addTest("testUrlToString009", testUrlToString009);
-	
+    suite.addTest("testUrlToString010", testUrlToString010);
+    suite.addTest("testUrlToString011", testUrlToString011);
+	suite.addTest("testUrlToString012", testUrlToString012);
 
 	//passed
 	return suite.run();
