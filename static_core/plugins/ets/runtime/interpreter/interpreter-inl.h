@@ -426,6 +426,19 @@ public:
         this->template MoveToNextInst<FORMAT, true>();
     }
 
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsNullcheck()
+    {
+        LOG_INST() << "ets.nullcheck";
+
+        if (UNLIKELY(this->GetAcc().GetReference() == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+            return;
+        }
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
 private:
     ALWAYS_INLINE bool IsNull(ObjectHeader *obj)
     {

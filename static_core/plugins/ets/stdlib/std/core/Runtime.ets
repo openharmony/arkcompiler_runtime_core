@@ -149,12 +149,7 @@ export final class Runtime {
      *
      * @returns exception object to throw
      */
-    static failedTypeCastException(src: NullishType, dstStr: string): ClassCastError {
-        let srcStr = src === null ? "null" :
-            (src === undefined ? "undefined" :
-                Class.of(src).getName());
-        return new ClassCastError(srcStr + " cannot be cast to " + dstStr);
-    }
+    static native failedTypeCastException(src: NullishType, dstStr: string): ClassCastError
 
     native static __getTypeInfo(o: NullishType): Class|undefined;
 

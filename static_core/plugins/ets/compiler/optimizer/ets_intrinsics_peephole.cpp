@@ -420,6 +420,17 @@ bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicI
     return true;
 }
 
+bool Peepholes::PeepholeNullcheck([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input = intrinsic->GetInput(0).GetInst();
+    if (IsInstNotNull(input)) {
+        intrinsic->ReplaceUsers(input);
+        intrinsic->ClearFlag(inst_flags::NO_DCE);
+        return true;
+    }
+    return false;
+}
+
 bool Peepholes::PeepholeStringFromCharCodeSingle([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     ASSERT(intrinsic->GetInputsCount() == 2U);

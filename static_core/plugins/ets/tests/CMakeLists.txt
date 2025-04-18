@@ -434,11 +434,12 @@ function(compile_stdlib TARGET_ARCH)
             COMMAND ${ARK_AOT_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=llvm -compiler-options="${COMPILER_OPTIONS_LLVM_PRE_OPT}" -paoc-output=etsstdlib_llvmaot_pre_opt_2_${TARGET_ARCH}.an
             DEPENDS ark_aot etsstdlib
         )
-        add_dependencies(
-                ets-compile-stdlib
-                ets-compile-stdlib-llvm-${TARGET_ARCH}
-                ets-compile-stdlib-llvm-pre-opt-2-${TARGET_ARCH}
-        )
+        # 26279
+        # add_dependencies(
+        #         ets-compile-stdlib
+        #         ets-compile-stdlib-llvm-${TARGET_ARCH}
+        #         ets-compile-stdlib-llvm-pre-opt-2-${TARGET_ARCH}
+        # )
     endif()
     if (TARGET_ARCH STREQUAL "arm64")
         add_custom_target(ets-compile-stdlib-osr-${TARGET_ARCH}

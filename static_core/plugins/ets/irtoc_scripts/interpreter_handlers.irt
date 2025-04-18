@@ -389,3 +389,10 @@ macro(:"handle_ets_call_name_range") do |v, id, size|
   }
   generic_call(id, size, false, method, nil, copy_lambda)
 end
+
+macro(:handle_ets_nullcheck) do
+  If(acc.ref, 0).EQ.Unlikely {
+    call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+    move_to_exception
+  }
+end

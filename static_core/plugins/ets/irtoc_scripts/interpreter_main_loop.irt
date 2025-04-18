@@ -47,3 +47,5 @@
     handle_ets_call_name_long(op[1], op[2], op[3], op[4], as_id(op[0]), i.format.size)
   when "ETS_CALL_NAME_RANGE_PREF_V8_ID16"
     handle_ets_call_name_range(op[1], as_id(op[0]), i.format.size)
+  when "ETS_NULLCHECK_PREF_NONE"
+    handle_ets_nullcheck()

@@ -44,13 +44,12 @@ const PROMISE_IMPLEMENTED = false;
 		testAccessorsOf(ras, tname, ...values);
 	}
 
-	testAccessors('UClass1', undefined, new UClass1());
-	testAccessors('String', undefined, 'fooo', '0123456789abcdef');
-	testAccessors('JSValue', undefined, 1234, 'fooo', {}, new UClass1());
+	testAccessors('UClass1', new UClass1());
+	testAccessors('String', 'fooo', '0123456789abcdef');
+	testAccessors('JSValue', 1234, 'fooo', {}, new UClass1());
 	PROMISE_IMPLEMENTED &&
 		testAccessors(
 			'Promise',
-			undefined,
 			new Promise(
 				function () {},
 				function () {}
