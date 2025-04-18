@@ -54,7 +54,8 @@ double BigInt06(double a, array_view<int64_t> b)
     return a;
 }
 }  // namespace
-// The macros used below are automatically generated code.
+
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_BigInt01(BigInt01);
 TH_EXPORT_CPP_API_BigInt02(BigInt02);

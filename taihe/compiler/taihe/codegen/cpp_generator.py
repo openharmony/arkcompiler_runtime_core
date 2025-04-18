@@ -37,18 +37,6 @@ from taihe.semantics.declarations import (
     UnionDecl,
 )
 from taihe.semantics.types import (
-    BOOL,
-    F32,
-    F64,
-    I8,
-    I16,
-    I32,
-    I64,
-    STRING,
-    U8,
-    U16,
-    U32,
-    U64,
     ArrayType,
     CallbackType,
     EnumType,
@@ -56,6 +44,7 @@ from taihe.semantics.types import (
     MapType,
     OpaqueType,
     OptionalType,
+    ScalarKind,
     ScalarType,
     SetType,
     StringType,
@@ -205,18 +194,18 @@ class ScalarTypeCppInfo(AbstractAnalysis[ScalarType], AbstractTypeCppInfo):
     def __init__(self, am: AnalysisManager, t: ScalarType):
         super().__init__(am, t)
         res = {
-            BOOL: "bool",
-            F32: "float",
-            F64: "double",
-            I8: "int8_t",
-            I16: "int16_t",
-            I32: "int32_t",
-            I64: "int64_t",
-            U8: "uint8_t",
-            U16: "uint16_t",
-            U32: "uint32_t",
-            U64: "uint64_t",
-        }.get(t)
+            ScalarKind.BOOL: "bool",
+            ScalarKind.F32: "float",
+            ScalarKind.F64: "double",
+            ScalarKind.I8: "int8_t",
+            ScalarKind.I16: "int16_t",
+            ScalarKind.I32: "int32_t",
+            ScalarKind.I64: "int64_t",
+            ScalarKind.U8: "uint8_t",
+            ScalarKind.U16: "uint16_t",
+            ScalarKind.U32: "uint32_t",
+            ScalarKind.U64: "uint64_t",
+        }.get(t.kind)
         if res is None:
             raise ValueError
         self.decl_headers = []
@@ -549,14 +538,14 @@ class CppHeadersGenerator:
         enum_cpp_info: EnumCppInfo,
         enum_cpp_target: COutputBuffer,
     ):
-        if enum.ty_ref is None:
-            return
-        if enum.ty_ref.resolved_ty == STRING:
-            as_owner = "char const*"
-        else:
-            # pyre-ignore
-            ty_cpp_info = TypeCppInfo.get(self.am, enum.ty_ref.resolved_ty)
-            as_owner = ty_cpp_info.as_owner
+        match enum.ty_ref.resolved_ty:
+            case StringType():
+                as_owner = "char const*"
+            case ScalarType():
+                ty_cpp_info = TypeCppInfo.get(self.am, enum.ty_ref.resolved_ty)
+                as_owner = ty_cpp_info.as_owner
+            case _:
+                raise ValueError("invalid enum type")
         enum_cpp_target.writeln(
             f"    static constexpr {as_owner} table[] = {{",
         )

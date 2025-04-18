@@ -30,9 +30,9 @@ interface ExampleInterface {
     
 
     func_Array(param1: Optional<Array<i32>>):void;
-    func_Buffer(param1: Optional<Array<u8>>):void;
+    func_Buffer(param1: Optional<@arraybuffer Array<u8>>):void;
     func_Union(param1: Optional<Union>):void;
-    func_Map(param1: Optional<Map<String,i32>>):void;
+    func_Map(param1: Optional<@record Map<String,i32>>):void;
 
     @get getName(): Optional<String>;
     @get geti8(): Optional<i8>;
@@ -42,7 +42,7 @@ interface ExampleInterface {
     @get getf32(): Optional<f32>;
     @get getf64(): Optional<f64>;
     @get getbool(): Optional<bool>;
-    @get getArraybuffer(): Optional<Array<u8>>;
+    @get getArraybuffer(): Optional<@arraybuffer Array<u8>>;
 
 }
 

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as bigint_new from "@generated/bigint_new";
 import * as bigint_test from "@generated/bigint_test";
 import * as System from "std/core/System";
 
@@ -26,8 +27,53 @@ function main() {
     suite.addTest("testBigint04", testBigint04);
     suite.addTest("testBigint05", testBigint05);
     suite.addTest("testBigint06", testBigint06);
+
+    suite.addTest("testProcessBigInt_1", testProcessBigInt_1);
+    suite.addTest("testProcessBigInt_2", testProcessBigInt_2);
+    suite.addTest("testProcessBigInt_3", testProcessBigInt_3);
+    suite.addTest("testProcessBigInt_4", testProcessBigInt_4);
+    suite.addTest("testProcessBigInt_5", testProcessBigInt_5);
+    suite.addTest("testProcessBigInt_6", testProcessBigInt_6);
+
+
     System.exit(suite.run());
     console.info("bigint_test run end...");
+}
+
+function testProcessBigInt_1() {
+    let arg: bigint = (1n << 63n) - 1n;
+    let res: bigint = bigint_new.processBigInt(arg);
+    assertEQ(res, arg << 64n);
+}
+
+function testProcessBigInt_2() {
+    let arg: bigint = 1n << 63n;
+    let res: bigint = bigint_new.processBigInt(arg);
+    assertEQ(res, arg << 64n);
+}
+
+function testProcessBigInt_3() {
+    let arg: bigint = (1n << 64n) - 1n;
+    let res: bigint = bigint_new.processBigInt(arg);
+    assertEQ(res, arg << 64n);
+}
+
+function testProcessBigInt_4() {
+    let arg: bigint = 1n << 64n;
+    let res: bigint = bigint_new.processBigInt(arg);
+    assertEQ(res, arg << 64n);
+}
+
+function testProcessBigInt_5() {
+    let arg: bigint = -1n << 63n;
+    let res: bigint = bigint_new.processBigInt(arg);
+    assertEQ(res, arg << 64n);
+}
+
+function testProcessBigInt_6() {
+    let arg: bigint = -1n << 64n;
+    let res: bigint = bigint_new.processBigInt(arg);
+    assertEQ(res, arg << 64n);
 }
 
 // test function Bigint01(a : number, b : BigInt) : boolean

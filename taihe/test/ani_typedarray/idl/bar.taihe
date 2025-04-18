@@ -1,0 +1,43 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function sumUint8Array(v: @typedarray Array<u8>): i8;
+function newUint8Array(n: i64, v: i8): @typedarray Array<u8>;
+
+function sumUint16Array(v: @typedarray Array<u16>): i16;
+function newUint16Array(n: i64, v: i16): @typedarray Array<u16>;
+
+function sumUint32Array(v: @typedarray Array<u32>): i32;
+function newUint32Array(n: i64, v: i32): @typedarray Array<u32>;
+
+function sumBigUint64Array(v: @typedarray Array<u64>): i64;
+function newBigUint64Array(n: i64, v: i64): @typedarray Array<u64>;
+
+function sumInt8Array(v: @typedarray Array<i8>): i8;
+function newInt8Array(n: i64, v: i8): @typedarray Array<i8>;
+
+function sumInt16Array(v: @typedarray Array<i16>): i16;
+function newInt16Array(n: i64, v: i16): @typedarray Array<i16>;
+
+function sumInt32Array(v: @typedarray Array<i32>): i32;
+function newInt32Array(n: i64, v: i32): @typedarray Array<i32>;
+
+function sumBigInt64Array(v: @typedarray Array<i64>): i64;
+function newBigInt64Array(n: i64, v: i64): @typedarray Array<i64>;
+
+function sumFloat32Array(v: @typedarray Array<f32>): f32;
+function newFloat32Array(n: i64, v: f32): @typedarray Array<f32>;
+
+function sumFloat64Array(v: @typedarray Array<f64>): f64;
+function newFloat64Array(n: i64, v: f64): @typedarray Array<f64>;

@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_MAP_HPP
-#define TAIHE_MAP_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_MAP_HPP_
+#define RUNTIME_INCLUDE_TAIHE_MAP_HPP_
+// NOLINTBEGIN
 
 #include <taihe/common.hpp>
 
@@ -21,9 +22,6 @@
 
 #define MAP_GROWTH_FACTOR 2
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename K, typename V>
 struct map_view;
@@ -401,10 +399,9 @@ struct as_param<map<K, V>> {
     using type = map_view<K, V>;
 };
 }  // namespace taihe
-// NOLINTEND
 
 #ifdef MAP_GROWTH_FACTOR
 #undef MAP_GROWTH_FACTOR
-#endif // MAP_GROWTH_FACTOR
-
-#endif // TAIHE_MAP_HPP
+#endif
+// NOLINTEND
+#endif  // RUNTIME_INCLUDE_TAIHE_MAP_HPP_

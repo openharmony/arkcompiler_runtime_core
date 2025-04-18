@@ -95,9 +95,8 @@ array<::array_test::Data> changeStructArray(array_view<::array_test::Data> value
                                             int32_t c)
 {
     auto result = array<::array_test::Data>::make(value.size(), value[0]);
-    std::transform(value.begin(), value.end(), result.begin(), [a, b, c](::array_test::Data d) {
-        return ::array_test::Data {a, b, c};
-    });
+    std::transform(value.begin(), value.end(), result.begin(),
+                   [a, b, c](::array_test::Data d) { return ::array_test::Data {a, b, c}; });
     return result;
 }
 
@@ -118,7 +117,8 @@ array<array<::array_test::Data>> makeStructArrayArray(string_view a, string_view
     return array<array<::array_test::Data>>::make(num2, arr);
 }
 }  // namespace
-// The macros used below are automatically generated code.
+
+// because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN
 TH_EXPORT_CPP_API_sumArray(sumArray);
 TH_EXPORT_CPP_API_getArrayValue(getArrayValue);

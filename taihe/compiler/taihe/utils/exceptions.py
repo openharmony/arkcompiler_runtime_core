@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import override
 
-from taihe.utils.diagnostics import DiagError, DiagNote, DiagWarn
+from taihe.utils.diagnostics import DiagError, DiagFatalError, DiagNote, DiagWarn
 
 if TYPE_CHECKING:
     from taihe.semantics.declarations import (
@@ -59,14 +59,15 @@ class DeclRedefError(DiagError):
         self.prev = prev
         self.current = current
 
-    def notes(self):
-        if self.prev.loc:
-            yield DeclRedefNote(self.prev)
-
     @property
     @override
     def format_msg(self) -> str:
         return f"redefinition of {self.current.description}"
+
+    @override
+    def notes(self):
+        if self.prev.loc:
+            yield DeclRedefNote(self.prev)
 
 
 @dataclass
@@ -163,12 +164,13 @@ class TypeUsageError(DiagError):
 
     def __init__(self, ty_ref: "TypeRefDecl"):
         super().__init__(loc=ty_ref.loc)
+        pass
         self.ty = ty_ref.maybe_resolved_ty
 
     @property
     @override
     def format_msg(self) -> str:
-        return f"{self.ty.representation} cannot be used in this context"
+        return f"{self.ty.signature} cannot be used in this context"
 
 
 @dataclass
@@ -184,11 +186,8 @@ class EnumValueError(DiagError):
     @property
     @override
     def format_msg(self) -> str:
-        if self.enum.ty_ref is None:
-            type_repr = "empty"
-        else:
-            type_repr = self.enum.ty_ref.maybe_resolved_ty.representation
-        return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({type_repr})"
+        pass
+        return f"value of {self.item.description} ({self.item.value}) is conflict with {self.enum.description} ({self.enum.ty_ref.maybe_resolved_ty.signature})"
 
 
 @dataclass
@@ -205,14 +204,15 @@ class DuplicateExtendsWarn(DiagWarn):
     parent_iface: "IfaceDecl"
     prev_loc: Optional["SourceLocation"] = field(kw_only=True)
 
-    def notes(self):
-        if self.prev_loc:
-            yield DuplicateExtendsNote(loc=self.prev_loc)
-
     @property
     @override
     def format_msg(self) -> str:
         return f"{self.parent_iface.description} is extended multiple times by {self.iface.description}"
+
+    @override
+    def notes(self):
+        if self.prev_loc:
+            yield DuplicateExtendsNote(loc=self.prev_loc)
 
 
 @dataclass
@@ -246,18 +246,49 @@ class RecursiveReferenceError(DiagError):
         self.decl = last[0]
         self.other = other
 
-    def notes(self):
-        for n in self.other:
-            yield RecursiveReferenceNote(n)
-
     @property
     @override
     def format_msg(self) -> str:
         return f"cycle detected in {self.decl.description}"
 
+    @override
+    def notes(self):
+        for n in self.other:
+            yield RecursiveReferenceNote(n)
+
 
 @dataclass
 class AdhocNote(DiagNote):
+    msg: str
+
+    @property
+    @override
+    def format_msg(self) -> str:
+        return self.msg
+
+
+@dataclass
+class AdhocWarn(DiagWarn):
+    msg: str
+
+    @property
+    @override
+    def format_msg(self) -> str:
+        return self.msg
+
+
+@dataclass
+class AdhocError(DiagError):
+    msg: str
+
+    @property
+    @override
+    def format_msg(self) -> str:
+        return self.msg
+
+
+@dataclass
+class AdhocFatalError(DiagFatalError):
     msg: str
 
     @property

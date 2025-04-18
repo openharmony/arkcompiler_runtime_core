@@ -152,8 +152,15 @@ class CppImplSourcesGenerator:
         pkg_cpp_impl_target.writeln("")
         self.gen_anonymous_namespace_block(pkg, pkg_cpp_impl_target)
         pkg_cpp_impl_target.writeln("")
+        pkg_cpp_impl_target.writeln(
+            "// Since these macros are auto-generate, lint will cause false positive.",
+            "// NOLINTBEGIN",
+        )
         for func in pkg.functions:
             self.gen_func_macro(func, pkg_cpp_impl_target)
+        pkg_cpp_impl_target.writeln(
+            "// NOLINTEND",
+        )
         self.using_namespaces = []
 
     def gen_anonymous_namespace_block(

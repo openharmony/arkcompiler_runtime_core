@@ -68,7 +68,7 @@ EOF
 }
 
 copy-documentation() {
-    cp -r cookbook "$DOC_DIR"
+    find cookbook -type d \( -name "build" -o -name "*generated" \) -prune -o -type f -exec cp --parents {} "$DOC_DIR/" \;
 }
 
 write-version() {
@@ -80,7 +80,7 @@ write-version() {
         echo "Last Commit   : $GIT_COMMIT"
         echo "Commit Message: $GIT_MESSAGE"
         echo "Build Date    : $BUILD_DATE"
-    } > "$DIST/version.txt"
+    } >"$DIST/version.txt"
 }
 
 main() {

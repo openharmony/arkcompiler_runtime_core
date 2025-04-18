@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from json import dumps
-from typing import TYPE_CHECKING, Optional
 
 from taihe.codegen.abi_generator import (
     IfaceABIInfo,
@@ -43,11 +42,6 @@ from taihe.semantics.types import IfaceType, StructType
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.outputs import OutputManager, STSOutputBuffer
 
-if TYPE_CHECKING:
-    from taihe.semantics.declarations import (
-        Type,
-    )
-
 
 class Namespace:
     def __init__(self):
@@ -72,7 +66,7 @@ class STSCodeGenerator:
         ns_dict: dict[str, Namespace] = {}
         for pkg in pg.packages:
             pkg_ani_info = PackageANIInfo.get(self.am, pkg)
-            ns_dict.setdefault(pkg_ani_info.module, Namespace()).add_path(
+            ns_dict.setdefault(pkg_ani_info.module_name, Namespace()).add_path(
                 pkg_ani_info.sts_ns_parts, pkg
             )
         for module, ns in ns_dict.items():
@@ -81,9 +75,20 @@ class STSCodeGenerator:
     def gen_module_file(self, module: str, ns: Namespace):
         module_sts_file = f"{module}.ets"
         target = STSOutputBuffer.create(self.tm, module_sts_file)
+        self.gen_module_injected_codes(ns, target)
         self.gen_namespace(ns, target)
 
+    def gen_module_injected_codes(self, ns: Namespace, target: STSOutputBuffer):
+        for pkg in ns.packages:
+            pkg_ani_info = PackageANIInfo.get(self.am, pkg)
+            for injected in pkg_ani_info.module_injected_codes:
+                target.writeln(injected)
+        for _, child_ns in ns.children.items():
+            self.gen_module_injected_codes(child_ns, target)
+
     def gen_namespace(self, ns: Namespace, target: STSOutputBuffer):
+        for pkg in ns.packages:
+            self.gen_package(pkg, target)
         for child_ns_name, child_ns in ns.children.items():
             target.writeln(
                 f"export namespace {child_ns_name} {{",
@@ -93,47 +98,48 @@ class STSCodeGenerator:
             target.writeln(
                 f"}}",
             )
-        for pkg in ns.packages:
-            self.gen_package(pkg, target)
+        # TODO: BigInt
+        self.gen_utils(target)
 
-    def stat_on_off_funcs(self, funcs: list[GlobFuncDecl]):
+    def stat_on_off_funcs(
+        self,
+        funcs: list[GlobFuncDecl],
+    ):
         glob_func_on_off_map: dict[
-            tuple[str, tuple[Type, ...], Optional[Type]], list[tuple[str, GlobFuncDecl]]
+            tuple[str, tuple[str, ...]],
+            list[tuple[str, GlobFuncDecl]],
         ] = {}
         for func in funcs:
             func_ani_info = GlobFuncANIInfo.get(self.am, func)
             if func_ani_info.on_off_type is not None:
                 func_name, type_name = func_ani_info.on_off_type
-                sts_params_ty = []
+                sts_params_ty: list[str] = []
                 for sts_param in func_ani_info.sts_params:
-                    sts_params_ty.append(sts_param.ty_ref.resolved_ty)
-                if return_ty_ref := func.return_ty_ref:
-                    return_ty = return_ty_ref.resolved_ty
-                else:
-                    return_ty = None
+                    ty_ani_info = TypeANIInfo.get(self.am, sts_param.ty_ref.resolved_ty)
+                    sts_params_ty.append(ty_ani_info.type_desc)
                 glob_func_on_off_map.setdefault(
-                    (func_name, tuple(sts_params_ty), return_ty), []
+                    (func_name, tuple(sts_params_ty)), []
                 ).append((type_name, func))
         return glob_func_on_off_map
 
-    def stat_on_off_methods(self, methods: list[IfaceMethodDecl]):
+    def stat_on_off_methods(
+        self,
+        methods: list[IfaceMethodDecl],
+    ):
         method_on_off_map: dict[
-            tuple[str, tuple[Type, ...], Optional[Type]],
+            tuple[str, tuple[str, ...]],
             list[tuple[str, IfaceMethodDecl]],
         ] = {}
         for method in methods:
             method_ani_info = IfaceMethodANIInfo.get(self.am, method)
             if method_ani_info.on_off_type is not None:
                 method_name, type_name = method_ani_info.on_off_type
-                sts_params_ty = []
+                sts_params_ty: list[str] = []
                 for sts_param in method_ani_info.sts_params:
-                    sts_params_ty.append(sts_param.ty_ref.resolved_ty)
-                if return_ty_ref := method.return_ty_ref:
-                    return_ty = return_ty_ref.resolved_ty
-                else:
-                    return_ty = None
+                    ty_ani_info = TypeANIInfo.get(self.am, sts_param.ty_ref.resolved_ty)
+                    sts_params_ty.append(ty_ani_info.type_desc)
                 method_on_off_map.setdefault(
-                    (method_name, tuple(sts_params_ty), return_ty), []
+                    (method_name, tuple(sts_params_ty)), []
                 ).append((type_name, method))
         return method_on_off_map
 
@@ -180,13 +186,13 @@ class STSCodeGenerator:
             func_ani_info = GlobFuncANIInfo.get(self.am, func)
             sts_native_params = []
             for param in func.params:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, param.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
                 sts_native_params.append(
                     f"{param.name}: {type_ani_info.sts_type_in(pkg, target)}"
                 )
             sts_native_params_str = ", ".join(sts_native_params)
             if return_ty_ref := func.return_ty_ref:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                 sts_return_ty_name = type_ani_info.sts_type_in(pkg, target)
             else:
                 sts_return_ty_name = "void"
@@ -204,32 +210,46 @@ class STSCodeGenerator:
         glob_func_on_off_map = self.stat_on_off_funcs(funcs)
         for (
             func_name,
-            sts_params_ty,
-            return_ty,
+            sts_params_ani_desc,
         ), func_list in glob_func_on_off_map.items():
             sts_params = []
-            sts_args = []
+            sts_args_any = []
             sts_params.append("type: string")
-            for index, param_ty in enumerate(sts_params_ty):
-                type_ani_info = TypeANIInfo.get(self.am, pkg, param_ty)
+            for index in range(len(sts_params_ani_desc)):
                 param_name = f"p_{index}"
-                sts_params.append(
-                    f"{param_name}: {type_ani_info.sts_type_in(pkg, target)}"
-                )
-                sts_args.append(param_name)
+                sts_param_i_types = []
+                for _, func in func_list:
+                    func_ani_info = GlobFuncANIInfo.get(self.am, func)
+                    param_ty = func_ani_info.sts_params[index].ty_ref.resolved_ty
+                    type_ani_info = TypeANIInfo.get(self.am, param_ty)
+                    sts_param_i_types.append(type_ani_info.sts_type_in(pkg, target))
+                sts_param_ty_name = " | ".join(sts_param_i_types)
+                sts_params.append(f"{param_name}: {sts_param_ty_name}")
+                sts_args_any.append(param_name)
             sts_params_str = ", ".join(sts_params)
-            if return_ty:
-                type_ani_info = TypeANIInfo.get(self.am, pkg, return_ty)
-                return_ty_str = type_ani_info.sts_type_in(pkg, target)
-            else:
-                return_ty_str = "void"
+            sts_return_ty_names = set()
+            for _, func in func_list:
+                if return_ty_ref := func.return_ty_ref:
+                    type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
+                    sts_return_ty_names.add(type_ani_info.sts_type_in(pkg, target))
+                else:
+                    sts_return_ty_names.add("void")
+            sts_return_ty_name = sts_return_ty_names.pop()
             target.writeln(
-                f"export function {func_name}({sts_params_str}): {return_ty_str} {{",
+                f"export function {func_name}({sts_params_str}): {sts_return_ty_name} {{",
                 f"    switch(type) {{",
             )
             for type_name, func in func_list:
                 func_ani_info = GlobFuncANIInfo.get(self.am, func)
-                sts_native_call = func_ani_info.call_native_with(sts_args)
+                sts_args_fix = []
+                for sts_arg_any, param in zip(
+                    sts_args_any, func_ani_info.sts_params, strict=True
+                ):
+                    type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
+                    sts_args_fix.append(
+                        f"{sts_arg_any} as {type_ani_info.sts_type_in(pkg, target)}"
+                    )
+                sts_native_call = func_ani_info.call_native_with(sts_args_fix)
                 target.writeln(
                     f'        case "{type_name}": return {sts_native_call};',
                 )
@@ -244,7 +264,7 @@ class STSCodeGenerator:
             sts_params = []
             sts_args = []
             for sts_param in func_ani_info.sts_params:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, sts_param.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, sts_param.ty_ref.resolved_ty)
                 sts_params.append(
                     f"{sts_param.name}: {type_ani_info.sts_type_in(pkg, target)}"
                 )
@@ -252,10 +272,12 @@ class STSCodeGenerator:
             sts_params_str = ", ".join(sts_params)
             sts_native_call = func_ani_info.call_native_with(sts_args)
             if return_ty_ref := func.return_ty_ref:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                 sts_return_ty_name = type_ani_info.sts_type_in(pkg, target)
+                sts_resolved_ty_name = type_ani_info.sts_type_in(pkg, target)
             else:
                 sts_return_ty_name = "void"
+                sts_resolved_ty_name = "undefined"
             # real
             if (sts_func_name := func_ani_info.sts_func_name) is not None:
                 target.writeln(
@@ -265,16 +287,12 @@ class STSCodeGenerator:
                 )
                 # promise
                 if (sts_promise_name := func_ani_info.sts_promise_name) is not None:
-                    if return_ty_ref := func.return_ty_ref:
-                        resolve_args = f"ret as {sts_return_ty_name}"
-                    else:
-                        resolve_args = "undefined"
                     target.writeln(
                         f"export function {sts_promise_name}({sts_params_str}): Promise<{sts_return_ty_name}> {{",
                         f"    return new Promise<{sts_return_ty_name}>((resolve, reject): void => {{",
                         f"        taskpool.execute((): {sts_return_ty_name} => {{ return {sts_native_call}; }})",
                         f"        .then((ret: NullishType): void => {{",
-                        f"            resolve({resolve_args});",
+                        f"            resolve(ret as {sts_resolved_ty_name});",
                         f"        }})",
                         f"        .catch((ret: NullishType): void => {{",
                         f"            reject(ret as Error);",
@@ -284,22 +302,16 @@ class STSCodeGenerator:
                     )
                 # async
                 if (sts_async_name := func_ani_info.sts_async_name) is not None:
-                    if return_ty_ref := func.return_ty_ref:
-                        callback = f"callback: (err: Error, data?: {sts_return_ty_name}) => void"
-                        then_args = f"new Error(), ret as {sts_return_ty_name}"
-                    else:
-                        callback = "callback: (err: Error) => void"
-                        then_args = "new Error()"
-                    sts_params_with_cb = [*sts_params, callback]
-                    sts_params_with_cb_str = ", ".join(sts_params_with_cb)
+                    callback_param = f"callback: __AsyncCallback<{sts_return_ty_name}>"
+                    sts_params_with_cb_str = ", ".join([*sts_params, callback_param])
                     target.writeln(
                         f"export function {sts_async_name}({sts_params_with_cb_str}): void {{",
                         f"    taskpool.execute((): {sts_return_ty_name} => {{ return {sts_native_call}; }})",
                         f"    .then((ret: NullishType): void => {{",
-                        f"        callback({then_args});",
+                        f"        callback(new Error(), ret as {sts_resolved_ty_name});",
                         f"    }})",
                         f"    .catch((ret: NullishType): void => {{",
-                        f"        callback(ret as Error);",
+                        f"        callback(ret as Error, undefined);",
                         f"    }});",
                         f"}}",
                     )
@@ -311,8 +323,8 @@ class STSCodeGenerator:
         target: STSOutputBuffer,
     ):
         enum_ani_info = EnumANIInfo.get(self.am, enum)
-        if enum_ani_info.const and enum.ty_ref:
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, enum.ty_ref)
+        if enum_ani_info.const:
+            type_ani_info = TypeANIInfo.get(self.am, enum.ty_ref.resolved_ty)
             for item in enum.items:
                 target.writeln(
                     f"export const {item.name}: {type_ani_info.sts_type_in(pkg, target)} = {dumps(item.value)};",
@@ -347,7 +359,7 @@ class STSCodeGenerator:
             if field.ty_ref is None:
                 sts_types.append("null")
                 continue
-            ty_ani_info = TypeANIInfo.get_by_ty_ref(self.am, field.ty_ref)
+            ty_ani_info = TypeANIInfo.get(self.am, field.ty_ref.resolved_ty)
             sts_types.append(f"{ty_ani_info.sts_type_in(pkg, target)}")
         sts_types_str = " | ".join(sts_types)
         target.writeln(
@@ -367,6 +379,7 @@ class STSCodeGenerator:
         parents = []
         for parent in struct_ani_info.sts_parents:
             parent_ty = parent.ty_ref.resolved_ty
+            pass
             parent_ani_info = StructANIInfo.get(self.am, parent_ty.ty_decl)
             parents.append(parent_ani_info.sts_type_name)
         extends_str = " extends " + ", ".join(parents) if parents else ""
@@ -374,8 +387,11 @@ class STSCodeGenerator:
             f"export interface {struct_ani_info.sts_type_name}{extends_str} {{",
         )
         with target.indent_manager.offset(4):
+            # TODO: hack inject
+            for injected in struct_ani_info.interface_injected_codes:
+                target.writeln(injected)
             for field in struct_ani_info.sts_fields:
-                ty_ani_info = TypeANIInfo.get_by_ty_ref(self.am, field.ty_ref)
+                ty_ani_info = TypeANIInfo.get(self.am, field.ty_ref.resolved_ty)
                 target.writeln(
                     f"{field.name}: {ty_ani_info.sts_type_in(pkg, target)};",
                 )
@@ -394,6 +410,7 @@ class STSCodeGenerator:
             parents = []
             for parent in struct_ani_info.sts_parents:
                 parent_ty = parent.ty_ref.resolved_ty
+                pass
                 parent_ani_info = StructANIInfo.get(self.am, parent_ty.ty_decl)
                 parents.append(parent_ani_info.sts_type_name)
             implements_str = " implements " + ", ".join(parents) if parents else ""
@@ -405,9 +422,12 @@ class STSCodeGenerator:
                 f"class {struct_ani_info.sts_impl_name} implements {struct_ani_info.sts_type_name} {{",
             )
         with target.indent_manager.offset(4):
+            # TODO: hack inject
+            for injected in struct_ani_info.class_injected_codes:
+                target.writeln(injected)
             for parts in struct_ani_info.sts_final_fields:
                 final = parts[-1]
-                ty_ani_info = TypeANIInfo.get_by_ty_ref(self.am, final.ty_ref)
+                ty_ani_info = TypeANIInfo.get(self.am, final.ty_ref.resolved_ty)
                 target.writeln(
                     f"{final.name}: {ty_ani_info.sts_type_in(pkg, target)};",
                 )
@@ -416,7 +436,7 @@ class STSCodeGenerator:
             )
             for parts in struct_ani_info.sts_final_fields:
                 final = parts[-1]
-                ty_ani_info = TypeANIInfo.get_by_ty_ref(self.am, final.ty_ref)
+                ty_ani_info = TypeANIInfo.get(self.am, final.ty_ref.resolved_ty)
                 target.writeln(
                     f"    {final.name}: {ty_ani_info.sts_type_in(pkg, target)},",
                 )
@@ -448,6 +468,7 @@ class STSCodeGenerator:
         parents = []
         for parent in iface.parents:
             ty = parent.ty_ref.resolved_ty
+            pass
             parent_ani_info = IfaceANIInfo.get(self.am, ty.ty_decl)
             parents.append(parent_ani_info.sts_type_name)
         extends_str = " extends " + ", ".join(parents) if parents else ""
@@ -456,7 +477,7 @@ class STSCodeGenerator:
         )
         with target.indent_manager.offset(4):
             # TODO: hack inject
-            for injected in iface_ani_info.iface_injected_codes:
+            for injected in iface_ani_info.interface_injected_codes:
                 target.writeln(injected)
             self.gen_iface_methods_decl(pkg, iface.methods, target)
         target.writeln(
@@ -473,38 +494,44 @@ class STSCodeGenerator:
         method_on_off_map = self.stat_on_off_methods(methods)
         for (
             method_name,
-            sts_params_ty,
-            return_ty,
-        ), _ in method_on_off_map.items():
+            sts_params_ani_desc,
+        ), method_list in method_on_off_map.items():
             sts_params = []
             sts_params.append("type: string")
-            for index, param_ty in enumerate(sts_params_ty):
-                type_ani_info = TypeANIInfo.get(self.am, pkg, param_ty)
+            for index in range(len(sts_params_ani_desc)):
                 param_name = f"p_{index}"
-                sts_params.append(
-                    f"{param_name}: {type_ani_info.sts_type_in(pkg, target)}"
-                )
-            if return_ty:
-                type_ani_info = TypeANIInfo.get(self.am, pkg, return_ty)
-                return_ty_str = type_ani_info.sts_type_in(pkg, target)
-            else:
-                return_ty_str = "void"
+                sts_param_i_types = []
+                for _, method in method_list:
+                    method_ani_info = IfaceMethodANIInfo.get(self.am, method)
+                    param_ty = method_ani_info.sts_params[index].ty_ref.resolved_ty
+                    type_ani_info = TypeANIInfo.get(self.am, param_ty)
+                    sts_param_i_types.append(type_ani_info.sts_type_in(pkg, target))
+                sts_param_ty_name = " | ".join(sts_param_i_types)
+                sts_params.append(f"{param_name}: {sts_param_ty_name}")
             sts_params_str = ", ".join(sts_params)
+            sts_return_ty_names = set()
+            for _, method in method_list:
+                if return_ty_ref := method.return_ty_ref:
+                    type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
+                    sts_return_ty_names.add(type_ani_info.sts_type_in(pkg, target))
+                else:
+                    sts_return_ty_names.add("void")
+            sts_return_ty_name = sts_return_ty_names.pop()
             target.writeln(
-                f"{method_name}({sts_params_str}): {return_ty_str};",
+                f"{method_name}({sts_params_str}): {sts_return_ty_name};",
             )
         # other
         for method in methods:
             method_ani_info = IfaceMethodANIInfo.get(self.am, method)
             sts_params = []
             for sts_param in method_ani_info.sts_params:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, sts_param.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, sts_param.ty_ref.resolved_ty)
                 sts_params.append(
                     f"{sts_param.name}: {type_ani_info.sts_type_in(pkg, target)}"
                 )
             sts_params_str = ", ".join(sts_params)
             if return_ty_ref := method.return_ty_ref:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                 sts_return_ty_name = type_ani_info.sts_type_in(pkg, target)
             else:
                 sts_return_ty_name = "void"
@@ -520,12 +547,8 @@ class STSCodeGenerator:
                     )
                 # async
                 if (sts_async_name := method_ani_info.sts_async_name) is not None:
-                    if return_ty_ref := method.return_ty_ref:
-                        callback = f"callback: (err: Error, data?: {sts_return_ty_name}) => void"
-                    else:
-                        callback = "callback: (err: Error) => void"
-                    sts_params_with_cb = [*sts_params, callback]
-                    sts_params_with_cb_str = ", ".join(sts_params_with_cb)
+                    callback_param = f"callback: __AsyncCallback<{sts_return_ty_name}>"
+                    sts_params_with_cb_str = ", ".join([*sts_params, callback_param])
                     target.writeln(
                         f"{sts_async_name}({sts_params_with_cb_str}): void;",
                     )
@@ -553,6 +576,7 @@ class STSCodeGenerator:
             parents = []
             for parent in iface.parents:
                 ty = parent.ty_ref.resolved_ty
+                pass
                 parent_ani_info = IfaceANIInfo.get(self.am, ty.ty_decl)
                 parents.append(parent_ani_info.sts_type_name)
             implements_str = " implements " + ", ".join(parents) if parents else ""
@@ -584,7 +608,9 @@ class STSCodeGenerator:
                 sts_params = []
                 sts_args = []
                 for sts_param in ctor_ani_info.sts_params:
-                    type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, sts_param.ty_ref)
+                    type_ani_info = TypeANIInfo.get(
+                        self.am, sts_param.ty_ref.resolved_ty
+                    )
                     sts_params.append(
                         f"{sts_param.name}: {type_ani_info.sts_type_in(pkg, target)}"
                     )
@@ -617,32 +643,46 @@ class STSCodeGenerator:
         func_on_off_map = self.stat_on_off_funcs(funcs)
         for (
             func_name,
-            sts_params_ty,
-            return_ty,
+            sts_params_ani_desc,
         ), func_list in func_on_off_map.items():
             sts_params = []
-            sts_args = []
+            sts_args_any = []
             sts_params.append("type: string")
-            for index, param_ty in enumerate(sts_params_ty):
-                type_ani_info = TypeANIInfo.get(self.am, pkg, param_ty)
+            for index in range(len(sts_params_ani_desc)):
                 param_name = f"p_{index}"
-                sts_params.append(
-                    f"{param_name}: {type_ani_info.sts_type_in(pkg, target)}"
-                )
-                sts_args.append(param_name)
+                sts_param_i_types = []
+                for _, func in func_list:
+                    func_ani_info = GlobFuncANIInfo.get(self.am, func)
+                    param_ty = func_ani_info.sts_params[index].ty_ref.resolved_ty
+                    type_ani_info = TypeANIInfo.get(self.am, param_ty)
+                    sts_param_i_types.append(type_ani_info.sts_type_in(pkg, target))
+                sts_param_ty_name = " | ".join(sts_param_i_types)
+                sts_params.append(f"{param_name}: {sts_param_ty_name}")
+                sts_args_any.append(param_name)
             sts_params_str = ", ".join(sts_params)
-            if return_ty:
-                type_ani_info = TypeANIInfo.get(self.am, pkg, return_ty)
-                return_ty_str = type_ani_info.sts_type_in(pkg, target)
-            else:
-                return_ty_str = "void"
+            sts_return_ty_names = set()
+            for _, func in func_list:
+                if return_ty_ref := func.return_ty_ref:
+                    type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
+                    sts_return_ty_names.add(type_ani_info.sts_type_in(pkg, target))
+                else:
+                    sts_return_ty_names.add("void")
+            sts_return_ty_name = sts_return_ty_names.pop()
             target.writeln(
-                f"static {func_name}({sts_params_str}): {return_ty_str} {{",
+                f"static {func_name}({sts_params_str}): {sts_return_ty_name} {{",
                 f"    switch(type) {{",
             )
             for type_name, func in func_list:
                 func_ani_info = GlobFuncANIInfo.get(self.am, func)
-                sts_native_call = func_ani_info.call_native_with(sts_args)
+                sts_args_fix = []
+                for sts_arg_any, param in zip(
+                    sts_args_any, func_ani_info.sts_params, strict=True
+                ):
+                    type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
+                    sts_args_fix.append(
+                        f"{sts_arg_any} as {type_ani_info.sts_type_in(pkg, target)}"
+                    )
+                sts_native_call = func_ani_info.call_native_with(sts_args_fix)
                 target.writeln(
                     f'        case "{type_name}": return {sts_native_call};',
                 )
@@ -657,7 +697,7 @@ class STSCodeGenerator:
             sts_params = []
             sts_args = []
             for sts_param in func_ani_info.sts_params:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, sts_param.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, sts_param.ty_ref.resolved_ty)
                 sts_params.append(
                     f"{sts_param.name}: {type_ani_info.sts_type_in(pkg, target)}"
                 )
@@ -665,10 +705,12 @@ class STSCodeGenerator:
             sts_params_str = ", ".join(sts_params)
             sts_native_call = func_ani_info.call_native_with(sts_args)
             if return_ty_ref := func.return_ty_ref:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                 sts_return_ty_name = type_ani_info.sts_type_in(pkg, target)
+                sts_resolved_ty_name = type_ani_info.sts_type_in(pkg, target)
             else:
                 sts_return_ty_name = "void"
+                sts_resolved_ty_name = "undefined"
             # real
             if (sts_func_name := func_ani_info.sts_func_name) is not None:
                 target.writeln(
@@ -678,16 +720,12 @@ class STSCodeGenerator:
                 )
                 # promise
                 if (sts_promise_name := func_ani_info.sts_promise_name) is not None:
-                    if return_ty_ref := func.return_ty_ref:
-                        resolve_args = f"ret as {sts_return_ty_name}"
-                    else:
-                        resolve_args = "undefined"
                     target.writeln(
                         f"static {sts_promise_name}({sts_params_str}): Promise<{sts_return_ty_name}> {{",
                         f"    return new Promise<{sts_return_ty_name}>((resolve, reject): void => {{",
                         f"        taskpool.execute((): {sts_return_ty_name} => {{ return {sts_native_call}; }})",
                         f"        .then((ret: NullishType): void => {{",
-                        f"            resolve({resolve_args});",
+                        f"            resolve(ret as {sts_resolved_ty_name});",
                         f"        }})",
                         f"        .catch((ret: NullishType): void => {{",
                         f"            reject(ret as Error);",
@@ -697,22 +735,16 @@ class STSCodeGenerator:
                     )
                 # async
                 if (sts_async_name := func_ani_info.sts_async_name) is not None:
-                    if return_ty_ref := func.return_ty_ref:
-                        callback = f"callback: (err: Error, data?: {sts_return_ty_name}) => void"
-                        then_args = f"new Error(), ret as {sts_return_ty_name}"
-                    else:
-                        callback = "callback: (err: Error) => void"
-                        then_args = "new Error()"
-                    sts_params_with_cb = [*sts_params, callback]
-                    sts_params_with_cb_str = ", ".join(sts_params_with_cb)
+                    callback_param = f"callback: __AsyncCallback<{sts_return_ty_name}>"
+                    sts_params_with_cb_str = ", ".join([*sts_params, callback_param])
                     target.writeln(
                         f"static {sts_async_name}({sts_params_with_cb_str}): void {{",
                         f"    taskpool.execute((): {sts_return_ty_name} => {{ return {sts_native_call}; }})",
                         f"    .then((ret: NullishType): void => {{",
-                        f"        callback({then_args});",
+                        f"        callback(new Error(), ret as {sts_resolved_ty_name});",
                         f"    }})",
                         f"    .catch((ret: NullishType): void => {{",
-                        f"        callback(ret as Error);",
+                        f"        callback(ret as Error, undefined);",
                         f"    }});",
                         f"}}",
                     )
@@ -742,13 +774,13 @@ class STSCodeGenerator:
             method_ani_info = IfaceMethodANIInfo.get(self.am, method)
             sts_native_params = []
             for param in method.params:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, param.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
                 sts_native_params.append(
                     f"{param.name}: {type_ani_info.sts_type_in(pkg, target)}"
                 )
             sts_native_params_str = ", ".join(sts_native_params)
             if return_ty_ref := method.return_ty_ref:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                 sts_return_ty_name = type_ani_info.sts_type_in(pkg, target)
             else:
                 sts_return_ty_name = "void"
@@ -766,32 +798,46 @@ class STSCodeGenerator:
         method_on_off_map = self.stat_on_off_methods(methods)
         for (
             method_name,
-            sts_params_ty,
-            return_ty,
+            sts_params_ani_desc,
         ), method_list in method_on_off_map.items():
             sts_params = []
-            sts_args = []
+            sts_args_any = []
             sts_params.append("type: string")
-            for index, param_ty in enumerate(sts_params_ty):
-                type_ani_info = TypeANIInfo.get(self.am, pkg, param_ty)
+            for index in range(len(sts_params_ani_desc)):
                 param_name = f"p_{index}"
-                sts_params.append(
-                    f"{param_name}: {type_ani_info.sts_type_in(pkg, target)}"
-                )
-                sts_args.append(param_name)
+                sts_param_i_types = []
+                for _, method in method_list:
+                    method_ani_info = IfaceMethodANIInfo.get(self.am, method)
+                    param_ty = method_ani_info.sts_params[index].ty_ref.resolved_ty
+                    type_ani_info = TypeANIInfo.get(self.am, param_ty)
+                    sts_param_i_types.append(type_ani_info.sts_type_in(pkg, target))
+                sts_param_ty_name = " | ".join(sts_param_i_types)
+                sts_params.append(f"{param_name}: {sts_param_ty_name}")
+                sts_args_any.append(param_name)
             sts_params_str = ", ".join(sts_params)
-            if return_ty:
-                type_ani_info = TypeANIInfo.get(self.am, pkg, return_ty)
-                return_ty_str = type_ani_info.sts_type_in(pkg, target)
-            else:
-                return_ty_str = "void"
+            sts_return_ty_names = set()
+            for _, method in method_list:
+                if return_ty_ref := method.return_ty_ref:
+                    type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
+                    sts_return_ty_names.add(type_ani_info.sts_type_in(pkg, target))
+                else:
+                    sts_return_ty_names.add("void")
+            sts_return_ty_name = sts_return_ty_names.pop()
             target.writeln(
-                f"{method_name}({sts_params_str}): {return_ty_str} {{",
+                f"{method_name}({sts_params_str}): {sts_return_ty_name} {{",
                 f"    switch(type) {{",
             )
             for type_name, method in method_list:
                 method_ani_info = IfaceMethodANIInfo.get(self.am, method)
-                sts_native_call = method_ani_info.call_native_with("this", sts_args)
+                sts_args_fix = []
+                for sts_arg_any, param in zip(
+                    sts_args_any, method_ani_info.sts_params, strict=True
+                ):
+                    type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
+                    sts_args_fix.append(
+                        f"{sts_arg_any} as {type_ani_info.sts_type_in(pkg, target)}"
+                    )
+                sts_native_call = method_ani_info.call_native_with("this", sts_args_fix)
                 target.writeln(
                     f'        case "{type_name}": return {sts_native_call};',
                 )
@@ -806,7 +852,7 @@ class STSCodeGenerator:
             sts_params = []
             sts_args = []
             for sts_param in method_ani_info.sts_params:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, sts_param.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, sts_param.ty_ref.resolved_ty)
                 sts_params.append(
                     f"{sts_param.name}: {type_ani_info.sts_type_in(pkg, target)}"
                 )
@@ -814,10 +860,12 @@ class STSCodeGenerator:
             sts_params_str = ", ".join(sts_params)
             sts_native_call = method_ani_info.call_native_with("this", sts_args)
             if return_ty_ref := method.return_ty_ref:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                 sts_return_ty_name = type_ani_info.sts_type_in(pkg, target)
+                sts_resolved_ty_name = type_ani_info.sts_type_in(pkg, target)
             else:
                 sts_return_ty_name = "void"
+                sts_resolved_ty_name = "undefined"
             # real
             if (sts_method_name := method_ani_info.sts_method_name) is not None:
                 target.writeln(
@@ -827,16 +875,12 @@ class STSCodeGenerator:
                 )
                 # promise
                 if (sts_promise_name := method_ani_info.sts_promise_name) is not None:
-                    if return_ty_ref := method.return_ty_ref:
-                        resolve_args = f"ret as {sts_return_ty_name}"
-                    else:
-                        resolve_args = "undefined"
                     target.writeln(
                         f"{sts_promise_name}({sts_params_str}): Promise<{sts_return_ty_name}> {{",
                         f"    return new Promise<{sts_return_ty_name}>((resolve, reject): void => {{",
                         f"        taskpool.execute((): {sts_return_ty_name} => {{ return {sts_native_call}; }})",
                         f"        .then((ret: NullishType): void => {{",
-                        f"            resolve({resolve_args});",
+                        f"            resolve(ret as {sts_resolved_ty_name});",
                         f"        }})",
                         f"        .catch((ret: NullishType): void => {{",
                         f"            reject(ret as Error);",
@@ -846,22 +890,16 @@ class STSCodeGenerator:
                     )
                 # async
                 if (sts_async_name := method_ani_info.sts_async_name) is not None:
-                    if return_ty_ref := method.return_ty_ref:
-                        callback = f"callback: (err: Error, data?: {sts_return_ty_name}) => void"
-                        then_args = f"new Error(), ret as {sts_return_ty_name}"
-                    else:
-                        callback = "callback: (err: Error) => void"
-                        then_args = "new Error()"
-                    sts_params_with_cb = [*sts_params, callback]
-                    sts_params_with_cb_str = ", ".join(sts_params_with_cb)
+                    callback_param = f"callback: __AsyncCallback<{sts_return_ty_name}>"
+                    sts_params_with_cb_str = ", ".join([*sts_params, callback_param])
                     target.writeln(
                         f"{sts_async_name}({sts_params_with_cb_str}): void {{",
                         f"    taskpool.execute((): {sts_return_ty_name} => {{ return {sts_native_call}; }})",
                         f"    .then((ret: NullishType): void => {{",
-                        f"        callback({then_args});",
+                        f"        callback(new Error(), ret as {sts_resolved_ty_name});",
                         f"    }})",
                         f"    .catch((ret: NullishType): void => {{",
-                        f"        callback(ret as Error);",
+                        f"        callback(ret as Error, undefined);",
                         f"    }});",
                         f"}}",
                     )
@@ -879,3 +917,47 @@ class STSCodeGenerator:
                     f"    return {sts_native_call};",
                     f"}}",
                 )
+
+    def gen_utils(
+        self,
+        target: STSOutputBuffer,
+    ):
+        target.writeln(
+            "type __AsyncCallback<T> = (err: Error, result: T | undefined) => void;",
+        )
+        target.writeln(
+            "function __fromArrayBufferToBigInt(arr: ArrayBuffer): BigInt {",
+            "    let res: BigInt = 0n;",
+            "    for (let i: int = 0; i < arr.getByteLength(); i++) {",
+            "        res |= BigInt(arr.at(i) as long & 0xff) << BigInt(i * 8);",
+            "    }",
+            "    let m: int = arr.getByteLength();",
+            "    if (arr.at(m - 1) < 0) {",
+            "        res |= -1n << BigInt(m * 8 - 1);",
+            "    }",
+            "    return res;",
+            "}",
+        )
+        target.writeln(
+            "function __fromBigIntToArrayBuffer(val: BigInt, blk: int): ArrayBuffer {",
+            "    let n_7 = BigInt(blk * 8 - 1);",
+            "    let n_8 = BigInt(blk * 8);",
+            "    let tmp: BigInt = val;",
+            "    let n: int = 0;",
+            "    while (true) {",
+            "        n += blk;",
+            "        let t_7 = tmp >> n_7;",
+            "        let t_8 = tmp >> n_8;",
+            "        if (t_7 == t_8) {",
+            "            break;",
+            "        }",
+            "        tmp = t_8;",
+            "    }",
+            "    let buf = new ArrayBuffer(n);",
+            "    for (let i: int = 0; i < n; i++) {",
+            "        buf.set(i, (val & 255n).getLong() as byte)",
+            "        val >>= 8n;",
+            "    }",
+            "    return buf;",
+            "}",
+        )

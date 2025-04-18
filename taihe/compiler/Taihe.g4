@@ -46,7 +46,7 @@ declAliasPair
 
 specField
     : (DeclAttrLst_forward_attrs += declAttr)*
-      KW_ENUM TOKEN_name = ID (COLON TypeOpt_enum_ty = type)?
+      KW_ENUM TOKEN_name = ID COLON Type_enum_ty = type
       LEFT_BRACE (EnumItemLst_fields += enumItem (COMMA EnumItemLst_fields += enumItem)* COMMA?)? RIGHT_BRACE # enum
     | (DeclAttrLst_forward_attrs += declAttr)*
       KW_STRUCT TOKEN_name = ID
@@ -117,10 +117,14 @@ attrVal
 //////////
 
 type
-    : PkgName_pkg_name = pkgName DOT TOKEN_decl_name = ID # longType
-    | TOKEN_decl_name = ID # shortType
-    | TOKEN_decl_name = ID LESS_THAN (TypeLst_args += type (COMMA TypeLst_args += type)* COMMA?)? GREATER_THAN # genericType
+    : (DeclAttrLst_forward_attrs += declAttr)*
+      PkgName_pkg_name = pkgName DOT TOKEN_decl_name = ID # longType
+    | (DeclAttrLst_forward_attrs += declAttr)*
+      TOKEN_decl_name = ID # shortType
+    | (DeclAttrLst_forward_attrs += declAttr)*
+      TOKEN_decl_name = ID LESS_THAN (TypeLst_args += type (COMMA TypeLst_args += type)* COMMA?)? GREATER_THAN # genericType
     | <assoc = right>
+      (DeclAttrLst_forward_attrs += declAttr)*
       LEFT_PARENTHESIS (ParameterLst_parameters += parameter (COMMA ParameterLst_parameters += parameter)* COMMA?)? RIGHT_PARENTHESIS ARROW (TypeOpt_return_ty = type | KW_VOID) # callbackType
     ;
 
@@ -161,8 +165,9 @@ boolExpr
     ;
 
 stringExpr
-    : TOKENLst_vals += STRING_LITERAL+ # literalStringExpr
-    | LEFT_PARENTHESIS StringExpr_expr = stringExpr RIGHT_PARENTHESIS # parenthesisStringExpr
+    : TOKEN_val = STRING_LITERAL # literalStringExpr
+    | TOKEN_val = DOCSTRING_LITERAL # literalDocStringExpr
+    | StringExpr_left = stringExpr StringExpr_right = stringExpr # binaryStringExpr
     ;
 
 ///////////
@@ -346,11 +351,11 @@ KW_FUNCTION
     ;
 
 KW_TRUE
-    : 'TRUE'
+    : 'true'
     ;
 
 KW_FALSE
-    : 'FALSE'
+    : 'false'
     ;
 
 KW_VOID
@@ -359,7 +364,10 @@ KW_VOID
 
 STRING_LITERAL
     : '"' (ESCAPE_SEQUENCE | ~ ('\\' | '"'))* '"'
-    | '"""' .*? '"""'
+    ;
+
+DOCSTRING_LITERAL
+    : '"""' .*? '"""'
     ;
 
 fragment ESCAPE_SEQUENCE

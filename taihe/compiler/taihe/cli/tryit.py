@@ -255,28 +255,27 @@ class BuildSystem:
             self.logger.info(f"Already found {target_file}, skipping download")
             return
 
-        # Check if credentials are available
-        if not self.config.panda_username or not self.config.panda_password:
-            self.logger.error("Panda credentials are not set in environment variables")
-            raise ValueError(
-                "Missing credentials. Set PANDA_USERNAME and PANDA_PASSWORD environment variables."
-            )
+        temp_file = target_file.with_suffix(".tmp")
 
         command = [
-            "wget",
-            "--no-verbose",  # Reduce output verbosity
-            "--user",
-            self.config.panda_username,
-            "--password",
-            self.config.panda_password,
-            "--progress=bar:force:noscroll",
+            "curl",
+            "-L",
+            "-u",
+            f"{self.config.panda_username}:{self.config.panda_password}",
+            "--progress-bar",
             url,
-            "-O",
-            str(target_file),
-            "--no-check-certificate",
+            "-o",
+            str(temp_file),
         ]
 
         self.run_command(command, capture_output=False)
+
+        if temp_file.exists():
+            temp_file.rename(target_file)
+            self.logger.info(f"Downloaded {url} to {target_file}")
+        else:
+            self.logger.error(f"Failed to download {url}")
+            raise FileNotFoundError(f"Failed to download {url}")
 
     def extract_file(
         self, target_file: Path, extract_dir: Path, version_file: Path, version: str

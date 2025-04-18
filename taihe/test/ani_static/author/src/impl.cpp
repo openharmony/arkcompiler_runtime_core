@@ -95,8 +95,7 @@ int32_t static_func(int32_t a, int32_t b)
 {
     return taihe::make_holder<ITest, ::staticTest::ITest>();
 }
-
-}
+}  // namespace
 
 // because these macros are auto-generate, lint will cause false positive.
 // NOLINTBEGIN

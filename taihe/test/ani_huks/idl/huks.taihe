@@ -28,10 +28,10 @@ function isKeyItemExist(keyAlias: String, options: HuksOptions): bool;
 function hasKeyItem(keyAlias: String, options: HuksOptions): bool;
 function init(keyAlias: String, options: HuksOptions): HuksHandle;
 function initSession(keyAlias: String, options: HuksOptions): HuksSessionHandle;
-function update(handle: f64, token: Optional<Array<u8>>, options: HuksOptions): HuksResult;
-function updateSession(handle: f64, options: HuksOptions, token: Optional<Array<u8>>): HuksReturnResult;
+function update(handle: f64, token: Optional<@arraybuffer Array<u8>>, options: HuksOptions): HuksResult;
+function updateSession(handle: f64, options: HuksOptions, token: Optional<@arraybuffer Array<u8>>): HuksReturnResult;
 function finish(handle: f64, options: HuksOptions): HuksResult;
-function finishSession(handle: f64, options: HuksOptions, token: Optional<Array<u8>>): HuksReturnResult;
+function finishSession(handle: f64, options: HuksOptions, token: Optional<@arraybuffer Array<u8>>): HuksReturnResult;
 function abort(handle: f64, options: HuksOptions): HuksResult;
 function abortSession(handle: f64, options: HuksOptions): void;
 function attestKeyItem(keyAlias: String, options: HuksOptions): HuksReturnResult;
@@ -44,7 +44,7 @@ union HuksParamValue {
     booleanValue: bool;
     numberValue: f64;
     bigintValue: i64;
-    bufferValue: Array<u8>;
+    bufferValue: @arraybuffer Array<u8>;
 }
 
 struct HuksParam {
@@ -55,28 +55,28 @@ struct HuksParam {
 struct HuksHandle {
     errorCode: f64;
     handle: f64;
-    token: Optional<Array<u8>>;
+    token: Optional<@arraybuffer Array<u8>>;
 }
 
 struct HuksSessionHandle {
     handle: f64;
-    challenge: Optional<Array<u8>>;
+    challenge: Optional<@arraybuffer Array<u8>>;
 }
 
 struct HuksOptions {
     properties: Optional<Array<HuksParam>>;
-    inData: Optional<Array<u8>>;
+    inData: Optional<@arraybuffer Array<u8>>;
 }
 
 struct HuksResult {
     errorCode: f64;
-    outData: Optional<Array<u8>>;
+    outData: Optional<@arraybuffer Array<u8>>;
     properties: Optional<Array<HuksParam>>;
     certChains: Optional<Array<String>>;
 }
 
 struct HuksReturnResult {
-    outData: Optional<Array<u8>>;
+    outData: Optional<@arraybuffer Array<u8>>;
     properties: Optional<Array<HuksParam>>;
     certChains: Optional<Array<String>>;
 }

@@ -36,102 +36,102 @@ union union_primitive {
 
 union color_map_value1 {
     colorValue: Color;
-    mapValue1: Map<String, i8>;
+    mapValue1: @record Map<String, i8>;
 }
 
 union color_map_value2 {
     colorValue: Color;
-    mapValue2: Map<String, i16>;
+    mapValue2: @record Map<String, i16>;
 }
 
 union color_map_value3 {
     colorValue: Color;
-    mapValue3: Map<String, i32>;
+    mapValue3: @record Map<String, i32>;
 }
 
 union color_map_value4 {
     colorValue: Color;
-    mapValue4: Map<String, i64>;
+    mapValue4: @record Map<String, i64>;
 }
 
 union color_map_value5 {
     colorValue: Color;
-    mapValue5: Map<String, f32>;
+    mapValue5: @record Map<String, f32>;
 }
 
 union color_map_value6 {
     colorValue: Color;
-    mapValue6: Map<String, f64>;
+    mapValue6: @record Map<String, f64>;
 }
 
 union color_map_value7 {
     colorValue: Color;
-    mapValue7: Map<String, bool>;
+    mapValue7: @record Map<String, bool>;
 }
 
 union color_map_value8 {
     colorValue: Color;
-    mapValue8: Map<String, String>;
+    mapValue8: @record Map<String, String>;
 }
 
 union color_map_value9 {
     colorValue: Color;
-    mapValue9: Map<i32, i32>;
+    mapValue9: @record Map<i32, i32>;
 }
 
 
 
 union UnionArrayMap1 {
   arri8: Array<i8>;
-  mapValue1: Map<String, i8>;
+  mapValue1: @record Map<String, i8>;
 }
 
 
 union UnionArrayMap2 {
   arri8: Array<i8>;
-  mapValue2: Map<String, i16>;
+  mapValue2: @record Map<String, i16>;
 }
 
 
 union UnionArrayMap3 {
   arri8: Array<i8>;
-  mapValue3: Map<String, i32>;
+  mapValue3: @record Map<String, i32>;
 }
 
 
 union UnionArrayMap4 {
   arri8: Array<i8>;
-  mapValue4: Map<String, i64>;
+  mapValue4: @record Map<String, i64>;
 }
 
 
 union UnionArrayMap5 {
   arri8: Array<i8>;
-  mapValue5: Map<String, f32>;
+  mapValue5: @record Map<String, f32>;
 }
 
 
 union UnionArrayMap6 {
   arri8: Array<i8>;
-  mapValue6: Map<String, f64>;
+  mapValue6: @record Map<String, f64>;
 }
 
 
 union UnionArrayMap7 {
   arri8: Array<i8>;
-  mapValue7: Map<String, bool>;
+  mapValue7: @record Map<String, bool>;
 }
 
 
 union UnionArrayMap8 {
   arri8: Array<i8>;
-  mapValue8: Map<String, String>;
+  mapValue8: @record Map<String, String>;
 }
 
 
 union UnionArrayMap9 {
   arri8: Array<i8>;
-  mapValue9: Map<i32, i32>;
+  mapValue9: @record Map<i32, i32>;
 }
 
 union union_mix{
@@ -201,7 +201,7 @@ union union_mix_5 {
 }
 
 union union_map{
-  mapValue: Map<String, i8>;
+  mapValue: @record Map<String, i8>;
 }
 
 

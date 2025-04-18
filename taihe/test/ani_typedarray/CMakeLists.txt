@@ -12,12 +12,10 @@
 # limitations under the License.
 
 set(IDL_FILES
-    "${CMAKE_CURRENT_LIST_DIR}/idl/foo.taihe"
     "${CMAKE_CURRENT_LIST_DIR}/idl/bar.taihe"
 )
 
 set(GEN_ETS_FILES
-    "foo.ets"
     "bar.ets"
 )
 
@@ -27,4 +25,4 @@ set(USER_ETS_FILES
 
 file(GLOB AUTHOR_CPP_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/author/src/*.cpp")
 
-add_ani_demo(ani_typed_array "${IDL_FILES}" "${GEN_ETS_FILES}" "" "${USER_ETS_FILES}" "${AUTHOR_CPP_FILES}" "test")
+add_ani_demo(ani_typedarray "${IDL_FILES}" "${GEN_ETS_FILES}" "" "${USER_ETS_FILES}" "${AUTHOR_CPP_FILES}" "test")

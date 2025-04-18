@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_STRING_ABI_H
-#define TAIHE_STRING_ABI_H
+#ifndef RUNTIME_INCLUDE_TAIHE_STRING_ABI_H_
+#define RUNTIME_INCLUDE_TAIHE_STRING_ABI_H_
 
 #include <taihe/common.h>
 
 #include <stddef.h>
 #include <stdint.h>
 
-// Private ABI: Don't use in your code
+// Private ABI: Don't use in your code //
 
 enum TStringFlags {
     TSTRING_REF = 1,
@@ -37,7 +37,7 @@ struct TStringData {
     char buffer[];
 };
 
-// Public C API
+// Public C API //
 
 // Returns the buffer of the TString.
 TH_INLINE const char *tstr_buf(struct TString tstr)
@@ -126,5 +126,4 @@ TH_EXPORT struct TString tstr_concat(struct TString left, struct TString right);
 // # Notes
 // - Calling this function returns an unowned string reference (string_view).
 TH_EXPORT struct TString tstr_substr(struct TString tstr, size_t pos, size_t len);
-
-#endif // TAIHE_STRING_ABI_H
+#endif  // RUNTIME_INCLUDE_TAIHE_STRING_ABI_H_

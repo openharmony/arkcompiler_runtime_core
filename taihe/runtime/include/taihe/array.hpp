@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TAIHE_ARRAY_HPP
-#define TAIHE_ARRAY_HPP
+#ifndef RUNTIME_INCLUDE_TAIHE_ARRAY_HPP_
+#define RUNTIME_INCLUDE_TAIHE_ARRAY_HPP_
+// NOLINTBEGIN
 
 #include <taihe/array.abi.h>
 #include <taihe/common.hpp>
@@ -27,9 +28,6 @@
 #include <utility>
 #include <vector>
 
-// This file is used as a standard library and needs to be easy to use.
-// The rule that single-parameter constructors need to be explicit does not apply.
-// NOLINTBEGIN
 namespace taihe {
 template <typename cpp_owner_t>
 struct array_view;
@@ -234,12 +232,12 @@ struct array : public array_view<cpp_owner_t> {
         std::uninitialized_move_n(data, size, this->m_data);
     }
 
-    array(size_type size) : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
+    explicit array(size_type size) : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
         std::uninitialized_default_construct_n(this->m_data, size);
     }
 
-    array(size_type size, cpp_owner_t const &value)
+    explicit array(size_type size, cpp_owner_t const &value)
         : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
         std::uninitialized_fill_n(this->m_data, size, value);
@@ -327,5 +325,4 @@ struct as_param<array<cpp_owner_t>> {
 };
 }  // namespace taihe
 // NOLINTEND
-
-#endif // TAIHE_ARRAY_HPP
+#endif  // RUNTIME_INCLUDE_TAIHE_ARRAY_HPP_

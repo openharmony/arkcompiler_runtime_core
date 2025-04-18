@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function SumArrayU8(nums: Array<u8>): u8;
-function GetArrayBuffer(nums: u8): Array<u8>;
-function DoubleArrayBuffer(nums: Array<u8>): Array<u8>;
+function SumArrayU8(nums: @arraybuffer Array<u8>): u8;
+function GetArrayBuffer(nums: u8): @arraybuffer Array<u8>;
+function DoubleArrayBuffer(nums: @arraybuffer Array<u8>): @arraybuffer Array<u8>;
 function SumArrayI8(nums: Array<i8>): i8;
 function GetArrayI8(nums: i8): Array<i8>;
 function DoubleI8(nums: Array<i8>): Array<i8>;
@@ -36,11 +36,11 @@ function SumArrayF64(nums: Array<f64>): f64;
 function GetArrayF64(nums: f64): Array<f64>;
 function DoubleF64(nums: Array<f64>): Array<f64>;
 
-function DoubleBufferToInt8Array(nums: Array<u8>): Array<u8>;
-function DoubleBufferToInt16Array(nums: Array<u8>): Array<u8>;
-function DoubleBufferToInt32Array(nums: Array<u8>): Array<u8>;
-function DoubleBufferToUint16Array(nums: Array<u8>): Array<u8>;
-function DoubleBufferToUint32Array(nums: Array<u8>): Array<u8>;
+function DoubleBufferToInt8Array(nums: @arraybuffer Array<u8>): @arraybuffer Array<u8>;
+function DoubleBufferToInt16Array(nums: @arraybuffer Array<u8>): @arraybuffer Array<u8>;
+function DoubleBufferToInt32Array(nums: @arraybuffer Array<u8>): @arraybuffer Array<u8>;
+function DoubleBufferToUint16Array(nums: @arraybuffer Array<u8>): @arraybuffer Array<u8>;
+function DoubleBufferToUint32Array(nums: @arraybuffer Array<u8>): @arraybuffer Array<u8>;
 @!sts_inject("""
 export function doubleInt8Array(int8Array: Int8Array): Int8Array  {
     const arrayBuffer: ArrayBuffer = int8Array.buffer as ArrayBuffer;

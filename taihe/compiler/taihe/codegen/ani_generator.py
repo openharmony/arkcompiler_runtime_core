@@ -36,6 +36,7 @@ from taihe.codegen.cpp_user_generator import (
 )
 from taihe.codegen.mangle import DeclKind, encode
 from taihe.semantics.declarations import (
+    AttrItemDecl,
     EnumDecl,
     GlobFuncDecl,
     IfaceDecl,
@@ -43,21 +44,9 @@ from taihe.semantics.declarations import (
     PackageDecl,
     PackageGroup,
     StructDecl,
-    TypeRefDecl,
     UnionDecl,
 )
 from taihe.semantics.types import (
-    BOOL,
-    F32,
-    F64,
-    I8,
-    I16,
-    I32,
-    I64,
-    U8,
-    U16,
-    U32,
-    U64,
     ArrayType,
     CallbackType,
     EnumType,
@@ -65,6 +54,7 @@ from taihe.semantics.types import (
     MapType,
     OpaqueType,
     OptionalType,
+    ScalarKind,
     ScalarType,
     StringType,
     StructType,
@@ -73,7 +63,9 @@ from taihe.semantics.types import (
 )
 from taihe.semantics.visitor import TypeVisitor
 from taihe.utils.analyses import AbstractAnalysis, AnalysisManager
+from taihe.utils.exceptions import AdhocError
 from taihe.utils.outputs import COutputBuffer, OutputManager, STSOutputBuffer
+from taihe.utils.sources import SourceLocation
 
 if TYPE_CHECKING:
     from taihe.semantics.declarations import (
@@ -83,16 +75,62 @@ if TYPE_CHECKING:
     )
 
 
+def raise_adhoc_error(
+    am: AnalysisManager,
+    msg: str,
+    loc: SourceLocation | None,
+):
+    am.diagnostics_manager.emit(AdhocError(msg, loc=loc))
+
+
+def check_attr_args(
+    am: AnalysisManager,
+    attr: AttrItemDecl,
+    pattern: str,
+) -> bool:
+    expect_dict = {"s": str, "i": int, "f": float, "b": bool}
+    trailing = "/"
+    if len(pattern) >= 2 and pattern[-1] == "*":
+        trailing = pattern[-2]
+        pattern = pattern[:-2]
+    if trailing == "/" and len(attr.args) != len(pattern):
+        raise_adhoc_error(
+            am,
+            f"@{attr.name} expects exactly {len(pattern)} arguments",
+            attr.loc,
+        )
+        return False
+    if len(attr.args) < len(pattern):
+        raise_adhoc_error(
+            am,
+            f"@{attr.name} expects at least {len(pattern)} arguments",
+            attr.loc,
+        )
+        return False
+    result = []
+    for i, arg in enumerate(attr.args):
+        p = pattern[i] if i < len(pattern) else trailing
+        if not isinstance(arg, expect_dict[p]):
+            raise_adhoc_error(
+                am,
+                f"@{attr.name} expects {i + 1}th argument to be {expect_dict[p].__name__}",
+                attr.loc,
+            )
+            return False
+        result.append(arg)
+    return True
+
+
+@dataclass(repr=False)
 class ANIType:
     hint: str
     base: "ANIBaseType"
 
-    def __init__(self, hint: str, base: "ANIBaseType"):
-        self.hint = hint
-        self.base = base
-
     def __repr__(self) -> str:
         return f"ani_{self.hint}"
+
+    def __hash__(self) -> int:
+        return hash(self.hint)
 
     @property
     def suffix(self) -> str:
@@ -100,19 +138,26 @@ class ANIType:
 
     @property
     def array(self) -> "ANIArrayType":
+        pass
         return self.base.inner_array
 
 
+@dataclass(repr=False)
 class ANIArrayType(ANIType):
-    pass
+    def __hash__(self) -> int:
+        return hash(self.hint)
 
 
+@dataclass(repr=False)
 class ANIBaseType(ANIType):
     inner_array: "ANIArrayType | None"
 
     def __init__(self, hint: str):
         super().__init__(hint, self)
         self.inner_array = None
+
+    def __hash__(self) -> int:
+        return hash(self.hint)
 
 
 ANI_REF = ANIBaseType(hint="ref")
@@ -154,32 +199,48 @@ ANI_STRING = ANIType(hint="string", base=ANI_REF)
 ANI_ARRAYBUFFER = ANIType(hint="arraybuffer", base=ANI_REF)
 
 
+@dataclass(repr=False)
+class ANIFuncLike:
+    hint: str
+
+    def __repr__(self) -> str:
+        return f"ani_{self.hint}"
+
+    def __hash__(self) -> int:
+        return hash(self.hint)
+
+    @property
+    def suffix(self) -> str:
+        return self.hint[0].upper() + self.hint[1:]
+
+
+ANI_FUNCTION = ANIFuncLike("function")
+ANI_METHOD = ANIFuncLike("method")
+
+
+@dataclass(repr=False)
+class ANIScope:
+    hint: str
+    member: ANIFuncLike
+
+    def __repr__(self) -> str:
+        return f"ani_{self.hint}"
+
+    def __hash__(self) -> int:
+        return hash(self.hint)
+
+    @property
+    def suffix(self) -> str:
+        return self.hint[0].upper() + self.hint[1:]
+
+
+ANI_CLASS = ANIScope("class", ANI_METHOD)
+ANI_MODULE = ANIScope("module", ANI_FUNCTION)
+ANI_NAMESPACE = ANIScope("namespace", ANI_FUNCTION)
+
+
 @dataclass
-class ANIParentScope:
-    ani_type: str
-    find: str
-    bind: str
-
-
-ANI_SCOPE_CLASS = ANIParentScope(
-    "ani_class",
-    "FindClass",
-    "Class_BindNativeMethods",
-)
-ANI_SCOPE_MODULE = ANIParentScope(
-    "ani_module",
-    "FindModule",
-    "Module_BindNativeFunctions",
-)
-ANI_SCOPE_NAMESPACE = ANIParentScope(
-    "ani_namespace",
-    "FindNamespace",
-    "Namespace_BindNativeFunctions",
-)
-
-
-@dataclass
-class ANIFunctionLikeInfo:
+class ANINativeFuncInfo:
     sts_native_name: str
     mangled_name: str
 
@@ -187,8 +248,8 @@ class ANIFunctionLikeInfo:
 @dataclass
 class ANIRegisterInfo:
     impl_desc: str
-    member_infos: list[ANIFunctionLikeInfo]
-    parent_scope: ANIParentScope
+    member_infos: list[ANINativeFuncInfo]
+    parent_scope: ANIScope
 
 
 class PackageANIInfo(AbstractAnalysis[PackageDecl]):
@@ -201,43 +262,47 @@ class PackageANIInfo(AbstractAnalysis[PackageDecl]):
 
         self.cpp_ns = "::".join(p.segments)
 
-        if namespace_attr := p.get_attr_item("namespace"):
-            self.module, *sts_ns_parts = namespace_attr.args
+        if (namespace_attr := p.get_last_attr("namespace")) and check_attr_args(
+            am, namespace_attr, "ss*"
+        ):
+            self.module_name, *sts_ns_parts = namespace_attr.args
             self.sts_ns_parts = []
             for sts_ns_part in sts_ns_parts:
                 self.sts_ns_parts.extend(sts_ns_part.split("."))
         else:
-            self.module = p.name
+            self.module_name = p.name
             self.sts_ns_parts = []
 
-        self.ani_path = "/".join(self.module.split(".") + self.sts_ns_parts)
+        self.ani_path = "/".join(self.module_name.split(".") + self.sts_ns_parts)
         self.impl_desc = f"L{self.ani_path};"
 
         self.injected_codes: list[str] = []
-        for injected in p.get_attr_list("sts_inject"):
-            (code,) = injected.args
-            self.injected_codes.append(code)
+        for injected in p.get_all_attrs("sts_inject"):
+            if check_attr_args(am, injected, "s"):
+                (code,) = injected.args
+                self.injected_codes.append(code)
 
-    def is_namespace(self):
-        return len(self.sts_ns_parts) > 0
+        self.module_injected_codes: list[str] = []
+        for module_injected in p.get_all_attrs("sts_inject_into_module"):
+            if check_attr_args(am, module_injected, "s"):
+                (code,) = module_injected.args
+                self.module_injected_codes.append(code)
+
+    @property
+    def scope(self):
+        return ANI_NAMESPACE if len(self.sts_ns_parts) > 0 else ANI_MODULE
 
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer, sts_name: str):
         pkg_ani_info = PackageANIInfo.get(self.am, pkg)
-        if pkg_ani_info.module == self.module:
-            self_sts_ns_parts = iter(self.sts_ns_parts)
-            for else_sts_ns_part in pkg_ani_info.sts_ns_parts:
-                try:
-                    if next(self_sts_ns_parts) != else_sts_ns_part:
-                        break
-                except Exception:
-                    break
-            else:
-                relative_name = ".".join([*self_sts_ns_parts, sts_name])
+        if pkg_ani_info.module_name == self.module_name:
+            length = len(pkg_ani_info.sts_ns_parts)
+            if self.sts_ns_parts[:length] == pkg_ani_info.sts_ns_parts:
+                relative_name = ".".join(self.sts_ns_parts[length:] + [sts_name])
                 return relative_name
         # name mangling
-        module_imported = "_" + "".join(c if c.isalnum() else "_" for c in self.module)
-        target.imports({module_imported: self.module})
-        relative_name = ".".join([module_imported, *self.sts_ns_parts, sts_name])
+        import_name = "_" + "".join(c if c.isalnum() else "_" for c in self.module_name)
+        target.import_module(import_name, self.module_name)
+        relative_name = ".".join([import_name, *self.sts_ns_parts, sts_name])
         return relative_name
 
 
@@ -251,10 +316,14 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
         self.sts_static_scope = None
         self.sts_ctor_scope = None
 
-        if static_attr := f.get_attr_item("static"):
+        if (static_attr := f.get_last_attr("static")) and check_attr_args(
+            am, static_attr, "s"
+        ):
             (self.sts_static_scope,) = static_attr.args
 
-        if ctor_attr := f.get_attr_item("ctor"):
+        if (ctor_attr := f.get_last_attr("ctor")) and check_attr_args(
+            am, ctor_attr, "s"
+        ):
             (self.sts_ctor_scope,) = ctor_attr.args
 
         self.sts_func_name = None
@@ -262,67 +331,89 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
         self.get_name = None
         self.set_name = None
 
-        if overload_attr := f.get_attr_item("overload"):
+        if (overload_attr := f.get_last_attr("overload")) and check_attr_args(
+            am, overload_attr, "s"
+        ):
             (self.sts_func_name,) = overload_attr.args
 
-        elif on_off_attr := f.get_attr_item("on_off"):
+        elif on_off_attr := f.get_last_attr("on_off"):
             if not f.name.startswith(("on", "off", "On", "Off")):
-                raise ValueError(f'{f.loc}: @on_off method name must start with "on" or "off"')
+                raise_adhoc_error(
+                    am,
+                    '@on_off method name must start with "On/on/Off/off"',
+                    f.loc,
+                )
 
             if f.name.startswith(("on", "On")):
-                if not on_off_attr.args:
+                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
+                    (type_name,) = on_off_attr.args
+                else:
                     type_name = f.name[2:]
                     type_name = type_name[0].lower() + type_name[1:]
-                else:
-                    (type_name,) = on_off_attr.args
                 self.on_off_type = ("on", type_name)
 
             if f.name.startswith(("off", "Off")):
-                if not on_off_attr.args:
+                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
+                    (type_name,) = on_off_attr.args
+                else:
                     type_name = f.name[3:]
                     type_name = type_name[0].lower() + type_name[1:]
-                else:
-                    (type_name,) = on_off_attr.args
                 self.on_off_type = ("off", type_name)
 
-        elif get_attr := f.get_attr_item("get"):
-            if len(f.params) != 0:
-                raise ValueError(f"{f.loc}: @get method should take no parameters")
-
-            if not f.return_ty_ref:
-                raise ValueError(f"{f.loc}: @get method cannot return void")
-
+        elif get_attr := f.get_last_attr("get"):
             if not self.sts_static_scope:
-                raise ValueError(f"{f.loc}: @get of global functions must be used together with @static")
+                raise_adhoc_error(
+                    am,
+                    "@get of global functions must be used together with @static",
+                    f.loc,
+                )
+            if len(f.params) != 0 or f.return_ty_ref is None:
+                raise_adhoc_error(
+                    am,
+                    "@get method should take no parameters and return non-void",
+                    f.loc,
+                )
 
-            if not get_attr.args:
-                if not f.name.startswith(("get", "Get")):
-                    raise ValueError(f'{f.loc}: @get method name must start with "get" if property name is omitted')
+            if get_attr.args and check_attr_args(am, get_attr, "s"):
+                (self.get_name,) = get_attr.args
+            elif f.name.startswith(("get", "Get")):
                 get_name = f.name[3:]
                 self.get_name = get_name[0].lower() + get_name[1:]
             else:
-                (self.get_name,) = get_attr.args
+                raise_adhoc_error(
+                    am,
+                    '@get method name must start with "Get/get" or have @get argument',
+                    f.loc,
+                )
 
-        elif set_attr := f.get_attr_item("set"):
-            if len(f.params) != 1:
-                raise ValueError(f"{f.loc}: @set method should have one parameter")
-
-            if f.return_ty_ref is not None:
-                raise ValueError(f"{f.loc}: @set method should return void")
-
+        elif set_attr := f.get_last_attr("set"):
             if not self.sts_static_scope:
-                raise ValueError(f"{f.loc}: @set of global functions must be used together with @static")
+                raise_adhoc_error(
+                    am,
+                    "@set of global functions must be used together with @static",
+                    f.loc,
+                )
+            if len(f.params) != 1 or f.return_ty_ref is not None:
+                raise_adhoc_error(
+                    am,
+                    "@set method should have one parameter and return void",
+                    f.loc,
+                )
 
-            if not set_attr.args:
-                if not f.name.startswith(("set", "Set")):
-                    raise ValueError(f'{f.loc}: @set method name must start with "set" if the property name is omitted')
+            if set_attr.args and check_attr_args(am, set_attr, "s"):
+                (self.set_name,) = set_attr.args
+            elif f.name.startswith(("set", "Set")):
                 set_name = f.name[3:]
                 self.set_name = set_name[0].lower() + set_name[1:]
             else:
-                (self.set_name,) = set_attr.args
+                raise_adhoc_error(
+                    am,
+                    '@set method name must start with "Set/set" or have @set argument',
+                    f.loc,
+                )
 
         else:
-            if f.parent_pkg.get_attr_item("sts_keep_name"):
+            if f.parent_pkg.get_last_attr("sts_keep_name"):
                 self.sts_func_name = f.name
             else:
                 self.sts_func_name = f.name[0].lower() + f.name[1:]
@@ -330,10 +421,14 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
         self.sts_async_name = None
         self.sts_promise_name = None
 
-        if sts_async_attr := f.get_attr_item("gen_async"):
+        if (sts_async_attr := f.get_last_attr("gen_async")) and check_attr_args(
+            am, sts_async_attr, "s"
+        ):
             (self.sts_async_name,) = sts_async_attr.args
 
-        if sts_promise_attr := f.get_attr_item("gen_promise"):
+        if (sts_promise_attr := f.get_last_attr("gen_promise")) and check_attr_args(
+            am, sts_promise_attr, "s"
+        ):
             (self.sts_promise_name,) = sts_promise_attr.args
 
         self.sts_params: list[ParamDecl] = []
@@ -360,66 +455,82 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
 
         self.ani_method_name = None
 
-        if overload_attr := f.get_attr_item("overload"):
+        if (overload_attr := f.get_last_attr("overload")) and check_attr_args(
+            am, overload_attr, "s"
+        ):
             (self.sts_method_name,) = overload_attr.args
             (self.ani_method_name,) = overload_attr.args
 
-        elif on_off_attr := f.get_attr_item("on_off"):
+        elif on_off_attr := f.get_last_attr("on_off"):
             if not f.name.startswith(("on", "off", "On", "Off")):
-                raise ValueError(f'{f.loc}: @on_off method name must start with "on" or "off"')
+                raise_adhoc_error(
+                    am,
+                    '@on_off method name must start with "On/on/Off/off"',
+                    f.loc,
+                )
 
             if f.name.startswith(("on", "On")):
-                if not on_off_attr.args:
+                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
+                    (type_name,) = on_off_attr.args
+                else:
                     type_name = f.name[2:]
                     type_name = type_name[0].lower() + type_name[1:]
-                else:
-                    (type_name,) = on_off_attr.args
                 self.on_off_type = ("on", type_name)
                 self.ani_method_name = "on"
 
             if f.name.startswith(("off", "Off")):
-                if not on_off_attr.args:
+                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
+                    (type_name,) = on_off_attr.args
+                else:
                     type_name = f.name[3:]
                     type_name = type_name[0].lower() + type_name[1:]
-                else:
-                    (type_name,) = on_off_attr.args
                 self.on_off_type = ("off", type_name)
                 self.ani_method_name = "off"
 
-        elif get_attr := f.get_attr_item("get"):
-            if len(f.params) != 0:
-                raise ValueError(f"{f.loc}: @get method should take no parameters")
+        elif get_attr := f.get_last_attr("get"):
+            if len(f.params) != 0 or f.return_ty_ref is None:
+                raise_adhoc_error(
+                    am,
+                    "@get method should take no parameters and return non-void",
+                    f.loc,
+                )
 
-            if not f.return_ty_ref:
-                raise ValueError(f"{f.loc}: @get method cannot return void")
-
-            if not get_attr.args:
-                if not f.name.startswith(("get", "Get")):
-                    raise ValueError(f'{f.loc}: @get method name must start with "get" if the property name is omitted')
+            if get_attr.args and check_attr_args(am, get_attr, "s"):
+                (self.get_name,) = get_attr.args
+            elif f.name.startswith(("get", "Get")):
                 get_name = f.name[3:]
                 self.get_name = get_name[0].lower() + get_name[1:]
             else:
-                (self.get_name,) = get_attr.args
+                raise_adhoc_error(
+                    am,
+                    '@get method name must start with "Get/get" or have @get argument',
+                    f.loc,
+                )
             self.ani_method_name = f"<get>{self.get_name}"
 
-        elif set_attr := f.get_attr_item("set"):
-            if len(f.params) != 1:
-                raise ValueError(f"{f.loc}: @set method should have one parameter")
+        elif set_attr := f.get_last_attr("set"):
+            if len(f.params) != 1 or f.return_ty_ref is not None:
+                raise_adhoc_error(
+                    am,
+                    "@set method should have one parameter and return void",
+                    f.loc,
+                )
 
-            if f.return_ty_ref is not None:
-                raise ValueError(f"{f.loc}: @set method should return void")
-
-            if not set_attr.args:
-                if not f.name.startswith(("set", "Set")):
-                    raise ValueError(f'{f.loc}: @set method name must start with "set" if the property name is omitted')
+            if set_attr.args and check_attr_args(am, set_attr, "s"):
+                (self.set_name,) = set_attr.args
+            elif f.name.startswith(("set", "Set")):
                 set_name = f.name[3:]
                 self.set_name = set_name[0].lower() + set_name[1:]
             else:
-                (self.set_name,) = set_attr.args
+                raise_adhoc_error(
+                    am,
+                    '@set method name must start with "Set/set" or have @set argument',
+                    f.loc,
+                )
             self.ani_method_name = f"<set>{self.set_name}"
 
         else:
-            if f.parent_pkg.get_attr_item("sts_keep_name"):
+            if f.parent_pkg.get_last_attr("sts_keep_name"):
                 self.sts_method_name = f.name
                 self.ani_method_name = f.name
             else:
@@ -429,15 +540,19 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
         self.sts_async_name = None
         self.sts_promise_name = None
 
-        if sts_async_attr := f.get_attr_item("gen_async"):
+        if (sts_async_attr := f.get_last_attr("gen_async")) and check_attr_args(
+            am, sts_async_attr, "s"
+        ):
             (self.sts_async_name,) = sts_async_attr.args
 
-        if sts_promise_attr := f.get_attr_item("gen_promise"):
+        if (sts_promise_attr := f.get_last_attr("gen_promise")) and check_attr_args(
+            am, sts_promise_attr, "s"
+        ):
             (self.sts_promise_name,) = sts_promise_attr.args
 
         self.sts_params: list[ParamDecl] = []
         for param in f.params:
-            if param.get_attr_item("sts_this"):
+            if param.get_last_attr("sts_this"):
                 continue
             self.sts_params.append(param)
 
@@ -445,7 +560,7 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
         arg = iter(sts_args)
         sts_native_args: list[str] = []
         for param in self.f.params:
-            if param.get_attr_item("sts_this"):
+            if param.get_last_attr("sts_this"):
                 sts_native_args.append(this)
                 continue
             sts_native_args.append(next(arg))
@@ -461,7 +576,23 @@ class EnumANIInfo(AbstractAnalysis[EnumDecl]):
         self.sts_type_name = d.name
         self.type_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_type_name};"
 
-        self.const = d.get_attr_item("const") is not None
+        self.const = d.get_last_attr("const") is not None
+
+        if (
+            not self.const
+            and isinstance(d.ty_ref.resolved_ty, ScalarType)
+            and d.ty_ref.resolved_ty.kind
+            in (
+                ScalarKind.BOOL,
+                ScalarKind.F32,
+                ScalarKind.F64,
+            )
+        ):
+            raise_adhoc_error(
+                am,
+                f"{d.description} without @const cannot have type {d.ty_ref.resolved_ty.signature}",
+                d.loc,
+            )
 
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer):
         return self.pkg_ani_info.sts_type_in(pkg, target, self.sts_type_name)
@@ -505,29 +636,52 @@ class StructANIInfo(AbstractAnalysis[StructDecl]):
 
         self.pkg_ani_info = PackageANIInfo.get(am, d.parent_pkg)
         self.sts_type_name = d.name
-        if d.get_attr_item("class"):
+        if d.get_last_attr("class"):
             self.sts_impl_name = f"{d.name}"
         else:
             self.sts_impl_name = f"{d.name}_inner"
         self.type_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_type_name};"
         self.impl_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_impl_name};"
 
+        self.interface_injected_codes: list[str] = []
+        for iface_injected in d.get_all_attrs("sts_inject_into_interface"):
+            if check_attr_args(am, iface_injected, "s"):
+                (code,) = iface_injected.args
+                self.interface_injected_codes.append(code)
+        self.class_injected_codes: list[str] = []
+        for class_injected in d.get_all_attrs("sts_inject_into_class"):
+            if check_attr_args(am, class_injected, "s"):
+                (code,) = class_injected.args
+                self.class_injected_codes.append(code)
+
         self.sts_fields: list[StructFieldDecl] = []
         self.sts_parents: list[StructFieldDecl] = []
         self.sts_final_fields: list[list[StructFieldDecl]] = []
         for field in d.fields:
-            if field.get_attr_item("extends"):
+            try:
+                if not field.get_last_attr("extends"):
+                    raise RuntimeError
                 ty = field.ty_ref.resolved_ty
                 if not isinstance(ty, StructType):
-                    raise ValueError(f"{field.loc}: @extends expects a struct type field")
+                    raise_adhoc_error(
+                        am,
+                        "struct cannot extend non-struct type",
+                        field.loc,
+                    )
+                    raise RuntimeError
                 parent_ani_info = StructANIInfo.get(am, ty.ty_decl)
                 if parent_ani_info.is_class():
-                    raise ValueError(f"{field.loc}: cannot extend an @class struct")
+                    raise_adhoc_error(
+                        am,
+                        "struct cannot extend an @class struct",
+                        field.loc,
+                    )
+                    raise RuntimeError
                 self.sts_parents.append(field)
                 self.sts_final_fields.extend(
                     [field, *parts] for parts in parent_ani_info.sts_final_fields
                 )
-            else:
+            except RuntimeError:
                 self.sts_fields.append(field)
                 self.sts_final_fields.append([field])
 
@@ -549,27 +703,34 @@ class IfaceANIInfo(AbstractAnalysis[IfaceDecl]):
 
         self.pkg_ani_info = PackageANIInfo.get(am, d.parent_pkg)
         self.sts_type_name = d.name
-        if d.get_attr_item("class"):
+        if d.get_last_attr("class"):
             self.sts_impl_name = f"{d.name}"
         else:
             self.sts_impl_name = f"{d.name}_inner"
         self.type_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_type_name};"
         self.impl_desc = f"L{self.pkg_ani_info.ani_path}/{self.sts_impl_name};"
 
-        self.iface_injected_codes: list[str] = []
-        for iface_injected in d.get_attr_list("sts_inject_into_interface"):
-            (code,) = iface_injected.args
-            self.iface_injected_codes.append(code)
+        self.interface_injected_codes: list[str] = []
+        for iface_injected in d.get_all_attrs("sts_inject_into_interface"):
+            if check_attr_args(am, iface_injected, "s"):
+                (code,) = iface_injected.args
+                self.interface_injected_codes.append(code)
         self.class_injected_codes: list[str] = []
-        for class_injected in d.get_attr_list("sts_inject_into_class"):
-            (code,) = class_injected.args
-            self.class_injected_codes.append(code)
+        for class_injected in d.get_all_attrs("sts_inject_into_class"):
+            if check_attr_args(am, class_injected, "s"):
+                (code,) = class_injected.args
+                self.class_injected_codes.append(code)
 
         for parent in d.parents:
             ty = parent.ty_ref.resolved_ty
+            pass
             parent_ani_info = IfaceANIInfo.get(am, ty.ty_decl)
             if parent_ani_info.is_class():
-                raise ValueError(f"{parent.loc}: cannot extend an @class interface")
+                raise_adhoc_error(
+                    am,
+                    "interface cannot extend an @class interface",
+                    parent.loc,
+                )
 
     def is_class(self):
         return self.sts_type_name == self.sts_impl_name
@@ -582,11 +743,18 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
     ani_type: ANIType
     type_desc: str
 
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: Type):
+    def __init__(self, am: AnalysisManager, t: Type):
         self.cpp_info = TypeCppInfo.get(am, t)
 
+    @property
+    def type_desc_boxed(self) -> str:
+        if self.ani_type.base == ANI_REF:
+            return self.type_desc
+        return f"Lstd/core/{self.ani_type.suffix};"
+
+    @abstractmethod
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def from_ani_impl(
@@ -634,27 +802,27 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         self,
         target: COutputBuffer,
         env: str,
-        size: str,
+        ani_size: str,
         ani_array_value: str,
         cpp_array_buffer: str,
     ):
         if self.ani_type.base == ANI_REF:
             ani_value = f"{cpp_array_buffer}_ani_item"
             cpp_result = f"{cpp_array_buffer}_cpp_item"
-            i = f"{cpp_array_buffer}_i"
+            cpp_i = f"{cpp_array_buffer}_i"
             target.writeln(
-                f"for (size_t {i} = 0; {i} < {size}; {i}++) {{",
+                f"for (size_t {cpp_i} = 0; {cpp_i} < {ani_size}; {cpp_i}++) {{",
                 f"    {self.ani_type} {ani_value};",
-                f"    {env}->Array_Get_Ref({ani_array_value}, {i}, reinterpret_cast<ani_ref*>(&{ani_value}));",
+                f"    {env}->Array_Get_Ref({ani_array_value}, {cpp_i}, reinterpret_cast<ani_ref*>(&{ani_value}));",
             )
             self.from_ani(target, 4, env, ani_value, cpp_result)
             target.writeln(
-                f"    new (&{cpp_array_buffer}[{i}]) {self.cpp_info.as_owner}(std::move({cpp_result}));",
+                f"    new (&{cpp_array_buffer}[{cpp_i}]) {self.cpp_info.as_owner}(std::move({cpp_result}));",
                 f"}}",
             )
         else:
             target.writeln(
-                f"{env}->Array_GetRegion_{self.ani_type.suffix}({ani_array_value}, 0, {size}, reinterpret_cast<{self.ani_type}*>({cpp_array_buffer}));",
+                f"{env}->Array_GetRegion_{self.ani_type.suffix}({ani_array_value}, 0, {ani_size}, reinterpret_cast<{self.ani_type}*>({cpp_array_buffer}));",
             )
 
     def from_ani_array(
@@ -662,46 +830,47 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         target: COutputBuffer,
         offset: int,
         env: str,
-        size: str,
+        ani_size: str,
         ani_array_value: str,
         cpp_array_buffer: str,
     ):
         with target.indent_manager.offset(offset):
             self.from_ani_array_impl(
-                target, env, size, ani_array_value, cpp_array_buffer
+                target, env, ani_size, ani_array_value, cpp_array_buffer
             )
 
     def into_ani_array_impl(
         self,
         target: COutputBuffer,
         env: str,
-        size: str,
+        cpp_size: str,
         cpp_array_value: str,
         ani_array_result: str,
     ):
         if self.ani_type.base == ANI_REF:
             ani_class = f"{ani_array_result}_cls"
             ani_result = f"{ani_array_result}_item"
-            i = f"{ani_array_result}_i"
+            ani_undefined = f"{ani_array_result}_undef"
+            cpp_i = f"{ani_array_result}_i"
             target.writeln(
                 f"ani_array_ref {ani_array_result};",
                 f"ani_class {ani_class};",
                 f'{env}->FindClass("{self.type_desc}", &{ani_class});',
-                f"ani_ref ani_undefined;",
-                f"{env}->GetUndefined(&ani_undefined);",
-                f"{env}->Array_New_Ref({ani_class}, {size}, ani_undefined, &{ani_array_result});",
-                f"for (size_t {i} = 0; {i} < {size}; {i}++) {{",
+                f"ani_ref {ani_undefined};",
+                f"{env}->GetUndefined(&{ani_undefined});",
+                f"{env}->Array_New_Ref({ani_class}, {cpp_size}, {ani_undefined}, &{ani_array_result});",
+                f"for (size_t {cpp_i} = 0; {cpp_i} < {cpp_size}; {cpp_i}++) {{",
             )
-            self.into_ani(target, 4, env, f"{cpp_array_value}[{i}]", ani_result)
+            self.into_ani(target, 4, env, f"{cpp_array_value}[{cpp_i}]", ani_result)
             target.writeln(
-                f"    {env}->Array_Set_Ref({ani_array_result}, {i}, {ani_result});",
+                f"    {env}->Array_Set_Ref({ani_array_result}, {cpp_i}, {ani_result});",
                 f"}}",
             )
         else:
             target.writeln(
                 f"{self.ani_type.array} {ani_array_result};",
-                f"{env}->Array_New_{self.ani_type.suffix}({size}, &{ani_array_result});",
-                f"{env}->Array_SetRegion_{self.ani_type.suffix}({ani_array_result}, 0, {size}, reinterpret_cast<{self.ani_type} const*>({cpp_array_value}));",
+                f"{env}->Array_New_{self.ani_type.suffix}({cpp_size}, &{ani_array_result});",
+                f"{env}->Array_SetRegion_{self.ani_type.suffix}({ani_array_result}, 0, {cpp_size}, reinterpret_cast<{self.ani_type} const*>({cpp_array_value}));",
             )
 
     def into_ani_array(
@@ -709,21 +878,14 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         target: COutputBuffer,
         offset: int,
         env: str,
-        size: str,
+        cpp_size: str,
         cpp_array_value: str,
         ani_array_result: str,
     ):
         with target.indent_manager.offset(offset):
             self.into_ani_array_impl(
-                target, env, size, cpp_array_value, ani_array_result
+                target, env, cpp_size, cpp_array_value, ani_array_result
             )
-
-    @property
-    def type_desc_boxed(self) -> str:
-        if self.ani_type.base == ANI_REF:
-            return self.type_desc
-        else:
-            return f"Lstd/core/{self.ani_type.suffix};"
 
     def into_ani_boxed_impl(
         self,
@@ -802,19 +964,22 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
             self.from_ani_boxed_impl(target, env, ani_value, cpp_result)
 
 
-class EnumTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, EnumType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: EnumType):
-        super().__init__(am, pkg, t)
-        enum_ani_info = EnumANIInfo.get(am, t.ty_decl)
+class EnumTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[EnumType]):
+    def __init__(self, am: AnalysisManager, t: EnumType):
+        super().__init__(am, t)
+        self.am = am
+        self.t = t
+        enum_ani_info = EnumANIInfo.get(self.am, self.t.ty_decl)
         self.ani_type = ANI_ENUM_ITEM
         self.type_desc = enum_ani_info.type_desc
-        self.am = am
-        self.pkg = pkg
-        self.t = t
+        if enum_ani_info.const:
+            raise_adhoc_error(
+                am,
+                f"@const {t.ty_decl.description} cannot be used as type",
+                t.ty_ref.loc,
+            )
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         enum_ani_info = EnumANIInfo.get(self.am, self.t.ty_decl)
         return enum_ani_info.sts_type_in(pkg, target)
@@ -827,7 +992,7 @@ class EnumTypeANIInfo(
         ani_value: str,
         cpp_result: str,
     ):
-        ani_index = f"{cpp_result}_ani"
+        ani_index = f"{cpp_result}_idx"
         enum_cpp_info = EnumCppInfo.get(self.am, self.t.ty_decl)
         target.writeln(
             f"ani_size {ani_index};",
@@ -843,28 +1008,25 @@ class EnumTypeANIInfo(
         cpp_value: str,
         ani_result: str,
     ):
-        cls = f"{ani_result}_cls"
+        ani_class = f"{ani_result}_cls"
         target.writeln(
-            f"ani_enum {cls};",
-            f'{env}->FindEnum("{self.type_desc}", &{cls});',
+            f"ani_enum {ani_class};",
+            f'{env}->FindEnum("{self.type_desc}", &{ani_class});',
             f"ani_enum_item {ani_result};",
-            f"{env}->Enum_GetEnumItemByIndex({cls}, (ani_size){cpp_value}.get_key(), &{ani_result});",
+            f"{env}->Enum_GetEnumItemByIndex({ani_class}, (ani_size){cpp_value}.get_key(), &{ani_result});",
         )
 
 
-class StructTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, StructType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: StructType):
-        super().__init__(am, pkg, t)
-        struct_ani_info = StructANIInfo.get(am, t.ty_decl)
+class StructTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[StructType]):
+    def __init__(self, am: AnalysisManager, t: StructType):
+        super().__init__(am, t)
+        self.am = am
+        self.t = t
+        struct_ani_info = StructANIInfo.get(self.am, self.t.ty_decl)
         self.ani_type = ANI_OBJECT
         self.type_desc = struct_ani_info.type_desc
-        self.am = am
-        self.pkg = pkg
-        self.t = t
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         struct_ani_info = StructANIInfo.get(self.am, self.t.ty_decl)
         return struct_ani_info.sts_type_in(pkg, target)
@@ -898,19 +1060,16 @@ class StructTypeANIInfo(
         )
 
 
-class UnionTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, UnionType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: UnionType):
-        super().__init__(am, pkg, t)
-        union_ani_info = UnionANIInfo.get(am, t.ty_decl)
+class UnionTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[UnionType]):
+    def __init__(self, am: AnalysisManager, t: UnionType):
+        super().__init__(am, t)
+        self.am = am
+        self.t = t
+        union_ani_info = UnionANIInfo.get(self.am, self.t.ty_decl)
         self.ani_type = ANI_REF
         self.type_desc = union_ani_info.type_desc
-        self.am = am
-        self.pkg = pkg
-        self.t = t
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         union_ani_info = UnionANIInfo.get(self.am, self.t.ty_decl)
         return union_ani_info.sts_type_in(pkg, target)
@@ -944,19 +1103,16 @@ class UnionTypeANIInfo(
         )
 
 
-class IfaceTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, IfaceType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: IfaceType):
-        super().__init__(am, pkg, t)
-        iface_ani_info = IfaceANIInfo.get(am, t.ty_decl)
+class IfaceTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[IfaceType]):
+    def __init__(self, am: AnalysisManager, t: IfaceType):
+        super().__init__(am, t)
+        self.am = am
+        self.t = t
+        iface_ani_info = IfaceANIInfo.get(self.am, self.t.ty_decl)
         self.ani_type = ANI_OBJECT
         self.type_desc = iface_ani_info.type_desc
-        self.am = am
-        self.pkg = pkg
-        self.t = t
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         iface_ani_info = IfaceANIInfo.get(self.am, self.t.ty_decl)
         return iface_ani_info.sts_type_in(pkg, target)
@@ -990,29 +1146,30 @@ class IfaceTypeANIInfo(
         )
 
 
-class ScalarTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, ScalarType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: ScalarType):
-        super().__init__(am, pkg, t)
-        sts_type, ani_type, type_desc = {
-            BOOL: ("boolean", ANI_BOOLEAN, "Z"),
-            F32: ("float", ANI_FLOAT, "F"),
-            F64: ("double", ANI_DOUBLE, "D"),
-            I8: ("byte", ANI_BYTE, "B"),
-            I16: ("short", ANI_SHORT, "S"),
-            I32: ("int", ANI_INT, "I"),
-            I64: ("long", ANI_LONG, "J"),
-            U8: ("byte", ANI_BYTE, "B"),
-            U16: ("short", ANI_SHORT, "S"),
-            U32: ("int", ANI_INT, "I"),
-            U64: ("long", ANI_LONG, "J"),
-        }[t]
+class ScalarTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ScalarType]):
+    def __init__(self, am: AnalysisManager, t: ScalarType):
+        super().__init__(am, t)
+        sts_info = {
+            ScalarKind.BOOL: ("boolean", ANI_BOOLEAN, "Z"),
+            ScalarKind.F32: ("float", ANI_FLOAT, "F"),
+            ScalarKind.F64: ("double", ANI_DOUBLE, "D"),
+            ScalarKind.I8: ("byte", ANI_BYTE, "B"),
+            ScalarKind.I16: ("short", ANI_SHORT, "S"),
+            ScalarKind.I32: ("int", ANI_INT, "I"),
+            ScalarKind.I64: ("long", ANI_LONG, "J"),
+            ScalarKind.U8: ("byte", ANI_BYTE, "B"),
+            ScalarKind.U16: ("short", ANI_SHORT, "S"),
+            ScalarKind.U32: ("int", ANI_INT, "I"),
+            ScalarKind.U64: ("long", ANI_LONG, "J"),
+        }.get(t.kind)
+        if sts_info is None:
+            raise ValueError
+        sts_type, ani_type, type_desc = sts_info
         self.sts_type = sts_type
         self.ani_type = ani_type
         self.type_desc = type_desc
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         return self.sts_type
 
@@ -1041,17 +1198,24 @@ class ScalarTypeANIInfo(
         )
 
 
-class OpaqueTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, OpaqueType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: OpaqueType) -> None:
-        super().__init__(am, pkg, t)
-        self.ani_type = ANI_REF
+class OpaqueTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[OpaqueType]):
+    def __init__(self, am: AnalysisManager, t: OpaqueType) -> None:
+        super().__init__(am, t)
+        self.am = am
+        self.t = t
+        self.ani_type = ANI_OBJECT
+        if (
+            sts_type_attr := self.t.ty_ref.get_last_attr("sts_type")
+        ) and check_attr_args(self.am, sts_type_attr, "s"):
+            (sts_type,) = sts_type_attr.args
+            self.sts_type = sts_type
+        else:
+            self.sts_type = "Object"
         self.type_desc = "Lstd/core/Object;"
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
-        return "Object"
+        return self.sts_type
 
     @override
     def from_ani_impl(
@@ -1078,15 +1242,13 @@ class OpaqueTypeANIInfo(
         )
 
 
-class StringTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, StringType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: StringType):
-        super().__init__(am, pkg, t)
+class StringTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[StringType]):
+    def __init__(self, am: AnalysisManager, t: StringType):
+        super().__init__(am, t)
         self.ani_type = ANI_STRING
         self.type_desc = "Lstd/core/String;"
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         return "string"
 
@@ -1098,18 +1260,18 @@ class StringTypeANIInfo(
         ani_value: str,
         cpp_result: str,
     ):
-        length = f"{cpp_result}_len"
-        tstr = f"{cpp_result}_tstr"
-        buffer = f"{cpp_result}_buf"
+        ani_length = f"{cpp_result}_len"
+        cpp_tstr = f"{cpp_result}_tstr"
+        cpp_buffer = f"{cpp_result}_buf"
         target.writeln(
-            f"ani_size {length};",
-            f"{env}->String_GetUTF8Size({ani_value}, &{length});",
-            f"TString {tstr};",
-            f"char* {buffer} = tstr_initialize(&{tstr}, {length} + 1);",
-            f"{env}->String_GetUTF8({ani_value}, {buffer}, {length} + 1, &{length});",
-            f"{buffer}[{length}] = '\\0';",
-            f"{tstr}.length = {length};",
-            f"taihe::string {cpp_result} = taihe::string({tstr});",
+            f"ani_size {ani_length};",
+            f"{env}->String_GetUTF8Size({ani_value}, &{ani_length});",
+            f"TString {cpp_tstr};",
+            f"char* {cpp_buffer} = tstr_initialize(&{cpp_tstr}, {ani_length} + 1);",
+            f"{env}->String_GetUTF8({ani_value}, {cpp_buffer}, {ani_length} + 1, &{ani_length});",
+            f"{cpp_buffer}[{ani_length}] = '\\0';",
+            f"{cpp_tstr}.length = {ani_length};",
+            f"taihe::string {cpp_result} = taihe::string({cpp_tstr});",
         )
 
     @override
@@ -1126,21 +1288,32 @@ class StringTypeANIInfo(
         )
 
 
-class ArrayTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, ArrayType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: ArrayType) -> None:
-        super().__init__(am, pkg, t)
+class ArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
+    def __init__(self, am: AnalysisManager, t: ArrayType) -> None:
+        super().__init__(am, t)
         self.am = am
-        self.pkg = pkg
         self.t = t
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
         self.ani_type = item_ty_ani_info.ani_type.array
         self.type_desc = f"[{item_ty_ani_info.type_desc}"
+        # TODO: remove this check
+        if isinstance(self.t.item_ty, ScalarType) and self.t.item_ty.kind in (
+            ScalarKind.U8,
+            ScalarKind.U16,
+            ScalarKind.U32,
+            ScalarKind.U64,
+        ):
+            raise_adhoc_error(
+                am,
+                f"Array of unsigned integer types is not supported, "
+                f"if you want to use ArrayBuffer, please use @arraybuffer Array<{self.t.item_ty.ty_ref.text}>, "
+                f"if you want to use TypedArray, please use @typedarray Array<{self.t.item_ty.ty_ref.text}>",
+                self.t.ty_ref.loc,
+            )
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
         sts_type = item_ty_ani_info.sts_type_in(pkg, target)
         return f"({sts_type}[])"
 
@@ -1153,17 +1326,17 @@ class ArrayTypeANIInfo(
         cpp_result: str,
     ):
         item_ty_cpp_info = TypeCppInfo.get(self.am, self.t.item_ty)
-        size = f"{cpp_result}_size"
-        buffer = f"{cpp_result}_buffer"
+        ani_size = f"{cpp_result}_size"
+        cpp_buffer = f"{cpp_result}_buffer"
         target.writeln(
-            f"size_t {size};",
-            f"{env}->Array_GetLength({ani_value}, &{size});",
-            f"{item_ty_cpp_info.as_owner}* {buffer} = ({item_ty_cpp_info.as_owner}*)malloc({size} * sizeof({item_ty_cpp_info.as_owner}));",
+            f"size_t {ani_size};",
+            f"{env}->Array_GetLength({ani_value}, &{ani_size});",
+            f"{item_ty_cpp_info.as_owner}* {cpp_buffer} = reinterpret_cast<{item_ty_cpp_info.as_owner}*>(malloc({ani_size} * sizeof({item_ty_cpp_info.as_owner})));",
         )
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
-        item_ty_ani_info.from_ani_array(target, 0, env, size, ani_value, buffer)
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
+        item_ty_ani_info.from_ani_array(target, 0, env, ani_size, ani_value, cpp_buffer)
         target.writeln(
-            f"{self.cpp_info.as_owner} {cpp_result}({buffer}, {size});",
+            f"{self.cpp_info.as_owner} {cpp_result}({cpp_buffer}, {ani_size});",
         )
 
     @override
@@ -1174,41 +1347,107 @@ class ArrayTypeANIInfo(
         cpp_value: str,
         ani_result: str,
     ):
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
-        size = f"{ani_result}_size"
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
+        cpp_size = f"{ani_result}_size"
         target.writeln(
-            f"size_t {size} = {cpp_value}.size();",
+            f"size_t {cpp_size} = {cpp_value}.size();",
         )
         item_ty_ani_info.into_ani_array(
-            target, 0, env, size, f"{cpp_value}.data()", ani_result
+            target, 0, env, cpp_size, f"{cpp_value}.data()", ani_result
         )
 
 
-class TypedArrayTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, ArrayType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: ArrayType):
-        super().__init__(am, pkg, t)
-        sts_type = {
-            F32: "Float32Array",
-            F64: "Float64Array",
-            I8: "Int8Array",
-            I16: "Int16Array",
-            I32: "Int32Array",
-            I64: "Int64Array",
-            U8: "Uint8Array",
-            U16: "Uint16Array",
-            U32: "Uint32Array",
-            U64: "Uint64Array",
-        }[t.item_ty]
-        self.sts_type = sts_type
-        self.ani_type = ANI_OBJECT
-        self.type_desc = f"Lescompat/{sts_type};"
+class ArrayBufferTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
+    def __init__(self, am: AnalysisManager, t: ArrayType) -> None:
+        super().__init__(am, t)
         self.am = am
-        self.pkg = pkg
         self.t = t
+        if not isinstance(t.item_ty, ScalarType) or t.item_ty.kind not in (
+            ScalarKind.I8,
+            ScalarKind.U8,
+        ):
+            raise_adhoc_error(
+                am,
+                "@arraybuffer only supports Array<i8> or Array<i8>",
+                t.ty_ref.loc,
+            )
+        self.ani_type = ANI_ARRAYBUFFER
+        self.type_desc = "Lescompat/ArrayBuffer;"
 
+    @override
+    def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
+        return "ArrayBuffer"
+
+    @override
+    def from_ani_impl(
+        self,
+        target: COutputBuffer,
+        env: str,
+        ani_value: str,
+        cpp_result: str,
+    ):
+        item_ty_cpp_info = TypeCppInfo.get(self.am, self.t.item_ty)
+        ani_data = f"{cpp_result}_data"
+        ani_length = f"{cpp_result}_length"
+        target.writeln(
+            f"char* {ani_data} = nullptr;",
+            f"size_t {ani_length} = 0;",
+            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_value}), reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
+            f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data}), {ani_length});",
+        )
+
+    @override
+    def into_ani_impl(
+        self,
+        target: COutputBuffer,
+        env: str,
+        cpp_value: str,
+        ani_result: str,
+    ):
+        ani_data = f"{ani_result}_data"
+        target.writeln(
+            f"char* {ani_data} = nullptr;",
+            f"ani_arraybuffer {ani_result};",
+            f"{env}->CreateArrayBuffer({cpp_value}.size(), reinterpret_cast<void**>(&{ani_data}), &{ani_result});",
+            f"memcpy({ani_data}, {cpp_value}.data(), {cpp_value}.size());",
+        )
+
+
+class TypedArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
+    def __init__(self, am: AnalysisManager, t: ArrayType):
+        super().__init__(am, t)
+        self.am = am
+        self.t = t
+        if (
+            not isinstance(t.item_ty, ScalarType)
+            or (
+                sts_type := {
+                    ScalarKind.F32: "Float32Array",
+                    ScalarKind.F64: "Float64Array",
+                    ScalarKind.I8: "Int8Array",
+                    ScalarKind.I16: "Int16Array",
+                    ScalarKind.I32: "Int32Array",
+                    ScalarKind.I64: "BigInt64Array",
+                    ScalarKind.U8: "Uint8Array",
+                    ScalarKind.U16: "Uint16Array",
+                    ScalarKind.U32: "Uint32Array",
+                    ScalarKind.U64: "BigUint64Array",
+                }.get(t.item_ty.kind)
+            )
+            is None
+        ):
+            raise_adhoc_error(
+                am,
+                f"@typedarray does not supports Array<{t.item_ty.ty_ref.text}>",
+                t.ty_ref.loc,
+            )
+            self.sts_type = "TypedArray"
+        else:
+            self.sts_type = sts_type
+        self.ani_type = ANI_OBJECT
+        self.type_desc = f"Lescompat/{self.sts_type};"
+
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         return self.sts_type
 
@@ -1221,22 +1460,22 @@ class TypedArrayTypeANIInfo(
         cpp_result: str,
     ):
         item_ty_cpp_info = TypeCppInfo.get(self.am, self.t.item_ty)
-        ani_byte_length = f"{cpp_result}_bl"
-        ani_byte_offset = f"{cpp_result}_bo"
-        ani_arrbuf = f"{cpp_result}_ab"
-        ani_data_ptr = f"{cpp_result}_data"
+        ani_byte_length = f"{cpp_result}_bylen"
+        ani_byte_offset = f"{cpp_result}_byoff"
+        ani_arrbuf = f"{cpp_result}_arrbuf"
+        ani_data = f"{cpp_result}_data"
         ani_length = f"{cpp_result}_length"
         target.writeln(
-            f"ani_int {ani_byte_length};",
-            f"ani_int {ani_byte_offset};",
+            f"ani_double {ani_byte_length};",
+            f"ani_double {ani_byte_offset};",
             f"ani_arraybuffer {ani_arrbuf};",
-            f'{env}->Object_GetPropertyByName_Int({ani_value}, "byteLengthInt", &{ani_byte_length});',
-            f'{env}->Object_GetPropertyByName_Int({ani_value}, "byteOffsetInt", &{ani_byte_offset});',
+            f'{env}->Object_GetPropertyByName_Double({ani_value}, "byteLength", &{ani_byte_length});',
+            f'{env}->Object_GetPropertyByName_Double({ani_value}, "byteOffset", &{ani_byte_offset});',
             f'{env}->Object_GetPropertyByName_Ref({ani_value}, "buffer", reinterpret_cast<ani_ref*>(&{ani_arrbuf}));',
-            f"char* {ani_data_ptr} = nullptr;",
+            f"char* {ani_data} = nullptr;",
             f"size_t {ani_length} = 0;",
-            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_arrbuf}), reinterpret_cast<void**>(&{ani_data_ptr}), &{ani_length});",
-            f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data_ptr} + {ani_byte_offset}), {ani_byte_length} / (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
+            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_arrbuf}), reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
+            f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data} + (size_t){ani_byte_offset}), (size_t){ani_byte_length} / (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
         )
 
     @override
@@ -1248,17 +1487,17 @@ class TypedArrayTypeANIInfo(
         ani_result: str,
     ):
         item_ty_cpp_info = TypeCppInfo.get(self.am, self.t.item_ty)
-        ani_data_ptr = f"{ani_result}_data"
-        ani_arrbuf = f"{ani_result}_ab"
+        ani_data = f"{ani_result}_data"
+        ani_arrbuf = f"{ani_result}_arrbuf"
         ani_class = f"{ani_result}_cls"
         ani_method = f"{ani_result}_ctor"
-        ani_byte_length = f"{ani_result}_bl"
-        ani_byte_offset = f"{ani_result}_bo"
+        ani_byte_length = f"{ani_result}_bylen"
+        ani_byte_offset = f"{ani_result}_byoff"
         target.writeln(
-            f"char* {ani_data_ptr} = nullptr;",
+            f"char* {ani_data} = nullptr;",
             f"ani_arraybuffer {ani_arrbuf};",
-            f"{env}->CreateArrayBuffer({cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)), reinterpret_cast<void**>(&{ani_data_ptr}), &{ani_arrbuf});",
-            f"memcpy({ani_data_ptr}, {cpp_value}.data(), {cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
+            f"{env}->CreateArrayBuffer({cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)), reinterpret_cast<void**>(&{ani_data}), &{ani_arrbuf});",
+            f"memcpy({ani_data}, {cpp_value}.data(), {cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
             f"ani_class {ani_class};",
             f'{env}->FindClass("{self.type_desc}", &{ani_class});',
             f"ani_method {ani_method};",
@@ -1272,20 +1511,32 @@ class TypedArrayTypeANIInfo(
         )
 
 
-class ArrayBufferTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, ArrayType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: ArrayType) -> None:
-        super().__init__(am, pkg, t)
-        self.ani_type = ANI_ARRAYBUFFER
-        self.type_desc = "Lescompat/ArrayBuffer;"
+class BigIntTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
+    def __init__(self, am: AnalysisManager, t: ArrayType) -> None:
+        super().__init__(am, t)
         self.am = am
-        self.pkg = pkg
         self.t = t
+        if not isinstance(t.item_ty, ScalarType) or t.item_ty.kind not in (
+            ScalarKind.I8,
+            ScalarKind.I16,
+            ScalarKind.I32,
+            ScalarKind.I64,
+            ScalarKind.U8,
+            ScalarKind.U16,
+            ScalarKind.U32,
+            ScalarKind.U64,
+        ):
+            raise_adhoc_error(
+                am,
+                f"@bigint does not supports Array<{t.item_ty.ty_ref.text}>",
+                t.ty_ref.loc,
+            )
+        self.ani_type = ANI_OBJECT
+        self.type_desc = "Lescompat/BigInt;"
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
-        return "ArrayBuffer"
+        return "BigInt"
 
     @override
     def from_ani_impl(
@@ -1296,13 +1547,24 @@ class ArrayBufferTypeANIInfo(
         cpp_result: str,
     ):
         item_ty_cpp_info = TypeCppInfo.get(self.am, self.t.item_ty)
-        ani_data_ptr = f"{cpp_result}_data"
+        pkg_ani_info = PackageANIInfo.get(self.am, self.t.ty_ref.parent_pkg)
+        parent_scope = pkg_ani_info.scope
+        ani_scope = f"{cpp_result}_scope"
+        ani_cast = f"{cpp_result}_cast"
+        ani_arrbuf = f"{cpp_result}_arrbuf"
+        ani_data = f"{cpp_result}_data"
         ani_length = f"{cpp_result}_length"
         target.writeln(
-            f"char* {ani_data_ptr} = nullptr;",
+            f"{parent_scope} {ani_scope};",
+            f'{env}->Find{parent_scope.suffix}("{pkg_ani_info.impl_desc}", &{ani_scope});',
+            f"ani_function {ani_cast};",
+            f'{env}->{parent_scope.suffix}_FindFunction({ani_scope}, "__fromBigIntToArrayBuffer", nullptr, &{ani_cast});',
+            f"ani_arraybuffer {ani_arrbuf};",
+            f"{env}->Function_Call_Ref({ani_cast}, reinterpret_cast<ani_ref*>(&{ani_arrbuf}), {ani_value}, sizeof({item_ty_cpp_info.as_owner}) / sizeof(char));"
+            f"char* {ani_data} = nullptr;",
             f"size_t {ani_length} = 0;",
-            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_value}), reinterpret_cast<void**>(&{ani_data_ptr}), &{ani_length});",
-            f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data_ptr}), {ani_length} / (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
+            f"{env}->ArrayBuffer_GetInfo(reinterpret_cast<ani_arraybuffer>({ani_arrbuf}), reinterpret_cast<void**>(&{ani_data}), &{ani_length});",
+            f"{self.cpp_info.as_param} {cpp_result}(reinterpret_cast<{item_ty_cpp_info.as_owner}*>({ani_data}), {ani_length} / (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
         )
 
     @override
@@ -1314,30 +1576,38 @@ class ArrayBufferTypeANIInfo(
         ani_result: str,
     ):
         item_ty_cpp_info = TypeCppInfo.get(self.am, self.t.item_ty)
-        ani_data_ptr = f"{ani_result}_data"
+        pkg_ani_info = PackageANIInfo.get(self.am, self.t.ty_ref.parent_pkg)
+        parent_scope = pkg_ani_info.scope
+        ani_data = f"{ani_result}_data"
+        ani_arrbuf = f"{ani_result}_arrbuf"
+        ani_scope = f"{ani_result}_scope"
+        ani_cast = f"{ani_result}_cast"
         target.writeln(
-            f"char* {ani_data_ptr} = nullptr;",
-            f"ani_arraybuffer {ani_result};",
-            f"{env}->CreateArrayBuffer({cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)), reinterpret_cast<void**>(&{ani_data_ptr}), &{ani_result});",
-            f"memcpy({ani_data_ptr}, {cpp_value}.data(), {cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
+            f"char* {ani_data} = nullptr;",
+            f"ani_arraybuffer {ani_arrbuf};",
+            f"{env}->CreateArrayBuffer({cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)), reinterpret_cast<void**>(&{ani_data}), &{ani_arrbuf});",
+            f"memcpy({ani_data}, {cpp_value}.data(), {cpp_value}.size() * (sizeof({item_ty_cpp_info.as_owner}) / sizeof(char)));",
+            f"{parent_scope} {ani_scope};",
+            f'{env}->Find{parent_scope.suffix}("{pkg_ani_info.impl_desc}", &{ani_scope});',
+            f"ani_function {ani_cast};",
+            f'{env}->{parent_scope.suffix}_FindFunction({ani_scope}, "__fromArrayBufferToBigInt", nullptr, &{ani_cast});',
+            f"ani_object {ani_result};",
+            f"{env}->Function_Call_Ref({ani_cast}, reinterpret_cast<ani_ref*>(&{ani_result}), {ani_arrbuf});",
         )
 
 
-class OptionalTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, OptionalType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: OptionalType) -> None:
-        super().__init__(am, pkg, t)
+class OptionalTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[OptionalType]):
+    def __init__(self, am: AnalysisManager, t: OptionalType) -> None:
+        super().__init__(am, t)
         self.am = am
-        self.pkg = pkg
         self.t = t
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
         self.ani_type = ANI_REF
         self.type_desc = item_ty_ani_info.type_desc_boxed
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
         sts_type = item_ty_ani_info.sts_type_in(pkg, target)
         return f"({sts_type} | undefined)"
 
@@ -1359,7 +1629,7 @@ class OptionalTypeANIInfo(
             f"{env}->Reference_IsUndefined({ani_value}, &{ani_is_undefined});",
             f"if (!{ani_is_undefined}) {{",
         )
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
         item_ty_ani_info.from_ani_boxed(target, 4, env, ani_value, cpp_spec)
         target.writeln(
             f"    {cpp_pointer} = new {item_ty_cpp_info.as_owner}(std::move({cpp_spec}));",
@@ -1375,38 +1645,33 @@ class OptionalTypeANIInfo(
         cpp_value: str,
         ani_result: str,
     ):
-        ani_result_spec = f"{ani_result}_spec"
+        ani_spec = f"{ani_result}_spec"
         target.writeln(
             f"ani_ref {ani_result};",
             f"if (!{cpp_value}) {{",
             f"    {env}->GetUndefined(&{ani_result});",
             f"}} else {{",
         )
-        item_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.item_ty)
-        item_ty_ani_info.into_ani_boxed(
-            target, 4, env, f"(*{cpp_value})", ani_result_spec
-        )
+        item_ty_ani_info = TypeANIInfo.get(self.am, self.t.item_ty)
+        item_ty_ani_info.into_ani_boxed(target, 4, env, f"(*{cpp_value})", ani_spec)
         target.writeln(
-            f"    {ani_result} = {ani_result_spec};",
+            f"    {ani_result} = {ani_spec};",
             f"}}",
         )
 
 
-class MapTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, MapType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: MapType) -> None:
-        super().__init__(am, pkg, t)
+class RecordTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[MapType]):
+    def __init__(self, am: AnalysisManager, t: MapType) -> None:
+        super().__init__(am, t)
         self.am = am
-        self.pkg = pkg
         self.t = t
         self.ani_type = ANI_OBJECT
         self.type_desc = "Lescompat/Record;"
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
-        key_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.key_ty)
-        val_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.val_ty)
+        key_ty_ani_info = TypeANIInfo.get(self.am, self.t.key_ty)
+        val_ty_ani_info = TypeANIInfo.get(self.am, self.t.val_ty)
         key_sts_type = key_ty_ani_info.sts_type_in(pkg, target)
         val_sts_type = val_ty_ani_info.sts_type_in(pkg, target)
         return f"Record<{key_sts_type}, {val_sts_type}>"
@@ -1419,28 +1684,30 @@ class MapTypeANIInfo(
         ani_value: str,
         cpp_result: str,
     ):
-        ani_iter = f"{cpp_result}_ani_iter"
-        ani_item = f"{cpp_result}_ani_item"
+        ani_iter = f"{cpp_result}_iter"
+        ani_item = f"{cpp_result}_item"
+        ani_next = f"{cpp_result}_next"
+        ani_done = f"{cpp_result}_done"
         ani_key = f"{cpp_result}_ani_key"
         ani_val = f"{cpp_result}_ani_val"
         cpp_key = f"{cpp_result}_cpp_key"
         cpp_val = f"{cpp_result}_cpp_val"
-        key_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.key_ty)
-        val_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.val_ty)
+        key_ty_ani_info = TypeANIInfo.get(self.am, self.t.key_ty)
+        val_ty_ani_info = TypeANIInfo.get(self.am, self.t.val_ty)
         target.writeln(
             f"ani_ref {ani_iter};",
             f'{env}->Object_CallMethodByName_Ref({ani_value}, "$_iterator", nullptr, &{ani_iter});',
             f"{self.cpp_info.as_owner} {cpp_result};",
             f"while (true) {{",
-            f"    ani_ref next;",
-            f"    ani_boolean done;",
-            f'    {env}->Object_CallMethodByName_Ref(static_cast<ani_object>({ani_iter}), "next", nullptr, &next);',
-            f'    {env}->Object_GetFieldByName_Boolean(static_cast<ani_object>(next), "done", &done);',
-            f"    if (done) {{;",
+            f"    ani_ref {ani_next};",
+            f"    ani_boolean {ani_done};",
+            f'    {env}->Object_CallMethodByName_Ref(static_cast<ani_object>({ani_iter}), "next", nullptr, &{ani_next});',
+            f'    {env}->Object_GetFieldByName_Boolean(static_cast<ani_object>({ani_next}), "done", &{ani_done});',
+            f"    if ({ani_done}) {{;",
             f"        break;",
             f"    }};",
             f"    ani_ref {ani_item};",
-            f'    {env}->Object_GetFieldByName_Ref(static_cast<ani_object>(next), "value", &{ani_item});',
+            f'    {env}->Object_GetFieldByName_Ref(static_cast<ani_object>({ani_next}), "value", &{ani_item});',
             f"    ani_ref {ani_key};",
             f"    {env}->TupleValue_GetItem_Ref(static_cast<ani_tuple_value>({ani_item}), 0, &{ani_key});",
             f"    ani_ref {ani_val};",
@@ -1461,8 +1728,8 @@ class MapTypeANIInfo(
         cpp_value: str,
         ani_result: str,
     ):
-        key_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.key_ty)
-        val_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, self.t.val_ty)
+        key_ty_ani_info = TypeANIInfo.get(self.am, self.t.key_ty)
+        val_ty_ani_info = TypeANIInfo.get(self.am, self.t.val_ty)
         ani_class = f"{ani_result}_class"
         ani_method = f"{ani_result}_ctor"
         cpp_key = f"{ani_result}_cpp_key"
@@ -1486,27 +1753,72 @@ class MapTypeANIInfo(
         )
 
 
-class CallbackTypeANIInfo(
-    AbstractTypeANIInfo,
-    AbstractAnalysis[[PackageDecl, CallbackType]],
-):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl, t: CallbackType) -> None:
-        super().__init__(am, pkg, t)
+class MapTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[MapType]):
+    def __init__(self, am: AnalysisManager, t: MapType) -> None:
+        super().__init__(am, t)
         self.am = am
-        self.pkg = pkg
+        self.t = t
+        self.ani_type = ANI_OBJECT
+        self.type_desc = "Lescompat/Map;"
+        raise_adhoc_error(
+            am,
+            f"Map is not supported yet, "
+            f"if you want to use TS Record type, "
+            f"please use @record Map<{self.t.key_ty.ty_ref.text}, {self.t.val_ty.ty_ref.text}>",
+            self.t.ty_ref.loc,
+        )
+
+    @override
+    def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
+        key_ty_ani_info = TypeANIInfo.get(self.am, self.t.key_ty)
+        val_ty_ani_info = TypeANIInfo.get(self.am, self.t.val_ty)
+        key_sts_type = key_ty_ani_info.sts_type_in(pkg, target)
+        val_sts_type = val_ty_ani_info.sts_type_in(pkg, target)
+        return f"Map<{key_sts_type}, {val_sts_type}>"
+
+    @override
+    def from_ani_impl(
+        self,
+        target: COutputBuffer,
+        env: str,
+        ani_value: str,
+        cpp_result: str,
+    ):
+        target.writeln(
+            f"{self.cpp_info.as_owner} {cpp_result};",
+        )
+
+    @override
+    def into_ani_impl(
+        self,
+        target: COutputBuffer,
+        env: str,
+        cpp_value: str,
+        ani_result: str,
+    ):
+        target.writeln(
+            f"ani_object {ani_result} = {{}};",
+        )
+
+
+class CallbackTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[CallbackType]):
+    def __init__(self, am: AnalysisManager, t: CallbackType) -> None:
+        super().__init__(am, t)
+        self.am = am
         self.t = t
         self.ani_type = ANI_FN_OBJECT
         self.type_desc = f"Lstd/core/Function{len(t.params_ty)};"
 
+    @override
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer) -> str:
         params_ty_sts = []
         for index, param_ty in enumerate(self.t.params_ty):
-            param_ty_sts_info = TypeANIInfo.get(self.am, self.pkg, param_ty)
+            param_ty_sts_info = TypeANIInfo.get(self.am, param_ty)
             prm_sts_type = param_ty_sts_info.sts_type_in(pkg, target)
             params_ty_sts.append(f"arg_{index}: {prm_sts_type}")
         params_ty_sts_str = ", ".join(params_ty_sts)
         if return_ty := self.t.return_ty:
-            return_ty_sts_info = TypeANIInfo.get(self.am, self.pkg, return_ty)
+            return_ty_sts_info = TypeANIInfo.get(self.am, return_ty)
             ret_sts_type = return_ty_sts_info.sts_type_in(pkg, target)
             return_ty_sts = ret_sts_type
         else:
@@ -1525,8 +1837,7 @@ class CallbackTypeANIInfo(
         target.writeln(
             f"struct {cpp_impl_class} {{",
             f"    ani_ref ref;",
-            f"    {cpp_impl_class}(ani_fn_object obj) {{",
-            f"        ani_env *env = ::taihe::get_env();",
+            f"    {cpp_impl_class}(ani_env* env, ani_fn_object obj) {{",
             f"        env->GlobalReference_Create(obj, &this->ref);",
             f"    }}",
             f"    ~{cpp_impl_class}() {{",
@@ -1557,7 +1868,7 @@ class CallbackTypeANIInfo(
         for inner_ani_arg, inner_cpp_arg, param_ty in zip(
             inner_ani_args, inner_cpp_args, self.t.params_ty, strict=True
         ):
-            param_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, param_ty)
+            param_ty_ani_info = TypeANIInfo.get(self.am, param_ty)
             param_ty_ani_info.into_ani_boxed(
                 target, 8, "env", inner_cpp_arg, inner_ani_arg
             )
@@ -1570,7 +1881,7 @@ class CallbackTypeANIInfo(
                 f"        ani_ref {inner_ani_res};",
                 f"        env->FunctionalObject_Call(static_cast<ani_fn_object>(this->ref), {len(self.t.params_ty)}, ani_argv, &{inner_ani_res});",
             )
-            return_ty_ani_info = TypeANIInfo.get(self.am, self.pkg, return_ty)
+            return_ty_ani_info = TypeANIInfo.get(self.am, return_ty)
             return_ty_ani_info.from_ani_boxed(
                 target, 8, "env", inner_ani_res, inner_cpp_res
             )
@@ -1590,7 +1901,7 @@ class CallbackTypeANIInfo(
         )
         target.writeln(
             f"}};",
-            f"{self.cpp_info.as_owner} {cpp_result} = {self.cpp_info.as_owner}::from<{cpp_impl_class}>({ani_value});",
+            f"{self.cpp_info.as_owner} {cpp_result} = {self.cpp_info.as_owner}::from<{cpp_impl_class}>({env}, {ani_value});",
         )
 
     @override
@@ -1603,70 +1914,69 @@ class CallbackTypeANIInfo(
     ):
         # TODO: Callback into ani
         target.writeln(
-            f"ani_fn_object {ani_result};",
+            f"ani_fn_object {ani_result} = {{}};",
         )
 
 
 class TypeANIInfo(TypeVisitor[AbstractTypeANIInfo]):
-    def __init__(self, am: AnalysisManager, pkg: PackageDecl):
+    def __init__(self, am: AnalysisManager):
         self.am = am
-        self.pkg = pkg
 
     @staticmethod
-    def get(am: AnalysisManager, pkg: PackageDecl, t: Type) -> AbstractTypeANIInfo:
-        return TypeANIInfo(am, pkg).handle_type(t)
-
-    @staticmethod
-    def get_by_ty_ref(am: AnalysisManager, ty_ref: TypeRefDecl) -> AbstractTypeANIInfo:
-        return TypeANIInfo.get(am, ty_ref.parent_pkg, ty_ref.resolved_ty)
+    def get(am: AnalysisManager, t: Type) -> AbstractTypeANIInfo:
+        return TypeANIInfo(am).handle_type(t)
 
     @override
     def visit_enum_type(self, t: EnumType) -> AbstractTypeANIInfo:
-        return EnumTypeANIInfo.get(self.am, self.pkg, t)
+        return EnumTypeANIInfo.get(self.am, t)
 
     @override
     def visit_union_type(self, t: UnionType) -> AbstractTypeANIInfo:
-        return UnionTypeANIInfo.get(self.am, self.pkg, t)
+        return UnionTypeANIInfo.get(self.am, t)
 
     @override
     def visit_struct_type(self, t: StructType) -> AbstractTypeANIInfo:
-        return StructTypeANIInfo.get(self.am, self.pkg, t)
+        return StructTypeANIInfo.get(self.am, t)
 
     @override
     def visit_iface_type(self, t: IfaceType) -> AbstractTypeANIInfo:
-        return IfaceTypeANIInfo.get(self.am, self.pkg, t)
+        return IfaceTypeANIInfo.get(self.am, t)
 
     @override
     def visit_scalar_type(self, t: ScalarType) -> AbstractTypeANIInfo:
-        return ScalarTypeANIInfo.get(self.am, self.pkg, t)
+        return ScalarTypeANIInfo.get(self.am, t)
 
     @override
     def visit_string_type(self, t: StringType) -> AbstractTypeANIInfo:
-        return StringTypeANIInfo.get(self.am, self.pkg, t)
+        return StringTypeANIInfo.get(self.am, t)
 
     @override
     def visit_array_type(self, t: ArrayType) -> AbstractTypeANIInfo:
-        if self.pkg.get_attr_item("typed_array") and t.item_ty in {U8, U16, U32, U64}:
-            return TypedArrayTypeANIInfo.get(self.am, self.pkg, t)
-        if t.item_ty in {U8, U16, U32, U64}:
-            return ArrayBufferTypeANIInfo.get(self.am, self.pkg, t)
-        return ArrayTypeANIInfo.get(self.am, self.pkg, t)
+        if t.ty_ref.attrs.get("bigint"):
+            return BigIntTypeANIInfo.get(self.am, t)
+        if t.ty_ref.attrs.get("typedarray"):
+            return TypedArrayTypeANIInfo.get(self.am, t)
+        if t.ty_ref.attrs.get("arraybuffer"):
+            return ArrayBufferTypeANIInfo.get(self.am, t)
+        return ArrayTypeANIInfo.get(self.am, t)
 
     @override
     def visit_optional_type(self, t: OptionalType) -> AbstractTypeANIInfo:
-        return OptionalTypeANIInfo.get(self.am, self.pkg, t)
+        return OptionalTypeANIInfo.get(self.am, t)
 
     @override
     def visit_opaque_type(self, t: OpaqueType) -> AbstractTypeANIInfo:
-        return OpaqueTypeANIInfo.get(self.am, self.pkg, t)
+        return OpaqueTypeANIInfo.get(self.am, t)
 
     @override
     def visit_map_type(self, t: MapType) -> AbstractTypeANIInfo:
-        return MapTypeANIInfo.get(self.am, self.pkg, t)
+        if t.ty_ref.attrs.get("record"):
+            return RecordTypeANIInfo.get(self.am, t)
+        return MapTypeANIInfo.get(self.am, t)
 
     @override
     def visit_callback_type(self, t: CallbackType) -> AbstractTypeANIInfo:
-        return CallbackTypeANIInfo.get(self.am, self.pkg, t)
+        return CallbackTypeANIInfo.get(self.am, t)
 
 
 class ANICodeGenerator:
@@ -1772,16 +2082,14 @@ class ANICodeGenerator:
         pkg_register_info = ANIRegisterInfo(
             impl_desc=pkg_ani_info.impl_desc,
             member_infos=[],
-            parent_scope=(
-                ANI_SCOPE_NAMESPACE if pkg_ani_info.is_namespace() else ANI_SCOPE_MODULE
-            ),
+            parent_scope=pkg_ani_info.scope,
         )
         register_infos.append(pkg_register_info)
         for func in pkg.functions:
             segments = [*pkg.segments, func.name]
             mangled_name = encode(segments, DeclKind.ANI_FUNC)
             func_ani_info = GlobFuncANIInfo.get(self.am, func)
-            func_info = ANIFunctionLikeInfo(
+            func_info = ANINativeFuncInfo(
                 sts_native_name=func_ani_info.sts_native_name,
                 mangled_name=mangled_name,
             )
@@ -1792,7 +2100,7 @@ class ANICodeGenerator:
             iface_register_info = ANIRegisterInfo(
                 impl_desc=iface_ani_info.impl_desc,
                 member_infos=[],
-                parent_scope=ANI_SCOPE_CLASS,
+                parent_scope=ANI_CLASS,
             )
             register_infos.append(iface_register_info)
             for ancestor in iface_abi_info.ancestor_dict:
@@ -1800,7 +2108,7 @@ class ANICodeGenerator:
                     segments = [*iface.parent_pkg.segments, iface.name, method.name]
                     mangled_name = encode(segments, DeclKind.ANI_FUNC)
                     method_ani_info = IfaceMethodANIInfo.get(self.am, method)
-                    method_info = ANIFunctionLikeInfo(
+                    method_info = ANINativeFuncInfo(
                         sts_native_name=method_ani_info.sts_native_name,
                         mangled_name=mangled_name,
                     )
@@ -1809,7 +2117,7 @@ class ANICodeGenerator:
             pkg_ani_source_target.include("taihe/object.hpp")
             segments = [*iface.parent_pkg.segments, iface.name, "static_finalize"]
             mangled_name = encode(segments, DeclKind.ANI_FUNC)
-            finalizer_info = ANIFunctionLikeInfo(
+            finalizer_info = ANINativeFuncInfo(
                 sts_native_name="_finalize",
                 mangled_name=mangled_name,
             )
@@ -1820,10 +2128,11 @@ class ANICodeGenerator:
             f"ani_status ANIRegister(ani_env *env) {{",
         )
         for register_info in register_infos:
+            parent_scope = register_info.parent_scope
             pkg_ani_source_target.writeln(
                 f"    {{",
-                f"        {register_info.parent_scope.ani_type} ani_env;",
-                f'        if (ANI_OK != env->{register_info.parent_scope.find}("{register_info.impl_desc}", &ani_env)) {{',
+                f"        {parent_scope} ani_env;",
+                f'        if (ANI_OK != env->Find{parent_scope.suffix}("{register_info.impl_desc}", &ani_env)) {{',
                 f"            return ANI_ERROR;",
                 f"        }}",
                 f"        ani_native_function methods[] = {{",
@@ -1834,7 +2143,7 @@ class ANICodeGenerator:
                 )
             pkg_ani_source_target.writeln(
                 f"        }};",
-                f"        if (ANI_OK != env->{register_info.parent_scope.bind}(ani_env, methods, sizeof(methods) / sizeof(ani_native_function))) {{",
+                f"        if (ANI_OK != env->{parent_scope.suffix}_BindNative{parent_scope.member.suffix}s(ani_env, methods, sizeof(methods) / sizeof(ani_native_function))) {{",
                 f"            return ANI_ERROR;",
                 f"        }}",
                 f"    }}",
@@ -1869,7 +2178,7 @@ class ANICodeGenerator:
         ani_args = []
         cpp_args = []
         for param in func.params:
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, param.ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
             ani_arg = f"ani_arg_{param.name}"
             cpp_arg = f"cpp_arg_{param.name}"
             ani_params.append(f"{type_ani_info.ani_type} {ani_arg}")
@@ -1877,7 +2186,7 @@ class ANICodeGenerator:
             cpp_args.append(cpp_arg)
         ani_params_str = ", ".join(ani_params)
         if return_ty_ref := func.return_ty_ref:
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
             ani_return_ty_name = type_ani_info.ani_type
         else:
             ani_return_ty_name = "void"
@@ -1888,12 +2197,12 @@ class ANICodeGenerator:
         for param, ani_arg, cpp_arg in zip(
             func.params, ani_args, cpp_args, strict=True
         ):
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, param.ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
             type_ani_info.from_ani(pkg_ani_source_target, 4, "env", ani_arg, cpp_arg)
         cpp_args_str = ", ".join(cpp_args)
         if return_ty_ref := func.return_ty_ref:
             type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
             cpp_return_ty_name = type_cpp_info.as_owner
             cpp_res = "cpp_result"
             ani_res = "ani_result"
@@ -1931,7 +2240,7 @@ class ANICodeGenerator:
         ani_args = []
         cpp_args = []
         for param in method.params:
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, param.ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
             ani_arg = f"ani_arg_{param.name}"
             cpp_arg = f"cpp_arg_{param.name}"
             ani_params.append(f"{type_ani_info.ani_type} {ani_arg}")
@@ -1939,7 +2248,7 @@ class ANICodeGenerator:
             cpp_args.append(cpp_arg)
         ani_params_str = ", ".join(ani_params)
         if return_ty_ref := method.return_ty_ref:
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
             ani_return_ty_name = type_ani_info.ani_type
         else:
             ani_return_ty_name = "void"
@@ -1957,12 +2266,12 @@ class ANICodeGenerator:
         for param, ani_arg, cpp_arg in zip(
             method.params, ani_args, cpp_args, strict=True
         ):
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, param.ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
             type_ani_info.from_ani(pkg_ani_source_target, 4, "env", ani_arg, cpp_arg)
         cpp_args_str = ", ".join(cpp_args)
         if return_ty_ref := method.return_ty_ref:
             type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
             cpp_return_ty_name = type_cpp_info.as_owner
             cpp_res = "cpp_result"
             ani_res = "ani_result"
@@ -2058,8 +2367,7 @@ class ANICodeGenerator:
             f"inline {iface_cpp_info.as_owner} {iface_ani_info.from_ani_func_name}(ani_env* env, ani_object ani_obj) {{",
             f"    struct cpp_impl_t {{",
             f"        ani_ref ref;",
-            f"        cpp_impl_t(ani_object obj) {{",
-            f"            ani_env *env = ::taihe::get_env();",
+            f"        cpp_impl_t(ani_env* env, ani_object obj) {{",
             f"            env->GlobalReference_Create(obj, &this->ref);",
             f"        }}",
             f"        ~cpp_impl_t() {{",
@@ -2094,10 +2402,10 @@ class ANICodeGenerator:
                 for param, inner_cpp_arg, inner_ani_arg in zip(
                     method.params, inner_cpp_args, inner_ani_args, strict=True
                 ):
-                    type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, param.ty_ref)
+                    type_ani_info = TypeANIInfo.get(self.am, param.ty_ref.resolved_ty)
                     type_ani_info.into_ani(
                         iface_ani_impl_target,
-                        8,
+                        12,
                         "env",
                         inner_cpp_arg,
                         inner_ani_arg,
@@ -2108,14 +2416,14 @@ class ANICodeGenerator:
                 if return_ty_ref := method.return_ty_ref:
                     inner_ani_res = "ani_result"
                     inner_cpp_res = "cpp_result"
-                    type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, return_ty_ref)
+                    type_ani_info = TypeANIInfo.get(self.am, return_ty_ref.resolved_ty)
                     iface_ani_impl_target.writeln(
                         f"            {type_ani_info.ani_type} {inner_ani_res};",
-                        f'            env->Object_CallMethodByName_{type_ani_info.ani_type.suffix}(static_cast<ani_object>(this->ref), "{method_ani_info.ani_method_name}", nullptr, reinterpret_cast<{type_ani_info.ani_type.base}*>(&{inner_ani_res}){inner_ani_args_trailing});\n',
+                        f'            env->Object_CallMethodByName_{type_ani_info.ani_type.suffix}(static_cast<ani_object>(this->ref), "{method_ani_info.ani_method_name}", nullptr, reinterpret_cast<{type_ani_info.ani_type.base}*>(&{inner_ani_res}){inner_ani_args_trailing});',
                     )
                     type_ani_info.from_ani(
                         iface_ani_impl_target,
-                        8,
+                        12,
                         "env",
                         inner_ani_res,
                         inner_cpp_res,
@@ -2132,7 +2440,7 @@ class ANICodeGenerator:
                 )
         iface_ani_impl_target.writeln(
             f"    }};",
-            f"    return taihe::make_holder<cpp_impl_t, {iface_cpp_info.as_owner}>(ani_obj);",
+            f"    return taihe::make_holder<cpp_impl_t, {iface_cpp_info.as_owner}>(env, ani_obj);",
             f"}}",
         )
 
@@ -2203,6 +2511,10 @@ class ANICodeGenerator:
         )
         struct_ani_impl_target.include(struct_ani_info.decl_header)
         struct_ani_impl_target.include(struct_cpp_info.impl_header)
+        # TODO: ignore compiler warning
+        struct_ani_impl_target.writeln(
+            '#pragma clang diagnostic ignored "-Wmissing-braces"',
+        )
         self.gen_struct_from_ani_func(
             struct,
             struct_cpp_info,
@@ -2229,12 +2541,12 @@ class ANICodeGenerator:
         cpp_field_results = []
         for parts in struct_ani_info.sts_final_fields:
             final = parts[-1]
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, final.ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, final.ty_ref.resolved_ty)
             ani_field_value = f"ani_field_{final.name}"
             cpp_field_result = f"cpp_field_{final.name}"
             struct_ani_impl_target.writeln(
                 f"    {type_ani_info.ani_type} {ani_field_value};",
-                f'    env->Object_GetPropertyByName_{type_ani_info.ani_type.suffix}(ani_obj, "{final.name}", reinterpret_cast<{type_ani_info.ani_type.base}*>(&{ani_field_value}));\n',
+                f'    env->Object_GetPropertyByName_{type_ani_info.ani_type.suffix}(ani_obj, "{final.name}", reinterpret_cast<{type_ani_info.ani_type.base}*>(&{ani_field_value}));',
             )
             type_ani_info.from_ani(
                 struct_ani_impl_target, 4, "env", ani_field_value, cpp_field_result
@@ -2262,7 +2574,7 @@ class ANICodeGenerator:
         for parts in struct_ani_info.sts_final_fields:
             final = parts[-1]
             ani_field_result = f"ani_field_{final.name}"
-            type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, final.ty_ref)
+            type_ani_info = TypeANIInfo.get(self.am, final.ty_ref.resolved_ty)
             type_ani_info.into_ani(
                 struct_ani_impl_target,
                 4,
@@ -2373,12 +2685,12 @@ class ANICodeGenerator:
                     f"    }}",
                 )
             else:
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, final.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, final.ty_ref.resolved_ty)
                 union_ani_impl_target.writeln(
                     f"    ani_class {field_class};",
                     f'    env->FindClass("{type_ani_info.type_desc_boxed}", &{field_class});',
                     f"    ani_boolean {is_field};",
-                    f"    env->Object_InstanceOf((ani_object)ani_value, {field_class}, &{is_field});",
+                    f"    env->Object_InstanceOf(static_cast<ani_object>(ani_value), {field_class}, &{is_field});",
                     f"    if ({is_field}) {{",
                 )
                 cpp_result_spec = f"cpp_field_{full_name}"
@@ -2420,7 +2732,7 @@ class ANICodeGenerator:
                 )
             else:
                 ani_result_spec = f"ani_field_{field.name}"
-                type_ani_info = TypeANIInfo.get_by_ty_ref(self.am, field.ty_ref)
+                type_ani_info = TypeANIInfo.get(self.am, field.ty_ref.resolved_ty)
                 type_ani_info.into_ani_boxed(
                     union_ani_impl_target,
                     8,

@@ -21,7 +21,7 @@ enum Color: String {
 function nextEnum(color: Color): Color;
 function showEnum(color: Color): void;
 
-enum Weekday {
+enum Weekday: i32 {
     MONDAY,
     TUESDAY,
     WEDNESDAY,
