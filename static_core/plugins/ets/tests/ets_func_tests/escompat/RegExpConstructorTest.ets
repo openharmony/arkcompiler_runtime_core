@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+const success = 0;
+const fail = 1;
+
 function main(): int {
     let failCounter: int = 0;
     let testResult: int = 0;
@@ -71,6 +74,16 @@ function main(): int {
     testResult = checkTestResult(regExpObj110, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
     printTestVerdict(testResult, "test110")
     failCounter += testResult
+
+    let regExpObj230 = new RegExp("(?:\u{23456})");
+    testResult = checkTestResult(regExpObj230, "(?:𣑖)", "", false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, "test230")
+    failCounter += testResult
+
+    failCounter += test(testRegExpParse(),"Regpex parse failed and returned SyntaxError");
+    failCounter += test(testRegExpParseUnclosedGroup(),"Regpex parse failed and returned SyntaxError");
+    failCounter += test(testRegExpParseQuantifierRange(),"Regpex parse failed and returned SyntaxError");
+    failCounter += test(testRegExpParseNestedQuantifiers(),"Regpex parse failed and returned SyntaxError");
 
     if (failCounter > 0) return 1
     return 0;
@@ -131,3 +144,58 @@ function printTestVerdict(flag: int, testName: String) {
     }
 }
 
+function testRegExpParse(): int {
+    try {
+        let regExpObj120 = new RegExp("a**");
+    } catch (err) {
+        if (err instanceof SyntaxError) {
+            return success
+        }
+        return fail
+    }
+    return fail
+}
+
+function testRegExpParseUnclosedGroup(): int {
+    try {
+        let regExpObj120 = new RegExp("(abc|def");
+    } catch (err) {
+        if (err instanceof SyntaxError) {
+            return success
+        }
+        return fail
+    }
+    return fail
+}
+
+function testRegExpParseQuantifierRange(): int {
+    try {
+        let regExpObj120 = new RegExp("a{3,2}");
+    } catch (err) {
+        if (err instanceof SyntaxError) {
+            return success
+        }
+        return fail
+    }
+    return fail
+}
+
+function testRegExpParseNestedQuantifiers(): int {
+    try {
+        let regExpObj120 = new RegExp("a++b");
+    } catch (err) {
+        if (err instanceof SyntaxError) {
+            return success
+        }
+        return fail
+    }
+    return fail
+}
+
+function test(result: int, message: String): int {
+    if (result == 0) {
+      return success;
+    }
+    console.println("FAILED: " + message);
+    return fail;
+}

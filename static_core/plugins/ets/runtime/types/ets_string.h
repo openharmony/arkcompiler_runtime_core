@@ -393,6 +393,15 @@ public:
         return out;
     }
 
+    PandaString GetUtf8()
+    {
+        size_t len = GetUtf8Length();
+        PandaString out;
+        out.resize(len);
+        CopyDataRegionUtf8(out.data(), 0, GetCoreType()->GetLength(), len);
+        return out;
+    }
+
     uint8_t *GetDataUtf8()
     {
         return GetCoreType()->GetDataUtf8();

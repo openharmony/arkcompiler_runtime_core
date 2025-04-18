@@ -3889,6 +3889,16 @@ intrinsics:
       args: [ std.core.String, std.core.String, std.core.String ]
     impl: ark::ets::intrinsics::EscompatRegExpExec
 
+  - name: EscompatRegExpParse
+    space: ets
+    class_name: escompat.RegExp
+    method_name: parse
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::EscompatRegExpParse
+
 ####################
 # std.core.TypeAPI #
 ####################
