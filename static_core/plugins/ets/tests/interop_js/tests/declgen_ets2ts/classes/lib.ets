@@ -125,3 +125,9 @@ class B {
 export class D extends B {
   override foo() : void { console.log("D.foo") }
 }
+
+export class C12 {
+  foo(i: "some str") {
+    return 2;
+  }
+}

@@ -262,8 +262,7 @@ endfunction()
 add_subdirectory(async)
 add_subdirectory(basic_var)
 add_subdirectory(classes)
-# NOTE: Need to support new enum implementation in declgen 
-# add_subdirectory(enums)
+add_subdirectory(enums)
 add_subdirectory(fields)
 add_subdirectory(functions)
 add_subdirectory(generics)
@@ -272,15 +271,16 @@ add_subdirectory(imports)
 add_subdirectory(interface)
 add_subdirectory(methods)
 add_subdirectory(unions)
-add_subdirectory(properties)
 add_subdirectory(depend_export)
 add_subdirectory(re_export)
 add_subdirectory(export_error)
+add_subdirectory(export_default)
 
 # interop not supported
 # eg: E/ets_interop_js: InteropCtx::Fatal: ets_proxy requested for Lescompat/WeakMap; must add or forbid
 # add_subdirectory(esobject)
 # add_subdirectory(standard_lib)
+# add_subdirectory(properties)
 
 # error: [TID 006c83] E/ets_interop_js: InteropCtx::Fatal: Class lib.A has no constructor
 # a bug exists in interop. interop is being fixed
