@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as path from 'path';
 
@@ -70,6 +71,12 @@ export class Declgen {
      */
     let program = this.recompile();
 
+    /**
+     * If the rootFiles contains declaration files,
+     * process the declaration files here.
+     */
+    this.processDeclarationFiles(program);
+
     const emitResult = program.emit(undefined, undefined, undefined, true, {
       before: [],
       after: [],
@@ -101,7 +108,53 @@ export class Declgen {
 
     return [];
   }
+  
+  private processDeclarationFiles(program: ts.Program): void {
+    const typeChecker = program.getTypeChecker();
 
+    this.rootFiles.forEach((fileName) => {
+      const sourceFile = program.getSourceFile(fileName);
+      if (sourceFile && sourceFile.isDeclarationFile) {
+        const outDir = program.getCompilerOptions().outDir || path.dirname(fileName);
+        const regex = new RegExp(`\\${Extension.DTS}|\\${Extension.DETS}$`);
+        const dEtsFilePath = path.join(outDir, `${path.basename(fileName).replace(regex, '')}${Extension.DETS}`);
+
+        const result = this.transformDeclarationFiles(program, sourceFile, typeChecker);
+        const printer = ts.createPrinter();
+        const transformedCode = printer.printFile(result.transformed[0] as ts.SourceFile);
+        fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+      }
+    });
+  }
+
+  private transformDeclarationFiles(program:ts.Program, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker,): ts.TransformationResult<ts.Node> { 
+    const result = ts.transform(
+      sourceFile,
+      [
+        (context: ts.TransformationContext) => {
+          const autofixer = new Autofixer(typeChecker, context);
+          const visit = (node: ts.Node): ts.Node | undefined => {
+            const fixedNode = autofixer.fixNode(node);
+
+            if (fixedNode === undefined) {
+              return undefined;
+            } else if (Array.isArray(fixedNode)) {
+              return context.factory.createBlock(fixedNode as readonly ts.Statement[]);
+            } else {
+              return ts.visitEachChild(fixedNode, visit, context);
+            }
+          };
+          return (node: ts.Node) => {
+            return visit(node) ?? node;
+          };
+        }
+      ],
+      program.getCompilerOptions()
+    );
+
+    return result;
+  }
+  
   private static createHookedCompilerHost(
     sourceFileMap: Map<string, ts.SourceFile>,
     compilerOptions: ts.CompilerOptions,
