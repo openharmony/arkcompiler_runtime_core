@@ -92,7 +92,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     public native $_get(idx: int): T;
 
-    internal $_get_unsafe(idx: int): T {
+    internal final $_get_unsafe(idx: int): T {
         return this.buffer[idx] as T
     }
 

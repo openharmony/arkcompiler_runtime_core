@@ -414,6 +414,13 @@ void ChecksElimination::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
     });
 
     auto bri = block->GetGraph()->GetBoundsRangeInfo();
+    auto boundsCheckRange = bri->FindBoundsRange(block, inst);
+    if (boundsCheckRange.IsWithinActualLengthRange()) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Index of BoundsCheck is within array actual length range";
+        visitor->ReplaceUsersAndRemoveCheck(inst, index);
+        return;
+    }
+
     auto lenArrayRange = bri->FindBoundsRange(block, lenArray);
     auto upperChecker = [&lenArrayRange, &lenArray](const BoundsRange &idxRange) {
         return idxRange.IsLess(lenArrayRange) || idxRange.IsLess(lenArray);
