@@ -1,8 +1,8 @@
 #FailKind.ABORT_FAIL - 3 tests:
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/method_overload6.ets
-#FailKind.DECLGEN_ETS2TS_FAIL - 53 tests:
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
+#FailKind.DECLGEN_ETS2TS_FAIL - 52 tests:
 arkui/dollar_dollar_13.ets
 regression/11979-interface-attr-init-010.ets
 regression/11979-interface-attr-init-011.ets
@@ -15,7 +15,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_4.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_5.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_6.ets
-spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_0.ets
 spec/03.types/References_Types/Tuples_type/tuple_write_6.ets
 spec/03.types/References_Types/Type_undefined/define/define-class-extends-undefined.ets
 spec/03.types/References_Types/Type_undefined/define/define-class-implements-undefined.ets
@@ -56,7 +55,7 @@ std/core/std_core_char_instance_Char_isWhiteSpace.ets
 std/core/std_core_char_static_Char_isWhiteSpace.ets
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
-#FailKind.TSC_FAIL - 158 tests:
+#FailKind.TSC_FAIL - 157 tests:
 algorithms/SampleAppTest.ets
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
@@ -89,6 +88,7 @@ spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Param
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassSingleArg.ets
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassTwoArgs.ets
 spec/05.Generics/comparableClass.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_02.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.ets
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.ets
@@ -106,9 +106,8 @@ spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_000
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0003.ets
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0004.ets
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0005.ets
-spec/10.Interfaces/method_overiding_0001.ets
+spec/13.Compilation_Units_Packages_and_Modules/05.top-level_declarations/01.exported_declarations/to_export.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/clashing_reexports.ets
-spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/re_export_all_2.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_incorrect.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue_15669_03.ets
@@ -127,7 +126,6 @@ spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.D
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0004.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0005.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0006.ets
-spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
 std/TypeCreateVoidTest.ets
 std/concurrency/AsyncLockTest.ets
 std/containers/array_blocking_queue/ArrayBlockingQueue_AddTest.ets
@@ -180,8 +178,10 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_PollTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PushTest_Stress.ets
+std/core/IntlListFormatTest.ets
 std/core/IntlLocaleTest.ets
 std/core/IntlLocaleTest2.ets
+std/core/IntlNumberFormatToParts.ets
 std/core/IntlPluralRulesTest.ets
 std/core/Object.ets
 std/core/TypeClassTypeTest.ets
@@ -204,7 +204,6 @@ std/core/dateformat/IntlDateFormatRangeToPartsOptionsTest.ets
 std/core/dateformat/IntlDateFormatTest.ets
 std/core/dateformat/IntlDateFormatToPartsOptionsTest.ets
 std/core/dateformat/IntlDateTimeFormatStyleTest.ets
-std/core/dateformat/IntlTimeFormatOptionsTest.ets
 std/core/std_core_constructor_StringBuilder_constructor.ets
 std/core/std_core_constructor_StringBuilder_constructor_001.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append.ets

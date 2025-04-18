@@ -32,3 +32,76 @@ export class Derived extends Base implements I0, I1 {
     b: double = 2;
     constructor(a: double, b: double) {super(a); this.b = b;}
 }
+
+export class C1 {
+    a: CC1 = new CC1;
+    foo(a: CC2): CC3 {
+        return new CC3;
+    }
+}
+export interface I2 {
+    a: CI1;
+    foo(a: CI2): CI3;
+}
+export let p1: CP1;
+export function foo1(a: CP2): CP3 {
+    return new CP3;
+}
+export let p5: CP4 | CP5;
+export function foo5(a: CP6 | CP7): CP8 | CP9 {
+  return new CP8;
+}
+export let p6: IP1;
+export function foo6(a: IP2): IP3 {
+  return new CC7;
+}
+export let p8: NN1.C1;
+export let p9: Promise<CP10>;
+export let p10: Promise<IP5>;
+export class C4<T extends CC4> {}
+export class C5 extends CC5 implements IP4 {}
+
+
+class CC1 {}
+class CC2 {}
+class CC3 {}
+class CC4 {}
+class CC5 {}
+class CC7 implements IP3{}
+class CP1 {}
+class CP2 {}
+class CP3 {}
+class CP4 {}
+class CP5 {}
+class CP6 {}
+class CP7 {}
+class CP8 {}
+class CP9 {}
+class CP10 {}
+class CI1 {}
+class CI2 {}
+class CI3 {}
+interface IP1 {}
+interface IP2 {}
+interface IP3 {}
+interface IP4 {}
+interface IP5 {}
+enum E1 {
+  A
+}
+enum E2 {
+  A
+}
+enum E3 {
+  A
+}
+enum E4 {
+  A
+}
+namespace NN1 {
+    export class C1 {}
+}
+
+
+interface IN {}
+class CN implements IN {}
