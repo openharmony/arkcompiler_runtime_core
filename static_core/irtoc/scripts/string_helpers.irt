@@ -591,64 +591,58 @@ end  # copy_compressed_string_to_array_of_chars
 # calculate the difference between string chunks
 # stored in 64-bits numbers, byte/hword swap is
 # required before comparison for the correct result
+
+scoped_macro(:calculate_chars_difference_lat) do |d1, d2|
+  ldata1 := Intrinsic(:REVERSE_BYTES_U64, d1).u64
+  ldata2 := Intrinsic(:REVERSE_BYTES_U64, d2).u64
+  ret := Cmp(ldata1, ldata2).i32
+end
+
+scoped_macro(:calculate_chars_difference_utf) do |d1, d2|
+  udata1 := Bitcast(Intrinsic(:REVERSE_HALF_WORDS, Bitcast(d1).f64).f64).u64
+  udata2 := Bitcast(Intrinsic(:REVERSE_HALF_WORDS, Bitcast(d2).f64).f64).u64
+  ret := Cmp(udata1, udata2).i32
+end
+
 scoped_macro(:calculate_chars_difference) do |d1, d2, utf|
   data1 := Cast(d1).u64
   data2 := Cast(d2).u64
 
-  IfImm(Compare(utf, 0).EQ.b).Imm(0).NE.b {
-    ldata1 := Intrinsic(:REVERSE_BYTES_U64, data1).u64
-    ldata2 := Intrinsic(:REVERSE_BYTES_U64, data2).u64
-    cmp1 := Cmp(ldata1, ldata2).i32
+  If(utf, 0).EQ.b {
+    cmp1 := calculate_chars_difference_lat(data1, data2)
   } Else {
-    udata1 := Bitcast(Intrinsic(:REVERSE_HALF_WORDS, Bitcast(Cast(data1).u64).f64).f64).u64
-    udata2 := Bitcast(Intrinsic(:REVERSE_HALF_WORDS, Bitcast(Cast(data2).u64).f64).f64).u64
-    cmp2 := Cmp(udata1, udata2).i32
+    cmp2 := calculate_chars_difference_utf(data1, data2)
   }
   ret := Phi(cmp1, cmp2).i32
 end
 
-scoped_macro(:compare_LU_1_chars) do |lat, utf|
-  ret := Sub(Cast(lat).u32, Cast(utf).u32).i32
-end
-
-scoped_macro(:compare_LU_2_chars) do |lat, utf|
-  res1 := ShlI(Sub(AndI(lat).Imm(0xff).u32, AndI(utf).Imm(0xffff).u32).i32).Imm(16).u32
-  res2 := Sub(ShrI(lat).Imm(8).u32, ShrI(utf).Imm(16).u32).i32
-  res := Add(res1, res2).i32 
-end
-
 scoped_macro(:compare_LU_strings) do |lat, utf, len|
-  IfImm(Compare(len, 2).LT.b).Imm(0).NE.b {
-    ret1 := compare_LU_1_chars(LoadI(lat).Imm(0).u8, LoadI(utf).Imm(0).u16).i32
+  # considering the data buffer to be allocated to
+  # 8-bytes alignment, we can safely read 8-bytes chunks
+  last_idx := SubI(len).Imm(4).i64
+  i1 := 0
+Label(:Loop)
+  i := Phi(i1, i2).i64
+  If(i, last_idx).GE.Unlikely.b {
+    # can safely read 8 bytes behind - length and hashcode
+    junk_bits := ShlI(Sub(i, last_idx).u64).Imm(4).u64
+    last_lv := Load(lat, last_idx).u32
+    last_v := Shr(Bitcast(Intrinsic(:EXPAND_U8_TO_U16, Bitcast(last_lv).f32).f64).u64, junk_bits).u64
+    last_u := Shr(Load(utf, ShlI(last_idx).Imm(1).u64).u64, junk_bits).u64
+    If(last_v, last_u).NE.b {
+      Goto(:NotEqual)
+    }
     Goto(:End)
   }
 
-  IfImm(Compare(len, 3).LT.b).Imm(0).NE.b {
-    ret2 := compare_LU_2_chars(LoadI(lat).Imm(0).u16, LoadI(utf).Imm(0).u32).i32
-    Goto(:End)
-  }
-
-  i1 := Cast(0).u64
-Label(:Loop)    
-  i := Phi(i1, i2).u64
-  lv1 := Load(lat, i).u32
-  v1 := Bitcast(Intrinsic(:EXPAND_U8_TO_U16, Bitcast(lv1).f32).f64).u64
-  u1 := Load(utf, ShlI(i).Imm(1).u64).u64
-  If(u1, v1).NE.b {
+  lv := Load(lat, i).u32
+  v := Bitcast(Intrinsic(:EXPAND_U8_TO_U16, Bitcast(lv).f32).f64).u64
+  u := Load(utf, ShlI(i).Imm(1).u64).u64
+  If(v, u).NE.b {
     Goto(:NotEqual)
   }
-
-  lv2 := Load(lat, AddI(i).Imm(4).u32).u32
-  v2 := Bitcast(Intrinsic(:EXPAND_U8_TO_U16, Bitcast(lv2).f32).f64).u64
-  u2 := Load(utf, AddI(ShlI(i).Imm(1).u64).Imm(8).u64).u64
-  If(u2, v2).NE.b {
-    Goto(:NotEqual)
-  }
-
-  i2 := AddI(i).Imm(8).u64
-  If(i, len).B.b {
-    Goto(:Loop)
-  }
+  i2 := AddI(i).Imm(4).i64
+  Goto(:Loop)
 
   # the version assuming 128-bits types support
   #
@@ -678,23 +672,20 @@ Label(:Loop)
   # d2 := Phi(d21, d22)
   # res := Sub(d1, d2).u64
 
-  ret0 := -1     # the prefix is the same but the utf string has to be
-                 # longer as it would have had latin encoding otherwise
+Label(:NotEqual)
+  v_ne := Phi(last_v, v).u64
+  u_ne := Phi(last_u, u).u64
+  ret_ne := calculate_chars_difference_utf(v_ne, u_ne).i32
   Goto(:End)
 
-Label(:NotEqual)
-  u3 := Phi(u1, u2).u64
-  v3 := Phi(v1, v2).u64
-  d1 := Bitcast(Intrinsic(:REVERSE_HALF_WORDS, Bitcast(v3).f64).f64).u64
-  d2 := Bitcast(Intrinsic(:REVERSE_HALF_WORDS, Bitcast(u3).f64).f64).u64
-  ret3 := Cmp(d1, d2).i32
-
 Label(:End)
-  ret := Phi(ret1, ret2, ret0, ret3).i32
+  # -1: the prefix is the same but the utf string has to be
+  # longer as it would have had latin encoding otherwise
+  ret := Phi(-1, ret_ne).i32
 end
 
 scoped_macro(:compare_mixed_strings) do |buf1, buf2, len, utf_is_first|
-  IfImm(Compare(utf_is_first, 0).NE.b).Imm(0).EQ.b {
+  If(utf_is_first, 0).EQ.b {
     ret1 := compare_LU_strings(buf1, buf2, len)
   } Else {
     ret2 := Neg(compare_LU_strings(buf2, buf1, len).i32).i32
