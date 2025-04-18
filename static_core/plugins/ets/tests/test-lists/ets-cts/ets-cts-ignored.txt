@@ -1,7 +1,7 @@
 #23500 Successful compilation instead of CTE
 02.lexical_elements/07.keywords/hard_16.ets
-02.lexical_elements/07.keywords/hard_29.ets
-02.lexical_elements/07.keywords/hard_41.ets
+02.lexical_elements/07.keywords/hard_28.ets
+02.lexical_elements/07.keywords/hard_40.ets
 02.lexical_elements/07.keywords/types_1.ets
 02.lexical_elements/07.keywords/types_2.ets
 02.lexical_elements/07.keywords/types_4.ets
@@ -709,6 +709,9 @@
 
 #23238 Method returning 'this' returns wrong instance
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.ets
+
+#24507
+09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_24.ets
 
 #24022 missing CTE for uninitialized static field
 09.classes/08.class_initializer/class_initializer_ensure_fields_initialized.ets

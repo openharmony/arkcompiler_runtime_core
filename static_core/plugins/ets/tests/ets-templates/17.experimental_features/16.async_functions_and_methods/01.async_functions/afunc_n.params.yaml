@@ -50,7 +50,7 @@ cases:
     - decl: |-
           // Returning values of types Promise<T> and T from async functions is allowed.
           async function foo(p: string): Promise<String> {
-              return launch ((): Object => new Object())()
+              return (async (): Object => new Object())()
           }
 
     - decl: |-

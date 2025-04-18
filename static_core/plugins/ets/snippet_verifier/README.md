@@ -190,7 +190,6 @@ the function *async* (see :ref:`Async Functions`). No restrictions apply as to
 from what scope to call the function *async*.
 
 .. index::
-launch expression
 return type
 function call
 coroutine

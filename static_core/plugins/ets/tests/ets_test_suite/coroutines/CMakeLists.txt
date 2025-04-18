@@ -119,8 +119,8 @@ add_ets_coroutines_test(FILE await.ets
 
 add_ets_coroutines_test(FILE launch_launch.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED"
-                        OPTION_SETS_THREADED "DEFAULT"
+                        IMPL "STACKFUL" # Issue 24058
+                        OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
 )
@@ -153,7 +153,7 @@ if (NOT PANDA_TARGET_ARM32)
 
     add_ets_coroutines_test(FILE launch_instr_array.ets
                             SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
+                            IMPL "STACKFUL" "THREADED"
                             OPTION_SETS_THREADED "DEFAULT"
                             OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                             WORKERS "AUTO" "ONE"
@@ -257,7 +257,7 @@ add_ets_coroutines_test(FILE eworker_id.ets
 # # Issue 12886
 add_ets_coroutines_test(FILE launch_return.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
+                        IMPL "STACKFUL" # Issue 24058
                         OPTION_SETS_THREADED "DEFAULT"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"

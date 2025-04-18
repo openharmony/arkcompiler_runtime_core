@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let flag: int = 0;
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -88,10 +90,10 @@ function main(): int {
     {
         concurrentHashMapKeys.clear();
         assertTrue(concurrentHashMapKeys.isEmpty());
-        let p1 = launch setAll();
-        let p2 = launch keysAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setAll);
+        let p2 = launch<void, () => void>(keysAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapKeys.size >= 0);
     });
     concurrentHashMapKeysTestsuite.addTest("keysAndTest_002", () =>
@@ -99,10 +101,10 @@ function main(): int {
         concurrentHashMapKeys.clear();
         assertTrue(concurrentHashMapKeys.isEmpty());
         setAll();
-        let p1 = launch deleteAll();
-        let p2 = launch keysAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(deleteAll);
+        let p2 = launch<void, () => void>(keysAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapKeys.isEmpty());
     });
     concurrentHashMapKeysTestsuite.addTest("keysAndTest_003", () =>
@@ -110,10 +112,10 @@ function main(): int {
         concurrentHashMapKeys.clear();
         assertTrue(concurrentHashMapKeys.isEmpty());
         setAll();
-        let p1 = launch clearAll();
-        let p2 = launch keysAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(clearAll);
+        let p2 = launch<void, () => void>(keysAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapKeys.isEmpty());
     });
 

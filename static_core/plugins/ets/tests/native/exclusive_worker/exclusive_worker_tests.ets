@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let workerId = -1;
 
 function setWorkerId(eworkerId: int)
@@ -40,8 +42,8 @@ function asyncCall(): boolean {
 
 // LaunchCallMethod
 function launchCall(): boolean {
-    let p = launch call();
-    return await p;
+    let p = launch<boolean, () => boolean>(call);
+    return p.Await();
 }
 
 // ConcurrentWorkerAndRuntimeDestroy
@@ -70,10 +72,11 @@ let eWorkerLaunchEvent = new Event();
 
 function mainRoutine() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    launch () => {
+    let l = () => {
         eWorkerLaunchEvent.wait();
         mainEvent.fire();
-    }();
+    }
+    launch<void, () => void>(l);
 }
 
 function eWorkerRoutine(): boolean {
@@ -81,10 +84,11 @@ function eWorkerRoutine(): boolean {
         eWorkerAsyncEvent.wait();
     }();
 
-    launch () => {
+    let l = () => {
         eWorkerLaunchEvent.fire();
         mainEvent.wait();
         eWorkerAsyncEvent.fire();
-    }();
+    }
+    launch<void, () => void>(l);
     return true;
 }

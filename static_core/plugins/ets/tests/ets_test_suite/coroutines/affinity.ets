@@ -15,6 +15,8 @@
 
 import {CoroutineExtras, AtomicFlag} from "std/debug/concurrency"
 import {StdDebug} from "std/debug"
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
 
 type L = StdDebug.Logger
 
@@ -44,15 +46,15 @@ function checker(id_main: int): Int {
 
 function check_sync_id_nonmain(number_of_coros: int): int {
     let id_current: int = CoroutineExtras.getWorkerId();
-    let promises: NullablePromise<Int>[] = new NullablePromise<Int>[number_of_coros];
+    let promises: (Job<Int> | undefined)[] = new (Job<Int> | undefined)[number_of_coros];
 
     for (let i = 0; i < number_of_coros; ++i) {
-        promises[i] = launch checker(id_current);
+        promises[i] = launch<Int, (i: int) => Int>(checker, id_current);
     }
     continue_execution.set(true);
     let result: int = 0;
     for (let i = 0; i < number_of_coros; ++i) {
-        result += await promises[i]!;
+        result += (promises[i]!).Await();
     }
     return result == 0 ? result : 1;
 }

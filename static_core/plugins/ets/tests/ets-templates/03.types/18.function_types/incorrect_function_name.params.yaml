@@ -20,7 +20,6 @@ ids:
     - 'static'
     - 'as'
     - 'enum'
-    - 'launch'
     - 'switch'
     - 'export'
     - 'let'

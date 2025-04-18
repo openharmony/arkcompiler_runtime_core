@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 const elementsNum: int = 100;
 let b1: int | null = 0;
 let f1: int | null = 0;
@@ -45,14 +47,14 @@ function main(): int {
         while (!queueIntPopN.isEmpty()) {
             queueIntPopN.pop();
         }
-        let p1 = launch queueIntAdddata();
-        let p2 = launch queueIntAdddata();
-        let p3 = launch queueIntAdddata();
-        let p4 = launch queueIntAdddata();
-        await p1;
-        await p2;
-        await p3;
-        await p4;
+        let p1 = launch<void, () => void>(queueIntAdddata);
+        let p2 = launch<void, () => void>(queueIntAdddata);
+        let p3 = launch<void, () => void>(queueIntAdddata);
+        let p4 = launch<void, () => void>(queueIntAdddata);
+        p1.Await();
+        p2.Await();
+        p3.Await();
+        p4.Await();
         assertFalse(queueIntPopN.isEmpty());
     });
     ArrayBlockingQueueTestsuite.addTest("AddTestInt007", () =>
@@ -63,8 +65,8 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.add(i);
         }
-        let p1 = launch queueIntFrontF1data();
-        await p1;
+        let p1 = launch<void, () => void>(queueIntFrontF1data);
+        p1.Await();
         assertEQ(queueInt.size, elementsNum);
     });
     ArrayBlockingQueueTestsuite.addTest("AddTestInt008", () =>
@@ -75,8 +77,8 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.add(i);
         }
-        let p1 = launch queueIntBackB1data();
-        await p1;
+        let p1 = launch<void, () => void>(queueIntBackB1data);
+        p1.Await();
         assertFalse(queueInt.isEmpty());
     });
 

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {StdDebug} from "std/debug"
+import { StdDebug } from "std/debug"
+import { launch } from "std/concurrency"
 
 type L = StdDebug.Logger
 
@@ -29,14 +30,14 @@ function main() {
     arr_2 = new Int32Array(buf_2, 0, 1);
 
     for (let i = 0; i < 5; i++) {
-        launch worker_i8(i as byte)
+        launch<Int, (i: byte) => Int>(worker_i8, i as byte)
     }
     while (Atomics.load(arr, 0) != 5) {
     }
     L.log("Finished for Int8Array")
 
     for (let i = 0; i < 5; i++) {
-        launch worker_i32(i as int)
+        launch<Int, (i: int) => Int>(worker_i32, i as int)
     }
     while (Atomics.load(arr_2, 0) != 5) {
     }

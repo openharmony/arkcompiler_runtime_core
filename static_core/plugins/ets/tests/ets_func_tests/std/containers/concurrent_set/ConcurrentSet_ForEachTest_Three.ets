@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let flag: int = 0;
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrKeysOne: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
@@ -47,10 +49,10 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
-        let p1 = launch forEachThree();
-        let p2 = launch addAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachThree);
+        let p2 = launch<void, () => void>(addAll);
+        p1.Await();
+        p2.Await();
         assertTrue(ConcurrentSetTestOne.size >= 0);
     });
     ConcurrentSetTestsuite.addTest("ForEach&DeteleTest004", () =>
@@ -59,10 +61,10 @@ function main(): int {
         assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
-        let p1 = launch forEachThree();
-        let p2 = launch deleteAllBack();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachThree);
+        let p2 = launch<void, () => void>(deleteAllBack);
+        p1.Await();
+        p2.Await();
         assertTrue(ConcurrentSetTestOne.size < 11);
     });
     ConcurrentSetTestsuite.addTest("ForEach&HasTest004", () =>
@@ -71,10 +73,10 @@ function main(): int {
         assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
-        let p1 = launch forEachThree();
-        let p2 = launch hasAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachThree);
+        let p2 = launch<void, () => void>(hasAll);
+        p1.Await();
+        p2.Await();
         assertEQ(ConcurrentSetTestOne.size, 10);
     });
     ConcurrentSetTestsuite.addTest("ForEach&ClearTest004", () =>
@@ -83,10 +85,10 @@ function main(): int {
         assertEQ(ConcurrentSetTestOne.size, 0); 
         flag = 0;
         addAll();
-        let p1 = launch forEachThree();
-        let p2 = launch clearTest();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(forEachThree);
+        let p2 = launch<void, () => void>(clearTest);
+        p1.Await();
+        p2.Await();
         assertTrue(ConcurrentSetTestOne.size < 11);
     });
 

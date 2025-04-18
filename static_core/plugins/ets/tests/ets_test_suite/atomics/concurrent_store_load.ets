@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let RESULT = 10 as long
 
 let arr: BigInt64Array
@@ -21,7 +23,7 @@ function main() {
     let buf = new SharedArrayBuffer(8);
     arr = new BigInt64Array(buf, 0, 1);
 
-    launch incrementer()
+    launch<Int, () => Int>(incrementer)
 
     while (Atomics.load(arr, 0) != RESULT) {
         wait()

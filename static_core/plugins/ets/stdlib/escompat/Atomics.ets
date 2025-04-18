@@ -956,7 +956,8 @@ export class Atomics {
     }
 
     public static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: number): Promise<string> {
-        return launch Atomics.wait(typedArray, offset, value)
+        const waiter = (t: Int32Array | BigInt64Array, o: int, v: number) => { return Atomics.wait(t, o, v) }
+        return Atomics.launchInternalPromiseNative(waiter, [typedArray, offset, value] as NullishType[]);
     }
 
     /**
@@ -982,8 +983,11 @@ export class Atomics {
     }
 
     public static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: number, timeout: long): Promise<string> {
-        return launch Atomics.wait(typedArray, offset, value, timeout)
+        const waiter = (ta: Int32Array | BigInt64Array, o: int, v: number, t: long) => { return Atomics.wait(ta, o, v, t) }
+        return Atomics.launchInternalPromiseNative(waiter, [typedArray, offset, value, timeout] as NullishType[]);
     }
+
+    private static native launchInternalPromiseNative<F>(func: F, args: NullishType[]): Promise<string>;
 
     /**
      * Notifies (wakes up) threads that are suspended by the Atomics.wait() calls at the given index.

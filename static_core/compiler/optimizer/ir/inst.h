@@ -863,22 +863,13 @@ public:
     {
         return GetFlag(inst_flags::CF);
     }
-    bool IsVirtualLaunchCall() const
-    {
-        return GetOpcode() == Opcode::CallLaunchVirtual || GetOpcode() == Opcode::CallResolvedLaunchVirtual;
-    }
     bool IsVirtualCall() const
     {
-        return GetOpcode() == Opcode::CallVirtual || GetOpcode() == Opcode::CallResolvedVirtual ||
-               IsVirtualLaunchCall();
-    }
-    bool IsStaticLaunchCall() const
-    {
-        return GetOpcode() == Opcode::CallLaunchStatic || GetOpcode() == Opcode::CallResolvedLaunchStatic;
+        return GetOpcode() == Opcode::CallVirtual || GetOpcode() == Opcode::CallResolvedVirtual;
     }
     bool IsStaticCall() const
     {
-        return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic || IsStaticLaunchCall();
+        return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic;
     }
     bool IsNativeApiCall() const
     {
@@ -921,10 +912,6 @@ public:
     bool IsDynamicCall() const
     {
         return GetOpcode() == Opcode::CallDynamic;
-    }
-    bool IsLaunchCall() const
-    {
-        return IsStaticLaunchCall() || IsVirtualLaunchCall();
     }
     bool IsIndirectCall() const
     {

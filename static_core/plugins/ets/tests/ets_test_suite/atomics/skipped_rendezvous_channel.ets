@@ -13,16 +13,18 @@
 * limitations under the License.
 */
 
+import { launch } from "std/concurrency"
+
 let s = new SharedArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
 function main() {
-    let consumerPromise = launch consumer()
+    let consumerJob = launch<Int, () => Int>(consumer)
     heavyComputation()
-    let producerPromise = launch producer()
+    let producerJob = launch<Int, () => Int>(producer)
 
-    await producerPromise;
-    await consumerPromise;
+    producerJob.Await();
+    consumerJob.Await();
 }
 
 function producer(): Int {

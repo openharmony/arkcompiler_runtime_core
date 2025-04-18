@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let counter = 0;
 
 function body(): Object {
@@ -22,7 +24,7 @@ function body(): Object {
 export function main(): int {
     try {
         for (let i = 0; i < 50000; ++i) {
-            launch body();
+            launch<Object, () => Object>(body);
             ++counter;
         }
     } catch (e) {

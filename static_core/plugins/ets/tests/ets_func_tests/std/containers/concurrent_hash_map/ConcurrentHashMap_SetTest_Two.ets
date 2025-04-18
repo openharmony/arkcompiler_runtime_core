@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let flag: int = 0;
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -36,10 +38,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch setBack();
-        let p2 = launch getAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setBack);
+        let p2 = launch<void, () => void>(getAll);
+        p1.Await();
+        p2.Await();
         for (let i: int = 0; i < 10; i++) {
             assertEQ(concurrentHashMapOne.get(i), arrValues[i]);
         }
@@ -56,10 +58,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch setBack();
-        let p2 = launch deleteAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setBack);
+        let p2 = launch<void, () => void>(deleteAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.size <= 5);
     });
     concurrentHashMapTestsuite.addTest("setAndTest_004", () =>
@@ -67,10 +69,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch setBack();
-        let p2 = launch replaceAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setBack);
+        let p2 = launch<void, () => void>(replaceAll);
+        p1.Await();
+        p2.Await();
         flag = 0;
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re";
@@ -84,20 +86,20 @@ function main(): int {
     {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
-        let p1 = launch setAll();
-        let p2 = launch isEmptyFun();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setAll);
+        let p2 = launch<void, () => void>(isEmptyFun);
+        p1.Await();
+        p2.Await();
         assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("setAndTest_006", () =>
     {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
-        let p1 = launch setAll();
-        let p2 = launch clearAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setAll);
+        let p2 = launch<void, () => void>(clearAll);
+        p1.Await();
+        p2.Await();
         assertTrue(concurrentHashMapOne.get(9) == undefined || concurrentHashMapOne.get(9) == "nine");
     });
     concurrentHashMapTestsuite.addTest("setAndTest_007", () =>
@@ -106,10 +108,10 @@ function main(): int {
         concurrentHashMapOne.clear();
         assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch setBack();
-        let p2 = launch removeAll();
-        await p1;
-        await p2;
+        let p1 = launch<void, () => void>(setBack);
+        let p2 = launch<void, () => void>(removeAll);
+        p1.Await();
+        p2.Await();
         flag = 0;
         for (let i = 0; i < 10; i++) {
             if (arrValuesTest[i] == arrValues[i]) {

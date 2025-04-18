@@ -863,7 +863,7 @@ void LivenessAnalyzer::BlockReg(Register reg, LifeNumber blockFrom, LifeNumber b
 
 bool LivenessAnalyzer::IsCallBlockingRegisters(Inst *inst) const
 {
-    if (inst->IsCall() && !inst->IsLaunchCall() && !static_cast<CallInst *>(inst)->IsInlined()) {
+    if (inst->IsCall() && !static_cast<CallInst *>(inst)->IsInlined()) {
         return true;
     }
     if (inst->IsIntrinsic() && inst->CastToIntrinsic()->IsNativeCall()) {

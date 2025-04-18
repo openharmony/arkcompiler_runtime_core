@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 let isLaunchMigrated: AtomicFlag = new AtomicFlag(false);
 
 function durationFunc(duration: int): void {
@@ -43,7 +46,7 @@ function testLaunch(): void {
 }
 
 function checkLaunchMigration(): void {
-    await launch testLaunch();
+    launch<void, () => void>(testLaunch).Await();
 }
 
 function main() {

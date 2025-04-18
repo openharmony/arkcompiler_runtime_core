@@ -42,11 +42,21 @@ type CoroFunT<A, R> = (
  *
  * @returns instance of the Job class that represents newly launched coroutine.
  */
-export function mlaunch<R, F extends CoroFunT<never, R>>(
-  coroFun: F,
-  ...args: (Object | null | undefined)[]
-): Job<R> {
-  return mlaunchInternal<R, F>(coroFun, args as (Object | null | undefined)[]);
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: NullishType[]): Job<R> {
+  return launchInternal<R, F>(coroFun, args as NullishType[]);
+}
+
+/**
+ * NOTE: Remove when both mlaunch and launch are merged
+ * This function is used to launch new coroutines.
+ *
+ * @param coroFun entrypoint of the the new coroutine.
+ * @param args arguments for the function coroFun.
+ *
+ * @returns instance of the Job class that represents newly launched coroutine.
+ */
+export function mlaunch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: NullishType[]): Job<R> {
+  return launchInternal<R, F>(coroFun, args as NullishType[]);
 }
 
 // This overload is currently blocked by issue #22472. Enable when frontend supports it
@@ -54,23 +64,13 @@ export function mlaunch<R, F extends CoroFunT<never, R>>(
 //   settings?: string
 // }
 // 
-// export function mlaunch<R, F extends CoroFunT<never, R>>(
-//   coroFun: F,
-//   launchParams: LaunchParams,
-//   ...args: (Object | null | undefined)[]
-// ): Job<R> {
-//     return mlaunchInternal<R, F>(coroFun, launchParams, args as (Object | null | undefined)[])
+// export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams,...args: NullishType[]): Job<R> {
+//     return launchInternal<R, F>(coroFun, launchParams, args as NullishType[])
 // }
 
-function mlaunchInternal<R, F extends CoroFunT<never, R>>(
-  coroFun: F,
-  args: (Object | null | undefined)[]
-): Job<R> {
+function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: NullishType[]): Job<R> {
   const paddedArgs = padArrayToMaxArgs(args);
-  return mlaunchInternalNative<F, R>(
-    coroFun,
-    args as (Object | null | undefined)[]
-  );
+  return launchInternalJobNative<F, R>(coroFun, args as NullishType[]);
 }
 
 function padArrayToMaxArgs<T>(arr: T[]): (T | undefined)[] {
@@ -85,4 +85,4 @@ function padArrayToMaxArgs<T>(arr: T[]): (T | undefined)[] {
   return res;
 }
 
-native function mlaunchInternalNative<F, R>(coroFun: F, args: (Object | null | undefined)[]): Job<R>;
+native function launchInternalJobNative<F, R>(coroFun: F, args: NullishType[]): Job<R>;

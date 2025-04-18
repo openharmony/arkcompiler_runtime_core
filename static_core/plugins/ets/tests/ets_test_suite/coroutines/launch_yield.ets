@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 let counter = 0;
 
 function add(a: int): String {
@@ -21,7 +23,7 @@ function add(a: int): String {
 }
 
 export function main(): int {
-    launch add(5);
+    launch<String, (i: int) => String>(add, 5);
     Coroutine.Schedule();
     if (counter != 5) {
         console.println("Invalid counter: expected 5 but was " + counter);

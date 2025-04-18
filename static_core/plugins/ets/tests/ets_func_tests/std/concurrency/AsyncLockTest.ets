@@ -88,7 +88,7 @@ function asyncLockAvailableTest(): int {
     return await promise;
 }
 
-function testCallbackExclusive(lock: AsyncLock): Promise<int> {
+async function testCallbackExclusive(lock: AsyncLock): Promise<int> {
 
     let promise = lock.lockAsync((): int => {
         let status = lock.query();
@@ -104,8 +104,8 @@ function asyncLockExclusiveModeTest(): int {
 
     let lock = new AsyncLock();
 
-    let promise1 = launch testCallbackExclusive(lock);
-    let promise2 = launch testCallbackExclusive(lock);
+    let promise1 = testCallbackExclusive(lock);
+    let promise2 = testCallbackExclusive(lock);
     let promise3 = testCallbackExclusive(lock);
     let promise4 = testCallbackExclusive(lock);
 

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 const elementsNum: int = 100;
 
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
@@ -45,32 +47,32 @@ function main(): int {
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestInt", () =>
     {
-        let p1 = launch pusherInt();
+        let p1 = launch<void, () => void>(pusherInt);
         let arrayToCheck = popperInt();
         for (let i = 0; i < elementsNum; i++) {
             assertEQ(testArrayInt[i], arrayToCheck[i]);
         }
-        await p1;
+        p1.Await();
         assertEQ(queueInt.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestObj", () =>
     {
-        let p1 = launch pusherObj();
+        let p1 = launch<void, () => void>(pusherObj);
         let arrayToCheck = popperObj();
         for (let i = 0; i < elementsNum; i++) {
             assertEQ(testArrayObj[i], arrayToCheck[i]);
         }
-        await p1;
+        p1.Await();
         assertEQ(queueObj.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
-        let p1 = launch pusherStr();
+        let p1 = launch<void, () => void>(pusherStr);
         let arrayToCheck = popperStr();
         for (let i = 0; i < elementsNum; i++) {
             assertEQ(testArrayStr[i], arrayToCheck[i]);
         }
-        await p1;
+        p1.Await();
         assertEQ(queueStr.size, 0);
     });
 

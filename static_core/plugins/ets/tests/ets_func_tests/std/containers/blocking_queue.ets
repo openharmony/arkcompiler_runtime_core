@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+
 const elementsNum: int = 100;
 let testArrayInt: Array<int> = new Array<int>(elementsNum);
 let testArrayObj: Array<Object> = new Array<Object>(elementsNum);
@@ -102,8 +104,8 @@ function popperStr(): Array<String> {
 }
 
 function concurrentPushPopTestInt() {
-    let p1 = launch pusherInt();
-    await p1;
+    let p1 = launch<void, () => void>(pusherInt);
+    p1.Await();
     let arrayToCheck = popperInt();
     for (let i = 0; i < elementsNum; i++) {
         assertEQ(testArrayInt[i], arrayToCheck[i]);
@@ -112,8 +114,8 @@ function concurrentPushPopTestInt() {
 }
 
 function concurrentPushPopTestObj() {
-    let p1 = launch pusherObj();
-    await p1;
+    let p1 = launch<void, () => void>(pusherObj);
+    p1.Await();
     let arrayToCheck = popperObj();
     for (let i = 0; i < elementsNum; i++) {
         assertEQ(testArrayObj[i], arrayToCheck[i]);
@@ -122,8 +124,8 @@ function concurrentPushPopTestObj() {
 }
 
 function concurrentPushPopTestStr() {
-    let p1 = launch pusherStr();
-    await p1;
+    let p1 = launch<void, () => void>(pusherStr);
+    p1.Await();
     let arrayToCheck = popperStr();
     for (let i = 0; i < elementsNum; i++) {
         assertEQ(testArrayStr[i], arrayToCheck[i]);

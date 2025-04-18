@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+import { launch } from "std/concurrency"
+import { Job } from "std/core"
+
 class A { }
 
 class DummyRuntimeLinker extends RuntimeLinker {
@@ -249,7 +252,7 @@ class Test {
         const promises = new Array<Promise<void>>();
         // Add all files except "additional1.ets"
         for (let i = 1; i < allAbcFiles.length; i++) {
-            promises.push(launch Test.addSingleAbcFile(linker, allAbcFiles[i]));
+            promises.push(launch<void, (l: AbcRuntimeLinker, p: string) => void>(Test.addSingleAbcFile, linker, allAbcFiles[i]));
         }
         // Try to load a class from "additional1.ets"
         expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },

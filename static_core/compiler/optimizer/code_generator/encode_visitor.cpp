@@ -2130,30 +2130,6 @@ void EncodeVisitor::VisitInitString(GraphVisitor *visitor, Inst *inst)
     }
 }
 
-void EncodeVisitor::VisitCallLaunchStatic(GraphVisitor *visitor, Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallLaunchStatic());
-}
-
-void EncodeVisitor::VisitCallLaunchVirtual(GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallLaunchVirtual());
-}
-
-void EncodeVisitor::VisitCallResolvedLaunchStatic(GraphVisitor *visitor, Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallResolvedLaunchStatic());
-}
-
-void EncodeVisitor::VisitCallResolvedLaunchVirtual(GraphVisitor *visitor, Inst *inst)
-{
-    auto *enc = static_cast<EncodeVisitor *>(visitor);
-    enc->GetCodegen()->CreateLaunchCall(inst->CastToCallResolvedLaunchVirtual());
-}
-
 void EncodeVisitor::VisitResolveStatic(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);

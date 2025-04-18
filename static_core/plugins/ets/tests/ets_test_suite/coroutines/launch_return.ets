@@ -15,31 +15,31 @@
 
 const FLOAT_PI: float = 3.14;
 
-function byteFunc(): Object {
+async function byteFunc(): Promise<Object> {
     return -3 as byte as Object;
 }
 
-function charFunc(): Object {
+async function charFunc(): Promise<Object> {
     return c'x' as Object;
 }
 
-function shortFunc(): Object {
+async function shortFunc(): Promise<Object> {
     return 32767 as short as Object;
 }
 
-function intFunc(): Object {
+async function intFunc(): Promise<Object> {
     return 5 as Object;
 }
 
-function longFunc(): Object {
+async function longFunc(): Promise<Object> {
     return 777 as long as Object;
 }
 
-function floatFunc(): Object {
+async function floatFunc(): Promise<Object> {
     return FLOAT_PI as Object;
 }
 
-function doubleFunc(): Object {
+async function doubleFunc(): Promise<Object> {
     return 2.71 as Object;
 }
 
@@ -60,7 +60,7 @@ function check(test: String): void {
 
 export function main(): int {
     reset();
-    let byteP: Promise<Object> = launch byteFunc();
+    let byteP: Promise<Object> = byteFunc();
     let pThen = byteP.then<Object>((value: Object): Object => {
         if ((value as Byte) == -3) {
             passed = true;
@@ -74,7 +74,7 @@ export function main(): int {
     check("byteFunc");
 
     reset();
-    let charP: Promise<Object> = launch charFunc();
+    let charP: Promise<Object> = charFunc();
     pThen = charP.then<Object>((value: Object): Object => {
         if ((value as Char) == c'x') {
             passed = true;
@@ -88,7 +88,7 @@ export function main(): int {
     check("charFunc");
 
     reset();
-    let shortP: Promise<Object> = launch shortFunc();
+    let shortP: Promise<Object> = shortFunc();
     pThen = shortP.then<Object>((value: Object): Object => {
         if ((value as Short) == 32767) {
             passed = true;
@@ -102,7 +102,7 @@ export function main(): int {
     check("shortFunc");
 
     reset();
-    let intP: Promise<Object> = launch intFunc();
+    let intP: Promise<Object> = intFunc();
     pThen = intP.then<Object>((value: Object): Object => {
         if ((value as Int) == 5) {
             passed = true;
@@ -116,7 +116,7 @@ export function main(): int {
     check("intFunc");
 
     reset();
-    let longP: Promise<Object> = launch longFunc();
+    let longP: Promise<Object> = longFunc();
     pThen = longP.then<Object>((value: Object): Object => {
         if ((value as Long) == 777) {
             passed = true;
@@ -131,7 +131,7 @@ export function main(): int {
     check("longFunc");
 
     reset();
-    let floatP: Promise<Object> = launch floatFunc();
+    let floatP: Promise<Object> = floatFunc();
     pThen = floatP.then<Object>((value: Object): Object => {
         if ((value as Float) == FLOAT_PI) {
             passed = true;
@@ -146,7 +146,7 @@ export function main(): int {
     check("floatFunc");
 
     reset();
-    let doubleP: Promise<Object> = launch doubleFunc();
+    let doubleP: Promise<Object> = doubleFunc();
     pThen = doubleP.then<Object>((value: Object): Object => {
         if ((value as Double) == 2.71) {
             passed = true;

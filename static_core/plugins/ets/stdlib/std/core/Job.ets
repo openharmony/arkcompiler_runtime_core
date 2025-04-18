@@ -19,7 +19,7 @@ enum JobStatus { RUNNING = 0, FINISHED = 1, FAILED = 2 }
 
 /**
  * Object of Job class is used to represent a task
- * that was launched using std.concurrency.mlaunch function.
+ * that was launched using std.concurrency.launch function.
  */
 export class Job<T> {
 
