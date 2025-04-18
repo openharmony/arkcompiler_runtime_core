@@ -847,16 +847,6 @@
 #24017
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/interface_return_value_overload_1.ets
 
-#24428
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc2.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_0.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_1.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_2.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_3.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_1.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_3.ets
-17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_ref_4.ets
-
 #25070 ES2PANDA_NEG_FAIL
 17.experimental_features/03.array_creation_expressions/expr_n_12.ets
 
