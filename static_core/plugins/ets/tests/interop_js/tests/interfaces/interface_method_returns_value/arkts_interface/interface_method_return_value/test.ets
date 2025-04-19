@@ -89,7 +89,7 @@ class TestClass implements ISuperInterface {
         const returnedArray: FixedArray<number> = [1,2,3,4,5,6,8,9,0]
         return returnedArray
     }
-   
+
     loopback(): TestClass {
         return this;
     }

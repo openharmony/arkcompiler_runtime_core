@@ -8,7 +8,7 @@
 		"dynamicPaths": {
 			"js_code": {
 				"language": "js",
-				"ohmUrl": "${CMAKE_CURRENT_SOURCE_DIR}/index.js"
+				"ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/index"
 			}
 		}
 	}

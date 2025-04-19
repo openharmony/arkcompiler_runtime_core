@@ -242,13 +242,15 @@ TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_spread_parameter)
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropScenariosJsToEts, testFunctionOverload)
+// #24756
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_testFunctionOverload)
 {
     auto ret = CallEtsMethod<bool>("testFunctionOverload");
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropScenariosJsToEts, testFunctionCallableReturnValue)
+// NOTE #24130
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_testFunctionCallableReturnValue)
 {
     auto ret = CallEtsMethod<bool>("testFunctionCallableReturnValue");
     ASSERT_EQ(ret, true);

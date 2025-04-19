@@ -11,7 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js__generic_ets_to_ts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_ets_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic.ets
+    JS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_abstract.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_any.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_class.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_explicitly_declared.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_interface.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_subset_ref.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_tuple.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_union.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/generic.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

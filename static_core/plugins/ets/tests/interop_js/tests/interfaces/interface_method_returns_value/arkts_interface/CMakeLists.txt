@@ -14,8 +14,9 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_arkts_calls_js_interface_method__arkts_interfaces
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_arkts_calls_js_interface_method__arkts_interfaces
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/interface_method_return_value/test.ets
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.ts
     ETS_CONFIG ${ETS_CONFIG}
 )

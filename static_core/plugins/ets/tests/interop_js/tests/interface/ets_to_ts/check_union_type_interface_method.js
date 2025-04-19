@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { num, string, UnionTypeMethodClass, createInterfaceClassUnionTypeMethod } = require('interface_method.test.js');
+const { num, string, UnionTypeMethodClass, createInterfaceClassUnionTypeMethod } = require('interface_method.test.abc');
 
 function checkUnionTypeMethodClassInterfaceInt() {
 	const IClass = new UnionTypeMethodClass();
@@ -28,13 +28,13 @@ function checkUnionTypeMethodClassInterfaceString() {
 }
 
 function checkUnionInterfaceObjectFromEtsInt() {
-	const IClass = new createInterfaceClassUnionTypeMethod();
+	const IClass = createInterfaceClassUnionTypeMethod();
 
 	ASSERT_TRUE(IClass.get(num) === num);
 }
 
 function checkUnionInterfaceObjectFromEtsString() {
-	const IClass = new createInterfaceClassUnionTypeMethod();
+	const IClass = createInterfaceClassUnionTypeMethod();
 
 	ASSERT_TRUE(IClass.get(string) === string);
 }
@@ -52,13 +52,13 @@ function checkUnionValueTypeMethodClassInterfaceString() {
 }
 
 function checkUnionValueInterfaceObjectFromEtsInt() {
-	const IClass = new createInterfaceClassUnionTypeMethod();
+	const IClass = createInterfaceClassUnionTypeMethod();
 
 	ASSERT_TRUE(IClass.get(num) === num);
 }
 
 function checkUnionValueInterfaceObjectFromEtsString() {
-	const IClass = new createInterfaceClassUnionTypeMethod();
+	const IClass = createInterfaceClassUnionTypeMethod();
 
 	ASSERT_TRUE(IClass.get(string) === string);
 }
