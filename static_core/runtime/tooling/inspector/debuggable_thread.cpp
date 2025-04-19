@@ -102,6 +102,12 @@ void DebuggableThread::SetSkipAllPauses(bool skip)
     state_.SetSkipAllPauses(skip);
 }
 
+void DebuggableThread::SetMixedDebugEnabled(bool mixedDebugEnabled)
+{
+    os::memory::LockHolder lock(mutex_);
+    state_.SetMixedDebugEnabled(mixedDebugEnabled);
+}
+
 std::optional<BreakpointId> DebuggableThread::SetBreakpoint(const std::vector<PtLocation> &locations,
                                                             const std::string *condition)
 {

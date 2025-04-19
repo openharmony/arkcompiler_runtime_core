@@ -53,6 +53,7 @@ public:
     void Pause();
     void SetBreakpointsActive(bool active);
     void SetSkipAllPauses(bool skip);
+    void SetMixedDebugEnabled(bool mixedDebugEnabled);
     /**
      * @brief Set a breakpoint with optional condition.
      * @param locations to set breakpoint at, all will have the same BreakpointId.
@@ -126,6 +127,7 @@ private:
 
     bool paused_ {false};
     bool skipAllPauses_ {false};
+    bool mixedDebugEnabled_ {false};
 };
 }  // namespace ark::tooling::inspector
 
