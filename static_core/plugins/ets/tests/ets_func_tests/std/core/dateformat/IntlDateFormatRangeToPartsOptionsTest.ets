@@ -76,7 +76,7 @@ function initFormatResults(): void {
         return
     }
 
-    const resultUS = [
+    const resultUS:Intl.DateTimeRangeFormatPart[] = [
         RPart("month", "10", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("day", "11", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("year", "2024", "startRange"), RPart("literal", " – ", "shared"), 
@@ -87,7 +87,7 @@ function initFormatResults(): void {
 
     addFormatRangeToPartsResult("en-US", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" }, resultUS)
 
-    const resultCN = [
+    const resultCN:Intl.DateTimeRangeFormatPart[] = [
         RPart("year", "2024", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("month", "10", "startRange"), RPart("literal", "/", "startRange"), 
         RPart("day", "11", "startRange"), RPart("literal", " – ", "shared"), 

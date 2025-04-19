@@ -229,7 +229,7 @@ export final class JSRuntime {
     public static isPromise(object: JSValue): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    public static invoke(recv: JSValue, func: JSValue, ...args: JSValue[]): JSValue {
+    public static invoke(recv: JSValue, func: JSValue, ...args: FixedArray<JSValue>): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
     public static instanceOfStaticType(recv: JSValue, type: Type): boolean {
@@ -310,7 +310,7 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    public static instantiate(callable: JSValue, ...args: JSValue[]): JSValue {
+    public static instantiate(callable: JSValue, ...args: FixedArray<JSValue>): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
 

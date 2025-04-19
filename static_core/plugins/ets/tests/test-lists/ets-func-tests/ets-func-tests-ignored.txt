@@ -400,3 +400,10 @@ std/math/std_math_clz64_long.ets
 
 #18766
 spec/partial_type/partialType_main.ets
+
+std/containers/concurrent_hash_map/ConcurrentHashMap_MoreTypeTest.ets
+
+#25053
+std/core/IntlPluralRulesTest.ets
+std/core/dateformat/IntlDateFormatRangeToPartsOptionsTest.ets
+std/core/dateformat/IntlDateFormatToPartsOptionsTest.ets

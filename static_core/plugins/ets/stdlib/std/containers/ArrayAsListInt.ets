@@ -59,7 +59,7 @@ export class ArrayAsListInt implements ListInt {
      */
     public reserve(capacity: int): void {
         if (this.data.length < capacity) {
-            let newData = new Int[capacity];
+            let newData : FixedArray<Int> = new Int[capacity];
             for (let i = 0; i < this.curSize; ++i) {
                newData[i] = this.data[i];
             }
@@ -132,7 +132,7 @@ export class ArrayAsListInt implements ListInt {
      */
     public override pushBack(e: Int): void {
         if (this.curSize == this.data.length) {
-            let newData = new Int[ArrayAsListInt.getNewCapacity(this.data.length)];
+            let newData : FixedArray<Int> = new Int[ArrayAsListInt.getNewCapacity(this.data.length)];
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i];
             }
@@ -305,6 +305,6 @@ export class ArrayAsListInt implements ListInt {
     }
 
 */
-    private data: Int[] = [];
+    private data: FixedArray<Int> = [];
     private curSize: int;
 }

@@ -352,9 +352,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Creates an {{element['name']}}Array from number[]
+     * Creates an {{element['name']}}Array from FixedArray<number>
      */
-    public constructor(numbers: number[]) {
+    public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             {%- if element.get('name') != 'Uint8Clamped' %}
@@ -366,9 +366,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Creates an {{element['name']}}Array from int[]
+     * Creates an {{element['name']}}Array from FixedArray<int>
      */
-    public constructor(numbers: int[]) {
+    public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             {%- if element.get('name') != 'Uint8Clamped' %}
@@ -382,9 +382,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     {%- if element['name'] == 'BigUint64' %}
 
     /**
-     * Creates an {{element['name']}}Array from bigint[]
+     * Creates an {{element['name']}}Array from FixedArray<bigint>
      */
-    public constructor(numbers: bigint[]) {
+    public constructor(numbers: FixedArray<bigint>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, {{fromElementCompat % 'numbers[i]'}})
@@ -900,10 +900,10 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: {{element['subsetType']}}[], insertPos1: number): void {
+    public set(arr: FixedArray<{{element['subsetType']}}>, insertPos1: number): void {
         const insertPos = insertPos1 as int
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: {{element['primitiveType']}}[]): size of arr is greater than {{element['name']}}Array.length")
+            throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
         {%- if element.get('name') != 'Uint8Clamped' %}
@@ -924,9 +924,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
-    public set(arr: {{element['primitiveType']}}[], insertPos: int): void {
+    public set(arr: FixedArray<{{element['primitiveType']}}>, insertPos: int): void {
         if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
-            throw new RangeError("set(insertPos: int, arr: {{element['primitiveType']}}[]): size of arr is greater than {{element['name']}}Array.length")
+            throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
         {%- if element.get('name') != 'Uint8Clamped' %}
@@ -943,7 +943,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param arr array to copy data from
      */
-    public set(arr: {{element['subsetType']}}[]): void {
+    public set(arr: FixedArray<{{element['subsetType']}}>): void {
         this.set(arr, 0)
     }
 
@@ -952,7 +952,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param arr array to copy data from
      */
-    public set(arr: {{element['primitiveType']}}[]): void {
+    public set(arr: FixedArray<{{element['primitiveType']}}>): void {
         this.set(arr, 0)
     }
 
@@ -988,7 +988,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns new {{element['name']}}Array
      */
-    public static of(...items: {{argType}}[]): {{element['name']}}Array {
+    public static of(...items: FixedArray<{{argType}}>): {{element['name']}}Array {
         let res = new {{element['name']}}Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
         {%- if element.get('name') != 'Uint8Clamped' %}
@@ -1078,7 +1078,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new {{element['name']}}Array(6)
-        let index = new int[1]
+        let index : FixedArray<int> = new int[1]
         index[0] = 0
 
         iteratorForEach<{{element['subsetType']}}>(arrayLike.$_iterator(), (x: {{element['subsetType']}}): void => {
@@ -1116,7 +1116,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
         let res = new {{element['name']}}Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx = new int[1]
+        const idx : FixedArray<int> = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
         {%- if element.get('name') == 'BigUint64' %}
@@ -1392,7 +1392,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     *
     * @returns a new {{element['name']}}Array from data
     */
-    public of(...data: {{element['subsetType']}}[]): {{element['name']}}Array {
+    public of(...data: FixedArray<{{element['subsetType']}}>): {{element['name']}}Array {
         throw new Error("{{element['name']}}Array.of: not implemented")
     }
 
@@ -1538,7 +1538,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     {%- set sortCompareFnRetTy = 'number' %}
     {%- endif %}
     public sort(compareFn?: (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => {{sortCompareFnRetTy}}): this {
-        let arr: {{element['primitiveType']}}[] = new {{element['primitiveType']}}[this.lengthInt]
+        let arr: FixedArray<{{element['primitiveType']}}> = new {{element['primitiveType']}}[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
@@ -1941,7 +1941,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns a new {{element['name']}}Array with elements from current {{element['name']}}Array that satisfy condition fn
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{element['name']}}Array {
-        let markers = new boolean[this.lengthInt]
+        let markers : FixedArray<boolean> = new boolean[this.lengthInt]
         let resLen = 0
         for (let i = 0; i < this.lengthInt; i++) {
             markers[i] = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)

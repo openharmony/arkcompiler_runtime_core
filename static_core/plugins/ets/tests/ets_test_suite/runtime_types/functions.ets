@@ -27,7 +27,7 @@ class FakeLambdaObject extends Lambda2 implements Function1<__T, __T> {
         return fakeLambdaInvoke(a as string, undefined)
     }
 
-    public invokeR1(a: __T, ...r: __T[]): __T {
+    public invokeR1(a: __T, ...r: FixedArray<__T>): __T {
         r = Runtime.restArgumentsUnderapplicationStub(r, 1)
         return fakeLambdaInvoke(a as string, r[0] as string | undefined)
     }

@@ -15,6 +15,10 @@ ani_add_gtest(ani_test_array_getlen
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_get_length_test.cpp
 )
 
+ani_add_gtest(ani_test_fixedarray_getlen
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_get_length_test.cpp
+)
+
 ani_add_gtest(ani_test_array_region_boolean
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_boolean_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_region_boolean_test.ets
@@ -52,6 +56,10 @@ ani_add_gtest(ani_test_array_region_double
 
 ani_add_gtest(ani_test_array_new_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/array_new_ref_test.cpp
+)
+
+ani_add_gtest(ani_test_fixedarray_new_ref
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/fixedarray_new_ref_test.cpp
 )
 
 ani_add_gtest(ani_test_array_get_ref

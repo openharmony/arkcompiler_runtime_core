@@ -86,11 +86,11 @@ function jsonStringifyArrayWithFunctionReplacer(): int {
     Assertions.assertEquals(`[{},null]`, JSON.stringify(ar, replacer))
 
     const reverser = (key: string, value: NullishType): NullishType => 
-            Array.isArray(value) ? Array.from(value as Object[]).reverse() : value
+            Array.isArray(value) ? Array.from(value as FixedArray<Object>).reverse() : value
 
-    Assertions.assertEquals(`[{"id":2,"name":"A"},{"id":1,"name":"A"}]`, JSON.stringify([new A(1), new A(2)], reverser))
+    Assertions.assertEquals(`[{"id":2,"name":"A"},{"id":1,"name":"A"}]`, JSON.stringify([new A(1), new A(2)] as FixedArray<A>, reverser))
 
-    const numbers: number[] = [1, 2, 3]
+    const numbers: FixedArray<number> = [1, 2, 3]
     Assertions.assertEquals(`[1,2,3]`, JSON.stringify(numbers, dummyReplacer))
     Assertions.assertEquals(`["1","2","3"]`, JSON.stringify(numbers, toStringReplacer))
 
@@ -99,7 +99,7 @@ function jsonStringifyArrayWithFunctionReplacer(): int {
     return RESULT_SUCCESS
 }
 
-const EMPTY_ARRAY: string[] = []
+const EMPTY_ARRAY: FixedArray<string> = []
 
 function jsonStringifyWithArrayReplacer(): int {
     Assertions.assertEquals(`{}`, JSON.stringify(new A(), EMPTY_ARRAY))
@@ -108,7 +108,7 @@ function jsonStringifyWithArrayReplacer(): int {
 
     Assertions.assertEquals(`[true]`, JSON.stringify([new Boolean(true)], EMPTY_ARRAY))
 
-    const filter: (string | number)[] = ["id", 0]
+    const filter: FixedArray<string | number> = ["id", 0]
     Assertions.assertEquals(`{"id":1}`, JSON.stringify(new A(), filter))
 
     // space cases

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,8 +16,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "boolean[]",
-    method_signature: { arr: "boolean[]", value: boolean },
+    result_type: "FixedArray<boolean>",
+    method_signature: { arr: "FixedArray<boolean>", value: boolean },
     method_throws: "false",
     method_signature_desc: {first: "boolean_array", value: "boolean"},
     method_test_index_data:
@@ -58,8 +58,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "byte[]",
-    method_signature: { arr: "byte[]", value: byte },
+    result_type: "FixedArray<byte>",
+    method_signature: { arr: "FixedArray<byte>", value: byte },
     method_throws: "false",
     method_signature_desc: {first: "byte_array", value: "byte"},
     method_test_index_data:
@@ -82,8 +82,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "short[]",
-    method_signature: { arr: "short[]", value: short },
+    result_type: "FixedArray<short>",
+    method_signature: { arr: "FixedArray<short>", value: short },
     method_throws: "false",
     method_signature_desc: {first: "short_array", value: "short"},
     method_test_index_data:
@@ -106,8 +106,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "int[]",
-    method_signature: { arr: "int[]", value: int },
+    result_type: "FixedArray<int>",
+    method_signature: { arr: "FixedArray<int>", value: int },
     method_throws: "false",
     method_signature_desc: {first: "int_array", value: "int"},
     method_test_index_data:
@@ -130,8 +130,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "long[]",
-    method_signature: { arr: "long[]", value: long },
+    result_type: "FixedArray<long>",
+    method_signature: { arr: "FixedArray<long>", value: long },
     method_throws: "false",
     method_signature_desc: {first: "long_array", value: "long"},
     method_test_index_data:
@@ -154,8 +154,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "float[]",
-    method_signature: { arr: "float[]", value: float },
+    result_type: "FixedArray<float>",
+    method_signature: { arr: "FixedArray<float>", value: float },
     method_throws: "false",
     method_signature_desc: {first: "float_array", value: "float"},
     method_test_index_data:
@@ -179,8 +179,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "double[]",
-    method_signature: { arr: "double[]", value: double },
+    result_type: "FixedArray<double>",
+    method_signature: { arr: "FixedArray<double>", value: double },
     method_throws: "false",
     method_signature_desc: {first: "double_array", value: "double"},
     method_test_index_data:
@@ -203,8 +203,8 @@
     method_nature: procedure,
     result: arr,
     result_nature: array,
-    result_type: "char[]",
-    method_signature: { arr: "char[]", value: char },
+    result_type: "FixedArray<char>",
+    method_signature: { arr: "FixedArray<char>", value: char },
     method_signature_desc: {first: "char_array", value: "char"},
     method_throws: "false",
     method_test_index_data:

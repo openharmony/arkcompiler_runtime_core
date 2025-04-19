@@ -57,10 +57,10 @@ cases:
 
     - decl: |-
           class C {
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }
@@ -193,7 +193,7 @@ cases:
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nR" )
+          assertEQ( c.met(0.0),  "ND1" )
           assertEQ( c.met(new Number()),  "ND1" )
 
 
@@ -209,7 +209,7 @@ cases:
       use: |-
           // select method with rest parameter and undefined parameter
           let c: C = new C()
-          assertEQ( c.met(0.0),  "nR" )
+          assertEQ( c.met(0.0),  "ND2" )
           assertEQ( c.met(new Number()),  "ND2" )
 
 
@@ -253,10 +253,10 @@ cases:
               met(p: Number): string {
                   return "N"
               }
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }
@@ -272,10 +272,10 @@ cases:
               met(p: number): string {
                   return "n"
               }
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }
@@ -291,10 +291,10 @@ cases:
               met(p: Number): string {
                   return "N"
               }
-              met(...p: number[]): string {
+              met(...p: FixedArray<number>): string {
                   return "nR"
               }
-              met(...p: Number[]): string {
+              met(...p: FixedArray<Number>): string {
                   return "NR"
               }
           }

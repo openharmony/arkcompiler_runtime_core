@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,8 +80,8 @@ function check(result: number, message: String): number {
     return fail;
 }
 
-const source: {{.item.primitiveType}}[] = {{.item.data}};
-const abnormalSource: {{.item.primitiveType}}[] = {{.item.abnormalData}};
+const source: FixedArray<{{.item.primitiveType}}> = {{.item.data}};
+const abnormalSource: FixedArray<{{.item.primitiveType}}> = {{.item.abnormalData}};
 
 function testBytePerElement(): number {
     if ({{.item.objectType}}.BYTES_PER_ELEMENT as int == {{.item.primitiveSizeBytes}}) return success;
@@ -158,7 +158,7 @@ function testEmptyTypedArrayToString(): number {
 }
 
 function testNonEmptyTypedArrayToString(): number {
-    let source1: {{.item.elementType}}[] = [
+    let source1: FixedArray<{{.item.elementType}}> = [
         {{.item.create}}(1),
         {{.item.create}}(2),
         {{.item.create}}(3),
@@ -259,7 +259,7 @@ function testEmptyTypedArrayAt(): number {
 }
 
 function testNonEmptyTypedArrayReverse(): number {
-    let source1: {{.item.elementType}}[] = [
+    let source1: FixedArray<{{.item.elementType}}> = [
         {{.item.create}}(5),
         {{.item.create}}(3),
         {{.item.create}}(1),
@@ -278,7 +278,7 @@ function testNonEmptyTypedArrayReverse(): number {
 
     // Test toReversed function
     let reversedArray: {{.item.objectType}} = typedArray.reverse();
-    let expectedArray: {{.item.elementType}}[] = [
+    let expectedArray: FixedArray<{{.item.elementType}}> = [
         {{.item.create}}(2),
         {{.item.create}}(4),
         {{.item.create}}(1),
@@ -377,7 +377,7 @@ function testTypedArrayIteratorAfterModification(): number {
     // Testing iterator after modification
     let arrayIterator = typedArray.$_iterator();
     let next = arrayIterator.next();
-    let expectedValues: {{.item.elementType}}[] = [
+    let expectedValues: FixedArray<{{.item.elementType}}> = [
         {{.item.create}}(1),
         {{.item.create}}(2),
         {{.item.create}}(3),
@@ -703,7 +703,7 @@ function testTypedArrayMap(): number {
     return failures == 0 ? success: fail
 }
 
-const testTypedArrayOf = parametrize<{{.item.type}}[]>(
+const testTypedArrayOf = parametrize<FixedArray<{{.item.type}}>>(
    "testTypedArrayOf",
    [
        [
@@ -712,9 +712,9 @@ const testTypedArrayOf = parametrize<{{.item.type}}[]>(
            {{.item.create}}(0),
            {{.item.create}}(3),
            {{.item.create}}(4)
-       ] as {{.item.type}}[]
+       ] as FixedArray<{{.item.type}}>
    ],
-   (args: {{.item.type}}[]): number => {
+   (args: FixedArray<{{.item.type}}>): number => {
        const viaCtor = new {{.item.objectType}}(args)
        const viaOf = {{.item.objectType}}.of(...args)
 

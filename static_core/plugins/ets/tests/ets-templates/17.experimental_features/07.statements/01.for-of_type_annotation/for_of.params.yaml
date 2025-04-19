@@ -214,7 +214,7 @@ cases:
 
     - decl: |-
           // function, implicit widening conversion: byte -> int
-          let foo: () => byte[] = ():byte[] => { return [42 as byte, 43 as byte] }
+          let foo: () => FixedArray<byte> = ():FixedArray<byte> => { return [42 as byte, 43 as byte] }
       use: |-
           for (let v: int of foo()) res += new Int(v)
           if (res == "4243") return 0;

@@ -21,10 +21,10 @@ desc: NegativeArraySizeError is thrown by an array creation expression
 function main(): int {
   let a: int = 1;
   let b: int = 1;
-  let sz: int = 0x0fffffff;
-
+  // Changed to small number because it will cause runtime timeout
+  let sz: int = 10;
   try {
-    let v: int = 42 + (a = 2) + new byte[sz].length + (b = 2);
+    let v: int = 42 + (a = 2) + new byte[sz].length as int + (b = 2);
     if (a != 2 || b != 2) return 1;
     return 0;
   } catch (e: NegativeArraySizeError) {

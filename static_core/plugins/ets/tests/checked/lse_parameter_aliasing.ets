@@ -31,7 +31,7 @@
 //! INST_COUNT   "LoadArray", 3
 //! RUN          options: "", entry: "lse_parameter_aliasing.ETSGLOBAL::main"
 
-function test(a: String[][], b: String[][]): String {
+function test(a: FixedArray<FixedArray<String>>, b: FixedArray<FixedArray<String>>): String {
     let x = a[0]
     b[0] = new String[2]
     let y = a[0]
@@ -42,14 +42,14 @@ function test(a: String[][], b: String[][]): String {
 function main(): void
 {
     {
-        let c = new String[2][2]
-        let d = new String[2][2]
+        let c: FixedArray<FixedArray<String>> = new String[2][2]
+        let d: FixedArray<FixedArray<String>> = new String[2][2]
         c[0][0] = "b"
         assertEQ(test(c, d), "a")
         assertEQ(c[0][0], "a")
     }
     {
-        let c = new String[2][2]
+        let c: FixedArray<FixedArray<String>> = new String[2][2]
         c[0][0] = "b"
         assertEQ(test(c, c), "")
         assertEQ(c[0][0], "")

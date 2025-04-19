@@ -15,7 +15,7 @@
 
 const emptyString = "";
 let nullString: String = new String(null);
-let chArray: char[] = [c'!', c'@', c'#', c'$', c'%'];
+let chArray: FixedArray<char> = [c'!', c'@', c'#', c'$', c'%'];
 
 const b1: byte = Byte.MIN_VALUE as byte
 const b2: byte = 0 as byte
@@ -113,7 +113,7 @@ function main(): int {
         // =============== Test 4 ===============
         // An element of array may be changed after StringBuilder is constructed from the array.
         // So StringBuilder must add a copy of the array to the buffer.
-        let arr4: char[] = new char[3];
+        let arr4: FixedArray<char> = new char[3];
         arr4[0] = c'a';
         arr4[1] = c'b';
         arr4[2] = c'c';

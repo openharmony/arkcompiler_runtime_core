@@ -41,7 +41,7 @@ export const KEY_NOT_FOUND = -1;
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: boolean[], key: boolean, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -75,7 +75,7 @@ export function lowerBoundSearch(arr: boolean[], key: boolean, startIndex: int, 
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: boolean[], key: boolean): int {
+export function lowerBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -94,7 +94,7 @@ export function lowerBoundSearch(arr: boolean[], key: boolean): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: boolean[], key: boolean, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -128,7 +128,7 @@ export function upperBoundSearch(arr: boolean[], key: boolean, startIndex: int, 
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: boolean[], key: boolean): int {
+export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -138,8 +138,8 @@ export function upperBoundSearch(arr: boolean[], key: boolean): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: boolean[]): boolean[] {
-    const r = new boolean[src.length];
+export function copyOf(src: FixedArray<boolean>): FixedArray<boolean> {
+    const r : FixedArray<boolean> = new boolean[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -167,7 +167,7 @@ export function copyOf(src: boolean[]): boolean[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: boolean[], dst: boolean[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<boolean>, dst: FixedArray<boolean>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -207,7 +207,7 @@ export function copyTo(src: boolean[], dst: boolean[], dstStart: int, srcStart: 
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: byte[], key: byte, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -241,7 +241,7 @@ export function lowerBoundSearch(arr: byte[], key: byte, startIndex: int, endInd
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: byte[], key: byte): int {
+export function lowerBoundSearch(arr: FixedArray<byte>, key: byte): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -260,7 +260,7 @@ export function lowerBoundSearch(arr: byte[], key: byte): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: byte[], key: byte, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<byte>, key: byte, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -294,7 +294,7 @@ export function upperBoundSearch(arr: byte[], key: byte, startIndex: int, endInd
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: byte[], key: byte): int {
+export function upperBoundSearch(arr: FixedArray<byte>, key: byte): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -304,8 +304,8 @@ export function upperBoundSearch(arr: byte[], key: byte): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: byte[]): byte[] {
-    const r = new byte[src.length];
+export function copyOf(src: FixedArray<byte>): FixedArray<byte> {
+    const r : FixedArray<byte> = new byte[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -333,7 +333,7 @@ export function copyOf(src: byte[]): byte[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: byte[], dst: byte[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<byte>, dst: FixedArray<byte>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -373,7 +373,7 @@ export function copyTo(src: byte[], dst: byte[], dstStart: int, srcStart: int, s
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: short[], key: short, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<short>, key: short, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -407,7 +407,7 @@ export function lowerBoundSearch(arr: short[], key: short, startIndex: int, endI
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: short[], key: short): int {
+export function lowerBoundSearch(arr: FixedArray<short>, key: short): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -426,7 +426,7 @@ export function lowerBoundSearch(arr: short[], key: short): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: short[], key: short, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<short>, key: short, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -460,7 +460,7 @@ export function upperBoundSearch(arr: short[], key: short, startIndex: int, endI
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: short[], key: short): int {
+export function upperBoundSearch(arr: FixedArray<short>, key: short): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -470,8 +470,8 @@ export function upperBoundSearch(arr: short[], key: short): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: short[]): short[] {
-    const r = new short[src.length];
+export function copyOf(src: FixedArray<short>): FixedArray<short> {
+    const r : FixedArray<short> = new short[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -499,7 +499,7 @@ export function copyOf(src: short[]): short[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: short[], dst: short[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<short>, dst: FixedArray<short>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -539,7 +539,7 @@ export function copyTo(src: short[], dst: short[], dstStart: int, srcStart: int,
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: int[], key: int, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<int>, key: int, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -573,7 +573,7 @@ export function lowerBoundSearch(arr: int[], key: int, startIndex: int, endIndex
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: int[], key: int): int {
+export function lowerBoundSearch(arr: FixedArray<int>, key: int): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -592,7 +592,7 @@ export function lowerBoundSearch(arr: int[], key: int): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: int[], key: int, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<int>, key: int, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -626,7 +626,7 @@ export function upperBoundSearch(arr: int[], key: int, startIndex: int, endIndex
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: int[], key: int): int {
+export function upperBoundSearch(arr: FixedArray<int>, key: int): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -636,8 +636,8 @@ export function upperBoundSearch(arr: int[], key: int): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: int[]): int[] {
-    const r = new int[src.length];
+export function copyOf(src: FixedArray<int>): FixedArray<int> {
+    const r : FixedArray<int> = new int[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -665,7 +665,7 @@ export function copyOf(src: int[]): int[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: int[], dst: int[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<int>, dst: FixedArray<int>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -705,7 +705,7 @@ export function copyTo(src: int[], dst: int[], dstStart: int, srcStart: int, src
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: long[], key: long, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<long>, key: long, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -739,7 +739,7 @@ export function lowerBoundSearch(arr: long[], key: long, startIndex: int, endInd
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: long[], key: long): int {
+export function lowerBoundSearch(arr: FixedArray<long>, key: long): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -758,7 +758,7 @@ export function lowerBoundSearch(arr: long[], key: long): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: long[], key: long, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<long>, key: long, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -792,7 +792,7 @@ export function upperBoundSearch(arr: long[], key: long, startIndex: int, endInd
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: long[], key: long): int {
+export function upperBoundSearch(arr: FixedArray<long>, key: long): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -802,8 +802,8 @@ export function upperBoundSearch(arr: long[], key: long): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: long[]): long[] {
-    const r = new long[src.length];
+export function copyOf(src: FixedArray<long>): FixedArray<long> {
+    const r : FixedArray<long> = new long[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -831,7 +831,7 @@ export function copyOf(src: long[]): long[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: long[], dst: long[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<long>, dst: FixedArray<long>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -871,7 +871,7 @@ export function copyTo(src: long[], dst: long[], dstStart: int, srcStart: int, s
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: float[], key: float, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<float>, key: float, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -905,7 +905,7 @@ export function lowerBoundSearch(arr: float[], key: float, startIndex: int, endI
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: float[], key: float): int {
+export function lowerBoundSearch(arr: FixedArray<float>, key: float): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -924,7 +924,7 @@ export function lowerBoundSearch(arr: float[], key: float): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: float[], key: float, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<float>, key: float, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -958,7 +958,7 @@ export function upperBoundSearch(arr: float[], key: float, startIndex: int, endI
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: float[], key: float): int {
+export function upperBoundSearch(arr: FixedArray<float>, key: float): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -968,8 +968,8 @@ export function upperBoundSearch(arr: float[], key: float): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: float[]): float[] {
-    const r = new float[src.length];
+export function copyOf(src: FixedArray<float>): FixedArray<float> {
+    const r : FixedArray<float> = new float[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -997,7 +997,7 @@ export function copyOf(src: float[]): float[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: float[], dst: float[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<float>, dst: FixedArray<float>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -1037,7 +1037,7 @@ export function copyTo(src: float[], dst: float[], dstStart: int, srcStart: int,
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: double[], key: double, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<double>, key: double, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -1071,7 +1071,7 @@ export function lowerBoundSearch(arr: double[], key: double, startIndex: int, en
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: double[], key: double): int {
+export function lowerBoundSearch(arr: FixedArray<double>, key: double): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -1090,7 +1090,7 @@ export function lowerBoundSearch(arr: double[], key: double): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: double[], key: double, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<double>, key: double, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -1124,7 +1124,7 @@ export function upperBoundSearch(arr: double[], key: double, startIndex: int, en
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: double[], key: double): int {
+export function upperBoundSearch(arr: FixedArray<double>, key: double): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -1134,8 +1134,8 @@ export function upperBoundSearch(arr: double[], key: double): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: double[]): double[] {
-    const r = new double[src.length];
+export function copyOf(src: FixedArray<double>): FixedArray<double> {
+    const r : FixedArray<double> = new double[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1163,7 +1163,7 @@ export function copyOf(src: double[]): double[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: double[], dst: double[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<double>, dst: FixedArray<double>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -1203,7 +1203,7 @@ export function copyTo(src: double[], dst: double[], dstStart: int, srcStart: in
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than endIndex
  */
-export function lowerBoundSearch(arr: char[], key: char, startIndex: int, endIndex: int): int {
+export function lowerBoundSearch(arr: FixedArray<char>, key: char, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new RangeError("lowerBoundSearch: bounds verification failed")
     }
@@ -1237,7 +1237,7 @@ export function lowerBoundSearch(arr: char[], key: char, startIndex: int, endInd
  *
  * @returns index such (arr[index] < key) is false. If no such index is found than arr.length
  */
-export function lowerBoundSearch(arr: char[], key: char): int {
+export function lowerBoundSearch(arr: FixedArray<char>, key: char): int {
     return lowerBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -1256,7 +1256,7 @@ export function lowerBoundSearch(arr: char[], key: char): int {
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than endIndex
  */
-export function upperBoundSearch(arr: char[], key: char, startIndex: int, endIndex: int): int {
+export function upperBoundSearch(arr: FixedArray<char>, key: char, startIndex: int, endIndex: int): int {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new RangeError("upperBoundSearch: bounds verification failed")
     }
@@ -1290,7 +1290,7 @@ export function upperBoundSearch(arr: char[], key: char, startIndex: int, endInd
  *
  * @returns index such (key < arr[index]) is true. If no such index is found than arr.length
  */
-export function upperBoundSearch(arr: char[], key: char): int {
+export function upperBoundSearch(arr: FixedArray<char>, key: char): int {
     return upperBoundSearch(arr, key, 0, arr.length);
 }
 
@@ -1300,8 +1300,8 @@ export function upperBoundSearch(arr: char[], key: char): int {
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: char[]): char[] {
-    const r = new char[src.length];
+export function copyOf(src: FixedArray<char>): FixedArray<char> {
+    const r : FixedArray<char> = new char[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1329,7 +1329,7 @@ export function copyOf(src: char[]): char[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: char[], dst: char[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
@@ -1353,8 +1353,8 @@ export function copyTo(src: char[], dst: char[], dstStart: int, srcStart: int, s
  * @param src source array to be copied
  * @returns copy of `src`
  */
-export function copyOf(src: NullishType[]): NullishType[] {
-    const r = new NullishType[src.length];
+export function copyOf(src: FixedArray<NullishType>): FixedArray<NullishType> {
+    const r : FixedArray<NullishType> = new NullishType[src.length];
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1382,7 +1382,7 @@ export function copyOf(src: NullishType[]): NullishType[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: NullishType[], dst: NullishType[], dstStart: int, srcStart: int, srcEnd: int): void {
+export function copyTo(src: FixedArray<NullishType>, dst: FixedArray<NullishType>, dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }

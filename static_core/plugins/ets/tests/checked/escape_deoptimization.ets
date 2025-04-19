@@ -18,7 +18,7 @@ class A {
     b: int;
 };
 
-let arr: int[] = new int[4]
+let arr: FixedArray<int> = new int[4]
 function foo(obj: A, cnt: int): int  {
     obj.b = 2;
     return arr[cnt]
@@ -60,17 +60,20 @@ function __noinline__abort() {
     assertTrue(false);
 }
 
+// remove dependence from assert in stdlib
+function cassert(v: boolean, s?: string) { if (!v) { throw new AssertionError(s) } }
+
 function main() {
     let cnt: int = 0
-    let a: int[] = [ 42 ]
+    let a: FixedArray<int> = [ 42 ]
     try {
        let obj = new A();
        obj.a = 1;
        a = [foo(obj, cnt++), foo(obj, cnt++), foo(obj, cnt++), foo(obj, cnt++), foo(obj, cnt++)];
     } catch (e) {
-        assertTrue(e instanceof ArrayIndexOutOfBoundsError, "Throwed not ArrayIndexOutOfBoundsError");
-        assertEQ(a.length, 1);
-        assertEQ(a[0], 42);
+        cassert(e instanceof ArrayIndexOutOfBoundsError, "Throwed not ArrayIndexOutOfBoundsError");
+        cassert(a.length == 1);
+        cassert(a[0] == 42);
         return
     }
     __noinline__abort();

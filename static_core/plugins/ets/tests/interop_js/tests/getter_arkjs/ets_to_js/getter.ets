@@ -212,8 +212,8 @@ function create_any_type_getter_class_from_ets_bool(arg: boolean): AnyTypeClass<
     return new AnyTypeClass<boolean>(arg);
 }
 
-function create_any_type_getter_class_from_ets_arr(arg: int[]): AnyTypeClass<int[]> {
-    return new AnyTypeClass<int[]>(arg);
+function create_any_type_getter_class_from_ets_arr(arg: FixedArray<int>): AnyTypeClass<FixedArray<int>> {
+    return new AnyTypeClass<FixedArray<int>>(arg);
 }
 
 function create_any_type_getter_class_from_ets_obj(arg: object): AnyTypeClass<object> {

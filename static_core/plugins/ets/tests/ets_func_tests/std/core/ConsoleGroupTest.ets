@@ -75,7 +75,7 @@ class ConsoleLogger {
         
         console.groupCollapsed("Response");
         console.log("Status: 200");
-        console.log("Data:", [new User(1, "John")]);
+        console.log("Data:", [new User(1, "John")] as FixedArray<User>);
         console.groupEnd();
         console.groupEnd();
     }

@@ -42,8 +42,8 @@ type CoroFunT<A, R> = (
  *
  * @returns instance of the Job class that represents newly launched coroutine.
  */
-export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: NullishType[]): Job<R> {
-  return launchInternal<R, F>(coroFun, args as NullishType[]);
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<NullishType>): Job<R> {
+  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>);
 }
 
 /**
@@ -55,8 +55,8 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: Nul
  *
  * @returns instance of the Job class that represents newly launched coroutine.
  */
-export function mlaunch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: NullishType[]): Job<R> {
-  return launchInternal<R, F>(coroFun, args as NullishType[]);
+export function mlaunch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<NullishType>): Job<R> {
+  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>);
 }
 
 // This overload is currently blocked by issue #22472. Enable when frontend supports it
@@ -68,14 +68,14 @@ export function mlaunch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: Nu
 //     return launchInternal<R, F>(coroFun, launchParams, args as NullishType[])
 // }
 
-function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: NullishType[]): Job<R> {
+function launchInternal<R, F extends CoroFunT<never, R>>(coroFun: F, args: FixedArray<NullishType>): Job<R> {
   const paddedArgs = padArrayToMaxArgs(args);
-  return launchInternalJobNative<F, R>(coroFun, args as NullishType[]);
+  return launchInternalJobNative<F, R>(coroFun, args as FixedArray<NullishType>);
 }
 
-function padArrayToMaxArgs<T>(arr: T[]): (T | undefined)[] {
+function padArrayToMaxArgs<T>(arr: FixedArray<T>): FixedArray<(T | undefined)> {
   const MAX_ARGS = 16;
-  const res = new (T | undefined)[MAX_ARGS];
+  const res: FixedArray<(T | undefined)> = new (T | undefined)[MAX_ARGS];
   for (let i = 0; i < arr.length && i < MAX_ARGS; ++i) {
     res[i] = arr[i];
   }
@@ -85,4 +85,4 @@ function padArrayToMaxArgs<T>(arr: T[]): (T | undefined)[] {
   return res;
 }
 
-native function launchInternalJobNative<F, R>(coroFun: F, args: NullishType[]): Job<R>;
+native function launchInternalJobNative<F, R>(coroFun: F, args: FixedArray<NullishType>): Job<R>;

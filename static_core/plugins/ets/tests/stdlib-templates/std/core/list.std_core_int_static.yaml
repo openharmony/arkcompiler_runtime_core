@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,12 +14,12 @@
 - {
     method_name: valueOf,
     object_type: Int,
-    param_init_data_types: {"param1":"int[]"} ,
+    param_init_data_types: {"param1":"FixedArray<int>"} ,
     param_types: {"param1":int},
     param_nature: {"param1": primitive},
     method_return_type: Int,
     expected_data_item_type: int,
-    expected_data_type: "int[]",
+    expected_data_type: "FixedArray<int>",
     param_list: {"param1": "[(-1) as int, 0 as int, 1 as int, Int.MAX_VALUE as int, Int.MIN_VALUE as int]"},
     expected_test_data: "[(-1) as int, 0 as int, 1 as int, Int.MAX_VALUE as int, Int.MIN_VALUE as int]",
     verify_test_result_function: compareWrapperObjectValue,

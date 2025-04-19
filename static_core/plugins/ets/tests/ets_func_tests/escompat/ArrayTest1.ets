@@ -52,8 +52,8 @@ function main(): int {
     return res;
 }
 
-const d: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
-const dd: Number[] = [1, 0, 3, 4, 0, 6];
+const d: Array<Number> = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
+const dd: FixedArray<Number> = [1, 0, 3, 4, 0, 6];
 
 function newProxy<T>(a: Array<T>): Array<T> {
     class Handler<T> extends DefaultArrayProxyHandler<T> {}
@@ -117,7 +117,7 @@ function createWithGivenSize(): int {
 }
 
 function isArrayRawArrayNumber(): int {
-    let n: Number[] = [];
+    let n: FixedArray<Number> = [];
     return Array.isArray(n) == true ? success : fail;
 }
 
@@ -262,12 +262,12 @@ function toSplicedArg2(): int {
 
 function check(fn: () => int, message: String): int {
     let result: int = 0;
-    try {
+    // try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Exception catched: " + e);
-        return fail;
-    }
+    // } catch(e) {
+    //     console.println("FAILED: " + message + " => Exception catched: " + e);
+    //     return fail;
+    // }
     if (result == success) {
         return success;
     }

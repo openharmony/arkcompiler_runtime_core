@@ -177,7 +177,7 @@ cases:
 
     # Custom
   - decl: |-
-      type T = int[]
+      type T = FixedArray<int>
       const a: T = [1, -2];
     check: |-
       function main() {
@@ -185,7 +185,7 @@ cases:
       }
 
   - decl: |-
-      type T = Int[][]
+      type T = FixedArray<FixedArray<Int>>
       const a: T = [[new Int(1)], [new Int(-2)]];
     check: |-
       function main() {

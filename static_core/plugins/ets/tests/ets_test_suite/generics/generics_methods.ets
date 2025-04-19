@@ -14,9 +14,9 @@
  */
 
 class Arr<T> {
-	public constructor(a: (T | undefined)[]) {}
+	public constructor(a: FixedArray<(T | undefined)>) {}
 
-	public mp<U>(a: int): (U | undefined)[] {
+	public mp<U>(a: int): FixedArray<(U | undefined)> {
         return new (U | undefined)[a]
 	}
 	public mg<U>(): Arr<U> {

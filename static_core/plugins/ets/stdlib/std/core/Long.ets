@@ -183,7 +183,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
         if (negative) {
             ++digitsNum;
         }
-        let data = new char[digitsNum];
+        let data : FixedArray<char> = new char[digitsNum];
         let curPlace = digitsNum - 1;
         while (val != 0) {
             let remainder = val % (radix as int);

@@ -23,8 +23,8 @@ tags:
 ---*/
 
 function main() {
-  let src_{{loop.index}}: {{c.src_type}}[] = new {{c.src_type}}[1];
-  let dst_{{loop.index}}: {{c.dst_type}}[] = new {{c.dst_type}}[1];
+  let src_{{loop.index}}: FixedArray<{{c.src_type}}> = new {{c.src_type}}[1];
+  let dst_{{loop.index}}: FixedArray<{{c.dst_type}}> = new {{c.dst_type}}[1];
   dst_{{loop.index}} = src_{{loop.index}};
 }
 {% endfor %}

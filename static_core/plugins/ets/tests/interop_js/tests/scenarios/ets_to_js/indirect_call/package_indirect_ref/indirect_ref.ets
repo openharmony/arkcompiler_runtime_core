@@ -25,7 +25,7 @@ function GCJSRuntimeCleanup(): void {
     }
 }
 
-function function_type_ref_array(arg: number[]): number[] {
+function function_type_ref_array(arg: FixedArray<number>): FixedArray<number> {
     return [...arg];
 }
 

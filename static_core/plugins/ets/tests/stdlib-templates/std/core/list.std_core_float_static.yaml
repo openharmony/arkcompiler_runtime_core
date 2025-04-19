@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,13 +14,13 @@
 - {
     method_name: valueOf,
     object_type: Float,
-    param_init_data_types: {"param1":"float[]"} ,
+    param_init_data_types: {"param1":"FixedArray<float>"} ,
     param_types: {"param1":Float},
     param_nature: {"param1": object},
     param_list: {"param1": "[(-1) as float, 0 as float, 1 as float, Float.MAX_VALUE as float, Float.MIN_VALUE as float]"},
     method_return_type: Float,
     expected_data_item_type: Float,
-    expected_data_type: "float[]",
+    expected_data_type: "FixedArray<float>",
 
     expected_test_data: "[(-1) as float, 0 as float, 1 as float, Float.MAX_VALUE as float, Float.MIN_VALUE as float]",
     verify_test_result_function: compareWrapperObjectValue,
@@ -28,13 +28,13 @@
 - {
     method_name: isSafeInteger,
     object_type: Float,
-    param_init_data_types: {"param1":"float[]"},
+    param_init_data_types: {"param1":"FixedArray<float>"},
     param_types: {"param1":Float},
     param_nature: {"param1": object},
     param_list: {"param1": "[(-1) as float, 0 as float, 1 as float, Float.MAX_SAFE_INTEGER, Float.MAX_SAFE_INTEGER + 1, 12.5 as float, -Float.MAX_SAFE_INTEGER, (-Float.MAX_SAFE_INTEGER - 1)]"},
     method_return_type: boolean,
     expected_data_item_type: boolean,
-    expected_data_type: "boolean[]",
+    expected_data_type: "FixedArray<boolean>",
     expected_test_data: "[true, true, true, true, false, false, true, false]",
     verify_test_result_function: comparePrimitiveValue
   }

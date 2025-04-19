@@ -50,7 +50,7 @@ class StringArrayProxyHandler extends DefaultArrayProxyHandler<string> {
         return super.set(target, name, value)
     }
 
-    override invoke(target: Array<string>, method: Method, args: NullishType[]): NullishType {
+    override invoke(target: Array<string>, method: Method, args: FixedArray<NullishType>): NullishType {
         if (method.getName() == "pop") {
             this.popTrapped = true
         } else if (method.getName() == "splice") {

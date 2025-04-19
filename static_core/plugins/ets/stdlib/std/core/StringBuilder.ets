@@ -21,7 +21,7 @@ package std.core;
 export final class StringBuilder {
     private static readonly INITIAL_BUF_SIZE: int = 16;
 
-    private buf: (Object|undefined)[] = new (Object|undefined)[StringBuilder.INITIAL_BUF_SIZE]; // array with pointers to strings or char[]
+    private buf: FixedArray<(Object|undefined)> = new (Object|undefined)[StringBuilder.INITIAL_BUF_SIZE]; // array with pointers to strings or char[]
     private index: int = 0;                                             // index of the current free element in the buf
     private length: int = 0;                                            // length of the resulting string
     private compress: boolean = true;                                   // compress or not the resulting string.
@@ -37,6 +37,20 @@ export final class StringBuilder {
      * @param fromChars array that will be used to initialize the builder
      */
     constructor(fromChars: char[]) {
+        let s: String = new String(fromChars);
+        this.buf[this.index++] = s;
+        this.length = s.getLength();
+        if (!s.isCompressed()) {
+            this.compress = false;
+        }
+    }
+
+    /**
+     * Construct a new builder instance with the provided array of chars
+     *
+     * @param fromChars array that will be used to initialize the builder
+     */
+    constructor(fromChars: FixedArray<char>) {
         let s: String = new String(fromChars);
         this.buf[this.index++] = s;
         this.length = s.getLength();

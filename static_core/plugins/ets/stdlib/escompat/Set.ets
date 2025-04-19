@@ -69,7 +69,7 @@ export final class Set<K> implements ReadonlySet<K> {
      * Constructs a Set from collection
      * @param elements initial collection
      */
-    constructor(elements?: Iterable<K> | readonly K[] | null) {
+    constructor(elements?: Iterable<K> | FixedArray<K> | null) {
         if (elements == null) {
             this.elements = new Map<K, K>();
         } else if (elements instanceof Iterable) {

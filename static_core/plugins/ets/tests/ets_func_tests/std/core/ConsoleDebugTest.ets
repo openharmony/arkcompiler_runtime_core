@@ -77,7 +77,7 @@ function main() {
     console.debug("Active connections:", [
         new Connection(1, "user1"),
         new Connection(2, "user2")
-    ]);
+    ] as FixedArray<Connection>);
     
     // Debug with Error objects
     try {

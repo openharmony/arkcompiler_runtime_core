@@ -97,20 +97,20 @@ cases:
     params: override-compatible with itself return value
 
   - base: |-
-      foo(): Base[] {
+      foo(): FixedArray<Base> {
           res = 1
           return [new Base()]
       }
-      bar(): Base[] {
+      bar(): FixedArray<Base> {
           res = 1
           return [new Base()]
       }
     derived: |-
-      foo(): Derived[] {
+      foo(): FixedArray<Derived> {
           res = 2
           return [new Derived()]
       }
-      override bar(): Derived[] {
+      override bar(): FixedArray<Derived> {
           res = 2
           return [new Derived()]
       }

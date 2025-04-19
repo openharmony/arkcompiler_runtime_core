@@ -40,7 +40,7 @@ class SupplierImplForShadow implements Supplier {
 type SupplierN = Supplier|null;
 
 class Base {
-    public call(...values: SupplierN[]): int {
+    public call(...values: Supplier[]): int {
         let sum: int = 0;
         for(let call of values) {
             if(call != null) sum += call.get();
@@ -52,7 +52,7 @@ class Base {
 
 class Testee extends Base {
 
-    public call(prefix: String, ...values: SupplierN[]): int {
+    public call(prefix: String, ...values: Supplier[]): int {
         let sum: int = 0;
         for(let call of values) {
             if(call != null) sum += call.get();

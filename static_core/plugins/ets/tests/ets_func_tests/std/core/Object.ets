@@ -128,7 +128,7 @@ function objectKeys(): int {
     let fl: float = 50.0
     let dou: double = 60.0
 
-    let arr: number[] = [10, 20, 30]
+    let arr: FixedArray<number> = [10, 20, 30]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, 20, 30)
@@ -149,6 +149,7 @@ function objectKeys(): int {
     result += strArraysAreEqual(Object.keys(dou), emptyArr) ? 0 : 1
 
     result += strArraysAreEqual(Object.keys(arr), ["0", "1", "2"]) ? 0 : 1
+
     result += strArraysAreEqual(Object.keys(str), ["0", "1", "2"]) ? 0 : 1
 
     result += strArraysAreEqual(Object.keys(cl), ["x", "y", "z"]) ? 0 : 1
@@ -170,7 +171,7 @@ function objectValues(): int {
     let fl: float = 50.0
     let dou: double = 60.0
 
-    let arr: number[] = [10, 20, 30]
+    let arr: FixedArray<number> = [10, 20, 30]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, 20, undefined)
@@ -216,7 +217,7 @@ function objectEntries(): int {
     let fl: float = 50.0
     let dou: double = 60.0
 
-    let arr: number[] = [10, 20, 30]
+    let arr: FixedArray<number> = [10, 20, 30]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, null, 30)
@@ -227,34 +228,34 @@ function objectEntries(): int {
 
     let emptyTuple: NullishTuple[] = new NullishTuple[0]
 
-    result += tupleAreEqual(Object.entries(c), emptyTuple) ? 0 : 1
-    result += tupleAreEqual(Object.entries(bo), emptyTuple) ? 0 : 1
-    result += tupleAreEqual(Object.entries(bt), emptyTuple) ? 0 : 1
-    result += tupleAreEqual(Object.entries(sh), emptyTuple) ? 0 : 1
-    result += tupleAreEqual(Object.entries(i), emptyTuple) ? 0 : 1
-    result += tupleAreEqual(Object.entries(lo), emptyTuple) ? 0 : 1
-    result += tupleAreEqual(Object.entries(fl), emptyTuple) ? 0 : 1
-    result += tupleAreEqual(Object.entries(dou), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(c) as Object as NullishTuple[], emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(bo) as Object as NullishTuple[], emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(bt) as Object as NullishTuple[], emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(sh) as Object as NullishTuple[], emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(i) as Object as NullishTuple[], emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(lo) as Object as NullishTuple[], emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(fl) as Object as NullishTuple[], emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(dou) as Object as NullishTuple[], emptyTuple) ? 0 : 1
 
     let arrVal: NullishTuple[] = new NullishTuple[3]
     arrVal[0] = ["0", new Number(10)] as TupleT
     arrVal[1] = ["1", new Number(20)] as TupleT
     arrVal[2] = ["2", new Number(30)] as TupleT
-    result += tupleAreEqual(Object.entries(arr), arrVal) ? 0 : 1
+    result += tupleAreEqual(Object.entries(arr) as Object as NullishTuple[], arrVal) ? 0 : 1
 
     let strVal: NullishTuple[] = new NullishTuple[3]
     strVal[0] = ["0", "a"] as TupleT
     strVal[1] = ["1", "b"] as TupleT
     strVal[2] = ["2", "c"] as TupleT
-    result += tupleAreEqual(Object.entries(str), strVal) ? 0 : 1
+    result += tupleAreEqual(Object.entries(str) as Object as NullishTuple[], strVal) ? 0 : 1
 
     let clVal: NullishTuple[] = new NullishTuple[3]
     clVal[0] = ["x", new Number(10)] as TupleT
     clVal[1] = ["y", null] as TupleT
     clVal[2] = ["z", new Number(30)] as TupleT
-    result += tupleAreEqual(Object.entries(cl), clVal) ? 0 : 1
+    result += tupleAreEqual(Object.entries(cl) as Object as NullishTuple[], clVal) ? 0 : 1
 
-    result += tupleAreEqual(Object.entries(lambda), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(lambda) as Object as NullishTuple[], emptyTuple) ? 0 : 1
 
     return result
 }
@@ -271,7 +272,7 @@ function objectGetOwnPropertyNames(): int {
     let fl: float = 50.0
     let dou: double = 60.0
 
-    let arr: number[] = [10, 20, 30]
+    let arr: FixedArray<number> = [10, 20, 30]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, 20, 30)
@@ -304,7 +305,7 @@ function objectGetOwnPropertyNames(): int {
 function objectHasOwnProperty(): int {
     let result: int = 0
 
-    let arr: number[] = [10, 20, 30]
+    let arr: FixedArray<number> = [10, 20, 30]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, 20, 30)
@@ -342,7 +343,7 @@ function objectHasOwnProperty(): int {
 function objectHasOwn(): int {
     let result: int = 0
 
-    let arr: number[] = [10, 20, 30]
+    let arr: FixedArray<number> = [10, 20, 30]
 
     result += (Object.hasOwn(arr as Object, '0') == true) ? 0 : 1
     result += (Object.hasOwn(arr as Object, '3') == false) ? 0 : 1

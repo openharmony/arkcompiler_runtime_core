@@ -159,7 +159,7 @@ function testUnion() {
 }
 
 class A implements Function {
-    unsafeCall(...r: NullishType[]): NullishType { return null }
+    unsafeCall(...r: FixedArray<NullishType>): NullishType { return null }
 }
 class B extends Numeric {
     public byteValue(): byte { return 1 };

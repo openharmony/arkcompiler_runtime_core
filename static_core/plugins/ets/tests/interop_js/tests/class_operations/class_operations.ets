@@ -29,7 +29,7 @@ class jscall {
     native static any$(top: JSValue, qname: String, v0: JSValue): JSValue;
     native static any$(top: JSValue, qname: String, v0: String): JSValue;
     native static any$(top: JSValue, qname: String, v0: double, v1: String): JSValue;
-    native static any$(top: JSValue, qname: String, v0: int[], v1: int): JSValue;
+    native static any$(top: JSValue, qname: String, v0: FixedArray<int>, v1: int): JSValue;
     // Remove after JSValue cast fix
     native static any$a(top: JSValue, qname: String, v0: JSValue): JSValue;
 
@@ -46,7 +46,7 @@ class jsnew {
     native static $(top: JSValue, qname: String) : JSValue;
     native static $(top: JSValue, qname: String, a0: JSValue, a1: JSValue) : JSValue;
     native static $(top: JSValue, qname: String, a0: String, a1: String) : JSValue;
-    native static $(top: JSValue, qname: String, a0: int[], a1: int[]) : JSValue;
+    native static $(top: JSValue, qname: String, a0: FixedArray<int>, a1: FixedArray<int>) : JSValue;
     // Remove after JSValue cast fix
     native static $aa(top: JSValue, qname: String, a0: JSValue, a1: JSValue) : JSValue;
     // Remove after JSValue cast fix
@@ -187,7 +187,7 @@ function jscallStaticMethodString(): int {
 }
 
 function jscallArray(): int {
-    let v0: int[] = new int[10];
+    let v0: FixedArray<int> = new int[10];
     for (let i = 0; i < 10; ++i) {
         v0[i] = i * i;
     }
@@ -203,7 +203,7 @@ function jscallArray(): int {
 }
 
 function jsnewArray(): int {
-    let v0: int[] = new int[10];
+    let v0: FixedArray<int> = new int[10];
     for (let i = 0; i < 10; ++i) {
         v0[i] = i * i;
     }
@@ -222,7 +222,7 @@ function jsnewArray(): int {
 }
 
 function jsnewSetPropertyArray(): int {
-    let v0: int[] = new int[10];
+    let v0: FixedArray<int> = new int[10];
     for (let i = 0; i < 10; ++i) {
         v0[i] = i * i;
     }
@@ -243,7 +243,7 @@ function jsnewSetPropertyArray(): int {
 }
 
 function jscallStaticMethodArray(): int {
-    let v0: int[] = new int[10];
+    let v0: FixedArray<int> = new int[10];
     for (let i = 0; i < 10; ++i) {
         v0[i] = i * i;
     }

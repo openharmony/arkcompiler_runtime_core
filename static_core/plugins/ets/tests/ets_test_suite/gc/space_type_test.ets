@@ -29,7 +29,7 @@ function AllocateAndMoveTest(): void throws {
 
 function HumongousObjectTest(): void throws
 {
-    let h_obj = new long[1024 * 1024];
+    let h_obj: FixedArray<long> = new long[1024 * 1024];
     assertEQ(GC.getObjectSpaceType(h_obj), GC.HUMONGOUS_SPACE, "Must be humongous space");
 }
 

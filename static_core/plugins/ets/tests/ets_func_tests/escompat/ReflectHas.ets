@@ -43,7 +43,7 @@ class Point3D extends Point2D {
     }
 }
 
-function arraysAreEqual(a: string[], b: string[]): boolean {
+function arraysAreEqual(a: FixedArray<string>, b: FixedArray<string>): boolean {
     let alen = a.length
     if (alen != b.length) {
         return false
@@ -59,7 +59,7 @@ function arraysAreEqual(a: string[], b: string[]): boolean {
 function reflectHas(): int {
     let result: int = 0
 
-    let arr: number[] = [10, 20, 30]
+    let arr: FixedArray<number> = [10, 20, 30]
     let str: string = "abc"
 
     let cl: Point2D = new Point3D(10, 20, 30)

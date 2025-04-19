@@ -151,24 +151,24 @@ cases:
               }
               constructor() {}
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: A[]) { this.t = "A" }
-              constructor(p: Object[]) throws { if (p.length == 0) throw ex; else this.t = "Object" }
-              constructor(p: byte[]) { this.t = "byte" }
-              constructor(p: short[]) throws { if (p.length == 0) throw ex; else this.t = "short" }
-              constructor(p: int[]) { this.t = "int" }
-              constructor(p: long[]) throws { if (p.length == 0) throw ex; else this.t = "long" }
-              constructor(p: char[]) { this.t = "char" }
-              constructor(p: boolean[]) { this.t = "boolean" }
-              constructor(p: float[]) throws { if (p.length == 0) throw ex; else this.t = "float" }
-              constructor(p: double[]) throws { if (p.length == 0) throw ex; else this.t = "double" }
-              constructor(p: Byte[]) { this.t = "Byte" }
-              constructor(p: Short[]) throws { if (p.length == 0) throw ex; else this.t = "Short" }
-              constructor(p: Int[]) { this.t = "Int" }
-              constructor(p: Long[]) throws { if (p.length == 0) throw ex; else this.t = "Long" }
-              constructor(p: Char[]) throws { if (p.length == 0) throw ex; else this.t = "Char" }
-              constructor(p: Boolean[]) { this.t = "Boolean" }
-              constructor(p: Float[]) throws { if (p.length == 0) throw ex; else this.t = "Float" }
-              constructor(p: Double[]) { this.t = "Double" }
+              constructor(p: FixedArray<A>) { this.t = "A" }
+              constructor(p: FixedArray<Object>) throws { if (p.length == 0) throw ex; else this.t = "Object" }
+              constructor(p: FixedArray<byte>) { this.t = "byte" }
+              constructor(p: FixedArray<short>) throws { if (p.length == 0) throw ex; else this.t = "short" }
+              constructor(p: FixedArray<int>) { this.t = "int" }
+              constructor(p: FixedArray<long>) throws { if (p.length == 0) throw ex; else this.t = "long" }
+              constructor(p: FixedArray<char>) { this.t = "char" }
+              constructor(p: FixedArray<boolean>) { this.t = "boolean" }
+              constructor(p: FixedArray<float>) throws { if (p.length == 0) throw ex; else this.t = "float" }
+              constructor(p: FixedArray<double>) throws { if (p.length == 0) throw ex; else this.t = "double" }
+              constructor(p: FixedArray<Byte>) { this.t = "Byte" }
+              constructor(p: FixedArray<Short>) throws { if (p.length == 0) throw ex; else this.t = "Short" }
+              constructor(p: FixedArray<Int>) { this.t = "Int" }
+              constructor(p: FixedArray<Long>) throws { if (p.length == 0) throw ex; else this.t = "Long" }
+              constructor(p: FixedArray<Char>) throws { if (p.length == 0) throw ex; else this.t = "Char" }
+              constructor(p: FixedArray<Boolean>) { this.t = "Boolean" }
+              constructor(p: FixedArray<Float>) throws { if (p.length == 0) throw ex; else this.t = "Float" }
+              constructor(p: FixedArray<Double>) { this.t = "Double" }
           }
       use: |-
           try {

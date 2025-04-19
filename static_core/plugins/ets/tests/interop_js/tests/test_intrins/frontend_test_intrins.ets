@@ -108,55 +108,55 @@ function testStringOps(): boolean {
 }
 
 function testBuiltinArrayAny(): boolean {
-    let v: JSValue[] = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
+    let v: FixedArray<JSValue> = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
     let r = "object:,1.23,foo,[object Object]";
-    // v = identity(identity(v)) as JSValue[]; // TODO(vpukhov): jscast
+    // v = identity(identity(v)) as FixedArray<JSValue>; // TODO(vpukhov): jscast
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayBoolean(): boolean {
-    let v: boolean[] = [true, false, true];
+    let v: FixedArray<boolean> = [true, false, true];
     let r = "object:true,false,true";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayInt(): boolean {
-    let v: int[] = [111, 222];
+    let v: FixedArray<int> = [111, 222];
     let r = "object:111,222";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayNumber(): boolean {
-    let v: double[] = [11.1, 22.2];
+    let v: FixedArray<double> = [11.1, 22.2];
     let r = "object:11.1,22.2";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayString(): boolean {
-    let v: String[] = ["foo0", "foo1"];
+    let v: FixedArray<String> = ["foo0", "foo1"];
     let r = "object:foo0,foo1";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayObject(): boolean {
-    let v: Object[] = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1];
+    let v: FixedArray<Object> = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1];
     let r = "object:,[object Object],foo,1";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayMultidim(): boolean {
-    let v: double[][] = [[11.1, 22.2], [33.3, 44.4]];
+    let v: FixedArray<FixedArray<double>> = [[11.1, 22.2], [33.3, 44.4]];
     let r = "object:11.1,22.2,33.3,44.4";
     let v1 = identity(identity(v));
     return r == vstringify(identity(v1));
 }
 function testBuiltinArrayInstanceof(): boolean {
-    let v: int[] = [111, 222];
+    let v: FixedArray<int> = [111, 222];
     let ctor = JSRuntime.getGlobal().Array;
     return JSRuntime.instanceOfDynamic(identity(v), ctor);
 }
 function testInitArrayComponent(): boolean {
-    // TODO(vpukhov): relies on jscast BadClass[]
+    // TODO(vpukhov): relies on jscast FixedArray<BadClass>
     return true;
 }
 

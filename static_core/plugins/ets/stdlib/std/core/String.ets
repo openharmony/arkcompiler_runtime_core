@@ -36,8 +36,9 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @param data initializer
      */
-    public native constructor(data: char[])
-
+    public native constructor(data: FixedArray<char>)
+    // let a = new char[1]
+    // let b = new String(a)
     /**
      * Constructs String from another String
      *
@@ -141,7 +142,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return "";
         }
-        let c = new char[1];
+        let c : FixedArray<char> = new char[1];
         c[0] = this.charAt(index as int)
         return new String(c)
     }
@@ -302,7 +303,17 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @remark
      * Implemented as native function,  @see `getChars()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L231).
      */
-    public native getChars(begin: int, end: int): char[];
+    public getChars(begin: int, end: int): char[] {
+        // #24515: Need to remove the following function call after primitive type refactoring
+        let ret : FixedArray<char> = this.getCharsImpl(begin, end);
+        let tmpForceBox : FixedArray<Char> = new Char[ret.length];
+        for (let i = 0; i < tmpForceBox.length; i++) {
+            tmpForceBox[i] = ret[i]
+        }
+        return Array.from<Char>(tmpForceBox);
+    }
+
+    private native getCharsImpl(begin: int, end: int): FixedArray<char>;
 
     /**
      * Gets the byte sequence that is representing the part of
@@ -318,7 +329,17 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns byte[] array
      */
-    public native getBytes(begin: int, end: int): byte[];
+    public getBytes(begin: int, end: int): byte[] {
+        // #24515: Need to remove the following function call after primitive type refactoring
+        let ret : FixedArray<byte> = this.getBytesImpl(begin, end);
+        let tmpForceBox : FixedArray<Byte> = new Byte[ret.length];
+        for (let i = 0; i < tmpForceBox.length; i++) {
+            tmpForceBox[i] = ret[i]
+        }
+        return Array.from<byte>(tmpForceBox);
+    }
+
+    private native getBytesImpl(begin: int, end: int): FixedArray<byte>;
 
     /**
      * Compares the given StringBuilder to this String. The
@@ -659,7 +680,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns new String with replaced characters
      */
     public replaceChar(oldCh: char, newCh: char): String {
-        let newChars: char[] = this.getChars();
+        let newChars: FixedArray<char> = this.getCharsImpl(0, this.getLength());
         for (let i: int = 0; i < newChars.length; i++) {
             if (newChars[i] == oldCh) {
                 newChars[i] = newCh;
@@ -1269,7 +1290,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (this.getLength() >= end) {
             return this;
         }
-        let arr = new char[end]
+        let arr : FixedArray<char> = new char[end]
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[i] = this.charAt(i)
         }
@@ -1287,7 +1308,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr = new char[end];
+        let arr : FixedArray<char> = new char[end];
         let length = this.getLength();
         let strLength = str.getLength()
         for (let i: int = 0; i < length; i++) {
@@ -1328,7 +1349,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (padLen <= 0) {
             return this;
         }
-        let arr: char[] = new char[end]
+        let arr: FixedArray<char> = new char[end]
         for(let i = 0; i < padLen; i++){
             arr[i] = ch
         }
@@ -1346,7 +1367,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr: char[] = new char[end];
+        let arr: FixedArray<char> = new char[end];
         let padLen: int = end - this.getLength();
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[padLen + i] = this.charAt(i);

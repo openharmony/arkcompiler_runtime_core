@@ -21,7 +21,7 @@ class SharedClass {
     public jsRef?: JSValue;
 }
 
-const sharedObjects: (WeakRef<SharedClass>|undefined)[] = new undefined[SHARED_OBJECTS_COUNT];
+const sharedObjects: FixedArray<(WeakRef<SharedClass>|undefined)> = new undefined[SHARED_OBJECTS_COUNT];
 for (let i: int = 0; i < SHARED_OBJECTS_COUNT; ++i) {
     sharedObjects[i] = new WeakRef<SharedClass>(new SharedClass());
 }

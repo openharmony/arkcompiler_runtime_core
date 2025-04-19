@@ -34,7 +34,7 @@ function Test_indirect_call_type_any_call(): boolean {
 }
 
 function Test_indirect_call_type_any_apply(): boolean {
-    let result = js.indirectCallTypeAny.apply(null, [1]) as int;
+    let result = js.indirectCallTypeAny.apply(null, [1] as FixedArray<int>) as int;
     assertTrue(result == 1);
 
     return true;

@@ -20,6 +20,6 @@ tags:
 - not-a-test
 ---*/
 
-export function foo(i: String[]): int {
+export function foo(i: FixedArray<String>): int {
     return 2;
 }

@@ -83,64 +83,64 @@ function foo(a: String): int {
 function foo(a: Object): int {
   return 32;
 }
-function foo(a: byte[]): int {
+function foo(a: FixedArray<byte>): int {
   return 101;
 }
-function foo(a: short[]): int {
+function foo(a: FixedArray<short>): int {
   return 102;
 }
-function foo(a: char[]): int {
+function foo(a: FixedArray<char>): int {
   return 103;
 }
-function foo(a: int[]): int {
+function foo(a: FixedArray<int>): int {
   return 104;
 }
-function foo(a: long[]): int {
+function foo(a: FixedArray<long>): int {
   return 105;
 }
-function foo(a: float[]): int {
+function foo(a: FixedArray<float>): int {
   return 106;
 }
-function foo(a: double[]): int {
+function foo(a: FixedArray<double>): int {
   return 107;
 }
-function foo(a: boolean[]): int {
+function foo(a: FixedArray<boolean>): int {
   return 108;
 }
-function foo(a: Byte[]): int {
+function foo(a: FixedArray<Byte>): int {
   return 121;
 }
-function foo(a: Short[]): int {
+function foo(a: FixedArray<Short>): int {
   return 122;
 }
-function foo(a: Char[]): int {
+function foo(a: FixedArray<Char>): int {
   return 123;
 }
-function foo(a: Int[]): int {
+function foo(a: FixedArray<Int>): int {
   return 124;
 }
-function foo(a: Long[]): int {
+function foo(a: FixedArray<Long>): int {
   return 125;
 }
-function foo(a: Float[]): int {
+function foo(a: FixedArray<Float>): int {
   return 126;
 }
-function foo(a: Double[]): int {
+function foo(a: FixedArray<Double>): int {
   return 127;
 }
-function foo(a: Boolean[]): int {
+function foo(a: FixedArray<Boolean>): int {
   return 128;
 }
-function foo(a: Integral[]): int {
+function foo(a: FixedArray<Integral>): int {
   return 129;
 }
-function foo(a: Floating[]): int {
+function foo(a: FixedArray<Floating>): int {
   return 130;
 }
-function foo(a: String[]): int {
+function foo(a: FixedArray<String>): int {
   return 131;
 }
-function foo(a: Object[]): int {
+function foo(a: FixedArray<Object>): int {
   return 132;
 }
 

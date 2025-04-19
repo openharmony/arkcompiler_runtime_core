@@ -15,7 +15,7 @@
 
 package rest_spread.test;
 
-function checkRestOfNumber(obj: number[], ...nums: number[]) {
+function checkRestOfNumber(obj: FixedArray<number>, ...nums: FixedArray<number>) {
     if(obj.length !== nums.length)
         return false;
     for(let i = 0; i < obj.length; i++) {
@@ -25,7 +25,7 @@ function checkRestOfNumber(obj: number[], ...nums: number[]) {
     return true;
 }
 
-function checkRestOfString(obj: string[], ...strs: string[]) {
+function checkRestOfString(obj: FixedArray<string>, ...strs: FixedArray<string>) {
     if(obj.length !== strs.length)
         return false;
     for(let i = 0; i < obj.length; i++) {
@@ -35,7 +35,7 @@ function checkRestOfString(obj: string[], ...strs: string[]) {
     return true;
 }
 
-function checkRestOfTuple(obj: ((number | string)[])[], ...tupleArr: ((number | string)[])[]) {
+function checkRestOfTuple(obj: FixedArray<FixedArray<number | string>>, ...tupleArr: FixedArray<FixedArray<number | string>>) {
     if(obj.length !== tupleArr.length)
         return false;
     for(let i = 0; i < obj.length; i++) {
@@ -47,7 +47,7 @@ function checkRestOfTuple(obj: ((number | string)[])[], ...tupleArr: ((number | 
     return true;
 }
 
-function checkRestofUnion(obj: (int | string | boolean)[], ...unionArr: (int | string | boolean)[]) {
+function checkRestofUnion(obj: FixedArray<int | string | boolean>, ...unionArr: FixedArray<int | string | boolean>) {
     if(obj.length != unionArr.length)
         return false;
     for(let i = 0; i < obj.length; i++) {

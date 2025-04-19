@@ -14,11 +14,11 @@
 ---
 cases:
     # value types
-    - { type: 'byte[]', vals: '[3, 2, 1]', val: '0x7f', assert: 'arr[0] == Byte.MAX_VALUE' }
-    - { type: 'short[]', vals: '[3, 2, 1]', val: '0x7fff', assert: 'arr[0] == Short.MAX_VALUE' }
+    - { type: 'FixedArray<byte>', vals: '[3, 2, 1]', val: '0x7f', assert: 'arr[0] == Byte.MAX_VALUE' }
+    - { type: 'FixedArray<short>', vals: '[3, 2, 1]', val: '0x7fff', assert: 'arr[0] == Short.MAX_VALUE' }
     - { type: 'int[]', vals: '[3, 2, 1]', val: '0x7fffffff', assert: 'arr[0] == Int.MAX_VALUE' }
     - { type: 'long[]', vals: '[3, 2, 1]', val: '0x7fffffffffffffff', assert: 'arr[0] == Long.MAX_VALUE' }
-    - { type: 'float[]', vals: '[3, 2, 1]', val: 1.5, assert: 'arr[0] == 1.5' }
+    - { type: 'FixedArray<float>', vals: '[3, 2, 1]', val: 1.5, assert: 'arr[0] == 1.5' }
     - { type: 'double[]', vals: '[3, 1, 2]', val: -1.5, assert: 'arr[0] == -1.5' }
     - { type: 'char[]', vals: "[c'A', c'B', c'C']", val: c'Z', assert: "arr[0] == c'Z'" }
     - { type: 'boolean[]', vals: '[true, false, true]', val: 'false', assert: 'arr[0] == false' }

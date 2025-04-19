@@ -69,7 +69,7 @@ const funcPredicate2 = (num: number, index: number, array: Array<Number>): boole
 
 const mapAndFlatten = (num: number, k: number, arr: Array<Number>): Number => num * num
 
-const flatMapAndFlatten = (num: number, k: number, arr: Array<Number>): Number[] => [num * num]
+const flatMapAndFlatten = (num: number, k: number, arr: Array<Number>): FixedArray<Number> => [num * num]
 
 const processElement = (element: number, index: number, array: Array<Number>): void => result = (element === index + 1)
 

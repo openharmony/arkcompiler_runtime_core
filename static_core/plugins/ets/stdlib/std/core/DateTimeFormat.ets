@@ -107,12 +107,12 @@ export namespace Intl {
             return resolvedOptions
         }
 
-        public static supportedLocalesOf(locales: string | Locale | readonly (string | Locale)[]): string[] {
+        public static supportedLocalesOf(locales: string | Locale | FixedArray<string | Locale>): string[] {
             const supportedLocales = new Array<string>()
 
-            if (locales instanceof string[]) {
+            if (locales instanceof FixedArray<string>) {
                 return DateTimeFormat.bestFitLocales(Array.from(locales))
-            } else if (locales instanceof Locale[]) {
+            } else if (locales instanceof FixedArray<Locale>) {
                 return DateTimeFormat.bestFitLocales(Array.from(locales, (loc: Locale) => loc.toString()))
             } else if (locales instanceof string) {
                 return DateTimeFormat.bestFitLocales(Array.of(locales))

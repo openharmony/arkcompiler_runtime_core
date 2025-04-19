@@ -52,6 +52,7 @@ static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle, ui
 {
     // Allocate the new buffer - may trigger GC
     auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), bufLen);
+    /* nothing prevents this assertion from failing! */
     ASSERT(newBuf != nullptr);
     // Copy the old buffer data
     bufHandle->CopyDataTo(newBuf);

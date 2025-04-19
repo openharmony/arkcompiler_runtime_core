@@ -44,10 +44,10 @@ import {
 } from 'dynamic_import';
 
 
-const tupleArr: TupleType = [tsNumber, tsString];
+const tupleArr: TupleType = [tsNumber, tsString] as FixedArray<JSValue>;
 const etsNumber = 1;
 const etsString = 'string';
-const etsArr: int[] = [etsNumber];
+const etsArr: FixedArray<int> = [etsNumber];
 const etsBool = true;
 const etsObj: Object = {};
 const etsUnion: int | string = etsNumber;

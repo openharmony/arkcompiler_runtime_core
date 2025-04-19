@@ -25,7 +25,7 @@ function Test_indirect_call_type_user_class_call(): boolean {
 
 function Test_indirect_call_type_user_class_apply(): boolean {
     let obj = new UserClass();
-    let result = obj.method.apply(null, [1]) as int;
+    let result = obj.method.apply(null, [1] as FixedArray<int>) as int;
     assertTrue(result == 1);
 
     return true;
@@ -59,7 +59,7 @@ function Test_indirect_call_type_user_interface_call(): boolean {
 }
 
 function Test_indirect_call_type_user_interface_apply(): boolean {
-    let result = js.interfaceFunc().interfaceMethod.apply(null, [1]) as int;
+    let result = js.interfaceFunc().interfaceMethod.apply(null, [1] as FixedArray<int>) as int;
     assertTrue(result == 1);
 
     return true;

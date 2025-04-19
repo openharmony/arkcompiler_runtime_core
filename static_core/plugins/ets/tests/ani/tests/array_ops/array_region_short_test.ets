@@ -17,8 +17,8 @@ class ArrayClass {
     public static array: short[] = [1, 2, 3, 4, 5];
 
     public static ChangeStaticArray() {
-        ArrayClass.array[2] = 222;
-        ArrayClass.array[4] = 444;
+        ArrayClass.array[2] = 222 as short;
+        ArrayClass.array[4] = 444 as short;
     }
 
     public static CheckStaticArray(): boolean {

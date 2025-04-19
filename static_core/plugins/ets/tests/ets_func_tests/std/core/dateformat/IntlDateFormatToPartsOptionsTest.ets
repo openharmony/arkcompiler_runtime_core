@@ -64,7 +64,7 @@ function initFormatResults(): void {
         return
     }
 
-    const result001 = [FmtPart("year", "2023"), FmtPart("literal", "/"), FmtPart("month", "10"), FmtPart("literal", "/"), FmtPart("day", "11")]
+    const result001:Intl.DateTimeFormatPart[] = [FmtPart("year", "2023"), FmtPart("literal", "/"), FmtPart("month", "10"), FmtPart("literal", "/"), FmtPart("day", "11")]
     addFormatToPartsResult("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }, result001)
 }
 

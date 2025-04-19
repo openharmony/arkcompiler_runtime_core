@@ -210,7 +210,7 @@ private:
             {utf::CStringAsMutf8("lastIndexOf"), std::make_pair("Lstd/core/Object;I:I", 3)},
             {utf::CStringAsMutf8("slice"), std::make_pair("II:Lescompat/Array;", 3)},
             {utf::CStringAsMutf8("splice"), std::make_pair("I:Lescompat/Array;", 2)},
-            {utf::CStringAsMutf8("splice"), std::make_pair("II[Lstd/core/Object;:Lescompat/Array;", 3)},
+            {utf::CStringAsMutf8("splice"), std::make_pair("IILescompat/Array;:Lescompat/Array;", 3)},
             {utf::CStringAsMutf8("toSpliced"), std::make_pair("II[Lstd/core/Object;:Lescompat/Array;", 3)},
             {utf::CStringAsMutf8("with"), std::make_pair("DLstd/core/Object;:Lescompat/Array;", 3)},
         };

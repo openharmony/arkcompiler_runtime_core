@@ -177,10 +177,10 @@ final class TypeCreatorCtx {
      *
      * @throws errors happened on class initialization.
      */
-    private static native commit(ctxPtr: long, objects: Object[], targetLinker: RuntimeLinker): string | undefined
+    private static native commit(ctxPtr: long, objects: FixedArray<Object>, targetLinker: RuntimeLinker): string | undefined
 
     private static native getError(ctxPtr: long): string | undefined
-    internal static native getObjectsArrayForCCtor(ctxPtr: long): Object[]
+    internal static native getObjectsArrayForCCtor(ctxPtr: long): FixedArray<Object>
 
     internal static native getTypeDescFromPointer(ctxItemPtr: long): RuntimeTypeDescriptor
 
@@ -310,7 +310,7 @@ final class TypeCreatorCtx {
 
         this.checkError()
 
-        const objsArray = new Object[this.objects.length as int]
+        const objsArray : FixedArray<Object> = new Object[this.objects.length as int]
         for (let i = 0; i < this.objects.length; i++) {
             objsArray[i] = this.objects.$_get(i) as Object
         }
@@ -1225,9 +1225,8 @@ export final class CallableBodyFunction extends CallableBody {
  * Represents call to lambda with boxing all arguments
  */
 export final class CallableBodyErasedFunction extends CallableBody {
-    internal /* readonly */ body: (recv: NullishType, args: NullishType[]) => NullishType
-
-    public constructor(m: (recv: NullishType, args: NullishType[]) => NullishType) {
+    internal /* readonly */ body: (recv: NullishType, args: FixedArray<NullishType>) => NullishType
+    public constructor(m: (recv: NullishType, args: FixedArray<NullishType>) => NullishType) {
         super()
         this.body = m
     }

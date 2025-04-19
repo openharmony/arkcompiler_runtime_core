@@ -22,7 +22,7 @@ desc: >-
 tags: [negative, compile-only]
 ---*/
 
-let arr: number[] = [1, 2, 3]
+let arr: FixedArray<number> = [1, 2, 3]
 
 function main() {
     arr[{{c.index}}] = 0;  // CTE expected

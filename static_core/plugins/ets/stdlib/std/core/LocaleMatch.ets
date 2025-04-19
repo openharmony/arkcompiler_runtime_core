@@ -17,7 +17,7 @@ package std.core;
 
 export class LocaleMatch {
     native static bestFitLocale(locale: string): string
-    native static lookupLocale(locale: string[]): string
+    static native lookupLocale(locale: string[]): string
 }
 
 export function localesToString(locale: Intl.BCP47LanguageTag[]): string {

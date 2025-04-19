@@ -172,7 +172,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
         if (negative) {
             ++digitsNum;
         }
-        let data = new char[digitsNum];
+        let data : FixedArray<char> = new char[digitsNum];
         let curPlace = digitsNum - 1;
         while (val != 0) {
             let remainder = val % 10;

@@ -77,7 +77,7 @@ cases:
 
   # 5. array and extra arguments
   - sig: |-
-      foo(x: int, y: int, ...p: int[]): int
+      foo(x: int, y: int, ...p: int[]): number
     def: |-
       return x + y + p.length;
     call: |-

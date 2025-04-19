@@ -53,6 +53,28 @@ TEST_F(ArraySetGetRegionFloatTest, GetFloatArrayRegionErrorTests)
     ani_float nativeBuffer[LENGTH_5] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    // Should change to ANI_OK when std lib array will work according to spec
+    ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_ERROR);
+}
+
+TEST_F(ArraySetGetRegionFloatTest, SetFloatFixedArrayRegionErrorTests)
+{
+    ani_array_float array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, &array), ANI_OK);
+    ani_float nativeBuffer[LENGTH_5] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
+    const ani_size offset1 = -1;
+    ASSERT_EQ(env_->Array_SetRegion_Float(array, offset1, LENGTH_2, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Float(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->Array_SetRegion_Float(array, OFFSET_0, LENGTH_5, nativeBuffer), ANI_OK);
+}
+
+TEST_F(ArraySetGetRegionFloatTest, GetFloatFixedArrayRegionErrorTests)
+{
+    ani_array_float array = nullptr;
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, &array), ANI_OK);
+    ani_float nativeBuffer[LENGTH_5] = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4, TEST_VALUE_5};
+    ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_5, LENGTH_10, nativeBuffer), ANI_OUT_OF_RANGE);
     ASSERT_EQ(env_->Array_GetRegion_Float(array, OFFSET_0, LENGTH_1, nativeBuffer), ANI_OK);
 }
 
@@ -147,7 +169,7 @@ TEST_F(ArraySetGetRegionFloatTest, GetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionFloatTest, SetSpecialValueToArrayTest)
 {
     ani_array_float array = nullptr;
-    ASSERT_EQ(env_->Array_New_Float(LENGTH_6, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_6, &array), ANI_OK);
     ani_float max = std::numeric_limits<float>::max();
     ani_float minPositive = std::numeric_limits<float>::min();
     ani_float min = -std::numeric_limits<float>::max();
@@ -166,7 +188,7 @@ TEST_F(ArraySetGetRegionFloatTest, SetSpecialValueToArrayTest)
 TEST_F(ArraySetGetRegionFloatTest, SetGetUnionToArrayTest)
 {
     ani_array_float array = nullptr;
-    ASSERT_EQ(env_->Array_New_Float(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, &array), ANI_OK);
 
     std::array<ani_float, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                     TEST_VALUE_5};
@@ -202,7 +224,7 @@ TEST_F(ArraySetGetRegionFloatTest, SetGetUnionToArrayTest)
 TEST_F(ArraySetGetRegionFloatTest, SetGetStabilityToArrayTest)
 {
     ani_array_float array = nullptr;
-    ASSERT_EQ(env_->Array_New_Float(LENGTH_5, &array), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_New_Float(LENGTH_5, &array), ANI_OK);
 
     std::array<ani_float, LENGTH_5> nativeBuffer = {TEST_VALUE_1, TEST_VALUE_2, TEST_VALUE_3, TEST_VALUE_4,
                                                     TEST_VALUE_5};

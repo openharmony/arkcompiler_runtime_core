@@ -98,7 +98,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public override toString(): String {
         // TODO(ivan-tyulyandin): if String(char) will be implemented, rewrite code below
-        let buf = new char[1];
+        let buf: FixedArray<char> = new char[1];
         buf[0] = this.value;
         return new String(buf);
     }

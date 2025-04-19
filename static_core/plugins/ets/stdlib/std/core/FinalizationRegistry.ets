@@ -36,10 +36,10 @@ package std.core;
 export final class FinalizationRegistry<T> {
     private callback: (value: T) => void;
     // Can be changed to local trimplet class when it will be implemented
-    private obj_token_refs: (Object | undefined)[] = [];
-    private callback_arguments: (T | undefined)[] = [];
+    private obj_token_refs: FixedArray<Object | undefined> = [];
+    private callback_arguments: FixedArray<T | undefined> = [];
     // Contains chains of used and free trimplet indexes, [0] serves as uselist head
-    private idxarr: int[] = [];
+    private idxarr: FixedArray<int> = [];
     private freeidx: int = -1;
     private static finalizationRegistryLock = new Mutex();
     private mutex = new Mutex();
@@ -47,7 +47,7 @@ export final class FinalizationRegistry<T> {
 
     private static readonly FIRST_SIZE = 32;
 
-    private static execCleanup(array: (WeakRef<FinalizationRegistry<T>> | undefined)[], launchmode: int): void {
+    private static execCleanup(array: FixedArray<(WeakRef<FinalizationRegistry<T>> | undefined)>, launchmode: int): void {
         FinalizationRegistry.finalizationRegistryLock.lock();
         try {
             for (let i = 0; i < array.length; i++) {

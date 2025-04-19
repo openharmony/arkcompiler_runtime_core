@@ -157,7 +157,7 @@
             }
 
             if (!this.options.collation.includes("default")) {
-                let data : string[] = [this.options.collation, this.options.locale, xToCompare, yToCompare]
+                let data = [this.options.collation, this.options.locale, xToCompare, yToCompare]
                 return this.compareByCollation(data)
             }
 

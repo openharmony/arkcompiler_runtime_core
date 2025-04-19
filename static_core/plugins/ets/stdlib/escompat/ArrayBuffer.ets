@@ -251,10 +251,10 @@ export class ArrayBuffer extends Buffer
     }
 
     /// @brief Allocates non-movable array of fixed length
-    private native static allocateNonMovable(length: int): byte[]
+    private native static allocateNonMovable(length: int): FixedArray<byte>
 
     /// @brief Returns native address of non-movable array
-    private native static getAddress(array: byte[]): long
+    private native static getAddress(array: FixedArray<byte>): long
 
     /**
     * Creates a new ArrayBuffer from an array of bytes.
@@ -264,7 +264,7 @@ export class ArrayBuffer extends Buffer
     * @param {byte[]} arr - An array of bytes to initialize the ArrayBuffer.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the byte array.
     */
-    public static from(arr: byte[]): ArrayBuffer {
+    public static from(arr: FixedArray<byte>): ArrayBuffer {
         const bf = new ArrayBuffer(arr.length)
         copyTo(arr, bf.data!, 0, 0, arr.length)
         return bf
@@ -432,7 +432,7 @@ export class ArrayBuffer extends Buffer
  * Internal non-movable memory of a SharedArrayBuffer
  */
 class SharedMemory {
-    private data: byte[] = []
+    private data: FixedArray<byte> = [];
     private waiterPtr: long
 
     private constructor() {}
@@ -448,7 +448,7 @@ class SharedMemory {
     }
 
     internal getByteLength(): int {
-        return this.data.length
+        return this.data.length as int
     }
 
     internal native atomicAddI8(index: int, value: byte): byte;

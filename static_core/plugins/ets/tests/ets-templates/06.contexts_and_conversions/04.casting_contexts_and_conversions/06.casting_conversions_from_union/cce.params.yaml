@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,12 +22,12 @@ cases:
           - { type: Error, v: 'false' }
           - { type: Number, v: 'false' }
 
-    - from_type: string[]|byte|byte[]|undefined
+    - from_type: FixedArray<string>|byte|FixedArray<byte>|undefined
       types:
-          - { type: 'Byte', v: '["a"] as string[]' }
-          - { type: 'byte[]', v: '["a"] as string[]' }
-          - { type: 'byte[]', v: '0x77 as byte' }
-          - { type: 'string[]', v: '0x77 as byte' }
+          - { type: 'Byte', v: '["a"] as FixedArray<string>' }
+          - { type: 'FixedArray<byte>', v: '["a"] as FixedArray<string>' }
+          - { type: 'FixedArray<byte>', v: '0x77 as byte' }
+          - { type: 'FixedArray<string>', v: '0x77 as byte' }
 
     - decl: |-
           let d = 42.0

@@ -37,7 +37,7 @@ function main(): int {
 }
 
 function testBlobFromStringArray() {
-    let src: string[] = ["1", "2", "3", "4", "5"]
+    let src: FixedArray<string> = ["1", "2", "3", "4", "5"]
     let blob = new buffer.Blob(src)
     assertEQ(blob.type, "")
     assertEQ(blob.size, 5)
@@ -49,7 +49,7 @@ function testBlobFromArrayBuffer() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
 
-    let src: ArrayBuffer[] = [arrayBuffer]
+    let src: FixedArray<ArrayBuffer> = [arrayBuffer]
     let blob = new buffer.Blob(src)
     assertEQ(blob.type, "")
     assertEQ(blob.size, 5)
@@ -58,7 +58,7 @@ function testBlobFromArrayBuffer() {
 }
 
 function testBlobFromTypedArray() {
-    let src: Int8Array[] = [new Int8Array([1, 2, 3, 4, 5])]
+    let src: FixedArray<Int8Array> = [new Int8Array([1, 2, 3, 4, 5])]
     let blob = new buffer.Blob(src)
     assertEQ(blob.size, 5)
     assertEQ(blob.type, "")
@@ -70,7 +70,7 @@ function testBlobFromDataView() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
     const dataView = new DataView(arrayBuffer)
-    let src: DataView[] = [dataView, dataView, dataView]
+    let src: FixedArray<DataView> = [dataView, dataView, dataView]
     let blob = new buffer.Blob(src)
     assertEQ(blob.type, "")
     assertEQ(blob.size, 15)
@@ -80,7 +80,7 @@ function testBlobFromDataView() {
 
 function testBlobFromBlob() {
     let src = new buffer.Blob(["1", "2", "3", "4", "5"])
-    let blob = new buffer.Blob([src])
+    let blob = new buffer.Blob([src] as FixedArray<buffer.Blob>)
     assertEQ(blob.type, "")
     assertEQ(blob.size, 5)
     let text = await blob.text()
@@ -88,7 +88,7 @@ function testBlobFromBlob() {
 }
 
 function testBlobWithOptions() {
-    const blobParts = ['<q id="a"><span id="b">hey!</span></q>'];
+    const blobParts: FixedArray<string> = ['<q id="a"><span id="b">hey!</span></q>'];
     const blob = new buffer.Blob(blobParts, { type: "text/html" } as buffer.BlobOptions);
     assertEQ(blob.type, "text/html")
     let text = await blob.text()
@@ -96,7 +96,7 @@ function testBlobWithOptions() {
 }
 
 function testStringArraySlice() {
-    let src: string[] = ["1", "2", "3", "4", "5"]
+    let src: FixedArray<string> = ["1", "2", "3", "4", "5"]
     let blob = new buffer.Blob(src).slice(0,3)
     assertEQ(blob.type, '')
     assertEQ(blob.size, 3)
@@ -107,7 +107,7 @@ function testStringArraySlice() {
 function testArrayBufferSlice() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
-    let src: ArrayBuffer[] = [arrayBuffer, arrayBuffer, arrayBuffer, arrayBuffer]
+    let src: FixedArray<ArrayBuffer> = [arrayBuffer, arrayBuffer, arrayBuffer, arrayBuffer]
     let blob = new buffer.Blob(src).slice(1,2)
     assertEQ(blob.type, '')
     assertEQ(blob.size, 5)
@@ -116,7 +116,7 @@ function testArrayBufferSlice() {
 }
 
 function testTypedArraySlice() {
-    let src: Int8Array[] = [new Int8Array([1, 2, 3]), 
+    let src: FixedArray<Int8Array> = [new Int8Array([1, 2, 3]), 
                             new Int8Array([ 4, 5]),
                             new Int8Array([6, 7]),
                             new Int8Array([8, 9, 10]),
@@ -131,7 +131,7 @@ function testTypedArraySlice() {
 function testDataViewSlice() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
-    let src: DataView[] = [new DataView(arrayBuffer)]
+    let src: FixedArray<DataView> = [new DataView(arrayBuffer)]
     let blob = new buffer.Blob(src).slice()
     assertEQ(blob.type, '')
     assertEQ(blob.size, 5)
@@ -141,13 +141,13 @@ function testDataViewSlice() {
 
 function testBlobSlice() {
     let src1 = new buffer.Blob(["1", "2", "3", "4", "5"])
-    let src2 = new buffer.Blob([new Int8Array([1, 2, 3, 4, 5])])
+    let src2 = new buffer.Blob([new Int8Array([1, 2, 3, 4, 5])] as FixedArray<Int8Array>)
     let src3 = new buffer.Blob(["1", "2", "3", "4", "5"])
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
-    let src4 = new buffer.Blob([arrayBuffer, arrayBuffer])
+    let src4 = new buffer.Blob([arrayBuffer, arrayBuffer] as FixedArray<ArrayBuffer>)
 
-    let blob = new buffer.Blob([src1, src2, src3, src4]).slice(2)
+    let blob = new buffer.Blob([src1, src2, src3, src4] as FixedArray<buffer.Blob>).slice(2)
 
     assertEQ(blob.type, '')
     assertEQ(blob.size, 15)
@@ -158,7 +158,7 @@ function testBlobSlice() {
 function testBlobToArrayBuffer() {
     const arr = new Uint8Array([72, 101, 108, 108, 111])
     const arrayBuffer = arr.buffer as ArrayBuffer
-    let src: DataView[] = [new DataView(arrayBuffer)]
+    let src: FixedArray<DataView> = [new DataView(arrayBuffer)]
     let blob = new buffer.Blob(src)
     let arrayBufferFromBlob = await blob.arrayBuffer()
     let text = await blob.text()

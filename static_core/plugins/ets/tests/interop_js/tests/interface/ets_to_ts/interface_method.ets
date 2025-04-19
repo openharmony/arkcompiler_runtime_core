@@ -158,7 +158,7 @@ function create_subset_by_value_class_from_ets(): SubsetByValueClass {
 //   return { with: arg }
 // }
 
-// type ArrayArg = (WithOptionalMethodClass | WithoutOptionalMethodClass)[];
+// type ArrayArg = FixedArray<WithOptionalMethodClass | WithoutOptionalMethodClass>;
 
 // function optional_arg_array(...arg: ArrayArg): OptionalArgResult {
 //   const withOptional = arg[0] as WithOptionalMethodClass;

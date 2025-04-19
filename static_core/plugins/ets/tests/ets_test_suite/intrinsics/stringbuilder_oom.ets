@@ -14,7 +14,7 @@
  */
 function foo(n: int): int { return (n * 17 + 7) % 141;}
 function main(): int {
-    let c: char[] = new char[10000];
+    let c: FixedArray<char> = new char[10000];
     let sb: StringBuilder = new StringBuilder();
     for (let i = 0; i < 10000000; ++i) {
         let n: int = foo(i);

@@ -28,7 +28,7 @@ function testResolvedOptionsRetrieval(): void {
 }
 
 function testSupportedLocalesOfStringArray(): void {
-    const requestedLocales = ["en-US-u-hc-h23", "zh-CN", "foo", "en-US"]
+    const requestedLocales:FixedArray<string> = ["en-US-u-hc-h23", "zh-CN", "foo", "en-US"]
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocales)
 
     assertEQ(supportedLocales.length, 3)
@@ -46,7 +46,7 @@ function testSupportedLocalesOfString(): void {
 }
 
 function testSupportedLocalesOfLocaleArray(): void {
-    const requestedLocales = [new Intl.Locale("en-US-u-hc-h23"), new Intl.Locale("foo"), new Intl.Locale("zh-CN")]
+    const requestedLocales:FixedArray<Intl.Locale> = [new Intl.Locale("en-US-u-hc-h23"), new Intl.Locale("foo"), new Intl.Locale("zh-CN")]
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocales)
 
     assertEQ(supportedLocales.length, 2)

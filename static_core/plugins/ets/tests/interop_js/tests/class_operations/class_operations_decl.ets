@@ -154,7 +154,7 @@ function jscallStaticMethodString(): int {
 }
 
 function jscallArray(): int {
-	let v0: int[] = new int[10];
+	let v0: FixedArray<int> = new int[10];
 	for (let i = 0; i < 10; ++i) {
 		v0[i] = i * i;
 	}
@@ -170,7 +170,7 @@ function jscallArray(): int {
 }
 
 function jsnewArray(): int {
-	let v0: int[] = new int[10];
+	let v0: FixedArray<int> = new int[10];
 	for (let i = 0; i < 10; ++i) {
 		v0[i] = i * i;
 	}
@@ -188,7 +188,7 @@ function jsnewArray(): int {
 }
 
 function jsnewSetPropertyArray(): int {
-	let v0: int[] = new int[10];
+	let v0: FixedArray<int> = new int[10];
 	for (let i = 0; i < 10; ++i) {
 		v0[i] = i * i;
 	}
@@ -209,7 +209,7 @@ function jsnewSetPropertyArray(): int {
 }
 
 function jscallStaticMethodArray(): int {
-	let v0: int[] = new int[10];
+	let v0: FixedArray<int> = new int[10];
 	for (let i = 0; i < 10; ++i) {
 		v0[i] = i * i;
 	}

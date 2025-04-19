@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let compressable_strings_table: String[] = [
+let compressable_strings_table: FixedArray<String> = [
     "\0",
     "0",
     "01",
@@ -38,7 +38,7 @@ let compressable_strings_table: String[] = [
     "0123456789abcdefghijk"
 ];
 
-let uncompressable_strings_table: String[] = [
+let uncompressable_strings_table: FixedArray<String> = [
     "\u0000",
     "\u00b0",
     "\u00b0\u00b1",
@@ -58,7 +58,7 @@ let uncompressable_strings_table: String[] = [
     "\u00b0\u00b1\u00b2\u00b3\u00b4\u00b5\u00b6\u00b7\u00b8\u00b9\u00ba\u00bb\u00bc\u00bd\u00be\u00bf"
 ];
 
-let compressable_hashcode_table: int[] = [
+let compressable_hashcode_table: FixedArray<int> = [
     0,
     48,
     1537,
@@ -83,7 +83,7 @@ let compressable_hashcode_table: int[] = [
     -422922943
 ];
 
-let uncompressable_hashcode_table: int[] = [
+let uncompressable_hashcode_table: FixedArray<int> = [
     0,
     176,
     5633,
@@ -103,10 +103,10 @@ let uncompressable_hashcode_table: int[] = [
     -1966137336
 ];
 
-let hash_collision_a: char[] = [ 1, 0 ];
-let hash_collision_b: char[] = [ 0, 31 ];
-let hash_collision_c: char[] = [ 2, 0 ];
-let hash_collision_d: char[] = [ 1, 31 ];
+let hash_collision_a: FixedArray<char> = [ 1, 0 ];
+let hash_collision_b: FixedArray<char> = [ 0, 31 ];
+let hash_collision_c: FixedArray<char> = [ 2, 0 ];
+let hash_collision_d: FixedArray<char> = [ 1, 31 ];
 
 function main(): int {
     for (let i: int = 0; i < compressable_strings_table.length; i++) {

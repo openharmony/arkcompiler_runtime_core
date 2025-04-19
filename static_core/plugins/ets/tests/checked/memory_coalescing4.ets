@@ -33,7 +33,7 @@ class A {
 
 export class Test {
 
-    private static __noinline__fnSum(u: int[],
+    private static __noinline__fnSum(u: FixedArray<int>,
                                      a1: A,
                                      a2: A): void {
         a1.i1 = 1;
@@ -49,7 +49,7 @@ export class Test {
 
     __noinline__test(n: int): void {
         let i: int;
-        let u: int[] = new int[n];
+        let u: FixedArray<int> = new int[n];
         let a: A = new A();
         for (i = 0; i < n; i++) {
             u[i] = i;

@@ -27,7 +27,7 @@ class CallMeTrinity {
 
     static $_instantiate(factory: () => CallMeTrinity, ...values: int[]): CallMeTrinity {
         let x = factory();
-        x.value = values.length;
+        x.value = values.length as int;
         return x;
     }
 

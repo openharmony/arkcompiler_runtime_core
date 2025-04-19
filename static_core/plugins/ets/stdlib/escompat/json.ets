@@ -129,8 +129,8 @@ export class JSON {
         return "false"
     }
 
-    private static readonly ESCAPED_CHARS: char[] = [c'\"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
-    private static readonly NON_ESCAPED_CHARS: char[] = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
+    private static readonly ESCAPED_CHARS: FixedArray<char> = [c'\"', c'\\', c'\b', c'\f', c'\n', c'\r', c'\t']
+    private static readonly NON_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'b', c'f', c'n', c'r', c't']
     private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
     /**
@@ -240,8 +240,21 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringify(obj: NullishType, replacer: (string | number)[], space?: string | number): string {
-        const filter = new string[replacer.length]
+    public static stringify(obj: NullishType, replacer: FixedArray<string | number>, space?: string | number): string {
+        const filter : FixedArray<string> = new string[replacer.length]
+        for (let i = 0; i < replacer.length; i++) {
+            filter[i] = `${replacer[i]}`
+        }
+
+        if (space instanceof String || space === undefined) {
+            return new JSONWriter(filter, space).write(obj)
+        } else {
+            return new JSONWriter(filter, JSON.spaceFromNumber(space as number)).write(obj)
+        }
+    }
+
+    public static stringify(obj: NullishType, replacer: Array<string | number>, space?: string | number): string {
+        const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
         }
@@ -279,7 +292,7 @@ export class JSON {
      *
      * @returns String - JSON representation of bytes array
      */
-    public static stringify(d: byte[]): String {
+    public static stringify(d: FixedArray<byte>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -296,11 +309,11 @@ export class JSON {
     /**
      * Converts shorts array to JSON format
      *
-     * @param d: short[] - shorts array to be converted to a JSON as an Array of Numbers
+     * @param d: FixedArray<short> - shorts array to be converted to a JSON as an Array of Numbers
      *
      * @returns String - JSON representation of shorts array
      */
-    public static stringify(d: short[]): String {
+    public static stringify(d: FixedArray<short>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -317,11 +330,11 @@ export class JSON {
     /**
      * Converts ints array to JSON format
      *
-     * @param d: int[] - ints array to be converted to a JSON as an Array of Numbers
+     * @param d: FixedArray<int> - ints array to be converted to a JSON as an Array of Numbers
      *
      * @returns String - JSON representation of ints array
      */
-    public static stringify(d: int[]): String {
+    public static stringify(d: FixedArray<int>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -338,11 +351,11 @@ export class JSON {
     /**
      * Converts longs array to JSON format
      *
-     * @param d: long[] - longs array to be converted to a JSON as an Array of Numbers
+     * @param d: FixedArray<long> - longs array to be converted to a JSON as an Array of Numbers
      *
      * @returns String - JSON representation of longs array
      */
-    public static stringify(d: long[]): String {
+    public static stringify(d: FixedArray<long>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -359,11 +372,11 @@ export class JSON {
     /**
      * Converts array of bytes to JSON format
      *
-     * @param d: byte[] - array of byte to be converted to a JSON as an Array of Numbers
+     * @param d: FixedArray<byte> - array of byte to be converted to a JSON as an Array of Numbers
      *
      * @returns String - JSON representation of array of bytes
      */
-    public static stringify(d: float[]): String {
+    public static stringify(d: FixedArray<float>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -380,11 +393,11 @@ export class JSON {
     /**
      * Converts doubles array to JSON format
      *
-     * @param d: double[] - doubles array to be converted to a JSON as an Array of Numbers
+     * @param d: FixedArray<double> - doubles array to be converted to a JSON as an Array of Numbers
      *
      * @returns String - JSON representation of doubles array
      */
-    public static stringify(d: double[]): String {
+    public static stringify(d: FixedArray<double>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -401,11 +414,11 @@ export class JSON {
     /**
      * Converts chars array to JSON format
      *
-     * @param d: char[] - chars array  to be converted to a JSON as an Array of Numbers
+     * @param d: FixedArray<char> - chars array  to be converted to a JSON as an Array of Numbers
      *
      * @returns String - JSON representation of chars array
      */
-    public static stringify(d: char[]): String {
+    public static stringify(d: FixedArray<char>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -422,11 +435,11 @@ export class JSON {
     /**
      * Converts booleans array to JSON format
      *
-     * @param d: boolean[] - booleans array to be converted to a JSON as an Array of Boolean literals
+     * @param d: FixedArray<boolean> - booleans array to be converted to a JSON as an Array of Boolean literals
      *
      * @returns String - JSON representation of booleans array
      */
-    public static stringify(d: boolean[]): String {
+    public static stringify(d: FixedArray<boolean>): String {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
@@ -555,11 +568,11 @@ export class JSON {
 
 class JSONWriter {
     // NOTE(cheezzario) replace with Type.for<JSValue>() when it will be implemented
-    private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as JSValue[]) as ArrayType).getElementType()
+    private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as FixedArray<JSValue>) as ArrayType).getElementType()
     private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
 
     private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
-    private readonly fieldsFilter: string[]
+    private readonly fieldsFilter: FixedArray<string>
     private readonly space: String | undefined
 
     private readonly useReplacer: boolean
@@ -581,7 +594,7 @@ class JSONWriter {
         this.useIndent = !(this.space == undefined || this.space == "")
     }
 
-    constructor(filter: string[], space?: String) {
+    constructor(filter: FixedArray<string>, space?: String) {
         this.replacer = undefined
         this.fieldsFilter = filter
         this.space = space
@@ -1164,8 +1177,8 @@ export class JSONParser {
         return res
     }
 
-    private static readonly CAN_BE_ESCAPED_CHARS: char[] = [c'"', c'\\', c'/', c'b', c'f', c'n', c'r', c't']
-    private static readonly ESCAPED_CHARS: char[] = [c'\"', c'\\', c'\/', c'\b', c'\f', c'\n', c'\r', c'\t']
+    private static readonly CAN_BE_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'/', c'b', c'f', c'n', c'r', c't']
+    private static readonly ESCAPED_CHARS: FixedArray<char> = [c'\"', c'\\', c'\/', c'\b', c'\f', c'\n', c'\r', c'\t']
 
     private parse(res: JSONString): JSONString {
         let resBuilder: StringBuilder = new StringBuilder()
@@ -1317,12 +1330,12 @@ class JSONValueParser {
 
     private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
         let len = jVal.values.length
-        let arr = aType.make(len as int) as NullishType[]
+        let arr = aType.make(len as int) as FixedArray<NullishType>
 
-        let setArrayElementFn = (a: NullishType[], i: int, v: NullishType) => { a[i] = v }
+        let setArrayElementFn = (a: FixedArray<NullishType>, i: int, v: NullishType) => { a[i] = v }
 
         if (this.reviver !== undefined) {
-            setArrayElementFn = (array: NullishType[], index: int, elemVal: NullishType): void => {
+            setArrayElementFn = (array: FixedArray<NullishType>, index: int, elemVal: NullishType): void => {
                 const revivedVal = this.reviver!(`${index}`, elemVal)
                 array[index] = revivedVal !== undefined ? revivedVal : null
             }

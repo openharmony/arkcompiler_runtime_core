@@ -211,7 +211,7 @@ TEST_F(ClassFindMethodTest, has_method_C_unusual_types)
     }
     {
         ani_array_int params;
-        ASSERT_EQ(env_->Array_New_Int(2U, &params), ANI_OK);
+        ASSERT_EQ(env_->FixedArray_New_Int(2U, &params), ANI_OK);
         ani_int nativeParams[] = {TEST_NATIVE_PARAM1, TEST_NATIVE_PARAM2};
         const ani_size offset = 0;
         ASSERT_EQ(env_->Array_SetRegion_Int(params, offset, 2U, nativeParams), ANI_OK);
