@@ -38,3 +38,10 @@ break_statements:
           if (true) { break; }
         }
         assertEQ(i, 2)
+  - use: |
+        let i = 2;
+          while (i > 0) {
+            break;
+            i--;
+          }
+        assertEQ(i, 2)
