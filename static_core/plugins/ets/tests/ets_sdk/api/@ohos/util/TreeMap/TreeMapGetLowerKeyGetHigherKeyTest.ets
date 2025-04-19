@@ -21,21 +21,22 @@ const fail = 1;
 function main(): int {
     const suite = new ArkTestsuite("TreeMap GetLowerKey GetHigherKey API tests")
 
-    suite.addTest("TreeMap getLowerKey getHigherKey lower and higher key",
-        testGetLowerKeyAndHigherKeyValidKeys)
+    suite.addTest("TreeMap getLowerKey getHigherKey lower and higher key", testGetLowerKeyAndHigherKeyValidKeys)
     suite.addTest("TreeMap getLowerKey getHigherKey lower and higher key from the null treeMap",
         testGetLowerKeyAndHigherKeyEmptyTreeMap)
     suite.addTest("TreeMap getLowerKey getHigherKey lower and higher key with boundary data",
         testGetLowerKeyAndHigherKeyBoundaryData)
-    suite.addTest("TreeMap getLowerKey getHigherKey lower and higher empty string key when treeMap is mepty.",
+    suite.addTest("TreeMap getLowerKey getHigherKey lower and higher non-exist key.",
+        testGetLowerKeyAndHigherKeyNonExistingKey)
+    suite.addTest("TreeMap getLowerKey getHigherKey lower and higher empty string key when treeMap is empty.",
         testGetLowerKeyAndHigherKeyEmptyStringKey)
-    suite.addTest("TreeMap getLowerKey getHigherKey lower and higher object key",
-        testGetLowerKeyAndHigherKeyObjectKeys)
+    suite.addTest("TreeMap getLowerKey getHigherKey lower and higher object key", testGetLowerKeyAndHigherKeyObjectKeys)
     suite.addTest("TreeMap getLowerKey getHigherKey lower and higher object key with boundary data",
         testGetLowerKeyAndHigherKeyObjectKeysBoundaryData)
 
     return suite.run()
 }
+
 
 class MyObject extends Object {
     size: number;
@@ -100,6 +101,30 @@ function testGetLowerKeyAndHigherKeyBoundaryData() {
     assertEQ(lower, undefined, "The treeMap should return undefined for the lower key at the boundary value");
     assertEQ(higher, undefined, "The treeMap should return undefined for the higher key at the boundary value");
     assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+}
+
+function testGetLowerKeyAndHigherKeyNonExistingKey() {
+    let treeMap: TreeMap<string, string> =
+        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
+            return firstValue < secondValue
+        });
+    treeMap.set("bb", "456");
+    treeMap.set("cc", "123");
+    treeMap.set("dd", "789");
+    treeMap.set("ee", "111");
+    treeMap.set("gg", "777");
+    treeMap.set("ii", "333");
+    treeMap.set("kk", "555");
+    treeMap.set("nn", "666");
+    let lower_ = treeMap.getLowerKey("aa");
+    let lower = treeMap.getLowerKey("ff");
+    let higher_ = treeMap.getHigherKey("pp");
+    let higher = treeMap.getHigherKey("ff");
+    assertEQ(lower_, undefined, "The treeMap should return undefined when no data is found above this key");
+    assertEQ(higher_, undefined, "The treeMap should return undefined when no data is found below this key");
+    assertEQ(lower, "ee", "The treeMap should return the correct lower key");
+    assertEQ(higher, "gg", "The treeMap should return the correct higher key");
+    assertEQ(treeMap.length, 8, "The treeMap length should be 8");
 }
 
 function testGetLowerKeyAndHigherKeyEmptyStringKey() {

@@ -229,48 +229,6 @@ export class List<T> implements Iterable<T> {
     }
 
     /**
-     * Replaces all elements in the list with the result of the provided function.
-     *
-     * @param callbackfn The function to generate the new elements.
-     */
-    public replaceAllElements(callbackfn: () => T): void {
-        let currentNode: ListNode<T> | undefined = this.buffer.head
-        while (currentNode !== undefined) {
-            currentNode!.element = callbackfn()
-            currentNode = currentNode!.next
-        }
-    }
-
-    /**
-     * Replaces all elements in the List using a callback function that takes the value.
-     *
-     * @param callbackfn - The callback function taking the value as arguments.
-     *
-     */
-    public replaceAllElements(callbackfn: (value: T) => T): void {
-        let currentNode: ListNode<T> | undefined = this.buffer.head
-        while (currentNode !== undefined) {
-            currentNode!.element = callbackfn(currentNode!.element)
-            currentNode = currentNode!.next
-        }
-    }
-
-    /**
-     * Replaces all elements in the List using a callback function that takes the value and index.
-     *
-     * @param callbackfn - The callback function taking the value, index as arguments.
-     *
-     */
-    public replaceAllElements(callbackfn: (value: T, index: number) => T): void {
-        let currentNode: ListNode<T> | undefined = this.buffer.head
-        let index: number = 0;
-        while (currentNode !== undefined) {
-            currentNode!.element = callbackfn(currentNode!.element, index++)
-            currentNode = currentNode!.next
-        }
-    }
-
-    /**
      * Replaces all elements in the List using a callback function that takes the value and index, and itself.
      *
      * @param callbackfn - The callback function taking the value, index, and the List as arguments.
@@ -389,5 +347,27 @@ export class List<T> implements Iterable<T> {
             return currentNode;
         }
         return undefined;
+    }
+
+    /**
+     * Gets the element at the specified index.
+     *
+     * @param index - The index of the element to retrieve.
+     *
+     * @returns The element at the specified index. If the index is out of range, returns undefined.
+     */
+    public $_get(index: number): T | undefined {
+        return this.buffer.get(index);
+    }
+
+    /**
+     * Sets the element at the specified index.
+     *
+     * @param index - The index of the element to set.
+     *
+     * @param val - The value to set at the specified index.
+     */
+    public $_set(index: number, val: T): void {
+        this.buffer.set(index, val);
     }
 }

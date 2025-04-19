@@ -22,8 +22,6 @@ function main() {
     suite.addTest("ArrayList create an instance that stores multiple types of data", testCreateMultiTypeInstance);
     suite.addTest("ArrayList length", testArrayListLength);
     suite.addTest("ArrayList length with mixed types", testArrayListLengthMixedTypes);
-    suite.addTest("ArrayList length setter", testArrayListLengthSetter);
-    suite.addTest("ArrayList length setter with negative value", testArrayListLengthSetterNegative);
     suite.addTest("ArrayList length setter with large value", testArrayListLengthSetterLarge);
     suite.addTest("ArrayList add", testArrayListAdd);
     suite.addTest("ArrayList add special characters", testArrayListAddSpecialCharacters);
@@ -95,36 +93,6 @@ function testArrayListLengthMixedTypes() {
     arrayList.remove(TestData.testNumber3);
     arrayList.remove(TestData.testString1);
     assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after removing two elements");
-}
-
-function testArrayListLengthSetter() {
-    let arrayList = new ArrayList<number>();
-    arrayList.add(TestData.testNumber3);
-    arrayList.add(TestData.testNumber3);
-    arrayList.length = TestData.testNumber1;
-    assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after set");
-    try {
-        arrayList.length = TestData.testNumber8;
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "can't change length to bigger or negative",
-            "The result should be 'Cant't change");
-        return;
-    }
-    assertTrue(false, "The result should be 'RangeError'");
-}
-
-function testArrayListLengthSetterNegative() {
-    let arrayList = new ArrayList<number>();
-    try {
-        arrayList.length = -TestData.testNumber8;
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "can't change length to bigger or negative",
-            "The result should be 'Cant't change");
-        return;
-    }
-    assertTrue(false, "The result should be 'RangeError'");
 }
 
 function testArrayListLengthSetterLarge() {

@@ -24,11 +24,11 @@ export interface ReadonlyTreeMap<K, V> extends Iterable<[K, V]> {
     get length(): number;
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param k: the key to find in the TreeMap
      *
-     * @returns value if assosiated with key presents
+     * @returns value if associated with key presents
      */
     get(key: K): V | undefined;
 
@@ -263,11 +263,11 @@ export class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
     }
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param k: the key to find in the TreeMap
      *
-     * @returns value if assosiated with key presents
+     * @returns value if associated with key presents
      */
     get(key: K): V | undefined {
         return this.getEntry(key)?.val;
@@ -343,29 +343,23 @@ export class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      *
      * @param key: the key of the element which will be get the higher key
      *
-     * @returns the higher key of the given key's element if exists
+     * @returns the higher key of the given key's element if exists or undefined
      */
     getHigherKey(key: K): K | undefined {
-        let entry = this.getEntry(key);
+        let resultEntry: TreeMapEntry<K, V> | undefined = undefined;
+        let entry = this.rootEntry;
 
-        if (entry !== undefined) {
-            if (entry.right !== undefined) {
-                entry = entry.right;
-                while (entry!.left !== undefined) {
-                    entry = entry!.left;
-                }
+        while(entry !== undefined) {
+            if (this.comparator!(key, entry!.key)) {
+                resultEntry = entry;
+                entry = entry!.left;
             } else {
-                while ((entry!.parent !== undefined) && (entry === entry!.parent!.right)) {
-                    entry = entry!.parent;
-                }
-                entry = entry!.parent;
+                entry = entry!.right;
             }
+        }
 
-            if (entry !== undefined) {
-                return entry.key;
-            } else {
-                return undefined;
-            }
+        if (resultEntry !== undefined) {
+            return resultEntry.key;
         } else {
             return undefined;
         }
@@ -393,29 +387,23 @@ export class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
      *
      * @param key: the key of the element which will be get the lower key
      *
-     * @returns the lower key of the given key's element if exists
+     * @returns the lower key of the given key's element if exists or undefined
      */
     getLowerKey(key: K): K | undefined {
-        let entry = this.getEntry(key);
+        let resultEntry: TreeMapEntry<K, V> | undefined = undefined;
+        let entry = this.rootEntry;
 
-        if (entry !== undefined) {
-            if (entry.left !== undefined) {
-                entry = entry.left;
-                while (entry!.right !== undefined) {
-                    entry = entry!.right;
-                }
+        while(entry !== undefined) {
+            if (this.comparator!(entry!.key, key)) {
+                resultEntry = entry;
+                entry = entry!.right;
             } else {
-                while ((entry!.parent !== undefined) && (entry === entry!.parent!.left)) {
-                    entry = entry!.parent;
-                }
-                entry = entry!.parent;
+                entry = entry!.left;
             }
+        }
 
-            if (entry !== undefined) {
-                return entry.key;
-            } else {
-                return undefined;
-            }
+        if (resultEntry !== undefined) {
+            return resultEntry.key;
         } else {
             return undefined;
         }
