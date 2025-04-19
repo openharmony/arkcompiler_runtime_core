@@ -1032,7 +1032,3 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_7.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_8.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_7.ets
-
-
-#23710
-18.annotations/02.using_annotations/using_annotations_n_10.ets
