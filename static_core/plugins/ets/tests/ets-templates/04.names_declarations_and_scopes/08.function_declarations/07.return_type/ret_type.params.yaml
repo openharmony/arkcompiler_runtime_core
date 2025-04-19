@@ -208,3 +208,16 @@ function_decls:
           }
       call: |-
           let v = foo<Boolean>();
+
+    - decl: |-
+        let i = 1
+        function foo() throws {
+            i += 1
+            throw new Exception()
+            return i;
+        }
+      call: |-
+        try {
+          foo();
+        } catch (e) {
+        }

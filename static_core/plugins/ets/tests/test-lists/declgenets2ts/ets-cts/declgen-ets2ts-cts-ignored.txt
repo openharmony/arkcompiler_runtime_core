@@ -1347,7 +1347,7 @@
 08.statements/09.for_of_statements/for_of_neg_7.ets
 08.statements/09.for_of_statements/for_of_neg_8.ets
 08.statements/09.for_of_statements/for_of_neg_9.ets
-08.statements/10.break_statements/break_negative_1.ets
+08.statements/10.break_statements/break_negative_0.ets
 08.statements/11.continue_statements/continue_do2l_neg2.ets
 08.statements/11.continue_statements/continue_do2l_neg4.ets
 08.statements/11.continue_statements/continue_for2l_neg2.ets
@@ -1356,7 +1356,7 @@
 08.statements/11.continue_statements/continue_for_of2l_neg4.ets
 08.statements/11.continue_statements/continue_while2l_neg2.ets
 08.statements/11.continue_statements/continue_while2l_neg4.ets
-08.statements/12.return_statements/return_negative_1.ets
+08.statements/12.return_statements/return_negative_0.ets
 08.statements/13.switch_statements/switch_negative_0.ets
 08.statements/13.switch_statements/switch_negative_1.ets
 08.statements/15.try_statements/02.finally_clause/finally_n_0.ets
