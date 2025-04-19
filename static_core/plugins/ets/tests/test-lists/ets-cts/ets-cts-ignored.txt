@@ -949,11 +949,6 @@
 17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_4.ets
 17.experimental_features/12.adding_functionality_to_existing_types/06.implicit_this_in_lambda/implicit_this_in_lambda_6.ets
 
-#23063
-17.experimental_features/13.trailing_lambda/trlambda_func_8.ets
-17.experimental_features/13.trailing_lambda/trlambda_met_8.ets
-17.experimental_features/13.trailing_lambda/trlambda_static_met_8.ets
-
 #21834 overloads for |undefined are not available
 17.experimental_features/08.function_method_and_constructor_overloading/01.function_overloading/fn_overloading2_2.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_12.ets

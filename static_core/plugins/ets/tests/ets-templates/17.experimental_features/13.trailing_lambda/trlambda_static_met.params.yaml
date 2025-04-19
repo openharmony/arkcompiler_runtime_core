@@ -159,7 +159,7 @@ cases:
           A.foo(10.0); { A.globl = 4.0 } // not a trailing lambda
           assertEQ( A.globl, 4.0 )
 
-    # cases without last function parameter
+    # case without last function parameter with extra block afterwards separated by a semicolon
     - decl: |-
           class A {
               static globl: number = 0.0
@@ -169,5 +169,5 @@ cases:
           }
       use: |-
           A.globl = 1.0
-          A.foo(10.0) { A.globl = 4.0 } // no last function parameter
+          A.foo(10.0); { A.globl = 4.0 } // no last function parameter
           assertEQ( A.globl, 4.0 )
