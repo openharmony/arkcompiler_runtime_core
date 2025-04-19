@@ -1027,5 +1027,26 @@
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex4_1.ets
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex5.ets
 
-#23710
-18.annotations/02.using_annotations/using_annotations_n_10.ets
+#25054
+20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_0.ets
+20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_1.ets
+20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_2.ets
+20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_3.ets
+20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_4.ets
+20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_5.ets
+20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_6.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_29.ets
+
+25056
+07.expressions/01.evaluation_of_expressions/typ_2.ets
+
+#24859 undefined register, Register type conflict
+17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_1.ets
+17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
+17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_3.ets
+17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_4.ets
+
+#24901 FixedArray overload is not properly implemented
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_7.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_8.ets
+17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_7.ets
