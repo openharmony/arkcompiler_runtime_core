@@ -814,7 +814,9 @@ std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionNa
                                                    panda::pandasm::Function &functionImpl, AbckitFile *file)
 {
     std::string moduleName = pandasm::GetOwnerName(functionName);
-    ASSERT(file->localModules.count(moduleName) != 0);
+    if (file->localModules.count(moduleName) == 0) {
+        return std::unique_ptr<AbckitCoreFunction> {};
+    }
     auto &m = file->localModules[moduleName];
 
     auto function = std::make_unique<AbckitCoreFunction>();
@@ -1118,7 +1120,11 @@ void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
         if (!libabckit::IsFunction(functionName)) {
             continue;
         }
-        functions.emplace_back(CreateFunction(functionName, function, file));
+        auto abckitCoreFunction = CreateFunction(functionName, function, file);
+        if (abckitCoreFunction == nullptr) {
+            continue;
+        }
+        functions.emplace_back(std::move(abckitCoreFunction));
         ASSERT(nameToFunction.count(function.name) == 0);
         nameToFunction[function.name] = functions.back().get();
     }
