@@ -422,6 +422,11 @@ uint32_t EtsRuntimeInterface::GetRuntimeClassOffset(Arch arch) const
     return ark::cross_values::GetEtsClassRuntimeClassOffset(arch);
 }
 
+bool EtsRuntimeInterface::IsBoxedClass(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsBoxed();
+}
+
 size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const
 {
     return ark::cross_values::GetEtsCoroutineAniEnvOffset(arch);

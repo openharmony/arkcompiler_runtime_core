@@ -518,6 +518,11 @@ public:
         return false;
     }
 
+    virtual bool IsBoxedClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
     virtual std::string GetMethodName([[maybe_unused]] MethodPtr method) const
     {
         return "UnknownMethod";
