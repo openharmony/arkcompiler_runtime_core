@@ -374,3 +374,11 @@ add_ets_coroutines_test(FILE job_test.ets
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
 )
+
+add_ets_coroutines_test(FILE eworker_parameter.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)

@@ -53,7 +53,7 @@ export class EAWorker {
      * Run task in EAWorker
      * Note: it has no effect if EAWorker was stoped
      */
-    public run<R> (task: Function, ...args: NullishType[]): Job<R> {
+    public run<R> (task: Function, ...args: FixedArray<NullishType>): Job<R> {
         return this.worker.run<R>(task, ...args);
     }
 
@@ -69,7 +69,7 @@ export class EAWorker {
 
 interface InternalWorker {
 
-    run<R>(task:Function, ...args: NullishType[]): Job<R>;
+    run<R>(task:Function, ...args:FixedArray<NullishType>): Job<R>;
 
     join();
 }
@@ -113,11 +113,11 @@ class InteropWorker implements InternalWorker {
         ExclusiveLauncher.elaunch(() => this.body(), true);
     }
 
-    public run<R>(task:Function, ...args:NullishType[]):Job<R> {
+    public run<R>(task:Function, ...args:FixedArray<NullishType>):Job<R> {
         let job = new CompletableJob<R>();
         this.initEvent.wait();
         let wrapperTask = ():R => {
-            return task.unsafeCall(args) as R;
+            return task.unsafeCall(...args) as R;
         }
         this.poster!.post((): void => {
             InteropWorker.asyncCall(() => {
@@ -155,10 +155,10 @@ class StaticWorker implements InternalWorker {
         ExclusiveLauncher.elaunch(() => this.body(), false);
     }
 
-    public run<T>(task: Function, ...args:(Object | null | undefined)[]): Job<T> {
+    public run<T>(task: Function, ...args:FixedArray<NullishType>): Job<T> {
         let job = new CompletableJob<T>();
         let wrapperTask = ():T => {
-            return task.unsafeCall(args) as T;
+            return task.unsafeCall(...args) as T;
         }
         this.tasks.push((): void => {
             try {
