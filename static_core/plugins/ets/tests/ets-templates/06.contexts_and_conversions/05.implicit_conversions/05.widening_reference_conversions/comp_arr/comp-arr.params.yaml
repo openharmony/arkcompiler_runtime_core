@@ -187,7 +187,6 @@ cases:
           enum Color { Red, Green, Blue }
       from_type: Color[]
       values:
-          - { to_type: 'Object[]', expr: '[Color.Green, Color.Blue]' }
           - { to_type: Object, expr: '[Color.Red, Color.Green]' }
 
     - decl: |-

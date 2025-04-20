@@ -127,9 +127,9 @@ cases:
                   return this.t
               }
               constructor(p: Object) { this.t = "should never be called" }
-              constructor(p: Color) throws { if (p.getValue() == 1) throw ex; else this.t = "Color" }
+              constructor(p: Color) throws { if (p.valueOf() == 1) throw ex; else this.t = "Color" }
               constructor(p: Size) { this.t = "Size" }
-              constructor(p: Status) throws { if (p.getValue() == 1) throw ex; else this.t = "Status" }
+              constructor(p: Status) throws { if (p.valueOf() == 1) throw ex; else this.t = "Status" }
           }
       use: |-
           try {

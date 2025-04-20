@@ -634,8 +634,9 @@ cases:
               constructor(p: int, q: char) {
                   super([p, q])
               }
-              meth(): int {
-                  return 10 + Z.foo(...super.meth())
+              meth(): [int, char] {
+                  this.fld[0] = 10 + Z.foo(...super.meth())
+                  return this.fld 
               }
           }
           class Z {
@@ -646,7 +647,7 @@ cases:
       use: |-
           // use super expression
           let b: B = new B(1, c'Z')
-          assertTrue(b.meth() == 111)
+          assertEQ(b.meth()[0], 111)
 
     - decl: |-
           class A<T> {}
