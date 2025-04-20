@@ -926,7 +926,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < arr.length as int; ++i) {
-        {%- if (N != 'Float32') and (N != 'Float64') %}
+        {%- if (N == 'BigInt64') %}
+            let v = this.zeroIfInfinity(arr[i])
+            let truncatedVal: BigInt = BigInt.asIntN(64, v)
+            this.$_set(offset + i, truncatedVal{{fromElementCompat}})
+        {%- elif (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(arr[i])
             this.$_set(offset + i, v{{fromElementCompat}})
         {%- else %}
@@ -996,7 +1000,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             throw new RangeError("offset is out of bounds")
         }
         for (let i = array.length - 1 as int; i >= 0; --i) {
-        {%- if (N != 'Float32') and (N != 'Float64') %}
+        {%- if (N == 'BigInt64') %}
+            let v = this.zeroIfInfinity(array[i])
+            let truncatedVal: BigInt = BigInt.asIntN(64, v)
+            this.$_set(offset + i, truncatedVal{{fromElementCompat}})
+        {%- elif (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(array[i])
             this.$_set(insertPos + i, v{{fromElementCompat}})
         {%- else %}

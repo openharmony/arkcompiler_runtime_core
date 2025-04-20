@@ -6711,7 +6711,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.$_set(offset + i, v.getLong())
+            let truncatedVal: BigInt = BigInt.asIntN(64, v)
+            this.$_set(offset + i, truncatedVal.getLong())
         }
     }
 
@@ -6771,7 +6772,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
         for (let i = array.length - 1 as int; i >= 0; --i) {
             let v = this.zeroIfInfinity(array[i])
-            this.$_set(insertPos + i, v.getLong())
+            let truncatedVal: BigInt = BigInt.asIntN(64, v)
+            this.$_set(offset + i, truncatedVal.getLong())
         }
     }
 
