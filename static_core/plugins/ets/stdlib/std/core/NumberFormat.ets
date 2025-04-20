@@ -281,6 +281,54 @@ export namespace Intl {
         }
 
         /**
+        * Returns an Array of objects representing the range of numbers in parts that can be used for custom locale-aware formatting.
+        *
+        * @param start Start range to format a number or BigInt
+        * @param end End range to format a number or BigInt
+        *
+        * @throws TypeError if start or end is NaN
+        *
+        * @returns An Array of objects containing the formatted range in parts
+        */
+        public formatRangeToParts(start: number | bigint, end: number | bigint): NumberRangeFormatPart[] {
+            let isStartBigInt: boolean = false;
+            if (start instanceof BigInt) {
+                isStartBigInt = true;
+            } else if (isNaN(start as number)) {
+                throw new TypeError("Invalid start: NaN");
+            }
+            let isEndBigInt: boolean = false;
+            if (end instanceof BigInt) {
+                isEndBigInt = true;
+            } else if (isNaN(end as number)) {
+                throw new TypeError("Invalid end: NaN");
+            }
+
+            if (!isStartBigInt && !isEndBigInt) {
+                return this.formatToRangePartsDoubleDouble(start as double, end as double);
+            } else if (!isStartBigInt && isEndBigInt) {
+                return this.formatToRangePartsDoubleDecStr(start as double, (end as BigInt).toString());
+            } else if (isStartBigInt && !isEndBigInt) {
+                return this.formatToRangePartsDecStrDouble((start as BigInt).toString(), end as double);
+            }
+            return this.formatToRangePartsDecStrDecStr((start as BigInt).toString(), (end as BigInt).toString());
+        }
+
+        /**
+        * Returns an Array of objects representing the number string in parts that can be used for custom locale-aware formatting.
+        *
+        * @param value A number or BigInt to format
+        *
+        * @returns An Array of objects containing the formatted number in parts
+        */
+        public formatToParts(value: number | bigint): NumberFormatPart[] {
+            if (value instanceof BigInt) {
+                return this.formatToPartsDecStr(value.toString());
+            }
+            return this.formatToPartsDouble(value);
+        }
+
+        /**
         *
         * Returns resolved options
         *
@@ -340,17 +388,43 @@ export namespace Intl {
         private native formatRangeDoubleDecStr(start: number, end: string): string;
         private native formatRangeDecStrDouble(start: string, end: number): string;
         private native formatRangeDecStrDecStr(start: string, end: string): string;
+        private native formatToPartsDouble(value: double): NumberFormatPart[];
+        private native formatToPartsDecStr(value: string): NumberFormatPart[];
+        private native formatToRangePartsDoubleDouble(start: number, end: number): NumberRangeFormatPart[];
+        private native formatToRangePartsDoubleDecStr(start: number, end: string): NumberRangeFormatPart[];
+        private native formatToRangePartsDecStrDouble(start: string, end: number): NumberRangeFormatPart[];
+        private native formatToRangePartsDecStrDecStr(start: string, end: string): NumberRangeFormatPart[];
     }
 
     export class NumberRangeFormatPart {
+        type: NumberFormatPartTypes;
+        value: string;
         source: "startRange" | "endRange" | "shared"
+
+        public constructor(
+            type: NumberFormatPartTypes,
+            value: string,
+            source: "startRange" | "endRange" | "shared")
+        {
+            this.type = type;
+            this.value = value;
+            this.source = source;
+        }
+
     }
 
     export class NumberFormatPart {
-        type: NumberFormatPartTypes; // No default value in TS/JS, because of this class is only used as returned result for function Intl.NumberFormat.formatToParts(..)
+        // No default value in TS/JS, because of this class
+        //  is only used as returned result for
+        //  function Intl.NumberFormat.formatToParts(..)
+        type: NumberFormatPartTypes;
         value: string;
 
-        public constructor() {}
+        public constructor(type: NumberFormatPartTypes, value: string)
+        {
+            this.type = type;
+            this.value = value;
+        }
     }
 
     // NOTE(ilyakorobkov) replace class with interface after fix issue #22050, #24106
