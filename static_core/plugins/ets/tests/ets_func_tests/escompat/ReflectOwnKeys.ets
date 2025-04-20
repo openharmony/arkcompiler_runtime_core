@@ -67,7 +67,10 @@ function reflectOwnKeys(): int {
     let dou: double = 60.0
 
     let arr: number[] = [10, 20, 30]
+    let emptyarr: number[] = []
+
     let str: string = "abc"
+    let emptystr: string = ""
 
     let cl: Point2D = new Point3D(10, 20, 30)
 
@@ -87,7 +90,9 @@ function reflectOwnKeys(): int {
     result += arraysAreEqual(Reflect.ownKeys(dou), emptyArr) ? 0 : 1
 
     result += arraysAreEqual(Reflect.ownKeys(arr), ["0", "1", "2", "length"]) ? 0 : 1
+    result += arraysAreEqual(Reflect.ownKeys(emptyarr), ["length"]) ? 0 : 1
     result += arraysAreEqual(Reflect.ownKeys(str), ["0", "1", "2", "length"]) ? 0 : 1
+    result += arraysAreEqual(Reflect.ownKeys(emptystr), ["length"]) ? 0 : 1
 
     result += arraysAreEqual(Reflect.ownKeys(cl), ["x", "y", "z"]) ? 0 : 1
 
