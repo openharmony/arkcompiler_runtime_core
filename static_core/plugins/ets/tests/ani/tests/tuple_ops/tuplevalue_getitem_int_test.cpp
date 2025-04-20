@@ -19,7 +19,11 @@ namespace ark::ets::ani::testing {
 
 class TupleValueGetItemIntTest : public AniGTestTupleOps {
 public:
-    static constexpr ani_int EXPECTED_RESULT = 300;
+    static constexpr ani_int EXPECTED_RESULT = 300U;
+    static constexpr ani_int EXPECTED_RESULT_2 = 350U;
+    static constexpr ani_int EXPECTED_RESULT_3 = 200U;
+    static constexpr ani_int EXPECTED_RESULT_4 = 100U;
+    static constexpr ani_int EXPECTED_RESULT_5 = 50U;
 };
 
 TEST_F(TupleValueGetItemIntTest, tupleValueGetItemInt)
@@ -55,6 +59,28 @@ TEST_F(TupleValueGetItemIntTest, tupleValueGetItemIntIndexOutOfRange2)
     auto tuple = GetTupleWithCheck("tuplevalue_getitem_int_test", "getIntTuple");
     ani_int result = 0U;
     ASSERT_EQ(env_->TupleValue_GetItem_Int(tuple, -1U, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemIntTest, tupleValueGetItemIntIndexOutOfRange3)
+{
+    const ani_size maxNum = std::numeric_limits<ani_size>::max();
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_int_test", "getIntTuple");
+    ani_int result = 0U;
+    ASSERT_EQ(env_->TupleValue_GetItem_Int(tuple, maxNum, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemIntTest, tupleValueGetItemIntCompositeScene)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_int_test", "getIntTuple");
+
+    const std::array<ani_int, 5U> expectedValues = {EXPECTED_RESULT, EXPECTED_RESULT_2, EXPECTED_RESULT_3,
+                                                    EXPECTED_RESULT_4, EXPECTED_RESULT_5};
+
+    ani_int result = 0U;
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
+        ASSERT_EQ(env_->TupleValue_GetItem_Int(tuple, i, &result), ANI_OK);
+        ASSERT_EQ(result, expectedValues[i]);
+    }
 }
 
 TEST_F(TupleValueGetItemIntTest, tupleValueGetItemIntNullResult)

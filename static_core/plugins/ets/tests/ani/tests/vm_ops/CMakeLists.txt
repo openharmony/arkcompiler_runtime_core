@@ -24,7 +24,8 @@ ani_add_gtest(ani_test_create_vm
 )
 
 ani_add_gtest(ani_test_get_created_vms
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_get_created_vms_test.cpp
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_get_created_virtual_machines_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_get_created_virtual_machines_test.ets
 )
 
 ani_add_gtest(ani_attach_thread

@@ -61,6 +61,27 @@ TEST_F(TupleValueGetItemCharTest, tupleValueGetItemCharIndexOutOfRange2)
     ASSERT_EQ(env_->TupleValue_GetItem_Char(tuple, -1U, &result), ANI_OUT_OF_RANGE);
 }
 
+TEST_F(TupleValueGetItemCharTest, tupleValueGetItemCharIndexOutOfRange3)
+{
+    const ani_size maxNum = std::numeric_limits<ani_size>::max();
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_char_test", "getCharTuple");
+    ani_char result = '\0';
+    ASSERT_EQ(env_->TupleValue_GetItem_Char(tuple, maxNum, &result), ANI_OUT_OF_RANGE);
+}
+
+TEST_F(TupleValueGetItemCharTest, tupleValueGetItemCharCompositeScene)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_char_test", "getCharTuple");
+
+    const std::array<ani_char, 5U> expectedValues = {'H', 'e', 'l', 'l', 'o'};
+
+    ani_char result = '\0';
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
+        ASSERT_EQ(env_->TupleValue_GetItem_Char(tuple, i, &result), ANI_OK);
+        ASSERT_EQ(result, expectedValues[i]);
+    }
+}
+
 TEST_F(TupleValueGetItemCharTest, tupleValueGetItemCharNullResult)
 {
     auto tuple = GetTupleWithCheck("tuplevalue_getitem_char_test", "getCharTuple");
@@ -75,5 +96,18 @@ TEST_F(TupleValueGetItemCharTest, tupleValueGetItemCharRepeat)
         ASSERT_EQ(env_->TupleValue_GetItem_Char(tuple, 0U, &result), ANI_OK);
         ASSERT_EQ(result, 'H');
     }
+}
+
+TEST_F(TupleValueGetItemCharTest, DISABLED_incorrectElementType)
+{
+    auto tuple = GetTupleWithCheck("tuplevalue_getitem_char_test", "getCharTuple");
+    ani_boolean booleanValue = ANI_FALSE;
+    ASSERT_EQ(env_->TupleValue_GetItem_Boolean(tuple, 0U, &booleanValue), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->TupleValue_SetItem_Boolean(tuple, 0U, booleanValue), ANI_INVALID_TYPE);
+
+    auto boxedPrimitivesTuple = GetTupleWithCheck("tuplevalue_getitem_char_test", "getTestPrimitiveTuple");
+    ani_char charValue = ANI_FALSE;
+    ASSERT_EQ(env_->TupleValue_GetItem_Char(boxedPrimitivesTuple, 0U, &charValue), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->TupleValue_SetItem_Char(boxedPrimitivesTuple, 0U, charValue), ANI_INVALID_TYPE);
 }
 }  // namespace ark::ets::ani::testing
