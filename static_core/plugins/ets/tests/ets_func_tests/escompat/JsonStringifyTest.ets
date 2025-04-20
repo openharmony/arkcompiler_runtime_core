@@ -87,6 +87,19 @@ function jsonStringifyFloat64Array(): void {
     assertEQ(`{"0":5e-324,"1":1.7976931348623157e+308}`, JSON.stringify(value));
 }
 
+function jsonStringifyPromise(): void {
+    let pro = new Promise<Object>((resolve: (value: Object) => void): void => {
+        console.log("test");
+    });
+    assertEQ("{}", JSON.stringify(pro));
+}
+
+function jsonStringifySet(): void {
+    let set: Set<string> = new Set<string>();
+    set.add("foo");
+    assertEQ("{}", JSON.stringify(set));
+}
+
 function main(): int {
     const suite = new ArkTestsuite("Json stringify for ArrayLike tests ")
     suite.addTest("JSON.stringify for Uint8Array", jsonStringifyUint8Array)
@@ -98,6 +111,8 @@ function main(): int {
     suite.addTest("JSON.stringify for Uint32Array", jsonStringifyUint32Array)
     suite.addTest("JSON.stringify for Float32Array", jsonStringifyFloat32Array)
     suite.addTest("JSON.stringify for Float64Array", jsonStringifyFloat64Array)
+    suite.addTest("JSON.stringify for Promise", jsonStringifyPromise)
+    suite.addTest("JSON.stringify for Set", jsonStringifySet)
 
     return suite.run()
 }
