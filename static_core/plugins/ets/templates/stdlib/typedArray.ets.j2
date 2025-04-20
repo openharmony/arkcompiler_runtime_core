@@ -434,7 +434,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
-        {%- if (N != 'Float32') and (N != 'Float64') %}
+        {%- if (N == 'BigInt64') %}
+        let v = this.zeroIfInfinity(val)
+        let truncatedVal: BigInt = BigInt.asIntN(64, v);
+        this.setUnsafe(index, truncatedVal{{fromElementCompat}})
+        {%- elif (N != 'Float32') and (N != 'Float64') %}
         let v = this.zeroIfInfinity(val)
         this.setUnsafe(index, v{{fromElementCompat}})
         {%- else %}

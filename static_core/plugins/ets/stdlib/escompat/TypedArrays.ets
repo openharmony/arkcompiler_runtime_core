@@ -6295,7 +6295,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v.getLong())
+        let truncatedVal: BigInt = BigInt.asIntN(64, v);
+        this.setUnsafe(index, truncatedVal.getLong())
     }
 
     /**
