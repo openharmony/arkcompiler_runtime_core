@@ -34,6 +34,7 @@ function main(): int {
 
     failures += test(testStringConstructor(), "Test constructor with string")
     failures += test(testDateConstructor(), "Test constructor with Date object")
+    failures += test(testNaNConstructor(), "Test constructor with NaN")
     
     return test(failures, "All tests run");
 }
@@ -392,6 +393,18 @@ function testDateConstructor(): int {
 
     return failures;
     
+}
+
+function testNaNConstructor(): int {
+    try {
+        let d1 = new Date(Number.NaN);
+        let val = d1.valueOf();
+        assertTrue(isNaN(val));
+    } catch (e) {
+        return 1;
+    }
+
+    return 0;
 }
 
 //*************************************************************************************************************************************************************

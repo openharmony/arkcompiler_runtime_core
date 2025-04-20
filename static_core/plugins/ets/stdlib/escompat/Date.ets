@@ -584,7 +584,11 @@ export class Date {
             this.ms = (Date.parseDateFromString(value as string) as long);
         }
         else {
-            this.ms = trunc(value as number) as long;
+            if (isNaN(value as number)) {
+                this.ms = (maxDateOffset + 1) as long;
+            } else {
+                this.ms = trunc(value as number) as long;
+            }
         }
     }
 
