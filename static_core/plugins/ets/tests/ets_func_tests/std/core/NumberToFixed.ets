@@ -18,16 +18,82 @@ desc: Number toFixed tests
 ---*/
 
 function main(): int {
-   const suite = new ArkTestsuite("Number API test for SDK");
-   suite.addTest("number.toFixed(num), the parameter is too large", testLargeParameter);
-   suite.addTest("number.toFixed(num), the parameter is negative", testNegativeParameter);
-   return suite.run()
+    const suite = new ArkTestsuite("Number API test for SDK");
+    suite.addTest("number.toFixed(num), treatment of Scientific notation", testNumberToFixed);
+    suite.addTest("number.toFixed(num), the parameter is too large", testLargeParameter);
+    suite.addTest("number.toFixed(num), the parameter is negative", testNegativeParameter);
+    return suite.run()
+}
+
+interface TestCase {
+    number: number,
+    fractionDigits: number;
+    expected: string
 }
 
 class TestData {
+    static testCases: TestCase[] = [
+        {
+            number: 1e21,
+            fractionDigits: 3,
+            expected: "1e+21"
+        },
+        {
+            number: 1e20,
+            fractionDigits: 0,
+            expected: "100000000000000000000"
+        },
+        {
+            number: 1e20/1e21,
+            fractionDigits: 3,
+            expected: "0.100"
+        },
+        {
+            number: 1e26,
+            fractionDigits: 1,
+            expected: "1e+26"
+        },
+        {
+            number: 1e-8,
+            fractionDigits: 0,
+            expected: "0"
+        },
+        {
+            number: -1e22,
+            fractionDigits: 2,
+            expected: "-1e+22"
+        },
+        {
+            number: -1e-6,
+            fractionDigits: 0,
+            expected: "-0"
+        },
+        {
+            number: 6e-32,
+            fractionDigits: 1,
+            expected: "0.0"
+        },
+        {
+            number: 9.999e20,
+            fractionDigits: 0,
+            expected: "999900000000000000000"
+        },
+    ]
     static a: Number = new Number('a');
     static big_digits: Number = Number.POSITIVE_INFINITY;
     static negative_digits: Number = -Number.POSITIVE_INFINITY;
+}
+
+function testNumberToFixed() {
+    for (let i = 0; i < TestData.testCases.length; i++) {
+        let testCase: TestCase = TestData.testCases[i];
+        let num: number = testCase.number;
+        let digits: number = testCase.fractionDigits;
+        let expected: string = testCase.expected;
+        let actual: string = new Number(num).toFixed(digits);
+
+        assertEQ(actual, expected, "failed: Expected" + expected + "got: " + actual);
+    }
 }
 
 function testLargeParameter() {
