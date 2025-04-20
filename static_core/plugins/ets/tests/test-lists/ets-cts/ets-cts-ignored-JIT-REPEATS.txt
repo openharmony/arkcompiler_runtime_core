@@ -10,6 +10,7 @@
 
 #24568
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_call_12.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_13.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_decl_13.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_call_12.ets
 

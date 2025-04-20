@@ -354,10 +354,6 @@
 06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_4.ets
 06.contexts_and_conversions/05.implicit_conversions/12.literal_type_conversions/decl_field/decl-field2_6.ets
 
-#24021
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.ets
-
-
 #enum cannot be assigned to type Object - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_func/call-func_21.ets
 06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_arr/comp-arr_21.ets
@@ -669,6 +665,10 @@
 
 #24005
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.ets
+07.expressions/32.lambda_expression/decl_full_ref_4.ets
+07.expressions/32.lambda_expression/decl_full_value_4.ets
+07.expressions/32.lambda_expression/decl_short_ref_4.ets
+07.expressions/32.lambda_expression/decl_short_value_4.ets
 
 #20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.ets
@@ -864,7 +864,6 @@
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_1.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_2.ets
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_2.ets
-
 #23051 Reference comparison
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
@@ -872,20 +871,10 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_1.ets
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.ets
 
-#23199 Lambda doesn't support rest parameter #24005
-07.expressions/32.lambda_expression/decl_full_ref_4.ets
-07.expressions/32.lambda_expression/decl_full_value_4.ets
-07.expressions/32.lambda_expression/decl_short_ref_4.ets
-07.expressions/32.lambda_expression/decl_short_value_4.ets
-
 #24401 Generic lambda is not supported by compiler
 07.expressions/32.lambda_expression/generic.ets
 
 #23513
-07.expressions/33.constant_expression/check_array/constant_logical_expression_0.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_1.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_2.ets
-07.expressions/33.constant_expression/check_array/constant_logical_expression_3.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_10.ets
 07.expressions/33.constant_expression/check_array/constant_logical_expression_11.ets
 07.expressions/33.constant_expression/check_enum/constant_logical_expression_11.ets
@@ -998,9 +987,6 @@
 #21888 no support for package initializer
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
 
-#24511
-13.compilation_units/08.namespace_declarations/simple_spec4_3.ets
-
 #23856
 13.compilation_units/09.export_directives/01.selective_export_directive/t01/c.ets
 13.compilation_units/09.export_directives/01.selective_export_directive/t02/d.ets
@@ -1019,7 +1005,6 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_13.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_17.ets
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_25.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/instance_method_over_n2_20.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/single_class_over_generic_1.ets
@@ -1191,15 +1176,6 @@
 17.experimental_features/03.array_creation_expressions/expr_9.ets
 17.experimental_features/03.array_creation_expressions/expr_7.ets
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.ets
-
-#18550 es2panda aborts on implicit number conversion
-17.experimental_features/04.indexable_types/ind_interface_7.ets
-17.experimental_features/04.indexable_types/ind_class_6.ets
-17.experimental_features/04.indexable_types/ind_class_7.ets
-17.experimental_features/04.indexable_types/ind_interface_13.ets
-17.experimental_features/04.indexable_types/ind_class_12.ets
-17.experimental_features/04.indexable_types/ind_class_13.ets
-17.experimental_features/04.indexable_types/ind_class_16.ets
 
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/05.iterable_types/it_11.ets
