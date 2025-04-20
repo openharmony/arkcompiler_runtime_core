@@ -20,15 +20,15 @@
 // |-----------------------------------------------------|--------------------------------|--------------------|
 // |                 Mark Word (64 bits)                 |      Class Word (64 bits)      |                    |
 // |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 |        nothing:60         | RB:1 | GC:1  |     OOP to metadata object     |       Unlock       |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 |  tId:29   |   Lcount:31   | RB:1 | GC:1  |     OOP to metadata object     |  Lightweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:01 |        Monitor:60         | RB:1 | GC:1  |     OOP to metadata object     |  Heavyweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:10 |          Hash:60          | RB:1 | GC:1  |     OOP to metadata object     |       Hashed       |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:11 |          Forwarding address:62           |     OOP to metadata object     |         GC         |
+// | state:00 | RB:1 | GC:1 |        nothing:60          |     OOP to metadata object     |       Unlock       |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:00 | RB:1 | GC:1 |  tId:29   |   Lcount:31    |     OOP to metadata object     |  Lightweight Lock  |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:01 | RB:1 | GC:1 |        Monitor:60          |     OOP to metadata object     |  Heavyweight Lock  |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:10 | RB:1 | GC:1 |          Hash:60           |     OOP to metadata object     |       Hashed       |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:11 |           Forwarding address:62          |     OOP to metadata object     |         GC         |
 // |-----------------------------------------------------|--------------------------------|--------------------|
 //
 // 64 bits object header for high-end devices: (32 bits pointer)
@@ -37,30 +37,15 @@
 // |-----------------------------------------------------|--------------------------------|--------------------|
 // |                 Mark Word (32 bits)                 |      Class Word (32 bits)      |                    |
 // |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 |         nothing:28         | RB:1 | GC:1 |     OOP to metadata object     |       Unlock       |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 |   tId:13   |   Lcount:15   | RB:1 | GC:1 |     OOP to metadata object     |  Lightweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:01 |         Monitor:28         | RB:1 | GC:1 |     OOP to metadata object     |  Heavyweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:10 |           Hash:28          | RB:1 | GC:1 |     OOP to metadata object     |       Hashed       |
-// |-----------------------------------------------------|--------------------------------|--------------------|
+// | state:00 | RB:1 | GC:1 |        nothing:28          |     OOP to metadata object     |       Unlock       |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:00 | RB:1 | GC:1 |  tId:13   |   Lcount:15    |     OOP to metadata object     |  Lightweight Lock  |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:01 | RB:1 | GC:1 |        Monitor:28          |     OOP to metadata object     |  Heavyweight Lock  |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:10 | RB:1 | GC:1 |          Hash:28           |     OOP to metadata object     |       Hashed       |
+// |----------|------------------------------------------|--------------------------------|--------------------|
 // | state:11 |           Forwarding address:30          |     OOP to metadata object     |         GC         |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-//
-// However, we can also support such version of the object header: (Hash is stored just after the object in mem)
-// |--------------------------------------------------------------------------------------|--------------------|
-// |                                   Object Header (64 bits)                            |        State       |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// |                 Mark Word (32 bits)                 |      Class Word (32 bits)      |                    |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 |     nothing:27    | Hash:1 | RB:1 | GC:1 |     OOP to metadata object     |       Unlock       |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 | tId:13 |LCount:14 | Hash:1 | RB:1 | GC:1 |     OOP to metadata object     |  Lightweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:01 |     Monitor:27    | Hash:1 | RB:1 | GC:1 |     OOP to metadata object     |  Heavyweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:11 |      Forwarding address:29      | Hash:1 |     OOP to metadata object     |         GC         |
 // |-----------------------------------------------------|--------------------------------|--------------------|
 //
 // 32 bits object header for low-end devices:
@@ -69,13 +54,13 @@
 // |-----------------------------------------------------|--------------------------------|--------------------|
 // |                 Mark Word (16 bits)                 |      Class Word (16 bits)      |                    |
 // |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 |         nothing:12         | RB:1 | GC:1 |     OOP to metadata object     |       Unlock       |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:00 |   tId:7    |   Lcount:4    | RB:1 | GC:1 |     OOP to metadata object     |  Lightweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:01 |         Monitor:12         | RB:1 | GC:1 |     OOP to metadata object     |  Heavyweight Lock  |
-// |-----------------------------------------------------|--------------------------------|--------------------|
-// | state:10 |           Hash:12          | RB:1 | GC:1 |     OOP to metadata object     |       Hashed       |
+// | state:00 | RB:1 | GC:1 |        nothing:12          |     OOP to metadata object     |       Unlock       |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:00 | RB:1 | GC:1 |  tId:7    |   Lcount:4     |     OOP to metadata object     |  Lightweight Lock  |
+// |----------|------------------------------------------|-------------------------------|---------------------|
+// | state:01 | RB:1 | GC:1 |        Monitor:12          |     OOP to metadata object     |  Heavyweight Lock  |
+// |----------|------------------------------------------|--------------------------------|--------------------|
+// | state:10 | RB:1 | GC:1 |          Hash:12           |     OOP to metadata object     |       Hashed       |
 // |-----------------------------------------------------|--------------------------------|--------------------|
 // | state:11 |         Forwarding address:14            |     OOP to metadata object     |         GC         |
 // |-----------------------------------------------------|--------------------------------|--------------------|
@@ -124,7 +109,7 @@ public:
         FORWARDING_ADDRESS_SIZE = CONFIG_MARK_WORD_BIT_SIZE - STATUS_SIZE - HASH_STATUS_SIZE,
 
         // Unlocked state masks and shifts
-        UNLOCKED_STATE_SHIFT = CONFIG_MARK_WORD_BIT_SIZE - MONITOR_POINTER_SIZE - STATUS_SIZE,
+        UNLOCKED_STATE_SHIFT = 0U,
         UNLOCKED_STATE_MASK = (1UL << MONITOR_POINTER_SIZE) - 1UL,
         UNLOCKED_STATE_MASK_IN_PLACE = UNLOCKED_STATE_MASK << UNLOCKED_STATE_SHIFT,
 
@@ -132,30 +117,29 @@ public:
         LIGHT_LOCK_THREADID_SIZE = CONFIG_LOCK_THREADID_SIZE,
         LIGHT_LOCK_LOCK_COUNT_SIZE = MONITOR_POINTER_SIZE - LIGHT_LOCK_THREADID_SIZE,
 
-        LIGHT_LOCK_LOCK_COUNT_SHIFT = CONFIG_MARK_WORD_BIT_SIZE - MONITOR_POINTER_SIZE - STATUS_SIZE,
+        LIGHT_LOCK_LOCK_COUNT_SHIFT = 0U,
         LIGHT_LOCK_LOCK_COUNT_MASK = (1UL << LIGHT_LOCK_LOCK_COUNT_SIZE) - 1UL,
         LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE = LIGHT_LOCK_LOCK_COUNT_MASK << LIGHT_LOCK_LOCK_COUNT_SHIFT,
         LIGHT_LOCK_LOCK_MAX_COUNT = LIGHT_LOCK_LOCK_COUNT_MASK,
 
-        LIGHT_LOCK_THREADID_SHIFT =
-            CONFIG_MARK_WORD_BIT_SIZE - MONITOR_POINTER_SIZE + LIGHT_LOCK_LOCK_COUNT_SIZE - STATUS_SIZE,
+        LIGHT_LOCK_THREADID_SHIFT = LIGHT_LOCK_LOCK_COUNT_SIZE,
         LIGHT_LOCK_THREADID_MASK = (1UL << LIGHT_LOCK_THREADID_SIZE) - 1UL,
         LIGHT_LOCK_THREADID_MASK_IN_PLACE = LIGHT_LOCK_THREADID_MASK << LIGHT_LOCK_THREADID_SHIFT,
         LIGHT_LOCK_THREADID_MAX_COUNT = LIGHT_LOCK_THREADID_MASK,
 
         // Heavyweight Lock state masks and shifts
-        MONITOR_POINTER_SHIFT = CONFIG_MARK_WORD_BIT_SIZE - MONITOR_POINTER_SIZE - STATUS_SIZE,
+        MONITOR_POINTER_SHIFT = 0U,
         MONITOR_POINTER_MASK = (1UL << MONITOR_POINTER_SIZE) - 1UL,
         MONITOR_POINTER_MASK_IN_PLACE = MONITOR_POINTER_MASK << MONITOR_POINTER_SHIFT,
         MONITOR_POINTER_MAX_COUNT = MONITOR_POINTER_MASK,
 
         // Hash state masks and shifts
-        HASH_SHIFT = CONFIG_MARK_WORD_BIT_SIZE - HASH_SIZE - STATUS_SIZE,
+        HASH_SHIFT = 0U,
         HASH_MASK = (1UL << HASH_SIZE) - 1UL,
         HASH_MASK_IN_PLACE = HASH_MASK << HASH_SHIFT,
 
         // Forwarding state masks and shifts
-        FORWARDING_ADDRESS_SHIFT = CONFIG_MARK_WORD_BIT_SIZE - FORWARDING_ADDRESS_SIZE - STATUS_SIZE,
+        FORWARDING_ADDRESS_SHIFT = 0U,
         FORWARDING_ADDRESS_MASK = (1UL << FORWARDING_ADDRESS_SIZE) - 1UL,
         FORWARDING_ADDRESS_MASK_IN_PLACE = FORWARDING_ADDRESS_MASK << FORWARDING_ADDRESS_SHIFT,
 
@@ -172,19 +156,14 @@ public:
         STATUS_GC = 3UL,  // Or Forwarding state
 
         // Marked for GC bit masks and shifts
-        GC_STATUS_SHIFT = 0U,
+        GC_STATUS_SHIFT = MONITOR_POINTER_SIZE,
         GC_STATUS_MASK = (1UL << GC_STATUS_SIZE) - 1UL,
         GC_STATUS_MASK_IN_PLACE = GC_STATUS_MASK << GC_STATUS_SHIFT,
 
         // Read barrier bit masks and shifts
-        RB_STATUS_SHIFT = GC_STATUS_SIZE,
+        RB_STATUS_SHIFT = GC_STATUS_SHIFT + GC_STATUS_SIZE,
         RB_STATUS_MASK = (1UL << RB_STATUS_SIZE) - 1UL,
         RB_STATUS_MASK_IN_PLACE = RB_STATUS_MASK << RB_STATUS_SHIFT,
-
-        // Hashed bits masks and shifts
-        HASH_STATUS_SHIFT = GC_STATUS_SIZE + RB_STATUS_SIZE,
-        HASH_STATUS_MASK = (1UL << HASH_STATUS_SIZE) - 1UL,
-        HASH_STATUS_MASK_IN_PLACE = HASH_STATUS_MASK << HASH_STATUS_SHIFT,
     };
 
     enum ObjectState {
@@ -275,8 +254,6 @@ public:
         return MarkWord(Value() & (~RB_STATUS_MASK_IN_PLACE));
     }
 
-    MarkWord SetHashed();
-
     ObjectState GetState() const
     {
         switch ((Value() >> STATUS_SHIFT) & STATUS_MASK) {
@@ -351,19 +328,6 @@ private:
     {
         return value_;
     }
-
-    // Functions depend on memory model config
-    template <bool HASH_POLICY>
-    uint32_t GetHashConfigured() const;
-
-    template <bool HASH_POLICY>
-    MarkWord DecodeFromHashConfigured(uint32_t hash);
-
-    template <bool HASH_POLICY>
-    bool IsHashedConfigured() const;
-
-    template <bool HASH_POLICY>
-    MarkWord SetHashedConfigured();
 
     explicit MarkWord(MarkWordSize value) noexcept : value_(value) {}
 
