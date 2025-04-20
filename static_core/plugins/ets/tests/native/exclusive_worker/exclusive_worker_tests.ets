@@ -16,6 +16,7 @@
 import { launch } from "std/concurrency"
 
 let workerId = -1;
+let counter = 0;
 
 function setWorkerId(eworkerId: int)
 {
@@ -91,4 +92,169 @@ function eWorkerRoutine(): boolean {
     }
     launch<void, () => void>(l);
     return true;
+}
+
+function add(a: int) {
+    counter += a;
+}
+
+function clearCounter() {
+    counter = 0;
+}
+
+function scheduleACoroutine(): boolean {
+    clearCounter();
+    mlaunch<void, ()=>void>(():void => {
+        add(5);
+    });
+    Coroutine.Schedule();
+    return counter == 5 && call();
+}
+
+async function asyncAdd(a: int) {
+    mlaunch<void, ()=>void>(():void => {
+        add(6);
+    });
+    counter += a;
+}
+
+function scheduleAJCoroutine(): boolean {
+    clearCounter();
+    asyncAdd(6);
+    Coroutine.Schedule();
+    return counter == 12 && call();
+}
+
+function launchCallWithoutAwait(): Promise<boolean> {
+    return taskpool.execute(call) as Promise<boolean>;
+}
+
+// recursive launch
+function recursiveLaunch(): boolean {
+    let res : Promise<Promise<boolean>> = taskpool.execute(launchCallWithoutAwait) as Promise<Promise<boolean>>;
+    return await res;
+}
+
+async function callAsync(): Promise<boolean> {
+    return checkWorkerId();
+}
+
+async function asyncCallWithoutAwait(): Promise<Promise<boolean>> {
+    return callAsync();
+}
+
+// recursive async functions
+function recursiveAsync(): boolean {
+    let res : Promise<Promise<boolean>> = asyncCallWithoutAwait();
+    return await res;
+}
+
+function launchAsyncFunctions(): Promise<boolean> {
+    return callAsync();
+}
+
+function ACoroutineCallAsyncFunctions(): boolean {
+    let res : Promise<Promise<boolean>> = taskpool.execute(launchAsyncFunctions) as Promise<Promise<boolean>>
+    return await res;
+}
+
+async function asyncFunctionLaunchCall(): Promise<boolean> {
+    return taskpool.execute(call) as Promise<boolean>;
+}
+
+function asyncFunctionLaunchACoroutine(): boolean {
+    let res : Promise<boolean> = asyncFunctionLaunchCall();
+    return await res;
+}
+
+// oom
+function body(): Object {
+    return new Object();
+}
+
+function testOOM(): boolean {
+    try {
+        for (let i = 0; i < 50000; ++i) {
+            mlaunch<Object, ()=>Object>(body);
+        }
+    } catch (e) {
+        if (e instanceof OutOfMemoryError) {
+            return true;
+        } else {
+            console.println("Wrong exception thrown!");
+            return false;
+        }
+    }
+    console.println("No exception thrown but should be!");
+    return false;
+}
+
+
+function test_stack_overflow(): boolean {
+    try {
+        mlaunch<Object | null, ()=>Object | null>(coro_stack_overflow).Await();
+        console.println("No exceptions thrown by coro_stack_overflow() but should be!")
+        return false;
+    } catch (e) {
+        if (!(e instanceof StackOverflowError)) {
+            console.println("Expected StackOverflowError but another exception has been thrown!");
+            return false;
+        }
+        return true;
+    }
+}
+
+function stack_eater(): void {
+    stack_eater();
+}
+
+function coro_stack_overflow(): Object | null {
+    stack_eater();
+    return null;
+}
+
+function coro_error(): Object {
+    throw new Error();
+}
+
+function test_error(): boolean {
+    try {
+        let res = mlaunch<Object, ()=>Object>(coro_error);
+        res.Await();
+        console.println("No exceptions thrown by coro_error() but should be!")
+        return false;
+    } catch (e) {
+        if (!(e instanceof Error)) {
+            console.println("Expected Error but another exception has been thrown!");
+            return false;
+        }
+        return true;
+    }
+}
+
+// throw exceptions
+function throwExceptions(): boolean {
+    if (!test_stack_overflow()) {
+        return false;
+    }
+    if (!test_error()) {
+        return false;
+    }
+    return true;
+}
+
+let e2m: LinkedBlockingQueue<boolean> = new LinkedBlockingQueue<boolean>();
+let m2e: LinkedBlockingQueue<boolean> = new LinkedBlockingQueue<boolean>();
+
+function EACoroutineSendToMain(): boolean {
+    mlaunch<void, ()=>void>(():void => {
+        e2m.push(true);
+    });
+    return m2e.pop();
+}
+
+function mainSendToEACoroutine(){
+    if (e2m.pop()) {
+        m2e.push(true);
+    }
 }
