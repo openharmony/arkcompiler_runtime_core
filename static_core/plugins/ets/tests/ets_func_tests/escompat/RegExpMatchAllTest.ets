@@ -40,6 +40,10 @@ function main(): int {
     failure += checkTestResult(next_result.done, false)
     failure += checkTestResult(regexp.lastIndex as int, 2)
 
+    let regexplastIndextest = new RegExp("(?:ab|cd)\\d?","g");
+    regexplastIndextest.lastIndex = -1;
+    failure += checkTestResult(regexplastIndextest.test("aacd22"), true);
+
     return failure
 }
 
