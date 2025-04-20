@@ -14,8 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: this can be passed as an argument only after each object field receives an initial value
-tags: [compile-only, negative]
+desc: this can be passed as an argument no matter if fields are inited. If an uninited fields is used. NullPointerError should happen
 ---*/
 
 class A {
@@ -30,4 +29,14 @@ class A {
     this.n = this.foo(this)
     this.s = "abcd"
   }
+}
+
+function main(){
+  try{
+    let a = new A
+  } catch (e) {
+    arktest.assertTrue( e instanceof NullPointerError )
+    return
+  }
+  arktest.assertTrue(false, "NPE expected")
 }
