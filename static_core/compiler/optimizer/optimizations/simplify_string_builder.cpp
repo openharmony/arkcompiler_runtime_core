@@ -1292,6 +1292,18 @@ bool SimplifyStringBuilder::HasToStringCallInput(PhiInst *phi) const
     return hasToStringCallInput && !toStringCallInputUsedAnywhereExceptPhi;
 }
 
+static bool UsedByPhiInstInSameBB(const PhiInst *phi)
+{
+    auto header = phi->GetBasicBlock();
+    for (auto &user : phi->GetUsers()) {
+        auto inst = user.GetInst();
+        if (inst->IsPhi() && inst->GetBasicBlock() == header) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool SimplifyStringBuilder::HasInputInst(Inst *inputInst, Inst *inst) const
 {
     MarkerHolder visited {GetGraph()};
@@ -1346,7 +1358,8 @@ bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi) const
     //      20 CallStatic std.core.StringBuilder::toString sb, ss
     //      ...
 
-    return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && HasAppendInstructionUser(phi);
+    return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && !UsedByPhiInstInSameBB(phi) &&
+           HasAppendInstructionUser(phi);
 }
 
 ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
