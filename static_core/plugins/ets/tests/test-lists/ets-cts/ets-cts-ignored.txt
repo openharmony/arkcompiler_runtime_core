@@ -77,11 +77,9 @@
 
 #20936 Access to common union method doesn't work
 03.types/19.union_types/02.access_to_common_union_members/cm_meth1_0.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_11.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_3.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_4.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth3_11.ets
 
 #24598
 03.types/19.union_types/03.keyof_types/keyof_class_15.ets
