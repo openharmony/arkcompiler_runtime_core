@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-from mate.bar use BarType as MyBar;
-
-union MateType {
-    sValue: String;
-    bValue: bool;
-    @undefined xValue;
+struct A {
+    param1: i32;
 }
 
-function testBar(bar: MyBar): void;
+struct B {
+    @extends a: A;
+    @readonly param2: i32;
+}
+
+@class
+struct C {
+    @extends b: B;
+    @readonly param3: i32;
+}

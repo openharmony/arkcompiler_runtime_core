@@ -230,7 +230,7 @@ union TestUnionName {
   value1:i16;
   value2:String;
   value3:bool;
-  value4;
+  @null value4;
 }
 
 

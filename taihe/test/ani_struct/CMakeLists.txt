@@ -1,5 +1,3 @@
-# coding=utf-8
-#
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ["ast", "Visitor", "AstConverter", "SourceManager"]
+set(IDL_FILES
+    "${CMAKE_CURRENT_LIST_DIR}/idl/struct_test.taihe"
+)
 
-from taihe.parse.antlr.TaiheAST import TaiheAST as ast
-from taihe.parse.antlr.TaiheVisitor import TaiheVisitor as Visitor
-from taihe.parse.convert import AstConverter
-from taihe.utils.sources import SourceManager
+set(GEN_ETS_FILES
+    "struct_test.ets"
+)
+
+set(USER_ETS_FILES
+    "${CMAKE_CURRENT_LIST_DIR}/user/main.ets"
+)
+
+file(GLOB AUTHOR_CPP_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/author/src/*.cpp")
+
+add_ani_demo(ani_struct "${IDL_FILES}" "${GEN_ETS_FILES}" "" "${USER_ETS_FILES}" "${AUTHOR_CPP_FILES}" "test")

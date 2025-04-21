@@ -15,7 +15,7 @@
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from typing_extensions import override
 
@@ -44,7 +44,9 @@ from taihe.semantics.declarations import (
     PackageDecl,
     PackageGroup,
     StructDecl,
+    StructFieldDecl,
     UnionDecl,
+    UnionFieldDecl,
 )
 from taihe.semantics.types import (
     ArrayType,
@@ -70,8 +72,6 @@ from taihe.utils.sources import SourceLocation
 if TYPE_CHECKING:
     from taihe.semantics.declarations import (
         ParamDecl,
-        StructFieldDecl,
-        UnionFieldDecl,
     )
 
 
@@ -309,6 +309,7 @@ class PackageANIInfo(AbstractAnalysis[PackageDecl]):
 class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
     def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
         super().__init__(am, f)
+        self.am = am
         self.f = f
 
         self.sts_native_name = f"{f.name}_inner"
@@ -316,124 +317,182 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
         self.sts_static_scope = None
         self.sts_ctor_scope = None
 
-        if (static_attr := f.get_last_attr("static")) and check_attr_args(
-            am, static_attr, "s"
-        ):
-            (self.sts_static_scope,) = static_attr.args
-
-        if (ctor_attr := f.get_last_attr("ctor")) and check_attr_args(
-            am, ctor_attr, "s"
-        ):
-            (self.sts_ctor_scope,) = ctor_attr.args
-
         self.sts_func_name = None
         self.on_off_type = None
         self.get_name = None
         self.set_name = None
 
-        if (overload_attr := f.get_last_attr("overload")) and check_attr_args(
-            am, overload_attr, "s"
-        ):
-            (self.sts_func_name,) = overload_attr.args
-
-        elif on_off_attr := f.get_last_attr("on_off"):
-            if not f.name.startswith(("on", "off", "On", "Off")):
-                raise_adhoc_error(
-                    am,
-                    '@on_off method name must start with "On/on/Off/off"',
-                    f.loc,
-                )
-
-            if f.name.startswith(("on", "On")):
-                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
-                    (type_name,) = on_off_attr.args
-                else:
-                    type_name = f.name[2:]
-                    type_name = type_name[0].lower() + type_name[1:]
-                self.on_off_type = ("on", type_name)
-
-            if f.name.startswith(("off", "Off")):
-                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
-                    (type_name,) = on_off_attr.args
-                else:
-                    type_name = f.name[3:]
-                    type_name = type_name[0].lower() + type_name[1:]
-                self.on_off_type = ("off", type_name)
-
-        elif get_attr := f.get_last_attr("get"):
-            if not self.sts_static_scope:
-                raise_adhoc_error(
-                    am,
-                    "@get of global functions must be used together with @static",
-                    f.loc,
-                )
-            if len(f.params) != 0 or f.return_ty_ref is None:
-                raise_adhoc_error(
-                    am,
-                    "@get method should take no parameters and return non-void",
-                    f.loc,
-                )
-
-            if get_attr.args and check_attr_args(am, get_attr, "s"):
-                (self.get_name,) = get_attr.args
-            elif f.name.startswith(("get", "Get")):
-                get_name = f.name[3:]
-                self.get_name = get_name[0].lower() + get_name[1:]
-            else:
-                raise_adhoc_error(
-                    am,
-                    '@get method name must start with "Get/get" or have @get argument',
-                    f.loc,
-                )
-
-        elif set_attr := f.get_last_attr("set"):
-            if not self.sts_static_scope:
-                raise_adhoc_error(
-                    am,
-                    "@set of global functions must be used together with @static",
-                    f.loc,
-                )
-            if len(f.params) != 1 or f.return_ty_ref is not None:
-                raise_adhoc_error(
-                    am,
-                    "@set method should have one parameter and return void",
-                    f.loc,
-                )
-
-            if set_attr.args and check_attr_args(am, set_attr, "s"):
-                (self.set_name,) = set_attr.args
-            elif f.name.startswith(("set", "Set")):
-                set_name = f.name[3:]
-                self.set_name = set_name[0].lower() + set_name[1:]
-            else:
-                raise_adhoc_error(
-                    am,
-                    '@set method name must start with "Set/set" or have @set argument',
-                    f.loc,
-                )
-
-        else:
-            if f.parent_pkg.get_last_attr("sts_keep_name"):
-                self.sts_func_name = f.name
-            else:
-                self.sts_func_name = f.name[0].lower() + f.name[1:]
-
         self.sts_async_name = None
         self.sts_promise_name = None
 
-        if (sts_async_attr := f.get_last_attr("gen_async")) and check_attr_args(
-            am, sts_async_attr, "s"
+        if (
+            self.resolve_ctor()
+            or self.resolve_static()
+            and (self.resolve_getter() or self.resolve_setter())
         ):
-            (self.sts_async_name,) = sts_async_attr.args
-
-        if (sts_promise_attr := f.get_last_attr("gen_promise")) and check_attr_args(
-            am, sts_promise_attr, "s"
-        ):
-            (self.sts_promise_name,) = sts_promise_attr.args
+            pass
+        elif self.resolve_on_off() or self.resolve_normal():
+            self.resolve_async()
+            self.resolve_promise()
 
         self.sts_params: list[ParamDecl] = []
         for param in f.params:
             self.sts_params.append(param)
+
+    def resolve_ctor(self) -> bool:
+        if (ctor_attr := self.f.get_last_attr("ctor")) is None:
+            return False
+        if not check_attr_args(self.am, ctor_attr, "s"):
+            return True
+        (self.sts_ctor_scope,) = ctor_attr.args
+        return True
+
+    def resolve_static(self) -> bool:
+        if (static_attr := self.f.get_last_attr("static")) is None:
+            return False
+        if not check_attr_args(self.am, static_attr, "s"):
+            return True
+        (self.sts_static_scope,) = static_attr.args
+        return True
+
+    def resolve_getter(self) -> bool:
+        if (get_attr := self.f.get_last_attr("get")) is None:
+            return False
+        if len(self.f.params) != 0 or self.f.return_ty_ref is None:
+            raise_adhoc_error(
+                self.am,
+                "@get method should take no parameters and return non-void",
+                self.f.loc,
+            )
+            return True
+        if get_attr.args and check_attr_args(self.am, get_attr, "s"):
+            (get_name,) = get_attr.args
+        elif self.f.name[:3].lower() == "get":
+            get_name = self.f.name[3:]
+            get_name = get_name[0].lower() + get_name[1:]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@get method name must start with "Get/get" or have @get argument',
+                self.f.loc,
+            )
+            return True
+        self.get_name = get_name
+        return True
+
+    def resolve_setter(self) -> bool:
+        if (set_attr := self.f.get_last_attr("set")) is None:
+            return False
+        if len(self.f.params) != 1 or self.f.return_ty_ref is not None:
+            raise_adhoc_error(
+                self.am,
+                "@set method should have one parameter and return void",
+                self.f.loc,
+            )
+            return True
+        if set_attr.args and check_attr_args(self.am, set_attr, "s"):
+            (set_name,) = set_attr.args
+        elif self.f.name[:3].lower() == "set":
+            set_name = self.f.name[3:]
+            set_name = set_name[0].lower() + set_name[1:]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@set method name must start with "Set/set" or have @set argument',
+                self.f.loc,
+            )
+            return True
+        self.set_name = set_name
+        return True
+
+    def resolve_on_off(self) -> bool:
+        if (on_off_attr := self.f.get_last_attr("on_off")) is None:
+            return False
+        if on_off_attr.args:
+            if not check_attr_args(self.am, on_off_attr, "s"):
+                return True
+            (type_name,) = on_off_attr.args
+        else:
+            type_name = None
+        if overload_attr := self.f.get_last_attr("overload"):
+            if not check_attr_args(self.am, overload_attr, "s"):
+                return True
+            (func_name,) = overload_attr.args
+            if type_name is None:
+                if self.f.name[: len(func_name)].lower() == func_name.lower():
+                    type_name = self.f.name[len(func_name):]
+                    type_name = type_name[0].lower() + type_name[1:]
+                else:
+                    raise_adhoc_error(
+                        self.am,
+                        f"@on_off method name must start with {func_name}",
+                        self.f.loc,
+                    )
+                    return True
+        else:
+            for func_name in ("on", "off"):
+                if self.f.name[: len(func_name)].lower() == func_name.lower():
+                    if type_name is None:
+                        type_name = self.f.name[len(func_name):]
+                        type_name = type_name[0].lower() + type_name[1:]
+                    break
+            else:
+                raise_adhoc_error(
+                    self.am,
+                    '@on_off method name must start with "On/on/Off/off" or use together with @overload',
+                    self.f.loc,
+                )
+                return True
+        self.sts_func_name = func_name  # pyre-ignore
+        self.on_off_type = type_name
+        return True
+
+    def resolve_normal(self) -> bool:
+        if overload_attr := self.f.get_last_attr("overload"):
+            if not check_attr_args(self.am, overload_attr, "s"):
+                return True
+            (func_name,) = overload_attr.args
+        else:
+            if self.f.parent_pkg.get_last_attr("sts_keep_name"):
+                func_name = self.f.name
+            else:
+                func_name = self.f.name[0].lower() + self.f.name[1:]
+        self.sts_func_name = func_name
+        return True
+
+    def resolve_async(self) -> bool:
+        if (async_attr := self.f.get_last_attr("gen_async")) is None:
+            return False
+        if self.sts_func_name is None:
+            return True
+        if async_attr.args and check_attr_args(self.am, async_attr, "s"):
+            (self.sts_async_name,) = async_attr.args
+        elif self.sts_func_name[-4:].lower() == "sync":
+            self.sts_async_name = self.sts_func_name[:-4]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@gen_async method name must end with "Sync" or have @gen_async argument',
+                self.f.loc,
+            )
+        return True
+
+    def resolve_promise(self) -> bool:
+        if (promise_attr := self.f.get_last_attr("gen_promise")) is None:
+            return False
+        if self.sts_func_name is None:
+            return True
+        if promise_attr.args and check_attr_args(self.am, promise_attr, "s"):
+            (self.sts_promise_name,) = promise_attr.args
+        elif self.sts_func_name[-4:].lower() == "sync":
+            self.sts_promise_name = self.sts_func_name[:-4]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@gen_promise method name must end with "Sync" or have @gen_promise argument',
+                self.f.loc,
+            )
+        return True
 
     def call_native_with(self, sts_args: list[str]) -> str:
         sts_native_args = sts_args
@@ -444,117 +503,175 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
 class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
     def __init__(self, am: AnalysisManager, f: IfaceMethodDecl) -> None:
         super().__init__(am, f)
+        self.am = am
         self.f = f
 
         self.sts_native_name = f"{f.name}_inner"
+
+        self.ani_method_name = None
 
         self.sts_method_name = None
         self.get_name = None
         self.set_name = None
         self.on_off_type = None
 
-        self.ani_method_name = None
-
-        if (overload_attr := f.get_last_attr("overload")) and check_attr_args(
-            am, overload_attr, "s"
-        ):
-            (self.sts_method_name,) = overload_attr.args
-            (self.ani_method_name,) = overload_attr.args
-
-        elif on_off_attr := f.get_last_attr("on_off"):
-            if not f.name.startswith(("on", "off", "On", "Off")):
-                raise_adhoc_error(
-                    am,
-                    '@on_off method name must start with "On/on/Off/off"',
-                    f.loc,
-                )
-
-            if f.name.startswith(("on", "On")):
-                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
-                    (type_name,) = on_off_attr.args
-                else:
-                    type_name = f.name[2:]
-                    type_name = type_name[0].lower() + type_name[1:]
-                self.on_off_type = ("on", type_name)
-                self.ani_method_name = "on"
-
-            if f.name.startswith(("off", "Off")):
-                if on_off_attr.args and check_attr_args(am, on_off_attr, "s"):
-                    (type_name,) = on_off_attr.args
-                else:
-                    type_name = f.name[3:]
-                    type_name = type_name[0].lower() + type_name[1:]
-                self.on_off_type = ("off", type_name)
-                self.ani_method_name = "off"
-
-        elif get_attr := f.get_last_attr("get"):
-            if len(f.params) != 0 or f.return_ty_ref is None:
-                raise_adhoc_error(
-                    am,
-                    "@get method should take no parameters and return non-void",
-                    f.loc,
-                )
-
-            if get_attr.args and check_attr_args(am, get_attr, "s"):
-                (self.get_name,) = get_attr.args
-            elif f.name.startswith(("get", "Get")):
-                get_name = f.name[3:]
-                self.get_name = get_name[0].lower() + get_name[1:]
-            else:
-                raise_adhoc_error(
-                    am,
-                    '@get method name must start with "Get/get" or have @get argument',
-                    f.loc,
-                )
-            self.ani_method_name = f"<get>{self.get_name}"
-
-        elif set_attr := f.get_last_attr("set"):
-            if len(f.params) != 1 or f.return_ty_ref is not None:
-                raise_adhoc_error(
-                    am,
-                    "@set method should have one parameter and return void",
-                    f.loc,
-                )
-
-            if set_attr.args and check_attr_args(am, set_attr, "s"):
-                (self.set_name,) = set_attr.args
-            elif f.name.startswith(("set", "Set")):
-                set_name = f.name[3:]
-                self.set_name = set_name[0].lower() + set_name[1:]
-            else:
-                raise_adhoc_error(
-                    am,
-                    '@set method name must start with "Set/set" or have @set argument',
-                    f.loc,
-                )
-            self.ani_method_name = f"<set>{self.set_name}"
-
-        else:
-            if f.parent_pkg.get_last_attr("sts_keep_name"):
-                self.sts_method_name = f.name
-                self.ani_method_name = f.name
-            else:
-                self.sts_method_name = f.name[0].lower() + f.name[1:]
-                self.ani_method_name = f.name[0].lower() + f.name[1:]
-
         self.sts_async_name = None
         self.sts_promise_name = None
 
-        if (sts_async_attr := f.get_last_attr("gen_async")) and check_attr_args(
-            am, sts_async_attr, "s"
-        ):
-            (self.sts_async_name,) = sts_async_attr.args
-
-        if (sts_promise_attr := f.get_last_attr("gen_promise")) and check_attr_args(
-            am, sts_promise_attr, "s"
-        ):
-            (self.sts_promise_name,) = sts_promise_attr.args
+        if self.resolve_getter() or self.resolve_setter():
+            pass
+        elif self.resolve_on_off() or self.resolve_normal():
+            self.resolve_async()
+            self.resolve_promise()
 
         self.sts_params: list[ParamDecl] = []
         for param in f.params:
             if param.get_last_attr("sts_this"):
                 continue
             self.sts_params.append(param)
+
+    def resolve_getter(self) -> bool:
+        if (get_attr := self.f.get_last_attr("get")) is None:
+            return False
+        if len(self.f.params) != 0 or self.f.return_ty_ref is None:
+            raise_adhoc_error(
+                self.am,
+                "@get method should take no parameters and return non-void",
+                self.f.loc,
+            )
+            return True
+        if get_attr.args and check_attr_args(self.am, get_attr, "s"):
+            (get_name,) = get_attr.args
+        elif self.f.name[:3].lower() == "get":
+            get_name = self.f.name[3:]
+            get_name = get_name[0].lower() + get_name[1:]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@get method name must start with "Get/get" or have @get argument',
+                self.f.loc,
+            )
+            return True
+        self.ani_method_name = f"<get>{get_name}"
+        self.get_name = get_name
+        return True
+
+    def resolve_setter(self) -> bool:
+        if (set_attr := self.f.get_last_attr("set")) is None:
+            return False
+        if len(self.f.params) != 1 or self.f.return_ty_ref is not None:
+            raise_adhoc_error(
+                self.am,
+                "@set method should have one parameter and return void",
+                self.f.loc,
+            )
+            return True
+        if set_attr.args and check_attr_args(self.am, set_attr, "s"):
+            (set_name,) = set_attr.args
+        elif self.f.name[:3].lower() == "set":
+            set_name = self.f.name[3:]
+            set_name = set_name[0].lower() + set_name[1:]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@set method name must start with "Set/set" or have @set argument',
+                self.f.loc,
+            )
+            return True
+        self.ani_method_name = f"<set>{set_name}"
+        self.set_name = set_name
+        return True
+
+    def resolve_on_off(self) -> bool:
+        if (on_off_attr := self.f.get_last_attr("on_off")) is None:
+            return False
+        if on_off_attr.args:
+            if not check_attr_args(self.am, on_off_attr, "s"):
+                return True
+            (type_name,) = on_off_attr.args
+        else:
+            type_name = None
+        if overload_attr := self.f.get_last_attr("overload"):
+            if not check_attr_args(self.am, overload_attr, "s"):
+                return True
+            (method_name,) = overload_attr.args
+            if type_name is None:
+                if self.f.name[: len(method_name)].lower() == method_name.lower():
+                    type_name = self.f.name[len(method_name):]
+                    type_name = type_name[0].lower() + type_name[1:]
+                else:
+                    raise_adhoc_error(
+                        self.am,
+                        f"@on_off method name must start with {method_name}",
+                        self.f.loc,
+                    )
+                    return True
+        else:
+            for method_name in ("on", "off"):
+                if self.f.name[: len(method_name)].lower() == method_name.lower():
+                    if type_name is None:
+                        type_name = self.f.name[len(method_name):]
+                        type_name = type_name[0].lower() + type_name[1:]
+                    break
+            else:
+                raise_adhoc_error(
+                    self.am,
+                    '@on_off method name must start with "On/on/Off/off" or use together with @overload',
+                    self.f.loc,
+                )
+                return True
+        self.ani_method_name = method_name  # pyre-ignore
+        self.sts_method_name = method_name  # pyre-ignore
+        self.on_off_type = type_name
+        return True
+
+    def resolve_normal(self) -> bool:
+        if overload_attr := self.f.get_last_attr("overload"):
+            if not check_attr_args(self.am, overload_attr, "s"):
+                return True
+            (method_name,) = overload_attr.args
+        else:
+            if self.f.parent_pkg.get_last_attr("sts_keep_name"):
+                method_name = self.f.name
+            else:
+                method_name = self.f.name[0].lower() + self.f.name[1:]
+        self.ani_method_name = method_name
+        self.sts_method_name = method_name
+        return True
+
+    def resolve_async(self) -> bool:
+        if (async_attr := self.f.get_last_attr("gen_async")) is None:
+            return False
+        if self.sts_method_name is None:
+            return True
+        if async_attr.args and check_attr_args(self.am, async_attr, "s"):
+            (self.sts_async_name,) = async_attr.args
+        elif self.sts_method_name[-4:].lower() == "sync":
+            self.sts_async_name = self.sts_method_name[:-4]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@gen_async method name must end with "Sync" or have @gen_async argument',
+                self.f.loc,
+            )
+        return True
+
+    def resolve_promise(self) -> bool:
+        if (promise_attr := self.f.get_last_attr("gen_promise")) is None:
+            return False
+        if self.sts_method_name is None:
+            return True
+        if promise_attr.args and check_attr_args(self.am, promise_attr, "s"):
+            (self.sts_promise_name,) = promise_attr.args
+        elif self.sts_method_name[-4:].lower() == "sync":
+            self.sts_promise_name = self.sts_method_name[:-4]
+        else:
+            raise_adhoc_error(
+                self.am,
+                '@gen_promise method name must end with "Sync" or have @gen_promise argument',
+                self.f.loc,
+            )
+        return True
 
     def call_native_with(self, this: str, sts_args: list[str]) -> str:
         arg = iter(sts_args)
@@ -598,6 +715,28 @@ class EnumANIInfo(AbstractAnalysis[EnumDecl]):
         return self.pkg_ani_info.sts_type_in(pkg, target, self.sts_type_name)
 
 
+class UnionFieldANIInfo(AbstractAnalysis[UnionFieldDecl]):
+    field_ty: Type | None | Literal["null", "undefined"]
+
+    def __init__(self, am: AnalysisManager, d: UnionFieldDecl) -> None:
+        super().__init__(am, d)
+        if d.ty_ref is None:
+            if d.get_last_attr("null"):
+                self.field_ty = "null"
+                return
+            if d.get_last_attr("undefined"):
+                self.field_ty = "undefined"
+                return
+            raise_adhoc_error(
+                am,
+                f"union field {d.name} must have a type or have @null/@undefined attribute",
+                d.loc,
+            )
+            self.field_ty = None
+        else:
+            self.field_ty = d.ty_ref.resolved_ty
+
+
 class UnionANIInfo(AbstractAnalysis[UnionDecl]):
     def __init__(self, am: AnalysisManager, d: UnionDecl) -> None:
         super().__init__(am, d)
@@ -623,6 +762,12 @@ class UnionANIInfo(AbstractAnalysis[UnionDecl]):
 
     def sts_type_in(self, pkg: PackageDecl, target: STSOutputBuffer):
         return self.pkg_ani_info.sts_type_in(pkg, target, self.sts_type_name)
+
+
+class StructFieldANIInfo(AbstractAnalysis[StructFieldDecl]):
+    def __init__(self, am: AnalysisManager, d: StructFieldDecl) -> None:
+        super().__init__(am, d)
+        self.readonly = d.get_last_attr("readonly") is not None
 
 
 class StructANIInfo(AbstractAnalysis[StructDecl]):
@@ -757,7 +902,7 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -775,10 +920,10 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         cpp_result: str,
     ):
         with target.indent_manager.offset(offset):
-            self.from_ani_impl(target, env, ani_value, cpp_result)
+            self._from_ani_impl(target, env, ani_value, cpp_result)
 
     @abstractmethod
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -796,9 +941,9 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         ani_result: str,
     ):
         with target.indent_manager.offset(offset):
-            self.into_ani_impl(target, env, cpp_value, ani_result)
+            self._into_ani_impl(target, env, cpp_value, ani_result)
 
-    def from_ani_array_impl(
+    def _from_ani_array_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -835,11 +980,11 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         cpp_array_buffer: str,
     ):
         with target.indent_manager.offset(offset):
-            self.from_ani_array_impl(
+            self._from_ani_array_impl(
                 target, env, ani_size, ani_array_value, cpp_array_buffer
             )
 
-    def into_ani_array_impl(
+    def _into_ani_array_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -883,11 +1028,11 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         ani_array_result: str,
     ):
         with target.indent_manager.offset(offset):
-            self.into_ani_array_impl(
+            self._into_ani_array_impl(
                 target, env, cpp_size, cpp_array_value, ani_array_result
             )
 
-    def into_ani_boxed_impl(
+    def _into_ani_boxed_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -921,9 +1066,9 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         ani_result: str,
     ):
         with target.indent_manager.offset(offset):
-            self.into_ani_boxed_impl(target, env, cpp_value, ani_result)
+            self._into_ani_boxed_impl(target, env, cpp_value, ani_result)
 
-    def from_ani_boxed_impl(
+    def _from_ani_boxed_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -961,7 +1106,7 @@ class AbstractTypeANIInfo(metaclass=ABCMeta):
         cpp_result: str,
     ):
         with target.indent_manager.offset(offset):
-            self.from_ani_boxed_impl(target, env, ani_value, cpp_result)
+            self._from_ani_boxed_impl(target, env, ani_value, cpp_result)
 
 
 class EnumTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[EnumType]):
@@ -985,7 +1130,7 @@ class EnumTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[EnumType]):
         return enum_ani_info.sts_type_in(pkg, target)
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1001,7 +1146,7 @@ class EnumTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[EnumType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1032,7 +1177,7 @@ class StructTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[StructType]):
         return struct_ani_info.sts_type_in(pkg, target)
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1046,7 +1191,7 @@ class StructTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[StructType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1075,7 +1220,7 @@ class UnionTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[UnionType]):
         return union_ani_info.sts_type_in(pkg, target)
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1089,7 +1234,7 @@ class UnionTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[UnionType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1118,7 +1263,7 @@ class IfaceTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[IfaceType]):
         return iface_ani_info.sts_type_in(pkg, target)
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1132,7 +1277,7 @@ class IfaceTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[IfaceType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1174,7 +1319,7 @@ class ScalarTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ScalarType]):
         return self.sts_type
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1186,7 +1331,7 @@ class ScalarTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ScalarType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1218,7 +1363,7 @@ class OpaqueTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[OpaqueType]):
         return self.sts_type
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1230,7 +1375,7 @@ class OpaqueTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[OpaqueType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1253,7 +1398,7 @@ class StringTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[StringType]):
         return "string"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1275,7 +1420,7 @@ class StringTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[StringType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1318,7 +1463,7 @@ class ArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         return f"({sts_type}[])"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1340,7 +1485,7 @@ class ArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1379,7 +1524,7 @@ class ArrayBufferTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         return "ArrayBuffer"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1397,7 +1542,7 @@ class ArrayBufferTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1452,7 +1597,7 @@ class TypedArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         return self.sts_type
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1479,7 +1624,7 @@ class TypedArrayTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1539,7 +1684,7 @@ class BigIntTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         return "BigInt"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1568,7 +1713,7 @@ class BigIntTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[ArrayType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1612,7 +1757,7 @@ class OptionalTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[OptionalType]):
         return f"({sts_type} | undefined)"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1638,7 +1783,7 @@ class OptionalTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[OptionalType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1677,7 +1822,7 @@ class RecordTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[MapType]):
         return f"Record<{key_sts_type}, {val_sts_type}>"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1721,7 +1866,7 @@ class RecordTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[MapType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1777,7 +1922,7 @@ class MapTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[MapType]):
         return f"Map<{key_sts_type}, {val_sts_type}>"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1789,7 +1934,7 @@ class MapTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[MapType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1826,7 +1971,7 @@ class CallbackTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[CallbackType]):
         return f"(({params_ty_sts_str}) => {return_ty_sts})"
 
     @override
-    def from_ani_impl(
+    def _from_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -1905,7 +2050,7 @@ class CallbackTypeANIInfo(AbstractTypeANIInfo, AbstractAnalysis[CallbackType]):
         )
 
     @override
-    def into_ani_impl(
+    def _into_ani_impl(
         self,
         target: COutputBuffer,
         env: str,
@@ -2675,8 +2820,8 @@ class ANICodeGenerator:
             static_tags_str = ", ".join(static_tags)
             full_name = "_".join(part.name for part in parts)
             is_field = f"ani_is_{full_name}"
-            field_class = f"ani_cls_{full_name}"
-            if final.ty_ref is None:
+            final_ani_info = UnionFieldANIInfo.get(self.am, final)
+            if final_ani_info.field_ty == "null":
                 union_ani_impl_target.writeln(
                     f"    ani_boolean {is_field};",
                     f"    env->Reference_IsNull(ani_value, &{is_field});",
@@ -2684,8 +2829,29 @@ class ANICodeGenerator:
                     f"        return {union_cpp_info.full_name}({static_tags_str});",
                     f"    }}",
                 )
-            else:
-                type_ani_info = TypeANIInfo.get(self.am, final.ty_ref.resolved_ty)
+            if final_ani_info.field_ty == "undefined":
+                union_ani_impl_target.writeln(
+                    f"    ani_boolean {is_field};",
+                    f"    env->Reference_IsUndefined(ani_value, &{is_field});",
+                    f"    if ({is_field}) {{",
+                    f"        return {union_cpp_info.full_name}({static_tags_str});",
+                    f"    }}",
+                )
+        for parts in union_ani_info.sts_final_fields:
+            final = parts[-1]
+            static_tags = []
+            for part in parts:
+                path_cpp_info = UnionCppInfo.get(self.am, part.parent_union)
+                static_tags.append(
+                    f"taihe::static_tag<{path_cpp_info.full_name}::tag_t::{part.name}>"
+                )
+            static_tags_str = ", ".join(static_tags)
+            full_name = "_".join(part.name for part in parts)
+            is_field = f"ani_is_{full_name}"
+            field_class = f"ani_cls_{full_name}"
+            final_ani_info = UnionFieldANIInfo.get(self.am, final)
+            if isinstance(final_ty := final_ani_info.field_ty, Type):
+                type_ani_info = TypeANIInfo.get(self.am, final_ty)
                 union_ani_impl_target.writeln(
                     f"    ani_class {field_class};",
                     f'    env->FindClass("{type_ani_info.type_desc_boxed}", &{field_class});',
@@ -2723,26 +2889,32 @@ class ANICodeGenerator:
             f"    switch (cpp_value.get_tag()) {{",
         )
         for field in union.fields:
+            field_ani_info = UnionFieldANIInfo.get(self.am, field)
             union_ani_impl_target.writeln(
                 f"    case {union_cpp_info.full_name}::tag_t::{field.name}: {{",
             )
-            if field.ty_ref is None:
-                union_ani_impl_target.writeln(
-                    f"        env->GetNull(&ani_value);",
-                )
-            else:
-                ani_result_spec = f"ani_field_{field.name}"
-                type_ani_info = TypeANIInfo.get(self.am, field.ty_ref.resolved_ty)
-                type_ani_info.into_ani_boxed(
-                    union_ani_impl_target,
-                    8,
-                    "env",
-                    f"cpp_value.get_{field.name}_ref()",
-                    ani_result_spec,
-                )
-                union_ani_impl_target.writeln(
-                    f"        ani_value = {ani_result_spec};",
-                )
+            match field_ani_info.field_ty:
+                case "null":
+                    union_ani_impl_target.writeln(
+                        f"        env->GetNull(&ani_value);",
+                    )
+                case "undefined":
+                    union_ani_impl_target.writeln(
+                        f"        env->GetUndefined(&ani_value);",
+                    )
+                case field_ty if isinstance(field_ty, Type):
+                    ani_result_spec = f"ani_field_{field.name}"
+                    type_ani_info = TypeANIInfo.get(self.am, field_ty)
+                    type_ani_info.into_ani_boxed(
+                        union_ani_impl_target,
+                        8,
+                        "env",
+                        f"cpp_value.get_{field.name}_ref()",
+                        ani_result_spec,
+                    )
+                    union_ani_impl_target.writeln(
+                        f"        ani_value = {ani_result_spec};",
+                    )
             union_ani_impl_target.writeln(
                 f"        break;",
                 f"    }}",
