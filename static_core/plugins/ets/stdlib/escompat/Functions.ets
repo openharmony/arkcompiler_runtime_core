@@ -15,7 +15,8 @@
 
 package escompat;
 
-const hexChars: char[] = [c'0', c'1', c'2', c'3', c'4', c'5', c'6', c'7', c'8', c'9', c'A', c'B', c'C', c'D', c'E', c'F'];
+// initialized in _initializerBlock_.ets
+const hexChars: char[];
 
 function fillInCommonURI(): boolean[] {
     const arr = new boolean[128]
@@ -40,7 +41,8 @@ function fillInCommonURI(): boolean[] {
     return arr
 }
 
-const uriArray: boolean[] = fillInURINotComponent()
+// initialized in _initializerBlock_.ets
+const uriArray: boolean[];
 
 function fillInURISpecial(arr: boolean[]) {
     arr[c';'] = true
@@ -62,7 +64,8 @@ function createAndFillInURISpecial(): boolean[] {
     return arr
 }
 
-const uriSpecialChars = createAndFillInURISpecial()
+// initialized in _initializerBlock_.ets
+const uriSpecialChars: boolean[];
 
 function fillInURINotComponent(): boolean[] {
     const arr = fillInCommonURI()
@@ -70,7 +73,8 @@ function fillInURINotComponent(): boolean[] {
     return arr
 }
 
-const uriArrayComponent: boolean[] = fillInCommonURI()
+// initialized in _initializerBlock_.ets
+const uriArrayComponent: boolean[];
 
 /**
  * The decodeURI() function decodes a Uniform Resource Identifier

@@ -18,8 +18,14 @@
 
 package PandaGC
 
-let storage = new Object();
-let gwr: WeakRef<Object> = new WeakRef<Object>(new Object());
+let storage:Object;
+let gwr: WeakRef<Object>;
+static {
+    storage = new Object();
+    gwr = new WeakRef<Object>(new Object());
+}
+
+
 let gpwr: WeakRef<Promise<Object>>;
 
 function GetSTSObject(): Object {

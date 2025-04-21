@@ -21,10 +21,14 @@ class SharedClass {
     public jsRef?: JSValue;
 }
 
-const sharedObjects: FixedArray<(WeakRef<SharedClass>|undefined)> = new undefined[SHARED_OBJECTS_COUNT];
-for (let i: int = 0; i < SHARED_OBJECTS_COUNT; ++i) {
-    sharedObjects[i] = new WeakRef<SharedClass>(new SharedClass());
+const sharedObjects: FixedArray<(WeakRef<SharedClass>|undefined)>;
+static {
+    sharedObjects = new undefined[SHARED_OBJECTS_COUNT];
+    for (let i: int = 0; i < SHARED_OBJECTS_COUNT; ++i) {
+        sharedObjects[i] = new WeakRef<SharedClass>(new SharedClass());
+    }
 }
+
 
 function xgc(): void throws {
     GC.waitForFinishGC(JSRuntime.xgc());

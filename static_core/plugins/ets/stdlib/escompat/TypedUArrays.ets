@@ -19,7 +19,8 @@ package escompat
 // NOTE(kprokopenko): placing into std.core.Runtime breaks frontend
 native function RuntimeGetPlatformIsLittleEndian(): boolean
 
-const IS_LITTLE_ENDIAN = RuntimeGetPlatformIsLittleEndian()
+// initialized in _initializerBlock_.ets
+const IS_LITTLE_ENDIAN: boolean;
 
 class Uint8ClampedArrayIteratorKeys implements IterableIterator<number> {
     private length: int = 0

@@ -67,7 +67,8 @@ function functionOptDefaultArgTypeObjectEts(arg: JSValue = {id: 1}): JSValue {
     return arg;
 }
 
-let defaultClass: ClassWithMethodEts = new ClassWithMethodEts()
+let defaultClass: ClassWithMethodEts;
+
 function functionOptDefaultArgTypeClassEts(arg: ClassWithMethodEts = defaultClass): number {
     return arg.methodInClass();
 }

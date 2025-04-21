@@ -114,8 +114,9 @@ class ClassWithGetterSetterEts {
     }
 }
 
-let lambdaFunctionEts: () => int = () => {
-    return 1;
+let lambdaFunctionEts: () => int;
+static {
+    lambdaFunctionEts = () => { return 1; }
 }
 
 function getLambdaFunctionEts(): () => int {

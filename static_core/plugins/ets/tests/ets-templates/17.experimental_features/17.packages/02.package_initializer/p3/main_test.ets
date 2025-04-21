@@ -13,17 +13,12 @@
  * limitations under the License.
  */
 
-package sealed_function.test;
+/*---
+desc: >-
+    Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
+    initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
+    and in Initializer Block
+tags: [negative, compile-only]
+---*/
 
-const arrow_func: (x: double) => double;
-static {
-    arrow_func = (x: double) => x * x
-}
-
-function sum_double(v0: double, v1: double): double {
-    return v0 + v1;
-}
-
-function foo(): int {
-    return 42;
-}
+import {var1, pi} from "./packageP3"

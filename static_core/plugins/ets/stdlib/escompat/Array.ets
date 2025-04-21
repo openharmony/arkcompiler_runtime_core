@@ -60,7 +60,8 @@ class ArrayKeysIterator<T> implements IterableIterator<number> {
 }
 
 class FromBuffer {}
-const FROM_BUFFER = new FromBuffer()
+// initialized in _initializerBlock_.ets
+const FROM_BUFFER: FromBuffer;
 
 /**
  * Represents JS API-compatible Array

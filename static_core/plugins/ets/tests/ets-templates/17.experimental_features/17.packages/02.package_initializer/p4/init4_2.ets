@@ -18,7 +18,7 @@ desc: >-
     Among all package modules there can be one to contain a code that performs initialization actions (e.g., setting
     initial values for variables across all package modules) as described in detail in Compilation Unit Initialization
     and in Initializer Block
-tags: [not-a-test]
+tags: [compile-only]
 ---*/
 
 package p4

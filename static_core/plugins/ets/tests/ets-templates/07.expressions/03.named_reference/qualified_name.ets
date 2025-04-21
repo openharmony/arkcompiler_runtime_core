@@ -30,7 +30,10 @@ class Clazz{{loop.index0}} {
   method(): void {}
 }
 
-let instance{{loop.index0}}: Clazz{{loop.index0}} = new Clazz{{loop.index0}}();
+let instance{{loop.index0}}: Clazz{{loop.index0}};
+static {
+  instance{{loop.index0}} = new Clazz{{loop.index0}}();
+} 
 
 
 {% if loop.last %}

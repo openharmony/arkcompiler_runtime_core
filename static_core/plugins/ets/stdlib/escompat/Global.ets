@@ -18,12 +18,14 @@ package escompat;
 /**
  * Represents the NaN value according to IEEE-754 specification
  */
-export const NaN = Double.NaN;
+// initialized in _initializerBlock_.ets
+export const NaN: number;
 
 /**
  * Represents the +Infinity value according to IEEE-754 specification
  */
-export const Infinity = Double.POSITIVE_INFINITY;
+// initialized in _initializerBlock_.ets
+export const Infinity: number;
 
 /**
  * Parses integer number from `String` with specified radix

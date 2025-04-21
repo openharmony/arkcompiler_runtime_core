@@ -751,8 +751,8 @@ export final class Console {
 
 }
 
-export const console = new Console();
-
+// initialized in _initializerBlock_.ets
+export const console: Console;
 
 /**
  * @section Dataframe helpers class for console.table API
