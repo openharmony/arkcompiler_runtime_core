@@ -90,7 +90,8 @@ static_core/libpandabase/tests/ringbuf/                  @udav
 static_core/libpandabase/tests/taskmanager/              @udav @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov
 static_core/plugins/ets/compiler/                        @Prof1983
-static_core/plugins/ets/doc/spec                         ^dmitriitr ^Prof1983 ^igelhaus ^ragnvald ^sergeyandreev @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer
+static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria @dmitriitr
+static_core/plugins/ets/doc/spec                         ^konstanting ^Prof1983 ^ragnvald ^sergeyandreev ^slynkodenis ^nazarovkonstantin @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer @godmiaozi @wanzixuan330 @zsw_zhushiwei @wuzhefengh @mengbierr @davidwulanxi @huanghuijin @egavrin @igelhaus @vpukhov @dmitriitr
 static_core/plugins/ets/irtoc_scripts/                   @Prof1983 @mbolshov
 static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  ^Prof1983 ^kosovpavel @asidorov
