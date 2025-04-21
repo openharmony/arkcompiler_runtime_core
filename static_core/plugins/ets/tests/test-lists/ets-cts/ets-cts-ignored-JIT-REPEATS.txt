@@ -18,3 +18,6 @@
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_18.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_19.ets
+
+#25252
+17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_29.ets
