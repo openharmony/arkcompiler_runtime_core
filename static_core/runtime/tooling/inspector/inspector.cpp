@@ -273,6 +273,19 @@ void Inspector::SetSkipAllPauses(PtThread thread, bool skip)
     }
 }
 
+void Inspector::SetMixedDebugEnabled(PtThread thread, bool mixedDebugEnabled)
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
+    auto *debuggableThread = GetDebuggableThread(thread);
+    if (debuggableThread != nullptr) {
+        debuggableThread->SetMixedDebugEnabled(mixedDebugEnabled);
+    }
+}
+
 std::set<size_t> Inspector::GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
                                                    bool restrictToFunction)
 {
@@ -617,6 +630,36 @@ void Inspector::ClientDisconnect(PtThread thread)
     (void)thread;
 }
 
+void Inspector::SetAsyncCallStackDepth(PtThread thread)
+{
+    (void)thread;
+}
+
+void Inspector::SetBlackboxPatterns(PtThread thread)
+{
+    (void)thread;
+}
+
+void Inspector::SmartStepInto(PtThread thread)
+{
+    (void)thread;
+}
+
+void Inspector::DropFrame(PtThread thread)
+{
+    (void)thread;
+}
+
+void Inspector::SetNativeRange(PtThread thread)
+{
+    (void)thread;
+}
+
+void Inspector::ReplyNativeCalling(PtThread thread)
+{
+    Continue(thread);
+}
+
 void Inspector::RegisterMethodHandlers()
 {
     // NOLINTBEGIN(modernize-avoid-bind)
@@ -629,6 +672,9 @@ void Inspector::RegisterMethodHandlers()
     inspectorServer_.OnCallDebuggerRemoveBreakpointsByUrl(std::bind(&Inspector::RemoveBreakpoints, this, _1, _2));
     inspectorServer_.OnCallDebuggerRestartFrame(std::bind(&Inspector::RestartFrame, this, _1, _2));
     inspectorServer_.OnCallDebuggerResume(std::bind(&Inspector::Continue, this, _1));
+    inspectorServer_.OnCallDebuggerSetAsyncCallStackDepth(std::bind(&Inspector::SetAsyncCallStackDepth, this, _1));
+    inspectorServer_.OnCallDebuggerSetBlackboxPatterns(std::bind(&Inspector::SetBlackboxPatterns, this, _1));
+    inspectorServer_.OnCallDebuggerSmartStepInto(std::bind(&Inspector::SmartStepInto, this, _1));
     inspectorServer_.OnCallDebuggerSetBreakpoint(std::bind(&Inspector::SetBreakpoint, this, _1, _2, _3, _4, _5));
     inspectorServer_.OnCallDebuggerSetBreakpointByUrl(std::bind(&Inspector::SetBreakpoint, this, _1, _2, _3, _4, _5));
     inspectorServer_.OnCallDebuggerGetPossibleAndSetBreakpointByUrl(
@@ -642,6 +688,11 @@ void Inspector::RegisterMethodHandlers()
     inspectorServer_.OnCallDebuggerEvaluateOnCallFrame(std::bind(&Inspector::Evaluate, this, _1, _2, _3));
     inspectorServer_.OnCallDebuggerDisable(std::bind(&Inspector::Disable, this, _1));
     inspectorServer_.OnCallDebuggerClientDisconnect(std::bind(&Inspector::ClientDisconnect, this, _1));
+    inspectorServer_.OnCallDebuggerDropFrame(std::bind(&Inspector::DropFrame, this, _1));
+    inspectorServer_.OnCallDebuggerSetNativeRange(std::bind(&Inspector::SetNativeRange, this, _1));
+    inspectorServer_.OnCallDebuggerReplyNativeCalling(std::bind(&Inspector::ReplyNativeCalling, this, _1));
+    inspectorServer_.OnCallDebuggerCallFunctionOn(std::bind(&Inspector::Evaluate, this, _1, _2, _3));
+    inspectorServer_.OnCallDebuggerSetMixedDebugEnabled(std::bind(&Inspector::SetMixedDebugEnabled, this, _1, _2));
     inspectorServer_.OnCallRuntimeEnable(std::bind(&Inspector::RuntimeEnable, this, _1));
     inspectorServer_.OnCallRuntimeGetProperties(std::bind(&Inspector::GetProperties, this, _1, _2, _3));
     inspectorServer_.OnCallRuntimeRunIfWaitingForDebugger(std::bind(&Inspector::RunIfWaitingForDebugger, this, _1));

@@ -597,6 +597,78 @@ TEST_F(ServerTest, OnCallDebuggerClientDisconnect)
     });
 }
 
+TEST_F(ServerTest, OnCallDebuggerSetAsyncCallStackDepth)
+{
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+
+    EXPECT_CALL(server, OnCallMock("Debugger.setAsyncCallStackDepth", testing::_)).WillOnce(g_simpleHandler);
+
+    inspectorServer.OnCallDebuggerSetAsyncCallStackDepth([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
+    });
+}
+
+TEST_F(ServerTest, OnCallDebuggerSetBlackboxPatterns)
+{
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+
+    EXPECT_CALL(server, OnCallMock("Debugger.setBlackboxPatterns", testing::_)).WillOnce(g_simpleHandler);
+
+    inspectorServer.OnCallDebuggerSetBlackboxPatterns([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
+    });
+}
+
+TEST_F(ServerTest, OnCallDebuggerSmartStepInto)
+{
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+
+    EXPECT_CALL(server, OnCallMock("Debugger.smartStepInto", testing::_)).WillOnce(g_simpleHandler);
+
+    inspectorServer.OnCallDebuggerSmartStepInto([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
+    });
+}
+
+TEST_F(ServerTest, OnCallDebuggerDropFrame)
+{
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+
+    EXPECT_CALL(server, OnCallMock("Debugger.dropFrame", testing::_)).WillOnce(g_simpleHandler);
+
+    inspectorServer.OnCallDebuggerDropFrame([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
+    });
+}
+
+TEST_F(ServerTest, OnCallDebuggerSetNativeRange)
+{
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+
+    EXPECT_CALL(server, OnCallMock("Debugger.setNativeRange", testing::_)).WillOnce(g_simpleHandler);
+
+    inspectorServer.OnCallDebuggerSetNativeRange([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
+    });
+}
+
+TEST_F(ServerTest, OnCallDebuggerReplyNativeCalling)
+{
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+
+    EXPECT_CALL(server, OnCallMock("Debugger.replyNativeCalling", testing::_)).WillOnce(g_simpleHandler);
+
+    inspectorServer.OnCallDebuggerReplyNativeCalling([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
+    });
+}
+
 TEST_F(ServerTest, OnCallDebuggerContinueToLocation)
 {
     auto scriptId = 0;
@@ -663,6 +735,22 @@ TEST_F(ServerTest, OnCallDebuggerEvaluateOnCallFrame)
         });
 
     inspectorServer.OnCallDebuggerEvaluateOnCallFrame(handlerForEvaluateFailed);
+}
+
+TEST_F(ServerTest, OnCallDebuggerCallFunctionOn)
+{
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+
+    EXPECT_CALL(server, OnCallMock("Debugger.callFunctionOn", testing::_)).WillOnce([&](testing::Unused, auto handler) {
+        JsonObjectBuilder params;
+        params.AddProperty("callFrameId", -1);
+        params.AddProperty("functionDeclaration", "any functionDeclaration");
+
+        auto res = handler(g_sessionId, JsonObject(std::move(params).Build()));
+        ASSERT_FALSE(res.HasValue());
+    });
+
+    inspectorServer.OnCallDebuggerCallFunctionOn(handlerForEvaluateFailed);
 }
 
 TEST_F(ServerTest, OnCallDebuggerGetPossibleAndSetBreakpointByUrl)
