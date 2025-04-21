@@ -270,7 +270,9 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     } else {
         file = panda_file::File::Open(location, openMode);
     }
-    fclose(fp);
+    if (file != nullptr) {
+        fclose(fp);
+    }
     return file;
 }
 
