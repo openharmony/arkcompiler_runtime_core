@@ -38,7 +38,8 @@ TEST_F(CallFunctionalObjectTest, functional_object_call_invalid_args)
     ani_ref result;
     ASSERT_EQ(env_->FunctionalObject_Call(nullptr, 0, nullptr, &result), ANI_INVALID_ARGS);
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 0, nullptr, nullptr), ANI_INVALID_ARGS);
-    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, 1, nullptr, nullptr), ANI_INVALID_ARGS);
+    std::array<ani_ref, 1> argv {nullptr};
+    ASSERT_EQ(env_->FunctionalObject_Call(fnObj, argv.size(), argv.data(), nullptr), ANI_INVALID_ARGS);
     const size_t argsSize = 16;
     std::vector<ani_ref> args(argsSize, nullptr);
     ASSERT_EQ(env_->FunctionalObject_Call(fnObj, args.size(), args.data(), &result), ANI_INVALID_ARGS);

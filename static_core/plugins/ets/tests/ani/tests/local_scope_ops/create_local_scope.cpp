@@ -334,37 +334,31 @@ TEST_F(CreateLocalScopeTest, scope_test1)
     ASSERT_EQ(size, TEST_STRING.size());
 }
 
-TEST_F(CreateLocalScopeTest, scope_test2)
+static void CheckReferenceEquality(ani_env *env, ani_ref lhs, ani_ref rhs)
 {
-    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
-    ani_string objectRef {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRef), ANI_OK);
-
-    ani_ref result {};
-    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, &result), ANI_OK);
-
     ani_boolean isEquals = ANI_FALSE;
-    ASSERT_EQ(env_->Reference_Equals(objectRef, result, &isEquals), ANI_OK);
+    ASSERT_EQ(env->Reference_Equals(lhs, rhs, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
 
     isEquals = ANI_FALSE;
-    ASSERT_EQ(env_->Reference_StrictEquals(objectRef, result, &isEquals), ANI_OK);
+    ASSERT_EQ(env->Reference_StrictEquals(lhs, rhs, &isEquals), ANI_OK);
     ASSERT_EQ(isEquals, ANI_TRUE);
 }
 
-TEST_F(CreateLocalScopeTest, scope_test3)
+TEST_F(CreateLocalScopeTest, scope_test2)
 {
+    ani_string stringRef {};
+    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &stringRef), ANI_OK);
+
     ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
 
-    ASSERT_EQ(env_->CreateLocalScope(REF_NUM), ANI_OK);
+    auto identityRef = CallEtsFunction<ani_ref>("create_local_scope", "identity", stringRef);
+    CheckReferenceEquality(env_, stringRef, identityRef);
 
-    ani_string objectRefA {};
-    ASSERT_EQ(env_->String_NewUTF8(TEST_STRING.data(), TEST_STRING.size(), &objectRefA), ANI_OK);
+    ani_ref escapedRef {};
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(identityRef, &escapedRef), ANI_OK);
 
-    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
-
-    ani_ref result {};
-    ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRefA, &result), ANI_OK);
+    CheckReferenceEquality(env_, stringRef, escapedRef);
 }
 
 TEST_F(CreateLocalScopeTest, scope_test4)

@@ -32,3 +32,7 @@ class Student {
     age: int;
     name: String;
 };
+
+function identity<T>(arg: T): T {
+    return arg;
+}
