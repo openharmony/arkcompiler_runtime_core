@@ -24,7 +24,7 @@ let obj_array: Object[] = new Object[object_count];
 
 function doFullGC() {
 	try {
-		GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+		GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
 	} catch (e) {
 		assertTrue(false, "Unexpected exception during GC");
 	}
@@ -32,7 +32,7 @@ function doFullGC() {
 
 async function doFullGCAsync() {
 	try {
-		GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+		GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
 	} catch (e) {
 		assertTrue(false, "Unexpected exception during GC");
 	}

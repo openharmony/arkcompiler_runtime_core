@@ -90,7 +90,7 @@ function AddPandaArray(arr: Array<Object>): void {
 function RunPandaGC(): void {
     try {
         console.log("--- Start ETS GC Full ---");
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         console.log("--- Finish ETS GC Full ---");
     } catch(e) {
         throw new Error("Unexpected exception during ETS full GC");

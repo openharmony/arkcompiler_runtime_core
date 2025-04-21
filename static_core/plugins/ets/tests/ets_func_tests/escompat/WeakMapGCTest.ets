@@ -40,8 +40,8 @@ const keyRegistry = new FinalizationRegistry<Int>((keyId: Int) => {
 
 function isStwGcType(): boolean {
     try {
-        // using the fact that startGC(YOUNG_CAUSE) request throws when GC type is STW
-        GC.startGC(GC.YOUNG_CAUSE)
+        // using the fact that startGC(GC.Cause.YOUNG) request throws when GC type is STW
+        GC.startGC(GC.Cause.YOUNG)
     } catch (gcEx) {
         return true
     }
@@ -80,7 +80,7 @@ function weakMapKeyGarbageCollection(): void {
 
     while (reclaimedKeyId != KEY_ID) {
         try {
-            const gcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE)
+            const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE)
             // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
             // if main coro is executed first, the test will return false
             Coroutine.Schedule()

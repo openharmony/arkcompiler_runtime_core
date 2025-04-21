@@ -69,7 +69,7 @@ function getOuterObject(obj:TestOuterType){
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let full_gc_id = GC.startGC(GC.FULL_CAUSE);
+        let full_gc_id = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(full_gc_id);
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");

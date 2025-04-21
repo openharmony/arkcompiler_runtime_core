@@ -45,7 +45,7 @@ class TestHumongousStress {
         catch(e: OutOfMemoryError) {
             TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
             try {
-                GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+                GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
             }
             catch (e) {
                 assertTrue( false, "Unexpected exception during GC");
@@ -106,7 +106,7 @@ class TestHumongousStress {
     public clear(): void {
         TestHumongousStress.GARBAGE = new LinkedBlockingQueue<Object>();
         try {
-            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+            GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
         }
         catch (e) {
             assertTrue( false, "Unexpected exception during GC");

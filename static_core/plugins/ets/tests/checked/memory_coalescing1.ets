@@ -117,12 +117,12 @@ export class Test {
             t.g = 0;
             for (let j: int = 0; j < u.length; j = j + 2) {
                 t.f += u[j];
-                GC.startGC(GC.FULL_CAUSE);
+                GC.startGC(GC.Cause.FULL);
                 t.g += u[j + 1];
             }
             for (let i: int = 0; i < v.length; i = i + 2) {
                 v[i] = t.f;
-                GC.startGC(GC.FULL_CAUSE);
+                GC.startGC(GC.Cause.FULL);
                 v[i + 1] = t.g + 1;
             }
         } catch (exception) {

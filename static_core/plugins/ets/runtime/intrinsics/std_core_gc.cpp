@@ -51,6 +51,7 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
     if (cause == 3_I) {
         return GCTaskCause::OOM_CAUSE;
     }
+    UNREACHABLE();
     return GCTaskCause::INVALID_CAUSE;
 }
 
@@ -70,11 +71,6 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     bool runGcInPlace = (isRunGcInPlace == 1) ? true : Runtime::GetOptions().IsRunGcInPlace("ets");
 
     GCTaskCause reason = GCCauseFromInt(cause);
-    if (reason == GCTaskCause::INVALID_CAUSE) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION,
-                          "Invalid GC cause");
-        return -1;
-    }
     auto *gc = coroutine->GetVM()->GetGC();
     if (!gc->CheckGCCause(reason)) {
         PandaStringStream eMsg;
@@ -260,6 +256,7 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
     auto *vm = Thread::GetCurrent()->GetVM();
     SpaceType objSpaceType =
         PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(obj->GetCoreType()));
+    ASSERT_PRINT(IsHeapSpace(objSpaceType), SpaceTypeToString(objSpaceType));
     if (objSpaceType == SpaceType::SPACE_TYPE_OBJECT && vm->GetGC()->IsGenerational()) {
         if (vm->GetHeapManager()->IsObjectInYoungSpace(obj->GetCoreType())) {
             const EtsInt youngSpace = 4;
@@ -319,11 +316,6 @@ extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
         return;
     }
     GCTaskCause reason = GCCauseFromInt(cause);
-    if (reason == GCTaskCause::INVALID_CAUSE) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION,
-                          "Invalid GC cause");
-        return;
-    }
 
     auto *vm = coroutine->GetVM();
     auto *gc = vm->GetGC();

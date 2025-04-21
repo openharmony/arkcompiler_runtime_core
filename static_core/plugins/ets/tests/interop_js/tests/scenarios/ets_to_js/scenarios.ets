@@ -338,7 +338,7 @@ function functionArgTypeConflictObject(): Object {
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let fullGcId = GC.startGC(GC.FULL_CAUSE);
+        let fullGcId = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(fullGcId);
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");

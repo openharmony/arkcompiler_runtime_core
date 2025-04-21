@@ -35,7 +35,7 @@ function xgc(): void throws {
 }
 
 function runFullGC(): void throws {
-    GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
 }
 
 // If cross reference is not existed then create it: JS object -> ETS object

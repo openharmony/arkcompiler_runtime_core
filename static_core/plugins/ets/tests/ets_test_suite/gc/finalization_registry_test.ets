@@ -24,7 +24,7 @@ let emptyArgCallbackRegistry: FinalizationRegistry<Int> | null = null;
 
 function doFullGC() {
     try {
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+        GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
         assertTrue(false, "Unexpected exception during GC");
     }

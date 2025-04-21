@@ -23,10 +23,10 @@ function AllocMemoryAndReturnFreeHeapSize(): long throws {
 
 function main(): void throws {
     // Free allocations done during runtime creation (i.e. application RuntimeLinker)
-    GC.startGC(GC.FULL_CAUSE);
+    GC.startGC(GC.Cause.FULL);
     let free_size_in_start = GC.getFreeHeapSize();
     let free_size_after_new = AllocMemoryAndReturnFreeHeapSize();
-    GC.startGC(GC.FULL_CAUSE);
+    GC.startGC(GC.Cause.FULL);
     let free_size_after_gc = GC.getFreeHeapSize();
 
     assertLT(0, free_size_in_start);
