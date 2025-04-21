@@ -37,7 +37,7 @@ function getSTSWeakRef(etsVm): WeakRef<Object> {
     return new WeakRef(etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObjectWithWeakRef')());
 }
 
-function main() {
+function main(): void {
     let etsVm = loadStaticVM();
     let wr = new WeakRef<Object>(new Object);
     for (let i = 0; i < CROSS_REFS_NUMBER; ++i) {

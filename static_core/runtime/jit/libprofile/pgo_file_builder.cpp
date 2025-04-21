@@ -357,22 +357,17 @@ uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, M
 
 // CC-OFFNXT(G.PRE.06) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CheckAndAddBytes(fd, filePath, checkBytes, writtenBytes)              \
-    {                                                                         \
-        /* CC-OFFNXT(G.PRE.02) part name */                                   \
-        if (checkBytes == 0) {                                                \
-            /* CC-OFFNXT(G.PRE.02) part name */                               \
-            fd.close();                                                       \
-            /* CC-OFFNXT(G.PRE.02) part name */                               \
-            if (remove(filePath.data()) == -1) {                              \
-                /* CC-OFFNXT(G.PRE.02) part name */                           \
-                LOG(ERROR, RUNTIME) << "Failed to remove file: " << filePath; \
-            }                                                                 \
-            /* CC-OFFNXT(G.PRE.05) function gen */                            \
-            return 0;                                                         \
-        }                                                                     \
-        /* CC-OFFNXT(G.PRE.02) part name */                                   \
-        writtenBytes += checkBytes;                                           \
+#define CheckAndAddBytes(fd, filePath, checkBytes, writtenBytes)                \
+    {                                                                           \
+        if ((checkBytes) == 0) {                                                \
+            (fd).close();                                                       \
+            if (remove((filePath).data()) == -1) {                              \
+                LOG(ERROR, RUNTIME) << "Failed to remove file: " << (filePath); \
+            }                                                                   \
+            /* CC-OFFNXT(G.PRE.05) function gen */                              \
+            return 0;                                                           \
+        }                                                                       \
+        (writtenBytes) += (checkBytes);                                         \
     }
 
 uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObject, const PandaString &classCtxStr)
