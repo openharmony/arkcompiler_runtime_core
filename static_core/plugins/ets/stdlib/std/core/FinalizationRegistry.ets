@@ -89,7 +89,7 @@ export final class FinalizationRegistry<T> {
         this.enlarge_freeidx(old_idxarr.length);
 
         let old_obj_token_refs = this.obj_token_refs;
-        this.obj_token_refs = new Object[newsize * 2];
+        this.obj_token_refs = new (Object | undefined)[newsize * 2];
         for (let i = 0; i < old_obj_token_refs.length; ++i) {
             this.obj_token_refs[i] = old_obj_token_refs[i];
         }
@@ -158,11 +158,11 @@ export final class FinalizationRegistry<T> {
         if (token != undefined) {
             refToken = new WeakRef<Object>(token);
         }
-        this.mutex.lockGuard(() => {
-            let free_index = this.allocTrimplet();
-            // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations
-            this.setTrimplet(free_index, refObject, callbackArg, refToken);
-        });
+        this.mutex.lock();
+        let free_index = this.allocTrimplet();
+        // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations
+        this.setTrimplet(free_index, refObject, callbackArg, refToken);
+        this.mutex.unlock();
     }
 
     /**
@@ -217,7 +217,9 @@ export final class FinalizationRegistry<T> {
 
     private allocTrimplet(): int {
         if (this.freeidx == -1) {
-            this.enlarge_arrays(this.idxarr.length * 2);
+            // The value selected relative to the internal issue 
+            const mult: int = this.idxarr.length < 1024 ? 32 : 2;
+            this.enlarge_arrays(this.idxarr.length * mult);
         }
         // pop elem from freelist
         let new_idx = this.freeidx;
