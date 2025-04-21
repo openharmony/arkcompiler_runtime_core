@@ -19,15 +19,15 @@ tags: [compile-only, negative]
 ---*/
 
 class A {}
-class B extends A{}
+class B extends A {}
 class C {}
 class D<T extends A> {}
 class E<T extends A | C> {}
 class F<T> {
-    data: T
+    data: T;
     constructor(p: T) {
-        let o: Object = p
-        p.toString()
+        let o: Object = p;
+        p.toString();
     }
 }
 

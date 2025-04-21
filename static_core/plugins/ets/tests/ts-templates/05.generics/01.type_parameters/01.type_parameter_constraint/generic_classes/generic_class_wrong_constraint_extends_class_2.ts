@@ -19,7 +19,7 @@ tags: [compile-only, negative]
 ---*/
 
 class A {}
-class B extends A{}
+class B extends A {}
 class C {}
 class D<T, S extends T> {}
 

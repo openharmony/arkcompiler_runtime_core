@@ -18,16 +18,16 @@ desc: generic parameters with constraint in extends
 ---*/
 
 class A {}
-class B extends A{}
+class B extends A {}
 class C {}
 class D<T extends A> {}
 class E<T extends A | C> {}
 class F<T extends Object> {
-    data: T
+    data: T;
     constructor(p: T) {
-        this.data = p
-        let o: Object = p
-        p.toString()
+        this.data = p;
+        let o: Object = p;
+        p.toString();
     }
 }
 
