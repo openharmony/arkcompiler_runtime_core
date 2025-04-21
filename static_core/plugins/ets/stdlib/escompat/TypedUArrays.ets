@@ -346,13 +346,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         }
     }
 
-    internal zeroIfInfinity(val: number): number {
-        if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as number
-        }
-        return val as number
-    }
-
     /**
      * Iteratorable interface implementation
      *
@@ -432,8 +425,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        let v = this.zeroIfInfinity(val)
-        this.$_set(index, v as int)
+        this.$_set(index, val as int)
     }
 
     /**
@@ -2282,7 +2274,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as int)
         }
     }
-
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -4234,7 +4225,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as int)
         }
     }
-
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -6171,7 +6161,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as long)
         }
     }
-
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -8130,7 +8119,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, this.zeroIfInfinity(new BigInt(numbers[i]).getULong()))
+            this.setUnsafeClamp(i, new BigInt(numbers[i]).getULong())
         }
     }
 
@@ -8140,7 +8129,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafeClamp(i, this.zeroIfInfinity(new BigInt(numbers[i]).getULong()))
+            this.setUnsafeClamp(i, new BigInt(numbers[i]).getULong())
         }
     }
 
@@ -8152,20 +8141,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, numbers[i].getULong())
         }
-    }
-
-    internal zeroIfInfinity(val: BigInt): BigInt {
-        if ((val.getULong() == Infinity) || (val.getULong() == -Infinity)) {
-            return new BigInt(0)
-        }
-        return new BigInt(val)
-    }
-
-    internal zeroIfInfinity(val: long): long {
-        if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as long
-        }
-        return val
     }
 
     /**
@@ -8429,7 +8404,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start?: number, end?: number): BigUint64Array {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getULong(), asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
         return this
     }
@@ -8442,7 +8416,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: int, end?: number): BigUint64Array {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getULong(), start as int, asIntOrDefault(end, this.lengthInt))
         return this
     }
@@ -8455,7 +8428,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: int, end: number): BigUint64Array {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getULong(), start as int, end as int)
         return this
     }
@@ -8468,7 +8440,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: number, end: int): BigUint64Array {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getULong(), start as int, end as int)
         return this
     }
@@ -8481,7 +8452,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: int, end: int): BigUint64Array {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getULong(), start as int, end as int)
         return this
     }
@@ -8609,8 +8579,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than BigUint64Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
-            let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafeClamp(insertPos as int + i as int, v.getULong())
+            this.setUnsafeClamp(insertPos as int + i as int, arr[i].getULong())
         }
     }
 
@@ -8628,8 +8597,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             throw new RangeError("set(insertPos: int, arr: FixedArray<long>): size of arr is greater than BigUint64Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
-            let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafeClamp(insertPos + i, v)
+            this.setUnsafeClamp(insertPos + i, arr[i])
         }
     }
 
@@ -8668,8 +8636,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             throw new RangeError("offset is out of bounds")
         }
         for (let i = array.length - 1; i >= 0; --i) {
-            let v = this.zeroIfInfinity(array[i])
-            this.setUnsafeClamp(insertPos as int + i as int, v.getULong())
+            this.setUnsafeClamp(insertPos as int + i as int, array[i].getULong())
         }
     }
 
@@ -8683,8 +8650,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public static of(...items: FixedArray<number>): BigUint64Array {
         let res = new BigUint64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
-            const isInfinity = (items[i] == Infinity) || (items[i] == -Infinity)
-            res.setUnsafeClamp(i, (new BigInt((isInfinity ? 0 : items[i]))).getULong())
+            res.setUnsafeClamp(i, (new BigInt(items[i])).getULong())
         }
         return res
     }
