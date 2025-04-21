@@ -25,6 +25,7 @@
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormat.h"
 #include "plugins/ets/stdlib/native/core/IntlListFormat.h"
 
+#include "plugins/ets/stdlib/native/core/IntlDisplayNames.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "ani/ani.h"
 
@@ -44,6 +45,7 @@ ani_status InitCoreIntl(ani_env *env)
     err = err == ANI_OK ? RegisterIntlDateTimeFormatMethods(env) : err;
     err = err == ANI_OK ? RegisterIntlSegmenter(env) : err;
     err = err == ANI_OK ? RegisterIntlListFormat(env) : err;
+    err = err == ANI_OK ? RegisterIntlDisplayNames(env) : err;
     return err;
 }
 
