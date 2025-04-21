@@ -55,11 +55,6 @@
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_11.ets
 
-#24598
-03.types/19.union_types/03.keyof_types/keyof_class_15.ets
-03.types/19.union_types/03.keyof_types/keyof_class_41.ets
-03.types/19.union_types/03.keyof_types/keyof_class_67.ets
-
 #24420
 03.types/19.union_types/ut_34.ets
 
