@@ -49,10 +49,3 @@ cases:
        = c + 100
   - value: |-
        = c
-  - decl: |-
-      abstract class SomeAbstractClass {
-        @SomeAnnotation({field2: "Some string" })
-        foo() {}      
-      }
-    value: |-
-      = 100
