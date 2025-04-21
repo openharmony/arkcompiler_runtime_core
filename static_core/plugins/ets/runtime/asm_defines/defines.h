@@ -21,5 +21,6 @@
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
+#include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
 
 #endif  // PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H

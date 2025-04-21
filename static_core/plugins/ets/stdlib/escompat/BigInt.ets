@@ -60,7 +60,7 @@ export final class BigInt {
     internal static fromLongHelper(val: long, bitLen: int, sign: int): int[] {
         // get required array of Ints' size to store whole value
         // split by suported mode (baseSys)
-        let size: int = (bitLen < BigInt.shiftSys ? 1 : (bitLen / BigInt.shiftSys + 1) as int)
+        let size: int = ((bitLen + BigInt.shiftSys - 1) / BigInt.shiftSys) as int
 
         let digits: int[] = new int[size]
         for (let i = 0; i < size; i++) {
@@ -1058,8 +1058,9 @@ export final class BigInt {
     public getLong(): long {
         let buff = 0 as long
         const bytes = this.bytes
-        for (let i = 0; i < bytes.length; ++i) {
-            buff += ((bytes[i] as long) & BigInt.maskSys) * (Math.pow(BigInt.baseSys, i) as long)
+        const num = Math.min(2, bytes.length)
+        for (let i = 0; i < num; ++i) {
+            buff += ((bytes[i] as long) & BigInt.maskSys) << i * BigInt.shiftSys
         }
         return this.sign * buff
     }

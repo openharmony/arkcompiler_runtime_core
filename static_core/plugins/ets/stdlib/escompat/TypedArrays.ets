@@ -371,12 +371,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
         let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v as byte)
+        this.$_set(index, v as byte)
     }
 
     /**
@@ -397,14 +393,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val as byte)
-        this.setUnsafe(index, v as byte)
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Assigns val as element on index.
@@ -424,14 +413,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: byte): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v)
-    }
+    public native $_set(index: int, val: byte): void
 
     /** Number of byte stored in Int8Array */
     public get length(): number {
@@ -456,12 +438,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: int): number {
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        return this.getUnsafe(index) as number
-    }
+    public native $_get(index: int): number
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -2352,12 +2329,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
         let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v as short)
+        this.$_set(index, v as short)
     }
 
     /**
@@ -2378,14 +2351,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val as short)
-        this.setUnsafe(index, v as short)
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Assigns val as element on index.
@@ -2405,14 +2371,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: short): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v)
-    }
+    public native $_set(index: int, val: short): void
 
     /** Number of short stored in Int16Array */
     public get length(): number {
@@ -2437,12 +2396,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: int): number {
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        return this.getUnsafe(index) as number
-    }
+    public native $_get(index: int): number
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -4337,12 +4291,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
         let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v as int)
+        this.$_set(index, v as int)
     }
 
     /**
@@ -4363,14 +4313,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v)
-    }
+    public native $_set(index: int, val: int): void
 
     /** Number of int stored in Int32Array */
     public get length(): number {
@@ -4395,12 +4338,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: int): number {
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        return this.getUnsafe(index) as number
-    }
+    public native $_get(index: int): number
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -6290,40 +6228,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param index index to change
      */
     public $_set(index: int, val: BigInt): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        let truncatedVal: BigInt = BigInt.asIntN(64, v);
-        this.setUnsafe(index, truncatedVal.getLong())
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index as int, val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val as long)
-        this.setUnsafe(index, v as long)
+        this.$_set(index, val.getLong())
     }
 
     /**
@@ -6344,14 +6249,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param index index to change
      */
-    public $_set(index: int, val: long): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v)
-    }
+    public native $_set(index: int, val: long): void
 
     /** Number of long stored in BigInt64Array */
     public get length(): number {
@@ -6377,11 +6275,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns a primitive at index
      */
     public $_get(index: int): BigInt {
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        return new BigInt(this.getUnsafe(index))
+        return new BigInt(this.getLong(index))
     }
+
+    private native getLong(index: int): long
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -8273,37 +8170,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        this.setUnsafe(index, val as float)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index as int, val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        this.setUnsafe(index, val as float)
+        this.$_set(index, val as float)
     }
 
     /**
@@ -8324,13 +8191,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: float): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        this.setUnsafe(index, val)
-    }
+    public native $_set(index: int, val: float): void
 
     /** Number of float stored in Float32Array */
     public get length(): number {
@@ -8355,12 +8216,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: int): number {
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        return this.getUnsafe(index) as number
-    }
+    public native $_get(index: int): number
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -10227,7 +10083,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: number, val: number): void {
+    public $_set(index: number, val: double): void {
         this.$_set(index as int, val)
     }
 
@@ -10238,39 +10094,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        this.setUnsafe(index, val as double)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: number, val: int): void {
-        this.$_set(index as int, val)
-    }
-
-    /**
-     * Assigns val as element on index.
-     *
-     * @param val value to set
-     *
-     * @param index index to change
-     */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        this.setUnsafe(index, val as double)
-    }
+    public native $_set(index: int, val: double): void
 
     /** Number of double stored in Float64Array */
     public get length(): number {
@@ -10295,12 +10119,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: int): number {
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        return this.getUnsafe(index) as number
-    }
+    public native $_get(index: int): number
 
     /**
      * Returns an instance of primitive type at passed index.

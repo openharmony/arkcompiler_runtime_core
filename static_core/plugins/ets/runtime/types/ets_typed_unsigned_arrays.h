@@ -13,48 +13,43 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_ARRAYS_H
-#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_ARRAYS_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_UNSIGNED_ARRAYS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_UNSIGNED_ARRAYS_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets {
-class EtsEscompatTypedArrayBase : public EtsObject {
+class EtsEscompatTypedUArrayBase : public EtsObject {
 public:
-    EtsEscompatTypedArrayBase() = delete;
-    ~EtsEscompatTypedArrayBase() = delete;
+    EtsEscompatTypedUArrayBase() = delete;
+    ~EtsEscompatTypedUArrayBase() = delete;
 
-    NO_COPY_SEMANTIC(EtsEscompatTypedArrayBase);
-    NO_MOVE_SEMANTIC(EtsEscompatTypedArrayBase);
+    NO_COPY_SEMANTIC(EtsEscompatTypedUArrayBase);
+    NO_MOVE_SEMANTIC(EtsEscompatTypedUArrayBase);
 
     static constexpr size_t GetBufferOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, buffer_);
+        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, buffer_);
     }
 
     static constexpr size_t GetByteOffsetOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, byteOffset_);
+        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, byteOffset_);
     }
 
     static constexpr size_t GetByteLengthOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, byteLength_);
-    }
-
-    static constexpr size_t GetNameOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, name_);
+        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, byteLength_);
     }
 
     static constexpr size_t GetLengthIntOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, lengthInt_);
+        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, lengthInt_);
     }
 
     static constexpr size_t GetArrayBufferBackedOffset()
     {
-        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, arrayBufferBacked_);
+        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, arrayBufferBacked_);
     }
 
     ObjectPointer<EtsObject> GetBuffer()
@@ -96,24 +91,27 @@ private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
     EtsDouble bytesPerElement_;
-    EtsDouble byteOffset_;
-    EtsDouble byteLength_;
+    EtsInt byteOffset_;
+    EtsInt byteLength_;
     EtsInt lengthInt_;
     EtsBoolean arrayBufferBacked_;
 };
 
 template <typename T>
-class EtsEscompatTypedArray : public EtsEscompatTypedArrayBase {
+class EtsEscompatTypedUArray : public EtsEscompatTypedUArrayBase {
 public:
     using ElementType = T;
 };
 
-class EtsEscompatInt8Array : public EtsEscompatTypedArray<EtsByte> {};
-class EtsEscompatInt16Array : public EtsEscompatTypedArray<EtsShort> {};
-class EtsEscompatInt32Array : public EtsEscompatTypedArray<EtsInt> {};
-class EtsEscompatBigInt64Array : public EtsEscompatTypedArray<EtsLong> {};
-class EtsEscompatFloat32Array : public EtsEscompatTypedArray<EtsFloat> {};
-class EtsEscompatFloat64Array : public EtsEscompatTypedArray<EtsDouble> {};
+class EtsEscompatUInt8ClampedArray : public EtsEscompatTypedUArray<uint8_t> {
+public:
+    static constexpr int MIN = 0;
+    static constexpr int MAX = 255;
+};
+class EtsEscompatUInt8Array : public EtsEscompatTypedUArray<uint8_t> {};
+class EtsEscompatUInt16Array : public EtsEscompatTypedUArray<uint16_t> {};
+class EtsEscompatUInt32Array : public EtsEscompatTypedUArray<uint32_t> {};
+class EtsEscompatBigUInt64Array : public EtsEscompatTypedUArray<uint64_t> {};
 }  // namespace ark::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_ARRAYS_H
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_UNSIGNED_ARRAYS_H

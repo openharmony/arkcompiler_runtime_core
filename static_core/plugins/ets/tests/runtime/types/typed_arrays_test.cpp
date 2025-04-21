@@ -55,13 +55,24 @@ public:
     NO_COPY_SEMANTIC(TypedArrayRelatedMemberOffsetTest);
     NO_MOVE_SEMANTIC(TypedArrayRelatedMemberOffsetTest);
 
-    static std::vector<MirrorFieldInfo> GetInt8ArrayMembers()
+    static std::vector<MirrorFieldInfo> GetTypedArrayMembers()
     {
         return std::vector<MirrorFieldInfo> {
-            MirrorFieldInfo("buffer", ark::cross_values::GetInt8ArrayBufferOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("lengthInt", ark::cross_values::GetInt8ArrayLengthOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("byteOffset", ark::cross_values::GetInt8ArrayByteOffsetOffset(RUNTIME_ARCH)),
-            MirrorFieldInfo("arrayBufferBacked", ark::cross_values::GetInt8ArrayArrayBufferBackedOffset(RUNTIME_ARCH))};
+            MirrorFieldInfo("buffer", ark::cross_values::GetTypedArrayBufferOffset(RUNTIME_ARCH)),
+            MirrorFieldInfo("lengthInt", ark::cross_values::GetTypedArrayLengthOffset(RUNTIME_ARCH)),
+            MirrorFieldInfo("byteOffset", ark::cross_values::GetTypedArrayByteOffsetOffset(RUNTIME_ARCH)),
+            MirrorFieldInfo("arrayBufferBacked",
+                            ark::cross_values::GetTypedArrayArrayBufferBackedOffset(RUNTIME_ARCH))};
+    }
+
+    static std::vector<MirrorFieldInfo> GetUArrayMembers()
+    {
+        return std::vector<MirrorFieldInfo> {
+            MirrorFieldInfo("buffer", ark::cross_values::GetTypedUnsignedArrayBufferOffset(RUNTIME_ARCH)),
+            MirrorFieldInfo("lengthInt", ark::cross_values::GetTypedUnsignedArrayLengthOffset(RUNTIME_ARCH)),
+            MirrorFieldInfo("byteOffsetInt", ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(RUNTIME_ARCH)),
+            MirrorFieldInfo("arrayBufferBacked",
+                            ark::cross_values::GetTypedUnsignedArrayArrayBufferBackedOffset(RUNTIME_ARCH))};
     }
 
     static std::vector<MirrorFieldInfo> GetArrayBufferMembers()
@@ -95,7 +106,67 @@ protected:
 TEST_F(TypedArrayRelatedMemberOffsetTest, Int8ArrayLayout)
 {
     auto *klass = GetClass("Lescompat/Int8Array;");
-    MirrorFieldInfo::CompareMemberOffsets(klass, GetInt8ArrayMembers(), false);
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, Int16ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Int16Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, Int32ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Int32Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, BigInt64ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/BigInt64Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, Float32ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Float32Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, Float64ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Float64Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, UInt8ClampedArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Uint8ClampedArray;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, UInt8ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Uint8Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, UInt16ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Uint16Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, UInt32ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/Uint32Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
+}
+
+TEST_F(TypedArrayRelatedMemberOffsetTest, UBigUInt64ArrayLayout)
+{
+    auto *klass = GetClass("Lescompat/BigUint64Array;");
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, ArrayBufferLayout)

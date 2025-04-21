@@ -103,7 +103,7 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
 /**
  * JS {{element['name']}}Array API-compatible class
  */
-export class {{element['name']}}Array implements Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> {
+export final class {{element['name']}}Array implements Iterable<{{element['subsetTypeValues']}}>, ArrayLike<{{element['subsetTypeValues']}}> {
     public static readonly BYTES_PER_ELEMENT: number = {{element['bytes']}}
     public readonly BYTES_PER_ELEMENT: number = {{element['name']}}Array.BYTES_PER_ELEMENT
 
@@ -113,6 +113,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
+    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty {{element['name']}}Array.
@@ -148,6 +149,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -170,6 +172,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -280,6 +283,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             }
             this.lengthInt = this.byteLengthInt / {{element['name']}}Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLengthInt = (buf as SharedArrayBuffer).getByteLength()
@@ -296,6 +300,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             this.byteLengthInt = arr.length as int * {{element['name']}}Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 {%- if element.get('clamped', False) %}
@@ -331,6 +336,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.byteLengthInt = this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -341,6 +347,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     public constructor(other: {{element['name']}}Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -392,8 +399,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
     {%- endif %}
 
-{%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
-
     internal zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
         {%- if element.get('subsetType') == 'number' %}
         if ((val == Infinity) || (val == -Infinity)) {
@@ -404,6 +409,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         }
         return {{asElementCompat % 'val'}}
     }
+{%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
 
     internal zeroIfInfinity(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
         if ((val == Infinity) || (val == -Infinity)) {
@@ -475,12 +481,14 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns a primitive at index
      */
+    {%- if element['name'] == 'BigUint64' %}
     public $_get(i: int): {{element['subsetType']}} {
-        if (i < 0 || i >= this.lengthInt) {
-            throw new RangeError("invalid offset")
-        }
-        return {{asElementCompat % 'this.getUnsafe(i)'}}
+        return BigInt.fromULong(this.getLong(i))
     }
+    private native getLong(i: int): long
+    {%- else %}
+    public native $_get(i: int): {{element['subsetType']}}
+    {%- endif %}
 
     /**
      * Assigns val as element on index.
@@ -501,15 +509,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param index index to change
      */
     public $_set(index: int, val: {{element['subsetType']}}): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if element['subsetType'] == 'number' %}
         let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, {{fromElementCompat % 'v'}})
+        this.$_set(index, {{fromElementCompat % 'v'}})
         {%- else %}
-        this.setUnsafeClamp(index, {{fromElementCompat % 'val'}})
+        this.$_set(index, {{fromElementCompat % 'val'}})
         {%- endif %}
     }
 
@@ -531,18 +535,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param index index to change
      */
-    public $_set(index: int, val: {{element['primitiveType']}}): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        {%- if element.get('name') != 'Uint8Clamped' %}
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v)
-        {%- else %}
-        this.setUnsafeClamp(index, val)
-        {%- endif %}
-    }
+    public native $_set(index: int, val: {{element['primitiveType']}}): void
     {%- if element['primitiveType'] != 'int' %}
 
     /**
@@ -563,18 +556,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        {%- if element.get('name') != 'Uint8Clamped' %}
-        let v = this.zeroIfInfinity(val as {{element['primitiveType']}})
-        this.setUnsafeClamp(index, v)
-        {%- else %}
-        this.setUnsafeClamp(index, val as {{element['primitiveType']}})
-        {%- endif %}
-    }
+    public native $_set(index: int, val: int): void
     {%- endif %}
 
     /**
@@ -955,6 +937,10 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     public set(arr: {{element['primitiveType']}}[]): void {
         this.set(arr, 0)
     }
+
+    public native set(array: {{element['name']}}Array): void
+
+    public native set(array: {{element['name']}}Array, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the {{element['name']}}Array.
