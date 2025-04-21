@@ -79,9 +79,9 @@ const uriArrayComponent: boolean[] = fillInCommonURI()
 export function decodeURI(uri: string): string {
     return unescapeImpl(
         uri,
-        (ret: StringBuilder, unit: int): void => {
+        (str: string, i: int, ret: StringBuilder, unit: int): void => {
             if (unit < 128 && uriSpecialChars[unit]) {
-                encodeCharAsHex(ret, unit)
+                ret.append(str.slice(i, i + 3))
             } else {
                 ret.append(unit as char)
             }
@@ -178,7 +178,7 @@ export function encodeURI(uri: string): string {
 export function decodeURIComponent(uriComponent: string): string {
     return unescapeImpl(
         uriComponent,
-        (ret: StringBuilder, unit: int): void => {
+        (str: string, i: int, ret: StringBuilder, unit: int): void => {
             ret.append(unit as char)
         }
     )
@@ -264,7 +264,7 @@ function encodedURIHexAt(str: string, i: int): int {
     }
 }
 
-function unescapeImpl(str: string, push: (ret: StringBuilder, unit: int) => void): string {
+function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilder, unit: int) => void): string {
     let ret = new StringBuilder();
     for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
@@ -279,7 +279,7 @@ function unescapeImpl(str: string, push: (ret: StringBuilder, unit: int) => void
         let chr0 = encodedURIHexAt(str, i);
         let chrsCnt: int
         if ((chr0 & 0x80) == 0) {
-            push(ret, chr0 as char)
+            push(str, i, ret, chr0 as char)
             i += 2
             continue
         } else if ((chr0 & 0xe0) == 0xc0) {
@@ -305,7 +305,7 @@ function unescapeImpl(str: string, push: (ret: StringBuilder, unit: int) => void
         i += chrsCnt * 3 - 1
 
         if (chr0 >= 0 && chr0 <= 0xd7ff || chr0 >= 0xe000 && chr0 <= 0xffff) {
-            push(ret, chr0 as char)
+            push(str, i, ret, chr0 as char)
         } else {
             ret.append(Char.getHighSurrogate(chr0))
             ret.append(Char.getLowSurrogate(chr0))
