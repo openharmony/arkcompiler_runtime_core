@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function plus_one(x: number): number {
+function plusOne(x: number): number {
     return x + 1;
 }
 
@@ -32,7 +32,7 @@ function main(): void {
     ASSERT_TRUE(call_back_res === 0x55ab);
 
     // test normal function
-    call_back_res = callback_js_function_ets(plus_one);
+    call_back_res = callback_js_function_ets(plusOne);
     ASSERT_TRUE(call_back_res === 0x55ab);
 }
 
