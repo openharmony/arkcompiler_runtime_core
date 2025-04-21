@@ -602,6 +602,11 @@ ani_status CreateNumRangeFormatter(ani_env *env, const ParsedOptions &options,
     return ANI_OK;
 }
 
+static ani_double NormalizeIfNaN(ani_double value)
+{
+    return std::isnan(value) ? std::numeric_limits<ani_double>::quiet_NaN() : value;
+}
+
 ani_string IcuFormatDouble(ani_env *env, ani_object self, ani_double value)
 {
     ParsedOptions options;
@@ -610,7 +615,7 @@ ani_string IcuFormatDouble(ani_env *env, ani_object self, ani_double value)
     icu::number::LocalizedNumberFormatter formatter;
     if (CreateNumFormatter(env, options, formatter) == ANI_OK) {
         UErrorCode status = U_ZERO_ERROR;
-        auto fmtNumber = formatter.formatDouble(value, status);
+        auto fmtNumber = formatter.formatDouble(NormalizeIfNaN(value), status);
         if (UNLIKELY(U_FAILURE(status) != 0)) {
             std::string message = "IcuFormatDouble. Unable to format double " + std::to_string(value);
             ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");

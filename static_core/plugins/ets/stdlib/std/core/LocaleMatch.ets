@@ -49,3 +49,24 @@ export function intlLookUpLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47Langu
 export function intlBestFitLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47LanguageTag[]): string {
     return LocaleMatch.bestFitLocale(localesToString(locale))
 }
+
+export function localesToLanguageTags(locales: string | Intl.Locale | readonly (string | Intl.Locale)[]): string[] {
+    if (locales instanceof string) {
+        return [locales]
+    } else if (locales instanceof Intl.Locale) {
+        return [locales.toString()]
+    } else if (locales instanceof Array) {
+        if (locales.length == 0) {
+            return []
+        }
+
+        const langTags = new string[locales.length]
+        for (let i = 0; i < locales.length; i++) {
+            const locale = locales[i] as string | Intl.Locale
+            langTags[i] = locale instanceof string ? locale : locale.toString()
+        }
+        return langTags
+    } else {
+        throw new TypeError("'locales' parameter has invalid type")
+    }
+}

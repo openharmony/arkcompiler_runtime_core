@@ -1525,16 +1525,6 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::EscompatDateGetTimezoneName
 
-  - name: EscompatDateGetLocaleString
-    space: ets
-    class_name: escompat.Date
-    method_name: getLocaleString
-    static: true
-    signature:
-      ret: std.core.String
-      args: [ std.core.String, std.core.String, i64, u1 ]
-    impl: ark::ets::intrinsics::EscompatDateGetLocaleString
-
 ##################
 # escompat.Array #
 ##################
@@ -1959,16 +1949,6 @@ intrinsics:
       args: [ f64, i32 ]
     impl: ark::ets::intrinsics::StdCoreDoubleToString
     peephole_func: PeepholeDoubleToString
-
-  - name: StdCoreDoubleToLocaleString
-    space: ets
-    class_name: std.core.Double
-    method_name: toLocaleString
-    static: false
-    signature:
-      ret: std.core.String
-      args: [ std.core.String ]
-    impl: ark::ets::intrinsics::StdCoreDoubleToLocaleString
 
   - name: StdCoreDoubleParseFloat
     space: ets

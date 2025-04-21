@@ -308,23 +308,18 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Accepts a locale and returns string in language-sensitive representation
-     *
-     * @remark
-     * Implemented as native function,  @see `toLocaleString()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#741).
-     * @returns result of the conversion in a local representation
-     *
-     */
-    public native toLocaleString(locale: String): String;
-
-    /**
      * Without an argument method returns just toString value
      *
      * @returns result of the conversion
      *
      */
     public toLocaleString(): String {
-        return this.toLocaleString("")
+        return new Intl.NumberFormat().format(this.value)
+    }
+
+    public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.NumberFormatOptions): string {
+        const formatter = new Intl.NumberFormat(localesToLanguageTags(locales), options)
+        return formatter.format(this.value)
     }
 
     /**

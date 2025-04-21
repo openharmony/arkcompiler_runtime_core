@@ -402,6 +402,27 @@ function ecmaInLeapYear(year: int): byte {
  * Date JS API-compatible class
  */
 export class Date {
+    private static readonly DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+
+    private static readonly DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric"
+    }
+
+    private static readonly TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+
     /** Stored value of Date, milliseconds */
     private ms: long;
     private get TZOffset(): long {
@@ -700,27 +721,32 @@ export class Date {
     public static native getTimezoneName(ms: long): String;
 
     /**
-     * Gets locale string representation according to format.
-     *
-     * @param format
-     *
-     * @param locale
-     *
-     * @param ms
-     *
-     * @param isUTC
-     *
-     * @returns locale string in the specified format.
-     */
-    public static native getLocaleString(format: String, locale: String, ms: long, isUTC: boolean): String;
-
-    /**
      * Gets a string with a language-sensitive representation of the time portion of the date.
      *
      * @returns a language-sensitive representation of the time portion of the date.
      */
     public toLocaleTimeString(): string {
-        return Date.getLocaleString("%EX", "", this.ms, false);
+        const formatter = new Intl.DateTimeFormat(undefined, Date.TIME_FORMAT_OPTIONS)
+        return formatter.format(this.getTime())
+    }
+
+    private appendDefaultTimeOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
+        const appendTimeOptions = !options.dayPeriod
+                && !options.hour
+                && !options.minute
+                && !options.second
+                && !options.fractionalSecondDigits
+
+        let effectiveOptions = options
+        if (appendTimeOptions) {
+            // client options instance should not be modified, so creating a copy
+            effectiveOptions = new Intl.DateTimeFormatOptions(options)
+            effectiveOptions.hour = Date.TIME_FORMAT_OPTIONS.hour
+            effectiveOptions.minute = Date.TIME_FORMAT_OPTIONS.minute
+            effectiveOptions.second = Date.TIME_FORMAT_OPTIONS.second
+        }
+
+        return effectiveOptions
     }
 
     /**
@@ -730,8 +756,13 @@ export class Date {
      *
      * @returns a language-sensitive representation of the time portion of the date with respect to locale.
      */
-    public toLocaleTimeString(locale: string): string {
-        return Date.getLocaleString("%EX", locale, this.ms, false);
+    public toLocaleTimeString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.DateTimeFormatOptions): string {
+        if (options && options.dateStyle) {
+            throw new TypeError("Invalid option : dateStyle")
+        }
+
+        const effectiveOptions = !options ? Date.TIME_FORMAT_OPTIONS : this.appendDefaultTimeOptions(options!)
+        return new Intl.DateTimeFormat(localesToLanguageTags(locales), effectiveOptions).format(this.getTime())
     }
 
     /**
@@ -740,7 +771,8 @@ export class Date {
      * @returns a language-sensitive representation of this date.
      */
     public toLocaleString(): string {
-        return Date.getLocaleString("%Ex %EX", "", this.ms, false);
+        const formatter = new Intl.DateTimeFormat(undefined, Date.DATE_TIME_FORMAT_OPTIONS)
+        return formatter.format(this.getTime())
     }
 
     /**
@@ -750,8 +782,9 @@ export class Date {
      *
      * @returns a language-sensitive representation of this date.
      */
-    public toLocaleString(locale: string): string {
-        return Date.getLocaleString("%Ex %EX", locale, this.ms, false);
+    public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.DateTimeFormatOptions): string {
+        const formatter = new Intl.DateTimeFormat(localesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
+        return formatter.format(this.getTime())
     }
 
     /**
@@ -762,7 +795,23 @@ export class Date {
      * of the date portion of the specified date in the user agent's timezone.
      */
     public toLocaleDateString(): string {
-        return Date.getLocaleString("%Ex", "", this.ms, false);
+        const formatter = new Intl.DateTimeFormat(undefined, Date.DATE_FORMAT_OPTIONS)
+        return formatter.format(this.getTime())
+    }
+
+    private appendDefaultDateOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
+        const appendDateOptions = !options.weekday && !options.year && !options.month && !options.day
+
+        let effectiveOptions = options
+        if (appendDateOptions) {
+            // client options instance should not be modified, so creating a copy
+            effectiveOptions = new Intl.DateTimeFormatOptions(options)
+            effectiveOptions.year = Date.DATE_FORMAT_OPTIONS.year
+            effectiveOptions.month = Date.DATE_FORMAT_OPTIONS.month
+            effectiveOptions.day = Date.DATE_FORMAT_OPTIONS.day
+        }
+
+        return effectiveOptions
     }
 
     /**
@@ -772,8 +821,14 @@ export class Date {
      * @returns a string with a language-sensitive representation
      * of the date portion of the specified date in the user agent's timezone.
      */
-    public toLocaleDateString(locale: string): string {
-        return Date.getLocaleString("%Ex", locale, this.ms, false);
+    public toLocaleDateString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.DateTimeFormatOptions): string {
+        if (options && options.timeStyle) {
+            throw new TypeError("Invalid option : timeStyle")
+        }
+
+        const effectiveOptions = !options ? Date.DATE_FORMAT_OPTIONS : this.appendDefaultDateOptions(options)
+        const formatter = new Intl.DateTimeFormat(localesToLanguageTags(locales), effectiveOptions)
+        return formatter.format(this.getTime())
     }
 
     /**

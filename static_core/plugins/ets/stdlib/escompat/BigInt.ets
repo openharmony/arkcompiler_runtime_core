@@ -28,6 +28,24 @@ const MAX_REGULAR_INTEGER: BigInt;
 // initialized in _initializerBlock_.ets
 const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap;
 
+export interface BigIntToLocaleStringOptions {
+    compactDisplay?: string;
+    currency?: string;
+    currencyDisplay?: string;
+    localeMatcher?: string;
+    maximumFractionDigits?: number;
+    maximumSignificantDigits?: number;
+    minimumFractionDigits?: number;
+    minimumIntegerDigits?: number;
+    minimumSignificantDigits?: number;
+    notation?: string;
+    numberingSystem?: string;
+    style?: string;
+    unit?: string;
+    unitDisplay?: string;
+    useGrouping?: boolean;
+}
+
 /**
  * BigInt class stub
  */
@@ -164,19 +182,81 @@ export final class BigInt {
      *
      * @returns string representation
      */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("BigInt.toLocaleString: not implemented")
+    public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: BigIntToLocaleStringOptions): string {
+        const numFmtOptions = BigInt.toNumberFormatOptions(options)
+        const formatter = new Intl.NumberFormat(localesToLanguageTags(locales), numFmtOptions)
+        return formatter.format(this)
     }
 
-    /**
-     * Returns a locale string representing the specified array and its elements.
-     *
-     * @param options
-     *
-     * @returns string representation
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
+    private static toNumberFormatOptions(options?: BigIntToLocaleStringOptions): Intl.NumberFormatOptions | undefined {
+        if (!options) {
+            return undefined
+        }
+
+        const numFmtOptions = new Intl.NumberFormatOptions()
+
+        if (options.compactDisplay) {
+            if (!(options.compactDisplay == "short" || options.compactDisplay == "long")) {
+                throw new RangeError(`invalid value "${options.compactDisplay}" for option compactDisplay`)
+            }
+            numFmtOptions.compactDisplay = options.compactDisplay as "short" | "long"
+        }
+
+        numFmtOptions.currency = options.currency
+
+        if (options.currencyDisplay) {
+            const currencyDisplay = options.currencyDisplay
+            if (!(currencyDisplay == "code" || currencyDisplay == "symbol" || currencyDisplay == "narrowSymbol" || currencyDisplay == "name")) {
+                throw new RangeError(`invalid value "${currencyDisplay}" for option currencyDisplay`)
+            }
+            numFmtOptions.currencyDisplay = currencyDisplay as "code" | "symbol" | "narrowSymbol" | "name"
+        }
+
+        if (options.localeMatcher) {
+            const localeMatcher = options.localeMatcher
+            if (!(localeMatcher == "lookup" || localeMatcher == "best fit")) {
+                throw new RangeError(`invalid value "${localeMatcher}" for option localeMatcher`)
+            }
+            numFmtOptions.localeMatcher = localeMatcher as "lookup" | "best fit"
+        }
+
+        numFmtOptions.maximumFractionDigits = options.maximumFractionDigits
+        numFmtOptions.maximumSignificantDigits = options.maximumSignificantDigits
+        numFmtOptions.minimumFractionDigits = options.minimumFractionDigits
+        numFmtOptions.minimumIntegerDigits = options.minimumIntegerDigits
+        numFmtOptions.minimumSignificantDigits = options.minimumSignificantDigits
+
+        if (options.notation) {
+            const notation = options.notation
+            if (!(notation == "standard" || notation == "scientific" || notation == "engineering" || notation == "compact")) {
+                throw new RangeError(`invalid value "${notation}" for option notation`)
+            }
+            numFmtOptions.notation = notation as "standard" | "scientific" | "engineering" | "compact"
+        }
+
+        // numFmtOptions.numberingSystem = options.numberingSystem
+
+        if (options.style) {
+            const style = options.style
+            if (!(style == "decimal" || style == "percent" || style == "currency" || style == "unit")) {
+                throw new RangeError(`invalid value "${style}" for option style`)
+            }
+            numFmtOptions.style = style as "decimal" | "percent" | "currency" | "unit"
+        }
+
+        numFmtOptions.unit = options.unit
+
+        if (options.unitDisplay) {
+            const unitDisplay = options.unitDisplay
+            if (unitDisplay == "short" || unitDisplay == "long" || unitDisplay == "narrow") {
+                throw new RangeError(`invalid value "${unitDisplay}" for option unitDisplay`)
+            }
+            numFmtOptions.unitDisplay = unitDisplay as "short" | "long" | "narrow"
+        }
+
+        numFmtOptions.useGrouping = options.useGrouping
+
+        return numFmtOptions
     }
 
     /**
@@ -185,7 +265,7 @@ export final class BigInt {
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        return new Intl.NumberFormat().format(this)
     }
 
     public override toString(): string {
