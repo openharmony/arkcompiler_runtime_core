@@ -12,12 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-from mate.bar use BarType as MyBar;
+import * as StructTest from "@generated/struct_test";
 
-union MateType {
-    sValue: String;
-    bValue: bool;
-    @undefined xValue;
+function main() {
+    let a: StructTest.A = {
+        param1: 1,
+    };
+    let b: StructTest.B = {
+        param1: 2,
+        param2: 3,
+    };
+    let c: StructTest.C = new StructTest.C(4, 5, 6);
+
+    console.log("a:", a);
+    console.log("b:", b);
+    console.log("c:", c);
 }
-
-function testBar(bar: MyBar): void;

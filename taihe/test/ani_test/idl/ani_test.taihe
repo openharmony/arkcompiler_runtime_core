@@ -22,7 +22,7 @@ function makeData(): Data;
 function showData(s: Data): void;
 
 union Union {
-    empty;
+    @null empty;
     iValue: i32;
     fValue: f32;
     sValue: String;

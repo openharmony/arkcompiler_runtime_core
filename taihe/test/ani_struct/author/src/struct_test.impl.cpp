@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-from mate.bar use BarType as MyBar;
+#include "struct_test.impl.hpp"
+#include "stdexcept"
+#include "struct_test.proj.hpp"
+#include "taihe/runtime.hpp"
 
-union MateType {
-    sValue: String;
-    bValue: bool;
-    @undefined xValue;
-}
+using namespace taihe;
 
-function testBar(bar: MyBar): void;
+namespace {
+// To be implemented.
+}  // namespace
+
+// Since these macros are auto-generate, lint will cause false positive.
+// NOLINTBEGIN
+// NOLINTEND

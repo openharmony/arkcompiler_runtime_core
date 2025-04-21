@@ -20,7 +20,7 @@ struct Pair {
 union InnerUnion {
   stringValue: String;
   pairValue: Pair;
-  undefinedValue;
+  @undefined undefinedValue;
 }
 
 union MyUnion {
