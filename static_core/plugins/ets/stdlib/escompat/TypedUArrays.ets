@@ -87,7 +87,7 @@ class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Numb
 /**
  * JS Uint8ClampedArray API-compatible class
  */
-export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
+export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 1
     public readonly BYTES_PER_ELEMENT: number = Uint8ClampedArray.BYTES_PER_ELEMENT
 
@@ -97,6 +97,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
+    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint8ClampedArray.
@@ -126,6 +127,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -148,6 +150,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -251,6 +254,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint8ClampedArray.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLengthInt = (buf as SharedArrayBuffer).getByteLength()
@@ -267,6 +271,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length as int * Uint8ClampedArray.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, Uint8ClampedArray.clamp(arr.$_get(i).intValue()))
@@ -298,6 +303,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -308,6 +314,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Uint8ClampedArray) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -336,6 +343,13 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafeClamp(i, numbers[i] as int)
         }
+    }
+
+    internal zeroIfInfinity(val: number): number {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as number
+        }
+        return val as number
     }
 
     /**
@@ -396,12 +410,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(i: int): number {
-        if (i < 0 || i >= this.lengthInt) {
-            throw new RangeError("invalid offset")
-        }
-        return this.getUnsafe(i) as number
-    }
+    public native $_get(i: int): number
 
     /**
      * Assigns val as element on index.
@@ -422,11 +431,8 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        this.setUnsafeClamp(index, val as int)
+        let v = this.zeroIfInfinity(val)
+        this.$_set(index, v as int)
     }
 
     /**
@@ -447,13 +453,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        this.setUnsafeClamp(index, val)
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -806,6 +806,10 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: int[]): void {
         this.set(arr, 0)
     }
+
+    public native set(array: Uint8ClampedArray): void
+
+    public native set(array: Uint8ClampedArray, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint8ClampedArray.
@@ -2020,7 +2024,7 @@ class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 /**
  * JS Uint8Array API-compatible class
  */
-export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
+export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 1
     public readonly BYTES_PER_ELEMENT: number = Uint8Array.BYTES_PER_ELEMENT
 
@@ -2030,6 +2034,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
+    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint8Array.
@@ -2059,6 +2064,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -2081,6 +2087,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -2184,6 +2191,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint8Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLengthInt = (buf as SharedArrayBuffer).getByteLength()
@@ -2200,6 +2208,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length as int * Uint8Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).intValue())
@@ -2231,6 +2240,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint8Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -2241,6 +2251,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Uint8Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -2343,12 +2354,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(i: int): number {
-        if (i < 0 || i >= this.lengthInt) {
-            throw new RangeError("invalid offset")
-        }
-        return this.getUnsafe(i) as number
-    }
+    public native $_get(i: int): number
 
     /**
      * Assigns val as element on index.
@@ -2369,12 +2375,8 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
         let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v as int)
+        this.$_set(index, v as int)
     }
 
     /**
@@ -2395,14 +2397,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v)
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -2761,6 +2756,10 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: int[]): void {
         this.set(arr, 0)
     }
+
+    public native set(array: Uint8Array): void
+
+    public native set(array: Uint8Array, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint8Array.
@@ -3970,7 +3969,7 @@ class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 /**
  * JS Uint16Array API-compatible class
  */
-export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
+export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 2
     public readonly BYTES_PER_ELEMENT: number = Uint16Array.BYTES_PER_ELEMENT
 
@@ -3980,6 +3979,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
+    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint16Array.
@@ -4009,6 +4009,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -4031,6 +4032,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -4141,6 +4143,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint16Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLengthInt = (buf as SharedArrayBuffer).getByteLength()
@@ -4157,6 +4160,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length as int * Uint16Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).intValue())
@@ -4188,6 +4192,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint16Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -4198,6 +4203,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Uint16Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -4300,12 +4306,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(i: int): number {
-        if (i < 0 || i >= this.lengthInt) {
-            throw new RangeError("invalid offset")
-        }
-        return this.getUnsafe(i) as number
-    }
+    public native $_get(i: int): number
 
     /**
      * Assigns val as element on index.
@@ -4326,12 +4327,8 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
         let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v as int)
+        this.$_set(index, v as int)
     }
 
     /**
@@ -4352,14 +4349,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v)
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -4718,6 +4708,10 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: int[]): void {
         this.set(arr, 0)
     }
+
+    public native set(array: Uint16Array): void
+
+    public native set(array: Uint16Array, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint16Array.
@@ -5912,7 +5906,7 @@ class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 /**
  * JS Uint32Array API-compatible class
  */
-export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
+export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 4
     public readonly BYTES_PER_ELEMENT: number = Uint32Array.BYTES_PER_ELEMENT
 
@@ -5922,6 +5916,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
+    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty Uint32Array.
@@ -5951,6 +5946,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -5973,6 +5969,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -6083,6 +6080,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
             this.lengthInt = this.byteLengthInt / Uint32Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLengthInt = (buf as SharedArrayBuffer).getByteLength()
@@ -6099,6 +6097,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLengthInt = arr.length as int * Uint32Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).longValue())
@@ -6130,6 +6129,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLengthInt = this.lengthInt * Uint32Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -6140,6 +6140,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(other: Uint32Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -6242,12 +6243,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(i: int): number {
-        if (i < 0 || i >= this.lengthInt) {
-            throw new RangeError("invalid offset")
-        }
-        return this.getUnsafe(i) as number
-    }
+    public native $_get(i: int): number
 
     /**
      * Assigns val as element on index.
@@ -6268,12 +6264,8 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
         let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v as long)
+        this.$_set(index, v as long)
     }
 
     /**
@@ -6294,14 +6286,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: long): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v)
-    }
+    public native $_set(index: int, val: long): void
 
     /**
      * Assigns val as element on index.
@@ -6321,14 +6306,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val as long)
-        this.setUnsafeClamp(index, v)
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -6687,6 +6665,10 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public set(arr: long[]): void {
         this.set(arr, 0)
     }
+
+    public native set(array: Uint32Array): void
+
+    public native set(array: Uint32Array, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the Uint32Array.
@@ -7896,7 +7878,7 @@ class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]
 /**
  * JS BigUint64Array API-compatible class
  */
-export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
+export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public static readonly BYTES_PER_ELEMENT: number = 8
     public readonly BYTES_PER_ELEMENT: number = BigUint64Array.BYTES_PER_ELEMENT
 
@@ -7906,6 +7888,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     internal readonly byteOffsetInt: int
     internal readonly byteLengthInt: int
     internal readonly lengthInt: int
+    private readonly arrayBufferBacked: boolean
 
     /**
      * Creates an empty BigUint64Array.
@@ -7935,6 +7918,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             this.buffer = x.buffer
             this.byteOffsetInt = x.byteOffsetInt
         }
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -7957,6 +7941,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
         let intByteLength: int
         if (buf instanceof ArrayBuffer) {
             intByteLength = (buf as ArrayBuffer).getByteLength()
+            this.arrayBufferBacked = true
         } else if (buf instanceof SharedArrayBuffer) {
             intByteLength = (buf as SharedArrayBuffer).getByteLength()
         } else {
@@ -8067,6 +8052,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             }
             this.lengthInt = this.byteLengthInt / BigUint64Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
         } else if (buf instanceof SharedArrayBuffer) {
             this.byteLengthInt = (buf as SharedArrayBuffer).getByteLength()
@@ -8083,6 +8069,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
             this.byteLengthInt = arr.length as int * BigUint64Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.arrayBufferBacked = true
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).longValue())
@@ -8114,6 +8101,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
         this.byteLengthInt = this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT as int
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
+        this.arrayBufferBacked = true
     }
 
     /**
@@ -8124,6 +8112,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public constructor(other: BigUint64Array) {
         if (other.buffer instanceof ArrayBuffer) {
             this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
             this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
         } else {
@@ -8237,11 +8226,9 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * @returns a primitive at index
      */
     public $_get(i: int): BigInt {
-        if (i < 0 || i >= this.lengthInt) {
-            throw new RangeError("invalid offset")
-        }
-        return new BigInt(this.getUnsafe(i))
+        return BigInt.fromULong(this.getLong(i))
     }
+    private native getLong(i: int): long
 
     /**
      * Assigns val as element on index.
@@ -8262,12 +8249,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: BigInt): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v.getULong())
+        this.$_set(index, val.getULong())
     }
 
     /**
@@ -8288,14 +8270,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: long): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafeClamp(index, v)
-    }
+    public native $_set(index: int, val: long): void
 
     /**
      * Assigns val as element on index.
@@ -8315,14 +8290,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        let v = this.zeroIfInfinity(val as long)
-        this.setUnsafeClamp(index, v)
-    }
+    public native $_set(index: int, val: int): void
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -8681,6 +8649,10 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public set(arr: long[]): void {
         this.set(arr, 0)
     }
+
+    public native set(array: BigUint64Array): void
+
+    public native set(array: BigUint64Array, offset: number): void
 
     /**
      * Copies elements from an ArrayLike object to the BigUint64Array.

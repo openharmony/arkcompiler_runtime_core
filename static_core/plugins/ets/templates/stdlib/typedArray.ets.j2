@@ -411,6 +411,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
     {%- endif %}
 
+    {%- if T != 'double' %}
+
     /**
      * Assigns val as element on index.
      *
@@ -430,22 +432,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @param index index to change
      */
     public $_set(index: int, val: {{elementCompat}}): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        {%- if (N == 'BigInt64') %}
+        {%- if (N != 'Float32') and (N != 'Float64') and (N != 'BigInt64') %}
         let v = this.zeroIfInfinity(val)
-        let truncatedVal: BigInt = BigInt.asIntN(64, v);
-        this.setUnsafe(index, truncatedVal{{fromElementCompat}})
-        {%- elif (N != 'Float32') and (N != 'Float64') %}
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v{{fromElementCompat}})
+        this.$_set(index, v{{fromElementCompat}})
         {%- else %}
-        this.setUnsafe(index, val{{fromElementCompat}})
+        this.$_set(index, val{{fromElementCompat}})
         {%- endif %}
     }
-    {%- if T != 'int' %}
+    {%- endif %}
+    {%- if N == 'Int8' or N == 'Int16' %}
 
     /**
      * Assigns val as element on index.
@@ -465,20 +460,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param index index to change
      */
-    public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        {%- if (N != 'Float32') and (N != 'Float64') %}
-        let v = this.zeroIfInfinity(val as {{T}})
-        this.setUnsafe(index, v as {{T}})
-        {%- else %}
-        this.setUnsafe(index, val as {{T}})
-        {%- endif %}
-    }
+    public native $_set(index: int, val: int): void
     {%- endif %}
-    {%- if T != 'double' %}
 
     /**
      * Assigns val as element on index.
@@ -498,19 +481,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param index index to change
      */
-    public $_set(index: int, val: {{T}}): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        {%- if (N != 'Float32') and (N != 'Float64') %}
-        let v = this.zeroIfInfinity(val)
-        this.setUnsafe(index, v)
-        {%- else %}
-        this.setUnsafe(index, val)
-        {%- endif %}
-    }
-    {%- endif %}
+    public native $_set(index: int, val: {{T}}): void
 
     /** Number of {{T}} stored in {{N}}Array */
     public get length(): number {
@@ -535,12 +506,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns a primitive at index
      */
+    {%- if T != 'long' %}
+    public native $_get(index: int): {{elementCompat}}
+    {%- else %}
     public $_get(index: int): {{elementCompat}} {
-        if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid index")
-        }
-        return {{asElementCompat % 'this.getUnsafe(index)'}}
+        return {{asElementCompat % 'this.getLong(index)'}}
     }
+
+    private native getLong(index: int): long
+    {%- endif %}
+
     {%- if T != 'long' %}
 
     /**
