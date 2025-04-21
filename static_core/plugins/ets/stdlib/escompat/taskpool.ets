@@ -1061,5 +1061,3 @@ function launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<N
     launch<void, () => void>(cb)
     return p;
 }
-
-native function launchInternalPromiseNative<F>(func: F, args: FixedArray<NullishType>): Promise<NullishType>;

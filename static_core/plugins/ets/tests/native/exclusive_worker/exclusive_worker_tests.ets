@@ -104,7 +104,7 @@ function clearCounter() {
 
 function scheduleACoroutine(): boolean {
     clearCounter();
-    mlaunch<void, ()=>void>(():void => {
+    launch<void, ()=>void>(():void => {
         add(5);
     });
     Coroutine.Schedule();
@@ -112,7 +112,7 @@ function scheduleACoroutine(): boolean {
 }
 
 async function asyncAdd(a: int) {
-    mlaunch<void, ()=>void>(():void => {
+    launch<void, ()=>void>(():void => {
         add(6);
     });
     counter += a;
@@ -175,7 +175,7 @@ function body(): Object {
 function testOOM(): boolean {
     try {
         for (let i = 0; i < 50000; ++i) {
-            mlaunch<Object, ()=>Object>(body);
+            launch<Object, ()=>Object>(body);
         }
     } catch (e) {
         if (e instanceof OutOfMemoryError) {
@@ -192,7 +192,7 @@ function testOOM(): boolean {
 
 function test_stack_overflow(): boolean {
     try {
-        mlaunch<Object | null, ()=>Object | null>(coro_stack_overflow).Await();
+        launch<Object | null, ()=>Object | null>(coro_stack_overflow).Await();
         console.println("No exceptions thrown by coro_stack_overflow() but should be!")
         return false;
     } catch (e) {
@@ -219,7 +219,7 @@ function coro_error(): Object {
 
 function test_error(): boolean {
     try {
-        let res = mlaunch<Object, ()=>Object>(coro_error);
+        let res = launch<Object, ()=>Object>(coro_error);
         res.Await();
         console.println("No exceptions thrown by coro_error() but should be!")
         return false;
@@ -247,7 +247,7 @@ let e2m: LinkedBlockingQueue<boolean> = new LinkedBlockingQueue<boolean>();
 let m2e: LinkedBlockingQueue<boolean> = new LinkedBlockingQueue<boolean>();
 
 function EACoroutineSendToMain(): boolean {
-    mlaunch<void, ()=>void>(():void => {
+    launch<void, ()=>void>(():void => {
         e2m.push(true);
     });
     return m2e.pop();

@@ -957,7 +957,7 @@ export class Atomics {
 
     public static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: number): Promise<string> {
         const waiter = (t: Int32Array | BigInt64Array, o: int, v: number) => { return Atomics.wait(t, o, v) }
-        return Atomics.launchInternalPromiseNative(waiter, [typedArray, offset, value] as FixedArray<NullishType>);
+        return Atomics.launchPromise(waiter, typedArray, offset, value);
     }
 
     /**
@@ -984,10 +984,27 @@ export class Atomics {
 
     public static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: number, timeout: long): Promise<string> {
         const waiter = (ta: Int32Array | BigInt64Array, o: int, v: number, t: long) => { return Atomics.wait(ta, o, v, t) }
-        return Atomics.launchInternalPromiseNative(waiter, [typedArray, offset, value, timeout] as FixedArray<NullishType>);
+        return Atomics.launchPromise(waiter, typedArray, offset, value, timeout);
     }
 
-    private static native launchInternalPromiseNative<F>(func: F, args: FixedArray<NullishType>): Promise<string>;
+    private static launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<string> {
+        let resolver: (((v: string | PromiseLike<string>) => void) | undefined) = undefined;
+        let rejecter: (((error: NullishType) => void) | undefined) = undefined;
+        let p = new Promise<string>((res, rej) => {
+            resolver = res
+            rejecter = rej;
+        })
+        let cb = () => {
+            try {
+                let v = f.unsafeCall(...args) as string
+                resolver!(v)
+            } catch (e: Error) {
+                rejecter!(e)
+            }
+        }
+        launch<void, () => void>(cb)
+        return p;
+    }
 
     /**
      * Notifies (wakes up) threads that are suspended by the Atomics.wait() calls at the given index.

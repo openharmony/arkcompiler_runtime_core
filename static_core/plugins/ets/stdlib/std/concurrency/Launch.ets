@@ -46,19 +46,6 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: Fix
   return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>);
 }
 
-/**
- * NOTE: Remove when both mlaunch and launch are merged
- * This function is used to launch new coroutines.
- *
- * @param coroFun entrypoint of the the new coroutine.
- * @param args arguments for the function coroFun.
- *
- * @returns instance of the Job class that represents newly launched coroutine.
- */
-export function mlaunch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<NullishType>): Job<R> {
-  return launchInternal<R, F>(coroFun, args as FixedArray<NullishType>);
-}
-
 // This overload is currently blocked by issue #22472. Enable when frontend supports it
 // export interface LaunchParams {
 //   settings?: string
