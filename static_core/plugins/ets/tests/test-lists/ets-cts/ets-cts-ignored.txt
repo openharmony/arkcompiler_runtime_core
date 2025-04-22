@@ -16,23 +16,9 @@
 #23596
 03.types/06.value_types/01.integer_types_and_operations/bitwise_complement/bitwise_complement_char_3.ets
 
-#24407 rest parameter doesn`t work with tuples
-03.types/15.literal_types/function_literal_type_18.ets
-
 #24419: Resizable arrays implementation
-03.types/16.array_types/01.resizable_array_types/form_1_assign_to_2.ets
-03.types/16.array_types/01.resizable_array_types/form_2_assign_to_1.ets
-03.types/16.array_types/01.resizable_array_types/grow_array_form_one_1.ets
-03.types/16.array_types/01.resizable_array_types/grow_array_form_two_1.ets
 03.types/16.array_types/01.resizable_array_types/put_to_empty_form_1.ets
 03.types/16.array_types/01.resizable_array_types/put_to_empty_form_2.ets
-03.types/16.array_types/01.resizable_array_types/shrink_array_form_one.ets
-03.types/16.array_types/01.resizable_array_types/shrink_array_form_two.ets
-
-#23522
-03.types/16.array_types/01.resizable_array_types/resizable_array_0.ets
-03.types/16.array_types/01.resizable_array_types/resizable_array_2.ets
-03.types/16.array_types/01.resizable_array_types/resizable_array_4.ets
 
 #23975
 03.types/17.tuple_types/tt2_31.ets
@@ -77,10 +63,6 @@
 
 #23134
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_15.ets
-
-#24417 - Array, FixedArray not implemented yet
-04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_12.ets
-04.names_declarations_and_scopes/08.function_declarations/05.rest_parameter/rest_parameter_13.ets
 
 #24303 missing CTE for uninitialized fields
 05.generics/01.type_parameters/01.type_parameter_constraint/example.ets
@@ -165,40 +147,19 @@
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_5.ets
 
 #23074
-06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_19.ets
 06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_21.ets
-06.contexts_and_conversions/01.assignment-like_contexts/forbidden1_27.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5a.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/neg_1a.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/pos_2a.ets
-
-
-#14001
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_10.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_8.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_9.ets
 
 #22450 - should throw an exception
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.ets
 
 #24415
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_6.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_7.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_object/ref_type_from_object_8.ets
 
 #18118 No ClassCastError on casting to a wrong function type
 06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/cce_5.ets
 
 #18115 CTE on a union type variable in instanceof
 06.contexts_and_conversions/04.casting_contexts_and_conversions/06.casting_conversions_from_union/un2_0.ets
-
-#enum cannot be assigned to type Object - not yet implemented
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_func/call-func_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/comp_arr/comp-arr_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_meth/call-meth_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_lmbd/call-lmbd_21.ets
-06.contexts_and_conversions/05.implicit_conversions/05.widening_reference_conversions/call_cons/call-cons_21.ets
 
 #22339
 06.contexts_and_conversions/05.implicit_conversions/09.tuple_types_conversions/assn_var/assn-var_2.ets
@@ -228,17 +189,21 @@
 #24930
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 
-#24641
-07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
-
 #24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
 
 #24031 not implemented
 07.expressions/01.evaluation_of_expressions/heap_pollution.ets
 
+#25056
+07.expressions/01.evaluation_of_expressions/typ_2.ets
+
 #22791 FixedArray and Array<T> support is not implemented yet
-07.expressions/04.array_literal/01.type_inference_from_context/spec-ex9.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_28.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_18.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_23.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_27.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_22.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_28.ets
@@ -249,129 +214,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_26.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_12.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_0.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_1.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_10.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_11.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_12.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_14.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_15.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_16.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_17.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_18.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_19.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_2.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_20.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_21.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_22.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_23.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_24.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_25.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_26.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_29.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_3.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_30.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_4.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_5.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_7.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_8.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_assn_9.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_0.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_1.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_10.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_11.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_12.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_14.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_15.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_16.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_17.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_18.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_19.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_2.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_20.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_21.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_22.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_23.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_24.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_25.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_26.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_29.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_3.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_30.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_31.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_4.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_5.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_7.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_8.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_call_9.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_0.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_1.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_10.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_11.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_12.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_14.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_15.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_16.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_17.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_18.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_19.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_2.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_20.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_21.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_22.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_23.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_24.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_25.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_29.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_3.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_4.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_5.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_7.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_8.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_9.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_0.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_1.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_10.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_11.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_12.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_14.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_15.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_16.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_17.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_18.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_19.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_2.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_20.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_21.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_22.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_23.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_24.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_25.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_26.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_28.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_29.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_3.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_4.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_5.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_7.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_8.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_decl_9.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_26.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr2_inf_cast_28.ets
 
 #24879 Cannot determine type of array expression in Union type
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_29.ets
@@ -385,19 +227,11 @@
 
 #23369 Specification example in 7.4.1 doesn't compile
 07.expressions/04.array_literal/01.type_inference_from_context/spec-ex6.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_decl_26.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_decl_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_assn_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_assn_28.ets
 
 #23453 Cannot cast array literal to union of arrays
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_26.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_cast_27.ets
-
-#23525 Tuple literal type cannot be detected from context
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_assn_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_call_13.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_cast_12.ets
 
 #23363 No CTE when array type cannot be determined
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_n_0.ets
@@ -406,60 +240,6 @@
 07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_n_3.ets
 07.expressions/04.array_literal/arr_n_2.ets
 07.expressions/04.array_literal/arr_n_3.ets
-
-#23529 es2panda doesn't support type detection as number[] when all elements are numeric
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_17.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_18.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_19.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_20.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_22.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_23.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_24.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_26.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_27.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_28.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_17.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_18.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_19.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_20.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_22.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_23.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_24.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_25.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_26.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_27.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_28.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_6.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_2.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_3.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_4.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_5.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_6.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_8.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_9.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_0.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_1.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_10.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_11.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_12.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_13.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_14.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_15.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_2.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_3.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_4.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_5.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_6.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_8.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num2_9.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_0.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_1.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_10.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_11.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_12.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_13.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_14.ets
-07.expressions/04.array_literal/02.type_inference_from_types_of_elements/arr_inf2_num1_15.ets
 
 #15577 union type inference
 07.expressions/05.object_literal/01.object_literal_of_class_type/cl_2.ets
@@ -474,10 +254,6 @@
 
 #24005
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.ets
-07.expressions/32.lambda_expression/decl_full_ref_4.ets
-07.expressions/32.lambda_expression/decl_full_value_4.ets
-07.expressions/32.lambda_expression/decl_short_ref_4.ets
-07.expressions/32.lambda_expression/decl_short_value_4.ets
 
 #20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.ets
@@ -491,17 +267,11 @@
 07.expressions/06.spread_expression/spex_lmbd_37.ets
 
 #20371 Unexpected Type Error on string array
-07.expressions/06.spread_expression/spex_const_31.ets
-07.expressions/06.spread_expression/spex_func_31.ets
 07.expressions/06.spread_expression/spex_lmbd_31.ets
-07.expressions/06.spread_expression/spex_meth_31.ets
 07.expressions/06.spread_expression/spex_32.ets
 
 #24410
-07.expressions/06.spread_expression/spex_const_45.ets
-07.expressions/06.spread_expression/spex_func_45.ets
 07.expressions/06.spread_expression/spex_lmbd_45.ets
-07.expressions/06.spread_expression/spex_meth_45.ets
 
 #24408 Fails on spread expression with tuple, tuples in rest parameters not supported
 07.expressions/06.spread_expression/spex_func_46.ets
@@ -580,8 +350,6 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_2.ets
 
 #14001 Type number cannot be used as an index type
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_access6.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_access7.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
 
@@ -696,9 +464,6 @@
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.ets
 
-#24200 test behavior need to corrected for JIT mode.
-13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
-
 #23856
 13.compilation_units/09.export_directives/01.selective_export_directive/t01/c.ets
 13.compilation_units/09.export_directives/01.selective_export_directive/t02/d.ets
@@ -712,7 +477,6 @@
 15.semantic_rules/01.subtyping/04.subtyping_for_function_types/positive_3.ets
 
 #23537
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_3.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_13.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_17.ets
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_argument_equivalent_neg_n2_0.ets
@@ -820,21 +584,12 @@
 #22816
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
 
-#14563 Verifier failure on unboxing in array dimension expression
-17.experimental_features/03.array_creation_expressions/expr_1.ets
-17.experimental_features/03.array_creation_expressions/expr_9.ets
-17.experimental_features/03.array_creation_expressions/expr_7.ets
-17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.ets
-
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/05.iterable_types/it_11.ets
 17.experimental_features/05.iterable_types/it_12.ets
 
 #18767 Cannot use $_iterator from superclass
 17.experimental_features/05.iterable_types/it_4.ets
-
-#15484 Type conversions are not supported in for-of statement
-17.experimental_features/07.statements/01.for-of_type_annotation/for_of_15.ets
 
 #15767 Cannot select the right method among overloaded ones
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over3_3.ets
@@ -880,10 +635,6 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_8.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_6.ets
 
-#24123
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_8.ets
-17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_6.ets
-
 #24289
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_10.ets
 
@@ -914,7 +665,6 @@
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_22.ets
 
 #24118
-17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_5.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_6.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_6.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_6.ets
@@ -942,19 +692,6 @@
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex4.ets
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex4_1.ets
 17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex5.ets
-
-#25054
-20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_0.ets
-20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_1.ets
-20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_2.ets
-20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_3.ets
-20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_4.ets
-20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_5.ets
-20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_6.ets
-17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_29.ets
-
-25056
-07.expressions/01.evaluation_of_expressions/typ_2.ets
 
 #24859 undefined register, Register type conflict
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_1.ets
