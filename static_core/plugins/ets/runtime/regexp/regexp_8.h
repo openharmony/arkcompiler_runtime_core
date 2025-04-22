@@ -25,7 +25,7 @@ using Pcre2Obj = void *;
 
 class RegExp8 {
 public:
-    static Pcre2Obj CreatePcre2Object(const uint8_t *pattern, uint32_t flags);
+    static Pcre2Obj CreatePcre2Object(const uint8_t *pattern, uint32_t flags, const int len);
     static RegExpExecResult Execute(Pcre2Obj re, const uint8_t *str, const int len, const int startOffset);
     static void ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data);
     static void FreePcre2Object(Pcre2Obj re);
