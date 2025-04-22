@@ -16,20 +16,18 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: |-
-    A compile-time error occurs if a type parameter without a default value follows a type parameter
-    with a default value in the declaration of a generic type.
+    A compile-time error occurs if
+        - a type parameter without a default type follows a type parameter
+        with a default value in the declaration of a generic type.
+        - Type parameter default refers to a type parameter defined after the current type parameter.
     Also covered some wrong declarations where the default parameter is not a type.
 tags: [compile-only, negative]
-params: c
+params: {{c}}
 ---*/
 
 class SomeType {}
 class OtherType {}
 
-{{c|indent}}
-
-function main(): int {
-    return 0
-}
+class Base<{{c}}> {}
 
 {% endfor %}

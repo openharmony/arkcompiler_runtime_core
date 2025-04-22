@@ -18,8 +18,8 @@
 
 /*---
 desc: >-
-    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter.
-    A constraint of any type parameter can follow the keyword extends. The constraint is denoted as any type.
+    If possible instantiations need to be constrained, then an individual constraint can be set for each type parameter after
+    the keyword extends. A constraint can have the form of any type.
 params: >
   {{c.type}}
   {{mm}}

@@ -19,24 +19,34 @@ desc: >-
     If actual types of values are compatible, then the corresponding
     evaluation of an equality operator is used.
 ---*/
-function eq<P, Q>(p: P, q: Q): boolean {
-    return p == q
+
+function eq<P, Q>(p: P, q: Q, ps: string, qs: string): string {
+    if (p == q || q == p) {
+        return '\n' + ps + ' == ' + qs + ', expected false, got true'
+    } else {
+        return ''
+    }
 }
-function ne<P, Q>(p: P, q: Q): boolean {
-    return p != q
+function ne<P, Q>(p: P, q: Q, ps: string, qs: string): string {
+    if (p != q && q != p) {
+        return ''
+    } else {
+        return '\n' + ps + ' != ' + qs + ', expected true, got false'
+    }
 }
 
 {{c.decl}}
 
-function main(): int {
+function main() {
+    let failed: string = ''
 {%- for p in c['case1'] %}
 {%- for q in c['case2'] %}
 {%- if p != q %}
-    if (eq<{{c.type1}}, {{c.type2}}>({{p}}, {{q}})) return 1
-    if (!ne<{{c.type1}}, {{c.type2}}>({{p}}, {{q}})) return 1
+    failed += eq<{{c.type1}}, {{c.type2}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
+    failed += ne<{{c.type1}}, {{c.type2}}>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
 {%- endif %}
 {%- endfor %}
 {%- endfor %}
-    return 0
+    assertTrue(failed == '', 'Failed operations: ' + failed)
 }
 {%- endfor %}

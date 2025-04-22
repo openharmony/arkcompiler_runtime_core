@@ -13,7 +13,6 @@
 
 set(DISABLES_TESTS
     standalone_function
-    static_enum
 )
 
 set(TESTS_EXECUTED_WITH_NODEJS
@@ -29,17 +28,11 @@ set(TESTS_EXECUTED_WITH_NODEJS
     scenarios
     generic
     getter
-
-    # Blocked by #22821
-    declgen_ets2ts
-
-    # Blocked by 22820
-    checked
 )
 
 # NOTE: Remove this condition after all tests have been migrated to ArkJSVM.
 list(LENGTH TESTS_EXECUTED_WITH_NODEJS INTEROP_NODEJS_TEST_NUM)
-if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 13)
+if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 11)
     message(FATAL_ERROR "All new interop tests should be executed on ArkJSVM.
                          INTEROP_NODEJS_TEST_NUM = ${INTEROP_NODEJS_TEST_NUM}")
 endif()

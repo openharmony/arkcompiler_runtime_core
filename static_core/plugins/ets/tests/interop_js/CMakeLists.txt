@@ -19,6 +19,5 @@ set(ARK_JS_NAPI_CLI ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/arkjsvm_interop/ark_js_nap
 set(ARK_JS_STUB_FILE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/arkjsvm_interop/stub.an)
 
 add_subdirectory(ark_js_napi_tests)
-add_subdirectory(backtrace)
 add_subdirectory(gtest_plugin)
 add_subdirectory(tests)

@@ -796,10 +796,12 @@ public:
 
     panda_file::File::StringData GetClassSourceFile() const;
 
+    inline bool InitProfilingData(ProfilingData *profilingData);
+
     PANDA_PUBLIC_API void StartProfiling();
     PANDA_PUBLIC_API void StopProfiling();
 
-    bool IsProxy() const;
+    PANDA_PUBLIC_API bool IsProxy() const;
 
     ProfilingData *GetProfilingData()
     {

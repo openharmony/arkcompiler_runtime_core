@@ -23,13 +23,23 @@
 //! INST_NOT     "Throw"
 
 //! CHECKER      Try Catch Resolving AOT Optimize when default catch is outside
-//! SKIP_IF       @architecture == "arm32"
+//! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex=ets_try_catch.MultipleCatch::__noinline__multipleCatch"
 //! METHOD       "ets_try_catch.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_COUNT   "Throw",2
+
+//! CHECKER      Try Catch Resolving AOT+PGO Optimize when default catch is outside
+//! SKIP_IF      @architecture == "arm32"
+//! RUN_PGO_PROF entry: "ets_try_catch.ETSGLOBAL::main"
+//! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch.MultipleCatch::__noinline__multipleCatch"
+//! METHOD       "ets_try_catch.MultipleCatch::__noinline__multipleCatch"
+//! PASS_AFTER   "Inline"
+//! INST_COUNT   "Throw",2
+//! PASS_AFTER   "TryCatchResolving"
+//! INST_NOT     "Throw"
 
 class Exception0 extends Exception {}
 class Exception1 extends Exception {}

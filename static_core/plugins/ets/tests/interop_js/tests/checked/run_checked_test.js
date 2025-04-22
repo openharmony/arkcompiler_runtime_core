@@ -13,22 +13,58 @@
  * limitations under the License.
  */
 
+const helper = requireNapiPreview('../../module/libinterop_test_helper.so', false);
+
+function parseArgs(input) {
+    const args = input.split(',');
+    const opts = {};
+
+    for (let i = 0; i < args.length; i++) {
+		if (args[i].startsWith('--')) {
+			args[i] = args[i].slice(2);
+
+			if (args[i].includes('=')) {
+				const [key, value] = args[i].split('=', 2);
+				opts[key.trim()] = value.trim();
+			} else if (i + 1 < args.length && !args[i + 1].startsWith('--')) {
+				// this case realized when "--ark-aot", "path" comes
+				opts[args[i]] = args[i + 1];
+				++i;
+			} else {
+				opts[args[i]] = 'true';
+			}
+		}
+    }
+
+    return opts;
+}
+
 function runTest(test, pandaOptions) {
-	console.log('Running test ' + test);
-	let penv = process.env;
-	let etsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
-	globalThis.require = require;
-	let options = [
-		'--boot-panda-files',
-		penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
-		'--panda-files',
-		penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
-	].concat(pandaOptions);
-	const etsVmRes = etsVm.createRuntimeLegacy(options);
+	print('Running test ' + test);
+
+	const testAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_TEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+	const etsVm = requireNapiPreview('../../module/ets_interop_js_napi_arkjsvm.so', false);
+
+	const options = {
+		'xgc-trigger-type': 'never',
+		'panda-files': testAbcPath,
+		'boot-panda-files': `${stdlibPath}:${testAbcPath}`,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	const transformedPandaOptions = parseArgs(pandaOptions.toString());
+	const etsOpts = { ...options, ...transformedPandaOptions };
+
+	const etsVmRes = etsVm.createRuntimeLegacy(etsOpts);
 	if (!etsVmRes) {
-		console.error(`Failed to create ETS runtime`);
-		return 1;
+		let message = '\n';
+		for (const key in etsOpts) {
+			message += `  '${key}': '${etsOpts[key]}'\n`;
+		}
+		throw Error(`Failed to create ETS runtime with options: ${message}`);
 	}
+
 	try {
 		const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
 		let res = runTestImpl();
@@ -41,12 +77,10 @@ function runTest(test, pandaOptions) {
 	return 0;
 }
 
-let args = process.argv;
-
-if (args.length < 4) {
-	console.log('Expected ark options, test package and test function name');
-	process.exit(1);
+let args = helper.getArgv();
+if (args.length < 5) {
+	throw Error('Expected ark options, test package and test function name');
 }
 // checker.rb passes file and entry point as two last arguments
 let test = args[args.length - 1];
-runTest(test, args.slice(2, -2));
+runTest(test, args.slice(4, -2));

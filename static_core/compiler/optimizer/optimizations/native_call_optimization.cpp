@@ -59,6 +59,12 @@ void NativeCallOptimization::VisitCallStatic(GraphVisitor *v, Inst *inst)
         return;
     }
 
+    if (runtime->IsMethodInModuleScope(callInst->GetCallMethod())) {
+        COMPILER_LOG(DEBUG, NATIVE_CALL_OPT)
+            << "CallStatic with id=" << callInst->GetId() << " is in module scope, skip (workaround)";
+        return;
+    }
+
     if (runtime->CanNativeMethodUseObjects(callInst->GetCallMethod())) {
         ASSERT(callInst->GetCanNativeException());
         OptimizeNativeCallWithObjects(v, callInst);

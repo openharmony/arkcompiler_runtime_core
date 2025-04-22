@@ -555,33 +555,18 @@ void Method::StartProfiling()
     }
     ASSERT(std::is_sorted(vcalls.begin(), vcalls.end()));
 
-    auto vcallDataOffset = RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
-    auto branchesDataOffset =
-        RoundUp(vcallDataOffset + sizeof(CallSiteInlineCache) * vcalls.size(), alignof(BranchData));
-    auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * branches.size(), alignof(ThrowData));
-    auto data = allocator->Alloc(throwsDataOffset + sizeof(ThrowData) * throws.size());
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto vcallsMem = reinterpret_cast<uint8_t *>(data) + vcallDataOffset;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto branchesMem = reinterpret_cast<uint8_t *>(data) + branchesDataOffset;
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto throwsMem = reinterpret_cast<uint8_t *>(data) + throwsDataOffset;
-
     auto profilingData =
-        new (data) ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls), BranchData::From(branchesMem, branches),
-                                 ThrowData::From(throwsMem, throws));
-
-    ProfilingData *oldValue = nullptr;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    while (!pointer_.profilingData.compare_exchange_weak(oldValue, profilingData)) {
-        if (oldValue != nullptr) {
-            // We're late, some thread already started profiling.
-            allocator->Delete(data);
-            return;
-        }
+        ProfilingData::Make(allocator, vcalls.size(), branches.size(), throws.size(),
+                            [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem) {
+                                return new (data) ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls),
+                                                                BranchData::From(branchesMem, branches),
+                                                                ThrowData::From(throwsMem, throws));
+                            });
+    if (!InitProfilingData(profilingData)) {
+        allocator->Free(profilingData);
+        return;
     }
+
     EVENT_INTERP_PROFILING(events::InterpProfilingAction::START, GetFullName(), vcalls.size());
     Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->TryAddMethodToProfile(this);
 }

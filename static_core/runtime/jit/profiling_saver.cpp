@@ -20,12 +20,12 @@ void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInline
                                         std::vector<Class *> &runtimeClasses, pgo::AotProfilingData *profileData)
 {
     for (uint32_t i = 0; i < runtimeClasses.size();) {
-        auto storedClass = ic->GetInlineCache(i);
+        auto storedClass = ic->classes[i];
 
         auto runtimeCls = runtimeClasses[i];
         // Megamorphic Call, update first item, and return.
         if (i == 0 && CallSiteInlineCache::IsMegamorphic(runtimeCls)) {
-            ic->SetInlineCache(i, ic->MEGAMORPHIC_FLAG, -1);
+            ic->classes[i] = {ic->MEGAMORPHIC_FLAG, -1};
             return;
         }
 
@@ -37,7 +37,7 @@ void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInline
         auto pfIdx = profileData->GetPandaFileIdxByName(clsPandaFile);
         auto clsIdx = runtimeCls->GetFileId().GetOffset();
 
-        ic->SetInlineCache(i, clsIdx, pfIdx);
+        ic->classes[i] = {clsIdx, pfIdx};
         i++;
     }
 }
@@ -48,8 +48,8 @@ void ProfilingSaver::CreateInlineCaches(pgo::AotProfilingData::AotMethodProfilin
     auto icCount = runtimeICs.size();
     auto aotICs = profilingData->GetInlineCaches();
     for (size_t i = 0; i < icCount; i++) {
-        aotICs[i].SetBytecodePc(runtimeICs[i].GetBytecodePc());
-        aotICs[i].InitClasses();
+        aotICs[i] = {static_cast<uint32_t>(runtimeICs[i].GetBytecodePc()), {}};
+        pgo::AotProfilingData::AotCallSiteInlineCache::ClearClasses(aotICs[i].classes);
         auto classes = runtimeICs[i].GetClassesCopy();
         UpdateInlineCaches(&aotICs[i], classes, profileData);
     }
@@ -62,8 +62,9 @@ void ProfilingSaver::CreateBranchData(pgo::AotProfilingData::AotMethodProfilingD
     auto aotBrs = profilingData->GetBranchData();
 
     for (size_t i = 0; i < brCount; i++) {
-        aotBrs[i].SetBranchData(runtimeBranch[i].GetPc(), runtimeBranch[i].GetTakenCounter(),
-                                runtimeBranch[i].GetNotTakenCounter());
+        aotBrs[i] = {static_cast<uint32_t>(runtimeBranch[i].GetPc()),
+                     static_cast<uint64_t>(runtimeBranch[i].GetTakenCounter()),
+                     static_cast<uint64_t>(runtimeBranch[i].GetNotTakenCounter())};
     }
 }
 
@@ -74,7 +75,8 @@ void ProfilingSaver::CreateThrowData(pgo::AotProfilingData::AotMethodProfilingDa
     auto aotThs = profilingData->GetThrowData();
 
     for (size_t i = 0; i < thCount; i++) {
-        aotThs[i].SetThrowData(runtimeThrow[i].GetPc(), runtimeThrow[i].GetTakenCounter());
+        aotThs[i] = {static_cast<uint32_t>(runtimeThrow[i].GetPc()),
+                     static_cast<uint64_t>(runtimeThrow[i].GetTakenCounter())};
     }
 }
 
@@ -115,7 +117,7 @@ void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData,
     }
 }
 
-void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, PandaString &classCtxStr,
+void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
                                  PandaVector<const Method *> profiledMethods,
                                  PandaUnorderedSet<std::string_view> &profiledPandaFiles)
 {

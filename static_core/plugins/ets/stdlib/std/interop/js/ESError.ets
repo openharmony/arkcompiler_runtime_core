@@ -85,7 +85,7 @@ export final class ESError extends Error {
         return this.err_;
     }
 
-    internal getJsError(): JSValue {
+    getJsError(): JSValue {
         return this.jserr_;
     }
 }

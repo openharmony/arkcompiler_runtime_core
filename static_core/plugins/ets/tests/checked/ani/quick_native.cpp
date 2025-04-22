@@ -295,6 +295,11 @@ static Type Virtual(ani_env *env, ani_object that, ani_object i0, ani_byte i1, a
     }
 }
 
+static ani_int ModuleLevelFunc([[maybe_unused]] ani_env *env, ani_int i)
+{
+    return i;
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
@@ -325,6 +330,23 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
         return ANI_ERROR;
     };
+
+    static const char *moduleName = "Lquick_native;";
+    ani_module module;
+    if (ANI_OK != env->FindModule(moduleName, &module)) {
+        std::cerr << "Module '" << moduleName << "' not found\n";
+        return ANI_ERROR;
+    }
+
+    std::array functions = {
+        ani_native_function {"generalModuleLevelFunc", nullptr, reinterpret_cast<void *>(ModuleLevelFunc)},
+        ani_native_function {"quickModuleLevelFunc", nullptr, reinterpret_cast<void *>(ModuleLevelFunc)},
+    };
+
+    if (ANI_OK != env->Module_BindNativeFunctions(module, functions.data(), functions.size())) {
+        std::cerr << "Cannot bind native functions to '" << moduleName << "'\n";
+        return ANI_ERROR;
+    }
 
     *result = ANI_VERSION_1;
     return ANI_OK;

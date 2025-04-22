@@ -348,6 +348,12 @@ int Paoc::Run(const ark::Span<const char *> &args)
     if (!LoadPandaFiles()) {
         LOG_PAOC(FATAL) << "Can not load panda files";
     }
+    if (!TryLoadAotProfile()) {
+        LOG_PAOC(ERROR) << "Can not load AOT profile";
+        if (paocOptions_->IsPaocUseProfileForce()) {
+            LOG_PAOC(FATAL) << "Can not continue execution without profiling file, since 'force' option is set.";
+        }
+    }
     bool errorOccurred = !CompileFiles();
     bool attemptedToCompile = (compilationIndex_ != 0);
     errorOccurred |= !attemptedToCompile;
@@ -369,13 +375,8 @@ int Paoc::Run(const ark::Span<const char *> &args)
     return ShouldIgnoreFailures() ? 0 : (errorOccurred ? 1 : 0);
 }
 
-void Paoc::RunAotMode(const ark::Span<const char *> &args)
+std::string Paoc::BuildClassContext()
 {
-    std::string cmdline;
-    for (auto arg : args) {
-        cmdline += arg;
-        cmdline += " ";
-    }
     std::string classCtx;
     loader_->EnumeratePandaFiles([this, &classCtx](const panda_file::File &pf) {
         if (locationMapping_.find(pf.GetFilename()) == locationMapping_.end()) {
@@ -383,12 +384,23 @@ void Paoc::RunAotMode(const ark::Span<const char *> &args)
         } else {
             classCtx += locationMapping_[pf.GetFilename()];
         }
-        classCtx += '*';
+        classCtx += AotClassContextCollector::HASH_DELIMETER;
         classCtx += pf.GetPaddedChecksum();
-        classCtx += ':';
+        classCtx += AotClassContextCollector::DELIMETER;
         return true;
     });
     classCtx.pop_back();
+    return classCtx;
+}
+
+void Paoc::RunAotMode(const ark::Span<const char *> &args)
+{
+    std::string cmdline;
+    for (auto arg : args) {
+        cmdline += arg;
+        cmdline += " ";
+    }
+    std::string classCtx = BuildClassContext();
     aotBuilder_->SetClassContext(classCtx);
     LOG(DEBUG, COMPILER) << "PAOC: ClassContext '" << classCtx << '\'';
     auto outputFile = paocOptions_->GetPaocOutput();
@@ -431,6 +443,164 @@ void Paoc::StartAotFile(const panda_file::File &pfileRef)
     }
     ASSERT(!filename.empty());
     aotBuilder_->StartFile(filename, pfileRef.GetHeader()->checksum);
+}
+
+static bool CheckFilesInClassContext(std::string_view profileContext, std::string_view context)
+{
+    size_t start = 0;
+    size_t end = profileContext.find(AotClassContextCollector::DELIMETER, start);
+    while (end != std::string::npos) {
+        auto fileContext = profileContext.substr(start, end - start);
+        if (context.find(fileContext) == std::string::npos) {
+            size_t nameEnd = fileContext.find(AotClassContextCollector::HASH_DELIMETER);
+            if (nameEnd == std::string::npos) {
+                LOG_PAOC(WARNING) << "Invalid profile context";
+                return false;
+            }
+            auto file = fileContext.substr(0, nameEnd);
+            if (context.find(file) != std::string::npos) {
+                LOG_PAOC(WARNING) << "Hash mismatch for file " << file << " in profile context";
+                return false;
+            }
+            LOG_PAOC(DEBUG) << "Will skip file " << file << " profile";
+        }
+        start = end + 1;
+        end = profileContext.find(AotClassContextCollector::DELIMETER, start);
+    }
+    return true;
+}
+
+bool Paoc::TryLoadAotProfile()
+{
+    if (!paocOptions_->IsPaocUseProfile()) {
+        return true;
+    }
+
+    if (!paocOptions_->WasSetPaocUseProfilePath()) {
+        LOG_PAOC(ERROR) << "AOT profile path not set";
+        return false;
+    }
+
+    PandaString profileClassCtxStr;
+    ProfilingLoader profilingLoader;
+    {
+        auto profileCtxOrError = profilingLoader.LoadProfile(ConvertToString(paocOptions_->GetPaocUseProfilePath()));
+        if (!profileCtxOrError) {
+            LOG_PAOC(ERROR) << "Could not load AOT profile: " << profileCtxOrError.Error();
+            return false;
+        }
+        profileClassCtxStr = std::move(*profileCtxOrError);
+    }
+
+    auto classCtxStr = BuildClassContext();
+    if (!CheckFilesInClassContext(profileClassCtxStr, classCtxStr)) {
+        LOG_PAOC(WARNING) << "Cannot use profile '" << paocOptions_->GetPaocUseProfilePath() << "'";
+        LOG_PAOC(WARNING) << "\tAOT class context:";
+        LOG_PAOC(WARNING) << classCtxStr;
+        LOG_PAOC(WARNING) << "\tProfile class context:";
+        LOG_PAOC(WARNING) << profileClassCtxStr;
+        return false;
+    }
+
+    bool errorOccurred = false;
+    loader_->EnumeratePandaFiles([this, &profilingLoader, &errorOccurred](const panda_file::File &pfileRef) {
+        std::string filename;
+        if (auto mappedIt = locationMapping_.find(pfileRef.GetFilename()); mappedIt != locationMapping_.end()) {
+            filename = mappedIt->second;
+        } else {
+            filename = GetFilePath(pfileRef.GetFilename());
+        }
+        if (auto pfileIdx = profilingLoader.GetAotProfilingData().GetPandaFileIdxByName(filename); pfileIdx != -1) {
+            errorOccurred = errorOccurred || !TryLoadAotFileProfile(profilingLoader, pfileRef, pfileIdx);
+        }
+        return true;
+    });
+    return !errorOccurred;
+}
+
+template <typename Callback>
+static void IterateClassMethods(const panda_file::File &pfileRef, ark::Class *klass, Callback &&callback)
+{
+    auto methods = klass->GetMethods();
+    panda_file::ClassDataAccessor cda(pfileRef, klass->GetFileId());
+    size_t methodIndex = 0;
+    size_t smethodIdx = klass->GetNumVirtualMethods();
+    size_t vmethodIdx = 0;
+    cda.EnumerateMethods([&smethodIdx, &vmethodIdx, &methods, &methodIndex,
+                          &callback](panda_file::MethodDataAccessor &methodDataAccessor) {
+        Method &method = methodDataAccessor.IsStatic() ? methods[smethodIdx++] : methods[vmethodIdx++];
+        callback(method);
+        methodIndex++;
+    });
+}
+
+bool Paoc::TryLoadAotFileProfile(ProfilingLoader &profilingLoader, const panda_file::File &pfileRef, size_t pfileIdx)
+{
+    auto &allMethods = profilingLoader.GetAotProfilingData().GetAllMethods();
+    auto fileProfiles = allMethods.find(pfileIdx);
+    if (fileProfiles == allMethods.end()) {
+        return true;
+    }
+    auto &methodProfiles = fileProfiles->second;
+
+    auto classes = pfileRef.GetClasses();
+    bool errorOccurred = false;
+    for (auto &classId : classes) {
+        panda_file::File::EntityId id(classId);
+        ark::Class *klass = ResolveClass(pfileRef, id);
+        if (klass == nullptr) {
+            continue;
+        }
+
+        IterateClassMethods(
+            pfileRef, klass, [this, &profilingLoader, classId, &methodProfiles, &errorOccurred](Method &method) {
+                errorOccurred =
+                    errorOccurred || !TryLoadAotMethodProfile(profilingLoader, methodProfiles, classId, method);
+            });
+    }
+
+    return !errorOccurred;
+}
+
+bool Paoc::TryLoadAotMethodProfile(
+    ProfilingLoader &profilingLoader,
+    PandaMap<uint32_t, ark::pgo::AotProfilingData::AotMethodProfilingData> &methodProfiles, uint32_t classId,
+    Method &method)
+{
+    // CC-OFFNXT(G.FMT.14-CPP) project code style
+    auto classResolver = [this, &profilingLoader](uint32_t classIdx, size_t fileIdx) -> ark::Class * {
+        const auto &fileMapRev = profilingLoader.GetAotProfilingData().GetPandaFileMapReverse();
+        auto fileNameIt = fileMapRev.find(fileIdx);
+        if (fileNameIt == fileMapRev.end()) {
+            return nullptr;
+        }
+        auto fileIt = preloadedFiles_.find(std::string(fileNameIt->second));
+        if (fileIt == preloadedFiles_.end()) {
+            return nullptr;
+        }
+        return ResolveClass(*fileIt->second, panda_file::File::EntityId(classIdx));
+    };
+
+    auto methodId = method.GetFileId();
+    auto profileIt = methodProfiles.find(methodId.GetOffset());
+    if (profileIt == methodProfiles.end()) {
+        return true;
+    }
+
+    const pgo::AotProfilingData::AotMethodProfilingData &profile = profileIt->second;
+    if (profile.GetClassIdx() != classId) {
+        LOG_PAOC(ERROR) << "ClassIdx mismatch for method '" << runtime_->GetMethodFullName(&method) << "' AOT profile";
+        return false;
+    }
+
+    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    ProfilingData *profilingData = profilingLoader.CreateProfilingData(profile, allocator, classResolver);
+    if (!method.InitProfilingData(profilingData)) {
+        allocator->Free(profilingData);
+        return false;
+    }
+
+    return true;
 }
 
 bool Paoc::TryLoadPandaFile(const std::string &fileName, PandaVM *vm)
@@ -629,20 +799,14 @@ bool Paoc::Compile(Class *klass, const panda_file::File &pfileRef)
         aotBuilder_->StartClass(*klass);
     }
     bool errorOccurred = false;
-    auto methods = klass->GetMethods();
-    panda_file::ClassDataAccessor cda(pfileRef, klass->GetFileId());
     size_t methodIndex = 0;
-    size_t smethodIdx = klass->GetNumVirtualMethods();
-    size_t vmethodIdx = 0;
-    cda.EnumerateMethods([this, &smethodIdx, &vmethodIdx, &methods, &methodIndex, &pfileRef,
-                          &errorOccurred](panda_file::MethodDataAccessor &methodDataAccessor) {
+    IterateClassMethods(pfileRef, klass, [this, &methodIndex, &pfileRef, &errorOccurred](Method &method) {
         if (errorOccurred && !ShouldIgnoreFailures()) {
             return;
         }
         // NOTE(pishin, msherstennikov): revisit
         // Method (or the whole class?) may already have a definition in another file,
         // in this case it should not be added into AOT file.
-        Method &method = methodDataAccessor.IsStatic() ? methods[smethodIdx++] : methods[vmethodIdx++];
         auto methodName = runtime_->GetMethodFullName(&method, g_options.WasSetCompilerRegexWithSignature());
         if (method.GetPandaFile()->GetFilename() == pfileRef.GetFilename() && !Skip(&method) &&
             IsMethodInList(methodName) && g_options.MatchesRegex(methodName) && !Compile(&method, methodIndex)) {
@@ -885,6 +1049,7 @@ void Paoc::MakeAotData(CompilingContext *ctx, uintptr_t codeAddress)
                               {aotBuilder_->GetGotIntfInlineCache(), aotBuilder_->GetGotCommon()}});
 
     aotData->SetUseCha(paocOptions_->IsPaocUseCha());
+    aotData->SetHasProfileData(ctx->method->GetProfilingData() != nullptr);
     ctx->graph->SetAotData(aotData);
 }
 
