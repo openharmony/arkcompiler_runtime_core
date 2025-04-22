@@ -487,10 +487,10 @@ bool Method::Verify()
         return true;
     }
     auto &&options = Runtime::GetCurrent()->GetOptions();
-    auto mode = options.GetVerificationMode();
+    auto mode = verifier::VerificationModeFromString(options.GetVerificationMode());
     auto service = Runtime::GetCurrent()->GetVerifierService();
     if (service == nullptr) {
-        ASSERT(mode == VerificationMode::DISABLED);
+        ASSERT(mode == verifier::VerificationMode::DISABLED);
         // set VERIFIED_OK status in order not to go into Method::Verify() anymore,
         // since the verifier cannot be enabled during the execution of the managed code
         if (!IsIntrinsic()) {

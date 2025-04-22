@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "public.h"
+#include "include/runtime_options.h"
 #include "public_internal.h"
 #include "runtime/include/mem/allocator.h"
 #include "verification/config/config_load.h"
@@ -149,7 +150,7 @@ static std::optional<Status> CheckBeforeVerification(Service *service, ark::Meth
         return Status::FAILED;
     }
 
-    if (!IsEnabled(mode)) {
+    if (!verifier::IsEnabled(mode)) {
         ReportStatus(service, method, "SKIP");
         return Status::OK;
     }
@@ -226,6 +227,25 @@ Status Verify(Service *service, ark::Method *method, VerificationMode mode)
     method->SetVerificationStage(VStage::VERIFIED_FAIL);
     ReportStatus(service, method, "FAIL");
     return Status::FAILED;
+}
+
+bool IsEnabled(VerificationMode mode)
+{
+    return mode != VerificationMode::DISABLED;
+}
+
+VerificationMode VerificationModeFromString(const std::string &mode)
+{
+    if (mode == "on-the-fly") {
+        return VerificationMode::ON_THE_FLY;
+    }
+    if (mode == "ahead-of-time") {
+        return VerificationMode::AHEAD_OF_TIME;
+    }
+    if (mode == "debug") {
+        return VerificationMode::DEBUG;
+    }
+    return VerificationMode::DISABLED;
 }
 
 }  // namespace ark::verifier

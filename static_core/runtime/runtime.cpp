@@ -480,7 +480,7 @@ bool Runtime::Destroy()
         taskScheduler_->Finalize();
     }
 
-    if (IsEnabled(options_.GetVerificationMode())) {
+    if (verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode()))) {
         verifier::DestroyService(instance_->verifierService_, options_.IsVerificationUpdateCache());
     }
 
@@ -498,8 +498,8 @@ bool Runtime::Destroy()
 
 void Runtime::InitializeVerifierRuntime()
 {
-    auto mode = options_.GetVerificationMode();
-    if (IsEnabled(mode)) {
+    auto mode = verifier::VerificationModeFromString(options_.GetVerificationMode());
+    if (verifier::IsEnabled(mode)) {
         std::string const &cacheFile = options_.GetVerificationCacheFile();
         verifierService_ = ark::verifier::CreateService(verifierConfig_, internalAllocator_, classLinker_, cacheFile);
     }
@@ -706,7 +706,7 @@ mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::Source
 
 bool Runtime::LoadVerificationConfig()
 {
-    return !IsEnabled(options_.GetVerificationMode()) ||
+    return !verifier::IsEnabled(verifier::VerificationModeFromString(options_.GetVerificationMode())) ||
            verifier::LoadConfigFile(verifierConfig_, options_.GetVerificationConfigFile());
 }
 

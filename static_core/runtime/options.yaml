@@ -710,11 +710,6 @@ options:
   default: false
   description: whether current vm is zygote
 
-- name: verification-enabled
-  type: bool
-  default: false
-  description: Whether to enable verification
-
 - name: verification-mode
   type: std::string
   default: disabled
@@ -722,7 +717,7 @@ options:
     - disabled
     - on-the-fly
     - ahead-of-time
-  description: Verification mode. If verification-enabled option is turned on, the default value is ahead-of-time.
+  description: Verification mode.
 
 - name: verification-update-cache
   type: bool

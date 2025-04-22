@@ -67,7 +67,6 @@ class RunnerETS(RunnerFileBased):
             boot_files = f"--boot-panda-files={self.stdlib_path}"
         load_runtime_ets = [boot_files, "--load-runtimes=ets"]
         self.test_env.runtime_args.extend(load_runtime_ets)
-        self.test_env.runtime_args.append("--verification-enabled=true")
         self.test_env.runtime_args.append("--verification-mode=on-the-fly")
         if self.__ets_suite_name == EtsSuites.SDK.value:
             self.test_env.runtime_args.append(f"--panda-files={self.sdk_path}")
