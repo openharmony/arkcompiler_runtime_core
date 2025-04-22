@@ -26,7 +26,7 @@ static {
 }
 
 
-let gpwr: WeakRef<Promise<Object>>;
+let gpwr: WeakRef<Promise<Object>> | undefined;
 
 function GetSTSObject(): Object {
     return new Object();
@@ -62,7 +62,7 @@ function isSTSObjectCollected(): boolean {
 }
 
 function isSTSPromiseCollected(): boolean {
-    return gpwr.deref() === undefined;
+    return gpwr!.deref() === undefined;
 }
 
 function SetJSObject(obj: JSValue): void {

@@ -196,13 +196,13 @@ class TimerTable {
     }
 
     public createTimer(callback: Callback, delay: int, repeat: boolean, linkedTimer: long): Timer {
-        let timer: Timer;
+        let timer: Timer | undefined;
         ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
             let timerId = this.nextFreeId++;
             timer = new Timer(callback, delay, repeat, linkedTimer, timerId);
-            this.timers.set(timerId, timer);
+            this.timers.set(timerId, timer!);
         });
-        return timer;
+        return timer!;
     }
 
     public findTimer(id: TimerId): Timer | undefined {

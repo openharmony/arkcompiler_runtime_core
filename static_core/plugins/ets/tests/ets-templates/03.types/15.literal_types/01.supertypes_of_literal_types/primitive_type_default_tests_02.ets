@@ -14,8 +14,8 @@
  */
 
 /*---
-desc: Default values for primitive type string in global variable.
-params: string, ""
+desc: String is not a primitive type so it does not support default values.
+tags: [compile-only, negative]
 ---*/
 
 let y: string;

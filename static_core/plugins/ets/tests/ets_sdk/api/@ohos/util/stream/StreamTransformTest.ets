@@ -106,7 +106,7 @@ function testStreamTransformUnpipe001() {
 // this test case will be completed future
 function testStreamTransformOn001() {
     let transformStream = new stream.Transform();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};
     transformStream.on("data", callback);
     assertTrue(true);
 }
@@ -114,7 +114,7 @@ function testStreamTransformOn001() {
 // this test case will be completed future
 function testStreamTransformOff001() {
     let transformStream = new stream.Transform();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};
     transformStream.off("data", callback);
     assertTrue(true);
 }

@@ -104,7 +104,7 @@ function testStreamDuplexUnpipe001() {
 // this test case will be completed future
 function testStreamDuplexOn001() {
     let duplexStream = new stream.Duplex();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};
     duplexStream.on("data", callback);
     assertTrue(true);
 }
@@ -112,7 +112,7 @@ function testStreamDuplexOn001() {
 // this test case will be completed future
 function testStreamDuplexOff001() {
     let duplexStream = new stream.Duplex();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};
     duplexStream.off("data", callback);
     assertTrue(true);
 }

@@ -18,10 +18,10 @@ import { launch } from "std/concurrency"
 
 type L = StdDebug.Logger
 
-let buf: ArrayBuffer;
-let buf_2: ArrayBuffer;
-let arr: Int8Array;
-let arr_2: Int32Array;
+let buf: ArrayBuffer = new ArrayBuffer(0);
+let buf_2: ArrayBuffer = new ArrayBuffer(0);
+let arr: Int8Array = new Int8Array;
+let arr_2: Int32Array = new Int32Array;
 
 function main() {
     buf = new ArrayBuffer(1);

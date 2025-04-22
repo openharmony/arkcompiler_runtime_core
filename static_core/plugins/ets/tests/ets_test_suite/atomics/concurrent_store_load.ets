@@ -17,7 +17,7 @@ import { launch } from "std/concurrency"
 
 let RESULT = 10 as long
 
-let arr: BigInt64Array
+let arr: BigInt64Array = new BigInt64Array;
 
 function main() {
     let buf = new ArrayBuffer(8);

@@ -20,12 +20,12 @@ type L = StdDebug.Logger
 
 let N = 9
 
-let buf_1: ArrayBuffer;
-let buf_2: ArrayBuffer;
-let arr_1: Int32Array;
-let arr_2: BigInt64Array;
-let bytearr_i8: Int8Array;
-let bytearr_i64: BigInt64Array;
+let buf_1: ArrayBuffer = new ArrayBuffer(0);
+let buf_2: ArrayBuffer = new ArrayBuffer(0);
+let arr_1: Int32Array = new Int32Array;
+let arr_2: BigInt64Array = new BigInt64Array;
+let bytearr_i8: Int8Array = new Int8Array;
+let bytearr_i64: BigInt64Array = new BigInt64Array;
 
 function main() {
     buf_1 = new ArrayBuffer(4)
