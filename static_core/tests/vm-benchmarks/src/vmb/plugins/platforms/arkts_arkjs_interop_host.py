@@ -112,8 +112,8 @@ class Platform(PlatformBase):
 
     def establish_arkjs_module(self) -> None:
         self.sh.run('mkdir -p module')
-        self.sh.run('ln -sf $PANDA_BUILD/lib/module/ets_interop_js_napi_arkjsvm.so ' +
-                    '$PANDA_BUILD/lib/arkjsvm_interop/libinterop_test_helper.so' +
+        self.sh.run('ln -sf $PANDA_BUILD/lib/module/ets_interop_js_napi.so ' +
+                    '$PANDA_BUILD/lib/interop_js/libinterop_test_helper.so' +
                     ' -t module')
 
     def es2abc(self, js_file_name: str, bu: BenchUnit) -> None:
@@ -122,7 +122,7 @@ class Platform(PlatformBase):
             log.debug(f'skip es2abc for missing file {str(js_file)}')
             return
         path: str = str(bu.path)
-        self.sh.run('$PANDA_BUILD/bin/arkjsvm_interop/es2abc --module --merge-abc ' +
+        self.sh.run('$PANDA_BUILD/bin/interop_js/es2abc --module --merge-abc ' +
                     path + '/' + js_file_name + '.js' + ' --output=' + path + '/' + js_file_name + '.abc')
 
     def make_classes_abc(self, bu: BenchUnit) -> None:

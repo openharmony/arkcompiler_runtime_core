@@ -14,63 +14,63 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_int_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_int_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_int/conversion_int.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_int/conversion_int.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_array_int_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_array_int_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_array_int/conversion_array_int.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_array_int/conversion_array_int.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_binary_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_binary_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_binary/conversion_binary.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_binary/conversion_binary.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_hexadecimal_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_hexadecimal_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_hexadecimal/conversion_hexadecimal.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_hexadecimal/conversion_hexadecimal.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_string_to_int_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_string_to_int_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_string_to_int/conversion_string_to_int.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_string_to_int/conversion_string_to_int.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_byte_to_int_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_byte_to_int_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_byte/conversion_byte.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_byte/conversion_byte.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_float_ts_to_ets
+panda_ets_interop_js_gtest(ets_interop_js__conversion_float_ts_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_float/conversion_float.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_float/conversion_float.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_big_int_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_big_int_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_big_int/conversion_big_int.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_big_int/conversion_big_int.ets
     ETS_CONFIG ${ETS_CONFIG}
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__conversion_exponential_ts_to_sts
+panda_ets_interop_js_gtest(ets_interop_js__conversion_exponential_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_exponential/conversion_exponential.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conversion_exponential/conversion_exponential.ets
     ETS_CONFIG ${ETS_CONFIG}

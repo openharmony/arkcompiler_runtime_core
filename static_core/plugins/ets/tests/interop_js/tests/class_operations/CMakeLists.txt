@@ -17,21 +17,21 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 set(ETS_CONFIG_DECL ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig_decl.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.decl.json ${ETS_CONFIG_DECL})
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_class_operations
+panda_ets_interop_js_gtest(ets_interop_js_class_operations
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.ts
     ETS_CONFIG ${ETS_CONFIG}
     PACKAGE_NAME "class_operations"
 )
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_class_operations
+panda_ets_interop_js_gtest(ets_interop_js_frontend_class_operations
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations_frontend.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.ts
     ETS_CONFIG ${ETS_CONFIG}
     PACKAGE_NAME "class_operations_frontend"
 )
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_class_operations_decl
+panda_ets_interop_js_gtest(ets_interop_js_class_operations_decl
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_operations_decl.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/module.ts

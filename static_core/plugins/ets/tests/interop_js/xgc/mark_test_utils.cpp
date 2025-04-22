@@ -19,7 +19,7 @@
 #include <array>
 #include <thread>
 #include <chrono>
-#include <node_api.h>
+
 #include "hybrid/ecma_vm_interface.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_object.h"

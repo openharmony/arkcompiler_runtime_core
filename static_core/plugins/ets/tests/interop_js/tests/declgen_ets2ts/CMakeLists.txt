@@ -13,7 +13,7 @@
 
 add_custom_target(declgen_ets2ts_test)
 add_custom_target(declgen_ets2ts_test_diff)
-add_dependencies(ets_interop_js_tests_arkjsvm declgen_ets2ts_test_diff declgen_ets2ts_test)
+add_dependencies(ets_interop_js_tests declgen_ets2ts_test_diff declgen_ets2ts_test)
 
 # Create create_declgen_ets2ts_test test
 #
@@ -30,7 +30,7 @@ add_dependencies(ets_interop_js_tests_arkjsvm declgen_ets2ts_test_diff declgen_e
 #      ${BINARY_ROOT_DIR}/*.ts -> ${BINARY_ROOT_DIR}/*.js
 #   4. Links all 'abc' files into single file:
 #      ${BINARY_ROOT_DIR}/*.abc -> ${BINARY_ROOT_DIR}/lib_linked.abc
-#   5. Creates panda_ets_interop_js_test_arkjsvm from ${BINARY_ROOT_DIR}/*.js and ${BINARY_ROOT_DIR}/lib_linked.abc
+#   5. Creates panda_ets_interop_js_test from ${BINARY_ROOT_DIR}/*.js and ${BINARY_ROOT_DIR}/lib_linked.abc
 #   6. Tests difference between expected and actual declaration files:
 #      ${BINARY_ROOT_DIR}/*.ts <-> ${ROOT_DIR}/*.expected
 #
@@ -207,7 +207,7 @@ function(create_declgen_ets2ts_test TARGET)
     list(APPEND ALL_DYNAMIC_SOURCES ${GLUE_FILES})
 
     # Execute compiled interop project
-    panda_ets_interop_js_test_arkjsvm(${TARGET}
+    panda_ets_interop_js_test(${TARGET}
         ABC_FILE ${LIB_LINKED_ABC}
         JS_LAUNCHER ${ARG_TS_MAIN}
         JS_SOURCES ${ALL_DYNAMIC_SOURCES}

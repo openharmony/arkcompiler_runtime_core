@@ -113,7 +113,7 @@ const helper = requireNapiPreview('libinterop_test_helper.so', false);
 function initEtsVm() {
     // Note #23757 this needs to be further tested and possibly adjusted
     const modulePath = helper.getEnvironmentVar('MODULE_PATH');
-    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+    let etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
     const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
     const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
     const etsVmOpts = helper.getEnvironmentVar('ETS_VM_OPTS');

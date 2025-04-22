@@ -46,7 +46,7 @@ add_custom_target(ets_interop_js_perf_benchmarks)
 
 macro(add_ets_interop_js_benchmark BENCHMARK CALLER CALLEE)
     # NOTE: must be refactored, because not all targets has dependency from caller.js and callee.js
-    panda_ets_interop_js_test_arkjsvm(ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE}_${BENCHMARK}
+    panda_ets_interop_js_test(ets_interop_js_perf_benchmarks_${CALLER}_${CALLEE}_${BENCHMARK}
         ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/caller.ets ${CMAKE_CURRENT_LIST_DIR}/callee.ets
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/launcher.js
         JS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/callee.js ${CMAKE_CURRENT_LIST_DIR}/caller.js

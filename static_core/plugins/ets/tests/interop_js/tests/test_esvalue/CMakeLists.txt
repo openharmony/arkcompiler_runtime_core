@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_esvalue_def_test
+panda_ets_interop_js_gtest(ets_interop_js_test_esvalue_def_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_def_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_def_test.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_def_test.js
