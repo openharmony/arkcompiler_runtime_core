@@ -45,14 +45,10 @@ class MyObject extends Object {
     }
 }
 
-function compareObjects(first: MyObject, second: MyObject): boolean {
-    return first.size < second.size;
-}
-
 function testGetFirstKeyAndLastKeySingleElement() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue);
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
@@ -66,8 +62,8 @@ function testGetFirstKeyAndLastKeySingleElement() {
 
 function testGetFirstKeyAndLastKeyEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue);
         });
     let first = treeMap.getFirstKey();
     let last = treeMap.getLastKey();
@@ -78,8 +74,8 @@ function testGetFirstKeyAndLastKeyEmptyTreeMap() {
 
 function testGetFirstKeyAndLastKeyMultipleElements() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue);
         });
     treeMap.set("aa", "123");
     let first = treeMap.getFirstKey();
@@ -91,8 +87,8 @@ function testGetFirstKeyAndLastKeyMultipleElements() {
 
 function testGetFirstKeyAndLastKeyDescendingOrder() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue > secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return firstValue.compareTo(secondValue);
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
@@ -106,8 +102,8 @@ function testGetFirstKeyAndLastKeyDescendingOrder() {
 
 function testGetFirstKeyAndLastKeyObjectKeys() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
     let obj_sec: MyObject = new MyObject(2);
@@ -127,9 +123,9 @@ function testGetFirstKeyAndLastKeyObjectKeys() {
 
 function testGetFirstKeyAndLastKeyMultipleObjectKeys() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
-        });
+    new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+        return secondValue.size - firstValue.size;
+    });
     let obj: MyObject = new MyObject(1);
     let obj2: MyObject = new MyObject(2);
     treeMapo.set(obj, obj2);

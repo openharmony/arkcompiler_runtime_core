@@ -30,14 +30,15 @@ function main(): int {
     suite.addTest("TreeMap replace empty string when treeMap is empty", testReplaceEmptyStringInEmptyTreeMap)
     suite.addTest("TreeMap clear data", testClearData)
     suite.addTest("TreeMap clear the null treeMap", testClearEmptyTreeMap)
+    suite.addTest("TreeMap set data after clear the treeMap", testSetDataAfterClearTreeMap)
 
     return suite.run()
 }
 
 function testRemoveExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result = treeMap.remove("aa");
@@ -47,8 +48,8 @@ function testRemoveExistingKey() {
 
 function testRemoveNonExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result = treeMap.remove("bb");
@@ -58,8 +59,8 @@ function testRemoveNonExistingKey() {
 
 function testRemoveKeyFromEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let result = treeMap.remove("aa");
     assertEQ(result, undefined, "The treeMap should return undefined for a key in an empty map");
@@ -68,8 +69,8 @@ function testRemoveKeyFromEmptyTreeMap() {
 
 function testReplaceExistingValue() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result1 = treeMap.replace("aa", "456");
@@ -81,8 +82,8 @@ function testReplaceExistingValue() {
 
 function testReplaceNonExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result1 = treeMap.replace("bb", "456");
@@ -94,8 +95,8 @@ function testReplaceNonExistingKey() {
 
 function testReplaceValueInEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let result = treeMap.replace("aa", "789");
     assertEQ(result, false, "The treeMap should return false for a key in an empty map");
@@ -104,8 +105,8 @@ function testReplaceValueInEmptyTreeMap() {
 
 function testReplaceEmptyStringInEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let result = treeMap.replace("", "789");
     assertEQ(result, false, "The treeMap should return false for a key in an empty map");
@@ -114,8 +115,8 @@ function testReplaceEmptyStringInEmptyTreeMap() {
 
 function testClearData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result = treeMap.isEmpty();
@@ -126,9 +127,34 @@ function testClearData() {
 
 function testClearEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.clear();
     assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+}
+
+function testSetDataAfterClearTreeMap() {
+    let treeMap: TreeMap<string, number> =
+        new TreeMap<string, number>((firstValue: string, secondValue: string): number => {
+            return firstValue.compareTo(secondValue)
+        });
+    treeMap.set("aa", 123);
+    treeMap.set("bb", 456);
+    treeMap.clear();
+    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+    treeMap.set("cc", 111);
+    treeMap.set("dd", 222);
+    treeMap.set("ee", 333);
+    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+    let iterator = treeMap.$_iterator();
+    let str = "";
+    for (let i: int = 0; i < 3; i++) {
+        str += iterator.next().value!.toString();
+        if (i < 2) {
+            str += ",";
+        }
+    }
+    let strAll = "ee,333,dd,222,cc,111";
+    assertEQ(str, strAll, "The treeMap should return the correct iterator");
 }
