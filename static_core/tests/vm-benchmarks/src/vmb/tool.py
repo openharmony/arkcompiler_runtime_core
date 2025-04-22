@@ -51,6 +51,7 @@ class ToolMode(StringEnum):
     INT_IRTOC = 'int-irtoc'
     INT_LLVM = 'int-llvm'
     LLVMAOT = 'llvmaot'
+    AOTPGO = 'aot-pgo'
     DEFAULT = 'default'
 
 
@@ -69,6 +70,7 @@ class OptFlags(Flag):
     INT_IRTOC = auto()
     INT_LLVM = auto()
     LLVMAOT = auto()
+    AOTPGO = auto()
 
 
 class ToolBase(CrossShell, ABC):

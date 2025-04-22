@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,6 +54,7 @@ class Tool(ToolBase):
             aot_mode = '--paoc-mode=llvm '
         else:
             aot_mode = '--paoc-mode=aot '
+
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.paoc} ' \
                    f'--boot-panda-files={self.etsstdlib} {aot_mode} ' \
                    '--load-runtimes=ets {opts} ' \
@@ -72,7 +73,7 @@ class Tool(ToolBase):
         return '--panda-files=' + ':'.join([str(f.with_suffix('.abc'))
                                             for f in files])
 
-    def exec(self, bu: BenchUnit) -> None:
+    def do_exec(self, bu: BenchUnit, profdata: bool = False) -> None:
         _, bu_opts = self.get_bu_opts(bu)
         libs = self.x_libs(bu, '.abc')
         opts = self.panda_files(libs)
@@ -87,6 +88,8 @@ class Tool(ToolBase):
                 raise VmbToolExecError(f'{self.name} failed', res)
         abc = self.x_src(bu, '.abc')
         an = abc.with_suffix('.an')
+        if profdata:
+            opts += f' --paoc-use-profile:path={abc}.profdata,force '
         res = self.run_paoc(abc, an, opts=opts)
         if 0 != res.ret:
             bu.status = BUStatus.COMPILATION_FAILED
@@ -96,6 +99,9 @@ class Tool(ToolBase):
             BuildResult(self.bin_name, an_size, res.tm, res.rss))
         bu.result.aot_stats = self.get_aot_stats(an, bu.path)
         bu.binaries.append(an)
+
+    def exec(self, bu: BenchUnit) -> None:
+        self.do_exec(bu)
 
     def run_paoc(self,
                  abc: Union[str, Path],

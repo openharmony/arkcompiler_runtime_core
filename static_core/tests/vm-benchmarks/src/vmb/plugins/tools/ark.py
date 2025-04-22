@@ -77,7 +77,7 @@ class Tool(ToolBase):
     def name(self) -> str:
         return 'Ark VM'
 
-    def exec(self, bu: BenchUnit) -> None:
+    def do_exec(self, bu: BenchUnit, profile: bool = False) -> None:
         bu_flags, _ = self.get_bu_opts(bu)
         gclog = ''
         libs = ':'.join([str(f) for f in self.x_libs(bu, '.abc')])
@@ -95,6 +95,10 @@ class Tool(ToolBase):
             options += '--compiler-inlining=false '
         if OptFlags.GC_STATS in bu_flags:
             gclog = str(abc.with_suffix('.gclog.txt'))
+        if profile:
+            options += ('--compiler-profiling-threshold=0 '
+                        '--profilesaver-enabled=true '
+                        f'--profile-output={abc}.profdata ')
         arkts_cmd = self.cmd.format(
             name=bu.name, abc=abc, options=options, gclog=gclog, an=an)
         res = self.x_run(arkts_cmd)
@@ -108,6 +112,9 @@ class Tool(ToolBase):
                 bu.result.jit_stats = JITStat.from_csv(csv)
             else:
                 log.error('JIT stats dump missed: %s', str(csv))
+
+    def exec(self, bu: BenchUnit) -> None:
+        self.do_exec(bu)
 
     def kill(self) -> None:
         self.x_sh.run('pkill ark')
