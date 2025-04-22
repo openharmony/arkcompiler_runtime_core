@@ -188,12 +188,37 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns A new Array instance with the specified length
      */
+    static $_invoke<T>(): Array<T> {
+        return new Array<T>();
+    }
+    
+    /**
+     * Creates a new instance of an Array with the specified length
+     *
+     * @param arrayLength The length of the array to be created (optional).
+     *
+     * @returns A new Array instance with the specified length
+     */
     static $_invoke<T>(arrayLength?: number): Array<T> {
         if (arrayLength != undefined) {
             return new Array<T>(arrayLength);
         } else {
             return new Array<T>();
         }
+    }
+
+    /**
+     * Creates a new instance of an Array with the specified length
+     *
+     * @param items array of values.
+     *
+     * @returns A new Array instance with the specified length
+     */
+    static $_invoke<T>(...items: T[]): Array<T> {
+        if (items.length == 0) {
+            return new Array<T>(0)
+        }
+        return new Array<T>(items[0], ...items.slice(1))
     }
 
     /**
