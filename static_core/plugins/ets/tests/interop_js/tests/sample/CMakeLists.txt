@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test__sample
+panda_ets_interop_js_gtest(ets_interop_js_test__sample
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_sample.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_sample.ets
     COMPILATION_JS_WITH_CJS_ON

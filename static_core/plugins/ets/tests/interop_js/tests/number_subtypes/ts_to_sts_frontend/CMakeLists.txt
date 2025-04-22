@@ -28,7 +28,7 @@ gen_file(TARGET frontend_test_number_subtypes_gen_ets
     REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/../number_subtypes.rb
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_number_subtypes_ts_to_sts_frontend
+panda_ets_interop_js_gtest(ets_interop_js_frontend_test_number_subtypes_ts_to_sts_frontend
     CPP_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.cpp
     ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets
     ETS_CONFIG ${ETS_CONFIG}

@@ -29,8 +29,7 @@ globalThis.require = require;
 const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
 class Benchmark {
-    let modulePath = helper.getEnvironmentVar('MODULE_PATH');
-    #ark = requireNapiPreview(modulePath + 'lib/ets_interop_js_napi_arkjsvm.so', false);
+    #ark = requireNapiPreview('ets_interop_js_napi.so', false);
     #benchmark;
     #passedTime = BigInt(0);
     #binaries = [];

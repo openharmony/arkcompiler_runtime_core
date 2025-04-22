@@ -24,7 +24,7 @@ async function runTest(test) {
 	}
 	const globalName = 'L' + packageName + '/ETSGLOBAL;';
 
-    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+    let etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
 
     let runtimeCreated = etsVm.createRuntime({
         'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
