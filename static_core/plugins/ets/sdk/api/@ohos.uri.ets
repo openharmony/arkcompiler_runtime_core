@@ -80,7 +80,10 @@ export namespace uri {
     }
 
     getQueryValue(key: string): string {
-      let queryStrs: string[] = this.query.split('&');
+      if (this.query == null) {
+        return "";
+      }
+      let queryStrs: string[] = this.query!.split('&');
       if (key == "" && queryStrs.length > 0 && queryStrs[0] == "") {
         return "";
       }
@@ -132,11 +135,11 @@ export namespace uri {
     }
 
     getQueryNames(): Array<string> {
-      if (this.query == "") {
+      if (this.query == null || this.query == "") {
         return new Array<string>();
       }
       let names = new Set<string>();
-      let query = this.query;
+      let query = this.query!;
       let start: number = 0;
       while (start < query.length) {
         let next: number = query.indexOf('&', start);
@@ -153,11 +156,11 @@ export namespace uri {
     }
 
     getQueryValues(key: string): Array<string> {
-      let values = new Array<string>();
-      if (this.query == "") {
-        return values;
+      if (this.query == null || this.query == "") {
+        return new Array<string>();
       }
-      let queryStrs: string[] = this.query.split('&');
+      let values = new Array<string>();
+      let queryStrs: string[] = this.query!.split('&');
       let isKeyEmpty = key == "";
       for (let item of queryStrs) {
         if (isKeyEmpty && item == "") {
@@ -211,12 +214,18 @@ export namespace uri {
       return createNewUri(uriStr);
     }
 
-    get scheme(): string {
+    get scheme(): string | null {
+      if (this.uriEntry.getScheme() == '') {
+        return null;
+      }
       return this.uriEntry.getScheme();
     }
 
-    get authority(): string {
+    get authority(): string | null {
       let thisAuthority: string = this.uriEntry.getAuthority();
+      if (thisAuthority == '') {
+        return null;
+      }
       return this.dealDecode(thisAuthority, true);
     }
 
@@ -243,11 +252,17 @@ export namespace uri {
       return result;
     }
 
-    get userInfo(): string {
+    get userInfo(): string | null {
+      if (this.uriEntry.getUserinfo() == '') {
+        return null;
+      }
       return this.decodeSafelyInner(this.uriEntry.getUserinfo());
     }
 
-    get host(): string {
+    get host(): string | null {
+      if (this.uriEntry.getHost() == '') {
+        return null;
+      }
       return this.uriEntry.getHost();
     }
 
@@ -255,36 +270,60 @@ export namespace uri {
       return Number.toString(this.uriEntry.getPort());
     }
 
-    get path(): string {
+    get path(): string | null {
+      if (this.uriEntry.getPath() == '') {
+        return null;
+      }
       return this.decodeSafelyInner(this.uriEntry.getPath());
     }
 
-    get query(): string {
+    get query(): string | null {
+      if (this.uriEntry.getQuery() == '') {
+        return null;
+      }
       return this.decodeSafelyInner(this.uriEntry.getQuery());
     }
 
-    get fragment(): string {
+    get fragment(): string | null {
+      if (this.uriEntry.getFragment() == '') {
+        return null;
+      }
       return this.decodeSafelyInner(this.uriEntry.getFragment());
     }
 
-    get encodedUserInfo(): string {
+    get encodedUserInfo(): string | null {
+      if (this.uriEntry.getUserinfo() == '') {
+        return null;
+      }
       return this.uriEntry.getUserinfo();
     }
 
-    get encodedPath(): string {
+    get encodedPath(): string | null {
+      if (this.uriEntry.getPath() == '') {
+        return null;
+      }
       return this.uriEntry.getPath();
     }
 
-    get encodedQuery(): string {
+    get encodedQuery(): string | null {
+      if (this.uriEntry.getQuery() == '') {
+        return null;
+      }
       return this.uriEntry.getQuery();
     }
 
-    get encodedFragment(): string {
+    get encodedFragment(): string | null {
+      if (this.uriEntry.getFragment() == '') {
+        return null;
+      }
       return this.uriEntry.getFragment();
     }
 
-    get encodedAuthority(): string {
+    get encodedAuthority(): string | null {
       let thisAuthority: string = this.uriEntry.getAuthority();
+      if (thisAuthority == '') {
+        return null;
+      }
       return this.dealDecode(thisAuthority);
     }
 

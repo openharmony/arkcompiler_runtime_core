@@ -244,7 +244,7 @@ function testUriConstruction022() {
   assertEQ(gaogao.scheme, "http");
   assertEQ(gaogao.authority, "16.9.5.4:99");
   assertEQ(gaogao.ssp, "//16.9.5.4:99/path/path?query");
-  assertEQ(gaogao.userInfo, "");
+  assertEQ(gaogao.userInfo, null);
   assertEQ(gaogao.host, "16.9.5.4");
   assertEQ(gaogao.port, "99");
   assertEQ(gaogao.path, "/path/path");
@@ -257,7 +257,7 @@ function testUriConstruction023() {
   assertEQ(gaogao.scheme, "http");
   assertEQ(gaogao.authority, "49.99.54.12:50");
   assertEQ(gaogao.ssp, "//49.99.54.12:50/path/path23?query");
-  assertEQ(gaogao.userInfo, "");
+  assertEQ(gaogao.userInfo, null);
   assertEQ(gaogao.host, "49.99.54.12");
   assertEQ(gaogao.port, "50");
   assertEQ(gaogao.path, "/path/path23");
@@ -270,8 +270,8 @@ function testUriConstruction024() {
   assertEQ(gaogao.scheme, "http");
   assertEQ(gaogao.authority, "user@49.10pe8.54.12:80");
   assertEQ(gaogao.ssp, "//user@49.10pe8.54.12:80/path/path23?query");
-  assertEQ(gaogao.userInfo, "");
-  assertEQ(gaogao.host, "");
+  assertEQ(gaogao.userInfo, null);
+  assertEQ(gaogao.host, null);
   assertEQ(gaogao.port, "-1");
   assertEQ(gaogao.path, "/path/path23");
   assertEQ(gaogao.query, "query");
@@ -322,8 +322,8 @@ function testUriConstruction028() {
   assertEQ(gaogao.scheme, "ht2tp");
   assertEQ(gaogao.authority, "user@www.1hw.1com:77");
   assertEQ(gaogao.ssp, "//user@www.1hw.1com:77/path/path23?query");
-  assertEQ(gaogao.userInfo, "");
-  assertEQ(gaogao.host, "");
+  assertEQ(gaogao.userInfo, null);
+  assertEQ(gaogao.host, null);
   assertEQ(gaogao.port, "-1");
   assertEQ(gaogao.path, "/path/path23");
   assertEQ(gaogao.query, "query");
@@ -361,7 +361,7 @@ function testUriConstruction031() {
   assertEQ(gaogao.scheme, "http");
   assertEQ(gaogao.authority, "[::192:0:5]");
   assertEQ(gaogao.ssp, "//[::192:0:5]/path/path23?query");
-  assertEQ(gaogao.userInfo, "");
+  assertEQ(gaogao.userInfo, null);
   assertEQ(gaogao.host, "[::192:0:5]");
   assertEQ(gaogao.port, "-1");
   assertEQ(gaogao.path, "/path/path23");
