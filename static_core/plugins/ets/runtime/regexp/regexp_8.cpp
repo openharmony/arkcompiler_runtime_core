@@ -25,12 +25,12 @@ namespace ark::ets {
 
 constexpr int PCRE2_MATCH_DATA_UNIT_WIDTH = 2;
 
-Pcre2Obj RegExp8::CreatePcre2Object(const uint8_t *patternStr, uint32_t flags)
+Pcre2Obj RegExp8::CreatePcre2Object(const uint8_t *patternStr, uint32_t flags, const int len)
 {
     int errorNumber;
     PCRE2_SPTR pattern = static_cast<PCRE2_SPTR>(patternStr);
     PCRE2_SIZE errorOffset;
-    auto re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, flags, &errorNumber, &errorOffset, nullptr);
+    auto re = pcre2_compile(pattern, len, flags, &errorNumber, &errorOffset, nullptr);
     return reinterpret_cast<Pcre2Obj>(re);
 }
 

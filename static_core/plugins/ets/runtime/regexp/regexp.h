@@ -28,7 +28,7 @@ class pcre2_code;
 class EtsRegExp {
 public:
     void SetFlags(EtsString *flagsStr);
-    bool Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16);
+    bool Compile(const PandaVector<uint8_t> &pattern, const bool isUtf16, const int len);
     RegExpMatchResult Execute(const PandaVector<uint8_t> &str, const int len, const int startOffset);
     void Destroy();
 

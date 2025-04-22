@@ -269,7 +269,7 @@ RegExpMatchResult Execute(EtsString *pattern, EtsString *flags, EtsString *input
 
     auto str = ExtractString(inputStr.GetPtr(), isUtf16);
     auto patternStr = ExtractString(patternHandle.GetPtr(), isUtf16);
-    auto compiled = re.Compile(patternStr, isUtf16);
+    auto compiled = re.Compile(patternStr, isUtf16, patternHandle.GetPtr()->GetLength());
     if (!compiled) {
         RegExpMatchResult badResult;
         badResult.isSuccess = false;
