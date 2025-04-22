@@ -35,7 +35,7 @@ TEST(AniOptionLoggerTest, logger_options_parser_faild)
     ASSERT_EQ(g_msgs.size(), 1);
     ASSERT_EQ(g_msgs[0].level, ANI_LOGLEVEL_ERROR);
     ASSERT_STREQ(g_msgs[0].component.c_str(), "ani");
-    ASSERT_STREQ(g_msgs[0].message.c_str(), "pandargs: Invalid option \"bla-bla-bla\"");
+    ASSERT_STREQ(g_msgs[0].message.c_str(), "'--ext:bla-bla-bla' option is not supported");
 }
 
 }  // namespace ark::ets::ani::testing

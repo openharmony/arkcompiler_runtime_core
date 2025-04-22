@@ -15,6 +15,10 @@ ani_add_gtest(ani_test_ani_option_logger_parser_success
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_option_logger_parser_success_test.cpp
 )
 
-ani_add_gtest(ani_test_ani_option_logger_parser_faild
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_option_logger_parser_faild_test.cpp
+ani_add_gtest(ani_test_ani_option_logger_parser_wrong_log_option
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_option_logger_parser_wrong_log_option_test.cpp
+)
+
+ani_add_gtest(ani_test_ani_option_logger_parser_wrong_ext_option
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_option_logger_parser_wrong_ext_option_test.cpp
 )

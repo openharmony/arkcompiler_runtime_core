@@ -20,7 +20,7 @@
 #include "assembler/assembly-parser.h"
 #include "libpandafile/file.h"
 #include "libpandabase/trace/trace.h"
-#include "libpandabase/panda_gen_options/generated/base_options.h"
+#include "generated/logger_options.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/runtime.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
@@ -49,7 +49,7 @@ public:
     // NOLINTNEXTLINE(readability-function-size)
     void SetUp() override
     {
-        Logger::Initialize(base_options::Options(""));
+        Logger::Initialize(logger::Options(""));
 
         RuntimeOptions options;
         options.SetLoadRuntimes({"core"});

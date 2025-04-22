@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "base_options.h"
+#include "generated/logger_options.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 

@@ -26,7 +26,7 @@
 #include "mem/mem_stats.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/os/native_stack.h"
-#include "generated/base_options.h"
+#include "generated/logger_options.h"
 
 #include "ark_version.h"
 
@@ -166,7 +166,7 @@ int Main(int argc, const char **argv)
 {
     Span<const char *> sp(argv, argc);
     RuntimeOptions runtimeOptions(sp[0]);
-    base_options::Options baseOptions(sp[0]);
+    logger::Options loggerOptions(sp[0]);
 
     ark::PandArg<bool> help("help", false, "Print this message and exit");
     ark::PandArg<bool> options("options", false, "Print compiler and runtime options");
@@ -177,7 +177,7 @@ int Main(int argc, const char **argv)
     ark::PandArgParser paParser = GetPandArgParser(help, options, file, entrypoint);
 
     runtimeOptions.AddOptions(&paParser);
-    baseOptions.AddOptions(&paParser);
+    loggerOptions.AddOptions(&paParser);
     compiler::g_options.AddOptions(&paParser);
 
     auto startTime =
@@ -201,7 +201,7 @@ int Main(int argc, const char **argv)
 
     compiler::g_options.AdjustCpuFeatures(false);
 
-    Logger::Initialize(baseOptions);
+    Logger::Initialize(loggerOptions);
 
     ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
     if (compiler::g_options.IsCompilerEnableEvents()) {

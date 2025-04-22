@@ -94,6 +94,8 @@ srcs_runtime = [
   "dfx/heap_helpers.cpp",
   "runtime/ani/ani_interaction_api.cpp",
   "runtime/ani/ani_mangle.cpp",
+  "runtime/ani/ani_options.cpp",
+  "runtime/ani/ani_options_parser.cpp",
   "runtime/ani/ani_vm_api.cpp",
   "runtime/ets_annotation.cpp",
   "runtime/ets_class_linker.cpp",

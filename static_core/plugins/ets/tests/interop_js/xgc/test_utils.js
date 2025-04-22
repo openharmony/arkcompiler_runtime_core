@@ -17,7 +17,6 @@ exports.runTest = function (module, stsFile, testFn) {
     let test = requireNapiPreview(module, true);
 
     const etsVmRes = etsVm.createRuntime({
-        'load-runtimes': 'ets',
         'log-components': 'ets_interop_js',
         'boot-panda-files': 'etsstdlib.abc:' + stsFile,
         'gc-trigger-type': 'heap-trigger',

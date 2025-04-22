@@ -23,13 +23,13 @@
 #include "verification/plugins.h"
 #include "verification/util/is_system.h"
 #include "verification/util/optional_ref.h"
-#include "generated/base_options.h"
 #ifdef ARK_HYBRID
 #include <node_api.h>
 #endif
 
 // generated
 #include "ark_version.h"
+#include "generated/logger_options.h"
 #include "generated/verifier_options_gen.h"
 
 #include <csignal>
@@ -357,7 +357,7 @@ static int RunThreads(Options &cliOptions, RuntimeOptions &runtimeOptions)
     return ret;
 }
 
-static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, base_options::Options &baseOptions,
+static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, logger::Options &loggerOptions,
                PandArg<std::string> &file)
 {
     auto bootPandaFiles = cliOptions.GetBootPandaFiles();
@@ -380,11 +380,11 @@ static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, base_options
     runtimeOptions.SetLoadRuntimes(cliOptions.GetLoadRuntimes());
     runtimeOptions.SetGcType(cliOptions.GetGcType());
 
-    baseOptions.SetLogComponents(cliOptions.GetLogComponents());
-    baseOptions.SetLogLevel(cliOptions.GetLogLevel());
-    baseOptions.SetLogStream(cliOptions.GetLogStream());
-    baseOptions.SetLogFile(cliOptions.GetLogFile());
-    Logger::Initialize(baseOptions);
+    loggerOptions.SetLogComponents(cliOptions.GetLogComponents());
+    loggerOptions.SetLogLevel(cliOptions.GetLogLevel());
+    loggerOptions.SetLogStream(cliOptions.GetLogStream());
+    loggerOptions.SetLogFile(cliOptions.GetLogFile());
+    Logger::Initialize(loggerOptions);
 
     runtimeOptions.SetLimitStandardAlloc(cliOptions.IsLimitStandardAlloc());
     runtimeOptions.SetInternalAllocatorType(cliOptions.GetInternalAllocatorType());
@@ -404,7 +404,7 @@ int Main(int argc, const char **argv)
     RuntimeOptions runtimeOptions(sp[0]);
     Options cliOptions(sp[0]);
     PandArgParser paParser;
-    base_options::Options baseOptions("");
+    logger::Options loggerOptions("");
 
     PandArg<bool> help("help", false, "Print this message and exit");
     PandArg<bool> options("options", false, "Print verifier options");
@@ -453,7 +453,7 @@ int Main(int argc, const char **argv)
         return 1;
     }
 
-    return Run(cliOptions, runtimeOptions, baseOptions, file);
+    return Run(cliOptions, runtimeOptions, loggerOptions, file);
 }
 
 }  // namespace ark::verifier

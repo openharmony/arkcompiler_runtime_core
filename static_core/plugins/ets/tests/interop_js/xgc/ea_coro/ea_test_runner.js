@@ -18,7 +18,6 @@ exports.runTest = function (cppTestModule, stsFile, testFunc, ...eaWorkerModules
     let testModule = requireNapiPreview(cppTestModule, true);
 
     const etsVmRes = etsVm.createRuntime({
-        'load-runtimes': 'ets',
         'boot-panda-files': 'etsstdlib.abc:' + stsFile,
         'log-components': 'ets_interop_js:gc_trigger',
         'log-level': 'debug',

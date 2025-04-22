@@ -82,8 +82,8 @@ public:
     std::vector<ani_option> GetExtraAniOptions() override
     {
         return {
-            ani_option {"--gc-type=g1-gc", nullptr},
-            ani_option {"--compiler-enable-jit", nullptr},
+            ani_option {"--ext:gc-type=g1-gc", nullptr},
+            ani_option {"--ext:compiler-enable-jit", nullptr},
             // Note: here set the coroutine-e-workers-limit to 2 to save system resources
             ani_option {"--ext:coroutine-e-workers-limit=2", nullptr},
         };

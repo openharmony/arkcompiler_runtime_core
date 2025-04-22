@@ -30,7 +30,6 @@ function runTest(test) {
         'panda-files': gtestAbcPath,
         'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
         'gc-trigger-type': 'heap-trigger',
-        'load-runtimes': 'ets',
         'compiler-enable-jit': 'false',
         'xgc-trigger-type': 'never',
     };

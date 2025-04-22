@@ -702,7 +702,7 @@ TEST(linkertests, TestForCoverage)
     linkRes = std::system(cmd.c_str());
     ASSERT_EQ(linkRes, 0);
 
-    std::string opt = " --show-stats --version --log-level info";
+    std::string opt = " --show-stats --log-level info";
     std::string dst = " --output data/ets/sys/target.abc -- data/ets/sys/1.ets.abc data/ets/sys/2.ets.abc";
     cmd = GenLinkCmd(opt + dst);
     // NOLINTNEXTLINE(cert-env33-c)

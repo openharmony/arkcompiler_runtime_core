@@ -12,20 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let etsVm = requireNapiPreview('ets_interop_js_napi', true);
 
-let etsVmRes = etsVm.createRuntime({
-    'boot-panda-files': 'etsstdlib.abc',
-    'gc-type': 'epsilon'
-});
-if (etsVmRes) {
-    throw new Error('Test failed: expected runtime cannot be created with GC other than G1');
-}
+#ifndef PANDA_PLUGINS_ETS_COMPILER_PRODUCT_OPTIONS_H
+#define PANDA_PLUGINS_ETS_COMPILER_PRODUCT_OPTIONS_H
 
-etsVmRes = etsVm.createRuntime({
-    'boot-panda-files': 'etsstdlib.abc',
-    'no-async-jit': 'true'
-});
-if (etsVmRes) {
-    throw new Error('Test failed: expected runtime cannot be created with "no-async-jit" option');
-}
+#include <array>
+
+namespace ark::ets {
+
+// clang-format off
+static constexpr std::array AVAILABLE_COMPILER_OPTIONS_IN_PRODUCT = {
+    "compiler-inline-external-methods",
+    "compiler-regex",
+};
+// clang-format on
+
+}  // namespace ark::ets
+
+#endif  // PANDA_PLUGINS_ETS_COMPILER_PRODUCT_OPTIONS_H

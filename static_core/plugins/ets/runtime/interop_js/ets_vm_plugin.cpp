@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 
-#include "generated/base_options.h"
+#include "generated/logger_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
@@ -186,11 +186,11 @@ static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_
     return argStrings;
 }
 
-static bool AddOptions(base_options::Options *baseOptions, ark::RuntimeOptions *runtimeOptions,
+static bool AddOptions(logger::Options *loggerOptions, ark::RuntimeOptions *runtimeOptions,
                        const std::vector<std::string> &argStrings)
 {
     ark::PandArgParser paParser;
-    baseOptions->AddOptions(&paParser);
+    loggerOptions->AddOptions(&paParser);
     runtimeOptions->AddOptions(&paParser);
     ark::compiler::g_options.AddOptions(&paParser);
 
@@ -252,8 +252,8 @@ static bool AddOptions(base_options::Options *baseOptions, ark::RuntimeOptions *
         return napiFalse;
     }
 
-    auto addOpts = [&argStrings](base_options::Options *baseOptions, ark::RuntimeOptions *runtimeOptions) {
-        return AddOptions(baseOptions, runtimeOptions, argStrings.value());
+    auto addOpts = [&argStrings](logger::Options *loggerOptions, ark::RuntimeOptions *runtimeOptions) {
+        return AddOptions(loggerOptions, runtimeOptions, argStrings.value());
     };
 
     bool res = ets::CreateRuntime(addOpts);

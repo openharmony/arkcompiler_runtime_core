@@ -140,7 +140,7 @@ group("arkruntime_header_deps") {
     ":plugins_interpreters_inl_h",
     ":profiling_gen_profiling_gen_h",
     ":substitute_icu_path",
-    "$ark_root/libpandabase:base_options_h",
+    "$ark_root/libpandabase:gen_logger_options_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_abs_int_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_cflow_iterate_inl_gen_h",
     "$ark_root/verification/gen:isa_gen_verification_gen_handle_gen_h",
