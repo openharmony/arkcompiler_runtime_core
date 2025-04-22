@@ -126,6 +126,8 @@ function testUriAddQueryValue007() {
   let route = new uri.URI('https://www.test.com');
   let newRoute = route.addQueryValue("param 1", "value 1");
   assertEQ(newRoute.getQueryValue("param 1"), "value 1");
+  let mui = new uri.URI('http://www.baidu.com?sa%3D=\ud83d\ude0a')
+  assertEQ(mui.getQueryValue('sa='), "\ud83d\ude0a");
 }
 
 function testUriAddQueryValue008() {

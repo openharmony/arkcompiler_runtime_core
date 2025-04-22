@@ -90,29 +90,29 @@ export namespace uri {
       return createNewUri(uriStr);
     }
 
-    getQueryValue(key: string): string | null {
-      let query = this.uriEntry.getQuery();
-      if (query === '') {
-        return null;
-      }
-      const queryStrs = query.split('&');
-      for (const item of queryStrs) {
-        const eqPos = item.indexOf('=');
-        let currentKey = item;
-        let currentValue = '';
-        if (eqPos !== -1) {
-          currentKey = item.substring(0, eqPos);
-          currentValue = item.substring(eqPos + 1);
-        }
+      getQueryValue(key: string): string | null {
+          let query = this.uriEntry.getQuery();
+          if (query === '') {
+              return null;
+          }
+          const queryStrs = query.split('&');
+          for (const item of queryStrs) {
+              const eqPos = item.indexOf('=');
+              let currentKey = item;
+              let currentValue = '';
+              if (eqPos !== -1) {
+                  currentKey = item.substring(0, eqPos);
+                  currentValue = item.substring(eqPos + 1);
+              }
 
-        const decodedKey = this.decodeSafelyInner(currentKey);
-        if (decodedKey === key) {
-          const decodedValue = this.decodeSafelyInner(currentValue.replaceAll('+', ' '));
-          return decodedValue || '';
-        }
+              const decodedKey = this.decodeSafelyInner(currentKey);
+              if (decodedKey === key) {
+                  const decodedValue = this.decodeSafelyInner(currentValue.replaceAll('+', ' '));
+                  return decodedValue || '';
+              }
+          }
+          return null;
       }
-      return null;
-    }
 
     private decodeSafelyOut(input: string): string {
       let decodedString = "";
@@ -150,11 +150,11 @@ export namespace uri {
     }
 
     getQueryNames(): Array<string> {
-      if (this.query == null || this.query == "") {
+      let query = this.uriEntry.getQuery();
+      if (query == "") {
         return new Array<string>();
       }
       let names = new Set<string>();
-      let query = this.query!;
       let start: number = 0;
       while (start < query.length) {
         let next: number = query.indexOf('&', start);
@@ -171,11 +171,12 @@ export namespace uri {
     }
 
     getQueryValues(key: string): Array<string> {
-      if (this.query == null || this.query == "") {
+      let query = this.uriEntry.getQuery();
+      if (query == "") {
         return new Array<string>();
       }
       let values = new Array<string>();
-      let queryStrs: string[] = this.query!.split('&');
+      let queryStrs: string[] = query.split('&');
       let isKeyEmpty = key == "";
       for (let item of queryStrs) {
         if (isKeyEmpty && item == "") {

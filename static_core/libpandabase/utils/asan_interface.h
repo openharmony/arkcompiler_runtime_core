@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,10 +31,12 @@
 extern "C" {
 // Marks memory region [addr, addr+size) as unaddressable.
 // CC-OFFNXT(G.DCL.01) public API
+// CC-OFFNXT(G.EXP.01)
 // NOLINTNEXTLINE(readability-identifier-naming, readability-redundant-declaration)
 void __asan_poison_memory_region(void const volatile *addr, size_t size) __attribute__((visibility("default")));
 // Marks memory region [addr, addr+size) as addressable.
 // CC-OFFNXT(G.DCL.01) public API
+// CC-OFFNXT(G.EXP.01)
 // NOLINTNEXTLINE(readability-identifier-naming, readability-redundant-declaration)
 void __asan_unpoison_memory_region(void const volatile *addr, size_t size) __attribute__((visibility("default")));
 }
