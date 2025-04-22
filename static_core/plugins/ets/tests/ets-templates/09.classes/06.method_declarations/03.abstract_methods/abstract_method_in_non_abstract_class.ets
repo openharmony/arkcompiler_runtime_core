@@ -14,24 +14,16 @@
  */
 
 /*---
-desc: Overriding abstract method.
-assert: A compile-time error occurs if an abstract method overrides a non-abstract instance method
-tags: [positive, compile-only]
+desc: Abstract method defined in non-abstract class.
+assert: A compile-time error must be thrown when a class contains an abstract method but is not marked abstract.
+tags: [negative, compile-only]
 ---*/
 
-abstract class A {
-  abstract run(): number;
+class B {
+    foo(): void {};
 }
 
-class B extends A {
-  override run(): number {
-    let result = 5 + 5;
-    return result;
-  };
-}
-
-function main(): void {
-  let b: A = new B();
-  assertEQ(b.run(), 10);
+class A extends B {
+    abstract foo(): void;
 }
 

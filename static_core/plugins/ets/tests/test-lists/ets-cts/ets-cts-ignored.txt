@@ -689,10 +689,6 @@
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_6.ets
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_8.ets
 
-#21929 - should fail, but compiles
-09.classes/06.method_declarations/03.abstract_methods/instance_method_overridden_by_abstract.ets
-09.classes/06.method_declarations/06.overriding_methods/overriding_by_instance_methods/abstract_method_overridden_by_instance.ets
-
 #22253
 09.classes/06.method_declarations/09.methods_returning_this/methods_returning_this_interface_03.ets
 
