@@ -318,7 +318,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.NumberFormatOptions): string {
-        const formatter = new Intl.NumberFormat(localesToLanguageTags(locales), options)
+        const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), options)
         return formatter.format(this.value)
     }
 
