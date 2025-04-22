@@ -36,8 +36,8 @@ function main(): int {
 
 function testHasKeyAndValueExisting() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let hasK = treeMap.hasKey("aa");
@@ -49,8 +49,8 @@ function testHasKeyAndValueExisting() {
 
 function testHasKeyAndValueNonExisting() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let hasK = treeMap.hasKey("bb");
@@ -62,8 +62,8 @@ function testHasKeyAndValueNonExisting() {
 
 function testHasKeyAndValueEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let hasK = treeMap.hasKey("aa");
     let hasV = treeMap.hasValue("123");
@@ -74,12 +74,12 @@ function testHasKeyAndValueEmptyTreeMap() {
 
 function testSetAllFromEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let treeMapp: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     treeMapp.setAll(treeMap);
@@ -90,15 +90,15 @@ function testSetAllFromEmptyTreeMap() {
 
 function testSetAllFromTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("HIG", "456");
     treeMap.set("DEF", "123");
     treeMap.set("XYZ", "789");
     let newMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     newMap.set("demo", '123');
     newMap.setAll(treeMap);
@@ -108,8 +108,8 @@ function testSetAllFromTreeMap() {
 
 function testForEachNoReference() {
     let treeMap: TreeMap<string, number> =
-        new TreeMap<string, number>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, number>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", 123);
     treeMap.set("bb", 456);
@@ -124,8 +124,8 @@ function testForEachNoReference() {
 
 function testForEachValueReference() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
@@ -138,8 +138,8 @@ function testForEachValueReference() {
 
 function testForEachValueKeyReference() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
@@ -152,8 +152,8 @@ function testForEachValueKeyReference() {
 
 function testForEachThreeReferences() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");

@@ -22,6 +22,7 @@ function main(): int {
     const suite = new ArkTestsuite("TreeMap Set Get API tests")
 
     suite.addTest("TreeMap set data", testSetData)
+    suite.addTest("TreeMap set data with same key and different values", testSetDataWithSameKeyDifferentValues)
     suite.addTest("TreeMap set empty string data", testSetEmptyStringData)
     suite.addTest("TreeMap loop set data", testLoopSetData)
     suite.addTest("TreeMap get data", testGetData)
@@ -32,10 +33,18 @@ function main(): int {
     return suite.run()
 }
 
+class MyObject extends Object {
+    size: number;
+    constructor(size: number) {
+        super();
+        this.size = size;
+    }
+}
+
 function testSetData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("a", "123");
     let result = treeMap.get("a");
@@ -43,10 +52,24 @@ function testSetData() {
     assertEQ(treeMap.length, 1, "The treeMap Length should be 1");
 }
 
+function testSetDataWithSameKeyDifferentValues() {
+    let treeMap: TreeMap<MyObject, string> =
+        new TreeMap<MyObject, string>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size
+        });
+    let obj: MyObject = new MyObject(1);
+    let obj2: MyObject = new MyObject(1);
+    treeMap.set(obj, "123");
+    treeMap.set(obj2, "456");
+    let result = treeMap.get(obj);
+    assertEQ(result, "456", "The treeMap should get the value by key");
+    assertEQ(treeMap.length, 1, "The treeMap Length should be 1");
+}
+
 function testSetEmptyStringData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("", "123");
     let length = treeMap.length;
@@ -57,8 +80,8 @@ function testSetEmptyStringData() {
 
 function testLoopSetData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let arr = 'abc';
     for (let i = 0; i < 1000; i++) {
@@ -75,8 +98,8 @@ function testLoopSetData() {
 
 function testGetData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result = treeMap.get("aa");
@@ -86,8 +109,8 @@ function testGetData() {
 
 function testGetNonExistingData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result = treeMap.get("bb");
@@ -97,8 +120,8 @@ function testGetNonExistingData() {
 
 function testGetDataFromEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let result = treeMap.get("aa");
     assertEQ(result, undefined, "The treeMap should return undefined for the key in an empty map");
@@ -107,8 +130,8 @@ function testGetDataFromEmptyTreeMap() {
 
 function testGetEmptyStringDataFromEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let result = treeMap.get("");
     assertEQ(result, undefined, "The treeMap should return undefined for the key in an empty map");

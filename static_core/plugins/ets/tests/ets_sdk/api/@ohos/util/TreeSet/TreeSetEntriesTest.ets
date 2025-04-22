@@ -31,8 +31,8 @@ function main(): int {
 
 function testEntriesReturnIteratorByKeyValue() {
     let treeSet: TreeSet<number | undefined> = new TreeSet<number | undefined>(
-        (firstValue: number | undefined, secondValue: number | undefined): boolean => {
-            return firstValue! < secondValue!
+        (firstValue: number | undefined, secondValue: number | undefined): number => {
+            return secondValue! - firstValue!
         });
     treeSet.add(123);
     treeSet.add(456);
@@ -51,8 +51,8 @@ function testEntriesReturnIteratorByKeyValue() {
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyTreeSet() {
-    let treeSet: TreeSet<string> = new TreeSet<string>(
-        (firstValue: string, secondValue: string): boolean => { return firstValue < secondValue });
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.entries();
     assertEQ(it.next().value, undefined, "The treeSet entries iterator should return undefined when treeSet is empty");
 }

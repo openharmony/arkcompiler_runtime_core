@@ -62,7 +62,7 @@ export class TreeSet<T> implements ReadonlyTreeSet<T> {
      *
      * @param comparator: the comparator of the TreeSet
      */
-    constructor(comparator?: (firstValue: T, secondValue: T) => boolean) {
+    constructor(comparator?: (firstValue: T, secondValue: T) => number) {
         this.treeMap = new TreeMap<T, T>(comparator);
     }
 

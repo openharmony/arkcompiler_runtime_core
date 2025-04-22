@@ -40,13 +40,9 @@ class MyObject extends Object {
     }
 }
 
-function compareObjects(first: MyObject, second: MyObject): boolean {
-    return first.size < second.size;
-}
-
 function testConstructDefaultEmptyStringTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     assertTrue(treeSet instanceof TreeSet, "The treeSet should be of the same type as the TreeSet");
     assertEQ(treeSet.length, 1, "The treeSet length should be 1");
@@ -54,7 +50,7 @@ function testConstructDefaultEmptyStringTreeSet() {
 
 function testConstructDefaultEmptyNumberTreeSet() {
     let treeSet: TreeSet<number> = new TreeSet<number>((firstValue: number,
-        secondValue: number): boolean => { return firstValue < secondValue });
+        secondValue: number): number => { return secondValue - firstValue });
     treeSet.add(111);
     treeSet.add(222);
     treeSet.add(333);
@@ -64,8 +60,8 @@ function testConstructDefaultEmptyNumberTreeSet() {
 
 function testConstructDefaultEmptyObjectTreeSet() {
     let treeSet: TreeSet<MyObject> =
-        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
+        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
     treeSet.add(obj);
@@ -84,7 +80,7 @@ function testConstructNoComparatorTreeSet() {
 
 function testIsEmptyReturnsTrue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.isEmpty();
     assertEQ(result, true, "The treeSet should be empty");
     assertEQ(treeSet.length, 0, "The treeSet length should be 0");
@@ -92,7 +88,7 @@ function testIsEmptyReturnsTrue() {
 
 function testIsEmptyReturnsFalse() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.isEmpty();
     assertEQ(result, false, "The treeSet should not be empty");
@@ -101,7 +97,7 @@ function testIsEmptyReturnsFalse() {
 
 function testIsEmptyReturnsTrueAfterRemove() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.remove("aa");
     let result = treeSet.isEmpty();
