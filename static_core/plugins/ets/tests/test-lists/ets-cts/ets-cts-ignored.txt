@@ -34,10 +34,6 @@
 03.types/16.array_types/01.resizable_array_types/resizable_array_2.ets
 03.types/16.array_types/01.resizable_array_types/resizable_array_4.ets
 
-#24032
-03.types/17.tuple_types/tt_7.ets
-
-
 #23975
 03.types/17.tuple_types/tt2_31.ets
 
