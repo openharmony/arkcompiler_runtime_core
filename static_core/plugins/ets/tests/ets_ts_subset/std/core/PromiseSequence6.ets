@@ -33,7 +33,7 @@ let p = new Promise<number>((_: (v: number) => void, _reject: (error: Object) =>
 });
 
 sequence.push(1);
-reject!("abc");
+reject!(new Error("abc"));
 
 p.then<void, void>((valule: number): void => {
     console.log("Test failed. The promise should not be resolved.")

@@ -90,8 +90,9 @@ async function doTestWithAwait(p : Promise<Object>) : Promise<void> {
 async function doTestReject(p : Promise<Object>) : Promise<void> {
     p.then((x:Object): void => {
         globalTest!.fail();
-    }).catch((x:Object): void => {
-        if (x as string == "rejected") {
+    }).catch<void>((x: Error): void => {
+        let jsx = x as JSValue;
+        if (jsx.message == "rejected") {
             globalTest!.success();
         } else {
             globalTest!.fail();
@@ -102,8 +103,9 @@ async function doTestReject(p : Promise<Object>) : Promise<void> {
 async function doTestRejectWithAwait(p : Promise<Object>) : Promise<void> {
     let q = p.then((x:Object): void => {
         globalTest!.fail();
-    }).catch((x: Object): void => {
-        if (x as string == "rejected") {
+    }).catch((x: Error): void => {
+        let jsx = x as JSValue;
+        if (jsx.message == "rejected") {
             globalTest!.success();
         } else {
             globalTest!.fail();
@@ -116,8 +118,9 @@ async function doTestRejectWithAwaitShouldFail(p : Promise<Object>) : Promise<vo
     try {
         await p;
         globalTest!.fail();
-    } catch (e) {
-        if (e as string == 'rejected') {
+    } catch (e: Error) {
+        let jse = e as JSValue;
+        if (jse.message == 'rejected') {
             globalTest!.success();
             return Promise.resolve();
         }
@@ -134,8 +137,9 @@ async function doTestThenRejectWithAwaitShouldFail(p : Promise<Object>) : Promis
     try {
         await q;
         globalTest!.fail();
-    } catch (e) {
-        if (e as string == 'rejected') {
+    } catch (e: Error) {
+        let jse = e as JSValue;
+        if (jse.message == 'rejected') {
             globalTest!.success();
             return Promise.resolve();
         }

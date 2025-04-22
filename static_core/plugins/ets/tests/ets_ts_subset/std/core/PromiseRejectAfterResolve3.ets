@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let error = new Object();
+let error = new Error("abc");
 let reject: ((err: Object) => void)|null = null;
 let p1 = new Promise<string>((_: (value: string) => void, _reject: (err: Object) => void): void => {
     reject = _reject;

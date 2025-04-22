@@ -31,7 +31,7 @@ Promise.allSettled(thenable).then<void, void>((values: PromiseSettledResult<stri
         console.log("Test failed. Expected a string array of length 2 but got length " + values.length + ".");
         return;
     }
-    if (values[0].status != "fulfilled" || values[1].status != "fulfilled") {
+    if (values[0].status != PromiseStatus.fulfilled || values[1].status != PromiseStatus.fulfilled) {
         console.log("Test failed. Expected all elements has status 'fulfilled'.");
         return;
     }

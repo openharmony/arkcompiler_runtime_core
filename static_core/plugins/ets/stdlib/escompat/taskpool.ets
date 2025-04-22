@@ -622,7 +622,9 @@ export namespace taskpool {
             const taskRunner = (value: NullishType): NullishType => {
                 return task.execute();
             };
-            this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<NullishType, NullishType>(taskRunner, taskRunner));
+            this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<NullishType>(taskRunner, (error: Error) : void => {
+                taskRunner(undefined);
+            } ));
             return this.impl.seqPromise;
         }
 

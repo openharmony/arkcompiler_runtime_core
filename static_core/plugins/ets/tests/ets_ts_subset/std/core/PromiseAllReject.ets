@@ -13,16 +13,23 @@
  * limitations under the License.
  */
 class Thenable implements PromiseLike<string> {
-    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return Promise.resolve<E>(onRejected!("abc"));
+    constructor(e: Error) {
+        this.error = e;
     }
+
+    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+        return Promise.resolve<E>(onRejected!(this.error));
+    }
+
+    private error: Error;
 };
 
-let thenable = new Thenable();
+let error = new Error("abc");
+let thenable = new Thenable(error);
 Promise.all([thenable]).then<void, void>((value: Array<string>): void => {
     console.log("Test failed. The promise should not be resolved.");
-}, (error: Object): void => {
-    if (error != "abc") {
+}, (e: Object): void => {
+    if (error !== e) {
         console.log("Test failed. The promise should be rejected by the provided value.");
         return;
     }
