@@ -10,16 +10,7 @@
                   "$ROOT/tools/es2panda/test/parser/ets/import_tests"]
         },
         "dynamicPaths": {
-            "dynamic_import_tests": {"language": "js", "ohmUrl": "dynamic_import_tests"},
-            "dynamic_import_tests/modules/instanceof": {
-                "language": "js",
-                "declPath": "$ROOT/tools/es2panda/test/parser/ets/dynamic_import_tests/modules/instanceof.ets",
-                "ohmUrl": "$ROOT/tools/es2panda/test/parser/ets/dynamic_import_tests/modules/instanceof.ets"},
-            "dynamic_import_tests/modules/module": {
-                "language": "js",
-                "declPath": "$ROOT/tools/es2panda/test/parser/ets/dynamic_import_tests/modules/module.ets",
-                "ohmUrl": "$ROOT/tools/es2panda/test/parser/ets/dynamic_import_tests/modules/module.ets"
-            }
+          "dynamic_import_tests": {"language": "js", "ohmUrl": "dynamic_import_tests"}
         }
     }
 }

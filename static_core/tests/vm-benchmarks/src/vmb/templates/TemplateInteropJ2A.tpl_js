@@ -107,24 +107,8 @@ $common
 
 $src
 
-function initEtsVm() {
-    let penv = process.env;
-    let etsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
-
-    const etsRT = etsVm.createRuntime(Object.assign({
-        'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-        'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH
-    }, JSON.parse(penv.ETS_VM_OPTS)));
-
-    if (!etsRT) {
-        console.error('Failed to create ETS runtime');
-        return 1;
-    }
-	return etsVm;
-}
-
-function log(msg) {
-    console.log(msg); // NOTE only difference with Template.mjs is console.log here instead of print
+function print_log(msg) {
+    console.log(msg); // NOTE can be console.log or print or something else depending on platform
 }
 
 var bench = new $state_name();

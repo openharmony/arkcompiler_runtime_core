@@ -113,7 +113,7 @@ const helper = requireNapiPreview('libinterop_test_helper.so', false);
 function initEtsVm() {
     // Note #23757 this needs to be further tested and possibly adjusted
     const modulePath = helper.getEnvironmentVar('MODULE_PATH');
-    const etsVm = require(modulePath + '/ets_interop_js_napi.node');
+    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
     const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
     const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
     const etsVmOpts = helper.getEnvironmentVar('ETS_VM_OPTS');
@@ -121,7 +121,7 @@ function initEtsVm() {
     const etsRT = etsVm.createRuntime(Object.assign({
         'boot-panda-files': stdlibPath + ':' + gtestAbcPath,
         'panda-files': gtestAbcPath
-    }, JSON.parse(penv.ETS_VM_OPTS)));
+    }, JSON.parse(etsVmOpts)));
 
     if (!etsRT) {
         console.error('Failed to create ETS runtime');
@@ -130,8 +130,8 @@ function initEtsVm() {
 	return etsVm;
 }
 
-function log(msg) {
-    console.log(msg); // NOTE only difference with Template.mjs is console.log here instead of print
+function print_log(msg) {
+    print(msg); // NOTE can be console.log or print or something else depending on platform
 }
 
 var bench = new $state_name();
@@ -157,7 +157,7 @@ function tune() {
     }
     loopCount1 = loopCount * iterMs / loopMs >> 0;
     if (loopCount1 == 0) loopCount1++;
-    log('Tuning: ' +  loopCount + ' ops, ' + loopMs*MS2NS/loopCount + ' ns/op => '
+    print_log('Tuning: ' +  loopCount + ' ops, ' + loopMs*MS2NS/loopCount + ' ns/op => '
         + loopCount1 + ' reps');
 }
 
@@ -179,11 +179,11 @@ function runIters(phase, count, time) {
         }
         totalOps += ops;
         totalMs += elapsedMs;
-        log(phase + ' ' + iter + ':' + ops + ' ops, ' + elapsedMs*MS2NS/ops + ' ns/op');
+        print_log(phase + ' ' + iter + ':' + ops + ' ops, ' + elapsedMs*MS2NS/ops + ' ns/op');
     }
 }
 
-log('Startup execution started: ' + Date.now() * MS2NS);
+print_log('Startup execution started: ' + Date.now() * MS2NS);
 if (FI > 0) {
     let start = Date.now();
     for (let i = 0; i < FI; i++) {
@@ -193,7 +193,7 @@ if (FI > 0) {
     if (elapsed <= 0) {
         elapsed = 1;  // 0 is invalid result
     }
-    log('Benchmark result: $bench_name ' + elapsed*MS2NS / FI);
+    print_log('Benchmark result: $bench_name ' + elapsed*MS2NS / FI);
 } else {
     tune();
     if (WI > 0) {
@@ -207,7 +207,7 @@ if (FI > 0) {
     iter = 1;
     var measure_iters = MI >> 0; // make sure it has int type
     runIters('Iter', measure_iters, IT);
-    log('Benchmark result: $bench_name ' + totalMs*MS2NS/totalOps);
+    print_log('Benchmark result: $bench_name ' + totalMs*MS2NS/totalOps);
 }
 
 Consumer.consumeObj(bench);

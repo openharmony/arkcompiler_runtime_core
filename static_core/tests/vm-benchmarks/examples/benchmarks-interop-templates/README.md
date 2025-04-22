@@ -13,14 +13,14 @@ If needed, see also [vm-benchmarks/readme.md](../../readme.md) for more details 
 
 ## Sanity check run
 
-Note `-wi=1 -mi=1` parameters below mean minimal number of iterations to execute and is intended only as a smoke test verifying that code can run. For realistic benchmarks, customise these values or remove them to use defaults.
+Note `VMB_BENCH_UNIT_ITERATIONS=1 -wi=1 -mi=1` parameters below mean minimal non-zero number of iterations to execute and is intended only as a smoke test verifying that code can run. For realistic benchmarks, customise these values or remove them to use defaults.
 
 ```
 cd $PANDA_ROOT/tests/vm-benchmarks
 # assume PANDA and VMB are built and installed per interop.readme.md
 export PANDA_BUILD=$PANDA_ROOT/build
 export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
-vmb all -p arkts_node_interop_host --aot-skip-libs -v debug \
+env VMB_BENCH_UNIT_ITERATIONS=1 vmb all -p arkts_node_interop_host --aot-skip-libs -v debug \
   -wi=1 -mi=1 \
   --ark-custom-option=--gc-trigger-type=heap-trigger \
   --ark-custom-option=--compiler-enable-jit=true \
@@ -50,19 +50,27 @@ benchJ2j_test | 4.58e-01 | 0.00e+00 | 4.71e+04 | Passed  |
 
 Along with [Prerequisites](#Prerequisites) above, ArkjsVM is built and installed per [tests/interop_js/README.MD](../../../../plugins/ets/tests/interop_js/README.MD)
 
+Specifically, it is necessary to have these libs available:
+```
+$PANDA_BUILD/lib/module/ets_interop_js_napi_arkjsvm.so
+$PANDA_BUILD/lib/arkjsvm_interop/libinterop_test_helper.so
+```
+
+Note `VMB_BENCH_UNIT_ITERATIONS=1 -wi=1 -mi=1` parameters below mean minimal non-zero number of iterations.
+
 ```
 cd $PANDA_ROOT/tests/vm-benchmarks
 # assume ArkjsVM built and installed per $PANDA_ROOT/plugins/ets/tests/interop_js/README.MD
 # assume PANDA and VMB are built and installed per $PANDA_ROOT/tests/vm-benchmarks/interop.readme.md
 export PANDA_BUILD=$PANDA_ROOT/build
 export PANDA_STDLIB_SRC=$PANDA_ROOT/plugins/ets/stdlib
-vmb all -p arkts_arkjs_interop_host --aot-skip-libs -v debug \
+env VMB_BENCH_UNIT_ITERATIONS=1 vmb all -p arkts_arkjs_interop_host --aot-skip-libs -v debug \
   -wi=1 -mi=1 \
   --ark-custom-option=--gc-trigger-type=heap-trigger \
   --ark-custom-option=--compiler-enable-jit=true \
   --ark-custom-option=--run-gc-in-place=false \
   --ark-custom-option=--log-components=ets_interop_js \
   --ark-custom-option=--load-runtimes=ets \
-  --exclude-list $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates/exclude-interop-benchmarks-examples.txt 
+  --exclude-list $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates/exclude-interop-benchmarks-examples-arkjs.txt 
   $PANDA_ROOT/tests/vm-benchmarks/examples/benchmarks-interop-templates
 ```

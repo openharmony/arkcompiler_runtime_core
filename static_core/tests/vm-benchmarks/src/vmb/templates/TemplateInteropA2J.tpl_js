@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { 
+const {
     MODULE_PATH,
     ARK_ETS_STDLIB_PATH,
     ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
@@ -24,6 +24,10 @@ const {
 const DEFAULT_ITERATIONS = 100000;
 
 globalThis.require = require;
+
+function print_log(msg) {
+    console.log(msg); // NOTE can be console.log or print or something else depending on platform
+}
 
 class Benchmark {
     #ark = require(MODULE_PATH + '/ets_interop_js_napi.node');
@@ -78,13 +82,13 @@ class Benchmark {
         const isSelfTimed = this.#benchmark.totalTime !== undefined;
         const testRunner = isSelfTimed ? this.#loopFromArk.bind(this) : this.#loopFromJS.bind(this);
         const timing = testRunner(iterations);
-        console.log("Benchmark result: $NAME " + timing);
+        print_log("Benchmark result: $NAME " + timing);
     }
 }
 
 const benchmark = new Benchmark(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH);
 
-const iterations = (VMB_BENCH_UNIT_ITERATIONS && Number.isFinite(Number(VMB_BENCH_UNIT_ITERATIONS))) 
+const iterations = (VMB_BENCH_UNIT_ITERATIONS && Number.isFinite(Number(VMB_BENCH_UNIT_ITERATIONS)))
     ? Number(VMB_BENCH_UNIT_ITERATIONS)
     : DEFAULT_ITERATIONS;
 

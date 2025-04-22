@@ -35,12 +35,12 @@ class Platform(PlatformBase):
         ensure_env_var('PANDA_BUILD')
         super().__init__(args)
         self.es2panda = self.tools_get('es2panda')
-        self.node = self.tools_get('ark_js_vm')
+        self.arkjs_interop = self.tools_get('arkjs_interop')
         self.ark = self.tools_get('ark')
 
     @property
     def name(self) -> str:
-        return 'Interop ArkTS from NodeJS'
+        return 'Interop ArkTS from ArkJS VM host'
 
     @property
     def target(self) -> Target:
@@ -48,8 +48,7 @@ class Platform(PlatformBase):
 
     @property
     def required_tools(self) -> List[str]:
-        # Note #23757 this needs to be further tested and possibly adjusted
-        return ['es2panda', 'ark_js_vm', 'ark']
+        return ['es2panda', 'arkjs_interop', 'ark']
 
     @property
     def langs(self) -> List[str]:
@@ -80,32 +79,58 @@ class Platform(PlatformBase):
             self.ark(bu)
             return
         if 'bu_a2j' in bu.tags:
+            self.establish_arkjs_module()
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.js {bu.path}')
             self.es2panda(bu)
+            self.es2abc('InteropRunner', str(bu.path))
+            self.es2abc('test_import', str(bu.path))
             self.run_generated(bu)
             return
         if 'bu_j2j' in bu.tags:
+            self.establish_arkjs_module()
             self.sh.run(f'cp -f -n {str(bu.doclet_src.parent)}/*.js {bu.path}')
-            self.node(bu)
+            self.es2abc(str(bu.src('.js').stem), str(bu.path))
+            self.es2abc('test_import', str(bu.path))
+            if self.dry_run_stop(bu):
+                return
+            self.arkjs_interop(bu)
             return
         if 'bu_j2a' in bu.tags:
+            self.establish_arkjs_module()
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.ets {bu.path}')
             bu.src_for_es2panda_override = Path(f'{bu.path}/*.ets')  # wildcard here assumes single ets file
-            self.run_generated(bu)
+            self.make_classes_abc(bu)
+            self.es2abc(str(bu.src('.js').stem), str(bu.path))
+            if self.dry_run_stop(bu):
+                return
+            self.arkjs_interop(bu)
             return
 
         log.warning('Valid generated interop mode not found in tags: %s',
                     ','.join(bu.tags))
         return
 
-    def run_generated(self, bu: BenchUnit) -> None:
+    def establish_arkjs_module(self) -> None:
+        self.sh.run('mkdir -p module')
+        self.sh.run('ln -sf $PANDA_BUILD/lib/module/ets_interop_js_napi_arkjsvm.so ' +
+                    '$PANDA_BUILD/lib/arkjsvm_interop/libinterop_test_helper.so' +
+                    ' -t module')
+
+    def es2abc(self, js_file_name: str, path: str) -> None:
+        self.sh.run('$PANDA_BUILD/bin/arkjsvm_interop/es2abc --module --merge-abc ' +
+                    path + '/' + js_file_name + '.js' + ' --output=' + path + '/' + js_file_name + '.abc')
+
+    def make_classes_abc(self, bu: BenchUnit) -> None:
         abc = bu.src('.abc')
         if not abc.is_file():
             self.es2panda(bu)
             abc = bu.src('.abc')
-        if self.dry_run_stop(bu):
-            return
         abc.rename(abc.parent.joinpath('classes.abc'))
         self.sh.run(f'zip -r -0 {abc.with_suffix(".zip").name} classes.abc',
                     cwd=str(bu.path))
-        self.node(bu)
+
+    def run_generated(self, bu: BenchUnit) -> None:
+        self.make_classes_abc(bu)
+        if self.dry_run_stop(bu):
+            return
+        self.arkjs_interop(bu)
