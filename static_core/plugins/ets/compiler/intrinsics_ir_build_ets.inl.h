@@ -30,8 +30,6 @@ std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedArrayLoadData
 // CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
 std::tuple<ark::compiler::Inst *, ark::compiler::Inst *> BuildTypedUnsignedArrayLoadDataAndOffset(
     const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
-void BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(ark::compiler::Inst *typedArrayInst, size_t bcAddr,
-                                                     ark::compiler::SaveStateInst *saveState, size_t fieldOffset);
 void BuildTypedArrayDeoptimizeIfExternalData(ark::compiler::Inst *dataInst, size_t bcAddr,
                                              ark::compiler::SaveStateInst *saveState);
 void BuildTypedArrayDeoptimizeIfOutOfRange(ark::compiler::Inst *posInst, ark::compiler::Inst *lengthInst, size_t bcAddr,

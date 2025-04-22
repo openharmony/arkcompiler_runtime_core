@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-let buf: SharedArrayBuffer;
+let buf: ArrayBuffer;
 let arr: Int32Array; 
 
 function main() {
     try {
-        buf = new SharedArrayBuffer(4);
+        buf = new ArrayBuffer(4);
         arr = new Int32Array(buf, 0, 1);
 
         for (let i = 1; i < 100; i++) {

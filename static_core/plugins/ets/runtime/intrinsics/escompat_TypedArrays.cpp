@@ -22,13 +22,6 @@ namespace ark::ets::intrinsics {
 template <typename T>
 static void *GetNativeData(T *array)
 {
-    if (!array->IsArrayBufferBacked()) {
-        return static_cast<EtsEscompatSharedArrayBuffer *>(&*array->GetBuffer())
-            ->GetSharedMemory()
-            ->GetData()
-            ->GetData<void>();
-    }
-
     auto *arrayBuffer = static_cast<EtsEscompatArrayBuffer *>(&*array->GetBuffer());
     if (UNLIKELY(arrayBuffer->WasDetached())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();

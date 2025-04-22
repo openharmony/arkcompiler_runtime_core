@@ -20,7 +20,7 @@ let RESULT = 10 as long
 let arr: BigInt64Array
 
 function main() {
-    let buf = new SharedArrayBuffer(8);
+    let buf = new ArrayBuffer(8);
     arr = new BigInt64Array(buf, 0, 1);
 
     launch<Int, () => Int>(incrementer)

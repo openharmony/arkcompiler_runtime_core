@@ -15,7 +15,7 @@
 
 
 function main() {
-    let buf = new SharedArrayBuffer(4);
+    let buf = new ArrayBuffer(4);
     let arr = new Int8Array(buf, 0, 1);
 
     Atomics.store(arr, 0, 10);

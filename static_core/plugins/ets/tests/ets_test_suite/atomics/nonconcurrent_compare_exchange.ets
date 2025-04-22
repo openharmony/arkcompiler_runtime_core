@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-let buf: SharedArrayBuffer;
-let buf_2: SharedArrayBuffer;
+let buf: ArrayBuffer;
+let buf_2: ArrayBuffer;
 let arr: Int8Array;
 let arr_2: BigUint64Array; 
 
 function main() {
-    buf = new SharedArrayBuffer(1);
-    buf_2 = new SharedArrayBuffer(8);
+    buf = new ArrayBuffer(1);
+    buf_2 = new ArrayBuffer(8);
     arr = new Int8Array(buf, 0, 1);
     arr_2 = new BigUint64Array(buf_2, 0, 1);
 

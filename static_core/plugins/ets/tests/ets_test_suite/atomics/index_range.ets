@@ -22,4 +22,11 @@ function main() {
     let arrInt32: Int32Array = new Int32Array(3)
     Atomics.add(arrInt32, 2, 88)
     assertEQ(Atomics.load(arrInt32, 2), 88)
+    assertEQ(arrInt32[2], 88)
+
+    // Correct atomic loading after non-atomic store
+    let arrUint32: Uint32Array = new Uint32Array(2)
+    arrUint32[1] = 56
+    assertEQ(Atomics.load(arrUint32,1), 56)
+
 }

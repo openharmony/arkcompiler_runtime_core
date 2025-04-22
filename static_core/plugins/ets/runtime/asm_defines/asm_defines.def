@@ -28,17 +28,12 @@ DEFINE_VALUE(ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET,
 DEFINE_VALUE(TYPED_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetBufferOffset())
 DEFINE_VALUE(TYPED_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetLengthIntOffset())
 DEFINE_VALUE(TYPED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetByteOffsetOffset())
-DEFINE_VALUE(TYPED_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetArrayBufferBackedOffset())
 
 DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetBufferOffset())
 DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetLengthIntOffset())
 DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetByteOffsetOffset())
-DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetArrayBufferBackedOffset())
 
 DEFINE_VALUE(ARRAY_BUFFER_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetManagedDataOffset())
-
-DEFINE_VALUE(SHARED_ARRAY_BUFFER_SHARED_MEMORY_OFFSET, ark::ets::EtsEscompatSharedArrayBuffer::GetSharedMemoryOffset())
-DEFINE_VALUE(SHARED_MEMORY_DATA_OFFSET, ark::ets::EtsEscompatSharedMemory::GetDataOffset())
 
 DEFINE_VALUE(ETS_BOX_PRIMITIVE_VALUE_OFFSET, ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::GetValueOffset())
 // NOLINTEND(readability-identifier-naming)

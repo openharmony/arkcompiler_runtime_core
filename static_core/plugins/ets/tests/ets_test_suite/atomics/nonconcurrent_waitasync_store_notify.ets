@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-let buf: SharedArrayBuffer;
+let buf: ArrayBuffer;
 let arr: Int32Array;
 
 function main() {
     let c = new Console()
 
-    buf = new SharedArrayBuffer(4);
+    buf = new ArrayBuffer(4);
     arr = new Int32Array(buf, 0, 1);
 
-    let promise: Promise<string> = Atomics.waitAsync(arr, 0, 0);
+    let promise: Promise<string> = Atomics.waitAsync(arr, 0, new BigInt(0));
     Atomics.store(arr, 0, 5);
     let count = Atomics.notify(arr, 0);
     let res: string = await promise;

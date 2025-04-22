@@ -116,7 +116,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -128,7 +127,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type byte in newly created Int8Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
             intByteOffset = byteOffset.intValue()
@@ -136,16 +135,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
+        let intByteLength: int = buf.getByteLength() - intByteOffset
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
@@ -180,7 +170,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type byte in newly created Int8Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
         this(buf, byteOffset, undefined)
     }
 
@@ -193,7 +183,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type byte in newly created Int8Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -206,7 +196,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type byte in newly created Int8Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -219,7 +209,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type byte in newly created Int8Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -230,7 +220,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -239,23 +229,14 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param buf data initializer
      */
-    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+    public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
             if (this.byteLength % Int8Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
+               throw new RangeError("ArrayBuffer.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
             }
             this.lengthInt = this.byteLength / Int8Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
-            this.byteOffset = 0
-        } else if (buf instanceof SharedArrayBuffer) {
-            this.byteLength = (buf as SharedArrayBuffer).getByteLength()
-            if (this.byteLength % Int8Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
-            }
-            this.lengthInt = this.byteLength / Int8Array.BYTES_PER_ELEMENT as int
-            this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -264,7 +245,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Int8Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
-            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).byteValue())
@@ -296,7 +276,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Int8Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -305,14 +284,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Int8Array) {
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
@@ -1293,15 +1265,8 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        if (this.buffer instanceof ArrayBuffer) {
-            let buf = (this.buffer as ArrayBuffer).slice(relStart * Int8Array.BYTES_PER_ELEMENT as int, relEnd * Int8Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
-            return new Int8Array(buf)
-        } else if (this.buffer instanceof SharedArrayBuffer) {
-            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Int8Array.BYTES_PER_ELEMENT as int, relEnd * Int8Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
-            return new Int8Array(buf)
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        let buf = this.buffer.slice(relStart * Int8Array.BYTES_PER_ELEMENT as int, relEnd * Int8Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        return new Int8Array(buf)
     }
 
     /**
@@ -1327,65 +1292,65 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Int8Array with the same underlying ArrayBufferLike
+     * Creates a Int8Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int8Array with the same underlying ArrayBufferLike
+     * @returns new Int8Array with the same underlying ArrayBuffer
      */
     public subarray(begin?: number, end?: number): Int8Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Creates a Int8Array with the same underlying ArrayBufferLike
+     * Creates a Int8Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int8Array with the same underlying ArrayBufferLike
+     * @returns new Int8Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: number): Int8Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int8Array with the same underlying ArrayBufferLike
+     * Creates a Int8Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int8Array with the same underlying ArrayBufferLike
+     * @returns new Int8Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: int): Int8Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int8Array with the same underlying ArrayBufferLike
+     * Creates a Int8Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int8Array with the same underlying ArrayBufferLike
+     * @returns new Int8Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Int8Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int8Array with the same underlying ArrayBufferLike
+     * Creates a Int8Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int8Array with the same underlying ArrayBufferLike
+     * @returns new Int8Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Int8Array {
         const len: int = this.lengthInt
@@ -1399,22 +1364,22 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Int8Array with the same ArrayBufferLike
+     * Creates a Int8Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int8Array with the same ArrayBufferLike
+     * @returns new Int8Array with the same ArrayBuffer
      */
     public subarray(begin: number): Int8Array {
         return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
-     * Creates a Int8Array with the same ArrayBufferLike
+     * Creates a Int8Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int8Array with the same ArrayBufferLike
+     * @returns new Int8Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int8Array {
         return this.subarray(begin as int, this.lengthInt)
@@ -1553,7 +1518,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param compareFn comparator —  used to determine the order of the elements.
+     * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
@@ -1858,33 +1823,15 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         let res : byte = 0
         let byteVal : byte
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                    res = (res | byteVal << (8 * i)) as byte
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
-                    res = (res | byteVal << (8 * i)) as byte
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                res = (res | byteVal << (8 * i)) as byte
             }
             return res
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + 0 - i)
-                    res = (res | byteVal << (8 * i)) as byte
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + 0 - i)
-                    res = (res | byteVal << (8 * i)) as byte
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = this.buffer.at(byteIndex as int + 0 - i)
+                res = (res | byteVal << (8 * i)) as byte
             }
             return res
         }
@@ -1894,46 +1841,26 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + 0 - i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + 0 - i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + 0 - i, byteVal)
             }
         }
     }
 
-    /** Underlying ArrayBufferLike */
-    public readonly buffer: ArrayBufferLike
+    /** Underlying ArrayBuffer */
+    public readonly buffer: ArrayBuffer
 
-    /** Byte offset within the underlying ArrayBufferLike */
+    /** Byte offset within the underlying ArrayBuffer */
     public readonly byteOffset: number
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    private readonly arrayBufferBacked: boolean
 
     /** String \"Int8Array\" */
     public readonly name = "Int8Array"
@@ -2038,7 +1965,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -2050,7 +1976,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type short in newly created Int16Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
             intByteOffset = byteOffset.intValue()
@@ -2058,22 +1984,13 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
+        let intByteLength: int = buf.getByteLength() - intByteOffset
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
         if (intByteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
+            throw new RangeError("ArrayBuffer.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
         }
         if (intByteOffset % Int16Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
@@ -2109,7 +2026,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type short in newly created Int16Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
         this(buf, byteOffset, undefined)
     }
 
@@ -2122,7 +2039,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type short in newly created Int16Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -2135,7 +2052,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type short in newly created Int16Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -2148,7 +2065,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type short in newly created Int16Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -2159,7 +2076,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -2168,23 +2085,14 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param buf data initializer
      */
-    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+    public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
             if (this.byteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
+               throw new RangeError("ArrayBuffer.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
             }
             this.lengthInt = this.byteLength / Int16Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
-            this.byteOffset = 0
-        } else if (buf instanceof SharedArrayBuffer) {
-            this.byteLength = (buf as SharedArrayBuffer).getByteLength()
-            if (this.byteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
-            }
-            this.lengthInt = this.byteLength / Int16Array.BYTES_PER_ELEMENT as int
-            this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -2193,7 +2101,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Int16Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
-            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).shortValue())
@@ -2225,7 +2132,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Int16Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -2234,14 +2140,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Int16Array) {
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
@@ -3222,15 +3121,8 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        if (this.buffer instanceof ArrayBuffer) {
-            let buf = (this.buffer as ArrayBuffer).slice(relStart * Int16Array.BYTES_PER_ELEMENT as int, relEnd * Int16Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
-            return new Int16Array(buf)
-        } else if (this.buffer instanceof SharedArrayBuffer) {
-            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Int16Array.BYTES_PER_ELEMENT as int, relEnd * Int16Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
-            return new Int16Array(buf)
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        let buf = this.buffer.slice(relStart * Int16Array.BYTES_PER_ELEMENT as int, relEnd * Int16Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        return new Int16Array(buf)
     }
 
     /**
@@ -3256,65 +3148,65 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Int16Array with the same underlying ArrayBufferLike
+     * Creates a Int16Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int16Array with the same underlying ArrayBufferLike
+     * @returns new Int16Array with the same underlying ArrayBuffer
      */
     public subarray(begin?: number, end?: number): Int16Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Creates a Int16Array with the same underlying ArrayBufferLike
+     * Creates a Int16Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int16Array with the same underlying ArrayBufferLike
+     * @returns new Int16Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: number): Int16Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int16Array with the same underlying ArrayBufferLike
+     * Creates a Int16Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int16Array with the same underlying ArrayBufferLike
+     * @returns new Int16Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: int): Int16Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int16Array with the same underlying ArrayBufferLike
+     * Creates a Int16Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int16Array with the same underlying ArrayBufferLike
+     * @returns new Int16Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Int16Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int16Array with the same underlying ArrayBufferLike
+     * Creates a Int16Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int16Array with the same underlying ArrayBufferLike
+     * @returns new Int16Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Int16Array {
         const len: int = this.lengthInt
@@ -3328,22 +3220,22 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Int16Array with the same ArrayBufferLike
+     * Creates a Int16Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int16Array with the same ArrayBufferLike
+     * @returns new Int16Array with the same ArrayBuffer
      */
     public subarray(begin: number): Int16Array {
         return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
-     * Creates a Int16Array with the same ArrayBufferLike
+     * Creates a Int16Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int16Array with the same ArrayBufferLike
+     * @returns new Int16Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int16Array {
         return this.subarray(begin as int, this.lengthInt)
@@ -3482,7 +3374,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param compareFn comparator —  used to determine the order of the elements.
+     * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
@@ -3787,37 +3679,17 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         let res : short = 0
         let byteVal : short
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as short
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as short
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as short
             }
             return res
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + 1 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as short
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + 1 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as short
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = this.buffer.at(byteIndex as int + 1 - i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as short
             }
             return res
         }
@@ -3827,46 +3699,26 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + 1 - i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + 1 - i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + 1 - i, byteVal)
             }
         }
     }
 
-    /** Underlying ArrayBufferLike */
-    public readonly buffer: ArrayBufferLike
+    /** Underlying ArrayBuffer */
+    public readonly buffer: ArrayBuffer
 
-    /** Byte offset within the underlying ArrayBufferLike */
+    /** Byte offset within the underlying ArrayBuffer */
     public readonly byteOffset: number
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    private readonly arrayBufferBacked: boolean
 
     /** String \"Int16Array\" */
     public readonly name = "Int16Array"
@@ -3971,7 +3823,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -3983,7 +3834,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type int in newly created Int32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
             intByteOffset = byteOffset.intValue()
@@ -3991,22 +3842,13 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
+        let intByteLength: int = buf.getByteLength() - intByteOffset
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
         if (intByteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
+            throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
         }
         if (intByteOffset % Int32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
@@ -4042,7 +3884,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type int in newly created Int32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
         this(buf, byteOffset, undefined)
     }
 
@@ -4055,7 +3897,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type int in newly created Int32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -4068,7 +3910,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type int in newly created Int32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -4081,7 +3923,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type int in newly created Int32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -4092,7 +3934,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -4101,23 +3943,14 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param buf data initializer
      */
-    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+    public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
             if (this.byteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
+               throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
             }
             this.lengthInt = this.byteLength / Int32Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
-            this.byteOffset = 0
-        } else if (buf instanceof SharedArrayBuffer) {
-            this.byteLength = (buf as SharedArrayBuffer).getByteLength()
-            if (this.byteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
-            }
-            this.lengthInt = this.byteLength / Int32Array.BYTES_PER_ELEMENT as int
-            this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -4126,7 +3959,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Int32Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
-            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).intValue())
@@ -4158,7 +3990,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Int32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -4167,14 +3998,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Int32Array) {
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
@@ -5120,15 +4944,8 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        if (this.buffer instanceof ArrayBuffer) {
-            let buf = (this.buffer as ArrayBuffer).slice(relStart * Int32Array.BYTES_PER_ELEMENT as int, relEnd * Int32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
-            return new Int32Array(buf)
-        } else if (this.buffer instanceof SharedArrayBuffer) {
-            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Int32Array.BYTES_PER_ELEMENT as int, relEnd * Int32Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
-            return new Int32Array(buf)
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        let buf = this.buffer.slice(relStart * Int32Array.BYTES_PER_ELEMENT as int, relEnd * Int32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        return new Int32Array(buf)
     }
 
     /**
@@ -5154,65 +4971,65 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Int32Array with the same underlying ArrayBufferLike
+     * Creates a Int32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int32Array with the same underlying ArrayBufferLike
+     * @returns new Int32Array with the same underlying ArrayBuffer
      */
     public subarray(begin?: number, end?: number): Int32Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Creates a Int32Array with the same underlying ArrayBufferLike
+     * Creates a Int32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int32Array with the same underlying ArrayBufferLike
+     * @returns new Int32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: number): Int32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int32Array with the same underlying ArrayBufferLike
+     * Creates a Int32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int32Array with the same underlying ArrayBufferLike
+     * @returns new Int32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: int): Int32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int32Array with the same underlying ArrayBufferLike
+     * Creates a Int32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int32Array with the same underlying ArrayBufferLike
+     * @returns new Int32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Int32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int32Array with the same underlying ArrayBufferLike
+     * Creates a Int32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int32Array with the same underlying ArrayBufferLike
+     * @returns new Int32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Int32Array {
         const len: int = this.lengthInt
@@ -5226,22 +5043,22 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Int32Array with the same ArrayBufferLike
+     * Creates a Int32Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int32Array with the same ArrayBufferLike
+     * @returns new Int32Array with the same ArrayBuffer
      */
     public subarray(begin: number): Int32Array {
         return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
-     * Creates a Int32Array with the same ArrayBufferLike
+     * Creates a Int32Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int32Array with the same ArrayBufferLike
+     * @returns new Int32Array with the same ArrayBuffer
      */
     public subarray(begin: int): Int32Array {
         return this.subarray(begin as int, this.lengthInt)
@@ -5380,7 +5197,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param compareFn comparator —  used to determine the order of the elements.
+     * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
@@ -5685,37 +5502,17 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         let res : int = 0
         let byteVal : int
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int
             }
             return res
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + 3 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + 3 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = this.buffer.at(byteIndex as int + 3 - i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int
             }
             return res
         }
@@ -5725,46 +5522,26 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + 3 - i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + 3 - i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + 3 - i, byteVal)
             }
         }
     }
 
-    /** Underlying ArrayBufferLike */
-    public readonly buffer: ArrayBufferLike
+    /** Underlying ArrayBuffer */
+    public readonly buffer: ArrayBuffer
 
-    /** Byte offset within the underlying ArrayBufferLike */
+    /** Byte offset within the underlying ArrayBuffer */
     public readonly byteOffset: number
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    private readonly arrayBufferBacked: boolean
 
     /** String \"Int32Array\" */
     public readonly name = "Int32Array"
@@ -5869,7 +5646,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -5881,7 +5657,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param length size of elements of type long in newly created BigInt64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
             intByteOffset = byteOffset.intValue()
@@ -5889,22 +5665,13 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
+        let intByteLength: int = buf.getByteLength() - intByteOffset
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
         if (intByteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
+            throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
         }
         if (intByteOffset % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
@@ -5940,7 +5707,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param length size of elements of type long in newly created BigInt64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
         this(buf, byteOffset, undefined)
     }
 
@@ -5953,7 +5720,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param length size of elements of type long in newly created BigInt64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -5966,7 +5733,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param length size of elements of type long in newly created BigInt64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -5979,7 +5746,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param length size of elements of type long in newly created BigInt64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -5990,7 +5757,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -5999,23 +5766,14 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @param buf data initializer
      */
-    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+    public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
             if (this.byteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
+               throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
             }
             this.lengthInt = this.byteLength / BigInt64Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
-            this.byteOffset = 0
-        } else if (buf instanceof SharedArrayBuffer) {
-            this.byteLength = (buf as SharedArrayBuffer).getByteLength()
-            if (this.byteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
-            }
-            this.lengthInt = this.byteLength / BigInt64Array.BYTES_PER_ELEMENT as int
-            this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -6024,7 +5782,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             this.byteLength = arr.length as int * BigInt64Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
-            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).longValue())
@@ -6056,7 +5813,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         this.byteLength = this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -6065,14 +5821,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @param other data initializer
      */
     public constructor(other: BigInt64Array) {
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
@@ -7032,15 +6781,8 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         if (count < 0) {
             count = 0
         }
-        if (this.buffer instanceof ArrayBuffer) {
-            let buf = (this.buffer as ArrayBuffer).slice(relStart * BigInt64Array.BYTES_PER_ELEMENT as int, relEnd * BigInt64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
-            return new BigInt64Array(buf)
-        } else if (this.buffer instanceof SharedArrayBuffer) {
-            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * BigInt64Array.BYTES_PER_ELEMENT as int, relEnd * BigInt64Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
-            return new BigInt64Array(buf)
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        let buf = this.buffer.slice(relStart * BigInt64Array.BYTES_PER_ELEMENT as int, relEnd * BigInt64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        return new BigInt64Array(buf)
     }
 
     /**
@@ -7066,65 +6808,65 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     * Creates a BigInt64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
     public subarray(begin?: number, end?: number): BigInt64Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     * Creates a BigInt64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: number): BigInt64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     * Creates a BigInt64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: int): BigInt64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     * Creates a BigInt64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): BigInt64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     * Creates a BigInt64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     * @returns new BigInt64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): BigInt64Array {
         const len: int = this.lengthInt
@@ -7138,22 +6880,22 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates a BigInt64Array with the same ArrayBufferLike
+     * Creates a BigInt64Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new BigInt64Array with the same ArrayBufferLike
+     * @returns new BigInt64Array with the same ArrayBuffer
      */
     public subarray(begin: number): BigInt64Array {
         return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
-     * Creates a BigInt64Array with the same ArrayBufferLike
+     * Creates a BigInt64Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new BigInt64Array with the same ArrayBufferLike
+     * @returns new BigInt64Array with the same ArrayBuffer
      */
     public subarray(begin: int): BigInt64Array {
         return this.subarray(begin as int, this.lengthInt)
@@ -7292,7 +7034,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     /**
      * Sorts in-place
      *
-     * @param compareFn comparator —  used to determine the order of the elements.
+     * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
@@ -7601,37 +7343,17 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         let res : long = 0
         let byteVal : long
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long
             }
             return res
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + 7 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + 7 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = this.buffer.at(byteIndex as int + 7 - i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long
             }
             return res
         }
@@ -7641,46 +7363,26 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = val
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + 7 - i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + 7 - i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + 7 - i, byteVal)
             }
         }
     }
 
-    /** Underlying ArrayBufferLike */
-    public readonly buffer: ArrayBufferLike
+    /** Underlying ArrayBuffer */
+    public readonly buffer: ArrayBuffer
 
-    /** Byte offset within the underlying ArrayBufferLike */
+    /** Byte offset within the underlying ArrayBuffer */
     public readonly byteOffset: number
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    private readonly arrayBufferBacked: boolean
 
     /** String \"BigInt64Array\" */
     public readonly name = "BigInt64Array"
@@ -7785,7 +7487,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -7797,7 +7498,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type float in newly created Float32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
             intByteOffset = byteOffset.intValue()
@@ -7805,22 +7506,13 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
+        let intByteLength: int = buf.getByteLength() - intByteOffset
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
         if (intByteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
+            throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
         }
         if (intByteOffset % Float32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
@@ -7856,7 +7548,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type float in newly created Float32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
         this(buf, byteOffset, undefined)
     }
 
@@ -7869,7 +7561,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type float in newly created Float32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -7882,7 +7574,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type float in newly created Float32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -7895,7 +7587,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type float in newly created Float32Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -7906,7 +7598,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -7915,23 +7607,14 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param buf data initializer
      */
-    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+    public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
             if (this.byteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
+               throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
             }
             this.lengthInt = this.byteLength / Float32Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
-            this.byteOffset = 0
-        } else if (buf instanceof SharedArrayBuffer) {
-            this.byteLength = (buf as SharedArrayBuffer).getByteLength()
-            if (this.byteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
-            }
-            this.lengthInt = this.byteLength / Float32Array.BYTES_PER_ELEMENT as int
-            this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -7940,7 +7623,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Float32Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
-            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).floatValue())
@@ -7972,7 +7654,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Float32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -7981,14 +7662,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Float32Array) {
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
@@ -8932,15 +8606,8 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        if (this.buffer instanceof ArrayBuffer) {
-            let buf = (this.buffer as ArrayBuffer).slice(relStart * Float32Array.BYTES_PER_ELEMENT as int, relEnd * Float32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
-            return new Float32Array(buf)
-        } else if (this.buffer instanceof SharedArrayBuffer) {
-            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Float32Array.BYTES_PER_ELEMENT as int, relEnd * Float32Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
-            return new Float32Array(buf)
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        let buf = this.buffer.slice(relStart * Float32Array.BYTES_PER_ELEMENT as int, relEnd * Float32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        return new Float32Array(buf)
     }
 
     /**
@@ -8966,65 +8633,65 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Float32Array with the same underlying ArrayBufferLike
+     * Creates a Float32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float32Array with the same underlying ArrayBufferLike
+     * @returns new Float32Array with the same underlying ArrayBuffer
      */
     public subarray(begin?: number, end?: number): Float32Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Creates a Float32Array with the same underlying ArrayBufferLike
+     * Creates a Float32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float32Array with the same underlying ArrayBufferLike
+     * @returns new Float32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: number): Float32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float32Array with the same underlying ArrayBufferLike
+     * Creates a Float32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float32Array with the same underlying ArrayBufferLike
+     * @returns new Float32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: int): Float32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float32Array with the same underlying ArrayBufferLike
+     * Creates a Float32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float32Array with the same underlying ArrayBufferLike
+     * @returns new Float32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Float32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float32Array with the same underlying ArrayBufferLike
+     * Creates a Float32Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float32Array with the same underlying ArrayBufferLike
+     * @returns new Float32Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Float32Array {
         const len: int = this.lengthInt
@@ -9038,22 +8705,22 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Float32Array with the same ArrayBufferLike
+     * Creates a Float32Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float32Array with the same ArrayBufferLike
+     * @returns new Float32Array with the same ArrayBuffer
      */
     public subarray(begin: number): Float32Array {
         return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
-     * Creates a Float32Array with the same ArrayBufferLike
+     * Creates a Float32Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float32Array with the same ArrayBufferLike
+     * @returns new Float32Array with the same ArrayBuffer
      */
     public subarray(begin: int): Float32Array {
         return this.subarray(begin as int, this.lengthInt)
@@ -9192,7 +8859,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param compareFn comparator —  used to determine the order of the elements.
+     * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
@@ -9497,37 +9164,17 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         let res : int = 0
         let byteVal : int
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int
             }
             return Float.bitCastFromInt(res)
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + 3 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + 3 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as int
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = this.buffer.at(byteIndex as int + 3 - i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int
             }
             return Float.bitCastFromInt(res)
         }
@@ -9537,46 +9184,26 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = Float.bitCastToInt(val)
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + 3 - i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + 3 - i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + 3 - i, byteVal)
             }
         }
     }
 
-    /** Underlying ArrayBufferLike */
-    public readonly buffer: ArrayBufferLike
+    /** Underlying ArrayBuffer */
+    public readonly buffer: ArrayBuffer
 
-    /** Byte offset within the underlying ArrayBufferLike */
+    /** Byte offset within the underlying ArrayBuffer */
     public readonly byteOffset: number
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    private readonly arrayBufferBacked: boolean
 
     /** String \"Float32Array\" */
     public readonly name = "Float32Array"
@@ -9681,7 +9308,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -9693,7 +9319,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type double in newly created Float64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
             intByteOffset = byteOffset.intValue()
@@ -9701,22 +9327,13 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
+        let intByteLength: int = buf.getByteLength() - intByteOffset
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 
         if (intByteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
+            throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
         }
         if (intByteOffset % Float64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
@@ -9752,7 +9369,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type double in newly created Float64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
         this(buf, byteOffset, undefined)
     }
 
@@ -9765,7 +9382,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type double in newly created Float64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -9778,7 +9395,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type double in newly created Float64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -9791,7 +9408,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param length size of elements of type double in newly created Float64Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -9802,7 +9419,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -9811,23 +9428,14 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param buf data initializer
      */
-    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+    public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
             if (this.byteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
+               throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
             }
             this.lengthInt = this.byteLength / Float64Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
-            this.byteOffset = 0
-        } else if (buf instanceof SharedArrayBuffer) {
-            this.byteLength = (buf as SharedArrayBuffer).getByteLength()
-            if (this.byteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
-            }
-            this.lengthInt = this.byteLength / Float64Array.BYTES_PER_ELEMENT as int
-            this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -9836,7 +9444,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             this.byteLength = arr.length as int * Float64Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
-            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).doubleValue())
@@ -9868,7 +9475,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         this.byteLength = this.lengthInt * Float64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -9877,14 +9483,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @param other data initializer
      */
     public constructor(other: Float64Array) {
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
@@ -10696,15 +10295,8 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        if (this.buffer instanceof ArrayBuffer) {
-            let buf = (this.buffer as ArrayBuffer).slice(relStart * Float64Array.BYTES_PER_ELEMENT as int, relEnd * Float64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
-            return new Float64Array(buf)
-        } else if (this.buffer instanceof SharedArrayBuffer) {
-            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Float64Array.BYTES_PER_ELEMENT as int, relEnd * Float64Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
-            return new Float64Array(buf)
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        let buf = this.buffer.slice(relStart * Float64Array.BYTES_PER_ELEMENT as int, relEnd * Float64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        return new Float64Array(buf)
     }
 
     /**
@@ -10730,65 +10322,65 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Float64Array with the same underlying ArrayBufferLike
+     * Creates a Float64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float64Array with the same underlying ArrayBufferLike
+     * @returns new Float64Array with the same underlying ArrayBuffer
      */
     public subarray(begin?: number, end?: number): Float64Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Creates a Float64Array with the same underlying ArrayBufferLike
+     * Creates a Float64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float64Array with the same underlying ArrayBufferLike
+     * @returns new Float64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: number): Float64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float64Array with the same underlying ArrayBufferLike
+     * Creates a Float64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float64Array with the same underlying ArrayBufferLike
+     * @returns new Float64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: int): Float64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float64Array with the same underlying ArrayBufferLike
+     * Creates a Float64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float64Array with the same underlying ArrayBufferLike
+     * @returns new Float64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): Float64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float64Array with the same underlying ArrayBufferLike
+     * Creates a Float64Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float64Array with the same underlying ArrayBufferLike
+     * @returns new Float64Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): Float64Array {
         const len: int = this.lengthInt
@@ -10802,22 +10394,22 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a Float64Array with the same ArrayBufferLike
+     * Creates a Float64Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float64Array with the same ArrayBufferLike
+     * @returns new Float64Array with the same ArrayBuffer
      */
     public subarray(begin: number): Float64Array {
         return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
-     * Creates a Float64Array with the same ArrayBufferLike
+     * Creates a Float64Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float64Array with the same ArrayBufferLike
+     * @returns new Float64Array with the same ArrayBuffer
      */
     public subarray(begin: int): Float64Array {
         return this.subarray(begin as int, this.lengthInt)
@@ -10956,7 +10548,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param compareFn comparator —  used to determine the order of the elements.
+     * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
@@ -11261,37 +10853,17 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         let res : long = 0
         let byteVal : long
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long
             }
             return Double.bitCastFromLong(res)
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + 7 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + 7 - i)
-                    byteVal &= 0xff
-                    res = (res | byteVal << (8 * i)) as long
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = this.buffer.at(byteIndex as int + 7 - i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long
             }
             return Double.bitCastFromLong(res)
         }
@@ -11301,46 +10873,26 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let bits = Double.bitCastToLong(val)
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + 7 - i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + 7 - i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + 7 - i, byteVal)
             }
         }
     }
 
-    /** Underlying ArrayBufferLike */
-    public readonly buffer: ArrayBufferLike
+    /** Underlying ArrayBuffer */
+    public readonly buffer: ArrayBuffer
 
-    /** Byte offset within the underlying ArrayBufferLike */
+    /** Byte offset within the underlying ArrayBuffer */
     public readonly byteOffset: number
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    private readonly arrayBufferBacked: boolean
 
     /** String \"Float64Array\" */
     public readonly name = "Float64Array"

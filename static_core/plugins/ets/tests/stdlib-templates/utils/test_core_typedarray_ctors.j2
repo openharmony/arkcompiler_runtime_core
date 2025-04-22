@@ -51,11 +51,6 @@ function main(): int {
     failures += check(createTAFromNonEmptyArrayBufferOneParamWithOffset(),"Create default empty {{.item.objectType}} from non empty source with offset");
     failures += check(createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(),"Create default empty {{.item.objectType}} from non empty source with offset and size");
 
-    failures += check(createTAFromEmptySharedArrayBuffer(),"Create default empty {{.item.objectType}} from empty source");
-    failures += check(createTAFromNonEmptySharedArrayBuffer(),"Create default empty {{.item.objectType}} from non empty source");
-    failures += check(createTAFromNonEmptySharedArrayBufferOneParamWithOffset(),"Create default empty {{.item.objectType}} from non empty source with offset");
-    failures += check(createTAFromNonEmptySharedArrayBufferOneParamWithOffsetAndSize(),"Create default empty {{.item.objectType}} from non empty source with offset and size");
-
     if (failures > 0){
         console.log("failed");
         return fail;
@@ -260,35 +255,6 @@ function createTAFromNonEmptyArrayBuffer(): number {
     return fail;
 }
 
-function createTAFromEmptySharedArrayBuffer(): number {
-    let ss = new SharedArrayBuffer(0);    // Buffer 0-bytes length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.length as int == 0 && target.byteOffset as int == 0) return success;
-    return fail;
-}
-
-function createTAFromNonEmptySharedArrayBuffer(): number {
-    let ss = new SharedArrayBuffer(5 * {{.item.primitiveSizeBytes}} as int);    // Buffer 5-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.byteLength as int == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) return success;
-    console.println("Error: Actual bytes length: " + target.byteLength);
-    return fail;
-}
-
-
-
 function createTAFromEmptyArrayBufferOneParamNoOffset(): number {
     let ss = new ArrayBuffer(0);
     let target: {{.item.objectType}};
@@ -424,44 +390,6 @@ function createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(): number {
     console.println("Error: length: " + target.length);
     return fail;
 }
-
-function createTAFromNonEmptySharedArrayBufferOneParamWithOffset(): number {
-    let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}} as int);    // Buffer 7-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}});
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    if (target.byteLength as int == 5 * {{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}} 
-        && target.length as int == 5){
-        return success;
-    }
-    console.println("withSharedArrayBuffer1 Error: Actual bytes length: " + target.byteLength);
-    console.println("withSharedArrayBuffer1 Error: Actual bytes offset: " + target.byteOffset);
-    console.println("withSharedArrayBuffer1 Error: Actual length: " + target.length);
-    return fail;
-}
-
-function createTAFromNonEmptySharedArrayBufferOneParamWithOffsetAndSize(): number {
-    let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}} as int);    // Buffer 7-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}}, 4);
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    if (target.byteLength as int == 4*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}} && target.length as int == 4) return success;
-    console.println("withSharedArrayBuffer2 Error: Actual bytes length: " + target.byteLength);
-    console.println("withSharedArrayBuffer2 Error: Actual bytes offset: " + target.byteOffset);
-    console.println("withSharedArrayBuffer2 Error: length: " + target.length);
-    return fail;
-}
-
 
 function createTAFromEmptyArrayBufferTwoParams(): number {
     let ss = new ArrayBuffer(0);

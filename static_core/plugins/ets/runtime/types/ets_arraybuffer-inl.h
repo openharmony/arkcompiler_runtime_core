@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_SHARED_MEMORY_INL_H
-#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_SHARED_MEMORY_INL_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_INL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_INL_H
 
 #include "runtime/include/thread_scopes.h"
-#include "plugins/ets/runtime/types/ets_shared_memory.h"
+#include "plugins/ets/runtime/types/ets_arraybuffer.h"
 
 namespace ark::ets {
 
@@ -72,148 +72,109 @@ namespace ark::ets {
     } while (false)
 
 template <typename T>
-T EtsSharedMemory::GetElement(uint32_t index)
+T EtsEscompatArrayBuffer::GetElement(uint32_t index)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, Get, T, obj, index);
     return val;
 }
 
 template <typename T>
-void EtsSharedMemory::SetElement(uint32_t index, T element)
+void EtsEscompatArrayBuffer::SetElement(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, element);
 }
 
 template <typename T>
-T EtsSharedMemory::GetVolatileElement(uint32_t index)
+T EtsEscompatArrayBuffer::GetVolatileElement(uint32_t index)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetVolatile, T, obj, index);
     return val;
 }
 
 template <typename T>
-void EtsSharedMemory::SetVolatileElement(uint32_t index, T element)
+void EtsEscompatArrayBuffer::SetVolatileElement(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, element);
 }
 
 template <typename T>
-std::pair<bool, T> EtsSharedMemory::CompareAndExchangeElement(uint32_t index, T oldElement, T newElement, bool strong)
+std::pair<bool, T> EtsEscompatArrayBuffer::CompareAndExchangeElement(uint32_t index, T oldElement, T newElement,
+                                                                     bool strong)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    std::pair<bool, T> val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    std::pair<bool, T> val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, CompareAndExchange, T, obj, index, oldElement, newElement, strong);
     return val;
 }
 template <typename T>
-T EtsSharedMemory::ExchangeElement(uint32_t index, T element)
+T EtsEscompatArrayBuffer::ExchangeElement(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, Exchange, T, obj, index, element);
     return val;
 }
 
 template <typename T>
-T EtsSharedMemory::GetAndAdd(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndAdd(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndAdd, T, obj, index, element);
     return val;
 }
 
 template <typename T>
-T EtsSharedMemory::GetAndSub(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndSub(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndSub, T, obj, index, element);
     return val;
 }
 
 template <typename T>
-T EtsSharedMemory::GetAndBitwiseOr(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndBitwiseOr(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, element);
     return val;
 }
 
 template <typename T>
-T EtsSharedMemory::GetAndBitwiseAnd(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndBitwiseAnd(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseAnd, T, obj, index, element);
     return val;
 }
 
 template <typename T>
-T EtsSharedMemory::GetAndBitwiseXor(uint32_t index, T element)
+T EtsEscompatArrayBuffer::GetAndBitwiseXor(uint32_t index, T element)
 {
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
     auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
-    // CC-OFFNXT(G.EXP.09): var is used as macros parameter
-    T val;
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
+    T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, element);
     return val;
-}
-
-template <typename T, typename F>
-std::pair<T, T> EtsSharedMemory::ReadModifyWrite(int32_t index, const F &f)
-{
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsSharedMemory> thisHandle(coroutine, this);
-
-    // NOTE(egor-porsev): add LIKELY(std::try_lock) path to prevent ScopedNativeCodeThread creation if no blocking
-    // occurs
-    ScopedNativeCodeThread n(coroutine);
-    os::memory::LockHolder lock(coroutine->GetPandaVM()->GetAtomicsMutex());
-    ScopedManagedCodeThread m(coroutine);
-
-    auto oldValue = thisHandle->GetElement<T>(index);
-    auto newValue = f(oldValue);
-    thisHandle->SetElement<T>(index, newValue);
-
-    return std::pair(oldValue, newValue);
 }
 
 #undef EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE
@@ -221,4 +182,4 @@ std::pair<T, T> EtsSharedMemory::ReadModifyWrite(int32_t index, const F &f)
 
 }  // namespace ark::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_SHARED_MEMORY_INL_H
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_INL_H

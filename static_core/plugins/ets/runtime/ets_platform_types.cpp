@@ -121,7 +121,6 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreMethod = findType(METHOD);
     coreParameter = findType(PARAMETER);
 
-    escompatSharedMemory = findType(SHARED_MEMORY);
     interopJSValue = findType(JS_VALUE);
 
     coreTupleN = findType(TUPLEN);

@@ -16,7 +16,7 @@
 import { launch } from "std/concurrency"
 import { Job } from "std/core"
 
-let s = new SharedArrayBuffer(4);
+let s = new ArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
 let N = 5

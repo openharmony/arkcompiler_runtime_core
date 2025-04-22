@@ -15,7 +15,7 @@
 
 import { launch } from "std/concurrency"
 
-let s = new SharedArrayBuffer(4);
+let s = new ArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
 function main() {

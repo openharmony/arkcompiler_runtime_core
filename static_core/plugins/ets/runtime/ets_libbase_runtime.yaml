@@ -54,9 +54,6 @@ coretypes:
 - managed_class: std.core.Parameter
   mirror_class: ark::ets::EtsTypeAPIParameter
 
-- managed_class: escompat.SharedMemory
-  mirror_class: ark::ets::EtsSharedMemory
-
 - managed_class: std.debug.concurrency.AtomicFlag
   mirror_class: ark::ets::EtsAtomicFlag
 
@@ -3338,738 +3335,728 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsQueueSpinlockGuard
 
 ############################
-#   escompat.SharedMemory  #
+#   escompat.ArrayBuffer  #
 ############################
 
-  - name: SharedMemoryCreate
+  - name: ArrayBufferAddI8
     space: ets
-    class_name: escompat.SharedMemory
-    method_name: create
-    static: true
-    signature:
-      ret: escompat.SharedMemory
-      args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryCreate
-
-  - name: SharedMemoryAddI8
-    space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddI8
+    impl: ark::ets::intrinsics::ArrayBufferAddI8
 
-  - name: SharedMemoryAndI8
+  - name: ArrayBufferAndI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndI8
+    impl: ark::ets::intrinsics::ArrayBufferAndI8
 
-  - name: SharedMemoryCompareExchangeI8
+  - name: ArrayBufferCompareExchangeI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeI8
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI8
 
-  - name: SharedMemoryExchangeI8
+  - name: ArrayBufferExchangeI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeI8
+    impl: ark::ets::intrinsics::ArrayBufferExchangeI8
 
-  - name: SharedMemoryLoadI8
+  - name: ArrayBufferLoadI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadI8
     static: false
     signature:
       ret: i8
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadI8
+    impl: ark::ets::intrinsics::ArrayBufferLoadI8
 
-  - name: SharedMemoryOrI8
+  - name: ArrayBufferrI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrI8
+    impl: ark::ets::intrinsics::ArrayBufferOrI8
 
-  - name: SharedMemoryStoreI8
+  - name: ArrayBufferStoreI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreI8
+    impl: ark::ets::intrinsics::ArrayBufferStoreI8
 
-  - name: SharedMemorySubI8
+  - name: ArrayBufferSubI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemorySubI8
+    impl: ark::ets::intrinsics::ArrayBufferSubI8
 
-  - name: SharedMemoryXorI8
+  - name: ArrayBufferXorI8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorI8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorI8
+    impl: ark::ets::intrinsics::ArrayBufferXorI8
 
-  - name: SharedMemoryAddI16
+  - name: ArrayBufferAddI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddI16
+    impl: ark::ets::intrinsics::ArrayBufferAddI16
 
-  - name: SharedMemoryAndI16
+  - name: ArrayBufferAndI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndI16
+    impl: ark::ets::intrinsics::ArrayBufferAndI16
 
-  - name: SharedMemoryCompareExchangeI16
+  - name: ArrayBufferCompareExchangeI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeI16
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI16
 
-  - name: SharedMemoryExchangeI16
+  - name: ArrayBufferExchangeI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeI16
+    impl: ark::ets::intrinsics::ArrayBufferExchangeI16
 
-  - name: SharedMemoryLoadI16
+  - name: ArrayBufferLoadI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadI16
     static: false
     signature:
       ret: i16
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadI16
+    impl: ark::ets::intrinsics::ArrayBufferLoadI16
 
-  - name: SharedMemoryOrI16
+  - name: ArrayBufferOrI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrI16
+    impl: ark::ets::intrinsics::ArrayBufferOrI16
 
-  - name: SharedMemoryStoreI16
+  - name: ArrayBufferStoreI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreI16
+    impl: ark::ets::intrinsics::ArrayBufferStoreI16
 
-  - name: SharedMemorySubI16
+  - name: ArrayBufferSubI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemorySubI16
+    impl: ark::ets::intrinsics::ArrayBufferSubI16
 
-  - name: SharedMemoryXorI16
+  - name: ArrayBufferXorI16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorI16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorI16
+    impl: ark::ets::intrinsics::ArrayBufferXorI16
 
-  - name: SharedMemoryAddI32
+  - name: ArrayBufferAddI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddI32
+    impl: ark::ets::intrinsics::ArrayBufferAddI32
 
-  - name: SharedMemoryAndI32
+  - name: ArrayBufferAndI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndI32
+    impl: ark::ets::intrinsics::ArrayBufferAndI32
 
-  - name: SharedMemoryCompareExchangeI32
+  - name: ArrayBufferCompareExchangeI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeI32
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI32
 
-  - name: SharedMemoryExchangeI32
+  - name: ArrayBufferExchangeI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeI32
+    impl: ark::ets::intrinsics::ArrayBufferExchangeI32
 
-  - name: SharedMemoryLoadI32
+  - name: ArrayBufferLoadI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadI32
     static: false
     signature:
       ret: i32
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadI32
+    impl: ark::ets::intrinsics::ArrayBufferLoadI32
 
-  - name: SharedMemoryOrI32
+  - name: ArrayBufferOrI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrI32
+    impl: ark::ets::intrinsics::ArrayBufferOrI32
 
-  - name: SharedMemoryStoreI32
+  - name: ArrayBufferStoreI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreI32
+    impl: ark::ets::intrinsics::ArrayBufferStoreI32
 
-  - name: SharedMemorySubI32
+  - name: ArrayBufferSubI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemorySubI32
+    impl: ark::ets::intrinsics::ArrayBufferSubI32
 
-  - name: SharedMemoryXorI32
+  - name: ArrayBufferXorI32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorI32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorI32
+    impl: ark::ets::intrinsics::ArrayBufferXorI32
 
-  - name: SharedMemoryAddI64
+  - name: ArrayBufferAddI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddI64
+    impl: ark::ets::intrinsics::ArrayBufferAddI64
 
-  - name: SharedMemoryAndI64
+  - name: ArrayBufferAndI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndI64
+    impl: ark::ets::intrinsics::ArrayBufferAndI64
 
-  - name: SharedMemoryCompareExchangeI64
+  - name: ArrayBufferCompareExchangeI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeI64
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI64
 
-  - name: SharedMemoryExchangeI64
+  - name: ArrayBufferExchangeI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeI64
+    impl: ark::ets::intrinsics::ArrayBufferExchangeI64
 
-  - name: SharedMemoryLoadI64
+  - name: ArrayBufferLoadI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadI64
     static: false
     signature:
       ret: i64
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadI64
+    impl: ark::ets::intrinsics::ArrayBufferLoadI64
 
-  - name: SharedMemoryOrI64
+  - name: ArrayBufferOrI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrI64
+    impl: ark::ets::intrinsics::ArrayBufferOrI64
 
-  - name: SharedMemoryStoreI64
+  - name: ArrayBufferStoreI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreI64
+    impl: ark::ets::intrinsics::ArrayBufferStoreI64
 
-  - name: SharedMemorySubI64
+  - name: ArrayBufferSubI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemorySubI64
+    impl: ark::ets::intrinsics::ArrayBufferSubI64
 
-  - name: SharedMemoryXorI64
+  - name: ArrayBufferXorI64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorI64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorI64
+    impl: ark::ets::intrinsics::ArrayBufferXorI64
 
-  - name: SharedMemoryAddU8
+  - name: ArrayBufferAddU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddU8
+    impl: ark::ets::intrinsics::ArrayBufferAddU8
 
-  - name: SharedMemoryAndU8
+  - name: ArrayBufferAndU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndU8
+    impl: ark::ets::intrinsics::ArrayBufferAndU8
 
-  - name: SharedMemoryCompareExchangeU8
+  - name: ArrayBufferCompareExchangeU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeU8
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU8
 
-  - name: SharedMemoryExchangeU8
+  - name: ArrayBufferExchangeU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeU8
+    impl: ark::ets::intrinsics::ArrayBufferExchangeU8
 
-  - name: SharedMemoryLoadU8
+  - name: ArrayBufferLoadU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadU8
     static: false
     signature:
       ret: i8
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadU8
+    impl: ark::ets::intrinsics::ArrayBufferLoadU8
 
-  - name: SharedMemoryOrU8
+  - name: ArrayBufferOrU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrU8
+    impl: ark::ets::intrinsics::ArrayBufferOrU8
 
-  - name: SharedMemoryStoreU8
+  - name: ArrayBufferStoreU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreU8
+    impl: ark::ets::intrinsics::ArrayBufferStoreU8
 
-  - name: SharedMemorySubU8
+  - name: ArrayBufferSubU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemorySubU8
+    impl: ark::ets::intrinsics::ArrayBufferSubU8
 
-  - name: SharedMemoryXorU8
+  - name: ArrayBufferXorU8
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorU8
     static: false
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorU8
+    impl: ark::ets::intrinsics::ArrayBufferXorU8
 
-  - name: SharedMemoryAddU16
+  - name: ArrayBufferAddU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddU16
+    impl: ark::ets::intrinsics::ArrayBufferAddU16
 
-  - name: SharedMemoryAndU16
+  - name: ArrayBufferAndU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndU16
+    impl: ark::ets::intrinsics::ArrayBufferAndU16
 
-  - name: SharedMemoryCompareExchangeU16
+  - name: ArrayBufferCompareExchangeU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeU16
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU16
 
-  - name: SharedMemoryExchangeU16
+  - name: ArrayBufferExchangeU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeU16
+    impl: ark::ets::intrinsics::ArrayBufferExchangeU16
 
-  - name: SharedMemoryLoadU16
+  - name: ArrayBufferLoadU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadU16
     static: false
     signature:
       ret: i16
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadU16
+    impl: ark::ets::intrinsics::ArrayBufferLoadU16
 
-  - name: SharedMemoryOrU16
+  - name: ArrayBufferOrU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrU16
+    impl: ark::ets::intrinsics::ArrayBufferOrU16
 
-  - name: SharedMemoryStoreU16
+  - name: ArrayBufferStoreU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreU16
+    impl: ark::ets::intrinsics::ArrayBufferStoreU16
 
-  - name: SharedMemorySubU16
+  - name: ArrayBufferSubU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemorySubU16
+    impl: ark::ets::intrinsics::ArrayBufferSubU16
 
-  - name: SharedMemoryXorU16
+  - name: ArrayBufferXorU16
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorU16
     static: false
     signature:
       ret: i16
       args: [ i32, i16 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorU16
+    impl: ark::ets::intrinsics::ArrayBufferXorU16
 
-  - name: SharedMemoryAddU32
+  - name: ArrayBufferAddU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddU32
+    impl: ark::ets::intrinsics::ArrayBufferAddU32
 
-  - name: SharedMemoryAndU32
+  - name: ArrayBufferAndU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndU32
+    impl: ark::ets::intrinsics::ArrayBufferAndU32
 
-  - name: SharedMemoryCompareExchangeU32
+  - name: ArrayBufferCompareExchangeU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeU32
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU32
 
-  - name: SharedMemoryExchangeU32
+  - name: ArrayBufferExchangeU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeU32
+    impl: ark::ets::intrinsics::ArrayBufferExchangeU32
 
-  - name: SharedMemoryLoadU32
+  - name: ArrayBufferLoadU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadU32
     static: false
     signature:
       ret: i32
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadU32
+    impl: ark::ets::intrinsics::ArrayBufferLoadU32
 
-  - name: SharedMemoryOrU32
+  - name: ArrayBufferOrU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrU32
+    impl: ark::ets::intrinsics::ArrayBufferOrU32
 
-  - name: SharedMemoryStoreU32
+  - name: ArrayBufferStoreU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreU32
+    impl: ark::ets::intrinsics::ArrayBufferStoreU32
 
-  - name: SharedMemorySubU32
+  - name: ArrayBufferSubU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemorySubU32
+    impl: ark::ets::intrinsics::ArrayBufferSubU32
 
-  - name: SharedMemoryXorU32
+  - name: ArrayBufferXorU32
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorU32
     static: false
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorU32
+    impl: ark::ets::intrinsics::ArrayBufferXorU32
 
-  - name: SharedMemoryAddU64
+  - name: ArrayBufferAddU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAddU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryAddU64
+    impl: ark::ets::intrinsics::ArrayBufferAddU64
 
-  - name: SharedMemoryAndU64
+  - name: ArrayBufferAndU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicAndU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryAndU64
+    impl: ark::ets::intrinsics::ArrayBufferAndU64
 
-  - name: SharedMemoryCompareExchangeU64
+  - name: ArrayBufferCompareExchangeU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicCompareExchangeU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeU64
+    impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU64
 
-  - name: SharedMemoryExchangeU64
+  - name: ArrayBufferExchangeU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicExchangeU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryExchangeU64
+    impl: ark::ets::intrinsics::ArrayBufferExchangeU64
 
-  - name: SharedMemoryLoadU64
+  - name: ArrayBufferLoadU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicLoadU64
     static: false
     signature:
       ret: i64
       args: [ i32 ]
-    impl: ark::ets::intrinsics::SharedMemoryLoadU64
+    impl: ark::ets::intrinsics::ArrayBufferLoadU64
 
-  - name: SharedMemoryOrU64
+  - name: ArrayBufferOrU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicOrU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryOrU64
+    impl: ark::ets::intrinsics::ArrayBufferOrU64
 
-  - name: SharedMemoryStoreU64
+  - name: ArrayBufferStoreU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicStoreU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryStoreU64
+    impl: ark::ets::intrinsics::ArrayBufferStoreU64
 
-  - name: SharedMemorySubU64
+  - name: ArrayBufferSubU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicSubU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemorySubU64
+    impl: ark::ets::intrinsics::ArrayBufferSubU64
 
-  - name: SharedMemoryXorU64
+  - name: ArrayBufferXorU64
     space: ets
-    class_name: escompat.SharedMemory
+    class_name: escompat.ArrayBuffer
     method_name: atomicXorU64
     static: false
     signature:
       ret: i64
       args: [ i32, i64 ]
-    impl: ark::ets::intrinsics::SharedMemoryXorU64
+    impl: ark::ets::intrinsics::ArrayBufferXorU64
 
   - name: StdCoroutineGetWorkerId
     space: ets

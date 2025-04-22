@@ -81,8 +81,6 @@ public:
     EtsClass *coreMethod;
     EtsClass *coreParameter;
 
-    EtsClass *escompatSharedMemory;
-
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;

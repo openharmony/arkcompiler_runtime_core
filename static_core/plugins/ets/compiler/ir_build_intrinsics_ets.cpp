@@ -145,7 +145,6 @@ void InstBuilder::BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst,
     1. typedArray
     2. pos
     3. NullCheck v1
-    4. DeoptimizeIf v3.arrayBufferBacked != 1
     5. LoadNative v3, TYPED_ARRAY_BUFFER_OFFSET
     6. LoadNative v5, ARRAY_BUFFER_DATA_OFFSET
     7. DeoptimizeIf v6 == 0
@@ -170,9 +169,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     auto arch = graph->GetArch();
     auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, obj, saveState);
     AddInstruction(nullCheck);
-
-    BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(
-        nullCheck, bcAddr, saveState, ark::cross_values::GetTypedArrayArrayBufferBackedOffset(graph->GetArch()));
 
     auto *loadBufferInst =
         graph->CreateInstLoadNative(DataType::REFERENCE, bcAddr, nullCheck,
@@ -213,22 +209,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
     return std::make_tuple(loadDataInst, dataOffsetInst);
 }
 
-void InstBuilder::BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(Inst *typedArrayInst, size_t bcAddr,
-                                                                  SaveStateInst *saveState, size_t fieldOffset)
-{
-    auto *graph = GetGraph();
-    auto *loadArrayBufferBackedInst =
-        graph->CreateInstLoadNative(DataType::INT8, bcAddr, typedArrayInst, graph->FindOrCreateConstant(fieldOffset));
-    AddInstruction(loadArrayBufferBackedInst);
-    auto *zeroInst = GetGraph()->FindOrCreateConstant(0);
-    auto *isNotArrayBufferBackedInst = graph->CreateInstCompare(DataType::BOOL, bcAddr, loadArrayBufferBackedInst,
-                                                                zeroInst, DataType::INT8, ConditionCode::CC_EQ);
-    AddInstruction(isNotArrayBufferBackedInst);
-    auto *deoptIsNotArrayBufferBackedInst =
-        graph->CreateInstDeoptimizeIf(bcAddr, isNotArrayBufferBackedInst, saveState, DeoptimizeType::ZERO_CHECK);
-    AddInstruction(deoptIsNotArrayBufferBackedInst);
-}
-
 void InstBuilder::BuildTypedArrayDeoptimizeIfExternalData(Inst *dataInst, size_t bcAddr, SaveStateInst *saveState)
 {
     auto *graph = GetGraph();
@@ -257,7 +237,6 @@ void InstBuilder::BuildTypedArrayDeoptimizeIfOutOfRange(Inst *posInst, Inst *len
     1. typedUArray
     2. pos
     3. NullCheck v1
-    4. DeoptimizeIf v3.arrayBufferBacked != 1
     5. LoadNative v3, TYPED_U_ARRAY_BUFFER_OFFSET
     6. LoadNative v5, ARRAY_BUFFER_DATA_OFFSET
     7. DeoptimizeIf v6 == 0
@@ -281,10 +260,6 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
     auto arch = graph->GetArch();
     auto *nullCheck = graph->CreateInstNullCheck(DataType::REFERENCE, bcAddr, obj, saveState);
     AddInstruction(nullCheck);
-
-    BuildTypedArrayDeoptimizeIfNotArrayBufferBacked(
-        nullCheck, bcAddr, saveState,
-        ark::cross_values::GetTypedUnsignedArrayArrayBufferBackedOffset(graph->GetArch()));
 
     auto *loadBufferInst = graph->CreateInstLoadNative(
         DataType::REFERENCE, bcAddr, nullCheck,

@@ -344,13 +344,14 @@ inline ObjectHeader *ObjectAccessor::GetAndSetFieldObject(void *obj, size_t offs
 }
 
 /* static */
-template <typename T>
+template <typename T, bool USE_UBYTE_ARITHMETIC>
 // CC-OFFNXT(G.FUD.06) perf critical
 inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[maybe_unused]] size_t offset,
                                                  [[maybe_unused]] T value,
                                                  [[maybe_unused]] std::memory_order memoryOrder)
 {
-    if constexpr (std::is_same_v<T, uint8_t>) {  // NOLINT(readability-braces-around-statements)
+    if constexpr (std::is_same_v<T, uint8_t> &&
+                  !USE_UBYTE_ARITHMETIC) {  // NOLINT(readability-braces-around-statements)
         LOG(FATAL, RUNTIME) << "Could not do add for boolean";
         UNREACHABLE();
     } else {                                          // NOLINT(readability-misleading-indentation)
