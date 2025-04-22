@@ -14,7 +14,7 @@
  */
 'use strict';
 
-globalThis.gtest.etsVm = requireNapiPreview('lib/ets_interop_js_napi_arkjsvm.so', false);
+globalThis.gtest.etsVm = requireNapiPreview('lib/ets_interop_js_napi.so', false);
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -11,73 +11,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_settimeout
+panda_ets_interop_js_test(ets_interop_js_test_settimeout
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetTimeout"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_cleartimeout
+panda_ets_interop_js_test(ets_interop_js_test_cleartimeout
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testClearTimeout"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_setinterval
+panda_ets_interop_js_test(ets_interop_js_test_setinterval
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetInterval"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_settimeout_execute_order
+panda_ets_interop_js_test(ets_interop_js_test_settimeout_execute_order
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetTimeoutExecuteOrder"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_settimeout_invoke_callback_with_specified_parameter
+panda_ets_interop_js_test(ets_interop_js_test_settimeout_invoke_callback_with_specified_parameter
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetTimeoutInvokeCallbackWithSpecifiedParameter"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_settimeout_invoke_callback_with_4_specified_parameters
+panda_ets_interop_js_test(ets_interop_js_test_settimeout_invoke_callback_with_4_specified_parameters
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetTimeoutInvokeCallbackWith4SpecifiedParameters"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_setinterval_invoke_callback_with_specified_parameter
+panda_ets_interop_js_test(ets_interop_js_test_setinterval_invoke_callback_with_specified_parameter
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetIntervalInvokeCallbacWithSpecifiedParameter"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_setinterval_invoke_callback_with_4_specified_parameters
+panda_ets_interop_js_test(ets_interop_js_test_setinterval_invoke_callback_with_4_specified_parameters
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetIntervalInvokeCallbacWith4SpecifiedParameters"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_settimeout_with_negitive_delay
+panda_ets_interop_js_test(ets_interop_js_test_settimeout_with_negitive_delay
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetTimeoutWithNegitiveDelay"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_setinterval_with_negitive_delay
+panda_ets_interop_js_test(ets_interop_js_test_setinterval_with_negitive_delay
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetIntervalWithNegitiveDelay"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_settimeout_with_string
+panda_ets_interop_js_test(ets_interop_js_test_settimeout_with_string
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetTimeoutWithString"
 )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_setinterval_with_string
+panda_ets_interop_js_test(ets_interop_js_test_setinterval_with_string
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/timer_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_timer_test.js
     LAUNCHER_ARGS "testSetIntervalWithString"

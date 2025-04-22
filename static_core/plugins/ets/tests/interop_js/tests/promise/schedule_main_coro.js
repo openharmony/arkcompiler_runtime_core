@@ -22,7 +22,7 @@ function init() {
 		throw Error('PACKAGE_NAME is not set');
     }
 
-    let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+    let etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
     const etsOpts = {
         'panda-files': gtestAbcPath,
         'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,

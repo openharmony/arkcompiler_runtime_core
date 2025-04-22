@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__error_ets_to_ts
+panda_ets_interop_js_gtest(ets_interop_js__error_ets_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/error.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_error.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/error.ts

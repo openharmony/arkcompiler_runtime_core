@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-// NOTE: this file is required by panda_ets_interop_js_nodevm_gtest()
+// NOTE: this file is required by panda_ets_interop_js_gtest()

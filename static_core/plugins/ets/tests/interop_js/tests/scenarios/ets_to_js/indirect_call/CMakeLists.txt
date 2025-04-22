@@ -12,7 +12,7 @@
 # limitations under the License.
 
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_ref
+panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_ref
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.ets
     JS_SOURCES
@@ -32,7 +32,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_r
     COMPILATION_JS_WITH_CJS_ON
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_value
+panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_value
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.ets
     JS_SOURCES  
@@ -52,7 +52,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_v
     COMPILATION_JS_WITH_CJS_ON
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_scenarios_ets_to_js_indirect_union
+panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_union
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.ets
     JS_SOURCES
