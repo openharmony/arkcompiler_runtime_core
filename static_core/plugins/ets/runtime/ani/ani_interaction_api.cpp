@@ -135,14 +135,14 @@ static inline EtsMethod *ToInternalFunction(ani_function fn)
 {
     auto *m = reinterpret_cast<EtsMethod *>(fn);
     ASSERT(m->IsStatic());
-    // NODE: Add assert 'ASSERT(method->IsFunction())' when #22482 is resolved.
+    ASSERT(m->IsFunction());
     return m;
 }
 
 static inline ani_function ToAniFunction(EtsMethod *method)
 {
     ASSERT(method->IsStatic());
-    // NODE: Add assert 'ASSERT(method->IsFunction())' when #22482 is resolved.
+    ASSERT(method->IsFunction());
     return reinterpret_cast<ani_function>(method);
 }
 
@@ -1428,7 +1428,6 @@ NO_UB_SANITIZE static ani_status Array_Get_Ref(ani_env *env, ani_array_ref array
     return s.AddLocalRef(obj, result);
 }
 
-template <bool IS_FUNCTION>
 static ani_status DoBindNative(ScopedManagedCodeFix &s, const PandaVector<EtsMethod *> &etsMethods,
                                const ani_native_function *functions, ani_size nrFunctions)
 {
@@ -1440,22 +1439,25 @@ static ani_status DoBindNative(ScopedManagedCodeFix &s, const PandaVector<EtsMet
     // Check native methods
     for (EtsMethod *method : etsMethods) {
         ANI_CHECK_RETURN_IF_EQ(method, nullptr, ANI_NOT_FOUND);
-        ANI_CHECK_RETURN_IF_EQ(method->IsNative(), false, ANI_NOT_FOUND);
-        ANI_CHECK_RETURN_IF_EQ(method->IsBindedNativeFunction(), true, ANI_ALREADY_BINDED);
+
+        if (!method->IsNative()) {
+            LOG(ERROR, ANI) << "Registered function isn't native";
+            return ANI_NOT_FOUND;
+        }
+        if (method->IsIntrinsic()) {
+            LOG(ERROR, ANI) << "Register native method to intrinsic is not supported";
+            return ANI_ALREADY_BINDED;
+        }
+        if (method->IsBoundNativeFunction()) {
+            return ANI_ALREADY_BINDED;
+        }
     }
 
     // Bind native methods
     for (ani_size i = 0; i < nrFunctions; ++i) {
         EtsMethod *method = etsMethods[i];       // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         const void *ptr = functions[i].pointer;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        bool ret = [method, ptr]() {
-            if constexpr (IS_FUNCTION) {
-                return method->RegisterNativeFunction(ptr);
-            } else {
-                return method->RegisterNativeMethod(ptr);
-            }
-        }();
-        LOG_IF(!ret, FATAL, ANI) << "Cannot register native method";
+        method->RegisterNative(ptr);
     }
     return ANI_OK;
 }
@@ -1483,7 +1485,7 @@ static ani_status DoBindNativeFunctions(ani_env *env, ani_namespace ns, const an
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         etsMethods.push_back(etsNs->GetFunction(functions[i].name, optSignature.value().c_str()));
     }
-    return DoBindNative<true>(s, etsMethods, functions, nrFunctions);
+    return DoBindNative(s, etsMethods, functions, nrFunctions);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1686,7 +1688,7 @@ NO_UB_SANITIZE static ani_status Class_BindNativeMethods(ani_env *env, ani_class
         }();
         etsMethods.push_back(method);
     }
-    return DoBindNative<false>(s, etsMethods, methods, nrMethods);
+    return DoBindNative(s, etsMethods, methods, nrMethods);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

@@ -540,4 +540,8 @@ class NotOverloaded {
     {
         return 1
     }
+};
+
+class FindNativeMethods {
+    native foo(): int;
 }
