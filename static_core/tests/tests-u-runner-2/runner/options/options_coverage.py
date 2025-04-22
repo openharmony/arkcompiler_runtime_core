@@ -25,8 +25,8 @@ from runner.utils import make_dir_if_not_exist
 
 class CoverageOptions(IOptions):
     __USE_LLVM_COV = "use-llvm-cov"
-    __LLVM_PROFDATA_OUT_PATH = "llvm-cov-profdata-out-path"
-    __LLVM_COV_HTML_OUT_PATH = "llvm-cov-html-out-path"
+    __LLVM_PROFDATA_OUT_PATH = "profdata-files-dir"
+    __LLVM_COV_HTML_OUT_PATH = "coverage-html-report-dir"
 
     def __init__(self, args: dict[str, Any]):
         super().__init__(args)
@@ -53,11 +53,11 @@ class CoverageOptions(IOptions):
         return cast(bool, self.__parameters[self.__USE_LLVM_COV])
 
     @cached_property
-    def llvm_profdata_out_path(self) -> str | None:
+    def profdata_files_dir(self) -> str | None:
         value = self.__parameters[self.__LLVM_PROFDATA_OUT_PATH]
         return str(value) if value is not None else value
 
     @cached_property
-    def llvm_cov_html_out_path(self) -> str | None:
+    def coverage_html_report_dir(self) -> str | None:
         value = self.__parameters[self.__LLVM_COV_HTML_OUT_PATH]
         return str(value) if value is not None else value

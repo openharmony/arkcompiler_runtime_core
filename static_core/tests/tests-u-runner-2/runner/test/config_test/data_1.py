@@ -100,5 +100,5 @@ args = {
     'runner.time_edges': [1, 5, 10],
     'runner.use_llvm_cov': False,
     'runner.llvm_cov_profdata_out_path': None,
-    'runner.llvm_cov_html_out_path': None
+    'runner.coverage_html_report_dir': None
 }

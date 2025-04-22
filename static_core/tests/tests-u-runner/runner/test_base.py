@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -68,6 +68,7 @@ class Test:
         self.time: Optional[float] = None
         # Reports if generated. Key is ReportFormat.XXX. Value is a path to the generated report
         self.reports: Dict[ReportFormat, str] = {}
+        self.coverage = self.test_env.coverage
 
     def steps_to_reproduce(self) -> str:
         return "\n".join(self.reproduce)
