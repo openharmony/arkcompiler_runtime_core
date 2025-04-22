@@ -140,6 +140,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/loop_peeling.cpp",
   "optimizer/optimizations/loop_unroll.cpp",
   "optimizer/optimizations/loop_unswitch.cpp",
+  "optimizer/optimizations/lower_boxed_boolean.cpp",
   "optimizer/optimizations/lowering.cpp",
   "optimizer/optimizations/lse.cpp",
   "optimizer/optimizations/memory_barriers.cpp",

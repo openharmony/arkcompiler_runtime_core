@@ -50,6 +50,9 @@ public:
     ClassPtr GetStringBuilderClass() const override;
     MethodPtr GetStringBuilderDefaultConstructor() const override;
     uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
+    bool IsFieldBooleanFalse(FieldPtr field) const override;
+    bool IsFieldBooleanTrue(FieldPtr field) const override;
+    bool IsFieldBooleanValue(FieldPtr field) const override;
     bool IsFieldStringBuilderBuffer(FieldPtr field) const override;
     bool IsFieldStringBuilderIndex(FieldPtr field) const override;
     FieldPtr GetFieldStringBuilderBuffer(ClassPtr klass) const override;
@@ -70,6 +73,7 @@ public:
     uint64_t GetDeprecatedNativeApiMask() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
     bool IsBoxedClass(ClassPtr klass) const override;
+    bool IsClassBoxedBoolean(ClassPtr klass) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;

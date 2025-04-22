@@ -238,6 +238,21 @@ uint32_t EtsRuntimeInterface::GetMethodId(MethodPtr method) const
     return static_cast<EtsMethod *>(method)->GetMethodId();
 }
 
+bool EtsRuntimeInterface::IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
+{
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == "FALSE";
+}
+
+bool EtsRuntimeInterface::IsFieldBooleanTrue([[maybe_unused]] FieldPtr field) const
+{
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == "TRUE";
+}
+
+bool EtsRuntimeInterface::IsFieldBooleanValue([[maybe_unused]] FieldPtr field) const
+{
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == "value";
+}
+
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderBuffer(ClassPtr klass) const
 {
     ASSERT(IsClassStringBuilder(klass));
@@ -425,6 +440,11 @@ uint32_t EtsRuntimeInterface::GetRuntimeClassOffset(Arch arch) const
 bool EtsRuntimeInterface::IsBoxedClass(ClassPtr klass) const
 {
     return EtsClass::FromRuntimeClass(ClassCast(klass))->IsBoxed();
+}
+
+bool EtsRuntimeInterface::IsClassBoxedBoolean(ClassPtr klass) const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->coreBoolean->GetRuntimeClass() == klass;
 }
 
 size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const
