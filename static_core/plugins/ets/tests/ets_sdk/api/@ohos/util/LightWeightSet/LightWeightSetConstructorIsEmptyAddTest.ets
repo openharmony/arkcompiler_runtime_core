@@ -28,6 +28,7 @@ function main(): int {
     suite.addTest("LightWeightSet isEmpty is true after clear data", testIsEmptyTrueAfterClear)
     suite.addTest("LightWeightSet add data", testAddData)
     suite.addTest("LightWeightSet add Max data", testAddMaxData)
+    suite.addTest("LightWeightSet add exist data", testAddExistData)
 
     return suite.run()
 }
@@ -88,5 +89,18 @@ function testAddMaxData() {
     const MY_MAX = 10240;
     let result = lightWeightSet.add(MY_MAX);
     assertEQ(result, true, "The lightWeightSet should contain the added value");
+    assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
+}
+
+function testAddExistData() {
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    lightWeightSet.add("aa");
+
+    let result = lightWeightSet.has("aa");
+    assertEQ(result, true, "The lightWeightSet should contain the added value");
+
+    result = lightWeightSet.add("aa");
+    assertEQ(result, false, "The lightWeightSet should not add exist value");
+
     assertEQ(lightWeightSet.length, 1, "The lightWeightSet length should be 1");
 }
