@@ -156,10 +156,6 @@ export final class AsyncLock {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
-    public getName(): string {
-        return this.name;
-    }
-
     public static query(name: string): AsyncLockState {
         return asyncLockManager.query(name);
     }
@@ -175,7 +171,7 @@ export final class AsyncLock {
         return state;
     }
 
-    private name: string;
+    public readonly name: string;
     private holderCID: int = 0;
     private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;
     private counter: int = 0;
