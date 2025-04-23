@@ -56,6 +56,8 @@ def main() -> None:
             plugin = "declgenets2ts"
         elif test_suite.startswith("declgen_ts2ets"):
             plugin = "declgents2ets"
+        elif test_suite.startswith("declgen_ets2ets"):
+            plugin = "declgenets2ets"
         else:
             plugin = "ets" if test_suite.startswith("ets") or test_suite.startswith("ets") else test_suite
         runner_class = registry.get_runner(plugin)
