@@ -1175,16 +1175,26 @@ bool ConstFoldingLoadStatic(Inst *inst)
 {
     auto field = inst->CastToLoadStatic()->GetObjField();
     ASSERT(field != nullptr);
-    if (DataType::GetCommonType(inst->GetType()) != DataType::INT64) {
+    auto isFloatType = DataType::IsFloatType(inst->GetType());
+    if (DataType::GetCommonType(inst->GetType()) != DataType::INT64 && !isFloatType) {
         return false;
     }
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto runtime = graph->GetRuntime();
-
     auto klass = runtime->GetClassForField(field);
     if (runtime->IsFieldReadonly(field) && runtime->IsClassInitialized(reinterpret_cast<uintptr_t>(klass))) {
-        auto value = runtime->GetStaticFieldValue(field);
-        inst->ReplaceUsers(graph->FindOrCreateConstant(ConvertIntToInt(value, inst->GetType())));
+        if (isFloatType) {
+            auto value = runtime->GetStaticFieldFloatValue(field);
+            if (inst->GetType() == DataType::FLOAT32) {
+                inst->ReplaceUsers(graph->FindOrCreateConstant(static_cast<float>(value)));
+            } else {
+                ASSERT(inst->GetType() == DataType::FLOAT64);
+                inst->ReplaceUsers(graph->FindOrCreateConstant(value));
+            }
+        } else {
+            auto value = runtime->GetStaticFieldIntegerValue(field);
+            inst->ReplaceUsers(graph->FindOrCreateConstant(ConvertIntToInt(value, inst->GetType())));
+        }
         return true;
     }
     return false;

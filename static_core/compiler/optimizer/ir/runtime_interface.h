@@ -1170,7 +1170,12 @@ public:
         return false;
     }
 
-    virtual uint64_t GetStaticFieldValue([[maybe_unused]] FieldPtr fieldPtr) const
+    virtual uint64_t GetStaticFieldIntegerValue([[maybe_unused]] FieldPtr fieldPtr) const
+    {
+        return 0;
+    }
+
+    virtual double GetStaticFieldFloatValue([[maybe_unused]] FieldPtr fieldPtr) const
     {
         return 0;
     }

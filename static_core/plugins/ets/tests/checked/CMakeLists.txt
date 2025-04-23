@@ -309,3 +309,4 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/llvm_infer_flags.ets
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/direct_native.ets NATIVE SUPPORT_RELEASE)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/quick_native.ets NATIVE SUPPORT_RELEASE)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_object_boxed.ets)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_static_const_folding.ets)

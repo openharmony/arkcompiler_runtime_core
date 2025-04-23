@@ -534,7 +534,8 @@ public:
     bool IsFieldFinal(FieldPtr field) const override;
     bool IsFieldReadonly(FieldPtr field) const override;
     bool HasFieldMetadata(FieldPtr field) const override;
-    uint64_t GetStaticFieldValue(FieldPtr fieldPtr) const override;
+    uint64_t GetStaticFieldIntegerValue(FieldPtr fieldPtr) const override;
+    double GetStaticFieldFloatValue(FieldPtr fieldPtr) const override;
 
     std::string GetFieldName(FieldPtr field) const override
     {
