@@ -21,13 +21,6 @@ import { promise } from 'import';
  */
 class PromiseA2j {
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting...');
-    }
-
-    /**
      * @Benchmark
      */
     test(): number {
@@ -43,7 +36,7 @@ class PromiseA2j {
 
             return this.test();
         }).catch((err: Object): number => {
-            console.log("Test failed.", err);
+            // Test failed
             return this.totalTime;
         });
     }

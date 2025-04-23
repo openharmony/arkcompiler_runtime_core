@@ -22,14 +22,6 @@ import {
  * @Tags interop, bu_a2j
  */
 class StringifyArrayA2j {
-
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
     /**
      * @Benchmark
      */

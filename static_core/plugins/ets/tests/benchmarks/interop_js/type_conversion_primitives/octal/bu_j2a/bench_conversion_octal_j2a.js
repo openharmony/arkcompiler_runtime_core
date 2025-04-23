@@ -24,7 +24,6 @@ function conversionOctalJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         const State = stsVm.getClass('Lbench_conversion_octal_j2a/ConversionOctalJ2a;');

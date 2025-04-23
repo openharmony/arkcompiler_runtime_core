@@ -25,13 +25,6 @@ function promise(): Promise<number> {
  */
 class PromiseA2a {
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): Promise<number> {

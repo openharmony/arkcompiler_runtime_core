@@ -13,26 +13,12 @@
  * limitations under the License.
  */
 
-const jsArr = [];
-const jsArrCopy = jsArr;
-const jsArrOther = [];
-const jsArrowFoo = () => { };
-const jsArrowFooCopy = jsArrowFoo;
-const jsArrowFooOther = () => { };
+const jsBigInt1 = 1n;
+const jsBool1 = true;
+const jsNull1 = null;
+const jsUndefined1 = undefined;
 
-function jsFoo() { }
-function jsFooOther() { }
-
-const keyOne = 'one';
-const keyTwo = 'two';
-
-module.exports = {
-    jsArr,
-    jsArrCopy,
-    jsArrOther,
-    jsArrowFoo,
-    jsArrowFooCopy,
-    jsArrowFooOther,
-    jsFoo,
-    jsFooOther,
-};
+export let jsBigInt = jsBigInt1;
+export let jsBool = jsBool1;
+export let jsNull = jsNull1;
+export let jsUndefined = jsUndefined1;

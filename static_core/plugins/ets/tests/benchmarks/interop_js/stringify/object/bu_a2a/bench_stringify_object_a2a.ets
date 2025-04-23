@@ -18,20 +18,16 @@ class Person {
     constructor() {}
 }
 
-const obj = new Person();
+const obj: Person;
+static {
+    obj = new Person();
+}
 
 /**
  * @State
  * @Tags interop, bu_a2a
  */
 class StringifyObjectA2a {
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
     /**
      * @Benchmark
      */

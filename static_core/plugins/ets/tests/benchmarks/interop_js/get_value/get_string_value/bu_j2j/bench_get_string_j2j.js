@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-const { 
-    jsString
-} = require('./test_import');
+import { jsString } from './test_import';
 
 /**
  * @State
@@ -23,19 +21,10 @@ const {
  */
 function getStringJ2j() {
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {
         let stringVal = jsString;
-        delete require.cache['./test_import'];
         return;
     };
 

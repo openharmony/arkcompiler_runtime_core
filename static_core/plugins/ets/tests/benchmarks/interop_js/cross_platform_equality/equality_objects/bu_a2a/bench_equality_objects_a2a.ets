@@ -21,10 +21,16 @@ class ClassTest {
     }
 }
 
-const stsNum = 1;
-const stsObj = new ClassTest(stsNum);
-const stsObjCopy = stsObj;
-const stsObjOther = new ClassTest(stsNum);
+const stsNum: int;
+const stsObj: ClassTest;
+const stsObjCopy: ClassTest;
+const stsObjOther: ClassTest;
+static {
+    stsNum = 1;
+    stsObj = new ClassTest(stsNum);
+    stsObjCopy = stsObj;
+    stsObjOther = new ClassTest(stsNum);
+}
 
 /**
  * @State
@@ -35,13 +41,6 @@ class EqualityObjectsA2a {
     state: number = 0;
     noEqual: string = '==';
     equal: string = '!=';
-
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
 
     /**
      * @Benchmark

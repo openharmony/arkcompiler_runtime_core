@@ -24,13 +24,6 @@ class ConversionCharA2j {
     result: string = '';
 
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): string {

@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-const array: int[] = [1, 2, 3, 4, 5];
+const array: int[];
+
+static {
+    array = [1, 2, 3, 4, 5];
+}
 
 /**
  * @State
  * @Tags interop, bu_a2a
  */
 class StringifyArrayA2a {
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
     /**
      * @Benchmark
      */

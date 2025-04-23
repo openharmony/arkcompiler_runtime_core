@@ -82,15 +82,15 @@ class Platform(PlatformBase):
             self.establish_arkjs_module()
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.js {bu.path}')
             self.es2panda(bu)
-            self.es2abc('InteropRunner', str(bu.path))
-            self.es2abc('test_import', str(bu.path))
+            self.es2abc('InteropRunner', bu)
+            self.es2abc('test_import', bu)
             self.run_generated(bu)
             return
         if 'bu_j2j' in bu.tags:
             self.establish_arkjs_module()
             self.sh.run(f'cp -f -n {str(bu.doclet_src.parent)}/*.js {bu.path}')
-            self.es2abc(str(bu.src('.js').stem), str(bu.path))
-            self.es2abc('test_import', str(bu.path))
+            self.es2abc(str(bu.src('.js').stem), bu)
+            self.es2abc('test_import', bu)
             if self.dry_run_stop(bu):
                 return
             self.arkjs_interop(bu)
@@ -100,7 +100,7 @@ class Platform(PlatformBase):
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.ets {bu.path}')
             bu.src_for_es2panda_override = Path(f'{bu.path}/*.ets')  # wildcard here assumes single ets file
             self.make_classes_abc(bu)
-            self.es2abc(str(bu.src('.js').stem), str(bu.path))
+            self.es2abc(str(bu.src('.js').stem), bu)
             if self.dry_run_stop(bu):
                 return
             self.arkjs_interop(bu)
@@ -116,7 +116,12 @@ class Platform(PlatformBase):
                     '$PANDA_BUILD/lib/arkjsvm_interop/libinterop_test_helper.so' +
                     ' -t module')
 
-    def es2abc(self, js_file_name: str, path: str) -> None:
+    def es2abc(self, js_file_name: str, bu: BenchUnit) -> None:
+        js_file = bu.path.joinpath(js_file_name + '.js')
+        if not js_file.is_file():
+            log.debug(f'skip es2abc for missing file {str(js_file)}')
+            return
+        path: str = str(bu.path)
         self.sh.run('$PANDA_BUILD/bin/arkjsvm_interop/es2abc --module --merge-abc ' +
                     path + '/' + js_file_name + '.js' + ' --output=' + path + '/' + js_file_name + '.abc')
 

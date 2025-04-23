@@ -41,7 +41,6 @@ class ConversionOctalA2a {
      * @Setup
      */
     public setup(): void {
-        console.log('Starting');
         const data: Number = this.generateNumber(this.seed);
         this.octalString = data.toString(8);
     }

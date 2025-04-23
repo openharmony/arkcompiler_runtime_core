@@ -21,14 +21,6 @@ function stringifyArrayJ2j() {
     const array = [1, 2, 3, 4, 5];
 
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {

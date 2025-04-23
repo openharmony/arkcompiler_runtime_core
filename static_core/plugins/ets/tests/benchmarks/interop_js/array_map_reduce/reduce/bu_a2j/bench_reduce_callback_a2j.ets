@@ -42,7 +42,6 @@ class ReduceCallbackA2j {
      * @Setup
      */
     public setup(): void {
-        console.log('Starting');
         this.generateRandomArray(this.arrayLength, this.min, this.max, this.testArray);
     }
 

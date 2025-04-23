@@ -24,7 +24,6 @@ function promiseJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         this.promise = stsVm.getFunction('LETSGLOBAL;', 'promise');
@@ -34,8 +33,6 @@ function promiseJ2a() {
 
     async function checkPromise() {
         await (() => {
-            console.log(i);
-
             start = process.hrtime.bigint();
             return promise();
         }

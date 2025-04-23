@@ -41,14 +41,6 @@ function conversionDecimalJ2j() {
     strNumber = data.toString(10);
 
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {

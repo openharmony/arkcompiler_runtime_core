@@ -20,7 +20,8 @@ export class ConversionBinaryJ2a {
     }
 
     public setup(): void {
-        console.log('starting')
+        // presence of this method is necessary for benchmark
+        return;
     }
 
     test(data: string) {

@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-const {
+import {
     jsBigInt,
     jsBool,
     jsNull,
-    jsUndefined,
-} = require('./import');
+    jsUndefined } from './test_import';
 
 /**
  * @State
@@ -35,14 +34,6 @@ function equalityPrimitivesJ2j() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
-    };
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
         return;
     };
 

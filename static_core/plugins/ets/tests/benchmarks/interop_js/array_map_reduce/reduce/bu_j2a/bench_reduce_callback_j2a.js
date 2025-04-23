@@ -24,12 +24,10 @@ function reduceCallbackJ2a() {
      * @Setup
      */
    this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         const State = stsVm.getClass('Lbench_reduce_callback_j2a/ReduceCallbackJ2a;');
 
-        const start = process.hrtime.bigint();
         this.bench = new State();
         this.bench.setup();
         return 0;

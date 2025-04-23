@@ -13,20 +13,6 @@
  * limitations under the License.
  */
 
-const jsNum = 1;
+const jsStr1 = 'string';
 
-const keyOne = 'one';
-const keyTwo = 'two';
-
-const jsObj = {
-    [jsNum === jsNum ? keyOne : keyTwo]: jsNum === jsNum ? jsNum : jsStr,
-};
-const jsObjCopy = jsObj;
-const jsObjOther = Object.assign({}, jsObj);
-
-module.exports = {
-    jsNum,
-    jsObj,
-    jsObjCopy,
-    jsObjOther,
-};
+export let jsStr = jsStr1;

@@ -41,7 +41,6 @@ class ConversionBinaryA2a {
      * @Setup
      */
     public setup(): void {
-        console.log('Starting');
         const data: Number = this.generateNumber(this.seed);
         this.binaryString = data.toString(2);
     }

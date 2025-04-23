@@ -38,7 +38,6 @@ class ConversionDecimalA2j{
      * @Setup
      */
     public setup(): void {
-        console.log('Starting');
         const data: Number = this.generateNumber(this.seed);
         this.strNumber = data.toString(10);
     }

@@ -24,7 +24,6 @@ function classInitByRestJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         this.UnlimitedArguments = stsVm.getClass('Lbench_unlimited_arguments/UnlimitedArguments;');

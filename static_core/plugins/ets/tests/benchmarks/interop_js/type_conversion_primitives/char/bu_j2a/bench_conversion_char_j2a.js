@@ -25,7 +25,6 @@ function conversionCharJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         this.char = 'A';
         let stsVm = initEtsVm();
 

@@ -15,9 +15,7 @@
 
 //NOTE: if there is no sts file in the directory then vmb cannot open the js file
 
-const {
-    UnlimitedArguments,
-} = require('./import');
+import { UnlimitedArguments } from './test_import';
 
 /**
  * @State
@@ -35,14 +33,6 @@ function classInitByRestJ2j() {
 
     function init(arg) {
         new UnlimitedArguments(arg);
-        return;
-    };
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
         return;
     };
 

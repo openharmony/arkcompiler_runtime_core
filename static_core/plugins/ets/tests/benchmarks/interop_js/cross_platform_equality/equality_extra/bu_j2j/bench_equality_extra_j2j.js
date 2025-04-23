@@ -15,7 +15,7 @@
 
 //NOTE: if there is no sts file in the directory then vmb cannot open the js file
 
-const {
+import {
     jsArr,
     jsArrCopy,
     jsArrOther,
@@ -23,8 +23,7 @@ const {
     jsArrowFooCopy,
     jsArrowFooOther,
     jsFoo,
-    jsFooOther,
-} = require('./import');
+    jsFooOther } from './test_import';
 
 /**
  * @State
@@ -41,14 +40,6 @@ function equalityExtraJ2j() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
-    };
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
         return;
     };
 

@@ -41,14 +41,6 @@ function conversionHexJ2j() {
     hexString = data.toString(16);
 
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {

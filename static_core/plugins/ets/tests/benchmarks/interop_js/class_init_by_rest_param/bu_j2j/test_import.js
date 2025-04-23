@@ -13,5 +13,15 @@
  * limitations under the License.
  */
 
-exports.jsVoid = (a, b) => {};
-exports.returnAnonymous = () => (a, b) => {};
+class UnlimitedArguments1 {
+    a = 0;
+    constructor(arg) {
+        let i = arg.length - 1;
+        while (i >= 0) {
+            this.a += arg[i];
+            i = i - 1;
+        }
+    }
+}
+
+export let UnlimitedArguments = UnlimitedArguments1;

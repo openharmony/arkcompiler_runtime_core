@@ -25,7 +25,6 @@ function callImportFunctionJ2a() {
       * @Setup
       */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         this.etsVoid = stsVm.getFunction('LETSGLOBAL;', 'stsVoid');

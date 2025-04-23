@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-exports.jsNumber = 123;
-exports.jsByte = 123;
-exports.jsShort = 123;
-exports.jsInt = 123;
-exports.jsLong = 123;
-exports.jsFloat = 12.34;
-exports.jsDouble = 12.34;
+export let jsNumber = 123;
+export let jsByte = 123;
+export let jsShort = 123;
+export let jsInt = 123;
+export let jsLong = 123;
+export let jsFloat = 12.34;
+export let jsDouble = 12.34;

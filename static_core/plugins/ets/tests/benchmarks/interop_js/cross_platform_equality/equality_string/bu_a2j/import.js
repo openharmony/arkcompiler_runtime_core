@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-const jsStr = 'string';
+const jsStr1 = 'string';
 
-module.exports = {
-    jsStr,
-};
+export let jsStr = jsStr1;

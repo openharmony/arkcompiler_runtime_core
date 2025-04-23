@@ -25,13 +25,6 @@ class StringifyObjectA2j {
     obj: JSValue = new Person();
 
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): number {

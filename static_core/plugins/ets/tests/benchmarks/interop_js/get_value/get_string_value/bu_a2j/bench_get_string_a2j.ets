@@ -24,13 +24,6 @@ import {
  */
 export class GetStringA2j {
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): object {
