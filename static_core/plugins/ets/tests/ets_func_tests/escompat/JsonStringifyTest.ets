@@ -40,6 +40,13 @@ const FLOAT32_MIN: number = Float.MIN_VALUE; // 1.4e-45
 const FLOAT64_MAX: number = Double.MAX_VALUE; // 1.7976931348623157e+308
 const FLOAT64_MIN: number = Double.MIN_VALUE; // 5e-324
 
+class TestClass {
+    value: string;
+    constructor(v: string) {
+        this.value = v;
+    }
+}
+
  function jsonStringifyUint8Array(): void {
     let value: Uint8Array = Uint8Array.of(UINT8_MIN - 1, UINT8_MIN, UINT8_MAX, UINT8_MAX + 1);
     assertEQ(`{"0":255,"1":0,"2":255,"3":0}`, JSON.stringify(value));
@@ -100,6 +107,129 @@ function jsonStringifySet(): void {
     assertEQ("{}", JSON.stringify(set));
 }
 
+function jsonStringifyMapEmpty(): void {
+    const map1 = new Map<string, string>();
+    assertEQ("{}", JSON.stringify(map1));
+}
+
+function jsonStringifyMapWithEntries(): void {
+    const map2 = new Map<string, string>();
+    map2.set("key1", "value1");
+    assertEQ("{}", JSON.stringify(map2));
+}
+
+function jsonStringifyRecord(): void {
+    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    record["name"] = "arkts";
+    record["version"] = 1;
+
+    let jsonStr = JSON.stringify(record);
+    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
+    let fields = jsonObj.getFields();
+
+    assertEQ(fields.get("name")?.toString(), "arkts");
+    assertEQ(fields.get("version")?.toString(), "1");
+}
+
+function jsonStringifyRecordWithUndefinedValue(): void {
+    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    record["name"] = "arkts";
+    record["version"] = 1.0;
+    record["ignore"] = undefined;
+
+    let jsonStr = JSON.stringify(record);
+    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
+    let fields = jsonObj.getFields();
+
+    assertEQ(fields.get("name")?.toString(), "arkts");
+    assertEQ(fields.get("version")?.toString(), "1");
+    assertEQ(fields.has("ignore"), false);
+}
+
+function jsonStringifyNestedRecord(): void {
+    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    record["name"] = "arkts";
+    record["version"] = 1.0;
+
+    const nestedRecord: Record<string, NullishType> = new Record<string, NullishType>();
+    nestedRecord["inner"] = record;
+    nestedRecord["desc"] = new String("nested");
+
+    let jsonStr = JSON.stringify(nestedRecord);
+    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
+    let fields = jsonObj.getFields();
+
+    let innerObj = fields.get("inner") as JSONObject;
+    let innerFields = innerObj.getFields();
+
+    assertEQ(innerFields.get("name")?.toString(), "arkts");
+    assertEQ(innerFields.get("version")?.toString(), "1");
+    assertEQ(fields.get("desc")?.toString(), "nested");
+}
+
+function jsonStringifyRecordWithClassInstance(): void {
+    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    record["TestClass"] = new TestClass("Test");
+
+    let jsonStr = JSON.stringify(record);
+    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
+    let fields = jsonObj.getFields();
+
+    let classObj = fields.get("TestClass") as JSONObject;
+    let classFields = classObj.getFields();
+
+    assertEQ(classFields.get("value")?.toString(), "Test");
+}
+
+function jsonStringifyRecordWithArray(): void {
+    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    record["list"] = new Array<Number>(1, 2, 3);
+
+    let jsonStr = JSON.stringify(record);
+    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
+    let fields = jsonObj.getFields();
+
+    let arr = fields.get("list") as JSONArray;
+    let elements = arr.values;
+
+    assertEQ(elements.length, 3);
+    assertEQ(elements[0]?.toString(), "1");
+    assertEQ(elements[1]?.toString(), "2");
+    assertEQ(elements[2]?.toString(), "3");
+}
+
+function jsonStringifyRecordWithNull(): void {
+    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    record["nullable"] = null;
+
+    let jsonStr = JSON.stringify(record);
+    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
+    let fields = jsonObj.getFields();
+
+    let nullableVal = fields.get("nullable");
+    assertEQ(nullableVal instanceof JSONNull, true);
+}
+
+function jsonStringifyNestedMap(): void {
+    const map = new Map<string, Object>();
+    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    record["name"] = "arkts";
+    map.set("nested", record);
+
+    assertEQ("{}", JSON.stringify(map));
+}
+
+function jsonStringifyCyclicRecord(): void {
+    const cycleRecord = new Record<string, NullishType>();
+    cycleRecord["self"] = cycleRecord;
+    try {
+        JSON.stringify(cycleRecord);
+        throw new Error("Expected JSON.stringify to throw on cyclic structure, but it did not.");
+    } catch (e) {
+        assertEQ("cyclic object value", (e as Error).message);
+    }
+}
+
 function main(): int {
     const suite = new ArkTestsuite("Json stringify for ArrayLike tests ")
     suite.addTest("JSON.stringify for Uint8Array", jsonStringifyUint8Array)
@@ -113,6 +243,16 @@ function main(): int {
     suite.addTest("JSON.stringify for Float64Array", jsonStringifyFloat64Array)
     suite.addTest("JSON.stringify for Promise", jsonStringifyPromise)
     suite.addTest("JSON.stringify for Set", jsonStringifySet)
+    suite.addTest("JSON.stringify for empty Map", jsonStringifyMapEmpty);
+    suite.addTest("JSON.stringify for Map with entries", jsonStringifyMapWithEntries);
+    suite.addTest("JSON.stringify for Record", jsonStringifyRecord);
+    suite.addTest("JSON.stringify for Record with undefined value", jsonStringifyRecordWithUndefinedValue);
+    suite.addTest("JSON.stringify for nested Record", jsonStringifyNestedRecord);
+    suite.addTest("JSON.stringify for Record with class instance", jsonStringifyRecordWithClassInstance);
+    suite.addTest("JSON.stringify for Record with array", jsonStringifyRecordWithArray);
+    suite.addTest("JSON.stringify for Record with null", jsonStringifyRecordWithNull);
+    suite.addTest("JSON.stringify for nested Map", jsonStringifyNestedMap);
+    suite.addTest("JSON.stringify for cyclic Record", jsonStringifyCyclicRecord);
 
     return suite.run()
 }
