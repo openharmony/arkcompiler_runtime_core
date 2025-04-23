@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-exports.jsNumber = 1;
+export let jsNumber = 1;

@@ -384,11 +384,11 @@ def generate_main_interop(generator: BenchGenerator, arkjs_suffix: str = '') -> 
         return bus  # empty
     # Note a2a and a2j templates are like in arkts_host
     bus += generate_mode('bu_a2a', 'ets', generator, settings=GenSettings(src={'.ets'},
-                         template='Template.ets',
+                         template='TemplateInteropA2A.tpl_ets',
                          out='.ets',
                          link_to_src=False))
     bus += generate_mode('bu_a2j', 'ets', generator, settings=GenSettings(src={'.ets'},
-                         template='Template.ets',
+                         template='TemplateInteropA2A.tpl_ets',
                          out='.ets',
                          link_to_src=False), arkjs_suffix=arkjs_suffix)
     bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
@@ -396,7 +396,7 @@ def generate_main_interop(generator: BenchGenerator, arkjs_suffix: str = '') -> 
                          out='.js',
                          link_to_src=False))
     bus += generate_mode('bu_j2j', 'js', generator, settings=GenSettings(src={'.js'},
-                         template='Template.tpl_js',
+                         template='Template' + ('.tpl_js' if len(arkjs_suffix) == 0 else '.mjs'),
                          out='.js',
                          link_to_src=False))
     log.passed('Generated %d bench units', len(bus))

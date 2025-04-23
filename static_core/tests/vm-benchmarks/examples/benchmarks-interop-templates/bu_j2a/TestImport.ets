@@ -21,6 +21,6 @@ export class TestImport {
     }
 
     public setup(): void {
-        console.log('Starting');
+        // place for code to use in benchmark setup
     }
 }

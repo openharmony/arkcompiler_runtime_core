@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
-const { 
-    MODULE_PATH,
-    ARK_ETS_STDLIB_PATH,
-    ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-    VMB_BENCH_UNIT_ITERATIONS,
-    ETS_VM_OPTS
-} = process.env;
-
 const DEFAULT_ITERATIONS = 100000;
-
-globalThis.require = require;
-
-// Note #23757 this needs to be further tested and possibly adjusted
 const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
+function print_log(msg) {
+    print(msg); // NOTE can be console.log or print or something else depending on platform
+}
+
 class Benchmark {
-    let modulePath = helper.getEnvironmentVar('MODULE_PATH');
-    #ark = requireNapiPreview(modulePath + 'lib/ets_interop_js_napi_arkjsvm.so', false);
+    #ark = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
     #benchmark;
     #passedTime = BigInt(0);
     #binaries = [];
@@ -40,22 +31,30 @@ class Benchmark {
     }
 
     #__init() {
-        // Note #23757 this needs to be further tested and possibly adjusted
-        let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
-        let etsVmOpts = helper.getEnvironmentVar('ETS_VM_OPTS');
+        if (helper === undefined) {
+            throw new Error('Failed to initialize helper');
+        }
 
-        const isOk = this.#ark.createRuntime(Object.assign({
-            'boot-panda-files': [stdlibPath, ...this.#binaries].join(':'),
-            'panda-files': this.#binaries.join(':')
+    	let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+
+        let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+        if (this.#ark === undefined) {
+            throw new Error('Failed to initialize etsVm');
+        }
+
+        const etsVmOpts = helper.getEnvironmentVar('ETS_VM_OPTS');
+        let etsVmRes = this.#ark.createRuntime(Object.assign({
+                'boot-panda-files': [stdlibPath, ...this.#binaries].join(':'),
+                'panda-files': this.#binaries.join(':')
         }, JSON.parse(etsVmOpts)));
 
-        if (!isOk) {
+        if (!etsVmRes) {
             throw new Error('Failed to initialize');
         }
     }
 
     #prepare() {
-        const TestClass = this.#ark.getClass("L$STATE/$STATE;");
+        const TestClass = this.#ark.getClass("L$STATE" + "_" + "$METHOD" + "/$STATE;");
         this.#benchmark = new TestClass();
         this.#benchmark.setup();
     }
@@ -65,10 +64,11 @@ class Benchmark {
             throw new Error(`Iteration count should be a valid integer, $${iterations} given instead`);
         }
         for (let i = 0; i < iterations ?? this.iterations; i++) {
-            const startTimeNsec = process.hrtime.bigint();
+            const startTimeMSec = BigInt(Date.now());
             this.#benchmark.$METHOD();
-            const endTimeNSec = process.hrtime.bigint();
-            this.#passedTime += (endTimeNSec - startTimeNsec);
+            const endTimeMSec = BigInt(Date.now());
+            const MILLIS2NANOS = 1000000;
+            this.#passedTime += (endTimeMSec - startTimeMSec) * BigInt(MILLIS2NANOS);
         }
         return this.#passedTime;
     }
@@ -86,14 +86,16 @@ class Benchmark {
         const isSelfTimed = this.#benchmark.totalTime !== undefined;
         const testRunner = isSelfTimed ? this.#loopFromArk.bind(this) : this.#loopFromJS.bind(this);
         const timing = testRunner(iterations);
-        console.log("Benchmark result: $NAME " + timing);
+        print("Benchmark result: $NAME " + timing);
     }
 }
 
-const benchmark = new Benchmark(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH);
+let interopJsGtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+const benchmark = new Benchmark(interopJsGtestAbcPath);
 
-const iterations = (VMB_BENCH_UNIT_ITERATIONS && Number.isFinite(Number(VMB_BENCH_UNIT_ITERATIONS))) 
-    ? Number(VMB_BENCH_UNIT_ITERATIONS)
+let vmbBenchUnitIterations = helper.getEnvironmentVar('VMB_BENCH_UNIT_ITERATIONS');
+const iterations = (vmbBenchUnitIterations && Number.isFinite(Number(vmbBenchUnitIterations)))
+    ? Number(vmbBenchUnitIterations)
     : DEFAULT_ITERATIONS;
 
 benchmark.run(iterations);

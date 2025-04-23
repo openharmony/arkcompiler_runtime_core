@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { jsNumber } = require('./test_import');
+import { jsNumber } from './test_import';
 
 /**
  * @State
@@ -25,7 +25,7 @@ function benchJ2j() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
+        // place for code to use in benchmark setup
         return;
     };
 

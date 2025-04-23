@@ -25,7 +25,7 @@ function benchJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
+        print_log('Starting...');
         let stsVm = initEtsVm();
 
         const State = stsVm.getClass('LTestImport/TestImport;');
