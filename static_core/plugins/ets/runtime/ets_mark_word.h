@@ -62,7 +62,6 @@ public:
 
         INTEROP_INDEX_FLAG_SHIFT = HASH_SIZE,
         INTEROP_INDEX_FLAG_MASK = (1UL << INTEROP_INDEX_FLAG_SIZE) - 1UL,
-        INTEROP_INDEX_FLAG_MASK_IN_PLACE = INTEROP_INDEX_FLAG_MASK << INTEROP_INDEX_FLAG_SHIFT,
 
         // Interop index state masks and shifts
         INTEROP_INDEX_SHIFT = 0U,
@@ -84,10 +83,9 @@ public:
         STATE_UNLOCKED = MarkWord::STATE_UNLOCKED,
         UNUSED_STATE_STATE_LIGHT_LOCKED = MarkWord::STATE_LIGHT_LOCKED,
         STATE_USE_INFO = MarkWord::STATE_HEAVY_LOCKED,
-        STATE_GC = MarkWord::STATE_GC,
-        // STATE_HASHED and STATE_HAS_INTEROP_INDEX looks similar for MarkWord, but is different for EtsMarkWord
         STATE_HASHED = MarkWord::STATE_HASHED,
-        STATE_HAS_INTEROP_INDEX = (INTEROP_INDEX_FLAG_SIZE << MarkWord::STATUS_SIZE) | MarkWord::STATE_HASHED,
+        STATE_GC = MarkWord::STATE_GC,
+        STATE_HAS_INTEROP_INDEX = STATE_GC + 1,
     };
 
     // MarkWord specific methods
@@ -146,13 +144,13 @@ public:
 
     EtsMarkWord DecodeFromHash(uint32_t hash)
     {
-        return EtsMarkWord::FromMarkWord(
-            MarkWord::DecodeFromHash(((hash & HASH_MASK) << HASH_SHIFT) | (HASH_STATE_ETS_HASH << HASH_STATE_SHIFT)));
+        return EtsMarkWord::FromMarkWord(MarkWord::DecodeFromHashWide(((hash & HASH_MASK) << HASH_SHIFT) |
+                                                                      (HASH_STATE_ETS_HASH << HASH_STATE_SHIFT)));
     }
 
     EtsMarkWord DecodeFromInteropIndex(uint32_t index)
     {
-        return EtsMarkWord::FromMarkWord(MarkWord::DecodeFromHash(
+        return EtsMarkWord::FromMarkWord(MarkWord::DecodeFromHashWide(
             ((index & INTEROP_INDEX_MASK) << INTEROP_INDEX_SHIFT) | (HASH_STATE_INTEROP_INDEX << HASH_STATE_SHIFT)));
     }
 
@@ -179,19 +177,8 @@ public:
 private:
     EtsObjectState GetStateBasedOnMarkHash() const
     {
-        auto hashState = (MarkWord::GetHash() >> HASH_STATE_SHIFT) & INTEROP_INDEX_MASK;
-        switch (hashState) {
-            case HASH_STATE_ETS_HASH: {
-                return EtsObjectState::STATE_HASHED;
-            }
-            case HASH_STATE_INTEROP_INDEX: {
-                return EtsObjectState::STATE_HAS_INTEROP_INDEX;
-            }
-            default: {
-                LOG(FATAL, RUNTIME) << "Unsupported Hash State";
-                return EtsObjectState::STATE_HASHED;
-            }
-        }
+        auto flag = (GetValue() >> INTEROP_INDEX_FLAG_SHIFT) & INTEROP_INDEX_FLAG_MASK;
+        return (flag != 0) ? STATE_HAS_INTEROP_INDEX : STATE_HASHED;
     }
 
     // Methods for MarkWord usage

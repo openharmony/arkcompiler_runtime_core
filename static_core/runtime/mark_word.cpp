@@ -25,14 +25,6 @@ uint32_t MarkWord::GetHash() const
     return static_cast<uint32_t>((Value() >> HASH_SHIFT) & HASH_MASK);
 }
 
-MarkWord MarkWord::DecodeFromHash(uint32_t hash)
-{
-    // Clear hash and status bits
-    MarkWordSize temp = Value() & (~(HASH_MASK_IN_PLACE | STATUS_MASK_IN_PLACE));
-    MarkWordSize hashInPlace = (static_cast<MarkWordSize>(hash) & HASH_MASK) << HASH_SHIFT;
-    return MarkWord(temp | hashInPlace | (STATUS_HASHED << STATUS_SHIFT));
-}
-
 }  // namespace ark
 
 #endif  // PANDA_RUNTIME_MARK_WORD_CPP_
