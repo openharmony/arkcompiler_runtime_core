@@ -50,7 +50,9 @@ function InitFinRegAndFill(callback: (value: int) => void, isMainCoro: boolean =
 
 function runGCInDiffThreads() {
     doFullGC();
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     launch<void, () => void>(doFullGC).Await();
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
 function testFinRegOnMainAndDiffCoro() {
@@ -59,7 +61,9 @@ function testFinRegOnMainAndDiffCoro() {
     let cb = (value: int) => {
         result_finreg_not_main = value;
     }
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     launch<void, (cb: (v: int) => void, f: boolean) => void>(InitFinRegAndFill, cb, false).Await();
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     InitFinRegAndFill((value: int) => {
         result_finreg_main = value;
     }, true);
@@ -68,7 +72,9 @@ function testFinRegOnMainAndDiffCoro() {
     assertEQ(result_finreg_not_main, 1);
     // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
     // if main coro is executed first, the test will return false
-    Coroutine.Schedule();
+    while(!result_finreg_main) {
+        Coroutine.Schedule();
+    }
     assertEQ(result_finreg_main, 1);
 }
 
