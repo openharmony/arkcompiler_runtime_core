@@ -153,10 +153,5 @@ EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr)
 {
     return static_cast<EtsJob *>(Launch<EtsJob>(func, arr));
 }
-
-EtsPromise *EtsLaunchInternalPromiseNative(EtsObject *func, EtsArray *arr)
-{
-    return static_cast<EtsPromise *>(Launch<EtsPromise>(func, arr));
-}
 }
 }  // namespace ark::ets::intrinsics
