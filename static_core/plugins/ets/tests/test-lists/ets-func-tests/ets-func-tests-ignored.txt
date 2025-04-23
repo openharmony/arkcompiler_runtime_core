@@ -62,9 +62,6 @@ spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_0.ets
 #19931
 spec/03.types/References_Types/Tuples_type/func_tuple_1.ets
 
-#19930
-spec/03.types/References_Types/Tuples_type/tuple_as_generic_7.ets
-
 #15394
 spec/03.types/References_Types/Tuples_type/tuple_write_6.ets
 
