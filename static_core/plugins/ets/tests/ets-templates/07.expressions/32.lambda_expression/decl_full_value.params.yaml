@@ -36,6 +36,6 @@ cases:
 
   - desc: rest arg
     impl: |-
-        let f: (e: int, ...es: int[]) => int = (e: int, ...es: int[]) => { return e + (es.lengh > 0 ? es[0] : 1 ) }
+        let f: (e: int, ...es: int[]) => int = (e: int, ...es: int[]) => { return e + (es.length > 0 ? es[0] : 1 ) }
         assertEQ(f(8), 9, "rest arg failed")
         assertEQ(f(7, 1, 2, 3), 8, "rest arg[2] failed")

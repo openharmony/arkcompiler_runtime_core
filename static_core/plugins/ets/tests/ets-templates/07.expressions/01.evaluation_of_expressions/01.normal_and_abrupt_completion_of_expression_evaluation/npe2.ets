@@ -25,13 +25,10 @@ function main(): int {
   let foo = (i: byte): byte[]|null => { return i <= 0 ? null : [i] };
 
   try {
-    let v: String = "X" + (a = 2) + (byt = foo(42)[0]) + (b = 2);
+    let v: String = "X" + (a = 2) + (byt = foo(42 as byte)![0]) + (b = 2);
     if (a != 2 || b != 2) return 1;
     return 0;
-  } catch (e: NullPointerError) {
-    return 1;
-  } catch {
+  } catch (e) {
     return 1;
   }
-  return 1;
 }

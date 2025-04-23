@@ -170,9 +170,9 @@ cases:
           class Ex extends Exception {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: Color): void throws { if (p.getValue() >= 2) throw ex }
+              meth(p: Color): void throws { if (p.valueOf() >= 2) throw ex }
               meth(p: Size): string { return "Size" }
-              meth(p: Status): Size throws { if (p.getValue() >= 2) throw ex; else return Size.L }
+              meth(p: Status): Size throws { if (p.valueOf() >= 2) throw ex; else return Size.L }
           }
       use: |-
           let a: A = new A()

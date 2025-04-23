@@ -36,6 +36,6 @@ cases:
 
   - desc: rest arg
     impl: |-
-        let f: (e: Object, ...es: Object[]) => Object = (e: Object, ...es: Object[]) => { return e + ", " + es.length > 0 : "" : es[0] + "!" }
+        let f: (e: Object, ...es: Object[]) => Object = (e: Object, ...es: Object[]) => { return e + ", " + (es.length > 0 ? es[0] : "") + "!" }
         assertEQ(f("Hello"), "Hello, !", "rest arg failed")
         assertEQ(f("Hello", "World", "a", "b"), "Hello, World!", "rest arg[2] failed")
