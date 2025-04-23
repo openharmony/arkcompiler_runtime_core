@@ -338,6 +338,10 @@ bool PandaEtsVM::InitializeFinish()
             return false;
         }
     }
+    // Initialize platform classes only if intrinsics were loaded, because static initializers might call them
+    if (Runtime::GetOptions().ShouldInitializeIntrinsics()) {
+        classLinker_->GetEtsClassLinkerExtension()->InitializeFinish();
+    }
     return true;
 }
 

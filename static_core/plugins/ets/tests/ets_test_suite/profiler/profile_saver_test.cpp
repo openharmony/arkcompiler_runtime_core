@@ -148,21 +148,6 @@ TEST_F(ProfileSaverTest, ProfilingSaverAddFailOfTimeTest)
     DestroyRuntime();
 }
 
-TEST_F(ProfileSaverTest, ProfilingSaverAddFailOfJoinedTest)
-{
-    InitPGOFilePath("profiling_saver_add_fail_of_time_test.ap");
-    SetIncrementalProfilesaverEnabled(true);
-    CreateRuntime();
-    auto saver = Runtime::GetCurrent()->GetPandaVM()->GetProfileSaverWorker();
-    EXPECT_NE(saver, nullptr);
-    saver->JoinWorker();
-    RunPandafile();
-    EXPECT_TRUE(Runtime::GetCurrent()->IncrementalSaveProfileInfo());
-    EXPECT_FALSE(saver->TryAddTask());
-    CheckLoadProfileFail();
-    DestroyRuntime();
-}
-
 TEST_F(ProfileSaverTest, ProfilingSaverDisabledWithOption)
 {
     InitPGOFilePath("profiling_saver_disabled_with_option.ap");

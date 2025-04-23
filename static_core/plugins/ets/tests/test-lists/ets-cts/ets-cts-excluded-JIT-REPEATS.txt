@@ -4,9 +4,6 @@
 13.compilation_units/09.program_entry_point/program_entry_error_coroutines.ets
 13.compilation_units/09.program_entry_point/program_entry_normal_coroutine.ets
 13.compilation_units/09.program_entry_point/program_entry_normal_coroutines.ets
-16.concurrency/03.asynchronous_api/04.await/a_2.ets
-16.concurrency/03.asynchronous_api/04.await/a_4.ets
-16.concurrency/03.asynchronous_api/04.await/a_8.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_10.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_12.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_14.ets

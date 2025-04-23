@@ -161,6 +161,13 @@ private:
     PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 
     explicit EtsPlatformTypes(EtsCoroutine *coro);
+
+    /**
+     * @brief Initialize all classes.
+     * This method must be called after construction of `EtsPlatformTypes`
+     * to ensure correct initialization of all classes
+     */
+    void InitializeClasses(EtsCoroutine *coro);
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 

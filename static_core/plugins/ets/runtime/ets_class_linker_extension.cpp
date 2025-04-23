@@ -738,18 +738,22 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
 
     InitializeBuiltinSpecialClasses();
 
-    plaformTypes_ = PandaUniquePtr<EtsPlatformTypes>(
-        Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(EtsCoroutine::GetCurrent()));
+    auto *coro = EtsCoroutine::GetCurrent();
+    plaformTypes_ =
+        PandaUniquePtr<EtsPlatformTypes>(Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(coro));
 
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
     coro->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
     coro->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
     coro->SetStringClassPtr(GetClassRoot(ClassRoot::LINE_STRING));
     coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
     coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
+}
+
+void EtsClassLinkerExtension::InitializeFinish()
+{
+    plaformTypes_->InitializeClasses(EtsCoroutine::GetCurrent());
 }
 
 static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)

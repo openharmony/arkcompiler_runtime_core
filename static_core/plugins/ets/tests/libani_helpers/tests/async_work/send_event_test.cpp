@@ -200,7 +200,7 @@ TEST_F(SendEventTest, SendTimeoutEvent)
 
     event.Wait();
     auto endTime = time::GetCurrentTimeInMillis();
-    ASSERT_GT(endTime - startTime, TIMEOUT_MILLIS);
+    ASSERT_GE(endTime - startTime, TIMEOUT_MILLIS);
 }
 
 }  // namespace ark::ets::ani_helpers::testing

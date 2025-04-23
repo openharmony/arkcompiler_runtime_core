@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "ets_class_linker_extension.h"
+#include "include/thread_scopes.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_class.h"
@@ -74,6 +75,7 @@ static EtsClass *FindType(EtsClassLinker *classLinker, std::string_view descript
     auto bootCtx = classLinker->GetEtsClassLinkerExtension()->GetBootContext();
     auto klass = classLinker->GetClass(descriptor.data(), false, bootCtx, &handler);
     if (klass == nullptr) {
+        // In some cases (i.e. unit-tests) we allow platform classes to be not found
         LOG(ERROR, RUNTIME) << "Cannot find a platform class " << descriptor;
         return nullptr;
     }
@@ -236,6 +238,23 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     findType(&EtsPlatformTypes::escompatMap, MAP);
     findType(&EtsPlatformTypes::escompatMapEntry, MAPENTRY);
+}
+
+void EtsPlatformTypes::InitializeClasses(EtsCoroutine *coro)
+{
+    ASSERT(coro != nullptr);
+    ScopedManagedCodeThread sj(coro);
+
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    for (auto iter : entryTable_) {
+        auto idx = iter.second.slotIndex;
+        ASSERT(idx < sizeof(EtsPlatformTypes));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        EtsClass *klass = *(reinterpret_cast<EtsClass **>(this) + idx);
+        if (klass != nullptr && !classLinker->InitializeClass(coro, klass)) {
+            LOG(FATAL, RUNTIME) << "Cannot initialize a platform class " << klass->GetDescriptor();
+        }
+    }
 }
 
 }  // namespace ark::ets
