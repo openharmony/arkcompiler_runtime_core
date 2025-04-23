@@ -29,6 +29,8 @@ function main(): int {
     suite.addTest("LRUCache update&getCapacity Decimal", testLRUCacheUpdateGetCapacity_Decimal);
     suite.addTest("LRUCache update&getCapacity Zero", testLRUCacheUpdateGetCapacity_Zero);
     suite.addTest("LRUCache update&getCapacity Negative", testLRUCacheUpdateGetCapacity_Negative);
+    suite.addTest("LRUCache Constructor NumberMin", testLRUCacheConstructor_NumberMin);
+    suite.addTest("LRUCache update&getCapacity NumberMin", testLRUCacheUpdateGetCapacity_NumberMin);
 
     return suite.run()
 }
@@ -38,9 +40,10 @@ function testLRUCacheUpdateGetCapacity_Long() {
     try {
         that.updateCapacity(2147483648);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of 2147483648 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
         return
     }
+    assertTrue(false, "LRUCache should throw an exception when capacity is not int");
 }
 
 function testLRUCacheUpdateGetCapacity_Decimal() {
@@ -48,9 +51,10 @@ function testLRUCacheUpdateGetCapacity_Decimal() {
     try {
         that.updateCapacity(2.5);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of 2.5 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
         return
     }
+    assertTrue(false, "LRUCache should throw an exception when capacity is not int");
 }
 
 function testLRUCacheUpdateGetCapacity_Zero() {
@@ -58,9 +62,10 @@ function testLRUCacheUpdateGetCapacity_Zero() {
     try {
         that.updateCapacity(0);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of 0 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
         return
     }
+    assertTrue(false, "LRUCache should throw an exception when capacity is not int");
 }
 
 function testLRUCacheUpdateGetCapacity_Negative() {
@@ -68,34 +73,37 @@ function testLRUCacheUpdateGetCapacity_Negative() {
     try {
         that.updateCapacity(-1);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of -1 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is negative")
         return
     }
+    assertTrue(false, "LRUCache should throw an exception when capacity is negative");
 }
 
 function testLRUCacheConstructor_Long() {
     try {
         let that = new util.LRUCache<number, number>(2147483648);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of 2147483648 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
         return
     }
+    assertTrue(false, "LRUCache should throw an exception when capacity is not int");
 }
 
 function testLRUCacheConstructor_Decimal() {
     try {
         let that = new util.LRUCache<number, number>(0.1);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of 0.1 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
         return
     }
+    assertTrue(false, "LRUCache should throw an exception when capacity is not int");
 }
 
 function testLRUCacheConstructor_Zero() {
     try {
         let that = new util.LRUCache<number, number>(0);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of 0 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
         return
     }
 }
@@ -104,7 +112,29 @@ function testLRUCacheConstructor_Negative() {
     try {
         let that = new util.LRUCache<number, number>(-1);
     } catch (err: BusinessError) {
-        assertEQ(err.message, "Parameter error. The type of -1 must be small integer")
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is negative")
         return
     }
+    assertTrue(false, "LRUCache should throw an exception when capacity is negative");
+}
+
+function testLRUCacheConstructor_NumberMin() {
+    try {
+        let that = new util.LRUCache<number, number>(Double.MIN_VALUE);
+    } catch (err: BusinessError) {
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
+        return
+    }
+    assertTrue(false, "LRUCache should throw an exception when capacity is not int");
+}
+
+function testLRUCacheUpdateGetCapacity_NumberMin() {
+    let that = new util.LRUCache<number, number>();
+    try {
+        that.updateCapacity(Double.MIN_VALUE);
+    } catch (err: BusinessError) {
+        assertEQ(err.code, 401, "LRUCache should throw an exception when capacity is not int")
+        return
+    }
+    assertTrue(false, "LRUCache should throw an exception when capacity is not int");
 }

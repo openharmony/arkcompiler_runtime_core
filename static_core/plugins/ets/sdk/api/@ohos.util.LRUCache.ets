@@ -46,7 +46,7 @@ export namespace util {
         }
         
         private checkCapacityIsIllegal(capacity: number): boolean {
-            return !(Number.isInteger(capacity) && capacity > 0);
+            return (capacity > Int.MAX_VALUE || capacity <= 0 || (capacity % 1) != 0);
         }
         
         private getLRUKey(): K {
