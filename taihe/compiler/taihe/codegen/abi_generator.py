@@ -407,12 +407,12 @@ class ABIHeadersGenerator:
         params = []
         for param in func.params:
             type_abi_info = TypeABIInfo.get(self.am, param.ty_ref.resolved_ty)
-            pkg_abi_target.include(*type_abi_info.decl_headers)
+            pkg_abi_target.include(*type_abi_info.impl_headers)
             params.append(f"{type_abi_info.as_param} {param.name}")
         params_str = ", ".join(params)
         if return_ty_ref := func.return_ty_ref:
             type_abi_info = TypeABIInfo.get(self.am, return_ty_ref.resolved_ty)
-            pkg_abi_target.include(*type_abi_info.decl_headers)
+            pkg_abi_target.include(*type_abi_info.impl_headers)
             return_ty_name = type_abi_info.as_owner
         else:
             return_ty_name = "void"

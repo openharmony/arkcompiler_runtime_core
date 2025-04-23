@@ -420,7 +420,7 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
             (func_name,) = overload_attr.args
             if type_name is None:
                 if self.f.name[: len(func_name)].lower() == func_name.lower():
-                    type_name = self.f.name[len(func_name):]
+                    type_name = self.f.name[len(func_name) :]
                     type_name = type_name[0].lower() + type_name[1:]
                 else:
                     raise_adhoc_error(
@@ -433,7 +433,7 @@ class GlobFuncANIInfo(AbstractAnalysis[GlobFuncDecl]):
             for func_name in ("on", "off"):
                 if self.f.name[: len(func_name)].lower() == func_name.lower():
                     if type_name is None:
-                        type_name = self.f.name[len(func_name):]
+                        type_name = self.f.name[len(func_name) :]
                         type_name = type_name[0].lower() + type_name[1:]
                     break
             else:
@@ -597,7 +597,7 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
             (method_name,) = overload_attr.args
             if type_name is None:
                 if self.f.name[: len(method_name)].lower() == method_name.lower():
-                    type_name = self.f.name[len(method_name):]
+                    type_name = self.f.name[len(method_name) :]
                     type_name = type_name[0].lower() + type_name[1:]
                 else:
                     raise_adhoc_error(
@@ -610,7 +610,7 @@ class IfaceMethodANIInfo(AbstractAnalysis[IfaceMethodDecl]):
             for method_name in ("on", "off"):
                 if self.f.name[: len(method_name)].lower() == method_name.lower():
                     if type_name is None:
-                        type_name = self.f.name[len(method_name):]
+                        type_name = self.f.name[len(method_name) :]
                         type_name = type_name[0].lower() + type_name[1:]
                     break
             else:
