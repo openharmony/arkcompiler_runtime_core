@@ -25,7 +25,7 @@ export function evaluateObject(obj): ExampleClass {
 	return new ExampleClass(obj.v0 + obj.v1, obj.v0 + obj.v1);
 }
 
-export function evaluateArray(arr, size) {
+export function evaluateArray(arr, size): number[] {
 	let result = [];
 	for (let i = 0; i < size; i++) {
 		result[i] = arr[i] + i * i;
