@@ -16,6 +16,7 @@
 #include <sys/syscall.h>
 #include <atomic>
 
+#include "coroutines/coroutine_stats.h"
 #include "libpandabase/macros.h"
 #include "os/thread.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
@@ -439,7 +440,12 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
     }
     auto scopedHandlersCounting = ScopedHandlersCounting();
 
-    ManagedThread *mthread = ManagedThread::GetCurrent();
+    Coroutine *coro = Coroutine::GetCurrent();
+    if (coro != nullptr && coro->GetCoroutineStatus() != Coroutine::Status::RUNNING) {
+        return;
+    }
+
+    ManagedThread *mthread = coro == nullptr ? ManagedThread::GetCurrent() : coro;
     ASSERT(mthread != nullptr);
 
     // Checking that code is being executed
@@ -459,6 +465,7 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
     // `mthread` is passed as non-const argument into `GetThreadStatus`, so call it before `setjmp`
     // in order to bypass "variable might be clobbered by ‘longjmp’" compiler warning.
     sample.threadInfo.threadStatus = GetThreadStatus(mthread);
+    sample.threadInfo.threadId = coro == nullptr ? os::thread::GetCurrentThreadId() : coro->GetCoroutineId();
     size_t stackCounter = 0;
 
     ScopedThreadSampling scopedThreadSampling(mthread->GetPtThreadInfo()->GetSamplingInfo());
@@ -491,7 +498,6 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
         return;
     }
     sample.stackInfo.managedStackSize = stackCounter;
-    sample.threadInfo.threadId = os::thread::GetCurrentThreadId();
 
     const ThreadCommunicator &communicator = Sampler::GetSampleCommunicator();
     communicator.SendSample(sample);
