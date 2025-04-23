@@ -53,6 +53,8 @@ group("ark_host_linux_tools_packages") {
   deps = plugin_ark_host_linux_tools_packages
   if (host_os != "mac" && current_cpu != "arm") {
     deps += [
+      "$ark_root/abc2program:arkts_abc2prog(${host_toolchain})",
+      "$ark_root/abc2program:arkts_abc2program(${host_toolchain})",
       "$ark_root/assembler:arkts_asm(${host_toolchain})",
       "$ark_root/compiler:libarktscompiler(${host_toolchain})",
       "$ark_root/compiler/aot:libarkaotmanager(${host_toolchain})",
@@ -85,6 +87,8 @@ group("ark_host_windows_tools_packages") {
   if (host_os != "mac" && current_cpu != "arm" &&
       !ark_static_standalone_build && !ark_standalone_build) {
     deps += [
+      "$ark_root/abc2program:arkts_abc2prog(//build/toolchain/mingw:mingw_x86_64)",
+      "$ark_root/abc2program:arkts_abc2program(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/assembler:arkts_asm(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/disassembler:arkts_disasm(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/static_linker:ark_link(//build/toolchain/mingw:mingw_x86_64)",
@@ -97,6 +101,8 @@ group("ark_host_mac_tools_packages") {
   if (host_os == "mac") {
     if (host_cpu == "arm64") {
       deps += [
+        "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/libpandabase:libarktsbase($build_root/toolchain/mac:clang_arm64)",
@@ -106,6 +112,8 @@ group("ark_host_mac_tools_packages") {
       ]
     } else {
       deps += [
+        "$ark_root/abc2program:arkts_abc2prog($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/abc2program:arkts_abc2program($build_root/toolchain/mac:clang_x64)",
         "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_x64)",
         "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_x64)",
         "$ark_root/libpandabase:libarktsbase($build_root/toolchain/mac:clang_x64)",
