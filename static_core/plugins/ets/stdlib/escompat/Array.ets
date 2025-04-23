@@ -1377,24 +1377,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns a result after applying callbackfn over all elements of the Array
-     */
-    public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
-        if (this.actualLength == 0) {
-            throw new TypeError("Reduce of empty array with no initial value")
-        }
-        let acc: T = this.$_get_unsafe(this.actualLength - 1);
-        for (let i = this.actualLength - 2; i >= 0; i--) {
-            acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
-        }
-        return acc
-    }
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-     *
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
-     *
      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      *
      * @returns a result after applying callbackfn over all elements of the Array
@@ -1912,10 +1894,30 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
         let res = new NullishType[len];
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < this.actualLength; i++) {
             res[i] = callbackfn(this.$_get_unsafe(i), i as number, this);
         }
         return new Array<U>(FROM_BUFFER, res);
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+        if (this.actualLength == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+        let acc: T = this.$_get_unsafe(this.actualLength - 1);
+        for (let i = this.actualLength - 2; i >= 0; i--) {
+            if (this.actualLength > i) {
+                acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
+            }
+        }
+        return acc
     }
 
 }

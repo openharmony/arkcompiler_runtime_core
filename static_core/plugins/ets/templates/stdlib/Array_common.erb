@@ -360,24 +360,6 @@
  *
  * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying callbackfn over all elements of the Array
- */
-<%= access_public %> <%= override %> reduceRight<%= this_generic %>(<%= this_arg %>callbackfn: (previousValue: <%= el_type %>, currentValue: <%= el_type %><%= lambda_params %>) => <%= el_type %>): <%= el_type %> {
-    if (<%= this_len_int %> == 0) {
-        throw new TypeError("Reduce of empty array with no initial value")
-    }
-    let acc: <%= el_type %> = <%= get_unsafe.(this, "#{this_len_int} - 1") %>;
-    for (let i = <%= this_len_int %> - 2; i >= 0; i--) {
-        acc = callbackfn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
-    }
-    return acc
-}
-
-/**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
  * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
  * @returns a result after applying callbackfn over all elements of the Array
