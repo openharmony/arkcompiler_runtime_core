@@ -75,5 +75,3 @@ if(PANDA_WITH_BENCHMARKS)
         endforeach()
     endforeach()
 endif()
-
-add_dependencies(ets_tests sampler_etsnapi_test_suite)

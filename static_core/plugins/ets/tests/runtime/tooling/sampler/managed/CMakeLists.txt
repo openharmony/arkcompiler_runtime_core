@@ -15,21 +15,11 @@ if (PANDA_TARGET_ARM32 OR PANDA_QEMU_BUILD)
     return()
 endif()
 
-# Build ETSNAPI library
-set(SAMPLER_GEN_ETSNAPI_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-file(MAKE_DIRECTORY ${SAMPLER_GEN_ETSNAPI_LIB_DIR})
-
-panda_add_library(sampler_etsnapi_lib SHARED
-    SamplerNapiTest.cpp
-)
-set_target_properties(sampler_etsnapi_lib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${SAMPLER_GEN_ETSNAPI_LIB_DIR})
-panda_target_link_libraries(sampler_etsnapi_lib arkruntime)
-panda_target_include_directories(sampler_etsnapi_lib PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
-
-add_custom_target(sampler_etsnapi_test_suite COMMENT "Running sampler etsnapi tests")
+add_custom_target(sampler_test_suite COMMENT "Running sampler etsnapi tests")
 
 if(CMAKE_CROSSCOMPILING)
     ExternalProject_Get_Property(panda_host_tools binary_dir)
+
     set(aspt_converter_target panda_host_tools-build)
     set(aspt_converter_bin "${binary_dir}/tools/sampler/aspt_converter")
 else()
@@ -59,15 +49,14 @@ set(INTERPRETER_ARGUMENTS_LIST
 set(testing_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Compile Ets tests
-add_custom_target(sampler_etsnapi_es2panda
-    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerNapiTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerNapiTest.ets
+add_custom_target(sampler_es2panda
+    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerTest.ets
     WORKING_DIRECTORY "${testing_dir}"
     DEPENDS ${es2panda_target}
 )
-add_dependencies(sampler_etsnapi_es2panda sampler_etsnapi_lib)
 
 set(ETS_ENTRY_POINT "main")
-if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "FastVerify")
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(ETS_ENTRY_POINT "release_main")
 endif()
 
@@ -77,29 +66,43 @@ set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --workers-type=threadpool)
 foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
     foreach(i_arg ${INTERPRETER_ARGUMENTS_LIST})
         # Run tests
-        add_custom_target(sampler_etsnapi_run_${c_arg}_${i_arg}
-            COMMAND LD_LIBRARY_PATH=${SAMPLER_GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --compiler-enable-jit=${c_arg} --interpreter-type=${i_arg} --sampling-profiler-output-file=${testing_dir}/stack_output_${c_arg}_${i_arg}.aspt ${testing_dir}/SamplerNapiTest.abc SamplerNapiTest.ETSGLOBAL::${ETS_ENTRY_POINT}
-            WORKING_DIRECTORY "${SAMPLER_GEN_ETSNAPI_LIB_DIR}"
-            DEPENDS ark etsstdlib sampler_etsnapi_es2panda
+        add_custom_target(sampler_run_${c_arg}_${i_arg}
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --compiler-enable-jit=${c_arg} --interpreter-type=${i_arg} --sampling-profiler-output-file=${testing_dir}/stack_output_${c_arg}_${i_arg}.aspt ${testing_dir}/SamplerTest.abc SamplerTest.ETSGLOBAL::${ETS_ENTRY_POINT}
+            WORKING_DIRECTORY "${testing_dir}"
+            DEPENDS ark etsstdlib sampler_es2panda
         )
 
-        add_custom_target(sampler_etsnapi_run_aspt_convertor_${c_arg}_${i_arg}
+        add_custom_target(sampler_run_aspt_converter_${c_arg}_${i_arg}
             COMMAND ${aspt_converter_bin} --input=${testing_dir}/stack_output_${c_arg}_${i_arg}.aspt --output=${testing_dir}/traceout_${c_arg}_${i_arg}.csv --cold-graph-enable=true
-            WORKING_DIRECTORY "${SAMPLER_GEN_ETSNAPI_LIB_DIR}"
-            DEPENDS sampler_etsnapi_run_${c_arg}_${i_arg} ${aspt_converter_target}
+            WORKING_DIRECTORY "${testing_dir}"
+            DEPENDS sampler_run_${c_arg}_${i_arg} ${aspt_converter_target}
         )
 
-        add_custom_target(sampler_etsnapi_trace_check_${c_arg}_${i_arg}
-            COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/napi/sampler/sampler_napi_traces_check.py --file=${testing_dir}/traceout_${c_arg}_${i_arg}.csv
-            WORKING_DIRECTORY "${SAMPLER_GEN_ETSNAPI_LIB_DIR}"
-            DEPENDS sampler_etsnapi_run_aspt_convertor_${c_arg}_${i_arg}
+        add_custom_target(sampler_trace_check_${c_arg}_${i_arg}
+            COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/tooling/sampler/managed/sampler_traces_check.py --file=${testing_dir}/traceout_${c_arg}_${i_arg}.csv
+            WORKING_DIRECTORY "${testing_dir}"
+            DEPENDS sampler_run_aspt_converter_${c_arg}_${i_arg}
         )
 
-        add_dependencies(sampler_etsnapi_test_suite sampler_etsnapi_trace_check_${c_arg}_${i_arg})
+        add_dependencies(sampler_test_suite sampler_trace_check_${c_arg}_${i_arg})
     endforeach()
 endforeach()
 
+add_custom_target(sampler_run_aspt_converter_module_dump_mode
+    COMMAND ${aspt_converter_bin} --input=${testing_dir}/stack_output_false_cpp.aspt --dump-modules --output=${testing_dir}/modules.txt
+    WORKING_DIRECTORY "${testing_dir}"
+    DEPENDS sampler_run_false_cpp ${aspt_converter_target}
+)
+
+add_custom_target(sampler_aspt_converter_module_file_check
+    COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/tooling/sampler/managed/sampler_module_file_check.py --file=${testing_dir}/modules.txt --bindir=${PANDA_BINARY_ROOT}
+    WORKING_DIRECTORY "${testing_dir}"
+    DEPENDS sampler_run_aspt_converter_module_dump_mode
+)
+
+add_dependencies(sampler_test_suite sampler_aspt_converter_module_file_check)
+
 # NOTE: Add tests only if sanitizers are disabled to avoid conflicts with sanitizers' signal stack
 if (PANDA_USE_CUSTOM_SIGNAL_STACK)
-    add_dependencies(ets_tests sampler_etsnapi_test_suite)
+    add_dependencies(ets_tests sampler_test_suite)
 endif()

@@ -634,7 +634,6 @@ add_target_to_group(ets_time02_tests ets_app_linker_context_tests)
 
 if (PANDA_USE_CUSTOM_SIGNAL_STACK)
     add_target_to_group(ets_time01_tests sampler_asm_test_suite)
-    add_target_to_group(ets_time02_tests sampler_etsnapi_test_suite)
     add_target_to_group(ets_time02_tests sampler_test_suite)
 endif()
 

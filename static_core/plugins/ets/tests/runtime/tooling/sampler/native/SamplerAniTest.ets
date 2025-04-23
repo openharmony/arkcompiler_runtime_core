@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    loadLibrary("sampler_etsnapi_lib");
+    loadLibrary("sampler_ani_lib");
 
     let res: int = 0;
     res = CallNativeSlowFunction(20000000);
@@ -29,15 +29,15 @@ function main(): int {
         return 2;
     }
 
-    res = CallNativeNAPISlowFunction(500000);
+    res = CallNativeANISlowFunction(500000);
     if (res != 500000) {
-        // throw new Exception("ERROR: CallNativeNAPISlowFunction worked wrong");
+        // throw new Exception("ERROR: CallNativeANISlowFunction worked wrong");
         return 3;
     }
 
-    res = CallNativeNAPIFastFunction(100000);
+    res = CallNativeANIFastFunction(100000);
     if (res != 100000) {
-        // throw new Exception("ERROR: CallNativeNAPIFastFunction worked wrong");
+        // throw new Exception("ERROR: CallNativeANIFastFunction worked wrong");
         return 4;
     }
 
@@ -45,7 +45,7 @@ function main(): int {
 }
 
 function release_main(): int {
-    loadLibrary("sampler_etsnapi_lib");
+    loadLibrary("sampler_ani_lib");
 
     let res: int = 0;
     res = CallNativeSlowFunction(2000000000);
@@ -61,15 +61,15 @@ function release_main(): int {
         return 2;
     }
 
-    res = CallNativeNAPISlowFunction(5000000);
+    res = CallNativeANISlowFunction(5000000);
     if (res != 5000000) {
-        // throw new Exception("ERROR: CallNativeNAPISlowFunction worked wrong");
+        // throw new Exception("ERROR: CallNativeANISlowFunction worked wrong");
         return 3;
     }
 
-    res = CallNativeNAPIFastFunction(1000000);
+    res = CallNativeANIFastFunction(1000000);
     if (res != 1000000) {
-        // throw new Exception("ERROR: CallNativeNAPIFastFunction worked wrong");
+        // throw new Exception("ERROR: CallNativeANIFastFunction worked wrong");
         return 4;
     }
 
@@ -88,9 +88,14 @@ function CallNativeFastFunction(iterations: int): int {
     return ret;
 }
 
-function CallNativeNAPISlowFunction(iterations: int): int {
-    return NativeNAPISlowFunction(iterations);
+function CallNativeANISlowFunction(iterations: int): int {
+    return NativeANISlowFunction(iterations);
 }
+
+function CallNativeANIFastFunction(iterations: int): int {
+    return NativeANIFastFunction(iterations);
+}
+
 
 function SlowETSFunction(iterations: int): int {
     let ret: int = 0;
@@ -106,9 +111,6 @@ function SlowETSFunction(iterations: int): int {
     return ret;
 }
 
-function CallNativeNAPIFastFunction(iterations: int): int {
-    return NativeNAPIFastFunction(iterations);
-}
 
 function FastETSFunction(): int {
     let ret: int = 1;
@@ -117,5 +119,5 @@ function FastETSFunction(): int {
 
 native function NativeSlowFunction(iterations: int): int;
 native function NativeFastFunction(): int;
-native function NativeNAPISlowFunction(iterations: int): int;
-native function NativeNAPIFastFunction(iterations: int): int;
+native function NativeANISlowFunction(iterations: int): int;
+native function NativeANIFastFunction(iterations: int): int;
