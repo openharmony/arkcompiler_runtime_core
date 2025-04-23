@@ -31,8 +31,8 @@ function main(): int {
 
 function testEntriesReturnIteratorByKeyValue() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
@@ -52,8 +52,8 @@ function testEntriesReturnIteratorByKeyValue() {
 
 function testEntriesReturnIteratorByKeyValueWithEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let it = treeMap.entries();
     assertEQ(it.next().value, undefined, "The treeMap should return undefined for the next entry in an empty map");

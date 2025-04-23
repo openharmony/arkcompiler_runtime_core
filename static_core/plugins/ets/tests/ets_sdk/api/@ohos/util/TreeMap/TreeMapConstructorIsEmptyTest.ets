@@ -40,14 +40,10 @@ class MyObject extends Object {
     }
 }
 
-function compareObjects(first: MyObject, second: MyObject): boolean {
-    return first.size < second.size;
-}
-
 function testConstructDefaultEmptyStringTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     assertTrue(treeMap instanceof TreeMap, "The treeMap should be of the same type as the TreeMap");
@@ -56,8 +52,8 @@ function testConstructDefaultEmptyStringTreeMap() {
 
 function testConstructDefaultEmptyNumberTreeMap() {
     let treeMap: TreeMap<number, number> =
-        new TreeMap<number, number>((firstValue: number, secondValue: number): boolean => {
-            return firstValue < secondValue
+        new TreeMap<number, number>((firstValue: number, secondValue: number): number => {
+            return secondValue - firstValue
         });
     treeMap.set(111, 999)
     treeMap.set(222, 888)
@@ -68,8 +64,8 @@ function testConstructDefaultEmptyNumberTreeMap() {
 
 function testConstructDefaultEmptyObjectTreeMap() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size
         });
     let obj: MyObject = new MyObject(1);
     let obj2: MyObject = new MyObject(2);
@@ -89,8 +85,8 @@ function testConstructNoComparatorTreeMap() {
 
 function testIsEmptyReturnsTrue() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let result = treeMap.isEmpty();
     assertEQ(result, true, "The treeMap should be empty");
@@ -99,8 +95,8 @@ function testIsEmptyReturnsTrue() {
 
 function testIsEmptyReturnsFalse() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result = treeMap.isEmpty();
@@ -110,8 +106,8 @@ function testIsEmptyReturnsFalse() {
 
 function testIsEmptyReturnsTrueAfterRemove() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     let result1 = treeMap.isEmpty();
