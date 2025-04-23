@@ -44,6 +44,18 @@ export class BaseGeneric<T, U> {
     constructor(c: T, d: U) {}
 }
 
+export class C1<T> {}
+export function foo1<T>(x: Partial<C1<T>>): void {}
+
+export type Callback<T, C = void, V = void> = (data: T, data2: C) => V;
+export class C2 {
+    a: Callback<string, int>
+    constructor() {
+        this.a = (data: string, data2: int) => {
+        };
+    }
+}
+
 // NOTE(ivagin): enable when supported by interop
 // export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGeneric0<U>, IGeneric1<IGeneric0<V>> {
 //    I0Method(a: U): U { return a; };

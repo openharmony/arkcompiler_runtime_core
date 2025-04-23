@@ -14,6 +14,7 @@
  */
 export declare function Identity<T>(x: T): T;
 export declare function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void;
+export declare function foo1<T>(x: Partial<C1<T>>): void;
 export declare class GenericClass<T extends Object> {
     public identity(x: T): T;
     constructor();
@@ -30,4 +31,13 @@ export declare class BaseGeneric<T, U> {
     public get d(): U;
     public set d(value: U);
     public constructor(c: T, d: U);
+}
+export declare class C1<T> {
+    constructor();
+}
+export type Callback<T, C = void, V = void> = (data: T, data2: C) => V;
+export declare class C2 {
+    public get a(): Callback<string, number>;
+    public set a(value: Callback<string, number>);
+    public constructor();
 }

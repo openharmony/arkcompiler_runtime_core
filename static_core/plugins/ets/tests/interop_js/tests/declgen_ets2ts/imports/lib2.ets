@@ -23,3 +23,16 @@ export class Lib2Class2 {
     val: double = 324;
 }
 
+export class EC1 {}
+
+export class B {}
+export class C {}
+export class D {}
+export class E {}
+export class F {}
+export class G {}
+export type I = string
+export type J = string
+export type K = string
+export type L = string
+export type M = string

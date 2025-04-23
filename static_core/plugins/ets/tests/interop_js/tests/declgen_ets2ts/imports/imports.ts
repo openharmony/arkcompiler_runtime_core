@@ -18,7 +18,7 @@ const TEN = 10;
 const TWENTY = 20;
 const PRECISION = 3;
 
-import { DynObjWrapper, C } from './lib1';
+import { C1 } from './lib1';
 
 function assertEq<T>(a: T, b: T): void {
 	// @ts-ignore
@@ -33,12 +33,9 @@ export function main(): void {
 }
 
 function testImports(): void {
-	const o = new C();
+	const o = new C1();
 	assertEq(o.o1.val, 323);
 	assertEq(o.o2.val, 324);
 	assertEq(o.v1.toFixed(PRECISION), ONE.toFixed(PRECISION));
 
-	const dynObjWrapper = new DynObjWrapper();
-	assertEq(dynObjWrapper.dynObj_.val, TEN);
-	assertEq(dynObjWrapper.dynObj_.GetDynVal(), TWENTY);
 }

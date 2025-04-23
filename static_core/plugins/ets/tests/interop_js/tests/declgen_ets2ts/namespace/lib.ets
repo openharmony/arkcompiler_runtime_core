@@ -34,3 +34,91 @@ export namespace X {
 export namespace myNamespace {
   export enum nsEnum { White, Blue = 2, Red = 2 }
 }
+
+export namespace BarNameSpace {
+    export type Callback = (arg: string) => void
+
+    export namespace FooNameSpace {
+        export type Callback2 = (arg: string) => void
+    }
+}
+
+export function foo(arg: BarNameSpace.Callback): void {
+    arg('hello');
+}
+
+export function bar(arg: BarNameSpace.FooNameSpace.Callback2): void {
+    arg('goodbye');
+}
+
+export namespace MySpace {
+    // 1. Variable definition and assignment
+    export let count = 123;
+    export let message = "Initial message";
+
+    // 2. Function definition
+    export function resetMessage() {
+        message = "Message has been reset";
+    }
+
+    // 3. Interface definition
+    export interface IShape {
+        area(): number;
+    }
+
+    // 4. Class definition implementing the interface
+    export class Rectangle implements IShape {
+        width: number;
+        height: number;
+
+        constructor(width: number, height: number) {
+            this.width = width;
+            this.height = height;
+        }
+
+        area(): number {
+            return this.width * this.height;
+        }
+    }
+
+    // 5. Enum definition
+    export enum Color {
+        RED,
+        GREEN,
+        BLUE
+    }
+
+    // 6. Annotations definition
+    export @interface Anno {
+        color: Color
+    }
+
+    // Reset function to initialize the variables to their default values
+    export function resetState() {
+        count = 123;
+        message = "Initial message";
+    }
+
+}
+
+export let rectangleShape: MySpace.IShape = new MySpace.Rectangle(5, 10);
+
+export namespace N {
+    export class NA {}
+    export type NB = (arg: string) => void
+    export namespace NN {
+        export class NNA {}
+        export namespace NNN {
+            export class NNNA {}
+        }
+    }
+}
+
+export let a: N.NA
+export let b: N.NN.NNA
+export let c: N.NN.NNN.NNNA
+export function foo1(arg: N.NA) {}
+export function foo2(arg: N.NN.NNA) {}
+export function foo3(arg: N.NN.NNN.NNNA):N.NN.NNN.NNNA {
+    return new N.NN.NNN.NNNA;
+}
