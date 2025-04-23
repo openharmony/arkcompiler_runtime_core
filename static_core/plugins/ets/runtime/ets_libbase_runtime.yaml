@@ -96,6 +96,21 @@ coretypes:
 - managed_class: escompat.Float64Array
   mirror_class: ark::ets::EtsEscompatFloat64Array
 
+- managed_class: escompat.Uint8ClampedArray
+  mirror_class: ark::ets::EtsEscompatUInt8ClampedArray
+
+- managed_class: escompat.Uint8Array
+  mirror_class: ark::ets::EtsEscompatUInt8Array
+
+- managed_class: escompat.Uint16Array
+  mirror_class: ark::ets::EtsEscompatUInt16Array
+
+- managed_class: escompat.Uint32Array
+  mirror_class: ark::ets::EtsEscompatUInt32Array
+
+- managed_class: escompat.BigUint64Array
+  mirror_class: ark::ets::EtsEscompatBigUInt64Array
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -1692,6 +1707,36 @@ intrinsics:
       args: [escompat.Int8Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySetValuesWithOffset
 
+  - name: Int16ArraySetInt
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetInt
+
+  - name: Int16ArraySetShort
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i16]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetShort
+
+  - name: Int16ArrayGet
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayGet
+
   - name: Int16ArraySetValues
     space: ets
     class_name: escompat.Int16Array
@@ -1711,6 +1756,26 @@ intrinsics:
       ret: void
       args: [escompat.Int16Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySetValuesWithOffset
+
+  - name: Int32ArraySetInt
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetInt
+
+  - name: Int32ArrayGet
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayGet
 
   - name: Int32ArraySetValues
     space: ets
@@ -1732,6 +1797,26 @@ intrinsics:
       args: [escompat.Int32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArraySetValuesWithOffset
 
+  - name: BigInt64ArraySetLong
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetLong
+
+  - name: BigInt64ArrayGet
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: getLong
+    static: false
+    signature:
+      ret: i64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayGet
+
   - name: BigInt64ArraySetValues
     space: ets
     class_name: escompat.BigInt64Array
@@ -1751,6 +1836,26 @@ intrinsics:
       ret: void
       args: [escompat.BigInt64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySetValuesWithOffset
+
+  - name: Float32ArraySetFloat
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, f32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetFloat
+
+  - name: Float32ArrayGet
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayGet
 
   - name: Float32ArraySetValues
     space: ets
@@ -1772,6 +1877,26 @@ intrinsics:
       args: [escompat.Float32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySetValuesWithOffset
 
+  - name: Float64ArraySetDouble
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, f64]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetDouble
+
+  - name: Float64ArrayGet
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayGet
+
   - name: Float64ArraySetValues
     space: ets
     class_name: escompat.Float64Array
@@ -1791,6 +1916,226 @@ intrinsics:
       ret: void
       args: [escompat.Float64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySetValuesWithOffset
+
+  - name: UInt8ClampedArraySetInt
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetInt
+
+  - name: UInt8ClampedArrayGet
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayGet
+
+  - name: UInt8ClampedArraySetValues
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8ClampedArray]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetValues
+
+  - name: UInt8ClampedArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8ClampedArray, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySetValuesWithOffset
+
+  - name: UInt8ArraySetInt
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetInt
+
+  - name: UInt8ArrayGet
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayGet
+
+  - name: UInt8ArraySetValues
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8Array]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValues
+
+  - name: UInt8ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint8Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySetValuesWithOffset
+
+  - name: UInt16ArraySetInt
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetInt
+
+  - name: UInt16ArrayGet
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayGet
+
+  - name: UInt16ArraySetValues
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint16Array]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValues
+
+  - name: UInt16ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint16Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValuesWithOffset
+
+  - name: UInt32ArraySetInt
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetInt
+
+  - name: UInt32ArraySetLong
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetLong
+
+  - name: UInt32ArrayGet
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: $_get
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayGet
+
+  - name: UInt32ArraySetValues
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint32Array]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValues
+
+  - name: UInt32ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.Uint32Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValuesWithOffset
+
+  - name: BigUInt64ArraySetInt
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetInt
+
+  - name: BigUInt64ArraySetLong
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: $_set
+    static: false
+    signature:
+      ret: void
+      args: [i32, i64]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetLong
+
+  - name: BigUInt64ArrayGet
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: getLong
+    static: false
+    signature:
+      ret: i64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayGet
+
+  - name: BigUInt64ArraySetValues
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigUint64Array]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValues
+
+  - name: BigUInt64ArraySetValuesWithOffset
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [escompat.BigUint64Array, f64]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValuesWithOffset
 
 ########################
 # escompat.taskpool #
