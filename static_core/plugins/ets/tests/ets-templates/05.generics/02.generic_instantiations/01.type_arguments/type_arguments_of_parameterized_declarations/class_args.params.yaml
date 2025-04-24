@@ -101,7 +101,7 @@ cases:
       type B = A<X>[]
 
   - use: |-
-      let v: A<B> = new A<B>([new A<X>(new X())])
+      let v: A<B> = new A<B>([new A<X|null>(new X())])
     decl: |-
       type B = A<X|null>[]
     bound: ' extends Object|null'

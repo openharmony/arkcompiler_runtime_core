@@ -52,4 +52,4 @@ cases:
   - { type: 'FixedArray<Floating>', val: '[]', res: 130 }
   - { type: 'FixedArray<Object>', val: '[new Int(1), new Boolean()]', res: 132 }
   - { type: StringBuilder, val: new StringBuilder(), res: 32 }
-  - { type: 'Comparable<Int>[]', val: '[new Int(0)]', res: 132, tags: 'compile-only, negative' }
+  - { type: 'Comparable<Int>[]', val: '[new Int(0)]', res: 32 }
