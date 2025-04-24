@@ -21,8 +21,9 @@
 #include <sys/types.h>
 #include <random>
 
+#include "tools/format_logger.h"
 #include "Util.h"
-#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
+#include "stdlib/native/core/stdlib_ani_helpers.h"
 
 namespace ark::ets::sdk::util {
 

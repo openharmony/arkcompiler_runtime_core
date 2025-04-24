@@ -68,6 +68,7 @@ components:
   - name: static_linker
   - name: task_manager
   - name: stdlib
+  - name: sdk
 
 dfx_components:
   - name: common
