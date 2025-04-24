@@ -15,21 +15,13 @@ import("//build/ohos/sdk/sdk.gni")
 
 ohos_copy("copy_taihe_tools") {
   if (current_toolchain == "//build/toolchain/linux:clang_x64") {
-      sources = [
-        "../../../prebuilts/taihe/ohos/linux-x86_64",
-      ]
+    sources = [ "../../../prebuilts/taihe/ohos/linux-x86_64" ]
   } else if (current_toolchain == "//build/toolchain/mingw:mingw_x86_64") {
-      sources = [
-        "../../../prebuilts/taihe/ohos/windows-x86_64",
-      ]
+    sources = [ "../../../prebuilts/taihe/ohos/windows-x86_64" ]
   } else if (current_toolchain == "//build/toolchain/mac:clang_arm64") {
-      sources = [
-        "../../../prebuilts/taihe/ohos/darwin-arm64",
-      ]
+    sources = [ "../../../prebuilts/taihe/ohos/darwin-arm64" ]
   } else if (current_toolchain == "//build/toolchain/mac:clang_x64") {
-      sources = [
-        "../../../prebuilts/taihe/ohos/darwin-x86_64",
-      ]
+    sources = [ "../../../prebuilts/taihe/ohos/darwin-x86_64" ]
   }
   outputs = [ target_out_dir + "/$target_name" ]
   module_source_dir = target_out_dir + "/$target_name"
