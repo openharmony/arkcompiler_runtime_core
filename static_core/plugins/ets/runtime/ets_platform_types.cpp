@@ -88,6 +88,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreInt = findType(BOX_INT);
     coreLong = findType(BOX_LONG);
     coreFloat = findType(BOX_FLOAT);
+    coreObject = findType(OBJECT);
     coreDouble = findType(BOX_DOUBLE);
     escompatBigint = findType(BIG_INT);
     coreFunction = findType(FUNCTION);

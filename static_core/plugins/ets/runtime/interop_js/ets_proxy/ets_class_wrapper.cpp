@@ -14,7 +14,11 @@
  */
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
+#include <js_native_api.h>
+#include <js_native_api_types.h>
 
+#include "interop_js/ets_proxy/ets_proxy.h"
+#include "interop_js/interop_common.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -22,6 +26,7 @@
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "runtime/mem/local_object_handle.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -328,13 +333,32 @@ bool EtsClassWrapper::SetupHierarchy(InteropCtx *ctx, const char *jsBuiltinName)
         }
     }
 
-    if (jsBuiltinName != nullptr) {
+    if (jsBuiltinName != nullptr && std::string(jsBuiltinName) != "Object") {
         auto env = ctx->GetJSEnv();
         napi_value jsBuiltinCtor;
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), jsBuiltinName, &jsBuiltinCtor));
         NAPI_CHECK_FATAL(napi_create_reference(env, jsBuiltinCtor, 1, &jsBuiltinCtorRef_));
     }
     return true;
+}
+
+void EtsClassWrapper::SetBaseWrapperMethods(napi_env env, const EtsClassWrapper::MethodsVec &methods)
+{
+    for (auto method : methods) {
+        const std::string methodName(method->GetName());
+        if (methodName == GET_INDEX_METHOD || methodName == SET_INDEX_METHOD) {
+            SetUpMimicHandler(env);
+        }
+        auto baseClassWrapper = baseWrapper_;
+        while (nullptr != baseClassWrapper) {
+            EtsMethodSet *baseMethodSet = baseClassWrapper->GetMethod(methodName);
+            if (nullptr != baseMethodSet) {
+                method->SetBaseMethodSet(baseMethodSet);
+                break;
+            }
+            baseClassWrapper = baseClassWrapper->baseWrapper_;
+        }
+    }
 }
 
 std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapper::CalculateProperties(
@@ -373,20 +397,10 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
         }
     }
 
-    // If class is std.core.Object
-    auto klassDesc = utf::Mutf8AsCString(klass->GetDescriptor());
-    if (klassDesc == panda_file_items::class_descriptors::OBJECT) {
-        // Ingore all methods of std.core.Object due to names intersection with JS Object
-        // Keep constructors only
-        CollectConstructors(&props);
-        // NOTE(shumilov-petr): Think about removing methods from std.core.Object
-        // that are already presented in JS Object, others should be kept
-    } else {
-        // Collect methods
-        CollectClassMethods(&props, overloads);
+    CollectClassMethods(&props, overloads);
+    if (etsClass_ != PlatformTypes()->coreObject) {
+        UpdatePropsWithBaseClasses(&props);
     }
-
-    UpdatePropsWithBaseClasses(&props);
 
     return CalculateFieldsAndMethods(props);
 }
@@ -478,7 +492,8 @@ void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *prop
 
     if (hasSquashedProto(this)) {
         // Copy properties of base classes if we have to split prototype chain
-        for (auto wclass = baseWrapper_; wclass != nullptr; wclass = wclass->baseWrapper_) {
+        for (auto wclass = baseWrapper_; wclass != nullptr && (wclass->etsClass_ != PlatformTypes()->coreObject);
+             wclass = wclass->baseWrapper_) {
             for (auto &wfield : wclass->GetFields()) {
                 Field *field = wfield.GetField();
                 props->insert({field->GetName().data, field});
@@ -619,25 +634,36 @@ EtsClassWrapper *EtsClassWrapper::LookupBaseWrapper(EtsClass *klass)
     return nullptr;
 }
 
-static void SimulateJSInheritance(napi_env env, napi_value jsCtor, napi_value jsBaseCtor)
+static void DoSetPrototype(napi_env env, napi_value obj, napi_value proto)
 {
     napi_value builtinObject;
     napi_value setprotoFn;
     NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), "Object", &builtinObject));
     NAPI_CHECK_FATAL(napi_get_named_property(env, builtinObject, "setPrototypeOf", &setprotoFn));
 
-    auto setproto = [&env, &builtinObject, &setprotoFn](napi_value obj, napi_value proto) {
-        std::array args = {obj, proto};
-        NAPI_CHECK_FATAL(NapiCallFunction(env, builtinObject, setprotoFn, args.size(), args.data(), nullptr));
-    };
+    std::array args = {obj, proto};
+    NAPI_CHECK_FATAL(NapiCallFunction(env, builtinObject, setprotoFn, args.size(), args.data(), nullptr));
+}
 
+static void SetNullPrototype(napi_env env, napi_value jsCtor)
+{
+    napi_value prot;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &prot));
+
+    auto nullProto = GetNull(env);
+    DoSetPrototype(env, jsCtor, nullProto);
+    DoSetPrototype(env, prot, nullProto);
+}
+
+static void SimulateJSInheritance(napi_env env, napi_value jsCtor, napi_value jsBaseCtor)
+{
     napi_value cprototype;
     napi_value baseCprototype;
     NAPI_CHECK_FATAL(napi_get_named_property(env, jsCtor, "prototype", &cprototype));
     NAPI_CHECK_FATAL(napi_get_named_property(env, jsBaseCtor, "prototype", &baseCprototype));
 
-    setproto(jsCtor, jsBaseCtor);
-    setproto(cprototype, baseCprototype);
+    DoSetPrototype(env, jsCtor, jsBaseCtor);
+    DoSetPrototype(env, cprototype, baseCprototype);
 }
 
 /*static*/
@@ -654,21 +680,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
 
     auto [fields, methods] = _this->CalculateProperties(overloads);
-    for (auto method : methods) {
-        const std::string methodName(method->GetName());
-        if (methodName == GET_INDEX_METHOD || methodName == SET_INDEX_METHOD) {
-            _this->SetUpMimicHandler(env);
-        }
-        auto baseClassWrapper = _this->baseWrapper_;
-        while (nullptr != baseClassWrapper) {
-            EtsMethodSet *baseMethodSet = baseClassWrapper->GetMethod(methodName);
-            if (nullptr != baseMethodSet) {
-                method->SetBaseMethodSet(baseMethodSet);
-                break;
-            }
-            baseClassWrapper = baseClassWrapper->baseWrapper_;
-        }
-    }
+    _this->SetBaseWrapperMethods(env, methods);
 
     auto jsProps = _this->BuildJSProperties(env, {fields.data(), fields.size()}, {methods.data(), methods.size()});
 
@@ -690,11 +702,20 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
             ctx->SetJsProxyInstance(etsClass, _this->jsproxyWrapper_);
         }
     }
-
     napi_value jsCtor {};
     NAPI_CHECK_FATAL(napi_define_class(env, etsClass->GetDescriptor(), NAPI_AUTO_LENGTH,
                                        EtsClassWrapper::JSCtorCallback, _this.get(), jsProps.size(), jsProps.data(),
                                        &jsCtor));
+
+    if (etsClass == PlatformTypes()->coreObject) {
+        SetNullPrototype(env, jsCtor);
+
+        NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &_this->jsCtorRef_));
+        NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &_this->jsBuiltinCtorRef_));
+        NAPI_CHECK_FATAL(napi_object_seal(env, jsCtor));
+
+        return _this;
+    }
 
     auto base = _this->baseWrapper_;
     napi_value fakeSuper = _this->HasBuiltin() ? _this->GetBuiltin(env)
