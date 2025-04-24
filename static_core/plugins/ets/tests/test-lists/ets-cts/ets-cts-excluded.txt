@@ -100,18 +100,6 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.ets
 
 # move from exclude to ignore list on 4/12
-#24169
-05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_11.ets
-05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_12.ets
-05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_9.ets
-
-# move from exclude to ignore list on 4/12
-#23714
-05.generics/03.utility_types/02.required_utility_type/required_compatibility_neg_0.ets
-05.generics/03.utility_types/01.partial_utility_type/partial_generic.ets
-05.generics/03.utility_types/02.required_utility_type/required_module_implements_0.ets
-
-# move from exclude to ignore list on 4/12
 #24165
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_1.ets
 
@@ -126,10 +114,10 @@
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_1.ets
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_2.ets
 05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_3.ets
-
-# move from exclude to ignore list on 4/12
-#20368: union of Readonly compilation failure
-05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union.ets
+05.generics/03.utility_types/02.required_utility_type/required_compatibility_neg_0.ets
+05.generics/03.utility_types/02.required_utility_type/required_module_implements_0.ets
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_0.ets
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_neg_3.ets
 
 # move from exclude to ignore list on 4/12
 #24167 no methods should be inherited using readonly utility type

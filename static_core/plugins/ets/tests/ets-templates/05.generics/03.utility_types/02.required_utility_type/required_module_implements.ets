@@ -16,27 +16,25 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc:  Use imported class which implements interface with optional fields as T for Required<T>
-tags: [{% if c.result == -1 %}compile-only, negative{% endif %}]
+desc:  >-
+    If class T has a user-defined getter, setter, or both, then none of those is called when object literal is used with
+    Partial<T> variables. Object literal has its own built-in getters and setters to modify its variables.
+    Use imported class which implements interface with {{c.field_type}} fields as T for Required<T>.
+tags: [compile-only, negative]
 files:
     - ../exported_data.ets
 ---*/
 
-import {CIOPT} from "../exported_data"
-
-function foo(i: Required<CIOPT>) {
-  let v: int = 0;
-  if(i.j != undefined) {
-    v += 1;
-  }
-  if(i.i != 0) {
-    v += 2;
-  }
-  return v;
-}
+import {gs} from "../exported_data"
+import {{c.import}} from "../exported_data"
 
 function main() {
-  assertTrue( foo( {{c.argument}} ) == {{c.result}} )
+  let a: Required<{{c.use}}> = {{c.init}}
+  a.i = 2.0
+  a.j = "str2"
+  let b = a.i
+  let c = a.j
+  assertEQ(gs,0, gs + " != 0")
 }
 
 {% endfor %}

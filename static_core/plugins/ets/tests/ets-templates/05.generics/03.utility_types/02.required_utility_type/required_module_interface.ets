@@ -26,7 +26,7 @@ import {IOPT} from "../exported_data"
 
 function foo(i: Required<IOPT>) {
   let v: int = 0;
-  if(i.j != undefined) {
+  if(i.j != "") {
     v += 1;
   }
   if(i.i != 0) {
