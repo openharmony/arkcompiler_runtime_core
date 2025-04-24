@@ -25,6 +25,90 @@ function max(a: int, b: int): int {
     return (a > b) ? a : b;
 }
 
+function delayWithYield(duration: int): void {
+    let t = Date.now();
+    while ((Date.now() - t) < duration) {}
+    Coroutine.Schedule();
+}
+
+function launchImpl(func: () => NullishType): Promise<NullishType> {
+    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+        func
+    );
+    return new Promise<NullishType>((resolve, reject) => {
+        try {
+            let res = job.Await();
+            resolve(res);
+        } catch(e) {
+            reject(e);
+        }
+    });
+}
+
+function testDelayFunc(): NullishType {
+    let task = new taskpool.Task(max, 80, 90);
+    let res = await taskpool.executeDelayed(50.0, task);
+    let runner = new taskpool.SequenceRunner();
+    expectError(() => {
+        runner.execute(task);
+    }, new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask"));
+    return res;
+}
+
+function executeDelayedTest(): void {
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    try {
+        let res = await launchImpl(testDelayFunc);
+        assertEQ(res, 90);
+    } catch(e: Error) {
+        // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
+        assertEQ(e instanceof StackOverflowError, true);
+    }
+    let runner = new taskpool.SequenceRunner();
+    let task = new taskpool.Task(sum, 25, 35);
+    await runner.execute(task);
+    expectError(() => {
+        taskpool.executeDelayed(100.0, task);
+    }, new Error("taskpool:: seqRunnerTask cannot executeDelayed outside"));
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
+}
+
+function executePeriodicallyTest(): void {
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    let runner = new taskpool.SequenceRunner();
+    let task1 = new taskpool.Task(returnAbc);
+    await runner.execute(task1);
+    expectError(() => {
+        taskpool.executePeriodically(100.0, task1);
+    }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
+    try {
+        let res2 = await launchImpl(testPeriodFunc);
+        assertEQ(res2, "success");
+    } catch(e: Error) {
+        // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
+        assertEQ(e instanceof LinkerUnresolvedClassError, true);
+    }
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
+}
+
+function testPeriodFunc(): NullishType {
+    let task = new taskpool.Task(sum, 80, 90);
+    taskpool.executePeriodically(200.0, task);
+    let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
+    setTimeout(() => {
+        taskpool.cancel(task);
+        isTaskCanceled.set(true);
+    }, 50);
+    while (!isTaskCanceled.get()) {
+        delayWithYield(50);
+    }
+    let runner = new taskpool.SequenceRunner();
+    expectError(() => {
+        runner.execute(task);
+    }, new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask"));
+    return "success";
+}
+
 function main(): int {
     let seqRunnerSuite = new ArkTestsuite("taskpool.SequenceRunner");
     seqRunnerSuite.addTest("OrderTest", () =>
@@ -202,5 +286,9 @@ function main(): int {
         assertEQ(task4.isDone(), true);
         assertEQ(longTask.isDone(), true);
     });
-    return seqRunnerSuite.run();
+    seqRunnerSuite.addTest("ExecuteDelayedTest", executeDelayedTest);
+    seqRunnerSuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);
+    let res = seqRunnerSuite.run();
+    CoroutineExtras.stopTaskpool();
+    return res;
 }

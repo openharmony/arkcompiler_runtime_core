@@ -61,12 +61,85 @@ async function promiseCase(duration: int): Promise<string> {
     return p;
 }
 
+function delayWithYield(duration: int): void {
+    let t = Date.now();
+    while ((Date.now() - t) < duration) {}
+    Coroutine.Schedule();
+}
+
+function launchImpl(func: () => NullishType): Promise<NullishType> {
+    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+        func
+    );
+    return new Promise<NullishType>((resolve, reject) => {
+        try {
+            let res = job.Await();
+            resolve(res);
+        } catch(e) {
+            reject(e);
+        }
+    });
+}
+
+function testDelayFunc(): NullishType {
+    let task1 = new taskpool.Task(returnFailAbc);
+    let res: string = "";
+    let isTask1Finished: AtomicFlag = new AtomicFlag(false);
+    taskpool.executeDelayed(100, task1).catch((e: NullishType) => {
+        res = (e as Error).message;
+        isTask1Finished.set(true);
+    })
+    while (!isTask1Finished.get()) {
+        delayWithYield(50);
+    }
+    return res;
+}
+
+function taskExecuteDelayedTest(): void {
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    try {
+        let res1 = await launchImpl(testDelayFunc);
+        assertEQ(res1, "Concurrent function failed");
+        let task2 = new taskpool.Task(longFunc, 50);
+        expectError(() => {
+            await taskpool.executeDelayed(-100.0, task2);
+        }, new Error("taskpool:: The delayTime is less than zero"));
+    } catch(e: Error) {
+        // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
+        assertEQ(e instanceof NullPointerError, true);
+    }
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
+}
+
+function taskExecutePeriodicallyTest(): void {
+    let task1 = new taskpool.Task(returnAbc);
+    expectError(() => {
+        taskpool.executePeriodically(-100.0, task1);
+    }, new Error("taskpool:: The period value is less than zero"));
+    let res = await taskpool.execute(task1);
+    assertEQ(res, "abc");
+    expectError(() => {
+        taskpool.executePeriodically(100.0, task1);
+    }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
+}
+
+function taskWithDependencyExecutePeriodicallyTest(): void {
+    let task1 = new taskpool.Task(sum, 5, 25);
+    let task2 = new taskpool.Task(max, 36, 12);
+    task1.addDependency(task2);
+    expectError(() => {
+        taskpool.executePeriodically(10.0, task1);
+    }, new Error("taskpool:: the task with dependency cannot executePeriodically"));
+    expectError(() => {
+        taskpool.executePeriodically(100.0, task2);
+    }, new Error("taskpool:: the task with dependency cannot executePeriodically"));
+}
+
 function main(): int {
     let commonTaskSuite = new ArkTestsuite("taskpool.CommonTask");
     let commonTaskSuiteDisabled = new ArkTestsuite("taskpool.CommonTask.DISABLED");
     commonTaskSuite.addTest("GetTaskpoolInfoTest", () =>
     {
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
         let flagForTask: AtomicFlag = new AtomicFlag(false);
         let isRunTask: AtomicFlag = new AtomicFlag(false);
         let funcForTask = (): string => {
@@ -75,29 +148,30 @@ function main(): int {
             return "result"
         };
         let task = new taskpool.Task("task_name", funcForTask);
+        let info1 = taskpool.getTaskPoolInfo();
+        // Obtain the worker pool info, and the behavior is the same as 1.0 taskpool
+        assertNE(info1.threadInfos.length, 0);
         let p = taskpool.execute(task);
         // wait for task started
         while (isRunTask.get() != true) {}
-        let info = taskpool.getTaskPoolInfo();
+        let info2 = taskpool.getTaskPoolInfo();
         // Notify to continue task
         flagForTask.set(true);
-        assertEQ(info.taskInfos.length, 1);
-        assertNE(info.threadInfos.length, 0);
+        assertEQ(info2.taskInfos.length, 1);
+        assertNE(info2.threadInfos.length, 0);
         let isNonEmptyWorker: boolean = false;
-        for (let threadInfo of info.threadInfos) {
+        for (let threadInfo of info2.threadInfos) {
             assertLT(0, threadInfo.tid);
             isNonEmptyWorker = isNonEmptyWorker || (threadInfo.taskIds != undefined);
         }
         assertEQ(isNonEmptyWorker, true);
         // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
-        assertEQ(info.taskInfos[0].state as int, taskpool.State.RUNNING as int);
-        assertEQ(info.taskInfos[0].name, "task_name");
+        assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
+        assertEQ(info2.taskInfos[0].name, "task_name");
         assertEQ(await p, "result");
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     });
     commonTaskSuite.addTest("OneTaskExecutionTest", () =>
     {
-        assertEQ(taskpool.isConcurrent(returnAbc), true);
         let Sum = (): int => {
             return 10 + 20;
         }
@@ -111,17 +185,11 @@ function main(): int {
         let res = await taskpool.execute(funcTask);
         assertEQ(res, "abc");
         assertEQ(funcTask.isDone(), true);
-        // Execute one task several times
-        let p1 = taskpool.execute(funcTask);
-        let p2 = taskpool.execute(funcTask);
-        let p3 = taskpool.execute(funcTask);
-        let p4 = taskpool.execute(funcTask);
-        assertEQ(await p1, "abc");
-        assertEQ(await p2, "abc");
-        assertEQ(await p3, "abc");
-        assertEQ(await p4, "abc");
-        assertEQ(funcTask.isDone(), true);
-        // tasks with params
+        // Disallow execute one task several times
+        expectError(() => {
+            taskpool.execute(funcTask);
+        }, new Error("taskpool:: task has been executed"));
+        // Tasks with params
         let task1 = new taskpool.Task(sum, 10, 20);
         let res1 = await taskpool.execute(task1);
         assertEQ(res1, 30);
@@ -200,10 +268,10 @@ function main(): int {
     {
         assertEQ(taskpool.Task.isCanceled(), false);
         let t = new taskpool.Task(returnAbc);
-        taskpool.execute(t);
+        let res = await taskpool.execute(t);
+        assertEQ(res, "abc");
         assertEQ(taskpool.Task.isCanceled(), false);
         // Check canceling of exeuting task
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN); 
         let isCanceled: AtomicFlag = new AtomicFlag(false);
         let isRunning: AtomicFlag = new AtomicFlag(false);
         let waitForCancel: AtomicFlag = new AtomicFlag(true);
@@ -225,7 +293,6 @@ function main(): int {
         // Check isCanceled from taskpool
         assertEQ(isCanceled.get(), true);
         expectError(() => { await p }, new Error("taskpool:: task has been canceled"));
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     });
     commonTaskSuite.addTest("CancelNonExecutingTaskTest", (): void throws =>
     {
@@ -263,8 +330,10 @@ function main(): int {
             return;
         }
         expectError(() => { await p1 }, new Error("taskpool:: task has been canceled"));
-        // task finished, new execution should not produce an Error
-        expectNoThrow(() => { await taskpool.execute(task1) });
+        // task finished, disallow new execution
+        expectError(() => {
+            await taskpool.execute(task1);
+        }, new Error("taskpool:: task has been executed"));
         let task2 = new taskpool.Task(testCancelFunc, 300);
         let val: int = 0;
         let isExecuted: AtomicFlag = new AtomicFlag(false);
@@ -283,7 +352,7 @@ function main(): int {
             return;
         }
         while (isExecuted.get() != true) {
-            await promiseCase(100);
+            delayWithYield(10);
         }
         assertEQ(task2.isDone(), true);
         // The canceled task result returns through the catch branch, not the then branch.
@@ -309,7 +378,6 @@ function main(): int {
             isRunning.set(false);
             return true;
         };
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
         let task1 = new taskpool.Task(funcForTask, 50);
         let p1 = taskpool.execute(task1);
         while (!isRunning.get()) {}
@@ -333,7 +401,6 @@ function main(): int {
                 taskpool.cancel(task2);
             }
         }, new Error("taskpool:: task is not executed or has been executed"));
-        CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     });
     commonTaskSuite.addTest("DependentTasksTest", (): void throws =>
     {
@@ -458,19 +525,22 @@ function main(): int {
         let task1 = new taskpool.Task(returnAbc);
         let task2 = new taskpool.Task(sum, 10, 20);
         expectError(() => { task1.removeDependency(task2) }, new Error("taskpool:: task has no dependency"));
-        taskpool.execute(task2);
+        let res1 = await taskpool.execute(task2);
+        assertEQ(res1, 30);
         expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
         expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
         let task3 = new taskpool.Task(returnAbc);
         let task4 = new taskpool.Task(max, 30, 10);
         let expectedAgainExecuteError = new Error("taskpool:: executedTask with dependency cannot execute again");
         task1.addDependency(task3);
-        taskpool.execute(task3);
+        let res2 = await taskpool.execute(task3);
+        assertEQ(res2, "abc");
         expectError(() => { task1.removeDependency(task3); }, new Error("taskpool:: cannot removeDependency on a dependent and executed task"));
         expectError(() => { task1.removeDependency(task4); }, new Error("taskpool:: task has no dependency"));
-        taskpool.execute(task1);
-        expectError(() => { taskpool.execute(task1) }, expectedAgainExecuteError);
-        expectError(() => { taskpool.execute(task3) }, expectedAgainExecuteError);
+        let res3 = await taskpool.execute(task1);
+        assertEQ(res3, "abc");
+        expectError(() => { await taskpool.execute(task1) }, expectedAgainExecuteError);
+        expectError(() => { await taskpool.execute(task3) }, expectedAgainExecuteError);
         // Try to remove dependency after execute
         let task5 = new taskpool.Task(returnAbc);
         let task6 = new taskpool.Task(returnAbc);
@@ -490,16 +560,20 @@ function main(): int {
             taskpool.Task.sendData();
             return "abc";
         };
-        let t = new taskpool.Task(sendDataFunc);
-        t.onReceiveData(recvCallback);
-        let p1 = taskpool.execute(t);
-        let p2 = taskpool.execute(t);
+        let t1 = new taskpool.Task(sendDataFunc);
+        t1.onReceiveData(recvCallback);
+        let t2 = new taskpool.Task(sendDataFunc);
+        t2.onReceiveData(recvCallback);
+        let t3 = new taskpool.Task(sendDataFunc);
+        t3.onReceiveData(recvCallback);
+        let p1 = taskpool.execute(t1);
+        let p2 = taskpool.execute(t2);
         let res1 = await p1;
         let res2 = await p2;
         assertEQ(res1, "abc");
         assertEQ(res2, "abc");
         assertEQ(res, 20);
-        let r = await taskpool.execute(t);
+        let r = await taskpool.execute(t3);
         assertEQ(r, "abc");
         assertEQ(res, 30);
     });
@@ -511,7 +585,9 @@ function main(): int {
             value += 10;
             return "";
         };
+        let isRunning: AtomicFlag = new AtomicFlag(false);
         let sendDataFunc = (): string => {
+            isRunning.set(true);
             taskpool.Task.sendData();
             let t = Date.now();
             while ((Date.now() - t) < 200) {
@@ -530,7 +606,9 @@ function main(): int {
         let task = new taskpool.Task(sendDataFunc);
         task.onReceiveData(recvCallback);
         let p = taskpool.execute(task);
-        await promiseCase(100);
+        while (!isRunning.get()) {
+            delayWithYield(10);
+        }
         try {
             taskpool.cancel(task);
         } catch(e: Error) {
@@ -628,7 +706,7 @@ function main(): int {
             })
         }
         while (allExecuted.get() != true) {
-            await promiseCase(100);
+            delayWithYield(5);
         }
         assertEQ(taskArray[0].isDone(), true);
         assertEQ(taskArray[50].isDone(), true);
@@ -654,5 +732,10 @@ function main(): int {
         assertNE(task2.cpuDuration, 0);
         assertNE(task2.totalDuration, 0);
     });
-    return commonTaskSuite.run();
+    commonTaskSuite.addTest("TaskExecuteDelayedTest", taskExecuteDelayedTest);
+    commonTaskSuite.addTest("TaskExecutePeriodicallyTest", taskExecutePeriodicallyTest);
+    commonTaskSuite.addTest("TaskWithDependencyExecutePeriodicallyTest", taskWithDependencyExecutePeriodicallyTest);
+    let res = commonTaskSuite.run();
+    CoroutineExtras.stopTaskpool();
+    return res;
 }

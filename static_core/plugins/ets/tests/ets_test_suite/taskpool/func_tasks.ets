@@ -131,5 +131,6 @@ function main(): int {
     TaskpoolFuncTestSumInt2();
     TaskpoolFuncTestSumInt2SameArguments();
     TaskpoolFuncTestSumAndMulti();
+    CoroutineExtras.stopTaskpool();
     return 0;
 }

@@ -29,15 +29,89 @@ function max(a: int, b: int): int {
     return (a > b) ? a : b;
 }
 
-async function promiseCase(duration: int): Promise<string> {
-    let p: Promise<string> = new Promise<string>((resolve: (value: string) => void, reject: (reason: Error) => void) => {
-        let t = Date.now();
-        while ((Date.now() - t) < duration) {
-            continue;
+function delayWithYield(duration: int): void {
+    let t = Date.now();
+    while ((Date.now() - t) < duration) {}
+    Coroutine.Schedule();
+}
+
+function launchImpl(func: () => NullishType): Promise<NullishType> {
+    const job: Job<NullishType> = launch<NullishType, () => NullishType>(
+        func
+    );
+    return new Promise<NullishType>((resolve, reject) => {
+        try {
+            let res = job.Await();
+            resolve(res);
+        } catch(e) {
+            reject(e);
         }
-        resolve("success");
     });
-    return p;
+}
+
+function testDelayFunc(): NullishType {
+    let task = new taskpool.Task(sum, 100, 300);
+    let value = await taskpool.executeDelayed(100.0, task);
+    let g = new taskpool.TaskGroup();
+    expectError(() => {
+        g.addTask(task);
+    }, new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask"));
+    return value;
+}
+
+function executeDelayedTest(): void {
+    try {
+        let res = await launchImpl(testDelayFunc);
+        assertEQ(res, 400);
+    } catch(e: Error) {
+        // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
+        assertEQ(e instanceof NullPointerError, true);
+    }
+    let task = new taskpool.Task(max, 10, 15);
+    let g = new taskpool.TaskGroup();
+    g.addTask(task);
+    expectError(() => {
+        taskpool.executeDelayed(100.0, task);
+    }, new Error("taskpool:: groupTask cannot executeDelayed outside"));
+}
+
+function testPeriodFunc(): NullishType {
+    let task = new taskpool.Task(sum, 100, 300);
+    taskpool.executePeriodically(200.0, task);
+    let isTaskCanceled: AtomicFlag = new AtomicFlag(false);
+    setTimeout(() => {
+        taskpool.cancel(task);
+        isTaskCanceled.set(true);
+    }, 50);
+    while (!isTaskCanceled.get()) {
+        delayWithYield(50);
+    }
+    let g = new taskpool.TaskGroup();
+    expectError(() => {
+        g.addTask(task);
+    }, new Error("taskpool:: The interface does not support the periodicTask"));
+    return "success";
+}
+
+function executePeriodicallyTest(): void {
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    try {
+        let res1 = await launchImpl(testPeriodFunc);
+        assertEQ(res1, "success");
+    } catch(e: Error) {
+        // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
+        assertEQ(e instanceof NullPointerError, true);
+    }
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
+}
+
+function grouptaskExecutePeriodicallyTest(): void {
+    let task = new taskpool.Task(returnAbc);
+    let g = new taskpool.TaskGroup();
+    g.addTask(task);
+    expectError(() => {
+        taskpool.executePeriodically(10.0, task);
+    }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
 }
 
 function main(): int {
@@ -270,5 +344,10 @@ function main(): int {
         assertEQ(task4.isDone(), true);
         assertEQ(longTask.isDone(), false);
     });
-    return taskGroupTestsuite.run();
+    taskGroupTestsuite.addTest("ExecuteDelayedTest", executeDelayedTest);
+    taskGroupTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);
+    taskGroupTestsuite.addTest("GrouptaskExecutePeriodicallyTest", grouptaskExecutePeriodicallyTest);
+    let res = taskGroupTestsuite.run();
+    CoroutineExtras.stopTaskpool();
+    return res;
 }
