@@ -29,6 +29,7 @@ module Constants
   TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedUnsignedArrayByteOffsetOffset(GetArch())"
   TYPED_UNSIGNED_ARRAY_BYTE_LENGTH_OFFSET = "cross_values::GetTypedUnsignedArrayByteLengthOffset(GetArch())"
   TYPED_UNSIGNED_ARRAY_LENGTH_INT_OFFSET = "cross_values::GetTypedUnsignedArrayLengthIntOffset(GetArch())"
+  TYPED_UNSIGNED_ARRAY_LENGTH_OFFSET = "cross_values::GetTypedUnsignedArrayLengthOffset(GetArch())"
   TYPED_UNSIGNED_ARRAY_CLASS_SIZE = "cross_values::GetTypedUnsignedArrayClassSize(GetArch())"
   TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedUnsignedArrayBufferOffset(GetArch())"
   TYPED_UNSIGNED_ARRAY_CLASS_SIZE_WITH_ALIGNMENT = "cross_values::GetTypedUnsignedArrayClassSize(GetArch()) + TLAB_ALIGNMENT - 1"
@@ -37,11 +38,11 @@ module Constants
   TYPED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedArrayByteOffsetOffset(GetArch())"
   TYPED_ARRAY_BYTE_LENGTH_OFFSET = "cross_values::GetTypedArrayByteLengthOffset(GetArch())"
   TYPED_ARRAY_LENGTH_INT_OFFSET = "cross_values::GetTypedArrayLengthIntOffset(GetArch())"
+  TYPED_ARRAY_LENGTH_OFFSET = "cross_values::GetTypedArrayLengthOffset(GetArch())"
   TYPED_ARRAY_CLASS_SIZE = "cross_values::GetTypedArrayClassSize(GetArch())"
   TYPED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedArrayBufferOffset(GetArch())"
   TYPED_ARRAY_CLASS_SIZE_WITH_ALIGNMENT = "cross_values::GetTypedArrayClassSize(GetArch()) + TLAB_ALIGNMENT - 1"
 end
-
 
 def GenerateTypedArrayFillInternal(name, prefix, type, scale)
     function("#{name}ArrayFillInternalFastPath".to_sym,
@@ -161,7 +162,7 @@ macro(:allocate_object_tlab) do |klass, klass_size, data_size|
     _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
     # Check if there is enough space
     If(Sub(_end, _start).word, _size).B.Unlikely {
-      Goto(:SlowPathEntrypoint)
+        Goto(:SlowPathEntrypoint)
     }
     Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
     if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
@@ -175,6 +176,65 @@ macro(:allocate_object_tlab) do |klass, klass_size, data_size|
     _allocated_object := _start
 end
 
+macro(:allocate_objects_tlab_3) do |object0_size, object1_size, object2_size, data2_size|
+    if Options.arch == :arm32
+      Intrinsic(:UNREACHABLE).Terminator.void
+      ReturnVoid().void
+      next
+    end
+
+    _size_0 := AndI(AddI(Cast(object0_size).word).Imm("TLAB_ALIGNMENT - 1").word).Imm("(~(TLAB_ALIGNMENT - 1))").word
+    _size_1 := AndI(AddI(Cast(object1_size).word).Imm("TLAB_ALIGNMENT - 1").word).Imm("(~(TLAB_ALIGNMENT - 1))").word
+    _size_2 := Add(Add(Cast(data2_size).word, Cast(object2_size).word).word, "TLAB_ALIGNMENT - 1").word
+    _size_2 := And(_size_2, "(~(TLAB_ALIGNMENT - 1))").word
+    _size := Add(Add(_size_0, _size_1).word, _size_2).word
+
+    # Load pointer to the TLAB from TLS
+    _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
+    # Load pointer to the start address of free memory in the TLAB
+    _start := LoadI(_tlab).Imm(Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
+    # Load pointer to the end address of free memory in the TLAB
+    _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
+    # Check if there is enough space
+    If(Sub(_end, _start).word, _size).B.Unlikely {
+        Goto(:SlowPathEntrypoint)
+    }
+    Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+    if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+      call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+    end
+    # Update the TLAB state
+    StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+    _start1 := Add(_start, _size_0).ptr
+    _start2 := Add(_start1, _size_1).ptr
+    # Return a pointer to the newly allocated string
+    _allocated_object := _start
+end
+
+scoped_macro(:store_object_klass) do |start, klass|
+    StoreI(start, klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    _allocated_object := start
+end
+
+scoped_macro(:normalize_index) do |idx0, len|
+    If(idx0, Neg(len).i32).LT.Unlikely {
+        _idx1 := 0
+        Goto(:_Done)
+    }
+    If(idx0, 0).LT.Unlikely {
+        _idx2 := Add(len, idx0).i32
+        Goto(:_Done)
+    }
+    If(idx0, len).GT.Unlikely {
+        _idx3 := len
+        Goto(:_Done)
+    } Else {
+        _idx0 := idx0
+    }
+
+Label(:_Done)
+    _idx := Phi(_idx1, _idx2, _idx3, _idx0).i32
+end
 
 # Try to allocate TypedArray, ArrayBuffer, Array in TLAB.
 # The result is a pointers to a new TypedArray, ArrayBuffer, Array or null if there is no enough space in TLAB.
@@ -470,3 +530,162 @@ GenerateTypedArrayWith('Uint8', 'i32', 'u8', 1, "unsigned")
 GenerateTypedArrayWith('Uint16', 'i32', 'u16', 2, "unsigned")
 GenerateTypedArrayWith('Uint32', 'i64', 'u32', 4, "unsigned")
 GenerateTypedArrayWith('BigUint64', 'i64', 'u64', 8, "unsigned")
+
+def GenerateTypedArraySlice(name, prefix, scale)
+    function("#{name}ArraySliceTlab".to_sym,
+            params: {arr: 'ref', begIn: 'i32', endEx: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [:FastPath]) {
+
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.void
+            ReturnVoid().void
+            next
+        end
+
+        buffer := LoadI(arr).Imm(Constants::TYPED_ARRAY_BUFFER_OFFSET).ref
+        packet := LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref
+        If(packet, 0).EQ.Unlikely {
+            Goto(:SlowPathEntrypoint)
+        }
+
+        arr_byte_offset := Cast(LoadI(arr).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64).u64
+        arr_len := LoadI(arr).Imm(Constants::TYPED_ARRAY_LENGTH_OFFSET).i32
+
+        vbegIn := normalize_index(begIn, arr_len)
+        vendEx := normalize_index(endEx, arr_len)
+        new_len_1 := Sub(vendEx, vbegIn).i32
+        If(new_len_1, 0).LT.Unlikely {
+            new_len_0 := Cast(0).i32
+        }
+        new_len := Cast(Phi(new_len_1, new_len_0).i32).u32
+        begin_byte_offset := ShlI(vbegIn).Imm(scale).i32
+        new_packet_byte_len := ShlI(new_len).Imm(scale).u32
+
+        allocate_objects_tlab_3(Constants::TYPED_ARRAY_CLASS_SIZE, Constants::ARRAY_BUFFER_CLASS_SIZE, Constants::ARRAY_CLASS_SIZE, new_packet_byte_len)
+
+        # new array (EtsEscompatTypedArrayBase)
+        klass := LoadI(arr).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+        new_array := store_object_klass(_start, klass)
+        copy_u8_chars(arr, new_array, Constants::TYPED_ARRAY_CLASS_SIZE)
+
+        # new buffer (EtsEscompatArrayBuffer)
+        buffer_klass := LoadI(buffer).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+        new_buffer := store_object_klass(_start1, buffer_klass)
+
+        StoreI(new_array, new_buffer).Imm(Constants::TYPED_ARRAY_BUFFER_OFFSET).ptr
+        StoreI(new_array, Cast(0).f64).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
+        StoreI(new_array, Cast(new_packet_byte_len).f64).Imm(Constants::TYPED_ARRAY_BYTE_LENGTH_OFFSET).f64
+        StoreI(new_array, new_len).Imm(Constants::TYPED_ARRAY_LENGTH_OFFSET).u32
+
+        # new packet (Array)
+        packet_klass := LoadI(packet).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+        packet_data := Add(AddI(packet).Imm(Constants::ARRAY_DATA_OFFSET).ptr, arr_byte_offset).ptr
+        packet_begin_data := Add(packet_data, begin_byte_offset).ptr
+
+        new_packet := store_object_klass(_start2, packet_klass)
+        StoreI(new_packet, new_packet_byte_len).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
+        new_packet_data := AddI(new_packet).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+
+        StoreI(new_buffer, new_packet).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ptr
+        StoreI(new_buffer, new_packet_data).Imm(Constants::ARRAY_BUFFER_NATIVE_DATA_OFFSET).ptr
+        StoreI(new_buffer, new_packet_byte_len).Imm(Constants::ARRAY_BUFFER_BYTE_LENGTH_OFFSET).u32
+        StoreI(new_buffer, Cast(0).u8).Imm(Constants::ARRAY_BUFFER_IS_RESIZABLE_OFFSET).u8
+
+        copy_u8_chars(packet_begin_data, new_packet_data, new_packet_byte_len)
+        Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+        Return(new_array).ptr
+
+    Label(:SlowPathEntrypoint)
+        entrypoint = get_entrypoint_offset("#{prefix}_ARRAY_SLICE_SLOW_PATH_ODD_SAVED")
+        Intrinsic(:SLOW_PATH_ENTRY, arr, begIn, endEx).AddImm(entrypoint).MethodAsImm("#{name}ArraySliceOddSavedBridge").Terminator.ptr
+        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    }
+end
+
+GenerateTypedArraySlice('Int8', 'INT8', 0)
+GenerateTypedArraySlice('Int16', 'INT16', 1)
+GenerateTypedArraySlice('Int32', 'INT32', 2)
+GenerateTypedArraySlice('BigInt64', 'BIG_INT64', 3)
+GenerateTypedArraySlice('Float32', 'FLOAT32', 2)
+GenerateTypedArraySlice('Float64', 'FLOAT64', 3)
+
+def GenerateTypedUnsignedArraySlice(name, prefix, scale)
+    function("#{name}ArraySliceTlab".to_sym,
+            params: {arr: 'ref', begIn: 'i32', endEx: 'i32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [:FastPath]) {
+
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).Terminator.void
+            ReturnVoid().void
+            next
+        end
+
+        buffer := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
+        packet := LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref
+        If(packet, 0).EQ.Unlikely {
+            Goto(:SlowPathEntrypoint)
+        }
+
+        arr_byte_offset := Cast(LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).i32).u64
+        arr_len := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_LENGTH_OFFSET).i32
+
+        vbegIn := normalize_index(begIn, arr_len)
+        vendEx := normalize_index(endEx, arr_len)
+        new_len_1 := Sub(vendEx, vbegIn).i32
+        If(new_len_1, 0).LT.Unlikely {
+            new_len_0 := Cast(0).i32
+        }
+        new_len := Cast(Phi(new_len_1, new_len_0).i32).u32
+        begin_byte_offset := ShlI(vbegIn).Imm(scale).i32
+        new_packet_byte_len := ShlI(new_len).Imm(scale).u32
+
+        allocate_objects_tlab_3(Constants::TYPED_UNSIGNED_ARRAY_CLASS_SIZE, Constants::ARRAY_BUFFER_CLASS_SIZE, Constants::ARRAY_CLASS_SIZE, new_packet_byte_len)
+
+        # new array (EtsEscompatTypedArrayBase)
+        klass := LoadI(arr).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+        new_array := store_object_klass(_start, klass)
+        copy_u8_chars(arr, new_array, Constants::TYPED_UNSIGNED_ARRAY_CLASS_SIZE)
+
+        # new buffer (EtsEscompatArrayBuffer)
+        buffer_klass := LoadI(buffer).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+        new_buffer := store_object_klass(_start1, buffer_klass)
+
+        StoreI(new_array, new_buffer).Imm(Constants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ptr
+        StoreI(new_array, Cast(0).u32).Imm(Constants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).u32
+        StoreI(new_array, Cast(new_packet_byte_len).u32).Imm(Constants::TYPED_UNSIGNED_ARRAY_BYTE_LENGTH_OFFSET).u32
+        StoreI(new_array, new_len).Imm(Constants::TYPED_UNSIGNED_ARRAY_LENGTH_OFFSET).u32
+
+        # new packet (Array)
+        packet_klass := LoadI(packet).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+        packet_data := Add(AddI(packet).Imm(Constants::ARRAY_DATA_OFFSET).ptr, arr_byte_offset).ptr
+        packet_begin_data := Add(packet_data, begin_byte_offset).ptr
+
+        new_packet := store_object_klass(_start2, packet_klass)
+        StoreI(new_packet, new_packet_byte_len).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
+        new_packet_data := AddI(new_packet).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+
+        StoreI(new_buffer, new_packet).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ptr
+        StoreI(new_buffer, new_packet_data).Imm(Constants::ARRAY_BUFFER_NATIVE_DATA_OFFSET).ptr
+        StoreI(new_buffer, new_packet_byte_len).Imm(Constants::ARRAY_BUFFER_BYTE_LENGTH_OFFSET).u32
+        StoreI(new_buffer, Cast(0).u8).Imm(Constants::ARRAY_BUFFER_IS_RESIZABLE_OFFSET).u8
+
+        copy_u8_chars(packet_begin_data, new_packet_data, new_packet_byte_len)
+        Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+        Return(new_array).ptr
+
+    Label(:SlowPathEntrypoint)
+        entrypoint = get_entrypoint_offset("#{prefix}_ARRAY_SLICE_SLOW_PATH_ODD_SAVED")
+        Intrinsic(:SLOW_PATH_ENTRY, arr, begIn, endEx).AddImm(entrypoint).MethodAsImm("#{name}ArraySliceOddSavedBridge").Terminator.ptr
+        Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+    }
+end
+
+GenerateTypedUnsignedArraySlice('Uint8', 'UINT8', 0)
+GenerateTypedUnsignedArraySlice('Uint16', 'UINT16', 1)
+GenerateTypedUnsignedArraySlice('Uint32', 'UINT32', 2)
+GenerateTypedUnsignedArraySlice('BigUint64', 'BIG_UINT64', 3)
+GenerateTypedUnsignedArraySlice('Uint8Clamped', 'UINT8_CLAMPED', 0)

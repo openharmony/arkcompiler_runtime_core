@@ -118,6 +118,18 @@ public:
         return EtsString::FromEtsObject(EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetNameOffset())));
     }
 
+    void Initialize(EtsCoroutine *coro, EtsInt lengthInt, EtsInt bytesPerElement, EtsDouble byteOffset,
+                    EtsObject *buffer, EtsString *name)
+    {
+        ASSERT(buffer != nullptr);
+        ObjectAccessor::SetObject(coro, this, GetBufferOffset(), buffer->GetCoreType());
+        ObjectAccessor::SetObject(coro, this, GetNameOffset(), name != nullptr ? name->GetCoreType() : nullptr);
+        bytesPerElement_ = bytesPerElement;
+        byteOffset_ = byteOffset;
+        byteLength_ = static_cast<EtsDouble>(lengthInt) * bytesPerElement;
+        lengthInt_ = lengthInt;
+    }
+
 private:
     ObjectPointer<EtsObject> buffer_;
     ObjectPointer<EtsString> name_;
@@ -141,6 +153,7 @@ class EtsEscompatInt32Array : public EtsEscompatTypedArray<EtsInt> {};
 class EtsEscompatBigInt64Array : public EtsEscompatTypedArray<EtsLong> {};
 class EtsEscompatFloat32Array : public EtsEscompatTypedArray<EtsFloat> {};
 class EtsEscompatFloat64Array : public EtsEscompatTypedArray<EtsDouble> {};
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_ARRAYS_H

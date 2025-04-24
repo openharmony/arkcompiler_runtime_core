@@ -124,3 +124,27 @@ bool EmitUint8ArrayWith(Inst *inst);
 bool EmitUint16ArrayWith(Inst *inst);
 bool EmitUint32ArrayWith(Inst *inst);
 bool EmitBigUint64ArrayWith(Inst *inst);
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EMIT_TYPED_ARRAY_SLICE(Name, Type)                             \
+    /* CC-OFFNXT(G.PRE.02) name part */                                \
+    bool Emit##Name##ArraySlice(Inst *inst)                            \
+    {                                                                  \
+        auto eid = RuntimeInterface::EntrypointId::Type##_ARRAY_SLICE; \
+        /* CC-OFFNXT(G.PRE.05) function gen */                         \
+        return EmitFastPath(inst, eid, 3U);                            \
+    }
+
+EMIT_TYPED_ARRAY_SLICE(Int8, INT8)
+EMIT_TYPED_ARRAY_SLICE(Int16, INT16)
+EMIT_TYPED_ARRAY_SLICE(Int32, INT32)
+EMIT_TYPED_ARRAY_SLICE(BigInt64, BIG_INT64)
+EMIT_TYPED_ARRAY_SLICE(Float32, FLOAT32)
+EMIT_TYPED_ARRAY_SLICE(Float64, FLOAT64)
+EMIT_TYPED_ARRAY_SLICE(Uint8, UINT8)
+EMIT_TYPED_ARRAY_SLICE(Uint16, UINT16)
+EMIT_TYPED_ARRAY_SLICE(Uint32, UINT32)
+EMIT_TYPED_ARRAY_SLICE(BigUint64, BIG_UINT64)
+EMIT_TYPED_ARRAY_SLICE(Uint8Clamped, UINT8_CLAMPED)
+
+#undef EMIT_TYPED_ARRAY_SLICE

@@ -41,12 +41,12 @@ DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BYTES_PER_ELEMENT_OFFSET, ark::ets::EtsEscompa
 DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetByteOffsetOffset())
 DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BYTE_LENGTH_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetByteLengthOffset())
 
+DEFINE_VALUE(ARRAY_BUFFER_CLASS_SIZE, sizeof(ark::ets::EtsEscompatArrayBuffer))
 DEFINE_VALUE(ARRAY_BUFFER_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetManagedDataOffset())
 DEFINE_VALUE(ARRAY_BUFFER_BYTE_LENGTH_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetByteLengthOffset())
 DEFINE_VALUE(ARRAY_BUFFER_NATIVE_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetNativeDataOffset())
 DEFINE_VALUE(ARRAY_BUFFER_MANAGED_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetManagedDataOffset())
 DEFINE_VALUE(ARRAY_BUFFER_IS_RESIZABLE_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetIsResizableOffset())
-DEFINE_VALUE(ARRAY_BUFFER_CLASS_SIZE, sizeof(ark::ets::EtsEscompatArrayBuffer))
 
 DEFINE_VALUE(ETS_BOX_PRIMITIVE_VALUE_OFFSET, ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::GetValueOffset())
 // NOLINTEND(readability-identifier-naming)

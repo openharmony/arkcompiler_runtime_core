@@ -2590,6 +2590,151 @@ intrinsics:
       ret: void
       args: [escompat.BigUint64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValuesWithOffset
+#################################
+# escompat.TypedArray.slice     #
+#################################    
+  - name: Int8ArraySlice
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Int8Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt8ArraySlice
+    llvm_codegen_func: EmitInt8ArraySlice
+
+  - name: Int16ArraySlice
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Int16Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt16ArraySlice
+    llvm_codegen_func: EmitInt16ArraySlice
+
+  - name: Int32ArraySlice
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Int32Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt32ArraySlice
+    llvm_codegen_func: EmitInt32ArraySlice
+
+  - name: BigInt64ArraySlice
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.BigInt64Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateBigInt64ArraySlice
+    llvm_codegen_func: EmitBigInt64ArraySlice
+
+  - name: Float32ArraySlice
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Float32Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateFloat32ArraySlice
+    llvm_codegen_func: EmitFloat32ArraySlice
+
+  - name: Float64ArraySlice
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Float64Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateFloat64ArraySlice
+    llvm_codegen_func: EmitFloat64ArraySlice
+
+  - name: UInt8ArraySlice
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Uint8Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint8ArraySlice
+    llvm_codegen_func: EmitUint8ArraySlice
+
+  - name: UInt16ArraySlice
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Uint16Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint16ArraySlice
+    llvm_codegen_func: EmitUint16ArraySlice
+
+  - name: UInt32ArraySlice
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Uint32Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint32ArraySlice
+    llvm_codegen_func: EmitUint32ArraySlice
+
+  - name: BigUInt64ArraySlice
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.BigUint64Array
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateBigUint64ArraySlice
+    llvm_codegen_func: EmitBigUint64ArraySlice
+
+  - name: UInt8ClampedArraySlice
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: sliceImpl
+    static: false
+    signature:
+      ret: escompat.Uint8ClampedArray
+      args: [i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySlice
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint8ClampedArraySlice
+    llvm_codegen_func: EmitUint8ClampedArraySlice
 
   - name: BigUInt64ArrayFillInternal
     space: ets
