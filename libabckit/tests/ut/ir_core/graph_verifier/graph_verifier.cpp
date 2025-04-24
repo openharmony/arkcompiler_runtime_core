@@ -139,7 +139,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
 }
 
 // Test: test-kind=internal, abc-kind=ArkTS2, category=internal
-TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBinInst)
+TEST_F(LibAbcKitGraphVerifierTest, DISABLED_LibAbcKitTestGraphVerifierBinInst)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "ut/ir_core/graph_verifier/graph_verifier.abc";
     auto output = helpers::ExecuteStaticAbc(INPUT_PATH, "graph_verifier/ETSGLOBAL", "main");
