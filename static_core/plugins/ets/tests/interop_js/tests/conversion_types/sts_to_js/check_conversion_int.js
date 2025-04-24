@@ -24,7 +24,7 @@ function checkIntToNumber() {
 }
 
 function checkNumberToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.number === 'number');
+    ASSERT_TRUE(typeof deferentTypes.numb === 'number');
 }
 
 function checkBigInt() {

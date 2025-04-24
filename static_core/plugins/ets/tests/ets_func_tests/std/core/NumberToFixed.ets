@@ -26,7 +26,7 @@ function main(): int {
 }
 
 interface TestCase {
-    number: number,
+    numb: number,
     fractionDigits: number;
     expected: string
 }
@@ -34,47 +34,47 @@ interface TestCase {
 class TestData {
     static testCases: TestCase[] = [
         {
-            number: 1e21,
+            numb: 1e21,
             fractionDigits: 3,
             expected: "1e+21"
         },
         {
-            number: 1e20,
+            numb: 1e20,
             fractionDigits: 0,
             expected: "100000000000000000000"
         },
         {
-            number: 1e20/1e21,
+            numb: 1e20/1e21,
             fractionDigits: 3,
             expected: "0.100"
         },
         {
-            number: 1e26,
+            numb: 1e26,
             fractionDigits: 1,
             expected: "1e+26"
         },
         {
-            number: 1e-8,
+            numb: 1e-8,
             fractionDigits: 0,
             expected: "0"
         },
         {
-            number: -1e22,
+            numb: -1e22,
             fractionDigits: 2,
             expected: "-1e+22"
         },
         {
-            number: -1e-6,
+            numb: -1e-6,
             fractionDigits: 0,
             expected: "-0"
         },
         {
-            number: 6e-32,
+            numb: 6e-32,
             fractionDigits: 1,
             expected: "0.0"
         },
         {
-            number: 9.999e20,
+            numb: 9.999e20,
             fractionDigits: 0,
             expected: "999900000000000000000"
         },
@@ -87,7 +87,7 @@ class TestData {
 function testNumberToFixed() {
     for (let i = 0; i < TestData.testCases.length; i++) {
         let testCase: TestCase = TestData.testCases[i];
-        let num: number = testCase.number;
+        let num: number = testCase.numb;
         let digits: number = testCase.fractionDigits;
         let expected: string = testCase.expected;
         let actual: string = new Number(num).toFixed(digits);

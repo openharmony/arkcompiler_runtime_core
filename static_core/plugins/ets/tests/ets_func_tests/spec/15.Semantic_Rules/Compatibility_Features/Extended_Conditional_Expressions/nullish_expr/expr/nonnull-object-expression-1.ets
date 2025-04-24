@@ -21,9 +21,9 @@ tags: []
 
 
 function main(): int {
-    let object: Object = new Object();
+    let obj: Object = new Object();
     let flag: boolean = false;
-    if (object && flag) {
+    if (obj && flag) {
         return 1;
     } else {
         return 0;
