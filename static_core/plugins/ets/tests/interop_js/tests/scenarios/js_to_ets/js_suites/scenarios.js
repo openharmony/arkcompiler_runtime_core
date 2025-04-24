@@ -294,7 +294,7 @@ export class ClassWithInFieldDeclaration {
 }
 
 export function functionReturnsCompositeType(arg) {
-    switch (arg){
+    switch (arg) {
       case 0:
         return STRING_VALUE;
       case 1:
