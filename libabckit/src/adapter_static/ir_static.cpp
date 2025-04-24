@@ -803,13 +803,14 @@ bool BBisCatchStatic(AbckitBasicBlock *basicBlock)
     return basicBlock->impl->IsCatch();
 }
 
-void BBdumpStatic(AbckitBasicBlock *basicBlock, int /*fd*/)
+void BBdumpStatic(AbckitBasicBlock *basicBlock, int fd)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
 
     std::stringstream ss;
-    LIBABCKIT_LOG_DUMP(basicBlock->impl->Dump(&ss), DEBUG);
+    basicBlock->impl->Dump(&ss);
+    write(fd, ss.str().data(), ss.str().size());
 }
 
 bool BBcheckDominanceStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominator)
