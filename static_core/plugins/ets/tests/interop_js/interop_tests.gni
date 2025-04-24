@@ -19,6 +19,44 @@ template("interop_test") {
   assert(defined(invoker.js), "js must be defined")
   assert(defined(invoker.ets), "ets must be defined")
 
+  if (defined(invoker.js_module)) {
+    lines_helpers = []
+    count_helpers = 0
+    foreach(file, invoker.js_module) {
+      line_helper =
+          rebase_path(file) + ";" + get_path_info(file, "name") + ";commonjs;" +
+          get_path_info(file, "file") + ";${target_name}"
+      lines_helpers += [ line_helper ]
+      count_helpers += 1
+    }
+    js_helpers_file = ""
+    if (count_helpers > 1) {
+      js_helpers_list = rebase_path(
+              "$target_out_dir/${target_name}/${target_name}_helpers_list.txt")
+      write_file(js_helpers_list, lines_helpers)
+      js_helpers_file = "@$js_helpers_list"
+    } else {
+      files_helpers = invoker.js_module
+      js_helpers_file = rebase_path(files_helpers[0])
+    }
+    jsabc_helpers_file =
+        "$target_out_dir/${target_name}/${target_name}_helpers_js.abc"
+
+    es2abc_gen_abc("${target_name}_helpers_jsabc") {
+      extra_visibility = [ ":*" ]
+      src_js = js_helpers_file
+      dst_file = rebase_path(jsabc_helpers_file)
+      extra_args = []
+      if (count_helpers > 1) {
+        extra_args += [ "--commonjs" ]
+      }
+      extra_args += [ "--merge-abc" ]
+      extra_args += [ "--module" ]
+      in_puts = invoker.js_module
+      out_puts = [ jsabc_helpers_file ]
+    }
+  }
+
   lines = []
   count = 0
   foreach(file, invoker.js) {
@@ -133,6 +171,9 @@ template("interop_test") {
     if (defined(invoker.sources)) {
       deps += [ ":${target_name}_module" ]
     }
+    if (defined(invoker.js_module)) {
+      deps += [ ":${target_name}_helpers_jsabc" ]
+    }
     outputs = [ "$target_out_dir/${target_name}/" ]
     script = "../run_test.sh"
     args = []
@@ -152,6 +193,9 @@ template("interop_test") {
       "--module",
       rebase_path(
           "${root_out_dir}/arkcompiler/runtime_core/libets_interop_js_napi.so"),
+      "--module",
+      rebase_path(
+          "${root_out_dir}/arkcompiler/runtime_core/libinterop_test_helper.so"),
       "--module",
       rebase_path(
           "${root_out_dir}/arkcompiler/runtime_core/lib${target_name}_module.so"),

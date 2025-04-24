@@ -33,37 +33,85 @@ public:
     TestModule() = delete;
     ~TestModule() = default;
 
-    static napi_value AttachTest(napi_env env, [[maybe_unused]] napi_callback_info info)
+    static napi_value CallJsBuiltinTest(napi_env env, [[maybe_unused]] napi_callback_info info)
     {
-        napi_value result;
-        napi_get_undefined(env, &result);
+        return callTestMethod(env, "callJsBuiltinTest");
+    }
 
+    static napi_value LoadJsModuleTest(napi_env env, [[maybe_unused]] napi_callback_info info)
+    {
+        return callTestMethod(env, "loadJsModuleTest");
+    }
+
+    static napi_value CallJsFunctionTest(napi_env env, [[maybe_unused]] napi_callback_info info)
+    {
+        return callTestMethod(env, "callJsFunctionTest");
+    }
+
+    static napi_value CallJsAsyncFunctionTest(napi_env env, [[maybe_unused]] napi_callback_info info)
+    {
+        return callTestMethod(env, "callJsAsyncFunctionTest");
+    }
+
+    static napi_value CallJsAsyncFunctionWithAwaitTest(napi_env env, [[maybe_unused]] napi_callback_info info)
+    {
+        return callTestMethod(env, "callJsAsyncFunctionWithAwaitTest");
+    }
+
+    static napi_value Init(napi_env env, napi_value exports)
+    {
+        const std::array desc = {
+            napi_property_descriptor {"callJsBuiltinTest", 0, CallJsBuiltinTest, 0, 0, 0, napi_enumerable, 0},
+            napi_property_descriptor {"loadJsModuleTest", 0, LoadJsModuleTest, 0, 0, 0, napi_enumerable, 0},
+            napi_property_descriptor {"callJsFunctionTest", 0, CallJsFunctionTest, 0, 0, 0, napi_enumerable, 0},
+            napi_property_descriptor {"callJsAsyncFunctionTest", 0, CallJsAsyncFunctionTest, 0, 0, 0, napi_enumerable,
+                                      0},
+            napi_property_descriptor {"callJsAsyncFunctionWithAwaitTest", 0, CallJsAsyncFunctionWithAwaitTest, 0, 0, 0,
+                                      napi_enumerable, 0},
+        };
+
+        napi_define_properties(env, exports, desc.size(), desc.data());
+
+        return exports;
+    }
+
+private:
+    static ani_vm *GetEtsVm()
+    {
         ani_vm *etsVM;
         ani_size vmCount;
         [[maybe_unused]] ets_int res = ANI_GetCreatedVMs(&etsVM, 1, &vmCount);
         ASSERT(res == ETS_OK);
         ASSERT(vmCount == 1);
+        return etsVM;
+    }
+
+    static napi_value callTestMethod(napi_env env, const char *name)
+    {
+        napi_value result;
+        napi_get_undefined(env, &result);
+
+        ani_vm *etsVM = GetEtsVm();
 
         auto event = os::memory::Event();
-        auto t = std::thread([&event, etsVM] {
+        auto t = std::thread([&event, etsVM, &name] {
             ani_env *etsEnv {nullptr};
             ani_option interopEnabled {"--interop=enable", nullptr};
             ani_options aniArgs {1, &interopEnabled};
             etsVM->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
             ASSERT(etsEnv != nullptr);
             event.Fire();
-            std::function<void()> func = [etsEnv]() {
-                ani_class cls;
-                [[maybe_unused]] ani_status status = etsEnv->FindClass("Lattach_test/TestClass;", &cls);
-                ASSERT(status == ETS_OK);
-                ani_static_method method;
-                status = etsEnv->Class_FindStaticMethod(cls, "sum", "II:I", &method);
-                ASSERT(status == ETS_OK);
-                ani_int sum;
-                etsEnv->c_api->Class_CallStaticMethod_Int(etsEnv, cls, method, &sum, 5U, 6U);
-                ASSERT(sum == 11U);
-            };
-            func();
+
+            ani_class cls;
+            [[maybe_unused]] ani_status status = etsEnv->FindClass("Lattach_test/TestClass;", &cls);
+            ASSERT(status == ETS_OK);
+            ani_static_method method;
+            status = etsEnv->Class_FindStaticMethod(cls, name, nullptr, &method);
+            ASSERT(status == ETS_OK);
+            ani_int val;
+            etsEnv->c_api->Class_CallStaticMethod_Int(etsEnv, cls, method, &val);
+            ASSERT(val == 0);
+
             etsVM->DetachCurrentThread();
         });
 
@@ -71,17 +119,6 @@ public:
         t.join();
 
         return result;
-    }
-
-    static napi_value Init(napi_env env, napi_value exports)
-    {
-        const std::array desc = {
-            napi_property_descriptor {"attachTest", 0, AttachTest, 0, 0, 0, napi_enumerable, 0},
-        };
-
-        napi_define_properties(env, exports, desc.size(), desc.data());
-
-        return exports;
     }
 };
 
