@@ -18,7 +18,7 @@ package std.containers;
 /**
  * ArrayBlockingQueue implementation
  */
-export final class ArrayBlockingQueue<T> implements BlockingQueue<T> {
+export class ArrayBlockingQueue<T> implements BlockingQueue<T> {
 
     constructor(capacity: int) {
         if (capacity <= 0) {
@@ -135,7 +135,12 @@ export final class ArrayBlockingQueue<T> implements BlockingQueue<T> {
         }
     }
 
-    getEnd(): T | null {
+    /**
+     * Returns the end element in a ArrayBlockingQueue.
+     *
+     * @returns return the end element or null.
+     */
+    public getEnd(): T | null {
         ConcurrencyHelpers.mutexLock(this.mutex);
         try {
             if (this.isQueueEmpty) {
