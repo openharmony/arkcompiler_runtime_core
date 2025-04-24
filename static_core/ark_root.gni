@@ -24,7 +24,7 @@ ark_third_party_root = "//third_party"
 
 if (ark_standalone_build) {
   ark_es2panda_root = "//arkcompiler/ets_frontend/ets2panda"
-  ark_third_party_root = "//arkcompiler/toolchain/build/third_party_gn"
+  ark_third_party_root = "//build/third_party_gn"
   import("$build_root/config/build_type.gni")
 } else if (ark_static_standalone_build) {
   ark_root = "//"

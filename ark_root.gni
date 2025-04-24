@@ -22,7 +22,7 @@ if (!ark_standalone_build) {
   import("$build_root/config/components/toolchain/build_type.gni")
   import("$build_root/ohos.gni")
 } else {
-  ark_third_party_root = "//arkcompiler/toolchain/build/third_party_gn"
+  ark_third_party_root = "//build/third_party_gn"
   import("$build_root/ark.gni")
   import("$build_root/config/build_type.gni")
 }

@@ -21,7 +21,7 @@ if (!defined(ark_standalone_build)) {
 import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
 if (ark_standalone_build) {
-  import("//arkcompiler/toolchain/build/config/sanitizers/sanitizers.gni")
+  import("//build/config/sanitizers/sanitizers.gni")
   ark_root = "//arkcompiler/runtime_core/static_core"
   import("$build_root/ark_var.gni")
 } else if (ark_static_standalone_build) {

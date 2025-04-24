@@ -56,7 +56,7 @@ cd ${OpenHarmony}
 
 ./prebuilts/build-tools/darwin-arm64/bin/gn gen ./out/mac_arm64 \
 --root=. \
---dotfile=./arkcompiler/toolchain/build/compile_script/.gn \
+--dotfile=./build/compile_script/.gn \
 --args="target_os=\"mac\" target_cpu=\"arm64\" is_debug=false"
 
 ./prebuilts/build-tools/darwin-arm64/bin/ninja  -d keeprsp -C out/mac_arm64 ark_host_defectscanaux_tools -k 1
@@ -70,7 +70,7 @@ cd ${OpenHarmony}
 
 ./prebuilts/build-tools/darwin-x86/bin/gn gen ./out/mac_x64 \
 --root=. \
---dotfile=./arkcompiler/toolchain/build/compile_script/.gn \
+--dotfile=./build/compile_script/.gn \
 --args="target_os=\"mac\" target_cpu=\"x64\" is_debug=false"
 
 ./prebuilts/build-tools/darwin-x86/bin/ninja  -d keeprsp -C out/mac_x64 ark_host_defectscanaux_tools -k 1
