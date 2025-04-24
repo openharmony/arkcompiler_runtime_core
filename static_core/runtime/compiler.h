@@ -274,6 +274,8 @@ public:
 
     bool IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const override;
 
+    bool IsClassExternal(MethodPtr method, ClassPtr calleeClass) const override;
+
     bool IsMethodIntrinsic(MethodPtr method) const override
     {
         return MethodCast(method)->IsIntrinsic();

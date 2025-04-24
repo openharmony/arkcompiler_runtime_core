@@ -330,6 +330,14 @@ bool PandaRuntimeInterface::IsMethodExternal(MethodPtr parentMethod, MethodPtr c
     return MethodCast(parentMethod)->GetPandaFile() != MethodCast(calleeMethod)->GetPandaFile();
 }
 
+bool PandaRuntimeInterface::IsClassExternal(MethodPtr method, ClassPtr calleeClass) const
+{
+    if (calleeClass == nullptr) {
+        return true;
+    }
+    return MethodCast(method)->GetPandaFile() != ClassCast(calleeClass)->GetPandaFile();
+}
+
 compiler::DataType::Type PandaRuntimeInterface::GetMethodReturnType(MethodPtr parentMethod, MethodId id) const
 {
     auto *pf = MethodCast(parentMethod)->GetPandaFile();
