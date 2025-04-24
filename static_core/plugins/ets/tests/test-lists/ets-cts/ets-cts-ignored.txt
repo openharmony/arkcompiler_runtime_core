@@ -814,9 +814,6 @@
 #22148
 09.classes/01.class_declaration/03.class_extension_clause/extends_object_class.ets
 
-#22146 - should fail, but compiles
-09.classes/01.class_declaration/05.implementing_interface_properties/property_implementation_readonly_getter.ets
-
 #23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets
 
