@@ -321,6 +321,14 @@ add_ets_coroutines_test(FILE elauncher_id.ets
                         MODE "INT"
 )
 
+add_ets_coroutines_test(FILE eaworker_coroutines.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
 add_ets_coroutines_test(FILE eworkers_reached_limit.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
