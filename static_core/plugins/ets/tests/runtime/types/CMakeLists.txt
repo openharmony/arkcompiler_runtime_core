@@ -35,6 +35,7 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:mock_stdlib,FILE>
     DEPS_TARGETS
         mock_stdlib
+    TEST_GROUP ets_tests_runtime_gtests
 )
 
 panda_ets_add_gtest(
@@ -55,6 +56,7 @@ panda_ets_add_gtest(
         ets_typeapi_test.cpp
         typed_arrays_test.cpp
         ets_base_enum_test.cpp
+        ets_error_test.cpp
     LIBRARIES
         arkassembler
         arkruntime
@@ -66,4 +68,5 @@ panda_ets_add_gtest(
         $<TARGET_PROPERTY:etsstdlib,FILE>
     DEPS_TARGETS
         etsstdlib
+    TEST_GROUP ets_tests_runtime_gtests
 )

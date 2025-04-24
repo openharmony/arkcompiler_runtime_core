@@ -17,7 +17,7 @@ add_dependencies(ets_gtests ets_native_gtests)
 # Helper to add gtests.
 #
 # Example usage:
-#   panda_ets_native_add_gtest(test_name
+#   ets_native_test_helper(test_name
 #     ETS_CONFIG
 #       arktsconfig.json
 #     CPP_SOURCES
@@ -46,10 +46,6 @@ function (ets_native_test_helper TARGET)
     )
     if(NOT DEFINED ARG_CPP_SOURCES)
         message(FATAL_ERROR "CPP_SOURCES is not defined")
-    endif()
-
-    if(NOT DEFINED ARG_TEST_GROUP)
-        message(FATAL_ERROR "TEST_GROUP is not defined")
     endif()
 
     if(DEFINED ARG_ETS_SOURCES)
@@ -83,13 +79,16 @@ function (ets_native_test_helper TARGET)
         TEST_RUN_DIR ${NATIVE_TESTS_DIR}
         OUTPUT_DIRECTORY ${NATIVE_TESTS_DIR}
     )
-    add_dependencies(${ARG_TEST_GROUP} ${TARGET}_gtests)
+
+    if (DEFINED ARG_TEST_GROUP AND NOT ${ARG_TEST_GROUP} STREQUAL "")
+        add_dependencies(${ARG_TEST_GROUP} ${TARGET}_gtests)
+    endif()
 endfunction(ets_native_test_helper)
 
 # Add gtest-based tests to ets_native_gtests target.
 #
 # Example usage:
-#   panda_ets_native_add_gtest(test_name
+#   panda_add_gtest_with_ani(test_name
 #     CPP_SOURCES
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
@@ -99,15 +98,20 @@ endfunction(ets_native_test_helper)
 #       lib_target1
 #       lib_target2
 #   )
-function(panda_ets_native_add_gtest TARGET)
+function(panda_add_gtest_with_ani TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
         ""
-        ""
-        "CPP_SOURCES;ETS_SOURCES;LIBRARIES"
+        "TEST_GROUP"
+        "CPP_SOURCES;ETS_SOURCES;LIBRARIES;INCLUDE_DIRS"
         ${ARGN}
     )
+
+    set(TEST_GROUP "")
+    if (DEFINED ARG_TEST_GROUP)
+        set(TEST_GROUP ${ARG_TEST_GROUP})
+    endif()
 
     ets_native_test_helper(${TARGET}
         ETS_CONFIG ${ARG_ETS_CONFIG}
@@ -115,8 +119,11 @@ function(panda_ets_native_add_gtest TARGET)
         CPP_SOURCES ${ARG_CPP_SOURCES}
         LIBRARIES ${ARG_LIBRARIES} ani_gtest
         TSAN_EXTRA_OPTIONS ${ARG_TSAN_EXTRA_OPTIONS}
-        ETS_GTEST_ABC_PATH "ARK_ETS_GTEST_ABC_PATH"
+        ETS_GTEST_ABC_PATH "ANI_GTEST_ABC_PATH"
         VERIFY_SOURCES true
-        TEST_GROUP ets_native_gtests
+        TEST_GROUP ${TEST_GROUP}
+        INCLUDE_DIRS
+            ${ARG_INCLUDE_DIRS}
+            ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
     )
-endfunction(panda_ets_native_add_gtest)
+endfunction(panda_add_gtest_with_ani)

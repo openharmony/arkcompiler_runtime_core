@@ -41,6 +41,7 @@ public:
     EtsClass *coreFunction;
 
     EtsClass *escompatError;
+    EtsClass *coreOutOfMemoryError;
     EtsClass *coreException;
 
     EtsClass *coreStringBuilder;
@@ -61,6 +62,8 @@ public:
     EtsClass *interopJSValue;
 
     EtsClass *coreTupleN;
+
+    EtsClass *coreStackTraceElement;
 
     EtsClass *coreFinalizableWeakRef;
     EtsClass *coreFinalizationRegistry;
