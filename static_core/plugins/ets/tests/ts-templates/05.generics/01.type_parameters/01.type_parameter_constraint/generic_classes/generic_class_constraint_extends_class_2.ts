@@ -18,12 +18,12 @@ desc: generic parameters with constraint in extends
 ---*/
 
 class A {}
-class B extends A{}
+class B extends A {}
 class D<T, S extends T> {}
 
 function main(): void {
-    new D<A, A>
-    new D<A, B>
-    new D<B, B>
+    new D<A, A>;
+    new D<A, B>;
+    new D<B, B>;
 }
 

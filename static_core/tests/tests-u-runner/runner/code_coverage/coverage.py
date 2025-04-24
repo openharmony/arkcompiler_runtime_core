@@ -143,7 +143,8 @@ class LlvmCov:
 
         profdata_files = list(_profdata_root_dir_path.rglob('*.profdata'))
 
-        with open(_profdata_files_list_file_path, 'w', encoding='utf-8') as file:
+        with os.fdopen(os.open(_profdata_files_list_file_path, os.O_RDWR | os.O_CREAT, 0o755),
+                       'w', encoding="utf-8") as file:
             for entity in profdata_files:
                 file.write(f"{entity}\n")
 
