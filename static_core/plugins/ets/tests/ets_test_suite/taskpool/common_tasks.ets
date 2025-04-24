@@ -111,6 +111,64 @@ function taskExecuteDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
+let verifyCount = 0;
+function verifySendDataRes(a:int):void{
+    assertEQ(a, 10)
+    verifyCount++;
+}
+
+function verifySendDataResWithRestParameter(...args:FixedArray<NullishType>) {
+    let arg1 = args[0] as Array<int>;
+    let arg2 = args[1] as Array<string>;
+    assertEQ(arg1[0], 1);
+    assertEQ(arg1[1], 2);
+    assertEQ(arg2[0], "hello");
+    assertEQ(arg2[1], "world");
+}
+
+function testOnReceiveDataRestParameter():void {
+    let task = new taskpool.Task(() => {
+        let arg = new Array<int>(1, 2);
+        taskpool.Task.sendData(arg, new Array<string>("hello", "world"));
+    })
+    task.onReceiveData(verifySendDataResWithRestParameter)
+    await taskpool.execute(task);
+}
+
+function taskOnReceiveData():void {
+    clearCount();
+    let task = new taskpool.Task(() => {
+        taskpool.Task.sendData(10);
+        taskpool.Task.sendData(10);
+        taskpool.Task.sendData(10);
+        taskpool.Task.sendData(10);
+    });
+    task.onReceiveData(verifySendDataRes);
+    await taskpool.execute(task);
+    assertEQ(verifyCount, 4);
+}
+
+function clearCount():void {
+    verifyCount = 0;
+}
+
+function taskSendData():void {
+    clearCount();
+    let task = new taskpool.Task(() => {
+        taskpool.Task.sendData(10);
+        taskpool.Task.sendData(undefined);
+        taskpool.Task.sendData(null);
+        taskpool.Task.sendData("string");
+        taskpool.Task.sendData(1.0);
+    });
+
+    task.onReceiveData((): void => {
+        verifyCount++
+    });
+    await taskpool.execute(task);
+    assertEQ(verifyCount, 5);
+}
+
 function taskExecutePeriodicallyTest(): void {
     let task1 = new taskpool.Task(returnAbc);
     expectError(() => {
@@ -735,6 +793,9 @@ function main(): int {
     commonTaskSuite.addTest("TaskExecuteDelayedTest", taskExecuteDelayedTest);
     commonTaskSuite.addTest("TaskExecutePeriodicallyTest", taskExecutePeriodicallyTest);
     commonTaskSuite.addTest("TaskWithDependencyExecutePeriodicallyTest", taskWithDependencyExecutePeriodicallyTest);
+    commonTaskSuite.addTest("TaskOnReceiveDataTest", taskOnReceiveData);
+    commonTaskSuite.addTest("TaskSendDataTest", taskSendData);
+    commonTaskSuite.addTest("testOnReceiveDataRestParameter", testOnReceiveDataRestParameter);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;

@@ -282,7 +282,7 @@ export namespace taskpool {
          * @throws Error if the function is not called from a taskpool task
          * @throws Error if the callback is not registered
          */
-        static sendData(...args: Object[]): void {
+        static sendData(...args: FixedArray<NullishType>): void {
             const item: Task | undefined = getCurrentTask();
             if (item === undefined) {
                 throw new Error("The function is not called in the TaskPool thread");
@@ -299,8 +299,7 @@ export namespace taskpool {
         /**
          * Register a callback for this task to receive and handle data from the taskpool task 
          */
-        // NOTE(wang_zhaoyong, #23678): callback with params still has questions, also affects sendData.
-        onReceiveData(callback?: () => NullishType): void {
+        onReceiveData(callback?: Function): void {
             this.onReceiveCallback = callback;
         }
 
@@ -493,10 +492,10 @@ export namespace taskpool {
                 return p;
             }
             return p.then<NullishType>((value: NullishType): NullishType => {
-                const argsArray: Array<Object[]> = this.extractDataArgs();
-                argsArray.forEach((args: Object[]) => {
+                const argsArray: Array<FixedArray<NullishType>> = this.extractDataArgs();
+                argsArray.forEach((args: FixedArray<NullishType>) => {
                     try {
-                        this.onReceiveCallback!();
+                        this.onReceiveCallback!.unsafeCall(...args);
                     } catch(e: Error) {}
                 });
                 return value;
@@ -525,10 +524,10 @@ export namespace taskpool {
         }
 
         /// @see taskpool.Task.getOnReceivePromise
-        internal extractDataArgs(): Array<Object[]> {
+        internal extractDataArgs(): Array<FixedArray<NullishType>> {
             ConcurrencyHelpers.mutexLock(this.dataMutex);
-            const argsArray: Array<Object[]> = this.argsArray;
-            this.argsArray = new Array<Object[]>();
+            const argsArray: Array<FixedArray<NullishType>> = this.argsArray;
+            this.argsArray = new Array<FixedArray<NullishType>>();
             ConcurrencyHelpers.mutexUnlock(this.dataMutex);
             return argsArray;
         }
@@ -580,9 +579,9 @@ export namespace taskpool {
 
         private runner: SequenceRunner;
 
-        private onReceiveCallback?: () => NullishType;
+        private onReceiveCallback?: Function;
         private dataMutex: Object = ConcurrencyHelpers.mutexCreate();
-        private argsArray: Array<Object[]> = new Array<Object[]>();
+        private argsArray: Array<FixedArray<NullishType>> = new Array<FixedArray<NullishType>>();
 
         private onEnqueueCallback?: CallbackFunction;
         private onStartCallback?: CallbackFunction;
