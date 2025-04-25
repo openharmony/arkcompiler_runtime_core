@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -373,6 +373,36 @@ inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[m
             // Atomic with parameterized order reason: memory order passed as argument
             return atomicAddr->fetch_add(value, memoryOrder);
         }
+    }
+}
+
+/* static */
+template <typename T, bool USE_UBYTE_ARITHMETIC>
+// CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
+inline std::enable_if_t<!std::is_same_v<T, uint8_t> || USE_UBYTE_ARITHMETIC, T> ObjectAccessor::GetAndSubFieldPrimitive(
+    // CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
+    [[maybe_unused]] void *obj, [[maybe_unused]] size_t offset, [[maybe_unused]] T value,
+    // CC-OFFNXT(G.FMT.06, G.FUD.06) project code style
+    [[maybe_unused]] std::memory_order memoryOrder)
+{
+    if constexpr (std::is_floating_point_v<T>) {  // NOLINT(readability-braces-around-statements)
+        // Atmoic fetch_add only defined in the atomic specializations for integral and pointer
+        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+        ASSERT(IsAddressInObjectsHeap(rawAddr));
+        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
+        // Atomic with parameterized order reason: memory order passed as argument
+        T oldValue = atomicAddr->load(memoryOrder);
+        T newValue;
+        do {
+            newValue = oldValue - value;
+        } while (!atomicAddr->compare_exchange_weak(oldValue, newValue, memoryOrder));
+        return oldValue;
+    } else {  // NOLINT(readability-misleading-indentation, readability-else-after-return)
+        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+        ASSERT(IsAddressInObjectsHeap(rawAddr));
+        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
+        // Atomic with parameterized order reason: memory order passed as argument
+        return atomicAddr->fetch_sub(value, memoryOrder);
     }
 }
 

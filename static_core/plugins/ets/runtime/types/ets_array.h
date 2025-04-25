@@ -107,16 +107,58 @@ protected:
             coretypes::Array::Create(arrayClass->GetRuntimeClass(), length, spaceType, pinned));
     }
 
-    template <class T>
+    template <class T, bool IS_VOLATILE = false>
     void SetImpl(uint32_t idx, T elem)
     {
-        GetCoreType()->Set(idx, elem);
+        GetCoreType()->Set<T, true, false, IS_VOLATILE>(idx, elem);
+    }
+
+    template <class T, bool IS_VOLATILE = false>
+    T GetImpl(uint32_t idx)
+    {
+        return GetCoreType()->Get<T, true, false, IS_VOLATILE>(idx);
     }
 
     template <class T>
-    T GetImpl(uint32_t idx)
+    std::pair<bool, T> CompareAndExchangeImpl(uint32_t idx, T oldElemValue, T newValue, bool strong)
     {
-        return GetCoreType()->Get<T>(idx);
+        return GetCoreType()->CompareAndExchange(idx, oldElemValue, newValue, std::memory_order_seq_cst, strong);
+    }
+
+    template <class T>
+    T ExchangeImpl(uint32_t idx, T val)
+    {
+        return GetCoreType()->Exchange(idx, val, std::memory_order_seq_cst);
+    }
+
+    template <class T>
+    T GetAndAddImpl(uint32_t idx, T value)
+    {
+        return GetCoreType()->GetAndAdd(idx, value, std::memory_order_seq_cst);
+    }
+
+    template <class T>
+    T GetAndSubImpl(uint32_t idx, T value)
+    {
+        return GetCoreType()->GetAndSub(idx, value, std::memory_order_seq_cst);
+    }
+
+    template <class T>
+    T GetAndBitwiseOrImpl(uint32_t idx, T value)
+    {
+        return GetCoreType()->GetAndBitwiseOr(idx, value, std::memory_order_seq_cst);
+    }
+
+    template <class T>
+    T GetAndBitwiseAndImpl(uint32_t idx, T value)
+    {
+        return GetCoreType()->GetAndBitwiseAnd(idx, value, std::memory_order_seq_cst);
+    }
+
+    template <class T>
+    T GetAndBitwiseXorImpl(uint32_t idx, T value)
+    {
+        return GetCoreType()->GetAndBitwiseXor(idx, value, std::memory_order_seq_cst);
     }
 };
 
@@ -252,6 +294,43 @@ public:
     {
         return GetImpl<ClassType>(index);
     }
+    void SetVolatile(uint32_t index, ClassType element)
+    {
+        SetImpl<ClassType, true>(index, element);
+    }
+    ClassType GetVolatile(uint32_t index)
+    {
+        return GetImpl<ClassType, true>(index);
+    }
+    std::pair<bool, ClassType> CompareAndExchange(uint32_t index, ClassType oldVal, ClassType newVal, bool strong)
+    {
+        return CompareAndExchangeImpl(index, oldVal, newVal, strong);
+    }
+    ClassType Exchange(uint32_t index, ClassType val)
+    {
+        return ExchangeImpl(index, val);
+    }
+    ClassType GetAndAdd(uint32_t index, ClassType val)
+    {
+        return GetAndAddImpl(index, val);
+    }
+    ClassType GetAndSub(uint32_t index, ClassType val)
+    {
+        return GetAndSubImpl(index, val);
+    }
+    ClassType GetAndBitwiseAnd(uint32_t index, ClassType val)
+    {
+        return GetAndBitwiseXorImpl(index, val);
+    }
+    ClassType GetAndBitwiseOr(uint32_t index, ClassType val)
+    {
+        return GetAndBitwiseOrImpl(index, val);
+    }
+    ClassType GetAndBitwiseXor(uint32_t index, ClassType val)
+    {
+        return GetAndBitwiseXorImpl(index, val);
+    }
+
     static EtsClass *GetComponentClass()
     {
         return PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(ETS_CLASS_ROOT);

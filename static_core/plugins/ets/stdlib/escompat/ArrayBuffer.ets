@@ -428,14 +428,62 @@ export class ArrayBuffer extends Buffer
 
 }
 
+type Resolver = (value: string) => void;
+
+class Waiter {
+    public readonly static okStatus: string = "ok";
+    public readonly static notEqualStatus: string = "not-equal";
+    public readonly static timeOutStatus: string = "timed-out";
+
+    public wait(val: long, check: long, timeout?: long): Promise<string> {
+        ConcurrencyHelpers.mutexLock(this.mutex);
+
+        if (val != check) {
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
+            return Promise.resolve<string>(Waiter.notEqualStatus);
+        }
+        if(!(timeout instanceof undefined)) {
+            setTimeout((waiter: Waiter) => {
+                waiter.notify(Waiter.timeOutStatus);
+            }, timeout, this);
+        }
+
+        let resolver: Resolver | undefined = undefined;
+        let p = new Promise<string>((resolve: Resolver) => {
+            resolver = resolve;
+        });
+        this.promiseQueue.push(resolver!);
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+        return p;
+    }
+
+    public notify(val: string): boolean {
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        let res = this.promiseQueue.poll();
+        if(res instanceof null) {
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
+            return false;
+        }
+        res!(val);
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+        return true;
+    }
+    
+    private mutex: Object =  ConcurrencyHelpers.mutexCreate();
+    private promiseQueue: BlockingQueue<Resolver> = new LinkedBlockingQueue<Resolver>();
+}
+
 /**
  * Internal non-movable memory of a SharedArrayBuffer
  */
 class SharedMemory {
     private data: FixedArray<byte> = [];
-    private waiterPtr: long
+    private offsetToWaiterQueue: ConcurrentHashMap<int, Waiter> = new ConcurrentHashMap<int, Waiter>;
+    private creationWaitersMutex: Object =  ConcurrencyHelpers.mutexCreate();
 
-    private constructor() {}
+    public constructor(byteLength: int) {
+        this.data = new byte[byteLength];
+    }
 
     internal native static create(byteLength: int): SharedMemory;
 
@@ -449,6 +497,49 @@ class SharedMemory {
 
     internal getByteLength(): int {
         return this.data.length as int
+    }
+
+    internal wait(byteOffset: int, waitValue: long, useInt: boolean, timeout?: long): Promise<string> {
+        // Getting correct waiter
+        let waiter = this.offsetToWaiterQueue.get(byteOffset)
+        if (waiter instanceof undefined) {
+            ConcurrencyHelpers.mutexLock(this.creationWaitersMutex)
+            waiter = this.offsetToWaiterQueue.get(byteOffset)
+            if (waiter instanceof undefined) {
+                waiter = new Waiter()
+                this.offsetToWaiterQueue.set(byteOffset, waiter!)
+            }
+            ConcurrencyHelpers.mutexUnlock(this.creationWaitersMutex)
+        }
+        // Check condition to wait
+        let value: long = 0;
+        if(useInt) {
+            value = this.atomicLoadI32(byteOffset);
+        } else {
+            value = this.atomicLoadI64(byteOffset);
+        }
+        return waiter!.wait(value, waitValue, timeout);
+    }
+
+    internal notify(byteOffset: int, count: int = 1): int {
+        let waiter = this.offsetToWaiterQueue.get(byteOffset)
+        if (waiter instanceof undefined) {
+            ConcurrencyHelpers.mutexLock(this.creationWaitersMutex)
+            waiter = this.offsetToWaiterQueue.get(byteOffset)
+            if (waiter instanceof undefined) {
+                waiter = new Waiter()
+                this.offsetToWaiterQueue.set(byteOffset, waiter!)
+            }
+            ConcurrencyHelpers.mutexUnlock(this.creationWaitersMutex)
+        }
+        
+        let notified = 0;
+        for(let i = 0; i < count; i++) {
+            if (waiter!.notify(Waiter.okStatus)) {
+                notified++;
+            }
+        }
+        return notified;
     }
 
     internal native atomicAddI8(index: int, value: byte): byte;
@@ -594,18 +685,6 @@ class SharedMemory {
     internal native atomicSubU64(index: int, value: long): long;
 
     internal native atomicXorU64(index: int, value: long): long;
-
-    internal native atomicWaitI32(byteOffset: int, value: int): int;
-
-    internal native atomicWaitI64(byteOffset: int, value: long): int;
-
-    internal native atomicTimedWaitI32(byteOffset: int, value: int, timeout: long): int;
-
-    internal native atomicTimedWaitI64(byteOffset: int, value: long, timeout: long): int;
-
-    internal native atomicNotify(byteOffset: int): int;
-
-    internal native atomicBoundedNotify(byteOffset: int, count: int): int;
 }
 
 export class SharedArrayBuffer extends Buffer {
@@ -613,7 +692,7 @@ export class SharedArrayBuffer extends Buffer {
 
     public constructor(byteLength: int) {
         super()
-        this.sharedMemory = SharedMemory.create(byteLength)
+        this.sharedMemory = new SharedMemory(byteLength)
     }
 
     internal getSharedMemory(): SharedMemory {

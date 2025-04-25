@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,6 +102,10 @@ public:
 
     template <typename T>
     static T GetAndAddFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
+
+    template <typename T, bool USE_UBYTE_ARITHMETIC = false>
+    static std::enable_if_t<!std::is_same_v<T, uint8_t> || USE_UBYTE_ARITHMETIC, T> GetAndSubFieldPrimitive(
+        void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
     static T GetAndBitwiseOrFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);

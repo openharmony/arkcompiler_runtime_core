@@ -35,12 +35,15 @@ set(atomics_tests
     concurrent_countdownlatch
     # rendezvous_channel
     # cyclic_barrier
+
+    #index range
+    index_range
 )
 
 set(tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 set(tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
-set(coroutine_options --coroutine-impl=threaded --coroutine-workers-count=10 --gc-type=g1-gc)
+set(coroutine_options --coroutine-impl=stackful --coroutine-workers-count=0 --gc-type=g1-gc)
 
 add_custom_target(ets_test_suite_atomics)
 
