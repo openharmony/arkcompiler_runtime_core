@@ -16,6 +16,7 @@
 #include "macros.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/interop_js/js_value.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
@@ -139,6 +140,9 @@ JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
         ThrowNoInteropContextException();
         return nullptr;
     }
+    if (v->GetClass() == PlatformTypes(coro)->interopJSValue) {
+        return JSValue::FromEtsObject(v);
+    }
     INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -153,6 +157,15 @@ JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
     }
 
     return res.value();
+}
+
+uint8_t JSRuntimeIsJSValue(EtsObject *v)
+{
+    if (v == nullptr) {
+        return 0U;
+    }
+    auto coro = EtsCoroutine::GetCurrent();
+    return static_cast<uint8_t>(v->GetClass() == PlatformTypes(coro)->interopJSValue);
 }
 
 JSValue *JSRuntimeNewJSValueBigInt(EtsBigInt *v)

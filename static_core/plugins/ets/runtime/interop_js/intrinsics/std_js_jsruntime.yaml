@@ -95,6 +95,17 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueObjectIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
 
+  - name: JSRuntimeIsJSValue
+    space: ets
+    class_name: std.interop.js.JSRuntime
+    method_name: isJSValue
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeIsJSValueIntrinsic
+    clear_flags: [can_throw, heap_inv, no_cse]    
+
   - name: JSRuntimeNewJSValueBigInt
     space: ets
     class_name: std.interop.js.JSRuntime

@@ -30,6 +30,7 @@ JSValue *JSRuntimeNewJSValueDouble(double v);
 JSValue *JSRuntimeNewJSValueBoolean(uint8_t v);
 JSValue *JSRuntimeNewJSValueString(EtsString *v);
 JSValue *JSRuntimeNewJSValueObject(EtsObject *v);
+uint8_t JSRuntimeIsJSValue(EtsObject *v);
 JSValue *JSRuntimeNewJSValueBigInt(EtsBigInt *v);
 double JSRuntimeGetValueDouble(JSValue *etsJsValue);
 uint8_t JSRuntimeGetValueBoolean(JSValue *etsJsValue);
