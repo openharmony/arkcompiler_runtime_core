@@ -27,7 +27,7 @@ interface IStudent {
 }
 
 class Teacher {
-  name: string;
+  name: string = "";
 }
 
 class Student implements IStudent {

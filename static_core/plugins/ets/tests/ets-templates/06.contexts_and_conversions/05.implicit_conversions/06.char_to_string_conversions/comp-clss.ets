@@ -24,7 +24,7 @@ let c{{loop.index}}: char = {{v.char}}
 {%- endfor %}
 
 class A {
-    fld: string
+    fld: string = ""
 }
 
 function main() {

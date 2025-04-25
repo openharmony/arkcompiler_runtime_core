@@ -202,7 +202,7 @@ function checkGetPropertyByName(): boolean {
 // getProperty(name: string): ESObject
 function checkGetPropertyStaticObj(): boolean {
     class staticObjectA {
-        aaa: string
+        aaa: string = ""
     }
     let sObj = new staticObjectA();
     sObj.aaa = "bbb";
