@@ -23,6 +23,8 @@ function main(): int {
 
     suite.addTest("LightWeightSet addAll data", testAddAllData)
     suite.addTest("LightWeightSet addAll empty data", testAddAllEmptyData)
+    suite.addTest("LightWeightSet addAll with empty set as source", testAddAllWithNonEmptySet)
+    suite.addTest("LightWeightSet addAll with overlapping sets", testAddAllWithMultipleSets)
     suite.addTest("LightWeightSet hasAll data", testHasAllData)
     suite.addTest("LightWeightSet hasAll not set data", testHasAllNotSetData)
     suite.addTest("LightWeightSet hasAll data lightWeightSet out of range", testHasAllOutOfRangeData)
@@ -49,7 +51,36 @@ function testAddAllData() {
 function testAddAllEmptyData() {
     let set: LightWeightSet<number | string> = new LightWeightSet<number | string>();
     let result = set.addAll(set);
+    assertEQ(result, false, "The lightWeightSet should add all elements from another lightWeightSet");
+}
+
+function testAddAllWithNonEmptySet() {
+    let setA: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let setB: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+
+    setA.add("aa");
+    setB.add("bb");
+    let result = setB.addAll(setA);
     assertEQ(result, true, "The lightWeightSet should add all elements from another lightWeightSet");
+}
+
+function testAddAllWithMultipleSets() {
+    let setA: LightWeightSet<string> = new LightWeightSet<string>();
+    let setB: LightWeightSet<string> = new LightWeightSet<string>();
+
+    setA.add("sparrow");
+    setA.add("s");
+
+    setB.add("s");
+    setB.add("squirrel");
+
+    assertEQ(setA.addAll(setB), true, "The addAll method should return true when new elements are added");
+    assertEQ(setA.length, 3, "The set length should be 3 after adding all elements");
+
+    let setC: LightWeightSet<string> = new LightWeightSet<string>();
+    setC.add("s");
+
+    assertEQ(setA.addAll(setC), false, "The addAll method should return false when no new elements are added");
 }
 
 function testHasAllData() {
