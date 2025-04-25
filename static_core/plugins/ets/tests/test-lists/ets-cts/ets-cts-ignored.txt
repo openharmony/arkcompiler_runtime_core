@@ -37,6 +37,10 @@
 #23975
 03.types/17.tuple_types/tt2_31.ets
 
+#25060 Function.unsafeCall(...) works improperly with extra args
+03.types/18.function_types/01.type_function/negative_rt_1.ets
+03.types/18.function_types/01.type_function/negative_rt_2.ets
+
 #23696 Readonly arrays and readonly tuples not supported
 03.types/19.union_types/01.union_types_normalization/norm_29.ets
 03.types/19.union_types/01.union_types_normalization/norm_30.ets
