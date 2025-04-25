@@ -190,7 +190,7 @@ static_core/plugins/ets/tests/interop_js/tests/promise/                       @u
 /disassembler/ @ctw-ian
 /isa/ @ctw-ian @chenqy930
 /ldscripts/ @gitee-dakeQI
-/libabckit/ @nazarovkonstantin
+/libabckit/ @nazarovkonstantin @oatuwwutao
 /libark_defect_scan_aux/ @gitee-dakeQI
 /libpandabase/ @gitee-dakeQI
 /libpandafile/ @gitee-dakeQI @chenqy930
