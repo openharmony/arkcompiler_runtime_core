@@ -55,6 +55,9 @@ function prepare_file_test2() {
     if [ "$ICU_DAT_FILE" = "true" ]; then
         cat "$SCRIPT_DIR"/test/test_file_expected_list_icu.txt >> "$EXPECTED"
     fi
+    if [ "$ETS_SDK" = "true" ]; then
+        cat "$SCRIPT_DIR"/test/test_file_expected_list_etssdk.txt >> "$EXPECTED"
+    fi
 
     sort --version-sort "$EXPECTED" -o "$EXPECTED"
 }
