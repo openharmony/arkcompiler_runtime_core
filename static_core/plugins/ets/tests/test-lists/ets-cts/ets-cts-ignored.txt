@@ -128,9 +128,6 @@
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_5.ets
 05.generics/01.type_parameters/03.type_parameter_variance/generic_interfaces/wrong_type_parameter_variance_6.ets
 
-#14962
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/interface_args_12.ets
-
 #23754
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_0.ets
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/lmbd_1.ets
