@@ -27,7 +27,7 @@ _LOGGER = Log.get_logger(__file__)
 
 
 class CPUMask:
-    props = ('online')
+    props = ('online',)
     cpu_root = Path("/") / "sys" / "devices" / "system" / "cpu"
     sh = f"hdc {os.environ.get('HDC_OPTIONS', '')} shell"
 

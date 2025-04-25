@@ -50,9 +50,13 @@ EXIT_CODE=$?
 
 echo "Ruff check"
 ruff check .
+save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 echo "Check complexity with radon"
 flake8 --radon-max-cc 15 --select=R701 .
+save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 set -e
 
