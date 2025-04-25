@@ -91,6 +91,30 @@ static constexpr std::string_view FUNCTION15                           = "Lstd/c
 static constexpr std::string_view FUNCTION16                           = "Lstd/core/Function16;";
 static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
 
+// Tuple classes
+static constexpr std::string_view TUPLE                                = "Lstd/core/Tuple;";
+static constexpr std::string_view TUPLE0                               = "Lstd/core/Tuple0;";
+static constexpr std::string_view TUPLE1                               = "Lstd/core/Tuple1;";
+static constexpr std::string_view TUPLE2                               = "Lstd/core/Tuple2;";
+static constexpr std::string_view TUPLE3                               = "Lstd/core/Tuple3;";
+static constexpr std::string_view TUPLE4                               = "Lstd/core/Tuple4;";
+static constexpr std::string_view TUPLE5                               = "Lstd/core/Tuple5;";
+static constexpr std::string_view TUPLE6                               = "Lstd/core/Tuple6;";
+static constexpr std::string_view TUPLE7                               = "Lstd/core/Tuple7;";
+static constexpr std::string_view TUPLE8                               = "Lstd/core/Tuple8;";
+static constexpr std::string_view TUPLE9                               = "Lstd/core/Tuple9;";
+static constexpr std::string_view TUPLE10                              = "Lstd/core/Tuple10;";
+static constexpr std::string_view TUPLE11                              = "Lstd/core/Tuple11;";
+static constexpr std::string_view TUPLE12                              = "Lstd/core/Tuple12;";
+static constexpr std::string_view TUPLE13                              = "Lstd/core/Tuple13;";
+static constexpr std::string_view TUPLE14                              = "Lstd/core/Tuple14;";
+static constexpr std::string_view TUPLE15                              = "Lstd/core/Tuple15;";
+static constexpr std::string_view TUPLE16                              = "Lstd/core/Tuple16;";
+static constexpr std::string_view TUPLEN                               = "Lstd/core/TupleN;";
+
+// Base type for all enums
+static constexpr std::string_view BASE_ENUM                            = "Lstd/core/BaseEnum;";
+
 // core-defined error classes
 static constexpr std::string_view ABC_FILE_NOT_FOUND_ERROR             = "Lstd/core/AbcFileNotFoundError;";
 static constexpr std::string_view ARITHMETIC_ERROR                     = "Lstd/core/ArithmeticError;";

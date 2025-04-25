@@ -441,7 +441,7 @@ export namespace xml {
             }
             if (!this.isNullish(this.tokenFunc_)) {
                 let info = this.parseToken(node)
-                if (!this.tokenFunc_!(node.type ? node.type! : ((node.content == " ") ? EventType.WHITESPACE : EventType.TEXT), info)) {
+                if (!this.tokenFunc_!(node.type != undefined ? node.type! : ((node.content == " ") ? EventType.WHITESPACE : EventType.TEXT), info)) {
                     return false
                 }
             }
