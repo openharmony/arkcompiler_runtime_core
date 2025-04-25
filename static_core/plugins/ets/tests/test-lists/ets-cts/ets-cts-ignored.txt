@@ -833,10 +833,6 @@
 #23238 Method returning 'this' returns wrong instance
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.ets
 
-#24022 missing CTE for uninitialized static field
-09.classes/08.class_initializer/class_initializer_ensure_fields_initialized.ets
-09.classes/08.class_initializer/class_initializer_ensure_fields_initialized_1.ets
-
 #23832 missing CTE for static constructor
 09.classes/09.constructor_declaration/static_constructor_declaration.ets
 
