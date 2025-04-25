@@ -24,11 +24,11 @@ interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
     get length(): number;
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param k the key to find in the LightWeightMap/class
      *
-     * @returns value if assosiated with key presents.
+     * @returns value if associated with key presents.
      */
     get(key: K): V | undefined;
 
@@ -184,11 +184,11 @@ export class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V> {
     }
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param k the key to find in the LightWeightMap/class
      *
-     * @returns value if assosiated with key presents.
+     * @returns value if associated with key presents.
      */
     get(key: K): V | undefined {
         const index = this.getIndexOfKey(key);
