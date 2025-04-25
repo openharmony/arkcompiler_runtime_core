@@ -12,25 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+export let err = new Error('123')
+export function foo() { throw err }
 
-export namespace A {
-  export let v1 = 1;
-  export namespace B {
-    export let v2 = 2;
-    export namespace C {
-      export let v3 = 3;
-    }
-  }
-}
-
-export declare namespace X1 {
-    function foo1(): void;
-}
-
-export namespace X {
-  export function foo(): void { console.log("Hi") }
-}
-
-export namespace myNamespace {
-  export enum nsEnum { White, Blue = 2, Red = 2 }
-}
+export let err2 = new RangeError('123')
+export function foo2() { throw err2 }

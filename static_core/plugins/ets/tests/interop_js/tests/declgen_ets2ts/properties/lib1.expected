@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export declare class DynPropertiesWrapper {
-    public dynProps_: any;
+    public get dynProps_(): any;
+    public set dynProps_(value: any);
     public setPropertyExternal(key: string, value: string): void;
     public getPropertyExternal(key: string): string;
     constructor();

@@ -183,7 +183,7 @@ function(create_declgen_ets2ts_test TARGET)
     add_custom_command(
         OUTPUT ${JS_FILES}
         COMMENT "Compile ts files: ${COPIED_TS_SOURCES} ${DECL_FILES} ${GLUE_FILES}"
-        COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --target es5 --strict --outDir ${CMAKE_CURRENT_BINARY_DIR} ${COPIED_TS_SOURCES} ${DECL_FILES}
+        COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --target es5 --strict --lib es2020,dom --outDir ${CMAKE_CURRENT_BINARY_DIR} ${COPIED_TS_SOURCES} ${DECL_FILES}
         COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --target es5 --strict --outDir "${CMAKE_CURRENT_BINARY_DIR}" ${GLUE_FILES}
         DEPENDS es2panda ark_link ${ABC_TARGETS} ${ARKTSCONFIG} ${COPIED_TS_SOURCES} ${DECL_FILES}
     )
@@ -226,28 +226,33 @@ function(create_declgen_ets2ts_test TARGET)
     foreach(IDX RANGE ${DECL_LEN})
         list(GET ARG_DECLS_EXPECTED ${IDX} DECL_EXPECTED)
         list(GET DECL_FILES ${IDX} DECL_ACTUAL)
+        string(SHA1 DECL_ACTUAL_HASH "${DECL_ACTUAL}")
+        string(SHA1 DECL_EXPECTED_HASH "${DECL_EXPECTED}")
+        set(ACTUAL_CLEANED "${CMAKE_BINARY_DIR}/declaration_actual_${DECL_ACTUAL_HASH}.ts")
+        set(EXPECTED_CLEANED "${CMAKE_BINARY_DIR}/declaration_expected_${DECL_EXPECTED_HASH}.ts")
 
         get_filename_component(DECL_NAME ${DECL_EXPECTED} NAME)
         set(DIFF_TARGET ${TARGET}_diff_${DECL_NAME})
 
-        # Remove single-line comments (//) and multi-line comments (/* ... */)
-        string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
-        string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_ACTUAL_CONTENTS "${DECL_ACTUAL_CONTENTS}")
+        # Remove multi-line comments
+        add_custom_command(
+            OUTPUT ${ACTUAL_CLEANED}
+            COMMAND sed '/^\\/\\*/,/\\*\\//d' ${DECL_ACTUAL} > ${ACTUAL_CLEANED}
+            DEPENDS ${DECL_ACTUAL}
+        )
 
-        string(REGEX REPLACE "^[ \\t]*//.*$" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
-        string(REGEX REPLACE "/\\*[^*]*\\*+([^/][^*]*\\*+)*/" "" DECL_EXPECTED_CONTENTS "${DECL_EXPECTED_CONTENTS}")
+        add_custom_command(
+            OUTPUT ${EXPECTED_CLEANED}
+            COMMAND sed '/^\\/\\*/,/\\*\\//d' ${DECL_EXPECTED} > ${EXPECTED_CLEANED}
+            DEPENDS ${DECL_EXPECTED}
+        )
 
-        # Write the modified content to temporary files
-        set(TEMP_ACTUAL_FILE "${CMAKE_BINARY_DIR}/temp_actual_${DECL_NAME}.d.ets")
-        set(TEMP_EXPECTED_FILE "${CMAKE_BINARY_DIR}/temp_expected_${DECL_NAME}.d.ets")
-        file(WRITE ${TEMP_ACTUAL_FILE} "${DECL_ACTUAL_CONTENTS}")
-        file(WRITE ${TEMP_EXPECTED_FILE} "${DECL_EXPECTED_CONTENTS}")
-
-        # Compare the modified files
+        # Compare the modified files and remove them
         add_custom_target(${DIFF_TARGET}
-            COMMENT "Test declgen ets2ts diff between ${DECL_ACTUAL} and ${DECL_EXPECTED}"
-            COMMAND ${CMAKE_COMMAND} -E compare_files ${TEMP_ACTUAL_FILE} ${TEMP_EXPECTED_FILE}
-            DEPENDS ${DECL_ACTUAL} ${DECL_EXPECTED}
+            COMMENT "Test declgen ets2ts diff between ${DECL_ACTUAL} and ${DECL_EXPECTED} (ignoring comments)"
+            COMMAND ${CMAKE_COMMAND} -E compare_files ${ACTUAL_CLEANED} ${EXPECTED_CLEANED}
+            COMMAND ${CMAKE_COMMAND} -E remove ${ACTUAL_CLEANED} ${EXPECTED_CLEANED}
+            DEPENDS ${ACTUAL_CLEANED} ${EXPECTED_CLEANED}
         )
         add_dependencies(declgen_ets2ts_test_diff ${DIFF_TARGET})
     endforeach()
@@ -255,6 +260,7 @@ endfunction()
 
 
 add_subdirectory(async)
+add_subdirectory(basic_var)
 add_subdirectory(classes)
 add_subdirectory(enums)
 add_subdirectory(fields)
@@ -262,11 +268,18 @@ add_subdirectory(functions)
 add_subdirectory(generics)
 add_subdirectory(getters_setters)
 add_subdirectory(imports)
+add_subdirectory(interface)
 add_subdirectory(methods)
 add_subdirectory(unions)
 add_subdirectory(properties)
 add_subdirectory(depend_export)
 add_subdirectory(re_export)
+add_subdirectory(export_error)
+
+# interop not supported
+# eg: E/ets_interop_js: InteropCtx::Fatal: ets_proxy requested for Lescompat/WeakMap; must add or forbid
+# add_subdirectory(esobject)
+# add_subdirectory(standard_lib)
 
 # error: [TID 006c83] E/ets_interop_js: InteropCtx::Fatal: Class lib.A has no constructor
 # a bug exists in interop. interop is being fixed

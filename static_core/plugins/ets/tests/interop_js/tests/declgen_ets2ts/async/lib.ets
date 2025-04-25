@@ -22,3 +22,15 @@ export class PromiseWrapper {
 export async function AsyncIdentity(param: int): Promise<int> {
     return param;
 }
+
+export const myPromise: Promise<number> = new Promise<number>((resolve, reject) => {
+    setTimeout(() => {
+        resolve(42);
+    }, 1000);
+});
+
+export let cb: (arg: number) => void = (arg: number) => {}
+
+export let foo = async () => {
+  // do something
+}

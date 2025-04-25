@@ -12,13 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export declare namespace A {
-    let v1: number;
+    let v1: any;
     namespace B {
-        let v2: number;
+        let v2: any;
         namespace C {
-            let v3: number;
+            let v3: any;
         }
+    }
+}
+export declare namespace X1 {
+    function foo1(): void;
+}
+export declare namespace X {
+    function foo(): void;
+}
+export declare namespace myNamespace {
+    enum nsEnum {
+        White = 0,
+        Blue = 2,
+        Red = 2,
     }
 }
