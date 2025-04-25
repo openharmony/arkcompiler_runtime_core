@@ -467,7 +467,7 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcO
         return false;
     }
 
-    if (!Runtime::GetCurrent()->IsJitEnabled()) {
+    if (!Runtime::GetCurrent()->IsProfilerEnabled()) {
         if (TryVerify<IS_CALL>()) {
             ResetHotnessCounter();
         }
@@ -490,7 +490,7 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcO
         if (!IsProfiling()) {
             SetProfiled();
         }
-    } else {
+    } else if (Runtime::GetCurrent()->IsJitEnabled()) {
         CompilationStage status = GetCompilationStatus();
         if (!(status == FAILED || status == WAITING || status == COMPILATION)) {
             ASSERT((!osr) == (acc == nullptr));

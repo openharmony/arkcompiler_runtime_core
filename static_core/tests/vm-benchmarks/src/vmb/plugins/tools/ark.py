@@ -49,7 +49,8 @@ class Tool(ToolBase):
                 else str(self.dev_dir / 'etsstdlib.an')
             an_files.append(stdlib)
         if OptFlags.INT in self.flags:
-            opts += '--compiler-enable-jit=false '
+            opts += '--compiler-enable-jit=false ' \
+                    '--profiler-enabled=false '
         if OptFlags.INT_CPP in self.flags:
             opts += '--interpreter-type=cpp '
         if OptFlags.INT_IRTOC in self.flags:
