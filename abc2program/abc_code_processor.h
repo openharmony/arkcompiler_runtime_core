@@ -35,10 +35,11 @@ private:
     void FillFunctionRegsNum();
     void FillIns();
     void FillInsWithoutLabels();
+    void AddLabels();
     bool NeedToAddDummyEndIns() const;
     void AddDummyEndIns();
     void AddJumpLabels() const;
-    void AddJumpLabel4InsAtIndex(uint32_t inst_idx, pandasm::Ins &curr_pa_ins) const;
+    void AddJumpLabel4InsAtIndex(uint32_t inst_idx, pandasm::InsPtr &curr_pa_ins) const;
     void AddLabel4InsAtIndex(uint32_t inst_idx) const;
     void AddLabel4InsAtPc(uint32_t inst_pc) const;
     std::string GetLabelNameAtPc(uint32_t inst_pc) const;
@@ -65,6 +66,7 @@ private:
     std::vector<uint32_t> jump_inst_idx_vec_;
     std::map<uint32_t, uint32_t> inst_pc_idx_map_;
     std::unordered_map<uint32_t, uint32_t> inst_idx_pc_map_;
+    mutable std::unordered_map<uint32_t, std::string> inst_idx_label_map_;
     uint32_t ins_size_ = 0;
     uint32_t curr_try_begin_inst_pc_ = 0;
     uint32_t curr_try_end_inst_pc_ = 0;

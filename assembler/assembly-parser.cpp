@@ -509,12 +509,27 @@ bool Parser::ParseFunctionCode()
         return true;
     }
 
-    curr_ins_ = &curr_func_->ins.emplace_back();
+    opcode_ = panda::pandasm::Opcode::INVALID;
+    ids_.clear();
+    imms_.clear();
+    regs_.clear();
+    set_label_ = false;
+    label_.clear();
 
     LOG(DEBUG, ASSEMBLER) << "parse line " << line_stric_
                           << " as instruction ([label:] operation [operand,] [# comment])";
 
     ParseFunctionInstruction();
+
+    SetError();
+    if (err_.err == Error::ErrorType::ERR_NONE) {
+        if (set_label_) {
+            curr_func_->ins.emplace_back(new panda::pandasm::LabelIns(label_));
+        } else {
+            curr_func_->ins.emplace_back(panda::pandasm::Ins::CreateIns(opcode_, regs_, imms_, ids_));
+        }
+        curr_func_->ins.back()->ins_debug = curr_debug_;
+    }
 
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
         curr_func_->body_location.end = GetCurrentPosition(true);
@@ -665,15 +680,17 @@ void Parser::ParseResetFunctionLabelsAndParams()
 
         for (const auto &v : t.second) {
             if (!curr_func_->ins.empty() && curr_func_->ins.size() >= v.first &&
-                !curr_func_->ins[v.first - 1].regs.empty()) {
-                curr_func_->ins[v.first - 1].regs[v.second] +=
-                    static_cast<uint16_t>(curr_func_->value_of_first_param + 1);
-                size_t max_reg_number = (1 << curr_func_->ins[v.first - 1].MaxRegEncodingWidth());
-                if (curr_func_->ins[v.first - 1].regs[v.second] >= max_reg_number) {
-                    const auto &debug = curr_func_->ins[v.first - 1].ins_debug;
+                !curr_func_->ins[v.first - 1]->Regs().empty()) {
+                auto &ins =  curr_func_->ins[v.first - 1];
+                auto reg = ins->Regs()[v.second];
+                reg += static_cast<uint16_t>(curr_func_->value_of_first_param + 1);
+                ins->SetReg(v.second, reg);
+                size_t max_reg_number = (1 << ins->MaxRegEncodingWidth());
+                if (reg >= max_reg_number) {
+                    const auto &debug = ins->ins_debug;
                     context_.err =
                         Error("Register width mismatch.", debug.line_number, Error::ErrorType::ERR_BAD_NAME_REG, "",
-                              debug.bound_left, debug.bound_right, "");
+                              0, 0, "");
                     SetError();
                     break;
                 }
@@ -692,41 +709,40 @@ void Parser::ParseResetFunctionTable()
             SetError();
         } else {
             for (auto insn_it = k.second.ins.begin(); insn_it != k.second.ins.end(); ++insn_it) {
-                if (!(insn_it->IsCall() || insn_it->IsCallRange())) {
+                if (!((*insn_it)->IsCall() || (*insn_it)->IsCallRange())) {
                     continue;
                 }
 
                 size_t diff = 1;
-                auto func_name = insn_it->ids[0];
-
+                auto func_name = (*insn_it)->GetId(0);
                 if (!IsSignatureOrMangled(func_name)) {
                     const auto it_synonym = program_.function_synonyms.find(func_name);
                     if (it_synonym == program_.function_synonyms.end()) {
                         continue;
                     } else if (it_synonym->second.size() > 1) {
-                        const auto &debug = insn_it->ins_debug;
+                        const auto &debug = (*insn_it)->ins_debug;
                         context_.err = Error("Unable to resolve ambiguous function call", debug.line_number,
-                                             Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.bound_left,
-                                             debug.bound_right, "");
+                                             Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", 0, 0, "");
                         SetError();
                         break;
                     } else {
-                        insn_it->ids[0] = program_.function_synonyms.at(func_name)[0];
+                        (*insn_it)->GetId(0) = program_.function_synonyms.at(func_name)[0];
                     }
                 }
 
-                if (insn_it->OperandListLength() - diff < program_.function_table.at(insn_it->ids[0]).GetParamsNum()) {
-                    if (insn_it->IsCallRange() &&
-                        (static_cast<int>(insn_it->regs.size()) - static_cast<int>(diff) >= 0)) {
-                        continue;
-                    }
-
-                    const auto &debug = insn_it->ins_debug;
-                    context_.err = Error("Function argument mismatch.", debug.line_number,
-                                         Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.bound_left,
-                                         debug.bound_right, "");
-                    SetError();
+                if ((*insn_it)->OperandListLength() - diff >=
+                    program_.function_table.at((*insn_it)->GetId(0)).GetParamsNum()) {
+                    continue;
                 }
+                if ((*insn_it)->IsCallRange() &&
+                    (static_cast<int>((*insn_it)->Regs().size()) - static_cast<int>(diff) >= 0)) {
+                    continue;
+                }
+
+                const auto &debug = (*insn_it)->ins_debug;
+                context_.err = Error("Function argument mismatch.", debug.line_number,
+                                     Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", 0, 0, "");
+                SetError();
             }
         }
     }
@@ -1164,8 +1180,8 @@ bool Parser::ParseLabel()
         context_--;
         if (LabelValidName()) {
             if (AddObjectInTable(true, *label_table_)) {
-                curr_ins_->set_label = true;
-                curr_ins_->label = context_.GiveToken();
+                set_label_ = true;
+                label_ = context_.GiveToken();
 
                 LOG(DEBUG, ASSEMBLER) << "label detected (line " << line_stric_ << "): " << context_.GiveToken();
 
@@ -1225,10 +1241,10 @@ bool Parser::ParseOperation()
         SetOperationInformation();
 
         context_.UpSignOperation();
-        curr_ins_->opcode = TokenToOpcode(context_.id);
+        opcode_ = TokenToOpcode(context_.id);
 
         LOG(DEBUG, ASSEMBLER) << "operatiuon is detected (line " << line_stric_ << "): " << context_.GiveToken()
-                              << " (operand type: " << OperandTypePrint(curr_ins_->opcode) << ")";
+                              << " (operand type: " << OperandTypePrint(opcode_) << ")";
 
         context_++;
         return true;
@@ -1261,11 +1277,11 @@ bool Parser::ParseOperandVreg()
             *(context_.max_value_of_reg) = number;
         }
 
-        curr_ins_->regs.push_back(static_cast<uint16_t>(number));
+        regs_.push_back(static_cast<uint16_t>(number));
     } else if (p[0] == 'a') {
         p.remove_prefix(1);
-        curr_ins_->regs.push_back(static_cast<uint16_t>(ToNumber(p)));
-        context_.function_arguments_list->emplace_back(context_.ins_number, curr_ins_->regs.size() - 1);
+        regs_.push_back(static_cast<uint16_t>(ToNumber(p)));
+        context_.function_arguments_list->emplace_back(context_.ins_number, regs_.size() - 1);
     }
 
     ++context_;
@@ -1284,7 +1300,7 @@ bool Parser::ParseOperandCall()
     }
 
     const auto p = std::string(context_.GiveToken().data(), context_.GiveToken().length());
-    curr_ins_->ids.emplace_back(p);
+    ids_.emplace_back(p);
 
     AddObjectInTable(false, program_.function_table);
 
@@ -1297,7 +1313,7 @@ bool Parser::ParseOperandCall()
     }
 
     if (func_signature.empty()) {
-        const auto it_synonym = program_.function_synonyms.find(curr_ins_->ids.back());
+        const auto it_synonym = program_.function_synonyms.find(ids_.back());
         if (it_synonym == program_.function_synonyms.end()) {
             return true;
         }
@@ -1310,11 +1326,11 @@ bool Parser::ParseOperandCall()
 
         program_.function_table.erase(p);
     } else {
-        curr_ins_->ids.back() += func_signature;
+        ids_.back() += func_signature;
 
-        if (program_.function_table.find(curr_ins_->ids.back()) == program_.function_table.end()) {
+        if (program_.function_table.find(ids_.back()) == program_.function_table.end()) {
             auto node_handle = program_.function_table.extract(p);
-            node_handle.key() = curr_ins_->ids.back();
+            node_handle.key() = ids_.back();
             program_.function_table.insert(std::move(node_handle));
         } else {
             program_.function_table.erase(p);
@@ -1563,7 +1579,7 @@ bool Parser::ParseOperandString()
         return false;
     }
 
-    curr_ins_->ids.push_back(res.value());
+    ids_.push_back(res.value());
 
     ++context_;
 
@@ -1655,7 +1671,7 @@ bool Parser::ParseOperandInteger()
         return false;
     }
 
-    curr_ins_->imms.push_back(n);
+    imms_.push_back(n);
     ++context_;
     return true;
 }
@@ -1667,7 +1683,7 @@ bool Parser::ParseOperandFloat(bool is_64bit)
         return false;
     }
 
-    curr_ins_->imms.push_back(n);
+    imms_.push_back(n);
     ++context_;
     return true;
 }
@@ -1684,7 +1700,7 @@ bool Parser::ParseOperandLabel()
     }
 
     std::string_view p = context_.GiveToken();
-    curr_ins_->ids.emplace_back(p.data(), p.length());
+    ids_.emplace_back(p.data(), p.length());
     AddObjectInTable(false, *label_table_);
 
     ++context_;
@@ -1708,7 +1724,7 @@ bool Parser::ParseOperandId()
     }
 
     std::string_view p = context_.GiveToken();
-    curr_ins_->ids.emplace_back(p.data(), p.length());
+    ids_.emplace_back(p.data(), p.length());
     AddObjectInTable(false, *label_table_);
 
     ++context_;
@@ -1759,7 +1775,7 @@ bool Parser::ParseOperandType(Type::VerificationType ver_type)
         }
     }
 
-    curr_ins_->ids.push_back(type.GetName());
+    ids_.push_back(type.GetName());
 
     return true;
 }
@@ -1786,7 +1802,7 @@ bool Parser::ParseOperandLiteralArray()
         return false;
     }
 
-    curr_ins_->ids.emplace_back(p.data(), p.length());
+    ids_.emplace_back(p.data(), p.length());
 
     ++context_;
 
@@ -1837,7 +1853,7 @@ bool Parser::ParseOperandField()
         field.is_defined = false;
     }
 
-    curr_ins_->ids.emplace_back(p.data(), p.length());
+    ids_.emplace_back(p.data(), p.length());
 
     ++context_;
 
@@ -2067,11 +2083,8 @@ void Parser::SetArrayInformation()
 
 void Parser::SetOperationInformation()
 {
-    context_.ins_number = curr_func_->ins.size();
-    auto &curr_debug = curr_func_->ins.back().ins_debug;
-    curr_debug.line_number = line_stric_;
-    curr_debug.bound_left = context_.tokens[context_.number - 1].bound_left;
-    curr_debug.bound_right = context_.tokens[context_.number - 1].bound_right;
+    context_.ins_number = curr_func_->ins.size() + 1;
+    curr_debug_.line_number = line_stric_;
 }
 
 bool Parser::ParseFunctionReturn()

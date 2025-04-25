@@ -99,16 +99,16 @@ void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir
     auto instructions_buf = graph->GetRuntime()->GetMethodCode(method_ptr);
     compiler::BytecodeInstructions instructions(instructions_buf, graph->GetRuntime()->GetMethodCodeSize(method_ptr));
     compiler::BytecodeIterator insn_iter = instructions.begin();
-    for (pandasm::Ins &ins : function.ins) {
+    for (auto &ins : function.ins) {
         /**
          * pc_ins_map is built with instructions data from the emitted abc file and the original function assembly.
          * Instructions of invalid opcode will be removed during emitter, but kept within function assembly structure,
          * therefore these instructions need to be skipped here
          **/
-        if (ins.opcode == pandasm::Opcode::INVALID) {
+        if (ins->opcode == pandasm::Opcode::INVALID) {
             continue;
         }
-        pc_ins_map->emplace(instructions.GetPc(*insn_iter), &ins);
+        pc_ins_map->emplace(instructions.GetPc(*insn_iter), ins.get());
         ++insn_iter;
         if (insn_iter == instructions.end()) {
             break;
@@ -123,22 +123,22 @@ static void ColumnNumberPropagate(pandasm::Function *function)
     // handle the instructions that are at the beginning of code but do not have column number
     size_t k = 0;
     while (k < ins_vec.size() && cn == compiler::INVALID_COLUMN_NUM) {
-        cn = ins_vec[k++].ins_debug.column_number;
+        cn = ins_vec[k++]->ins_debug.column_number;
     }
     if (cn == compiler::INVALID_COLUMN_NUM) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed ColumnNumberPropagate: All insts have invalid column number";
         return;
     }
     for (size_t j = 0; j < k - 1; j++) {
-        ins_vec[j].ins_debug.SetColumnNumber(cn);
+        ins_vec[j]->ins_debug.SetColumnNumber(cn);
     }
 
     // handle other instructions that do not have column number
     for (; k < ins_vec.size(); k++) {
-        if (ins_vec[k].ins_debug.column_number != compiler::INVALID_COLUMN_NUM) {
-            cn = ins_vec[k].ins_debug.column_number;
+        if (ins_vec[k]->ins_debug.column_number != compiler::INVALID_COLUMN_NUM) {
+            cn = ins_vec[k]->ins_debug.column_number;
         } else {
-            ins_vec[k].ins_debug.SetColumnNumber(cn);
+            ins_vec[k]->ins_debug.SetColumnNumber(cn);
         }
     }
 }
@@ -154,22 +154,22 @@ static void LineNumberPropagate(pandasm::Function *function)
     // handle the instructions that are at the beginning of code but do not have line number
     size_t i = 0;
     while (i < ins_vec.size() && ln == 0) {
-        ln = ins_vec[i++].ins_debug.line_number;
+        ln = ins_vec[i++]->ins_debug.line_number;
     }
     if (ln == 0) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "Failed LineNumberPropagate: All insts have invalid line number";
         return;
     }
     for (size_t j = 0; j < i - 1; j++) {
-        ins_vec[j].ins_debug.SetLineNumber(ln);
+        ins_vec[j]->ins_debug.SetLineNumber(ln);
     }
 
     // handle other instructions that do not have line number
     for (; i < ins_vec.size(); i++) {
-        if (ins_vec[i].ins_debug.line_number != 0) {
-            ln = ins_vec[i].ins_debug.line_number;
+        if (ins_vec[i]->ins_debug.line_number != 0) {
+            ln = ins_vec[i]->ins_debug.line_number;
         } else {
-            ins_vec[i].ins_debug.SetLineNumber(ln);
+            ins_vec[i]->ins_debug.SetLineNumber(ln);
         }
     }
 }

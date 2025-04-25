@@ -93,7 +93,13 @@ private:
     panda::pandasm::LiteralArray *curr_array_ = nullptr;
     panda::pandasm::LiteralArray::Literal *curr_array_elem_ = nullptr;
     panda::pandasm::Function *curr_func_ = nullptr;
-    panda::pandasm::Ins *curr_ins_ = nullptr;
+    panda::pandasm::Opcode opcode_ { panda::pandasm::Opcode::INVALID };
+    std::vector<std::uint16_t> regs_;
+    std::vector<std::string> ids_;
+    std::vector<panda::pandasm::IType> imms_;
+    bool set_label_;
+    std::string label_;
+    panda::pandasm::debuginfo::Ins curr_debug_;
     panda::pandasm::Field *curr_fld_ = nullptr;
     size_t line_stric_ = 0;
     panda::pandasm::Error err_;

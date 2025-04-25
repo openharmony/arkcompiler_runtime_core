@@ -60,7 +60,7 @@ const std::string HELLO_WORLD_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "H
 const std::string HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpResult.txt";
 const std::string HELLO_WORLD_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDumpExpected.txt";
 const std::string HELLO_WORLD_DEBUG_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpExpected.txt";
-constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 72;
+constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 85;
 constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 4;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
 constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 7;
@@ -407,29 +407,29 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part1, Te
     EXPECT_TRUE(function.name == FUNC_NAME.foo);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_INS);
     // check ins[0]
-    const pandasm::Ins &ins0 = function.ins[0];
-    std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
+    const pandasm::InsPtr &ins0 = function.ins[0];
+    std::string pa_ins_str0 = ins0->ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str0 == "nop");
-    EXPECT_TRUE(ins0.label == "");
-    EXPECT_FALSE(ins0.set_label);
+    EXPECT_TRUE(ins0->Label() == "");
+    EXPECT_FALSE(ins0->IsLabel());
     // check ins[3]
-    const pandasm::Ins &ins3 = function.ins[3];
-    std::string pa_ins_str3 = ins3.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str3 == "label@3: ldai 0xb");
-    EXPECT_TRUE(ins3.label == "label@3");
-    EXPECT_TRUE(ins3.set_label);
-    // check ins[9]
-    const pandasm::Ins &ins9 = function.ins[9];
-    std::string pa_ins_str9 = ins9.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str9 == "label@9: ldai 0x1");
-    EXPECT_TRUE(ins9.label == "label@9");
-    EXPECT_TRUE(ins9.set_label);
-    // check ins[11]
-    const pandasm::Ins &ins11 = function.ins[11];
-    std::string pa_ins_str11 = ins11.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str11 == "label@11: jmp label@20");
-    EXPECT_TRUE(ins11.label == "label@11");
-    EXPECT_TRUE(ins11.set_label);
+    const pandasm::InsPtr &ins3 = function.ins[3];
+    std::string pa_ins_str3 = ins3->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str3 == "label@3: ");
+    EXPECT_TRUE(ins3->Label() == "label@3");
+    EXPECT_TRUE(ins3->IsLabel());
+    // check ins[10]
+    const pandasm::InsPtr &ins10 = function.ins[10];
+    std::string pa_ins_str10 = ins10->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str10 == "label@9: ");
+    EXPECT_TRUE(ins10->Label() == "label@9");
+    EXPECT_TRUE(ins10->IsLabel());
+    // check ins[13]
+    const pandasm::InsPtr &ins13 = function.ins[13];
+    std::string pa_ins_str13 = ins13->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str13 == "label@11: ");
+    EXPECT_TRUE(ins13->Label() == "label@11");
+    EXPECT_TRUE(ins13->IsLabel());
 }
 
 /**
@@ -443,42 +443,42 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part2, Te
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
 
-    // check ins[12]
-    const pandasm::Ins &ins12 = function.ins[12];
-    std::string pa_ins_str12 = ins12.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str12 == "label@12: lda.str inner catch");
-    EXPECT_TRUE(ins12.label == "label@12");
-    EXPECT_TRUE(ins12.set_label);
-    // check ins[22]
-    const pandasm::Ins &ins22 = function.ins[22];
-    std::string pa_ins_str22 = ins22.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str22 == "tryldglobalbyname 0x8, varA");
-    EXPECT_TRUE(ins22.label == "");
-    EXPECT_FALSE(ins22.set_label);
-    // check ins[26]
-    const pandasm::Ins &ins26 = function.ins[26];
-    std::string pa_ins_str26 = ins26.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str26 == "jeqz label@29");
-    EXPECT_TRUE(ins26.label == "");
-    EXPECT_FALSE(ins26.set_label);
-    // check ins[29]
-    const pandasm::Ins &ins29 = function.ins[29];
-    std::string pa_ins_str29 = ins29.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str29 == "label@29: tryldglobalbyname 0xa, x");
-    EXPECT_TRUE(ins29.label == "label@29");
-    EXPECT_TRUE(ins29.set_label);
-    // check ins[33]
-    const pandasm::Ins &ins33 = function.ins[33];
-    std::string pa_ins_str33 = ins33.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str33 == "jeqz label@36");
-    EXPECT_TRUE(ins33.label == "");
-    EXPECT_FALSE(ins33.set_label);
-    // check ins[36]
-    const pandasm::Ins &ins36 = function.ins[36];
-    std::string pa_ins_str36 = ins36.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str36 == "label@36: lda.str min");
-    EXPECT_TRUE(ins36.label == "label@36");
-    EXPECT_TRUE(ins36.set_label);
+    // check ins[15]
+    const pandasm::InsPtr &ins15 = function.ins[15];
+    std::string pa_ins_str15 = ins15->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str15 == "label@12: ");
+    EXPECT_TRUE(ins15->Label() == "label@12");
+    EXPECT_TRUE(ins15->IsLabel());
+    // check ins[27]
+    const pandasm::InsPtr &ins27 = function.ins[27];
+    std::string pa_ins_str27 = ins27->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str27 == "tryldglobalbyname 0x8, varA");
+    EXPECT_TRUE(ins27->Label() == "");
+    EXPECT_FALSE(ins27->IsLabel());
+    // check ins[31]
+    const pandasm::InsPtr &ins31 = function.ins[31];
+    std::string pa_ins_str31 = ins31->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str31 == "jeqz label@29");
+    EXPECT_TRUE(ins31->Label() == "");
+    EXPECT_FALSE(ins31->IsLabel());
+    // check ins[34]
+    const pandasm::InsPtr &ins34 = function.ins[34];
+    std::string pa_ins_str34 = ins34->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str34 == "label@29: ");
+    EXPECT_TRUE(ins34->Label() == "label@29");
+    EXPECT_TRUE(ins34->IsLabel());
+    // check ins[39]
+    const pandasm::InsPtr &ins39 = function.ins[39];
+    std::string pa_ins_str39 = ins39->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str39 == "jeqz label@36");
+    EXPECT_TRUE(ins39->Label() == "");
+    EXPECT_FALSE(ins39->IsLabel());
+    // check ins[42]
+    const pandasm::InsPtr &ins42 = function.ins[42];
+    std::string pa_ins_str42 = ins42->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str42 == "label@36: ");
+    EXPECT_TRUE(ins42->Label() == "label@36");
+    EXPECT_TRUE(ins42->IsLabel());
 }
 
 /**
@@ -491,54 +491,54 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part3, Te
 {
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
-    // check ins[38]
-    const pandasm::Ins &ins38 = function.ins[38];
-    std::string pa_ins_str38 = ins38.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str38 == "label@38: mov v1, v3");
-    EXPECT_TRUE(ins38.label == "label@38");
-    EXPECT_TRUE(ins38.set_label);
-    // check ins[44]
-    const pandasm::Ins &ins44 = function.ins[44];
-    std::string pa_ins_str44 = ins44.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str44 == "sta v4");
-    EXPECT_TRUE(ins44.label == "");
-    EXPECT_FALSE(ins44.set_label);
-    // check ins[47]
-    const pandasm::Ins &ins47 = function.ins[47];
-    std::string pa_ins_str47 = ins47.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str47 == "label@47: ldhole");
-    EXPECT_TRUE(ins47.label == "label@47");
-    EXPECT_TRUE(ins47.set_label);
-    // check ins[51]
-    const pandasm::Ins &ins51 = function.ins[51];
-    std::string pa_ins_str51 = ins51.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str51 == "jmp label@53");
-    EXPECT_TRUE(ins51.label == "");
-    EXPECT_FALSE(ins51.set_label);
+    // check ins[45]
+    const pandasm::InsPtr &ins45 = function.ins[45];
+    std::string pa_ins_str45 = ins45->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str45 == "label@38: ");
+    EXPECT_TRUE(ins45->Label() == "label@38");
+    EXPECT_TRUE(ins45->IsLabel());
     // check ins[52]
-    const pandasm::Ins &ins52 = function.ins[52];
-    std::string pa_ins_str52 = ins52.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str52 == "label@52: sta v2");
-    EXPECT_TRUE(ins52.label == "label@52");
-    EXPECT_TRUE(ins52.set_label);
-    // check ins[53]
-    const pandasm::Ins &ins53 = function.ins[53];
-    std::string pa_ins_str53 = ins53.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str53 == "label@53: ldundefined");
-    EXPECT_TRUE(ins53.label == "label@53");
-    EXPECT_TRUE(ins53.set_label);
+    const pandasm::InsPtr &ins52 = function.ins[52];
+    std::string pa_ins_str52 = ins52->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str52 == "sta v4");
+    EXPECT_TRUE(ins52->Label() == "");
+    EXPECT_FALSE(ins52->IsLabel());
     // check ins[55]
-    const pandasm::Ins &ins55 = function.ins[55];
-    std::string pa_ins_str55 = ins55.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str55 == "jeqz label@64");
-    EXPECT_TRUE(ins55.label == "");
-    EXPECT_FALSE(ins55.set_label);
-    // check ins[64]
-    const pandasm::Ins &ins64 = function.ins[64];
-    std::string pa_ins_str64 = ins64.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str64 == "label@64: ldhole");
-    EXPECT_TRUE(ins64.label == "label@64");
-    EXPECT_TRUE(ins64.set_label);
+    const pandasm::InsPtr &ins55 = function.ins[55];
+    std::string pa_ins_str55 = ins55->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str55 == "label@47: ");
+    EXPECT_TRUE(ins55->Label() == "label@47");
+    EXPECT_TRUE(ins55->IsLabel());
+    // check ins[60]
+    const pandasm::InsPtr &ins60 = function.ins[60];
+    std::string pa_ins_str60 = ins60->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str60 == "jmp label@53");
+    EXPECT_TRUE(ins60->Label() == "");
+    EXPECT_FALSE(ins60->IsLabel());
+    // check ins[61]
+    const pandasm::InsPtr &ins61 = function.ins[61];
+    std::string pa_ins_str61 = ins61->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str61 == "label@52: ");
+    EXPECT_TRUE(ins61->Label() == "label@52");
+    EXPECT_TRUE(ins61->IsLabel());
+    // check ins[63]
+    const pandasm::InsPtr &ins63 = function.ins[63];
+    std::string pa_ins_str63 = ins63->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str63 == "label@53: ");
+    EXPECT_TRUE(ins63->Label() == "label@53");
+    EXPECT_TRUE(ins63->IsLabel());
+    // check ins[66]
+    const pandasm::InsPtr &ins66 = function.ins[66];
+    std::string pa_ins_str66 = ins66->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str66 == "jeqz label@64");
+    EXPECT_TRUE(ins66->Label() == "");
+    EXPECT_FALSE(ins66->IsLabel());
+    // check ins[75]
+    const pandasm::InsPtr &ins75 = function.ins[75];
+    std::string pa_ins_str75 = ins75->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str75 == "label@64: ");
+    EXPECT_TRUE(ins75->Label() == "label@64");
+    EXPECT_TRUE(ins75->IsLabel());
 }
 
 /**
@@ -551,18 +551,24 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, Te
 {
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
-    // check ins[68]
-    const pandasm::Ins &ins68 = function.ins[68];
-    std::string pa_ins_str68 = ins68.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str68 == "jeqz label@71");
-    EXPECT_TRUE(ins68.label == "");
-    EXPECT_FALSE(ins68.set_label);
-    // check ins[71]
-    const pandasm::Ins &ins71 = function.ins[71];
-    std::string pa_ins_str71 = ins71.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str71 == "label@71: returnundefined");
-    EXPECT_TRUE(ins71.label == "label@71");
-    EXPECT_TRUE(ins71.set_label);
+    // check ins[80]
+    const pandasm::InsPtr &ins80 = function.ins[80];
+    std::string pa_ins_str80 = ins80->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str80 == "jeqz label@71");
+    EXPECT_TRUE(ins80->Label() == "");
+    EXPECT_FALSE(ins80->IsLabel());
+    // check ins[83]
+    const pandasm::InsPtr &ins83 = function.ins[83];
+    std::string pa_ins_str83 = ins83->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str83 == "label@71: ");
+    EXPECT_TRUE(ins83->Label() == "label@71");
+    EXPECT_TRUE(ins83->IsLabel());
+    // check ins[84]
+    const pandasm::InsPtr &ins84 = function.ins[84];
+    std::string pa_ins_str84 = ins84->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str84 == "returnundefined");
+    EXPECT_TRUE(ins84->Label() == "");
+    EXPECT_FALSE(ins84->IsLabel());
     // check catch blocks
     constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS = 3;
     EXPECT_TRUE(function.catch_blocks.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS);
@@ -601,11 +607,11 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_GOO_METHOD_INS);
     // check ins[0]
     constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 0;
-    const pandasm::Ins &ins1 = function.ins[INDEX_OF_FUNC_RETURNUNDEFINED];
-    std::string pa_ins_str1 = ins1.ToString("", true, regs_num);
+    const pandasm::InsPtr &ins1 = function.ins[INDEX_OF_FUNC_RETURNUNDEFINED];
+    std::string pa_ins_str1 = ins1->ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str1 == "returnundefined");
-    EXPECT_TRUE(ins1.label == "");
-    EXPECT_FALSE(ins1.set_label);
+    EXPECT_TRUE(ins1->Label() == "");
+    EXPECT_FALSE(ins1->IsLabel());
     // check catch blocks
     EXPECT_TRUE(function.catch_blocks.size() == 0);
 }
@@ -620,17 +626,18 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_imm_of_FLDAI, TestSize.Leve
 {
     const pandasm::Function &hoo = *hoo_function_;
     EXPECT_EQ(hoo.ins.size(), INS_SIZE_OF_FUNCTION_HOO);
-    pandasm::Ins ins_fldai;
+    pandasm::Ins *ins_fldai;
     for (auto &ins : hoo.ins) {
-        if (ins.opcode == pandasm::Opcode::FLDAI) {
-            ins_fldai = ins;
+        if (ins->opcode == pandasm::Opcode::FLDAI) {
+            ins_fldai = ins.get();
             break;
         }
     }
-    EXPECT_TRUE(ins_fldai.opcode == pandasm::Opcode::FLDAI);
+    EXPECT_TRUE(ins_fldai->opcode == pandasm::Opcode::FLDAI);
     // check imm of FLDAI
-    EXPECT_EQ(ins_fldai.imms.size(), IMMS_SIZE_OF_OPCODE_FLDAI);
-    auto p = std::get_if<double>(&ins_fldai.imms[0]);
+    EXPECT_EQ(ins_fldai->Imms().size(), IMMS_SIZE_OF_OPCODE_FLDAI);
+    auto imm = ins_fldai->GetImm(0);
+    auto p = std::get_if<double>(&(imm));
     EXPECT_NE(p, nullptr);
     EXPECT_EQ(*p, 1.23);
 }
@@ -792,7 +799,7 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_local_vari
     EXPECT_TRUE(function.local_variable_debug[0].signature_type.find("any") != std::string::npos);
     EXPECT_TRUE(function.local_variable_debug[0].reg == 0);
     EXPECT_TRUE(function.local_variable_debug[0].start == 3);
-    EXPECT_TRUE(function.local_variable_debug[0].length == 74);
+    EXPECT_TRUE(function.local_variable_debug[0].length == 88);
 }
 
 /**
@@ -807,23 +814,23 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_ins_debug,
     size_t regs_num = function.regs_num;
     EXPECT_FALSE(function.local_variable_debug.empty());
 
-    const pandasm::Ins &ins0 = function.ins[0];
-    std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
+    const pandasm::InsPtr &ins0 = function.ins[0];
+    std::string pa_ins_str0 = ins0->ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str0 == "mov v0, a0");
-    EXPECT_TRUE(ins0.ins_debug.line_number == -1);
-    EXPECT_TRUE(ins0.ins_debug.column_number == -1);
+    EXPECT_TRUE(ins0->ins_debug.line_number == -1);
+    EXPECT_TRUE(ins0->ins_debug.column_number == -1);
 
-    const pandasm::Ins &ins3 = function.ins[3];
-    std::string pa_ins_str3 = ins3.ToString("", true, regs_num);
+    const pandasm::InsPtr &ins3 = function.ins[3];
+    std::string pa_ins_str3 = ins3->ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str3 == "ldundefined");
-    EXPECT_TRUE(ins3.ins_debug.line_number == 40);
-    EXPECT_TRUE(ins3.ins_debug.column_number == 2);
+    EXPECT_TRUE(ins3->ins_debug.line_number == 40);
+    EXPECT_TRUE(ins3->ins_debug.column_number == 2);
 
-    const pandasm::Ins &ins5 = function.ins[5];
-    std::string pa_ins_str5 = ins5.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str5 == "label@5: ldai 0xb");
-    EXPECT_TRUE(ins5.ins_debug.line_number == 41);
-    EXPECT_TRUE(ins5.ins_debug.column_number == 11);
+    const pandasm::InsPtr &ins6 = function.ins[6];
+    std::string pa_ins_str6 = ins6->ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str6 == "ldai 0xb");
+    EXPECT_TRUE(ins6->ins_debug.line_number == 41);
+    EXPECT_TRUE(ins6->ins_debug.column_number == 11);
 }
 
 /**

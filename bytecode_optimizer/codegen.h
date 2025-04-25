@@ -18,7 +18,6 @@
 
 #include "assembler/annotation.h"
 #include "assembler/assembly-function.h"
-#include "assembler/assembly-ins.h"
 #include "ins_create_api.h"
 #include "ir_interface.h"
 #include "compiler/optimizer/pass.h"
@@ -33,8 +32,8 @@ using compiler::BasicBlock;
 using compiler::Inst;
 using compiler::Opcode;
 
-void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result);
-void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result);
+void DoLda(compiler::Register reg, std::vector<pandasm::InsPtr> &result);
+void DoSta(compiler::Register reg, std::vector<pandasm::InsPtr> &result);
 
 class BytecodeGen : public compiler::Optimization, public compiler::GraphVisitor {
 public:
@@ -49,7 +48,7 @@ public:
     {
         return "BytecodeGen";
     }
-    std::vector<pandasm::Ins> GetEncodedInstructions() const
+    const std::vector<pandasm::InsPtr> &GetEncodedInstructions() const
     {
         return res_;
     }
@@ -66,12 +65,12 @@ public:
         return success_;
     }
 
-    const std::vector<pandasm::Ins> &GetResult() const
+    const std::vector<pandasm::InsPtr> &GetResult() const
     {
         return result_;
     }
 
-    std::vector<pandasm::Ins> &&GetResult()
+    std::vector<pandasm::InsPtr> &&GetResult()
     {
         return std::move(result_);
     }
@@ -83,10 +82,7 @@ public:
 
     void EmitLabel(const std::string label)
     {
-        pandasm::Ins l;
-        l.label = label;
-        l.set_label = true;
-        result_.emplace_back(l);
+        result_.emplace_back(new pandasm::LabelIns(label));
     }
 
     void EmitJump(const BasicBlock *bb);
@@ -139,11 +135,11 @@ private:
     const BytecodeOptIrInterface *ir_interface_;
     pandasm::Program *program_;
 
-    std::vector<pandasm::Ins> res_;
+    std::vector<pandasm::InsPtr> res_;
     std::vector<pandasm::Function::CatchBlock> catch_blocks_;
 
     bool success_ {true};
-    std::vector<pandasm::Ins> result_;
+    std::vector<pandasm::InsPtr> result_;
 };
 
 }  // namespace panda::bytecodeopt

@@ -20,40 +20,20 @@
 
 namespace panda::pandasm {
 
+% def insn2node(insn)
+%   mnemonic = insn.mnemonic.split('.')
+%   return mnemonic.map{|el| el == '64' ? 'Wide' : el.capitalize}.join()
+% end
+%
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
 % insn = group.first 
 % signature = assembler_signature(group, insn.jump?)
 % signature_str = signature.map { |o| "#{o.type} #{o.name}" }.join(', ')
-inline Ins Create_<%= insn.asm_token %>(<%= signature_str %>)
-    {
-    Ins <%=insn.emitter_name%>_;
-    <%=group.first.emitter_name%>_.opcode = Opcode::<%= insn.asm_token %>;
-%   format = format_ops(insn.format)
-%   format.each { |o| o.width = storage_width(o.width) }
-%   count_reg = 0
-%   format.each_with_index do |o, i|
-%      if o.name.start_with?('v')
-%          count_reg += 1
-%      end
-%   end
-%   if count_reg > 0 then
-    <%=group.first.emitter_name%>_.regs.reserve(<%= count_reg %>);
-%   end
-%   format.each_with_index do |o, i|
-%       if o.name.start_with?('imm')
-%          if insn.jump?
-    <%=group.first.emitter_name%>_.ids.push_back(label);
-%          else
-    <%=group.first.emitter_name%>_.imms.emplace_back(<%= o.name %>);
-%          end
-%       elsif o.name.start_with?('id')
-    <%=group.first.emitter_name%>_.ids.push_back(<%= o.name %>);
-%       else
-    <%=group.first.emitter_name%>_.regs.push_back(<%= o.name %>);
-%       end
-%   end
-    return <%=insn.emitter_name%>_;
-    }
+% param_str = signature.map { |o| "#{o.name}" }.join(', ')
+inline Ins* Create_<%= insn.asm_token %>(<%= signature_str %>)
+{
+    return new pandasm::<%= insn2node(insn) %>(<%= param_str %>);
+}
 
 % end
 

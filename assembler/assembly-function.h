@@ -78,7 +78,7 @@ struct Function {
     std::unique_ptr<FunctionMetadata> metadata;
 
     std::unordered_map<std::string, panda::pandasm::Label> label_table;
-    std::vector<panda::pandasm::Ins> ins; /* function instruction list */
+    std::vector<InsPtr> ins; /* function instruction list */
     std::vector<panda::pandasm::debuginfo::LocalVariable> local_variable_debug;
     std::string source_file; /* The file in which the function is defined or empty */
     std::string source_code;
@@ -125,19 +125,6 @@ struct Function {
         return expected_property_count;
     }
 
-    void SetInsDebug(const std::vector<debuginfo::Ins> &ins_debug)
-    {
-        ASSERT(ins_debug.size() == ins.size());
-        for (std::size_t i = 0; i < ins.size(); i++) {
-            ins[i].ins_debug = ins_debug[i];
-        }
-    }
-
-    void AddInstruction(const panda::pandasm::Ins &instruction)
-    {
-        ins.emplace_back(instruction);
-    }
-
     Function(std::string s, panda::panda_file::SourceLang lang, size_t b_l, size_t b_r, std::string f_c, bool d,
              size_t l_n)
         : name(std::move(s)),
@@ -151,6 +138,9 @@ struct Function {
         : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang))
     {
     }
+
+    NO_COPY_SEMANTIC(Function);
+    DEFAULT_MOVE_SEMANTIC(Function);
 
     std::size_t GetParamsNum() const
     {
@@ -217,12 +207,12 @@ struct Function {
 
     bool CanThrow() const
     {
-        return std::any_of(ins.cbegin(), ins.cend(), [](const Ins &insn) { return insn.CanThrow(); });
+        return std::any_of(ins.cbegin(), ins.cend(), [](const InsPtr &insn) { return insn->CanThrow(); });
     }
 
     bool HasDebugInfo() const
     {
-        return std::any_of(ins.cbegin(), ins.cend(), [](const Ins &insn) { return insn.HasDebugInfo(); });
+        return std::any_of(ins.cbegin(), ins.cend(), [](const InsPtr &insn) { return insn->HasDebugInfo(); });
     }
 
     void DebugDump() const;

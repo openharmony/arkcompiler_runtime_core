@@ -1,31 +1,31 @@
-# source binary: out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/TsNewFeatrueSyntax.abc
+# source binary: openharmony/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/TsNewFeatrueSyntax.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_2039 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_2044 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_2015 { 8 [ tag_value:5, string:"Animal", tag_value:5, string:"Dog", tag_value:5, string:"Foo", tag_value:5, string:"StaticFoo", ]}
+_ESScopeNamesRecord_2020 { 8 [ tag_value:5, string:"Animal", tag_value:5, string:"Dog", tag_value:5, string:"Foo", tag_value:5, string:"StaticFoo", ]}
 
-_GLOBAL_2067 { 12 [ tag_value:5, string:"a", tag_value:5, string:"aaa", tag_value:5, string:"b", tag_value:5, string:"bbb", tag_value:5, string:"c", tag_value:5, string:"ccc", ]}
+_GLOBAL_2072 { 12 [ tag_value:5, string:"a", tag_value:5, string:"aaa", tag_value:5, string:"b", tag_value:5, string:"bbb", tag_value:5, string:"c", tag_value:5, string:"ccc", ]}
 
-_GLOBAL_2101 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2106 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2110 { 4 [ tag_value:5, string:"value", tag_value:255, null_value:0, ]}
+_GLOBAL_2115 { 4 [ tag_value:5, string:"value", tag_value:255, null_value:0, ]}
 
-_GLOBAL_2121 { 8 [ tag_value:5, string:"getName", tag_value:6, method:.#~@0>#getName, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_2126 { 8 [ tag_value:5, string:"getName", tag_value:6, method:.#~@0>#getName, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_2143 { 8 [ tag_value:5, string:"getName", tag_value:6, method:.#~@1>#getName, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_2148 { 8 [ tag_value:5, string:"getName", tag_value:6, method:.#~@1>#getName, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_2165 { 8 [ tag_value:5, string:"publicMethod", tag_value:6, method:.#~C>#publicMethod, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_2170 { 8 [ tag_value:5, string:"publicMethod", tag_value:6, method:.#~C>#publicMethod, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_2187 { 26 [ tag_value:6, method:.#~C>#, tag_value:9, method_affiliate:0, tag_value:26, getter:.#~C>#^1, tag_value:9, method_affiliate:0, tag_value:27, setter:.#~C>#^2, tag_value:9, method_affiliate:1, tag_value:6, method:.#~C<#, tag_value:9, method_affiliate:0, tag_value:26, getter:.#~C<#^1, tag_value:9, method_affiliate:0, tag_value:27, setter:.#~C<#^2, tag_value:9, method_affiliate:1, tag_value:2, i32:3, ]}
+_GLOBAL_2192 { 26 [ tag_value:6, method:.#~C>#, tag_value:9, method_affiliate:0, tag_value:26, getter:.#~C>#^1, tag_value:9, method_affiliate:0, tag_value:27, setter:.#~C>#^2, tag_value:9, method_affiliate:1, tag_value:6, method:.#~C<#, tag_value:9, method_affiliate:0, tag_value:26, getter:.#~C<#^1, tag_value:9, method_affiliate:0, tag_value:27, setter:.#~C<#^2, tag_value:9, method_affiliate:1, tag_value:2, i32:3, ]}
 
-_GLOBAL_2244 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2249 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2253 { 8 [ tag_value:5, string:"option-1", tag_value:5, string:"aaaa", tag_value:5, string:"option-2", tag_value:5, string:"bbbb", ]}
+_GLOBAL_2258 { 8 [ tag_value:5, string:"option-1", tag_value:5, string:"aaaa", tag_value:5, string:"option-2", tag_value:5, string:"bbbb", ]}
 
-_GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2282 { 2 [ tag_value:2, i32:0, ]}
 
 
 
@@ -39,13 +39,13 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/TsNewFeatrueSyntax.ts _ESModuleRecord_2039
+	u32 openharmony/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/TsNewFeatrueSyntax.ts _ESModuleRecord_2044
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/TsNewFeatrueSyntax.ts _ESScopeNamesRecord_2015
+	u32 openharmony/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/TsNewFeatrueSyntax.ts _ESScopeNamesRecord_2020
 }
 .record.source_file 
 
@@ -68,7 +68,7 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
  SlotNumber 3
 .language ECMAScript
 .function any .#*#makeBox(any a0, any a1, any a2, any a3) {
-	createobjectwithbuffer 0x0, _GLOBAL_2110 # line: 120           # column: 0
+	createobjectwithbuffer 0x0, _GLOBAL_2115 # line: 120           # column: 0
 	sta v0                                   # line: 120           # column: 0
 	lda a3                                   # line: 120           # column: 0
 	definepropertybyname 0x1, value, v0      # line: 120           # column: 0
@@ -303,7 +303,8 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	tryldglobalbyname 0x2, TypeError         # line: 57           # column: 0
 	callarg1 0x3, v0                         # line: 57           # column: 0
 	throw                                    # line: 57           # column: 0
-	label@12: ldlexvar 0x0, 0x5              # line: 57           # column: 0
+	label@12:                                # line: 0           # column: 0
+	ldlexvar 0x0, 0x5                        # line: 57           # column: 0
 	callthis0 0x5, v0                        # line: 57           # column: 0
 	lda a2                                   # line: 58           # column: 0
 	ldprivateproperty 0x7, 0x0, 0x8          # line: 58           # column: 0
@@ -323,7 +324,8 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	tryldglobalbyname 0xd, TypeError         # line: 59           # column: 0
 	callarg1 0xe, v0                         # line: 59           # column: 0
 	throw                                    # line: 59           # column: 0
-	label@32: lda v1                         # line: 59           # column: 0
+	label@32:                                # line: 0           # column: 0
+	lda v1                                   # line: 59           # column: 0
 	stprivateproperty 0x10, 0x0, 0x7, v0     # line: 59           # column: 0
 	lda a2                                   # line: 60           # column: 0
 	ldprivateproperty 0x12, 0x0, 0x8         # line: 60           # column: 0
@@ -353,7 +355,8 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	tryldglobalbyname 0x21, TypeError        # line: 61           # column: 0
 	callarg1 0x22, v0                        # line: 61           # column: 0
 	throw                                    # line: 61           # column: 0
-	label@62: lda v4                         # line: 61           # column: 0
+	label@62:                                # line: 0           # column: 0
+	lda v4                                   # line: 61           # column: 0
 	ldprivateproperty 0x24, 0x0, 0x6         # line: 61           # column: 0
 	sta v4                                   # line: 61           # column: 0
 	lda v1                                   # line: 61           # column: 0
@@ -414,10 +417,10 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	sta v0                                   # line: 18446744073709551615           # column: 0
 	ldhole                                   # line: 16           # column: 0
 	sta v1                                   # line: 16           # column: 0
-	defineclasswithbuffer 0x1, .#~@0=#Animal, _GLOBAL_2121, 0x0, v1 # line: 16           # column: 0
+	defineclasswithbuffer 0x1, .#~@0=#Animal, _GLOBAL_2126, 0x0, v1 # line: 16           # column: 0
 	sta v1                                   # line: 16           # column: 0
 	ldobjbyname 0x2, prototype               # line: 16           # column: 0
-	defineclasswithbuffer 0x4, .#~@1=#Dog, _GLOBAL_2143, 0x0, v1 # line: 21           # column: 0
+	defineclasswithbuffer 0x4, .#~@1=#Dog, _GLOBAL_2148, 0x0, v1 # line: 21           # column: 0
 	sta v1                                   # line: 21           # column: 0
 	ldobjbyname 0x5, prototype               # line: 21           # column: 0
 	mov v4, v1                               # line: 21           # column: 0
@@ -434,9 +437,10 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	lda v3                                   # line: 27           # column: 0
 	callthis1 0x10, v2, v1                   # line: 27           # column: 0
 	newlexenv 0xc                            # line: 30           # column: 0
-	label@25: ldhole                         # line: 30           # column: 0
+	label@25:                                # line: 0           # column: 0
+	ldhole                                   # line: 30           # column: 0
 	sta v2                                   # line: 30           # column: 0
-	defineclasswithbuffer 0x12, .#~C=#C, _GLOBAL_2165, 0x0, v2 # line: 30           # column: 0
+	defineclasswithbuffer 0x12, .#~C=#C, _GLOBAL_2170, 0x0, v2 # line: 30           # column: 0
 	sta v2                                   # line: 30           # column: 0
 	stlexvar 0x0, 0x9                        # line: 30           # column: 0
 	lda v2                                   # line: 30           # column: 0
@@ -445,16 +449,19 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	ldobjbyname 0x13, prototype              # line: 30           # column: 0
 	definemethod 0x15, .#~C>#instance_initializer, 0x0 # line: 30           # column: 0
 	stlexvar 0x0, 0xa                        # line: 30           # column: 0
-	callruntime.createprivateproperty 0x2, _GLOBAL_2187 # line: 30           # column: 0
+	callruntime.createprivateproperty 0x2, _GLOBAL_2192 # line: 30           # column: 0
 	lda v2                                   # line: 30           # column: 0
 	definemethod 0x16, .#~C>#static_initializer, 0x0 # line: 30           # column: 0
 	callthis0 0x17, v2                       # line: 30           # column: 0
-	label@40: jmp label@45                   # line: 30           # column: 0
-	label@41: sta v1                         # line: 30           # column: 0
+	label@40:                                # line: 0           # column: 0
+	jmp label@45                             # line: 30           # column: 0
+	label@41:                                # line: 0           # column: 0
+	sta v1                                   # line: 30           # column: 0
 	poplexenv                                # line: 30           # column: 0
 	lda v1                                   # line: 30           # column: 0
 	throw                                    # line: 30           # column: 0
-	label@45: poplexenv                      # line: 30           # column: 0
+	label@45:                                # line: 0           # column: 0
+	poplexenv                                # line: 30           # column: 0
 	mov v4, v2                               # line: 30           # column: 0
 	newobjrange 0x19, 0x1, v4                # line: 64           # column: 0
 	sta v1                                   # line: 64           # column: 0
@@ -462,7 +469,7 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	callthis0 0x1d, v1                       # line: 65           # column: 0
 	ldhole                                   # line: 68           # column: 0
 	sta v1                                   # line: 68           # column: 0
-	defineclasswithbuffer 0x1f, .#~@2=#Foo, _GLOBAL_2244, 0x0, v1 # line: 68           # column: 0
+	defineclasswithbuffer 0x1f, .#~@2=#Foo, _GLOBAL_2249, 0x0, v1 # line: 68           # column: 0
 	sta v1                                   # line: 68           # column: 0
 	ldobjbyname 0x20, prototype              # line: 68           # column: 0
 	mov v4, v1                               # line: 68           # column: 0
@@ -504,7 +511,7 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	sta v2                                   # line: 90           # column: 0
 	ldobjbyname 0x36, log                    # line: 90           # column: 0
 	callthis1 0x38, v2, v1                   # line: 90           # column: 0
-	createobjectwithbuffer 0x3a, _GLOBAL_2253 # line: 95           # column: 0
+	createobjectwithbuffer 0x3a, _GLOBAL_2258 # line: 95           # column: 0
 	sta v1                                   # line: 95           # column: 0
 	tryldglobalbyname 0x3b, console          # line: 99           # column: 0
 	sta v2                                   # line: 99           # column: 0
@@ -516,9 +523,10 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	lda v3                                   # line: 99           # column: 0
 	callthis1 0x40, v2, v1                   # line: 99           # column: 0
 	newlexenv 0x1                            # line: 103           # column: 0
-	label@107: ldhole                        # line: 103           # column: 0
+	label@107:                               # line: 0           # column: 0
+	ldhole                                   # line: 103           # column: 0
 	sta v2                                   # line: 103           # column: 0
-	defineclasswithbuffer 0x42, .#~@3=#StaticFoo, _GLOBAL_2277, 0x0, v2 # line: 103           # column: 0
+	defineclasswithbuffer 0x42, .#~@3=#StaticFoo, _GLOBAL_2282, 0x0, v2 # line: 103           # column: 0
 	sta v2                                   # line: 103           # column: 0
 	stlexvar 0x0, 0x0                        # line: 103           # column: 0
 	lda v2                                   # line: 103           # column: 0
@@ -526,12 +534,15 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	lda v2                                   # line: 103           # column: 0
 	definemethod 0x45, .#~@3>#static_initializer, 0x0 # line: 103           # column: 0
 	callthis0 0x46, v2                       # line: 103           # column: 0
-	label@117: jmp label@122                 # line: 103           # column: 0
-	label@118: sta v1                        # line: 103           # column: 0
+	label@117:                               # line: 0           # column: 0
+	jmp label@122                            # line: 103           # column: 0
+	label@118:                               # line: 0           # column: 0
+	sta v1                                   # line: 103           # column: 0
 	poplexenv                                # line: 103           # column: 0
 	lda v1                                   # line: 103           # column: 0
 	throw                                    # line: 103           # column: 0
-	label@122: poplexenv                     # line: 103           # column: 0
+	label@122:                               # line: 0           # column: 0
+	poplexenv                                # line: 103           # column: 0
 	tryldglobalbyname 0x48, console          # line: 115           # column: 0
 	sta v1                                   # line: 115           # column: 0
 	ldobjbyname 0x49, log                    # line: 115           # column: 0
@@ -552,10 +563,10 @@ _GLOBAL_2277 { 2 [ tag_value:2, i32:0, ]}
 	sta v0                                   # line: 123           # column: 0
 	lda v2                                   # line: 123           # column: 0
 	callthis1 0x54, v1, v0                   # line: 123           # column: 0
-	createobjectwithbuffer 0x56, _GLOBAL_2067 # line: 130           # column: 0
+	createobjectwithbuffer 0x56, _GLOBAL_2072 # line: 130           # column: 0
 	ldhole                                   # line: 138           # column: 0
 	sta v0                                   # line: 138           # column: 0
-	defineclasswithbuffer 0x57, .#~D=#D, _GLOBAL_2101, 0x1, v0 # line: 138           # column: 0
+	defineclasswithbuffer 0x57, .#~D=#D, _GLOBAL_2106, 0x1, v0 # line: 138           # column: 0
 	ldobjbyname 0x58, prototype              # line: 138           # column: 0
 	sta v0                                   # line: 138           # column: 0
 	lda.str name                             # line: 139           # column: 0

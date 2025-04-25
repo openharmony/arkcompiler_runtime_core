@@ -72,7 +72,7 @@ bool EmitFunctionsJob::EmitFunctions(const panda::pandasm::AsmEmitter::AsmEntity
         code->SetNumArgs(func.GetParamsNum());
 
         auto num_ins = static_cast<size_t>(
-            std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; }));
+            std::count_if(func.ins.begin(), func.ins.end(), [](auto &it) { return it->opcode != Opcode::INVALID; }));
         code->SetNumInstructions(num_ins);
 
         auto *bytes = code->GetInstructions();

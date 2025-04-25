@@ -347,64 +347,7 @@ void PandasmProgramDumper::DumpFunctionIns(std::ostream &os, const pandasm::Func
 
 void PandasmProgramDumper::DumpOriginalFunctionIns(std::ostream &os, const pandasm::Function &function)
 {
-    for (const pandasm::Ins &pa_ins : function.ins) {
-        std::string insStr = pa_ins.ToString("", true, regs_num_);
-        os << DUMP_CONTENT_TAB << std::setw(LINE_WIDTH)
-           << std::left << insStr
-           << DUMP_CONTENT_LINE_NUMBER << pa_ins.ins_debug.line_number;
-        os << std::setw(COLUMN_WIDTH) << std::left << DUMP_CONTENT_SPACE
-           << DUMP_CONTENT_COLUMN_NUMBER << pa_ins.ins_debug.column_number
-           << DUMP_CONTENT_SINGLE_ENDL;
-    }
-}
-
-void PandasmProgramDumper::DumpNormalizedFunctionIns(std::ostream &os, const pandasm::Function &function)
-{
-    GetOriginalDumpIns(function);
-    GetInvalidOpLabelMap();
-    UpdateLabels4DumpIns(original_dump_ins_ptrs_, invalid_op_label_map_);
-    GetFinalDumpIns();
-    GetFinalLabelMap();
-    UpdateLabels4DumpIns(final_dump_ins_ptrs_, final_label_map_);
-    DumpFinalIns(os);
-}
-
-void PandasmProgramDumper::GetOriginalDumpIns(const pandasm::Function &function)
-{
-    original_dump_ins_.clear();
-    original_dump_ins_ptrs_.clear();
-    original_ins_index_map_.clear();
-    for (const pandasm::Ins &pa_ins : function.ins) {
-        original_dump_ins_.emplace_back(PandasmDumperUtils::DeepCopyIns(pa_ins));
-    }
-    uint32_t idx = 0;
-    for (pandasm::Ins &pa_ins : original_dump_ins_) {
-        original_dump_ins_ptrs_.emplace_back(&pa_ins);
-        original_ins_index_map_[&pa_ins] = idx;
-        idx++;
-    }
-}
-
-void PandasmProgramDumper::GetFinalDumpIns()
-{
-    final_dump_ins_ptrs_.clear();
-    final_ins_index_map_.clear();
-    uint32_t idx = 0;
-    for (pandasm::Ins *pa_ins : original_dump_ins_ptrs_) {
-        final_ins_index_map_[pa_ins] = idx;
-        if (pa_ins->opcode != pandasm::Opcode::INVALID) {
-            final_dump_ins_ptrs_.emplace_back(pa_ins);
-            idx++;
-        }
-    }
-}
-
-void PandasmProgramDumper::DumpFinalIns(std::ostream &os)
-{
-    for (pandasm::Ins *pa_ins : final_dump_ins_ptrs_) {
-        if (PandasmDumperUtils::IsMatchLiteralId(*pa_ins)) {
-            ReplaceLiteralId4Ins(*pa_ins);
-        }
+    for (const pandasm::InsPtr &pa_ins : function.ins) {
         std::string insStr = pa_ins->ToString("", true, regs_num_);
         os << DUMP_CONTENT_TAB << std::setw(LINE_WIDTH)
            << std::left << insStr
@@ -415,57 +358,51 @@ void PandasmProgramDumper::DumpFinalIns(std::ostream &os)
     }
 }
 
-void PandasmProgramDumper::GetInvalidOpLabelMap()
+void PandasmProgramDumper::DumpNormalizedFunctionIns(std::ostream &os, const pandasm::Function &function)
 {
-    invalid_op_label_map_.clear();
-    size_t dump_ins_size = original_dump_ins_.size();
-    for (size_t i = 0; i < dump_ins_size; ++i) {
-        pandasm::Ins &curr_ins = original_dump_ins_[i];
-        if (curr_ins.opcode == pandasm::Opcode::INVALID) {
-            HandleInvalidopInsLabel(i, curr_ins);
+    GetFinalDumpIns(function);
+    UpdateLabels4DumpIns(final_dump_ins_ptrs_, label_map_);
+    DumpFinalIns(os);
+}
+
+void PandasmProgramDumper::GetFinalDumpIns(const pandasm::Function &function)
+{
+    label_map_.clear();
+    final_dump_ins_ptrs_.clear();
+    original_to_final_index_map_.clear();
+    size_t valid_op_cnt = 0;
+    for (size_t idx = 0; idx < function.ins.size(); idx++) {
+        auto &ins = function.ins[idx];
+        original_to_final_index_map_.emplace(idx, valid_op_cnt);
+        if (ins->IsLabel()) {
+            label_map_.emplace(ins->Label(), AbcFileUtils::GetLabelNameByInstIdx(valid_op_cnt));
+        } else {
+            valid_op_cnt++;
+            final_dump_ins_ptrs_.emplace_back(ins->DeepCopy());
         }
+    }
+    original_to_final_index_map_.emplace(function.ins.size(), final_dump_ins_ptrs_.size());
+}
+
+void PandasmProgramDumper::DumpFinalIns(std::ostream &os)
+{
+    size_t idx = 0;
+    for (pandasm::InsPtr &pa_ins : final_dump_ins_ptrs_) {
+        if (PandasmDumperUtils::IsMatchLiteralId(pa_ins)) {
+            ReplaceLiteralId4Ins(pa_ins);
+        }
+
+        std::string insStr = AbcFileUtils::GetLabelNameByInstIdx(idx++) + ": " + pa_ins->ToString("", true, regs_num_);
+        os << DUMP_CONTENT_TAB << std::setw(LINE_WIDTH)
+           << std::left << insStr
+           << DUMP_CONTENT_LINE_NUMBER << pa_ins->ins_debug.line_number;
+        os << std::setw(COLUMN_WIDTH) << std::left << DUMP_CONTENT_SPACE
+           << DUMP_CONTENT_COLUMN_NUMBER << pa_ins->ins_debug.column_number
+           << DUMP_CONTENT_SINGLE_ENDL;
     }
 }
 
-void PandasmProgramDumper::HandleInvalidopInsLabel(size_t invalid_op_idx, pandasm::Ins &invalid_op_ins)
-{
-    if (!invalid_op_ins.set_label) {
-        return;
-    }
-    pandasm::Ins *nearest_valid_op_ins = GetNearestValidopIns4InvalidopIns(invalid_op_idx);
-    if (nearest_valid_op_ins == nullptr) {
-        return;
-    }
-    if (!nearest_valid_op_ins->set_label) {
-        // here, the invalid op ins and its nearest valid op ins has the same label
-        // the invalid op will be removed, so the label is still unique for each inst
-        nearest_valid_op_ins->label = invalid_op_ins.label;
-        nearest_valid_op_ins->set_label = true;
-    }
-    invalid_op_label_map_.emplace(invalid_op_ins.label, nearest_valid_op_ins->label);
-}
-
-pandasm::Ins *PandasmProgramDumper::GetNearestValidopIns4InvalidopIns(size_t invalid_op_ins_idx)
-{
-    size_t dump_ins_size = original_dump_ins_.size();
-    // search downwards
-    for (size_t i = invalid_op_ins_idx + 1; i < dump_ins_size; ++i) {
-        pandasm::Ins &curr_ins = original_dump_ins_[i];
-        if (curr_ins.opcode != pandasm::Opcode::INVALID) {
-            return &curr_ins;
-        }
-    }
-    // search upwards
-    for (size_t i = 0; i < invalid_op_ins_idx; ++i) {
-        pandasm::Ins &curr_ins = original_dump_ins_[invalid_op_ins_idx - i - 1];
-        if (curr_ins.opcode != pandasm::Opcode::INVALID) {
-            return &curr_ins;
-        }
-    }
-    return nullptr;
-}
-
-void PandasmProgramDumper::UpdateLabels4DumpIns(std::vector<pandasm::Ins*> &dump_ins, const LabelMap &label_map) const
+void PandasmProgramDumper::UpdateLabels4DumpIns(std::vector<pandasm::InsPtr> &dump_ins, const LabelMap &label_map) const
 {
     size_t dump_ins_size = dump_ins.size();
     for (size_t i = 0; i < dump_ins_size; ++i) {
@@ -473,41 +410,15 @@ void PandasmProgramDumper::UpdateLabels4DumpIns(std::vector<pandasm::Ins*> &dump
     }
 }
 
-void PandasmProgramDumper::UpdateLabels4DumpInsAtIndex(size_t idx, std::vector<pandasm::Ins*> &dump_ins,
+void PandasmProgramDumper::UpdateLabels4DumpInsAtIndex(size_t idx, std::vector<pandasm::InsPtr> &dump_ins,
                                                        const LabelMap &label_map) const
 {
-    pandasm::Ins *curr_ins = dump_ins[idx];
-    std::string mapped_label = PandasmDumperUtils::GetMappedLabel(curr_ins->label, label_map);
-    if (mapped_label != "") {
-        curr_ins->label = mapped_label;
-    }
+    pandasm::InsPtr &curr_ins = dump_ins[idx];
     if (curr_ins->IsJump()) {
-        mapped_label = PandasmDumperUtils::GetMappedLabel(curr_ins->ids[0], label_map);
+        std::string mapped_label = PandasmDumperUtils::GetMappedLabel(curr_ins->GetId(0), label_map);
         if (mapped_label != "") {
-            curr_ins->ids.clear();
-            curr_ins->ids.emplace_back(mapped_label);
+            curr_ins->SetId(0, mapped_label);
         }
-    }
-}
-
-void PandasmProgramDumper::GetFinalLabelMap()
-{
-    final_label_map_.clear();
-    size_t dump_ins_size = final_dump_ins_ptrs_.size();
-    for (size_t i = 0; i < dump_ins_size; ++i) {
-        HandleFinalLabelAtIndex(i);
-    }
-}
-
-void PandasmProgramDumper::HandleFinalLabelAtIndex(size_t idx)
-{
-    pandasm::Ins *curr_ins = final_dump_ins_ptrs_[idx];
-    std::string new_label_name = AbcFileUtils::GetLabelNameByInstIdx(idx);
-    if (curr_ins->set_label) {
-        final_label_map_.emplace(curr_ins->label, new_label_name);
-    } else {
-        curr_ins->label = new_label_name;
-        curr_ins->set_label = true;
     }
 }
 
@@ -553,15 +464,11 @@ void PandasmProgramDumper::UpdateCatchBlock(pandasm::Function::CatchBlock &catch
 
 std::string PandasmProgramDumper::GetUpdatedCatchBlockLabel(const std::string &orignal_label) const
 {
-    std::string mapped_label1 = PandasmDumperUtils::GetMappedLabel(orignal_label, invalid_op_label_map_);
+    std::string mapped_label1 = PandasmDumperUtils::GetMappedLabel(orignal_label, label_map_);
     if (mapped_label1 == "") {
         return orignal_label;
     }
-    std::string mapped_label2 = PandasmDumperUtils::GetMappedLabel(mapped_label1, final_label_map_);
-    if (mapped_label2 == "") {
-        return mapped_label1;
-    }
-    return mapped_label2;
+    return mapped_label1;
 }
 
 void PandasmProgramDumper::DumpCatchBlock(std::ostream &os, const pandasm::Function::CatchBlock &catch_block) const
@@ -623,19 +530,6 @@ void PandasmProgramDumper::DumpFunctionDebugInfo(std::ostream &os, const pandasm
 void PandasmProgramDumper::UpdateLocalVarMap(const pandasm::Function &function,
     std::map<int32_t, panda::pandasm::debuginfo::LocalVariable>& local_variable_table)
 {
-    std::unordered_map<uint32_t, uint32_t> original_to_final_index_map_;
-    uint32_t max_original_idx = 0;
-    uint32_t max_final_idx = 0;
-    for (const auto &[key, value] : original_ins_index_map_) {
-        uint32_t final_idx = final_ins_index_map_[key];
-        original_to_final_index_map_[value] = final_idx;
-        if (value > max_original_idx) {
-            max_original_idx = value;
-            max_final_idx = final_idx;
-        }
-    }
-    original_to_final_index_map_[max_original_idx + 1] = max_final_idx;
-
     for (const auto &variable_info : function.local_variable_debug) {
         uint32_t original_start = variable_info.start;
         uint32_t original_end = variable_info.length + variable_info.start;
@@ -663,16 +557,16 @@ void PandasmProgramDumper::DumpStrings(std::ostream &os) const
     }
 }
 
-void PandasmProgramDumper::ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const
+void PandasmProgramDumper::ReplaceLiteralId4Ins(pandasm::InsPtr &pa_ins) const
 {
     size_t idx = PandasmDumperUtils::GetLiteralIdIndex4Ins(pa_ins);
-    std::string id_str = pa_ins.ids[idx];
+    std::string id_str = pa_ins->GetId(idx);
     auto it = program_->literalarray_table.find(id_str);
     ASSERT(it != program_->literalarray_table.end());
     const pandasm::LiteralArray &literal_array = it->second;
     auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(it->first);
     std::string replaced_value = SerializeLiteralArray(literal_array, id);
-    pa_ins.ids[idx] = replaced_value;
+    pa_ins->SetId(idx, replaced_value);
 }
 
 std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralArray &lit_array, uint32_t id) const
