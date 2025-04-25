@@ -21,3 +21,13 @@ export class Bibka {
 
 export type UT = null|undefined|never
 export type UTA = UT[]
+
+export type a1 = "a" | "b" | "c"
+export type b1 = Record<string, number |string | boolean | [] | Record<string, number |string | boolean | []>>
+export type c1 = Record<number, string> | Record<string, number>
+export class B<T> {}
+export type A<K,T> = string | B<A<K,T>>
+export type Callback<T> = (data: T) => void;
+export type ErrorCallback<T extends Error = BusinessError> = (err: T)=> void;
+export type AsyncCallback<T, E = void> = (err: BusinessError<E>, data: T)=> void;
+export declare class BusinessError<T = void> extends Error {}
