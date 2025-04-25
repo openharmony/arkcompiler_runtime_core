@@ -11,7 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js__interface_ets_to_ts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__interface_ets_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/interface_method.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/interface_method.ets
+    JS_SOURCES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_any_type_interface_method.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_literal_type_interface_method.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_optional_method_interface.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_subset_by_ref_interface_method.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_subset_by_value_interface_method.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_tuple_type_interface_method.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_union_type_interface_method.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/interface_method.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

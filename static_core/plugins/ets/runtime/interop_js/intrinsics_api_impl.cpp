@@ -57,15 +57,19 @@ namespace ark::ets::interop::js {
     }
     INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
     napi_value result;
-    auto status = napi_load_module_with_module_request(env, moduleName.c_str(), &result);
-    if (status == napi_pending_exception) {
-        napi_value exp;
-        NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
-        NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
-        INTEROP_LOG(FATAL) << "Unable to load module due to exception";
-        UNREACHABLE();
+    napi_status status;
+    {
+        ScopedNativeCodeThread etsNativeScope(coro);
+        NapiScope jsHandleScope(env);
+        status = napi_load_module_with_module_request(env, moduleName.c_str(), &result);
+        if (status == napi_pending_exception) {
+            napi_value exp;
+            NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
+            NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
+            INTEROP_LOG(FATAL) << "Unable to load module due to exception";
+            UNREACHABLE();
+        }
     }
     INTEROP_FATAL_IF(status != napi_ok);
     INTEROP_FATAL_IF(IsUndefined(env, result));

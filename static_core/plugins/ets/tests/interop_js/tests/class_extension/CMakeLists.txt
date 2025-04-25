@@ -14,8 +14,9 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js__ts_class_extended_in_arkts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__ts_class_extended_in_arkts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/interop_class_extension/index.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.js
     ETS_CONFIG ${ETS_CONFIG}
 )

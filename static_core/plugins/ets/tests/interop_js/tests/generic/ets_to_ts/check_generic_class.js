@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { GClass, createGenericObjectFromEts, num, str } = require('generic.test.js');
+const { GClass, createGenericObjectFromEts, num, str } = require('generic.test.abc');
 
 function checkGenericClassType() {
 	const gClass = new GClass(num);
@@ -21,7 +21,7 @@ function checkGenericClassType() {
 }
 
 function checkCreateGenericObjectFromEts() {
-	const gClass = new createGenericObjectFromEts();
+	const gClass = createGenericObjectFromEts();
 	ASSERT_EQ(typeof str, typeof gClass.get());
 }
 
