@@ -58,3 +58,26 @@ add_custom_target(
 add_dependencies(link_ets_sdk ets_sdk_prereqs)
 
 add_custom_target(etssdk DEPENDS link_ets_sdk)
+
+if(NOT CMAKE_CROSSCOMPILING)
+    set(verifier_target verifier)
+    set(verifier_bin    $<TARGET_FILE:${verifier_target}>)
+
+    add_dependencies(link_ets_sdk ${verifier_target})
+
+    set (ETS_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
+    set (ETS_SDK_ABC "${PANDA_BINARY_ROOT}/plugins/ets/sdk/etssdk.abc")
+    
+    set (RUN_VERIFIER_DST_DIR "${PANDA_BINARY_ROOT}/verification/verifier/")
+    set (RUN_VERIFIER_SRC_DIR "${CMAKE_SOURCE_DIR}/verification/verifier/")
+
+    configure_file(
+        ${RUN_VERIFIER_SRC_DIR}/run_verifier.sh
+        ${RUN_VERIFIER_DST_DIR}/run_verifier.sh
+        COPYONLY
+    )
+    add_custom_command(TARGET link_ets_sdk 
+        COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}' '${ETS_SDK_ABC}'" -P
+    )
+        
+endif()
