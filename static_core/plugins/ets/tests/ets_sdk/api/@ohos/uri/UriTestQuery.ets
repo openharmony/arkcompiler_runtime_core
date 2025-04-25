@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { uri, BusinessError } from "api"
+import { uri } from "@ohos.uri"
 
 function testUriClearQuery001() {
   let route = new uri.URI('https://www.test.com');

@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
-package api;
+import { BusinessError } from "@ohos.base";
+
+const SyntaxErrorCodeId: number = 10200002;
+const TypeErrorCodeId: number = 401;
+
+function createBusinessError(code: number, message:string){
+    let err = new BusinessError();
+    err.code = code;
+    err.name='BusinessError';
+    err.message = message;
+    return err;
+}
 
 export namespace uri {
 
@@ -23,7 +34,7 @@ export namespace uri {
       this.uriEntry = new UriEntry(input);
       let errStr: string = this.uriEntry.getErrStr();
       if (errStr != "") {
-        throw new BusinessError(`Syntax Error. Invalid Uri string: The ${errStr}`, SyntaxErrorCodeId);
+        throw createBusinessError(SyntaxErrorCodeId,`Syntax Error. Invalid Uri string: The ${errStr}`)
       }
     }
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {ArrayList} from "api"
+import {ArrayList} from "@ohos.util.ArrayList";
 
 function main() {
     const suite = new ArkTestsuite("ArrayList API tests");

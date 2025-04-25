@@ -314,7 +314,7 @@ ani_object DoEncodeIntoUint8Array(ani_env *env, [[maybe_unused]] ani_object obje
     }
 
     ani_class resultClass;
-    const char *resultClassName = "Lapi/util/EncodeIntoUint8ArrayInfoInner;";
+    const char *resultClassName = "L@ohos/util/util/EncodeIntoUint8ArrayInfoInner;";
     if (ANI_OK != env->FindClass(resultClassName, &resultClass)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("TextEncoder:: Failed to get class %{public}s", resultClassName);

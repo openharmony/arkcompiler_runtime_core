@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package api;
+import LightWeightMap from '@ohos.util.LightWeightMap';
 
 interface ReadonlyLightWeightSet<T> extends Iterable<T> {
     /**

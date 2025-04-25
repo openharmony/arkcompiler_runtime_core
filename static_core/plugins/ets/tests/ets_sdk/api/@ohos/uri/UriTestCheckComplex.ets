@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { uri, BusinessError } from "api"
+import {uri} from "@ohos.uri"
 
 function IsAbsoluteTest001() {
   let uri = new uri.UriEntry("f/tp://username:password@www.baidu.com:88/path?query#fagment");

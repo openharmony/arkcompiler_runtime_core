@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {TreeMap} from "api"
+import TreeMap from "@ohos.util.TreeMap";
 
 const success = 0;
 const fail = 1;

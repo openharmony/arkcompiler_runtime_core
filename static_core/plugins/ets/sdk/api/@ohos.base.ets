@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-package api;
-
-const TypeErrorCodeId: number = 401;
-export const OutOfBoundsErrorCodeId: number = 10200001;
-export const SyntaxErrorCodeId: number = 10200002;
-export const IncorrectBufferSizeId: number = 10200009;
-
 /**
  * Represents an error that occurs when using a function under the API package in an incorrect manner
  */
-export class BusinessError extends Error {
+export class BusinessError<T = void> extends Error {
     code: number;
-    constructor(msg: string) {
-        super(msg);
-        this.name = 'BusinessError';
-        this.code = TypeErrorCodeId;
+    data?: T;
+
+    constructor() {
+        super();
+        this.code = 0;
     }
 
-    constructor(msg: string, code: number) {
-        super(msg);
-        this.name = 'BusinessError';
+    constructor(code: number, error: Error) {
+        super(error.name, error.message, new ErrorOptions(error.cause));
         this.code = code;
+    }
+
+    constructor(code: number, data: T, error: Error) {
+        super(error.name, error.message, new ErrorOptions(error.cause));
+        this.code = code;
+        this.data = data;
     }
 }

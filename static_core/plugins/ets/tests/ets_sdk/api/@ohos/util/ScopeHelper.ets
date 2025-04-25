@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {util} from "api"
+import {util} from "@ohos.util"
 
 class NumberType implements util.ScopeType<NumberType> {
     n: number

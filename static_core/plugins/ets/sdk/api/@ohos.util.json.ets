@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
- package api;
-
  export namespace json {
 
     export type Transformer = (key: string, value: NullishType) => NullishType

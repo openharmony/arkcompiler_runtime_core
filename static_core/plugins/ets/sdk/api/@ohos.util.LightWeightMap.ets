@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package api;
-
 interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the LightWeightMap
@@ -165,7 +163,7 @@ class LightWeightMapIterator<K, V, R> implements IterableIterator<R> {
     }
 }
 
-export class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V> {
+export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V> {
     private buckets: LightWeightMapEntry<K, V>;
 
     private static readonly SHIFT_COUNT = 31;
