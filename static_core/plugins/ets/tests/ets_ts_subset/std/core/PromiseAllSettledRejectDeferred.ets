@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 class Thenable implements PromiseLike<string> {
+    constructor(e: Error) {
+        this.error = e;
+    }
     then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<E>((): E|PromiseLike<E> => {
-            return onRejected!("abc");
+            return onRejected!(this.error);
         });
     }
+    private error: Error;
 };
 
-let thenable = new Thenable();
+let error = new Error("abc");
+let thenable = new Thenable(error);
 Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<string>[]): void => {
     if (values.length != 1) {
         console.log("Test failed. Expected an array of length 1 but got length " + values.length + ".");
@@ -30,7 +35,7 @@ Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<st
         console.log("Test failed. Expected the first element has status 'rejected' but got '" + values[0].status + "'.");
         return;
     }
-    if ((values[0] as PromiseRejectedResult).reason != "abc") {
+    if ((values[0] as PromiseRejectedResult).reason.message != "abc") {
         console.log("Test failed. The promise should be rejected by the provided value.");
         return;
     }

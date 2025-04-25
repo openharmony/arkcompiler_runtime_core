@@ -140,7 +140,7 @@ function testRejectedPromise(): int {
             globalTest!.fail();
             return null;
         });
-        p.catch<Object | null>((err: NullishType): Object => {
+        p.catch<Object | null>((err: Error): Object => {
             if (err == error) {
                 globalTest!.success();
             } else {
@@ -246,12 +246,12 @@ function testPromiseChain(): int {
 function testPromiseCatchFinallyChain(): int {
     globalTest = new Test();
     let fixture = new PromiseChainFixture();
-    let p: Promise<Object> = Promise.reject<Object>(new Object());
+    let p: Promise<Object> = Promise.reject<Object>(new Error());
     // NOTE(audovichenko): Remove p1 and p2 variables #17359
     let p1: Promise<void> = p.then<void>((v: Object): void => {
         globalTest!.fail();
     });
-    let p2: Promise<void> = p1.catch<void>((value: NullishType): void => {
+    let p2: Promise<void> = p1.catch<void>((value: Error): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
@@ -295,11 +295,11 @@ function testResolvePromiseThenFinally(): int {
 function testRejectPromiseThenFinally(): int {
     globalTest = new Test();
     let fixture = new PromiseChainFixture();
-    let p = Promise.reject<Object>(new Object());
+    let p = Promise.reject<Object>(new Error());
     // NOTE(audovichenko): Remove p1 and p2 variables #17359
     let p1: Promise<void> = p.then<void, void>((value: Object): void => {
         globalTest!.fail();
-    }, (error: NullishType): void => {
+    }, (error: Error): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
@@ -528,14 +528,14 @@ function testPromiseAllResolved(): void {
 function testPromiseAllRejected(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
-    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p2: Promise<Object> = Promise.reject<Object>(new Error("def"));
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     Promise.all([
         p1, p2, p3
     ]).then<void, void>((v: Object): void => {
         globalTest!.fail();
-    }, (err: NullishType): void => {
-        if (err != "def") {
+    }, (err: Error): void => {
+        if (err.message != "def") {
             globalTest!.fail();
         } else {
             globalTest!.success();
@@ -608,7 +608,7 @@ function testPromiseAllSettledEmpty(): void {
 function testPromiseAllSettled(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
-    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p2: Promise<Object> = Promise.reject<Object>(new Error("def"));
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     Promise.allSettled([
         p1, p2, p3
@@ -620,21 +620,21 @@ function testPromiseAllSettled(): void {
             globalTest!.fail();
         }
         let res0 = result[0] as PromiseFulfilledResult<Object>;
-        if (res0.status != "fulfilled" || res0.value != "abc") {
+        if (res0.status != PromiseStatus.fulfilled || res0.value != "abc") {
             globalTest!.fail();
         }
         if (!(result[1] instanceof PromiseRejectedResult)) {
             globalTest!.fail();
         }
         let res1 = result[1] as PromiseRejectedResult;
-        if (res1.status != "rejected" || res1.reason != "def") {
+        if (res1.status != PromiseStatus.rejected || res1.reason.message != "def") {
             globalTest!.fail();
         }
         if (!(result[2] instanceof PromiseFulfilledResult)) {
             globalTest!.fail();
         }
         let res2 = result[2] as PromiseFulfilledResult<Object>;
-        if (res2.status != "fulfilled" || res2.value != "xyz") {
+        if (res2.status != PromiseStatus.fulfilled || res2.value != "xyz") {
             globalTest!.fail();
         }
         globalTest!.success();
@@ -648,7 +648,7 @@ function testPromiseAnyEmpty(): void {
     let promises: Promise<Object>[] = [];
     Promise.any(promises).then<void, void>((v: Object): void => {
         globalTest!.fail();
-    }, (err: NullishType): void => {
+    }, (err: Error): void => {
         if (err != null && err instanceof AggregateError) {
             globalTest!.success();
         } else {
@@ -659,8 +659,8 @@ function testPromiseAnyEmpty(): void {
 
 function testPromiseAnyResolved(): void {
     globalTest = new Test();
-    let p1: Promise<Object> = Promise.reject<Object>("abc");
-    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p1: Promise<Object> = Promise.reject<Object>(new Error("abc"));
+    let p2: Promise<Object> = Promise.reject<Object>(new Error("def"));
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     Promise.any([
         p1, p2, p3
@@ -674,14 +674,14 @@ function testPromiseAnyResolved(): void {
 
 function testPromiseAnyRejected(): void {
     globalTest = new Test();
-    let p1: Promise<Object> = Promise.reject<Object>("abc");
-    let p2: Promise<Object> = Promise.reject<Object>("def");
-    let p3: Promise<Object> = Promise.reject<Object>("xyz");
+    let p1: Promise<Object> = Promise.reject<Object>(new Error("abc"));
+    let p2: Promise<Object> = Promise.reject<Object>(new Error("def"));
+    let p3: Promise<Object> = Promise.reject<Object>(new Error("xyz"));
     Promise.any([
         p1, p2, p3
     ]).then<void, void>((v: Object): void => {
         globalTest!.fail();
-    }, (err: NullishType): void => {
+    }, (err: Error): void => {
         if (err == null || !(err instanceof AggregateError)) {
             globalTest!.fail();
         } else {
@@ -705,7 +705,7 @@ function testPromiseAnyRawValues(): void {
 function testPromiseAnyIterable(): void {
     globalTest = new Test();
     let array = new Array<Object|PromiseLike<Object>>();
-    array.push(Promise.reject<Object>("def"));
+    array.push(Promise.reject<Object>(new Error("def")));
     array.push(Promise.resolve<Object>("xyz"));
     Promise.any<Object>(array).then<void>((value: Object): void => {
         if (value != "xyz") {
@@ -718,7 +718,7 @@ function testPromiseAnyIterable(): void {
 function testPromiseRaceResolved(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
-    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p2: Promise<Object> = Promise.reject<Object>(new Error("def"));
     Promise.race([
         p1, p2
     ]).then<void, void>((value: Object): void => {
@@ -726,21 +726,21 @@ function testPromiseRaceResolved(): void {
             globalTest!.fail();
         }
         globalTest!.success();
-    }, (error: NullishType): void => {
+    }, (error: Error): void => {
         globalTest!.fail();
     });
 }
 
 function testPromiseRaceRejected(): void {
     globalTest = new Test();
-    let p1: Promise<Object> = Promise.reject<Object>("abc");
+    let p1: Promise<Object> = Promise.reject<Object>(new Error("abc"));
     let p2: Promise<Object> = Promise.resolve<Object>("def");
     Promise.race([
         p1, p2
     ]).then<void, void>((value: Object): void => {
         globalTest!.fail();
-    }, (error: NullishType): void => {
-        if (error != "abc") {
+    }, (error: Error): void => {
+        if (error.message != "abc") {
             globalTest!.fail();
         }
         globalTest!.success();

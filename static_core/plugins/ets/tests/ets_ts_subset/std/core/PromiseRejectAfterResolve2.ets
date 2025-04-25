@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let thenable = Promise.resolve();
+let thenable = new Error("abc");
 let p = new Promise<string>((resolve: (value: string) => void, reject: (err: Object) => void): void => {
     resolve("abc");
     reject(thenable);

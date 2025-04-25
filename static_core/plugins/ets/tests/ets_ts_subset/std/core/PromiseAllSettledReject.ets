@@ -25,7 +25,7 @@ Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<st
         console.log("Test failed. Expected a string array of length 1 but got length " + values.length + ".");
         return;
     }
-    if (values[0].status != "rejected") {
+    if (values[0].status != PromiseStatus.rejected) {
         console.log("Test failed. Expected all elements has status 'rejected'.");
         return;
     }

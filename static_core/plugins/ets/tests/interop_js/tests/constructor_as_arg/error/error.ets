@@ -18,7 +18,7 @@ import {
     ParentClass,
     ChildClass,
     MethodClass,
-    createClassFunction,
+    CreateClassFunction,
 } from "main_js"
 
 const int = 1;
@@ -29,7 +29,7 @@ const arr: int[] = []
 
 function checkCreateClassFunctionInt(): boolean {
     try {
-        const TSClass = createClassFunction(int, tsInt);
+        const TSClass = CreateClassFunction(int, tsInt);
 
         return false;
     } catch (e) {
@@ -39,7 +39,7 @@ function checkCreateClassFunctionInt(): boolean {
 
 function checkCreateClassFunctionString(): boolean {
     try {
-        const TSClass = createClassFunction(str, tsInt);
+        const TSClass = CreateClassFunction(str, tsInt);
 
         return false;
     } catch (e) {
@@ -49,7 +49,7 @@ function checkCreateClassFunctionString(): boolean {
 
 function checkCreateClassFunctionObj(): boolean {
     try {
-        const TSClass = createClassFunction(obj, tsInt);
+        const TSClass = CreateClassFunction(obj, tsInt);
 
         return false;
     } catch (e) {
@@ -59,7 +59,7 @@ function checkCreateClassFunctionObj(): boolean {
 
 function checkCreateClassFunctionArr(): boolean {
     try {
-        const TSClass = createClassFunction(arr, tsInt);
+        const TSClass = CreateClassFunction(arr, tsInt);
 
         return false;
     } catch (e) {
@@ -69,7 +69,7 @@ function checkCreateClassFunctionArr(): boolean {
 
 function checkCreateClassFunctionArrow(): boolean {
     try {
-        createClassFunction(foo, tsInt);
+        CreateClassFunction(foo, tsInt);
 
         return false;
     } catch (e) {
@@ -79,7 +79,7 @@ function checkCreateClassFunctionArrow(): boolean {
 
 function checkCreateClassArrowFunctionInt(): boolean {
     try {
-        const TSClass = createClassFunction(int, tsInt);
+        const TSClass = CreateClassFunction(int, tsInt);
 
         return false;
     } catch (e) {
@@ -89,7 +89,7 @@ function checkCreateClassArrowFunctionInt(): boolean {
 
 function checkCreateClassArrowFunctionString(): boolean {
     try {
-        const TSClass = createClassFunction(str, tsInt);
+        const TSClass = CreateClassFunction(str, tsInt);
 
         return false;
     } catch (e) {
@@ -99,7 +99,7 @@ function checkCreateClassArrowFunctionString(): boolean {
 
 function checkCreateClassArrowFunctionObj(): boolean {
     try {
-        const TSClass = createClassFunction(obj, tsInt);
+        const TSClass = CreateClassFunction(obj, tsInt);
 
         return false;
     } catch (e) {
@@ -109,7 +109,7 @@ function checkCreateClassArrowFunctionObj(): boolean {
 
 function checkCreateClassArrowFunctionArr(): boolean {
     try {
-        const TSClass = createClassFunction(arr, tsInt);
+        const TSClass = CreateClassFunction(arr, tsInt);
 
         return false;
     } catch (e) {
@@ -119,7 +119,7 @@ function checkCreateClassArrowFunctionArr(): boolean {
 
 function checkCreateClassArrowFunctionArrow(): boolean {
     try {
-        createClassFunction(foo, tsInt);
+        CreateClassFunction(foo, tsInt);
 
         return false;
     } catch (e) {

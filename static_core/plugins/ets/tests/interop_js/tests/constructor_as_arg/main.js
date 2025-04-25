@@ -100,10 +100,10 @@ export class MethodClass {
 		return new anyClass(value);
 	}
 };
-export function createClassFunction(arg, val) {
+export function CreateClassFunction(arg, val) {
 	return new arg(val);
 };
-export function createClassArrowFunction(arg, val) {
+export function CreateClassArrowFunction(arg, val) {
 	return new arg(val);
 };
 export function checkInstance(MainClass, instance) {

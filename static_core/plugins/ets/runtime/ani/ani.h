@@ -1409,8 +1409,7 @@ struct __ani_interaction_api {
      * @param[in] fn The functional object to invoke.
      * @param[in] argc The number of arguments being passed to the functional object.
      * @param[in] argv A pointer to an array of references representing the arguments. Can be null if `argc` is 0.
-     * @param[out] result A pointer to store the result of the invocation. Can be null if the functional object does not
-     * return a value.
+     * @param[out] result A pointer to store the result of the invocation. Must be non null.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*FunctionalObject_Call)(ani_env *env, ani_fn_object fn, ani_size argc, ani_ref *argv, ani_ref *result);

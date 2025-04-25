@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let error = Promise.resolve();
+let error = new Error();
 let p = new Promise<string>((_: (v: string) => void, reject: (error: Object) => void) => {
     reject(error);
 });

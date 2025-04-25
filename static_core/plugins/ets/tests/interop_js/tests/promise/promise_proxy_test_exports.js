@@ -18,5 +18,5 @@ export async function jsAsync() {
 }
 
 export async function jsAsyncFailing() {
-    return Promise.reject('rejected');
+    return Promise.reject(Error('rejected'));
 }
