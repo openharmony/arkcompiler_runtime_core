@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
 
 /*---
-desc: >-
-    A compile-time error occurs if a throwing function value is assigned
-    to a non-throwing function type variable.
-    Call context, lambda, function type conversion, implicit
+desc: Throws clause should produce CTE
 tags: [compile-only, negative]
 ---*/
-{{c.decl}}
 
-function main() {
-    let x = ((p: {{c.type}}): {{c.type}} => { return p })(foo)
+function foo(): string throws {  // CTE expected
+    return "abc"
 }
-{%- endfor %}

@@ -67,72 +67,6 @@ cases:
           }
 
     - decl: |-
-          // Exception in launch function propagates outside
-          function foo(r: Promise<int>): int throws {
-              return await r
-          }
-          async function bar(p: int): Promise<int> throws {
-              if (p == 1) {
-                  throw new Exception('ABC')
-              }
-              return p + 1
-          }
-      use: |-
-          try {
-              foo(bar(1))
-              assertTrue(false)
-          } catch (e: Exception) {
-              assertTrue(e.message == 'ABC')  // expected
-          } catch (e) {
-              assertTrue(false)
-          }
-
-    - decl: |-
-          // Exception in await function propagates outside
-          function foo(p: int, r: Promise<int>): int throws {
-              if (p == 1) {
-                  throw new Exception('ABC')
-              }
-              return await r
-          }
-          async function bar(p: int): Promise<int> throws {
-              return p + 1
-          }
-      use: |-
-          try {
-              foo(1, bar(1))
-              assertTrue(false)
-          } catch (e: Exception) {
-              assertTrue(e.message == 'ABC')  // expected
-          } catch (e) {
-              assertTrue(false)
-          }
-
-    - decl: |-
-          // Exception re-thrown and propagates outside
-          function baz(r: Promise<int>, f: (r: Promise<int>) => int throws): int rethrows {
-              return f(r)
-          }
-          function foo(r: Promise<int>): int {
-              return await r
-          }
-          async function bar(p: int): Promise<int> throws {
-              if (p == 1) {
-                  throw new Exception('ABC')
-              }
-              return p + 1
-          }
-      use: |-
-          try {
-              baz(bar(1), foo)
-              assertTrue(false)
-          } catch (e: Exception) {
-              assertTrue(e.message == 'ABC')  // expected
-          } catch (e) {
-              assertTrue(false)
-          }
-
-    - decl: |-
           // Error in one promise should not affect other running promises
           async function foo(p: int): Promise<string> {
               if (p == 2) {
@@ -155,36 +89,6 @@ cases:
           arr = [foo(1), foo(2), foo(3)]
           for (let v of arr) res += bar(v)
           assertTrue(res == '1X3')
-
-    - decl: |-
-          // Exception in one promise should not affect other running promises
-          async function foo(p: int): Promise<string> throws {
-              if (p == 2) {
-                  throw new Exception('X')
-              }
-              return `${p}`
-          }
-
-          function bar(p: Promise<string>): string {
-              try {
-                  return await p
-              } catch (e: Exception) {
-                  return e.message
-              } catch (e) {
-                  return '' // should never come here
-              }
-          }
-
-          let arr: Promise<string>[]
-      use: |-
-          try {
-              let res = ''
-              arr = [foo(1), foo(2), foo(3)]
-              for (let v of arr) res += bar(v)
-              assertTrue(res == '1X3')
-          } catch (e) {
-              assertTrue(false)
-          }
 
     - decl: |-
           async function foo(p: string): Promise<string> {

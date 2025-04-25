@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -120,73 +120,6 @@ cases:
               return a
           }
       type: '(p: A[]) => B[]'
-
-    # functions
-    - decl: |-
-          class A {}
-          class B extends A {}
-          type F1 = (p: A) => A
-          type F2 = (p: A) => A throws
-
-          function f1(p: A): A {
-              return p
-          }
-
-          function f2(p: A): A throws {
-              if (p instanceof B) {
-                  throw new Exception()
-              }
-              return p
-          }
-
-          function foo(p: F1): F2 {
-              return f2
-          }
-      type: '(p: F2) => F2'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          type F1 = (p: A) => A
-          type F2 = (p: A) => A throws
-
-          function f1(p: A): A {
-              return p
-          }
-
-          function f2(p: A): A throws {
-              if (p instanceof B) {
-                  throw new Exception()
-              }
-              return p
-          }
-
-          function foo(p: F1): F2 {
-              return f2
-          }
-      type: '(p: F1) => F1'
-
-    - decl: |-
-          class A {}
-          class B extends A {}
-          type F1 = (p: A) => A
-          type F2 = (p: A) => A throws
-
-          function f1(p: A): A {
-              return p
-          }
-
-          function f2(p: A): A throws {
-              if (p instanceof B) {
-                  throw new Exception()
-              }
-              return p
-          }
-
-          function foo(p: F1): F2 {
-              return f2
-          }
-      type: '(p: F2) => F1'
 
     # unions
     - decl: |-

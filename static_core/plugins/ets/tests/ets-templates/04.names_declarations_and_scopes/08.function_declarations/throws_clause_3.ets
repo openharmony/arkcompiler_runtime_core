@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,25 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
 
 /*---
-desc: >-
-    A compile-time error occurs if a throwing function value is assigned
-    to a non-throwing function type variable.
-    Call context, method, function type conversion, implicit
+desc: Throws clause should produce CTE
 tags: [compile-only, negative]
 ---*/
-{{c.decl}}
 
-class Z {
-    meth(p: {{c.type}}): {{c.type}} {
+let foo = (p: string): string throws => {  // CTE expected
+    if (p == "") {
+        throw new Error()
+    } else {
         return p
     }
 }
-
-function main() {
-    let z: Z = new Z()
-    let x = z.meth(foo)
-}
-{%- endfor %}

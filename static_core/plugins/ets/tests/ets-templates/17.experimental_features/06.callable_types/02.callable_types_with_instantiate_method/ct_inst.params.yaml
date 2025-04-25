@@ -257,44 +257,6 @@ cases:
           }
 
     - decl: |-
-          // exception propagation from instantiate
-          class MyException extends Exception {}
-          class C {
-              static $_instantiate(f: ()=>C, p: boolean): C throws {
-                  if (p) {
-                      throw new MyException()
-                  }
-                  return f()
-              }
-          }
-      use: |-
-          try {
-              let x = C(true)
-              return 1
-          } catch (e) {
-              if (!(e instanceof MyException)) return 1
-          }
-
-    - decl: |-
-          // exception propagation from instantiate
-          class MyException extends Exception {}
-          class C {
-              static $_instantiate(f: () => C throws, p: boolean): C throws {
-                  return f()
-              }
-              constructor() throws {
-                  throw new MyException()
-              }
-          }
-      use: |-
-          try {
-              let x = C(true)
-              return 1
-          } catch (e) {
-              if (!(e instanceof MyException)) return 1
-          }
-
-    - decl: |-
           // using trailing lambda as explicit factory
           class C {
               fld: number = 0.0

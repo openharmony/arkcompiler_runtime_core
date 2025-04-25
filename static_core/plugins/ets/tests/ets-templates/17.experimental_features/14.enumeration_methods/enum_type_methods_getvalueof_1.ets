@@ -19,10 +19,11 @@ desc: getValueOf(string) returns an enumeration constant with the given name, or
 
 enum Color {Red, Green, Blue}
 
-function main(): void throws {
+function main(): void {
   try {
     Color.getValueOf("Yellow");
   } catch (e) {
-    assertTrue( true );
+    return
   }
+  assertTrue(false, "Error was expected")
 }

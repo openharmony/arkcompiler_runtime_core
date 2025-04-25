@@ -21,8 +21,6 @@ assert: Any local variable, formal parameter, or exception and panic parameter u
 tags: [compile-only, negative]
 ---*/
 
-class ZeroDivisor extends Exception { }
-
 class A {
   {{member.decl}};
 

@@ -17,31 +17,28 @@
 desc: Setter throw error.
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 
 class A {
   private _age: int = 0;
 
   set age(value: int) {
-    if (value < 0) { 
-      throw new TestException();
+    if (value < 0) {
+      throw new TestError();
     }
 
     this._age = value;
   }
 }
 
-function main(): void {
+function main() {
   let instance: A = new A();
-  let catchCode = 0;
 
   try {
     instance.age = -5;
-  } catch (e: TestException) {
-    catchCode = 1;
-  } catch (any) {
-    assertTrue( false );
+  } catch (e) {
+    assertTrue(e instanceof TestError)
+    return
   }
-
-  assertEQ( catchCode, 1 );
+  assertTrue(false, "Expected error wasn't caught")
 }

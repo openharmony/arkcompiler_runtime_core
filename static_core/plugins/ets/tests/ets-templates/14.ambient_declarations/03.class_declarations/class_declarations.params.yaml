@@ -68,10 +68,6 @@ declarations:
     declare class A<U, V> {
       constructor(u: U, v: V)
     }
-  - >
-    declare class A {
-      constructor() throws
-    }
   # classes and methods
   - >
     declare class A {
@@ -108,10 +104,6 @@ declarations:
   - >
     declare class A<U, V, R> {
       foo(u: U, v: V): R
-    }
-  - >
-    declare class A {
-      foo(): int throws
     }
   # classes and accessors
   - >
@@ -164,17 +156,17 @@ declarations:
     }
   - >
     class Returnee {}
-    
+
     declare class MyIndexable {
       readonly [index: number]: Returnee
     }
   - >
     declare class CallSignatureDeclaration {
-      static $_invoke(a: number, b: number): number 
+      static $_invoke(a: number, b: number): number
     }
   - >
     declare class CallSignatureDeclaration {
-      static $_instantiate(factory: () => CallSignatureDeclaration): CallSignatureDeclaration 
+      static $_instantiate(factory: () => CallSignatureDeclaration): CallSignatureDeclaration
     }
   - >
     class MyIterable implements Iterator<String> {
@@ -182,7 +174,7 @@ declarations:
         return {done: true, value: 'Hello World'}
       }
     }
-    
+
     declare class IterableClass  {
       [Symbol.iterator](): MyIterable
     }
@@ -192,7 +184,7 @@ declarations:
         return {done: true, value: 'Hello World'}
       }
     }
-    
+
     declare class IterableClass  {
       $_iterator(): MyIterable
     }
