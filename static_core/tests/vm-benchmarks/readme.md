@@ -244,6 +244,29 @@ For device platforms: required binaries should be pushed to device.
 Default place is `/data/local/tmp/vmb/v_8`.
 `/data/local/tmp/vmb` part could be configured via `--device-dir`
 
+### Hap (Ability Package) - Experimental
+This platform allows to run `arkts/ets` benchmarks as application ability
+
+##### Prerequisites:
+- `PANDA_SDK` env var should point to unpacked Panda OHOS SDK (package dir)
+- `OHOS_BASE_SDK_HOME` env var should point to unpacked OHOS SDK
+- `hvigorw` should be in PATH or `HVIGORW` env var should point to hvigor script or binary
+- `hdc` should be in PATH or `HDC` env var should point to hdc script or binary
+- For signing package `HAP_SIGNING_CONFIG` env var should point to json config 
+    as in `app/signingConfigs/material` section of `build-profile.json5`
+
+##### Run
+```sh
+vmb all -p hap -A examples/benchmarks/ets
+
+# --tests-per-batch option could be used to tune amount of benchmarks per one hap package (25 is the default)
+```
+##### Limitations
+- Total test run inside app is limited to 5 sec, so `-wi` is limited to 0..1 and `-mi` to 1..2.
+    `-wt` and `it` has no effect for `hap` platform.
+- "Macro" benchmarks (i.e. test functions which run longer than 1 sec) won't produce benchmark result.
+
+
 ## Platform Features
 
 | platform          | int-mode | aot-mode | jit-mode | gc-stats | jit-stats | aot-stats | imports |

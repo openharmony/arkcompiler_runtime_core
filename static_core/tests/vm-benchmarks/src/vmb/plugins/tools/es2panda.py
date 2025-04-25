@@ -22,15 +22,16 @@ from pathlib import Path
 from glob import glob
 from tempfile import mkstemp
 from string import Template
-from typing import List, Union
+from typing import List, Any, Union
 
 from vmb.tool import ToolBase, VmbToolExecError
 from vmb.unit import BenchUnit
 from vmb.shell import ShellResult
 from vmb.result import BuildResult, BUStatus
 from vmb.helpers import load_file, create_file
+from vmb.target import Target
 
-log = logging.getLogger('es2panda')
+log = logging.getLogger('vmb')
 
 
 def make_arktsconfig(configpath: Union[str, Path],
@@ -70,14 +71,56 @@ def make_arktsconfig(configpath: Union[str, Path],
         f.write(json.dumps(parsed_template))
 
 
+def fix_arktsconfig(dynamic_paths: Any = None) -> None:
+    ark_root_env = os.environ.get('PANDA_BUILD', '')
+    if not ark_root_env:
+        raise RuntimeError('PANDA_BUILD not set!')
+    ark_root = Path(ark_root_env).resolve()
+    if not ark_root.is_dir():
+        raise RuntimeError(f'PANDA_BUILD "{ark_root}" does not exist!')
+    ark_src_env = os.environ.get('PANDA_SRC', '')
+    if not ark_src_env:
+        raise RuntimeError('PANDA_SRC not set! Please point it to static_core dir.')
+    ark_src = Path(ark_src_env).resolve()
+    if not ark_src.is_dir():
+        raise RuntimeError(f'PANDA_SRC "{ark_src}" does not exist!')
+    config = ark_root.joinpath(
+        'tools', 'es2panda', 'generated', 'arktsconfig.json')
+    if config.is_file():
+        log.info('Updating %s with %s', config, ark_src)
+        with open(config, 'r', encoding="utf-8") as f:
+            j = json.load(f)
+        old_root = j.get('compilerOptions', {}).get('baseUrl', 'failed')
+        if dynamic_paths:
+            for k, v in dynamic_paths.items():
+                j['compilerOptions']['dynamicPaths'][k] = v
+        t = json.dumps(j)
+        with create_file(config) as f:
+            f.write(t.replace(old_root, str(ark_src)))
+        return
+    log.warning('%s does not exist! Creating it "manually"!', config)
+    make_arktsconfig(config, ark_src, [])
+
+
 class Tool(ToolBase):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.panda_root = self.ensure_dir(
-            os.environ.get('PANDA_BUILD', ''),
-            err='Please set $PANDA_BUILD env var'
-        )
+        # Panda binaries could be in form of:
+        # 1) panda build artifact
+        # 2) panda ohos sdk
+        # PANDA_SDK and PANDA_BUILD could be set simultaneously
+        panda_sdk = os.environ.get('PANDA_SDK', '')
+        if panda_sdk and Target.OHOS == self.target:
+            panda_root = os.path.join(panda_sdk, 'linux_host_tools')
+            self.panda_root = self.ensure_dir(
+                panda_root, err='Please point $PANDA_SDK to sdk/package')
+            os.environ['PANDA_BUILD'] = panda_root
+        else:
+            self.panda_root = self.ensure_dir(
+                os.environ.get('PANDA_BUILD', ''),
+                err='Please set $PANDA_BUILD env var'
+            )
         self.default_arktsconfig = str(Path(self.panda_root).joinpath(
             'tools', 'es2panda', 'generated', 'arktsconfig.json'))
         panda_stdlib_src = os.environ.get('PANDA_STDLIB_SRC', None)

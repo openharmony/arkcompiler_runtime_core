@@ -33,4 +33,5 @@ help:
 
 tox: dir
 	python3 -m tox --workdir=$(OUTDIR)
+	rm -rf src/vmb.egg-info/
 
