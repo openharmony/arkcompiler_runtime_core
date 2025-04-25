@@ -585,3 +585,15 @@ function checkInstaniateThrowString(): boolean {
     return res;
 }
 
+class foo {
+    public bar(): number {
+        return 0x55aa;
+    }
+}
+
+function checkCallEtsFromJS(): boolean {
+    let jsFuncFromJS = module.getProperty("callEtsFunc");
+    let param = new foo();
+    let ret = jsFuncFromJS.invoke(ESObject.wrap(param)).toNumber();
+    return (ret == 0x55aa);
+}

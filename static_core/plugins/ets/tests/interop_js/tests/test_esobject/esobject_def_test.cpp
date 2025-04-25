@@ -284,4 +284,9 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_instaniate)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniateThrowString"));
 }
 
+TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_call_ets_from_js)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallEtsFromJS"));
+}
+
 }  // namespace ark::ets::interop::js::testing

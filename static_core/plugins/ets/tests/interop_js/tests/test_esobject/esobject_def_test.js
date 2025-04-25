@@ -84,3 +84,7 @@ export class UserThrowString {
 export let doubledObj = {
     3.2: 'aaa'
 };
+
+export let callEtsFunc = function (foo) {
+    return foo.bar();
+};
