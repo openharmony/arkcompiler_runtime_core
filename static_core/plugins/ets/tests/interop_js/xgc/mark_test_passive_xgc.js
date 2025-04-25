@@ -14,14 +14,14 @@
  */
 const { init, triggerXGC, checkXRefsNumber } = require('./mark_test_utils.js');
 
-let g_threasholdSize = 2048;
-let g_array = new Array();
-let g_etsVm;
+let gThreasholdSize = 2048;
+let gArray = new Array();
+let gEtsVm;
 
 // clear the cross-reference objects that are referenced by the active objects
 function clearActiveRef() {
-    g_array = new Array();
-    const clearActiveRef = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    gArray = new Array();
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -38,9 +38,9 @@ function passiveXGCTest() {
     let jsNumAfter = 0;
     let stsNumAfter = 0;
     checkXRefsNumber(jsNum, stsNum);
-    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
-    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
-    for (let i = 0; i < g_threasholdSize; i++) {
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    for (let i = 0; i < gThreasholdSize; i++) {
         let j = i % 4;
         switch (j) {
             case 0:
@@ -57,7 +57,7 @@ function passiveXGCTest() {
                 stsNum++;
                 break;
             default:
-                g_array.push(createStsObject(false, false));
+                gArray.push(createStsObject(false, false));
                 stsNum++;
                 stsNumAfter++;
         }
@@ -66,11 +66,11 @@ function passiveXGCTest() {
     return {jsNumAfter: jsNumAfter, stsNumAfter: stsNumAfter};
 }
 
-g_etsVm = init('mark_test_passive_xgc_module', 'xgc_tests.abc');
+gEtsVm = init('mark_test_passive_xgc_module', 'xgc_tests.abc');
 
 let res = passiveXGCTest();
 // When the threshold is exceeded, the XGC is triggered
-const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
 createStsObject(false, false);
 
 checkXRefsNumber(res.jsNumAfter, res.stsNumAfter + 1);

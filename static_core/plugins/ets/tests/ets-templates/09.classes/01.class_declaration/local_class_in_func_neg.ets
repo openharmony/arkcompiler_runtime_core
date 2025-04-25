@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
 
 /*---
-desc: Declaration context, instance field declaration, literal type to type of literal conversion, implicit
-params: to {{c.to_type}}
-tags: [{{c.tags}}]
+desc: Local classes and interfaces are prohibited in ArkTS
+tags: [compile-only, negative]
 ---*/
 
-let d: {{c.to_type}}; // initialized with default value
-let p: {{c.from_type}} = {{c.expr}}
+function foo(): int {
 
-class A {
-    fld: {{c.to_type}} = p
+    class LocalClass {
+        fld: int
+
+        constructor() {
+          this.fld = 42;
+        }
+    }
+
+    return new LocalClass().fld
 }
 
 function main() {
-    d = new A().fld
-    assertEQ(d, {{c.expr}})
+    assertEQ(foo(), 42)
 }
-{%- endfor %}

@@ -17,11 +17,11 @@
 desc: Test using joint types to represent that a variable can be of multiple types.
 ---*/
 
-function main(): void {
-    class Base {}
-    class Derived extends Base {}
-    type A = Base | Derived;
+class Base {}
+class Derived extends Base {}
+type A = Base | Derived;
 
+function main(): void {
     let a = new Base();
     let b = new Derived();
 

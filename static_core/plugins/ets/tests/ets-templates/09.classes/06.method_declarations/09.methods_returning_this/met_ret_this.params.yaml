@@ -38,13 +38,13 @@ cases:
               this.fld += p
               return this
           }
-      use: |-
           class A extends B {
               foo(): this {
                   this.fld += 1
                   return this
               }
           }
+      use: |-
           let a: A = { fld: 1 }
           assertEQ(a.foo().foo(10).foo(), a)
           assertEQ(a.fld, 13)

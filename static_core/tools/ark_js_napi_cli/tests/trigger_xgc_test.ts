@@ -56,9 +56,10 @@ function main() {
     if (wr.deref() !== undefined) {
         throw new Error('XGC trigger was not called');
     }
-    if (stsObject == undefined) {
+    if (stsObject === undefined) {
         throw new Error('nullish stsObject');
     }
+    return;
 }
 
 main();

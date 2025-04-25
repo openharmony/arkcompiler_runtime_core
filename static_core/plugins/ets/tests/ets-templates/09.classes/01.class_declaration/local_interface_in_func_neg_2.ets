@@ -13,7 +13,26 @@
  * limitations under the License.
  */
 
-package std.annotations;
+/*---
+desc: Local classes and interfaces are prohibited in ArkTS
+tags: [compile-only, negative]
+---*/
 
-@Retention("RUNTIME")
-export @interface Module {};
+function foo(): int {
+
+    interface LocalInterface {
+        fld: int
+    }
+
+    class LocalClass implements LocalInterface {
+        fld: int
+    }
+
+    let v: LocalClass = new LocalClass
+    v.fld = 42
+    return v.fld
+}
+
+function main() {
+    assertEQ(foo(), 42)
+}

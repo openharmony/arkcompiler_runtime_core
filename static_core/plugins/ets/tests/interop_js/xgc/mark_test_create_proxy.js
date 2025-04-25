@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 const { init, validationXGCResult } = require('./mark_test_utils.js');
-let g_etsVm;
+let gEtsVm;
 
 /**
  * Proxy js objects on the sts side
  * js obj <- sts pobj <- sts obj
  */
 function proxyJsObjectTest() {
-    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
     proxyJsObject(Promise.resolve(), false, false);
 }
 
@@ -29,7 +29,7 @@ function proxyJsObjectTest() {
  * js pobj -> sts obj
  */
 function proxyStsObjectTest() {
-    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
     createStsObject(false, false);
 }
 
@@ -39,13 +39,13 @@ function proxyStsObjectTest() {
  * js pobj -> sts obj
  */
 function proxyObjectTest() {
-    const proxyJsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
     proxyJsObject(Promise.resolve(), false, false);
-    const createStsObject = g_etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
     createStsObject(false, false);
 }
 
-g_etsVm = init('mark_test_create_proxy_module', 'xgc_tests.abc');
+gEtsVm = init('mark_test_create_proxy_module', 'xgc_tests.abc');
 
 proxyJsObjectTest();
 validationXGCResult(1, 0, 0, 0);
