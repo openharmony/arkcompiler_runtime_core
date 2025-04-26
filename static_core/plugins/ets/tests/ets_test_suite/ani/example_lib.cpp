@@ -18,12 +18,12 @@
 #include <array>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
-ani_long NativeFuncExample([[maybe_unused]] ani_env *env, ani_long param1, ani_long param2)
+static ani_long NativeFuncExample([[maybe_unused]] ani_env *env, ani_long param1, ani_long param2)
 {
     return param1 * param2;
 }
 
-void TestCheck1(ani_env *env)
+static void TestCheck1(ani_env *env)
 {
     ani_double p1 = 5.0;
     ani_double p2 = 6.0;
@@ -40,7 +40,7 @@ void TestCheck1(ani_env *env)
     ASSERT_EQ(res, p1 + p2);
 }
 
-void TestCheck2(ani_env *env)
+static void TestCheck2(ani_env *env)
 {
     ani_long p1 = 12;
     ani_long p2 = -123;
@@ -57,7 +57,7 @@ void TestCheck2(ani_env *env)
     ASSERT_EQ(res, p1 * p2);
 }
 
-void TestCheck3()
+static void TestCheck3()
 {
     ani_vm *vm {nullptr};
     ani_env *env {nullptr};
@@ -99,7 +99,7 @@ void TestCheck3()
     ASSERT_EQ(res, false);
 }
 
-ani_long NativeTestFunc([[maybe_unused]] ani_env *env, ani_long param)
+static ani_long NativeTestFunc([[maybe_unused]] ani_env *env, ani_long param)
 {
     TestCheck1(env);
     TestCheck2(env);
