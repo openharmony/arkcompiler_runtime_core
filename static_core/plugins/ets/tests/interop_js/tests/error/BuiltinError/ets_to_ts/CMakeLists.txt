@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(ets_to_js)
-add_subdirectory(js_to_ets)
-add_subdirectory(ts_to_ets)
-add_subdirectory(ets_to_ts)
-add_subdirectory(BuiltinError)
+panda_ets_interop_js_gtest(ets_interop_js_builtinrror_ets_to_ts
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/builtinerror.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/builtinerror.ets
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_builtinerror.ts
+)

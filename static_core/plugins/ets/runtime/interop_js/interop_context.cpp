@@ -429,7 +429,10 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     //    Where js.UserError will be wrapped into compat/TypeError
     //    NOTE(vpukhov): compat: add intrinsic to obtain JSValue from compat/ instances
 
-    auto objRefconv = JSRefConvertResolve(ctx, ctx->GetESErrorClass());
+    auto env = InteropCtx::Current(coro)->GetJSEnv();
+    bool isInstanceof = false;
+    NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
+    auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? ctx->GetErrorClass() : ctx->GetESErrorClass());
     LocalObjectHandle<EtsObject> etsObj(coro, objRefconv->Unwrap(ctx, val));
     if (UNLIKELY(etsObj.GetPtr() == nullptr)) {
         INTEROP_LOG(INFO) << "Something went wrong while unwrapping pending js exception";
