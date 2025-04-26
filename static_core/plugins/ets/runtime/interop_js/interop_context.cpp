@@ -131,7 +131,10 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
 {
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
-    coro->GetPandaVM()->SetRunEventLoopFunction([]() { EventLoop::RunEventLoop(); });
+    coro->GetPandaVM()->SetRunEventLoopFunction(
+        [](EventLoopRunMode mode) { EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
+    coro->GetPandaVM()->SetWalkEventLoopFunction(
+        [](WalkEventLoopCallback &cb, void *args) { EventLoop::WalkEventLoop(cb, args); });
 }
 
 std::atomic_uint32_t ConstStringStorage::qnameBufferSize_ {0U};
