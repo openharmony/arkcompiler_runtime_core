@@ -29,7 +29,7 @@ export final class AsyncLock {
         this("default_name");
     }
 
-    constructor(name: string) {
+    internal constructor(name: string) {
         this.name = name;
         asyncLockManager.locks.set(name, this);
     }
@@ -97,7 +97,7 @@ export final class AsyncLock {
 
         this.lock<U>(callerCID, mode, asyncLockInfo, options);
         try {
-            return callback();
+            return Promise.resolve<T>(callback());
         } finally {
             this.unlock(asyncLockInfo);
         }

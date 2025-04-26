@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-let asyncLockTestsuite = new ArkTestsuite("asyncLockTestsuite");
+function main(): int {
+    let asyncLockTestsuite = new ArkTestsuite("asyncLockTestsuite");
 
-asyncLockTestsuite.addTest("TestWithEqualityAndNonEquality", () => {
+    asyncLockTestsuite.addTest("TestWithEqualityAndNonEquality", () => {
+        let failures = 0;
+        failures += asyncLockQueryTest();
+        failures += asyncLockDeadLockTest();
+        failures += asyncLockAvailableTest();
+        failures += asyncLockExclusiveModeTest();
+        failures += asyncLockQueryNonexistentNameTest();
 
-    let failures = 0;
-    failures += asyncLockQueryTest();
-    failures += asyncLockDeadLockTest();
-    failures += asyncLockAvailableTest();
-    failures += asyncLockExclusiveModeTest();
+        assertEQ(failures, 0);
+    });
 
-    assertEQ(failures, 0);
-});
+    return asyncLockTestsuite.run();
+}
 
 /**
  *  Check if lock returns information about current execution state.
@@ -43,6 +47,29 @@ function asyncLockQueryTest(): int {
         StdDebug.Logger.log("FAILED: AsyncLock query test");
         return 1;
     }
+}
+
+/**
+ *  Check if the query exception causes deadlock.
+ */
+function asyncLockQueryNonexistentNameTest(): int {
+    let result = 0;
+    let lockname = "name";
+    try {
+        AsyncLock.query(lockname);
+    } catch (e: Error) {
+        if(e.message != "AsyncLock " + lockname + " not found") {
+            result += 1; 
+        }
+    }
+
+    AsyncLock.request(lockname);
+
+    if (result != 0) {
+        StdDebug.Logger.log("FAILED: AsyncLock query nonexistent name test");
+    }
+
+    return result;
 }
 
 /**
