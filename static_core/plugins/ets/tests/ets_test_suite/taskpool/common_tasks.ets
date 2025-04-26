@@ -135,41 +135,47 @@ function taskWithDependencyExecutePeriodicallyTest(): void {
     }, new Error("taskpool:: the task with dependency cannot executePeriodically"));
 }
 
+function testTaskpoolInfo(){
+    // Check non empty threadInfo without tasks
+    let emptyThreadInfo = taskpool.getTaskPoolInfo();
+    assertNE(emptyThreadInfo.threadInfos.length, 0);
+    let flagForTask: AtomicFlag = new AtomicFlag(false);
+    let isRunTask: AtomicFlag = new AtomicFlag(false);
+    let funcForTask = (): string => {
+        isRunTask.set(true);
+        while (flagForTask.get() != true) {}
+        return "result"
+    };
+    let task = new taskpool.Task("task_name", funcForTask);
+    let info1 = taskpool.getTaskPoolInfo();
+    // Obtain the worker pool info, and the behavior is the same as 1.0 taskpool
+    assertNE(info1.threadInfos.length, 0);
+    let p = taskpool.execute(task, taskpool.Priority.HIGH);
+    // wait for task started
+    while (isRunTask.get() != true) {}
+    let info2 = taskpool.getTaskPoolInfo();
+    // Notify to continue task
+    flagForTask.set(true);
+    // Check current priority of the worker
+    assertEQ(info2.threadInfos[0].priority, taskpool.Priority.HIGH);
+    assertEQ(info2.taskInfos.length, 1);
+    assertNE(info2.threadInfos.length, 0);
+    let isNonEmptyWorker: boolean = false;
+    for (let threadInfo of info2.threadInfos) {
+        assertLT(0, threadInfo.tid);
+        isNonEmptyWorker = isNonEmptyWorker || (threadInfo.taskIds != undefined);
+    }
+    assertEQ(isNonEmptyWorker, true);
+    // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
+    assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
+    assertEQ(info2.taskInfos[0].name, "task_name");
+    assertEQ(await p, "result");
+}
+
 function main(): int {
     let commonTaskSuite = new ArkTestsuite("taskpool.CommonTask");
     let commonTaskSuiteDisabled = new ArkTestsuite("taskpool.CommonTask.DISABLED");
-    commonTaskSuite.addTest("GetTaskpoolInfoTest", () =>
-    {
-        let flagForTask: AtomicFlag = new AtomicFlag(false);
-        let isRunTask: AtomicFlag = new AtomicFlag(false);
-        let funcForTask = (): string => {
-            isRunTask.set(true);
-            while (flagForTask.get() != true) {}
-            return "result"
-        };
-        let task = new taskpool.Task("task_name", funcForTask);
-        let info1 = taskpool.getTaskPoolInfo();
-        // Obtain the worker pool info, and the behavior is the same as 1.0 taskpool
-        assertNE(info1.threadInfos.length, 0);
-        let p = taskpool.execute(task);
-        // wait for task started
-        while (isRunTask.get() != true) {}
-        let info2 = taskpool.getTaskPoolInfo();
-        // Notify to continue task
-        flagForTask.set(true);
-        assertEQ(info2.taskInfos.length, 1);
-        assertNE(info2.threadInfos.length, 0);
-        let isNonEmptyWorker: boolean = false;
-        for (let threadInfo of info2.threadInfos) {
-            assertLT(0, threadInfo.tid);
-            isNonEmptyWorker = isNonEmptyWorker || (threadInfo.taskIds != undefined);
-        }
-        assertEQ(isNonEmptyWorker, true);
-        // NOTE(ipetrov, #20349): uncomment when frontend fix enum comparison
-        assertEQ(info2.taskInfos[0].state as int, taskpool.State.RUNNING as int);
-        assertEQ(info2.taskInfos[0].name, "task_name");
-        assertEQ(await p, "result");
-    });
+    commonTaskSuite.addTest("GetTaskpoolInfoTest", testTaskpoolInfo);
     commonTaskSuite.addTest("OneTaskExecutionTest", () =>
     {
         let Sum = (): int => {
