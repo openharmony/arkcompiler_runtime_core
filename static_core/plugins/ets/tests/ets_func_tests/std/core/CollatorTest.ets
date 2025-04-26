@@ -37,7 +37,11 @@ function main(): int {
     failures += check(testSupportedLocalesOf(), "Test static SupportedLocalesOf")
     failures += check(testUsage(), "Test Collator with search usage")
     failures += check(testCollation(), "Test Collator specific collation")
-    
+    failures += check(testCollationFromLocale(), "Test Collator get collation from Locale")
+    failures += check(testNumericFromLocale(), "Test Collator get numeric from Locale")
+    failures += check(testCaseFirstFromLocale(), "Test Collator get caseFirst from Locale")
+    failures += check(testDe(), "Test deutsch letters with umlaut comparision")
+
     return failures
 }
 
@@ -366,7 +370,8 @@ function testUsage() : int {
 function testCollation() : int {
     {
         // https://snipp.ru/handbk/emoji
-        let c = new Intl.Collator(ru_RU, {collation: "emoji"} as Intl.CollatorOptions)
+        let c = new Intl.Collator(en_US, {collation: "emoji"} as Intl.CollatorOptions)
+        assertEQ(c.resolvedOptions().collation, "emoji")
         assertEQ(c.compare("😀","😄"), -1)
         assertEQ(c.compare("😀","😀"), 0)
         assertEQ(c.compare("&#128512;", "&#128516;"), -1)
@@ -374,12 +379,73 @@ function testCollation() : int {
     }
     {
         // https://en.wikipedia.org/wiki/Pinyin_table
-        let c = new Intl.Collator(ru_RU, {collation: "pinyin"} as Intl.CollatorOptions)
+        let c = new Intl.Collator(en_US, {collation: "pinyin"} as Intl.CollatorOptions)
+        assertEQ(c.resolvedOptions().collation, "pinyin")
         assertEQ(c.compare( "扽", "ㄌㄨㄢˊ"), 1)
         assertEQ(c.compare( "方言", "方"), 1)
         assertEQ(c.compare("ㄖㄨㄚˊ", "挼"), -1)
     }
 
+    return success
+}
+
+function testCollationFromLocale() : int {
+    {
+        let c = new Intl.Collator("zh-Hant-u-co-zhuyin", {} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.collation, "zhuyin")
+    }
+    {
+        let c = new Intl.Collator("zh-Hant-u-co-zhuyin", {"collation": "pinyin"} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.collation, "pinyin")
+    }
+
+    return success
+}
+
+function testNumericFromLocale() : int {
+    {
+        let c = new Intl.Collator("fr-Latn-FR-u-kn-true", {} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.numeric, true)
+    }
+    {
+        let c = new Intl.Collator("fr-Latn-FR-u-kn-false", {"numeric": true} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.numeric, true)
+    }
+    {
+        let c = new Intl.Collator("fr-Latn-FR-u-kn-true", {"numeric": false} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.numeric, false)
+    }
+
+    return success
+}
+
+function testCaseFirstFromLocale() : int {
+    {
+        let c = new Intl.Collator("fr-Latn-FR-u-kf-upper", {} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.caseFirst, "upper")
+    }
+    {
+        let c = new Intl.Collator("fr-Latn-FR-u-kf-upper", {"caseFirst": "lower"} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.caseFirst, "lower")
+    }
+    {
+        let c = new Intl.Collator("fr-Latn-FR-u-kf-upper", {"caseFirst": "false"} as Intl.CollatorOptions)
+        let resolved = c.resolvedOptions()
+        assertEQ(resolved.caseFirst, "false")
+    }
+    return success
+}
+
+function testDe() : int {
+    const collator = new Intl.Collator(intlBestFitLocale("de"))
+    assertEQ(collator.compare("ä", "z"), -1)
     return success
 }
 

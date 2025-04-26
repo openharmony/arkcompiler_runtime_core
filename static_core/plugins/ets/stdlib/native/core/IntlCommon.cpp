@@ -19,6 +19,11 @@
 
 namespace ark::ets::stdlib::intl {
 
+icu::UnicodeString StdStrToUnicode(const std::string &str)
+{
+    return icu::UnicodeString::fromUTF8(icu::StringPiece(str));
+}
+
 ani_string StdStrToAni(ani_env *env, const std::string &str)
 {
     return CreateUtf8String(env, str.data(), str.size());
