@@ -49,7 +49,7 @@ bool ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &[atName, at] : m->at) {
-        if (!cb(at.get(), data)) {
+        if (at.get() != nullptr && !cb(at.get(), data)) {
             return false;
         }
     }

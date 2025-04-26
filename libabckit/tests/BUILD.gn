@@ -227,7 +227,6 @@ test_ts_files = [
 
   "ut/extensions/arkts/inspect_api/api_casts/api_casts",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts_dynamic",
-  "ut/extensions/arkts/modify_api/annotations/annotations_dynamic",
 
   "regression/issue_IB1YEI/issue_IB1YEI",
   "regression/issue_IB2T4M/issue_IB2T4M",
@@ -314,6 +313,55 @@ test_ets_files = [
 test_ets_files += clean_scenario_ets_files
 
 module_output_path = "arkcompiler/runtime_core/libabckit"
+
+merge_datas = [
+  [
+    "ut/extensions/arkts/modify_api/annotations",
+    "annotations_dynamic",
+  ],
+  [
+    "ut/extensions/arkts/modify_api/annotations",
+    "annotations_imports",
+  ],
+]
+merge_file_info = merge_datas[0]
+anno_merge_file =
+    "$target_out_dir/${merge_file_info[0]}/${merge_file_info[1]}_merge.txt"
+anno_path_prefix = rebase_path("$test_js_path")
+anno_test_merge_path = rebase_path(anno_merge_file)
+content = ""
+foreach(data, merge_datas) {
+  item = "$anno_path_prefix/${data[0]}/${data[1]}.ts;${data[1]};esm;${data[1]}.ts;entry;false;ets"
+  if (content == "") {
+    content = "${content}echo '$item' > $anno_test_merge_path ; "
+  } else {
+    content = "${content}echo '$item' >> $anno_test_merge_path ; "
+  }
+}
+action("gen_anno_merge_file") {
+  script = "/usr/bin/sh"
+  args = [
+    "-c",
+    "$content",
+  ]
+  outputs = [ anno_merge_file ]
+}
+
+anno_test_abc = "$target_out_dir/ut/extensions/arkts/modify_api/annotations/annotations_dynamic.abc"
+es2abc_gen_abc("gen_anno_abc") {
+  extra_visibility = [ ":*" ]
+  extra_dependencies = [ ":gen_anno_merge_file" ]
+  src_js = "@" + anno_test_merge_path
+  dst_file = rebase_path(anno_test_abc)
+  extra_args = [
+    "--module",
+    "--merge-abc",
+    "--enable-annotations",
+  ]
+  extension = "ts"
+  in_puts = [ anno_merge_file ]
+  out_puts = [ anno_test_abc ]
+}
 
 foreach(file, test_js_files) {
   test_js = "${test_js_path}${file}.js"
@@ -748,6 +796,8 @@ libabckit_host_unittest_action("abckit_gtests") {
   foreach(file, test_ets_files) {
     deps += [ ":gen_${file}_abc" ]
   }
+
+  deps += [ ":gen_anno_abc" ]
 
   if (is_ohos && is_standard_system) {
     test_abc_dir = "/data/test"
