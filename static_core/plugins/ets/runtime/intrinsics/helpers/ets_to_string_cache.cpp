@@ -303,6 +303,7 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOr
     UNUSED_VAR(coro);
     return {ToString(number), ToStringResult::STORE_NEW};
 #else
+    EVENT_ETS_CACHE("Fastpath: create string from number with cache");
     auto index = GetIndex(number);
     // Atomic with acquire order reason: write of `elem` to array is dependency-ordered before reads from loaded `elem`
     auto *elem = Base::Get(index, std::memory_order_acquire);
@@ -335,6 +336,7 @@ EtsString *EtsToStringCache<T, Derived, Hash>::CacheAndGetNoCheck(EtsCoroutine *
                                                                   uint64_t cached)
 {
     ASSERT(elem != nullptr);
+    EVENT_ETS_CACHE("Fastpath: create string from number with cache");
     return FinishUpdate(coro, number, EtsToStringCacheElement<T>::FromCoreType(elem), cached).first;
 }
 
@@ -342,6 +344,7 @@ EtsString *EtsToStringCache<T, Derived, Hash>::CacheAndGetNoCheck(EtsCoroutine *
 template <typename T, typename Derived, typename Hash>
 EtsString *EtsToStringCache<T, Derived, Hash>::GetNoCache(T number)
 {
+    EVENT_ETS_CACHE("Slowpath: create string from number without cache");
     return ToString(number);
 }
 

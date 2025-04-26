@@ -276,9 +276,11 @@ bool PandaEtsVM::Initialize()
 
         coro->SetupNullValue(GetNullValue());
 
-        doubleToStringCache_ = DoubleToStringCache::Create(coro);
-        floatToStringCache_ = FloatToStringCache::Create(coro);
-        longToStringCache_ = LongToStringCache::Create(coro);
+        if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+            doubleToStringCache_ = DoubleToStringCache::Create(coro);
+            floatToStringCache_ = FloatToStringCache::Create(coro);
+            longToStringCache_ = LongToStringCache::Create(coro);
+        }
 
         referenceProcessor_->Initialize();
     }
@@ -683,9 +685,11 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
         }
         return true;
     });
-    visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
-    visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
-    visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
+    }
     {
         os::memory::LockHolder lock(rootProviderlock_);
         for (auto *rootProvider : rootProviders_) {

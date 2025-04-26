@@ -927,3 +927,7 @@ options:
   default: false
   description: Load entrypoint panda file in boot-panda-files
 
+- name: use-string-caches
+  type: bool
+  default: true
+  description: Whether to create cache for strings created from integer/floating point numbers.

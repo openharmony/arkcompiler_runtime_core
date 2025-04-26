@@ -364,7 +364,9 @@ extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
 
 extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, uint64_t number)
 {
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        return DoubleToStringDecimalNoCacheEntrypoint(number);
+    }
     return DoubleToStringCache::FromCoreType(cache)
         ->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number))
         ->GetCoreType();
@@ -373,7 +375,9 @@ extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, ui
 extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint64_t number, uint64_t cached)
 {
     auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-    ASSERT(cache != nullptr);
+    if (UNLIKELY(cache == nullptr)) {
+        return DoubleToStringDecimalNoCacheEntrypoint(number);
+    }
     return cache->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<double>(number), elem, cached)->GetCoreType();
 }
 

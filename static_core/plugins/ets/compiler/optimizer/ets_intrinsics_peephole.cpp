@@ -353,7 +353,8 @@ bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, Intrins
     ASSERT(intrinsic->GetInputsCount() == 3U);
     ASSERT(intrinsic->GetInput(2U).GetInst()->IsSaveState());
     auto graph = intrinsic->GetBasicBlock()->GetGraph();
-    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32) {
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32 ||
+        !graph->GetRuntime()->IsStringCachesUsed()) {
         return false;
     }
     auto radix = intrinsic->GetInput(1U).GetInst();

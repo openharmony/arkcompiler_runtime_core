@@ -328,3 +328,4 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_static_const_fo
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lower_boxed_boolean.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_doubled_xor.ets OPT_LEVEL 0)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/unsafe_memory.ets NATIVE BOOT_SELF SUPPORT_RELEASE)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_cache_options.ets)

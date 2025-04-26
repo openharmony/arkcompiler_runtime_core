@@ -51,11 +51,10 @@ double ParseFloat(EtsString *s, const uint32_t flags)
 
 EtsString *StdCoreDoubleToString(double number, int radix)
 {
-    if (UNLIKELY(radix != helpers::DECIMAL)) {
+    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    if (UNLIKELY(radix != helpers::DECIMAL || cache == nullptr)) {
         return helpers::FpToString(number, radix);
     }
-    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
-    ASSERT(cache != nullptr);
     return cache->GetOrCache(EtsCoroutine::GetCurrent(), number);
 }
 

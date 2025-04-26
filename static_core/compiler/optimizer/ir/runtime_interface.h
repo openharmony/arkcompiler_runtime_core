@@ -1633,6 +1633,11 @@ public:
         return nullptr;
     }
 
+    virtual bool IsStringCachesUsed() const
+    {
+        return false;
+    }
+
     NO_COPY_SEMANTIC(RuntimeInterface);
     NO_MOVE_SEMANTIC(RuntimeInterface);
 

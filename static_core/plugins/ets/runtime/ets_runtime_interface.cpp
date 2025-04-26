@@ -469,6 +469,11 @@ void *EtsRuntimeInterface::GetDoubleToStringCache() const
     return ark::ets::PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
 }
 
+bool EtsRuntimeInterface::IsStringCachesUsed() const
+{
+    return Runtime::GetCurrent()->GetOptions().IsUseStringCaches();
+}
+
 bool EtsRuntimeInterface::IsNativeMethodOptimizationEnabled() const
 {
     return true;
