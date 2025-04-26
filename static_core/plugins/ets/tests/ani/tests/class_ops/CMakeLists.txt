@@ -11,11 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# NOTE(ypigunova) enable tests. Issue: #23593
-if (PANDA_TARGET_ARM32)
-    return()
-endif()
-
 ani_add_gtest(ani_test_class_ops_class_find_field
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_field_test.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_field_test.ets
