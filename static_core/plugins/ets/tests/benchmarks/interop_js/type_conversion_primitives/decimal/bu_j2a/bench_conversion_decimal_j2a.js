@@ -35,7 +35,6 @@ function conversionDecimalJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         const seed = 123;
         this.strNumber = '';
         let stsVm = initEtsVm();

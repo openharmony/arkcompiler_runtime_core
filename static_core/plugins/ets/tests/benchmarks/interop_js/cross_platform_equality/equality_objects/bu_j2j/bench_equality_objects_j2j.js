@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-const {
+import {
     jsNum,
     jsObj,
     jsObjCopy,
-    jsObjOther,
-} = require('./import');
+    jsObjOther } from './test_import';
 
 /**
  * @State
@@ -35,14 +34,6 @@ function equalityObjectsJ2j() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
-    };
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
         return;
     };
 

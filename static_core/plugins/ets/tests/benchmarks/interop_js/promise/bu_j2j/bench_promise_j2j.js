@@ -18,14 +18,6 @@
  * @Tags interop, bu_j2j
  */
 function promiseJ2j() {
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
     async function checkPromise() {
         let loopTime = 0;
         await (() => {

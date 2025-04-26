@@ -27,7 +27,6 @@ function equalityPrimitivesJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         const State = stsVm.getClass('Lbench_equality_primitives_j2a/EqualityPrimitivesJ2a;');

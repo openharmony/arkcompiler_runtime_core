@@ -26,14 +26,6 @@ function stringifyObjectJ2j() {
     const obj = new Person();
 
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {

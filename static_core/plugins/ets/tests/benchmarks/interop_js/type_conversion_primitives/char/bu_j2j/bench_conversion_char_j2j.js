@@ -27,14 +27,6 @@ function conversionCharJ2j() {
     };
 
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {

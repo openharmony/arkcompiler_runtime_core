@@ -29,14 +29,6 @@ class UnlimitedArguments {
  * @Tags interop, bu_a2a
  */
 class ClassInitByRestA2a {
-
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
     /**
      * @Benchmark
      */

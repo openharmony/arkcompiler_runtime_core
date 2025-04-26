@@ -21,10 +21,16 @@ class ClassTest {
     }
 }
 
-const etsBigInt = 1n;
-const etsBool = true;
-const etsNull = null;
-const etsUndefined = undefined;
+const etsBigInt: bigint;
+const etsBool: boolean;
+const etsNull: null;
+const etsUndefined: undefined;
+static {
+    etsBigInt = 1n;
+    etsBool = true;
+    etsNull = null;
+    etsUndefined = undefined;
+}
 
 /**
  * @State
@@ -33,13 +39,6 @@ const etsUndefined = undefined;
 class EqualityPrimitivesA2a {
     noEqual: string = '==';
     equal: string = '!=';
-
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
 
     /**
      * @Benchmark

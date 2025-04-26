@@ -13,30 +13,20 @@
  * limitations under the License.
  */
 
-const { 
+import {
     jsNumber,
     jsByte,
     jsShort,
     jsInt,
     jsLong,
     jsFloat,
-    jsDouble
-} = require('./test_import');
+    jsDouble } from './test_import';
 
 /**
  * @State
  * @Tags interop, bu_j2a
  */
 function getNumericJ2j() {
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
     /**
      * @Benchmark
      */
@@ -48,7 +38,6 @@ function getNumericJ2j() {
         let longVal = jsLong;
         let floatVal = jsFloat;
         let doubleVal = jsDouble;
-        delete require.cache['./test_import'];
         return;
     };
 

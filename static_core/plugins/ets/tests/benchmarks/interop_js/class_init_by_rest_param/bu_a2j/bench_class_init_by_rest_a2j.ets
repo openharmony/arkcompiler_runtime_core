@@ -23,14 +23,6 @@ import {
  * @Tags interop, bu_a2j
  */
 class ClassInitByRestA2j {
-
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
     /**
      * @Benchmark
      */

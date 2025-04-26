@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-class Person {
+class Person1 {
     name = 'string';
     constructor() {
     }
 }
 
-module.exports = {
-    Person,
-};
+export let Person = Person1;

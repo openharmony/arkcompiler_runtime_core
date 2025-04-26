@@ -53,7 +53,6 @@ function mapCallbackJ2j() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         generateRandomArray(arrayLength, stringLength, testArray);
         return;
     };

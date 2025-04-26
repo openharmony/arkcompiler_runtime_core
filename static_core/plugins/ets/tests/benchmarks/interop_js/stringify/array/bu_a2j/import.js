@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-const array = [1, 2, 3, 4, 5];
+const array1 = [1, 2, 3, 4, 5];
 
-module.exports = {
-    array,
-};
+export let array = array1;

@@ -35,7 +35,6 @@ function conversionHexJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         this.hexString = '';
         const seed = 123;
         let stsVm = initEtsVm();

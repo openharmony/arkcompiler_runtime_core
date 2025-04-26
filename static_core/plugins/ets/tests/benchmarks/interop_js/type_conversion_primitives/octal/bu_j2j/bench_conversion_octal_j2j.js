@@ -41,14 +41,6 @@ function conversionOctalJ2j() {
     octalString = data.toString(8);
 
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {

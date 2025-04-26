@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-class UnlimitedArguments {
+class UnlimitedArguments1 {
     a = 0;
     constructor(arg) {
         let i = arg.length - 1;
@@ -24,6 +24,4 @@ class UnlimitedArguments {
     }
 }
 
-module.exports = {
-    UnlimitedArguments,
-};
+export let UnlimitedArguments = UnlimitedArguments1;

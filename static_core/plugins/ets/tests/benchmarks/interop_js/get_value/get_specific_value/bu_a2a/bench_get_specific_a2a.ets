@@ -21,13 +21,6 @@ export class GetSpecificA2a {
     valueHolder: ValueHolder = new ValueHolder();
 
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): boolean {

@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-const {
-    jsNum,
-} = require('./import');
+import { jsNum } from './test_import';
 
 /**
  * @State
@@ -32,14 +30,6 @@ function equalityNumericJ2j() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
-    };
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
         return;
     };
 

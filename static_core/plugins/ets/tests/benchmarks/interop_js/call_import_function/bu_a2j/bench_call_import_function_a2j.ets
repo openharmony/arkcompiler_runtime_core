@@ -21,13 +21,6 @@ import { jsVoid, returnAnonymous } from 'import';
  */
 class CallImportFunctionA2j {
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): number {

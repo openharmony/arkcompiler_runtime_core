@@ -29,13 +29,6 @@ class EqualityPrimitivesA2j {
     equal: string = '!=';
 
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): number {

@@ -21,12 +21,20 @@ class ClassTest {
     }
 }
 
-const etsArr: int[] = [];
-const etsArrCopy: int[] = etsArr;
-const etsArrOther: int[] = [];
-const etsArrowFunction = () => { };
-const etsArrowFunctionCopy = etsArrowFunction;
-const etsArrowFunctionOther = () => { };
+const etsArr: int[];
+const etsArrCopy: int[];
+const etsArrOther: int[];
+const etsArrowFunction: () => void;
+const etsArrowFunctionCopy: () => void;
+const etsArrowFunctionOther: () => void;
+static {
+    etsArr = [];
+    etsArrCopy = etsArr;
+    etsArrOther = [];
+    etsArrowFunction = () => { };
+    etsArrowFunctionCopy = etsArrowFunction;
+    etsArrowFunctionOther = () => { };
+}
 function foo() { }
 function fooOther() { }
 
@@ -37,13 +45,6 @@ function fooOther() { }
 class EqualityExtraA2a {
     noEqual: string = '==';
     equal: string = '!=';
-
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
 
     /**
      * @Benchmark

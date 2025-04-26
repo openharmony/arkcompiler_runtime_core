@@ -27,7 +27,6 @@ function equalityNumericJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         const State = stsVm.getClass('Lbench_equality_numeric_j2a/EqualityNumericJ2a;');

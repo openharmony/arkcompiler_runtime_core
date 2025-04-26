@@ -13,8 +13,5 @@
  * limitations under the License.
  */
 
-const jsNum = 1;
-
-module.exports = {
-    jsNum,
-};
+export let jsVoid = (a, b) => {};
+export let returnAnonymous = () => (a, b) => {};

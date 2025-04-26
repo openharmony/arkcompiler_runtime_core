@@ -25,7 +25,6 @@ function getNumericJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         if (!stsRT) {

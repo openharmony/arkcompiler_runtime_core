@@ -27,7 +27,6 @@ function equalityStringJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         const State = stsVm.getClass('Lbench_equality_string_j2a/EqualityStringJ2a;');

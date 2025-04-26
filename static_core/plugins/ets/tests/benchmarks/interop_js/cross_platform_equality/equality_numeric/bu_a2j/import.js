@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-const jsNum = 1;
+const jsNum1 = 1;
 
-module.exports = {
-    jsNum,
-};
+export let jsNum = jsNum1;

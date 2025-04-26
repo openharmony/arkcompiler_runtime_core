@@ -13,14 +13,6 @@
  * limitations under the License.
  */
 
-const jsBigInt = 1n;
-const jsBool = true;
-const jsNull = null;
-const jsUndefined = undefined;
+const jsNum1 = 1;
 
-module.exports = {
-    jsBigInt,
-    jsBool,
-    jsNull,
-    jsUndefined,
-};
+export let jsNum = jsNum1;

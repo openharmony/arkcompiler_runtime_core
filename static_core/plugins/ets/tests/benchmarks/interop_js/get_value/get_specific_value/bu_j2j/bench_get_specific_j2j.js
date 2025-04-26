@@ -13,27 +13,17 @@
  * limitations under the License.
  */
 
-const { 
+import {
     jsBigint,
     jsBoolean,
     jsNull,
-    jsUndefined
-} = require('./test_import');
+    jsUndefined } from './test_import';
 
 /**
  * @State
  * @Tags interop, bu_j2a
  */
 function getSpecificJ2j() {
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
     /**
      * @Benchmark
      */
@@ -42,7 +32,6 @@ function getSpecificJ2j() {
         let boolVal = jsBoolean;
         let nullVal = jsNull;
         let undefinedVal = jsUndefined;
-        delete require.cache['./test_import'];
         return;
     };
 

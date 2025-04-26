@@ -35,7 +35,6 @@ function conversionBinaryJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         const seed = 123;
         let stsVm = initEtsVm();
 

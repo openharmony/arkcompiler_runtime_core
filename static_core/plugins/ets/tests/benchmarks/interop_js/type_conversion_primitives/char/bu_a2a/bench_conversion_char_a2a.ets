@@ -28,13 +28,6 @@ class ConversionCharA2a {
     }
 
     /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
-    /**
      * @Benchmark
      */
     test(): string {

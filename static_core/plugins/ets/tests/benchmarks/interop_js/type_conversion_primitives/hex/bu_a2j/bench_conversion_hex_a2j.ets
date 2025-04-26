@@ -38,7 +38,6 @@ class ConversionHexA2j {
      * @Setup
      */
     public setup(): void {
-        console.log('Starting');
         const data: Number = this.generateNumber(this.seed);
         this.hexString = data.toString(16);
     }

@@ -45,7 +45,6 @@ function reduceCallbackJ2j() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         generateRandomArray(arrayLength, min, max, testArray);
     };
 

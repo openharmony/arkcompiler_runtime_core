@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-const { jsVoid, returnAnonymous } = require('./import');
+import { jsVoid, returnAnonymous } from './test_import';
+
 
 /**
  * @State
@@ -27,14 +28,6 @@ function callImportFunctionJ2j() {
     };
 
     const anonymous = returnAnonymous();
-
-    /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
 
     /**
      * @Benchmark

@@ -25,14 +25,6 @@ function returnAnonymous() {
  * @Tags interop, bu_a2a
  */
 class CallImportFunctionA2a {
-
-    /**
-     * @Setup
-     */
-    public setup(): void {
-        console.log('Starting');
-    }
-
     /**
      * @Benchmark
      */

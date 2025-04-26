@@ -29,7 +29,6 @@ function equalityExtraJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         const State = stsVm.getClass('Lbench_equality_extra_j2a/EqualityExtraJ2a;');

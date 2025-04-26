@@ -41,14 +41,6 @@ function conversionBinaryJ2j() {
     binaryString = data.toString(2);
 
     /**
-     * @Setup
-     */
-    this.setup = function () {
-        console.log('Starting...');
-        return;
-    };
-
-    /**
      * @Benchmark
      */
     this.test = function() {

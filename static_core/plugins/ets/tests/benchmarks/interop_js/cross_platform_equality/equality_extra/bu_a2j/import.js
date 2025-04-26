@@ -26,13 +26,11 @@ function jsFooOther() { }
 const keyOne = 'one';
 const keyTwo = 'two';
 
-module.exports = {
-    jsArr,
-    jsArrCopy,
-    jsArrOther,
-    jsArrowFoo,
-    jsArrowFooCopy,
-    jsArrowFooOther,
-    jsFoo,
-    jsFooOther,
-};
+export let jsArr;
+export let jsArrCopy;
+export let jsArrOther;
+export let jsArrowFoo;
+export let jsArrowFooCopy;
+export let jsArrowFooOther;
+export let jsFoo;
+export let jsFooOther;

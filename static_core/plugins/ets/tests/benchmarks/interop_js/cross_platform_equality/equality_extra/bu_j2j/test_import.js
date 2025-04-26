@@ -13,17 +13,24 @@
  * limitations under the License.
  */
 
-class UnlimitedArguments {
-    a = 0;
-    constructor(arg) {
-        let i = arg.length - 1;
-        while (i >= 0) {
-            this.a += arg[i];
-            i = i - 1;
-        }
-    }
-}
+const jsArr = [];
+const jsArrCopy = jsArr;
+const jsArrOther = [];
+const jsArrowFoo = () => { };
+const jsArrowFooCopy = jsArrowFoo;
+const jsArrowFooOther = () => { };
 
-module.exports = {
-    UnlimitedArguments,
-};
+function jsFoo() { }
+function jsFooOther() { }
+
+const keyOne = 'one';
+const keyTwo = 'two';
+
+export let jsArr;
+export let jsArrCopy;
+export let jsArrOther;
+export let jsArrowFoo;
+export let jsArrowFooCopy;
+export let jsArrowFooOther;
+export let jsFoo;
+export let jsFooOther;

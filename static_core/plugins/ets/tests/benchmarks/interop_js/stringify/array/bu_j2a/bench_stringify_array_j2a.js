@@ -24,7 +24,6 @@ function stringifyArrayJ2a() {
      * @Setup
      */
     this.setup = function () {
-        console.log('Starting...');
         let stsVm = initEtsVm();
 
         const getArray = stsVm.getFunction('LETSGLOBAL;', 'getArray');
