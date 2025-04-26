@@ -365,7 +365,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            {%- if element.get('name') != 'Uint8Clamped' %}
+            {%- if element.get('name') == 'BigUint64' %}
+            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
+            {%- elif element.get('name') != 'Uint8Clamped' %}
             this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( 'this.zeroIfInfinity(' + (valueOrBigIntGetULong % 'numbers[i]') + ')' ) }})
             {%- else %}
             this.setUnsafeClamp(i, numbers[i] as {{element['primitiveType']}})
@@ -379,7 +381,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            {%- if element.get('name') != 'Uint8Clamped' %}
+            {%- if element.get('name') == 'BigUint64' %}
+            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( valueOrBigIntGetULong % 'numbers[i]' ) }})
+            {%- elif element.get('name') != 'Uint8Clamped' %}
             this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( 'this.zeroIfInfinity(' + (valueOrBigIntGetULong % 'numbers[i]') + ')' ) }})
             {%- else %}
             this.setUnsafeClamp(i, numbers[i] as {{element['primitiveType']}})
@@ -400,6 +404,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
     {%- endif %}
 
+
+{%- if element.get('name') not in ['Uint8Clamped', 'BigUint64'] %}{#- comment: Uint8Array and others, except Uint8Clamped, BigUint64 #}
     internal zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
         {%- if element.get('subsetType') == 'number' %}
         if ((val == Infinity) || (val == -Infinity)) {
@@ -410,7 +416,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         }
         return {{asElementCompat % 'val'}}
     }
-{%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
 
     internal zeroIfInfinity(val: {{element['primitiveType']}}): {{element['primitiveType']}} {
         if ((val == Infinity) || (val == -Infinity)) {
@@ -510,7 +515,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @param index index to change
      */
     public $_set(index: int, val: {{element['subsetType']}}): void {
-        {%- if element['subsetType'] == 'number' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
         let v = this.zeroIfInfinity(val)
         this.$_set(index, {{fromElementCompat % 'v'}})
         {%- else %}
@@ -696,7 +701,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start?: number, end?: number): {{element['name']}}Array {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
         this.fill({{fromElementCompat % 'value'}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
@@ -711,7 +716,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: int, end?: number): {{element['name']}}Array {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
         this.fill({{fromElementCompat % 'value'}}, start as int, asIntOrDefault(end, this.lengthInt))
@@ -726,7 +731,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: int, end: number): {{element['name']}}Array {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
         this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
@@ -741,7 +746,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: number, end: int): {{element['name']}}Array {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
         this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
@@ -756,7 +761,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: int, end: int): {{element['name']}}Array {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
         this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
@@ -889,7 +894,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64']%}
             let v = this.zeroIfInfinity(arr[i])
             this.setUnsafeClamp(insertPos as int + i as int, {{fromElementCompat % 'v'}})
         {%- else %}
@@ -912,7 +917,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
         for (let i = 0; i < arr.length; i++) {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
             let v = this.zeroIfInfinity(arr[i])
             this.setUnsafeClamp(insertPos + i, v)
         {%- else %}
@@ -956,7 +961,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("offset is out of bounds")
         }
         for (let i = array.length - 1; i >= 0; --i) {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if not element.get('name') in ['Uint8Clamped', 'BigUint64'] %}
             let v = this.zeroIfInfinity(array[i])
             this.setUnsafeClamp(insertPos as int + i as int, {{fromElementCompat % 'v'}})
         {%- else %}
@@ -983,8 +988,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             res.setUnsafeClamp(i, items[i]{{numberBigIntToPrimitive}})
             {%- elif argType == 'number' %}
             {%- if element.get('name') == 'BigUint64' %}
-            const isInfinity = (items[i] == Infinity) || (items[i] == -Infinity)
-            res.setUnsafeClamp(i, ({{asElementCompat % '(isInfinity ? 0 : items[i])'}}){{numberBigIntToPrimitive}})
+            res.setUnsafeClamp(i, ({{asElementCompat % 'items[i]'}}){{numberBigIntToPrimitive}})
             {%- else %}
             res.setUnsafeClamp(i, res.zeroIfInfinity(items[i]) as {{element['primitiveType']}})
             {%- endif %}

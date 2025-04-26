@@ -5947,7 +5947,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             this.buffer = new ArrayBuffer(this.byteLength as int)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, this.zeroIfInfinity(arr.$_get(i)).getLong())
+                this.setUnsafe(i, arr.$_get(i).getLong())
             }
         } else {
           let x = BigInt64Array.from(elements)
@@ -6171,7 +6171,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public constructor(numbers: FixedArray<number>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i] as long))
+            this.setUnsafe(i, numbers[i] as long)
         }
     }
 
@@ -6181,7 +6181,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public constructor(numbers: FixedArray<int>) {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, this.zeroIfInfinity(numbers[i] as long))
+            this.setUnsafe(i, numbers[i] as long)
         }
     }
 
@@ -6193,20 +6193,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, numbers[i].getLong())
         }
-    }
-
-    internal zeroIfInfinity(val: BigInt): BigInt {
-        if ((val.getLong() == Infinity) || (val.getLong() == -Infinity)) {
-            return new BigInt(0)
-        }
-        return new BigInt(val)
-    }
-
-    internal zeroIfInfinity(val: long): long {
-        if ((val == Infinity) || (val == -Infinity)) {
-            return 0 as long
-        }
-        return val
     }
 
     /**
@@ -6447,7 +6433,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start?: number, end?: number): this {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getLong(), asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
         return this
     }
@@ -6460,7 +6445,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start: int, end?: number): this {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getLong(), start as int, asIntOrDefault(end, this.lengthInt))
         return this
     }
@@ -6473,7 +6457,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start: int, end: number): this {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getLong(), start as int, end as int)
         return this
     }
@@ -6486,7 +6469,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start: number, end: int): this {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getLong(), start as int, end as int)
         return this
     }
@@ -6499,7 +6481,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns modified BigInt64Array
      */
     public fill(value: BigInt, start: int, end: int): this {
-        value = this.zeroIfInfinity(value)
         this.fill(value.getLong(), start as int, end as int)
         return this
     }
@@ -6607,8 +6588,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < arr.length as int; ++i) {
-            let v = this.zeroIfInfinity(arr[i])
-            let truncatedVal: BigInt = BigInt.asIntN(64, v)
+            let truncatedVal: BigInt = BigInt.asIntN(64, arr[i])
             this.$_set(offset + i, truncatedVal.getLong())
         }
     }
@@ -6628,8 +6608,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             throw new RangeError("offset is out of bounds")
         }
         for (let i = 0; i < arr.length as int; ++i) {
-            let v = this.zeroIfInfinity(arr[i])
-            this.$_set(offset + i, v)
+            this.$_set(offset + i, arr[i])
         }
     }
 
@@ -6668,8 +6647,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             throw new RangeError("offset is out of bounds")
         }
         for (let i = array.length - 1 as int; i >= 0; --i) {
-            let v = this.zeroIfInfinity(array[i])
-            let truncatedVal: BigInt = BigInt.asIntN(64, v)
+            let truncatedVal: BigInt = BigInt.asIntN(64, array[i])
             this.$_set(offset + i, truncatedVal.getLong())
         }
     }
@@ -6684,8 +6662,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public static of(...items: FixedArray<number>): BigInt64Array {
         let res = new BigInt64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
-            const isInfinity = (items[i] == Infinity) || (items[i] == -Infinity)
-            res.setUnsafe(i, (isInfinity ? 0 : items[i]) as long)
+            res.setUnsafe(i, items[i] as long)
         }
         return res
     }
