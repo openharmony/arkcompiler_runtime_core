@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-let asyncLockTestsuite = new ArkTestsuite("asyncLockTestsuite");
+function main(): int {
+    let asyncLockTestsuite = new ArkTestsuite("asyncLockTestsuite");
 
-asyncLockTestsuite.addTest("TestWithEqualityAndNonEquality", () => {
+    asyncLockTestsuite.addTest("TestWithEqualityAndNonEquality", () => {
+        let failures = 0;
+        failures += asyncLockQueryTest();
+        failures += asyncLockDeadLockTest();
+        failures += asyncLockAvailableTest();
+        failures += asyncLockExclusiveModeTest();
 
-    let failures = 0;
-    failures += asyncLockQueryTest();
-    failures += asyncLockDeadLockTest();
-    failures += asyncLockAvailableTest();
-    failures += asyncLockExclusiveModeTest();
+        assertEQ(failures, 0);
+    });
 
-    assertEQ(failures, 0);
-});
+    return asyncLockTestsuite.run();
+}
 
 /**
  *  Check if lock returns information about current execution state.
