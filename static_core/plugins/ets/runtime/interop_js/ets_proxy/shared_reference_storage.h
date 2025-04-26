@@ -58,6 +58,9 @@ public:
     PANDA_PUBLIC_API SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
                                                          const PreInitJSObjectCallback &preInitCallback = nullptr);
     SharedReference *CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+
+    SharedReference *CreateJSObjectRefwithWrap(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+
     SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
 
     PANDA_PUBLIC_API SharedReference *GetReference(napi_env env, napi_value jsObject) const;
@@ -110,6 +113,10 @@ private:
     SharedReferenceStorage(PandaEtsVM *vm, void *data, size_t size) : SharedReferencePool(data, size), vm_(vm) {}
     NO_COPY_SEMANTIC(SharedReferenceStorage);
     NO_MOVE_SEMANTIC(SharedReferenceStorage);
+
+    template <SharedReference::InitFn REF_INIT>
+    SharedReference *CreateRefCommon(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject,
+                                     const PreInitJSObjectCallback &callback = nullptr);
 
     PANDA_PUBLIC_API static SharedReferenceStorage *GetCurrent()
     {
