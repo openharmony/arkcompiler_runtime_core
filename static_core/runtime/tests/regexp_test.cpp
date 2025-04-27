@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,39 @@ protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     ark::MTManagedThread *thread_;
 };
+
+TEST_F(RegExpTest, UnicodeTest)
+{
+    RegExpParser parser = RegExpParser();
+    {
+        PandaString source = u8"A";  // u8前缀确保UTF-8编码
+        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
+        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
+        PandaString name {};
+        parser.ParseGroupSpecifier(&p, name);
+    }
+    {
+        PandaString source = u8"¢";  // u8前缀确保UTF-8编码
+        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
+        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
+        PandaString name {};
+        parser.ParseGroupSpecifier(&p, name);
+    }
+    {
+        PandaString source = u8"€";  // u8前缀确保UTF-8编码
+        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
+        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
+        PandaString name {};
+        parser.ParseGroupSpecifier(&p, name);
+    }
+    {
+        PandaString source = u8"𐍈";  // u8前缀确保UTF-8编码
+        parser.Init(const_cast<char *>(reinterpret_cast<const char *>(source.c_str())), source.size(), 0);
+        const auto *p = reinterpret_cast<const uint8_t *>(source.c_str());
+        PandaString name {};
+        parser.ParseGroupSpecifier(&p, name);
+    }
+}
 
 TEST_F(RegExpTest, ParseError1)
 {

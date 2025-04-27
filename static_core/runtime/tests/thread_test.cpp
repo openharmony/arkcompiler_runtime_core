@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <string_view>
 
 #include "gtest/gtest.h"
 #include "runtime/include/runtime.h"
@@ -172,4 +173,66 @@ DEATH_TEST_F(ThreadTest, TestAllConversions)
     thread->ManagedCodeEnd();
     AssertNative();
 }
+
+std::string GetThreadStatus(ThreadStatus status)
+{
+    std::string expected;
+    switch (status) {
+        case ThreadStatus::CREATED:
+            expected = "New";
+            break;
+        case ThreadStatus::RUNNING:
+            expected = "Runnable";
+            break;
+        case ThreadStatus::IS_BLOCKED:
+            expected = "Blocked";
+            break;
+        case ThreadStatus::IS_WAITING:
+            expected = "Waiting";
+            break;
+        case ThreadStatus::IS_TIMED_WAITING:
+            expected = "Timed_waiting";
+            break;
+        case ThreadStatus::IS_SUSPENDED:
+            expected = "Suspended";
+            break;
+        case ThreadStatus::IS_COMPILER_WAITING:
+            expected = "Compiler_waiting";
+            break;
+        case ThreadStatus::IS_WAITING_INFLATION:
+            expected = "Waiting_inflation";
+            break;
+        case ThreadStatus::IS_SLEEPING:
+            expected = "Sleeping";
+            break;
+        case ThreadStatus::IS_TERMINATED_LOOP:
+            expected = "Terminated_loop";
+            break;
+        case ThreadStatus::TERMINATING:
+            expected = "Terminating";
+            break;
+        case ThreadStatus::NATIVE:
+            expected = "Native";
+            break;
+        case ThreadStatus::FINISHED:
+            expected = "Terminated";
+            break;
+        default:
+            expected = "unknown";
+            break;
+    }
+    return expected;
+}
+
+TEST_F(ThreadTest, ThreadStatusAsStringTest)
+{
+    int start = static_cast<int>(ThreadStatus::CREATED);
+    int end = static_cast<int>(ThreadStatus::FINISHED);
+    for (int i = start; i <= end; ++i) {
+        auto status = static_cast<ThreadStatus>(i);
+        std::string expected = GetThreadStatus(status);
+        EXPECT_EQ(std::string_view(ManagedThread::ThreadStatusAsString(status)), std::string_view(expected));
+    }
+}
+
 }  // namespace ark::test
