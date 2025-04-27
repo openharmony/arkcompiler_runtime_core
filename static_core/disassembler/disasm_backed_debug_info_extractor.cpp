@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,12 +91,9 @@ const std::optional<std::string> &DisasmBackedDebugInfoExtractor::GetDisassembly
         return it->second;
     }
 
-    auto sourceFile = std::string(DebugInfoExtractor::GetSourceFile(methodId));
-#if defined(PANDA_TARGET_OHOS) || defined(PANDA_TARGET_MOBILE)
+    std::string_view sourceFile = DebugInfoExtractor::GetSourceFile(methodId);
     if (!sourceFile.empty()) {
-#else
-    if (os::file::File::IsRegularFile(sourceFile)) {
-#endif
+        // Mark the queried method to be ignored, because debug information is available for it
         return sourceNames_.emplace(methodId, std::nullopt).first->second;
     }
 
