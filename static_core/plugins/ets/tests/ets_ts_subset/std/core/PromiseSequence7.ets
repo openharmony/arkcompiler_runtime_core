@@ -28,7 +28,7 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 
 let sequence = new Array<number>();
 let resolve: ((value: number) => void)|null = null;
-let p = new Promise<number>((_resolve: (v: number) => void, _: (error: Object) => void) => {
+let p = new Promise<number>((_resolve: (v: number) => void, _: (error: Error) => void) => {
     resolve = _resolve;
 });
 

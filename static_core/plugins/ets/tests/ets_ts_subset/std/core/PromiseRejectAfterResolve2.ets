@@ -14,7 +14,7 @@
  */
 
 let thenable = new Error("abc");
-let p = new Promise<string>((resolve: (value: string) => void, reject: (err: Object) => void): void => {
+let p = new Promise<string>((resolve: (value: string) => void, reject: (err: Error) => void): void => {
     resolve("abc");
     reject(thenable);
 });
@@ -25,6 +25,6 @@ p.then<void, void>((value: string): void => {
         return;
     }
     console.log("Test passed.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
 });

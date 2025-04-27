@@ -19,6 +19,6 @@ let p = Promise.resolve<number>(7).then<void, void>((value: number): void => {
         return;
     }
     console.log("Test passed.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     console.log("Test failed. The promise shouldn`t be rejected.");
 });

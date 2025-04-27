@@ -20,6 +20,6 @@ Promise.allSettled(array).then<void, void>((values: PromiseSettledResult<string>
         return;
     }
     console.log("Test passed.");
-}, (error: Object): void => {
+}, (error: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
 });

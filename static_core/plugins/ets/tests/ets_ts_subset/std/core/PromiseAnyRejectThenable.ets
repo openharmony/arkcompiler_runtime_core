@@ -16,7 +16,7 @@
 let error = new Error();
 
 class Thenable implements PromiseLike<Error> {
-    then<U, E>(_?: (value: Error) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(_?: (value: Error) => U|PromiseLike<U>, onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve<E>(onRejected!(error));
     }
 }

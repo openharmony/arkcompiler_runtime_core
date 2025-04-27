@@ -14,13 +14,13 @@
  */
 
 let error = new Error();
-let p = new Promise<string>((resolve: (value: string) => void, reject: (error: Object) => void) => {
+let p = new Promise<string>((resolve: (value: string) => void, reject: (error: Error) => void) => {
     throw error;
 });
 
 p.then<void, void>((value: string): void => {
     console.log("Test failed. The promise should not be fulfilled.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     if (err !== error) {
         console.log("Test failed. The promise should be rejected with the resolution value.");
         return;

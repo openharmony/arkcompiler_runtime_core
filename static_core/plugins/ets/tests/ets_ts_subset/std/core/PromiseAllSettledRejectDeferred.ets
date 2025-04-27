@@ -16,7 +16,7 @@ class Thenable implements PromiseLike<string> {
     constructor(e: Error) {
         this.error = e;
     }
-    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(_?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         return Promise.resolve().then<E>((): E|PromiseLike<E> => {
             return onRejected!(this.error);
         });
@@ -40,6 +40,6 @@ Promise.allSettled([thenable]).then<void, void>((values: PromiseSettledResult<st
         return;
     }
     console.log("Test passed.");
-}, (error: Object): void => {
+}, (error: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
 });

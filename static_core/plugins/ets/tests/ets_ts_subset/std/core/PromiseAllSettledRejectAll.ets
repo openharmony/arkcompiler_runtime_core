@@ -38,8 +38,8 @@ Promise.allSettled([r1, r2, r3]).then<void, void>((values: PromiseSettledResult<
         return;
     }
     console.log("Test passed.");
-}, (error: Object): void => {
+}, (error: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
-}).catch((e: Object): void => {
+}).catch((e: Error): void => {
     console.log("Test failed: " + e);
 });

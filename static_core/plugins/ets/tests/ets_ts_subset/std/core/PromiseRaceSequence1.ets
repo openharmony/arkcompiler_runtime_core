@@ -27,7 +27,7 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 }
 
 let sequence = new Array<number>();
-let p1 = new Promise<string>((resolve: (value: string) => void, reject: (err: Object) => void): void => {});
+let p1 = new Promise<string>((resolve: (value: string) => void, reject: (err: Error) => void): void => {});
 let p2 = Promise.resolve<string>("abc");
 let p = Promise.race([p1, p2]);
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let p = new Promise<number>((resolve: (v: number) => void, _: (error: Object) => void) => {
+let p = new Promise<number>((resolve: (v: number) => void, _: (error: Error) => void) => {
     resolve(7);
 });
 
@@ -23,6 +23,6 @@ p.then<void, void>((value: number): void => {
         return;
     }
     console.log("Test passed.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     console.log("Test failed. The promise shouldn`t be rejected.");
 });

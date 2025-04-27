@@ -28,8 +28,8 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 
 let sequence = new Array<number>();
 let resolve: ((value: number) => void)|null = null;
-let reject: ((err: Object) => void)|null = null;
-new Promise<number>((_resolve: (v: number) => void, _: (error: Object) => void) => {
+let reject: ((err: Error) => void)|null = null;
+new Promise<number>((_resolve: (v: number) => void, _: (error: Error) => void) => {
     resolve = _resolve;
 }).then<void>((): void => {
     sequence.push(3)
@@ -37,7 +37,7 @@ new Promise<number>((_resolve: (v: number) => void, _: (error: Object) => void) 
     checkSequence(sequence, 3);
     console.log("Test passed.");
 });
-new Promise<number>((_: (v: number) => void, _reject: (error: Object) => void) => {
+new Promise<number>((_: (v: number) => void, _reject: (error: Error) => void) => {
     reject = _reject;
 }).catch<void>((): void => {
     sequence.push(2);

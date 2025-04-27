@@ -14,13 +14,13 @@
  */
 
 let resolve: ((value: Object) => void)|null = null;
-let p = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Object) => void) => {
+let p = new Promise<Object>((_resolve: (v: Object) => void, _: (error: Error) => void) => {
     resolve = _resolve;
 });
 
 p.then<void, void>((value: Object): void => {
     console.log("Test failed. The promise should not be resolved.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     if (err instanceof TypeError) {
         console.log("Test passed.");
         return;

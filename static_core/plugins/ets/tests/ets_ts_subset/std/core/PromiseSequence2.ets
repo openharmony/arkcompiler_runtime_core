@@ -28,11 +28,11 @@ function checkSequence(actual: Array<number>, expectedLength: number): void {
 
 let sequence = new Array<number>();
 let resolve: ((value: number) => void)|null = null;
-let reject: ((err: Object) => void)|null = null;
-let p1 = new Promise<number>((_resolve: (v: number) => void, _: (error: Object) => void) => {
+let reject: ((err: Error) => void)|null = null;
+let p1 = new Promise<number>((_resolve: (v: number) => void, _: (error: Error) => void) => {
     resolve = _resolve;
 });
-let p2 = new Promise<number>((_: (v: number) => void, _reject: (error: Object) => void) => {
+let p2 = new Promise<number>((_: (v: number) => void, _reject: (error: Error) => void) => {
     reject = _reject;
 });
 

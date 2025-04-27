@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 class Fulfill implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, _?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         return new Promise<U>((resolve: (value: U|PromiseLike<U>) => void) => {
             resolve(onFulfilled!("abc"));
         });
@@ -21,10 +21,10 @@ class Fulfill implements PromiseLike<string> {
 }
 
 class Reject implements PromiseLike<string> {
-    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Object) => E|PromiseLike<E>): PromiseLike<U|E> {
+    then<U, E>(onFulfilled?: (value: string) => U|PromiseLike<U>, onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
         return new Promise<U>((resolve: (value: U|PromiseLike<U>) => void) => {
             let v = onFulfilled!("def");
-            onRejected!("xyz");
+            onRejected!(new Error("xyz"));
             resolve(v);
         });
     }
@@ -37,6 +37,6 @@ Promise.any(thenable).then<void, void>((value: string): void => {
         return;
     }
     console.log("Test passed.");
-}, (error: Object): void => {
+}, (error: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
 });

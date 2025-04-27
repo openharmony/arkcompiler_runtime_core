@@ -92,7 +92,7 @@ export final class AsyncLock {
 
     private static launchPromise<T>(f: Function, ...args: FixedArray<NullishType>): Promise<T> {
         let resolver: (((v: T | PromiseLike<T>) => void) | undefined) = undefined;
-        let rejecter: (((error: NullishType) => void) | undefined) = undefined;
+        let rejecter: (((error: Error) => void) | undefined) = undefined;
         let p = new Promise<T>((res, rej) => {
             resolver = res
             rejecter = rej;

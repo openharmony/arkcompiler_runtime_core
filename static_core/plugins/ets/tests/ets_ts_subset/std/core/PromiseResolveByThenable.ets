@@ -15,7 +15,7 @@
 
 let value = new Object();
 let thenable = Promise.resolve<Object>(value);
-let p = new Promise<Object>((resolve: (v: Object) => void, _: (error: Object) => void) => {
+let p = new Promise<Object>((resolve: (v: Object) => void, _: (error: Error) => void) => {
     resolve(thenable);
 });
 
@@ -25,6 +25,6 @@ p.then<void, void>((v: Object): void => {
         return;
     }
     console.log("Test passed.");
-}, (err: Object): void => {
+}, (err: Error): void => {
     console.log("Test failed. The promise should be rejected.");
 });

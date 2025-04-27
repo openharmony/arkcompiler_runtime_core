@@ -33,7 +33,7 @@ let p3 = Promise.reject<number>(new Error("3"));
 
 sequence.push(1);
 
-p1.catch<void>((err: Object): void => {
+p1.catch<void>((err: Error): void => {
     sequence.push(3);
     checkSequence(sequence, 3);
 });
@@ -51,7 +51,7 @@ p2.then<void>((): void => {
 
 sequence.push(2);
 
-p3.catch<void>((err: Object): void => {
+p3.catch<void>((err: Error): void => {
     sequence.push(5);
     checkSequence(sequence, 5);
 });

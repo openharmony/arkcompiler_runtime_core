@@ -34,6 +34,6 @@ Promise.all([v1, v2, v3]).then<void, void>((values: Array<Object>): void => {
         return;
     }
     console.log("Test passed.");
-}, (error: Object): void => {
+}, (error: Error): void => {
     console.log("Test failed. The promise should not be rejected.");
 });

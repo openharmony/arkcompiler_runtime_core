@@ -1439,7 +1439,7 @@ export namespace taskpool {
             try {
                 let res = job.Await();
                 resolve(res);
-            } catch(e) {
+            } catch(e: Error) {
                 reject(e);
             }
         });
@@ -1484,7 +1484,7 @@ export namespace taskpool {
 
 function launchPromise(f: Function, ...args: FixedArray<NullishType>): Promise<NullishType> {
     let resolver: (((v: NullishType | PromiseLike<NullishType>) => void) | undefined) = undefined;
-    let rejecter: (((error: NullishType) => void) | undefined) = undefined;
+    let rejecter: (((error: Error) => void) | undefined) = undefined;
     let p = new Promise<NullishType>((res, rej) => {
         resolver = res
         rejecter = rej;
