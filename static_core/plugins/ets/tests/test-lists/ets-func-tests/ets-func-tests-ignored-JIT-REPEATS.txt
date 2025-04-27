@@ -11,6 +11,3 @@ std/concurrency/AsyncLockTest.ets
 
 #24088
 std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
-
-#25162
-std/math/RoundTest.ets

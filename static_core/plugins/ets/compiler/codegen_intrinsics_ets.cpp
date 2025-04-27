@@ -73,9 +73,9 @@ void Codegen::CreateMathTrunc([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRC
     GetEncoder()->EncodeTrunc(dst, src[0]);
 }
 
-void Codegen::CreateMathRoundAway([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+void Codegen::CreateETSMathRound([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    GetEncoder()->EncodeRoundAway(dst, src[0]);
+    GetEncoder()->EncodeRoundToPInfReturnFloat(dst, src[0]);
 }
 
 void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)

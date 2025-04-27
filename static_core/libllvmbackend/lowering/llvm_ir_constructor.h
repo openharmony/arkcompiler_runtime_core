@@ -62,6 +62,7 @@ private:
     bool EmitMemoryFenceFull(Inst *inst);
     bool EmitMemoryFenceRelease(Inst *inst);
     bool EmitMemoryFenceAcquire(Inst *inst);
+    bool EmitRoundToPInf(Inst *inst);
     bool EmitFround(Inst *inst);
     bool EmitJsCastDoubleToChar(Inst *inst);
     bool EmitCtlz(Inst *inst);

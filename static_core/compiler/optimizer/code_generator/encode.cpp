@@ -351,7 +351,12 @@ void Encoder::EncodeRoundAway([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src
     SetFalseResult();
 }
 
-void Encoder::EncodeRoundToPInf([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
+void Encoder::EncodeRoundToPInfReturnFloat([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeRoundToPInfReturnScalar([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
 {
     SetFalseResult();
 }
