@@ -486,9 +486,13 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
             while (deleteEntry.left !== undefined) {
                 deleteEntry = deleteEntry.left!;
             }
+            const entryKey: K = entry.key;
+            const entryValue: V = entry.val;
             entry.key = deleteEntry.key;
             entry.val = deleteEntry.val;
             entry = deleteEntry;
+            deleteEntry.key = entryKey;
+            deleteEntry.val = entryValue;
         }
 
         if ((entry.left !== undefined) || (entry.right !== undefined) || !entry.isBlack) {
