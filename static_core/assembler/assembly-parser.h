@@ -95,7 +95,7 @@ public:
 
     inline bool IsNonDigit(char c)
     {
-        return std::isalpha(c) != 0 || IsUnderscoreOrDollarOrHyphen(c);
+        return std::isdigit(c) == 0;
     }
 
 private:
