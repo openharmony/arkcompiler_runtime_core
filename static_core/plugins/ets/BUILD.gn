@@ -146,6 +146,7 @@ if (!(ark_standalone_build ||
     ]
     sources = [
       "$ark_root/plugins/ets/sdk/native/api/Util.cpp",
+      "$ark_root/plugins/ets/sdk/native/api/ani_stringdecoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textdecoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder.cpp",
       "$ark_root/plugins/ets/sdk/native/api/ani_textencoder_helper.cpp",

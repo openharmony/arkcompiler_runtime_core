@@ -6,3 +6,4 @@ api/@ohos/util/LightWeightSet/LightWeightSetEntriesTest.ets
 api/@ohos/util/TreeMap/TreeMapSetGetTest.ets
 api/@ohos/util/TreeMap/TreeMapEntriesTest.ets
 api/@ohos/util/TreeSet/TreeSetEntriesTest.ets
+api/@ohos/util/StringDecoder/EncodingTest.ets

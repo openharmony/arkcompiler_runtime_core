@@ -796,6 +796,71 @@ export namespace util {
             input: string, inputEncoding: string, destArray: Uint8Array): EncodeIntoUint8ArrayInfo;
     }
 
+    export class StringDecoder {
+        static { loadLibrary("ets_sdk_native"); }
+
+        private encoding_: string = 'utf-8';
+        private nativeDecoder_: long;
+        private static knownEncodings: FixedArray<string> = [
+            "utf-8", "utf-16be", "utf-16le", "gbk", "gb2312", "gb18030", "ibm866",
+            "iso-8859-1", "iso-8859-2", "iso-8859-3", "iso-8859-4", "iso-8859-5", "iso-8859-6",
+            "iso-8859-7", "iso-8859-8", "iso-8859-8-i", "iso-8859-10", "iso-8859-13",
+            "iso-8859-14", "iso-8859-15", "koi8-r", "koi8-u", "macintosh",
+            "windows-874", "windows-1250", "windows-1251", "windows-1252",
+            "windows-1253", "windows-1254", "windows-1255", "windows-1256",
+            "windows-1257", "windows-1258", "big5", "euc-jp", "iso-2022-jp",
+            "shift_jis", "euc-kr", "x-mac-cyrillic"
+        ];
+
+        constructor(encoding?: string)
+        {
+            if (!encoding) {
+                this.encoding_ = 'utf-8';
+            } else {
+                let tempString: string = encoding.toLowerCase();
+                let flag: boolean = StringDecoder.checkEncodingFormat(tempString);
+                if (!flag) {
+                    throw createBusinessError(TypeErrorCodeId,
+                        `Wrong encoding format, the current '${encoding}' format is not support.`);
+                }
+                this.encoding_ = tempString;
+            }
+            this.bindNativeStringDecoder(this.encoding_);
+        }
+
+        write(chunk: string | Uint8Array): string
+        {
+            if (chunk instanceof string) {
+                return chunk;
+            }
+            return this.doWrite(chunk);
+        }
+
+        end(chunk?: string | Uint8Array): string
+        {
+            if (chunk && chunk instanceof string) {
+                return chunk;
+            }
+            return this.doEnd(chunk);
+        }
+
+        private static checkEncodingFormat(encoding: string): boolean
+        {
+            for (const enc of StringDecoder.knownEncodings) {
+                if (enc == encoding) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private native bindNativeStringDecoder(encoding: string): void;
+
+        private native doWrite(chunk: Uint8Array): string;
+
+        private native doEnd(chunk?: Uint8Array): string;
+    }
+
     export class UtilHelper {
 
         static {
