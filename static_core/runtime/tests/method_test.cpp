@@ -602,4 +602,96 @@ TEST_F(MethodTest, GetFullName)
     ASSERT_EQ(PandaStringToStd(method3->GetFullName(true)), "Foo R::multiple_args(R, i32, Foo, [J, [LFoo;)");
 }
 
+static auto g_testSource = R"(
+    .record Foo {}
+    .record R {}
+    .function void R.void_fun(R a0) {
+        return.void
+    }
+    .function u1 R.u1() {
+        ldai 0
+        return
+    }
+    .function i8 R.i8() {
+        ldai 0
+        return
+    }
+    .function u8 R.u8() {
+        ldai 0
+        return
+    }
+    .function i16 R.i16() {
+        ldai 0
+        return
+    }
+    .function u16 R.u16() {
+        ldai 0
+        return
+    }
+    .function i32 R.i32() {
+        ldai 0
+        return
+    }
+    .function u32 R.u32() {
+        ldai 0
+        return
+    }
+    .function f32 R.f32() {
+        ldai 0
+        return
+    }
+    .function i64 R.i64() {
+        ldai 0
+        return
+    }
+    .function u64 R.u64() {
+        ldai 0
+        return
+    }
+    .function f64 R.f64() {
+        ldai 0
+        return
+    }
+    .function R R.tagged() {
+        ldai 0
+        return
+    }
+)";
+
+void TestMethodType(Class *klass, const std::string &s, const std::string &type)
+{
+    Method *method = klass->GetDirectMethod(utf::CStringAsMutf8(s.c_str()));
+    Method::Proto proto = method->GetProto();
+    const char *descriptor = proto.GetReturnTypeDescriptor().data();
+    ASSERT_EQ(descriptor, std::string_view(type));
+}
+
+TEST_F(MethodTest, GetReturnTypeDescriptor)
+{
+    pandasm::Parser p;
+    auto res = p.Parse(g_testSource);
+    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+    ASSERT_NE(pf, nullptr);
+
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    PandaString cdescriptor;
+
+    Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &cdescriptor));
+    ASSERT_NE(klass, nullptr);
+
+    TestMethodType(klass, "void_fun", "V");
+    TestMethodType(klass, "u1", "Z");
+    TestMethodType(klass, "i8", "B");
+    TestMethodType(klass, "u8", "H");
+    TestMethodType(klass, "i16", "S");
+    TestMethodType(klass, "u16", "C");
+    TestMethodType(klass, "i32", "I");
+    TestMethodType(klass, "u32", "U");
+    TestMethodType(klass, "f32", "F");
+    TestMethodType(klass, "i64", "J");
+    TestMethodType(klass, "u64", "Q");
+    TestMethodType(klass, "f64", "D");
+}
 }  // namespace ark::test

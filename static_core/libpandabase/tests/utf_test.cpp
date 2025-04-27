@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -428,4 +428,51 @@ TEST(Utf, CompareUtf8ToUtf8_4b)
     }
 }
 
+TEST(Utf, IsValidUTF8)
+{
+    // test one byte
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0x7F};  // 01111111
+        EXPECT_TRUE(IsValidUTF8(data));
+    }
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0x80};  // 10000000
+        EXPECT_FALSE(IsValidUTF8(data));
+    }
+    // test two byte
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0xC2, 0x80};  // 11000010 10000000
+        EXPECT_TRUE(IsValidUTF8(data));
+    }
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0x80, 0x80};  // 10000000 10000000
+        EXPECT_FALSE(IsValidUTF8(data));
+    }
+    // test three byte
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0xE0, 0xA0, 0x80};  // 11100000 10100000 10000000
+        EXPECT_TRUE(IsValidUTF8(data));
+    }
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0xC0, 0x80, 0x80};  // 11000000 10000000 10000000
+        EXPECT_FALSE(IsValidUTF8(data));
+    }
+    // test four byte
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0xF0, 0x90, 0x80, 0x80};  // 11110000 10010000 10000000 10000000
+        EXPECT_TRUE(IsValidUTF8(data));
+    }
+    {
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        std::vector<uint8_t> data = {0xE0, 0x90, 0x80, 0x80};  // 11100000 10010000 10000000 10000000
+        EXPECT_FALSE(IsValidUTF8(data));
+    }
+}
 }  // namespace ark::utf::test
