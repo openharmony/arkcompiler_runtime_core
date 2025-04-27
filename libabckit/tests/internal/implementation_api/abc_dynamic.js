@@ -29,3 +29,15 @@ class ClassB extends ClassA {
         print('func');
     }
 }
+
+(()=> {
+    print('anonymousfunc1');
+})();
+
+(()=> {
+    print('anonymousfunc2');
+})();
+
+let anonymousfunc = (()=> {
+    print('anonymousfunc3');
+});

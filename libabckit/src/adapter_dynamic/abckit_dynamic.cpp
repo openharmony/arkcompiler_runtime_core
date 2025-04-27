@@ -889,9 +889,9 @@ std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionNa
 
     auto function = std::make_unique<AbckitCoreFunction>();
     function->owningModule = m.get();
-    auto [kind, _] = GetFunctionParentKindAndName(functionName, GetScopeNamesArray(function->owningModule));
     if (m->target == ABCKIT_TARGET_ARK_TS_V1) {
-        function->isAnonymous = kind == ParentKind::FUNCTION;
+        auto functionKind = functionImpl.GetFunctionKind();
+        function->isAnonymous = functionKind == panda::panda_file::FunctionKind::NC_FUNCTION;
     } else {
         function->isAnonymous = IsAnonymousName(functionName);
     }
