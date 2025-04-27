@@ -12,12 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+export declare function foo(arg: BarNameSpace.Callback): void;
+export declare function bar(arg: BarNameSpace.FooNameSpace.Callback2): void;
+export declare let rectangleShape: MySpace.IShape;
+export declare let a: N.NA;
+export declare let b: N.NN.NNA;
+export declare let c: N.NN.NNN.NNNA;
+export declare function foo1(arg: N.NA): void;
+export declare function foo2(arg: N.NN.NNA): void;
+export declare function foo3(arg: N.NN.NNN.NNNA): N.NN.NNN.NNNA;
 export declare namespace A {
-    let v1: any;
+    let v1: number;
     namespace B {
-        let v2: any;
+        let v2: number;
         namespace C {
-            let v3: any;
+            let v3: number;
         }
     }
 }
@@ -33,4 +42,46 @@ export declare namespace myNamespace {
         Blue = 2,
         Red = 2,
     }
+}
+export declare namespace BarNameSpace {
+    namespace FooNameSpace {
+        export type Callback2 = (arg: string) => void;
+    }
+    export type Callback = (arg: string) => void;
+}
+export declare namespace MySpace {
+    let count: number;
+    let message: string;
+    function resetMessage(): void;
+    function resetState(): void;
+    export interface IShape {
+    area(): number;
+}
+    class Rectangle implements IShape {
+        width: number;
+        height: number;
+        constructor(width: number, height: number);
+        area(): number;
+    }
+    enum Color {
+        RED = 0,
+        GREEN = 1,
+        BLUE = 2,
+    }
+}
+export declare namespace N {
+    namespace NN {
+        namespace NNN {
+            class NNNA {
+                constructor();
+            }
+        }
+        class NNA {
+            constructor();
+        }
+    }
+    class NA {
+        constructor();
+    }
+    export type NB = (arg: string) => void;
 }

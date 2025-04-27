@@ -13,11 +13,28 @@
  * limitations under the License.
  */
 
-import { Lib2Class, Lib2Class2 /*as Lib2Class2Alias*/, IntAlias } from './lib2';
+import { Lib2Class, Lib2Class2 /*as Lib2Class2Alias*/, IntAlias, EC1 } from './lib2';
+import { B } from './lib2';
+import { C, D } from './lib2';
+import { E as EE, F } from './lib2';
+import * as GG from './lib2';
+import type { I } from './lib2';
+import type { J, K } from './lib2';
+import type { L as LL, M } from './lib2';
 
-import { DynClass } from "lib3"
+export let b: B;
+export let c: C;
+export let d: D;
+export let e: EE;
+export let f: F;
+export let g: GG.G;
+export let i: I;
+export let j: J;
+export let k: K;
+export let l: LL;
+export let m: M;
 
-export class C {
+export class C1 {
     constructor() {
         this.o1 = new Lib2Class();
         this.o2 = new Lib2Class2();
@@ -27,6 +44,19 @@ export class C {
     v1: IntAlias = 1;
 };
 
-export class DynObjWrapper {
-    dynObj_: DynClass = new DynClass();
-};
+export class C2 {
+    a: EC1 = new EC1;
+    foo(a: EC1): EC1 {
+        return new EC1;
+    }
+}
+
+export interface I1 {
+    a: EC1;
+    foo(a: EC1): EC1;
+}
+
+export let p1: EC1;
+export function foo1(a: EC1): EC1 {
+    return new EC1;
+}

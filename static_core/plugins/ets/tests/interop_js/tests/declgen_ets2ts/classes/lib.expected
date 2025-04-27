@@ -116,3 +116,7 @@ export declare class D extends B {
     public foo(): void;
     constructor();
 }
+export declare class C12 {
+    public foo(i: "some str"): number;
+    constructor();
+}

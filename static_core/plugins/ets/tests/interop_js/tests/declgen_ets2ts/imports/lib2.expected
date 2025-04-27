@@ -23,3 +23,29 @@ export declare class Lib2Class2 {
     public set val(value: number);
     constructor();
 }
+export declare class EC1 {
+    constructor();
+}
+export declare class B {
+    constructor();
+}
+export declare class C {
+    constructor();
+}
+export declare class D {
+    constructor();
+}
+export declare class E {
+    constructor();
+}
+export declare class F {
+    constructor();
+}
+export declare class G {
+    constructor();
+}
+export type I = string;
+export type J = string;
+export type K = string;
+export type L = string;
+export type M = string;

@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
- export const CONSTANT: number = 228;
+export const CONSTANT: number = 228;
 
- export class Bibka {
-	public static readonly NOT_GLOBAL: number = 1337;
- }
+export class Bibka {
+    public static readonly NOT_GLOBAL: number = 1337;
+}
+
+export type UT = null|undefined|never
+export type UTA = UT[]
