@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     a: boolean[][][];
 }
 
-@interface Anno2 {
+@interface __$$ETS_ANNOTATION$$__Anno2 {
     a: boolean[][][] = [[new Array<boolean>()]];
 }
 
-@interface Anno3 {
+@interface __$$ETS_ANNOTATION$$__Anno3 {
     a: boolean[][][] = [[[true, false], [true, false]]];
 }

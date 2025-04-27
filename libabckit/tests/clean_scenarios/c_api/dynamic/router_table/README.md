@@ -15,7 +15,7 @@ import {
     IRouterHandler
 } from './IRouterHandler'
 
-@interface Router {
+@interface __$$ETS_ANNOTATION$$__Router {
     scheme: string;
     path: string;
 }

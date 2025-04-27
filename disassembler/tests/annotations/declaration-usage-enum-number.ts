@@ -18,7 +18,7 @@ const enum E {
     B = -2
 }
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: E = new Number(0) as number;
 }
 

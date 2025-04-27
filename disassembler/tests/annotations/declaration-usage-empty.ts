@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-@interface Anno {}
+@interface __$$ETS_ANNOTATION$$__Anno {}
 
 @__$$ETS_ANNOTATION$$__Anno
 class A {

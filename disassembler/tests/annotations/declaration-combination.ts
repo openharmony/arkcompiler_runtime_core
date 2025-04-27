@@ -24,7 +24,7 @@ const enum E1 {
     B = "world"
 } 
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: number
     b: number[] = [13, -10]
     c: string
