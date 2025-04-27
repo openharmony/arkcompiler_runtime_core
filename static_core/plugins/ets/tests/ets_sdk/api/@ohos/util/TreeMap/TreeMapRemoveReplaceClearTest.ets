@@ -22,6 +22,7 @@ function main(): int {
     const suite = new ArkTestsuite("TreeMap Remove Replace Clear API tests")
 
     suite.addTest("TreeMap remove key", testRemoveExistingKey)
+    suite.addTest("TreeMap remove root", testRemoveRootEntry)
     suite.addTest("TreeMap remove not set key", testRemoveNonExistingKey)
     suite.addTest("TreeMap remove key from the null treeMap", testRemoveKeyFromEmptyTreeMap)
     suite.addTest("TreeMap replace value", testReplaceExistingValue)
@@ -44,6 +45,20 @@ function testRemoveExistingKey() {
     let result = treeMap.remove("aa");
     assertEQ(result, "123", "The treeMap should remove the element and return its value");
     assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+}
+
+function testRemoveRootEntry() {
+    let treeMap: TreeMap<string, string> =
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
+        });
+    treeMap.set("aa", "a123");
+    treeMap.set("bb", "b123");
+    treeMap.set("cc", "c123");
+
+    let result = treeMap.remove("bb");
+    assertEQ(result, "b123", "The treeMap should remove the element and return its value");
+    assertEQ(treeMap.length, 2, "The treeMap length should be 0");
 }
 
 function testRemoveNonExistingKey() {
