@@ -24,71 +24,71 @@ class EtsInteropReturnThisTest : public EtsInteropTest {};
 TEST_F(EtsInteropReturnThisTest, DISABLED_TestReturnThisInClass)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisInClass"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisInClass"), true);
 }
 
 TEST_F(EtsInteropReturnThisTest, TestReturnThisAsNumber)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsNumber"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsNumber"), true);
 }
 
 TEST_F(EtsInteropReturnThisTest, TestReturnThisAsString)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsString"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsString"), true);
 }
 
 TEST_F(EtsInteropReturnThisTest, TestReturnThisAsNull)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsNull"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsNull"), true);
 }
 
 // Note: Test is disabled until #17852 is resolved
 TEST_F(EtsInteropReturnThisTest, DISABLED_eTS_call_TS_TestReturnThisAsMap)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsMap"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsMap"), true);
 }
 
 // Note: Test is disabled until #18365 is resolved
 TEST_F(EtsInteropReturnThisTest, DISABLED_eTS_call_TS_TestReturnThisAsTuple)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsTuple"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsTuple"), true);
 }
 
 // Note: Test is disabled until #18365 is resolved
 TEST_F(EtsInteropReturnThisTest, DISABLED_eTS_call_TS_TestReturnThisAsArray)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsArray"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsArray"), true);
 }
 
 TEST_F(EtsInteropReturnThisTest, TestReturnThisAsObj)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsObj"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsObj"), true);
 }
 
 TEST_F(EtsInteropReturnThisTest, DISABLED_TestReturnThisAsObjClass)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsObjClass"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsObjClass"), true);
 }
 
 TEST_F(EtsInteropReturnThisTest, TestReturnThisAsFunc)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsFunc"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsFunc"), true);
 }
 
 // Note: Test is disabled until #18468 is resolved
 TEST_F(EtsInteropReturnThisTest, DISABLED_eTS_call_TS_TestReturnThisAsAsyncFunc)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    ASSERT_EQ(CallEtsMethod<bool>("testReturnThisAsAsyncFunc"), true);
+    ASSERT_EQ(CallEtsFunction<bool>(GetPackageName(), "testReturnThisAsAsyncFunc"), true);
 }
 
 }  // namespace ark::ets::interop::js::testing

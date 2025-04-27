@@ -22,55 +22,55 @@ class EtsStaticFunctionException : public EtsInteropTest {};
 
 TEST_F(EtsStaticFunctionException, CheckCustomException)
 {
-    auto ret = CallEtsMethod<bool>("CheckCustomException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckCustomException");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, CheckNameCustomException)
 {
-    auto ret = CallEtsMethod<bool>("CheckNameCustomException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckNameCustomException");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, CheckMessageCustomException)
 {
-    auto ret = CallEtsMethod<bool>("CheckMessageCustomException");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckMessageCustomException");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, CheckBuiltinExceptionInStatic)
 {
-    auto ret = CallEtsMethod<bool>("CheckBuiltinExceptionInStatic");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckBuiltinExceptionInStatic");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, CheckNameBuiltinExceptionInStatic)
 {
-    auto ret = CallEtsMethod<bool>("CheckNameBuiltinExceptionInStatic");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckNameBuiltinExceptionInStatic");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, CheckMessageBuiltinExceptionInStatic)
 {
-    auto ret = CallEtsMethod<bool>("CheckMessageBuiltinExceptionInStatic");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckMessageBuiltinExceptionInStatic");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, ThrowCustomError)
 {
-    auto ret = CallEtsMethod<bool>("ThrowCustomError");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "ThrowCustomError");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, CheckThrowNewError)
 {
-    auto ret = CallEtsMethod<bool>("CheckThrowNewError");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "CheckThrowNewError");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsStaticFunctionException, throwTSCustomExceptionWithImportType)
 {
-    auto ret = CallEtsMethod<bool>("throwTSCustomExceptionWithImportType");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "throwTSCustomExceptionWithImportType");
     ASSERT_EQ(ret, true);
 }
 

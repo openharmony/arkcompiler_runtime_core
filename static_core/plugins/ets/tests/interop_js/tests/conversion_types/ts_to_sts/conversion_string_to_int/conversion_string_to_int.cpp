@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,37 +22,37 @@ class EtsConversionStringToIntTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsConversionStringToIntTsToEtsTest, checkConversionStringToInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionStringToInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionStringToInt"));
 }
 
 TEST_F(EtsConversionStringToIntTsToEtsTest, checkConversionStringToNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionStringToNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionStringToNumber"));
 }
 
 TEST_F(EtsConversionStringToIntTsToEtsTest, checkConversionStringToFloat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionStringToFloat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionStringToFloat"));
 }
 
 TEST_F(EtsConversionStringToIntTsToEtsTest, checkConversionStringToByte)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionStringToByte"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionStringToByte"));
 }
 
 TEST_F(EtsConversionStringToIntTsToEtsTest, checkConversionStringToShort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionStringToShort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionStringToShort"));
 }
 
 TEST_F(EtsConversionStringToIntTsToEtsTest, checkConversionStringToLong)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionStringToLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionStringToLong"));
 }
 
 TEST_F(EtsConversionStringToIntTsToEtsTest, checkConversionStringToDouble)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionStringToDouble"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionStringToDouble"));
 }
 
 }  // namespace ark::ets::interop::js::testing

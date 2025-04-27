@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,73 +22,73 @@ class EtsInteropScenariosJsToEtsIndirectCallValue : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_number_call)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_number_call");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_number_call");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_number_apply)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_number_apply");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_number_apply");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_number_bind_with_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_number_bind_with_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_number_bind_with_arg");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_number_bind_without_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_number_bind_without_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_number_bind_without_arg");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_string_call)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_string_call");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_string_call");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_string_apply)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_string_apply");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_string_apply");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_string_bind_with_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_string_bind_with_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_string_bind_with_arg");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_string_bind_without_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_string_bind_without_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_string_bind_without_arg");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_boolean_call)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_boolean_call");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_boolean_call");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_boolean_apply)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_boolean_apply");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_boolean_apply");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_boolean_bind_with_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_boolean_bind_with_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_boolean_bind_with_arg");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallValue, Test_indirect_call_type_value_boolean_bind_without_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_value_boolean_bind_without_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_value_boolean_bind_without_arg");
     ASSERT_EQ(ret, true);
 }
 

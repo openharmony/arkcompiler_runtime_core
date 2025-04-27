@@ -23,14 +23,14 @@ class EtsInteropCallableTest : public EtsInteropTest {};
 TEST_F(EtsInteropCallableTest, TestFuncCallArg_Pos)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestFuncCallArg_Pos");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFuncCallArg_Pos");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropCallableTest, TestFuncCallArg_Neg)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestFuncCallArg_Neg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFuncCallArg_Neg");
     ASSERT_EQ(ret, false);
 }
 

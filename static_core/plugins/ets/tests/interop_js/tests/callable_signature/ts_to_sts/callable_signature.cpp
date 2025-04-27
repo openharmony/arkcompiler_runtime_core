@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,12 @@ class EtsCallableSignatureTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsCallableSignatureTsToEtsTest, checkCallableSignatureWithArg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallableSignatureWithArg"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallableSignatureWithArg"));
 }
 
 TEST_F(EtsCallableSignatureTsToEtsTest, checkCallableSignatureWithoutArg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallableSignatureWithoutArg"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallableSignatureWithoutArg"));
 }
 
 }  // namespace ark::ets::interop::js::testing

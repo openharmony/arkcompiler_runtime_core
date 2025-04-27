@@ -27,8 +27,8 @@ function callImportFunctionJ2a() {
     this.setup = function () {
         let stsVm = initEtsVm();
 
-        this.etsVoid = stsVm.getFunction('LETSGLOBAL;', 'stsVoid');
-        this.returnAnonymous = stsVm.getFunction('LETSGLOBAL;', 'returnAnonymous');
+        this.etsVoid = stsVm.getFunction('Lbench_call_import_function_j2a/ETSGLOBAL;', 'stsVoid');
+        this.returnAnonymous = stsVm.getFunction('Lbench_call_import_function_j2a/ETSGLOBAL;', 'returnAnonymous');
         return 0;
     };
 

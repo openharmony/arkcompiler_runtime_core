@@ -19,6 +19,11 @@ function runTest(test) {
 	print('Running test ' + test);
 	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	if (!packageName) {
+		throw Error('PACKAGE_NAME is not set');
+	}
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
 
 	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 	const etsOpts = {
@@ -29,7 +34,8 @@ function runTest(test) {
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	
+	const runTestImpl = etsVm.getFunction(globalName, test);
 	runTestImpl();
 	let counter = 0;
 	const maxCounter = 5;
@@ -40,7 +46,7 @@ function runTest(test) {
 		if (counter === maxCounter) {
 			throw new Error('Test failed: timeout.');
 		}
-		const check = etsVm.getFunction('LETSGLOBAL;', 'check');
+		const check = etsVm.getFunction(globalName, 'check');
 		let result = check();
 		if (result) {
 			helper.clearInterval(tId);

@@ -43,9 +43,9 @@ function runTest(test) {
 
 function hashToInfo(etsVm) {
     // This test should show correct usage of interop hash for object that already have hash
-    const createHashedObject = etsVm.getFunction('LETSGLOBAL;', 'createHashedObject');
+    const createHashedObject = etsVm.getFunction('Lhashed_object/ETSGLOBAL;', 'createHashedObject');
     let obj = createHashedObject();
-    const checkIfInSet = etsVm.getFunction('LETSGLOBAL;', 'checkIfInSet');
+    const checkIfInSet = etsVm.getFunction('Lhashed_object/ETSGLOBAL;', 'checkIfInSet');
     if (!checkIfInSet(obj)) {
         throw Error('Problem with hash');
     }

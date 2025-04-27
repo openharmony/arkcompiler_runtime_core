@@ -19,6 +19,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_intrins
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_intrins.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.ts
     ETS_CONFIG ${ETS_CONFIG}
+    PACKAGE_NAME "test_intrins"
 )
 
 panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_intrins
@@ -26,4 +27,5 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_intrins
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/frontend_test_intrins.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.ts
     ETS_CONFIG ${ETS_CONFIG}
+    PACKAGE_NAME "frontend_test_intrins"
 )

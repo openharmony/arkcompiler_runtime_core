@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,25 +22,25 @@ class EtsInteropScenariosJsToEtsIndirectCallLiteral : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallLiteral, Test_indirect_call_type_literal_call)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_literal_call");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_literal_call");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallLiteral, Test_indirect_call_type_literal_apply)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_literal_apply");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_literal_apply");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallLiteral, Test_indirect_call_type_literal_bind_with_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_literal_bind_with_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_literal_bind_with_arg");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEtsIndirectCallLiteral, Test_indirect_call_type_literal_bind_without_arg)
 {
-    auto ret = CallEtsMethod<bool>("Test_indirect_call_type_literal_bind_without_arg");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_indirect_call_type_literal_bind_without_arg");
     ASSERT_EQ(ret, true);
 }
 

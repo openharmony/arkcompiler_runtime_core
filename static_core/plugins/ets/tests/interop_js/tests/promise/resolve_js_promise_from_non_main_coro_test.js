@@ -18,6 +18,11 @@ const helper = requireNapiPreview('libinterop_test_helper.so', false);
 async function runTest(test) {
     const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
     const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+    const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	if (!packageName) {
+		throw Error('PACKAGE_NAME is not set');
+	}
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
 
     let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 
@@ -37,12 +42,12 @@ async function runTest(test) {
         throw Error('Cannot create ETS runtime');
     }
     let valueToResolveWith = 42;
-    const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+    const runTestImpl = etsVm.getFunction(globalName, test);
     let promise = runTestImpl(valueToResolveWith);
     if (promise == null) {
         throw Error('Function returned null');
     }
-    const signalPromiseInJs = etsVm.getFunction('LETSGLOBAL;', 'signalPromiseInJs');
+    const signalPromiseInJs = etsVm.getFunction(globalName, 'signalPromiseInJs');
     signalPromiseInJs();
     try {
         let result = await promise;

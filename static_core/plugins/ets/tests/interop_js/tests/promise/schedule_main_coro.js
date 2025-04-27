@@ -18,6 +18,9 @@ const helper = requireNapiPreview('libinterop_test_helper.so', false);
 function init() {
     const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
     const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	if (!helper.getEnvironmentVar('PACKAGE_NAME')) {
+		throw Error('PACKAGE_NAME is not set');
+    }
 
     let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
     const etsOpts = {
@@ -35,18 +38,18 @@ function init() {
 function runTest() {
     let etsVm = init();
     let tId = 0;
-
+    const globalName = 'L' + helper.getEnvironmentVar('PACKAGE_NAME') + '/ETSGLOBAL;';
     let waitForSchedule = () => {
-        const isWasScheduled = etsVm.getFunction('LETSGLOBAL;', 'wasScheduled');
+        const isWasScheduled = etsVm.getFunction(globalName, 'wasScheduled');
         let wasSchedulded = isWasScheduled();
         if (wasSchedulded) {
             helper.clearInterval(tId);
         }
     };
 
-    const waitUntillJsIsReady = etsVm.getFunction('LETSGLOBAL;', 'waitUntillJsIsReady');
+    const waitUntillJsIsReady = etsVm.getFunction(globalName, 'waitUntillJsIsReady');
     waitUntillJsIsReady();
-    const jsIsReady = etsVm.getFunction('LETSGLOBAL;', 'jsIsReady');
+    const jsIsReady = etsVm.getFunction(globalName, 'jsIsReady');
     jsIsReady();
     tId = helper.setInterval(waitForSchedule, 0);
 }

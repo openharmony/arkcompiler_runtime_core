@@ -22,17 +22,17 @@ class EtsCallMethodForValueTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsCallMethodForValueTsToEtsTest, checkCallMethodForValue)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodForValue"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodForValue"));
 }
 
 TEST_F(EtsCallMethodForValueTsToEtsTest, checkCallMethodForValueWithOptionalOperator)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodForValueWithOptionalOperator"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodForValueWithOptionalOperator"));
 }
 // NOTE (alexanderpolenov) issue(18449) enable this after fix non null operator
 TEST_F(EtsCallMethodForValueTsToEtsTest, DISABLED_checkCallMethodForValueWithNotNullishOperator)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodForValueWithNotNullishOperator"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodForValueWithNotNullishOperator"));
 }
 
 }  // namespace ark::ets::interop::js::testing

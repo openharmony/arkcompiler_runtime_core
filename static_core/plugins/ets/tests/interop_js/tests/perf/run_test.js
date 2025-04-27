@@ -36,7 +36,7 @@ function runTest(test, warmup, iters) {
 		throw Error('Cannot create ETS runtime');
 	}
 
-	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	const runTestImpl = etsVm.getFunction('Ltest_frontend/ETSGLOBAL;', test);
 	if (warmup > 0) {
 		runTestImpl(warmup);
 	}

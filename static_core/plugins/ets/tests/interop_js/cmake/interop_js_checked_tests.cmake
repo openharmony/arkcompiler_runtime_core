@@ -23,7 +23,7 @@ function(panda_ets_interop_js_checked_test)
     cmake_parse_arguments(
         ARG
         "COMPILATION_JS_WITH_CJS_ON"
-        "FILE"
+        "FILE;PACKAGE_NAME"
         "JS_SOURCES;TS_SOURCES;DYNAMIC_ABC_OUTPUT_DIR"
         ${ARGN}
     )
@@ -109,12 +109,17 @@ function(panda_ets_interop_js_checked_test)
         "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
     )
-
+    if(NOT DEFINED ARG_PACKAGE_NAME AND DEFINED ARG_FILE)
+        get_filename_component(ARG_PACKAGE_NAME ${ARG_FILE} NAME_WE)
+    elseif(NOT DEFINED ARG_PACKAGE_NAME)
+        message("Please provide PACKAGE_NAME for ${TARGET}")
+    endif()
     set(RUN_COMMAND
         "/usr/bin/env"
         "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
         "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+        "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
         ${ARK_JS_NAPI_CLI}
         --stub-file=${ARK_JS_STUB_FILE}
         --enable-force-gc=false
@@ -124,8 +129,7 @@ function(panda_ets_interop_js_checked_test)
 
     SET(OPTIONS "--run-gc-in-place")
     set(PAOC_OPTIONS ${OPTIONS} "--load-runtimes=ets" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
-    # interop check tests don't remove --ets-unnamed because it will be removed in another pr
-    set(ES2PANDA_OPTIONS --thread=0 --extension=ets --arktsconfig=${ETS_CONFIG} --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS} --ets-unnamed)
+    set(ES2PANDA_OPTIONS --thread=0 --extension=ets --arktsconfig=${ETS_CONFIG} --ast-verifier:errors=${ETS_VERIFICATOR_ERRORS})
 
     if (PANDA_LLVM_AOT)
         set(WITH_LLVM "--with-llvm")

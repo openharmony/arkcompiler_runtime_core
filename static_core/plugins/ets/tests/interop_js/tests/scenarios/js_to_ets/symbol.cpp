@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ class EtsInteropScenariosJsToEts : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_class_to_check_symbol)
 {
-    auto ret = CallEtsMethod<bool>("Test_function_arg_type_class_to_check_symbol");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "Test_function_arg_type_class_to_check_symbol");
     ASSERT_EQ(ret, true);
 }
 

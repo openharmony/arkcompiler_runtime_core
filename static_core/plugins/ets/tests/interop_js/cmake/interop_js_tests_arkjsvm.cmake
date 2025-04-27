@@ -90,13 +90,15 @@ endfunction(compile_dynamic_file)
 #       lib_target2
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
+#     PACKAGE_NAME
+#       unit1_test 
 #   )
 function(panda_ets_interop_js_arkjsvm_gtest TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
         "COMPILATION_JS_WITH_CJS_ON"
-        "ETS_CONFIG"
+        "ETS_CONFIG;PACKAGE_NAME"
         "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;LIBRARIES"
         ${ARGN}
     )
@@ -139,6 +141,15 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
         )
     endif()
 
+    # if not set PACKAGE_NAME, using first ets file as its name;
+    set(ETS_SOURCES_NUM)
+    list(LENGTH ARG_ETS_SOURCES ETS_SOURCES_NUM)
+    if(NOT DEFINED ARG_PACKAGE_NAME AND ${ETS_SOURCES_NUM} EQUAL 1)
+        list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
+        get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
+    elseif(NOT DEFINED ARG_PACKAGE_NAME)
+        message("Please provide PACKAGE_NAME for ${TARGET}")
+    endif()
     # Add launcher <${TARGET}_gtests> target
     panda_ets_add_gtest(
         NAME ${TARGET}
@@ -153,6 +164,7 @@ function(panda_ets_interop_js_arkjsvm_gtest TARGET)
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
             "FIXED_ISSUES=${FIXED_ISSUES}"
+            "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
         LAUNCHER
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
@@ -177,7 +189,7 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
     cmake_parse_arguments(
         ARG
         "COMPILATION_JS_WITH_CJS_ON"
-        "JS_LAUNCHER;ETS_CONFIG;DYNAMIC_ABC_OUTPUT_DIR;"
+        "JS_LAUNCHER;ETS_CONFIG;DYNAMIC_ABC_OUTPUT_DIR;PACKAGE_NAME"
         "ETS_SOURCES;JS_SOURCES;ABC_FILE;LAUNCHER_ARGS;"
         ${ARGN}
     )
@@ -206,7 +218,15 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
         endif()
         compile_dynamic_file(${TARGET}_js_modules ${COMPILE_OPTIONS})
     endif()
-
+    # if not set PACKAGE_NAME, using first ets file as its name;
+    set(ETS_SOURCES_NUM)
+    list(LENGTH ARG_ETS_SOURCES ETS_SOURCES_NUM)
+    if(NOT DEFINED ARG_PACKAGE_NAME AND ${ETS_SOURCES_NUM} EQUAL 1)
+        list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
+        get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
+    elseif(NOT DEFINED ARG_PACKAGE_NAME)
+        message("Please provide PACKAGE_NAME  for ${TARGET}")
+    endif()
     set(COMPILED_LAUNCHER_NAME ${TARGET}_launcher_abc_name)
     set(COMPILE_OPTIONS SOURCES ${ARG_JS_LAUNCHER} OUTPUT_ABC_PATHS ${COMPILED_LAUNCHER_NAME} COMPILE_OPTION ${JS_COMPILATION_OPTIONS})
     if (DEFINED ARG_DYNAMIC_ABC_OUTPUT_DIR)
@@ -231,6 +251,7 @@ function(panda_ets_interop_js_test_arkjsvm TARGET)
         "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
         "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+        "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
     )
 
     get_filename_component(LAUNCHER_CLEAR_NAME ${ARG_JS_LAUNCHER} NAME_WLE)

@@ -15,34 +15,34 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const checkBoolean = etsVm.getFunction('LETSGLOBAL;', 'checkBoolean');
-const checkBooleanBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkBooleanBoxed');
-const checkByte = etsVm.getFunction('LETSGLOBAL;', 'checkByte');
-const checkByteBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkByteBoxed');
-const checkByteOverflow = etsVm.getFunction('LETSGLOBAL;', 'checkByteOverflow');
-const checkShort = etsVm.getFunction('LETSGLOBAL;', 'checkShort');
-const checkShortBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkShortBoxed');
-const checkShortOverflow = etsVm.getFunction('LETSGLOBAL;', 'checkShortOverflow');
-const checkInt = etsVm.getFunction('LETSGLOBAL;', 'checkInt');
-const checkIntBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkIntBoxed');
-const checkIntOverflow = etsVm.getFunction('LETSGLOBAL;', 'checkIntOverflow');
-const checkLong = etsVm.getFunction('LETSGLOBAL;', 'checkLong');
-const checkLongBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkLongBoxed');
-const checkFloat = etsVm.getFunction('LETSGLOBAL;', 'checkFloat');
-const checkFloatBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkFloatBoxed');
-const checkFloatOverflow = etsVm.getFunction('LETSGLOBAL;', 'checkFloatOverflow');
-const checkDouble = etsVm.getFunction('LETSGLOBAL;', 'checkDouble');
-const checkDoubleBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkDoubleBoxed');
-const checkNumber = etsVm.getFunction('LETSGLOBAL;', 'checkNumber');
-const checkNumberBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkNumberBoxed');
-const checkChar = etsVm.getFunction('LETSGLOBAL;', 'checkChar');
-const checkCharBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkCharBoxed');
-const checkString = etsVm.getFunction('LETSGLOBAL;', 'checkString');
-const checkStringBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkStringBoxed');
-const checkBigint = etsVm.getFunction('LETSGLOBAL;', 'checkBigint');
-const checkBigintBoxed = etsVm.getFunction('LETSGLOBAL;', 'checkBigintBoxed');
-const checkNull = etsVm.getFunction('LETSGLOBAL;', 'checkNull');
-const checkUndefined = etsVm.getFunction('LETSGLOBAL;', 'checkUndefined');
+const checkBoolean = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkBoolean');
+const checkBooleanBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkBooleanBoxed');
+const checkByte = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkByte');
+const checkByteBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkByteBoxed');
+const checkByteOverflow = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkByteOverflow');
+const checkShort = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkShort');
+const checkShortBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkShortBoxed');
+const checkShortOverflow = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkShortOverflow');
+const checkInt = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkInt');
+const checkIntBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkIntBoxed');
+const checkIntOverflow = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkIntOverflow');
+const checkLong = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkLong');
+const checkLongBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkLongBoxed');
+const checkFloat = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkFloat');
+const checkFloatBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkFloatBoxed');
+const checkFloatOverflow = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkFloatOverflow');
+const checkDouble = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkDouble');
+const checkDoubleBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkDoubleBoxed');
+const checkNumber = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkNumber');
+const checkNumberBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkNumberBoxed');
+const checkChar = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkChar');
+const checkCharBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkCharBoxed');
+const checkString = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkString');
+const checkStringBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkStringBoxed');
+const checkBigint = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkBigint');
+const checkBigintBoxed = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkBigintBoxed');
+const checkNull = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkNull');
+const checkUndefined = etsVm.getFunction('Lprimitive/ETSGLOBAL;', 'checkUndefined');
 
 
 function testCheckBoolean(): void {

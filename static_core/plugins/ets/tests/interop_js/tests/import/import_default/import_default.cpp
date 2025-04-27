@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ class EtsImportWithDefaultTsToEtsTest : public EtsInteropTest {};
 // NOTE issue(19699) enable after fix default import
 TEST_F(EtsImportWithDefaultTsToEtsTest, DISABLED_checkImportDefault)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkImportDefault"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkImportDefault"));
 }
 
 }  // namespace ark::ets::interop::js::testing

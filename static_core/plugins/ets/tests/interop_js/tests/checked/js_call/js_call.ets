@@ -17,7 +17,7 @@ import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable,
     from "checked/js_call/js_call.js"
 
 //! CHECKER      Several js function calls JIT (slow)
-//! RUN          force_jit: true, entry: "callSequence", options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "callSequence", options: "--compiler-regex=js_call.ETSGLOBAL::callSequence --compiler-enable-fast-interop=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
@@ -26,7 +26,7 @@ import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable,
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueString"
 
 //! CHECKER      Several js function calls JIT (fast)
-//! RUN          force_jit: true, entry: "callSequence", options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "callSequence", options: "--compiler-regex=js_call.ETSGLOBAL::callSequence --compiler-interop-try-single-scope=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 3
@@ -59,7 +59,7 @@ import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable,
 //! INST_COUNT   "Intrinsic.CompilerDestroyLocalScope", 1
 
 //! CHECKER      Several js function calls AOT (slow)
-//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=js_call.ETSGLOBAL::callSequence --compiler-enable-fast-interop=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
@@ -69,7 +69,7 @@ import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable,
 //! RUN          entry: "callSequence"
 
 //! CHECKER      Several js function calls AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callSequence --compiler-interop-try-single-scope=false"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::callSequence --compiler-interop-try-single-scope=false"
 //! METHOD       "callSequence"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 3
@@ -112,14 +112,14 @@ function callSequence(): int {
 }
 
 //! CHECKER      Chain of js function calls JIT (slow)
-//! RUN          force_jit: true, entry: "callChain", options: "--compiler-regex=ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "callChain", options: "--compiler-regex=js_call.ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 //! INST_NEXT    /i32.*Cast f64/
 
 //! CHECKER      Chain of js function calls JIT (fast)
-//! RUN          force_jit: true, entry: "callChain", options: "--compiler-regex=ETSGLOBAL::callChain --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "callChain", options: "--compiler-regex=js_call.ETSGLOBAL::callChain --compiler-interop-try-single-scope=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
@@ -153,7 +153,7 @@ function callSequence(): int {
 //! INST_COUNT   "Intrinsic.CompilerConvertLocalToF64", 1
 
 //! CHECKER      Chain of js function calls AOT (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "Codegen"
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
@@ -161,11 +161,11 @@ function callSequence(): int {
 //! RUN          entry: "callChain"
 
 //! CHECKER      Chain of js function calls LLVMAOT (slow)
-//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
+//! RUN_LLVM     options: "--compiler-regex=js_call.ETSGLOBAL::callChain --compiler-enable-fast-interop=false"
 //! RUN          entry: "callChain"
 
 //! CHECKER      Chain of js function calls AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callChain --compiler-interop-try-single-scope=false"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::callChain --compiler-interop-try-single-scope=false"
 //! METHOD       "callChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
@@ -198,14 +198,14 @@ function callChain(): int {
 }
 
 //! CHECKER      Chain of js new calls JIT (slow)
-//! RUN          force_jit: true, entry: "newChain", options: "--compiler-regex=ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "newChain", options: "--compiler-regex=js_call.ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.JSRuntimeGetValueDouble", 1
 //! INST         /i32.*Cast f64/
 
 //! CHECKER      Chain of js new calls JIT (fast)
-//! RUN          force_jit: true, entry: "newChain", options: "--compiler-regex=ETSGLOBAL::newChain --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "newChain", options: "--compiler-regex=js_call.ETSGLOBAL::newChain --compiler-interop-try-single-scope=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 4
@@ -239,18 +239,18 @@ function callChain(): int {
 //! INST_COUNT   "Intrinsic.CompilerConvertLocalToF64", 1
 
 //! CHECKER      Chain of js new calls AOT (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "Codegen"
 //! INST_COUNT   "Intrinsic.JSRuntimeGetValueDouble", 1
 //! RUN          entry: "newChain"
 
 //! CHECKER      Chain of js new calls LLVMAOT (slow)
-//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
+//! RUN_LLVM     options: "--compiler-regex=js_call.ETSGLOBAL::newChain --compiler-enable-fast-interop=false"
 //! RUN          entry: "newChain"
 
 //! CHECKER      Chain of js new calls AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::newChain --compiler-interop-try-single-scope=false"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::newChain --compiler-interop-try-single-scope=false"
 //! METHOD       "newChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 4
@@ -286,7 +286,7 @@ function newChain(): int {
 }
 
 //! CHECKER      JS load and store JIT (slow)
-//! RUN          force_jit: true, entry: "loadStoreChain", options: "--compiler-regex=ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "loadStoreChain", options: "--compiler-regex=js_call.ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
@@ -298,7 +298,7 @@ function newChain(): int {
 //! INST_NEXT    "Intrinsic.CompilerEtsStrictEquals"
 
 //! CHECKER      JS load and store JIT (fast)
-//! RUN          force_jit: true, entry: "loadStoreChain", options: "--compiler-regex=ETSGLOBAL::loadStoreChain"
+//! RUN          force_jit: true, entry: "loadStoreChain", options: "--compiler-regex=js_call.ETSGLOBAL::loadStoreChain"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.CompilerCreateLocalScope"
@@ -320,7 +320,7 @@ function newChain(): int {
 //! INST_NEXT    "Intrinsic.CompilerEtsStrictEquals"
 
 //! CHECKER      JS load and store AOT (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "Codegen"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
@@ -333,11 +333,11 @@ function newChain(): int {
 //! RUN          entry: "loadStoreChain"
 
 //! CHECKER      JS load and store LLVMAOT (slow)
-//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=js_call.ETSGLOBAL::loadStoreChain --compiler-enable-fast-interop=false"
 //! RUN          entry: "loadStoreChain"
 
 //! CHECKER      JS load and store AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::loadStoreChain"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::loadStoreChain"
 //! METHOD       "loadStoreChain"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.CompilerCreateLocalScope"
@@ -372,12 +372,12 @@ function loadStoreChain(): int {
 }
 
 //! CHECKER      Define object method in js and call it from ets, JIT (slow)
-//! RUN          force_jit: true, entry: "methodCall", options: "--compiler-regex=ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "methodCall", options: "--compiler-regex=js_call.ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
 
 //! CHECKER      Define object method in js and call it from ets, JIT (fast)
-//! RUN          force_jit: true, entry: "methodCall", options: "--compiler-regex=ETSGLOBAL::methodCall --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "methodCall", options: "--compiler-regex=js_call.ETSGLOBAL::methodCall --compiler-interop-try-single-scope=false"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
@@ -400,17 +400,17 @@ function loadStoreChain(): int {
 //! INST_COUNT   "Intrinsic.CompilerDestroyLocalScope", 2
 
 //! CHECKER      Define object method in js and call it from ets, AOT (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
 //! RUN          entry: "methodCall"
 
 //! CHECKER      Define object method in js and call it from ets, LLVMAOT (slow)
-//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
+//! RUN_LLVM     options: "--compiler-regex=js_call.ETSGLOBAL::methodCall --compiler-enable-fast-interop=false"
 //! RUN          entry: "methodCall"
 
 //! CHECKER      Define object method in js and call it from ets, AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::methodCall"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::methodCall"
 //! METHOD       "methodCall"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
@@ -450,7 +450,7 @@ function methodCall(): int {
 }
 
 //! CHECKER       Call JS static method and access static property, JIT (slow)
-//! RUN           force_jit: true, entry: "staticMethodCall", options: "--compiler-regex=ETSGLOBAL::staticMethodCall --compiler-enable-fast-interop=false"
+//! RUN           force_jit: true, entry: "staticMethodCall", options: "--compiler-regex=js_call.ETSGLOBAL::staticMethodCall --compiler-enable-fast-interop=false"
 //! METHOD        "staticMethodCall"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.JSRuntimeGetPropertyJSValue" # get StaticClass for lhs
@@ -462,7 +462,7 @@ function methodCall(): int {
 //! INST_COUNT      "Intrinsic.JSRuntimeGetValueDouble", 1
 
 //! CHECKER         Call JS static method and access static property, JIT (fast)
-//! RUN             force_jit: true, entry: "staticMethodCall", options: "--compiler-regex=ETSGLOBAL::staticMethodCall"
+//! RUN             force_jit: true, entry: "staticMethodCall", options: "--compiler-regex=js_call.ETSGLOBAL::staticMethodCall"
 //! METHOD          "staticMethodCall"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "Intrinsic.JSRuntimeGetPropertyJSValue" # get StaticClass for lhs
@@ -482,7 +482,7 @@ function methodCall(): int {
 //! INST_NEXT       "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER         Call JS static method and access static property, AOT (slow)
-//! RUN_PAOC        options: "--compiler-regex=ETSGLOBAL::staticMethodCall --compiler-enable-fast-interop=false"
+//! RUN_PAOC        options: "--compiler-regex=js_call.ETSGLOBAL::staticMethodCall --compiler-enable-fast-interop=false"
 //! METHOD          "staticMethodCall"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "Intrinsic.JSRuntimeGetPropertyJSValue" # get StaticClass for lhs
@@ -495,11 +495,11 @@ function methodCall(): int {
 //! RUN             entry: "staticMethodCall"
 
 //! CHECKER      Call JS static method and access static property, LLVMAOT (slow)
-//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::staticMethodCall --compiler-enable-fast-interop=false"
+//! RUN_LLVM     options: "--compiler-regex=js_call.ETSGLOBAL::staticMethodCall --compiler-enable-fast-interop=false"
 //! RUN          entry: "staticMethodCall"
 
 //! CHECKER         Call JS static method and access static property, AOT (fast)
-//! RUN_PAOC        options: "--compiler-regex=ETSGLOBAL::staticMethodCall"
+//! RUN_PAOC        options: "--compiler-regex=js_call.ETSGLOBAL::staticMethodCall"
 //! METHOD          "staticMethodCall"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "Intrinsic.JSRuntimeGetPropertyJSValue" # get StaticClass for lhs
@@ -537,13 +537,13 @@ class EtsClass {
 }
 
 //! CHECKER      Use ets object from js, JIT (slow)
-//! RUN          force_jit: true, entry: "jscallEtsObject", options: "--compiler-regex=ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "jscallEtsObject", options: "--compiler-regex=js_call.ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
 //! METHOD       "jscallEtsObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER     Use ets object from js, JIT (fast)
-//! RUN         force_jit: true, entry: "jscallEtsObject", options: "--compiler-regex=ETSGLOBAL::jscallEtsObject"
+//! RUN         force_jit: true, entry: "jscallEtsObject", options: "--compiler-regex=js_call.ETSGLOBAL::jscallEtsObject"
 //! METHOD     "jscallEtsObject"
 //! PASS_AFTER "IrBuilder"
 //! INST       "Intrinsic.CompilerCreateLocalScope"
@@ -559,14 +559,14 @@ class EtsClass {
 //! INST_NEXT  "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER      Use ets object from js, AOT (slow)
-//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=js_call.ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
 //! METHOD       "jscallEtsObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
 //! RUN          entry: "jscallEtsObject"
 
 //! CHECKER     Use ets object from js, AOT (fast)
-//! RUN_PAOC    options: "--compiler-regex=ETSGLOBAL::jscallEtsObject"
+//! RUN_PAOC    options: "--compiler-regex=js_call.ETSGLOBAL::jscallEtsObject"
 //! METHOD     "jscallEtsObject"
 //! PASS_AFTER "IrBuilder"
 //! INST       "Intrinsic.CompilerCreateLocalScope"
@@ -594,13 +594,13 @@ function jscallEtsObject(): int {
 }
 
 //! CHECKER      Load value from js prototype, JIT
-//! RUN          force_jit: true, entry: "jsLoadFromPrototype", options: "--compiler-regex=ETSGLOBAL::jsLoadFromPrototype"
+//! RUN          force_jit: true, entry: "jsLoadFromPrototype", options: "--compiler-regex=js_call.ETSGLOBAL::jsLoadFromPrototype"
 //! METHOD       "jsLoadFromPrototype"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
 
 //! CHECKER      Load value from js prototype, AOT
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::jsLoadFromPrototype"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::jsLoadFromPrototype"
 //! METHOD       "jsLoadFromPrototype"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
@@ -617,13 +617,13 @@ function jsLoadFromPrototype(): int {
 }
 
 //! CHECKER      Load value overridden in js object, JIT
-//! RUN          force_jit: true, entry: "jsLoadOverridden", options: "--compiler-regex=ETSGLOBAL::jsLoadOverridden"
+//! RUN          force_jit: true, entry: "jsLoadOverridden", options: "--compiler-regex=js_call.ETSGLOBAL::jsLoadOverridden"
 //! METHOD       "jsLoadOverridden"
 //! PASS_AFTER   "IrBuilder"
 //! INST        "Intrinsic.JSRuntimeGetPropertyDouble"
 
 //! CHECKER      Load value overridden in js object, AOT
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::jsLoadOverridden"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::jsLoadOverridden"
 //! METHOD       "jsLoadOverridden"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
@@ -640,13 +640,13 @@ function jsLoadOverridden(): int {
 }
 
 //! CHECKER      Call function from js prototype, JIT
-//! RUN          force_jit: true, entry: "jsCallFromPrototype", options: "--compiler-regex=ETSGLOBAL::jsCallFromPrototype"
+//! RUN          force_jit: true, entry: "jsCallFromPrototype", options: "--compiler-regex=js_call.ETSGLOBAL::jsCallFromPrototype"
 //! METHOD       "jsCallFromPrototype"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetValueString"
 
 //! CHECKER      Call function from js prototype, AOT
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::jsCallFromPrototype"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::jsCallFromPrototype"
 //! METHOD       "jsCallFromPrototype"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.JSRuntimeGetValueString"
@@ -663,12 +663,12 @@ function jsCallFromPrototype(): int {
 }
 
 //! CHECKER      Call function overridden in js object, JIT
-//! RUN          force_jit: true, entry: "jscallOverridden", options: "--compiler-regex=ETSGLOBAL::jscallOverridden"
+//! RUN          force_jit: true, entry: "jscallOverridden", options: "--compiler-regex=js_call.ETSGLOBAL::jscallOverridden"
 //! METHOD       "jscallOverridden"
 //! PASS_AFTER   "IrBuilder"
 
 //! CHECKER      Call function overridden in js object, AOT
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::jscallOverridden"
+//! RUN_PAOC     options: "--compiler-regex=js_call.ETSGLOBAL::jscallOverridden"
 //! METHOD       "jscallOverridden"
 //! RUN          entry: "jscallOverridden"
 
@@ -683,7 +683,7 @@ function jscallOverridden(): int {
 }
 
 //! CHECKER      Check that references stay valid after rehash in String->JSValue cast implementation
-//! RUN          force_jit: true, entry: "testRehash", options: "--compiler-regex=ETSGLOBAL::testRehash"
+//! RUN          force_jit: true, entry: "testRehash", options: "--compiler-regex=js_call.ETSGLOBAL::testRehash"
 
 function testRehash(): int {
     let count = 40
