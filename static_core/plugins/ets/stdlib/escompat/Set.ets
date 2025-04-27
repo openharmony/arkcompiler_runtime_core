@@ -62,7 +62,7 @@ export interface ReadonlySet<T> extends Iterable<T> {
 /**
  * Set implementation
  */
-export final class Set<K> implements ReadonlySet<K> {
+export class Set<K> implements ReadonlySet<K> {
     private readonly elements: Map<K, K>
 
     /**
