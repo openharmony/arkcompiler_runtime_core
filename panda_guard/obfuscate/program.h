@@ -29,9 +29,15 @@ public:
     void Obfuscate() override;
 
 private:
-    void ForEachFunction(const std::function<FunctionTraver> &callback);
+    void CreateNode(const pandasm::Record &record);
+
+    void CreateAnnotation(const pandasm::Record &record);
+
+    void EnumerateFunctions(const std::function<FunctionTraver> &callback);
 
     void RemoveConsoleLog();
+
+    void RemoveLineNumber();
 
     void UpdateReference();
 

@@ -23,7 +23,7 @@ bool panda::guard::InstructionInfo::IsInnerReg() const
     return this->ins_->GetReg(0) < this->function_->regsNum_;
 }
 
-void panda::guard::InstructionInfo::UpdateInsName(const bool generateNewName)
+void panda::guard::InstructionInfo::UpdateInsName(bool generateNewName)
 {
     this->origin_ = this->ins_->GetId(0);
     this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->origin_, generateNewName);

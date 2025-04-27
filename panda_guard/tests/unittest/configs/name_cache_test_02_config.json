@@ -31,7 +31,6 @@
     "keepOptions": {
       "enable": true,
       "keepPaths": []
-    },
-    "printNameCache": "/mnt/data/huyunhui/openharmony/arkcompiler/runtime_core/panda_guard/tests/unittest/configs/new_name_cache_test.json"
+    }
   }
 }

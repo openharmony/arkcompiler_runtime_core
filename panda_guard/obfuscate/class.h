@@ -36,7 +36,7 @@ public:
      * Traverse all method instructions
      * @param callback instruction callback
      */
-    void ForEachMethodIns(const std::function<InsTraver> &callback);
+    void EnumerateMethodIns(const std::function<InsTraver> &callback);
 
     /**
      * For Each Function In Class
@@ -44,7 +44,7 @@ public:
      * 2. Class.methods(LiteralArray)
      * 3. Class.outerMethods(defined by definemethod)
      */
-    void ForEachFunction(const std::function<FunctionTraver> &callback);
+    void EnumerateFunctions(const std::function<FunctionTraver> &callback);
 
     void ExtractNames(std::set<std::string> &strings) const override;
 
@@ -64,6 +64,7 @@ private:
 
 public:
     ModuleRecord *moduleRecord_ = nullptr;
+    std::optional<Node*> node_ = std::nullopt;
     Function constructor_;
     std::string literalArrayIdx_;
     /*

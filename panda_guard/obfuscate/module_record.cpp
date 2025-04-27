@@ -76,9 +76,9 @@ void panda::guard::FilePathItem::ExtractNames(std::set<std::string> &strings) co
 
 void panda::guard::FilePathItem::RefreshNeedUpdate()
 {
-    this->needUpdate = GuardContext::GetInstance()->GetGuardOptions()->IsFileNameObfEnabled() &&
-                       this->refFilePath_.pathType_ != FilePathType::EXTERNAL_DEPENDENCE;
-    if (!this->needUpdate) {
+    this->needUpdate_ = GuardContext::GetInstance()->GetGuardOptions()->IsFileNameObfEnabled() &&
+                        this->refFilePath_.pathType_ != FilePathType::EXTERNAL_DEPENDENCE;
+    if (!this->needUpdate_) {
         auto parts = StringUtil::Split(this->refFilePath_.GetRawPath(), PATH_DELIMITER.data());
         for (const auto &part : parts) {
             GuardContext::GetInstance()->GetNameMapping()->AddFileNameMapping(part);
@@ -113,8 +113,8 @@ void panda::guard::RegularImportItem::ExtractNames(std::set<std::string> &string
 
 void panda::guard::RegularImportItem::RefreshNeedUpdate()
 {
-    this->needUpdate = GuardContext::GetInstance()->GetGuardOptions()->IsExportObfEnabled() && !remoteFile_;
-    if (!this->needUpdate) {
+    this->needUpdate_ = GuardContext::GetInstance()->GetGuardOptions()->IsExportObfEnabled() && !remoteFile_;
+    if (!this->needUpdate_) {
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->localName_);
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->importName_);
     }
@@ -161,8 +161,8 @@ void panda::guard::NameSpaceImportItem::ExtractNames(std::set<std::string> &stri
 
 void panda::guard::NameSpaceImportItem::RefreshNeedUpdate()
 {
-    this->needUpdate = GuardContext::GetInstance()->GetGuardOptions()->IsToplevelObfEnabled() && !remoteFile_;
-    if (!this->needUpdate) {
+    this->needUpdate_ = GuardContext::GetInstance()->GetGuardOptions()->IsToplevelObfEnabled() && !remoteFile_;
+    if (!this->needUpdate_) {
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->localName_);
     }
 }
@@ -216,21 +216,21 @@ void panda::guard::LocalExportItem::RefreshNeedUpdate()
 {
     const auto &options = GuardContext::GetInstance()->GetGuardOptions();
     if (!options->IsToplevelObfEnabled()) {
-        this->needUpdate = false;
+        this->needUpdate_ = false;
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->localName_);
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->exportName_);
         return;
     }
     if (options->IsExportObfEnabled()) {
-        this->needUpdate = true;
+        this->needUpdate_ = true;
         return;
     }
     if (this->localName_ != this->exportName_) {
-        this->needUpdate = true;
+        this->needUpdate_ = true;
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->exportName_);
         return;
     }
-    this->needUpdate = false;
+    this->needUpdate_ = false;
     GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->localName_);
     GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->exportName_);
 }
@@ -280,8 +280,8 @@ void panda::guard::IndirectExportItem::ExtractNames(std::set<std::string> &strin
 
 void panda::guard::IndirectExportItem::RefreshNeedUpdate()
 {
-    this->needUpdate = GuardContext::GetInstance()->GetGuardOptions()->IsExportObfEnabled() && !remoteFile_;
-    if (!this->needUpdate) {
+    this->needUpdate_ = GuardContext::GetInstance()->GetGuardOptions()->IsExportObfEnabled() && !remoteFile_;
+    if (!this->needUpdate_) {
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->importName_);
         GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->exportName_);
     }
@@ -394,7 +394,7 @@ void panda::guard::ModuleRecord::Update()
 
 void panda::guard::ModuleRecord::WriteNameCache(const std::string &filePath)
 {
-    if (!this->obfuscated) {
+    if (!this->obfuscated_) {
         return;
     }
 

@@ -166,8 +166,8 @@ public:
     std::string name_;
     std::string obfName_;
     bool export_ = false;
-    bool needUpdate = true;
-    bool obfuscated = false;
+    bool needUpdate_ = true;
+    bool obfuscated_ = false;
     // define instruction list, when entity define in finally block, define ins maybe occurs multiple times
     std::vector<InstructionInfo> defineInsList_ {};
 };
