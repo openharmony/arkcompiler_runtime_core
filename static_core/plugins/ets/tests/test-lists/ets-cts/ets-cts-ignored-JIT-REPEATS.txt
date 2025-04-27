@@ -14,6 +14,9 @@
 #25189
 03.types/19.union_types/02.access_to_common_union_members/cm_meth3_10.ets
 
+#24200 test behavior need to corrected for JIT mode.
+13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
+
 #24004 ASSERTION FAILED: ic != nullptr
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_18.ets
@@ -21,3 +24,6 @@
 
 #25252
 17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_29.ets
+
+#25054
+17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_29.ets
