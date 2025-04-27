@@ -140,6 +140,24 @@ TEST_F(LibAbcKitAbcStuff, OpenAbcDynamic)
         ASSERT_NE(found, nullptr);
     }
 
+    std::set<std::string> anonymousMethods = {
+        "abc_dynamic.#*#",
+        "abc_dynamic.#*#^1",
+        "abc_dynamic.#*#anonymousfunc",
+    };
+    helpers::EnumerateAllMethods(file, [&anonymousMethods](AbckitCoreFunction *method) {
+        auto methodName = helpers::AbckitStringToString(g_implI->functionGetName(method));
+        bool isAnonymous = g_implI->functionIsAnonymous(method);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        if (isAnonymous) {
+            EXPECT_EQ(anonymousMethods.count(methodName.data()), 1);
+            anonymousMethods.erase(methodName.data());
+        } else {
+            EXPECT_EQ(anonymousMethods.count(methodName.data()), 0);
+        }
+    });
+    ASSERT_TRUE(anonymousMethods.empty());
+
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
