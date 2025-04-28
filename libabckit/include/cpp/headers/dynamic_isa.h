@@ -359,11 +359,11 @@ public:
      * @param [ in ] input0 - Inst containing object.
      * @param [ in ] input1 - Inst containing first `key`.
      * @param [ in ] imm0 - Number of optional insts containing `key`s.
-     * @param [ in ] ... - Optional insts containing `key`s.
+     * @param [ in ] args - Optional insts containing `key`s.
      */
     template <typename... Args>
     Instruction CreateCreateobjectwithexcludedkeys(Instruction input0, Instruction input1, uint64_t imm0,
-                                                   Args... /*args*/) &&;
+                                                   Args... args) &&;
 
     /**
      * @brief Creates instruction with opcode WIDE_CREATEOBJECTWITHEXCLUDEDKEYS. This instruction creates an object
@@ -373,11 +373,11 @@ public:
      * @param [ in ] input0 - Inst containing object.
      * @param [ in ] input1 - Inst containing first `key`.
      * @param [ in ] imm0 - Number of optional insts containing `key`s.
-     * @param [ in ] ... - Optional insts containing `key`s.
+     * @param [ in ] args - Optional insts containing `key`s.
      */
     template <typename... Args>
     Instruction CreateWideCreateobjectwithexcludedkeys(Instruction input0, Instruction input1, uint64_t imm0,
-                                                       Args... /*args*/) &&;
+                                                       Args... args) &&;
 
     /**
      * @brief Creates instruction with opcode CREATEARRAYWITHBUFFER. This instruction creates an array using literal
@@ -1000,20 +1000,20 @@ public:
      * `inputs[argCount-1]`.
      * @return Instruction
      * @param [ in ] acc - Inst containing function object.
-     * @param [ in ] ... - Arguments.
+     * @param [ in ] instrs - Arguments.
      */
     template <typename... Args>
-    Instruction CreateCallrange(Instruction acc, Args... /*instrs*/) &&;
+    Instruction CreateCallrange(Instruction acc, Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode WIDE_CALLRANGE. This instruction invokes `acc` with arguments `inputs[0]`,
      * ..., `inputs[argCount-1]`.
      * @return Instruction
      * @param [ in ] acc - Inst containing function object.
-     * @param [ in ] ... - Arguments.
+     * @param [ in ] instrs - Arguments.
      */
     template <typename... Args>
-    Instruction CreateWideCallrange(Instruction acc, Args... /*instrs*/) &&;
+    Instruction CreateWideCallrange(Instruction acc, Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode SUPERCALLSPREAD. This instruction invokes `acc`'s superclass constructor
@@ -1087,10 +1087,10 @@ public:
      * `...`.
      * @return Instruction
      * @param [ in ] acc - Function object.
-     * @param [ in ] ... - Object + arguments.
+     * @param [ in ] instrs - Object + arguments.
      */
     template <typename... Args>
-    Instruction CreateCallthisrange(Instruction acc, Args... /*instrs*/) &&;
+    Instruction CreateCallthisrange(Instruction acc, Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode WIDE_CALLTHISRANGE.
@@ -1098,30 +1098,30 @@ public:
      * `...`.
      * @return Instruction
      * @param [ in ] acc - Function object.
-     * @param [ in ] ... - Object + arguments.
+     * @param [ in ] instrs - Object + arguments.
      */
     template <typename... Args>
-    Instruction CreateWideCallthisrange(Instruction acc, Args... /*instrs*/) &&;
+    Instruction CreateWideCallthisrange(Instruction acc, Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode SUPERCALLTHISRANGE.
      * Invokes super with arguments ...
      * This instruction appears only in non-arrow functions.
      * @return Instruction
-     * @param [ in ] ... - Parameters.
+     * @param [ in ] instrs - Parameters.
      */
     template <typename... Args>
-    Instruction CreateSupercallthisrange(Args... /*instrs*/) &&;
+    Instruction CreateSupercallthisrange(Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode WIDE_SUPERCALLTHISRANGE.
      * Invokes super with arguments ...
      * This instruction appears only in non-arrow functions.
      * @return Instruction
-     * @param [ in ] ... - Parameters.
+     * @param [ in ] instrs - Parameters.
      */
     template <typename... Args>
-    Instruction CreateWideSupercallthisrange(Args... /*instrs*/) &&;
+    Instruction CreateWideSupercallthisrange(Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode SUPERCALLARROWRANGE.
@@ -1129,10 +1129,10 @@ public:
      * This instruction appears only in arrow functions.
      * @return Instruction
      * @param [ in ] acc - Class object.
-     * @param [ in ] ... - Parameters.
+     * @param [ in ] instrs - Parameters.
      */
     template <typename... Args>
-    Instruction CreateSupercallarrowrange(Instruction acc, Args... /*instrs*/) &&;
+    Instruction CreateSupercallarrowrange(Instruction acc, Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode WIDE_SUPERCALLARROWRANGE.
@@ -1140,10 +1140,10 @@ public:
      * This instruction appears only in arrow functions.
      * @return Instruction
      * @param [ in ] acc - Class object.
-     * @param [ in ] ... - Parameters.
+     * @param [ in ] instrs - Parameters.
      */
     template <typename... Args>
-    Instruction CreateWideSupercallarrowrange(Instruction acc, Args... /*instrs*/) &&;
+    Instruction CreateWideSupercallarrowrange(Instruction acc, Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode DEFINEGETTERSETTERBYVALUE.
