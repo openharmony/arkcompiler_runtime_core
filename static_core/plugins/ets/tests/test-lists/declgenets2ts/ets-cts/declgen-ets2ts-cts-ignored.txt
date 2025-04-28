@@ -246,7 +246,6 @@
 03.types/15.literal_types/unsupported_literal_types_7.ets
 03.types/15.literal_types/unsupported_literal_types_8.ets
 03.types/15.literal_types/unsupported_literal_types_9.ets
-03.types/17.tuple_types/tt2_31.ets
 03.types/18.function_types/function_type_neg_0.ets
 03.types/18.function_types/function_type_neg_1.ets
 03.types/18.function_types/function_type_neg_2.ets

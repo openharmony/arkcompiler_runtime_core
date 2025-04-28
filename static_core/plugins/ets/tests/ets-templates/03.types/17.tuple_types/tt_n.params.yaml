@@ -72,6 +72,9 @@ cases:
           let e: [char] = [true]  // wrong type
 
     - use: |-
+          let v: [1|2|3] = [1]   // wrong type
+
+    - use: |-
           let e: [Error] = [new Object()]  // wrong type
 
     - use: |-
