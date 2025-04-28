@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,9 @@ Logger::Buffer GetDebugInfoAboutObject(const ObjectHeader *header)
 {
     ValidateObject(nullptr, header);
 
+    Logger::Buffer buffer;
+// For Security reason we hide address
+#if !defined(PANDA_TARGET_OHOS) || !defined(NDEBUG)
     auto *baseClass = header->ClassAddr<BaseClass>();
     const uint8_t *descriptor = nullptr;
     if (baseClass->IsDynamicClass()) {
@@ -47,9 +50,9 @@ Logger::Buffer GetDebugInfoAboutObject(const ObjectHeader *header)
     uintmax_t mark = header->AtomicGetMark().GetValue();
     size_t size = header->ObjectSize();
 
-    Logger::Buffer buffer;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     buffer.Printf("(\"%s\" %p %zu bytes) mword = %" PRIuMAX, descriptor, rawptr, size, mark);
+#endif
 
     return buffer;
 }
