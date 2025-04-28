@@ -14,7 +14,7 @@
  */
 
 export class ArrayList<T> implements Iterable<T> {
-    private readonly DEFAULT_CAPACITY = 8;
+    private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
     private buffer: Array<T>;
 
