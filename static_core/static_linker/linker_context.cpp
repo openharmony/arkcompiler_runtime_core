@@ -636,7 +636,7 @@ void Context::AddAnnotationImpl(AddAnnotationImplData<T> ad, Getter getter, Adde
         auto mbNewAnnot = AnnotFromOld(oldAnnot);
         if (std::holds_alternative<panda_file::AnnotationItem *>(mbNewAnnot)) {
             adder(ad.ni, std::get<panda_file::AnnotationItem *>(mbNewAnnot));
-            return;
+            continue;
         }
         const auto &ed = std::get<ErrorDetail>(mbNewAnnot);
         if (ad.retriesLeft-- == 0) {
