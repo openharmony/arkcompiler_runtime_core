@@ -1198,7 +1198,7 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
             }
             return true;
         });
-        UNREACHABLE();
+        return false;
     }
 
     return Execute(entryPoint, args);
