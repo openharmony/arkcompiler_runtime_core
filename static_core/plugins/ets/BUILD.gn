@@ -130,7 +130,10 @@ if (!(ark_standalone_build ||
 
   generate_static_abc("ets2abc_commonsdk_arkts") {
     base_url = "./sdk/arkts"
-    files = [ "./sdk/arkts/@arkts.math.Decimal.ets" ]
+    files = [
+      "./sdk/arkts/@arkts.math.Decimal.ets",
+      "./sdk/arkts/@arkts.collections.ets",
+    ]
     is_boot_abc = "True"
     device_dst_file = "/system/framework/ets2abc_commonsdk_arkts.abc"
   }
