@@ -69,3 +69,8 @@ cases:
       let undef: undefined = undefined;
     logic: |-
       let str: string = undef as string;
+
+  - desc: Verify that attempting to cast an array to a string results in a type error.
+    logic: |-
+      let arr: number[] = [1, 2, 3];
+      let str: string = arr as string;
