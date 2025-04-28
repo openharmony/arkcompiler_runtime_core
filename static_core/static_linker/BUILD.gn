@@ -119,7 +119,6 @@ ohos_executable("ark_link") {
   deps = [
     ":arklinker_static",
     ":link_options_h",
-    "$ark_root/libpandabase:libarktsbase",
   ]
 
   if (target_os != "win" && target_os != "mingw" && target_os != "winuwp") {
