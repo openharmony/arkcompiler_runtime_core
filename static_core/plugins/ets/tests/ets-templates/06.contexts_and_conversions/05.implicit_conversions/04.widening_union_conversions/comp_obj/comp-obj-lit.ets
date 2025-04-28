@@ -27,7 +27,7 @@ let s{{loop.index}}: {{t.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 
 class A {
-    fld: {{c.to_type}}
+    fld: {{c.to_type}} = ""
 }
 
 function main() {

@@ -222,10 +222,10 @@ cases:
 
     - res: 'number'
       vals:
-          - { type: 'Comparable<Float>', expr: 'new Float()' }
-          - { type: 'Comparable<Double>', expr: 'new Double()' }
-          - { type: 'Comparable<Byte>', expr: 'new Byte()' }
-          - { type: 'Comparable<Short>', expr: 'new Short()' }
-          - { type: 'Comparable<Int>', expr: 'new Int()' }
-          - { type: 'Comparable<Long>', expr: 'new Long()' }
-          - { type: 'Comparable<Char>', expr: 'new Char()' }
+          - { type: 'Comparable<Float>', init_value: 'new Float()', expr: 'new Float()' }
+          - { type: 'Comparable<Double>', init_value: 'new Double()',  expr: 'new Double()' }
+          - { type: 'Comparable<Byte>', init_value: 'new Byte()',  expr: 'new Byte()' }
+          - { type: 'Comparable<Short>', init_value: 'new Short()',  expr: 'new Short()' }
+          - { type: 'Comparable<Int>', init_value: 'new Int()',  expr: 'new Int()' }
+          - { type: 'Comparable<Long>', init_value: 'new Long()',  expr: 'new Long()' }
+          - { type: 'Comparable<Char>', init_value: 'new Char()',  expr: 'new Char()' }
