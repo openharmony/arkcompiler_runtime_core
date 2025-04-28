@@ -836,7 +836,7 @@ class DataFrame {
      * @private
      */
     private buildBorderRow(
-        char: string,
+        ch: string,
         commonConnector: string,
         connectorLeft: string,
         connectorRight: string,
@@ -845,11 +845,11 @@ class DataFrame {
             this._indexColumnWidth - 
             (connectorLeft.length as int) -
             (connectorRight.length as int);
-        const conn: string = char.repeat(connLength);
+        const conn: string = ch.repeat(connLength);
         let border: string = `${connectorLeft}${conn}`;
         for (const col of this.tableModel.keys()) {
             const colWidth = this.columnWidths.get(col)!;
-            border += char.repeat(colWidth + 2) + commonConnector;
+            border += ch.repeat(colWidth + 2) + commonConnector;
         }
         return `${border}${connectorRight}`;
     }

@@ -40,11 +40,11 @@ function parseLong(s: String): long|null {
         return null;
     }
     for (let i = startFrom; i < s.length; i++) {
-        let char = s.charAt(i);
-        if (!Char.isDecDigit(char)) {
+        let ch = s.charAt(i);
+        if (!Char.isDecDigit(ch)) {
             return null;
         }
-        let digit = (char - c'0') as int;
+        let digit = (ch - c'0') as int;
         if (negative) {
             if (result < (Long.MIN_VALUE + digit) / 10) {
                 return null;

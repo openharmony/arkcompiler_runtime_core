@@ -17,8 +17,8 @@
 desc: Casting conversions char to float.
 ---*/
 
-let char: string = 'A';
-let floatValue: number = char.charCodeAt(0);
+let ch: string = 'A';
+let floatValue: number = ch.charCodeAt(0);
 let expectedFloatValue: number = 65.0;
 
 function main(): void {

@@ -20,7 +20,7 @@ const {
 const deferentTypes = new DeferentIntTypes();
 
 function checkIntToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.int === 'number');
+    ASSERT_TRUE(typeof deferentTypes.num === 'number');
 }
 
 function checkNumberToNumber() {
@@ -36,7 +36,7 @@ function checkBigIntToNumber() {
 }
 
 function checkFloatToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.float === 'number');
+    ASSERT_TRUE(typeof deferentTypes.fl === 'number');
 }
 
 function checkIntStringToNumber() {
@@ -44,19 +44,19 @@ function checkIntStringToNumber() {
 }
 
 function checkLongToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.long === 'number');
+    ASSERT_TRUE(typeof deferentTypes.l === 'number');
 }
 
 function checkDoubleToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.double === 'number');
+    ASSERT_TRUE(typeof deferentTypes.doub === 'number');
 }
 
 function checkCharToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.char === 'string');
+    ASSERT_TRUE(typeof deferentTypes.ch === 'string');
 }
 
 function checkByteToNumber() {
-    ASSERT_TRUE(typeof deferentTypes.byte === 'number');
+    ASSERT_TRUE(typeof deferentTypes.by === 'number');
 }
 
 checkIntToNumber();

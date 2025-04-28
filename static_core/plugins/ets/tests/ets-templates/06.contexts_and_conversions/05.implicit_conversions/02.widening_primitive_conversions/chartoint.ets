@@ -17,8 +17,8 @@
 desc: Casting conversions char to int.
 ---*/
 
-let char: string = 'A';
-let intValue: number = char.charCodeAt(0);
+let ch: string = 'A';
+let intValue: number = ch.charCodeAt(0);
 let expectedIntValue: number = 65;
 
 function main(): void {
