@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,11 @@
  * limitations under the License.
  */
 
-class Cls {
-    static func_s(i: int): int {
-        return i + i;
-    }
-
-    final func_f(i: int): int {
-        return i + i;
-    }
-
-    func_i(i: int): int {
-        return i + i;
-    }
+export @interface ClassAnno {
+    names: String[] = ["name01", "name02"]
 }
 
-let show = (str: string): string => {
-    return "Hi," + str;
-}
-
-function foo(x: string) : string {
-    let b: string = "Function foo was called"
-    return b + x;
-}
-
-function bar(y: number) : string {
-    let b: string = "Function bar was called"
-    return b + y;
+@ClassAnno({names: ["test"]})
+export class Cls {
+    name: string = ""
 }

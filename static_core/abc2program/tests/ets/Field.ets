@@ -13,30 +13,22 @@
  * limitations under the License.
  */
 
+namespace Ns {
+  let ns1: int = 1;
+}
+
 class Cls {
-    static func_s(i: int): int {
-        return i + i;
-    }
-
-    final func_f(i: int): int {
-        return i + i;
-    }
-
-    func_i(i: int): int {
-        return i + i;
-    }
+  cls1: int = 1;
 }
 
-let show = (str: string): string => {
-    return "Hi," + str;
+interface Itf {
+  itf1: int
 }
 
-function foo(x: string) : string {
-    let b: string = "Function foo was called"
-    return b + x;
+enum Enums {
+  enums1 = 1
 }
 
-function bar(y: number) : string {
-    let b: string = "Function bar was called"
-    return b + y;
+@interface Anno {
+  anno1: int = 1;
 }
