@@ -1294,7 +1294,15 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
     updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefsQueueTemp_->begin(), updatedRefsQueueTemp_->end());
     updatedRefsQueueTemp_->clear();
 
-    this->GetPandaVm()->UpdateMovedStrings();
+    auto gcRootUpdaterCallback = [](ObjectHeader **object) {
+        if ((*object)->IsForwarded()) {
+            *object = GetForwardAddress(*object);
+            return true;
+        }
+        return false;
+    };
+
+    this->GetPandaVm()->UpdateMovedStrings(gcRootUpdaterCallback);
     SweepRegularVmRefs();
 
     ResetRegionAfterMixedGC();

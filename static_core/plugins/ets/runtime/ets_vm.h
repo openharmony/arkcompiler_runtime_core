@@ -107,7 +107,7 @@ public:
     void StopGC() override;
     void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor) override;
     void VisitVmRoots(const GCRootVisitor &visitor) override;
-    void UpdateVmRefs() override;
+    void UpdateVmRefs(const GCRootUpdater &gcRootUpdater) override;
     void UninitializeThreads() override;
 
     void HandleReferences(const GCTask &task, const mem::GC::ReferenceClearPredicateT &pred) override;
@@ -409,9 +409,9 @@ private:
      * @tparam REF_CAN_BE_NULL true iff it is legal for @param ref to hold a null pointer
      */
     template <bool REF_CAN_BE_NULL>
-    static void UpdateMovedVmRef(Value &ref);
+    static void UpdateMovedVmRef(Value &ref, const GCRootUpdater &gcRootUpdater);
 
-    static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine);
+    static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine, const GCRootUpdater &gcRootUpdater);
 
     void InitializeRandomEngine()
     {

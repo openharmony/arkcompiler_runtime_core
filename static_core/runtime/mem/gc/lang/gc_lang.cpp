@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,20 +95,16 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
             return true;
         });
     }
-    // Update string table
-    if (GetPandaVm()->UpdateMovedStrings()) {
-        // AOT string slots are pointing to strings from the StringTable,
-        // so we should update it only if StringTable's pointers were updated.
-        rootManager_.UpdateAotStringRoots();
-    }
-    // Update thread locals
-    UpdateThreadLocals();
-    // Update refs in vm
-    UpdateVmRefs();
-    // Update refs in class linker contexts
-    UpdateClassLinkerContextRoots();
-    // Update global refs
-    UpdateGlobalObjectStorage();
+
+    auto gcRootUpdaterCallback = [](ObjectHeader **object) {
+        if ((*object)->IsForwarded()) {
+            *object = GetForwardAddress(*object);
+            return true;
+        }
+        return false;
+    };
+
+    UpdateRootRefsToMovedObjects(gcRootUpdaterCallback);
 }
 
 template <class LanguageConfig>

@@ -575,11 +575,7 @@ protected:
     /// Update all refs to moved objects
     virtual void CommonUpdateRefsToMovedObjects() = 0;
 
-    virtual void UpdateVmRefs() = 0;
-
-    virtual void UpdateGlobalObjectStorage() = 0;
-
-    virtual void UpdateClassLinkerContextRoots() = 0;
+    virtual void UpdateRootRefsToMovedObjects(const GCRootUpdater &gcRootUpdater) = 0;
 
     void UpdateRefsInVRegs(ManagedThread *thread);
 
@@ -707,7 +703,6 @@ private:
 
     size_t GetNativeBytesFromMallinfoAndRegister() const;
     virtual void ClearLocalInternalAllocatorPools() = 0;
-    virtual void UpdateThreadLocals() = 0;
     NativeGcTriggerType GetNativeGcTriggerType();
 
     class GCListenerManager {

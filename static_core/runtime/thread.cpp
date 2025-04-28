@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -712,24 +712,22 @@ void MTManagedThread::ProcessCreatedThread()
     NativeCodeBegin();
 }
 
-void ManagedThread::UpdateGCRoots()
+void ManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
 {
-    if ((exception_ != nullptr) && (exception_->IsForwarded())) {
-        exception_ = ::ark::mem::GetForwardAddress(exception_);
+    if ((exception_ != nullptr)) {
+        gcRootUpdater(&exception_);
     }
-    for (auto &&it : localObjects_) {
-        if ((*it)->IsForwarded()) {
-            (*it) = ::ark::mem::GetForwardAddress(*it);
-        }
+    for (auto **localObject : localObjects_) {
+        gcRootUpdater(localObject);
     }
 
     if (!taggedHandleScopes_.empty()) {
-        taggedHandleStorage_->UpdateHeapObject();
-        taggedGlobalHandleStorage_->UpdateHeapObject();
+        taggedHandleStorage_->UpdateHeapObject(gcRootUpdater);
+        taggedGlobalHandleStorage_->UpdateHeapObject(gcRootUpdater);
     }
 
     if (!objectHeaderHandleScopes_.empty()) {
-        objectHeaderHandleStorage_->UpdateHeapObject();
+        objectHeaderHandleStorage_->UpdateHeapObject(gcRootUpdater);
     }
 }
 
@@ -762,21 +760,19 @@ uint32_t ManagedThread::GetThreadPriority()
     return os::thread::GetPriority(tid);
 }
 
-void MTManagedThread::UpdateGCRoots()
+void MTManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
 {
-    ManagedThread::UpdateGCRoots();
+    ManagedThread::UpdateGCRoots(gcRootUpdater);
     for (auto &it : localObjectsLocked_.Data()) {
-        if (it.GetObject()->IsForwarded()) {
-            it.SetObject(ark::mem::GetForwardAddress(it.GetObject()));
-        }
+        it.UpdateObject(gcRootUpdater);
     }
 
     // Update enter_monitor_object_
-    if (enterMonitorObject_ != nullptr && enterMonitorObject_->IsForwarded()) {
-        enterMonitorObject_ = ark::mem::GetForwardAddress(enterMonitorObject_);
+    if (enterMonitorObject_ != nullptr) {
+        gcRootUpdater(&enterMonitorObject_);
     }
 
-    ptReferenceStorage_->UpdateMovedRefs();
+    ptReferenceStorage_->UpdateMovedRefs(gcRootUpdater);
 }
 
 void MTManagedThread::VisitGCRoots(const ObjectVisitor &cb)
