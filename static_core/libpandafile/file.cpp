@@ -512,7 +512,7 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openM
         return nullptr;
     }
 
-    if (!CheckHeader(ptr, filename)) {
+    if (!CheckHeader(ptr, filename, size)) {
         return nullptr;
     }
 
@@ -550,13 +550,18 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
-bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename)
+bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename, const size_t &expectedLength)
 {
     if (ptr.Get() == nullptr || ptr.GetSize() < sizeof(File::Header)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
         return false;
     }
-    auto header = reinterpret_cast<const File::Header *>(reinterpret_cast<uintptr_t>(ptr.Get()));
+    auto header = reinterpret_cast<const File::Header *>(ptr.Get());
+    if (expectedLength != 0 && expectedLength != header->fileSize) {
+        LOG(ERROR, PANDAFILE) << "File [" << filename << "]'s actual size [" << ptr.GetSize()
+                              << "] is not equal to Header's fileSize [" << header->fileSize << "]";
+        return false;
+    }
     if (header->magic != File::MAGIC) {
         LOG(ERROR, PANDAFILE) << "Invalid magic number '";
         return false;
