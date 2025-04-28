@@ -24,7 +24,6 @@
 #include <sstream>
 #include <string>
 
-#include "linker_context.h"
 #include "assembler/assembly-field.h"
 #include "assembler/assembly-function.h"
 #include "assembler/assembly-program.h"
@@ -36,6 +35,8 @@
 #include "libpandafile/file_writer.h"
 #include "include/runtime_options.h"
 #include "linker.h"
+#include "linker_context.h"
+#include "linker_context_misc.cpp"
 #include "runtime/include/runtime.h"
 #include "source_lang_enum.h"
 
@@ -509,4 +510,147 @@ TEST(linkertests, FilesInfo)
     TestSts("filesinfo", {"filesinfo.txt"});
 #endif
 }
+
+TEST(linkertests, Mix)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    TestSts("mix", {"1.ets.abc", "2.ets.abc"});
+#endif
+}
+
+#ifdef TEST_STATIC_LINKER_WITH_STS
+std::string GenLinkCmd(const std::string &param)
+{
+    std::string prefix = "../../bin/ark_link";
+    std::string suffix = " > /dev/null 2>&1";
+    return prefix + param + suffix;
+}
+#endif
+
+TEST(linkertests, TestForCoverage)
+{
+#ifdef TEST_STATIC_LINKER_WITH_STS
+    std::string cmd = GenLinkCmd(" --error-option");
+    // NOLINTNEXTLINE(cert-env33-c)
+    auto linkRes = std::system(cmd.c_str());
+    ASSERT_NE(linkRes, 0);
+
+    cmd = GenLinkCmd(" --output data/ets/sys/target.abc");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_NE(linkRes, 0);
+
+    cmd = GenLinkCmd(" -- data/ets/sys/1.ets.abc data/ets/sys/2.ets.abc");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_EQ(linkRes, 0);
+
+    cmd = GenLinkCmd(" -- data/ets/sys/no_exist.abc");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_NE(linkRes, 0);
+
+    cmd = GenLinkCmd(" -- data/ets/sys/1.ets.abc data/ets/sys/2.ets.abc");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_EQ(linkRes, 0);
+
+    cmd = GenLinkCmd(" --output data/ets/sys/target.abc -- data/ets/sys/1.ets.abc data/ets/sys/2.ets.abc");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_EQ(linkRes, 0);
+
+    std::string opt = " --show-stats --version --log-level info";
+    std::string dst = " --output data/ets/sys/target.abc -- data/ets/sys/1.ets.abc data/ets/sys/2.ets.abc";
+    cmd = GenLinkCmd(opt + dst);
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_EQ(linkRes, 0);
+
+    cmd = GenLinkCmd(" --output data/ets/sys/target.abc -- @data/ets/sys/no_exist.txt");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_NE(linkRes, 0);
+
+    cmd = GenLinkCmd(" --output data/ets/sys/target.abc -- @data/ets/sys/file_list_exist.txt");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_EQ(linkRes, 0);
+
+    cmd = GenLinkCmd(" --output data/ets/sys/target.abc -- @data/ets/sys/file_list_noexist.txt");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_NE(linkRes, 0);
+
+    cmd = GenLinkCmd(" --output data/ets/sys/target.abc -- @data/ets/sys/file_list_errorformat.txt");
+    // NOLINTNEXTLINE(cert-env33-c)
+    linkRes = std::system(cmd.c_str());
+    ASSERT_NE(linkRes, 0);
+#endif
+}
+
+constexpr uint32_t I = 32;
+constexpr uint64_t L = 64;
+constexpr float F = 11.1;
+constexpr double D = 22.2;
+
+TEST(linkertests, TestForReprValueItem)
+{
+    std::string sv1Expect = "32 as int";
+    std::stringstream ss1;
+    auto *sv1 = new ark::panda_file::ScalarValueItem(I);
+    ark::static_linker::ReprValueItem(ss1, sv1);
+    std::string sv1Res = ss1.str();
+    delete sv1;
+    ASSERT_TRUE(sv1Res == sv1Expect);
+
+    std::string sv2Expect = "64 as long";
+    std::stringstream ss2;
+    auto *sv2 = new ark::panda_file::ScalarValueItem(L);
+    ark::static_linker::ReprValueItem(ss2, sv2);
+    std::string sv2Res = ss2.str();
+    delete sv2;
+    ASSERT_TRUE(sv2Res == sv2Expect);
+
+    std::string sv3Expect = "11.1 as float";
+    std::stringstream ss3;
+    auto *sv3 = new ark::panda_file::ScalarValueItem(F);
+    ark::static_linker::ReprValueItem(ss3, sv3);
+    std::string sv3Res = ss3.str();
+    delete sv3;
+    ASSERT_TRUE(sv3Res == sv3Expect);
+
+    std::string sv4Expect = "22.2 as double";
+    std::stringstream ss4;
+    auto *sv4 = new ark::panda_file::ScalarValueItem(D);
+    ark::static_linker::ReprValueItem(ss4, sv4);
+    std::string sv4Res = ss4.str();
+    delete sv4;
+    ASSERT_TRUE(sv4Res == sv4Expect);
+
+    auto *sv5p = new ark::panda_file::ScalarValueItem(D);
+    auto *sv5 = new ark::panda_file::ScalarValueItem(sv5p);
+    std::stringstream ss5;
+    ark::static_linker::ReprValueItem(ss5, sv5);
+    std::string sv5Res = ss5.str();
+    delete sv5p;
+    delete sv5;
+    ASSERT_EQ(sv5Res, sv4Expect);
+}
+
+TEST(linkertests, TestForReprArrayValueItem)
+{
+    std::string av1Expect = "[1 as int, 2 as int, 3 as int]";
+    std::stringstream ss6;
+    std::vector<ark::panda_file::ScalarValueItem> items;
+    items.emplace_back(static_cast<uint32_t>(1));
+    items.emplace_back(static_cast<uint32_t>(2));
+    items.emplace_back(static_cast<uint32_t>(3));
+    auto *av1 = new ark::panda_file::ArrayValueItem(ark::panda_file::Type(ark::panda_file::Type::TypeId::I32), items);
+    ark::static_linker::ReprValueItem(ss6, av1);
+    std::string av1Res = ss6.str();
+    delete av1;
+    ASSERT_TRUE(av1Res == av1Expect);
+}
+
 }  // namespace
