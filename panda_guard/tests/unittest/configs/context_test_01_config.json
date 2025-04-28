@@ -30,15 +30,12 @@
     },
     "fileNameObfuscation": {
       "enable": true,
-      "reservedFileNames": [
-        "xxx"
-      ],
+      "reservedFileNames": ["xxx"],
       "universalReservedFileNames": []
     },
     "keepOptions": {
       "enable": true,
       "keepPaths": []
-    },
-    "applyNameCache": "/mnt/data/huyunhui/openharmony/arkcompiler/runtime_core/panda_guard/tests/unittest/configs/context_test_01_name_cache.json"
+    }
   }
 }

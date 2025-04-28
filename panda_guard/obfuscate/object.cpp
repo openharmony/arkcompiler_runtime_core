@@ -40,7 +40,7 @@ void panda::guard::ObjectProperty::Build()
         return;
     }
 
-    this->method_->nameNeedUpdate_ = this->needUpdate;
+    this->method_->nameNeedUpdate_ = this->needUpdate_;
     this->method_->Init();
     this->method_->Create();
 }
@@ -66,8 +66,8 @@ void panda::guard::ObjectProperty::Update()
 
 void panda::guard::ObjectProperty::SetContentNeedUpdate(bool toUpdate)
 {
-    this->contentNeedUpdate_ = toUpdate && this->needUpdate;
-    this->needUpdate = true;
+    this->contentNeedUpdate_ = toUpdate && this->needUpdate_;
+    this->needUpdate_ = true;
 
     if (this->method_) {
         this->method_->SetContentNeedUpdate(toUpdate);
@@ -92,7 +92,7 @@ void panda::guard::Object::Build()
     size_t valueIndex = keyIndex + LITERAL_OBJECT_ITEM_LEN;  // object item value index
     while (valueIndex < literalArray.literals_.size()) {
         auto &valueLiteral = literalArray.literals_[valueIndex];
-        bool isMethod = valueLiteral.tag_ == panda_file::LiteralTag::METHOD;
+        const bool isMethod = valueLiteral.tag_ == panda_file::LiteralTag::METHOD;
         CreateProperty(literalArray, keyIndex, isMethod);
         if (isMethod) {
             keyIndex += LITERAL_OBJECT_METHOD_ITEM_GROUP_LEN;
@@ -110,7 +110,7 @@ void panda::guard::Object::CreateProperty(const pandasm::LiteralArray &literalAr
     PANDA_GUARD_ASSERT_PRINT(keyTag != panda_file::LiteralTag::STRING, TAG, ErrorCode::GENERIC_ERROR,
                              "bad keyTag literal tag");
 
-    auto property = std::make_shared<ObjectProperty>(this->program_, this->literalArrayIdx_);
+    const auto property = std::make_shared<ObjectProperty>(this->program_, this->literalArrayIdx_);
     property->name_ = StringUtil::UnicodeEscape(std::get<std::string>(keyValue));
     property->scope_ = this->scope_;
     property->export_ = this->export_;
@@ -124,6 +124,7 @@ void panda::guard::Object::CreateProperty(const pandasm::LiteralArray &literalAr
         PANDA_GUARD_ASSERT_PRINT(valueTag != panda_file::LiteralTag::METHOD, TAG, ErrorCode::GENERIC_ERROR,
                                  "bad valueLiteral tag:" << (int)valueTag);
         property->method_ = std::make_shared<PropertyMethod>(this->program_, std::get<std::string>(valueValue));
+        property->method_->node_ = this->node_;
         property->method_->export_ = this->export_;
         property->method_->scope_ = this->scope_;
     }
@@ -164,7 +165,7 @@ void panda::guard::Object::UpdateLiteralArrayIdx()
     }
 }
 
-void panda::guard::Object::ForEachMethod(const std::function<FunctionTraver> &callback)
+void panda::guard::Object::EnumerateMethods(const std::function<FunctionTraver> &callback)
 {
     for (const auto &property : this->properties_) {
         if (property->method_) {
@@ -194,7 +195,7 @@ void panda::guard::Object::ExtractNames(std::set<std::string> &strings) const
 
 void panda::guard::Object::RefreshNeedUpdate()
 {
-    this->needUpdate = true;
+    this->needUpdate_ = true;
     this->needUpdateName_ = TopLevelOptionEntity::NeedUpdate(*this);
 }
 
@@ -225,7 +226,7 @@ void panda::guard::Object::Update()
 
 void panda::guard::Object::WriteNameCache(const std::string &filePath)
 {
-    if (!this->obfuscated || !this->contentNeedUpdate_) {
+    if (!this->obfuscated_ || !this->contentNeedUpdate_) {
         return;
     }
 

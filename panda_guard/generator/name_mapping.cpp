@@ -142,6 +142,12 @@ void panda::guard::NameMapping::AddNameMapping(const std::string &name)
     nameMapping_.emplace(name, name);
 }
 
+void panda::guard::NameMapping::AddNameMapping(const std::string &origin, const std::string &name)
+{
+    LOG(INFO, PANDAGUARD) << TAG << "NameMapping[Add]:" << origin << " --> " << name;
+    nameMapping_.emplace(origin, name);
+}
+
 void panda::guard::NameMapping::AddNameMapping(const std::set<std::string> &nameList)
 {
     for (const auto &name : nameList) {

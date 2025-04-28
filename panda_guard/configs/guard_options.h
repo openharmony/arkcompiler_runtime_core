@@ -46,6 +46,7 @@ struct ObfuscationRules {
     bool enableExportObfuscation = false;
     bool enableRemoveLog = false;
     bool enableDecorator = false;
+    bool enableCompact = false;
     std::string printNameCache;
     std::string applyNameCache;
     std::vector<std::string> reservedNames;
@@ -102,6 +103,8 @@ public:
     [[nodiscard]] bool IsRemoveLogObfEnabled() const;
 
     [[nodiscard]] bool IsDecoratorObfEnabled() const;
+
+    [[nodiscard]] bool IsCompactObfEnabled() const;
 
     [[nodiscard]] bool IsPropertyObfEnabled() const;
 

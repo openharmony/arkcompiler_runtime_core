@@ -18,6 +18,7 @@
     "enableExportObfuscation": true,
     "enableRemoveLog": true,
     "enableDecoratorObfuscation": true,
+    "compact": true,
     "printNameCache": "",
     "applyNameCache": "",
     "reservedNames": [

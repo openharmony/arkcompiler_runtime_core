@@ -27,6 +27,7 @@ panda_guard_sources = [
   "generator/order_name_generator.cpp",
   "guard4program.cpp",
   "guard_driver.cpp",
+  "obfuscate/annotation.cpp",
   "obfuscate/class.cpp",
   "obfuscate/entity.cpp",
   "obfuscate/file_path.cpp",

@@ -209,7 +209,7 @@ void panda::guard::Function::Init()
     this->name_ = scopeAndName.size() > 1 ? scopeAndName[1] : ANONYMOUS_FUNCTION_NAME;
 
     if (StringUtil::IsAnonymousFunctionName(this->name_)) {
-        this->anonymous = true;
+        this->anonymous_ = true;
     }
 
     this->obfName_ = this->name_;
@@ -217,7 +217,7 @@ void panda::guard::Function::Init()
     LOG(INFO, PANDAGUARD) << TAG << "scopeTypeStr:" << this->scopeTypeStr_;
     LOG(INFO, PANDAGUARD) << TAG << "type:" << (int)this->type_;
     LOG(INFO, PANDAGUARD) << TAG << "name:" << this->name_;
-    LOG(INFO, PANDAGUARD) << TAG << "anonymous:" << (this->anonymous ? "true" : "false");
+    LOG(INFO, PANDAGUARD) << TAG << "anonymous:" << (this->anonymous_ ? "true" : "false");
 }
 
 panda::pandasm::Function &panda::guard::Function::GetOriginFunction()
@@ -232,28 +232,33 @@ void panda::guard::Function::InitBaseInfo()
     this->obfName_ = this->name_;
     this->regsNum_ = func.regs_num;
 
-    size_t startLineIndex = 0;
-    while (startLineIndex < func.ins.size()) {
-        const size_t lineNumber = func.ins[startLineIndex]->ins_debug.line_number;
-        if (lineNumber < MAX_LINE_NUMBER) {
-            this->startLine_ = lineNumber;
-            break;
+    if (GuardContext::GetInstance()->GetGuardOptions()->IsCompactObfEnabled()) {
+        this->startLine_ = 1;
+        this->endLine_ = 1;
+    } else {
+        size_t startLineIndex = 0;
+        while (startLineIndex < func.ins.size()) {
+            const size_t lineNumber = func.ins[startLineIndex]->ins_debug.line_number;
+            if (lineNumber < MAX_LINE_NUMBER) {
+                this->startLine_ = lineNumber;
+                break;
+            }
+            startLineIndex++;
         }
-        startLineIndex++;
-    }
 
-    size_t endLineIndex = func.ins.size() - 1;
-    while (endLineIndex >= startLineIndex) {
-        const size_t lineNumber = func.ins[endLineIndex]->ins_debug.line_number;
-        if (lineNumber < MAX_LINE_NUMBER) {
-            this->endLine_ = lineNumber + 1;
-            break;
+        size_t endLineIndex = func.ins.size() - 1;
+        while (endLineIndex >= startLineIndex) {
+            const size_t lineNumber = func.ins[endLineIndex]->ins_debug.line_number;
+            if (lineNumber < MAX_LINE_NUMBER) {
+                this->endLine_ = lineNumber + 1;
+                break;
+            }
+            endLineIndex--;
         }
-        endLineIndex--;
     }
 }
 
-void panda::guard::Function::SetFunctionType(const char functionTypeCode)
+void panda::guard::Function::SetFunctionType(char functionTypeCode)
 {
     PANDA_GUARD_ASSERT_PRINT(FUNCTION_TYPE_MAP.find(functionTypeCode) == FUNCTION_TYPE_MAP.end(), TAG,
                              ErrorCode::GENERIC_ERROR, "unsupported function type code:" << functionTypeCode);
@@ -285,18 +290,18 @@ void panda::guard::Function::Build()
 
 bool panda::guard::Function::IsWhiteListOrAnonymousFunction(const std::string &functionIdx) const
 {
-    return IsWhiteListFunction(functionIdx) || this->anonymous;
+    return IsWhiteListFunction(functionIdx) || this->anonymous_;
 }
 
 void panda::guard::Function::RefreshNeedUpdate()
 {
-    this->needUpdate = true;
+    this->needUpdate_ = true;
     this->contentNeedUpdate_ = true;
     this->nameNeedUpdate_ = TopLevelOptionEntity::NeedUpdate(*this) && !IsWhiteListOrAnonymousFunction(this->idx_);
     LOG(INFO, PANDAGUARD) << TAG << "Function nameNeedUpdate: " << (this->nameNeedUpdate_ ? "true" : "false");
 }
 
-void panda::guard::Function::ForEachIns(const std::function<InsTraver> &callback)
+void panda::guard::Function::EnumerateIns(const std::function<InsTraver> &callback)
 {
     auto &func = this->GetOriginFunction();
     for (size_t i = 0; i < func.ins.size(); i++) {
@@ -309,8 +314,45 @@ void panda::guard::Function::ForEachIns(const std::function<InsTraver> &callback
 void panda::guard::Function::UpdateReference()
 {
     LOG(INFO, PANDAGUARD) << TAG << "update reference start:" << this->idx_;
-    this->ForEachIns([&](InstructionInfo &info) -> void { InstObf::UpdateInst(info); });
+    this->EnumerateIns([&](InstructionInfo &info) -> void { InstObf::UpdateInst(info); });
     LOG(INFO, PANDAGUARD) << TAG << "update reference end:" << this->idx_;
+}
+
+void panda::guard::Function::UpdateAnnotationReference()
+{
+    const auto &function = this->GetOriginFunction();
+    function.metadata->EnumerateAnnotations([this](pandasm::AnnotationData &annotation) {
+        const std::string annotationFullName = annotation.GetName();  // "recordName.annoName"
+        if (Annotation::IsWhiteListAnnotation(annotationFullName)) {
+            return;
+        }
+
+        PANDA_GUARD_ASSERT_PRINT(!this->node_.has_value(), TAG, ErrorCode::GENERIC_ERROR,
+                                 "function associate node is invalid");
+        LOG(INFO, PANDAGUARD) << TAG << "update annotation:" << annotationFullName;
+        const auto node = this->node_.value();
+        // annotation reference name maybe contains namespace name such as: ns1.n2.annoName
+        const auto annoNameWithNamespace =
+            annotationFullName.substr(annotationFullName.find(node->name_) + node->name_.length() + 1);
+        LOG(INFO, PANDAGUARD) << TAG << "annoName:" << annoNameWithNamespace;
+        const auto annoNames = StringUtil::Split(annoNameWithNamespace, RECORD_DELIMITER.data());
+        auto obfAnnoName = node->obfName_;
+        for (auto &name : annoNames) {
+            obfAnnoName += RECORD_DELIMITER.data() + GuardContext::GetInstance()->GetNameMapping()->GetName(name);
+        }
+        LOG(INFO, PANDAGUARD) << TAG << "obfAnnoName:" << obfAnnoName;
+        annotation.SetName(obfAnnoName);
+
+        auto &recordTable = this->program_->prog_->record_table;
+        if (recordTable.find(annotationFullName) != recordTable.end()) {
+            // update reference annotation record
+            LOG(INFO, PANDAGUARD) << TAG << "update reference record:" << annotationFullName;
+            auto entry = recordTable.extract(annotationFullName);
+            entry.key() = obfAnnoName;
+            entry.mapped().name = obfAnnoName;
+            recordTable.insert(std::move(entry));
+        }
+    });
 }
 
 void panda::guard::Function::RemoveConsoleLog()
@@ -327,7 +369,14 @@ void panda::guard::Function::RemoveConsoleLog()
     }
 }
 
-void panda::guard::Function::FillInstInfo(const size_t index, InstructionInfo &instInfo)
+void panda::guard::Function::RemoveLineNumber()
+{
+    for (auto &inst : this->GetOriginFunction().ins) {
+        inst->ins_debug.line_number = 1;
+    }
+}
+
+void panda::guard::Function::FillInstInfo(size_t index, InstructionInfo &instInfo)
 {
     auto &func = this->GetOriginFunction();
     PANDA_GUARD_ASSERT_PRINT(index >= func.ins.size(), TAG, ErrorCode::GENERIC_ERROR, "out of range index: " << index);
@@ -355,7 +404,7 @@ void panda::guard::Function::ExtractNames(std::set<std::string> &strings) const
     }
 }
 
-void panda::guard::Function::SetExportAndRefreshNeedUpdate(const bool isExport)
+void panda::guard::Function::SetExportAndRefreshNeedUpdate(bool isExport)
 {
     for (const auto &[_, property] : this->propertyTable_) {
         property->SetExportAndRefreshNeedUpdate(isExport);
