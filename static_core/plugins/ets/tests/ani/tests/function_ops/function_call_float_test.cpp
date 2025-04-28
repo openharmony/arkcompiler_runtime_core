@@ -375,6 +375,30 @@ TEST_F(FunctionCallFloatTest, function_call_float_009)
     ASSERT_EQ(env_->Function_Call_Float(fA, &value, value3, value4), ANI_OK);
     ASSERT_EQ(value, value3 + value4);
 }
+
+TEST_F(FunctionCallFloatTest, function_call_float_010)
+{
+    ani_namespace ns {};
+    ani_function fn {};
+    GetMethod(&ns, &fn);
+
+    ani_value args[2U];
+    args[0U].f = FLOAT_VAL1;
+    args[1U].f = FLOAT_VAL2;
+
+    ani_float result = 0.0F;
+    ASSERT_EQ(env_->c_api->Function_Call_Float(nullptr, fn, &result, FLOAT_VAL1, FLOAT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->Function_Call_Float_A(nullptr, fn, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Float(nullptr, &result, FLOAT_VAL1, FLOAT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Float_A(nullptr, &result, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Float(fn, nullptr, FLOAT_VAL1, FLOAT_VAL2), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Function_Call_Float_A(fn, nullptr, args), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Function_Call_Float(fn, &result, nullptr), ANI_OK);
+    ASSERT_EQ(env_->Function_Call_Float_A(fn, &result, nullptr), ANI_INVALID_ARGS);
+}
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

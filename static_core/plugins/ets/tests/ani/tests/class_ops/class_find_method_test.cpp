@@ -371,13 +371,22 @@ TEST_F(ClassFindMethodTest, invalid_argument_cls)
     ASSERT_EQ(env_->Class_FindMethod(nullptr, "int_method", nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassFindMethodTest, invalid_argument_result)
+TEST_F(ClassFindMethodTest, invalid_arguments)
 {
-    ani_class cls;
+    ani_class cls {};
     ASSERT_EQ(env_->FindClass("Ltest/A;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
+    ani_method method {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", nullptr, nullptr), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->c_api->Class_FindMethod(nullptr, cls, "int_method", nullptr, &method), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Class_FindMethod(cls, "", "II:I", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "\t", "II:I", &method), ANI_NOT_FOUND);
+
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "int_method", "\t", &method), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassFindMethodTest, has_static_method_1)
@@ -438,13 +447,21 @@ TEST_F(ClassFindMethodTest, static_method_invalid_argument_cls)
     ASSERT_EQ(env_->Class_FindStaticMethod(nullptr, "get_button_names", nullptr, &method), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassFindMethodTest, static_method_invalid_argument_result)
+TEST_F(ClassFindMethodTest, static_method_invalid_arguments)
 {
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("Ltest/Phone;", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
+    ani_static_method method {};
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", nullptr, nullptr), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->c_api->Class_FindStaticMethod(nullptr, cls, "get_button_names", nullptr, &method),
+              ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "", ":[Lstd/core/String;", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "\t", ":[Lstd/core/String;", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "", &method), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "get_button_names", "\t", &method), ANI_NOT_FOUND);
 }
 
 TEST_F(ClassFindMethodTest, static_method_find_static_method_001)

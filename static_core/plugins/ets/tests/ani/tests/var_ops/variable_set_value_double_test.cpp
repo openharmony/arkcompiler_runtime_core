@@ -115,7 +115,7 @@ TEST_F(VariableSetValueDoubleTest, composite_case_2)
     ASSERT_EQ(env_->Namespace_FindVariable(ns_, "aDouble", &variable), ANI_OK);
     ASSERT_NE(variable, nullptr);
 
-    const ani_double values[] = {3.14F, 6.28F, 9.42F};
+    const ani_double values[] = {3.14F, 0, -9.42F};
     ani_double result = 0.0F;
     for (ani_double value : values) {
         ASSERT_EQ(env_->Variable_SetValue_Double(variable, value), ANI_OK);

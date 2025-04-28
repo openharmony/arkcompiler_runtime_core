@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License"
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -26,21 +26,19 @@ TEST_F(FindClassTest, has_class)
     ASSERT_NE(cls, nullptr);
 }
 
-TEST_F(FindClassTest, class_not_found)
+TEST_F(FindClassTest, invalid_arguments)
 {
-    ani_class cls;
+    ani_class cls {};
+
     ASSERT_EQ(env_->FindClass("find_class_test/bla-bla-bla", &cls), ANI_NOT_FOUND);
-}
-
-TEST_F(FindClassTest, invalid_argument_1)
-{
-    ani_class cls;
     ASSERT_EQ(env_->FindClass(nullptr, &cls), ANI_INVALID_ARGS);
-}
 
-TEST_F(FindClassTest, invalid_argument_2)
-{
     ASSERT_EQ(env_->FindClass("Lfind_class_test/Point;", nullptr), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->c_api->FindClass(nullptr, "LPoint;", &cls), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->FindClass("", &cls), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->FindClass("\t", &cls), ANI_NOT_FOUND);
 }
 
 TEST_F(FindClassTest, class_is_not_namespace)

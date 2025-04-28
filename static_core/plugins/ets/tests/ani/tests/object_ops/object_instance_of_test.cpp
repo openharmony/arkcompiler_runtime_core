@@ -91,6 +91,8 @@ TEST_F(ObjectInstanceOfTest, object_instance_of)
     ASSERT_EQ(env_->Object_InstanceOf(nullptr, typeRefA, &res), ANI_INVALID_ARGS);
 
     ASSERT_EQ(env_->Object_InstanceOf(objectC, nullptr, &res), ANI_INVALID_ARGS);
+
+    ASSERT_EQ(env_->Object_InstanceOf(objectC, typeRefC, nullptr), ANI_INVALID_ARGS);
 }
 
 TEST_F(ObjectInstanceOfTest, invalid_parameter)
