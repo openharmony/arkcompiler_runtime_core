@@ -118,9 +118,10 @@ function linux_tools() {
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
         -DPANDA_BUILD_LLVM_BINARIES_PATH_ROOT=${SDK_BUILD_ROOT}/llvm_binaries"
-    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier ani_helpers aspt_converter"
+    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda etssdk e2p_test_plugin etsnative verifier ani_helpers aspt_converter"
     build_panda "$linux_build_dir" "$linux_cmake_args" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
+    cp -r "$linux_build_dir"/plugins/ets/sdk/etssdk.abc "$PANDA_SDK_PATH"/ets
 }
 
 function windows_tools() {
@@ -218,6 +219,12 @@ function ets_std_lib() {
     cp -r "$ARK_ROOT"/plugins/ets/stdlib/escompat "$PANDA_SDK_PATH"/ets/stdlib
 }
 
+function ets_sdk() {
+    echo "> Copying ets sdk into SDK..."
+    mkdir -p "$PANDA_SDK_PATH"/ets/sdk
+    cp -r "$ARK_ROOT"/plugins/ets/sdk "$PANDA_SDK_PATH"/ets/sdk
+}
+
 function icu_dat_file() {
     echo "> Copying icu data file into SDK..."
     mkdir -p "$PANDA_SDK_PATH"/icu/data
@@ -251,6 +258,8 @@ function print_help() {
     --ts_linter             Run building ts_linter
 
     --ets_std_lib           Copy ets std lib into SDK
+
+    --ets_sdk               Copy ets sdk into SDK
 
     --icu_dat_file          Copy icu data file into SDK
 
@@ -323,6 +332,7 @@ function set_default() {
     WINDOWS_TOOLS="true"
     TS_LINTER="true"
     ETS_STD_LIB="true"
+    ETS_SDK="true"
     ICU_DAT_FILE="true"
 }
 
@@ -380,6 +390,11 @@ function parse_options() {
             ;;
         --ets_std_lib)
             ETS_STD_LIB="true"
+            has_args="true"
+            shift
+            ;;
+        --ets_sdk)
+            ETS_SDK="true"
             has_args="true"
             shift
             ;;
@@ -463,6 +478,10 @@ function build_sdk_targets() {
 
     if [ "$ETS_STD_LIB" = "true" ]; then
         ets_std_lib
+    fi
+
+    if [ "$ETS_SDK" = "true" ]; then
+        ets_sdk
     fi
 
     if [ "$ICU_DAT_FILE" = "true" ]; then
