@@ -239,6 +239,18 @@ private:
         wSet_ = RegisterClassWithLeafMatcher(descriptors::SET, "Set", &W_SET_OVERLOADS);
     }
 
+    void RegisterDate()
+    {
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_DATE_OVERLOADS {
+            {utf::CStringAsMutf8("setDate"), std::make_pair("D:D", 2)},
+            {utf::CStringAsMutf8("setUTCDate"), std::make_pair("D:D", 2)},
+            {utf::CStringAsMutf8("setMilliseconds"), std::make_pair("D:D", 2)},
+            {utf::CStringAsMutf8("setUTCMilliseconds"), std::make_pair("D:D", 2)},
+            {utf::CStringAsMutf8("setTime"), std::make_pair("J:V", 2)},
+        };
+        wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date", &W_DATE_OVERLOADS);
+    }
+
     EtsObject *MArray(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
     {
         napi_env env = ctxx->GetJSEnv();
@@ -425,7 +437,7 @@ public:
 
         RegisterExceptions();
 
-        wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date");
+        RegisterDate();
         // #IC4UO2
         RegisterClassWithLeafMatcher(descriptors::MAPENTRY, nullptr);
         RegisterClassWithLeafMatcher(descriptors::MAPITERATOR, nullptr);
