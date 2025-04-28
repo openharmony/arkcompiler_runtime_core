@@ -91,10 +91,8 @@ export namespace uri {
     }
 
     getQueryValue(key: string): string {
-      if (this.query == null) {
-        return "";
-      }
-      let queryStrs: string[] = this.query!.split('&');
+      let query = this.uriEntry.getQuery();
+      let queryStrs: string[] = query.split('&');
       if (key == "" && queryStrs.length > 0 && queryStrs[0] == "") {
         return "";
       }
@@ -146,11 +144,11 @@ export namespace uri {
     }
 
     getQueryNames(): Array<string> {
-      if (this.query == null || this.query == "") {
+      let query = this.uriEntry.getQuery();
+      if (query == "") {
         return new Array<string>();
       }
       let names = new Set<string>();
-      let query = this.query!;
       let start: number = 0;
       while (start < query.length) {
         let next: number = query.indexOf('&', start);
@@ -167,11 +165,12 @@ export namespace uri {
     }
 
     getQueryValues(key: string): Array<string> {
-      if (this.query == null || this.query == "") {
+      let query = this.uriEntry.getQuery();
+      if (query == "") {
         return new Array<string>();
       }
       let values = new Array<string>();
-      let queryStrs: string[] = this.query!.split('&');
+      let queryStrs: string[] = query.split('&');
       let isKeyEmpty = key == "";
       for (let item of queryStrs) {
         if (isKeyEmpty && item == "") {
