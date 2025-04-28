@@ -73,20 +73,20 @@ class Platform(PlatformBase):
             return
         if not bu.doclet_src:
             raise ValueError(f'Sources for unit {bu.name} are not set')
-        if 'bu_a2a' in bu.tags:
+        if 'bu_s2s' in bu.tags:
             self.es2panda(bu)
             self.ark(bu)
             return
-        if 'bu_a2j' in bu.tags:
+        if 'bu_s2d' in bu.tags:
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.js {bu.path}')
             self.es2panda(bu)
             self.run_generated(bu)
             return
-        if 'bu_j2j' in bu.tags:
+        if 'bu_d2d' in bu.tags:
             self.sh.run(f'cp -f -n {str(bu.doclet_src.parent)}/*.js {bu.path}')
             self.node(bu)
             return
-        if 'bu_j2a' in bu.tags:
+        if 'bu_d2s' in bu.tags:
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.ets {bu.path}')
             bu.src_for_es2panda_override = Path(f'{bu.path}/*.ets')  # wildcard here assumes single ets file
             self.run_generated(bu)

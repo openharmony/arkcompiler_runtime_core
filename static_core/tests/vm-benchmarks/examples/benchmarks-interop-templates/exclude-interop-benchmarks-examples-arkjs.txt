@@ -1,4 +1,4 @@
 # 23757 need to adjust to tools update
-BenchA2j_otherTest_1
-BenchA2j_someTest
-BenchA2j_someTest_1
+BenchS2d_otherTest_1
+BenchS2d_someTest
+BenchS2d_someTest_1
