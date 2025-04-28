@@ -45,7 +45,7 @@ rapidcheck,https://github.com/emil-e/rapidcheck,commit,8fafda42e732164db58003e54
 asio,https://github.com/chriskohlhoff/asio,tag,asio-1-28-0,no_patches,no_submodules
 websocketpp,https://github.com/zaphoyd/websocketpp,tag,0.8.2,no_patches,no_submodules
 openssl,https://gitee.com/openharmony/third_party_openssl,branch,OpenHarmony-5.0.1-Release,no_patches,no_submodules
-arkcompiler/toolchain,https://gitee.com/openharmony/arkcompiler_toolchain,branch,master,no_patches,no_submodules
+arkcompiler/toolchain,https://gitee.com/openharmony/arkcompiler_toolchain,branch,OpenHarmony_feature_20250328,no_patches,no_submodules
 
 # ARK plugins:
 icu,https://gitee.com/openharmony/third_party_icu,branch,OpenHarmony-5.0.1-Release,no_patches,no_submodules
