@@ -369,4 +369,46 @@ extern "C" void EtsEscompatBigUInt64ArraySetValuesWithOffset(ark::ets::EtsEscomp
 {
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
+
+/*
+ * Typed Arrays: Reverse Implementation
+ */
+template <typename T>
+static T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
+{
+    auto *arrData = GetNativeData(thisArray);
+    if (UNLIKELY(arrData == nullptr)) {
+        return nullptr;
+    }
+    using ElementType = typename T::ElementType;
+    auto *ptrFirst = reinterpret_cast<ElementType *>(ToVoidPtr(ToUintPtr(arrData) + thisArray->GetByteOffset()));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto *ptrLast = ptrFirst + thisArray->GetLengthInt();
+    std::reverse(ptrFirst, ptrLast);
+    return thisArray;
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define TYPED_ARRAY_REVERSE_CALL_DECL(Type)                                         \
+    /* CC-OFFNXT(G.PRE.02) name part */                                             \
+    extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArrayReverse( \
+        ark::ets::EtsEscompat##Type##Array *thisArray)                              \
+    {                                                                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                      \
+        return EtsEscompatTypedArrayReverseImpl(thisArray);                         \
+    }  // namespace ark::ets::intrinsics
+
+TYPED_ARRAY_REVERSE_CALL_DECL(Int8)
+TYPED_ARRAY_REVERSE_CALL_DECL(Int16)
+TYPED_ARRAY_REVERSE_CALL_DECL(Int32)
+TYPED_ARRAY_REVERSE_CALL_DECL(BigInt64)
+TYPED_ARRAY_REVERSE_CALL_DECL(Float32)
+TYPED_ARRAY_REVERSE_CALL_DECL(Float64)
+
+TYPED_ARRAY_REVERSE_CALL_DECL(UInt8)
+TYPED_ARRAY_REVERSE_CALL_DECL(UInt8Clamped)
+TYPED_ARRAY_REVERSE_CALL_DECL(UInt16)
+TYPED_ARRAY_REVERSE_CALL_DECL(UInt32)
+TYPED_ARRAY_REVERSE_CALL_DECL(BigUInt64)
+
 }  // namespace ark::ets::intrinsics

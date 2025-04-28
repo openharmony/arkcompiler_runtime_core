@@ -1434,14 +1434,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns a new {{N}}Array using reversed data from the current one
      */
-    public reverse(): {{N}}Array {
-        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
-            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
-            this.setUnsafe(i, tmp)
-        }
-        return this
-    }
+    public native reverse(): {{N}}Array
 
     /**
      * Creates a slice of current {{N}}Array using range [begin, end)
