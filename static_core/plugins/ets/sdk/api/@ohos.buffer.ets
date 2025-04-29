@@ -437,8 +437,19 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`, OutOfBoundsErr
          */
         public toString(encoding?: BufferEncoding, start?: number, end?: number): string {
             let resolvedEncoding: string = encoding ?? "utf8";
-            let resolvedStart: int = (start ?? 0) as int;
-            let resolvedEnd: int = (end ?? buffer.byteLength(this.buffer)) as int;
+            let resolvedStart: int = 0;
+            let resolvedEnd: int = this.length as int;
+            if (start && !isNaN(start!) && start! > 0) {
+                resolvedStart = start as int;
+            }
+            if (end && !isNaN(end!)) {
+                resolvedEnd = end as int;
+            }
+            let bufLength = this.length;
+            if (resolvedStart >= bufLength || resolvedStart > resolvedEnd) {
+                 return '';
+            }
+            resolvedEnd = resolvedEnd > bufLength ? bufLength as int : resolvedEnd
             return ArrayBuffer.stringify(this.buffer, resolvedEncoding, resolvedStart, resolvedEnd);
         }
 
