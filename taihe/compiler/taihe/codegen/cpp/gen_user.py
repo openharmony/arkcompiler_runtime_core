@@ -13,44 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from taihe.codegen.abi_generator import (
+from taihe.codegen.abi.analyses import (
     GlobFuncABIInfo,
     PackageABIInfo,
 )
-from taihe.codegen.cpp_generator import (
+from taihe.codegen.cpp.analyses import (
+    GlobFuncCppUserInfo,
     PackageCppInfo,
+    PackageCppUserInfo,
     TypeCppInfo,
 )
-from taihe.semantics.declarations import (
-    GlobFuncDecl,
-    PackageDecl,
-    PackageGroup,
-)
-from taihe.utils.analyses import AbstractAnalysis, AnalysisManager
-from taihe.utils.outputs import COutputBuffer, OutputManager
+from taihe.driver.backend import Backend
+from taihe.driver.contexts import CompilerInstance
+from taihe.semantics.declarations import GlobFuncDecl, PackageDecl
+from taihe.utils.outputs import COutputBuffer
 
 
-class PackageCppUserInfo(AbstractAnalysis[PackageDecl]):
-    def __init__(self, am: AnalysisManager, p: PackageDecl) -> None:
-        super().__init__(am, p)
-        self.header = f"{p.name}.user.hpp"
+class CppUserHeadersGenerator(Backend):
+    def __init__(self, ci: CompilerInstance):
+        super().__init__(ci)
+        self.tm = ci.target_manager
+        self.am = ci.analysis_manager
+        self.pg = ci.package_group
 
-
-class GlobFuncCppUserInfo(AbstractAnalysis[GlobFuncDecl]):
-    def __init__(self, am: AnalysisManager, f: GlobFuncDecl) -> None:
-        super().__init__(am, f)
-        self.namespace = "::".join(f.parent_pkg.segments)
-        self.call_name = f.name
-        self.full_name = "::" + self.namespace + "::" + self.call_name
-
-
-class CppUserHeadersGenerator:
-    def __init__(self, tm: OutputManager, am: AnalysisManager):
-        self.tm = tm
-        self.am = am
-
-    def generate(self, pg: PackageGroup):
-        for pkg in pg.packages:
+    def generate(self):
+        for pkg in self.pg.packages:
             self.gen_package_file(pkg)
 
     def gen_package_file(self, pkg: PackageDecl):

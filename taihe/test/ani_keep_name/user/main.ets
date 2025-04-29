@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import * as IfaceTest from "@generated/keep_name_test";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_keep_name");

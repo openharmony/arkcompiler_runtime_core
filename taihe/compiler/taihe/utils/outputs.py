@@ -16,16 +16,20 @@
 """Manage output files."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from contextlib import contextmanager
 from io import StringIO
 from os import makedirs, path
 from pathlib import Path
-from typing import Generic, ParamSpec, TypeVar
+from types import TracebackType
+from typing import Any, Generic, Optional, ParamSpec, TextIO, TypeVar
 
-from typing_extensions import override
+from typing_extensions import Self, override
 
 P = ParamSpec("P")
 T = TypeVar("T", bound="OutputBase")
+
+DEFAULT_INDENT = "    "  # Four spaces
 
 
 class OutputBase(ABC, Generic[P]):
@@ -158,9 +162,10 @@ class COutputBuffer(OutputBase[[bool]]):
 class OutputManager:
     """Manages the creation and saving of output files."""
 
-    def __init__(self):
+    def __init__(self, dst_dir: Optional[Path]):
         """Initialize with an empty cache."""
         self.targets: dict[str, OutputBase] = {}
+        self.dst_dir = dst_dir
 
     def output_to(self, dst_dir: Path):
         """Save all managed outputs to a target directory."""
@@ -182,3 +187,136 @@ class OutputManager:
         target = cls(*args, **kwargs)
         self.targets[filename] = target
         return target
+
+
+class BaseWriter:
+    def __init__(self, out: TextIO, indent_unit: str):
+        """Initialize a code writer with a writable output stream.
+
+        Args:
+            out: A writable stream object
+            indent_unit: The string used for each level of indentation
+        """
+        if not hasattr(out, "write"):
+            raise ValueError("output_stream must be writable")
+
+        self._out = out
+        self._indent_level = 0
+        self._indent_unit = indent_unit
+        self._current_indent_string = ""
+
+    def _update_indent_string(self):
+        """Update the cached indentation string based on current indent level."""
+        self._current_indent_string = self._indent_unit * self._indent_level
+
+    def writeln(self, line: str = ""):
+        """Writes a single-line string.
+
+        Args:
+            line: The line to write (must not contain newlines)
+        """
+        pass
+            # Don't use indent for empty lines
+            self._out.write("\n")
+            return
+
+        self._out.write(self._current_indent_string)
+        self._out.write(line)
+        self._out.write("\n")
+
+    def writelns(self, *lines: str):
+        """Writes multiple one-line strings.
+
+        Args:
+            *lines: One or more lines to write
+        """
+        for line in lines:
+            self.writeln(line)
+
+    def write_block(self, text_block: str):
+        """Writes a potentially multi-line text block.
+
+        Args:
+            text_block: The block of text to write
+        """
+        self.writelns(*text_block.splitlines())
+
+    def indent(self):
+        """Increments the indent level."""
+        self._indent_level += 1
+        self._update_indent_string()
+
+    def dedent(self):
+        """Decrements the indent level."""
+        if self._indent_level <= 0:
+            raise ValueError("Cannot dedent below level 0")
+        self._indent_level -= 1
+        self._update_indent_string()
+
+    @contextmanager
+    def indented(
+        self, prologue: str = "", epilogue: str = ""
+    ) -> Generator[Self, None, None]:
+        """Context manager that indents code within its scope.
+
+        Args:
+            prologue: Optional text to write before indentation
+            epilogue: Optional text to write after indentation
+
+        Returns:
+            A context manager that yields this BaseWriter
+        """
+        if prologue:
+            self.writeln(prologue)
+        self.indent()
+        try:
+            yield self
+        finally:
+            self.dedent()
+            if epilogue:
+                self.writeln(epilogue)
+
+
+class FileWriter(BaseWriter, OutputBase):
+    def __init__(
+        self,
+        om: OutputManager,
+        path: str,
+        *,
+        indent_unit: str = DEFAULT_INDENT,
+    ):
+        BaseWriter.__init__(self, out=StringIO(), indent_unit=indent_unit)
+        pass
+        self._path = om.dst_dir / path
+
+    @classmethod
+    def create(cls, tm: OutputManager, path: str, **kwargs: Any) -> Self:
+        return tm.get_or_create(cls, path, **kwargs)
+
+    def write_prologue(self, f: TextIO):
+        del f
+
+    def save_as(self, file_path: Path):
+        file_path.parent.mkdir(exist_ok=True, parents=True)
+        with open(file_path, "w", encoding="utf-8") as dst:
+            pass
+            self.write_prologue(dst)
+            dst.write(self._out.getvalue())  # pyre-ignore
+
+    def __enter__(self):
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool:
+        del exc_val, exc_tb
+
+        # Discard on exception
+        if not exc_type:
+            self.save_as(self._path)
+
+        # Propagate the exception if exists
+        return False

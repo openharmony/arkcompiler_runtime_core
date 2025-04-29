@@ -55,7 +55,7 @@ set(TH_RUNTIME_SOURCE_DIR "${TH_RUNTIME_DIR}/src")
 
 
 # 设置 PANDA 路径
-set(PANDA_SDK_FILENAME "sdk-1.5.0-dev.26258.tgz")
+set(PANDA_SDK_FILENAME "sdk-1.5.0-dev.29115.tgz")
 set(PANDA_SDK_URL "https://nexus.bz-openlab.ru:10443/repository/koala-npm/%40panda/sdk/-/${PANDA_SDK_FILENAME}")
 set(PANDA_EXTRACT_DIR "${CMAKE_SOURCE_DIR}/.panda_vm")
 set(PANDA_HOME "${PANDA_EXTRACT_DIR}/package/linux_host_tools")
@@ -86,24 +86,61 @@ target_include_directories(th_runtime PUBLIC
 
 # 准备 panda sdk
 function(setup_panda_sdk)
-
   file(MAKE_DIRECTORY "${PANDA_EXTRACT_DIR}")
 
-  # Download Panda SDK
-  if(NOT EXISTS "${PANDA_SDK_PATH}")
-    message(STATUS "Downloading Panda SDK...")
-    execute_process(
-      COMMAND curl -u koala-pub:y3t!n0therP -L -o "${PANDA_SDK_PATH}" "${PANDA_SDK_URL}"
-      RESULT_VARIABLE DOWNLOAD_RESULT
-    )
-    if(NOT DOWNLOAD_RESULT EQUAL 0)
-      message(FATAL_ERROR "Failed to download Panda SDK! Please check the URL or credentials.")
-    endif()
+  set(PANDA_SDK_VERSION_FILE "${PANDA_EXTRACT_DIR}/version.txt")
+  string(REPLACE ".tgz" "" PANDA_SDK_VERSION "${PANDA_SDK_FILENAME}")
+
+  # 读取本地保存的版本信息
+  if(EXISTS "${PANDA_SDK_VERSION_FILE}")
+    file(READ "${PANDA_SDK_VERSION_FILE}" EXISTING_PANDA_SDK_VERSION)
+    string(STRIP "${EXISTING_PANDA_SDK_VERSION}" EXISTING_PANDA_SDK_VERSION)
+  else()
+    set(EXISTING_PANDA_SDK_VERSION "")
   endif()
 
-  # Extract Panda SDK
+  # 检查版本是否匹配
+  if(NOT "${EXISTING_PANDA_SDK_VERSION}" STREQUAL "${PANDA_SDK_VERSION}")
+    message(STATUS "Panda SDK version mismatch or missing. Expected: ${PANDA_SDK_VERSION}, Found: ${EXISTING_PANDA_SDK_VERSION}")
+    file(REMOVE_RECURSE "${PANDA_HOME}")
+    set(NEED_DOWNLOAD TRUE)
+  else()
+    set(NEED_DOWNLOAD FALSE)
+  endif()
+
+  # 如果需要重新准备SDK
+  if(NEED_DOWNLOAD)
+    # 先检查本地是否已有对应的SDK包
+    set(LOCAL_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_VERSION}.tgz")
+    if(EXISTS "${LOCAL_SDK_PATH}")
+      message(STATUS "Found local Panda SDK package: ${LOCAL_SDK_PATH}")
+      set(PANDA_SDK_PATH "${LOCAL_SDK_PATH}")
+      set(NEED_ACTUAL_DOWNLOAD FALSE)
+    else()
+      message(STATUS "No local Panda SDK package found, will download: ${PANDA_SDK_FILENAME}")
+      set(NEED_ACTUAL_DOWNLOAD TRUE)
+    endif()
+
+    # 如果确实找不到，就去下载
+    if(NEED_ACTUAL_DOWNLOAD)
+      message(STATUS "Downloading Panda SDK: ${PANDA_SDK_FILENAME}")
+      execute_process(
+        COMMAND curl -u koala-pub:y3t!n0therP -L -o "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}" "${PANDA_SDK_URL}"
+        RESULT_VARIABLE DOWNLOAD_RESULT
+      )
+      if(NOT DOWNLOAD_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to download Panda SDK!")
+      endif()
+      set(PANDA_SDK_PATH "${PANDA_EXTRACT_DIR}/${PANDA_SDK_FILENAME}")
+    endif()
+
+    # 删除原来的解压目录
+    file(REMOVE_RECURSE "${PANDA_HOME}")
+  endif()
+
+  # Extract Panda SDK if needed
   if(NOT EXISTS "${PANDA_HOME}")
-    message(STATUS "Extracting Panda SDK...")
+    message(STATUS "Extracting Panda SDK from ${PANDA_SDK_PATH} ...")
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E tar xzf "${PANDA_SDK_PATH}"
       WORKING_DIRECTORY "${PANDA_EXTRACT_DIR}"
@@ -112,6 +149,9 @@ function(setup_panda_sdk)
     if(NOT EXTRACT_RESULT EQUAL 0)
       message(FATAL_ERROR "Failed to extract Panda SDK!")
     endif()
+
+    # 保存当前版本信息
+    file(WRITE "${PANDA_SDK_VERSION_FILE}" "${PANDA_SDK_VERSION}")
   endif()
 
   # Set environment variable
@@ -130,7 +170,6 @@ function(setup_panda_sdk)
   else()
     message(STATUS "Found ets_compiler: ${ETS_COMPILER}")
   endif()
-
 endfunction()
 
 
@@ -143,6 +182,7 @@ function(write_arkts_config config_path gen_dir sys_dir)
     "    \"paths\": {\n"
     "      \"std\": [\"${PANDA_HOME}/../ets/stdlib/std\"],\n"
     "      \"escompat\": [\"${PANDA_HOME}/../ets/stdlib/escompat\"],\n"
+    "      \"@ohos.base\": [\"${gen_dir}/@ohos.base.ets\"],\n"
     "      \"@generated\": [\"${gen_dir}\"],\n"
     "      \"@system\": [\"${sys_dir}\"]\n"
     "    }\n"

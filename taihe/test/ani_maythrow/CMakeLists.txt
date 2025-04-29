@@ -16,12 +16,12 @@ set(IDL_FILES
 )
 
 set(GEN_ETS_FILES
+    "@ohos.base.ets"
     "maythrow.ets"
 )
 
 set(USER_ETS_FILES
     "${CMAKE_CURRENT_LIST_DIR}/user/main.ets"
-    "${CMAKE_CURRENT_LIST_DIR}/user/@ohos.base.ets"
 )
 
 file(GLOB AUTHOR_CPP_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/author/src/*.cpp")

@@ -12,23 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export class BusinessError<T = void> extends Error {
-    code: number;
-    data?: T;
+import * as threadTest from "@generated/thread_test";
+import {BusinessError} from "@ohos.base";
 
-    constructor() {
-        super();
-        this.code = 0;
-    }
+loadLibrary("ani_thread");
 
-    constructor(code: number, error: Error) {
-        super(error.name, error.message, new ErrorOptions(error.cause));
-        this.code = code;
-    }
-
-    constructor(code: number, data: T, error: Error) {
-        super(error.name, error.message, new ErrorOptions(error.cause));
-        this.code = code;
-        this.data = data;
+function main() {
+    threadTest.invokeFromOtherThreadAfter(1.0, () => {
+        console.log("hello world");
+    })
+    // sleep 2 seconds to wait for the callback
+    let start = Date.now();
+    while (Date.now() - start < 2000) {
+        // do nothing
     }
 }

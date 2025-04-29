@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import * as bar from "@generated/bar";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_typedarray");
@@ -44,8 +45,8 @@ function checkUint32Array() {
 
 function checkBigUint64Array() {
     let arr = bar.newBigUint64Array(2, 21 as long);
-    assert(arr.at(0) === 21n);
-    assert(arr.at(1) === 21n);
+    assertEQ(arr.at(0), 21n);
+    assertEQ(arr.at(1), 21n);
     let res = bar.sumBigUint64Array(arr);
     assertEQ(res, 42);
 }
@@ -76,8 +77,8 @@ function checkInt32Array() {
 
 function checkBigInt64Array() {
     let arr = bar.newBigInt64Array(2, 21 as long);
-    assert(arr.at(0) === 21n);
-    assert(arr.at(1) === 21n);
+    assertEQ(arr.at(0), 21n);
+    assertEQ(arr.at(1), 21n);
     let res = bar.sumBigInt64Array(arr);
     assertEQ(res, 42);
 }

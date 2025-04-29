@@ -17,7 +17,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from taihe.driver import CompilerInstance, CompilerInvocation
+from taihe.driver.backend import BackendRegistry
+from taihe.driver.contexts import CompilerInstance, CompilerInvocation
 
 
 def main():
@@ -70,15 +71,26 @@ def main():
         help="keep original function and interface method names",
     )
     args = parser.parse_args()
+
+    registry = BackendRegistry()
+    registry.register_all()
+    enabled_backend_names = []
+    if args.author:
+        enabled_backend_names.append("cpp-author")
+    if args.ani:
+        enabled_backend_names.append("ani-bridge")
+
+    resolved_backends = []
+    for b in registry.collect_required_backends(enabled_backend_names):
+        if b.NAME == "ani-bridge":
+            resolved_backends.append(b(keep_name=args.sts_keep_name))  # type: ignore
+        else:
+            resolved_backends.append(b())
+
     invocation = CompilerInvocation(
         src_dirs=[Path(d) for d in args.src_dirs],
         out_dir=Path(args.dst_dir),
-        gen_author=args.author,
-        gen_user=args.user,
-        gen_ani=args.ani,
-        gen_c_impl=args.c_impl,
-        debug=args.debug,
-        sts_keep_name=args.sts_keep_name,
+        backends=resolved_backends,
     )
     instance = CompilerInstance(invocation)
     if not instance.run():

@@ -43,3 +43,11 @@ function static_func(a: i32, b: i32): i32;
 
 @static("ITest")
 function ctor_func(): ITest;
+
+@static("IBase")
+@get
+function getName(): String;
+
+@static("IBase")
+@set
+function setName(a: String);

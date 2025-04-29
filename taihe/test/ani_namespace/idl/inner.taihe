@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@!namespace("my_ns", "outer.inner")
+@!namespace("my_ns", "inner")
 enum Color: i32 {
     red = 1,
     yellow = 2,

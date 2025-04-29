@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import * as test from "@generated/opaque_test";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_opaque");
@@ -45,13 +46,15 @@ function test_is_object_with_union() {
 
 function test_get_objects() {
     const objects = test.get_objects();
-    assertEQ(objects[0], "AAA")
-    assertEQ(objects[1], undefined)
+    assertEQ(objects[0], "AAA");
+    assertEQ(objects[1], undefined);
 }
 
 function main() {
     console.log("##############start#############");
     const suite = new ArkTestsuite("Test Suite");
+    const objects1 = test.get_objects();
+    console.log(objects1);
 
     suite.addTest("test is_string with object", test_is_string_with_object);
     suite.addTest("test is_string with string", test_is_string_with_string);

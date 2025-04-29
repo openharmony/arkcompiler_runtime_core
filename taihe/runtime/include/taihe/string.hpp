@@ -43,11 +43,11 @@ struct string_view {
 
     explicit string_view(struct TString handle) : m_handle(handle) {}
 
-    string_view(char const *value TH_NONNULL) : string_view(tstr_new_ref(value, strlen(value))) {}
+    string_view(char const *value TH_NONNULL) : string_view(tstr_new_ref(value, std::strlen(value))) {}
 
     string_view(char const *value TH_NONNULL, size_type size) : string_view(tstr_new_ref(value, size)) {}
 
-    string_view(std::initializer_list<char> value) : string_view(value.begin(), static_cast<uint32_t>(value.size())) {}
+    string_view(std::initializer_list<char> value) : string_view(value.begin(), value.size()) {}
 
     string_view(std::string_view value) : string_view(value.data(), value.size()) {}
 
@@ -161,7 +161,7 @@ struct string : public string_view {
 
     string(char const *value TH_NONNULL, size_type size) : string(tstr_new(value, size)) {}
 
-    string(std::initializer_list<char> value) : string(value.begin(), static_cast<uint32_t>(value.size())) {}
+    string(std::initializer_list<char> value) : string(value.begin(), value.size()) {}
 
     string(std::string_view value) : string(value.data(), value.size()) {}
 

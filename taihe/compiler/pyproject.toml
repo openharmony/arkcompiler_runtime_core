@@ -11,47 +11,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[tool.poetry]
+[project]
+dynamic = ["version"]
 name = "taihe"
-version = "0.1.0"
-description = ""
-authors = ["The Taihe Authors <asanrocks@outlook.com>"]
-include = [
-    "taihe/parse/antlr/*",
+description = "Language-neutral API tooling"
+requires-python = ">=3.10"
+dependencies = [
+    "antlr4-python3-runtime>=4.13.2",
+    "typing-extensions>=4.13.2",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-antlr4-python3-runtime = "^4.13.2"
-antlr4-tools = "^0.2.1"
-typing-extensions = "^4.12.2"
+[dependency-groups]
+dev = [
+    "antlr4-tools>=0.2.1",
+    "black>=25.1.0",
+    "coverage>=7.8.0",
+    "pyre-check>=0.9.23",
+    "pytest>=8.3.5",
+    "removestar>=1.5.2",
+    "ruff>=0.11.6",
+]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.6.5"
-black = "^24.8.0"
-exceptiongroup = "^1.2.2"
-coverage = "^7.6.1"
-pytest = "^8.3.3"
-pyre-check = "^0.9.23"
-
-[[tool.poetry.source]]
-name = "tsinghua"
+[[tool.uv.index]]
 url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/"
-priority = "primary"
-
-[[tool.poetry.source]]
-name = "ali"
-url = "https://mirrors.aliyun.com/pypi/simple/"
-priority = "primary"
-
-[[tool.poetry.source]]
-name = "tencent"
-url = "https://mirrors.cloud.tencent.com/pypi/simple/"
-priority = "primary"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+default = true
 
 [tool.black]
 exclude = "taihe/parse/antlr"
@@ -98,6 +81,7 @@ lint.ignore = [
     "D106",
     "D107", # -> "Missing docstring in public function too restrictive"
     "UP007", # Allow `Optional[T]`
+    "SIM117", # allow multiple `with` statements in code generator
 ]
 
 [tool.ruff.lint.pydocstyle]

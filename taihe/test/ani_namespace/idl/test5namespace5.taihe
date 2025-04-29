@@ -12,5 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@!namespace("my_ns", "test1.test2.test3.test4.test5")
+@!namespace("my_ns", "test1")
 function Funtest1(a: i32, b: f64): void;

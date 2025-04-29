@@ -17,6 +17,7 @@ set(IDL_FILES
 )
 
 set(GEN_ETS_FILES
+    "@ohos.base.ets"
     "iface_readonly_test.ets"
     "iface_test.ets"
 )

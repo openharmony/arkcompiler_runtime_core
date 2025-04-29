@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import * as ani_test from "@generated/ani_test";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_test");
@@ -100,7 +101,8 @@ function test_interface() {
         }
     }
 
-    const userFoos = [new UserFoo("X"), new UserFoo("Y"), new UserFoo("Z")];
+    const userFoos: Array<ani_test.Foo> =
+        [new UserFoo("X"), new UserFoo("Y"), new UserFoo("Z")];
     assertEQ(userFoos.length, 3);
     ani_test.callBar(userFoos);
 }

@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os
+import sys
+import shutil
+import subprocess
+import tarfile
+from datetime import datetime
+from pathlib import Path
+
+SYSTEM_TYPES = ["linux-x86_64", "windows-x86_64", "darwin-arm64", "darwin-x86_64"]
+PYTHON_REPO_URL = "https://gitee.com/ASeaSalt/python-multi-platform.git"
+PYTHON_REPO_BRANCH = "main"
+
+
+def copy_runtime(
+    current_system: str, include_dir: Path, src_dir: Path, project_dir: Path
+):
+    print(f"Copying the runtime files for {current_system}")
+    shutil.copytree(project_dir / "runtime/include", include_dir, dirs_exist_ok=True)
+    shutil.copytree(project_dir / "runtime/src", src_dir, dirs_exist_ok=True)
+
+
+def build_compiler(compiler_dir: Path):
+    print("Build the compiler ...")
+    os.chdir(compiler_dir)
+    subprocess.run(["./generate-grammar"], check=True)
+    subprocess.run(["uv", "build"], check=True)
+    os.chdir("..")
+
+
+def copy_compiler(
+    current_system: str,
+    lib_dir: Path,
+    bin_dir: Path,
+    cache_dir: Path,
+    project_dir: Path,
+):
+    print(f"Building the compiler for {current_system}")
+    compiler_dir = lib_dir / "compiler"
+    compiler_dir.mkdir(parents=True, exist_ok=True)
+
+    dist_dir = project_dir / "compiler" / "dist"
+    for file in dist_dir.glob("taihe-*.gz"):
+        with tarfile.open(file, "r:gz") as tar:
+            tar.extractall(path=dist_dir)
+
+    print(f"Copying the compiler for {current_system}")
+    taihe_dir = compiler_dir / "taihe"
+    taihe_dir.mkdir(parents=True, exist_ok=True)
+
+    extracted_dir = next(dist_dir.glob("taihe-*/taihe"))
+    shutil.copytree(extracted_dir, taihe_dir, dirs_exist_ok=True)
+
+    result = subprocess.run(
+        [sys.executable, "-c", "import site; print(site.getsitepackages()[0])"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    site_packages_dir = Path(result.stdout.strip())
+
+    compiler_lib_dir = compiler_dir / "lib"
+    compiler_lib_dir.mkdir(parents=True, exist_ok=True)
+
+    for package in ["antlr4", "typing_extensions.py"]:
+        source = site_packages_dir / package
+        if source.exists():
+            if source.is_dir():
+                shutil.copytree(source, compiler_lib_dir / package, dirs_exist_ok=True)
+            else:
+                shutil.copy2(source, compiler_lib_dir)
+        else:
+            raise ValueError("Can't find antlr4 and typing_extensions!")
+
+    for pycache in lib_dir.rglob("__pycache__"):
+        shutil.rmtree(pycache)
+
+    os.chdir("..")
+
+    # Create taihec script
+    prog = bin_dir / "taihec"
+    if current_system == "windows-x86_64":
+        prog = prog.with_suffix(".bat")
+        with open(prog, "w") as f:
+            f.write(
+                """@echo off
+set TAIHE_ROOT=%~dp0..
+set PYTHONPATH=%TAIHE_ROOT%\\lib\\taihe\\compiler;%TAIHE_ROOT%\\lib\\taihe\\compiler\\lib;%PYTHONPATH%
+%TAIHE_ROOT%\\lib\\taihe\\python\\bin\\python3.11.exe -m taihe.cli.compiler %*
+"""
+            )
+        prog.chmod(0o755)
+    else:
+        with open(prog, "w") as f:
+            f.write(
+                """#!/bin/bash -eu
+export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"
+export PYTHONPATH="${TAIHE_ROOT}/lib/taihe/compiler:${TAIHE_ROOT}/lib/taihe/compiler/lib:${PYTHONPATH:-}"
+exec "${TAIHE_ROOT}/lib/taihe/python/bin/python3" -m taihe.cli.compiler "$@"
+"""
+            )
+        prog.chmod(0o755)
+
+    # Create taihe-tryit script (only for linux-x86_64)
+    if current_system == "linux-x86_64":
+        prog = bin_dir / "taihe-tryit"
+        with open(prog, "w") as f:
+            f.write(
+                """#!/bin/bash -eu
+export TAIHE_ROOT="$(realpath $(dirname "$0")/..)"
+export PYTHONPATH="${TAIHE_ROOT}/lib/taihe/compiler:${TAIHE_ROOT}/lib/taihe/compiler/lib:${PYTHONPATH:-}"
+exec "${TAIHE_ROOT}/lib/taihe/python/bin/python3" -c 'from taihe.cli.tryit import *; main(BuildConfig(for_distribution=True));' "$@"
+"""
+            )
+        prog.chmod(0o755)
+
+    python_tar = cache_dir / f"{current_system}-python.tar.gz"
+    with tarfile.open(python_tar, "r:gz") as tar:
+        tar.extractall(path=lib_dir)
+
+
+def copy_documentation(doc_dir: Path):
+    cookbook = Path("cookbook")
+    for item in cookbook.rglob("*"):
+        if item.is_dir() and (item.name == "build" or item.name.endswith("generated")):
+            continue
+        if item.is_file():
+            dest = doc_dir / item.relative_to(cookbook.parent)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(item, dest)
+
+
+def write_version(current_system: str, dist: Path, version: str):
+    os.chdir("compiler")
+    git_commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+    ).stdout.strip()
+
+    git_message = (
+        subprocess.run(
+            ["git", "log", "-1", "--pretty=%B"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        .stdout.splitlines()[0]
+        .strip()
+    )
+
+    build_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with open(dist / "version.txt", "w") as f:
+        f.write(f"System        : {current_system}\n")
+        f.write(f"Version       : {version}\n")
+        f.write(f"Last Commit   : {git_commit}\n")
+        f.write(f"Commit Message: {git_message}\n")
+        f.write(f"Build Date    : {build_date}\n")
+
+
+def create_package(current_system, project_dir, dist, version):
+    package_name = (
+        f"taihe-{current_system}-{version}-{datetime.now().strftime('%Y%m%d')}"
+    )
+    package_path = project_dir / f"{package_name}.tar.gz"
+
+    def reset_tarinfo(tarinfo):
+        tarinfo.uid = 0
+        tarinfo.gid = 0
+        tarinfo.uname = ""
+        tarinfo.gname = ""
+        return tarinfo
+
+    with tarfile.open(package_path, "w:gz") as tar:
+        tar.add(dist, arcname=dist.name, filter=reset_tarinfo)
+
+    print(f"Created package for {current_system}: {package_name}")
+
+
+def setup_system_paths(current_system: str, base_dist: Path):
+    dist = base_dist / f"taihe-{current_system}" / "taihe"
+    lib_dir = dist / "lib" / "taihe"
+    bin_dir = dist / "bin"
+    include_dir = dist / "include"
+    src_dir = dist / "src" / "taihe" / "runtime"
+    doc_dir = dist / "share" / "doc" / "taihe"
+
+    return dist, lib_dir, bin_dir, include_dir, src_dir, doc_dir
+
+
+def main():
+    project_dir = Path(__file__).parent.parent
+    os.chdir(project_dir)
+
+    try:
+        version = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except subprocess.CalledProcessError:
+        short_hash = subprocess.run(
+            ["git", "rev-parse", "--short=8", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        version = f"TRUNK-{short_hash}"
+
+    print(f"Version {version}")
+
+    cache_dir = project_dir / ".cache" / "python-packages"
+    base_dist = project_dir / "dist"
+
+    print("Get python ...")
+    if not cache_dir.exists() or not any(cache_dir.iterdir()):
+        subprocess.run(
+            ["git", "clone", "-q", PYTHON_REPO_URL, str(cache_dir)], check=True
+        )
+
+    if base_dist.exists():
+        shutil.rmtree(base_dist)
+    base_dist.mkdir(parents=True)
+
+    compiler_dir = project_dir / "compiler"
+    build_compiler(compiler_dir)
+
+    for system in SYSTEM_TYPES:
+        print(f"Building for {system}...")
+        dist, lib_dir, bin_dir, include_dir, src_dir, doc_dir = setup_system_paths(
+            system, base_dist
+        )
+
+        dist.mkdir(parents=True, exist_ok=True)
+        lib_dir.mkdir(parents=True, exist_ok=True)
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        include_dir.mkdir(parents=True, exist_ok=True)
+        src_dir.mkdir(parents=True, exist_ok=True)
+        doc_dir.mkdir(parents=True, exist_ok=True)
+
+        copy_runtime(system, include_dir, src_dir, project_dir)
+        copy_documentation(doc_dir)
+        write_version(system, dist, version)
+        copy_compiler(system, lib_dir, bin_dir, cache_dir, project_dir)
+        create_package(system, project_dir, dist.parent, version)
+
+
+if __name__ == "__main__":
+    main()

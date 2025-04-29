@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import * as StructExtendTest from "@generated/struct_extend";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_struct_extend");

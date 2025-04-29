@@ -211,7 +211,7 @@ def decode(mangled_name: str) -> tuple[list[str], DeclKind]:
 
     base_name = mangled_name[:last_underscore]
     kind = DeclKind(mangled_name[last_underscore + 1])
-    encoding = mangled_name[last_underscore + 2 :]
+    encoding = mangled_name[last_underscore + 2:]
 
     # Decode special underscore positions
     special_positions = []

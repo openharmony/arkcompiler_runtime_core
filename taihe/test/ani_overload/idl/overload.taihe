@@ -64,9 +64,6 @@ interface OverloadInterface {
     OverloadFuncPoint(a: Array<i32>): i32;
 
     @overload("overloadFunc")
-    OverloadFuncPoint1(a: Array<f32>): f32;
-
-    @overload("overloadFunc")
     OverloadFuncArrayBuffer(a: @arraybuffer Array<u8>): u8;
 
     @overload("overloadFunc")

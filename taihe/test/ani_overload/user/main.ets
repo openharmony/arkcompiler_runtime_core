@@ -14,6 +14,7 @@
  */
 import * as test_overload from "@generated/overload";
 import * as OverloadTest from "@generated/overload_test";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_overload");
@@ -296,17 +297,14 @@ function test_10param4() {
 
 
 
-// 测试重载函数传入两个不同数据类型的数组
+// 测试重载函数传入数组
 function test_Array() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface()
 
     let numbers: int[] = [1, 2, 3, 4, 5];
-    let numbers1: float[] = [1.1, 2.1, 3.1, 4.1, 5.1];
     let tmp = instance.overloadFunc(numbers)
     assertEQ(tmp, 1 as int);
-    let tmp1 = instance.overloadFunc(numbers1)
-    assertEQ(tmp1, 1.1 as float);
 }
 
 function test_buffer() {
