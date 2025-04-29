@@ -359,13 +359,13 @@ void panda::guard::Node::CreateOuterMethod(const InstructionInfo &info)
     PANDA_GUARD_ASSERT_PRINT(!defineInsInfo.IsValid(), TAG, ErrorCode::GENERIC_ERROR, "defineInsInfo is invalid");
     // nameInsInfo maybe empty, therefore, there not check nameInsInfo. Instead, it is checked in actual use
 
-    const std::string methodIdx = info.ins_->GetId(1);
+    const std::string methodIdx = info.ins_->GetId(0);
     std::string literalArrayIdx;
     if (defineInsInfo.equalToOpcode(pandasm::Opcode::DEFINECLASSWITHBUFFER) ||
         defineInsInfo.equalToOpcode(pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS)) {
         literalArrayIdx = defineInsInfo.ins_->GetId(1);
     } else {  // createobjectwithbuffer
-        literalArrayIdx = defineInsInfo.ins_->GetId(1);
+        literalArrayIdx = defineInsInfo.ins_->GetId(0);
     }
 
     const auto outerMethod = std::make_shared<OuterMethod>(this->program_, methodIdx);
