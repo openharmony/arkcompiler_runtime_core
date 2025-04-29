@@ -1234,14 +1234,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Int8Array using reversed data from the current one
      */
-    public reverse(): Int8Array {
-        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
-            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
-            this.setUnsafe(i, tmp)
-        }
-        return this
-    }
+    public native reverse(): Int8Array
 
     /**
      * Creates a slice of current Int8Array using range [begin, end)
@@ -3192,14 +3185,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Int16Array using reversed data from the current one
      */
-    public reverse(): Int16Array {
-        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
-            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
-            this.setUnsafe(i, tmp)
-        }
-        return this
-    }
+    public native reverse(): Int16Array
 
     /**
      * Creates a slice of current Int16Array using range [begin, end)
@@ -5119,14 +5105,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Int32Array using reversed data from the current one
      */
-    public reverse(): Int32Array {
-        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
-            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
-            this.setUnsafe(i, tmp)
-        }
-        return this
-    }
+    public native reverse(): Int32Array
 
     /**
      * Creates a slice of current Int32Array using range [begin, end)
@@ -7060,14 +7039,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns a new BigInt64Array using reversed data from the current one
      */
-    public reverse(): BigInt64Array {
-        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
-            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
-            this.setUnsafe(i, tmp)
-        }
-        return this
-    }
+    public native reverse(): BigInt64Array
 
     /**
      * Creates a slice of current BigInt64Array using range [begin, end)
@@ -8989,14 +8961,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Float32Array using reversed data from the current one
      */
-    public reverse(): Float32Array {
-        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
-            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
-            this.setUnsafe(i, tmp)
-        }
-        return this
-    }
+    public native reverse(): Float32Array
 
     /**
      * Creates a slice of current Float32Array using range [begin, end)
@@ -10782,14 +10747,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a new Float64Array using reversed data from the current one
      */
-    public reverse(): Float64Array {
-        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
-            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
-            this.setUnsafe(i, tmp)
-        }
-        return this
-    }
+    public native reverse(): Float64Array
 
     /**
      * Creates a slice of current Float64Array using range [begin, end)

@@ -32,6 +32,7 @@ set(intrinsics_tests
     string_indexof
     string_repeat
     string_compare_to
+    typed_arrays_reverse
     char_isuppercase
     abs
     min

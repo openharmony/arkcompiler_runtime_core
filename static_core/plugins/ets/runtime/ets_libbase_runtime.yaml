@@ -2140,6 +2140,117 @@ intrinsics:
       args: [escompat.BigUint64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValuesWithOffset
 
+  - name: Int8ArrayReverse
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Int8Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayReverse
+
+  - name: Int16ArrayReverse
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Int16Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayReverse
+
+  - name: Int32ArrayReverse
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Int32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayReverse
+
+  - name: BigInt64ArrayReverse
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.BigInt64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayReverse
+
+  - name: Float32ArrayReverse
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Float32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayReverse
+
+  - name: Float64ArrayReverse
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Float64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayReverse
+
+  - name: UInt8ArrayReverse
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Uint8Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayReverse
+
+  - name: UInt8ClampedArrayReverse
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Uint8ClampedArray
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayReverse
+
+  - name: UInt16ArrayReverse
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Uint16Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayReverse
+
+  - name: UInt32ArrayReverse
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.Uint32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayReverse
+
+  - name: BigUInt64ArrayReverse
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: reverse
+    static: false
+    signature:
+      ret: escompat.BigUint64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverse
+
+
 ########################
 # escompat.taskpool #
 ########################
