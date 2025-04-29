@@ -144,24 +144,24 @@ export namespace xml {
             this.strXml_ = str
         }
 
-        private static readonly const XML = "<?xml"
-        private static readonly const SEMICOLON = ':'
-        private static readonly const HTTP = 'http'
-        private static readonly const HTTPS = 'https'
-        private static readonly const UNDESCORE = '_'
-        private static readonly const XMLNS = 'xmlns'
-        private static readonly const XMLNS_PREFIX = 'xmlns:'
-        private static readonly const lineEndRegExp = new RegExp("\n", "m")
-        private static readonly const selfCloseTagRegExp = new RegExp("<([\\w:]+)([^<^>])*?/>", "m")
-        private static readonly const startTagRegExp = new RegExp("<([\\w:]+)[\\s\\S]*?>", "m")
-        private static readonly const closeTagRegExp = new RegExp("</([\\w:]+)([^<^>])*?>", "m")
-        private static readonly const textTagRegExp = new RegExp(">[&|\\w:|\\s][^<>]+<", "m")
-        private static readonly const attributeRegExp = new RegExp("([\\w:-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*'|\\w+)\\s*", "m")
-        private static readonly const stripRegExp = new RegExp("^['\"]|['\"]$","g")
-        private static readonly const entityRegExp = new RegExp("<!ENTITY (?<name>\\w+) ('|\")(?<value>.*?)('|\")>", "gm")
-        private static readonly const nodeNameRegExp = new RegExp("^[\\w:]+$", "gm")
+        private static readonly XML = "<?xml"
+        private static readonly SEMICOLON = ':'
+        private static readonly HTTP = 'http'
+        private static readonly HTTPS = 'https'
+        private static readonly UNDESCORE = '_'
+        private static readonly XMLNS = 'xmlns'
+        private static readonly XMLNS_PREFIX = 'xmlns:'
+        private static readonly lineEndRegExp = new RegExp("\n", "m")
+        private static readonly selfCloseTagRegExp = new RegExp("<([\\w:]+)([^<^>])*?/>", "m")
+        private static readonly startTagRegExp = new RegExp("<([\\w:]+)[\\s\\S]*?>", "m")
+        private static readonly closeTagRegExp = new RegExp("</([\\w:]+)([^<^>])*?>", "m")
+        private static readonly textTagRegExp = new RegExp(">[&|\\w:|\\s][^<>]+<", "m")
+        private static readonly attributeRegExp = new RegExp("([\\w:-]+)\\s*=\\s*(\"[^\"]*\"|'[^']*'|\\w+)\\s*", "m")
+        private static readonly stripRegExp = new RegExp("^['\"]|['\"]$","g")
+        private static readonly entityRegExp = new RegExp("<!ENTITY (?<name>\\w+) ('|\")(?<value>.*?)('|\")>", "gm")
+        private static readonly nodeNameRegExp = new RegExp("^[\\w:]+$", "gm")
 
-        private static readonly const serviceTagRegExpMap = new Map<EventType, RegExp>([
+        private static readonly serviceTagRegExpMap = new Map<EventType, RegExp>([
             [EventType.INSTRUCTION, new RegExp("<\\?[^>]+?>","g")],
             [EventType.COMMENT, new RegExp("<!--[\\s\\S]*?-->","g")],
             [EventType.ENTITY_REFERENCE, new RegExp("<!ENTITY[\\s\\S]*?>","g")],
@@ -169,7 +169,7 @@ export namespace xml {
             [EventType.CDSECT, new RegExp("<!\\[CDATA\\[[\\s\\S]*?\]\]>","gm")]
         ])
 
-        private static readonly const xmlEscapeChars = new Map<string, string>([
+        private static readonly xmlEscapeChars = new Map<string, string>([
             ["&quot;", "\""],
             ["&amp;", "&"],
             ["&lt;", "<"],

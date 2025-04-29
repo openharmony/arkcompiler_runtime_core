@@ -31,22 +31,22 @@ namespace fnns {
     }
 
     abstract class B {
-        abstract function getInitialDoubleValue(): double;
+        abstract getInitialDoubleValue(): double;
     }
 
     class A extends B {
         constructor(){};
-        static function B(): double {
+        static B(): double {
             return 1.00;
         };
-        function getInitialDoubleValue(): double {
+        getInitialDoubleValue(): double {
             return 1.00;
         }
 
-        function getInitialIntValue(): int {
+        getInitialIntValue(): int {
             return 0;
         }
-        function getInitialIntValue(a: int, b: int): int {
+        getInitialIntValue(a: int, b: int): int {
             return a + b;
         }
     }

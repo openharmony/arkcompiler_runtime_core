@@ -668,8 +668,8 @@ export namespace util {
         private encoding_: string = "utf-8";
         private fatal_: boolean = false;
         ignoreBOM_: boolean = false;
-        const CONVERTER_FLAGS_FATAL = 0x2;
-        const CONVERTER_FLAGS_IGNORE_BOM = 0x4;
+        readonly CONVERTER_FLAGS_FATAL = 0x2;
+        readonly CONVERTER_FLAGS_IGNORE_BOM = 0x4;
         private nativeDecoder_: long;
 
         constructor(encoding?: string, options?: DecoderOptions) {
