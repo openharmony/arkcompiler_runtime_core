@@ -281,13 +281,6 @@
 #24941
 07.expressions/11.function_call_expression/fcall_10.ets
 
-#24938 Reference equality based on actual enum type fails - revisit after 11.04.2025
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_14.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_15.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_7.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_8.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_8.ets
-
 #24697
 08.statements/04.local_declarations/local_class.ets
 09.classes/01.class_declaration/local_class_in_func_neg.ets

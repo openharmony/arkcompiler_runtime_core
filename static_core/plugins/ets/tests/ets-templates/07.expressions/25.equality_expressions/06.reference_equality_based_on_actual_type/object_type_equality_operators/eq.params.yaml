@@ -138,7 +138,8 @@ cases:
       case2:
           - Color.values()[0]
           - Color.Green
-          - '0'
+          - "Color.getValueOf('Red')"
+          - "Color.getValueOf('Green')"
 
     - decl: |-
           enum Size { Small = "S", Medium = "M", medium = "M" }
@@ -147,7 +148,8 @@ cases:
       case2:
           - Size.medium
           - Size.values()[1]
-          - "'M'"
+          - "Size.getValueOf('Medium')"
+          - "Size.getValueOf('medium')"
 
     # bigint equality
     - case1:
