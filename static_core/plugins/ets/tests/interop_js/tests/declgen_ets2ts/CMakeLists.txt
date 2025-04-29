@@ -92,7 +92,7 @@ function(create_declgen_ets2ts_test TARGET)
 
     set(JS_TO_ABC_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/compiled_js)
 
-    # Create arktsconfig.json with "dynamicPaths" for js modules
+    # Create arktsconfig.json with "dependencies" for js modules
     set(ARKTSCONFIG_CONTENT
         "    }\n"
         "  }\n"
@@ -117,7 +117,7 @@ function(create_declgen_ets2ts_test TARGET)
         "      \"std\": [\"${PANDA_ROOT}/plugins/ets/stdlib/std\"],\n"
         "      \"escompat\": [\"${PANDA_ROOT}/plugins/ets/stdlib/escompat\"]\n"
         "    },\n"
-        "    \"dynamicPaths\": {\n"
+        "    \"dependencies\": {\n"
         "${ARKTSCONFIG_CONTENT}"
     )
     set(ARKTSCONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)

@@ -1,6 +1,7 @@
 bin/ark
 bin/ark_aot
 bin/aspt_converter
+lib/libabc2program.so
 lib/libarkaotmanager.so
 lib/libarkassembler.so
 lib/libarkbase.so

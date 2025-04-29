@@ -53,13 +53,13 @@ def make_arktsconfig(configpath: Union[str, Path],
         if is_compilable:
             continue
         key: str = path.replace("/", "_").replace(".", "_")
-        dynamic_paths[key] = {'language': 'js', 'declPath': path, 'ohmUrl': path}
+        dynamic_paths[key] = {'language': 'js', 'path': path, 'ohmUrl': path}
         parsed_template['compilerOptions']['paths'] = {
             **parsed_template['compilerOptions']['paths'],
             **paths
             }
-        parsed_template['compilerOptions']['dynamicPaths'] = {
-            **parsed_template['compilerOptions']['dynamicPaths'],
+        parsed_template['compilerOptions']['dependencies'] = {
+            **parsed_template['compilerOptions']['dependencies'],
             **dynamic_paths
             }
     with create_file(configpath) as f:
@@ -89,7 +89,7 @@ def fix_arktsconfig(dynamic_paths: Any = None) -> None:
         old_root = j.get('compilerOptions', {}).get('baseUrl', 'failed')
         if dynamic_paths:
             for k, v in dynamic_paths.items():
-                j['compilerOptions']['dynamicPaths'][k] = v
+                j['compilerOptions']['dependencies'][k] = v
         t = json.dumps(j)
         with create_file(config) as f:
             f.write(t.replace(old_root, str(ark_src)))
@@ -141,8 +141,8 @@ class Tool(ToolBase):
             j['compilerOptions']['paths'][lib.name] = [str(lib), ]
         for d in dynamic:
             lib = d.with_suffix('')
-            # Note: no 'declPath'
-            j['compilerOptions']['dynamicPaths'][lib.name] = {'language': 'js', 'ohmUrl': str(lib)}
+            # Note: no 'path'
+            j['compilerOptions']['dependencies'][lib.name] = {'language': 'js', 'ohmUrl': str(lib)}
         conf = bu.path.joinpath('arktsconfig.json')
         with create_file(conf) as f:
             json.dump(j, f, indent=4)

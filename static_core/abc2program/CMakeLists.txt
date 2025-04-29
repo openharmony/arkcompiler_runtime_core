@@ -15,6 +15,7 @@ cmake_minimum_required(VERSION 3.3.2 FATAL_ERROR)
 project(abc2program CXX)
 
 set(SOURCES
+    abc_annotation_processor.cpp
     abc_type_convert.cpp
     abc_opcode_convert.cpp
     abc_inst_convert.cpp
@@ -55,7 +56,7 @@ panda_gen_file(
 add_custom_target(abc_type_convert_cpp DEPENDS ${ABC_TYPE_CONVERT_CPP})
 add_dependencies(panda_gen_files abc_type_convert_cpp)
 
-panda_add_library(abc2program SHARED ${SOURCES})
+panda_add_library(abc2program ${PANDA_DEFAULT_LIB_TYPE} ${SOURCES})
 
 add_dependencies(abc2program
     abc_type_convert_cpp

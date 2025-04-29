@@ -13,13 +13,9 @@
  * limitations under the License.
  */
 
-/*---
-    tags: [not-a-test]
-    files: [../C/indexC.ets]
-    arktsconfig: arktsconfig.json
----*/
+package std.annotations;
 
-import {fooIC} from 'HarC'
-export function fooIB() {
-    fooIC()
+@Retention({policy: "BYTECODE"})
+export @interface ModuleDeclaration {
+    declaration: string;
 }
