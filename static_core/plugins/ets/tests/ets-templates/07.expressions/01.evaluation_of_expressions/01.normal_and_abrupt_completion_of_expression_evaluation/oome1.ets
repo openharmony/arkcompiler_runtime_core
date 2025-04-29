@@ -42,5 +42,4 @@ function main(): int {
   } catch (e) {
     return 1;
   }
-  return 1;
 }
