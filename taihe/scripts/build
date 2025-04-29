@@ -28,7 +28,7 @@ build-compiler() {
     local compiler_dir="$LIB_DIR/compiler"
     pushd compiler
 
-    ./generate-grammar && poetry build
+    ./generate-grammar && uv build
     cd dist
     tar xf taihe-*.gz
     echo "Copying the compiler"

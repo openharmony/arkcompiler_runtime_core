@@ -50,12 +50,6 @@ struct array_view {
 
     array_view(pointer data, size_type size) noexcept : m_size(size), m_data(data) {}  // main constructor
 
-    template <typename C>
-    array_view(std::initializer_list<C> value) noexcept
-        : array_view(value.begin(), static_cast<size_type>(value.size()))
-    {
-    }
-
     template <typename C, size_type N>
     array_view(C (&value)[N]) noexcept : array_view(value, N)
     {
@@ -253,10 +247,7 @@ struct array : public array_view<cpp_owner_t> {
         return array(size, value);
     }
 
-    template <typename value_type>
-    array(std::initializer_list<value_type> value) noexcept : array(copy_data_t {}, value.begin(), value.size())
-    {
-    }
+    array(std::initializer_list<cpp_owner_t> value) noexcept : array(copy_data_t {}, value.begin(), value.size()) {}
 
     array(array_view<cpp_owner_t> const &other) : array(copy_data_t {}, other.data(), other.size()) {}
 

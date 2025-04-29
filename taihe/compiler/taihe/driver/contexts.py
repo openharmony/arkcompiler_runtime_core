@@ -13,37 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Orchestrates the compilation process."""
+"""Orchestrates the compilation process.
 
-import sys
+- BackendRegistry: initializes all known backends
+- CompilerInvocation: constructs the invocation from cmdline
+    - Parses the general command line arguments
+    - Enables user specified backends
+    - Parses backend-specific arguments
+    - Sets backend options
+- CompilerInstance: runs the compilation
+    - CompilerInstance: scans and parses sources files
+    - Backends: post-process the IR
+    - Backends: validate the IR
+    - Backends: generate the output
+"""
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from taihe.codegen.abi_generator import (
-    ABIHeadersGenerator,
-    ABISourcesGenerator,
-)
-from taihe.codegen.ani_generator import (
-    ANICodeGenerator,
-)
-from taihe.codegen.c_impl_generator import (
-    CImplHeadersGenerator,
-    CImplSourcesGenerator,
-)
-from taihe.codegen.cpp_generator import (
-    CppHeadersGenerator,
-)
-from taihe.codegen.cpp_impl_generator import (
-    CppImplHeadersGenerator,
-    CppImplSourcesGenerator,
-)
-from taihe.codegen.cpp_user_generator import (
-    CppUserHeadersGenerator,
-)
-from taihe.codegen.sts_generator import (
-    STSCodeGenerator,
-)
+from taihe.driver.backend import Backend, BackendConfig
 from taihe.parse.convert import (
     AstConverter,
     IgnoredFileReason,
@@ -51,8 +40,7 @@ from taihe.parse.convert import (
     normalize_pkg_name,
 )
 from taihe.semantics.analysis import analyze_semantics
-from taihe.semantics.declarations import AttrItemDecl, PackageGroup
-from taihe.semantics.format import PrettyPrinter
+from taihe.semantics.declarations import PackageGroup
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.diagnostics import DiagnosticsManager
 from taihe.utils.exceptions import AdhocNote
@@ -63,29 +51,17 @@ from taihe.utils.sources import SourceFile, SourceLocation, SourceManager
 @dataclass
 class CompilerInvocation:
     """Describes the options and intents for a compiler invocation.
-
     CompilerInvocation stores the high-level intent in a structured way, such
     as the input paths, the target for code generation. Generally speaking, it
     can be considered as the parsed and verified version of a compiler's
     command line flags.
-
     CompilerInvocation does not manage the internal state. Use
     `CompilerInstance` instead.
     """
 
     src_dirs: list[Path] = field(default_factory=lambda: [])
-
-    # TODO: implement "CompilerBackend" and store the backend-specific options there?
     out_dir: Optional[Path] = None
-
-    gen_author: bool = False
-    gen_user: bool = False
-    gen_ani: bool = False
-    gen_c_impl: bool = False
-    gen_cpp_impl: bool = True
-
-    debug: bool = False
-    sts_keep_name: bool = False
+    backends: list[BackendConfig] = field(default_factory=lambda: [])
 
 
 class CompilerInstance:
@@ -98,6 +74,8 @@ class CompilerInstance:
     """
 
     invocation: CompilerInvocation
+    backends: list[Backend]
+
     diagnostics_manager: DiagnosticsManager
 
     source_manager: SourceManager
@@ -113,7 +91,9 @@ class CompilerInstance:
         self.analysis_manager = AnalysisManager(self.diagnostics_manager)
         self.source_manager = SourceManager()
         self.package_group = PackageGroup()
-        self.target_manager = OutputManager()
+        self.target_manager = OutputManager(self.invocation.out_dir)
+
+        self.backends = [conf.construct(self) for conf in invocation.backends]
 
     ##########################
     # The compilation phases #
@@ -170,16 +150,6 @@ class CompilerInstance:
                 pkg = conv.convert()
                 self.package_group.add(pkg)
 
-    def validate(self):
-        analyze_semantics(self.package_group, self.diagnostics_manager)
-
-        if self.invocation.debug:
-            PrettyPrinter(
-                sys.stdout,
-                show_resolved=True,
-                colorize=True,
-            ).handle_decl(self.package_group)
-
     def generate(self):
         if not self.invocation.out_dir:
             return
@@ -187,62 +157,30 @@ class CompilerInstance:
         if self.diagnostics_manager.has_errors():
             return
 
-        ABIHeadersGenerator(self.target_manager, self.analysis_manager).generate(
-            self.package_group
-        )
-        CppHeadersGenerator(self.target_manager, self.analysis_manager).generate(
-            self.package_group
-        )
-        if self.invocation.gen_author:
-            ABISourcesGenerator(self.target_manager, self.analysis_manager).generate(
-                self.package_group
-            )
-            if self.invocation.gen_cpp_impl:
-                CppImplHeadersGenerator(
-                    self.target_manager, self.analysis_manager
-                ).generate(self.package_group)
-                CppImplSourcesGenerator(
-                    self.target_manager, self.analysis_manager
-                ).generate(self.package_group)
-            if self.invocation.gen_c_impl:
-                CImplHeadersGenerator(
-                    self.target_manager, self.analysis_manager
-                ).generate(self.package_group)
-                CImplSourcesGenerator(
-                    self.target_manager, self.analysis_manager
-                ).generate(self.package_group)
-        if self.invocation.gen_user or self.invocation.gen_ani:
-            CppUserHeadersGenerator(
-                self.target_manager, self.analysis_manager
-            ).generate(self.package_group)
-        if self.invocation.gen_ani:
-            ANICodeGenerator(self.target_manager, self.analysis_manager).generate(
-                self.package_group
-            )
-            STSCodeGenerator(self.target_manager, self.analysis_manager).generate(
-                self.package_group
-            )
+        for b in self.backends:
+            b.generate()
 
+        # TODO: generation should not fail
         if self.diagnostics_manager.has_errors():
             return
 
+        # TODO: remove this after the completion of refactor
         self.target_manager.output_to(self.invocation.out_dir)
-
-    def add_pkg_attr(self):
-        if not self.invocation.sts_keep_name:
-            return
-        for pkg in self.package_group.packages:
-            if not pkg.get_last_attr("sts_keep_name"):
-                d = AttrItemDecl(None, "sts_keep_name", ())
-                pkg.add_attr(d)
 
     def run(self):
         self.diagnostics_manager.reset_max_level()
 
         self.scan()
         self.parse()
-        self.validate()
-        self.add_pkg_attr()
+
+        analyze_semantics(self.package_group, self.diagnostics_manager)
+
+        for b in self.backends:
+            b.post_process()
+
+        for b in self.backends:
+            b.validate()
+
         self.generate()
 
         return not self.diagnostics_manager.has_errors()

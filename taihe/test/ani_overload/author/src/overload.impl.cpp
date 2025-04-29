@@ -340,19 +340,6 @@ public:
         return a.data()[0];
     }
 
-    float OverloadFuncPoint1(array_view<float> a)
-    {
-        std::cout << "OverloadFuncPoint1: a = [";
-        for (size_t i = 0; i < a.size(); ++i) {
-            std::cout << a.data()[i];
-            if (i < a.size() - 1) {
-                std::cout << ", ";
-            }
-        }
-        std::cout << "]" << std::endl;
-        return a.data()[0];
-    }
-
     uint8_t OverloadFuncArrayBuffer(array_view<uint8_t> a)
     {
         std::cout << "OverloadFuncArrayBuffer: a = [";

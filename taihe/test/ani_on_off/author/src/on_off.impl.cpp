@@ -42,9 +42,32 @@ public:
         std::cout << "IBase::offSet" << std::endl;
     }
 
+    void mytestNew()
+    {
+        TH_THROW(std::runtime_error, "mytestNew not implemented");
+    }
+
+    int32_t onTest()
+    {
+        TH_THROW(std::runtime_error, "onTest not implemented");
+    }
+
 private:
     string str;
     string new_str;
+};
+
+class ColorImpl {
+public:
+    ColorImpl()
+    {
+        // Don't forget to implement the constructor.
+    }
+
+    int32_t add(int32_t a)
+    {
+        TH_THROW(std::runtime_error, "add not implemented");
+    }
 };
 
 class BaseCls {
@@ -55,6 +78,16 @@ public:
 ::on_off::IBase getIBase(string_view a, string_view b)
 {
     return make_holder<IBase, ::on_off::IBase>(a, b);
+}
+
+int32_t mytestGlobalnew()
+{
+    TH_THROW(std::runtime_error, "mytestGlobalnew not implemented");
+}
+
+int32_t onGlobalnew()
+{
+    TH_THROW(std::runtime_error, "onGlobalnew not implemented");
 }
 
 void onFoo(callback_view<void()> a)
@@ -148,4 +181,6 @@ TH_EXPORT_CPP_API_onFuncI(onFuncI);
 TH_EXPORT_CPP_API_onFuncB(onFuncB);
 TH_EXPORT_CPP_API_offFuncI(offFuncI);
 TH_EXPORT_CPP_API_offFuncB(offFuncB);
+TH_EXPORT_CPP_API_mytestGlobalnew(mytestGlobalnew);
+TH_EXPORT_CPP_API_onGlobalnew(onGlobalnew);
 // NOLINTEND

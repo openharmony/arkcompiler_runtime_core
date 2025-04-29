@@ -93,12 +93,12 @@ void ShowEnumWeekday(::enum_test::Weekday day)
 
 }  // namespace
 
-TH_EXPORT_CPP_API_NextEnum(NextEnum);
-TH_EXPORT_CPP_API_ShowEnum(ShowEnum);
-TH_EXPORT_CPP_API_NextEnumWeekday(NextEnumWeekday);
-TH_EXPORT_CPP_API_ShowEnumWeekday(ShowEnumWeekday);
-TH_EXPORT_CPP_API_NextEnumI8(NextEnumI8);
-TH_EXPORT_CPP_API_NextEnumI16(NextEnumI16);
-TH_EXPORT_CPP_API_NextEnumI32(NextEnumI32);
-TH_EXPORT_CPP_API_NextEnumI64(NextEnumI64);
-TH_EXPORT_CPP_API_NextEnumString(NextEnumString);
+TH_EXPORT_CPP_API_nextEnum(NextEnum);
+TH_EXPORT_CPP_API_showEnum(ShowEnum);
+TH_EXPORT_CPP_API_nextEnumWeekday(NextEnumWeekday);
+TH_EXPORT_CPP_API_showEnumWeekday(ShowEnumWeekday);
+TH_EXPORT_CPP_API_nextEnumI8(NextEnumI8);
+TH_EXPORT_CPP_API_nextEnumI16(NextEnumI16);
+TH_EXPORT_CPP_API_nextEnumI32(NextEnumI32);
+TH_EXPORT_CPP_API_nextEnumI64(NextEnumI64);
+TH_EXPORT_CPP_API_nextEnumString(NextEnumString);

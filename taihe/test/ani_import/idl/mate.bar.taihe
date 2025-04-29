@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 @!namespace("mate", "bar")
-
+@!sts_inject("let global_val = 1;")
+@!sts_inject_into_module("let module_val = 1;")
 from mate.foo use FooType;
 
 struct BarType {}

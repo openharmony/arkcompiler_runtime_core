@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import * as lib from "@generated/staticTest";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 loadLibrary("ani_static");
 

@@ -14,6 +14,7 @@
  */
 import * as OptTest from "@generated/opt";
 import * as optionalTest from "@generated/optional";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_optional");

@@ -15,13 +15,13 @@
 
 import re
 
-from taihe.codegen.abi_generator import (
+from taihe.codegen.abi.analyses import (
     GlobFuncABIInfo,
     IfaceABIInfo,
     PackageABIInfo,
     TypeABIInfo,
 )
-from taihe.codegen.cpp_generator import (
+from taihe.codegen.cpp.analyses import (
     IfaceMethodCppInfo,
     PackageCppInfo,
     TypeCppInfo,
@@ -113,7 +113,15 @@ class CppImplSourcesGenerator:
     def __init__(self, tm: OutputManager, am: AnalysisManager):
         self.tm = tm
         self.am = am
-        self.using_namespaces = []
+        self.using_namespaces: list[str] = []
+
+    @property
+    def make_holder(self):
+        return self.mask("taihe::make_holder")
+
+    @property
+    def runtime_error(self):
+        return self.mask("std::runtime_error")
 
     def mask(self, cpp_type: str):
         pattern = r"(::)?([A-Za-z_][A-Za-z_0-9]*::)*[A-Za-z_][A-Za-z_0-9]*"
@@ -123,10 +131,10 @@ class CppImplSourcesGenerator:
             for ns in self.using_namespaces:
                 ns = ns + "::"
                 if matched.startswith(ns):
-                    return matched[len(ns) :]
+                    return matched[len(ns):]
                 ns = "::" + ns
                 if matched.startswith(ns):
-                    return matched[len(ns) :]
+                    return matched[len(ns):]
             return matched
 
         return re.sub(pattern, replace_ns, cpp_type)
@@ -147,8 +155,6 @@ class CppImplSourcesGenerator:
         pkg_cpp_impl_target.include("stdexcept")
         pkg_cpp_impl_target.writeln("")
         self.using_namespaces = []
-        self.gen_using_namespace(pkg_cpp_impl_target, "taihe")
-        self.gen_using_namespace(pkg_cpp_impl_target, "::".join(pkg.segments))
         pkg_cpp_impl_target.writeln("")
         self.gen_anonymous_namespace_block(pkg, pkg_cpp_impl_target)
         pkg_cpp_impl_target.writeln("")
@@ -162,6 +168,16 @@ class CppImplSourcesGenerator:
             "// NOLINTEND",
         )
         self.using_namespaces = []
+
+    def gen_using_namespace(
+        self,
+        pkg_cpp_impl_target: COutputBuffer,
+        namespace: str,
+    ):
+        pkg_cpp_impl_target.writeln(
+            f"using namespace {namespace};",
+        )
+        self.using_namespaces.append(namespace)
 
     def gen_anonymous_namespace_block(
         self,
@@ -181,16 +197,6 @@ class CppImplSourcesGenerator:
         pkg_cpp_impl_target.writeln(
             f"}}  // namespace",
         )
-
-    def gen_using_namespace(
-        self,
-        pkg_cpp_impl_target: COutputBuffer,
-        namespace: str,
-    ):
-        pkg_cpp_impl_target.writeln(
-            f"using namespace {namespace};",
-        )
-        self.using_namespaces.append(namespace)
 
     def gen_iface(
         self,
@@ -239,11 +245,11 @@ class CppImplSourcesGenerator:
             pkg_cpp_impl_target.writeln(
                 f"        // The parameters in the make_holder function should be of the same type",
                 f"        // as the parameters in the constructor of the actual implementation class.",
-                f"        return make_holder<{impl_name}, {cpp_return_ty_name}>();",
+                f"        return {self.make_holder}<{impl_name}, {cpp_return_ty_name}>();",
             )
         else:
             pkg_cpp_impl_target.writeln(
-                f'        TH_THROW(std::runtime_error, "{func_cpp_impl_name} not implemented");',
+                f'        TH_THROW({self.runtime_error}, "{func_cpp_impl_name} not implemented");',
             )
         pkg_cpp_impl_target.writeln(
             f"    }}",
@@ -273,11 +279,11 @@ class CppImplSourcesGenerator:
             pkg_cpp_impl_target.writeln(
                 f"    // The parameters in the make_holder function should be of the same type",
                 f"    // as the parameters in the constructor of the actual implementation class.",
-                f"    return make_holder<{impl_name}, {cpp_return_ty_name}>();",
+                f"    return {self.make_holder}<{impl_name}, {cpp_return_ty_name}>();",
             )
         else:
             pkg_cpp_impl_target.writeln(
-                f'    TH_THROW(std::runtime_error, "{func_cpp_impl_name} not implemented");',
+                f'    TH_THROW({self.runtime_error}, "{func_cpp_impl_name} not implemented");',
             )
         pkg_cpp_impl_target.writeln(
             f"}}",

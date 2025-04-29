@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from taihe.codegen.mangle import DeclKind, decode, encode
+from taihe.codegen.abi.mangle import DeclKind, decode, encode
 
 
 def test_name_mangler():

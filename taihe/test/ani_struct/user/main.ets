@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import * as StructTest from "@generated/struct_test";
+import {BusinessError} from "@ohos.base";
 
 function main() {
     let a: StructTest.A = {

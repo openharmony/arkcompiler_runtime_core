@@ -14,6 +14,7 @@
  */
 import * as test_primitives from "@generated/primitives_test";
 import * as test_void_ns from "@generated/void_func";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
 
 loadLibrary("ani_primitives");
@@ -1035,34 +1036,45 @@ function testCasetestBaseBoolFunc4_2() {
 }
 
 function testCasetestBaseBoolFunc5() {
-    primitivesBoolTest.TestBaseBoolFunc5Async(
-        true, (error: Error, data?: boolean) => {
-            if (!error.message) {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5 success ",
-                    data);
-                assertEQ(data, true);
-            } else {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5 ERROR ", error);
-            }
-        })
+    let p = new Promise<boolean>((resolve, reject) => {
+        primitivesBoolTest.TestBaseBoolFunc5Async(
+            true, (err: BusinessError, data: boolean) => {
+                if (err.code !== 0) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+    });
+    let res: boolean;
+    let err: BusinessError;
+    try {
+        res = await p;
+    } catch (e) {
+        err = e as BusinessError;
+    }
+    assertEQ(res, true);
 }
 
 function testCasetestBaseBoolFunc5_1() {
-    primitivesBoolTest.TestBaseBoolFunc5Async(
-        false, (error: Error, data?: boolean) => {
-            if (!error.message) {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5_1 success ",
-                    data);
-                assertEQ(data, false);
-            } else {
-                console.log(
-                    "main finsih test testCasetestBaseBoolFunc5_1 ERROR ",
-                    error);
-            }
-        })
+    let p = new Promise<boolean>((resolve, reject) => {
+        primitivesBoolTest.TestBaseBoolFunc5Async(
+            false, (err: BusinessError, data: boolean) => {
+                if (err.code !== 0) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+    });
+    let res: boolean;
+    let err: BusinessError;
+    try {
+        res = await p;
+    } catch (e) {
+        err = e as BusinessError;
+    }
+    assertEQ(res, false);
 }
 
 function testCasetestBaseBoolFunc5_2() {

@@ -25,7 +25,15 @@ interface IBase {
     @gen_async("setAsync")
     @gen_promise("setPromise")
     set(a: String): void;
+
+    @gen_async
+    @gen_promise
+    makeSync();
 }
+
+@gen_async
+@gen_promise
+function makeGlobalSync();
 
 @gen_async("getIBaseAsync")
 @gen_promise("getIBasePromise")

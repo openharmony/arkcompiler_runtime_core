@@ -18,8 +18,8 @@ enum Color: String {
     BLUE = "Blue",
 }
 
-function NextEnum(color: Color): Color;
-function ShowEnum(color: Color): void;
+function nextEnum(color: Color): Color;
+function showEnum(color: Color): void;
 
 enum Weekday: i32 {
     MONDAY,
@@ -31,8 +31,8 @@ enum Weekday: i32 {
     SUNDAY
 }
 
-function NextEnumWeekday(day: Weekday): Weekday;
-function ShowEnumWeekday(day: Weekday): void;
+function nextEnumWeekday(day: Weekday): Weekday;
+function showEnumWeekday(day: Weekday): void;
 
 @const
 enum Flags: f64 {
@@ -46,7 +46,7 @@ enum NumTypeI8: i8 {
     THREE = 127
 }
 
-function NextEnumI8(numtypei8: NumTypeI8): NumTypeI8;
+function nextEnumI8(numtypei8: NumTypeI8): NumTypeI8;
 
 enum NumTypeI16: i16 {
     ONE = -32768,
@@ -54,7 +54,7 @@ enum NumTypeI16: i16 {
     THREE = 32767
 }
 
-function NextEnumI16(numtypei16: NumTypeI16): NumTypeI16;
+function nextEnumI16(numtypei16: NumTypeI16): NumTypeI16;
 
 enum NumTypeI32: i32 {
     ONE = -2147483648,
@@ -62,7 +62,7 @@ enum NumTypeI32: i32 {
     THREE = 2147483647
 }
 
-function NextEnumI32(numtypei32: NumTypeI32): NumTypeI32;
+function nextEnumI32(numtypei32: NumTypeI32): NumTypeI32;
 
 enum NumTypeI64: i64 {
     ONE = -922337203685477580,
@@ -70,7 +70,7 @@ enum NumTypeI64: i64 {
     THREE = 922337203685477580
 }
 
-function NextEnumI64(numtypei64: NumTypeI64): NumTypeI64;
+function nextEnumI64(numtypei64: NumTypeI64): NumTypeI64;
 
 enum EnumString: String {
     ONE = "hello",
@@ -78,7 +78,7 @@ enum EnumString: String {
     THREE = "good morning"
 }
 
-function NextEnumString(enumString: EnumString): EnumString;
+function nextEnumString(enumString: EnumString): EnumString;
 
 @const
 enum FlagsI8: i8 {

@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 import {getDataMaythrow, maythrow, noReturnBusinessError, noReturnMaythrow} from "@generated/maythrow";
+import {BusinessError} from "@ohos.base";
 import * as System from "std/core/System";
-
-import {BusinessError} from "./@ohos.base.ets"
 
 loadLibrary("ani_maythrow");
 
