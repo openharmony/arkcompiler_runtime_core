@@ -1,6 +1,3 @@
-#22588
-std/core/CollatorTest.ets
-
 #24380
 std/core/IntlDateFormatTest.ets
 
@@ -9,13 +6,11 @@ std/core/SortInternalTestByte.ets
 std/core/SortInternalTestInt.ets
 std/core/SortInternalTestShort.ets
 
-#24618
-std/containers/ArrayTestChecked.ets
-
 #20525
 std/concurrency/AsyncLockTest.ets
-#22500
-std/containers/ArrayTestChecked.ets
+
+#24088
+std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
 
 #25162
 std/math/RoundTest.ets
