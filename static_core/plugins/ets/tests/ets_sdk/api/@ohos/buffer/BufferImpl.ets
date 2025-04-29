@@ -49,6 +49,8 @@ function main(): int {
     suite.addTest("Test transcode", testTranscode)
     suite.addTest("Test Buffer.compare", testBufferCompare)
     suite.addTest("Test Buffer.copy", testBufferCopy)
+    suite.addTest("Test Buffer.copy with params", testBufferCopyWithParams)
+    suite.addTest("Test Buffer.copy with undefined", testBufferCopyWithUndefined)
     suite.addTest("Test entries", testEntries)
     suite.addTest("Test equals", testEquals)
     suite.addTest("Test fill", testFill)
@@ -320,6 +322,24 @@ function testBufferCopy() {
     const buf2 = buffer.alloc(5);
     buf1.copy(buf2);
     assertEQ(buf2.toString('ascii'), 'aaaaa');
+}
+
+function testBufferCopyWithParams() {
+    let b1 = buffer.from("abcdefg")
+    let b2 = buffer.from("1235789")
+    let num = b1.copy(b2, 2,1,3)
+    assertEQ(num, 2)
+    assertEQ(b2.toString(), "12bc789")
+}
+
+function testBufferCopyWithUndefined() {
+    let buf1 = buffer.allocUninitializedFromPool(26);
+    let buf2 = buffer.allocUninitializedFromPool(26).fill('!');
+    for (let i = 0; i < 26; i++) {
+        buf1.writeInt8(i + 97, i);
+    }
+    buf1.copy(buf2, undefined, 1);
+    assertEQ(buf2.toString(), "bcdefghijklmnopqrstuvwxyz!")
 }
 
 function testEntries() {
