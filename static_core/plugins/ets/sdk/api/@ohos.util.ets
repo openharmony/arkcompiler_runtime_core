@@ -1077,5 +1077,15 @@ export namespace util {
         }
 
     }  // class UtilHelper
+
+    /**
+     * Get the hash code of an object.
+     * @param { object } [object] - The object that need to get hash code.
+     * @returns { number } Return a hash code of an object.
+     */
+    export function getHash(obj: object): number {
+        let result: number = obj.$_hashCode();
+        return result;
+    }
 }
 
