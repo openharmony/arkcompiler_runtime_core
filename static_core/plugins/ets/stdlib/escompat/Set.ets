@@ -77,7 +77,7 @@ export class Set<K> implements ReadonlySet<K> {
             const entriesIter = new MappingIterator<K, [K, K]>(it, (element: K): [K, K] => [element, element])
             this.elements = new Map<K, K>(entriesIter)
         } else {
-            const entries = new ((readonly [K, K]) | null | undefined)[elements.length]
+            const entries = new ([K, K] | null | undefined)[elements.length]
             for (let i = 0; i < elements.length; ++i) {
                 entries[i] = [elements[i], elements[i]] as [K, K]
             }
