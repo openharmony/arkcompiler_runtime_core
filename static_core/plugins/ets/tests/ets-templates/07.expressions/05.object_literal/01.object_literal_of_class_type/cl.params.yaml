@@ -50,9 +50,25 @@ cases:
               age: number = 0
           }
       use: |-
-          let a: A = { b: { c: { age: 42, name: "John" }}}
-          assertEQ( a!.b!.c!.name, "John" )
-          assertEQ( a!.b!.c!.age, 42 )
+          let a: A = { b: { c: { age: 42, name: "John" } as C} as B}
+          assertEQ( a.b!.c!.name, "John" )
+          assertEQ( a.b!.c!.age, 42 )
+
+    - decl: |-
+        class A {
+            b?: B
+        }
+        class B {
+            c?: C
+        }
+        class C {
+            name: string = "";
+            age: number = 0
+        }
+      use: |-
+        let a: A = { b: { c: { age: 42, name: "John" } as C} as B}
+        assertEQ( a.b!.c!.name, "John" )
+        assertEQ( a.b!.c!.age, 42 )
 
     - decl: |-
           class A {
