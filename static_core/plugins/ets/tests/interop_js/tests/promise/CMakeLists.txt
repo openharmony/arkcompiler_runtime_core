@@ -106,6 +106,12 @@ panda_ets_interop_js_test(ets_interop_js_test_promise12
     COMPILATION_JS_WITH_CJS_ON
 )
 
+panda_ets_interop_js_test(ets_interop_js_test_await_two
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/await_two.js
+    COMPILATION_JS_WITH_CJS_ON
+)
+
 panda_ets_interop_js_test(ets_interop_js_test_await_promise
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
