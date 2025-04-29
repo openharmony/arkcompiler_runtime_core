@@ -42,6 +42,7 @@ set(SDK_SRCS
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.PlainArray.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.Queue.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.Stack.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.stream.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.TreeMap.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.util.TreeSet.ets"
