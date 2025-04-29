@@ -25,10 +25,15 @@ DEFINE_VALUE(ESCOMPAT_ARRAY_BUFFER_OFFSET, ark::ets::EtsArrayObject<ark::ets::Et
 DEFINE_VALUE(ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET,
              ark::ets::EtsArrayObject<ark::ets::EtsObject>::GetActualLengthOffset())
 
-DEFINE_VALUE(INT8_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatInt8Array::GetBufferOffset())
-DEFINE_VALUE(INT8_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatInt8Array::GetLengthIntOffset())
-DEFINE_VALUE(INT8_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatInt8Array::GetByteOffsetOffset())
-DEFINE_VALUE(INT8_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatInt8Array::GetArrayBufferBackedOffset())
+DEFINE_VALUE(TYPED_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetBufferOffset())
+DEFINE_VALUE(TYPED_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetLengthIntOffset())
+DEFINE_VALUE(TYPED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetByteOffsetOffset())
+DEFINE_VALUE(TYPED_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatTypedArrayBase::GetArrayBufferBackedOffset())
+
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetBufferOffset())
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_LENGTH_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetLengthIntOffset())
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetByteOffsetOffset())
+DEFINE_VALUE(TYPED_UNSIGNED_ARRAY_ARRAY_BUFFER_BACKED_OFFSET, ark::ets::EtsEscompatTypedUArrayBase::GetArrayBufferBackedOffset())
 
 DEFINE_VALUE(ARRAY_BUFFER_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetManagedDataOffset())
 

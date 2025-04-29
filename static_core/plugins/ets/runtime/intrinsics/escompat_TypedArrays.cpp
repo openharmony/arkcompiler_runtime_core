@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
+#include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
 #include "intrinsics.h"
 #include "cross_values.h"
 
@@ -38,7 +39,8 @@ static void *GetNativeData(T *array)
     return arrayBuffer->GetData();
 }
 
-extern "C" void EtsEscompatInt8ArraySetInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsInt val)
+template <typename T>
+static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::ElementType val)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
@@ -50,29 +52,40 @@ extern "C" void EtsEscompatInt8ArraySetInt(ark::ets::EtsEscompatInt8Array *thisA
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
         return;
     }
-    ObjectAccessor::SetPrimitive(data, pos * sizeof(EtsByte) + static_cast<EtsInt>(thisArray->GetByteOffset()),
-                                 static_cast<EtsByte>(val));
+    ObjectAccessor::SetPrimitive(
+        data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()), val);
+}
+
+template <typename T>
+typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
+{
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
+        return 0;
+    }
+
+    if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
+        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
+        return 0;
+    }
+    return ObjectAccessor::GetPrimitive<typename T::ElementType>(
+        data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()));
+}
+
+extern "C" void EtsEscompatInt8ArraySetInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
 }
 
 extern "C" void EtsEscompatInt8ArraySetByte(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsByte val)
 {
-    EtsEscompatInt8ArraySetInt(thisArray, pos, val);
+    EtsEscompatTypedArraySet(thisArray, pos, val);
 }
 
 extern "C" EtsDouble EtsEscompatInt8ArrayGet(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
 {
-    auto *data = GetNativeData(thisArray);
-    if (UNLIKELY(data == nullptr)) {
-        return 0;
-    }
-
-    if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
-        return 0;
-    }
-    return ObjectAccessor::GetPrimitive<EtsByte>(data, pos * sizeof(EtsByte) +
-                                                           static_cast<EtsInt>(thisArray->GetByteOffset()));
+    return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
 template <typename T>
@@ -112,6 +125,21 @@ extern "C" void EtsEscompatInt8ArraySetValuesWithOffset(ark::ets::EtsEscompatInt
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
+extern "C" void EtsEscompatInt16ArraySetInt(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" void EtsEscompatInt16ArraySetShort(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos, EtsShort val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatInt16ArrayGet(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
 extern "C" void EtsEscompatInt16ArraySetValues(ark::ets::EtsEscompatInt16Array *thisArray,
                                                ark::ets::EtsEscompatInt16Array *srcArray)
 {
@@ -122,6 +150,16 @@ extern "C" void EtsEscompatInt16ArraySetValuesWithOffset(ark::ets::EtsEscompatIn
                                                          ark::ets::EtsEscompatInt16Array *srcArray, EtsDouble pos)
 {
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatInt32ArraySetInt(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatInt32ArrayGet(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
 extern "C" void EtsEscompatInt32ArraySetValues(ark::ets::EtsEscompatInt32Array *thisArray,
@@ -136,6 +174,16 @@ extern "C" void EtsEscompatInt32ArraySetValuesWithOffset(ark::ets::EtsEscompatIn
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
+extern "C" void EtsEscompatBigInt64ArraySetLong(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos, EtsLong val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsLong EtsEscompatBigInt64ArrayGet(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
 extern "C" void EtsEscompatBigInt64ArraySetValues(ark::ets::EtsEscompatBigInt64Array *thisArray,
                                                   ark::ets::EtsEscompatBigInt64Array *srcArray)
 {
@@ -146,6 +194,16 @@ extern "C" void EtsEscompatBigInt64ArraySetValuesWithOffset(ark::ets::EtsEscompa
                                                             ark::ets::EtsEscompatBigInt64Array *srcArray, EtsDouble pos)
 {
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatFloat32ArraySetFloat(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos, EtsFloat val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatFloat32ArrayGet(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
 extern "C" void EtsEscompatFloat32ArraySetValues(ark::ets::EtsEscompatFloat32Array *thisArray,
@@ -160,6 +218,17 @@ extern "C" void EtsEscompatFloat32ArraySetValuesWithOffset(ark::ets::EtsEscompat
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
 
+extern "C" void EtsEscompatFloat64ArraySetDouble(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos,
+                                                 EtsDouble val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatFloat64ArrayGet(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
 extern "C" void EtsEscompatFloat64ArraySetValues(ark::ets::EtsEscompatFloat64Array *thisArray,
                                                  ark::ets::EtsEscompatFloat64Array *srcArray)
 {
@@ -168,6 +237,135 @@ extern "C" void EtsEscompatFloat64ArraySetValues(ark::ets::EtsEscompatFloat64Arr
 
 extern "C" void EtsEscompatFloat64ArraySetValuesWithOffset(ark::ets::EtsEscompatFloat64Array *thisArray,
                                                            ark::ets::EtsEscompatFloat64Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatUInt8ClampedArraySetInt(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos,
+                                                   EtsInt val)
+{
+    if (val > ark::ets::EtsEscompatUInt8ClampedArray::MAX) {
+        val = ark::ets::EtsEscompatUInt8ClampedArray::MAX;
+    } else if (val < ark::ets::EtsEscompatUInt8ClampedArray::MIN) {
+        val = ark::ets::EtsEscompatUInt8ClampedArray::MIN;
+    }
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatUInt8ClampedArrayGet(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" void EtsEscompatUInt8ClampedArraySetValues(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
+                                                      ark::ets::EtsEscompatUInt8ClampedArray *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatUInt8ClampedArraySetValuesWithOffset(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
+                                                                ark::ets::EtsEscompatUInt8ClampedArray *srcArray,
+                                                                EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatUInt8ArraySetInt(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatUInt8ArrayGet(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" void EtsEscompatUInt8ArraySetValues(ark::ets::EtsEscompatUInt8Array *thisArray,
+                                               ark::ets::EtsEscompatUInt8Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatUInt8ArraySetValuesWithOffset(ark::ets::EtsEscompatUInt8Array *thisArray,
+                                                         ark::ets::EtsEscompatUInt8Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatUInt16ArraySetInt(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatUInt16ArrayGet(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" void EtsEscompatUInt16ArraySetValues(ark::ets::EtsEscompatUInt16Array *thisArray,
+                                                ark::ets::EtsEscompatUInt16Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatUInt16ArraySetValuesWithOffset(ark::ets::EtsEscompatUInt16Array *thisArray,
+                                                          ark::ets::EtsEscompatUInt16Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatUInt32ArraySetInt(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" void EtsEscompatUInt32ArraySetLong(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos, EtsLong val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsDouble EtsEscompatUInt32ArrayGet(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" void EtsEscompatUInt32ArraySetValues(ark::ets::EtsEscompatUInt32Array *thisArray,
+                                                ark::ets::EtsEscompatUInt32Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatUInt32ArraySetValuesWithOffset(ark::ets::EtsEscompatUInt32Array *thisArray,
+                                                          ark::ets::EtsEscompatUInt32Array *srcArray, EtsDouble pos)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
+}
+
+extern "C" void EtsEscompatBigUInt64ArraySetInt(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos, EtsInt val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" void EtsEscompatBigUInt64ArraySetLong(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos,
+                                                 EtsLong val)
+{
+    EtsEscompatTypedArraySet(thisArray, pos, val);
+}
+
+extern "C" EtsLong EtsEscompatBigUInt64ArrayGet(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" void EtsEscompatBigUInt64ArraySetValues(ark::ets::EtsEscompatBigUInt64Array *thisArray,
+                                                   ark::ets::EtsEscompatBigUInt64Array *srcArray)
+{
+    EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, 0);
+}
+
+extern "C" void EtsEscompatBigUInt64ArraySetValuesWithOffset(ark::ets::EtsEscompatBigUInt64Array *thisArray,
+                                                             ark::ets::EtsEscompatBigUInt64Array *srcArray,
+                                                             EtsDouble pos)
 {
     EtsEscompatTypedArraySetValuesImpl(thisArray, srcArray, static_cast<EtsInt>(pos));
 }
