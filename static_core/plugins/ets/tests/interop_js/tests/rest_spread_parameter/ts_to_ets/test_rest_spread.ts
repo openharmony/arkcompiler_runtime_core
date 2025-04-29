@@ -19,13 +19,13 @@ function compareArraysAreEqual<T>(arr1: T[], arr2: T[]): boolean {
     if (arr1.length !== arr2.length) {
         return false;
     }
-    for(let i = 0; i < arr1.length; i++) {
+    for (let i = 0; i < arr1.length; i++) {
         if (Array.isArray(arr1[i]) && Array.isArray(arr2[i])) {
             if (!compareArraysAreEqual(arr1[i], arr2[i])) {
                 return false;
             }
         } else {
-            if(arr1[i] !== arr2[i]) {
+            if (arr1[i] !== arr2[i]) {
                 return false;
             }
         }
