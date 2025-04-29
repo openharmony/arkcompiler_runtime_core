@@ -200,3 +200,25 @@ cases:
               return
           }
           assertTrue(false)
+
+    - decl: |-
+          type ON = Object|null
+      use: |-
+          // ensure verify succeed
+          const r1 = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
+                  resolve("Async Data")
+              }
+          ).then(
+              (data:string) => console.log(data)
+          );
+          await r1;
+          const r2 = new Promise<string>(
+              (resolve: (p: string) => void, reject: (p: ON) => void): void => {
+                  resolve("Async Data")
+              }
+          ).then(
+              (data:string) => { console.log(data) }
+          );
+          await r2;
+          assertTrue(true);
