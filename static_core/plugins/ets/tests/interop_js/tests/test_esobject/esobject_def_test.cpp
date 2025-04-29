@@ -245,12 +245,20 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_type_of)
 TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_invoke)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoParam"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoParamThrowNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoParamThrowString"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoReturn"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeReturnNull"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeReturnUndefined"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethodThrowNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethodThrowString"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeHasParam"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeHasParamThrowNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeHasParamThrowString"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethodHasParam"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethodHasParamThrowNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethodHasParamThrowString"));
 }
 
 TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_iterator)
@@ -272,6 +280,8 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_instanceOf)
 TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_instaniate)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniate"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniateThrowNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniateThrowString"));
 }
 
 }  // namespace ark::ets::interop::js::testing

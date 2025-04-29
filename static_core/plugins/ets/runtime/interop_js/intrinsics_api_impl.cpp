@@ -621,9 +621,13 @@ JSValue *JSRuntimeInvoke(JSValue *recv, JSValue *func, EtsArray *args)
         realArgs.push_back(Convertor::Wrap(env, value));
     }
     napi_value retVal;
-    NAPI_CHECK_FATAL(napi_call_function(env, JSConvertJSValue::WrapWithNullCheck(env, recv),
-                                        JSConvertJSValue::WrapWithNullCheck(env, func), realArgs.size(),
-                                        realArgs.data(), &retVal));
+    auto jsStatus =
+        napi_call_function(env, JSConvertJSValue::WrapWithNullCheck(env, recv),
+                           JSConvertJSValue::WrapWithNullCheck(env, func), realArgs.size(), realArgs.data(), &retVal);
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+        return nullptr;
+    }
     return JSConvertJSValue::UnwrapWithNullCheck(ctx, env, retVal).value();
 }
 
@@ -650,8 +654,12 @@ JSValue *JSRuntimeInstantiate(JSValue *callable, EtsArray *args)
         realArgs.push_back(Convertor::Wrap(env, value));
     }
     napi_value retVal;
-    NAPI_CHECK_FATAL(napi_new_instance(env, JSConvertJSValue::WrapWithNullCheck(env, callable), realArgs.size(),
-                                       realArgs.data(), &retVal));
+    auto jsStatus = napi_new_instance(env, JSConvertJSValue::WrapWithNullCheck(env, callable), realArgs.size(),
+                                      realArgs.data(), &retVal);
+    if (jsStatus != napi_ok) {
+        ctx->ForwardJSException(coro);
+        return nullptr;
+    }
     return JSConvertJSValue::UnwrapWithNullCheck(ctx, env, retVal).value();
 }
 
