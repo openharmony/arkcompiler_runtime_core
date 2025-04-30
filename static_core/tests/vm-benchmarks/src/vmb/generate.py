@@ -346,7 +346,7 @@ def generate_mode(mode: str, lang: str,
         for variant in generator.process_source_file(src.full, lang_impl):
             bu = generator.add_bu(bus, template, lang_impl, src,
                                   variant, settings, out_ext)
-            if mode == 'bu_a2j' and lang == 'ets':
+            if mode == 'bu_s2d' and lang == 'ets':
                 create_interop_runner(generator, variant, bu, arkjs_suffix=arkjs_suffix)
     return tags_workaround(bus, mode)
 
@@ -382,20 +382,20 @@ def generate_main_interop(generator: BenchGenerator, arkjs_suffix: str = '') -> 
     if not generator:
         log.warning("Generator for interop is not defined, stop")
         return bus  # empty
-    # Note a2a and a2j templates are like in arkts_host
-    bus += generate_mode('bu_a2a', 'ets', generator, settings=GenSettings(src={'.ets'},
+    # Note s2s and s2d templates are like in arkts_host
+    bus += generate_mode('bu_s2s', 'ets', generator, settings=GenSettings(src={'.ets'},
                          template='TemplateInteropA2A.tpl_ets',
                          out='.ets',
                          link_to_src=False))
-    bus += generate_mode('bu_a2j', 'ets', generator, settings=GenSettings(src={'.ets'},
+    bus += generate_mode('bu_s2d', 'ets', generator, settings=GenSettings(src={'.ets'},
                          template='TemplateInteropA2A.tpl_ets',
                          out='.ets',
                          link_to_src=False), arkjs_suffix=arkjs_suffix)
-    bus += generate_mode('bu_j2a', 'js', generator, settings=GenSettings(src={'.js'},
+    bus += generate_mode('bu_d2s', 'js', generator, settings=GenSettings(src={'.js'},
                          template='TemplateInteropJ2A' + arkjs_suffix + '.tpl_js',
                          out='.js',
                          link_to_src=False))
-    bus += generate_mode('bu_j2j', 'js', generator, settings=GenSettings(src={'.js'},
+    bus += generate_mode('bu_d2d', 'js', generator, settings=GenSettings(src={'.js'},
                          template='Template' + ('.tpl_js' if len(arkjs_suffix) == 0 else '.mjs'),
                          out='.js',
                          link_to_src=False))

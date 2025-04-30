@@ -3,11 +3,11 @@
 PANDA and VMB are built and installed per [vm-benchmarks/interop.readme.md](../../interop.readme.md).
 
 The following conventions must be followed:
-- Bench Unit directories must follow naming convention depending on interop mode: `bu_a2a`, `bu_a2j`, `bu_j2a`, `bu_j2j`.
+- Bench Unit directories must follow naming convention depending on interop mode: `bu_s2s`, `bu_s2d`, `bu_d2s`, `bu_d2d`.
 
 - Bench Unit doclets for respective mode must have tags with same names as of its directory.
 
-- In `bu_a2j` mode benchmark methods must have name `test()`.
+- In `bu_s2d` mode benchmark methods must have name `test()`.
 
 If needed, see also [vm-benchmarks/readme.md](../../readme.md) for more details on how to use and configure VMB benchmarks.
 
@@ -40,10 +40,10 @@ env VMB_BENCH_UNIT_ITERATIONS=1 vmb all -p arkts_node_interop_host --aot-skip-li
 
 Test           |   Time   | CodeSize |   RSS    | Status  |
 ===========================================================
-BenchA2a_test | 4.02e-01 | 1.52e+05 | 5.97e+04 | Passed  |
-BenchA2j_test | 4.92e+08 | 1.52e+05 | 1.14e+05 | Passed  |
-benchJ2a_test | 2.86e+04 | 1.46e+05 | 4.52e+05 | Passed  |
-benchJ2j_test | 4.58e-01 | 0.00e+00 | 4.71e+04 | Passed  |
+BenchS2s_test | 4.02e-01 | 1.52e+05 | 5.97e+04 | Passed  |
+BenchS2d_test | 4.92e+08 | 1.52e+05 | 1.14e+05 | Passed  |
+benchD2s_test | 2.86e+04 | 1.46e+05 | 4.52e+05 | Passed  |
+benchD2s_test | 4.58e-01 | 0.00e+00 | 4.71e+04 | Passed  |
 ```
 
 # How to run for ArkjsVM

@@ -65,7 +65,7 @@ class Tool(ToolBase):
 
         js = bu.src('.js')
         if not js.is_file():
-            # for bu_a2j
+            # for bu_s2d
             js = bu.path.joinpath('InteropRunner.js')
         test_zip = bu.src('.zip')
         formatted_cmd = self.cmd.format(test_zip=test_zip,
