@@ -22,6 +22,13 @@
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 
+// NOLINTBEGIN(readability-identifier-naming)
+// CC-OFF(G.FMT.07) project code style
+napi_status __attribute__((weak)) napi_is_map(napi_env env, napi_value value, bool *result);
+// CC-OFF(G.FMT.07) project code style
+napi_status __attribute__((weak)) napi_is_set(napi_env env, napi_value value, bool *result);
+// NOLINTEND(readability-identifier-naming)
+
 namespace ark::ets::interop::js {
 
 // JSRefConvert adapter for builtin reference types
@@ -218,6 +225,20 @@ private:
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
     }
 
+    void RegisterMap()
+    {
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
+            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+        wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
+    }
+
+    void RegisterSet()
+    {
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
+            {utf::CStringAsMutf8("<ctor>"), std::make_pair("Lstd/core/Object;:V", 2)}};
+        wSet_ = RegisterClassWithLeafMatcher(descriptors::SET, "Set", &W_SET_OVERLOADS);
+    }
+
     EtsObject *MArray(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
     {
         napi_env env = ctxx->GetJSEnv();
@@ -229,6 +250,32 @@ private:
             }
         }
         return wArray_->CreateJSBuiltinProxy(ctxx, jsValue);
+    }
+
+    EtsObject *MMap(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
+    {
+        napi_env env = ctxx->GetJSEnv();
+        bool isInstanceof;
+        if (!verified) {
+            NAPI_CHECK_FATAL(napi_is_map(env, jsValue, &isInstanceof));
+            if (!isInstanceof) {
+                return NotAssignable("Map");
+            }
+        }
+        return wMap_->CreateJSBuiltinProxy(ctxx, jsValue);
+    }
+
+    EtsObject *MSet(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
+    {
+        napi_env env = ctxx->GetJSEnv();
+        bool isInstanceof;
+        if (!verified) {
+            NAPI_CHECK_FATAL(napi_is_set(env, jsValue, &isInstanceof));
+            if (!isInstanceof) {
+                return NotAssignable("Set");
+            }
+        }
+        return wSet_->CreateJSBuiltinProxy(ctxx, jsValue);
     }
 
     EtsObject *MDate(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
@@ -290,6 +337,14 @@ private:
         NAPI_CHECK_FATAL(napi_is_typedarray(env, jsValue, &isInstanceof));
         if (isInstanceof) {
             NotImplemented("TypedArray");
+        }
+        NAPI_CHECK_FATAL(napi_is_map(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            return MMap(ctxx, jsValue);
+        }
+        NAPI_CHECK_FATAL(napi_is_set(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            return MSet(ctxx, jsValue);
         }
         NAPI_CHECK_FATAL(napi_is_promise(env, jsValue, &isInstanceof));
         if (isInstanceof) {
@@ -371,6 +426,13 @@ public:
         RegisterExceptions();
 
         wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date");
+        // #IC4UO2
+        RegisterClassWithLeafMatcher(descriptors::MAPENTRY, nullptr);
+        RegisterClassWithLeafMatcher(descriptors::MAPITERATOR, nullptr);
+        RegisterClassWithLeafMatcher(descriptors::EMPTYMAPITERATOR, nullptr);
+
+        RegisterMap();
+        RegisterSet();
 
         RegisterClassWithLeafMatcher(descriptors::ARRAY_ENTRIES_ITERATOR_T, nullptr);
 
@@ -413,6 +475,8 @@ private:
     ets_proxy::EtsClassWrapper *wObject_ {};
     ets_proxy::EtsClassWrapper *wArray_ {};
     ets_proxy::EtsClassWrapper *wDate_ {};
+    ets_proxy::EtsClassWrapper *wMap_ {};
+    ets_proxy::EtsClassWrapper *wSet_ {};
 
     napi_ref ctorTypeError_ {nullptr};
     napi_ref ctorRangeError_ {nullptr};

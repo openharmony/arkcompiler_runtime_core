@@ -193,6 +193,11 @@ static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescom
 static constexpr std::string_view ITERATOR_RESULT                      = "Lescompat/IteratorResult;";
 static constexpr std::string_view ARRAY_KEYS_ITERATOR                  = "Lescompat/ArrayKeysIterator;";
 static constexpr std::string_view ARRAY_VALUES_ITERATOR_T              = "Lescompat/ArrayValuesIterator_T;";
+static constexpr std::string_view MAP                                  = "Lescompat/Map;";
+static constexpr std::string_view MAPENTRY                             = "Lescompat/MapEntry;";
+static constexpr std::string_view MAPITERATOR                          = "Lescompat/MapIterator;";
+static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescompat/EmptyMapIterator;";
+static constexpr std::string_view SET                                  = "Lescompat/Set;";
 
 }  // namespace class_descriptors
 
