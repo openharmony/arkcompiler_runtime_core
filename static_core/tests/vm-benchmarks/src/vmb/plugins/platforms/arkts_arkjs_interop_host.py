@@ -19,21 +19,21 @@
 import logging
 from pathlib import Path
 from typing import List, Optional
-from vmb.helpers import ensure_env_var
 from vmb.platform import PlatformBase
 from vmb.target import Target
 from vmb.unit import BenchUnit
 from vmb.cli import Args
 from vmb.gensettings import GenSettings
-
+from vmb.tool import ToolBase
+from vmb.helpers import force_link
 log = logging.getLogger('vmb')
 
 
 class Platform(PlatformBase):
 
     def __init__(self, args: Args) -> None:
-        ensure_env_var('PANDA_BUILD')
         super().__init__(args)
+        self.panda_root = ToolBase.ensure_dir_env('PANDA_BUILD')
         self.es2panda = self.tools_get('es2panda')
         self.arkjs_interop = self.tools_get('arkjs_interop')
         self.ark = self.tools_get('ark')
@@ -71,22 +71,19 @@ class Platform(PlatformBase):
             log.debug('Bench unit does not have tags, looking for freestyle benchmarks to run')
             self.run_generated(bu)
             return
-
         if not bu.doclet_src:
             raise ValueError(f'Sources for unit {bu.name} are not set')
-        if 'bu_s2s' in bu.tags:
+        if 'bu_s2s' in bu.tags:  # this has nothing to do with interop
             self.es2panda(bu)
             self.ark(bu)
-            return
-        if 'bu_s2d' in bu.tags:
+        elif 'bu_s2d' in bu.tags:
             self.establish_arkjs_module()
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.js {bu.path}')
             self.es2panda(bu)
             self.es2abc('InteropRunner', bu)
             self.es2abc('test_import', bu)
             self.run_generated(bu)
-            return
-        if 'bu_d2d' in bu.tags:
+        elif 'bu_d2d' in bu.tags:
             self.establish_arkjs_module()
             self.sh.run(f'cp -f -n {str(bu.doclet_src.parent)}/*.js {bu.path}')
             self.es2abc(str(bu.src('.js').stem), bu)
@@ -94,8 +91,7 @@ class Platform(PlatformBase):
             if self.dry_run_stop(bu):
                 return
             self.arkjs_interop(bu)
-            return
-        if 'bu_d2s' in bu.tags:
+        elif 'bu_d2s' in bu.tags:
             self.establish_arkjs_module()
             self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.ets {bu.path}')
             bu.src_for_es2panda_override = Path(f'{bu.path}/*.ets')  # wildcard here assumes single ets file
@@ -104,26 +100,30 @@ class Platform(PlatformBase):
             if self.dry_run_stop(bu):
                 return
             self.arkjs_interop(bu)
-            return
-
-        log.warning('Valid generated interop mode not found in tags: %s',
-                    ','.join(bu.tags))
-        return
+        else:
+            log.warning('Valid generated interop mode not found in tags: %s',
+                        ','.join(bu.tags))
 
     def establish_arkjs_module(self) -> None:
-        self.sh.run('mkdir -p module')
-        self.sh.run('ln -sf $PANDA_BUILD/lib/module/ets_interop_js_napi.so ' +
-                    '$PANDA_BUILD/lib/interop_js/libinterop_test_helper.so' +
-                    ' -t module')
+        # ideally this should be inside `generated/libs` and cd on exec
+        module = Path.cwd().joinpath('module')
+        module.mkdir(parents=True, exist_ok=True)
+        for p in (Path(self.panda_root).joinpath('lib/module/ets_interop_js_napi.so'),
+                  Path(self.panda_root).joinpath('lib/interop_js/libinterop_test_helper.so')):
+            if not p.exists():
+                raise RuntimeError(f'Lib `{str(p)}` not found!')
+            force_link(module.joinpath(p.name), p)
 
     def es2abc(self, js_file_name: str, bu: BenchUnit) -> None:
         js_file = bu.path.joinpath(js_file_name + '.js')
         if not js_file.is_file():
-            log.debug(f'skip es2abc for missing file {str(js_file)}')
+            log.debug('skip es2abc for missing file %s', str(js_file))
             return
         path: str = str(bu.path)
-        self.sh.run('$PANDA_BUILD/bin/interop_js/es2abc --module --merge-abc ' +
-                    path + '/' + js_file_name + '.js' + ' --output=' + path + '/' + js_file_name + '.abc')
+        # using es2abc copied to panda root
+        self.sh.run(f'{self.panda_root}/bin/interop_js/es2abc --module --merge-abc '
+                    f'{path}/{js_file_name}.js '
+                    f'--output={path}/{js_file_name}.abc')
 
     def make_classes_abc(self, bu: BenchUnit) -> None:
         abc = bu.src('.abc')
