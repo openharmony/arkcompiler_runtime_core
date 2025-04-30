@@ -28,6 +28,7 @@ export declare class ESObjectPropertyDescriptor {
 }
 
 export final class ESObject {
+    // #IC51G4: this.eo should be able to storage anything
     private eo: JSValue
     private isStatic: boolean
 
@@ -104,23 +105,23 @@ export final class ESObject {
     }
 
     public isBoolean(): boolean {
-        return JSRuntime.typeOf(this.eo) == "boolean";
+        return this.typeOf() == "boolean";
     }
 
     public isString(): boolean {
-        return JSRuntime.typeOf(this.eo) == "string";
+        return this.typeOf() == "string";
     }
 
     public isNumber(): boolean {
-        return JSRuntime.typeOf(this.eo) == "number";
+        return this.typeOf() == "number";
     }
 
     public isBigInt(): boolean {
-        return JSRuntime.typeOf(this.eo) == "bigint";
+        return this.typeOf() == "bigint";
     }
 
     public isUndefined(): boolean {
-        return JSRuntime.typeOf(this.eo) == "undefined";
+        return this.typeOf() == "undefined";
     }
 
     public isNull(): boolean {
@@ -147,7 +148,7 @@ export final class ESObject {
     }
 
     public isFunction(): boolean {
-        return JSRuntime.typeOf(this.eo) == "function";
+        return this.typeOf() == "function";
     }
 
     public toBoolean(): boolean {
@@ -323,7 +324,7 @@ export final class ESObject {
                 argJSVal[i] = ESObject.wrap(args[i]).eo;
             }
         }
-        return new ESObject(JSRuntime.invoke(ESObject.getGlobal().eo, this.eo, ...argJSVal));
+        return new ESObject(JSRuntime.invoke(ESObject.Undefined.eo, this.eo, ...argJSVal));
     }
 
     internal invokeWithRecv(recv: ESObject, ...args: StaticOrESObject[]): ESObject {
@@ -394,9 +395,9 @@ export final class ESObject {
             || (type) instanceof FloatType
             || (type) instanceof DoubleType
         ) {
-            return JSRuntime.typeOf(this.eo) == "number";
+            return this.typeOf() == "number";
         } else if (type.isPrimitive()) {
-            return JSRuntime.typeOf(this.eo) == type.getLiteral().toLowerCase();
+            return this.typeOf() == type.getLiteral().toLowerCase();
         } else if (type instanceof ClassType) {
             return JSRuntime.instanceOfStaticType(this.eo, type);
         }
@@ -404,6 +405,9 @@ export final class ESObject {
     }
 
     public typeOf(): String {
+        if (this.eo == undefined) {
+            return "undefined";
+        }
         return JSRuntime.typeOf(this.eo);
     }
 
