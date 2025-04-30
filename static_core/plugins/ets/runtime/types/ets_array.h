@@ -20,7 +20,6 @@
 #include "runtime/include/coretypes/array.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
-#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/ets_vm.h"

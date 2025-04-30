@@ -387,10 +387,13 @@ function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
 endfunction()
 
 function(run_int_jit_aot_ets_code_foreach_gc PARENT_TARGET ETS_SRC WORK_DIR TARGET)
+    set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
+    cmake_parse_arguments(ARG "" "" "${multiValueArgs}" ${ARGN})
+
     set(gc_types g1-gc gen-gc stw)
 
     foreach(gc_type ${gc_types})
-        set(extra_options RUNTIME_EXTRA_OPTIONS "--gc-type=${gc_type}")
+        set(extra_options RUNTIME_EXTRA_OPTIONS "--gc-type=${gc_type};${ARG_RUNTIME_EXTRA_OPTIONS}")
         run_int_jit_aot_ets_code(${ETS_SRC} ${WORK_DIR}-${gc_type} ${TARGET}-${gc_type} ${extra_options})
         add_dependencies(${PARENT_TARGET} ${TARGET}-${gc_type})
     endforeach()

@@ -17,7 +17,6 @@
 #define COMPILER_OPTIMIZER_IR_INST_H
 
 #include <vector>
-#include <iostream>
 #include "constants.h"
 #include "datatype.h"
 

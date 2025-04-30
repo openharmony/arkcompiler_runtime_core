@@ -30,6 +30,8 @@ public:
 
     static Class *GetBoxClass(EtsCoroutine *coro);
 
+    static EtsClass *GetEtsBoxClass(EtsCoroutine *coro);
+
     static constexpr EtsBoxPrimitive *FromCoreType(EtsObject *obj)
     {
         ASSERT(obj->GetClass()->IsBoxed());
@@ -48,6 +50,11 @@ public:
 
     NO_COPY_SEMANTIC(EtsBoxPrimitive);
     NO_MOVE_SEMANTIC(EtsBoxPrimitive);
+
+    static constexpr size_t GetValueOffset()
+    {
+        return MEMBER_OFFSET(EtsBoxPrimitive, value_);
+    }
 
 private:
     T value_;

@@ -181,6 +181,8 @@ public:
     virtual void EncodeMulOverflow(LabelHolder::LabelId id, Reg dst, Reg src0, Reg src1, Condition cc);
     virtual void EncodeNegOverflowAndZero(LabelHolder::LabelId id, Reg dst, Reg src);
     virtual void EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow);
+    virtual void EncodeJsDoubleToCharCast(Reg dst, Reg src);
+    virtual void EncodeJsDoubleToCharCast(Reg dst, Reg src, Reg tmp, uint32_t failureResult);
     virtual void EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned);
     virtual void EncodeCastToBool(Reg dst, Reg src);
     virtual void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1);

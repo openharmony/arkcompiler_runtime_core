@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -532,6 +532,38 @@ void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src
     enc->EncodeSelect({tmp, startIndex, zreg, startIndex, Imm(0), Condition::GE});
     enc->EncodeAdd(dst, dst, tmp);
     enc->BindLabel(charNotFoundLabel);
+}
+
+void Codegen::CreateStringFromCharCode(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(inst->GetInputsCount() == 2U && inst->RequireState());
+    auto array = src[FIRST_OPERAND];
+    auto getEntryId = [this, inst]() {
+        switch (inst->GetIntrinsicId()) {
+            case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE:
+                return GetRuntime()->IsCompressedStringsEnabled()
+                           ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB_COMPRESSED
+                           : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB;
+            case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE:
+                return GetRuntime()->IsCompressedStringsEnabled()
+                           ? EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB_COMPRESSED
+                           : EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+            default:
+                UNREACHABLE();
+        }
+    };
+    if (GetGraph()->IsAotMode()) {
+        ScopedTmpReg klassReg(GetEncoder());
+        GetEncoder()->EncodeLdr(
+            klassReg, false,
+            MemRef(ThreadReg(), static_cast<ssize_t>(GetRuntime()->GetStringClassPointerTlsOffset(GetArch()))));
+        CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassReg);
+    } else {
+        auto klassImm =
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr)));
+        CallFastPath(inst, getEntryId(), dst, RegMask::GetZeroMask(), array, klassImm);
+    }
 }
 
 void Codegen::CreateStringRepeat([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)

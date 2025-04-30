@@ -20,6 +20,7 @@ set(intrinsics_tests
     string_length
     string_isempty
     string_from_string
+    string_from_char_code
     string_from_chars
     string_substring
     string_getchars
@@ -48,6 +49,9 @@ set(intrinsics_tests
 if (NOT PANDA_TARGET_ARM32)
     # need coroutine support
     list(APPEND intrinsics_tests to_string_cache)
+
+    # need support for the 'escape' function
+    list(APPEND intrinsics_tests string_from_char_code_escape)
 endif()
 
 set(intrinsics_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -67,8 +71,14 @@ foreach(test ${intrinsics_tests})
         set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-enable-osr=false")
     endif()
 
+    # enable heap-verifier to check the TLB cleanup before going to the slow path
+    if ("${test}" STREQUAL "string_from_char_code")
+        set(extra_options RUNTIME_EXTRA_OPTIONS "--heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post")
+    endif()
+
     if ("${test}" STREQUAL "stringbuilder" OR
-        "${test}" STREQUAL "string_compare_to")
+        "${test}" STREQUAL "string_compare_to" OR
+        "${test}" STREQUAL "string_from_char_code")
         run_int_jit_aot_ets_code_foreach_gc(ets_test_suite_intrinsics ${test_in} ${test_out_dir} ${target})
     else()
         run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})

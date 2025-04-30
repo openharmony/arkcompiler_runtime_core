@@ -1070,7 +1070,6 @@ void Amd64Encoder::EncodeCastToBool(Reg dst, Reg src)
 void Amd64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow)
 {
     ASSERT(IsLabelValid(slow));
-    ASSERT(IsJsNumberCast());
     ASSERT(src.IsFloat() && dst.IsScalar());
 
     CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
@@ -1090,6 +1089,28 @@ void Amd64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::Labe
     GetMasm()->jo(*slowLabel);
 
     GetMasm()->bind(end);
+}
+
+void Amd64Encoder::EncodeJsDoubleToCharCast(Reg dst, Reg src, Reg tmp, uint32_t failureResult)
+{
+    ASSERT(src.IsFloat() && dst.IsScalar());
+
+    CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+
+    // infinite and big numbers will overflow here to INT64_MIN. If src is NaN, cvttsd2si itself returns zero.
+    GetMasm()->cvttsd2si(ArchReg(dst, DOUBLE_WORD_SIZE), ArchVReg(src));
+    // save the result to tmp
+    GetMasm()->mov(ArchReg(tmp, DOUBLE_WORD_SIZE), ArchReg(dst, DOUBLE_WORD_SIZE));
+    // 'and' the result with 0xffff
+    constexpr uint32_t UTF16_CHAR_MASK = 0xffff;
+    GetMasm()->and_(ArchReg(dst), asmjit::imm(UTF16_CHAR_MASK));
+    // check INT64_MIN
+    GetMasm()->cmp(ArchReg(tmp, DOUBLE_WORD_SIZE), asmjit::imm(1));
+    // 'mov' never affects the flags
+    GetMasm()->mov(ArchReg(tmp, DOUBLE_WORD_SIZE), failureResult);
+    // ... and we may move conditionally the failureResult into dst for overflow only
+    GetMasm()->cmovo(ArchReg(dst), ArchReg(tmp));
 }
 
 void Amd64Encoder::EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned)

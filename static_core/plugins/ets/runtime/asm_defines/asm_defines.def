@@ -39,4 +39,6 @@ DEFINE_VALUE(ARRAY_BUFFER_DATA_OFFSET, ark::ets::EtsEscompatArrayBuffer::GetMana
 
 DEFINE_VALUE(SHARED_ARRAY_BUFFER_SHARED_MEMORY_OFFSET, ark::ets::EtsEscompatSharedArrayBuffer::GetSharedMemoryOffset())
 DEFINE_VALUE(SHARED_MEMORY_DATA_OFFSET, ark::ets::EtsEscompatSharedMemory::GetDataOffset())
+
+DEFINE_VALUE(ETS_BOX_PRIMITIVE_VALUE_OFFSET, ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::GetValueOffset())
 // NOLINTEND(readability-identifier-naming)

@@ -237,6 +237,8 @@ public:
 
     void EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned) override;
     void EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow) override;
+    void EncodeJsDoubleToCharCast(Reg dst, Reg src) override;
+    void EncodeJsDoubleToCharCast(Reg dst, Reg src, Reg tmp, uint32_t failureResult) override;
     void EncodeCastToBool(Reg dst, Reg src) override;
 
     void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1) override;

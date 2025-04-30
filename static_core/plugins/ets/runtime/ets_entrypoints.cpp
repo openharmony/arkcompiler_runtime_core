@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
@@ -470,6 +471,17 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
 
     HandlePendingException();
     UNREACHABLE();
+}
+
+extern "C" coretypes::String *CreateStringFromCharCodeEntrypoint(ObjectHeader *array)
+{
+    auto *charCodes = EtsBoxedDoubleArray::FromEtsObject(EtsObject::FromCoreType(array));
+    return EtsString::CreateNewStringFromCharCode(charCodes->GetData())->GetCoreType();
+}
+
+extern "C" coretypes::String *CreateStringFromCharCodeSingleEntrypoint(uint64_t charCode)
+{
+    return EtsString::CreateNewStringFromCharCode(bit_cast<double>(charCode))->GetCoreType();
 }
 
 }  // namespace ark::ets

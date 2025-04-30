@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -275,9 +275,19 @@ private:
         "StringHashCode",            // LLVM-15 generates non-optimal code, MAdd cost is not accurate.
         "StringHashCodeCompressed",  //
     };
+
+    // The enumeration of functions cannot be compiled with LLVM because the LLVM backend doesn't support
+    // the llvm::Intrinsic::aarch64_fjcvtzs intrinsic lowering yet.
+    static constexpr std::array SKIPPED_FASTPATHS_JSCVT = {
+        "CreateStringFromCharCodeTlab",
+        "CreateStringFromCharCodeTlabCompressed",
+        "CreateStringFromCharCodeSingleTlab",
+        "CreateStringFromCharCodeSingleTlabCompressed",
+    };
 #endif  // PANDA_LLVM_FASTPATH
 #endif  // PANDA_LLVM_IRTOC
 };
+
 }  // namespace ark::irtoc
 
 #endif  // PANDA_FUNCTION_H

@@ -1225,6 +1225,30 @@ intrinsics:
     codegen_func: CreateStringEndsWith
     llvm_codegen_func: EmitStringEndsWith
 
+  - name: StdCoreStringFromCharCode
+    space: ets
+    class_name: std.core.String
+    method_name: fromCharCode
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ escompat.Array ]
+    impl: ark::ets::intrinsics::StdCoreStringFromCharCode
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateStringFromCharCode
+    llvm_codegen_func: EmitStringFromCharCode
+
+  - name: StdCoreStringFromCharCodeSingle
+    space: ets
+    class_name: std.core.String
+    method_name: fromCharCode
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdCoreStringFromCharCodeSingle
+    peephole_func: PeepholeStringFromCharCodeSingle
+
   - name: StdCoreStringRepeat
     space: ets
     class_name: std.core.String

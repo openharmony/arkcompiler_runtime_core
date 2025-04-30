@@ -1066,6 +1066,40 @@ bool LLVMIrConstructor::EmitFround(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitJsCastDoubleToChar([[maybe_unused]] Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT_DO(!g_options.IsCpuFeatureEnabled(CpuFeature::JSCVT),
+              std::cerr << "The LLVM backend doesn't support the aarch64_fjcvtzs intrinsic yet." << std::endl);
+    llvm::Value *input = GetInputValue(inst, 0);
+    auto sourceType = input->getType();
+    ASSERT_DO(sourceType->isDoubleTy(), std::cerr << "Unexpected source type: " << GetTypeName(sourceType)
+                                                  << ". Should be a double." << std::endl);
+    auto targetType = inst->GetType();
+    ASSERT_DO(targetType == DataType::UINT32,
+              std::cerr << "Unexpected target type: " << targetType << ". Should be a uint32_t." << std::endl);
+
+    // infinite and big numbers will overflow here to INT64_MIN or INT64_MAX, but NaN casts to 0
+    auto *doubleToInt =
+        builder_.CreateIntrinsic(llvm::Intrinsic::fptosi_sat, {builder_.getInt64Ty(), sourceType}, {input}, nullptr);
+
+    auto *int64min = builder_.CreateICmpEQ(doubleToInt, builder_.getInt64(std::numeric_limits<int64_t>::min()));
+    auto *int64max = builder_.CreateICmpEQ(doubleToInt, builder_.getInt64(std::numeric_limits<int64_t>::max()));
+    auto *overflow = builder_.CreateLogicalOr(int64min, int64max);
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr uint64_t UTF16_CHAR_MASK = 0xffff;
+    auto *character = builder_.CreateTrunc(builder_.CreateAnd(doubleToInt, builder_.getInt64(UTF16_CHAR_MASK)),
+                                           GetExactType(targetType));
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr uint32_t FAILURE_RESULT_FLAG = (1U << 16U);
+    auto *result = builder_.CreateSelect(overflow, builder_.getInt32(FAILURE_RESULT_FLAG), character);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
 bool LLVMIrConstructor::EmitCtlz(Inst *inst)
 {
     auto result = CreateZerosCount(inst, llvm::Intrinsic::ctlz);

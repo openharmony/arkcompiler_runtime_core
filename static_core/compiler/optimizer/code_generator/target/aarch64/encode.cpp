@@ -1642,7 +1642,6 @@ void Aarch64Encoder::EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool src
 
 void Aarch64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow)
 {
-    ASSERT(IsJsNumberCast());
     ASSERT(src.IsFloat() && dst.IsScalar());
 
     CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
@@ -1670,6 +1669,43 @@ void Aarch64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::La
     auto slowLabel {static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(slow)};
     // jump to slow path in case of overflow
     GetMasm()->B(slowLabel, vixl::aarch64::Condition::vs);
+}
+
+void Aarch64Encoder::EncodeJsDoubleToCharCast(Reg dst, Reg src)
+{
+    ASSERT(src.IsFloat() && dst.IsScalar());
+
+    CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+
+    // use special JS aarch64 instruction
+#ifndef NDEBUG
+    vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kFP, vixl::CPUFeatures::kJSCVT);
+#endif
+    GetMasm()->Fjcvtzs(VixlReg(dst), VixlVReg(src));
+}
+
+void Aarch64Encoder::EncodeJsDoubleToCharCast(Reg dst, Reg src, Reg tmp, uint32_t failureResult)
+{
+    ASSERT(src.IsFloat() && dst.IsScalar());
+
+    CHECK_EQ(src.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+
+    // infinite and big numbers will overflow here to INT64_MIN or INT64_MAX, but NaN casts to 0
+    GetMasm()->Fcvtzs(VixlReg(dst, DOUBLE_WORD_SIZE), VixlVReg(src));
+    // check INT64_MIN
+    GetMasm()->Cmp(VixlReg(dst, DOUBLE_WORD_SIZE), VixlImm(1));
+    // check INT64_MAX
+    GetMasm()->Ccmp(VixlReg(dst, DOUBLE_WORD_SIZE), VixlImm(-1), vixl::aarch64::StatusFlags::VFlag,
+                    vixl::aarch64::Condition::vc);
+    // 'And' with 0xffff
+    constexpr uint32_t UTF16_CHAR_MASK = 0xffff;
+    GetMasm()->And(VixlReg(dst), VixlReg(dst), VixlImm(UTF16_CHAR_MASK));
+    // 'And' and 'Mov' change no flags so we may conditionally move failure result in case of overflow at old checking
+    // for INT64_MAX
+    GetMasm()->mov(VixlReg(tmp), failureResult);
+    GetMasm()->csel(VixlReg(dst), VixlReg(tmp), VixlReg(dst), vixl::aarch64::Condition::vs);
 }
 
 void Aarch64Encoder::EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned)

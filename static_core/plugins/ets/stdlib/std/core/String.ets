@@ -1229,16 +1229,20 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @param codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
      *
-     * @returns string consisting of specified UTF-16 code units.
+     * @returns string consisting of the specified UTF-16 code units.
      *
      */
-    public static fromCharCode(...codes: number[]): String {
-        let res = new StringBuilder();
-        for (const cu of codes) {
-            res.append((cu % (0x10000)) as char)
-        }
-        return res.toString()
-    }
+    public static native fromCharCode(...codes: number[]): String;
+
+    /**
+     * The String.fromCharCode() static method returns a string created from the specified UTF-16 code unit
+     *
+     * @param code is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     *
+     * @returns string consisting of the specified UTF-16 code unit.
+     *
+     */
+    public static native fromCharCode(code: number): String;
 
     /*
      * The valueOf() method returns the primitive value of a String object.
