@@ -15,6 +15,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
+#include "runtime/include/thread_scopes.h"
 
 #include <atomic>
 
@@ -131,6 +132,66 @@ void EtsCondVar::NotifyAll([[maybe_unused]] EtsMutex *mutex)
         ResumeCoroutine();
         waiters_--;
     }
+}
+
+/* static */
+EtsQueueSpinlock *EtsQueueSpinlock::Create(EtsCoroutine *coro)
+{
+    auto *klass = PlatformTypes(coro)->coreQueueSpinlock;
+    return EtsQueueSpinlock::FromEtsObject(EtsObject::Create(klass));
+}
+
+void EtsQueueSpinlock::Acquire(Guard *waiter)
+{
+    // Atomic with acq_rel order reason: to guarantee happens-before for critical sections
+    auto *oldTail = tail_.exchange(waiter, std::memory_order_acq_rel);
+    if (oldTail == nullptr) {
+        return;
+    }
+    // Atomic with release order reason: to guarantee happens-before with waiter constructor
+    oldTail->next_.store(waiter, std::memory_order_release);
+    auto spinWait = SpinWait();
+    ScopedNativeCodeThread nativeCode(EtsCoroutine::GetCurrent());
+    // Atomic with acquire order reason: to guarantee happens-before for critical sections
+    while (!waiter->isOwner_.load(std::memory_order_acquire)) {
+        spinWait();
+    }
+}
+
+void EtsQueueSpinlock::Release(Guard *owner)
+{
+    auto *head = owner;
+    // Atomic with release order reason: to guarantee happens-before for critical sections
+    if (tail_.compare_exchange_strong(head, nullptr, std::memory_order_release, std::memory_order_relaxed)) {
+        return;
+    }
+    // Atomic with acquire order reason: to guarantee happens-before with next constructor
+    Guard *next = owner->next_.load(std::memory_order_acquire);
+    auto spinWait = SpinWait();
+    while (next == nullptr) {
+        spinWait();
+        // Atomic with acquire order reason: to guarantee happens-before with next constructor
+        next = owner->next_.load(std::memory_order_acquire);
+    }
+    // Atomic with release order reason: to guarantee happens-before for critical sections
+    next->isOwner_.store(true, std::memory_order_release);
+}
+
+bool EtsQueueSpinlock::IsHeld() const
+{
+    // Atomic with relaxed order reason: sync is not needed here
+    // because it is expected that method is not called concurrently with Acquire/Release
+    return tail_.load(std::memory_order_relaxed) != nullptr;
+}
+
+EtsQueueSpinlock::Guard::Guard(EtsHandle<EtsQueueSpinlock> &spinlock) : spinlock_(spinlock)
+{
+    spinlock_->Acquire(this);
+}
+
+EtsQueueSpinlock::Guard::~Guard()
+{
+    spinlock_->Release(this);
 }
 
 }  // namespace ark::ets

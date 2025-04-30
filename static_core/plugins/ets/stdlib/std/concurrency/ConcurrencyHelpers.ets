@@ -23,9 +23,17 @@ final class ConcurrencyHelpers {
     public static native mutexCreate(): Object;
     public static native mutexLock(mutex: Object): void;
     public static native mutexUnlock(mutex: Object): void;
+    // Event api
     public static native eventCreate(): Object;
     public static native eventWait(event: Object): void;
     public static native eventFire(event: Object): void;
+    // Spinlock api
+    public static native spinlockCreate(): Object;
+    public static spinlockGuard(spinlock: Object, callback: () => void) {
+        ConcurrencyHelpers.spinlockGuard(spinlock, callback as Object);
+    }
+
+    private static native spinlockGuard(spinlock: Object, callback: Object): void;
 }
 
 class NativeAsyncWorkHelper {

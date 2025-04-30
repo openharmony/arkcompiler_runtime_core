@@ -33,7 +33,6 @@ class EventLoop {
         this.workerId = workerId;
         this.initEvent = ConcurrencyHelpers.eventCreate();
         this.timerQueue = new Array<Timer>();
-        this.pollLoop();
     }
 
     static createTimer(callback: Callback, delay: int, repeat: boolean): Timer {
@@ -46,6 +45,10 @@ class EventLoop {
 
     static getOrCreate(): EventLoop {
         return EventLoop.registry.getOrCreateEventLoop();
+    }
+
+    public init() {
+        this.pollLoop();
     }
 
     public registerTimer(timer: Timer) {
@@ -97,25 +100,31 @@ class EventLoop {
 class Registry {
     constructor() {
         this.eventLoops = new Map<WorkerId, EventLoop>();
-        this.registryLock = ConcurrencyHelpers.mutexCreate();
+        this.registryLock = ConcurrencyHelpers.spinlockCreate();
     }
 
     public getOrCreateEventLoop(): EventLoop {
-        ConcurrencyHelpers.mutexLock(this.registryLock);
         let workerId = CoroutineExtras.getWorkerId();
-        if (!this.eventLoops.has(workerId)) {
-            let eLoop = new EventLoop(workerId);
-            this.eventLoops.set(workerId, eLoop);
+        let eLoop: EventLoop | undefined;
+        let needInit = false;
+        ConcurrencyHelpers.spinlockGuard(this.registryLock, () => {
+            eLoop = this.eventLoops.get(workerId);
+            needInit = eLoop === undefined;
+            if (needInit) {
+                eLoop = new EventLoop(workerId);
+                this.eventLoops.set(workerId, eLoop!);
+            }
+        });
+        if (needInit) {
+            eLoop!.init();
         }
-        let eLoop = this.eventLoops.get(workerId);
-        ConcurrencyHelpers.mutexUnlock(this.registryLock);
         return eLoop!;
     }
 
     public removeEventLoop(workerId: WorkerId) {
-        ConcurrencyHelpers.mutexLock(this.registryLock);
-        this.eventLoops.get(workerId);
-        ConcurrencyHelpers.mutexUnlock(this.registryLock);
+        ConcurrencyHelpers.spinlockGuard(this.registryLock, () => {
+            this.eventLoops.delete(workerId);
+        });
     }
 
     private eventLoops: Map<WorkerId, EventLoop>;
@@ -169,38 +178,39 @@ class Timer {
 class TimerTable {
     constructor() {
         this.nextFreeId = 0;
-        this.tableLock = ConcurrencyHelpers.mutexCreate();
+        this.tableSpinlock = ConcurrencyHelpers.spinlockCreate();
         this.timers = new Map<TimerId, Timer>();
     }
 
     public createTimer(callback: Callback, delay: int, repeat: boolean): Timer {
-        ConcurrencyHelpers.mutexLock(this.tableLock);
-        let timerId = this.nextFreeId++;
-        let timer = new Timer(callback, delay, repeat, timerId);
-        this.timers.set(timerId, timer);
-        ConcurrencyHelpers.mutexUnlock(this.tableLock);
+        let timer: Timer;
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            let timerId = this.nextFreeId++;
+            timer = new Timer(callback, delay, repeat, timerId);
+            this.timers.set(timerId, timer);
+        });
         return timer;
     }
 
     public clearTimer(id: TimerId) {
-        ConcurrencyHelpers.mutexLock(this.tableLock);
-        this.timers.delete(id);
-        ConcurrencyHelpers.mutexUnlock(this.tableLock);
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            this.timers.delete(id);
+        });
     }
 
     public removeClearedTimers(timerQueue: Array<Timer>) {
-        ConcurrencyHelpers.mutexLock(this.tableLock);
-        let queueLen = timerQueue.length;
-        for (let i = 0; i < queueLen; ++i) {
-            let timer = timerQueue.shift()!;
-            if (this.timers.has(timer.getId())) {
-                timerQueue.push(timer);
+        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+            let queueLen = timerQueue.length;
+            for (let i = 0; i < queueLen; ++i) {
+                let timer = timerQueue.shift()!;
+                if (this.timers.has(timer.getId())) {
+                    timerQueue.push(timer);
+                }
             }
-        }
-        ConcurrencyHelpers.mutexUnlock(this.tableLock);
+        });
     }
 
     private nextFreeId: TimerId;
-    private tableLock: Object;
+    private tableSpinlock: Object;
     private timers: Map<TimerId, Timer>;
 };
