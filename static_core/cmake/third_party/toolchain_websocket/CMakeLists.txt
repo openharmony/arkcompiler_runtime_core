@@ -25,6 +25,12 @@ set(SOURCES
     ${TOOLCHAIN_ROOT}/websocket/server/websocket_server.cpp
 )
 
+if (PANDA_TARGET_WINDOWS)
+    list(APPEND SOURCES ${TOOLCHAIN_ROOT}/platform/windows/file.cpp)
+else()
+    list(APPEND SOURCES ${TOOLCHAIN_ROOT}/platform/unix/file.cpp)
+endif()
+
 set(DEFINITIONS
     ""
 )
