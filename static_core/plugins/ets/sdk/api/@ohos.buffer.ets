@@ -425,10 +425,10 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             this.buffer = buffer;
             this.byteOffset = 0;
         }
-    
+
         /**
          * Returns a string decoded from the buffer's contents.
-         * 
+         *
          * @returns {string} The decoded string
          */
         public toString(): string {
@@ -811,9 +811,21 @@ Received value is: ${value}`)
          * @returns { Buffer } Returns a new Buffer that references the same memory as the original
          */
         public subarray(start?: number, end?: number): Buffer {
-            const resolvedStart = start ?? 0 as number;
-            const resolvedEnd = end ?? this.length;
-            return new Buffer(this.buffer.slice(resolvedStart, resolvedEnd));
+            if (start == undefined || isNaN(start!)) {
+                start = 0
+            }
+            if (end == undefined || isNaN(end!)) {
+                end = this.length
+            }
+            let e = end!
+            if (e > this.length) {
+                e = this.length
+            }
+            let s = start!
+            if (s < 0 || e < 0 || e <= s) {
+                return new Buffer(new ArrayBuffer(0))
+            }
+            return new Buffer(this.buffer.slice(s, e));
         }
 
         /**
