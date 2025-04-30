@@ -148,16 +148,16 @@ static_core/plugins/ets/runtime/interop_js/xgc/                               ^d
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts                         ^dmitriitr @konstanting ^ychen3
-static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker
-static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker
-static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav ^shemetovphilip
+static_core/plugins/ets/stdlib/std/core/EnumConstant.sts                      @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
+static_core/plugins/ets/stdlib/std/core/Field.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
+static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts              ^dmitriitr @udav ^shemetovphilip ^liyiming13
 static_core/plugins/ets/stdlib/std/core/GC.sts                                ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Method.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker
-static_core/plugins/ets/stdlib/std/core/Object.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/stdlib/std/core/Method.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
+static_core/plugins/ets/stdlib/std/core/Object.sts                            @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
 static_core/plugins/ets/stdlib/std/core/Promise.sts                           ^dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev @dreamdoomwalker
-static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @aleksander-sotov ^anton-sysoev @dreamdoomwalker
-static_core/plugins/ets/stdlib/std/core/Value.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker
+static_core/plugins/ets/stdlib/std/core/Type*                                 @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
+static_core/plugins/ets/stdlib/std/core/UnionCase.sts                         @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
+static_core/plugins/ets/stdlib/std/core/Value.sts                             @aleksander-sotov ^anton-sysoev @dreamdoomwalker ^liyiming13
 static_core/plugins/ets/tests/ets-templates/17.experimental_features/         @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/7.expressions/                    @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
 static_core/plugins/ets/tests/ets-templates/9.classes/                        @dmitriitr @Prof1983 @igelhaus @ragnvald @fotograf ^amate ^sergeyandreev ^lindvladimir_f9b8
