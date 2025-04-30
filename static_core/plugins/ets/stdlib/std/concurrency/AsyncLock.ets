@@ -117,7 +117,7 @@ export final class AsyncLock {
 
         this.lock<U>(callerCID, mode, asyncLockInfo, options);
         try {
-            return callback() as Promise<T>;
+            return Promise.resolve<T>(callback());
         } finally {
             this.unlock(asyncLockInfo);
         }
