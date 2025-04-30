@@ -299,6 +299,11 @@ public:
         return false;
     }
 
+    virtual bool IsClassExternal([[maybe_unused]] MethodPtr method, [[maybe_unused]] ClassPtr calleeClass) const
+    {
+        return true;
+    }
+
     virtual bool IsMethodIntrinsic([[maybe_unused]] MethodPtr method) const
     {
         return false;

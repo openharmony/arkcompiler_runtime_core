@@ -39,11 +39,27 @@
 #! EVENTS_COUNT /Inline,A::main,A::Get,.*STATIC,SUCCESS/, 1
 #! RUN          entry: "A::main"
 
+#! CHECKER      Inline depth limit at Regular AOT PGO
+#! RUN_PGO_PROF entry: "A::main"
+#! RUN_PGO_PAOC options: "--compiler-regex=A::main --compiler-inlining-max-depth=0 --compiler-inlining-recursive-calls-limit=1 --compiler-inlining-always-inline-bc-size=12"
+#! EVENTS_COUNT /Inline,C::Set,D::Set,.*STATIC,SUCCESS/, 1
+#! EVENTS_COUNT /Inline,B::Set,C::Set,.*STATIC,SUCCESS/, 1
+#! EVENTS_COUNT /Inline,A::Set,B::Set,.*STATIC,SUCCESS/, 1
+#! EVENTS_COUNT /Inline,A::main,A::Set,.*STATIC,SUCCESS/, 1
+#! EVENTS_COUNT /Inline,D::Get,D::GetModified,.*STATIC,SUCCESS/, 0
+#! EVENTS_COUNT /Inline,C::Get,D::Get,.*STATIC,SUCCESS/, 1
+#! EVENTS_COUNT /Inline,B::Get,C::Get,.*STATIC,SUCCESS/, 1
+#! EVENTS_COUNT /Inline,A::Get,B::Get,.*STATIC,SUCCESS/, 1
+#! EVENTS_COUNT /Inline,A::main,A::Get,.*STATIC,SUCCESS/, 1
+#! RUN          entry: "A::main"
+
 .record D {
     i32 val_
 }
 # Large method:
 .function i32 D.GetModified(D a0) {
+    jmp entry
+entry:
     ldobj a0, D.val_
     addi 1
     addi 1

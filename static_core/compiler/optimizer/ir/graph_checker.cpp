@@ -1751,7 +1751,11 @@ void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
             v,
             userInst->GetOpcode() == Opcode::CheckCast || userInst->GetOpcode() == Opcode::IsInstance ||
-                userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::Intrinsic,
+                userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::Intrinsic ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompare ||
+                userInst->GetOpcode() == Opcode::DeoptimizeCompareImm ||
+                userInst->GetOpcode() == Opcode::DeoptimizeIf || userInst->GetOpcode() == Opcode::Load ||
+                userInst->GetOpcode() == Opcode::If || userInst->GetOpcode() == Opcode::IfImm,
             (std::cerr << "Incorrect user of the LoadClass", inst->Dump(&std::cerr), userInst->Dump(&std::cerr)));
     }
 }
