@@ -226,10 +226,6 @@ export namespace util {
         MIME_URL_SAFE,
     }
 
-    export interface DecodeToStringOptions {
-        stream?: boolean;
-    }
-
     export class Base64Helper {
         private static BASE64_CHARS: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         private static BASE64_URL_SAFE_CHARS: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
@@ -656,11 +652,14 @@ export namespace util {
         }
     }
     
-    export interface DecoderOptions {
+    export interface TextDecoderOptions {
         fatal?: boolean;
         ignoreBOM?: boolean;
     }
 
+    export interface DecodeToStringOptions {
+        stream?: boolean;
+    }
     export class TextDecoder {
 
         static { loadLibrary("ets_sdk_native") }
@@ -672,7 +671,7 @@ export namespace util {
         const CONVERTER_FLAGS_IGNORE_BOM = 0x4;
         private nativeDecoder_: long;
 
-        constructor(encoding?: string, options?: DecoderOptions) {
+        constructor(encoding?: string, options?: TextDecoderOptions) {
             let flags = 0;
             if (encoding) {
                 this.encoding_ = encoding;
@@ -686,7 +685,7 @@ export namespace util {
             this.bindNativeDecoder(this.encoding_, flags);
         }
 
-        static create(encoding?: string, options?: DecoderOptions) {
+        static create(encoding?: string, options?: TextDecoderOptions): TextDecoder {
             return new TextDecoder(encoding, options);
         }
 
