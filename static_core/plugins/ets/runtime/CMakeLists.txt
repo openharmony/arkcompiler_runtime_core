@@ -112,6 +112,7 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCommon.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlState.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormat.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormatters.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlFormattersCache.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleMatch.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollator.cpp

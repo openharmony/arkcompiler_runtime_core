@@ -181,6 +181,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlCommon.cpp",
   "stdlib/native/core/IntlState.cpp",
   "stdlib/native/core/IntlNumberFormat.cpp",
+  "stdlib/native/core/IntlNumberFormatters.cpp",
   "stdlib/native/core/IntlFormattersCache.cpp",
   "stdlib/native/core/IntlLocale.cpp",
   "stdlib/native/core/IntlLocaleMatch.cpp",

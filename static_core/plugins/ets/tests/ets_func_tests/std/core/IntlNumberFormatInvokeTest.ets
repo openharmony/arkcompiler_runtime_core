@@ -20,6 +20,8 @@ function main(): int {
     suite.addTest("$_invoke currency unit error", testInvokeCurrencyStyleError);
     suite.addTest("$_invoke undefined locale", testInvokeUndefinedLocale);
     suite.addTest("$_invoke undefined locale undefined options", testInvokeUndefinedLocaleUndefinedOptions);
+    suite.addTest("$_invoke minMaxFracDigits", testInvokeMinMaxFracDigits);
+    suite.addTest("$_invoke minMaxSignDigits", testInvokeMinMaxSignDigits);
     return suite.run();
 }
 
@@ -52,7 +54,7 @@ function testInvokeUndefinedLocale() {
     assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
     assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
     assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
-    assertEQ(getOptions.useGrouping, false, "Error. Got: " + s);
+    assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
     assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
     assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
@@ -68,7 +70,7 @@ function testInvokeUndefinedLocaleUndefinedOptions() {
     assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
     assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
     assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
-    assertEQ(getOptions.useGrouping, false, "Error. Got: " + s);
+    assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
     assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
     assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
@@ -101,4 +103,27 @@ function printResolvedOptions(options: Intl.ResolvedNumberFormatOptions): string
     addValue(options.unitDisplay, "unitDisplay");
     addValue(options.useGrouping, "useGrouping");
     return parts.join(",");
+}
+
+function testInvokeMinMaxFracDigits() {
+
+    let options3: Intl.NumberFormatOptions = {
+        maximumFractionDigits: 5,
+        minimumFractionDigits: 3
+    }
+    let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
+    assertEQ(getOptions.minimumFractionDigits, 3.0);
+    assertEQ(getOptions.maximumFractionDigits, 5.0);
+    assertTrue(getOptions.maximumFractionDigits > getOptions.minimumFractionDigits);
+}
+
+function testInvokeMinMaxSignDigits() {
+    let options3: Intl.NumberFormatOptions = {
+        maximumSignificantDigits: 18,
+        minimumSignificantDigits: 17
+    }
+    let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
+    assertEQ(getOptions.maximumSignificantDigits!, 18.0);
+    assertEQ(getOptions.minimumSignificantDigits!, 17.0);
+    assertTrue(getOptions.maximumSignificantDigits! > getOptions.minimumSignificantDigits!);
 }

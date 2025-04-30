@@ -339,6 +339,13 @@ std/containers/BuiltinArrayMapTest.ets
 #24088
 std/containers/linked_blocking_queue/LinkedBlockingQueue_AddTest.ets
 
+#24700
+std/core/IntlNumberFormatSupportedLocalesOfTest2.ets
+std/core/IntlNumberFormatFaultLocaleTest.ets
+
+#25239
+std/core/IntlNumberFormatSupportedLocalesOfTest3.ets
+
 #16242
 std/core/std_core_char_static_Char_isPartOfSurrogatePair.ets
 std/core/std_core_char_static_Char_isValidCodePoint.ets

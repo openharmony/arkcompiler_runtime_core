@@ -15,6 +15,7 @@
 
 class NumberFormatOptionsBuilder
 {
+    // Default decimal style with default precision
     compactDisplay?: "short" | "long" = undefined;
     currency?: string = undefined;
     currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name" = undefined;
@@ -30,10 +31,31 @@ class NumberFormatOptionsBuilder
     style?: "decimal" | "percent" | "currency" | "unit" = "decimal";
     unit?: string = undefined;
     unitDisplay?: "short" | "long" | "narrow" = undefined;
-    useGrouping?: boolean = false;
+    useGrouping?: boolean = true;
 
     static newDefault(): NumberFormatOptionsBuilder {
         return new NumberFormatOptionsBuilder();
+    }
+
+    static newClear(): NumberFormatOptionsBuilder {
+        let options = NumberFormatOptionsBuilder.newDefault();
+        options.compactDisplay = undefined;
+        options.currency = undefined;
+        options.currencyDisplay = undefined;
+        options.currencySign = undefined;
+        options.localeMatcher = undefined;
+        options.maximumFractionDigits = undefined;
+        options.maximumSignificantDigits = undefined;
+        options.minimumFractionDigits = undefined;
+        options.minimumIntegerDigits = undefined;
+        options.minimumSignificantDigits = undefined;
+        options.notation = undefined;
+        options.signDisplay = undefined;
+        options.style = undefined;
+        options.unit = undefined;
+        options.unitDisplay = undefined;
+        options.useGrouping = undefined;
+        return options;
     }
 
     build(): Intl.NumberFormatOptions {
@@ -119,6 +141,25 @@ class NumberFormatOptionsBuilder
 
     public withStyle(style: "decimal" | "percent" | "currency" | "unit"): NumberFormatOptionsBuilder {
         this.style = style;
+        if (this.style == "percent") {
+            this.maximumFractionDigits = 0
+            this.minimumFractionDigits = 0
+            this.useGrouping = true
+        } else  if (this.style == "currency") {
+            if (this.currencySign == undefined) {
+                this.currencySign = "standard";
+            }
+            if (this.currencyDisplay == undefined) {
+                this.currencyDisplay = "symbol";
+            }
+            this.minimumFractionDigits = 2;
+            this.maximumFractionDigits = 2;
+            this.useGrouping = true
+        } else if (this.style == "unit") {
+            if (this.unitDisplay == undefined) {
+                this.unitDisplay = "short";
+            }
+        }
         return this;
     }
 
@@ -209,9 +250,9 @@ function testNumberFormatToPartsWithDifferentStyles() {
             .withStyle("percent")
             .build());
     const parts3 = numberFormat3.formatToParts(12.34);
-    assertPartEq(parts3[0], "integer", "12");
-    assertPartEq(parts3[1], "decimal", ".");
-    assertPartEq(parts3[2], "fraction", "34");
+    assertPartEq(parts3[0], "integer", "1");
+    assertPartEq(parts3[1], "group", ",");
+    assertPartEq(parts3[2], "integer", "234");
     assertPartEq(parts3[3], "percentSign", "%");
     assertEQ(parts3.length, 4, "Expected 4 parts for percent style");
 }
@@ -294,31 +335,28 @@ function testNumberFormatToPartsWithDifferentOptions() {
             .build());
 
     // Test value with fewer than minimum fraction digits
+    const fracParts1 = fracFormat.formatToParts(123.4);
+    assertPartEq(fracParts1[0], "integer", "123");
+    assertPartEq(fracParts1[1], "decimal", ".");
+    assertPartEq(fracParts1[2], "fraction", "40"); // Padded to reach minimum
+    // Test with minimum integer digits
+    const intFormat = new Intl.NumberFormat(
+        "en-US",
+        NumberFormatOptionsBuilder
+            .newDefault()
+            .withMinimumIntegerDigits(5)
+            .build());
 
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
-
-    // const fracParts1 = fracFormat.formatToParts(123.4);
-    // assertPartEq(fracParts1[0], "integer", "123");
-    // assertPartEq(fracParts1[1], "decimal", ".");
-    // assertPartEq(fracParts1[2], "fraction", "40"); // Padded to reach minimum
-    //     // Test with minimum integer digits
-    // const intFormat = new Intl.NumberFormat(
-    //     "en-US",
-    //     NumberFormatOptionsBuilder
-    //         .newDefault()
-    //         .withMinimumIntegerDigits(5)
-    //         .build());
-
-    // const intParts = intFormat.formatToParts(123);
-    // assertPartEq(intParts[0], "integer", "00123"); // Padded to reach minimum
+    const intParts = intFormat.formatToParts(123);
+    assertPartEq(intParts[0], "integer", "00");
+    assertPartEq(intParts[1], "group", ",");
+    assertPartEq(intParts[2], "integer", "123");
 
     // Test value with more than maximum fraction digits
     const fracParts2 = fracFormat.formatToParts(123.4567880);
     assertPartEq(fracParts2[0], "integer", "123");
     assertPartEq(fracParts2[1], "decimal", ".");
     assertPartEq(fracParts2[2], "fraction", "4568"); // Truncated to maximum
-
-
 }
 
 function testNumberFormatToPartsWithNotation() {
@@ -330,8 +368,13 @@ function testNumberFormatToPartsWithNotation() {
             .withNotation("scientific")
             .build());
 
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
     const scientificParts = scientificFormat.formatToParts(12345);
+    assertPartEq(scientificParts[0], "integer", "1");
+    assertPartEq(scientificParts[1], "decimal", ".");
+    assertPartEq(scientificParts[2], "fraction", "235");
+    assertPartEq(scientificParts[3], "exponentSeparator", "E");
+    assertPartEq(scientificParts[4], "exponentInteger", "4");
+
     // Test engineering notation
     const engineeringFormat = new Intl.NumberFormat(
         "en-US",
@@ -340,11 +383,15 @@ function testNumberFormatToPartsWithNotation() {
             .withNotation("engineering")
             .build());
 
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
     const engineeringParts = engineeringFormat.formatToParts(12345);
+    assertPartEq(engineeringParts[0], "integer", "12");
+    assertPartEq(engineeringParts[1], "decimal", ".");
+    assertPartEq(engineeringParts[2], "fraction", "345");
+    assertPartEq(engineeringParts[3], "exponentSeparator", "E");
+    assertPartEq(engineeringParts[4], "exponentInteger", "3");
 
-    // Test compact notation
-    const compactFormat = new Intl.NumberFormat(
+    // Test compact notation with default options
+    let compactFormat = new Intl.NumberFormat(
         "en-US",
         NumberFormatOptionsBuilder
             .newDefault()
@@ -352,9 +399,27 @@ function testNumberFormatToPartsWithNotation() {
             .withCompactDisplay("short")
             .build());
 
-    const compactParts = compactFormat.formatToParts(1234567);
-    // Note: Exact output depends on the locale's compact format patterns
-    assertEQ(compactParts.length > 0, true, "Expected parts in compact format");
+    let compactParts = compactFormat.formatToParts(1234567);
+    assertPartEq(compactParts[0], "integer", "1");
+    assertPartEq(compactParts[1], "decimal", ".");
+    assertPartEq(compactParts[2], "fraction", "235");
+    assertPartEq(compactParts[3], "compact", "M");
+    assertEQ(compactParts.length, 4, "Expected t parts for compact");
+
+    // Test compact notation with undefined options
+    compactFormat = new Intl.NumberFormat(
+        "en-US",
+        NumberFormatOptionsBuilder
+            .newClear()
+            .withNotation("compact")
+            .withCompactDisplay("short")
+            .build());
+    compactParts = compactFormat.formatToParts(1234567);
+    assertPartEq(compactParts[0], "integer", "1");
+    assertPartEq(compactParts[1], "decimal", ".");
+    assertPartEq(compactParts[2], "fraction", "2");
+    assertPartEq(compactParts[3], "compact", "M");
+    assertEQ(compactParts.length, 4, "Expected 4 parts for compact");
 }
 
 function testNumberFormatToPartsWithSignDisplay() {
@@ -368,18 +433,15 @@ function testNumberFormatToPartsWithSignDisplay() {
 
     // Positive number should have + sign
     const positiveParts = alwaysSignFormat.formatToParts(123);
-
     assertPartEq(positiveParts[0], "plusSign", "+");
     assertPartEq(positiveParts[1], "integer", "123");
     assertEQ(positiveParts.length, 2, "Expected 2 parts for positive number");
-
 
     // Negative number should have - sign
     const negativeParts = alwaysSignFormat.formatToParts(-123);
     assertPartEq(negativeParts[0], "minusSign", "-");
     assertPartEq(negativeParts[1], "integer", "123");
     assertEQ(negativeParts.length, 2, "Expected 2 parts for negative number");
-
 
     // Test with "never" sign display
     const neverSignFormat = new Intl.NumberFormat(
@@ -394,19 +456,17 @@ function testNumberFormatToPartsWithSignDisplay() {
     assertPartEq(negParts[0], "integer", "123");
     assertEQ(negParts.length, 1, "Expected 1 part for negative number");
 
-
     // Test with "exceptZero" sign display
     const exceptZeroFormat = new Intl.NumberFormat(
         "en-US",
         NumberFormatOptionsBuilder
-            .newDefault()
+            .newClear()
             .withSignDisplay("exceptZero")
             .build());
 
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
     const zeroParts = exceptZeroFormat.formatToParts(0);
-    // assertPartEq(zeroParts[0], "integer", "0");
-    // assertEQ(zeroParts.length, 1, "Expected 1 part for zero");
+    assertPartEq(zeroParts[0], "integer", "0");
+    assertEQ(zeroParts.length, 1, "Expected 1 part for zeroExcept");
 }
 
 function testNumberFormatToPartsWithUnit() {
@@ -419,7 +479,9 @@ function testNumberFormatToPartsWithUnit() {
             .build());
 
     const percentParts = percentFormat.formatToParts(0.5);
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
+    assertPartEq(percentParts[0], "integer", "50");
+    assertPartEq(percentParts[1], "percentSign", "%");
+    assertEQ(percentParts.length, 2, "Expected 2 parts for percent");
 
     // Test with currency instead of unit
     const currencyFormat = new Intl.NumberFormat(
@@ -431,10 +493,11 @@ function testNumberFormatToPartsWithUnit() {
             .build());
 
     const currencyParts = currencyFormat.formatToParts(100);
-
     assertPartEq(currencyParts[0], "currency", "$");
     assertPartEq(currencyParts[1], "integer", "100");
-    assertEQ(currencyParts.length, 2, "Expected 2 parts for currency");
+    assertPartEq(currencyParts[2], "decimal", ".");
+    assertPartEq(currencyParts[3], "fraction", "00");
+    assertEQ(currencyParts.length, 4, "Expected 4 parts for currency");
 }
 
 function testNumberFormatToPartsWithGrouping() {
@@ -482,7 +545,6 @@ function testNumberFormatToPartsWithEdgeCases() {
 
     // Test with Infinity
     const infParts = format.formatToParts(Infinity);
-
     assertPartEq(infParts[0], "integer", "∞");
     assertEQ(infParts.length, 1, "Expected 1 part for infinity");
 
@@ -493,12 +555,11 @@ function testNumberFormatToPartsWithEdgeCases() {
     assertEQ(negInfParts.length, 2, "Expected 2 parts for infinity");
 
     // Test with very small and very large numbers
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
     const smallParts = format.formatToParts(0.0000001);
-
+    assertPartEq(smallParts[0], "integer", "0");
+    assertEQ(smallParts.length, 1, "Expected 1 parts for small number");
 
     const largeParts = format.formatToParts(1e10);
-
     assertPartEq(largeParts[0], "integer", "10");
     assertPartEq(largeParts[1], "group", ",");
     assertPartEq(largeParts[2], "integer", "000");
@@ -506,7 +567,6 @@ function testNumberFormatToPartsWithEdgeCases() {
     assertPartEq(largeParts[4], "integer", "000");
     assertPartEq(largeParts[5], "group", ",");
     assertPartEq(largeParts[6], "integer", "000");
-
     assertEQ(largeParts.length, 7, "Expected 7 parts for large number");
 }
 
@@ -523,7 +583,6 @@ function testNumberFormatToPartsWithBigInt() {
     // Test with large BigInt
     const largeBigInt = 9007199254740991n; // 2^53 - 1
     const largeParts = format.formatToParts(largeBigInt);
-
     assertPartEq(largeParts[0], "integer", "9");
     assertPartEq(largeParts[1], "group", ",");
     assertPartEq(largeParts[2], "integer", "007");
@@ -573,11 +632,15 @@ function testNumberFormatRangeToPartsWithDifferentStyles() {
             .build());
 
     const currencyParts = currencyFormat.formatRangeToParts(10, 20);
-
-    assertRangePartEq(currencyParts[0], "integer", "10", "startRange");
-    assertRangePartEq(currencyParts[1], "literal", "–", "shared");
-    assertRangePartEq(currencyParts[2], "integer", "20", "endRange");
-    assertEQ(currencyParts.length, 3, "Expected 3 parts for currency");
+    assertRangePartEq(currencyParts[0], "currency", "$", "startRange");
+    assertRangePartEq(currencyParts[1], "integer", "10", "startRange");
+    assertRangePartEq(currencyParts[2], "decimal", ".", "startRange");
+    assertRangePartEq(currencyParts[3], "fraction", "00", "startRange");
+    assertRangePartEq(currencyParts[4], "literal", " – ", "shared");
+    assertRangePartEq(currencyParts[5], "currency", "$", "endRange");
+    assertRangePartEq(currencyParts[6], "integer", "20", "endRange");
+    assertRangePartEq(currencyParts[7], "decimal", ".", "endRange");
+    assertRangePartEq(currencyParts[8], "fraction", "00", "endRange");
 
     // Test with percent style
     const percentFormat = new Intl.NumberFormat(
@@ -588,14 +651,11 @@ function testNumberFormatRangeToPartsWithDifferentStyles() {
             .build());
 
     const percentParts = percentFormat.formatRangeToParts(0.1, 0.2);
-
-    assertRangePartEq(percentParts[0], "integer", "0", "startRange");
-    assertRangePartEq(percentParts[1], "decimal", ".", "startRange");
-    assertRangePartEq(percentParts[2], "fraction", "1", "startRange");
-    assertRangePartEq(percentParts[3], "literal", "–", "shared");
-    assertRangePartEq(percentParts[4], "integer", "0", "endRange");
-    assertRangePartEq(percentParts[5], "decimal", ".", "endRange");
-    assertRangePartEq(percentParts[6], "fraction", "2", "endRange");
+    assertRangePartEq(percentParts[0], "integer", "10", "startRange");
+    assertRangePartEq(percentParts[1], "percentSign", "%", "startRange");
+    assertRangePartEq(percentParts[2], "literal", " – ", "shared");
+    assertRangePartEq(percentParts[3], "integer", "20", "endRange");
+    assertRangePartEq(percentParts[4], "percentSign", "%", "endRange");
 }
 
 function testNumberFormatRangeToPartsWithDifferentLocales() {
@@ -636,7 +696,17 @@ function testNumberFormatRangeToPartsWithOptions() {
             .build());
 
     const parts = format.formatRangeToParts(1234.5, 5678.9);
-
+    assertRangePartEq(parts[0], "integer", "1", "startRange");
+    assertRangePartEq(parts[1], "group", ",", "startRange");
+    assertRangePartEq(parts[2], "integer", "234", "startRange");
+    assertRangePartEq(parts[3], "decimal", ".", "startRange");
+    assertRangePartEq(parts[4], "fraction", "50", "startRange");
+    assertRangePartEq(parts[5], "literal", "–", "shared");
+    assertRangePartEq(parts[6], "integer", "5", "endRange");
+    assertRangePartEq(parts[7], "group", ",", "endRange");
+    assertRangePartEq(parts[8], "integer", "678", "endRange");
+    assertRangePartEq(parts[9], "decimal", ".", "endRange");
+    assertRangePartEq(parts[10], "fraction", "90", "endRange");
 }
 
 function testNumberFormatRangeToPartsWithBigInt() {
@@ -644,14 +714,12 @@ function testNumberFormatRangeToPartsWithBigInt() {
 
     // Test with BigInt values
     const parts = format.formatRangeToParts(10n, 20n);
-
     assertRangePartEq(parts[0], "integer", "10", "startRange");
     assertRangePartEq(parts[1], "literal", "–", "shared");
     assertRangePartEq(parts[2], "integer", "20", "endRange");
 
     // Test with large BigInt values
     const largeParts = format.formatRangeToParts(9007199254740991n, 9007199254740992n);
-
     assertRangePartEq(largeParts[0], "integer", "9", "startRange");
     assertRangePartEq(largeParts[1], "group", ",", "startRange");
     assertRangePartEq(largeParts[2], "integer", "007", "startRange");
@@ -682,25 +750,21 @@ function testNumberFormatRangeToPartsWithMixedTypes() {
 
     // Test with number and BigInt
     const parts1 = format.formatRangeToParts(10, 20n);
-
     assertRangePartEq(parts1[0], "integer", "10", "startRange");
     assertRangePartEq(parts1[1], "literal", "–", "shared");
     assertRangePartEq(parts1[2], "integer", "20", "endRange");
 
     // Test with BigInt and number
     const parts2 = format.formatRangeToParts(30n, 40);
-
     assertRangePartEq(parts2[0], "integer", "30", "startRange");
     assertRangePartEq(parts2[1], "literal", "–", "shared");
     assertRangePartEq(parts2[2], "integer", "40", "endRange");
-
 }
 
 function testNumberFormatRangeToPartsWithEdgeCases() {
     const format = new Intl.NumberFormat("en-US");
 
     const negParts = format.formatRangeToParts(-10, -5);
-
     assertRangePartEq(negParts[0], "minusSign", "-", "startRange");
     assertRangePartEq(negParts[1], "integer", "10", "startRange");
     assertRangePartEq(negParts[2], "literal", " – ", "shared");
@@ -709,7 +773,6 @@ function testNumberFormatRangeToPartsWithEdgeCases() {
 
     // Test with mixed sign range
     const mixedSignParts = format.formatRangeToParts(-10, 5);
-
     assertRangePartEq(mixedSignParts[0], "minusSign", "-", "startRange");
     assertRangePartEq(mixedSignParts[1], "integer", "10", "startRange");
     assertRangePartEq(mixedSignParts[2], "literal", " – ", "shared");
@@ -717,13 +780,11 @@ function testNumberFormatRangeToPartsWithEdgeCases() {
 
     // Test with same value for start and end
     const sameParts = format.formatRangeToParts(10, 10);
-
     assertRangePartEq(sameParts[0], "approximatelySign", "~", "shared");
     assertRangePartEq(sameParts[1], "integer", "10", "shared");
 
     // Test with zero
     const zeroParts = format.formatRangeToParts(0, 1);
-
     assertRangePartEq(zeroParts[0], "integer", "0", "startRange");
     assertRangePartEq(zeroParts[1], "literal", "–", "shared");
     assertRangePartEq(zeroParts[2], "integer", "1", "endRange");
@@ -733,7 +794,6 @@ function testNumberFormatToPartsWithChineseLocale() {
      // Test basic number formatting with Chinese locale (zh-CN)
     const cnFormat = new Intl.NumberFormat("zh-CN");
     const cnParts = cnFormat.formatToParts(12345.67);
-
     assertPartEq(cnParts[0], "integer", "12");
     assertPartEq(cnParts[1], "group", ",");
     assertPartEq(cnParts[2], "integer", "345");
@@ -800,9 +860,9 @@ function testNumberFormatToPartsWithChineseLocale() {
             style: "percent",
         }
     );
-
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
     const cnPercentParts = cnPercentFormat.formatToParts(0.3456);
+    assertPartEq(cnPercentParts[0], "integer", "35");
+    assertPartEq(cnPercentParts[1], "percentSign", "%");
 
     // Test with large numbers in Chinese which might use special grouping
     const cnLargeFormat = new Intl.NumberFormat("zh-CN",
@@ -824,6 +884,20 @@ function testNumberFormatRangeToPartsWithChineseLocale() {
     // Test basic range formatting with Chinese locale (zh-CN)
     const cnRangeFormat = new Intl.NumberFormat("zh-CN");
     const cnRangeParts = cnRangeFormat.formatRangeToParts(1000, 2000);
+    assertRangePartEq(cnRangeParts[0], "integer", "1", "startRange");
+    assertRangePartEq(cnRangeParts[1], "group", ",", "startRange");
+    assertRangePartEq(cnRangeParts[2], "integer", "000", "startRange");
+    assertRangePartEq(cnRangeParts[3], "literal", "-", "shared");
+    assertRangePartEq(cnRangeParts[4], "integer", "2", "endRange");
+    assertRangePartEq(cnRangeParts[5], "group", ",", "endRange");
+    assertRangePartEq(cnRangeParts[6], "integer", "000", "endRange");
+
+    // Test with negative and positive range in Chinese
+    const cnMixedRangeParts = cnRangeFormat.formatRangeToParts(-100, 100);
+    assertRangePartEq(cnMixedRangeParts[0], "minusSign", "-", "startRange");
+    assertRangePartEq(cnMixedRangeParts[1], "integer", "100", "startRange");
+    assertRangePartEq(cnMixedRangeParts[2], "literal", " - ", "shared");
+    assertRangePartEq(cnMixedRangeParts[3], "integer", "100", "endRange");
 
     // Test range formatting with currency in Chinese Yuan (CNY)
     const cnCurrencyRangeFormat = new Intl.NumberFormat(
@@ -836,25 +910,20 @@ function testNumberFormatRangeToPartsWithChineseLocale() {
             .build());
 
     const cnCurrencyRangeParts = cnCurrencyRangeFormat.formatRangeToParts(1234.56, 7890.12);
+    assertRangePartEq(cnCurrencyRangeParts[0], "currency", "¥", "startRange");
+    assertRangePartEq(cnCurrencyRangeParts[1], "integer", "1", "startRange");
+    assertRangePartEq(cnCurrencyRangeParts[2], "group", ",", "startRange");
+    assertRangePartEq(cnCurrencyRangeParts[3], "integer", "234", "startRange");
+    assertRangePartEq(cnCurrencyRangeParts[4], "decimal", ".", "startRange");
+    assertRangePartEq(cnCurrencyRangeParts[5], "fraction", "56", "startRange");
+    assertRangePartEq(cnCurrencyRangeParts[6], "literal", " - ", "shared");
+    assertRangePartEq(cnCurrencyRangeParts[7], "currency", "¥", "endRange");
+    assertRangePartEq(cnCurrencyRangeParts[8], "integer", "7", "endRange");
+    assertRangePartEq(cnCurrencyRangeParts[9], "group", ",", "endRange");
+    assertRangePartEq(cnCurrencyRangeParts[10], "integer", "890", "endRange");
+    assertRangePartEq(cnCurrencyRangeParts[11], "decimal", ".", "endRange");
+    assertRangePartEq(cnCurrencyRangeParts[12], "fraction", "12", "endRange");
 
-    assertRangePartEq(cnCurrencyRangeParts[0], "integer", "1", "startRange");
-    assertRangePartEq(cnCurrencyRangeParts[1], "group", ",", "startRange");
-    assertRangePartEq(cnCurrencyRangeParts[2], "integer", "234", "startRange");
-    assertRangePartEq(cnCurrencyRangeParts[3], "decimal", ".", "startRange");
-    assertRangePartEq(cnCurrencyRangeParts[4], "fraction", "56", "startRange");
-    assertRangePartEq(cnCurrencyRangeParts[5], "literal", "-", "shared");
-    assertRangePartEq(cnCurrencyRangeParts[6], "integer", "7", "endRange");
-    assertRangePartEq(cnCurrencyRangeParts[7], "group", ",", "endRange");
-    assertRangePartEq(cnCurrencyRangeParts[8], "integer", "890", "endRange");
-    assertRangePartEq(cnCurrencyRangeParts[9], "decimal", ".", "endRange");
-    assertRangePartEq(cnCurrencyRangeParts[10], "fraction", "12", "endRange");
-
-
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
-    // Test with negative and positive range in Chinese
-    const cnMixedRangeParts = cnRangeFormat.formatRangeToParts(-100, 100);
-
-    /// FIXME (templin.konstantin): Fix this case after NumberFormat options fixes (internal issue: #24833)
     const cnPercentRangeFormat = new Intl.NumberFormat(
         "zh-CN",
         NumberFormatOptionsBuilder
@@ -862,6 +931,11 @@ function testNumberFormatRangeToPartsWithChineseLocale() {
             .withStyle("percent")
             .build());
 
-    // const cnPercentRangeParts = cnPercentRangeFormat.formatRangeToParts(0.25, 0.75);
-    // assertEQ(cnPercentRangeParts.length > 0, true, "Expected parts in Chinese percent range format");
+    const cnPercentRangeParts = cnPercentRangeFormat.formatRangeToParts(0.25, 0.75);
+    assertEQ(cnPercentRangeParts.length, 5, "Expected parts in Chinese percent range format");
+    assertRangePartEq(cnPercentRangeParts[0], "integer", "25", "startRange");
+    assertRangePartEq(cnPercentRangeParts[1], "percentSign", "%", "startRange");
+    assertRangePartEq(cnPercentRangeParts[2], "literal", " - ", "shared");
+    assertRangePartEq(cnPercentRangeParts[3], "integer", "75", "endRange");
+    assertRangePartEq(cnPercentRangeParts[4], "percentSign", "%", "endRange");
 }
