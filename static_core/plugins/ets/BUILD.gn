@@ -111,6 +111,7 @@ if (!(ark_standalone_build ||
       "./sdk/api/@ohos.util.PlainArray.ets",
       "./sdk/api/@ohos.util.Queue.ets",
       "./sdk/api/@ohos.util.Stack.ets",
+      "./sdk/api/@ohos.util.stream.ets",
       "./sdk/api/@ohos.util.ets",
       "./sdk/api/@ohos.util.TreeMap.ets",
       "./sdk/api/@ohos.util.TreeSet.ets",
