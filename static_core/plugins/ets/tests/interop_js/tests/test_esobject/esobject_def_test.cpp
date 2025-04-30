@@ -135,9 +135,34 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_undefined)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToUndefined"));
 }
 
+TEST_F(EtsESObjectJsToEtsTest, test_esobject_js_is_undefined)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkJsIsUndefined"));
+}
+
+TEST_F(EtsESObjectJsToEtsTest, test_esobject_typeof_undefined)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTypeOfUndefined"));
+}
+
+TEST_F(EtsESObjectJsToEtsTest, test_strictly_equal_undefined)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkStrictlyEqualUndefined"));
+}
+
 TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_null)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToNull"));
+}
+
+TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_null)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsNull"));
+}
+
+TEST_F(EtsESObjectJsToEtsTest, test_esobject_equal_null)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkStrictlyEqualNull"));
 }
 
 TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_equal_to)
@@ -220,6 +245,9 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_type_of)
 TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_invoke)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoParam"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoReturn"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeReturnNull"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeReturnUndefined"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethod"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeHasParam"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethodHasParam"));
