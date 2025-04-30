@@ -315,10 +315,10 @@ cases:
           let a: Number[]|String[]|Boolean[]|null
       use: |-
           // assignment context, union of arrays
-          a = [1, 2, 43]
-          assertEQ((a as Number[])[0], 1)
-          assertEQ((a as Number[])[1], 2)
-          assertEQ((a as Number[])[2], 43)
+          a = [1.0, 2.0, 43.0]
+          assertEQ((a as Number[])[0], 1.0)
+          assertEQ((a as Number[])[1], 2.0)
+          assertEQ((a as Number[])[2], 43.0)
           assertEQ((a as Number[]).length, 3)
 
     - decl: |-
