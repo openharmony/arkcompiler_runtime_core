@@ -27,7 +27,7 @@ class Base {
     }
 }
 
-class Tuple {
+class TupleT {
     index: int;
     name: String = "";
 }
@@ -44,7 +44,7 @@ function main(): int {
     let test = new Testee();
     let result: int = 0;
 
-    result = test.spread("Single Tuple", {} as Tuple);
+    result = test.spread("Single Tuple", {} as TupleT);
     if(result != 42) return 1;
 
     return 0;

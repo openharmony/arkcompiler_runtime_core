@@ -35,7 +35,7 @@ class DeferentIntTypes {
     systemHexadecimal = 16;
     systemBinary = 2;
     int: int = 1;
-    number: number = 1;
+    numb: number = 1;
     bigInt: BigInt = 1n;
     float: float = 1.1;
     intString: string = '1';

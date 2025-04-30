@@ -65,7 +65,7 @@ function checkGenericDefaultObj() {
 
 function checkGenericDefaultTuple() {
     const res = genericDefaultTuple(jsTuple);
-    ASSERT_TRUE(checkArray(res) && res[0] === jsTuple[0] && res[1] === jsTuple[1]);
+    ASSERT_TRUE(checkObj(res) && res.$0 === jsTuple[0] && res.$1 === jsTuple[1]);
 }
 
 function checkGenericDefaultUnion() {
@@ -96,7 +96,7 @@ function checkGenericDefaultObjCallFromEts() {
 
 function checkGenericDefaultTupleCallFromEts() {
     const res = genericDefaultTupleCallFromEts();
-    ASSERT_TRUE(checkArray(res) && res[0] === jsTuple[0] && res[1] === jsTuple[1]);
+    ASSERT_TRUE(checkObj(res) && res.$0 === jsTuple[0] && res.$1 === jsTuple[1]);
 }
 
 function checkGenericDefaultUnionCallFromEts() {

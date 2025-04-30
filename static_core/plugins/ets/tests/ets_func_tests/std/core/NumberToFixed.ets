@@ -24,10 +24,75 @@ function main(): int {
    return suite.run()
 }
 
+interface TestCase {
+    numb: number,
+    fractionDigits: number;
+    expected: string
+}
+
 class TestData {
+    static testCases: TestCase[] = [
+        {
+            numb: 1e21,
+            fractionDigits: 3,
+            expected: "1e+21"
+        },
+        {
+            numb: 1e20,
+            fractionDigits: 0,
+            expected: "100000000000000000000"
+        },
+        {
+            numb: 1e20/1e21,
+            fractionDigits: 3,
+            expected: "0.100"
+        },
+        {
+            numb: 1e26,
+            fractionDigits: 1,
+            expected: "1e+26"
+        },
+        {
+            numb: 1e-8,
+            fractionDigits: 0,
+            expected: "0"
+        },
+        {
+            numb: -1e22,
+            fractionDigits: 2,
+            expected: "-1e+22"
+        },
+        {
+            numb: -1e-6,
+            fractionDigits: 0,
+            expected: "-0"
+        },
+        {
+            numb: 6e-32,
+            fractionDigits: 1,
+            expected: "0.0"
+        },
+        {
+            numb: 9.999e20,
+            fractionDigits: 0,
+            expected: "999900000000000000000"
+        },
+    ]
     static a: Number = new Number('a');
     static big_digits: Number = Number.POSITIVE_INFINITY;
     static negative_digits: Number = -Number.POSITIVE_INFINITY;
+}
+
+function testNumberToFixed() {
+    for (let i = 0; i < TestData.testCases.length; i++) {
+        let testCase: TestCase = TestData.testCases[i];
+        let num: number = testCase.numb;
+        let digits: number = testCase.fractionDigits;
+        let expected: string = testCase.expected;
+        let actual: string = new Number(num).toFixed(digits);
+
+        assertEQ(actual, expected, "failed: Expected" + expected + "got: " + actual);
+    }
 }
 
 function testLargeParameter() {

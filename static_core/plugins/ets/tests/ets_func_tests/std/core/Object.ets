@@ -39,8 +39,8 @@ function main(): int {
     return test(failures, "All tests run");
 }
 
-type Tuple = [string, NullishType]
-type NullishTuple = Tuple | null | undefined
+type TupleT = [string, NullishType]
+type NullishTuple = TupleT | null | undefined
 
 class Point2D {
     static axisnum: number = 2
@@ -237,21 +237,21 @@ function objectEntries(): int {
     result += tupleAreEqual(Object.entries(dou), emptyTuple) ? 0 : 1
 
     let arrVal: NullishTuple[] = new NullishTuple[3]
-    arrVal[0] = ["0", new Number(10)] as Tuple
-    arrVal[1] = ["1", new Number(20)] as Tuple
-    arrVal[2] = ["2", new Number(30)] as Tuple
+    arrVal[0] = ["0", new Number(10)] as TupleT
+    arrVal[1] = ["1", new Number(20)] as TupleT
+    arrVal[2] = ["2", new Number(30)] as TupleT
     result += tupleAreEqual(Object.entries(arr), arrVal) ? 0 : 1
 
     let strVal: NullishTuple[] = new NullishTuple[3]
-    strVal[0] = ["0", "a"] as Tuple
-    strVal[1] = ["1", "b"] as Tuple
-    strVal[2] = ["2", "c"] as Tuple
+    strVal[0] = ["0", "a"] as TupleT
+    strVal[1] = ["1", "b"] as TupleT
+    strVal[2] = ["2", "c"] as TupleT
     result += tupleAreEqual(Object.entries(str), strVal) ? 0 : 1
 
     let clVal: NullishTuple[] = new NullishTuple[3]
-    clVal[0] = ["x", new Number(10)] as Tuple
-    clVal[1] = ["y", null] as Tuple
-    clVal[2] = ["z", new Number(30)] as Tuple
+    clVal[0] = ["x", new Number(10)] as TupleT
+    clVal[1] = ["y", null] as TupleT
+    clVal[2] = ["z", new Number(30)] as TupleT
     result += tupleAreEqual(Object.entries(cl), clVal) ? 0 : 1
 
     result += tupleAreEqual(Object.entries(lambda), emptyTuple) ? 0 : 1

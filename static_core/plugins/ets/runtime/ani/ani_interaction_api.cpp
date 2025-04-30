@@ -4992,6 +4992,23 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void(ani_env *env, ani_
     return status;
 }
 
+static ani_size DoGetTupleLength(EtsCoroutine *coroutine, EtsHandle<EtsObject> internalTuple)
+{
+    if (UNLIKELY(PlatformTypes(coroutine)->coreTupleN->IsAssignableFrom(internalTuple->GetClass()))) {
+        EtsClass *klass = internalTuple->GetClass();
+        EtsField *field = klass->GetFieldIDByName("$tupleValues", nullptr);
+        ASSERT(field != nullptr);
+
+        auto *valuesArray = internalTuple->GetFieldObject(field);
+        ASSERT(valuesArray->GetClass()->GetRuntimeClass()->IsObjectArrayClass());
+
+        auto *objectArray = EtsObjectArray::FromCoreType(valuesArray->GetCoreType());
+        return objectArray->GetLength();
+    }
+
+    return internalTuple->GetClass()->GetFieldsNumber();
+}
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(ani_env *env, ani_tuple_value tupleValue, ani_size *result)
 {
@@ -5001,47 +5018,48 @@ NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(ani_env *env, ani_t
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *internalTuple = s.ToInternalType(tupleValue);
-    *result = internalTuple->GetLength();
+    auto *coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
+
+    *result = DoGetTupleLength(coroutine, internalTuple);
+
     return ANI_OK;
 }
 
-template <typename PrimitiveArrayType>
+template <typename ValueType>
 static bool IsCorrectBoxType(EtsCoroutine *coro, EtsObject *element)
 {
     ASSERT(element != nullptr);
     ASSERT(element->GetClass() != nullptr);
-    auto *boxPrimitiveClass = EtsBoxPrimitive<typename PrimitiveArrayType::ValueType>::GetBoxClass(coro);
+    auto *boxPrimitiveClass = EtsBoxPrimitive<ValueType>::GetBoxClass(coro);
     return element->GetClass()->GetRuntimeClass() == boxPrimitiveClass;
 }
 
-template <typename PrimitiveArrayType>
-static ani_status TupleValueGetItem(ani_env *env, ani_tuple_value tupleValue, ani_size index,
-                                    typename PrimitiveArrayType::ValueType *result)
+template <typename ValueType>
+static ani_status TupleValueGetItem(ani_env *env, ani_object tupleValue, ani_size index, ValueType *result)
 {
     CHECK_ENV(env);
     CHECK_PTR_ARG(tupleValue);
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *internalTuple = s.ToInternalType(tupleValue);
-    ANI_CHECK_RETURN_IF_GE(index, internalTuple->GetLength(), ANI_OUT_OF_RANGE);
+    auto coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
 
-    const auto *arrayCls = internalTuple->GetClass();
-    ASSERT(arrayCls->IsArrayClass());
-    const auto *elementCls = arrayCls->GetComponentType();
-    ASSERT(elementCls != nullptr);
-    if (elementCls->IsPrimitive()) {
-        ANI_CHECK_RETURN_IF_NE(arrayCls, PrimitiveArrayType::GetComponentClass(), ANI_INVALID_TYPE);
-        *result = static_cast<PrimitiveArrayType *>(internalTuple)->Get(index);
-    } else {
-        // Case of boxing of tuple types to the least upper bound type.
-        auto *element = static_cast<EtsObjectArray *>(internalTuple)->Get(index);
-        ANI_CHECK_RETURN_IF_EQ(element, nullptr, ANI_ERROR);
-        ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<PrimitiveArrayType>(s.GetCoroutine(), element), false,
-                               ANI_INVALID_TYPE);
-        *result = EtsBoxPrimitive<typename PrimitiveArrayType::ValueType>::FromCoreType(element)->GetValue();
-    }
+    EtsClass *klass = internalTuple->GetClass();
+    // NOTE (#24962): Extend implementation to TupleN, when FE supports it
+    EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
+    ASSERT(field != nullptr);
+
+    auto *resultField = internalTuple->GetFieldObject(field);
+    ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<ValueType>(coroutine, resultField), false, ANI_INVALID_TYPE);
+
+    EtsBoxPrimitive<ValueType> *boxedVal = EtsBoxPrimitive<ValueType>::FromCoreType(resultField);
+    auto primitiveValue = boxedVal->GetValue();
+    *result = primitiveValue;
 
     return ANI_OK;
 }
@@ -5051,7 +5069,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Boolean(ani_env *env, ani_tu
                                                             ani_boolean *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsBooleanArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_boolean>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5059,7 +5077,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Char(ani_env *env, ani_tuple
                                                          ani_char *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsCharArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_char>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5067,7 +5085,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Byte(ani_env *env, ani_tuple
                                                          ani_byte *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsByteArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_byte>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5075,7 +5093,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Short(ani_env *env, ani_tupl
                                                           ani_short *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsShortArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_short>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5083,7 +5101,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Int(ani_env *env, ani_tuple_
                                                         ani_int *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsIntArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_int>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5091,7 +5109,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Long(ani_env *env, ani_tuple
                                                          ani_long *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsLongArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_long>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5099,7 +5117,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Float(ani_env *env, ani_tupl
                                                           ani_float *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsFloatArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_float>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5107,7 +5125,7 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Double(ani_env *env, ani_tup
                                                            ani_double *result)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueGetItem<EtsDoubleArray>(env, tupleValue, index, result);
+    return TupleValueGetItem<ani_double>(env, tupleValue, index, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5120,47 +5138,43 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Ref(ani_env *env, ani_tuple_
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *internalTuple = s.ToInternalType(tupleValue);
-    ANI_CHECK_RETURN_IF_GE(index, internalTuple->GetLength(), ANI_OUT_OF_RANGE);
-    ANI_CHECK_RETURN_IF_NE(internalTuple->GetClass()->GetRuntimeClass()->IsObjectArrayClass(), true, ANI_INVALID_TYPE);
-    auto *element = static_cast<EtsObjectArray *>(internalTuple)->Get(index);
+    auto coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+
+    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
+
+    EtsClass *klass = internalTuple->GetClass();
+    // NOTE (#24962): Extend implementation to TupleN, when FE supports it
+    EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
+    ASSERT(field != nullptr);
+
+    auto element = internalTuple->GetFieldObject(field);
     return s.AddLocalRef(element, result);
 }
 
-template <typename PrimitiveArrayType>
-static ani_status TupleValueSetItem(ani_env *env, ani_tuple_value tupleValue, ani_size index,
-                                    typename PrimitiveArrayType::ValueType value)
+template <typename ValueType>
+static ani_status TupleValueSetItem(ani_env *env, ani_tuple_value tupleValue, ani_size index, ValueType value)
 {
     CHECK_ENV(env);
     CHECK_PTR_ARG(tupleValue);
 
     ScopedManagedCodeFix s(env);
-    auto *internalTuple = s.ToInternalType(tupleValue);
-    ANI_CHECK_RETURN_IF_GE(index, internalTuple->GetLength(), ANI_OUT_OF_RANGE);
+    auto coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
 
-    const auto *arrayCls = internalTuple->GetClass();
-    ASSERT(arrayCls->IsArrayClass());
-    const auto *elementCls = arrayCls->GetComponentType();
-    ASSERT(elementCls != nullptr);
-    if (elementCls->IsPrimitive()) {
-        ANI_CHECK_RETURN_IF_NE(arrayCls, PrimitiveArrayType::GetComponentClass(), ANI_INVALID_TYPE);
-        static_cast<PrimitiveArrayType *>(internalTuple)->Set(index, value);
-    } else {
-        auto coro = s.GetCoroutine();
-        EtsHandleScope scope(coro);
-        EtsHandle etsArray(coro, static_cast<EtsObjectArray *>(internalTuple));
+    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
 
-        // Can check element type only if it was set before
-        auto *element = etsArray->Get(index);
-        if (element != nullptr) {
-            ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<PrimitiveArrayType>(s.GetCoroutine(), element), false,
-                                   ANI_INVALID_TYPE);
-        }
+    EtsHandle<EtsObject> boxed(coroutine, EtsBoxPrimitive<ValueType>::Create(coroutine, value));
+    ANI_CHECK_RETURN_IF_EQ(boxed.GetPtr(), nullptr, ANI_OUT_OF_MEMORY);
 
-        auto *boxed = EtsBoxPrimitive<typename PrimitiveArrayType::ValueType>::Create(coro, value);
-        ANI_CHECK_RETURN_IF_EQ(boxed, nullptr, ANI_OUT_OF_MEMORY);
-        etsArray->Set(index, boxed);
-    }
+    EtsHandle<EtsClass> klass(coroutine, internalTuple->GetClass());
+    // NOTE (#24962): Extend implementation to TupleN, when FE supports it
+    EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
+    ASSERT(field != nullptr);
+
+    internalTuple->SetFieldObject(field, boxed.GetPtr());
 
     return ANI_OK;
 }
@@ -5170,7 +5184,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Boolean(ani_env *env, ani_tu
                                                             ani_boolean value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsBooleanArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_boolean>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5178,7 +5192,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Char(ani_env *env, ani_tuple
                                                          ani_char value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsCharArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_char>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5186,7 +5200,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Byte(ani_env *env, ani_tuple
                                                          ani_byte value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsByteArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_byte>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5194,7 +5208,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Short(ani_env *env, ani_tupl
                                                           ani_short value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsShortArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_short>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5202,7 +5216,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Int(ani_env *env, ani_tuple_
                                                         ani_int value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsIntArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_int>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5210,7 +5224,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Long(ani_env *env, ani_tuple
                                                          ani_long value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsLongArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_long>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5218,7 +5232,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Float(ani_env *env, ani_tupl
                                                           ani_float value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsFloatArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_float>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5226,7 +5240,7 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Double(ani_env *env, ani_tup
                                                            ani_double value)
 {
     ANI_DEBUG_TRACE(env);
-    return TupleValueSetItem<EtsDoubleArray>(env, tupleValue, index, value);
+    return TupleValueSetItem<ani_double>(env, tupleValue, index, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5239,11 +5253,20 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Ref(ani_env *env, ani_tuple_
     CHECK_PTR_ARG(value);
 
     ScopedManagedCodeFix s(env);
-    auto *internalTuple = s.ToInternalType(tupleValue);
-    ANI_CHECK_RETURN_IF_GE(index, internalTuple->GetLength(), ANI_OUT_OF_RANGE);
-    ANI_CHECK_RETURN_IF_NE(internalTuple->GetClass()->GetRuntimeClass()->IsObjectArrayClass(), true, ANI_INVALID_TYPE);
-    auto *etsValue = s.ToInternalType(value);
-    static_cast<EtsObjectArray *>(internalTuple)->Set(index, etsValue);
+    auto coroutine = s.GetCoroutine();
+    EtsHandleScope scope(coroutine);
+
+    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
+
+    EtsHandle<EtsClass> klass(coroutine, internalTuple->GetClass());
+    // NOTE (#24962): Extend implementation to TupleN, when FE supports it
+    EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
+    ASSERT(field != nullptr);
+
+    EtsObject *etsValue = s.ToInternalType(value);
+    internalTuple->SetFieldObject(field, etsValue);
+
     return ANI_OK;
 }
 

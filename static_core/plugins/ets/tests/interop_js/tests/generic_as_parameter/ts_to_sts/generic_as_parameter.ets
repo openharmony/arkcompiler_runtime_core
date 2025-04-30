@@ -14,7 +14,7 @@
  */
 
 import {
-    Tuple,
+    TupleT,
     tsNumber,
     tsString,
     tsBool,
@@ -86,7 +86,7 @@ import {
     genericExtendClass,
 } from 'main_js';
 
-type Tuple = [int, boolean];
+type TupleT = [int, boolean];
 type Union = string | number;
 
 const etsNumber = 1;
@@ -95,7 +95,7 @@ const etsBool = true;
 const etsArr: int[] = [etsNumber];
 const etsObj: object = {};
 const etsUnion: Union = etsNumber;
-const etsTuple: Tuple = [etsNumber, etsBool];
+const etsTuple: TupleT = [etsNumber, etsBool];
 
 function checkAnyTypeParameterInt(): boolean {
     return anyTypeParameter(etsNumber) as int == etsNumber as int;
@@ -127,7 +127,7 @@ function checkAnyTypeParameterUnion(): boolean {
 function checkAnyTypeParameterTuple(): boolean {
     const res = anyTypeParameter(etsTuple);
 
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as int == etsTuple[0] as int
         && res[1] as boolean == etsTuple[1] as boolean;
 }
@@ -161,7 +161,7 @@ function checkAnyTypeParameterExplicitCallUnion(): boolean {
 
 function checkAnyTypeParameterExplicitCallTuple(): boolean {
     const res = anyTypeParameterExplicitCallFromTsTuple();
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as int == tsTuple[0] as int
         && res[1] as boolean == tsTuple[1] as boolean;
 }
@@ -201,7 +201,7 @@ function checkGenericTypeFunctionReturnAnyUnion(): boolean {
 function checkGenericTypeFunctionReturnAnyTuple(): boolean {
     const res = genericTypeFunctionReturnAny(etsTuple);
 
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as int == etsTuple[0] as int
         && res[1] as boolean == etsTuple[1] as boolean;
 }
@@ -234,7 +234,7 @@ function checkGenericTypeFunctionExplicitCallUnion(): boolean {
 
 function checkGenericTypeFunctionExplicitCallTuple(): boolean {
     const res = genericTypeFunctionExplicitCallFromTsTuple();
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as int == tsTuple[0] as int
         && res[1] as boolean == tsTuple[1] as boolean;
 }
@@ -272,7 +272,7 @@ function checkExtendGenericUnion(): boolean {
 function checkExtendGenericTuple(): boolean {
     const res = extendGenericTuple(etsTuple);
 
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as int == etsTuple[0] as int
         && res[1] as boolean == etsTuple[1] as boolean;
 }
@@ -298,7 +298,7 @@ function checkGenericExtendType(): boolean {
 function checkTupleGeneric() {
     const res = tupleGeneric(etsTuple);
 
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as boolean == etsTuple[1] as boolean
         && res[1] as int == etsTuple[0] as int;
 }
@@ -377,7 +377,7 @@ function checkGenericDefaultUnion(): boolean {
 function checkGenericDefaultTuple(): boolean {
     const res = genericDefaultTuple(etsTuple);
 
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as int == etsTuple[0] as int
         && res[1] as boolean == etsTuple[1] as boolean;
 }
@@ -416,7 +416,7 @@ function checkGenericDefaultUnionCallFromTs(): boolean {
 function checkGenericDefaultTupleCallFromTs(): boolean {
     const res = genericDefaultTupleCallFromTs();
 
-    return res as Array<Tuple> instanceof Array
+    return res as Array<TupleT> instanceof Array
         && res[0] as int == etsTuple[0] as int
         && res[1] as boolean == etsTuple[1] as boolean;
 }

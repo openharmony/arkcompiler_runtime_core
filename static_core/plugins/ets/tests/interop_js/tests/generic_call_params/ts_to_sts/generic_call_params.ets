@@ -29,12 +29,12 @@ import {
 } from 'main_js';
 
 type Union = string | int;
-type Tuple = [string, int];
+type TupleT = [string, int];
 const etsInt = 1;
 const etsUnion: Union = etsInt;
 const etsString = 'string';
 const arrForLoop: int[] = [0, 1, 2]
-const etsTuple: Tuple = [etsString, etsInt];
+const etsTuple: TupleT = [etsString, etsInt];
 class EtsUser {
     age = etsInt;
     data = etsString;
@@ -45,7 +45,7 @@ const etsUser = new EtsUser();
 const unionFoo = (a: Union, b: Union): Union[] => [a, b];
 const add = (a: int, b: int): int => a + b;
 const concat = (a: string, b: string): string => a + ' ' + b;
-const push = (a: string, b: int): Tuple => [a, b];
+const push = (a: string, b: int): TupleT => [a, b];
 
 function checkApplyFunctionGenericString(): boolean {
     return applyFunctionGeneric(etsString, etsString, concat) as string == etsString + ' ' + etsString as string;
@@ -56,10 +56,9 @@ function checkApplyFunctionGenericInt(): boolean {
 }
 
 function checkApplyFunctionGenericTuple(): boolean {
-    const res = applyFunctionGenericTuple(etsTuple[0], etsTuple[1], push);
+    const res: TupleT = applyFunctionGenericTuple(etsTuple[0], etsTuple[1], push);
 
-    return res as Array<Tuple> instanceof Array
-        && res[0] as string == etsTuple[0] as string
+    return res[0] as string == etsTuple[0] as string
         && res[1] as int == etsTuple[1] as int;
 }
 

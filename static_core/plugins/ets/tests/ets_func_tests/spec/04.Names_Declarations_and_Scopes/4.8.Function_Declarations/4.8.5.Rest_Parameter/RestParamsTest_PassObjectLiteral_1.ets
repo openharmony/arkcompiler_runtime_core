@@ -53,7 +53,7 @@ class Base {
     }
 }
 
-class Tuple {
+class TupleT {
     index: int;
     name: String = "";
 }
@@ -72,7 +72,7 @@ function main(): int {
     let test = new Testee();
     let result: int = 0;
 
-    let tu: Tuple = {index: 11, name: "Jane"};
+    let tu: TupleT = {index: 11, name: "Jane"};
     result = test.spread("Single Tuple", tu);
     if(result != 42) return 1;
 

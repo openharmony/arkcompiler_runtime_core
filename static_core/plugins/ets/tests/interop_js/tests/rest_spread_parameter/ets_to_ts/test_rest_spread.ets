@@ -35,7 +35,7 @@ function checkRestOfString(obj: string[], ...strs: string[]) {
     return true;
 }
 
-function checkRestOfTuple(obj: [number, string][], ...tupleArr: [number, string][]) {
+function checkRestOfTuple(obj: ((number | string)[])[], ...tupleArr: ((number | string)[])[]) {
     if(obj.length !== tupleArr.length)
         return false;
     for(let i = 0; i < obj.length; i++) {

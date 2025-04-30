@@ -1,7 +1,3 @@
-#23499 CTE instead of successful compilation
-02.lexical_elements/07.keywords/soft_6.ets
-02.lexical_elements/07.keywords/soft_13.ets
-
 #23500 Successful compilation instead of CTE
 02.lexical_elements/07.keywords/hard_16.ets
 02.lexical_elements/07.keywords/hard_29.ets
@@ -65,9 +61,6 @@
 
 #24420
 03.types/19.union_types/ut_34.ets
-
-#22987 es2panda aborts when name of the declaration clashes with the predefined type or standard library entity name.
-04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n10.ets
 
 #24649
 04.names_declarations_and_scopes/04.scopes/type_param_class_neg_3.ets
@@ -583,32 +576,9 @@
 07.expressions/06.spread_expression/spex_meth_45.ets
 
 #24408 Fails on spread expression with tuple, tuples in rest parameters not supported
-07.expressions/06.spread_expression/spex_const_32.ets
-07.expressions/06.spread_expression/spex_const_33.ets
-07.expressions/06.spread_expression/spex_const_34.ets
 07.expressions/06.spread_expression/spex_const_35.ets
-07.expressions/06.spread_expression/spex_const_36.ets
-07.expressions/06.spread_expression/spex_const_38.ets
-07.expressions/06.spread_expression/spex_const_40.ets
-07.expressions/06.spread_expression/spex_const_41.ets
-07.expressions/06.spread_expression/spex_const_42.ets
-07.expressions/06.spread_expression/spex_const_43.ets
-07.expressions/06.spread_expression/spex_const_44.ets
-07.expressions/06.spread_expression/spex_const_46.ets
-07.expressions/06.spread_expression/spex_const_47.ets
-07.expressions/06.spread_expression/spex_func_32.ets
-07.expressions/06.spread_expression/spex_func_33.ets
-07.expressions/06.spread_expression/spex_func_34.ets
 07.expressions/06.spread_expression/spex_func_35.ets
-07.expressions/06.spread_expression/spex_func_36.ets
-07.expressions/06.spread_expression/spex_func_38.ets
-07.expressions/06.spread_expression/spex_func_40.ets
-07.expressions/06.spread_expression/spex_func_41.ets
-07.expressions/06.spread_expression/spex_func_42.ets
-07.expressions/06.spread_expression/spex_func_43.ets
-07.expressions/06.spread_expression/spex_func_44.ets
 07.expressions/06.spread_expression/spex_func_46.ets
-07.expressions/06.spread_expression/spex_func_47.ets
 07.expressions/06.spread_expression/spex_lmbd_32.ets
 07.expressions/06.spread_expression/spex_lmbd_33.ets
 07.expressions/06.spread_expression/spex_lmbd_34.ets
@@ -621,19 +591,7 @@
 07.expressions/06.spread_expression/spex_lmbd_44.ets
 07.expressions/06.spread_expression/spex_lmbd_46.ets
 07.expressions/06.spread_expression/spex_lmbd_47.ets
-07.expressions/06.spread_expression/spex_meth_32.ets
-07.expressions/06.spread_expression/spex_meth_33.ets
-07.expressions/06.spread_expression/spex_meth_34.ets
 07.expressions/06.spread_expression/spex_meth_35.ets
-07.expressions/06.spread_expression/spex_meth_36.ets
-07.expressions/06.spread_expression/spex_meth_38.ets
-07.expressions/06.spread_expression/spex_meth_40.ets
-07.expressions/06.spread_expression/spex_meth_41.ets
-07.expressions/06.spread_expression/spex_meth_42.ets
-07.expressions/06.spread_expression/spex_meth_43.ets
-07.expressions/06.spread_expression/spex_meth_44.ets
-07.expressions/06.spread_expression/spex_meth_46.ets
-07.expressions/06.spread_expression/spex_meth_47.ets
 
 #20376 No support for spread arguments in lambda
 07.expressions/06.spread_expression/spex_lmbd_2.ets
@@ -778,9 +736,6 @@
 #23978
 08.statements/14.throw_statements/throw_neg2.ets
 
-#22148
-09.classes/01.class_declaration/03.class_extension_clause/extends_object_class.ets
-
 #23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets
 
@@ -828,10 +783,6 @@
 13.compilation_units/09.export_directives/04.re-export_directive/pkg01_re-export_all_by_old_names.ets
 13.compilation_units/09.export_directives/04.re-export_directive/pkg02_re-export_all_with_rename.ets
 13.compilation_units/09.export_directives/04.re-export_directive/pkg03_re-export_all.ets
-
-#22692
-15.semantic_rules/05.compatibility_call_args/tuple_rest_params_0.ets
-15.semantic_rules/05.compatibility_call_args/tuple_rest_params_1.ets
 
 #23537
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_3.ets

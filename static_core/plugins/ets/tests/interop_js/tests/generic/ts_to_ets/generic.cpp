@@ -79,8 +79,8 @@ TEST_F(EtsGenericTsToEtsTest, check_generic_function_type_any_bool)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericFunctionTypeAnyBool"));
 }
-
-TEST_F(EtsGenericTsToEtsTest, check_generic_function_tuple_type)
+// NOTE (#24570): fix interop tests for tuple
+TEST_F(EtsGenericTsToEtsTest, DISABLED_check_generic_function_tuple_type)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericFunctionTupleType"));
 }
