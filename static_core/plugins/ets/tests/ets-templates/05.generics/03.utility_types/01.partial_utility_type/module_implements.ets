@@ -22,6 +22,7 @@ files:
 ---*/
 
 import {CI} from "../exported_data"
+import {gs} from "../exported_data"
 
 function foo(i: Partial<CI>) {
   let v: int = 0;
