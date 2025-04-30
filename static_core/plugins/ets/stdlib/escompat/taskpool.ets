@@ -23,7 +23,7 @@ export namespace taskpool {
             super(false);
             this.run<void>((): void => {
                 this.workerId = CoroutineExtras.getWorkerId();
-            })
+            }).Await();
         }
 
         internal performTask(): void {
@@ -31,7 +31,7 @@ export namespace taskpool {
             if (task == undefined) {
                 return;
             }
-
+            this.currentPriority = task.priority;
             let job = this.run<NullishType>((): NullishType => {
                 ConcurrencyHelpers.lockGuard(workersMutex, () => {
                     idleWorkers.delete(this);
@@ -50,6 +50,8 @@ export namespace taskpool {
             }).catch((e) => {
                 task?.reject(e);
                 this.notifyTaskFinished(task)
+            }).finally(() => {
+                this.currentPriority = undefined;
             })
         }
 
@@ -62,6 +64,7 @@ export namespace taskpool {
         }
 
         internal workerId: int;
+        internal currentPriority?: Priority;
     }
 
     /**
@@ -473,7 +476,7 @@ export namespace taskpool {
         /// The task is added to taskpool for execution
         internal enqueue(priority?: Priority): void {
             priority = priority == undefined ? Priority.MEDIUM : priority;
-
+            this.priority = priority;
             if (!isTaskPoolUseLaunch) {
                 ConcurrencyHelpers.mutexLock(taskQueuesMutex);
                 initTaskQueues();
@@ -577,6 +580,8 @@ export namespace taskpool {
 
         internal resolve: (value: NullishType) => void;
         internal reject: (e: Error) => void;
+
+        internal priority: Priority;
 
         private runner: SequenceRunner;
 
@@ -1030,6 +1035,7 @@ export namespace taskpool {
      * @returns taskpool internal information about tasks and threads
      */
     export function getTaskPoolInfo(): TaskPoolInfo {
+        initWorkerPool();
         const taskInfos: Array<TaskInfo> = new Array<TaskInfo>();
         const threadInfos: Array<ThreadInfo> = new Array<ThreadInfo>();
         ConcurrencyHelpers.mutexLock(mutex);
@@ -1056,24 +1062,48 @@ export namespace taskpool {
             taskInfos.push(taskInfo);
         });
         // Collect worker threads info
-        workerToTasks.forEach((tasks: Set<Task>, workerId: int) => {
-            const threadInfo: ThreadInfo = new ThreadInfo();
-            threadInfo.tid = workerId;
-            const tasksCount: int = tasks.size as int;
-            if (tasksCount == 0) {
+        if (!isTaskPoolUseLaunch) {
+            workers.forEach(worker=>{
+                const threadInfo: ThreadInfo = new ThreadInfo();
+                threadInfo.tid = worker.workerId;
+                threadInfo.priority = worker!.currentPriority;
+                let tasks = workerToTasks.get(worker.workerId);
+                if (tasks != undefined) {
+                    let tasksCount : int = tasks.size as int;
+                    const taskIds: number[] = new number[tasksCount];
+                    let currentIndex: int = 0;
+                    tasks.forEach((task: Task) => {
+                        taskIds[currentIndex] = task.id;
+                        currentIndex++;
+                    });
+                    threadInfo.taskIds = taskIds;
+                }
                 threadInfos.push(threadInfo);
-                return;
-            }
-            const taskIds: number[] = new number[tasksCount];
-            let currentIndex: int = 0;
-            tasks.forEach((task: Task) => {
-                taskIds[currentIndex] = task.id;
-                currentIndex++;
+            })
+        } else {
+            workerToTasks.forEach((tasks: Set<Task>, workerId: int) => {
+                const threadInfo: ThreadInfo = new ThreadInfo();
+                threadInfo.tid = workerId;
+                const tasksCount: int = tasks.size as int;
+                if (tasksCount == 0) {
+                    threadInfos.push(threadInfo);
+                    return;
+                }
+                const taskIds: number[] = new number[tasksCount];
+                let currentIndex: int = 0;
+                tasks.forEach((task: Task) => {
+                    taskIds[currentIndex] = task.id;
+                    currentIndex++;
+                    // priority of running tasks can be regard as the priority of current thread's priority
+                    // current only when task has been executed the worker can execute other task
+                    if (runningTasks.has(task) && threadInfo.priority == undefined) {
+                        threadInfo.priority = task.priority;
+                    }
+                });
+                threadInfo.taskIds = taskIds;
+                threadInfos.push(threadInfo);
             });
-            threadInfo.taskIds = taskIds;
-            threadInfo.priority = Priority.MEDIUM;
-            threadInfos.push(threadInfo);
-        });
+        }
         ConcurrencyHelpers.mutexUnlock(mutex);
         const Info: TaskPoolInfo = new TaskPoolInfo();
         const taskInfosRes: TaskInfo[] = new TaskInfo[taskInfos.length as int];
@@ -1085,22 +1115,7 @@ export namespace taskpool {
             threadInfosRes[index as int] = threadInfo;
         });
         Info.taskInfos = taskInfosRes;
-        if (isTaskPoolUseLaunch) {
-            Info.threadInfos = threadInfosRes;
-            return Info;
-        }
-        if (threadInfosRes.length != 0) {
-            Info.threadInfos = threadInfosRes;
-        } else {
-            const infos: ThreadInfo[] = new ThreadInfo[workers.size as int];
-            let index: int = 0;
-            workers.forEach(worker => {
-                let threadInfo = new ThreadInfo();
-                threadInfo.tid = worker.workerId;
-                infos[index++] = threadInfo;
-            })
-            Info.threadInfos = infos;
-        }
+        Info.threadInfos = threadInfosRes;
         return Info;
     }
 
