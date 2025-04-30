@@ -33,6 +33,8 @@ function main(): int {
         testClearData)
     suite.addTest("TreeSet clear the null treeSet",
         testClearEmptyTreeSet)
+    suite.addTest("TreeSet add data after clear the TreeSet",
+        testAddDataAfterClearTreeSet)
     suite.addTest("TreeSet forEach the treeSet with no reference",
         testForEachNoReference)
     suite.addTest("TreeSet forEach the treeSet with reference is value",
@@ -51,7 +53,7 @@ function main(): int {
 
 function testRemoveExistingValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result1 = treeSet.remove("aa");
     let result2 = treeSet.has("aa");
@@ -62,7 +64,7 @@ function testRemoveExistingValue() {
 
 function testRemoveNonExistingValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.remove("bb");
     assertEQ(result, false, "The treeSet should return false for the value that is not set");
@@ -71,7 +73,7 @@ function testRemoveNonExistingValue() {
 
 function testRemoveValueFromEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.remove("aa");
     assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
     assertEQ(treeSet.length, 0, "The treeSet length should be 0");
@@ -79,7 +81,7 @@ function testRemoveValueFromEmptyTreeSet() {
 
 function testRemoveEmptyStringValueFromEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.remove("");
     assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
     assertEQ(treeSet.length, 0, "The treeSet length should be 0");
@@ -87,7 +89,7 @@ function testRemoveEmptyStringValueFromEmptyTreeSet() {
 
 function testClearData() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.clear();
     let result1 = treeSet.has("aa");
@@ -99,14 +101,29 @@ function testClearData() {
 
 function testClearEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.clear();
     assertEQ(treeSet.length, 0, "The treeSet length should be 0");
 }
 
+function testAddDataAfterClearTreeSet() {
+    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
+        secondValue: string): number => { return firstValue.compareTo(secondValue) });
+    treeSet.add("aa");
+    treeSet.add("bb");
+    treeSet.clear();
+    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
+    treeSet.add("cc");
+    treeSet.add("dd");
+    treeSet.add("ee");
+    assertEQ(treeSet.length, 3, "The treeSet length should be 3");
+    assertEQ(treeSet.getFirstValue(), "ee", "The treeMap first value should be ee");
+    assertEQ(treeSet.getLastValue(), "cc", "The treeMap last value should be cc");
+}
+
 function testForEachNoReference() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let count: number = 0;
@@ -118,7 +135,7 @@ function testForEachNoReference() {
 
 function testForEachValueReference() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let flag = false;
@@ -130,7 +147,7 @@ function testForEachValueReference() {
 
 function testForEachValueKeyReference() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let flag = false;
@@ -142,7 +159,7 @@ function testForEachValueKeyReference() {
 
 function testForEachThreeReferences() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let flag = false;
@@ -154,7 +171,7 @@ function testForEachThreeReferences() {
 
 function testValuesReturnIteratorByValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     let it = treeSet.values();
@@ -165,7 +182,7 @@ function testValuesReturnIteratorByValue() {
 
 function testValuesReturnIteratorByValueWithEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let it = treeSet.values();
     assertEQ(it.next().value, undefined, "The treeSet values iterator should return undefined when treeSet is empty");
 }

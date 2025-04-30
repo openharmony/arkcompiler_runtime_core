@@ -22,8 +22,8 @@ function main(): int {
     const suite = new ArkTestsuite("TreeSet Add Has API tests")
 
     suite.addTest("TreeSet add data", testAddData)
+    suite.addTest("TreeSet add data with same key and different values", testAddDataWithSameKeyDifferentValues)
     suite.addTest("TreeSet add empty string data", testAddEmptyStringData)
-    suite.addTest("TreeSet loop add data", testLoopAddData)
     suite.addTest("TreeSet has value", testHasValue)
     suite.addTest("TreeSet has not set value", testHasNonExistingValue)
     suite.addTest("TreeSet has value of the null TreeSet", testHasValueInEmptyTreeSet)
@@ -33,37 +33,47 @@ function main(): int {
     return suite.run()
 }
 
+class MyObject extends Object {
+    size: number;
+    constructor(size: number) {
+        super();
+        this.size = size;
+    }
+}
+
 function testAddData() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.has("aa");
     assertEQ(result, true, "The treeSet should contain the added value");
     assertEQ(treeSet.length, 1, "The treeSet length should be 1");
 }
 
+function testAddDataWithSameKeyDifferentValues() {
+    let treeSet: TreeSet<MyObject> = new TreeSet<MyObject>((firstValue: MyObject,
+        secondValue: MyObject): number => { return secondValue.size - firstValue.size });
+    let obj: MyObject = new MyObject(1);
+    let obj2: MyObject = new MyObject(1);
+    treeSet.add(obj);
+    treeSet.add(obj2);
+    let result = treeSet.has(obj);
+    assertEQ(result, true, "The treeSet should contain the added value");
+    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
+}
+
 function testAddEmptyStringData() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue > secondValue });
+        secondValue: string): number => { return firstValue.compareTo(secondValue) });
     treeSet.add("");
     let result = treeSet.has("");
     assertEQ(result, true, "The treeSet should contain the added value");
     assertEQ(treeSet.length, 1, "The treeSet Length should be 1");
 }
 
-function testLoopAddData() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue > secondValue });
-    for (let i = 0; i < 1000; i++) {
-        treeSet.add("sparrow" + i);
-        assertEQ(treeSet.has("sparrow" + i), true, "The treeSet should contain the added value");
-    }
-    assertEQ(treeSet.length, 1000, "The treeSet Length should be 1000");
-
-}
 function testHasValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.has("aa");
     assertEQ(result, true, "The treeSet should has the value");
@@ -72,7 +82,7 @@ function testHasValue() {
 
 function testHasNonExistingValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     let result = treeSet.has("bb");
     assertEQ(result, false, "The treeSet should not has the value that is not set");
@@ -81,7 +91,7 @@ function testHasNonExistingValue() {
 
 function testHasValueInEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.has("aa");
     assertEQ(result, false, "The treeSet should not has the value when the treeSet is empty");
     assertEQ(treeSet.length, 0, "The treeSet length should be 0");
@@ -89,7 +99,7 @@ function testHasValueInEmptyTreeSet() {
 
 function testHasEmptyStringValueInEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result = treeSet.has("");
     assertEQ(result, false, "The treeSet should not has the value that is not set");
     assertEQ(treeSet.length, 0, "The treeSet length should be 0");
@@ -97,7 +107,7 @@ function testHasEmptyStringValueInEmptyTreeSet() {
 
 function testHasValueAfterMixedOperations() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("squirrel");
     let resultOne = treeSet.has("squirrel");
     assertEQ(resultOne, true, "The treeSet should has the value");

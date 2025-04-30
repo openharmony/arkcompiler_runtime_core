@@ -49,10 +49,6 @@ class MyObject extends Object {
     }
 }
 
-function compareObjects(first: MyObject, second: MyObject): boolean {
-    return first.size < second.size;
-}
-
 function equalObjects(first: MyObject, second: MyObject): boolean {
     if (first.size == second.size) {
         return true;
@@ -62,7 +58,7 @@ function equalObjects(first: MyObject, second: MyObject): boolean {
 
 function testGetLowerValueGetHigherValueValidValues() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     treeSet.add("cc");
@@ -79,7 +75,7 @@ function testGetLowerValueGetHigherValueValidValues() {
 
 function testGetLowerValueGetHigherValueEmptyTreeSet() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let lower = treeSet.getLowerValue("bb");
     let higher = treeSet.getHigherValue("aa");
     assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
@@ -89,7 +85,7 @@ function testGetLowerValueGetHigherValueEmptyTreeSet() {
 
 function testGetLowerValueGetHigherValueBoundaryValues() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("aa");
     treeSet.add("bb");
     treeSet.add("cc");
@@ -102,7 +98,7 @@ function testGetLowerValueGetHigherValueBoundaryValues() {
 
 function testGetLowerValueAndHigherValueNonExistingValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     treeSet.add("bb");
     treeSet.add("cc");
     treeSet.add("dd");
@@ -124,7 +120,7 @@ function testGetLowerValueAndHigherValueNonExistingValue() {
 
 function testGetLowerValueGetHigherValueEmptyStringValue() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue < secondValue });
+        secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let lower = treeSet.getLowerValue("");
     let higher = treeSet.getHigherValue("");
     assertEQ(lower, undefined, "The treeSet should return undefined for the lower value in an empty set");
@@ -134,7 +130,7 @@ function testGetLowerValueGetHigherValueEmptyStringValue() {
 
 function testGetLowerValueGetHigherValueDescendingOrder() {
     let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): boolean => { return firstValue > secondValue });
+        secondValue: string): number => { return firstValue.compareTo(secondValue) });
     treeSet.add("b");
     treeSet.add("c");
     treeSet.add("d");
@@ -148,8 +144,8 @@ function testGetLowerValueGetHigherValueDescendingOrder() {
 
 function testGetLowerValueGetHigherValueObjectValues() {
     let treeSet: TreeSet<MyObject> =
-        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
+        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
     let obj_sec: MyObject = new MyObject(2);
@@ -170,8 +166,8 @@ function testGetLowerValueGetHigherValueObjectValues() {
 
 function testGetLowerValueGetHigherValueObjectValuesBoundaryValues() {
     let treeSet: TreeSet<MyObject> =
-        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
+        new TreeSet<MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
     let obj_sec: MyObject = new MyObject(2);

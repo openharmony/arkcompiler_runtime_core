@@ -46,10 +46,6 @@ class MyObject extends Object {
     }
 }
 
-function compareObjects(first: MyObject, second: MyObject): boolean {
-    return first.size < second.size;
-}
-
 function equalObjects(first: MyObject, second: MyObject): boolean {
     if (first.size == second.size) {
         return true;
@@ -59,8 +55,8 @@ function equalObjects(first: MyObject, second: MyObject): boolean {
 
 function testGetLowerKeyAndHigherKeyValidKeys() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
@@ -78,8 +74,8 @@ function testGetLowerKeyAndHigherKeyValidKeys() {
 
 function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let lower = treeMap.getLowerKey("bb");
     let higher = treeMap.getHigherKey("aa");
@@ -90,8 +86,8 @@ function testGetLowerKeyAndHigherKeyEmptyTreeMap() {
 
 function testGetLowerKeyAndHigherKeyBoundaryData() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("aa", "123");
     treeMap.set("bb", "456");
@@ -105,8 +101,8 @@ function testGetLowerKeyAndHigherKeyBoundaryData() {
 
 function testGetLowerKeyAndHigherKeyNonExistingKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     treeMap.set("bb", "456");
     treeMap.set("cc", "123");
@@ -129,8 +125,8 @@ function testGetLowerKeyAndHigherKeyNonExistingKey() {
 
 function testGetLowerKeyAndHigherKeyEmptyStringKey() {
     let treeMap: TreeMap<string, string> =
-        new TreeMap<string, string>((firstValue: string, secondValue: string): boolean => {
-            return firstValue < secondValue
+        new TreeMap<string, string>((firstValue: string, secondValue: string): number => {
+            return secondValue.compareTo(firstValue)
         });
     let lower = treeMap.getLowerKey("");
     let higher = treeMap.getHigherKey("");
@@ -141,8 +137,8 @@ function testGetLowerKeyAndHigherKeyEmptyStringKey() {
 
 function testGetLowerKeyAndHigherKeyObjectKeys() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
     let obj_sec: MyObject = new MyObject(2);
@@ -167,8 +163,8 @@ function testGetLowerKeyAndHigherKeyObjectKeys() {
 
 function testGetLowerKeyAndHigherKeyObjectKeysBoundaryData() {
     let treeMapo: TreeMap<MyObject, MyObject> =
-        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): boolean => {
-            return compareObjects(firstValue, secondValue);
+        new TreeMap<MyObject, MyObject>((firstValue: MyObject, secondValue: MyObject): number => {
+            return secondValue.size - firstValue.size;
         });
     let obj: MyObject = new MyObject(1);
     let obj_sec: MyObject = new MyObject(2);
