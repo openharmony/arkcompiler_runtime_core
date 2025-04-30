@@ -28,6 +28,7 @@ function main(): int {
     suite.addTest("LightWeightSet getValueAt value by index of null lightWeightSet", testGetValueAtIndexOfEmptySet)
     suite.addTest("LightWeightSet getValueAt value by left float index", testGetValueAtLeftFloatIndex)
     suite.addTest("LightWeightSet getValueAt value by right float index", testGetValueAtRightFloatIndex)
+    suite.addTest("LightWeightSet getValueAt long string value", testGetValueAtLongString)
 
     return suite.run()
 }
@@ -99,4 +100,16 @@ function testGetValueAtRightFloatIndex() {
     let result = lightWeightSet.getValueAt(Math.floor(1.8));
     assertEQ(result, "bb", "The lightWeightSet should return the value at the floored index");
     assertEQ(lightWeightSet.length, 2, "The lightWeightSet length should be 2");
+}
+
+function testGetValueAtLongString() {
+    let lightWeightSet: LightWeightSet<number | string> = new LightWeightSet<number | string>();
+    let str1 = "sparrow"
+    let str2 = "squirrel"
+    let str3 = "s"
+    lightWeightSet.add(str1);
+    lightWeightSet.add(str2);
+    lightWeightSet.add(str3);
+    let result = lightWeightSet.getValueAt(1);
+    assertEQ(result, "sparrow", "The lightWeightSet should return the value at the specified index");
 }
