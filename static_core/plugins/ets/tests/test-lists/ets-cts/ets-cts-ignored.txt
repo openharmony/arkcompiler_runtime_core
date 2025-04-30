@@ -28,9 +28,6 @@
 04.names_declarations_and_scopes/05.accessible/type_name_const_enum.ets
 04.names_declarations_and_scopes/05.accessible/type_name_variable_enum.ets
 
-#23065
-04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_7.ets
-
 #24781
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/01.variable_declarations/incorrect_var_decl_7.ets
 
