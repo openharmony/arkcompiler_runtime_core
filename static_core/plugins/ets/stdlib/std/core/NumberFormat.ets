@@ -145,7 +145,8 @@ export namespace Intl {
             }
 
             // Handle numberingSystem
-            this.options.numberingSystem = "latn" // NOTE (ilyakorobkov): to define this field needs to fix issue #24827
+            this.options.numberingSystem = NumberFormat.getNumberingSystem(this.options.locale)
+
             this.options.minFracStr = Number.toString(this.options.minimumFractionDigits)
             this.options.maxFracStr = Number.toString(this.options.maximumFractionDigits)
             this.options.minSignStr = this.options.minimumSignificantDigits != undefined ? Number.toString(this.options.minimumSignificantDigits!) : ""
@@ -253,7 +254,7 @@ export namespace Intl {
             } else {
                 newOptions.isCompact = false
             }
-            newOptions.numberingSystem = "latn" // NOTE (ilyakorobkov): to define this field needs to fix issue #24827
+            newOptions.numberingSystem = "latn"
             newOptions.signDisplay = options?.signDisplay ?? "auto"
             newOptions.style = options?.style ?? "decimal"
             newOptions.unit = options?.unit ?? undefined
@@ -432,6 +433,7 @@ export namespace Intl {
         private readonly options: ResolvedNumberFormatOptionsImpl
 
         private native static isUnitCorrect(unit: string): boolean;
+        private native static getNumberingSystem(locale: string): string;
         private native formatDouble(value: double): string;
         private native formatDecStr(value: string): string;
         private native formatRangeDoubleDouble(start: number, end: number): string;

@@ -53,6 +53,12 @@ constexpr std::string_view USE_GROUPING_FALSE = "false";
 constexpr std::string_view USE_GROUPING_MIN2 = "min2";
 constexpr int32_t STYLE_PERCENT_SCALE_FACTOR = 2;
 constexpr int32_t PER_UNIT_STR_SIZE = 5;
+constexpr const char *UNDEFINED_STR = "_";
+
+inline std::string IsUndefinedStr(const std::string &str)
+{
+    return str.empty() ? UNDEFINED_STR : str;
+}
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 const std::set<std::string> REFERENCE_UNITS({"acre",       "bit",        "byte",
@@ -117,23 +123,23 @@ struct ParsedOptions {
     std::string TagString() const
     {
         std::string tag;
-        tag.append(compactDisplay);
-        tag.append(currencySign);
-        tag.append(currency);
-        tag.append(currencyDisplay);
-        tag.append(locale);
-        tag.append(minFractionDigits);
-        tag.append(maxFractionDigits);
-        tag.append(minSignificantDigits);
-        tag.append(maxSignificantDigits);
-        tag.append(minIntegerDigits);
-        tag.append(notation);
-        tag.append(numberingSystem);
-        tag.append(signDisplay);
-        tag.append(style);
-        tag.append(unit);
-        tag.append(unitDisplay);
-        tag.append(useGrouping);
+        tag.append(IsUndefinedStr(compactDisplay));
+        tag.append(IsUndefinedStr(currencySign));
+        tag.append(IsUndefinedStr(currency));
+        tag.append(IsUndefinedStr(currencyDisplay));
+        tag.append(IsUndefinedStr(locale));
+        tag.append(IsUndefinedStr(minFractionDigits));
+        tag.append(IsUndefinedStr(maxFractionDigits));
+        tag.append(IsUndefinedStr(minSignificantDigits));
+        tag.append(IsUndefinedStr(maxSignificantDigits));
+        tag.append(IsUndefinedStr(minIntegerDigits));
+        tag.append(IsUndefinedStr(notation));
+        tag.append(IsUndefinedStr(numberingSystem));
+        tag.append(IsUndefinedStr(signDisplay));
+        tag.append(IsUndefinedStr(style));
+        tag.append(IsUndefinedStr(unit));
+        tag.append(IsUndefinedStr(unitDisplay));
+        tag.append(IsUndefinedStr(useGrouping));
         return tag;
     }
 };
@@ -143,7 +149,7 @@ using LocNumFmt = icu::number::LocalizedNumberFormatter;
 using UnlocNumFmt = icu::number::UnlocalizedNumberFormatter;
 using LocNumRangeFmt = icu::number::LocalizedNumberRangeFormatter;
 
-ANI_EXPORT icu::Locale LocTagToIcuLocale(ani_env *env, const std::string &localeTag);
+ANI_EXPORT ani_status LocTagToIcuLocale(ani_env *env, const std::string &localeTag, icu::Locale &locale);
 ANI_EXPORT ani_status InitNumFormatter(ani_env *env, const ParsedOptions &options, LocNumFmt &fmt);
 ANI_EXPORT ani_status InitNumRangeFormatter(ani_env *env, const ParsedOptions &options, LocNumRangeFmt &fmt);
 ANI_EXPORT bool IsCorrectUnitIdentifier(const std::string &unit);
