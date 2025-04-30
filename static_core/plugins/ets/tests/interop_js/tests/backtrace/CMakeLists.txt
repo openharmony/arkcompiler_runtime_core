@@ -16,17 +16,18 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_backtracetest
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.ets
-    PACKAGE_NAME "Test"
-)
-
-# Build rules for call_backtrace native shared library
-panda_add_library(call_backtrace SHARED
-    call_backtrace.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/runtime/interop_js/jsbacktrace/backtrace.cpp
-)
-panda_target_compile_options(call_backtrace PRIVATE -Wno-invalid-offsetof)
-panda_target_link_libraries(call_backtrace arkruntime c_secshared)
-add_dependencies(ets_interop_js_backtracetest call_backtrace)
+# NOTE: enable when #25140 is fixed
+# panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_backtracetest
+#     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.cpp
+#     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/backtrace_test.ets
+#     PACKAGE_NAME "Test"
+# )
+# 
+# # Build rules for call_backtrace native shared library
+# panda_add_library(call_backtrace SHARED
+#     call_backtrace.cpp
+#     ${PANDA_ETS_PLUGIN_SOURCE}/runtime/interop_js/jsbacktrace/backtrace.cpp
+# )
+# panda_target_compile_options(call_backtrace PRIVATE -Wno-invalid-offsetof)
+# panda_target_link_libraries(call_backtrace arkruntime c_secshared)
+# add_dependencies(ets_interop_js_backtracetest call_backtrace)
