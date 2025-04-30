@@ -525,11 +525,16 @@ void panda::guard::Function::BuildPcInsMap(const compiler::Graph *graph)
 
     auto instructionsBuf = graph->GetRuntime()->GetMethodCode(methodPtr);
     compiler::BytecodeInstructions instructions(instructionsBuf, graph->GetRuntime()->GetMethodCodeSize(methodPtr));
-    size_t idx = 0;
-    for (auto inst : instructions) {
-        this->pcInstMap_.emplace(instructions.GetPc(inst), idx);
-        idx++;
-        if (idx >= funcSize) {
+    compiler::BytecodeIterator ins_iter = instructions.begin();
+
+    for (size_t idx = 0; idx < this->GetOriginFunction().ins.size(); idx++) {
+        auto ins = this->GetOriginFunction().ins[idx].get();
+        if (ins->opcode == pandasm::Opcode::INVALID) {
+            continue;
+        }
+        this->pcInstMap_.emplace(instructions.GetPc(*ins_iter), idx);
+        ++ins_iter;
+        if (ins_iter == instructions.end()) {
             break;
         }
     }
