@@ -1079,6 +1079,257 @@ export namespace util {
     }  // class UtilHelper
 
     /**
+     * Check the type of parameter.
+     */
+    export class types {
+
+        /**
+         * Check whether the entered value is of bigint64array array type.
+         * @param { Object } value - A BigInt64Array value 
+         * @returns { boolean } Returns true if the value is a BigInt64Array instance.
+         */
+        isBigInt64Array(value: Object): boolean {
+            return value instanceof BigInt64Array;
+        }
+        
+        /**
+         * Check whether the entered value is of biguint64array array array type.
+         * @param { Object } value - A BigUint64Array value 
+         * @returns { boolean } Returns true if the value is a BigUint64Array instance.
+         */
+        isBigUint64Array(value: Object): boolean {
+            return value instanceof BigUint64Array;
+        }
+        
+        /**
+         * Check whether the entered value is of arraybuffer type.
+         * @param { Object } value - A ArrayBuffer value 
+         * @returns { boolean } Returns true if the value is a built-in ArrayBuffer instance.
+         */
+        isAnyArrayBuffer(value: Object): boolean {
+            return this.isArrayBuffer(value);
+        }
+        
+        /**
+         * Check whether the type is included in the isAnyArrayBuffer.
+         * @param { Object } value - A included in the isAnyArrayBuffer value 
+         * @returns { boolean } Returns true if the value is an instance of one of the ArrayBuffer views,
+         * such as typed array objects or DataView.
+         */
+        isArrayBufferView(value: Object): boolean {
+            return this.isDataView(value) || this.isTypedArray(value);
+        }
+        
+        /**
+         * Check whether the entered value is of arraybuffer type.
+         * @param { Object } value - A arraybuffer value
+         * @returns { boolean } Returns true if the value is a built-in ArrayBuffer instance. This does not include SharedArrayBuffer instances.
+         */
+        isArrayBuffer(value: Object): boolean {
+            return value instanceof ArrayBuffer;
+        }
+        
+        /**
+         * Check whether the entered value is of DataView type.
+         * @param { Object } value - A DataView value
+         * @returns { boolean } Returns true if the value is a built-in DataView instance.
+         */
+        isDataView(value: Object): boolean {
+            return value instanceof DataView;
+        }
+        
+        /**
+         * Check whether the entered value is of type date.
+         * @param { Object } value - A Date value
+         * @returns { boolean } Returns true if the value is a built-in Date instance.
+         */
+        isDate(value: Object): boolean {
+            return value instanceof Date;
+        }
+        
+        /**
+         * Check whether the entered value is of float32array array type.
+         * @param { Object } value - A Float32Array value
+         * @returns { boolean } Returns true if the value is a built-in Float32Array instance.
+         */
+        isFloat32Array(value: Object): boolean {
+            return value instanceof Float32Array;
+        }
+        
+        /**
+         * Check whether the entered value is of float64array array type.
+         * @param { Object } value - A Float64Array value
+         * @returns { boolean } Returns true if the value is a built-in Float64Array instance.
+         */
+        isFloat64Array(value: Object): boolean {
+            return value instanceof Float64Array;
+        }
+        
+        /**
+         * Check whether the entered value is of int8array array type.
+         * @param { Object } value - A Int8Array value
+         * @returns { boolean } Returns true if the value is a built-in Int8Array instance.
+         */
+        isInt8Array(value: Object): boolean {
+            return value instanceof Int8Array;
+        }
+        
+        /**
+         * Check whether the entered value is the int16array type.
+         * @param { Object } value - A Int16Array value
+         * @returns { boolean } Returns true if the value is a built-in Int16Array instance.
+         */
+        isInt16Array(value: Object): boolean {
+            return value instanceof Int16Array;
+        }
+        
+        /**
+         * Check whether the entered value is the int32array array type.
+         * @param { Object } value - A Int32Array value
+         * @returns { boolean } Returns true if the value is a built-in Int32Array instance.
+         */
+        isInt32Array(value: Object): boolean {
+            return value instanceof Int32Array;
+        }
+        
+        /**
+         * Check whether the entered value is of map type.
+         * @param { Object } value - A Map value
+         * @returns { boolean } Returns true if the value is a built-in Map instance.
+         */
+        isMap(value: Object): boolean {
+            return value instanceof Map;
+        }
+
+        /**
+         * Check whether the entered value is the iterator type of map.
+         * @param { Object } value - A Map iterator value
+         * @returns { boolean } Returns true if the value is an iterator returned for a built-in Map instance.
+         */
+        isMapIterator(value: Object): boolean {
+            return value instanceof IterableIterator;
+        }
+        
+        /**
+         * Check whether the value entered is of type error.
+         * @param { Object } value - A Error value
+         * @returns { boolean } Returns true if the value is an instance of a built-in Error type.
+         */
+        isNativeError(value: Object): boolean {
+            return value instanceof Error;
+        }
+        
+        /**
+         * Check whether the entered value is of promise type.
+         * @param { Object } value - A Promise value
+         * @returns { boolean } Returns true if the value is a built-in Promise.
+         */
+        isPromise(value: Object): boolean {
+            return value instanceof Promise;
+        }
+        
+        /**
+         * Check whether the entered value is of type regexp.
+         * @param { Object } value - A regular expression object value
+         * @returns { boolean } Returns true if the value is a regular expression object.
+         */
+        isRegExp(value: Object): boolean {
+            return value instanceof RegExp;
+        }
+        
+        /**
+         * Check whether the entered value is of type set.
+         * @param { Object } value - A Set instance value
+         * @returns { boolean } Returns true if the value is a built-in Set instance.
+         */
+        isSet(value: Object): boolean {
+            return value instanceof Set;
+        }
+
+        /**
+         * Check whether the entered value is the iterator type of set.
+         * @param { Object } value - A Set iterator value
+         * @returns { boolean } Returns true if the value is an iterator returned for a built-in Set instance.
+         */
+        isSetIterator(value: Object): boolean {
+            return value instanceof IterableIterator;
+        }
+        
+        /**
+         * Check whether the entered value is a type contained in typedarray.
+         * @param { Object } value - A TypedArray instance value
+         * @returns { boolean } Returns true if the value is a built-in TypedArray instance.
+         */
+        isTypedArray(value: Object): boolean {
+            return this.isInt8Array(value) ||
+                this.isUint8Array(value) ||
+                this.isUint8ClampedArray(value) ||
+                this.isInt16Array(value) ||
+                this.isUint16Array(value) ||
+                this.isInt32Array(value) ||
+                this.isUint32Array(value) ||
+                this.isFloat32Array(value) ||
+                this.isFloat64Array(value) ||
+                this.isBigInt64Array(value) ||
+                this.isBigUint64Array(value);
+        }
+  
+        /**
+         * Check whether the entered value is the uint8array array type.
+         * @param { Object } value - A Uint8Array value
+         * @returns { boolean } Returns true if the value is a built-in Uint8Array instance.
+         */
+        isUint8Array(value: Object): boolean {
+            return value instanceof Uint8Array;
+        }
+        
+        /**
+         * Check whether the entered value is the uint8clapedarray array type.
+         * @param { Object } value - A Uint8ClampedArray value
+         * @returns { boolean } Returns true if the value is a built-in Uint8ClampedArray instance.
+         */
+        isUint8ClampedArray(value: Object): boolean {
+            return value instanceof Uint8ClampedArray;
+        }
+        
+        /**
+         * Check whether the entered value is the uint16array array array type.
+         * @param { Object } value - A Uint16Array value
+         * @returns { boolean } Returns true if the value is a built-in Uint16Array instance.
+         */
+        isUint16Array(value: Object): boolean {
+            return value instanceof Uint16Array;
+        }
+        
+        /**
+         * Check whether the entered value is the uint32array array type.
+         * @param { Object } value - A Uint32Array value
+         * @returns { boolean } Returns true if the value is a built-in Uint32Array instance.
+         */
+        isUint32Array(value: Object): boolean {
+            return value instanceof Uint32Array;
+        }
+        
+        /**
+         * Check whether the entered value is of type weakmap.
+         * @param { Object } value - A WeakMap value
+         * @returns { boolean } Returns true if the value is a built-in WeakMap instance.
+         */
+        isWeakMap(value: Object): boolean {
+            return value instanceof WeakMap;
+        }
+        
+        /**
+         * Check whether the entered value is of type weakset.
+         * @param { Object } value - A WeakSet value
+         * @returns { boolean } Returns true if the value is a built-in WeakSet instance.
+         */
+        isWeakSet(value: Object): boolean {
+            return value instanceof WeakSet;
+        }
+    }
+
+    /**
      * Get the hash code of an object.
      * @param { object } [object] - The object that need to get hash code.
      * @returns { number } Return a hash code of an object.
