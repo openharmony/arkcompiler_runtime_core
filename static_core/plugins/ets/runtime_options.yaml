@@ -237,3 +237,8 @@ options:
   type: bool
   default: false
   description: Enable external coroutine scheduling (e.g. in event loop)
+
+- name: load-in-boot
+  type: bool
+  default: false
+  description: Load entrypoint panda file in boot-panda-files

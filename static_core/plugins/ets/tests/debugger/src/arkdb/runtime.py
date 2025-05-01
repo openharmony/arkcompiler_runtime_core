@@ -264,6 +264,7 @@ class Runtime:
             f"--load-runtimes={o.load_runtimes}",
             f"--interpreter-type={o.interpreter_type}",
             f"--boot-panda-files={':'.join(boot_panda_files)}",
+            "--load-in-boot",
         ]
         if debug:
             command.append("--debugger-break-on-start")

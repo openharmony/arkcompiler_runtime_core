@@ -911,3 +911,8 @@ options:
   - no-task-stats
   - light-task-stats
   description: Set type of task stats that will collect task manager metrics, if use set `no-task-stats` there will be no stats collection
+
+- name: load-in-boot
+  type: bool
+  default: false
+  description: Load entrypoint panda file in boot-panda-files

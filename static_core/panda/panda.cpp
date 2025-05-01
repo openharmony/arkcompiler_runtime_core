@@ -97,21 +97,27 @@ static bool PrepareArguments(ark::PandArgParser *paParser, const RuntimeOptions 
 
 static void SetPandaFiles(RuntimeOptions &runtimeOptions, ark::PandArg<std::string> &file)
 {
+    const std::string &fileName = file.GetValue();
     auto bootPandaFiles = runtimeOptions.GetBootPandaFiles();
-
-    if (runtimeOptions.GetPandaFiles().empty()) {
-        bootPandaFiles.push_back(file.GetValue());
-    } else {
-        auto pandaFiles = runtimeOptions.GetPandaFiles();
-        auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
-                                      [&](auto &fileName) { return fileName == file.GetValue(); });
-        if (foundIter == pandaFiles.end()) {
-            pandaFiles.push_back(file.GetValue());
-            runtimeOptions.SetPandaFiles(pandaFiles);
-        }
+    auto pandaFiles = runtimeOptions.GetPandaFiles();
+    auto bootFoundIter = std::find(bootPandaFiles.begin(), bootPandaFiles.end(), fileName);
+    if (runtimeOptions.IsLoadInBoot() && bootFoundIter == bootPandaFiles.end()) {
+        bootPandaFiles.push_back(fileName);
+        runtimeOptions.SetBootPandaFiles(bootPandaFiles);
+        return;
     }
 
-    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
+    if (pandaFiles.empty() && bootFoundIter == bootPandaFiles.end()) {
+        pandaFiles.push_back(fileName);
+        runtimeOptions.SetPandaFiles(pandaFiles);
+        return;
+    }
+
+    auto pandaFoundIter = std::find(pandaFiles.begin(), pandaFiles.end(), fileName);
+    if (pandaFoundIter == pandaFiles.end()) {
+        pandaFiles.push_back(fileName);
+        runtimeOptions.SetPandaFiles(pandaFiles);
+    }
 }
 
 static ark::PandArgParser GetPandArgParser(ark::PandArg<bool> &help, ark::PandArg<bool> &options,
