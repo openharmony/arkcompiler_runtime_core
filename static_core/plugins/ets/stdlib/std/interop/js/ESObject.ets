@@ -420,7 +420,14 @@ export final class ESObject {
     }
 
     public toPromise(): Promise<ESObject> {
-        throw Error("not implemented yet");
+        return new Promise<ESObject>((resolve, reject) => {
+            let jsPromise = this.eo as Promise<JSValue>;
+            jsPromise.then((value: JSValue) => {
+                resolve(ESObject.wrap(value));
+            }).catch((error) => {
+                reject(error);
+            });
+        });
     }
 
     static defineClass(
