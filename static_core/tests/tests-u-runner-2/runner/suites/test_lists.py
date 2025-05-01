@@ -105,7 +105,9 @@ class TestLists:
                              f"(-{conf_kind.upper()})?"
         if self.sanitizer != SanitizerKind.NONE:
             full_template_name += f"(-{self.sanitizer.value})?"
-        full_template_name += f"(-OL{self.opt_level()})?"
+        opt_level = self.opt_level()
+        if opt_level is not None:
+            full_template_name += f"(-OL{opt_level})?"
         if self.debug_info():
             full_template_name += "(-DI)?"
         if self.is_full_ast_verifier():
@@ -191,9 +193,9 @@ class TestLists:
 
         return ConfigurationKind.OTHER_INT
 
-    def opt_level(self) -> int:
-        level = str(self.config.workflow.get_parameter("opt-level"))
-        return int(level)
+    def opt_level(self) -> int | None:
+        level = self.config.workflow.get_parameter("opt-level")
+        return int(level) if level is not None else None
 
     def debug_info(self) -> bool:
         args = self.config.workflow.get_parameter("es2panda-extra-args")
