@@ -54,7 +54,7 @@ function testLazyLoading() {
 function triggerGC() {
     // Check that garbage collection does not break user-defined RuntimeLinker
     expectNoThrow((): void throws => {
-        const gcId = GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE);
+        const gcId = GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE);
         if(gcId > 0) {
         GC.waitForFinishGC(gcId);
     }

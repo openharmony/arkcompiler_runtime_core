@@ -89,7 +89,7 @@ function testThrowingPreallocOOMObject(
 {
     let error = testThrowingPreallocOOMObjectSuite();
 
-    GC.startGC(GC.FULL_CAUSE);
+    GC.startGC(GC.Cause.FULL);
 
     return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
 }
@@ -125,7 +125,7 @@ function testThrowingPreallocOOMObjectTwice(
 {
     let error = testThrowingPreallocOOMObjectTwiceSuite();
 
-    GC.startGC(GC.FULL_CAUSE);
+    GC.startGC(GC.Cause.FULL);
 
     return compareExceptionObjects(error, expectedExceptionName, expectedExceptionMsg, expectedExceptionStack);
 }

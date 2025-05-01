@@ -14,7 +14,7 @@
  */
 
 function simpleTest(): void throws {
-    GC.scheduleGcAfterNthAlloc(2, GC.YOUNG_CAUSE);
+    GC.scheduleGcAfterNthAlloc(2, GC.Cause.YOUNG);
     new Object();
     assertFalse(GC.isScheduledGCTriggered(), "GC was scheduled before 2nd allocation, current is 1st");
     new Object();
@@ -24,7 +24,7 @@ function simpleTest(): void throws {
 function incorrectCounterTest(): void {
     let detected = false;
     try {
-        GC.scheduleGcAfterNthAlloc(-1, GC.YOUNG_CAUSE);
+        GC.scheduleGcAfterNthAlloc(-1, GC.Cause.YOUNG);
     } catch (e: IllegalArgumentException) {
         detected = true;
     }

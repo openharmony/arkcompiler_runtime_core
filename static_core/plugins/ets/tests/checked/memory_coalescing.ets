@@ -101,12 +101,12 @@ export class Test {
             let t: double = 0;
             for (let j: int = 0; j < u.length; j = j + 2) {
                 t += u[j];
-                GC.startGC(GC.FULL_CAUSE);
+                GC.startGC(GC.Cause.FULL);
                 t += u[j + 1];
             }
             for (let i: int = 0; i < v.length; i = i + 2) {
                 v[i] = t;
-                GC.startGC(GC.FULL_CAUSE);
+                GC.startGC(GC.Cause.FULL);
                 v[i + 1] = t + 1;
             }
         } catch (exception) {

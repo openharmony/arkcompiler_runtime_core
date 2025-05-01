@@ -25,7 +25,7 @@ function main(): int {
     alloc();
     let gc: long = -100;
     try {
-        gc = GC.startGC(GC.THRESHOLD_CAUSE, (): void => {
+        gc = GC.startGC(GC.Cause.THRESHOLD, (): void => {
             flag = true;
         });
     }

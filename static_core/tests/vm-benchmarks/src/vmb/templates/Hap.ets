@@ -65,10 +65,10 @@ function log(msg: String): void {
 function doGC(): void throws {
     if (SYS_GC_PAUSE >= 0) {
         log("Force GC");
-        let gc = GC.startGC(GC.FULL_CAUSE);
+        let gc = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(gc);
         log("Force GC");
-        gc = GC.startGC(GC.FULL_CAUSE);
+        gc = GC.startGC(GC.Cause.FULL);
         GC.waitForFinishGC(gc);
         // No sleep in ETS: sleep(SYS_GC_PAUSE)
     }

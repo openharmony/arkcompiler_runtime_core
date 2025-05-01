@@ -173,7 +173,7 @@ class Test {
 
     private static triggerGC() {
         expectNoThrow((): void throws => {
-            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
+            GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
         });
     }
 

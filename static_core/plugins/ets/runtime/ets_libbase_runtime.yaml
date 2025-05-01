@@ -2817,7 +2817,7 @@ intrinsics:
   - name: StdGCScheduleGCAfterNthAlloc
     space: ets
     class_name: std.core.GC
-    method_name: scheduleGcAfterNthAlloc
+    method_name: scheduleGcAfterNthAllocImpl
     static: true
     signature:
       ret: void
@@ -2937,7 +2937,7 @@ intrinsics:
   - name: StdGCGetObjectSpaceType
     space: ets
     class_name: std.core.GC
-    method_name: getObjectSpaceType
+    method_name: getObjectSpaceTypeImpl
     static: true
     signature:
       ret: i32
