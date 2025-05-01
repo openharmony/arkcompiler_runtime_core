@@ -49,6 +49,7 @@ set(SDK_SRCS
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.xml.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/api/@ohos.base.ets"
     "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.math.Decimal.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/arkts/@arkts.collections.ets"
 )
 
 set(ABCS_TO_LINK "")
