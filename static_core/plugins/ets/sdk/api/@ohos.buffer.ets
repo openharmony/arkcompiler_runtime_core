@@ -634,7 +634,7 @@ Received value is: ${resolvedSourceEnd}`)
             const sourceSlice = resolvedSource.slice(resolvedSourceStart,
                                                      resolvedSourceEnd);
             for (let i = 0; i < sourceSlice.byteLength; i++) {
-                resolvedTarget.set(resolvedSourceStart + i, sourceSlice.at(i));
+                resolvedTarget.set(resolvedTargetStart + i, sourceSlice.at(i));
             }
             return sourceSlice.byteLength;
         }
