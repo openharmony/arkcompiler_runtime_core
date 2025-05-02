@@ -727,6 +727,241 @@ export namespace util {
         }
     }
 
+    export class RationalNumber {
+        private mnum: number = 0;
+        private mden: number = 0;
+        private sign: number;
+
+        constructor() {}
+
+        /**
+         * Check whether the string is number.
+         * @param { string } str a rationalNumber object of the string type.
+         * @returns { boolean } when the str can be parsed into a finite number return true otherwise return false.
+         */
+        static isNumeric(str: string): boolean {
+            let val = Double.parseFloat(str)
+            return !isNaN(val) && isFinite(val);
+        }
+
+        /**
+         * Used to create a RationalNumber instance with a given numerator and denominator.
+         * @param { number } num represents the numerator.
+         * @param { number } den represents the denominator.
+         * @returns { RationalNumber } return a RationalNumber object.
+         */
+        static parseRationalNumber(num: number, den: number): RationalNumber {
+            if (!Number.isInteger(num) || !Number.isInteger(den)) {
+                console.error('parseRationalNumber: The type of Parameter must be integer');
+            }
+            let sign = (num < 0) !== (den < 0) ? -1 : 1;
+            num = Math.abs(num);
+            den = Math.abs(den);
+            let ratNum = new RationalNumber();
+            if (den === 0) {
+                if (num !== 0) {
+                    ratNum.mnum = sign;
+                    ratNum.mden = 0;
+                } else {
+                    ratNum.mnum = 0;
+                    ratNum.mden = 0;
+                }
+            } else if (num === 0) {
+                ratNum.mnum = 0;
+                ratNum.mden = 1;
+            } else {
+                let gnum = RationalNumber.getCommonFactor(num, den);
+                if (gnum !== 0) {
+                    ratNum.mnum = (num / gnum) * sign;
+                    ratNum.mden = den / gnum;
+                }
+            }
+            return ratNum;
+        }
+
+        /**
+         * Create a RationalNumber object based on a given string.
+         * @param { string } str represents a string.
+         * @returns { RationalNumber } return a RationalNumber object.
+         */
+        static createRationalFromString(str: string): RationalNumber {
+            const regex = new RegExp('^(.*)([:\\/])(.*)$');
+            const match = str.match(regex);
+            if (!match) {
+                throw new BusinessError(TypeErrorCodeId,
+                    new Error(`Parameter error. The type of ${str} must be effective string`));
+            }
+            const str1 = match[1];
+            const separator = match[2];
+            const str2 = match[3];
+            if (RationalNumber.isNumeric(str1) && RationalNumber.isNumeric(str2)) {
+                const num1 = Number(str1);
+                 const num2 = Number(str2);
+                if (!Number.isInteger(num1) || !Number.isInteger(num2)) {
+                    console.error('createRationalFromString: The type of Parameter must be integer string');
+                }
+                return RationalNumber.parseRationalNumber(num1, num2);
+            } else {
+                throw new BusinessError(TypeErrorCodeId,
+                    new Error(`Parameter error. The type of ${str} must be character string`));
+            }
+        }
+
+        /**
+         * Compares the current RationalNumber object with the target RationalNumber object and returns the comparison result.
+         * @param { RationalNumber } other RationalNumber object.
+         * @returns { number } if equal return 0, If the givens smaller than the current return 1, otherwise return -1.
+         */
+        public compare(other: RationalNumber): number {
+            if (this.mnum === other.mnum && this.mden === other.mden) {
+                return 0;
+            } else if (this.isNaN()) {
+                return 1;
+            } else if (other.isNaN()) {
+                return -1;
+            } else if ((this.mden === 0 && this.mnum > 0) || (other.mden === 0 && other.mnum < 0)) {
+                return 1;
+            } else if ((this.mden === 0 && this.mnum < 0) || (other.mden === 0 && other.mnum > 0)) {
+                return -1;
+            }
+            let thisnum: number = this.mnum * other.mden;
+            let othernum: number = other.mnum * this.mden;
+            if (thisnum < othernum) {
+                return -1;
+            } else if (thisnum > othernum) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+        /**
+         * Compare the current RationalNumber object to the given object equally.
+         * @param { object } obj the given object.
+         * @returns { boolean } if the given object is same as the current object return true otherwise return false.
+         */
+        public equals(obj: object): boolean {
+            if (!(obj instanceof RationalNumber)) {
+                return false;
+            }
+            return this.compare(obj) === 0;
+        }
+
+        /**
+         * Gets the value of the current RationalNumber object as an integer or float number.
+         * 
+         * @returns { number } returns the value of an integer or float number.
+         */
+        public valueOf(): number {
+            if (this.mnum > 0 && this.mden === 0) {
+                return Number.POSITIVE_INFINITY;
+            } else if (this.mnum < 0 && this.mden === 0) {
+                return Number.NEGATIVE_INFINITY;
+            } else if (this.isNaN()) {
+                return Number.NaN;
+            } else {
+                return this.mnum / this.mden;
+            }
+        }
+
+        /**
+         * Gets the greatest common divisor of two specified integers.
+         * @param { number } firNum the integer.
+         * @param { number } SecNum the integer.
+         * @returns { number } returns the greatest common divisor of firNum and SecNum.
+         */
+        static getCommonFactor(firNum: number, SecNum: number): number {
+            if (firNum === 0 || SecNum === 0) {
+                throw new BusinessError(TypeErrorCodeId,
+                    new Error(`Parameter error. The Parameter cannot be zero`));
+            }
+            if (!Number.isInteger(firNum) || !Number.isInteger(SecNum)) {
+                console.error('getCommonFactor: The type of Parameter must be integer');
+            }
+            return RationalNumber.getGCD(firNum, SecNum);
+        }
+
+        private static getGCD(firNum: number, SecNum: number): number {
+            let temp: number = 0;
+            if (firNum < SecNum) {
+                temp = firNum;
+                firNum = SecNum;
+                SecNum = temp;
+            }
+            while (firNum % SecNum !== 0) {
+                temp = firNum % SecNum;
+                firNum = SecNum;
+                SecNum = temp;
+            }
+            return SecNum;
+        }
+
+        /**
+         * Gets the denominator of the current RationalNumber object.
+         * 
+         * @returns { number } returns the denominator.
+         */
+        public getDenominator(): number {
+            return this.mden;
+        }
+
+        /**
+         * Gets the numerator of the current RationalNumber object.
+         * 
+         * @returns { number } returns the numerator.
+         */
+        public getNumerator(): number {
+            return this.mnum;
+        }
+
+        /**
+         * Check if the current RationalNumber object represents a finite value.
+         * 
+         * @returns { boolean } if the denominator is not 0 return true otherwise return false.
+         */
+        public isFinite(): boolean {
+            return this.mden !== 0;
+        }
+
+        /**
+         * Check if the current RationalNumber object represents a finite value.
+         * 
+         * @returns { boolean } if both the denominator and the numerator are 0 return true otherwise return false.
+         */
+        public isNaN(): boolean {
+            return this.mnum === 0 && this.mden === 0;
+        }
+
+        /**
+         * Check whether the current RationalNumber object is 0.
+         * 
+         * @returns { boolean } if the value represented by the current object is 0 return true Otherwise return false.
+         */
+        public isZero(): boolean {
+            return this.mnum === 0 && this.mden !== 0;
+        }
+
+        /**
+         * Gets the string representation of the current RationalNumber object.
+         * 
+         * @returns { string } returns a string in Numerator/Denominator format if the denominator is 0 return Infinity.
+         * If both the numerator and denominator are 0 return NaN.
+         */
+        public toString(): string {
+            let buf: string;
+            if (this.isNaN()) {
+                buf = 'NaN';
+            } else if (this.mnum > 0 && this.mden === 0) {
+                buf = 'Infinity';
+            } else if (this.mnum < 0 && this.mden === 0) {
+                buf = '-Infinity';
+            } else {
+                buf = String(this.mnum) + '/' + String(this.mden);
+            }
+            return buf;
+        }
+    }
+
     export class TextEncoder {
 
         static { loadLibrary("ets_sdk_native") }
