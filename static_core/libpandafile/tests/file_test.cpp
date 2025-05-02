@@ -266,4 +266,22 @@ TEST(File, LineNumberProgramDeduplication)
     ASSERT_EQ(lnpCnt, 1);
 }
 
+constexpr uint8_t FIZE_SIZE_ERROR_SIZE = 0x09;
+TEST(File, CheckHeader)
+{
+    auto data = GetEmptyPandaFileBytes();
+    auto f = GetPandaFile(&data);
+    auto res = ark::panda_file::CheckHeader(f->GetPtr(), std::string_view(), data.size());
+    EXPECT_EQ(res, true);
+
+    const int fileSizeIndex = offsetof(ark::panda_file::File::Header, fileSize);
+    data[fileSizeIndex] = FIZE_SIZE_ERROR_SIZE;  // Corrupt file size
+    data[fileSizeIndex + 1] = FIZE_SIZE_ERROR_SIZE;
+    data[fileSizeIndex + 2] = FIZE_SIZE_ERROR_SIZE;
+    data[fileSizeIndex + 3] = FIZE_SIZE_ERROR_SIZE;
+
+    res = ark::panda_file::CheckHeader(f->GetPtr(), std::string_view(), data.size());
+    EXPECT_EQ(res, false);
+}
+
 }  // namespace ark::panda_file::test

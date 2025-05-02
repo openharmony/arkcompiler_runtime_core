@@ -454,7 +454,8 @@ PANDA_PUBLIC_API std::unique_ptr<const File> OpenPandaFile(
 /*
  * Check ptr point valid panda file: magic
  */
-bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "");
+bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "",
+                 const size_t &expectedLength = 0);
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern const char *ARCHIVE_FILENAME;
