@@ -52,8 +52,8 @@ Along with [Prerequisites](#Prerequisites) above, ArkjsVM is built and installed
 
 Specifically, it is necessary to have these libs available:
 ```
-$PANDA_BUILD/lib/module/ets_interop_js_napi_arkjsvm.so
-$PANDA_BUILD/lib/arkjsvm_interop/libinterop_test_helper.so
+$PANDA_BUILD/lib/module/ets_interop_js_napi.so
+$PANDA_BUILD/lib/interop_js/libinterop_test_helper.so
 ```
 
 Note `VMB_BENCH_UNIT_ITERATIONS=1 -wi=1 -mi=1` parameters below mean minimal non-zero number of iterations.

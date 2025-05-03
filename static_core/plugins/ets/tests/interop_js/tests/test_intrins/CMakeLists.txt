@@ -14,7 +14,7 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_intrins
+panda_ets_interop_js_gtest(ets_interop_js_test_intrins
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_intrins.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_intrins.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.ts
@@ -22,7 +22,7 @@ panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test_intrins
     PACKAGE_NAME "test_intrins"
 )
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_frontend_test_intrins
+panda_ets_interop_js_gtest(ets_interop_js_frontend_test_intrins
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_intrins.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/frontend_test_intrins.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/index.ts

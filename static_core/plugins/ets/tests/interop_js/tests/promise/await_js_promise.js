@@ -36,7 +36,7 @@ function init() {
 	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	let etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
 	const etsOpts = {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,

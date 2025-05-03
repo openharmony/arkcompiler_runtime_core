@@ -34,8 +34,8 @@ if [[ "${MODE}" != "release" && "${MODE}" != "debug" && "${MODE}" != "fastverify
     exit 1
 fi
 
-PANDA_LIBRARIES_PATH="$PANDA_BUILD_PATH/lib/arkjsvm_interop/"
-PANDA_BINARIES_PATH="$PANDA_BUILD_PATH/bin/arkjsvm_interop/"
+PANDA_LIBRARIES_PATH="$PANDA_BUILD_PATH/lib/interop_js/"
+PANDA_BINARIES_PATH="$PANDA_BUILD_PATH/bin/interop_js/"
 
 mkdir -p "$PANDA_BUILD_PATH"
 mkdir -p "$PANDA_LIBRARIES_PATH"

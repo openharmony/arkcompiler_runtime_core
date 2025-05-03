@@ -14,19 +14,19 @@
 set(ETS_FEATURES_CONFIG "${PANDA_BINARY_ROOT}/tests/ets_interop_js/arktsconfig_features_table_scenarios.json")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig_features_table_scenarios.in.json ${ETS_FEATURES_CONFIG})
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_arg_type_js_to_ets
+panda_ets_interop_js_gtest(ets_interop_js_arg_type_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_type.ets
     ETS_CONFIG ${ETS_FEATURES_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_opt_arg_type_js_to_ets
+panda_ets_interop_js_gtest(ets_interop_js_opt_arg_type_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/opt_arg_type.ets
     ETS_CONFIG ${ETS_FEATURES_CONFIG}
 )
 
-panda_ets_interop_js_nodevm_gtest(ets_interop_js_ret_type_js_to_ets
+panda_ets_interop_js_gtest(ets_interop_js_ret_type_js_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ret_type.ets
     ETS_CONFIG ${ETS_FEATURES_CONFIG}

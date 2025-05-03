@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__map_ts_to_ets
+panda_ets_interop_js_gtest(ets_interop_js__map_ts_to_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/map.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/map.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_map.ts

@@ -45,7 +45,7 @@ function runTest(test, pandaOptions) {
 	const testAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_TEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-	const etsVm = requireNapiPreview('../../module/ets_interop_js_napi_arkjsvm.so', false);
+	const etsVm = requireNapiPreview('../../module/ets_interop_js_napi.so', false);
 
 	const options = {
 		'xgc-trigger-type': 'never',

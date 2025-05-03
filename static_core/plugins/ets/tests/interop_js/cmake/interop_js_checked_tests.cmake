@@ -94,18 +94,18 @@ function(panda_ets_interop_js_checked_test)
 
     # Make symbolic links to convinient work with requireNapiPreview
     set(SO_FILES_LINK_PATH "${TEST_DIR}/module/")
-    set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi_arkjsvm.so")
-    set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/libinterop_test_helper.so")
+    set(INTEROP_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/module/ets_interop_js_napi.so")
+    set(INTEROP_HELPER_LIB_SOURCE "${PANDA_BINARY_ROOT}/lib/interop_js/libinterop_test_helper.so")
 
     add_custom_target(${TARGET}_create_symlinks
         COMMAND mkdir -p ${SO_FILES_LINK_PATH}
                 && ln -sf ${INTEROP_LIB_SOURCE} ${INTEROP_HELPER_LIB_SOURCE} -t ${SO_FILES_LINK_PATH}
-        DEPENDS ets_interop_js_napi_arkjsvm ${INTEROP_HELPER_LIB_SOURCE}
+        DEPENDS ets_interop_js_napi ${INTEROP_HELPER_LIB_SOURCE}
     )
 
     set(ARK_ETS_INTEROP_JS_PACKAGE_PATH ${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip)
     set(CUSTOM_PRERUN_ENVIRONMENT
-        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
+        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
         "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
     )
@@ -116,7 +116,7 @@ function(panda_ets_interop_js_checked_test)
     endif()
     set(RUN_COMMAND
         "/usr/bin/env"
-        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/arkjsvm_interop/:${PANDA_BINARY_ROOT}/lib/"
+        "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
         "ARK_ETS_INTEROP_JS_TEST_ABC_PATH=${ARK_ETS_INTEROP_JS_PACKAGE_PATH}"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
         "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
@@ -161,7 +161,7 @@ function(panda_ets_interop_js_checked_test)
             ${TARGET}_js_launcher
             ${TARGET}_create_symlinks
             ${TARGET_TEST_PACKAGE}
-            ets_interop_js_napi_arkjsvm
+            ets_interop_js_napi
             ${ETS_CONFIG}
     )
 

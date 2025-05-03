@@ -21,7 +21,7 @@ function print_log(msg) {
 }
 
 class Benchmark {
-    #ark = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+    #ark = requireNapiPreview('ets_interop_js_napi.so', false);
     #benchmark;
     #passedTime = BigInt(0);
     #binaries = [];
@@ -37,7 +37,7 @@ class Benchmark {
 
     	let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-        let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+        let etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
         if (this.#ark === undefined) {
             throw new Error('Failed to initialize etsVm');
         }

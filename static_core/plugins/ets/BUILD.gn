@@ -357,11 +357,10 @@ if (with_stdlib) {
     deps = [ "tests:ets_func_tests_int_jit_aot" ]
   }
 
-  group("hybrid_tests") {
-    if (ark_standalone_build) {
-      testonly = true
+  if (ark_standalone_build) {
+    testonly = true
+    group("hybrid_tests") {
       deps = [
-        "$ark_root/plugins/ets/tests/interop_js/test_helper:interop_test_helper",
         "$ark_root/tools/ark_js_napi_cli:HybridXGCTests",
         "tests/interop_js/eacoro:eacoro_tests",
         "tests/interop_js/xgc:xgc_tests",

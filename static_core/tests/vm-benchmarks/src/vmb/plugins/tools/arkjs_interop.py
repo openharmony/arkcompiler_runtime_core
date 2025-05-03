@@ -28,10 +28,10 @@ class Tool(ToolBase):
         # assuming PANDA_BUILD is PANDA_ROOT/build
         modules = self.ensure_dir(panda_build, 'lib', 'module')
         self.ark_js_napi_cli = self.ensure_file(
-            panda_build, 'bin', 'arkjsvm_interop', 'ark_js_napi_cli')
+            panda_build, 'bin', 'interop_js', 'ark_js_napi_cli')
         etsstdlib = self.ensure_file(
             panda_build, 'plugins', 'ets', 'etsstdlib.abc')
-        self.ld_library_path = f'LD_LIBRARY_PATH={panda_build}/lib/arkjsvm_interop/:{panda_build}/lib/ '
+        self.ld_library_path = f'LD_LIBRARY_PATH={panda_build}/lib/interop_js/:{panda_build}/lib/ '
         vmb_bench_unit_iterations = os.environ.get('VMB_BENCH_UNIT_ITERATIONS', '')
         if not vmb_bench_unit_iterations:
             vmb_bench_unit_iterations = 10000
