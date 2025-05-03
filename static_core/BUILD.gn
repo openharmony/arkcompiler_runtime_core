@@ -146,6 +146,7 @@ config("ark_config") {
       "$ark_es2panda_root:libes2panda_public_frontend_static",
       "$ark_es2panda_root/aot:ets2panda",
       "$ark_es2panda_root/bindings:ts_bindings",
+      "$ark_es2panda_root/driver/dependency_analyzer:dependency_analyzer",
       "$ark_es2panda_root/lsp:libes2panda_lsp",
       "$ark_es2panda_root/lsp:libes2panda_lsp_static",
       "$ark_third_party_root/asmjit:*",
