@@ -20,17 +20,17 @@
 
 namespace ark::ets::stdlib::intl {
 
-ANI_EXPORT icu::Locale LocTagToIcuLocale(ani_env *env, const std::string &localeTag)
+ANI_EXPORT ani_status LocTagToIcuLocale(ani_env *env, const std::string &localeTag, icu::Locale &locale)
 {
     icu::StringPiece sp {localeTag.data(), static_cast<int32_t>(localeTag.size())};
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(sp, status);
+    locale = icu::Locale::forLanguageTag(sp, status);
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Language tag '" + localeTag + std::string("' is invalid or not supported");
         ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
-        return icu::Locale::getDefault();
+        return ANI_PENDING_ERROR;
     }
-    return locale;
+    return ANI_OK;
 }
 
 ani_status SetNumberingSystemIntoLocale(ani_env *env, const ParsedOptions &options, icu::Locale &locale)
@@ -339,8 +339,12 @@ ani_status InitUnlocNumFormatter(ani_env *env, const ParsedOptions &options, Unl
 
 ani_status InitNumFormatter(ani_env *env, const ParsedOptions &options, LocNumFmt &fmt)
 {
-    auto localeWithNumSystem = LocTagToIcuLocale(env, options.locale);
-    ani_status err = SetNumberingSystemIntoLocale(env, options, localeWithNumSystem);
+    icu::Locale localeWithNumSystem(icu::Locale::getDefault());
+    ani_status err = LocTagToIcuLocale(env, options.locale, localeWithNumSystem);
+    if (err != ANI_OK) {
+        return err;
+    }
+    err = SetNumberingSystemIntoLocale(env, options, localeWithNumSystem);
     if (err == ANI_OK) {
         auto unlocFmt = icu::number::NumberFormatter::with();
         err = InitUnlocNumFormatter(env, options, unlocFmt);
@@ -353,8 +357,12 @@ ani_status InitNumFormatter(ani_env *env, const ParsedOptions &options, LocNumFm
 
 ani_status InitNumRangeFormatter(ani_env *env, const ParsedOptions &options, LocNumRangeFmt &fmt)
 {
-    auto localeWithNumSystem = LocTagToIcuLocale(env, options.locale);
-    ani_status err = SetNumberingSystemIntoLocale(env, options, localeWithNumSystem);
+    icu::Locale localeWithNumSystem(icu::Locale::getDefault());
+    ani_status err = LocTagToIcuLocale(env, options.locale, localeWithNumSystem);
+    if (err != ANI_OK) {
+        return err;
+    }
+    err = SetNumberingSystemIntoLocale(env, options, localeWithNumSystem);
     if (err == ANI_OK) {
         auto unlocFmt = icu::number::NumberFormatter::with();
         err = InitUnlocNumFormatter(env, options, unlocFmt);

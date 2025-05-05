@@ -19,9 +19,10 @@
 #include "IntlNumberFormatters.h"
 #include "IntlNumberFormat.h"
 #include <unicode/formattedvalue.h>
+#include <unicode/numsys.h>
 #include <algorithm>
 #include <optional>
-#include <string>
+#include <cstring>
 #include <cstdlib>
 #include <array>
 #include <utility>
@@ -664,12 +665,31 @@ ani_boolean IsIcuUnitCorrect(ani_env *env, [[maybe_unused]] ani_object self, ani
     return IsCorrectUnitIdentifier(ConvertFromAniString(env, unit)) ? ANI_TRUE : ANI_FALSE;
 }
 
+ani_string IcuNumberingSystem(ani_env *env, [[maybe_unused]] ani_object self, ani_string locale)
+{
+    icu::Locale icuLocale(icu::Locale::getDefault());
+    ani_status err = LocTagToIcuLocale(env, ConvertFromAniString(env, locale), icuLocale);
+    if (err == ANI_OK) {
+        UErrorCode status = U_ZERO_ERROR;
+        std::unique_ptr<icu::NumberingSystem> numSystem(icu::NumberingSystem::createInstance(icuLocale, status));
+        if (UNLIKELY(U_FAILURE(status))) {
+            std::string message = "NumberingSystem creation failed";
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            return nullptr;
+        }
+        return CreateUtf8String(env, numSystem->getName(), strlen(numSystem->getName()));
+    }
+    return nullptr;
+}
+
 ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
 {
     ani_class numberFormatClass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/NumberFormat;", &numberFormatClass));
 
     const auto methods = std::array {
+        ani_native_function {"getNumberingSystem", "Lstd/core/String;:Lstd/core/String;",
+                             reinterpret_cast<void *>(IcuNumberingSystem)},
         ani_native_function {"formatDouble", "D:Lstd/core/String;", reinterpret_cast<void *>(IcuFormatDouble)},
         ani_native_function {"formatDecStr", "Lstd/core/String;:Lstd/core/String;",
                              reinterpret_cast<void *>(IcuFormatDecStr)},
