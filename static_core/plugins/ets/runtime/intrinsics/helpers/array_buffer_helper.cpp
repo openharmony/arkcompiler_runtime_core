@@ -303,6 +303,16 @@ PandaString ConvertHexEncoding(const PandaVector<uint8_t> &bytes)
     return oss.str();
 }
 
+PandaString ConvertLatinEncoding(const PandaVector<uint8_t> &bytes)
+{
+    PandaString output;
+    output.reserve(bytes.size());
+    for (uint8_t byte : bytes) {
+        output.push_back(static_cast<char>(byte));
+    }
+    return output;
+}
+
 PandaVector<uint8_t> ConvertUtf16ToBytes(std::string_view input)
 {
     const size_t kUtf16Multiplier = 2;
