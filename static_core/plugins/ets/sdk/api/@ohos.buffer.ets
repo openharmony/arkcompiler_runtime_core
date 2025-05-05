@@ -1475,6 +1475,30 @@ Received value is: ${value}`)
             return offset + 4;
         }
 
+        /**
+         * Returns the byte at the specified index.
+         * @param {number} index – byte index to read
+         * @returns {number} the byte value at `index`
+         */
+        $_get(index: number): number | undefined {
+            if (index < 0 || index >= this.length) {
+                return undefined;
+            }
+            return this.getDataView().getUint8(index);
+        }
+
+        /**
+         * Sets the byte at the specified index.
+         *
+         * @param {number} index – byte index to write
+         * @param {number} value – byte value (0–255)
+         */
+        $_set(index: number, value: number): void {
+            if (index < 0 || index >= this.length) {
+                return;
+            }
+            this.getDataView().setUint8(index, value);
+        }
     }
 
     export interface BlobOptions {
