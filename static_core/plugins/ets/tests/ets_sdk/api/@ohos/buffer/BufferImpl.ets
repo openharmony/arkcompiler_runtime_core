@@ -108,9 +108,38 @@ function testByteLengthSpecialChars() {
 }
 
 function testByteLengthTypedArrays() {
-    // Test with different TypedArrays
     const int8Array = new Int8Array([1, 2, 3, 4])
-    assertEQ(buffer.byteLength(int8Array), 4)
+    assertEQ(buffer.byteLength(int8Array), 4, "int8Array byteLength is not 4")
+
+    const uint8Array = new Uint8Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(uint8Array), 4, "uint8Array byteLength is not 4")
+
+    const uint8ClampedArray = new Uint8ClampedArray([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(uint8ClampedArray), 4, "uint8ClampedArray byteLength is not 4")
+
+    const int16Array = new Int16Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(int16Array), 8, "int16Array byteLength is not 8")
+
+    const uint16Array = new Uint16Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(uint16Array), 8, "uint16Array byteLength is not 8")
+
+    const int32Array = new Int32Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(int32Array), 16, "int32Array byteLength is not 16")
+
+    const uint32Array = new Uint32Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(uint32Array), 16, "uint32Array byteLength is not 16")
+
+    const float32Array = new Float32Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(float32Array), 16, "float32Array byteLength is not 16")
+
+    const float64Array = new Float64Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(float64Array), 32, "float64Array byteLength is not 32")
+
+    const bigInt64Array = new BigInt64Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(bigInt64Array), 32, "bigInt64Array byteLength is not 32")
+
+    const bigUint64Array = new BigUint64Array([1, 2, 3, 4])
+    assertEQ(buffer.byteLength(bigUint64Array), 32, "bigUint64Array byteLength is not 32")
 }
 
 function testByteLengthBufferAndViews() {
@@ -304,9 +333,69 @@ function testIsEncoding() {
 }
 
 function testTranscode() {
-    const buf = buffer.alloc(5, 'a');
-    const transcoded = buffer.transcode(buf, 'utf8', 'ascii');
-    assertEQ(transcoded.toString('ascii'), 'aaaaa');
+    // invariant:
+    //     X = transcode(B, S, T)
+    //     B = transcode(X, T, S)
+    const checkInvariant = (b: buffer.Buffer, s: buffer.BufferEncoding, t: buffer.BufferEncoding) => {
+        let x = buffer.transcode(b, s, t);
+        let b2 = buffer.transcode(x, t, s);
+        assertEQ(b.length, b2.length, `Invariant violated: length of ${s} -> ${t} != length of ${t} -> ${s}`);
+        assertEQ(b.toString(s), b2.toString(s), `Invariant violated: ${s} -> ${t} != ${t} -> ${s}`);
+    }
+
+    // 1. ascii → hex
+    let b1 = buffer.from("Hello, World!", "ascii");
+    let b1_hex = buffer.transcode(b1, "ascii", "hex");
+    assertEQ(b1_hex.toString("hex"), "48656c6c6f2c20576f726c6421", "Case (1) failed: ascii -> hex");
+    checkInvariant(b1, "ascii", "hex");
+
+    // 2. hex → base64
+    let b2 = buffer.from("48656c6c6f2c20576f726c6421", "hex");
+    let b2_b64 = buffer.transcode(b2, "hex", "base64");
+    assertEQ(b2_b64.toString("base64"), "SGVsbG8sIFdvcmxkIQ==", "Case (2) failed: hex -> base64");
+    checkInvariant(b2, "hex", "base64");
+
+    // 3. base64 → utf8
+    let b3 = buffer.from("SGVsbG8sIFdvcmxkIQ==", "base64");
+    let b3_utf8 = buffer.transcode(b3, "base64", "utf8");
+    assertEQ(b3_utf8.toString("utf8"), "Hello, World!", "Case (3) failed: base64 -> utf8");
+    checkInvariant(b3, "base64", "utf8");
+
+    // 4. utf8 → hex
+    let b4 = buffer.from("Привет", "utf8");
+    let b4_hex = buffer.transcode(b4, "utf8", "hex");
+    assertEQ(b4_hex.toString("hex"), "d09fd180d0b8d0b2d0b5d182", "Case (4) failed: utf8 -> hex");
+    checkInvariant(b4, "utf8", "hex");
+
+    // 5. latin1 → utf8
+    let b5 = buffer.from("abc", "latin1");
+    let b5_utf8 = buffer.transcode(b5, "latin1", "utf8");
+    assertEQ(b5_utf8.toString("utf8"), "abc", "Case (5) failed: latin1 -> utf8");
+    checkInvariant(b5, "latin1", "utf8");
+
+    // 6. ascii → base64url
+    let b6 = buffer.from("Hello-World_", "ascii");
+    let b6_b64url = buffer.transcode(b6, "ascii", "base64url");
+    assertEQ(b6_b64url.toString("base64url"), "SGVsbG8tV29ybGRf", "Case (6) failed: ascii -> base64url");
+    checkInvariant(b6, "ascii", "base64url");
+
+    // 7. base64url → base64
+    let b7 = buffer.from("SGVsbG8tV29ybGRf", "base64url");
+    let b7_b64 = buffer.transcode(b7, "base64url", "base64");
+    assertEQ(b7_b64.toString("base64"), "SGVsbG8tV29ybGRf", "Case (7) failed: base64url -> base64");
+    checkInvariant(b7, "base64url", "base64");
+
+    // 8. hex → ascii
+    let b8 = buffer.from("48656c6c6f", "hex");
+    let b8_ascii = buffer.transcode(b8, "hex", "ascii");
+    assertEQ(b8_ascii.toString("ascii"), "Hello", "Case (8) failed: hex -> ascii");
+    checkInvariant(b8, "hex", "ascii");
+
+    // 9. base64 → hex
+    let b9 = buffer.from("4pyTIMOgIGV4YW1wbGU=", "base64");
+    let b9_hex = buffer.transcode(b9, "base64", "hex");
+    assertEQ(b9_hex.toString("hex"), "e29c9320c3a0206578616d706c65", "Case (9) failed: base64 -> hex");
+    checkInvariant(b9, "base64", "hex");
 }
 
 function testBufferCompare() {

@@ -57,7 +57,17 @@ export default namespace buffer {
         | 'hex';
 
     type TypedArray = Int8Array;
-    type TypedArrayOrigin = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array
+    type TypedArrayOrigin = Int8Array
+        | Uint8Array
+        | Uint8ClampedArray
+        | Int16Array
+        | Uint16Array
+        | Int32Array
+        | Uint32Array
+        | Float32Array
+        | Float64Array
+        | BigInt64Array
+        | BigUint64Array;
 
     const U32_MAX: long = 4294967295 as long;
 
@@ -139,7 +149,7 @@ export default namespace buffer {
      * 1. Mandatory parameters are left unspecified;
      */
     export function byteLength(
-        doc: string | Buffer | TypedArray | DataView | ArrayBuffer,
+        doc: string | Buffer | TypedArrayOrigin | DataView | ArrayBuffer,
         encoding?: BufferEncoding
     ): number {
         if (doc instanceof string) {
@@ -156,6 +166,26 @@ export default namespace buffer {
                 return (doc as Buffer).length;
             case "Int8Array":
                 return (doc as Int8Array).byteLength;
+            case "Uint8Array":
+                return (doc as Uint8Array).byteLength;
+            case "Uint8ClampedArray":
+                return (doc as Uint8ClampedArray).byteLength;
+            case "Int16Array":
+                return (doc as Int16Array).byteLength;
+            case "Uint16Array":
+                return (doc as Uint16Array).byteLength;
+            case "Int32Array":
+                return (doc as Int32Array).byteLength;
+            case "Uint32Array":
+                return (doc as Uint32Array).byteLength;
+            case "Float32Array":
+                return (doc as Float32Array).byteLength;
+            case "Float64Array":
+                return (doc as Float64Array).byteLength;
+            case "BigInt64Array":
+                return (doc as BigInt64Array).byteLength;
+            case "BigUint64Array":
+                return (doc as BigUint64Array).byteLength;
             case "DataView":
                 return (doc as DataView).byteLength;
             case "ArrayBuffer":
@@ -338,7 +368,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
         const resolvedSource = getArrayBufferFrom(source);
         const sourceBytesLength = resolvedSource.byteLength as int;
-        const str = ArrayBuffer.stringify(resolvedSource, fromEnc, 0, sourceBytesLength);
+        const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
         const newBytesLength = ArrayBuffer.bytesLength(str, toEnc);
         const newBytes = ArrayBuffer.from(str, toEnc, newBytesLength);
         return new Buffer(newBytes);
@@ -425,10 +455,10 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             this.buffer = buffer;
             this.byteOffset = 0;
         }
-    
+
         /**
          * Returns a string decoded from the buffer's contents.
-         * 
+         *
          * @returns {string} The decoded string
          */
         public toString(): string {
