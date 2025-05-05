@@ -420,4 +420,23 @@ extern "C" EtsDouble EtsEscompatArrayLastIndexOf(ObjectHeader *arrayHeader, EtsO
         arrayHeader, cross_values::GetEscompatArrayActualLengthOffset(RUNTIME_ARCH));
     return EtsEscompatArrayInternalLastIndexOfImpl(arrayHeader, value, actualLength - 1);
 }
+
+static uint32_t NormalizeIndex(int32_t idx, int64_t len)
+{
+    if (idx < 0) {
+        return idx < -len ? 0 : idx + len;
+    }
+    return idx > len ? len : idx;
+}
+
+extern "C" ObjectHeader *EtsEscompatArrayFill(ObjectHeader *arrayHeader, EtsObject *value, int32_t start, int32_t end)
+{
+    ASSERT(arrayHeader != nullptr);
+    auto *array = EtsArrayObject<EtsObject>::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto actualLength = static_cast<int64_t>(array->GetActualLength());
+    auto startInd = NormalizeIndex(start, actualLength);
+    auto endInd = NormalizeIndex(end, actualLength);
+    array->GetData()->Fill(value, startInd, endInd);
+    return arrayHeader;
+}
 }  // namespace ark::ets::intrinsics

@@ -1286,16 +1286,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns this array after transformation
      */
-    public fill(value: T, start: int, end: int): this {
-        start = normalizeIndex(start, this.actualLength);
-        end = normalizeIndex(end, this.actualLength)
-
-        for (let i = start; i < end; i++) {
-            this.$_set_unsafe(i, value);
-        }
-
-        return this;
-    }
+    public native fill(value: T, start: int, end: int): this;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined

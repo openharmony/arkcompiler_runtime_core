@@ -198,6 +198,7 @@
  *
  * @returns this array after transformation
  */
+% if function_type != 'has_native'
 <%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start: int, end: int): <%= this_return_type %> {
     start = normalizeIndex(start, <%= this_len_int %>);
     end = normalizeIndex(end, <%= this_len_int %>)
@@ -208,6 +209,10 @@
 
     return <%= this %>;
 }
+
+% else
+<%= access_public %> native fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start: int, end: int): <%= this_return_type %>;
+% end
 
 % TemplateData::get_lambda_data.each { |lambda_args_params|
 %   lambda_params_num, lambda_args, lambda_params, lambda_args2 = lambda_args_params
