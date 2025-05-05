@@ -74,6 +74,8 @@ public:
 
     PANDA_PUBLIC_API uint32_t GetNumArgSlots() const;
 
+    uint32_t GetNumMandatoryArgs();
+
     EtsType GetArgType(size_t idx) const
     {
         EtsType etsType = ConvertPandaTypeToEtsType(GetPandaMethod()->GetArgType(idx));
@@ -371,6 +373,8 @@ private:
         m->SetNativePointer(const_cast<void *>(ptr));
         return true;
     }
+
+    std::optional<uint32_t> TryGetMinArgCount();
 };
 
 }  // namespace ark::ets

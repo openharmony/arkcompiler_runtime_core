@@ -202,6 +202,10 @@ static constexpr std::string_view MAPITERATOR                          = "Lescom
 static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescompat/EmptyMapIterator;";
 static constexpr std::string_view SET                                  = "Lescompat/Set;";
 
+// Annotation for optional parameters
+static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
+    "Lstd/annotations/functions/OptionalParametersAnnotation;";
+
 }  // namespace class_descriptors
 
 static constexpr std::string_view CCTOR = "<cctor>";
