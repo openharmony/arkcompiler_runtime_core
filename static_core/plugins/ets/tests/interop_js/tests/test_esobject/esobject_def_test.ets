@@ -22,10 +22,14 @@ let jsUndefined = module.getProperty("jsUndefined");
 let jsBigInt = module.getProperty("bi");
 let jsNull = module.getProperty("jsNull");
 let jsFunc = module.getProperty("jsFunc");
+let jsFuncThrowNumber = module.getProperty("jsFuncThrowNumber");
+let jsFuncThrowString = module.getProperty("jsFuncThrowString");
 let jsFuncNoReturn = module.getProperty("jsFuncNoReturn");
 let jsFuncReturnNull = module.getProperty("jsFuncReturnNull");
 let jsFuncReturnUndefined = module.getProperty("jsFuncReturnUndefined");
 let jsFuncWithParam = module.getProperty("jsFuncWithParam");
+let jsFuncWithParamThrowNumber = module.getProperty("jsFuncWithParamThrowNumber");
+let jsFuncWithParamThrowString = module.getProperty("jsFuncWithParamThrowString");
 let jsArray = module.getProperty("jsArray");
 let jsArray1 = module.getProperty("jsArray1");
 let jsObjectA = module.getProperty("A");
@@ -35,6 +39,8 @@ let jsObjWithFuncParam = module.getProperty("objWithFuncParam");
 let jsIterable = module.getProperty("jsIterable");
 let jsIterableObject = module.getProperty("testItetatorObject");
 let jsUser = module.getProperty("User");
+let jsUserThrowNumber = module.getProperty("UserThrowNumber");
+let jsUserThrowString = module.getProperty("UserThrowString");
 let jsDoubledObj = module.getProperty("doubledObj");
 
 // get Undefined(): ESObject
@@ -325,6 +331,30 @@ function checkInvokeNoParam(): boolean {
     return result.toNumber() == 6;
 }
 
+function checkInvokeNoParamThrowNumber(): boolean {
+    let res: boolean;
+    try {
+        jsFuncThrowNumber.invoke();
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toNumber() === 5;
+    }
+    return res;
+}
+
+function checkInvokeNoParamThrowString(): boolean {
+    let res: boolean;
+    try {
+        jsFuncThrowString.invoke();
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toString() === 'made error';
+    }
+    return res;
+}
+
 function checkInvokeNoReturn(): boolean {
     let result = jsFuncNoReturn.invoke();
     return result.isUndefined();
@@ -350,12 +380,62 @@ function checkInvokeHasParam(): boolean {
     return result.toNumber() == 5;
 }
 
+function checkInvokeHasParamThrowNumber(): boolean {
+    let res: boolean;
+    try {
+        let args: FixedArray<(Object|null|undefined)> = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
+        jsFuncWithParamThrowNumber.invoke(...args);
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toNumber() === 5;
+    }
+    return res;
+}
+
+function checkInvokeHasParamThrowString(): boolean {
+    let res: boolean;
+    try {
+        let args: FixedArray<(Object|null|undefined)> = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
+        jsFuncWithParamThrowString.invoke(...args);
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toString() === 'made error';
+    }
+    return res;
+}
+
 function checkInvokeMethod(): boolean {
     let result = jsObjWithFunc.invokeMethod("func");
     if (!result.isString()) {
         return false;
     }
     return result.toString() == "hello";
+}
+
+function checkInvokeMethodThrowNumber(): boolean {
+    let res: boolean;
+    try {
+        jsObjWithFunc.invokeMethod("funcThrowNumber");
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toNumber() === 5;
+    }
+    return res;
+}
+
+function checkInvokeMethodThrowString(): boolean {
+    let res: boolean;
+    try {
+        jsObjWithFunc.invokeMethod("funcThrowString");
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toString() === 'made error';
+    }
+    return res;
 }
 
 function checkInvokeMethodHasParam(): boolean {
@@ -365,6 +445,32 @@ function checkInvokeMethodHasParam(): boolean {
         return false;
     }
     return result.toString() == "abcdef";
+}
+
+function checkInvokeMethodHasParamThrowNumber(): boolean {
+    let res: boolean;
+    try {
+        let args: FixedArray<ESObject> = [ESObject.wrapString("abc"), ESObject.wrapString("def")];
+        jsObjWithFuncParam.invokeMethod("helloThrowNumber", ...args);
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toNumber() === 5;
+    }
+    return res;
+}
+
+function checkInvokeMethodHasParamThrowString(): boolean {
+    let res: boolean;
+    try {
+        let args: FixedArray<ESObject> = [ESObject.wrapString("abc"), ESObject.wrapString("def")];
+        jsObjWithFuncParam.invokeMethod("helloThrowString", ...args);
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toString() === 'made error';
+    }
+    return res;
 }
 
 function checkIterator(): boolean {
@@ -454,3 +560,28 @@ function checkInstaniate(): boolean {
 	let user = jsUser.instantiate(num);
     return user.getProperty("ID").toNumber() == 123;
 }
+
+function checkInstaniateThrowNumber(): boolean {
+    let res: boolean;
+    try {
+	    jsUserThrowNumber.instantiate();
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toNumber() === 5;
+    }
+    return res;
+}
+
+function checkInstaniateThrowString(): boolean {
+    let res: boolean;
+    try {
+	    jsUserThrowString.instantiate();
+        res = false;
+    } catch (e) {
+        let errObj: ESObject = (e as ESError).getValue();
+        res = errObj.toString() === 'made error';
+    }
+    return res;
+}
+
