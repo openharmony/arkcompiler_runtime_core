@@ -50,12 +50,12 @@ export function intlBestFitLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47Lang
     return LocaleMatch.bestFitLocale(localesToString(locale))
 }
 
-export function localesToLanguageTags(locales: string | Intl.Locale | readonly (string | Intl.Locale)[]): string[] {
+export function intlLocalesToLanguageTags(locales: string | Intl.Locale | ReadonlyArray<string | Intl.Locale>): string[] {
     if (locales instanceof string) {
         return [locales]
     } else if (locales instanceof Intl.Locale) {
         return [locales.toString()]
-    } else if (locales instanceof Array) {
+    } else if (locales instanceof ReadonlyArray) {
         if (locales.length == 0) {
             return []
         }
@@ -69,4 +69,25 @@ export function localesToLanguageTags(locales: string | Intl.Locale | readonly (
     } else {
         throw new TypeError("'locales' parameter has invalid type")
     }
+}
+
+function supportedLocalesOf(locales: string[], localeFitFn: (loc: string) => string): string[] {
+    const supportedLocales = new Array<string>()
+
+    for (const locale of locales) {
+        const fitLocale = localeFitFn(locale)
+        if (locale.startsWith(fitLocale)) {
+            supportedLocales.push(locale)
+        }
+    }
+
+    return supportedLocales
+}
+
+export function intlSupportedBestFitLocales(locales: string[]): string[] {
+    return supportedLocalesOf(locales, intlBestFitLocale)
+}
+
+export function intlSupportedLookupLocales(locales: string[]): string[] {
+    return supportedLocalesOf(locales, intlLookUpLocale)
 }

@@ -106,38 +106,16 @@ export namespace Intl {
             return resolvedOptions
         }
 
-        public static supportedLocalesOf(locales: string | Locale | FixedArray<string | Locale>): string[] {
-            const supportedLocales = new Array<string>()
+        public static supportedLocalesOf(locales: string | Locale | ReadonlyArray<string | Locale>, options?: DateTimeFormatOptions): string[] {
+            const langTags = intlLocalesToLanguageTags(locales)
 
-            if (locales instanceof FixedArray<string>) {
-                return DateTimeFormat.bestFitLocales(Array.from(locales))
-            } else if (locales instanceof FixedArray<Locale>) {
-                return DateTimeFormat.bestFitLocales(Array.from(locales, (loc: Locale) => loc.toString()))
-            } else if (locales instanceof string) {
-                return DateTimeFormat.bestFitLocales(Array.of(locales))
-            } else if (locales instanceof Locale) { 
-                return DateTimeFormat.bestFitLocales(Array.of(locales).map((loc: Locale) => loc.toString()))
-            } else {
-                throw new TypeError("'locales' parameter has invalid type")
-            }
-        }
-
-        private static bestFitLocales(locales: Array<string>): string[] {
-            const bestFitLocales = new Array<string>()
-
-            for (const locale of locales) {
-                const bestFitLocale = intlBestFitLocale(locale)
-                if (locale.startsWith(bestFitLocale)) {
-                    bestFitLocales.push(locale)
-                }
+            if (options) {
+                return (options.localeMatcher == "best fit")
+                        ? intlSupportedBestFitLocales(langTags)
+                        : intlSupportedLookupLocales(langTags)
             }
 
-            const result: string[] = new string[bestFitLocales.length]
-            for (let i = 0; i < result.length; i++) {
-                result[i] = bestFitLocales[i]
-            }
-
-            return result
+            return intlSupportedBestFitLocales(langTags)
         }
 
         private native formatImpl(timestamp: number): string

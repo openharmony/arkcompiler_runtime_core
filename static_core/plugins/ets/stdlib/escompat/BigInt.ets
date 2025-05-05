@@ -184,7 +184,7 @@ export final class BigInt {
      */
     public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: BigIntToLocaleStringOptions): string {
         const numFmtOptions = BigInt.toNumberFormatOptions(options)
-        const formatter = new Intl.NumberFormat(localesToLanguageTags(locales), numFmtOptions)
+        const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), numFmtOptions)
         return formatter.format(this)
     }
 

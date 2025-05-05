@@ -159,6 +159,8 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     private static readonly LOWEST_16_BITS_MASK:  int = 0x0000FFFF;
     private static readonly HIGH_SURROGATE_BITS: int = (Char.HIGH_SURROGATE_MIN as int) << Char.CHAR_BIT_SIZE;
     private static readonly LOW_SURROGATE_BITS: int = Char.LOW_SURROGATE_MIN as int;
+    private static readonly LOW_SURROGATE_MASK: int = 0xfc00
+    private static readonly HIGH_SURROGATE_MASK: int = Char.LOW_SURROGATE_MASK << Char.CHAR_BIT_SIZE
     private static readonly BMP_BORDER: UTF_16_CodePoint = 0x10000;
 
     /**
@@ -180,7 +182,10 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns if the char is in Basic Multilingual Plane.
      */
     public static isInBasicMultilingualPlane(value: char): boolean {
-        return (value < Char.HIGH_SURROGATE_MIN) || (value > Char.LOW_SURROGATE_MAX);
+        if (value < Char.BMP_BORDER) {
+            return (value < Char.HIGH_SURROGATE_MIN) || (value > Char.LOW_SURROGATE_MAX);
+        }
+        return false
     }
 
     /**
@@ -216,8 +221,8 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      */
     public static isValidCodePoint(value: UTF_16_CodePoint): boolean {
         return (Char.isInBasicMultilingualPlane(value))
-                || ((value & Char.HIGH_SURROGATE_BITS) == Char.HIGH_SURROGATE_BITS)
-                    && ((value & Char.LOW_SURROGATE_BITS) == Char.LOW_SURROGATE_BITS);
+                || ((value & Char.HIGH_SURROGATE_MASK) == Char.HIGH_SURROGATE_BITS)
+                    && ((value & Char.LOW_SURROGATE_MASK) == Char.LOW_SURROGATE_BITS);
     }
 
     /**

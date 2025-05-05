@@ -331,11 +331,6 @@ std/core/IntlNumberFormatFaultLocaleTest.ets
 #25239
 std/core/IntlNumberFormatSupportedLocalesOfTest3.ets
 
-#16242
-std/core/std_core_char_static_Char_isPartOfSurrogatePair.ets
-std/core/std_core_char_static_Char_isValidCodePoint.ets
-std/core/std_core_string_String_localeCompare_string_005.ets
-
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
 std/core/std_core_array_forEach_byte_array_func_byte.ets

@@ -787,7 +787,7 @@ export class Date {
         }
 
         const effectiveOptions = !options ? Date.TIME_FORMAT_OPTIONS : this.appendDefaultTimeOptions(options!)
-        return new Intl.DateTimeFormat(localesToLanguageTags(locales), effectiveOptions).format(this.getTime())
+        return new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), effectiveOptions).format(this.getTime())
     }
 
     /**
@@ -808,7 +808,7 @@ export class Date {
      * @returns a language-sensitive representation of this date.
      */
     public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.DateTimeFormatOptions): string {
-        const formatter = new Intl.DateTimeFormat(localesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
+        const formatter = new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
         return formatter.format(this.getTime())
     }
 
@@ -852,7 +852,7 @@ export class Date {
         }
 
         const effectiveOptions = !options ? Date.DATE_FORMAT_OPTIONS : this.appendDefaultDateOptions(options)
-        const formatter = new Intl.DateTimeFormat(localesToLanguageTags(locales), effectiveOptions)
+        const formatter = new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), effectiveOptions)
         return formatter.format(this.getTime())
     }
 
