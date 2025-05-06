@@ -13,15 +13,33 @@
 import("//build/ohos.gni")
 import("//build/ohos/sdk/sdk.gni")
 
+action("copy_taihe_out") {
+  sources = [ "../../../prebuilts/taihe/ohos" ]
+  script = "process_sdk_files.py"
+  args = [
+    "--input_dir",
+    rebase_path("../../../prebuilts/taihe/ohos"),
+    "--output_dir",
+    rebase_path("$target_out_dir/tmp_taihe"),
+  ]
+  outputs = [
+    "$target_out_dir/tmp_taihe/linux-x86_64",
+    "$target_out_dir/tmp_taihe/windows-x86_64",
+    "$target_out_dir/tmp_taihe/darwin-arm64",
+    "$target_out_dir/tmp_taihe/darwin-x86_64",
+  ]
+}
+
 ohos_copy("copy_taihe_tools") {
+  deps = [ ":copy_taihe_out" ]
   if (current_toolchain == "//build/toolchain/linux:clang_x64") {
-    sources = [ "../../../prebuilts/taihe/ohos/linux-x86_64" ]
+    sources = [ "$target_out_dir/tmp_taihe/linux-x86_64" ]
   } else if (current_toolchain == "//build/toolchain/mingw:mingw_x86_64") {
-    sources = [ "../../../prebuilts/taihe/ohos/windows-x86_64" ]
+    sources = [ "$target_out_dir/tmp_taihe/windows-x86_64" ]
   } else if (current_toolchain == "//build/toolchain/mac:clang_arm64") {
-    sources = [ "../../../prebuilts/taihe/ohos/darwin-arm64" ]
+    sources = [ "$target_out_dir/tmp_taihe/darwin-arm64" ]
   } else if (current_toolchain == "//build/toolchain/mac:clang_x64") {
-    sources = [ "../../../prebuilts/taihe/ohos/darwin-x86_64" ]
+    sources = [ "$target_out_dir/tmp_taihe/darwin-x86_64" ]
   }
   outputs = [ target_out_dir + "/$target_name" ]
   module_source_dir = target_out_dir + "/$target_name"
