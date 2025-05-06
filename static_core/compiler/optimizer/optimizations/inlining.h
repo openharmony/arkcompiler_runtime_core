@@ -93,6 +93,10 @@ protected:
     bool DoInline(CallInst *callInst, InlineContext *ctx);
     bool DoInlineMethod(CallInst *callInst, InlineContext *ctx);
     bool DoInlineIntrinsic(CallInst *callInst, InlineContext *ctx);
+    bool DoInlineIntrinsicByExpansion(CallInst *callInst, InlineContext *ctx);
+    bool DoInlineIntrinsicByEncoding(CallInst *callInst, InlineContext *ctx);
+#include "intrinsics_inlining_expansion.inl.h"
+
     bool DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPtr receiver);
     bool DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterface::ClassPtr> *receivers);
     SaveStateInst *GetOrCloneSaveState(CallInst *callInst, BasicBlock *callBb);
@@ -123,7 +127,7 @@ protected:
     bool CheckMethodSize(const CallInst *callInst, InlineContext *ctx);
     bool ResolveTarget(CallInst *callInst, InlineContext *ctx);
     bool CanUseTypeInfo(ObjectTypeInfo typeInfo, RuntimeInterface::MethodPtr method);
-    void InsertChaGuard(CallInst *callInst);
+    void InsertChaGuard(CallInst *callInst, InlineContext *ctx);
 
     InlinedGraph BuildGraph(InlineContext *ctx, CallInst *callInst, CallInst *polyCallInst = nullptr);
     bool CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool *calleeCallRuntime);

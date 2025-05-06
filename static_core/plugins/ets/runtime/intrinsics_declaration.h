@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_atomic_flag.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"

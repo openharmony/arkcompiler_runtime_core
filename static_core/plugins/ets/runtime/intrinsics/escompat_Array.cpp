@@ -21,31 +21,27 @@
 namespace ark::ets::intrinsics {
 EtsObject *EtsEscompatArrayGet(ObjectHeader *arrayHeader, int32_t index)
 {
-    auto actualLength = ObjectAccessor::GetPrimitive<EtsInt>(
-        arrayHeader, cross_values::GetEscompatArrayActualLengthOffset(RUNTIME_ARCH));
-    if (UNLIKELY(static_cast<uint32_t>(index) >= static_cast<uint32_t>(actualLength))) {
+    ASSERT(arrayHeader != nullptr);
+    auto *array = EtsArrayObject<EtsObject>::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto actualLength = array->GetActualLength();
+    if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
                           "Out of bounds");
         return nullptr;
     }
-    ObjectHeader *bufferObjectHeader =
-        ObjectAccessor::GetObject(arrayHeader, cross_values::GetEscompatArrayBufferOffset(RUNTIME_ARCH));
-    EtsObjectArray *buffer = EtsObjectArray::FromCoreType(bufferObjectHeader);
-    return buffer->Get(index);
+    return array->GetData()->Get(index);
 }
 
 void EtsEscompatArraySet(ObjectHeader *arrayHeader, int32_t index, EtsObject *value)
 {
-    auto actualLength = ObjectAccessor::GetPrimitive<EtsInt>(
-        arrayHeader, cross_values::GetEscompatArrayActualLengthOffset(RUNTIME_ARCH));
-    if (UNLIKELY(static_cast<uint32_t>(index) >= static_cast<uint32_t>(actualLength))) {
+    ASSERT(arrayHeader != nullptr);
+    auto *array = EtsArrayObject<EtsObject>::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
+    auto actualLength = array->GetActualLength();
+    if (UNLIKELY(static_cast<uint32_t>(index) >= actualLength)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
                           "Out of bounds");
         return;
     }
-    ObjectHeader *bufferObjectHeader =
-        ObjectAccessor::GetObject(arrayHeader, cross_values::GetEscompatArrayBufferOffset(RUNTIME_ARCH));
-    EtsObjectArray *buffer = EtsObjectArray::FromCoreType(bufferObjectHeader);
-    buffer->Set(index, value);
+    array->GetData()->Set(index, value);
 }
 }  // namespace ark::ets::intrinsics

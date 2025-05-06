@@ -45,9 +45,11 @@ public:
     bool IsMethodStringBuilderAppend(MethodPtr method) const override;
     bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;
+    bool IsClassEscompatArray(ClassPtr klass) const override;
     uint32_t GetClassOffsetObjectsArray(MethodPtr method) const override;
     uint32_t GetClassOffsetObject(MethodPtr method) const override;
     ClassPtr GetStringBuilderClass() const override;
+    ClassPtr GetEscompatArrayClass() const override;
     MethodPtr GetStringBuilderDefaultConstructor() const override;
     uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
     bool IsFieldStringBuilderBuffer(FieldPtr field) const override;
@@ -56,6 +58,8 @@ public:
     FieldPtr GetFieldStringBuilderIndex(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderLength(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderCompress(ClassPtr klass) const override;
+    FieldPtr GetEscompatArrayBuffer(ClassPtr klass) const override;
+    FieldPtr GetEscompatArrayActualLength(ClassPtr klass) const override;
     bool IsIntrinsicStringBuilderToString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppendString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppend(IntrinsicId id) const override;
