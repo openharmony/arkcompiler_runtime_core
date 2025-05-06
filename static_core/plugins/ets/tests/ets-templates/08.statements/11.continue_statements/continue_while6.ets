@@ -14,8 +14,8 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Continue statement (inside while statement)
-tags: [negative, compile-only]
+desc: Continue statement
+tags: [compile-only]
 ---*/
 
 function main(): void {
@@ -23,7 +23,7 @@ function main(): void {
     while (i <= 2) {
         i++;
         continue;
-        i--; // compilation fails due to this unreachable statement
+        i--;
     }
     assertEQ( i, 3 )
 }
