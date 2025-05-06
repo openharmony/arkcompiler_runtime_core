@@ -276,6 +276,7 @@ def create_file(path: Union[str, Path]):
 
 
 def copy_file(src: Union[str, Path], dst: Union[str, Path]) -> None:
+    log.trace('Copy: %s -> %s', str(src), str(dst))
     s = Path(src)
     d = Path(dst)
     if not s.exists():
@@ -285,6 +286,7 @@ def copy_file(src: Union[str, Path], dst: Union[str, Path]) -> None:
 
 
 def copy_files(src: Union[str, Path], dst: Union[str, Path], pattern: str = '*') -> None:
+    log.trace('Copy: %s%s -> %s', str(src), pattern, str(dst))
     s = Path(src)
     d = Path(dst)
     if not s.exists():
@@ -323,6 +325,7 @@ def load_json(path: Union[str, Path]) -> Any:
 
 
 def force_link(link: Path, dest: Path) -> None:
+    log.trace('Force link: %s -> %s', str(link), str(dest))
     if link.exists():
         link.unlink()
     link.symlink_to(dest)

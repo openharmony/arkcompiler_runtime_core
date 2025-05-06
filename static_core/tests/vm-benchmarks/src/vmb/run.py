@@ -92,8 +92,8 @@ class VmbRunner:
             if self.abort_on_fail:
                 log.fatal('Aborting on first fail...')
                 return
-        except KeyboardInterrupt:
-            return
+        except KeyboardInterrupt as e:
+            raise KeyboardInterrupt() from e
         finally:
             if not self.dry_run:
                 self.platform.cleanup(bu)
@@ -111,13 +111,24 @@ class VmbRunner:
                 for bu in bench_units[i:i + self.tests_per_batch]:
                     bu.status = BUStatus.ERROR
                 continue
+            except KeyboardInterrupt:
+                log.warning('Aborting batch run...')
+                break
             for bu in bench_units[i:i + self.tests_per_batch]:
-                self.run_one_unit(bu)
+                try:
+                    self.run_one_unit(bu)
+                except KeyboardInterrupt:
+                    log.warning('Aborting run...')
+                    break
         return bench_units
 
     def run_suite_serial(self, bench_units: List[BenchUnit]) -> List[BenchUnit]:
         for bu in bench_units:
-            self.run_one_unit(bu)
+            try:
+                self.run_one_unit(bu)
+            except KeyboardInterrupt:
+                log.warning('Aborting run...')
+                break
         return bench_units
 
     def run(self, bench_units: List[BenchUnit]) -> Tuple[List[BenchUnit], ExtInfo, Timer]:

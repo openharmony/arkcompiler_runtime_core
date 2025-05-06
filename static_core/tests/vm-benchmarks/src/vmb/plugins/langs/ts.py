@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import os
 import re
 from typing import Optional, Tuple
 
@@ -36,8 +37,9 @@ class Lang(LangBase):
         r'^\s*(public)?\s+(?P<func>\w+)\s*'
         r'\(\s*\)\s*(throws)?\s*({)?\s*$')
     __re_param = re.compile(
-        r'^\s*(?P<param>\w+)\s*'
-        r':\s*(?P<type>\w+)\s*(;)?\s*$')
+        r'(?P<param>\w+)\s*'
+        r':\s*(?P<type>\w+)\s*'
+        r'(\s*=\s*.+)?(;)?\s*$')  # possible initialization
 
     def __init__(self):
         super().__init__()
@@ -71,3 +73,8 @@ class Lang(LangBase):
         if typ and typ != 'void':
             return f'Consumer.consume_{typ}(bench.{name}());'
         return f'bench.{name}();'
+
+    def get_import_line(self, lib: str, what: str) -> str:
+        libfile = os.path.split(lib)[1]
+        libname = os.path.splitext(libfile)[0]
+        return f'import {what} from "./{libname}";\n'  # Note "./"

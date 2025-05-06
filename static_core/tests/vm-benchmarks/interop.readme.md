@@ -1,5 +1,7 @@
 # Developing and running interop benchmarks in VMB
 
+Note: This approach is outdated. For actual docs see [this manual](./examples/benchmarks/interop/readme.md)
+
 ## Preparing project
 
 - ensure your runtime core and ets frontend are on latest version

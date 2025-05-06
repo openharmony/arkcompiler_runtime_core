@@ -74,7 +74,7 @@ function doGC(): void throws {
     }
 }
 
-function runIters(phase: String, count: int, time: int): void throws {
+function runIters(phase: String, count: int, time: int, bench: $state_name): void throws {
     // use 0.5 sec instead of 1 sec for hap
     let iterMs: long = time * S2MS;
     totalOps = 0;
@@ -98,12 +98,9 @@ function runIters(phase: String, count: int, time: int): void throws {
     }
 }
 
-let bench: $state_name;
-static {
-    bench = new $state_name();
-}
 
 function main(): void throws {
+    let bench: $state_name = new $state_name();
     log("Startup execution started: " + (Date.now() as long));
     $state_params
     $state_setup
@@ -145,11 +142,11 @@ function main(): void throws {
         // Re-entering runIters in warmup loop to allow profiler complete the method.
         // Possible deoptimizations and recompilations is done in warmup instead of measure phase.
         for (let wi: int = 0; wi < WI; ++wi) {
-            runIters("Warmup", 1, WT);
+            runIters("Warmup", 1, WT, bench);
         }
     }
     iter = 1;
-    runIters("Iter", MI, IT);
+    runIters("Iter", MI, IT, bench);
     log("Benchmark result: $bench_name " + 1.0*totalMs*MS2NS/totalOps);
     Consumer.consume(bench);
 }

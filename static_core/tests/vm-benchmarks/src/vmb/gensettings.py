@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Set
 
 
@@ -24,11 +24,12 @@ class GenSettings:
     """Template overrides class.
 
     In most cases template name, source and bench file extentions
-    are set by selected lang, but for some platforms these defaults needs
-    to be overriden.
+    are set by selected lang,
+    but for some platforms these defaults needs to be overriden.
     """
 
-    src: Set[str]
-    template: str
-    out: str
-    link_to_src: bool
+    src: Set[str]  # extensions for source files
+    template: str  # template name
+    out: str  # extension for generatad file
+    link_to_src: bool  # softlink from src to bu
+    link_to_other_src: Set[str] = field(default_factory=set)  # link for src with other extensions

@@ -185,7 +185,7 @@ class Consumer {
     public static pseudorand: long = Date.now() as long;
 
     public static consumeBool(boolc: boolean): void throws {
-        if (boolc == Consumer.boola && boolc == Consumer. boolb) {
+        if (boolc == Consumer.boola && boolc == Consumer.boolb) {
             throw new NullPointerError();
         }
     }

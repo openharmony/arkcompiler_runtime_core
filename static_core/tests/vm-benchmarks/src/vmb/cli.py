@@ -304,10 +304,6 @@ class Args(argparse.Namespace):
             flags |= OptFlags.DISABLE_INLINING
         return flags
 
-    def get_custom_opts(self, name: str) -> str:
-        opts = self.custom_opts.get(name, [])
-        return ' '.join(opts)
-
     def get_shared_path(self) -> str:
         path = self.get('outdir', '')
         if path:
