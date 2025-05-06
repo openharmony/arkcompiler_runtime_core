@@ -46,14 +46,17 @@ class AsyncLockManager {
     * @returns { AsyncLockState } Returns an instance of AsyncLockState.
     */
     public query(name: string): AsyncLockState {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        let lock = this.locks.get(name);
-        if (lock == undefined) {
-            throw new Error("AsyncLock " + name + " not found");
+        try{
+            ConcurrencyHelpers.mutexLock(this.mutex);
+            let lock = this.locks.get(name);
+            if (lock == undefined) {
+                throw new Error("AsyncLock " + name + " not found");
+            }
+            let state = lock.query();
+            return state;
+        } finally {
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
-        let state = lock.query();
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return state;
     }
 
     /**

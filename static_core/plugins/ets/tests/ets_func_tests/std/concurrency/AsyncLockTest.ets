@@ -22,6 +22,7 @@ function main(): int {
         failures += asyncLockDeadLockTest();
         failures += asyncLockAvailableTest();
         failures += asyncLockExclusiveModeTest();
+        failures += asyncLockQueryNonexistentNameTest();
 
         assertEQ(failures, 0);
     });
@@ -46,6 +47,29 @@ function asyncLockQueryTest(): int {
         StdDebug.Logger.log("FAILED: AsyncLock query test");
         return 1;
     }
+}
+
+/**
+ *  Check if the query exception causes deadlock.
+ */
+function asyncLockQueryNonexistentNameTest(): int {
+    let result = 0;
+    let lockname = "name";
+    try {
+        AsyncLock.query(lockname);
+    } catch (e: Error) {
+        if(e.message != "AsyncLock " + lockname + " not found") {
+            result += 1; 
+        }
+    }
+
+    AsyncLock.request(lockname);
+
+    if (result != 0) {
+        StdDebug.Logger.log("FAILED: AsyncLock query nonexistent name test");
+    }
+
+    return result;
 }
 
 /**
