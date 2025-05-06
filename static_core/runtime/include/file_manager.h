@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,12 @@ class FileManager {
 public:
     PANDA_PUBLIC_API static bool LoadAbcFile(std::string_view location, panda_file::File::OpenMode openMode);
 
-    PANDA_PUBLIC_API static bool TryLoadAnFileForLocation(std::string_view pandaFileLocation);
+    PANDA_PUBLIC_API static bool TryLoadAnFileForLocation(std::string_view abcPath);
+
+    PANDA_PUBLIC_API static bool TryLoadAnFileFromLocation(std::string_view anFileLocation, PandaString &abcFilePrefix,
+                                                           std::string_view pandaFileLocation);
 
     PANDA_PUBLIC_API static Expected<bool, std::string> LoadAnFile(std::string_view anLocation, bool force = false);
-
-    PANDA_PUBLIC_API static PandaString ResolveAnFilePath(std::string_view abcPath);
 };
 
 }  // namespace ark

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,21 +38,55 @@ bool FileManager::LoadAbcFile(std::string_view location, panda_file::File::OpenM
     return true;
 }
 
-bool FileManager::TryLoadAnFileForLocation(std::string_view pandaFileLocation)
+bool FileManager::TryLoadAnFileForLocation(std::string_view abcPath)
 {
-    auto anLocation = FileManager::ResolveAnFilePath(pandaFileLocation);
-    if (anLocation.empty()) {
+    PandaString::size_type posStart = abcPath.find_last_of('/');
+    PandaString::size_type posEnd = abcPath.find_last_of('.');
+    if (posStart == std::string_view::npos || posEnd == std::string_view::npos) {
         return true;
     }
-    auto res = FileManager::LoadAnFile(anLocation, false);
-    if (res && res.Value()) {
-        LOG(INFO, PANDAFILE) << "Successfully load .an file for '" << pandaFileLocation << "': '" << anLocation << "'";
-    } else if (!res) {
-        LOG(INFO, PANDAFILE) << "Failed to load AOT file: '" << anLocation << "': " << res.Error();
-    } else {
-        LOG(INFO, PANDAFILE) << "Failed to load '" << anLocation << "' with unknown reason";
+    LOG(DEBUG, PANDAFILE) << "current abc file path: " << abcPath;
+    PandaString abcFilePrefix = PandaString(abcPath.substr(posStart, posEnd - posStart));
+
+    // If set boot-an-location, load from this location first
+    std::string_view anLocation = Runtime::GetOptions().GetBootAnLocation();
+    if (!anLocation.empty()) {
+        bool res = FileManager::TryLoadAnFileFromLocation(anLocation, abcFilePrefix, abcPath);
+        if (res) {
+            return true;
+        }
     }
+
+    // If load failed from boot-an-location, continue try load from location of abc
+    anLocation = abcPath.substr(0, posStart);
+    FileManager::TryLoadAnFileFromLocation(anLocation, abcFilePrefix, abcPath);
     return true;
+}
+
+bool FileManager::TryLoadAnFileFromLocation(std::string_view anFileLocation, PandaString &abcFilePrefix,
+                                            std::string_view pandaFileLocation)
+{
+    const PandaString &anPathSuffix = ".an";
+    PandaString anFilePath = PandaString(anFileLocation) + abcFilePrefix + anPathSuffix;
+
+    const char *filename = anFilePath.c_str();
+    if (access(filename, F_OK) != 0) {
+        LOG(DEBUG, PANDAFILE) << "There is no corresponding .an file for '" << pandaFileLocation << "' in '"
+                              << anFileLocation << "'";
+        return false;
+    }
+    auto res = FileManager::LoadAnFile(anFilePath, false);
+    if (res && res.Value()) {
+        LOG(INFO, PANDAFILE) << "Successfully load .an file for '" << pandaFileLocation << "': '" << anFileLocation
+                             << "'";
+        return true;
+    }
+    if (!res) {
+        LOG(INFO, PANDAFILE) << "Failed to load AOT file: '" << anFileLocation << "': " << res.Error();
+    } else {
+        LOG(INFO, PANDAFILE) << "Failed to load '" << anFileLocation << "' with unknown reason";
+    }
+    return false;
 }
 
 Expected<bool, std::string> FileManager::LoadAnFile(std::string_view anLocation, bool force)
@@ -64,30 +98,6 @@ Expected<bool, std::string> FileManager::LoadAnFile(std::string_view anLocation,
     auto realAnFilePath = os::GetAbsolutePath(anLocation);
     return runtime->GetClassLinker()->GetAotManager()->AddFile(realAnFilePath, &runtimeIface,
                                                                static_cast<uint32_t>(gcType), force);
-}
-
-PandaString FileManager::ResolveAnFilePath(std::string_view abcPath)
-{
-    // check whether an aot version of this file already exist
-    // NOTE(Wentao):
-    //   1. search ark native file file base on ARCH info from runtime.
-    //   2. allow searching an file out of same path of ark bytecode file.
-    const PandaString &anPathSuffix = ".an";
-    PandaString::size_type posStart = abcPath.find_last_of('/');
-    PandaString::size_type posEnd = abcPath.find_last_of('.');
-    if (posStart != std::string_view::npos && posEnd != std::string_view::npos) {
-        LOG(DEBUG, PANDAFILE) << "current abc file path: " << abcPath;
-        PandaString abcPathPrefix = PandaString(abcPath.substr(0, posStart));
-        PandaString anFilePath =
-            abcPathPrefix + PandaString(abcPath.substr(posStart, posEnd - posStart)) + anPathSuffix;
-
-        const char *filename = anFilePath.c_str();
-        if (access(filename, F_OK) == 0) {
-            return anFilePath;
-        }
-    }
-    LOG(DEBUG, PANDAFILE) << "There is no corresponding .an file for " << abcPath;
-    return "";
 }
 
 }  // namespace ark
