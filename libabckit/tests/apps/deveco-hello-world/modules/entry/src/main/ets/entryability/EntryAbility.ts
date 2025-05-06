@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import ConfigurationConstant from "@ohos:app.ability.ConfigurationConstant";
-import UIAbility from "@ohos:app.ability.UIAbility";
-import type AbilityConstant from "@ohos:app.ability.AbilityConstant";
-import type Want from "@ohos:app.ability.Want";
-import hilog from "@ohos:hilog";
-import type window from "@ohos:window";
+import ConfigurationConstant from '@ohos:app.ability.ConfigurationConstant';
+import UIAbility from '@ohos:app.ability.UIAbility';
+import type AbilityConstant from '@ohos:app.ability.AbilityConstant';
+import type Want from '@ohos:app.ability.Want';
+import hilog from '@ohos:hilog';
+import type window from '@ohos:window';
 export default class EntryAbility extends UIAbility {
     onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
         this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
