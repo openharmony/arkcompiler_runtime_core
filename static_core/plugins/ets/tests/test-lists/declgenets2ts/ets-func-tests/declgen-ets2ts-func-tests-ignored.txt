@@ -1,4 +1,4 @@
-#FailKind.ABORT_FAIL - 3 tests:
+#FailKind.ABORT_FAIL - 1 tests:
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/method_overload6.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
@@ -56,7 +56,8 @@ std/core/std_core_char_instance_Char_isWhiteSpace.ets
 std/core/std_core_char_static_Char_isWhiteSpace.ets
 std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
-#FailKind.TSC_FAIL - 136 tests:
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-builder-param.ets
+#FailKind.TSC_FAIL - 133 tests:
 escompat/ArrayProxyTest.ets
 escompat/JsonParseTest.ets
 escompat/ProcessTest.ets
@@ -87,11 +88,13 @@ spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Param
 spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassTwoArgs.ets
 spec/05.Generics/comparableClass.ets
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_10_02.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.ets
-spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.ets
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_01.ets
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_03.ets
+spec/09.classes/Accessor_Declarations/issue-15142_4.ets
 spec/09.classes/Accessor_Declarations/issue-15142_7.ets
 spec/09.classes/Accessor_Declarations/issue-15142_8.ets
+spec/10.Interfaces/overriding/15523_0004_iterable_override.ets
+spec/10.Interfaces/overriding/15523_0005_iterable_override.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/clashing_reexports.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/03.re-export_directives/reexport_incorrect.ets
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_03.ets
@@ -157,12 +160,9 @@ std/containers/linked_blocking_queue/LinkedBlockingQueue_PollTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PopTest_Stress.ets
 std/containers/linked_blocking_queue/LinkedBlockingQueue_PushTest_Stress.ets
-std/core/IntlListFormatTest.ets
 std/core/IntlLocaleTest.ets
 std/core/IntlLocaleTest2.ets
-std/core/IntlNumberFormatToParts.ets
 std/core/IntlPluralRulesTest.ets
-std/core/Object.ets
 std/core/TypeClassTypeTest.ets
 std/core/TypeCreateClassTest.ets
 std/core/TypeCreateInterfaceTest.ets
@@ -184,3 +184,10 @@ std/core/std_core_stringbuilder_instance_StringBuilder_append_004.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append_005.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append_006.ets
 std/core/std_core_stringbuilder_instance_StringBuilder_append_007.ets
+std/core/std_core_typedarrays__BigInt64Array.ets
+std/core/std_core_typedarrays__Float32Array.ets
+std/core/std_core_typedarrays__Float64Array.ets
+std/core/std_core_typedarrays__Float64Array_001.ets
+std/core/std_core_typedarrays__Int16Array.ets
+std/core/std_core_typedarrays__Int32Array.ets
+std/core/std_core_typedarrays__Int8Array.ets

@@ -40,5 +40,7 @@ export declare class Fields {
     public set uint16Array_(value: Uint16Array);
     public get uint32Array_(): Uint32Array;
     public set uint32Array_(value: Uint32Array);
+    public get cb(): (arg1?: number, arg2?: number, arg3?: number) => void;
+    public set cb(value: (arg1?: number, arg2?: number, arg3?: number) => void);
     constructor();
 }

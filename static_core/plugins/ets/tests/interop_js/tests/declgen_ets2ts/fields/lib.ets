@@ -28,5 +28,6 @@ export class Fields {
     uint8Array_: Uint8Array = new Uint8Array();
     uint16Array_: Uint16Array = new Uint16Array();
     uint32Array_: Uint32Array = new Uint32Array();
+    public cb = (a: number = 1, b: number = 2, c: number = 3) => {};
 };
 Fields.staticFloat_ = 1.1;
