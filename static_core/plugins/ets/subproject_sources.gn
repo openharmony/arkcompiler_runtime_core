@@ -269,6 +269,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/js_refconvert_builtin.cpp",
     "runtime/interop_js/js_refconvert_function.cpp",
     "runtime/interop_js/js_refconvert_record.cpp",
+    "runtime/interop_js/js_refconvert_tuple.cpp",
     "runtime/interop_js/js_value.cpp",
     "runtime/interop_js/napi_impl/napi_impl.cpp",
     "runtime/interop_js/native_api/arkts_interop_js_api_impl.cpp",

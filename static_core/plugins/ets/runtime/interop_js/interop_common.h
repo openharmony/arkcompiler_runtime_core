@@ -202,6 +202,13 @@ inline napi_value GetUndefined(napi_env env)
     return jsValueUndefined;
 }
 
+inline napi_value GetBoolean(napi_env env, bool value)
+{
+    napi_value result;
+    NAPI_CHECK_FATAL(napi_get_boolean(env, value, &result));
+    return result;
+}
+
 inline napi_value GetNull(napi_env env)
 {
     napi_value jsValueNull {};
