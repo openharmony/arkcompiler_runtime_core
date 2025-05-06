@@ -78,8 +78,13 @@ class BenchGenerator:
         paths = [cwd.joinpath(p) for p in read_list_file(lst)]
         files = []
         for p in paths:
-            x = BenchGenerator.search_test_files_in_dir(p, p, ext, allowed_dir_name)
-            files += x
+            if not p.exists():
+                log.error('Path `%s` not found!', str(p))
+            elif p.is_file():  # add file from test list unconditionally
+                files.append(SrcPath(p, Path('.')))
+            else:
+                x = BenchGenerator.search_test_files_in_dir(p, p, ext, allowed_dir_name)
+                files += x
         return files
 
     @staticmethod

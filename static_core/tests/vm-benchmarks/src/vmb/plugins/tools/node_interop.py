@@ -20,6 +20,8 @@ from vmb.tool import ToolBase
 from vmb.unit import BenchUnit
 
 
+# Note: Node support is a subject to remove
+# pylint: disable=duplicate-code
 class Tool(ToolBase):
 
     def __init__(self, *args):
