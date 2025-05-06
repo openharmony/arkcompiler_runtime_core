@@ -89,7 +89,8 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
 
     ani_string resultStr {};
     size_t resultLen = target - arr;
-    if (env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr), resultLen, &resultStr) != ANI_OK) {
+    if (static_cast<int32_t>(resultLen) <= 0 ||
+        env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr), resultLen, &resultStr) != ANI_OK) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("StringDecoder:: create string error!");
         FreedMemory(arr);
@@ -135,10 +136,8 @@ ani_string StringDecoder::End(ani_env *env)
 
 void StringDecoder::FreedMemory(UChar *&pData)
 {
-    if (pData != nullptr) {
-        delete[] pData;
-        pData = nullptr;
-    }
+    delete[] pData;
+    pData = nullptr;
 }
 
 ani_object StringDecoder::ThrowError(ani_env *env, const std::string &message)
