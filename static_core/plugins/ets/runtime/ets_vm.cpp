@@ -861,7 +861,9 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
     [[maybe_unused]] ScopedManagedCodeThread sj(coro);
     [[maybe_unused]] EtsHandleScope scope(coro);
 
-    const auto exceptionHandler = [this, coro]() {
+    const auto exceptionHandler = [this, coro]() __attribute__((__noreturn__))
+    // CC-OFFNXT(G.FMT.03-CPP) project code style
+    {
         ASSERT(coro->HasPendingException());
         [[maybe_unused]] ScopedNativeCodeThread nj(coro);
         HandleUncaughtException();

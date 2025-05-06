@@ -724,9 +724,10 @@ uint8_t JSRuntimeInstanceOfStaticType(JSValue *object, EtsTypeAPIType *paramType
         return static_cast<uint8_t>(false);
     }
 
-    EtsHandle<EtsClass> klass(coro, paramType->GetClass());
-    EtsField *field = klass->GetFieldIDByName("cls", nullptr);
-    auto clsObj = paramType->GetFieldObject(field);
+    EtsHandle<EtsTypeAPIType> paramTypeHandle(coro, paramType);
+    EtsHandle<JSValue> objectHandle(coro, object);
+    EtsField *field = paramType->GetClass()->GetFieldIDByName("cls", nullptr);
+    auto clsObj = paramTypeHandle->GetFieldObject(field);
     if (clsObj == nullptr) {
         INTEROP_LOG(ERROR) << "failed to get field by name";
         return static_cast<uint8_t>(false);
@@ -735,7 +736,7 @@ uint8_t JSRuntimeInstanceOfStaticType(JSValue *object, EtsTypeAPIType *paramType
 
     // Check if object has SharedReference
     ets_proxy::SharedReference *sharedRef = [=] {
-        napi_value jsValue = JSConvertJSValue::Wrap(env, object);
+        napi_value jsValue = JSConvertJSValue::Wrap(env, objectHandle.GetPtr());
         return ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     }();
     auto result = false;

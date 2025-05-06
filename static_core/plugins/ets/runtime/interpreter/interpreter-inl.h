@@ -63,6 +63,8 @@ public:
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -100,6 +102,8 @@ public:
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->LoadPrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -137,6 +141,8 @@ public:
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 ASSERT(field->GetType().IsReference());
                 this->GetAccAsVReg().SetReference(
                     obj->GetFieldObject<RuntimeIfaceT::NEED_READ_BARRIER>(this->GetThread(), *field));
@@ -176,6 +182,8 @@ public:
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -213,6 +221,8 @@ public:
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 this->StorePrimitiveField(obj, field);
                 this->template MoveToNextInst<FORMAT, true>();
                 return;
@@ -250,6 +260,8 @@ public:
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
             if (field != nullptr) {
+                // GetFieldByName can trigger GC hanse need to reread
+                obj = this->GetFrame()->GetVReg(vs).GetReference();
                 ASSERT(field->GetType().IsReference());
                 obj->SetFieldObject<RuntimeIfaceT::NEED_WRITE_BARRIER>(this->GetThread(), *field,
                                                                        this->GetAcc().GetReference());

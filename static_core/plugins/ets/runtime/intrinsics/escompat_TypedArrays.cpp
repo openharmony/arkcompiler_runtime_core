@@ -47,12 +47,21 @@ static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::Eleme
         return;
     }
 
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
         return;
     }
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     ObjectAccessor::SetPrimitive(
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()), val);
 }
 
@@ -64,12 +73,27 @@ typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
         return 0;
     }
 
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
         return 0;
     }
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return ObjectAccessor::GetPrimitive<typename T::ElementType>(
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()));
 }
 
@@ -114,20 +138,39 @@ static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, T *srcArray, EtsInt
     if (UNLIKELY(dstData == nullptr)) {
         return;
     }
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *srcData = GetNativeData(srcArray);
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(srcData == nullptr)) {
         return;
     }
 
     using ElementType = typename T::ElementType;
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos + srcArray->GetLengthInt() > thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
         return;
     }
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *dst = ToVoidPtr(ToUintPtr(dstData) + thisArray->GetByteOffset() + pos * sizeof(ElementType));
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *src = ToVoidPtr(ToUintPtr(srcData) + srcArray->GetByteOffset());
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     [[maybe_unused]] auto error = memmove_s(dst, (thisArray->GetLengthInt() - pos) * sizeof(ElementType), src,
+                                            // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
                                             srcArray->GetLengthInt() * sizeof(ElementType));
     ASSERT(error == EOK);
 }
@@ -152,6 +195,13 @@ static void EtsEscompatTypedArrayFillInternal(T *thisArray, V val, EtsInt begin,
     if (UNLIKELY(data == nullptr)) {
         return;
     }
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto offset = static_cast<EtsInt>(thisArray->GetByteOffset()) + begin * sizeof(V);
     for (auto i = begin; i < end; ++i) {
         ObjectAccessor::SetPrimitive(data, offset, val);
@@ -547,10 +597,20 @@ static T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
         return nullptr;
     }
     using ElementType = typename T::ElementType;
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *ptrFirst = reinterpret_cast<ElementType *>(ToVoidPtr(ToUintPtr(arrData) + thisArray->GetByteOffset()));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto *ptrLast = ptrFirst + thisArray->GetLengthInt();
+    auto *ptrLast = ptrFirst +
+                    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+                    thisArray->GetLengthInt();
     std::reverse(ptrFirst, ptrLast);
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return thisArray;
 }
 
@@ -669,6 +729,13 @@ T *EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start
         return nullptr;
     }
 
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto arrayLength = thisArray->GetLengthInt();
     target = NormalizeIndex(target, arrayLength);
     start = NormalizeIndex(start, arrayLength);
@@ -679,15 +746,23 @@ T *EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start
         count = arrayLength - target;
     }
     if (count <= 0) {
+        // See (GetNativeData) reason
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         return thisArray;
     }
 
     using ElementType = typename T::ElementType;
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *targetAddress = ToVoidPtr(ToUintPtr(data) + thisArray->GetByteOffset() + target * sizeof(ElementType));
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *startAddress = ToVoidPtr(ToUintPtr(data) + thisArray->GetByteOffset() + start * sizeof(ElementType));
     [[maybe_unused]] auto error = memmove_s(targetAddress, (arrayLength - start) * sizeof(ElementType), startAddress,
                                             count * sizeof(ElementType));
     ASSERT(error == EOK);
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return thisArray;
 }
 
@@ -814,7 +889,16 @@ static EtsDouble EtsEscompatArrayIndexOfLong(T1 *thisArray, T2 searchElement, Et
     }
 
     using ElementType = typename T1::ElementType;
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto arrayLength = thisArray->GetLengthInt();
     fromIndex = NormalizeIndex(fromIndex, arrayLength);
     auto element = static_cast<ElementType>(searchElement);
@@ -840,7 +924,16 @@ static EtsDouble EtsEscompatArrayIndexOfNumber(T *thisArray, double searchElemen
     }
 
     using ElementType = typename T::ElementType;
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto arrayLength = thisArray->GetLengthInt();
     fromIndex = NormalizeIndex(fromIndex, arrayLength);
     for (int i = fromIndex; i < arrayLength; i++) {
@@ -903,6 +996,13 @@ static EtsDouble EtsEscompatArrayLastIndexOfLong(T1 *thisArray, T2 searchElement
         return INVALID_INDEX;
     }
 
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     int arrayLength = thisArray->GetLengthInt();
     if (arrayLength == 0) {
         return INVALID_INDEX;
@@ -914,6 +1014,13 @@ static EtsDouble EtsEscompatArrayLastIndexOfLong(T1 *thisArray, T2 searchElement
     }
 
     using ElementType = typename T1::ElementType;
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
     auto element = static_cast<ElementType>(searchElement);
     for (int i = startIndex; i >= 0; i--) {
@@ -938,6 +1045,13 @@ static EtsDouble EtsEscompatArrayLastIndexOfNumber(T *thisArray, double searchEl
         return INVALID_INDEX;
     }
 
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     int arrayLength = thisArray->GetLengthInt();
     if (arrayLength == 0) {
         return INVALID_INDEX;
@@ -949,6 +1063,13 @@ static EtsDouble EtsEscompatArrayLastIndexOfNumber(T *thisArray, double searchEl
     }
 
     using ElementType = typename T::ElementType;
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
     for (int i = startIndex; i >= 0; i--) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -1161,16 +1282,31 @@ static ark::ets::EtsString *TypedArrayJoin(T *thisArray, ark::ets::EtsString *se
         return nullptr;
     }
 
+    /**
+     * False-positive static-analyzer report:
+     * GC can happen only on ThrowException in GetNativeData.
+     * But such case meaning data to be nullptr and retun prevents
+     * us from proceeding
+     */
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto *tyDataPtr = reinterpret_cast<ElementType *>(static_cast<EtsByte *>(dataPtr) +
+                                                      // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
                                                       static_cast<size_t>(thisArray->GetByteOffset()));
     Span<ElementType> data(tyDataPtr, length);
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (separator->IsEmpty()) {
         return TypedArrayJoinUtf8(data);
     }
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (!separator->IsUtf16()) {
+        // See (GetNativeData) reason
+        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         return TypedArrayJoinUtf8(data, separator);
     }
+    // See (GetNativeData) reason
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     return TypedArrayJoinUtf16(data, separator);
 }
 
