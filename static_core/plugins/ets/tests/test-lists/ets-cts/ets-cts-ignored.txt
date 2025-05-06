@@ -227,10 +227,6 @@
 #20024 es2panda fails to infer type of spread expression of enum array
 07.expressions/06.spread_expression/spex_12.ets
 
-#20362 Class linker error: Cannot find class Lf64[]
-07.expressions/06.spread_expression/spex_26.ets
-07.expressions/06.spread_expression/spex_27.ets
-
 #24006 Array literal type inference needs to be improved
 07.expressions/06.spread_expression/spex_lmbd_35.ets
 07.expressions/06.spread_expression/spex_lmbd_37.ets
