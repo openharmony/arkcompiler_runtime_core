@@ -19,6 +19,11 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets {
+
+namespace test {
+class EtsEscompatTypedArrayBaseTest;
+}  // namespace test
+
 class EtsEscompatTypedArrayBase : public EtsObject {
 public:
     EtsEscompatTypedArrayBase() = delete;
@@ -89,6 +94,8 @@ private:
     EtsDouble byteOffset_;
     EtsDouble byteLength_;
     EtsInt lengthInt_;
+
+    friend class test::EtsEscompatTypedArrayBaseTest;
 };
 
 template <typename T>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,26 +15,24 @@
 
 #include "ets_mirror_class_test_base.h"
 
+#include "types/ets_atomic_flag.h"
 #include "types/ets_class.h"
-#include "types/ets_arraybuffer.h"
 #include "tests/runtime/types/ets_test_mirror_classes.h"
 
 namespace ark::ets::test {
 
-class EtsArrayBufferTest : public EtsMirrorClassTestBase {
+class EtsAtomicFlagTest : public EtsMirrorClassTestBase {
 public:
     static std::vector<MirrorFieldInfo> GetMembers()
     {
-        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, managedData_, "data"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, byteLength_, "_byteLength"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, nativeData_, "dataAddress"),
-                                             MIRROR_FIELD_INFO(EtsEscompatArrayBuffer, isResizable_, "isResizable")};
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsAtomicFlag, flag_, "flag")};
     }
 };
 
-TEST_F(EtsArrayBufferTest, MemoryLayout)
+TEST_F(EtsAtomicFlagTest, MemoryLayout)
 {
-    EtsClass *klass = GetPlatformTypes()->escompatArrayBuffer;
+    auto *klass = GetClassLinker()->GetClass("Lstd/debug/concurrency/AtomicFlag;");
+    ASSERT(klass != nullptr);
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 }  // namespace ark::ets::test

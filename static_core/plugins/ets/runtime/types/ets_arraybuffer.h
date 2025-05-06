@@ -32,7 +32,6 @@ namespace ark::ets {
 
 namespace test {
 class EtsArrayBufferTest;
-class EtsEscompatArrayBufferMembers;
 }  // namespace test
 
 class EtsEscompatArrayBuffer : public EtsObject {
@@ -315,7 +314,6 @@ private:
     EtsBoolean isResizable_;
 
     friend class test::EtsArrayBufferTest;
-    friend class test::EtsEscompatArrayBufferMembers;
 };
 
 }  // namespace ark::ets
