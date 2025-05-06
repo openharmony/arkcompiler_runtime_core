@@ -58,7 +58,7 @@ fi
 # Python
 if "$run_python"; then
     echo "--- Formatting Python code ---"
-    removestar -i taihe tests
+    removestar -i taihe tests || true
     black taihe tests
     ruff check taihe tests --fix
 fi

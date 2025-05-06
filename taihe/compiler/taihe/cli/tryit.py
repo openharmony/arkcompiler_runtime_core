@@ -61,9 +61,11 @@ class BuildSystem:
         opt_level: str,
         config: Optional[BuildConfig] = None,
         verbosity: int = logging.INFO,
+        sts_keep_name: bool = False,
     ):
         self.config = config if config is not None else BuildConfig()
         self.logger = self._setup_logger(verbosity)
+        self.sts_keep_name = sts_keep_name
 
         # Build paths
         self.target_path = Path(target_dir).resolve()
@@ -455,11 +457,18 @@ class BuildSystem:
         backends = registry.collect_required_backends(["ani-bridge", "cpp-author"])
 
         # TODO: cmdline
+        resolved_backends = []
+        for b in backends:
+            if b.NAME == "ani-bridge":
+                resolved_backends.append(b(keep_name=self.sts_keep_name))  # type: ignore
+            else:
+                resolved_backends.append(b())
+
         instance = CompilerInstance(
             CompilerInvocation(
                 src_dirs=[self.idl_dir],
                 out_dir=self.generated_dir,
-                backends=[b() for b in backends],  # pyre-ignore
+                backends=resolved_backends,  # pyre-ignore
             )
         )
 
@@ -648,7 +657,13 @@ def main(config: Optional[BuildConfig] = None):
         help="Generate and compile ANI files and ETS files",
     )
     parser.add_argument(
+        "--sts-keep-name",
+        action="store_true",
+        help="Keep original function and interface method names",
+    )
+    parser.add_argument(
         "-ani",
+        "--generate-and-compile-ani-deprecated",
         action="store_true",
         help="[DEPRECATED] Generate and compile ANI files and ETS files",
     )
@@ -680,6 +695,13 @@ def main(config: Optional[BuildConfig] = None):
     }
     verbosity = verbosity_levels.get(min(args.verbose, 2), logging.DEBUG)
 
+    if args.generate_and_compile_ani_deprecated:
+        print(
+            "Warning: -ani (with single dash) is deprecated. Use --ani (with double dash) instead.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     try:
         # Create BuildConfig with verbosity
 
@@ -690,6 +712,7 @@ def main(config: Optional[BuildConfig] = None):
             args.optimization,
             config=config or BuildConfig(),
             verbosity=verbosity,
+            sts_keep_name=args.sts_keep_name,
         )
         builder.run()
     except KeyboardInterrupt:
