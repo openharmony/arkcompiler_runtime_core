@@ -157,16 +157,19 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
     if (!IsVersionSupported(version)) {
-        return ANI_ERROR;  // NOTE: Unsupported version?
+        return ANI_INVALID_VERSION;
     }
 
-    PandaEtsVM *pandaVM = PandaEtsVM::FromAniVM(vm);
-    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(pandaVM->GetAssociatedThread());
-    if (coroutine == nullptr) {
-        LOG(ERROR, ANI) << "Cannot get environment";
+    Thread *thread = Thread::GetCurrent();
+    if (thread == nullptr) {
+        LOG(ERROR, ANI) << "Cannot get environment, thread is not attached to VM";
         return ANI_ERROR;
     }
-    *result = coroutine->GetEtsNapiEnv();
+    if (!EtsCoroutine::ThreadIsCoroutine(thread)) {
+        LOG(ERROR, ANI) << "Cannot get environment, no current coroutine exists";
+        return ANI_ERROR;
+    }
+    *result = EtsCoroutine::CastFromThread(thread)->GetEtsNapiEnv();
     return ANI_OK;
 }
 
