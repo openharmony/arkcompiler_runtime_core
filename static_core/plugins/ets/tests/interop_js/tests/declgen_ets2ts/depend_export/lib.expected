@@ -21,6 +21,9 @@ export declare function foo6(a: IP2): IP3;
 export declare let p8: NN1.C1;
 export declare let p9: Promise<CP10>;
 export declare let p10: Promise<IP5>;
+export declare let p3: E5;
+export declare function foo3(a: E6): E7;
+export declare let p12: Promise<E8>;
 declare interface I0 {
     I0Method(a: string): string;
 }
@@ -120,8 +123,28 @@ declare interface IP4 {
 }
 declare interface IP5 {
 }
-export declare namespace NN1 {
+declare class Want {
+    constructor();
+}
+export type ValueType = number | string | boolean | image.PixelMap | Want | ArrayBuffer | object | null | undefined;
+declare enum E5 {
+    A = 0,
+}
+declare enum E6 {
+    A = 0,
+}
+declare enum E7 {
+    A = 0,
+}
+declare enum E8 {
+    A = 0,
+}
+declare namespace NN1 {
     class C1 {
         constructor();
     }
+}
+declare namespace image {
+    interface PixelMap {
+}
 }
