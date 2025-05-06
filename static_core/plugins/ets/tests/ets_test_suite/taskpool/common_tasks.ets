@@ -508,29 +508,21 @@ function main(): int {
     });
     commonTaskSuite.addTest("DependentTasksWithParamsTest", (): void throws =>
     {
-        let resultStr: string = "";
-        let func1 = (a: string): string => {
-            resultStr += a;
-            return resultStr;
+        let func1 = (str: string): string => {
+            return str;
         };
-        let func2 = (a: string): string => {
+        let func2 = (num: int): int => {
             let t = Date.now();
-            while ((Date.now() - t) < 100) {
-                continue;
-            }
-            resultStr += a;
-            return resultStr;
+            while ((Date.now() - t) < 100) {}
+            return num;
         }
         let func3 = (duration: int): string => {
             let t = Date.now();
-            while ((Date.now() - t) < duration) {
-                continue;
-            }
-            resultStr += "3";
-            return resultStr;
+            while ((Date.now() - t) < duration) {}
+            return "Task3";
         }
         let task1 = new taskpool.Task(func1, "1");
-        let task2 = new taskpool.Task(func2, "2");
+        let task2 = new taskpool.Task(func2, 222);
         let task3 = new taskpool.Task(func3, 500);
         task1.addDependency(task2);
         task2.addDependency(task3);
@@ -542,10 +534,12 @@ function main(): int {
         let res1 = await p1;
         assertEQ(res1, "1");
         let res2 = await p2;
-        assertEQ(res2, "12");
+        assertEQ(res2, 222);
         let res3 = await p3;
-        assertEQ(res3, "123");
-        assertEQ(resultStr, "123");
+        assertEQ(res3, "Task3");
+        assertEQ(task1.isDone(), true);
+        assertEQ(task2.isDone(), true);
+        assertEQ(task3.isDone(), true);
         let task4 = new taskpool.Task(func3, 100);
         let task5 = new taskpool.Task(func3, 200);
         let task6 = new taskpool.Task(func3, 100);
