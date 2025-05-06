@@ -40,7 +40,14 @@ class MimicJSValueIteratableIterator implements IterableIterator<Object> {
         if (iterValue == undefined) {
             throw new Error('`value` field is expected in IteratorResult.');
         }
-        return new IteratorResult<Object>(JSRuntime.getValueObject(iterValue, Class.of(new Object())));
+        const valueObject = JSRuntime.getValueObject(iterValue, Class.of(new Object()));
+        // convert to Tuple2 for array&map&set
+        // NOTE(#IC68BA) Need to create special iterable iterator object at function level 
+        if (valueObject instanceof Array && valueObject.length == 2) {
+            return new IteratorResult<Object>(new Tuple2<Object, Object>(valueObject[0] as Object,valueObject[1] as Object));
+        } else {
+            return new IteratorResult<Object>(valueObject);
+        }
     }
 }
 
