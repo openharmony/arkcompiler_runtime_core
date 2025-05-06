@@ -240,6 +240,8 @@ def py_remove_asserts(text: str) -> str:
                 if assert_block.inner_count == 0:
                     result.append(line)
                 assert_block = None
+            elif indent == 0:
+                pass
             else:
                 assert_block.inner_count += 1
         elif line.lstrip().startswith("assert "):

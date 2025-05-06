@@ -31,7 +31,6 @@ void invokeFromOtherThreadAfter(double sec, callback_view<void()> cb)
     std::cerr << "-- begin invokeFromOtherThreadAfter --" << std::endl;
     std::thread thread([sec, cb = callback<void()>(cb)]() {
         std::this_thread::sleep_for(
-
             std::chrono::milliseconds(static_cast<int>(sec * THOUSAND)));
         std::cerr << "invokeFromOtherThreadAfter: " << sec << " seconds" << std::endl;
         cb();
