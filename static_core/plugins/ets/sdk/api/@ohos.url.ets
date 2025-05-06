@@ -98,10 +98,10 @@ export namespace url {
         static PATH_PERCENT_SIGN_CHARS = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
-            0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, // 0x30 - 0x3F
+            0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, // 0x30 - 0x3F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x40 - 0x4F
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x50 - 0x5F  // todo 5c
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, // 0x50 - 0x5F  // todo 5c
             0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x60 - 0x6F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, // 0x70 - 0x7F
         ]);
@@ -113,7 +113,7 @@ export namespace url {
             0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, // 0x30 - 0x3F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x40 - 0x4F
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, // 0x50 - 0x5F
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, // 0x50 - 0x5F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x60 - 0x6F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, // 0x70 - 0x7F
         ]);
@@ -122,10 +122,10 @@ export namespace url {
         static QUERY_PERCENT_SIGN_CHARS = new Int8Array([
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x00 - 0x0F
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x10 - 0x1F
-            0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
+            0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20 - 0x2F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, // 0x30 - 0x3F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x40 - 0x4F
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x50 - 0x5F
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, // 0x50 - 0x5F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x60 - 0x6F
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, // 0x70 - 0x7F
         ]);
@@ -207,19 +207,6 @@ export namespace url {
             return "";
         }
         return trimHead.substring(0, i + 1);
-    }
-
-    function deleteTabOrNewline(input: string): string {
-        let res = "";
-        for (let i = 0; i < input.length; i++) {
-            let ch = input[i];
-            if (ch == c'\t' || ch == c'\n' || ch == c'\r') {
-                continue;
-            } else {
-                res += ch;
-            }
-        }
-        return res;
     }
 
     function isAlpha(ch: string): boolean {
@@ -530,7 +517,7 @@ export namespace url {
     }
 
     class InnerURL {
-        flags: boolean[] = [false, false, false, false, false, false, false, false, false, false, false];
+        flags: boolean[] = [false, false, false, false, false, false, false, false, false, false, false, false];
         cScheme: string = "";
         cFragment: string = "";
         cQuery: string = "";
@@ -1110,6 +1097,9 @@ export namespace url {
                 if (inputLen > 0) {
                     this.cIsSpecialPath = input[0] != c'/' ? true : false;
                 }
+                if (this.flags[11] && inputLen == 2) {
+                    return;
+                }
                 this.analysizeNoDefaultProtocol(input);
             }
         }
@@ -1123,6 +1113,7 @@ export namespace url {
             if (tempInput.indexOf(':') != -1) {
                 let pos = tempInput.indexOf(':');
                 pos++;
+                this.flags[11] = (input[pos] == c'/' && input[pos + 1] == c'/');
                 let scheme: string = tempInput.substring(0, pos);
                 if (!this.analysizeScheme(scheme)) {
                     return tempInput;
@@ -1184,8 +1175,7 @@ export namespace url {
 
         parseSingleUrl(inputUrl: string): string {
             let trimedStr = deleteC0OrSpace(inputUrl);
-            let processInput = deleteTabOrNewline(trimedStr);
-            return this.initOnlyInput(processInput);
+            return this.initOnlyInput(trimedStr);
         }
 
         constructor() { }
@@ -1273,13 +1263,6 @@ export namespace url {
                     this.flags[1] = true;
                 }
                 this.cScheme = tempUrl.cScheme;
-                for (let key of Helper.head.keys()) {
-                    let value = Helper.head.get(key);
-                    if (key == this.cScheme && value == this.cPort) {
-                        this.cPort = -1;
-                        this.flags[5] = false;
-                    }
-                }
             }
         }
 
@@ -1397,7 +1380,6 @@ export namespace url {
         setHref(input: string) {
             let str: string = input;
             str = deleteC0OrSpace(str);
-            str = deleteTabOrNewline(str);
             let newUrl: InnerURL = new InnerURL();
             newUrl.initOnlyInput(str);
             this.flags = newUrl.flags;
@@ -1535,6 +1517,10 @@ export namespace url {
         getIsIpv6(): boolean {
             return this.flags[10] ? true : false;
         }
+
+        hasDoubleSlash(): boolean {
+            return this.flags[11];
+        }
     }
 
     function baseIntoUrl(base: InnerURL, res: InnerURL, inputIsEmpty: boolean) {
@@ -1607,6 +1593,7 @@ export namespace url {
         dst.cOrigin = src.getScheme() + '//' + src.getHost();
         dst.cParams = new URLParams(src.getEncodeSearch());
         dst.cParams.parentUrl = dst;
+        dst.cHasDoubleSlash = src.hasDoubleSlash();
         dst.setHref();
     }
 
@@ -1639,6 +1626,7 @@ export namespace url {
         cProtocol: string = '';
         cPathname: string = '';
         cPort: string = '';
+        cHasDoubleSlash: boolean = false;
         cParams: URLParams = new URLParams();
 
         constructor() { }
@@ -1678,7 +1666,6 @@ export namespace url {
             if (this.cProtocol == "file:" && (this.cHost == "" || this.cHost == null)) {
                 return;
             }
-            scheme = deleteTabOrNewline(scheme)
             this.urlInner.setScheme(scheme);
             this.cProtocol = this.urlInner.getScheme();
             this.cHost = this.urlInner.getHost();
@@ -1731,7 +1718,6 @@ export namespace url {
         }
 
         set hash(fragment: string) {
-            fragment = deleteTabOrNewline(fragment)
             this.urlInner.setFragment(fixIllegalString(fragment));
             this.cHash = this.urlInner.getFragment();
             this.setHref();
@@ -1742,7 +1728,6 @@ export namespace url {
         }
 
         set search(query: string) {
-            query = deleteTabOrNewline(query)
             this.urlInner.setEncodeSearch(fixIllegalString(query));
             this.cSearch = this.urlInner.getEncodeSearch();
             this.cParams.updateParams(this.cSearch);
@@ -1754,7 +1739,6 @@ export namespace url {
         }
 
         set hostname(hostname: string) {
-            hostname = deleteTabOrNewline(hostname)
             this.urlInner.setHostName(hostname);
             this.cHostname = this.urlInner.getHostName();
             this.setHref();
@@ -1765,7 +1749,6 @@ export namespace url {
         }
 
         set host(host: string) {
-            host = deleteTabOrNewline(host)
             this.urlInner.setHost(host);
             this.cHost = this.urlInner.getHost();
             this.cHostname = this.urlInner.getHostName();
@@ -1781,7 +1764,6 @@ export namespace url {
             if (this.cHost == '' || this.cProtocol == 'file:' || port == '') {
                 return;
             }
-            port = deleteTabOrNewline(port)
             this.urlInner.setPort(port);
             this.cPort = this.urlInner.getPort();
             this.setHref();
@@ -1792,7 +1774,6 @@ export namespace url {
         }
 
         set pathname(path: string) {
-            path = deleteTabOrNewline(path)
             this.urlInner.setPath(fixIllegalString(path));
             this.cPathname = this.urlInner.getPath();
             this.setHref();
@@ -1821,8 +1802,10 @@ export namespace url {
 
         setHref(): void {
             let temp: string = this.cProtocol;
-            if (this.cHostname != "") {
+            if (this.cHostname != "" || this.cProtocol == "file:" || this.cHasDoubleSlash) {
                 temp += "//";
+            }
+            if (this.cHostname != "") {
                 if (this.cPassword != "" || this.cUsername != "") {
                     if (this.cUsername != "") {
                         temp += this.cUsername;
@@ -1838,8 +1821,6 @@ export namespace url {
                     temp += ":";
                     temp += this.cPort;
                 }
-            } else if (this.cProtocol == "file:") {
-                temp += "//";
             }
             temp += this.cPathname;
             if (this.cSearch) {
