@@ -61,13 +61,6 @@ public:
     {
         return tranTool_.get();
     }
-
-    bool IsBomFlag() const
-    {
-        uint32_t temp = label_ & static_cast<uint32_t>(ConverterFlags::BOM_SEEN_FLG);
-        return temp == static_cast<int32_t>(ConverterFlags::BOM_SEEN_FLG);
-    }
-
     bool IsUnicode() const
     {
         uint32_t temp = label_ & static_cast<uint32_t>(ConverterFlags::UNICODE_FLG);
