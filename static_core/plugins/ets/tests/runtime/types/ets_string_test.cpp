@@ -14,10 +14,12 @@
  */
 
 #include "ets_coroutine.h"
+#include "include/mem/panda_string.h"
 #include "libpandabase/utils/utf.h"
 #include "types/ets_array.h"
 #include "types/ets_string.h"
 #include <gtest/gtest.h>
+#include <cstdint>
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -647,6 +649,60 @@ TEST_F(EtsStringTest, Resolve)
     ASSERT_EQ(string1, string2);
     ASSERT_TRUE(string1->StringsAreEqual(reinterpret_cast<EtsObject *>(string3)));
     ASSERT_TRUE(string2->StringsAreEqual(reinterpret_cast<EtsObject *>(string3)));
+}
+
+void CheckConvertString(EtsString *str)
+{
+    const std::vector<uint16_t> referenceUtf16 {'a', '\0', 'b', 0x20AC, 'z', '\n'};
+    const std::vector<uint8_t> referenceUtf8 {'a', '\0', 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+    const std::vector<uint8_t> referenceMUtf8 {'a', 0xc0, 0x80, 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+
+    PandaString utf8 = str->GetUtf8();
+    PandaString mutf8 = str->GetMutf8();
+    ASSERT_EQ(utf8.size(), referenceUtf8.size());
+    ASSERT_EQ(mutf8.size(), referenceMUtf8.size());
+
+    for (size_t i = 0; i < referenceUtf8.size(); ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT_EQ(static_cast<uint8_t>(utf8[i]), referenceUtf8[i]);
+    }
+    for (size_t i = 0; i < referenceMUtf8.size(); ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT_EQ(static_cast<uint8_t>(mutf8[i]), referenceMUtf8[i]);
+    }
+
+    auto utf16Data = str->GetDataUtf16();
+    auto utf16Len = str->GetUtf16Length();
+    ASSERT_EQ(utf16Len, referenceUtf16.size());
+
+    for (size_t i = 0; i < utf16Len; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT_EQ(utf16Data[i], referenceUtf16[i]);
+    }
+}
+
+TEST_F(EtsStringTest, ConvertFromUtf16)
+{
+    std::vector<uint16_t> data {'a', '\0', 'b', 0x20AC, 'z', '\n'};
+    EtsString *str = EtsString::CreateFromUtf16(data.data(), data.size());
+    CheckConvertString(str);
+}
+
+TEST_F(EtsStringTest, ConvertFromUtf8)
+{
+    std::vector<uint8_t> data {'a', '\0', 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+    auto *utf8Data = reinterpret_cast<const char *>(data.data());
+    EtsString *str = EtsString::CreateFromUtf8(utf8Data, data.size());
+    CheckConvertString(str);
+}
+
+TEST_F(EtsStringTest, ConvertFromMUtf8)
+{
+    std::vector<uint8_t> data {'a', 0xc0, 0x80, 'b', 0xe2, 0x82, 0xac, 'z', '\n'};
+    size_t strLen = 6U;
+    auto *utf8Data = reinterpret_cast<const char *>(data.data());
+    EtsString *str = EtsString::CreateFromMUtf8(utf8Data, strLen);
+    CheckConvertString(str);
 }
 
 }  // namespace ark::ets::test
