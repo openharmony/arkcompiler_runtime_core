@@ -457,9 +457,13 @@ public:
 
     PandaString GetMutf8()
     {
-        size_t len = GetMUtf8Length() - 1;
+        size_t len = GetMUtf8Length();
         PandaString out;
-        out.resize(len);
+        out.resize(len - 1);
+        if (!IsUtf16()) {
+            // CopyData expects one byte preserved for zero at the end. For utf16 it will preserve itself
+            --len;
+        }
         CopyDataMUtf8(out.data(), len, false);
         return out;
     }
