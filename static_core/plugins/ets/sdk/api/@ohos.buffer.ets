@@ -922,6 +922,13 @@ Received value is: ${value}`)
             return new DataView(this.buffer, 0, this.length);
         }
 
+        private fillInPaddingBase64(str: string): string {
+            let base64Divisible: int = 4
+            let remainder: int = str.length % base64Divisible as int
+            const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0
+            return str.padRight(c'=', str.length as int + paddingCount)
+        }
+
         /**
         * Writes a signed integer to the buffer at the specified offset using big-endian format
         *
@@ -1099,10 +1106,19 @@ Received value is: ${value}`)
         * @returns {number} Number of bytes written
         */
         public write(str: string, offset: number = 0, length?: number, encoding: string = 'utf8'): number {
+            if (offset < 0 || offset > this.length - 1) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, "Offset value is out of range")
+            }
+
             const resolvedEncoding = encoding as buffer.BufferEncoding;
-            const byteLen = buffer.byteLength(str, resolvedEncoding);
-            const resolvedLength = length ?? byteLen;
-            const strBuffer = buffer.from(str, resolvedEncoding);
+            const tmpLength = length ?? this.length - offset
+            const resolvedLength = Math.min(tmpLength, this.length - offset)
+            let resolvedString = str
+            if (encoding == 'base64' || encoding == 'base64url') {
+                resolvedString = this.fillInPaddingBase64(str)
+            }
+            const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
+            const strBuffer = buffer.from(resolvedString, resolvedEncoding);
             for (let i = 0; i < resolvedLength && i < byteLen; i++) {
                 this.buffer.set((offset + i) as int, strBuffer.at(i));
             }
