@@ -327,6 +327,8 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
 {
     ASSERT(newCoro != nullptr);
     newCoro->SetWorker(this);
+    auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
+    newCoro->LinkToExternalHolder(IsMainWorker() && !canMigrate);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()

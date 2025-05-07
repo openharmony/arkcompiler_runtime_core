@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,16 @@
 
 namespace ark {
 
+#ifndef ARK_HYBRID
 class PANDA_PUBLIC_API MutatorLock : public os::memory::RWLock {
+    using LockT = os::memory::RWLock;
+#else
+class PANDA_PUBLIC_API MutatorLock : public os::memory::DummyLock {
+    using LockT = os::memory::DummyLock;
+#endif
 #ifndef NDEBUG
 public:
-    enum MutatorLockState { UNLOCKED, RDLOCK, WRLOCK };
+    enum MutatorLockState {UNLOCKED, RDLOCK, WRLOCK};
 
     void ReadLock() ACQUIRE_SHARED();
 

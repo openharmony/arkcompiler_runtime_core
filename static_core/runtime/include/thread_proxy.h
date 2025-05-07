@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,32 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_RUNTIME_THREAD_PROXY_H
+#define PANDA_RUNTIME_THREAD_PROXY_H
 
-#ifndef PANDA_RUNTIME_THREAD_STATUS_H_
-#define PANDA_RUNTIME_THREAD_STATUS_H_
-
-#include <cstdint>
+#include "runtime/include/thread_proxy_static.h"
+#include "runtime/include/thread_proxy_hybrid.h"
 
 namespace ark {
 
-enum class ThreadStatus : uint16_t {
-    CREATED,
-    RUNNING,
-    IS_BLOCKED,
-    IS_WAITING,
-    IS_TIMED_WAITING,
-    IS_SUSPENDED,
-    IS_COMPILER_WAITING,
-    IS_WAITING_INFLATION,
-    IS_SLEEPING,
-    IS_TERMINATED_LOOP,
-    NATIVE,
-    TERMINATING,
-    FINISHED,
-};
+class MutatorLock;
 
-enum ThreadFlag { NO_FLAGS = 0, SUSPEND_REQUEST = 2, RUNTIME_TERMINATION_REQUEST = 4, SAFEPOINT_REQUEST = 8 };
+#ifndef ARK_HYBRID
+class ThreadProxy : public ThreadProxyStatic {
+public:
+    explicit ThreadProxy(MutatorLock *mutatorLock) : ThreadProxyStatic(mutatorLock) {}
+};
+#else
+class ThreadProxy : public ThreadProxyHybrid {
+public:
+    explicit ThreadProxy(MutatorLock *mutatorLock) : ThreadProxyHybrid(mutatorLock) {}
+};
+#endif
 
 }  // namespace ark
 
-#endif  // PANDA_RUNTIME_THREAD_H_
+#endif  // PANDA_RUNTIME_THREAD_PROXY_H

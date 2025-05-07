@@ -32,6 +32,7 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
 
     Coroutine::SetCurrent(main);
     main->InitBuffers();
+    main->LinkToExternalHolder(true);
     main->RequestResume();
     main->NativeCodeBegin();
 
@@ -67,6 +68,7 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
     co->InitBuffers();
     if (makeCurrent) {
         Coroutine::SetCurrent(co);
+        co->LinkToExternalHolder(false);
         co->RequestResume();
         co->NativeCodeBegin();
     }

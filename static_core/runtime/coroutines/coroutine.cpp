@@ -136,6 +136,16 @@ void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
     }
 }
 
+void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder)
+{
+#ifdef ARK_HYBRID
+    auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder);
+    if (wasCreated) {
+        GetThreadHolder()->RegisterCoroutine(this);
+    }
+#endif
+}
+
 void Coroutine::Destroy()
 {
     context_->Destroy();

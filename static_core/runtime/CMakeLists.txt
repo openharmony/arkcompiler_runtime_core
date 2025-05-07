@@ -113,6 +113,7 @@ set(SOURCES
     runtime_controller.cpp
     string_table.cpp
     thread.cpp
+    thread_proxy.cpp
     mt_thread_manager.cpp
     lock_order_graph.cpp
     time_utils.cpp
