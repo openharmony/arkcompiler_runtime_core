@@ -11,7 +11,7 @@
 	"isa": "*",
 	"ldscripts": "*",
 	"libabckit/tests": "*",
-	"libabckit/src/adapter_static": "*",
+	"libabckit/src": "*",
 	"libark_defect_scan_aux": "*",
 	"libpandabase": "*",
 	"libpandafile": "*",

@@ -24,6 +24,7 @@
 
 #include "libabckit/src/macros.h"
 #include "libabckit/src/logger.h"
+#include "scoped_timer.h"
 
 #include <cstdint>
 #include <iostream>
@@ -38,6 +39,7 @@ extern "C" AbckitIsaType GgetIsa(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(graph, ABCKIT_ISA_TYPE_UNSUPPORTED);
     if (IsDynamic(graph->function->owningModule->target)) {
         return AbckitIsaType::ABCKIT_ISA_TYPE_DYNAMIC;
@@ -49,6 +51,7 @@ extern "C" AbckitFile *GgetFile(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
@@ -59,6 +62,7 @@ extern "C" AbckitBasicBlock *GgetStartBasicBlock(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return GgetStartBasicBlockStatic(graph);
 }
 
@@ -66,6 +70,7 @@ extern "C" AbckitBasicBlock *GgetEndBasicBlock([[maybe_unused]] AbckitGraph *gra
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return GgetEndBasicBlockStatic(graph);
 }
 
@@ -73,6 +78,7 @@ extern "C" uint32_t GgetNumberOfBasicBlocks(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return GgetNumberOfBasicBlocksStatic(graph);
 }
@@ -82,6 +88,7 @@ extern "C" bool GvisitBlocksRPO([[maybe_unused]] AbckitGraph *graph, [[maybe_unu
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return GvisitBlocksRPOStatic(graph, data, cb);
 }
 
@@ -89,6 +96,7 @@ extern "C" AbckitBasicBlock *GgetBasicBlock(AbckitGraph *graph, uint32_t id)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return GgetBasicBlockStatic(graph, id);
 }
@@ -97,6 +105,7 @@ extern "C" uint32_t GgetNumberOfParameters(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, 0);
 
@@ -107,6 +116,7 @@ extern "C" AbckitInst *GgetParameter(AbckitGraph *graph, uint32_t index)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return GgetParameterStatic(graph, index);
 }
@@ -116,6 +126,7 @@ extern "C" void GinsertTryCatch(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(tryFirstBB);
     LIBABCKIT_BAD_ARGUMENT_VOID(tryLastBB);
@@ -129,6 +140,7 @@ extern "C" void Gdump(AbckitGraph *graph, int32_t fd)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(graph)
 
@@ -139,6 +151,7 @@ extern "C" void GrunPassRemoveUnreachableBlocks(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(graph)
 
@@ -153,6 +166,7 @@ extern "C" AbckitBasicBlock *BBcreateEmpty(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBcreateEmptyStatic(graph);
 }
@@ -161,6 +175,7 @@ extern "C" uint32_t BBgetId(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetIdStatic(basicBlock);
 }
@@ -169,6 +184,7 @@ extern "C" AbckitGraph *BBgetGraph(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetGraphStatic(basicBlock);
 }
@@ -177,6 +193,7 @@ extern "C" uint64_t BBgetPredBlockCount(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetPredBlockCountStatic(basicBlock);
 }
@@ -185,6 +202,7 @@ extern "C" AbckitBasicBlock *BBgetPredBlock(AbckitBasicBlock *basicBlock, uint32
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetPredBlockStatic(basicBlock, index);
 }
@@ -194,6 +212,7 @@ extern "C" bool BBvisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBvisitPredBlocksStatic(basicBlock, data, cb);
 }
@@ -202,6 +221,7 @@ extern "C" uint64_t BBgetSuccBlockCount(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetSuccBlockCountStatic(basicBlock);
 }
@@ -210,6 +230,7 @@ extern "C" AbckitBasicBlock *BBgetSuccBlock(AbckitBasicBlock *basicBlock, uint32
 {
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetSuccBlockStatic(basicBlock, index);
 }
@@ -218,6 +239,7 @@ extern "C" void BBinsertSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     BBinsertSuccBlockStatic(basicBlock, succBlock, index);
 }
@@ -226,6 +248,7 @@ extern "C" void BBappendSuccBlock(AbckitBasicBlock *basicBlock, AbckitBasicBlock
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     BBappendSuccBlockStatic(basicBlock, succBlock);
 }
@@ -234,6 +257,7 @@ extern "C" void BBdisconnectSuccBlock(AbckitBasicBlock *bb, uint32_t index)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     BBdisconnectSuccBlockStatic(bb, index);
 }
@@ -243,6 +267,7 @@ extern "C" bool BBvisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return BBvisitSuccBlocksStatic(basicBlock, data, cb);
 }
 
@@ -250,6 +275,7 @@ extern "C" AbckitBasicBlock *BBgetTrueBranch(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetTrueBranchStatic(basicBlock);
 }
@@ -258,6 +284,7 @@ extern "C" AbckitBasicBlock *BBgetFalseBranch(AbckitBasicBlock *curBasicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetFalseBranchStatic(curBasicBlock);
 }
@@ -266,6 +293,7 @@ extern "C" AbckitBasicBlock *BBsplitBlockAfterInstruction(AbckitBasicBlock *basi
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBsplitBlockAfterInstructionStatic(basicBlock, inst, makeEdge);
 }
@@ -274,6 +302,7 @@ extern "C" void BBaddInstFront(AbckitBasicBlock *basicBlock, AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     BBaddInstFrontStatic(basicBlock, inst);
 }
 
@@ -281,6 +310,7 @@ extern "C" void BBaddInstBack(AbckitBasicBlock *basicBlock, AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     BBaddInstBackStatic(basicBlock, inst);
 }
 
@@ -288,6 +318,7 @@ extern "C" void BBremoveAllInsts(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
 
@@ -298,6 +329,7 @@ extern "C" AbckitInst *BBgetFirstInst(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return BBgetFirstInstStatic(basicBlock);
 }
 
@@ -305,6 +337,7 @@ extern "C" AbckitInst *BBgetLastInst(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return BBgetLastInstStatic(basicBlock);
 }
 
@@ -312,6 +345,7 @@ extern "C" uint32_t BBgetNumberOfInstructions(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetNumberOfInstructionsStatic(basicBlock);
 }
@@ -320,6 +354,7 @@ extern "C" AbckitBasicBlock *BBgetImmediateDominator(AbckitBasicBlock *basicBloc
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBgetImmediateDominatorStatic(basicBlock);
 }
@@ -328,6 +363,7 @@ extern "C" bool BBcheckDominance(AbckitBasicBlock *basicBlock, AbckitBasicBlock 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBcheckDominanceStatic(basicBlock, dominator);
 }
@@ -337,6 +373,7 @@ extern "C" bool BBvisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBvisitDominatedBlocksStatic(basicBlock, data, cb);
 }
@@ -345,6 +382,7 @@ extern "C" bool BBisStart(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisStartStatic(basicBlock);
 }
@@ -353,6 +391,7 @@ extern "C" bool BBisEnd(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisEndStatic(basicBlock);
 }
@@ -361,6 +400,7 @@ extern "C" bool BBisLoopHead(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisLoopHeadStatic(basicBlock);
 }
@@ -369,6 +409,7 @@ extern "C" bool BBisLoopPrehead(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisLoopPreheadStatic(basicBlock);
 }
@@ -377,6 +418,7 @@ extern "C" bool BBisTryBegin(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisTryBeginStatic(basicBlock);
 }
@@ -385,6 +427,7 @@ extern "C" bool BBisTry(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisTryStatic(basicBlock);
 }
@@ -393,6 +436,7 @@ extern "C" bool BBisTryEnd(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisTryEndStatic(basicBlock);
 }
@@ -401,6 +445,7 @@ extern "C" bool BBisCatchBegin(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisCatchBeginStatic(basicBlock);
 }
@@ -409,6 +454,7 @@ extern "C" bool BBisCatch(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     return BBisCatchStatic(basicBlock);
 }
@@ -417,6 +463,7 @@ extern "C" void BBdump(AbckitBasicBlock *basicBlock, int32_t fd)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     BBdumpStatic(basicBlock, fd);
 }
@@ -425,6 +472,7 @@ extern "C" AbckitInst *BBcreatePhi(AbckitBasicBlock *bb, size_t argCount, ...)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(bb, nullptr);
 
@@ -441,6 +489,7 @@ extern "C" AbckitInst *BBcreateCatchPhi(AbckitBasicBlock *catchBegin, size_t arg
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(catchBegin, nullptr);
 
@@ -461,6 +510,7 @@ extern "C" AbckitInst *GfindOrCreateConstantI64(AbckitGraph *graph, int64_t valu
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
@@ -471,6 +521,7 @@ extern "C" AbckitInst *GfindOrCreateConstantI32(AbckitGraph *graph, int32_t valu
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
@@ -481,6 +532,7 @@ extern "C" AbckitInst *GfindOrCreateConstantU64(AbckitGraph *graph, uint64_t val
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
@@ -491,6 +543,7 @@ extern "C" AbckitInst *GfindOrCreateConstantF64(AbckitGraph *graph, double value
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
 
@@ -501,6 +554,7 @@ extern "C" void Iremove(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
 
@@ -511,6 +565,7 @@ extern "C" uint32_t IgetId(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
@@ -521,6 +576,7 @@ extern "C" AbckitInst *IgetNext(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
@@ -531,6 +587,7 @@ extern "C" AbckitInst *IgetPrev(AbckitInst *instprev)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(instprev, nullptr);
 
@@ -541,6 +598,7 @@ extern "C" void IinsertAfter(AbckitInst *inst, AbckitInst *refInst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return IinsertAfterStatic(inst, refInst);
 }
 
@@ -548,6 +606,7 @@ extern "C" void IinsertBefore(AbckitInst *inst, AbckitInst *refInst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return IinsertBeforeStatic(inst, refInst);
 }
 
@@ -555,6 +614,7 @@ extern "C" AbckitType *IgetType(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
     return IgetTypeStatic(inst);
@@ -564,6 +624,7 @@ extern "C" AbckitBasicBlock *IgetBasicBlock(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
     return IgetBasicBlockStatic(inst);
 }
@@ -572,6 +633,7 @@ extern "C" AbckitGraph *IgetGraph(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
     return IgetGraphStatic(inst);
 }
@@ -580,6 +642,7 @@ extern "C" bool IcheckIsCall(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, false);
     return IcheckIsCallStatic(inst);
 }
@@ -588,6 +651,7 @@ extern "C" bool IcheckDominance(AbckitInst *inst, AbckitInst *dominator)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, false);
     LIBABCKIT_BAD_ARGUMENT(dominator, false);
@@ -599,6 +663,7 @@ extern "C" uint32_t IgetUserCount(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
@@ -609,6 +674,7 @@ extern "C" bool IvisitUsers(AbckitInst *inst, void *data, bool (*cb)(AbckitInst 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -620,6 +686,7 @@ extern "C" uint32_t IgetInputCount(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
@@ -630,6 +697,7 @@ extern "C" AbckitInst *IgetInput(AbckitInst *inst, uint32_t index)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
@@ -640,6 +708,7 @@ extern "C" bool IvisitInputs(AbckitInst *inst, void *data, bool (*cb)(AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -651,6 +720,7 @@ extern "C" void IsetInput(AbckitInst *inst, AbckitInst *input, uint32_t index)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(input);
@@ -663,6 +733,7 @@ extern "C" void IsetInputs(AbckitInst *inst, size_t argCount, ...)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
 
@@ -677,6 +748,7 @@ extern "C" void IappendInput(AbckitInst *inst, AbckitInst *input)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(input);
@@ -689,6 +761,7 @@ extern "C" void Idump(AbckitInst *inst, int32_t fd)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
 
@@ -699,6 +772,7 @@ extern "C" AbckitCoreFunction *IgetFunction(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
@@ -709,6 +783,7 @@ extern "C" void IsetFunction(AbckitInst *inst, AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(function);
@@ -723,6 +798,7 @@ extern "C" uint64_t IgetImmediate(AbckitInst *inst, size_t idx)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
     return IgetImmediateStatic(inst, idx);
@@ -732,6 +808,7 @@ extern "C" void IsetImmediate(AbckitInst *inst, size_t idx, uint64_t imm)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
 
     IsetImmediateStatic(inst, idx, imm);
@@ -741,6 +818,7 @@ extern "C" AbckitBitImmSize IgetImmediateSize(AbckitInst *inst, size_t idx)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, AbckitBitImmSize::BITSIZE_0);
 
     return IgetImmediateSizeStatic(inst, idx);
@@ -750,6 +828,7 @@ extern "C" uint64_t IgetImmediateCount(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
     return IgetImmediateCountStatic(inst);
@@ -759,6 +838,7 @@ extern "C" AbckitLiteralArray *IgetLiteralArray(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
     return IgetLiteralArrayStatic(inst);
@@ -768,6 +848,7 @@ extern "C" void IsetLiteralArray(AbckitInst *inst, AbckitLiteralArray *la)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(la);
@@ -779,6 +860,7 @@ extern "C" AbckitString *IgetString(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
@@ -789,6 +871,7 @@ extern "C" void IsetString(AbckitInst *inst, AbckitString *str)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(str);
@@ -800,6 +883,7 @@ extern "C" int32_t IgetConstantValueI32(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
     return IgetConstantValueI32Static(inst);
@@ -809,6 +893,7 @@ extern "C" int64_t IgetConstantValueI64(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
     return IgetConstantValueI64Static(inst);
@@ -818,6 +903,7 @@ extern "C" uint64_t IgetConstantValueU64(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
     return IgetConstantValueU64Static(inst);
@@ -827,6 +913,7 @@ extern "C" double IgetConstantValueF64(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(inst, 0);
 
     return IgetConstantValueF64Static(inst);
