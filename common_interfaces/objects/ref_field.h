@@ -18,10 +18,10 @@
 
 #include <atomic>
 #include <functional>
+#include "objects/base_state_word.h"
 
 namespace panda {
 class BaseObject;
-using MAddress = uintptr_t;
 
 template <bool isAtomic = false>
 class RefField {
@@ -57,7 +57,7 @@ public:
     void SetTargetObject(const BaseObject *obj, std::memory_order order = std::memory_order_relaxed)
     {
         RefField<> newField(obj);
-        uintptr_t newVal = newField.GetFieldValue();
+        MAddress newVal = newField.GetFieldValue();
         RefFieldValue oldVal = fieldVal;
         (void)oldVal;
 
