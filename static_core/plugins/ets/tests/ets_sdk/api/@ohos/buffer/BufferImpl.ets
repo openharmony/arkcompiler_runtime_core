@@ -74,6 +74,10 @@ function main(): int {
     suite.addTest("Test variable length Int BE/LE read/write", testVarLengthIntReadWrite)
     suite.addTest("Test variable length UInt BE/LE read/write", testVarLengthUIntReadWrite)
     suite.addTest("Test string write", testStringWrite)
+    suite.addTest("Test string write base64", testBufferWriteStringBase64)
+    suite.addTest("Test string write single parameter", testBufferWriteStringSingleParam)
+    suite.addTest("Test string write with infinity length",  testBufferWriteStringInfinity)
+    suite.addTest("Test string write wrong offset", testBufferWriteStringWrongOffset)
 
     return suite.run()
 }
@@ -627,4 +631,35 @@ function testStringWrite() {
     const bytesWritten3 = buf.write(longStr, 0, 5, 'utf8')
     assertEQ(bytesWritten3, 5)
     assertEQ(buf.toString('utf8', 0, 5), "ThisI")
+}
+
+function testBufferWriteStringBase64() {
+    let buf = buffer.alloc(10)
+    let res = buf.write("abcdefg", 3, 1, 'base64')
+    assertEQ(res, 1)
+    assertEQ(buf.toString('base64'), "AAAAaQAAAAAAAA==")
+}
+
+function testBufferWriteStringSingleParam() {
+    const str = "abcdefg"
+    let buf = buffer.alloc(10)
+    let res = buf.write(str)
+    assertEQ(res, str.length)
+    assertEQ(buf.toString('utf8', 0, str.length), str)
+}
+
+function testBufferWriteStringInfinity() {
+    const str = "abcdefg"
+    let buf = buffer.alloc(10)
+    let res = buf.write(str, 0, Infinity)
+    assertEQ(res, str.length)
+    assertEQ(buf.toString('utf8', 0, str.length), str)
+}
+
+function testBufferWriteStringWrongOffset() {
+    const str = "abc"
+    let buf = buffer.alloc(10)
+    expectError(() => { 
+		buf.write(str, -12)
+	}, "Offset value is out of range")
 }
