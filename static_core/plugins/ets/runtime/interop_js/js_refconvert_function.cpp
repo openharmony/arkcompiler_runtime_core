@@ -42,7 +42,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     ScopedManagedCodeThread managedScope(coro);
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
-    auto method = etsThis->GetClass()->GetMethod(ark::ets::INVOKE_METHOD_NAME);
+    EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
     ASSERT(method != nullptr);
 
     return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
@@ -55,7 +55,9 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     auto env = ctx->GetJSEnv();
 
     ASSERT(obj->GetClass() == klass_);
-    ASSERT(klass_->GetMethod(ark::ets::INVOKE_METHOD_NAME) != nullptr);
+    [[maybe_unused]] EtsMethod *method = klass_->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
+    method = method == nullptr ? klass_->GetStaticMethod(INVOKE_METHOD_NAME, nullptr) : method;
+    ASSERT(method != nullptr);
 
     JSValue *jsValue;
     {

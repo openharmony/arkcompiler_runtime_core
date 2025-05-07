@@ -129,40 +129,6 @@ EtsMethod *EtsClass::GetMethodByIndex(uint32_t ind)
     return res;
 }
 
-EtsMethod *EtsClass::GetMethod(const char *name)
-{
-    auto coreName = reinterpret_cast<const uint8_t *>(name);
-
-    Method *coreMethod = nullptr;
-    auto *runtimeClass = GetRuntimeClass();
-    if (IsInterface()) {
-        coreMethod = runtimeClass->GetInterfaceMethod(coreName);
-    } else {
-        coreMethod = runtimeClass->GetClassMethod(coreName);
-    }
-    return reinterpret_cast<EtsMethod *>(coreMethod);
-}
-
-EtsMethod *EtsClass::GetMethod(const char *name, const char *signature)
-{
-    EtsMethodSignature methodSignature(signature);
-    if (!methodSignature.IsValid()) {
-        LOG(ERROR, ETS_NAPI) << "Wrong method signature:" << signature;
-        return nullptr;
-    }
-
-    auto coreName = reinterpret_cast<const uint8_t *>(name);
-
-    Method *coreMethod = nullptr;
-    auto *runtimeClass = GetRuntimeClass();
-    if (IsInterface()) {
-        coreMethod = runtimeClass->GetInterfaceMethod(coreName, methodSignature.GetProto());
-    } else {
-        coreMethod = runtimeClass->GetClassMethod(coreName, methodSignature.GetProto());
-    }
-    return reinterpret_cast<EtsMethod *>(coreMethod);
-}
-
 // NOTE(kirill-mitkin): Cache in EtsClass field later
 PandaVector<EtsMethod *> EtsClass::GetMethods()
 {
