@@ -65,6 +65,7 @@ libabckit_sources = [
   "metadata_js_modify_impl.cpp",
   "metadata_modify_impl.cpp",
   "metadata_unknown_inspect_impl.cpp",
+  "scoped_timer.cpp",
   "statuses_impl.cpp",
 ]
 

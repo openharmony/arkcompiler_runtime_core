@@ -19,6 +19,7 @@
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_unknown_inspect_impl.h"
 #include "libabckit/src/metadata_inspect_impl.h"
+#include "scoped_timer.h"
 
 namespace libabckit {
 
@@ -34,6 +35,7 @@ bool UnknownModuleEnumerateStub(AbckitCoreModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(m, false);
 

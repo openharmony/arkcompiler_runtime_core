@@ -21,6 +21,7 @@
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
+#include "scoped_timer.h"
 
 namespace libabckit {
 
@@ -33,6 +34,7 @@ extern "C" AbckitJsModule *FileAddExternalModule(AbckitFile *file,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
@@ -56,6 +58,7 @@ extern "C" AbckitJsImportDescriptor *ModuleAddImportFromJsToJs(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(importing, nullptr);
     LIBABCKIT_BAD_ARGUMENT(imported, nullptr);
@@ -71,6 +74,7 @@ extern "C" void ModuleRemoveImportJs(AbckitJsModule *m, AbckitJsImportDescriptor
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(m)
     LIBABCKIT_BAD_ARGUMENT_VOID(i)
@@ -85,6 +89,7 @@ extern "C" AbckitJsExportDescriptor *ModuleAddExportFromJsToJs(AbckitJsModule *e
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(exporting, nullptr);
     LIBABCKIT_BAD_ARGUMENT(exported, nullptr);
@@ -100,6 +105,7 @@ extern "C" void ModuleRemoveExportJs(AbckitJsModule *m, AbckitJsExportDescriptor
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(m)
     LIBABCKIT_BAD_ARGUMENT_VOID(e)

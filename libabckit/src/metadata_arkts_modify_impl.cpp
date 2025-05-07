@@ -18,6 +18,7 @@
 #include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
 
 #include "libabckit/src/macros.h"
+#include "scoped_timer.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
@@ -52,6 +53,7 @@ extern "C" AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
@@ -78,6 +80,7 @@ extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(importing, nullptr);
     LIBABCKIT_BAD_ARGUMENT(imported, nullptr);
@@ -105,6 +108,7 @@ extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV2ToArktsV2(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
     return nullptr;
@@ -114,6 +118,7 @@ extern "C" void ModuleRemoveImport(AbckitArktsModule *m, AbckitArktsImportDescri
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(m)
     LIBABCKIT_BAD_ARGUMENT_VOID(i)
@@ -142,6 +147,7 @@ extern "C" AbckitArktsExportDescriptor *ModuleAddExportFromArktsV1ToArktsV1(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(exporting, nullptr);
     LIBABCKIT_BAD_ARGUMENT(exported, nullptr);
@@ -168,6 +174,7 @@ extern "C" AbckitArktsExportDescriptor *ModuleAddExportFromArktsV2ToArktsV2(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
     return nullptr;
@@ -177,6 +184,7 @@ extern "C" void ModuleRemoveExport(AbckitArktsModule *m, AbckitArktsExportDescri
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(m)
     LIBABCKIT_BAD_ARGUMENT_VOID(e)
@@ -205,6 +213,7 @@ extern "C" AbckitArktsAnnotationInterface *ModuleAddAnnotationInterface(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
@@ -232,6 +241,7 @@ extern "C" AbckitArktsAnnotation *ClassAddAnnotation(AbckitArktsClass *klass,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
@@ -260,6 +270,7 @@ extern "C" void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnota
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(klass);
     LIBABCKIT_BAD_ARGUMENT_VOID(anno);
@@ -292,6 +303,7 @@ extern "C" AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddField(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ai, nullptr);
 
@@ -317,6 +329,7 @@ extern "C" void AnnotationInterfaceRemoveField(AbckitArktsAnnotationInterface *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(ai);
     LIBABCKIT_BAD_ARGUMENT_VOID(field);
@@ -344,6 +357,7 @@ extern "C" AbckitArktsAnnotation *FunctionAddAnnotation(AbckitArktsFunction *fun
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
@@ -371,6 +385,7 @@ extern "C" void FunctionRemoveAnnotation(AbckitArktsFunction *function, AbckitAr
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(function);
     LIBABCKIT_BAD_ARGUMENT_VOID(anno);
@@ -403,6 +418,7 @@ extern "C" AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(anno, nullptr);
 
@@ -431,6 +447,7 @@ extern "C" void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, A
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(anno);
     LIBABCKIT_BAD_ARGUMENT_VOID(elem);

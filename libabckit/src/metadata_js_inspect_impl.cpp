@@ -19,6 +19,7 @@
 
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/macros.h"
+#include "scoped_timer.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
@@ -48,6 +49,7 @@ extern "C" AbckitCoreModule *JsModuleToCoreModule(AbckitJsModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     return m->core;
 }
@@ -56,6 +58,7 @@ extern "C" AbckitJsModule *CoreModuleToJsModule(AbckitCoreModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(m);
     return m->GetJsImpl();
@@ -69,6 +72,7 @@ extern "C" AbckitCoreImportDescriptor *JsImportDescriptorToCoreImportDescriptor(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(id, nullptr);
     return id->core;
 }
@@ -77,6 +81,7 @@ extern "C" AbckitJsImportDescriptor *CoreImportDescriptorToJsImportDescriptor(Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(id, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(id->importingModule);
     return id->GetJsImpl();
@@ -90,6 +95,7 @@ extern "C" AbckitCoreExportDescriptor *JsExportDescriptorToCoreExportDescriptor(
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(ed, nullptr);
     return ed->core;
 }
@@ -98,6 +104,7 @@ extern "C" AbckitJsExportDescriptor *CoreExportDescriptorToJsExportDescriptor(Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(ed, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(ed->exportingModule);
     return ed->GetJsImpl();
@@ -111,6 +118,7 @@ extern "C" AbckitCoreClass *JsClassToCoreClass(AbckitJsClass *c)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(c, nullptr);
     return c->core;
 }
@@ -119,6 +127,7 @@ extern "C" AbckitJsClass *CoreClassToJsClass(AbckitCoreClass *c)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(c, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(c->owningModule);
     return c->GetJsImpl();
@@ -140,6 +149,7 @@ extern "C" AbckitCoreFunction *JsFunctionToCoreFunction(AbckitJsFunction *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     return m->core;
 }
@@ -148,6 +158,7 @@ extern "C" AbckitJsFunction *CoreFunctionToJsFunction(AbckitCoreFunction *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(m->owningModule);
     return m->GetJsImpl();

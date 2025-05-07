@@ -19,6 +19,7 @@
 
 #include "libabckit/include/c/statuses.h"
 #include "libabckit/src/macros.h"
+#include "scoped_timer.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"
@@ -53,6 +54,7 @@ extern "C" void FunctionSetGraph(AbckitCoreFunction *function, AbckitGraph *grap
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(function)
     LIBABCKIT_BAD_ARGUMENT_VOID(graph)
@@ -78,6 +80,7 @@ extern "C" AbckitType *CreateType(AbckitFile *file, AbckitTypeId id)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     if (id == ABCKIT_TYPE_ID_INVALID) {
@@ -91,6 +94,7 @@ extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *kl
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
@@ -105,6 +109,7 @@ extern "C" AbckitValue *CreateValueU1(AbckitFile *file, bool value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -121,6 +126,7 @@ extern "C" AbckitValue *CreateValueDouble(AbckitFile *file, double value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -137,6 +143,7 @@ extern "C" AbckitValue *CreateValueString(AbckitFile *file, const char *value, s
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
@@ -155,6 +162,7 @@ extern "C" AbckitValue *CreateLiteralArrayValue(AbckitFile *file, AbckitValue **
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
@@ -177,6 +185,7 @@ extern "C" AbckitString *CreateString(AbckitFile *file, const char *value, size_
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
@@ -199,6 +208,7 @@ extern "C" AbckitLiteralArray *CreateLiteralArray(AbckitFile *file, AbckitLitera
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
@@ -216,6 +226,7 @@ extern "C" AbckitLiteral *CreateLiteralBool(AbckitFile *file, bool value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -232,6 +243,7 @@ extern "C" AbckitLiteral *CreateLiteralU8(AbckitFile *file, uint8_t value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -248,6 +260,7 @@ extern "C" AbckitLiteral *CreateLiteralU16(AbckitFile *file, uint16_t value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -264,6 +277,7 @@ extern "C" AbckitLiteral *CreateLiteralMethodAffiliate(AbckitFile *file, uint16_
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -279,6 +293,7 @@ extern "C" AbckitLiteral *CreateLiteralU32(AbckitFile *file, uint32_t value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -295,6 +310,7 @@ extern "C" AbckitLiteral *CreateLiteralU64(AbckitFile *file, uint64_t value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -311,6 +327,7 @@ extern "C" AbckitLiteral *CreateLiteralFloat(AbckitFile *file, float value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -327,6 +344,7 @@ extern "C" AbckitLiteral *CreateLiteralDouble(AbckitFile *file, double value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     switch (file->frontend) {
@@ -343,6 +361,7 @@ extern "C" AbckitLiteral *CreateLiteralLiteralArray(AbckitFile *file, AbckitLite
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(litarr, nullptr);
@@ -361,6 +380,7 @@ extern "C" AbckitLiteral *CreateLiteralString(AbckitFile *file, const char *valu
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
@@ -379,6 +399,7 @@ extern "C" AbckitLiteral *CreateLiteralMethod(AbckitFile *file, AbckitCoreFuncti
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);

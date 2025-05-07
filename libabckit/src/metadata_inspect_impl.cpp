@@ -21,6 +21,7 @@
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/logger.h"
 #include "libabckit/src/macros.h"
+#include "scoped_timer.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/metadata_arkts_inspect_impl.h"
@@ -38,6 +39,7 @@ namespace libabckit {
 extern "C" AbckitFileVersion FileGetVersion(AbckitFile *file)
 {
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
 
@@ -48,6 +50,7 @@ extern "C" bool FileEnumerateModules(AbckitFile *file, void *data, bool (*cb)(Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(file, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
 
@@ -66,6 +69,7 @@ extern "C" bool FileEnumerateExternalModules(AbckitFile *file, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(file, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     bool isNormalExit = true;
@@ -83,6 +87,7 @@ extern "C" AbckitFile *ModuleGetFile(AbckitCoreModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     return m->file;
 }
@@ -90,6 +95,7 @@ extern "C" AbckitFile *ModuleGetFile(AbckitCoreModule *m)
 extern "C" AbckitTarget ModuleGetTarget(AbckitCoreModule *m)
 {
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, ABCKIT_TARGET_UNKNOWN);
 
     return m->target;
@@ -99,6 +105,7 @@ extern "C" AbckitString *ModuleGetName(AbckitCoreModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     return m->moduleName;
 }
@@ -107,6 +114,7 @@ extern "C" bool ModuleIsExternal(AbckitCoreModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, false);
     return m->isExternal;
 }
@@ -116,6 +124,7 @@ extern "C" bool ModuleEnumerateImports(AbckitCoreModule *m, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(m, false);
     LIBABCKIT_BAD_ARGUMENT(cb, false);
@@ -137,6 +146,7 @@ extern "C" bool ModuleEnumerateExports(AbckitCoreModule *m, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -159,6 +169,7 @@ extern "C" bool ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -180,6 +191,7 @@ extern "C" bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*c
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
@@ -200,6 +212,7 @@ extern "C" bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
@@ -220,6 +233,7 @@ extern "C" bool ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *dat
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
@@ -240,6 +254,7 @@ extern "C" bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *d
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
@@ -263,6 +278,7 @@ extern "C" AbckitString *NamespaceGetName(AbckitCoreNamespace *n)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(n, nullptr);
     switch (n->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
@@ -280,6 +296,7 @@ extern "C" AbckitCoreNamespace *NamespaceGetParentNamespace(AbckitCoreNamespace 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(n, nullptr);
     return n->parentNamespace;
 }
@@ -289,6 +306,7 @@ extern "C" bool NamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(n, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -309,6 +327,7 @@ extern "C" bool NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(n, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -329,6 +348,7 @@ extern "C" bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(n, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -352,6 +372,7 @@ extern "C" AbckitFile *ImportDescriptorGetFile(AbckitCoreImportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     return i->importingModule->file;
 }
@@ -360,6 +381,7 @@ extern "C" AbckitCoreModule *ImportDescriptorGetImportedModule(AbckitCoreImportD
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     return i->importedModule;
 }
@@ -368,6 +390,7 @@ extern "C" AbckitCoreModule *ImportDescriptorGetImportingModule(AbckitCoreImport
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     return i->importingModule;
 }
@@ -376,6 +399,7 @@ extern "C" AbckitString *ImportDescriptorGetName(AbckitCoreImportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     if (IsDynamic(i->importingModule->target)) {
         return ImportDescriptorGetNameDynamic(i);
@@ -388,6 +412,7 @@ extern "C" AbckitString *ImportDescriptorGetAlias(AbckitCoreImportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     if (IsDynamic(i->importingModule->target)) {
         return ImportDescriptorGetAliasDynamic(i);
@@ -404,6 +429,7 @@ extern "C" AbckitFile *ExportDescriptorGetFile(AbckitCoreExportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     return i->exportingModule->file;
 }
@@ -412,6 +438,7 @@ extern "C" AbckitCoreModule *ExportDescriptorGetExportingModule(AbckitCoreExport
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     return i->exportingModule;
 }
@@ -420,6 +447,7 @@ extern "C" AbckitCoreModule *ExportDescriptorGetExportedModule(AbckitCoreExportD
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     return i->exportedModule;
 }
@@ -428,6 +456,7 @@ extern "C" AbckitString *ExportDescriptorGetName(AbckitCoreExportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     if (IsDynamic(i->exportingModule->target)) {
         return ExportDescriptorGetNameDynamic(i);
@@ -440,6 +469,7 @@ extern "C" AbckitString *ExportDescriptorGetAlias(AbckitCoreExportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     if (IsDynamic(i->exportingModule->target)) {
         return ExportDescriptorGetAliasDynamic(i);
@@ -456,6 +486,7 @@ extern "C" AbckitFile *ClassGetFile(AbckitCoreClass *klass)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
     return klass->owningModule->file;
 }
@@ -464,6 +495,7 @@ extern "C" AbckitCoreModule *ClassGetModule(AbckitCoreClass *klass)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
 
@@ -474,6 +506,7 @@ extern "C" AbckitString *ClassGetName(AbckitCoreClass *klass)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr)
 
     if (IsDynamic(klass->owningModule->target)) {
@@ -486,6 +519,7 @@ extern "C" AbckitCoreFunction *ClassGetParentFunction(AbckitCoreClass *klass)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
     return klass->parentFunction;
 }
@@ -494,6 +528,7 @@ extern "C" AbckitCoreNamespace *ClassGetParentNamespace(AbckitCoreClass *klass)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
     return klass->parentNamespace;
 }
@@ -503,6 +538,7 @@ extern "C" bool ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(klass, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -523,6 +559,7 @@ extern "C" bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(klass, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -546,6 +583,7 @@ extern "C" AbckitFile *AnnotationInterfaceGetFile(AbckitCoreAnnotationInterface 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(anno, nullptr);
     return anno->owningModule->file;
@@ -555,6 +593,7 @@ extern "C" AbckitCoreModule *AnnotationInterfaceGetModule(AbckitCoreAnnotationIn
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(anno, nullptr);
     return anno->owningModule;
@@ -564,6 +603,7 @@ extern "C" AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterfac
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ai, nullptr);
 
@@ -579,6 +619,7 @@ extern "C" bool AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ai, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -602,6 +643,7 @@ extern "C" AbckitFile *AnnotationInterfaceFieldGetFile(AbckitCoreAnnotationInter
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(fld, nullptr);
 
@@ -612,6 +654,7 @@ extern "C" AbckitCoreAnnotationInterface *AnnotationInterfaceFieldGetInterface(A
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(fld, nullptr);
 
@@ -622,6 +665,7 @@ extern "C" AbckitString *AnnotationInterfaceFieldGetName(AbckitCoreAnnotationInt
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(fld, nullptr);
 
@@ -632,6 +676,7 @@ extern "C" AbckitType *AnnotationInterfaceFieldGetType(AbckitCoreAnnotationInter
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(fld, nullptr);
 
@@ -642,6 +687,7 @@ extern "C" AbckitValue *AnnotationInterfaceFieldGetDefaultValue(AbckitCoreAnnota
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(fld, nullptr);
 
@@ -656,6 +702,7 @@ extern "C" AbckitFile *FunctionGetFile(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
     return function->owningModule->file;
 }
@@ -664,6 +711,7 @@ extern "C" AbckitCoreModule *FunctionGetModule(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
@@ -674,6 +722,7 @@ extern "C" AbckitString *FunctionGetName(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
@@ -687,6 +736,7 @@ extern "C" AbckitCoreFunction *FunctionGetParentFunction(AbckitCoreFunction *fun
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
@@ -697,6 +747,7 @@ extern "C" AbckitCoreClass *FunctionGetParentClass(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
@@ -707,6 +758,7 @@ extern "C" AbckitCoreNamespace *FunctionGetParentNamespace(AbckitCoreFunction *f
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
     return function->parentNamespace;
 }
@@ -716,6 +768,7 @@ extern "C" bool FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, v
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -736,6 +789,7 @@ extern "C" bool FunctionEnumerateNestedClasses(AbckitCoreFunction *function, voi
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -756,6 +810,7 @@ extern "C" bool FunctionEnumerateAnnotations(AbckitCoreFunction *function, void 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(function, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -775,6 +830,7 @@ extern "C" AbckitGraph *CreateGraphFromFunction(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
     if (IsDynamic(function->owningModule->target)) {
@@ -787,6 +843,7 @@ extern "C" bool FunctionIsStatic(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, false);
 
     if (IsDynamic(function->owningModule->target)) {
@@ -799,6 +856,7 @@ extern "C" bool FunctionIsCtor(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, false);
 
     if (IsDynamic(function->owningModule->target)) {
@@ -811,6 +869,7 @@ extern "C" bool FunctionIsAnonymous(AbckitCoreFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, false);
 
     if (IsDynamic(function->owningModule->target)) {
@@ -827,6 +886,7 @@ extern "C" AbckitFile *AnnotationGetFile(AbckitCoreAnnotation *anno)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(anno, nullptr);
 
@@ -837,6 +897,7 @@ extern "C" AbckitCoreAnnotationInterface *AnnotationGetInterface(AbckitCoreAnnot
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(anno, nullptr);
 
@@ -848,6 +909,7 @@ extern "C" bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *da
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(anno, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
@@ -873,6 +935,7 @@ extern "C" AbckitFile *AnnotationElementGetFile(AbckitCoreAnnotationElement *ae)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ae, nullptr);
 
@@ -883,6 +946,7 @@ extern "C" AbckitCoreAnnotation *AnnotationElementGetAnnotation(AbckitCoreAnnota
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ae, nullptr);
 
@@ -893,6 +957,7 @@ extern "C" AbckitString *AnnotationElementGetName(AbckitCoreAnnotationElement *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ae, nullptr);
 
@@ -903,6 +968,7 @@ extern "C" AbckitValue *AnnotationElementGetValue(AbckitCoreAnnotationElement *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(ae, nullptr);
 
@@ -917,6 +983,7 @@ extern "C" AbckitTypeId TypeGetTypeId(AbckitType *type)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(type, AbckitTypeId::ABCKIT_TYPE_ID_INVALID);
 
     return type->id;
@@ -926,6 +993,7 @@ extern "C" AbckitCoreClass *TypeGetReferenceClass(AbckitType *type)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(type, nullptr);
     if (type->id != AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE) {
         return nullptr;
@@ -942,6 +1010,7 @@ extern "C" AbckitFile *ValueGetFile(AbckitValue *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
 
@@ -952,6 +1021,7 @@ extern "C" AbckitType *ValueGetType(AbckitValue *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
 
@@ -969,6 +1039,7 @@ extern "C" bool ValueGetU1(AbckitValue *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(value, false);
 
@@ -986,6 +1057,7 @@ extern "C" double ValueGetDouble(AbckitValue *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(value, 0);
 
@@ -1003,6 +1075,7 @@ extern "C" AbckitString *ValueGetString(AbckitValue *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
 
@@ -1020,6 +1093,7 @@ extern "C" AbckitLiteralArray *ArrayValueGetLiteralArray(AbckitValue *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
 
@@ -1041,6 +1115,7 @@ extern "C" const char *AbckitStringToString(AbckitString *value)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(value, nullptr);
 
@@ -1056,6 +1131,7 @@ extern "C" bool LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(litArr, false);
     LIBABCKIT_BAD_ARGUMENT(cb, false);
@@ -1079,6 +1155,7 @@ extern "C" AbckitFile *LiteralGetFile(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, nullptr);
 
@@ -1089,6 +1166,7 @@ extern "C" AbckitLiteralTag LiteralGetTag(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, ABCKIT_LITERAL_TAG_INVALID);
 
@@ -1106,6 +1184,7 @@ extern "C" bool LiteralGetBool(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, false);
 
@@ -1123,6 +1202,7 @@ extern "C" uint8_t LiteralGetU8(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, 0);
 
@@ -1140,6 +1220,7 @@ extern "C" uint16_t LiteralGetU16(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, 0);
 
@@ -1157,6 +1238,7 @@ extern "C" uint16_t LiteralGetMethodAffiliate(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, 0);
 
@@ -1174,6 +1256,7 @@ extern "C" uint32_t LiteralGetU32(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, 0);
 
@@ -1191,6 +1274,7 @@ extern "C" uint64_t LiteralGetU64(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, 0);
 
@@ -1208,6 +1292,7 @@ extern "C" float LiteralGetFloat(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, 0);
 
@@ -1225,6 +1310,7 @@ extern "C" double LiteralGetDouble(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, 0);
 
@@ -1242,6 +1328,7 @@ extern "C" AbckitLiteralArray *LiteralGetLiteralArray(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, nullptr);
 
@@ -1260,6 +1347,7 @@ extern "C" AbckitString *LiteralGetString(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, nullptr);
 
@@ -1277,6 +1365,7 @@ extern "C" AbckitString *LiteralGetMethod(AbckitLiteral *lit)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(lit, nullptr);
 
