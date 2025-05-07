@@ -1460,6 +1460,8 @@ export namespace taskpool {
         return task.getOnReceivePromise(promise);
     }
 
+    native function isUsingLaunch(): boolean;
+
     // managed mutex for taskpool containers below
     const mutex = ConcurrencyHelpers.mutexCreate();
     // value is count of tasks
@@ -1490,7 +1492,7 @@ export namespace taskpool {
     let highTaskExecuteCount: int = 0;
     let mediumTaskExecuteCount: int = 0;
 
-    let isTaskPoolUseLaunch: boolean = false;
+    const isTaskPoolUseLaunch: boolean = isUsingLaunch();
 
     const initialWorkersNumber: int = 2;
     const continuousExecutionCount: int = 5;

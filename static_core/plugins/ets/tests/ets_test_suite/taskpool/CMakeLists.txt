@@ -31,5 +31,13 @@ foreach(filename ${test_files})
                     TEST_NAME "taskpool_${test_name}"
                     MODE "INT" "JIT" "AOT"
         )
+
+        add_ets_test(ets_test_suite_taskpool
+                    SKIP_ARM32_COMPILER
+                    FILE ${test_file}
+                    TEST_NAME "taskpool_using_launch_${test_name}"
+                    OPTIONS "--taskpool-mode=launch"
+                    MODE "INT" "JIT" "AOT"
+        )
     endif()
 endforeach()
