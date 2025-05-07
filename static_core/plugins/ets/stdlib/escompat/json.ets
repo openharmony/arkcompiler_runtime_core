@@ -168,6 +168,13 @@ export class JSON {
                 if (escapedCharIndex != -1) {
                     sb.append(c'\\')
                     sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
+                } else if (currChar <= c'\x1f' && currChar >= c'\x00') {
+                    if (currChar <= c'\x0f') {
+                        sb.append('\\u000')
+                    } else {
+                        sb.append('\\u00')
+                    }
+                    sb.append(Number.toString(currChar, 16))
                 } else {
                     sb.append(currChar)
                 }
