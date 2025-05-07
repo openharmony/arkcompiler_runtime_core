@@ -59,6 +59,8 @@ const maxDaysInMonth = 31;
  */
 const maxDateOffset: long = 8.64e15;
 
+const INVALID_DATE: long = maxDateOffset + 1
+
 // initialized in _initializerBlock_.ets
 /** Day names */
 const dayNames: String[];
@@ -376,7 +378,7 @@ function ecmaMakeDate(day:long, time: long): long {
  */
 function ecmaTimeClip(time: long): long throws {
     if ((time > maxDateOffset) || (time < -maxDateOffset)) {
-        throw new InvalidDate();
+        throw new RangeError()
     }
 
     return time;
@@ -457,7 +459,7 @@ export class Date {
     /**
      * The `parseDateFromString()` static method parses a string representation of a date,
      * and returns the number of milliseconds since January 1, 1970, 00:00:00 UTC
-     * or raises `InvalidDate` if the string is unrecognized or, in some cases,
+     * or returns `INVALID_DATE` if the string is unrecognized or, in some cases,
      * contains illegal date values (e.g. 2015-02-31).
      *
      * Only the @link{https://tc39.es/ecma262/#sec-date-time-string-format|ISO 8601 format}
@@ -469,132 +471,56 @@ export class Date {
      *
      * @returns A number representing the milliseconds elapsed since January 1, 1970, 00:00:00 UTC
      * and the date obtained by parsing the given string representation of a date.
-     * If the argument doesn't represent a valid date, `InvalidDate` error is thrown.
      */
     private static parseDateFromString(dateStr: String): number {
-        const dateStrLen = dateStr.length as int;
-        if (dateStrLen < 4) {
-            return 0;
-        }
-        if (dateStrLen > 35) {
-            throw new InvalidDate();
+        let parseResult = new ISODateParseResult()
+        try {
+            parseResult = new ISODateParser(dateStr).parse()
+        } catch (parseError: ISODateParseError) {
+            return INVALID_DATE
         }
 
-        let date = new Date(0);
+        const date = new Date(0)
+        date.setUTCFullYear(parseResult.year);
 
-        let timeZone: long = 0;
-        const years = Date.parseIfContains(dateStr, 0, 4);
-        const months = Date.parseIfContains(dateStr, 5, 7);
-        const days = Date.parseIfContains(dateStr, 8, 10);
-        const hours = Date.parseIfContains(dateStr, 11, 13);
-        const minutes = Date.parseIfContains(dateStr, 14, 16);
-        const seconds = Date.parseIfContains(dateStr, 17, 19);
-        const milliseconds = Date.parseIfContains(dateStr, 20, 23);
+        if (parseResult.month > 0) {
+            if (parseResult.month > monthCountPerYear) {
+                return INVALID_DATE
+            }
+            date.setUTCMonth(parseResult.month - 1)
+        }
 
-        date.setUTCFullYear(years);
-        if (months != Date.UNSUCCESSFUL_PARSING) {
-            if (months > monthCountPerYear || months <= 0) {
-                throw new InvalidDate();
-            }
-            date.setUTCMonth((months - 1) as int);
-        } else {
-            date.setUTCMonth(0 as int);
+        if (parseResult.day > maxDaysInMonth) {
+            return INVALID_DATE
         }
-        if (days != Date.UNSUCCESSFUL_PARSING) {
-            if (days > maxDaysInMonth || days <= 0) {
-                throw new InvalidDate();
-            }
-            date.setUTCDate((days) as byte);
-        } else {
-            date.setUTCDate(1 as byte);
-        }
-        if (hours != Date.UNSUCCESSFUL_PARSING) {
-            if (hours > hoursPerDay || hours < 0) {
-                throw new InvalidDate();
-            }
-            date.setUTCHours(hours as byte);
-        } else {
-            date.setUTCHours(0 as byte);
-        }
-        if (minutes != Date.UNSUCCESSFUL_PARSING) {
-            if (minutes >= minutesPerHour || minutes < 0) {
-                throw new InvalidDate();
-            }
-            date.setUTCMinutes(minutes as byte);
-        } else {
-            date.setUTCMinutes(0 as byte);
-        }
-        if (seconds != Date.UNSUCCESSFUL_PARSING) {
-            if (seconds >= secondsPerMinute || seconds < 0) {
-                throw new InvalidDate();
-            }
-            date.setUTCSeconds(seconds as byte);
-        } else {
-            date.setUTCSeconds(0 as byte);
-        }
-        if (milliseconds != Date.UNSUCCESSFUL_PARSING) {
-            if (milliseconds >= msPerSecond || milliseconds < 0) {
-                throw new InvalidDate();
-            }
-            date.setUTCMilliseconds(milliseconds as short);
-        } else {
-            date.setUTCMilliseconds(0 as short);
-        }
-        if (dateStrLen > 23) {
-            timeZone = 0;
-            let timeZoneSign = 0;
-            let timeZoneSignChar = c'+';
-            timeZoneSignChar = dateStr.charAt(23);
-            if (timeZoneSignChar == c'-') {
-                timeZoneSign = 1;
-            } else if (timeZoneSignChar == c'Z') {
-                timeZoneSign = 0;
-            } else if (timeZoneSignChar == c'+') {
-                timeZoneSign = -1;
-            } else {
-                throw new InvalidDate();
-            }
-            const timeZoneHours = Date.parseIfContains(dateStr, 24, 26);
-            const timeZoneMinutes = Date.parseIfContains(dateStr, 27, 29);
-            const timeZoneSeconds = Date.parseIfContains(dateStr, 30, 32);
-            const timeZoneSecondsFraction = Date.parseIfContains(dateStr, 33, min(36, dateStrLen) as int);
-            if (timeZoneHours != Date.UNSUCCESSFUL_PARSING) {
-                if (timeZoneHours < 0 || timeZoneHours >= hoursPerDay) {
-                    throw new InvalidDate();
-                }
-                timeZone += timeZoneHours * msPerHour;
-            }
-            if (timeZoneMinutes != Date.UNSUCCESSFUL_PARSING) {
-                if (timeZoneMinutes < 0 || timeZoneMinutes >= minutesPerHour) {
-                    throw new InvalidDate();
-                }
-                timeZone += timeZoneMinutes * msPerMinute;
-            }
-            if (timeZoneSeconds != Date.UNSUCCESSFUL_PARSING) {
-                if (timeZoneSeconds < 0 || timeZoneSeconds >= secondsPerMinute) {
-                    throw new InvalidDate();
-                }
-                timeZone += timeZoneSeconds * msPerSecond;
-            }
-            if (timeZoneSecondsFraction != Date.UNSUCCESSFUL_PARSING) {
-                let timeZoneMillis = timeZoneSecondsFraction;
-                if (dateStrLen == 32) {
-                    timeZoneMillis *= 100;
-                } else if (dateStrLen == 33) {
-                    timeZoneMillis *= 10;
-                }
-                if (timeZoneSecondsFraction < 0) {
-                    throw new InvalidDate();
-                }
-                timeZone += timeZoneSecondsFraction;
-            }
+        date.setUTCDay(parseResult.day)
 
-            timeZone *= timeZoneSign;
+        if (parseResult.hour > hoursPerDay) {
+            return INVALID_DATE
         }
-        if (dateStrLen == 23) {
-            timeZone = Date.getLocalTimezoneOffset(date.valueOf() as long) *  msPerMinute;
+        date.setUTCHours(parseResult.hour)
+
+        if (parseResult.minute > minutesPerHour) {
+            return INVALID_DATE
         }
-        return date.valueOf() + timeZone;
+        date.setUTCMinutes(parseResult.minute)
+
+        if (parseResult.second > secondsPerMinute) {
+            return INVALID_DATE
+        }
+        date.setUTCSeconds(parseResult.second)
+
+        if (parseResult.ms > msPerSecond) {
+            return INVALID_DATE
+        }
+        date.setUTCMilliseconds(parseResult.ms)
+
+        const tzOffset = parseResult.tzOffset
+        if (tzOffset !== undefined) {
+            return date.valueOf() + tzOffset
+        } else {
+            return date.valueOf() + Date.getLocalTimezoneOffset(date.valueOf() as long) * msPerMinute
+        }
     }
     /**
      * Default constructor.
@@ -710,8 +636,6 @@ export class Date {
      * @see ECMA-262, 21.4.4.44
      *
      * @returns The number of milliseconds between 1 January 1970 00:00:00 UTC and the given date.
-     *
-     * @throws InvalidDate - Throws if Date object is invalid (@link{isDateValid} is `false`).
      */
     public valueOf(): number {
         if (!this.isDateValid()) {
@@ -1613,7 +1537,7 @@ export class Date {
     /**
      * Parses a string representation of a date,
      * and returns the number of milliseconds since January 1, 1970, 00:00:00 UTC
-     * or raises `InvalidDate` if the string is unrecognized or, in some cases,
+     * or returns `INVALID_DATE` if the string is unrecognized or, in some cases,
      * contains illegal date values (e.g. 2015-02-31).
      *
      * Only the @link{https://tc39.es/ecma262/#sec-date-time-string-format|ISO 8601 format}
@@ -1627,7 +1551,7 @@ export class Date {
      *
      * @returns A number representing the milliseconds elapsed since January 1, 1970, 00:00:00 UTC
      * and the date obtained by parsing the given string representation of a date.
-     * If the argument doesn't represent a valid date, `InvalidDate` exception is thrown.
+     * If the argument doesn't represent a valid date, `INVALID_DATE` value is returned.
      */
     public static parse(dateStr: string): number {
         return Date.parseDateFromString(dateStr) as number;
@@ -1961,16 +1885,186 @@ export class Date {
         sb.append(" GMT")
         return sb.toString();
     }
+}
 
-    /**
-     * Parses int from substring if indexes are in string
-     */
-    private static parseIfContains(dateStr: String, begin: int, end: int): int {
-        if (dateStr.length >= end && begin < end) {
-            return Double.parseInt(dateStr.substring(begin, end)) as int;
-        }
-        return Date.UNSUCCESSFUL_PARSING;
+class ISODateParseResult {
+    year: int = 0
+    month: int = 0
+    day: int = 0
+    hour: int = 0
+    minute: int = 0
+    second: int = 0
+    ms: int = 0
+    tzOffset: long | undefined = undefined
+
+    toString(): string {
+        return `{ year: ${this.year}, month: ${this.month}, day: ${this.day}, hour: ${this.hour}, minute: ${this.minute}, second: ${this.second}, ms: ${this.ms}, TZ offset: ${this.tzOffset} }`
+    }
+}
+
+const YEAR_COMPONENT_LENGTH: int = 4
+const EXPANDED_YEAR_COMPONENT_LENGTH: int = 6
+const MONTH_COMPONENT_LENGTH: int = 2
+const DAY_COMPONENT_LENGTH: int = 2
+const HOUR_COMPONENT_LENGTH: int = 2
+const MINUTE_COMPONENT_LENGTH: int = 2
+const SECOND_COMPONENT_LENGTH: int = 2
+const MS_COMPONENT_LENGTH: int = 3
+
+const DATE_TIME_SEPARATOR: string = "T"
+const DATE_COMPONENTS_SEPARATOR: string = "-"
+const TIME_COMPONENTS_SEPARATOR: string = ":"
+const FRACTIONAL_SECONDS_SEPARATOR: string = "."
+
+final class ISODateParseError extends Error {}
+
+// https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-date-time-string-format
+class ISODateParser {
+    private readonly dateStr: string
+    private currentPos: int = 0
+    // limitPos
+    private readonly endPos: int
+
+    constructor(dateStr: string) {
+        this.dateStr = dateStr
+        this.endPos = dateStr.length as int
     }
 
-    private static readonly UNSUCCESSFUL_PARSING: int = -1;
+    public parse(): ISODateParseResult {
+        const parseResult = this.parseDate()
+
+        // end-of-text check
+        if (this.currentPos != this.endPos) {
+            throw new ISODateParseError()
+        }
+
+        return parseResult
+    }
+
+    public parseDate(): ISODateParseResult {
+        const result = new ISODateParseResult()
+
+        if (this.match("+")) {
+            // expanded year +YYYYYY
+            result.year = this.parseInt(EXPANDED_YEAR_COMPONENT_LENGTH)
+        } else if (this.match("-")) {
+            // expanded year -YYYYYY
+            result.year = -this.parseInt(EXPANDED_YEAR_COMPONENT_LENGTH)
+        } else {
+            result.year = this.parseInt(YEAR_COMPONENT_LENGTH)
+        }
+
+        if (!this.match(DATE_COMPONENTS_SEPARATOR)) {
+            return result
+        }
+
+        result.month = this.parseInt(MONTH_COMPONENT_LENGTH)
+        if (!this.match(DATE_COMPONENTS_SEPARATOR)) {
+            return result
+        }
+
+        result.day = this.parseInt(DAY_COMPONENT_LENGTH)
+        if (!this.match(DATE_TIME_SEPARATOR)) {
+            // ISO date only TZ = UTC
+            result.tzOffset = 0
+            return result
+        }
+
+        result.hour = this.parseInt(HOUR_COMPONENT_LENGTH)
+        if (!this.match(TIME_COMPONENTS_SEPARATOR)) {
+            throw new ISODateParseError()
+        }
+
+        result.minute = this.parseInt(MINUTE_COMPONENT_LENGTH)
+        if (this.match(TIME_COMPONENTS_SEPARATOR)) {
+            result.second = this.parseInt(SECOND_COMPONENT_LENGTH)
+            if (this.match(FRACTIONAL_SECONDS_SEPARATOR)) {
+                result.ms = this.parseMillis()
+            }
+        }
+
+        if (this.match("Z")) {
+            result.tzOffset = 0
+            return result
+        } else if (this.match("+")) {
+            result.tzOffset = -this.parseTimeZoneOffset()
+            return result
+        } else if (this.match("-")) {
+            result.tzOffset = this.parseTimeZoneOffset()
+            return result
+        }
+
+        // local timezone case
+        return result
+    }
+
+    private parseTimeZoneOffset(): long {
+        const tzOffsetHour = this.parseInt(HOUR_COMPONENT_LENGTH)
+        if (!this.match(TIME_COMPONENTS_SEPARATOR)) {
+            throw new ISODateParseError()
+        }
+
+        const tzOffsetMinute = this.parseInt(MINUTE_COMPONENT_LENGTH)
+
+        return tzOffsetHour * msPerHour + tzOffsetMinute * msPerMinute
+    }
+
+    private parseInt(length: int): int {
+        const startPos = this.currentPos
+        const endPos = this.currentPos + length
+
+        if (endPos > this.endPos) {
+            throw new ISODateParseError()
+        }
+
+        const literalText = this.dateStr.substring(startPos, endPos)
+        for (const literalChar of literalText) {
+            if (!Char.isDecDigit(literalChar)) {
+                throw new ISODateParseError()
+            }
+        }
+
+        const literalValue = Double.parseInt(literalText) as int
+        this.currentPos += length
+
+        return literalValue
+    }
+
+    private parseMillis(): int {
+        const startPos = this.currentPos
+
+        let currentPos = startPos
+        while (currentPos < this.endPos && Char.isDecDigit(this.dateStr.charAt(currentPos))) {
+            currentPos++
+        }
+
+        const millisTextLength = currentPos - startPos
+        if (millisTextLength == 0) {
+            throw new ISODateParseError()
+        }
+
+        const millisText = (millisTextLength > MS_COMPONENT_LENGTH)
+                ? this.dateStr.substring(startPos, startPos + MS_COMPONENT_LENGTH)
+                : this.dateStr.substring(startPos, currentPos).padEnd(MS_COMPONENT_LENGTH, "0")
+
+        const millisValue = Double.parseInt(millisText) as int
+
+        this.currentPos = currentPos
+        return millisValue
+    }
+
+    private match(expectedToken: string): boolean {
+        const expectedTokenLength = expectedToken.length as int
+        if (this.currentPos + expectedTokenLength > this.endPos) {
+            return false
+        }
+
+        const actualToken = this.dateStr.substring(this.currentPos, this.currentPos + expectedTokenLength)
+        if (actualToken == expectedToken) {
+            this.currentPos += actualToken.length
+            return true
+        }
+
+        return false
+    }
 }

@@ -96,11 +96,12 @@ function testDateChangeMonth(): int {
 
 function testDateChangeMonthBad(): int {
     let date: Date = new Date();
-    try {
-        date.setMonth(13);
-    } catch(id: InvalidDate) {
-        return 0;
+    date.setMonth(13);
+
+    if (isNaN(date.valueOf())) {
+        return 0
     }
+
     return 1;
 }
 
