@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  files: [../dir_with_same_prefix/bar.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { bar } from "@dir_with_same_prefix/bar"
 
 function main() {

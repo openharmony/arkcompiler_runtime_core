@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  arktsconfig: arktsconfig.json
+---*/
+
 export function isFinal(): boolean {
   return false;
 }

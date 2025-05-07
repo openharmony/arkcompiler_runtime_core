@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  files: [module2.ets, module3.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import * as foo from "@foo/foo"
 import * as bar from "@bar/bar"
 import * as module2 from "./module2"
@@ -30,7 +35,7 @@ function getCurrentLinker() {
 function testLazyLoading() {
     const appLinker = getCurrentLinker();
 
-    // disabled as runtime verication is enabled
+    // disabled as runtime verification is enabled
     const verifierEnabled: boolean = true;
 
     if (!verifierEnabled) {

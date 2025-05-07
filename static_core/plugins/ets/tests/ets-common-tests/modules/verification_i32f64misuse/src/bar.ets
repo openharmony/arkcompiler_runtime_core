@@ -15,6 +15,7 @@
 
 /*---
   tags: [not-a-test]
+  arktsconfig: arktsconfig.json
 ---*/
 
 export function bar() {

@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [final_method.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { FinalMethod } from "./final_method";
 
 export class OverrideFinal extends FinalMethod {

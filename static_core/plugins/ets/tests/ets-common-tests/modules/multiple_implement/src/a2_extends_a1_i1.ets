@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [a1_implements_i2.ets, i1.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { A1 } from "./a1_implements_i2";
 import { I1 } from "./i1";
 

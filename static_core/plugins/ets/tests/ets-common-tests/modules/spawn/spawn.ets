@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  files: [ability.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { Ability } from "./ability";
 
 native function getAppAbcFiles(): string[];
