@@ -37,7 +37,7 @@ namespace panda {
 class BaseThread;
 class ThreadHolderManager;
 
-// TODO: to determine
+// to determine
 using CommonRootVisitor = void (*)(void *root);
 
 /**
@@ -64,7 +64,7 @@ public:
     static ThreadHolder *GetCurrent();
     static void SetCurrent(ThreadHolder *holder);
 
-    // TODO: This is a temporary impl so we need pass vm from JSThread, or nullptr otherwise
+    // This is a temporary impl so we need pass vm from JSThread, or nullptr otherwise
     static ThreadHolder *CreateAndRegisterNewThreadHolder(void *vm);
 
     // Transfer to Running no matter in Running or Native.
@@ -83,8 +83,7 @@ public:
 
     void CheckSafepointIfSuspended()
     {
-        if (UNLIKELY_CC(HasSuspendRequest()))
-        {
+        if (UNLIKELY_CC(HasSuspendRequest())) {
             WaitSuspension();
         }
     }
@@ -101,7 +100,7 @@ public:
         return !mutatorBase_->InSaferegion();
     }
 
-    // TODO: unify JSThread* and Coroutine*
+    // unify JSThread* and Coroutine*
     // When register a thread, it must be initialized, i.e. it's safe to visit GC-Root.
     void RegisterJSThread(JSThread *jsThread);
     void UnregisterJSThread(JSThread *jsThread);

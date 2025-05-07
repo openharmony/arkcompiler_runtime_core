@@ -73,4 +73,4 @@ private:
     static BaseRuntime *baseRuntimeInstance_;
 };
 }  // namespace panda
-#endif  // COMMON_INTERFACES_BASE_RUNTIME_H   
+#endif // COMMON_INTERFACES_BASE_RUNTIME_H
