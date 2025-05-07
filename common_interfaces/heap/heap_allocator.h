@@ -23,7 +23,7 @@ namespace panda {
 class HeapAllocator {
 public:
     using Address32 = uint32_t;
-    using Address = uintptr_t;
+    using Address = uint64_t;
 
     static Address Allocate(size_t size);
     static Address32 Allocate32(size_t size);

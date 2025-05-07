@@ -21,6 +21,8 @@
 
 namespace panda {
 using StateWordType = uint64_t;
+using MAddress = uint64_t;
+class TypeInfo;
 
 class BaseStateWord {
 public:
@@ -29,7 +31,7 @@ public:
     static constexpr size_t LANGUAGE_WIDTH = 2;
 
     BaseStateWord() = default;
-    BaseStateWord(uintptr_t header) : header_(header) {};
+    BaseStateWord(MAddress header) : header_(header) {};
 
     enum class ForwardState : uint8_t {
         NORMAL,
@@ -100,7 +102,7 @@ private:
 
     union {
         State state_;
-        uintptr_t header_;
+        MAddress header_;
     };
 
     BaseStateWord AtomicGetBaseStateWord() const
@@ -108,14 +110,14 @@ private:
         return BaseStateWord(AtomicGetHeader());
     }
 
-    uintptr_t AtomicGetHeader() const
+    MAddress AtomicGetHeader() const
     {
         return __atomic_load_n(&header_, __ATOMIC_ACQUIRE);
     }
 
-    uintptr_t GetHeader() const { return header_; }
+    MAddress GetHeader() const { return header_; }
 
-    bool CompareExchangeHeader(uintptr_t expected, uintptr_t newState)
+    bool CompareExchangeHeader(MAddress expected, MAddress newState)
     {
 #if defined(__x86_64__)
         bool success =
@@ -146,6 +148,16 @@ private:
     inline bool IsStatic() const
     {
         return state_.language_ == Language::STATIC;
+    }
+
+    inline void SetDynamic()
+    {
+        state_.language_ = Language::DYNAMIC;
+    }
+
+    inline bool IsDynamic()
+    {
+        return state_.language_ == Language::DYNAMIC;
     }
 
     friend class BaseObject;

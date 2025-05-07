@@ -69,13 +69,13 @@ public:
         // Set size in old obj when forwarded, forwardee obj size may changed.
         size_t objectHeaderSize = sizeof(BaseStateWord);
         DCHECK_CC(size >= objectHeaderSize + sizeof(size_t));
-        auto addr = reinterpret_cast<uintptr_t>(this) + objectHeaderSize;
+        auto addr = reinterpret_cast<MAddress>(this) + objectHeaderSize;
         *reinterpret_cast<size_t*>(addr) = size;
     }
 
     inline size_t GetSizeForwarded() const
     {
-        auto addr = reinterpret_cast<uintptr_t>(this) + sizeof(BaseStateWord);
+        auto addr = reinterpret_cast<MAddress>(this) + sizeof(BaseStateWord);
         return *reinterpret_cast<size_t*>(addr);
     }
 
@@ -92,14 +92,14 @@ public:
     template <typename T>
     Field<T> &GetField(uint32_t offset) const
     {
-        auto addr = reinterpret_cast<uintptr_t>(this) + offset;
+        auto addr = reinterpret_cast<MAddress>(this) + offset;
         return *reinterpret_cast<Field<T> *>(addr);
     }
 
     template <bool isVolatile = false>
     RefField<isVolatile> &GetRefField(uint32_t offset) const
     {
-        auto addr = reinterpret_cast<uintptr_t>(this) + offset;
+        auto addr = reinterpret_cast<MAddress>(this) + offset;
         return *reinterpret_cast<RefField<isVolatile> *>(addr);
     }
 

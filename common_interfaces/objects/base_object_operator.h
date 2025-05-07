@@ -22,7 +22,7 @@
 #include "heap/heap_visitor.h"
 #include "objects/field.h"
 #include "objects/ref_field.h"
-#include "objects/state_word.h"
+#include "objects/base_state_word.h"
 
 namespace panda {
 class BaseObject;
