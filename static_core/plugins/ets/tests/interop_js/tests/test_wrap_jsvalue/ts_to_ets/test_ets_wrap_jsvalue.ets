@@ -20,9 +20,9 @@ type Any = object | null | undefined;
 class B {}
 
 function foo(val: Any): boolean {
-    let a = ESObject.wrap(val);
-    let b = ESObject.wrap(val);
+    let a = ESValue.wrap(val);
+    let b = ESValue.wrap(val);
     let c = a.getProperty('a');
-    let d = ESObject.wrap(new B());
-    return !a.isStaticObject() && !b.isStaticObject() && ESObject.areStrictlyEqual(a, b) && c.isNumber() && d.isStaticObject();
+    let d = ESValue.wrap(new B());
+    return !a.isStaticObject() && !b.isStaticObject() && ESValue.areStrictlyEqual(a, b) && c.isNumber() && d.isStaticObject();
 }

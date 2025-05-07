@@ -18,9 +18,9 @@
 
 namespace ark::ets::interop::js::testing {
 
-class SealedESObjectTest : public EtsInteropTest {};
+class SealedESValueTest : public EtsInteropTest {};
 
-TEST_F(SealedESObjectTest, checkSealedObject)
+TEST_F(SealedESValueTest, checkSealedObject)
 {
     ASSERT_TRUE(RunJsTestSuite("sealed_object.js"));
 }

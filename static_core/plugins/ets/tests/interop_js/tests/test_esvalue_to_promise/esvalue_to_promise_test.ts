@@ -14,7 +14,7 @@
  */
 let helper = globalThis.gtest.helper;
 let etsVm = globalThis.gtest.etsVm;
-let checkToPromise = etsVm.getFunction('Lesobject_to_promise_test/ETSGLOBAL;', 'checkToPromise');
+let checkToPromise = etsVm.getFunction('Lesvalue_to_promise_test/ETSGLOBAL;', 'checkToPromise');
 
 export function sleep(ms: number): Promise<void> {
     return new Promise<void>((resolve) => {

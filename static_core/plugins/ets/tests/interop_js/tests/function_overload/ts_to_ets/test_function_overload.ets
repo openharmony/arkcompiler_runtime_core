@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/function_overload/ts_to_ets/function_overload');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/function_overload/ts_to_ets/function_overload');
 let processInputDy = module.getProperty('processInput');
 let createArrayDy = module.getProperty('createArray');
 let getUserDy = module.getProperty('getUser');
 
 function testProcessInput() {
-    let res1 = processInputDy.invoke(ESObject.wrapNumber(5)); //  2 * 5 = 10
-    let res2 = processInputDy.invoke(ESObject.wrapString('hello')); // 'HELLO'
-    let res3 = processInputDy.invoke(ESObject.wrapBoolean(true)); // false
+    let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
+    let res2 = processInputDy.invoke(ESValue.wrapString('hello')); // 'HELLO'
+    let res3 = processInputDy.invoke(ESValue.wrapBoolean(true)); // false
     let res = (res1.toNumber() === 10) && (res2.toString() === 'HELLO') && (!res3.toBoolean());
     return res;
 }
 
 function testCreateArray() {
     // [5]
-    let res1 = createArrayDy.invoke(ESObject.wrapNumber(5), ESObject.wrapNumber(1));
+    let res1 = createArrayDy.invoke(ESValue.wrapNumber(5), ESValue.wrapNumber(1));
     // ['a', 1, 'a', 1]
-    let res2 = createArrayDy.invoke(ESObject.wrapString('a'), ESObject.wrapNumber(1), ESObject.wrapNumber(4));
+    let res2 = createArrayDy.invoke(ESValue.wrapString('a'), ESValue.wrapNumber(1), ESValue.wrapNumber(4));
     // [true, true]
-    let res3 = createArrayDy.invoke(ESObject.wrapBoolean(true), ESObject.wrapNumber(2));
+    let res3 = createArrayDy.invoke(ESValue.wrapBoolean(true), ESValue.wrapNumber(2));
     let res = (res1.getProperty(0).toNumber() === 5) &&
                 (res2.getProperty(0).toString() === 'a') &&
                 (res3.getProperty(0).toBoolean() === true);
@@ -41,9 +41,9 @@ function testCreateArray() {
 
 function testGetUser() {
     // { id: 123, name: 'John Doe' }
-    let res1 = getUserDy.invoke(ESObject.wrapNumber(123));
+    let res1 = getUserDy.invoke(ESValue.wrapNumber(123));
     // { id: 1, name: 'admin' }
-    let res2 = getUserDy.invoke(ESObject.wrapString('admin'));
+    let res2 = getUserDy.invoke(ESValue.wrapString('admin'));
     let res = res1.getProperty('id').toNumber() === 123 &&
                 res2.getProperty('role').toString() === 'admin';
     return res;

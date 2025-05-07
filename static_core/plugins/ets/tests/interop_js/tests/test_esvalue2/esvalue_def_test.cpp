@@ -18,231 +18,231 @@
 
 namespace ark::ets::interop::js::testing {
 
-class EtsESObjectJsToEtsTest : public EtsInteropTest {};
+class EtsESValueJsToEtsTest : public EtsInteropTest {};
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_undefined)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_undefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetUndefined"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_null)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_null)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetNull"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_boolean)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_boolean)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapBoolean"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_string)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_string)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapString"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_number)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_number)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapNumber"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_byte)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_byte)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapByte"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_bigint)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_bigint)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapBigInt"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_short)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_short)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapShort"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_int)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_int)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapInt"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_long)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_long)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapLong"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_float)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_float)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapFloat"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_wrap_Double)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_wrap_Double)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWrapDouble"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_boolean)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_boolean)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsBoolean"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_string)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_string)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsString"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_number)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_number)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsNumber"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_bigint)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_bigint)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsBigInt"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_undefined)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_undefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsUndefined"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_Function)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_Function)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsFunction"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_boolean)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_to_boolean)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToBoolean"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_string)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_to_string)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToString"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_Number)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_to_Number)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToNumber"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_bigint)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_to_bigint)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToBigInt"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_undefined)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_to_undefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToUndefined"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_js_is_undefined)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_js_is_undefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkJsIsUndefined"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_typeof_undefined)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_typeof_undefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTypeOfUndefined"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_strictly_equal_undefined)
+TEST_F(EtsESValueJsToEtsTest, test_strictly_equal_undefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkStrictlyEqualUndefined"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_to_null)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_to_null)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkToNull"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_null)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_null)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsNull"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_equal_null)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_equal_null)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkStrictlyEqualNull"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_equal_to)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_equal_to)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsEqualTo"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_are_strict_equal)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_are_strict_equal)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAreStrictEqual"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_is_equal_to_safe)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_is_equal_to_safe)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIsEqualToSafe"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_property_by_name)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_name)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByName"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyStaticObj"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_property_by_name_safe)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_name_safe)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByNameSafe"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_property_by_index)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_index)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndex"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndexDouble"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_property_by_index_safe)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_by_index_safe)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertyByIndexSafe"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_property)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetProperty"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_get_property_safe)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_get_property_safe)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetPropertySafe"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_set_property_by_name)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_set_property_by_name)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSetPropertyByName"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_set_property_by_index)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_set_property_by_index)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSetPropertyByIndex"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_set_property)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_set_property)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSetProperty"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_has_property)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_has_property)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkHasProperty"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_has_property_by_name)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_has_property_by_name)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkHasPropertyByName"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_type_of)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_type_of)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTypeOf"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_invoke)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_invoke)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoParam"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeNoParamThrowNumber"));
@@ -261,7 +261,7 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_invoke)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInvokeMethodHasParamThrowString"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_iterator)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_iterator)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIterator"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkKeys"));
@@ -269,7 +269,7 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_iterator)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkEntries"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_instanceOf)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instanceOf)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceOfStaticObj"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceOfNumeric"));
@@ -277,14 +277,14 @@ TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_instanceOf)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceOfDynamic"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_instaniate)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instaniate)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniate"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniateThrowNumber"));
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniateThrowString"));
 }
 
-TEST_F(EtsESObjectJsToEtsTest, test_esobject_check_call_ets_from_js)
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_call_ets_from_js)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallEtsFromJS"));
 }

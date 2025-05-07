@@ -11,12 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
-
-panda_ets_interop_js_gtest(ets_interop_js__esobject_with_string_key_js_to_sts
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobjectwithstringkey.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobjectwithstringkey.ets
-    ETS_CONFIG ${ETS_CONFIG}
-    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobjectwithstringkey.js
+create_declgen_ets2ts_test(esvalue
+    ROOT_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    BINARY_ROOT_DIR
+        ${CMAKE_CURRENT_BINARY_DIR}
+    TS_MAIN
+        ${CMAKE_CURRENT_SOURCE_DIR}/main.ts
+    ETS_VM_LAUNCHER
+        ${CMAKE_CURRENT_SOURCE_DIR}/../ets_vm_launcher.ts
+    TS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/esvalue.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/export.ts
+    ETS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib.ets
+    DECLS_EXPECTED
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib.expected
 )

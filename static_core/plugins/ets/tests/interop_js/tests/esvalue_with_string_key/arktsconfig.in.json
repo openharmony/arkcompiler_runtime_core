@@ -10,7 +10,7 @@
           ]
       },
       "dynamicPaths": {
-		"esobjectwithstringkey_js": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/esobjectwithstringkey" }
+		"esvaluewithstringkey_js": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/esvaluewithstringkey" }
       }
   }
 }

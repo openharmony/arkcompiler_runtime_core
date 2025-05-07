@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-let module = ESObject.load('../../plugins/ets/tests/interop_js/tests/test_union/ts_to_ets/union');
+let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_union/ts_to_ets/union');
 let dynamicObj = module.getProperty('dynamicObj');
 let TestClass = module.getProperty("TestClass");
 
@@ -24,20 +24,20 @@ class NewTestClass {
 function testUnion() {
   let result = false;
   try {
-    dynamicObj.setProperty('unionProp', ESObject.wrapNumber(123));
+    dynamicObj.setProperty('unionProp', ESValue.wrapNumber(123));
     assertTrue(dynamicObj.getProperty('unionProp').toNumber() === 123);
 
-    dynamicObj.setProperty('unionProp', ESObject.wrapString('123'));
+    dynamicObj.setProperty('unionProp', ESValue.wrapString('123'));
     assertTrue(dynamicObj.getProperty('unionProp').toString() === '123');
 
-    dynamicObj.setProperty('unionProp', ESObject.wrapBoolean(true));
+    dynamicObj.setProperty('unionProp', ESValue.wrapBoolean(true));
     assertTrue(dynamicObj.getProperty('unionProp').toBoolean() === true);
 
     let testInstance = TestClass.instantiate();
     dynamicObj.setProperty('unionProp', testInstance);
     assertTrue(dynamicObj.getProperty('unionProp').getProperty('name').toString() === 'aaa');
 
-    dynamicObj.setProperty('unionProp', ESObject.wrap(new NewTestClass()));
+    dynamicObj.setProperty('unionProp', ESValue.wrap(new NewTestClass()));
     assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
 
     result = true;

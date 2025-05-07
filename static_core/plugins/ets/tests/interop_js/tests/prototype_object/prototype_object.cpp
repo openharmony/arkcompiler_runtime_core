@@ -18,9 +18,9 @@
 
 namespace ark::ets::interop::js::testing {
 
-class PrototypeESObjectTest : public EtsInteropTest {};
+class PrototypeESValueTest : public EtsInteropTest {};
 
-TEST_F(PrototypeESObjectTest, checkPrototypeObject)
+TEST_F(PrototypeESValueTest, checkPrototypeObject)
 {
     ASSERT_TRUE(RunJsTestSuite("prototype_object.js"));
 }

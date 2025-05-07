@@ -14,9 +14,9 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_gtest(ets_interop_js_test_esobject_def_test
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobject_def_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobject_def_test.ets
-    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esobject_def_test.js
+panda_ets_interop_js_gtest(ets_interop_js__esvalue_with_string_key_js_to_ets
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvaluewithstringkey.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvaluewithstringkey.ets
     ETS_CONFIG ${ETS_CONFIG}
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvaluewithstringkey.js
 )

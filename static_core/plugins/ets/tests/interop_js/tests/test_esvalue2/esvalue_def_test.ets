@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-let module = ESObject.load("../../plugins/ets/tests/interop_js/tests/test_esobject/esobject_def_test");
+let module = ESValue.load("../../plugins/ets/tests/interop_js/tests/test_esvalue2/esvalue_def_test");
 
 let jsBoolean = module.getProperty("b");
 let jsNumber = module.getProperty("n");
@@ -43,99 +43,99 @@ let jsUserThrowNumber = module.getProperty("UserThrowNumber");
 let jsUserThrowString = module.getProperty("UserThrowString");
 let jsDoubledObj = module.getProperty("doubledObj");
 
-// get Undefined(): ESObject
+// get Undefined(): ESValue
 function checkGetUndefined(): boolean {
-    let obj = ESObject.Undefined;
+    let obj = ESValue.Undefined;
     return obj.typeOf() == "undefined";
 }
 
-// get Null(): ESObject
+// get Null(): ESValue
 function checkGetNull(): boolean {
-    let obj = ESObject.Null;
+    let obj = ESValue.Null;
     return obj.isNull();
 }
 
-// wrapBoolean(b: boolean): ESObject
+// wrapBoolean(b: boolean): ESValue
 function checkWrapBoolean(): boolean {
     let val = false;
-    let obj = ESObject.wrapBoolean(val);
+    let obj = ESValue.wrapBoolean(val);
     return obj.toBoolean() == val;
 }
 
-// wrapString(s: string): ESObject
+// wrapString(s: string): ESValue
 function checkWrapString(): boolean {
     let val = "hello";
-    let obj = ESObject.wrapString(val);
+    let obj = ESValue.wrapString(val);
     return obj.toString() == val;
 }
 
-// wrapBigInt(bi: BigInt): ESObject
+// wrapBigInt(bi: BigInt): ESValue
 function checkWrapBigInt(): boolean {
     let val = new BigInt(9007199254740991n);
-    let obj = ESObject.wrapBigInt(val);
+    let obj = ESValue.wrapBigInt(val);
     return obj.toBigInt() == val;
 }
 
-// wrapNumber(n: number): ESObject
+// wrapNumber(n: number): ESValue
 function checkWrapNumber(): boolean {
     let val = 111;
-    let obj = ESObject.wrapNumber(val);
+    let obj = ESValue.wrapNumber(val);
     return obj.toNumber() == val;
 }
 
-// wrapByte(b: byte): ESObject
+// wrapByte(b: byte): ESValue
 function checkWrapByte(): boolean {
     let val: byte = 111;
-    let obj = ESObject.wrapByte(val);
+    let obj = ESValue.wrapByte(val);
     return obj.toNumber() as byte == val;
 }
 
-// wrapShort(s: short): ESObject
+// wrapShort(s: short): ESValue
 function checkWrapShort(): boolean {
     let val: short = 111;
-    let obj = ESObject.wrapShort(val);
+    let obj = ESValue.wrapShort(val);
     return obj.toNumber() as short == val;
 }
 
-// wrapInt(i: int): ESObject
+// wrapInt(i: int): ESValue
 function checkWrapInt(): boolean {
     let val: int = 111;
-    let obj = ESObject.wrapInt(val);
+    let obj = ESValue.wrapInt(val);
     return obj.toNumber() as int == val;
 }
 
-// wrapLong(l: long): ESObject
+// wrapLong(l: long): ESValue
 function checkWrapLong(): boolean {
     let val: long = 111;
-    let obj = ESObject.wrapLong(val);
+    let obj = ESValue.wrapLong(val);
     return obj.toNumber() as long == val;
 }
 
-// wrapFloat(f: float): ESObject
+// wrapFloat(f: float): ESValue
 function checkWrapFloat(): boolean {
     let val: float = 111;
-    let obj = ESObject.wrapFloat(val);
+    let obj = ESValue.wrapFloat(val);
     return obj.toNumber() as float == val;
 }
 
-// wrapDouble(d: double): ESObject
+// wrapDouble(d: double): ESValue
 function checkWrapDouble(): boolean {
     let val: double = 111;
-    let obj = ESObject.wrapDouble(val);
+    let obj = ESValue.wrapDouble(val);
     return obj.toNumber() as double == val;
 }
 
-// isBoolean(eo: ESObject): boolean
+// isBoolean(eo: ESValue): boolean
 function checkIsBoolean(): boolean {
     return jsBoolean.isBoolean();
 }
 
-// isString(eo: ESObject): boolean
+// isString(eo: ESValue): boolean
 function checkIsString(): boolean {
     return jsString.isString();
 }
 
-// isNumber(eo: ESObject): boolean
+// isNumber(eo: ESValue): boolean
 function checkIsNumber(): boolean {
     return jsNumber.isNumber();
 }
@@ -147,7 +147,7 @@ function checkIsBigInt(): boolean {
 
 // isUndefined
 function checkIsUndefined(): boolean {
-    let obj = ESObject.Undefined;
+    let obj = ESValue.Undefined;
     return obj.isUndefined();
 }
 
@@ -156,7 +156,7 @@ function checkIsFunction(): boolean {
     return jsFunc.isFunction();
 }
 
-// toBoolean(eo: ESObject): boolean
+// toBoolean(eo: ESValue): boolean
 function checkToBoolean(): boolean {
     return jsBoolean.toBoolean() == false;
 }
@@ -190,7 +190,7 @@ function checkTypeOfUndefined(): boolean {
 }
 
 function checkStrictlyEqualUndefined(): boolean {
-    return ESObject.areStrictlyEqual(jsUndefined, ESObject.Undefined);
+    return ESValue.areStrictlyEqual(jsUndefined, ESValue.Undefined);
 }
 
 // toNull(): null
@@ -203,56 +203,56 @@ function checkIsNull(): boolean {
 }
 
 function checkStrictlyEqualNull(): boolean {
-    return ESObject.areStrictlyEqual(jsNull, ESObject.Null);
+    return ESValue.areStrictlyEqual(jsNull, ESValue.Null);
 }
 
 function checkAreStrictEqual(): boolean {
-    return ESObject.areStrictlyEqual(jsFunc, jsFunc);
+    return ESValue.areStrictlyEqual(jsFunc, jsFunc);
 }
 
-// isEqualTo(other: ESObject): boolean
+// isEqualTo(other: ESValue): boolean
 function checkIsEqualTo(): boolean {
     return jsFunc.isEqualTo(jsFunc);
 }
 
-// isEqualToSafe(other: ESObject): boolean
+// isEqualToSafe(other: ESValue): boolean
 function checkIsEqualToSafe(): boolean {
-    let nullObj1 = ESObject.Null;
-    let nullObj2 = ESObject.Null;
+    let nullObj1 = ESValue.Null;
+    let nullObj2 = ESValue.Null;
     return nullObj1.isEqualToSafe(nullObj2);
 }
 
-// getProperty(name: string): ESObject
+// getProperty(name: string): ESValue
 function checkGetPropertyByName(): boolean {
     let val = jsObjectA.getProperty("property2");
     return val.toNumber() == 2;
 }
 
-// getProperty(name: string): ESObject
+// getProperty(name: string): ESValue
 function checkGetPropertyStaticObj(): boolean {
     class staticObjectA {
         aaa: string = ""
     }
     let sObj = new staticObjectA();
     sObj.aaa = "bbb";
-    let obj = ESObject.wrap(sObj);
+    let obj = ESValue.wrap(sObj);
     let value = obj.getPropertySafe("aaa");
     return value.toString() == "bbb";
 }
 
-// getPropertySafe(name: string): ESObject
+// getPropertySafe(name: string): ESValue
 function checkGetPropertyByNameSafe(): boolean {
     let val = jsObjectA.getPropertySafe("property3");
     return val.isUndefined() == true;
 }
 
-// getProperty(index: number): ESObject
+// getProperty(index: number): ESValue
 function checkGetPropertyByIndex(): boolean {
     let val = jsArray.getProperty(2);
     return val.toBoolean() == true;
 }
 
-// getProperty(index: number): ESObject
+// getProperty(index: number): ESValue
 function checkGetPropertyByIndexDouble(): boolean {
     let index = 3.2;
     let val = jsArray.getPropertySafe(3.2);
@@ -260,54 +260,54 @@ function checkGetPropertyByIndexDouble(): boolean {
     return val1.toString() == "aaa";
 }
 
-// getPropertySafe(index: number): ESObject
+// getPropertySafe(index: number): ESValue
 function checkGetPropertyByIndexSafe(): boolean {
     let val = jsArray.getPropertySafe(3);
     return val.isUndefined() == true;
 }
 
-// getProperty(property: ESObject): ESObject
+// getProperty(property: ESValue): ESValue
 function checkGetProperty(): boolean {
-    let peroperty = ESObject.wrapString("property2");
+    let peroperty = ESValue.wrapString("property2");
     let val = jsObjectA.getProperty(peroperty);
     return val.toNumber() == 2;
 }
 
-// getPropertySafe(property: ESObject): ESObject
+// getPropertySafe(property: ESValue): ESValue
 function checkGetPropertySafe(): boolean {
-    let peroperty = ESObject.wrapString("property3");
+    let peroperty = ESValue.wrapString("property3");
     let val = jsObjectA.getPropertySafe(peroperty);
     return val.isUndefined() == true;
 }
 
-// setProperty(name: string, value: ESObject): void
+// setProperty(name: string, value: ESValue): void
 function checkSetPropertyByName(): boolean {
-    let value = ESObject.wrapNumber(5);
+    let value = ESValue.wrapNumber(5);
     jsObjectA.setProperty("property2", value);
     let val = jsObjectA.getProperty("property2");
     return val.toNumber() == 5;
 }
 
-// setProperty(index: number, value: StaticOrESObject): void
+// setProperty(index: number, value: StaticOrESValue): void
 function checkSetPropertyByIndex(): boolean {
-    let value = ESObject.wrapBoolean(false);
+    let value = ESValue.wrapBoolean(false);
     jsArray1.setProperty(2, value);
     let val = jsArray1.getProperty(2);
     return val.toBoolean() == false;
 }
 
-// setProperty(property: ESObject, value: ESObject): void
+// setProperty(property: ESValue, value: ESValue): void
 function checkSetProperty(): boolean {
-    let value = ESObject.wrapNumber(5);
-    let property = ESObject.wrapString("property2");
+    let value = ESValue.wrapNumber(5);
+    let property = ESValue.wrapString("property2");
     jsObjectA.setProperty(property, value);
     let val = jsObjectA.getProperty(property);
     return val.toNumber() == 5;
 }
 
-// hasProperty(property: ESObject): boolean
+// hasProperty(property: ESValue): boolean
 function checkHasProperty(): boolean {
-    let property = ESObject.wrapString("property2");
+    let property = ESValue.wrapString("property2");
     return jsObjectB.hasProperty(property) == true;
 }
 
@@ -322,7 +322,7 @@ function checkTypeOf(): boolean {
     return jsType == "string"
 }
 
-// public invoke(...args: FixedArray<ESObject>): ESObject
+// public invoke(...args: FixedArray<ESValue>): ESValue
 function checkInvokeNoParam(): boolean {
     let result = jsFunc.invoke();
     if (!result.isNumber()) {
@@ -337,7 +337,7 @@ function checkInvokeNoParamThrowNumber(): boolean {
         jsFuncThrowNumber.invoke();
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toNumber() === 5;
     }
     return res;
@@ -349,7 +349,7 @@ function checkInvokeNoParamThrowString(): boolean {
         jsFuncThrowString.invoke();
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toString() === 'made error';
     }
     return res;
@@ -370,10 +370,10 @@ function checkInvokeReturnUndefined(): boolean {
     return result.isUndefined();
 }
 
-// public invoke(...args: FixedArray<ESObject>): ESObject
+// public invoke(...args: FixedArray<ESValue>): ESValue
 function checkInvokeHasParam(): boolean {
-    let args: FixedArray<(Object|null|undefined)> = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
-    let result: ESObject = jsFuncWithParam.invoke(...args);
+    let args: FixedArray<(Object|null|undefined)> = [ESValue.wrapDouble(2), ESValue.wrapDouble(3)];
+    let result: ESValue = jsFuncWithParam.invoke(...args);
     if (!result.isNumber()) {
         return false;
     }
@@ -383,11 +383,11 @@ function checkInvokeHasParam(): boolean {
 function checkInvokeHasParamThrowNumber(): boolean {
     let res: boolean;
     try {
-        let args: FixedArray<(Object|null|undefined)> = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
+        let args: FixedArray<(Object|null|undefined)> = [ESValue.wrapDouble(2), ESValue.wrapDouble(3)];
         jsFuncWithParamThrowNumber.invoke(...args);
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toNumber() === 5;
     }
     return res;
@@ -396,11 +396,11 @@ function checkInvokeHasParamThrowNumber(): boolean {
 function checkInvokeHasParamThrowString(): boolean {
     let res: boolean;
     try {
-        let args: FixedArray<(Object|null|undefined)> = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
+        let args: FixedArray<(Object|null|undefined)> = [ESValue.wrapDouble(2), ESValue.wrapDouble(3)];
         jsFuncWithParamThrowString.invoke(...args);
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toString() === 'made error';
     }
     return res;
@@ -420,7 +420,7 @@ function checkInvokeMethodThrowNumber(): boolean {
         jsObjWithFunc.invokeMethod("funcThrowNumber");
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toNumber() === 5;
     }
     return res;
@@ -432,14 +432,14 @@ function checkInvokeMethodThrowString(): boolean {
         jsObjWithFunc.invokeMethod("funcThrowString");
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toString() === 'made error';
     }
     return res;
 }
 
 function checkInvokeMethodHasParam(): boolean {
-    let args: FixedArray<ESObject> = [ESObject.wrapString("abc"), ESObject.wrapString("def")];
+    let args: FixedArray<ESValue> = [ESValue.wrapString("abc"), ESValue.wrapString("def")];
     let result = jsObjWithFuncParam.invokeMethod("hello", ...args);
     if (!result.isString()) {
         return false;
@@ -450,11 +450,11 @@ function checkInvokeMethodHasParam(): boolean {
 function checkInvokeMethodHasParamThrowNumber(): boolean {
     let res: boolean;
     try {
-        let args: FixedArray<ESObject> = [ESObject.wrapString("abc"), ESObject.wrapString("def")];
+        let args: FixedArray<ESValue> = [ESValue.wrapString("abc"), ESValue.wrapString("def")];
         jsObjWithFuncParam.invokeMethod("helloThrowNumber", ...args);
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toNumber() === 5;
     }
     return res;
@@ -463,11 +463,11 @@ function checkInvokeMethodHasParamThrowNumber(): boolean {
 function checkInvokeMethodHasParamThrowString(): boolean {
     let res: boolean;
     try {
-        let args: FixedArray<ESObject> = [ESObject.wrapString("abc"), ESObject.wrapString("def")];
+        let args: FixedArray<ESValue> = [ESValue.wrapString("abc"), ESValue.wrapString("def")];
         jsObjWithFuncParam.invokeMethod("helloThrowString", ...args);
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toString() === 'made error';
     }
     return res;
@@ -533,30 +533,30 @@ function checkEntries(): boolean {
 function checkInstanceOfStaticObj(): boolean {
     class testObj {};
     let staticObj = new testObj();
-    let obj = ESObject.wrap(staticObj);
+    let obj = ESValue.wrap(staticObj);
     return obj.instanceOf(Type.of(staticObj));
 }
 
 function checkInstanceOfNumeric(): boolean {
     let num: short = 3;
-    let obj = ESObject.wrapNumber(num);
+    let obj = ESValue.wrapNumber(num);
     return obj.instanceOf(Type.of(num));
 }
 
 function checkInstanceOfStaticPrimitive(): boolean {
     let boolObj = false;
-    let obj = ESObject.wrapBoolean(boolObj);
+    let obj = ESValue.wrapBoolean(boolObj);
     return obj.instanceOf(Type.of(boolObj));
 }
 
 function checkInstanceOfDynamic(): boolean {
-	let num = ESObject.wrapInt(123);
+	let num = ESValue.wrapInt(123);
 	let user = jsUser.instantiate(num);
     return user.instanceOf(jsUser);
 }
 
 function checkInstaniate(): boolean {
-	let num = ESObject.wrapInt(123);
+	let num = ESValue.wrapInt(123);
 	let user = jsUser.instantiate(num);
     return user.getProperty("ID").toNumber() == 123;
 }
@@ -567,7 +567,7 @@ function checkInstaniateThrowNumber(): boolean {
 	    jsUserThrowNumber.instantiate();
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toNumber() === 5;
     }
     return res;
@@ -579,7 +579,7 @@ function checkInstaniateThrowString(): boolean {
 	    jsUserThrowString.instantiate();
         res = false;
     } catch (e) {
-        let errObj: ESObject = (e as ESError).getValue();
+        let errObj: ESValue = (e as ESError).getValue();
         res = errObj.toString() === 'made error';
     }
     return res;
@@ -594,6 +594,6 @@ class foo {
 function checkCallEtsFromJS(): boolean {
     let jsFuncFromJS = module.getProperty("callEtsFunc");
     let param = new foo();
-    let ret = jsFuncFromJS.invoke(ESObject.wrap(param)).toNumber();
+    let ret = jsFuncFromJS.invoke(ESValue.wrap(param)).toNumber();
     return (ret == 0x55aa);
 }
