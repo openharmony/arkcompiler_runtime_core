@@ -123,7 +123,7 @@ EtsObject *JSRefConvertFunction::CreateJSFunctionProxy(InteropCtx *ctx, napi_val
         return nullptr;
     }
 
-    auto *sharedRef = storage->CreateJSObjectRef(ctx, etsObject, jsFun);
+    auto *sharedRef = storage->CreateJSObjectRefwithWrap(ctx, etsObject, jsFun);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return nullptr;

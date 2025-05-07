@@ -67,7 +67,7 @@ static constexpr std::string_view const FUNCTION_INTERFACE_DESCRIPTORS[] = {
     descriptors::FUNCTION4,  descriptors::FUNCTION5,  descriptors::FUNCTION6,  descriptors::FUNCTION7,
     descriptors::FUNCTION8,  descriptors::FUNCTION9,  descriptors::FUNCTION10, descriptors::FUNCTION11,
     descriptors::FUNCTION12, descriptors::FUNCTION13, descriptors::FUNCTION14, descriptors::FUNCTION15,
-    descriptors::FUNCTION16, descriptors::FUNCTIONN,
+    descriptors::FUNCTION16, descriptors::FUNCTIONN,  descriptors::FUNCTION,
 };
 
 static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descriptor)
