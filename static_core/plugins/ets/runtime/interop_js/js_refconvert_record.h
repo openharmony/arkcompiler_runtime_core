@@ -52,7 +52,7 @@ public:
 
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *obj);
 
-    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsFun);
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue);
 
 private:
     napi_ref handleObjCache_ {};

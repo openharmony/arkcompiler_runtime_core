@@ -106,6 +106,24 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
     return ets_proxy::GetETSClass(env, classDescriptor);
 }
 
+static napi_value GetEtsInstance(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+
+    if (jsArgc != 1) {
+        InteropCtx::ThrowJSError(env, "GetEtsInstance: bad args, actual args count: " + std::to_string(jsArgc));
+        return nullptr;
+    }
+    napi_value jsClassDescriptor {};
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, &jsClassDescriptor, nullptr, nullptr));
+
+    std::string classDescriptor = GetString(env, jsClassDescriptor);
+    return ets_proxy::GetETSInstance(env, classDescriptor);
+}
+
 static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options,
                                                              bool needFakeArgv0 = true)
 {
@@ -299,6 +317,7 @@ static napi_value Init(napi_env env, napi_value exports)
         napi_property_descriptor {"createRuntime", 0, CreateRuntimeViaAni, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getFunction", 0, GetEtsFunction, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getClass", 0, GetEtsClass, 0, 0, 0, napi_enumerable, 0},
+        napi_property_descriptor {"getInstance", 0, GetEtsInstance, 0, 0, 0, napi_enumerable, 0},
     };
 
     NAPI_CHECK_FATAL(napi_define_properties(env, exports, desc.size(), desc.data()));
