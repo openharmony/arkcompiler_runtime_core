@@ -299,7 +299,7 @@ public:
     bool IsMethodCanBeInlined(MethodPtr method) const override
     {
         auto methodPtr = MethodCast(method);
-        auto options = Runtime::GetCurrent()->GetOptions();
+        const auto &options = Runtime::GetCurrent()->GetOptions();
         if (verifier::VerificationModeFromString(options.GetVerificationMode()) ==
                 verifier::VerificationMode::ON_THE_FLY &&
             methodPtr->GetVerificationStage() != Method::VerificationStage::VERIFIED_OK) {

@@ -49,7 +49,7 @@ void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t threadN
     }
 
     auto *service = Runtime::GetCurrent()->GetVerifierService();
-    auto options = Runtime::GetCurrent()->GetOptions();
+    const auto &options = Runtime::GetCurrent()->GetOptions();
     auto mode = verifier::VerificationModeFromString(options.GetVerificationMode());
 
     ManagedThread *thread = nullptr;
