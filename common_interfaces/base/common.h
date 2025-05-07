@@ -20,6 +20,11 @@
 #include <cstdint>
 #include <iostream>
 
+// Windows platform will define ERROR, cause compiler error
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace panda {
 #ifndef PANDA_TARGET_WINDOWS
 #define PUBLIC_API __attribute__((visibility ("default")))
@@ -202,7 +207,7 @@ struct GCParam {
      * default to 8, must be > 0.
      * It will be set default value if the value is 0.
      */
-    int32_t gcThreads;
+    uint32_t gcThreads;
 };
 
 /*

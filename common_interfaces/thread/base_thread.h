@@ -50,17 +50,6 @@ public:
         return threadHolder_;
     }
 
-    // Fixme: replace with real RootVisitor and this funciton should be pure virtual
-    void VisitRoot([[maybe_unused]] MockRootVisitor *visitor) {}
-
-    // Fixme: This is a temporary mock function to adapt the current JSThread callback when transfer to RUNNING,
-    // and need to be removed later.
-    virtual void MockCallback()
-    {
-        CHECK_CC(false);
-        UNREACHABLE_CC();
-    }
-
 private:
     BaseThreadType threadType_ {};
     ThreadHolder *threadHolder_ {};
