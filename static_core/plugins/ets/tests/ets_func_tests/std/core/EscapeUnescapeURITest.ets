@@ -30,7 +30,10 @@ function main(): int {
     fails += testEquals(encodeURIComponent(set1), "%3B%2F%3F%3A%40%26%3D%2B%24%2C%23");
     fails += testEquals(encodeURIComponent(set2), "-.!~*'()");
     fails += testEquals(encodeURIComponent(set3), "ABC%20abc%20123");
-    fails += testURIComponentWellFormedStr()
+    fails += testURIComponentWellFormedStr001();
+    fails += testURIComponentWellFormedStr002();
+    fails += testURIComponentWellFormedStr003();
+    fails += testURIComponentWellFormedStr004();
 
     fails += testEquals(encodeURIComponent(numberExample), "12345");
     fails += testEquals(encodeURIComponent(booleanExampleTrue), "true");
@@ -123,7 +126,34 @@ function testInverse(s1: string): int {
     return testInverse1(s1) + testInverse2(s1)
 }
 
-function testURIComponentWellFormedStr(): int {
+function testURIComponentWellFormedStr001(): int {
     assertEQ(encodeURIComponent("\ude52".toWellFormed()), "%EF%BF%BD")
+    return 0
+}
+
+function testURIComponentWellFormedStr002(): int {
+    assertEQ(encodeURIComponent("\ud83d\ude0a".toWellFormed()), "%F0%9F%98%8A")
+    return 0
+}
+
+function testURIComponentWellFormedStr003(): int {
+    assertEQ(encodeURIComponent("\ud83d\ude0a\u5927\ude0a".toWellFormed()), "%F0%9F%98%8A%E5%A4%A7%EF%BF%BD")
+    return 0
+}
+
+function testURIComponentWellFormedStr004(): int {
+    assertEQ(encodeURIComponent("test\u6d4b\u8bd5".toWellFormed()), "test%E6%B5%8B%E8%AF%95")
+    assertEQ(encodeURIComponent("test\ude01test".toWellFormed()), "test%EF%BF%BDtest")
+    assertEQ(encodeURIComponent("\ud83d".toWellFormed()), "%EF%BF%BD")
+    assertEQ(encodeURIComponent("\ude25".toWellFormed()), "%EF%BF%BD")
+    assertEQ("\u6d4b\u8bd5".toWellFormed(), "测试")
+    assertEQ("ABC".toWellFormed(), "ABC")
+    assertEQ("\uD83D\uDE00".toWellFormed(), "😀")
+    assertEQ("🌈🌬️👩🏻‍🏭💅🏿".toWellFormed(), "🌈🌬️👩🏻‍🏭💅🏿")
+    assertEQ("A\u3042あ".toWellFormed(), "Aああ")
+    assertEQ(encodeURIComponent("\ude25😀".toWellFormed()), "%EF%BF%BD%F0%9F%98%80")
+    assertEQ(encodeURIComponent("\uD800\uDBFF".toWellFormed()), "%EF%BF%BD%EF%BF%BD")
+    assertEQ(encodeURIComponent("\uDBFF\u0041".toWellFormed()), "%EF%BF%BDA")
+    assertEQ(encodeURIComponent("🌈🌬️👩🏻‍🏭💅🏿".toWellFormed()), "%F0%9F%8C%88%F0%9F%8C%AC%EF%B8%8F%F0%9F%91%A9%F0%9F%8F%BB%E2%80%8D%F0%9F%8F%AD%F0%9F%92%85%F0%9F%8F%BF")
     return 0
 }
