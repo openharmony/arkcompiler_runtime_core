@@ -506,9 +506,14 @@ JSValue *JSRuntimeGetProperty(JSValue *object, JSValue *property)
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
+    auto jsThis = JSConvertJSValue::WrapWithNullCheck(env, object);
+    auto key = JSConvertJSValue::WrapWithNullCheck(env, property);
+
     napi_value result;
-    NAPI_CHECK_FATAL(napi_get_property(env, JSConvertJSValue::WrapWithNullCheck(env, object),
-                                       JSConvertJSValue::WrapWithNullCheck(env, property), &result));
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        NAPI_CHECK_FATAL(napi_get_property(env, jsThis, key, &result));
+    }
     return JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result).value();
 }
 
@@ -620,10 +625,16 @@ JSValue *JSRuntimeInvoke(JSValue *recv, JSValue *func, EtsArray *args)
         Cpptype value = std::remove_pointer_t<Cpptype>::FromEtsObject(EtsObject::FromCoreType(objHeader));
         realArgs.push_back(Convertor::Wrap(env, value));
     }
+
     napi_value retVal;
-    auto jsStatus =
-        napi_call_function(env, JSConvertJSValue::WrapWithNullCheck(env, recv),
-                           JSConvertJSValue::WrapWithNullCheck(env, func), realArgs.size(), realArgs.data(), &retVal);
+    napi_status jsStatus;
+    auto recvEtsObject = JSConvertJSValue::WrapWithNullCheck(env, recv);
+    auto funcEtsObject = JSConvertJSValue::WrapWithNullCheck(env, func);
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_call_function(env, recvEtsObject, funcEtsObject, realArgs.size(), realArgs.data(), &retVal);
+    }
+
     if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return nullptr;
@@ -653,9 +664,15 @@ JSValue *JSRuntimeInstantiate(JSValue *callable, EtsArray *args)
         Cpptype value = std::remove_pointer_t<Cpptype>::FromEtsObject(EtsObject::FromCoreType(objHeader));
         realArgs.push_back(Convertor::Wrap(env, value));
     }
+
+    auto ctor = JSConvertJSValue::WrapWithNullCheck(env, callable);
+    napi_status jsStatus;
     napi_value retVal;
-    auto jsStatus = napi_new_instance(env, JSConvertJSValue::WrapWithNullCheck(env, callable), realArgs.size(),
-                                      realArgs.data(), &retVal);
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_new_instance(env, ctor, realArgs.size(), realArgs.data(), &retVal);
+    }
+
     if (jsStatus != napi_ok) {
         ctx->ForwardJSException(coro);
         return nullptr;
