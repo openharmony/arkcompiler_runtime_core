@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const etsVm = globalThis.gtest.etsVm
+const etsVm = globalThis.gtest.etsVm;
 class TestModule {
     descriptorPrefix: string;
     constructor(name) {
