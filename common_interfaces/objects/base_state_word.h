@@ -33,11 +33,16 @@ public:
     BaseStateWord() = default;
     BaseStateWord(MAddress header) : header_(header) {};
 
-    enum class ForwardState : uint8_t {
+    enum class ForwardState : uint64_t {
         NORMAL,
         FORWARDING,
         FORWARDED,
         TO_VERSION
+    };
+
+    enum class Language : uint64_t {
+        DYNAMIC = 0,
+        STATIC = 1,
     };
 
     inline void SetForwarding()
@@ -88,11 +93,6 @@ public:
     }
 
 private:
-    enum class Language : uint8_t {
-        DYNAMIC = 0,
-        STATIC = 1,
-    };
-
     // Little endian
     struct State {
         StateWordType padding_     : PADDING_WIDTH;
