@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,7 @@ namespace panda {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_COPY_CTOR_CC(TypeName) \
-    TypeName(const TypeName&) = delete;
+    TypeName(const TypeName&) = delete
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_COPY_OPERATOR_CC(TypeName) \
@@ -69,13 +69,13 @@ namespace panda {
 // Disabling copy ctor and copy assignment operator.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_COPY_SEMANTIC_CC(TypeName) \
-    NO_COPY_CTOR_CC(TypeName)         \
+    NO_COPY_CTOR_CC(TypeName);        \
     NO_COPY_OPERATOR_CC(TypeName)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_MOVE_CTOR_CC(TypeName)                   \
     /* NOLINTNEXTLINE(misc-macro-parentheses) */ \
-    TypeName(TypeName&&) = delete;
+    TypeName(TypeName&&) = delete
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_MOVE_OPERATOR_CC(TypeName)               \
@@ -84,7 +84,7 @@ namespace panda {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define NO_MOVE_SEMANTIC_CC(TypeName) \
-    NO_MOVE_CTOR_CC(TypeName)         \
+    NO_MOVE_CTOR_CC(TypeName);        \
     NO_MOVE_OPERATOR_CC(TypeName)
 
 #endif  // defined(__cplusplus)

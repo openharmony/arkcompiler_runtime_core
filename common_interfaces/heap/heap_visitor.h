@@ -29,7 +29,7 @@ using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 void VisitRoots(const RefFieldVisitor &visitor, bool isMark);
 void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
-// TODO: Static VM Roots scanning
+// Static VM Roots scanning
 void VisitStaticRoots(const RefFieldVisitor &visitor);
 
 // Dynamic VM Roots scanning

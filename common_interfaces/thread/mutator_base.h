@@ -118,7 +118,7 @@ public:
         if (UNLIKELY_CC(HasAnySuspensionRequest())) {
             HandleSuspensionRequest();
         }
-        // TODO: temporary impl, and need to refact to call this by flip function
+        // temporary impl, and need to refact to call this by flip function
         HandleJSGCCallback();
     }
 
@@ -134,7 +134,7 @@ public:
     // Called if current mutator should handle stw request
     void SuspendForStw();
 
-    // TODO: temporary impl to clean GC callback, and need to refact to flip function
+    // temporary impl to clean GC callback, and need to refact to flip function
     void HandleJSGCCallback();
 
     __attribute__((always_inline)) inline bool FinishedTransition() const
@@ -272,7 +272,7 @@ private:
 
     std::atomic<CpuProfileState> cpuProfileState = { NO_CPUPROFILE };
 
-    // TODO: This is stored for process `satbNode`, merge Mutator & MutatorBase & SatbNode
+    // This is stored for process `satbNode`, merge Mutator & MutatorBase & SatbNode
     void *mutator {nullptr};
 
     friend Mutator;

@@ -30,11 +30,6 @@ inline void MutatorBase::DoEnterSaferegion()
 inline bool MutatorBase::EnterSaferegion(bool updateUnwindContext) noexcept
 {
     if (LIKELY_CC(!InSaferegion())) {
-        // // When the status is risky, no update is required. Because
-        // // valid information is already stored in the context.
-        // if (updateUnwindContext && uwContext.GetUnwindContextStatus() != UnwindContextStatus::RISKY) {
-        //     UpdateUnwindContext();
-        // }
         DoEnterSaferegion();
         return true;
     }
@@ -51,7 +46,7 @@ inline bool MutatorBase::LeaveSaferegion() noexcept
 }
 
 // Ensure that mutator is changed only once by mutator itself or Profile
-__attribute__((always_inline)) inline bool MutatorBase::TransitionToCpuProfile(bool bySelf)
+bool MutatorBase::TransitionToCpuProfile(bool bySelf)
 {
     do {
         CpuProfileState state = cpuProfileState.load();

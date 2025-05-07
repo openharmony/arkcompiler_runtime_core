@@ -107,7 +107,6 @@ public:
                                         [[maybe_unused]] const RefField<> oldRef,
                                         [[maybe_unused]] const RefField<> newRef)
     {
-        // TODO
         return true;
     }
 
