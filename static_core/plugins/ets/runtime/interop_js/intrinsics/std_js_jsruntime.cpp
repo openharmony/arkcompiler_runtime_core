@@ -47,6 +47,11 @@ JSValue *JSRuntimeNewJSValueObjectIntrinsic(EtsObject *v)
     return JSRuntimeNewJSValueObject(v);
 }
 
+uint8_t JSRuntimeIsJSValueIntrinsic(EtsObject *v)
+{
+    return JSRuntimeIsJSValue(v);
+}
+
 JSValue *JSRuntimeNewJSValueBigIntIntrinsic(EtsBigInt *v)
 {
     return JSRuntimeNewJSValueBigInt(v);

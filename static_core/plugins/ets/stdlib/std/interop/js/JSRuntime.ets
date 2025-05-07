@@ -87,7 +87,11 @@ export final class JSRuntime {
     public static newJSValueObject(value: Object): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }
-    
+
+    public static isJSValue(value: Object): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
     public static newJSValueBigInt(bi: BigInt): JSValue {
         JSRuntime.checkIntrinsicMethod();
     }

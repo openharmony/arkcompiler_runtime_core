@@ -94,14 +94,14 @@ export final class ESObject {
         return new ESObject(JSRuntime.newJSValueDouble(d));
     }
 
-    public static wrap(o: object | null | undefined ): ESObject {
+    public static wrap(o: object | null | undefined): ESObject {
         if (o == null) {
             return new ESObject(JSRuntime.getNull());
         }
         if (o == undefined) {
             return new ESObject(JSRuntime.getUndefined());
         }
-        return new ESObject(JSRuntime.newJSValueObject(o), true);
+        return new ESObject(JSRuntime.newJSValueObject(o), !JSRuntime.isJSValue(o));
     }
 
     public isBoolean(): boolean {
@@ -193,7 +193,7 @@ export final class ESObject {
     public static areEqualSafe(eo1: ESObject, eo2: ESObject): boolean {
         if (eo1.isUndefined() || eo1.isNull() &&
             (eo2.isUndefined() || eo2.isNull())) {
-                return true;
+            return true;
         }
         return ESObject.areStrictlyEqual(eo1, eo2);
     }
