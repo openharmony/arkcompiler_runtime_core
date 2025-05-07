@@ -158,7 +158,7 @@ public:
         return Current(Coroutine::GetCurrent());
     }
 
-    PandaEtsVM *GetPandaEtsVM()
+    const PandaEtsVM *GetPandaEtsVM() const
     {
         return sharedEtsVmState_->pandaEtsVm;
     }
@@ -455,7 +455,7 @@ public:
         return sharedEtsVmState_->etsProxyRefStorage.get();
     }
 
-    EtsObject *GetNullValue()
+    EtsObject *GetNullValue() const
     {
         return EtsObject::FromCoreType(GetPandaEtsVM()->GetNullValue());
     }

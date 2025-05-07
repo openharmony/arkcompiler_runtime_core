@@ -29,6 +29,7 @@ class InteropCtx;
 }  // namespace ark::ets::interop::js
 
 namespace ark::ets::interop::js::ets_proxy {
+class SharedReferenceStorageVerifier;
 namespace testing {
 class SharedReferenceStorage1GTest;
 }  // namespace testing
@@ -159,6 +160,7 @@ private:
     friend class testing::SharedReferenceStorage1GTest;
     // Allocator calls our protected ctor
     friend class mem::Allocator;
+    friend class SharedReferenceStorageVerifier;
 
     PANDA_PUBLIC_API static SharedReferenceStorage *sharedStorage_;
 

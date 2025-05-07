@@ -29,6 +29,8 @@ namespace ark::ets::interop::js {
 class InteropCtx;
 namespace ets_proxy {
 class SharedReferenceStorage;
+class SharedReferenceStorageVerifier;
+enum class XgcStatus;
 }  // namespace ets_proxy
 
 /**
@@ -155,6 +157,8 @@ private:
      */
     void WaitForFinishXGC();
 
+    void VerifySharedReferences(ets_proxy::XgcStatus status);
+
     /// External specific fields ///
 
     PandaEtsVM *vm_ {nullptr};
@@ -176,6 +180,7 @@ private:
     // We can load a value of the variable from several threads, so need to use atomic
     std::atomic<size_t> targetThreasholdSize_ {0U};
     const TriggerPolicy treiggerPolicy_ {TriggerPolicy::INVALID};
+    const bool enableXgcVerifier_ {false};
 };
 
 }  // namespace ark::ets::interop::js
