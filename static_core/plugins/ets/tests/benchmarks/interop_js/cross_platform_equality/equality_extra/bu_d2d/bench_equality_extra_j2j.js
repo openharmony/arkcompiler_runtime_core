@@ -38,11 +38,12 @@ function equalityExtraD2d() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         //NOTE: issue(19194) enable below after fix compare arrays
@@ -57,7 +58,7 @@ function equalityExtraD2d() {
 
         comparison(jsArrowFoo, jsArrowFooCopy, equal, 'arrow function by link ');
 
-        comparison(jsArrowFoo, jsArrowFooOther, noEqual, 'arrow different arrow ');
+        let result = comparison(jsArrowFoo, jsArrowFooOther, noEqual, 'arrow different arrow ');
 
         //NOTE: issue (19133) enable below after fix comparison functions
         if (false) {
@@ -65,7 +66,7 @@ function equalityExtraD2d() {
             comparison(jsFoo, jsFooOther, noEqual, 'function different function ');
         }
 
-        return;
+        return result;
     };
 
     return;

@@ -42,10 +42,11 @@ function conversionHexD2d() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
         result = hexStringToNumberToString(hexString);
-        return;
+        return result;
     };
 
     return;

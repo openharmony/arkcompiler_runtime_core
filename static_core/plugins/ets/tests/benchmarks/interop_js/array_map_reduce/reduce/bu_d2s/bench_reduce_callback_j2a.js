@@ -35,10 +35,10 @@ function reduceCallbackD2s() {
 
     /**
      * @Benchmark
+     * @returns {Int}
      */
     this.test = function() {
-        this.bench.test();
-        return;
+        return this.bench.test();
     };
 
     return;

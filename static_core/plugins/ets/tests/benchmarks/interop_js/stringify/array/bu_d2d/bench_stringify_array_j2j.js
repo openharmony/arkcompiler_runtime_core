@@ -22,10 +22,10 @@ function stringifyArrayD2d() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
-        JSON.stringify(array);
-        return;
+        return JSON.stringify(array);
     };
 
     return;

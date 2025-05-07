@@ -23,21 +23,19 @@ import { jsVoid, returnAnonymous } from './test_import';
 function callImportFunctionD2d() {
 
     function callFunction(fun, target) {
-        fun(1000000, 1000000);
-        return;
+        return fun(1000000, 1000000);
     };
 
     const anonymous = returnAnonymous();
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
          callFunction(anonymous, 'anonymous fu');
 
-         callFunction(jsVoid, 'function');
-
-         return;
+         return callFunction(jsVoid, 'function');
     };
 
     return;

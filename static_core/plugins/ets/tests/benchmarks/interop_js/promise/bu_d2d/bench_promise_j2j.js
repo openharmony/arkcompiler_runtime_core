@@ -30,15 +30,15 @@ function promiseD2d() {
             loopTime = 1;
             return;
         });
-        return;
+        return loopTime;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
-        checkPromise();
-        return;
+        return checkPromise();
     };
 
     return;

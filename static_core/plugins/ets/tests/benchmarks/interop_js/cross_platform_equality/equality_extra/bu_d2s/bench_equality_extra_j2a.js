@@ -48,11 +48,12 @@ function equalityExtraD2s() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         //NOTE: issue(19194) enable below after fix compare arrays
@@ -67,7 +68,7 @@ function equalityExtraD2s() {
 
         comparison(this.bench.etsArrowFunction, this.bench.etsArrowFunctionCopy, equal, 'arrow function by link ');
 
-        comparison(this.bench.etsArrowFunction, this.bench.etsArrowFunctionOther, noEqual, 'arrow different arrow ');
+        let result = comparison(this.bench.etsArrowFunction, this.bench.etsArrowFunctionOther, noEqual, 'arrow different arrow ');
 
         //NOTE: issue (19133) enable below after fix comparison functions
         if (false) {
@@ -75,7 +76,7 @@ function equalityExtraD2s() {
             comparison(this.foo, this.fooOther, noEqual, 'function different function ');
         }
 
-        return;
+        return result;
     };
 
     return;

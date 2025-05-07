@@ -28,10 +28,11 @@ function conversionCharD2d() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
         result = charToNumberToString(char);
-        return;
+        return result;
     };
 
     return;

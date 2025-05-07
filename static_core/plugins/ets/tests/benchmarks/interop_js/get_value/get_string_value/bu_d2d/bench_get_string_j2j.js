@@ -22,10 +22,11 @@ import { jsString } from './test_import';
 function getStringD2d() {
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
         let stringVal = jsString;
-        return;
+        return stringVal;
     };
 
     return;

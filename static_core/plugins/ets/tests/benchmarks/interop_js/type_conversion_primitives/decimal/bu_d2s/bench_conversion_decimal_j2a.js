@@ -51,10 +51,10 @@ function conversionDecimalD2s() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
-        this.bench.test(this.strNumber);
-        return;
+        return this.bench.test(this.strNumber);
     };
 
     return;

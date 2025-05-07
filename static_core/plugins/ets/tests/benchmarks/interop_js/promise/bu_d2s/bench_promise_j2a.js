@@ -45,13 +45,14 @@ function promiseD2s() {
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         //NOTE issue(19656) enable this after fix global reference storage
         if (false) {
             await checkPromise();
         }
-        return;
+        return this.promise;
     };
 
     return;

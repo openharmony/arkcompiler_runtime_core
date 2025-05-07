@@ -30,15 +30,15 @@ function equalityNumericD2d() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
-        comparison(jsNum, jsNum, equal, 'number ');
-        return;
+        return comparison(jsNum, jsNum, equal, 'number ');
     };
 
     return;

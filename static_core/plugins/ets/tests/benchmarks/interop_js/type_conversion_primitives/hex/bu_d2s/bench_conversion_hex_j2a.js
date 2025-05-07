@@ -52,10 +52,10 @@ function conversionHexD2s() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
-        this.bench.test(this.hexString);
-        return;
+        return this.bench.test(this.hexString);
     };
 
     return;

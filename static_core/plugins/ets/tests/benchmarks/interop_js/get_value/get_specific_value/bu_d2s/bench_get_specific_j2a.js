@@ -33,6 +33,7 @@ function getSpecificD2s() {
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         const stsObj = this.getObj();
@@ -42,7 +43,7 @@ function getSpecificD2s() {
         const undefinedVal = stsObj.etsUndefined;
         const nullVal = stsObj.etsNull;
 
-        return;
+        return nullVal;
     };
 
     return;

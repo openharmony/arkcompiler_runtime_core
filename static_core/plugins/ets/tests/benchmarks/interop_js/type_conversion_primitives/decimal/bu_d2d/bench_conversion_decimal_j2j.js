@@ -42,10 +42,11 @@ function conversionDecimalD2d() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
         result = decimalStringToNumberToString(strNumber);
-        return;
+        return result;
     };
 
     return;

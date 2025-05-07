@@ -38,14 +38,15 @@ class BenchS2d {
      * @Benchmark
      */
     public someTest(): number {
-        return jsNumber; // NOTE #23757 recover use of jsNumber here
+        // NOTE #23757 recover use of jsNumber here
+        return jsNumber; // returning value is important, see VMB docs
     }
 
     /**
      * @Benchmark
      */
     public otherTest(): int {
-        return this.size * 6;
+        return this.size * 6; // returning value is important, see VMB docs
     }
     
 }

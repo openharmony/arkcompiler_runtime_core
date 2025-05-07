@@ -36,10 +36,10 @@ function mapCallbackD2s() {
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
-        this.bench.test();
-        return;
+        return this.bench.test();
     };
 
     return;

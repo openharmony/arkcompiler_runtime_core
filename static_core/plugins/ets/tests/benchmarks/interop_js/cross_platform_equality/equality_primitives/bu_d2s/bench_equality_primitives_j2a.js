@@ -43,11 +43,12 @@ function equalityPrimitivesD2s() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         // NOTE issue (17741) - enable below after fix import bigInt
@@ -57,14 +58,14 @@ function equalityPrimitivesD2s() {
 
         comparison(this.bench.etsBool, this.bench.etsBool, equal, 'boolean ');
 
-        comparison(this.bench.null, this.bench.null, equal, 'null ');
+        let result = comparison(this.bench.null, this.bench.null, equal, 'null ');
 
         // NOTE: (19193) enable below after fix comparison
         if (false) {
             comparison(this.bench.etsUndefined, this.bench.etsUndefined, equal, 'undefined ');
         }
 
-        return;
+        return result;
     };
 
     return;

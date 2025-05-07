@@ -43,20 +43,19 @@ function equalityObjectsD2s() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         comparison(this.bench.etsObj, this.bench.etsObj, equal, 'object ');
 
         comparison(this.bench.etsObj, this.bench.etsObjCopy, equal, 'object by link ');
 
-        comparison(this.bench.etsObj, this.bench.etsObjOther, noEqual, 'object different object ');
-
-        return;
+        return comparison(this.bench.etsObj, this.bench.etsObjOther, noEqual, 'object different object ');
     };
 
     return;
