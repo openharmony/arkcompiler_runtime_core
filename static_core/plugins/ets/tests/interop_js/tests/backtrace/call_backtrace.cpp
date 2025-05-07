@@ -24,37 +24,6 @@
 extern "C" {
 namespace ark::ets::interop::js::testing {
 
-constexpr uint32_t HEX = 16;
-
-static uintptr_t FindMapbase(uintptr_t addr)
-{
-    std::string mapsPath = "/proc/self/maps";
-    std::ifstream mapsFile(mapsPath);
-    if (!mapsFile.is_open()) {
-        return 0;
-    }
-    std::string line;
-    while (std::getline(mapsFile, line)) {
-        std::istringstream iss(line);
-
-        std::string segment;
-        if (!std::getline(iss, segment, '-')) {
-            continue;
-        }
-        uintptr_t start = std::stoul(segment, nullptr, HEX);
-        if (!std::getline(iss, segment, ' ')) {
-            continue;
-        }
-        uintptr_t end = std::stoul(segment, nullptr, HEX);
-        if (addr >= start && addr < end) {
-            mapsFile.close();
-            return start;
-        }
-    }
-    mapsFile.close();
-    return 0;
-}
-
 static bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_t *value, bool isRead32)
 {
     if (addr == 0) {
@@ -72,7 +41,7 @@ static bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_
 // NOLINTNEXTLINE(readability-function-size)
 static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object)
 {
-    uintptr_t memBase = 0;
+    uintptr_t fileHeader = 0;
     const char *zipPath = std::getenv("ARK_ETS_INTEROP_JS_GTEST_ABC_PATH");
     if (zipPath == nullptr) {
         return 0;
@@ -88,10 +57,9 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
     std::vector<std::tuple<ark::Method *, size_t>> expectFrames;
     for (auto stack = ark::StackWalker::Create(ark::ManagedThread::GetCurrent()); stack.HasFrame(); stack.NextFrame()) {
         if (!stack.IsCFrame()) {
-            auto pc = reinterpret_cast<uintptr_t>(stack.GetIFrame()->GetInstruction());
             if (startFp == 0) {
                 startFp = reinterpret_cast<uintptr_t>(stack.GetFp());
-                memBase = FindMapbase(pc);
+                fileHeader = reinterpret_cast<uintptr_t>(stack.GetMethod()->GetPandaFile()->GetHeader());
             }
             expectFrames.emplace_back(std::make_tuple(stack.GetMethod(), stack.GetBytecodePc()));
         }
@@ -103,9 +71,10 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
     std::vector<panda::ecmascript::JsFunction> frames;
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     while (fp != 0 && panda::ecmascript::Backtrace::EtsStepArk(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode)) {
-        panda::ecmascript::JsFunction funtion;
-        if (panda::ecmascript::Backtrace::EtsSymbolize(pc, memBase, bcCode, abcBuffer.data(), abcSize, &funtion) == 1) {
-            frames.emplace_back(funtion);
+        panda::ecmascript::JsFunction function;
+        if (panda::ecmascript::Backtrace::EtsSymbolize(pc, fileHeader, bcCode, abcBuffer.data(), abcSize, &function) ==
+            1) {
+            frames.emplace_back(function);
         } else {
             return 0;
         }
