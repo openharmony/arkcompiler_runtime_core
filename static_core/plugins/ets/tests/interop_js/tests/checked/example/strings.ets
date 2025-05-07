@@ -14,14 +14,14 @@
  */
 
 //! CHECKER      Check string interop JIT (slow)
-//! RUN          force_jit: true, entry: "testString", options: "--compiler-regex=ETSGLOBAL::testString --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "testString", options: "--compiler-regex=strings.ETSGLOBAL::testString --compiler-enable-fast-interop=false"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueString"
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 
 //! CHECKER      Check string interop JIT (fast)
-//! RUN          force_jit: true, entry: "testString", options: "--compiler-regex=ETSGLOBAL::testString"
+//! RUN          force_jit: true, entry: "testString", options: "--compiler-regex=strings.ETSGLOBAL::testString"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.CompilerCreateLocalScope"
@@ -38,7 +38,7 @@
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 
 //! CHECKER      Check string interop AOT (slow)
-//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::testString --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=strings.ETSGLOBAL::testString --compiler-enable-fast-interop=false"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValueString"
@@ -47,7 +47,7 @@
 //! EVENT        /AotManager,.*,ADDED/
 
 //! CHECKER      Check string interop AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::testString"
+//! RUN_PAOC     options: "--compiler-regex=strings.ETSGLOBAL::testString"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.CompilerCreateLocalScope"

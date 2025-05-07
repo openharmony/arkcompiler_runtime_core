@@ -34,6 +34,11 @@ function runTest(test, iter) {
 	print("Running test '" + test + "'");
 	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	if (!packageName) {
+		throw Error('PACKAGE_NAME is not set');
+	}
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
 
 	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 	const etsOpts = {
@@ -44,7 +49,7 @@ function runTest(test, iter) {
 	if (!etsVm.createRuntime(etsOpts)) {
 		throw Error('Cannot create ETS runtime');
 	}
-	const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+	const runTestImpl = etsVm.getFunction(globalName, test);
 	let res = runTestImpl();
 	if (typeof res !== 'object') {
 		throw Error('Result is not an object');

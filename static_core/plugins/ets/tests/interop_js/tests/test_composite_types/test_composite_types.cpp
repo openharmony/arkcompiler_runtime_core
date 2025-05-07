@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,28 +24,28 @@ class EtsInteropComppositeTypesTest : public EtsInteropTest {};
 TEST_F(EtsInteropComppositeTypesTest, DISABLED_eTS_call_TS_TestReturnTuple)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnTuple");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnTuple");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropComppositeTypesTest, TestReturnStrArray)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnStrArray");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnStrArray");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropComppositeTypesTest, TestReturnNumArray)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnNumArray");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnNumArray");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropComppositeTypesTest, TestReturnRecord)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnRecord");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnRecord");
     ASSERT_EQ(ret, true);
 }
 
@@ -53,7 +53,7 @@ TEST_F(EtsInteropComppositeTypesTest, TestReturnRecord)
 TEST_F(EtsInteropComppositeTypesTest, DISABLED_eTS_call_TS_TestReturnInterface)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnInterface");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnInterface");
     ASSERT_EQ(ret, true);
 }
 

@@ -16,9 +16,9 @@
 const etsVm = globalThis.gtest.etsVm;
 const datestr = '2025-03-01T01:02:03.000Z';
 const timestamp = 1609459200000;
-let firstdate = etsVm.getClass('LETSGLOBAL;').firstdate;
-let datestring = etsVm.getClass('LETSGLOBAL;').datestring;
-let datetimestamp = etsVm.getClass('LETSGLOBAL;').datetimestamp;
+let firstdate = etsVm.getClass('Ldate/ETSGLOBAL;').firstdate;
+let datestring = etsVm.getClass('Ldate/ETSGLOBAL;').datestring;
+let datetimestamp = etsVm.getClass('Ldate/ETSGLOBAL;').datetimestamp;
 
 ASSERT_TRUE(firstdate instanceof Date);
 ASSERT_TRUE(typeof firstdate === 'object');

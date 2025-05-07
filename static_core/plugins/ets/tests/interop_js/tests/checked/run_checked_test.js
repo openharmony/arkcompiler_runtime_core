@@ -65,8 +65,12 @@ function runTest(test, pandaOptions) {
 		throw Error(`Failed to create ETS runtime with options: ${message}`);
 	}
 
+	if (!helper.getEnvironmentVar('PACKAGE_NAME')) {
+		throw Error('PACKAGE_NAME is not set');
+	}
+	const globalName = 'L' + helper.getEnvironmentVar('PACKAGE_NAME') + '/ETSGLOBAL;';
 	try {
-		const runTestImpl = etsVm.getFunction('LETSGLOBAL;', test);
+		const runTestImpl = etsVm.getFunction(globalName, test);
 		let res = runTestImpl();
 		if (res !== 0) {
 			throw 'test failed: ' + res;

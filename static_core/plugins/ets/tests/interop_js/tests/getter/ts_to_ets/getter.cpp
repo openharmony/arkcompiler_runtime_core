@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,231 +22,231 @@ class EtsGetterTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsGetterTsToEtsTest, check_getter_public_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGetterPublicClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetterPublicClass"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_public_getter_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreatePublicGetterClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreatePublicGetterClassFromTs"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_public_getter_instance_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkPublicGetterInstanceClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkPublicGetterInstanceClassFromTs"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_union_type_getter_class_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkUnionTypeGetterClassInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUnionTypeGetterClassInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_union_type_getter_class_from_ts_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateUnionTypeGetterClassFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateUnionTypeGetterClassFromTsInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_union_type_getter_class_from_ts_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceUnionTypeGetterClassFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceUnionTypeGetterClassFromTsInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_union_type_getter_class_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkUnionTypeGetterClassString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUnionTypeGetterClassString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_union_type_getter_class_from_ts_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateUnionTypeGetterClassFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateUnionTypeGetterClassFromTsString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_union_type_getter_class_from_ts_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceUnionTypeGetterClassFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceUnionTypeGetterClassFromTsString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_literal_type_getter_class_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkLiteralTypeGetterClassInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkLiteralTypeGetterClassInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_literal_type_getter_class_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkLiteralTypeGetterClassString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkLiteralTypeGetterClassString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_literal_type_getter_class_from_ts_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateLiteralTypeGetterClassFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateLiteralTypeGetterClassFromTsInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_literal_type_getter_class_from_ts_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateLiteralTypeGetterClassFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateLiteralTypeGetterClassFromTsString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_literal_type_getter_class_from_ts_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceLiteralTypeGetterClassFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceLiteralTypeGetterClassFromTsInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_literal_type_getter_class_from_ts_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceLiteralTypeGetterClassFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceLiteralTypeGetterClassFromTsString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_tuple_type_getter_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkTupleTypeGetterClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTupleTypeGetterClass"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_tuple_type_getter_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateTupleTypeGetterClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateTupleTypeGetterClassFromTs"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_tuple_type_getter_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceTupleTypeGetterClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceTupleTypeGetterClassFromTs"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_any_type_getter_class_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeGetterClassInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeGetterClassInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_any_type_getter_class_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeGetterClassString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeGetterClassString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_any_type_getter_class_bool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeGetterClassBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeGetterClassBool"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_any_type_getter_class_arr)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeGetterClassArr"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeGetterClassArr"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_any_type_getter_class_obj)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeGetterClassObj"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeGetterClassObj"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, DISABLED_check_any_type_getter_class_tuple)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeGetterClassTuple"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeGetterClassTuple"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_any_type_getter_class_union)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeGetterClassUnion"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeGetterClassUnion"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_any_type_getter_class_from_ts_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnyTypeGetterClassFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnyTypeGetterClassFromTsInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_any_type_getter_class_from_ts_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnyTypeGetterClassFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnyTypeGetterClassFromTsString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_any_type_getter_class_from_ts_bool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnyTypeGetterClassFromTsBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnyTypeGetterClassFromTsBool"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_any_type_getter_class_from_ts_arr)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnyTypeGetterClassFromTsArr"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnyTypeGetterClassFromTsArr"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_any_type_getter_class_from_ts_obj)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnyTypeGetterClassFromTsObj"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnyTypeGetterClassFromTsObj"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_any_type_getter_class_from_ts_tuple)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnyTypeGetterClassFromTsTuple"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnyTypeGetterClassFromTsTuple"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_any_type_getter_class_from_ts_union)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnyTypeGetterClassFromTsUnion"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnyTypeGetterClassFromTsUnion"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_type_getter_class_from_ts_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyTypeGetterClassFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyTypeGetterClassFromTsInt"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_type_getter_class_from_ts_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyTypeGetterClassFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyTypeGetterClassFromTsString"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_type_getter_class_from_ts_bool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyTypeGetterClassFromTsBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyTypeGetterClassFromTsBool"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_type_getter_class_from_ts_arr)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyTypeGetterClassFromTsArr"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyTypeGetterClassFromTsArr"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_type_getter_class_from_ts_obj)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyTypeGetterClassFromTsObj"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyTypeGetterClassFromTsObj"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_type_getter_class_from_ts_tuple)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyTypeGetterClassFromTsTuple"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyTypeGetterClassFromTsTuple"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_type_getter_class_from_ts_union)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyTypeGetterClassFromTsUnion"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyTypeGetterClassFromTsUnion"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_any_explicit_type_getter_class_from_ts_explicit)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAnyExplicitTypeGetterClassFromTsExplicit"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAnyExplicitTypeGetterClassFromTsExplicit"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_getter_subset_by_ref_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGetterSubsetByRefClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetterSubsetByRefClass"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_subset_by_ref_getter_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateSubsetByRefGetterClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateSubsetByRefGetterClassFromTs"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_subset_by_ref_getter_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceSubsetByRefGetterClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceSubsetByRefGetterClassFromTs"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_getter_subset_by_value_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGetterSubsetByValueClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGetterSubsetByValueClass"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_create_subset_by_value_getter_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateSubsetByValueGetterClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateSubsetByValueGetterClassFromTs"));
 }
 
 TEST_F(EtsGetterTsToEtsTest, check_instance_subset_by_value_getter_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceSubsetByValueGetterClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceSubsetByValueGetterClassFromTs"));
 }
 }  // namespace ark::ets::interop::js::testing

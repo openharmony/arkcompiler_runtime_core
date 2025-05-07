@@ -22,12 +22,12 @@ class EtsCoroutinesInteropTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsCoroutinesInteropTsToEtsTest, checkInteropTestNegative)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInteropNegative"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInteropNegative"));
 }
 
 TEST_F(EtsCoroutinesInteropTsToEtsTest, checkInteropTestPositive)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInteropPositive"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInteropPositive"));
 }
 
 }  // namespace ark::ets::interop::js::testing

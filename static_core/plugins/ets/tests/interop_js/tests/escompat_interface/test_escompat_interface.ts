@@ -15,9 +15,9 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const etsConcatArray1 = etsVm.getClass('LETSGLOBAL;').etsConcatArray1;
-const etsConcatArray2 = etsVm.getClass('LETSGLOBAL;').etsConcatArray2;
-const arrayConcat = etsVm.getClass('LETSGLOBAL;').arrayConcat;
+const etsConcatArray1 = etsVm.getClass('Lescompat_interface/ETSGLOBAL;').etsConcatArray1;
+const etsConcatArray2 = etsVm.getClass('Lescompat_interface/ETSGLOBAL;').etsConcatArray2;
+const arrayConcat = etsVm.getClass('Lescompat_interface/ETSGLOBAL;').arrayConcat;
 const error = new Error();
 
 const tsConcatArray1 = [1, 2, 3, 4];

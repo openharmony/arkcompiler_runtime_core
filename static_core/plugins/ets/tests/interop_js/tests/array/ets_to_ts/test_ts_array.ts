@@ -15,26 +15,26 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const etsArray = etsVm.getClass('LETSGLOBAL;').arr;
-const etsArrayConcat1 = etsVm.getClass('LETSGLOBAL;').arrConcat1;
-const etsArrayConcat2 = etsVm.getClass('LETSGLOBAL;').arrConcat2;
-const etsArrayCopyWithin1 = etsVm.getClass('LETSGLOBAL;').arrayCopyWithin1;
-const etsArrayCopyWithin2 = etsVm.getClass('LETSGLOBAL;').arrayCopyWithin2;
-const etsArrayCopyWithin3 = etsVm.getClass('LETSGLOBAL;').arrayCopyWithin3;
-const etsArrayFill = etsVm.getClass('LETSGLOBAL;').arrayFill;
-const etsArrayFlat = etsVm.getClass('LETSGLOBAL;').arrayFlat;
-const etsArrayIndex = etsVm.getClass('LETSGLOBAL;').arrayIndex;
-const etsArrayPop = etsVm.getClass('LETSGLOBAL;').arrayPop;
-const etsArrayPush = etsVm.getClass('LETSGLOBAL;').arrayPush;
-const etsArrayReverse = etsVm.getClass('LETSGLOBAL;').arrayReverse;
-const etsArrayShift = etsVm.getClass('LETSGLOBAL;').arrayShift;
-const etsArraySlice = etsVm.getClass('LETSGLOBAL;').arraySlice;
-const etsArraySort = etsVm.getClass('LETSGLOBAL;').arraySort;
-const etsArraySplice1 = etsVm.getClass('LETSGLOBAL;').arraySplice1;
-const etsArraySplice3 = etsVm.getClass('LETSGLOBAL;').arraySplice3;
-const etsArrayToSorted = etsVm.getClass('LETSGLOBAL;').arrayToSorted;
-const etsArrayUnshift = etsVm.getClass('LETSGLOBAL;').arrayUnshift;
-const etsArrayWith = etsVm.getClass('LETSGLOBAL;').arrayWith;
+const etsArray = etsVm.getClass('Lets_array/ETSGLOBAL;').arr;
+const etsArrayConcat1 = etsVm.getClass('Lets_array/ETSGLOBAL;').arrConcat1;
+const etsArrayConcat2 = etsVm.getClass('Lets_array/ETSGLOBAL;').arrConcat2;
+const etsArrayCopyWithin1 = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayCopyWithin1;
+const etsArrayCopyWithin2 = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayCopyWithin2;
+const etsArrayCopyWithin3 = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayCopyWithin3;
+const etsArrayFill = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayFill;
+const etsArrayFlat = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayFlat;
+const etsArrayIndex = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayIndex;
+const etsArrayPop = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayPop;
+const etsArrayPush = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayPush;
+const etsArrayReverse = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayReverse;
+const etsArrayShift = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayShift;
+const etsArraySlice = etsVm.getClass('Lets_array/ETSGLOBAL;').arraySlice;
+const etsArraySort = etsVm.getClass('Lets_array/ETSGLOBAL;').arraySort;
+const etsArraySplice1 = etsVm.getClass('Lets_array/ETSGLOBAL;').arraySplice1;
+const etsArraySplice3 = etsVm.getClass('Lets_array/ETSGLOBAL;').arraySplice3;
+const etsArrayToSorted = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayToSorted;
+const etsArrayUnshift = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayUnshift;
+const etsArrayWith = etsVm.getClass('Lets_array/ETSGLOBAL;').arrayWith;
 
 let localArray: Array<Number> = new Array<Number>(1, 2, 3, 4);
 let i = 0;

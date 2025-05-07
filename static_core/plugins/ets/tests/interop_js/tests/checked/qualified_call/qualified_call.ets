@@ -20,12 +20,12 @@ import { Outer, outerObj }
 //! RUN          entry: "callInner", options: "--compiler-enable-jit=false"
 
 //! CHECKER      Call method of class member JIT (slow)
-//! RUN          force_jit: true, entry: "callInner", options: "--compiler-regex=ETSGLOBAL::callInner --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "callInner", options: "--compiler-regex=qualified_call.ETSGLOBAL::callInner --compiler-enable-fast-interop=false"
 //! METHOD       "callInner"
 //! PASS_AFTER   "Codegen"
 
 //! CHECKER      Call method of class member JIT (fast)
-//! RUN          force_jit: true, entry: "callInner", options: "--compiler-regex=ETSGLOBAL::callInner --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "callInner", options: "--compiler-regex=qualified_call.ETSGLOBAL::callInner --compiler-interop-try-single-scope=false"
 //! METHOD       "callInner"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "Intrinsic.CompilerCreateLocalScope"
@@ -63,17 +63,17 @@ import { Outer, outerObj }
 //! INST_COUNT    "Intrinsic.CompilerGetJSProperty", 3
 
 //! CHECKER      Call method of class member PAOC (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callInner --compiler-enable-fast-interop=false"
+//! RUN_PAOC     options: "--compiler-regex=qualified_call.ETSGLOBAL::callInner --compiler-enable-fast-interop=false"
 //! METHOD       "callInner"
 //! PASS_AFTER   "Codegen"
 //! RUN          entry: "callInner"
 
 //! CHECKER      Call method of class member LLVMAOT (slow)
-//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::callInner --compiler-enable-fast-interop=false"
+//! RUN_LLVM     options: "--compiler-regex=qualified_call.ETSGLOBAL::callInner --compiler-enable-fast-interop=false"
 //! RUN          entry: "callInner"
 
 //! CHECKER      Call method of class member AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callInner --compiler-interop-try-single-scope=false"
+//! RUN_PAOC     options: "--compiler-regex=qualified_call.ETSGLOBAL::callInner --compiler-interop-try-single-scope=false"
 //! METHOD       "callInner"
 //! PASS_AFTER   "IrBuilder"
 //! PASS_AFTER   "IrBuilder"
@@ -124,10 +124,10 @@ function callInner(): int {
 //! RUN          entry: "callDeepInner", options: "--compiler-enable-jit=false"
 
 //! CHECKER      Call method of object nested member JIT (slow)
-//! RUN          force_jit: true, entry: "callDeepInner", options: "--compiler-regex=ETSGLOBAL::callDeepInner --compiler-enable-fast-interop=false"
+//! RUN          force_jit: true, entry: "callDeepInner", options: "--compiler-regex=qualified_call.ETSGLOBAL::callDeepInner --compiler-enable-fast-interop=false"
 
 //! CHECKER      Call method of object nested member JIT (fast)
-//! RUN          force_jit: true, entry: "callDeepInner", options: "--compiler-regex=ETSGLOBAL::callDeepInner --compiler-interop-try-single-scope=false"
+//! RUN          force_jit: true, entry: "callDeepInner", options: "--compiler-regex=qualified_call.ETSGLOBAL::callDeepInner --compiler-interop-try-single-scope=false"
 //! METHOD       "callDeepInner"
 //! PASS_BEFORE  "InteropIntrinsicOptimization"
 //! INST_COUNT   "Intrinsic.CompilerLoadJSConstantPool", 3
@@ -143,10 +143,10 @@ function callInner(): int {
 //! INST_COUNT   "Intrinsic.CompilerGetJSProperty", 15
 
 //! CHECKER      Call method of object nested member AOT (slow)
-//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::callDeepInner --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=qualified_call.ETSGLOBAL::callDeepInner --compiler-enable-fast-interop=false"
 
 //! CHECKER      Call method of object nested member AOT (fast)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::callDeepInner --compiler-interop-try-single-scope=false"
+//! RUN_PAOC     options: "--compiler-regex=qualified_call.ETSGLOBAL::callDeepInner --compiler-interop-try-single-scope=false"
 //! METHOD       "callDeepInner"
 //! PASS_BEFORE  "InteropIntrinsicOptimization"
 //! INST_COUNT   "Intrinsic.CompilerLoadJSConstantPool", 3

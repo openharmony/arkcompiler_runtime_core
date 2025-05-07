@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsConversionBinaryTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToInt"));
 }
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToNumber"));
 }
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToFloat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToFloat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToFloat"));
 }
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToByte)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToByte"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToByte"));
 }
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToShort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToShort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToShort"));
 }
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToLong)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToLong"));
 }
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToDouble)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToDouble"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToDouble"));
 }
 
 TEST_F(EtsConversionBinaryTsToEtsTest, checkConversionBinaryToChar)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBinaryToChar"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBinaryToChar"));
 }
 
 }  // namespace ark::ets::interop::js::testing

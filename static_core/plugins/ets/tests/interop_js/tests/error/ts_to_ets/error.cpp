@@ -22,17 +22,17 @@ class EtsErrorTSToETSTest : public EtsInteropTest {};
 
 TEST_F(EtsErrorTSToETSTest, testError)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testError"));
 }
 
 TEST_F(EtsErrorTSToETSTest, testThrowError)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testThrowError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testThrowError"));
 }
 
 TEST_F(EtsErrorTSToETSTest, testCustomThrowError)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testCustomThrowError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testCustomThrowError"));
 }
 
 }  // namespace ark::ets::interop::js::testing

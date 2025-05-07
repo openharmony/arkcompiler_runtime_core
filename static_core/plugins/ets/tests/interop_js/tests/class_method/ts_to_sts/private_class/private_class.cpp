@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,17 +22,17 @@ class EtsClassMethodPrivateClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsClassMethodPrivateClassTsToEtsTest, checkPrivateClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkPrivateClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkPrivateClassMethod"));
 }
 
 TEST_F(EtsClassMethodPrivateClassTsToEtsTest, checkCreatePrivateClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreatePrivateClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreatePrivateClassFromTs"));
 }
 
 TEST_F(EtsClassMethodPrivateClassTsToEtsTest, checkInstancePrivateClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstancePrivateClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstancePrivateClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,54 +22,54 @@ class EtsInteropObjectsPassing : public EtsInteropTest {};
 
 TEST_F(EtsInteropObjectsPassing, getPublicProperty)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("getPublicProperty"), "TestName");
+    ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "getPublicProperty"), "TestName");
 }
 
 TEST_F(EtsInteropObjectsPassing, usePublicMethod)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("usePublicMethod"),
+    ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "usePublicMethod"),
               "Name: TestName, Age: 30, ID: 456, Description: testDescription");
 }
 
 TEST_F(EtsInteropObjectsPassing, changePublicProperty)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("changePublicProperty"), "NewTestName");
+    ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "changePublicProperty"), "NewTestName");
 }
 
 TEST_F(EtsInteropObjectsPassing, getReadonlyProperty)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("getReadonlyProperty"), "testEdu");
+    ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "getReadonlyProperty"), "testEdu");
 }
 
 TEST_F(EtsInteropObjectsPassing, getProtectedProperty)
 {
-    auto ret = CallEtsMethod<int64_t>("getProtectedProperty");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "getProtectedProperty");
     constexpr int EXPECTED_VALUE = 789;
     ASSERT_EQ(ret, EXPECTED_VALUE);
 }
 
 TEST_F(EtsInteropObjectsPassing, useProtectedMethod)
 {
-    auto ret = CallEtsMethod<int64_t>("useProtectedMethod");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "useProtectedMethod");
     constexpr int EXPECTED_VALUE = 789;
     ASSERT_EQ(ret, EXPECTED_VALUE);
 }
 
 TEST_F(EtsInteropObjectsPassing, getPropertyFromObject)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("getPropertyFromObject"), "TestName");
+    ASSERT_EQ(CallEtsFunction<std::string>(GetPackageName(), "getPropertyFromObject"), "TestName");
 }
 
 TEST_F(EtsInteropObjectsPassing, getOuterObject)
 {
-    auto ret = CallEtsMethod<int64_t>("getOuterObject");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "getOuterObject");
     constexpr int EXPECTED_VALUE = 123;
     ASSERT_EQ(ret, EXPECTED_VALUE);
 }
 
 TEST_F(EtsInteropObjectsPassing, updateObjectValue)
 {
-    auto ret = CallEtsMethod<int64_t>("updateObjectValue");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "updateObjectValue");
     constexpr int EXPECTED_VALUE = 333;
     ASSERT_EQ(ret, EXPECTED_VALUE);
 }

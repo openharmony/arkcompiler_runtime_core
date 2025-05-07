@@ -22,47 +22,47 @@ class EtsErrorJsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_num_error)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkNumError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkNumError"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_str_error)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkStrError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkStrError"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_obj_error)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkObjError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkObjError"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_subclass_error)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkSubClassError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSubClassError"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_error_data)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkErrorData"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkErrorData"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_error_msg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkErrorMsg"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkErrorMsg"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_error_cause)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkErrorCause"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkErrorCause"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_error)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkError"));
 }
 
 TEST_F(EtsErrorJsToEtsTest, test_error_catch_ets_error)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkEtsError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkEtsError"));
 }
 
 }  // namespace ark::ets::interop::js::testing

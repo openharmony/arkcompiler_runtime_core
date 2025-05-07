@@ -32,6 +32,8 @@ add_dependencies(ets_interop_tests ets_interop_js_tests_nodevm)
 #     LIBRARIES
 #       lib_target1
 #       lib_target2
+#     PACKAGE_NAME
+#       unit1_test 
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
 #   )
@@ -40,7 +42,7 @@ function(panda_ets_interop_js_nodevm_gtest TARGET)
     cmake_parse_arguments(
         ARG
         ""
-        "ETS_CONFIG"
+        "ETS_CONFIG;PACKAGE_NAME"
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES"
         ${ARGN}
     )
@@ -58,7 +60,15 @@ function(panda_ets_interop_js_nodevm_gtest TARGET)
         ETS_CONFIG ${ARG_ETS_CONFIG}
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
-
+    # if not set PACKAGE_NAME, using first ets file as its name;
+    set(ETS_SOURCES_NUM)
+    list(LENGTH ARG_ETS_SOURCES ETS_SOURCES_NUM)
+    if(NOT DEFINED ARG_PACKAGE_NAME AND ${ETS_SOURCES_NUM} EQUAL 1)
+        list(GET ARG_ETS_SOURCES 0 PACKATE_FILE)
+        get_filename_component(ARG_PACKAGE_NAME ${PACKATE_FILE} NAME_WE)
+    elseif(NOT DEFINED ARG_PACKAGE_NAME)
+        message("Please provide PACKAGE_NAME for ${TARGET}")
+    endif()
     # Add launcher <${TARGET}_gtests> target
     panda_ets_add_gtest(
         NAME ${TARGET}
@@ -72,6 +82,7 @@ function(panda_ets_interop_js_nodevm_gtest TARGET)
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
             "FIXED_ISSUES=${FIXED_ISSUES}"
+            "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
         LAUNCHER ${NODE_BINARY} gtest_launcher_nodevm.js ${TARGET}
         DEPS_TARGETS ${TARGET} ets_interop_js_gtest_launcher
         TEST_RUN_DIR ${INTEROP_TESTS_DIR}

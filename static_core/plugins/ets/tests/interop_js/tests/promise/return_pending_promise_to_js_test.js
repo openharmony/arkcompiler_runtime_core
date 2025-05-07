@@ -23,6 +23,9 @@ function init() {
 
 	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
 
+	if (!helper.getEnvironmentVar('PACKAGE_NAME')) {
+		throw Error('PACKAGE_NAME is not set');
+	}
 	const etsOpts = {
 		'panda-files': gtestAbcPath,
 		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
@@ -35,7 +38,9 @@ function init() {
 }
 
 function callEts(etsVm) {
-	const testReturnPendingPromise = etsVm.getFunction('LETSGLOBAL;', 'testReturnPendingPromise');
+	const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
+	const testReturnPendingPromise = etsVm.getFunction(globalName, 'testReturnPendingPromise');
 	let res = testReturnPendingPromise();
 	if (typeof res !== 'object') {
 		throw Error('Result is not an object');
@@ -75,7 +80,13 @@ function queueTasks(etsVm) {
 		if (testSuccess) {
 			throw Error('Promise must not be resolved');
 		}
-		const resolvePendingPromise = etsVm.getFunction('LETSGLOBAL;', 'resolvePendingPromise');
+		const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+		if (!packageName) {
+			throw Error('PACKAGE_NAME is not set');
+		}
+		const globalName = 'L' + packageName + '/ETSGLOBAL;';
+
+		const resolvePendingPromise = etsVm.getFunction(globalName, 'resolvePendingPromise');
 		if (!resolvePendingPromise()) {
 			throw Error("Call of 'resolvePendingPromise' return false");
 		}

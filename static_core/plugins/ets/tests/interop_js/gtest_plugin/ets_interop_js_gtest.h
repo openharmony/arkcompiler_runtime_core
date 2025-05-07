@@ -69,6 +69,13 @@ public:
         if (!SetGtestEnv()) {
             std::abort();
         }
+
+        if (std::getenv("PACKAGE_NAME") != nullptr) {
+            packageName_ = std::string(std::getenv("PACKAGE_NAME"));
+        } else {
+            std::cerr << "PACKAGE_NAME is not set" << std::endl;
+            std::abort();
+        }
     }
 
     bool SetGtestEnv()
@@ -129,6 +136,11 @@ public:
             std::cerr << "Failed to load module: " << modulePath << std::endl;
             std::abort();
         }
+    }
+
+    const std::string &GetPackageName()
+    {
+        return packageName_;
     }
 
 private:
@@ -442,6 +454,7 @@ protected:
     bool runOnArkJSVM_ {false};
     std::string interopJsTestPath_;
     std::string jsAbcFilePath_;
+    std::string packageName_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 

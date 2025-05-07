@@ -22,18 +22,18 @@ class EtsInteropJsTestFrontend : public EtsInteropTest {};
 
 TEST_F(EtsInteropJsTestFrontend, test_newcall)
 {
-    ASSERT_EQ(true, CallEtsFunction<bool>("Test", "test_newcall"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "test_newcall"));
 }
 
 TEST_F(EtsInteropJsTestFrontend, test_dyncall)
 {
-    auto ret = CallEtsFunction<uint32_t>("Test", "test_dyncall");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "test_dyncall");
     ASSERT_EQ(ret, 10U);
 }
 
 TEST_F(EtsInteropJsTestFrontend, test_dyncall_by_value)
 {
-    auto ret = CallEtsFunction<uint32_t>("Test", "test_dyncall_by_value");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "test_dyncall_by_value");
     ASSERT_EQ(ret, 43U);
 }
 

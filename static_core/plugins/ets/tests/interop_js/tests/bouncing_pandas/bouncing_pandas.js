@@ -16,12 +16,12 @@
 'use strict';
 
 export function bouncingPandas() {
-	const Vec2 = gtest.etsVm.getClass('LVec2;');
+	const Vec2 = gtest.etsVm.getClass('Lbouncing_pandas/Vec2;');
 
 	const vec = new Vec2(1200, 800);
 	const countSB = 4;
 
-	const SBody = gtest.etsVm.getClass('LSBody;');
+	const SBody = gtest.etsVm.getClass('Lbouncing_pandas/SBody;');
 
 	const arrSBody = [];
 	const step = 13;
@@ -36,7 +36,7 @@ export function bouncingPandas() {
 
 		arrSBody[i] = el;
 	}
-	let recomputeFrameSBody = gtest.etsVm.getFunction('LETSGLOBAL;', 'recomputeFrameSBody');
+	let recomputeFrameSBody = gtest.etsVm.getFunction('Lbouncing_pandas/ETSGLOBAL;', 'recomputeFrameSBody');
 	const resArr = recomputeFrameSBody(arrSBody, vec);
 
 	let resultHash = 0;
