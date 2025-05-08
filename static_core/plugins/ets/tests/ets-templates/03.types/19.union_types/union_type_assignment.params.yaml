@@ -1000,3 +1000,243 @@ cases2:
       }
     check: |-
       assertEQ(getTrafficAction('wait'), 'wait');
+
+  - desc: Positive Test Assigning object literal compatible with class and a string to Class | string union.
+    dec1: |-
+      class UB {
+          name: string = "";
+          age: number = 0;
+      }
+      let val_pos: UB | string;
+    check: |-
+      val_pos = {name: "elma", age:10};
+      assertEQ((val_pos as UB).name, "elma");
+      assertEQ((val_pos as UB).age, 10);
+      val_pos = "test_string";
+      assertEQ(val_pos, "test_string");
+
+  - desc: Positive Test Assigning object literal compatible with interface and a number to Interface | number union.
+    dec1: |-
+      interface IV {
+          id: number;
+          label: string;
+      }
+      let val_pos_interface: IV | number;
+    check: |-
+      val_pos_interface = {id: 1, label: "test"};
+      assertEQ((val_pos_interface as IV).id, 1);
+      assertEQ((val_pos_interface as IV).label, "test");
+      val_pos_interface = 123;
+      assertEQ(val_pos_interface, 123);
+
+  - desc: Positive Test Assigning object literal compatible with class and a boolean to Class | boolean union.
+    dec1: |-
+      class UC {
+          flag: boolean = false;
+          data: string = "";
+      }
+      let val_pos_class: UC | boolean;
+    check: |-
+      val_pos_class = {flag: true, data: "example"};
+      assertEQ((val_pos_class as UC).flag, true);
+      assertEQ((val_pos_class as UC).data, "example");
+      val_pos_class = false;
+      assertEQ(val_pos_class, false);
+
+  - desc: Positive Test Assigning object literal compatible with interface and a string to Interface | string union.
+    dec1: |-
+      interface IA_string {
+          name: string;
+          value: number;
+      }
+      let val_pos_interface_string: IA_string | string;
+    check: |-
+      val_pos_interface_string = {name: "interface_elma", value:20};
+      assertEQ((val_pos_interface_string as IA_string).name, "interface_elma");
+      assertEQ((val_pos_interface_string as IA_string).value, 20);
+      val_pos_interface_string = "test_interface_string";
+      assertEQ(val_pos_interface_string, "test_interface_string");
+
+  - desc: Positive Test Assigning object literal compatible with interface and a number to Interface | number union.
+    dec1: |-
+      interface IA_number {
+          id_num: number;
+          label_text: string;
+      }
+      let val_pos_interface_number: IA_number | number;
+    check: |-
+      val_pos_interface_number = {id_num: 2, label_text: "interface_test"};
+      assertEQ((val_pos_interface_number as IA_number).id_num, 2);
+      assertEQ((val_pos_interface_number as IA_number).label_text, "interface_test");
+      val_pos_interface_number = 234;
+      assertEQ(val_pos_interface_number, 234);
+
+  - desc: Positive Test Assigning object literal compatible with interface and a boolean to Interface | boolean union.
+    dec1: |-
+      interface IA_boolean {
+          isActive: boolean;
+          content: string;
+      }
+      let val_pos_interface_boolean: IA_boolean | boolean;
+    check: |-
+      val_pos_interface_boolean = {isActive: false, content: "interface_example"};
+      assertEQ((val_pos_interface_boolean as IA_boolean).isActive, false);
+      assertEQ((val_pos_interface_boolean as IA_boolean).content, "interface_example");
+      val_pos_interface_boolean = true;
+      assertEQ(val_pos_interface_boolean, true);
+
+  - desc: P1 - Union with two distinct classes and a primitive, assigning object literal to class.
+    dec1: |-
+      class P_C1 { p1: string = ""; }
+      class P_C2 { p2: number = 0; }
+      let val_p1: P_C1 | P_C2 | boolean;
+    check: |-
+      val_p1 = { p1: "test_p1" };
+      assertEQ((val_p1 as P_C1).p1, "test_p1");
+      val_p1 = { p2: 100 };
+      assertEQ((val_p1 as P_C2).p2, 100);
+      val_p1 = true;
+      assertEQ(val_p1, true);
+
+  - desc: P2 - Union with two distinct interfaces and a primitive, assigning object literal to interface.
+    dec1: |-
+      interface P_I1 { i1: string; }
+      interface P_I2 { i2: number; }
+      let val_p2: P_I1 | P_I2 | boolean;
+    check: |-
+      val_p2 = { i1: "test_i1" };
+      assertEQ((val_p2 as P_I1).i1, "test_i1");
+      val_p2 = { i2: 200 };
+      assertEQ((val_p2 as P_I2).i2, 200);
+      val_p2 = false;
+      assertEQ(val_p2, false);
+
+  - desc: P3 - Assigning an instance of a class to a class union.
+    dec1: |-
+      class P_C3 { data: string; constructor(d:string){this.data=d;} }
+      class P_C4 { info: number = 0; }
+      let val_p3: P_C3 | P_C4;
+    check: |-
+      val_p3 = new P_C3("hello_p3");
+      assertEQ((val_p3 as P_C3).data, "hello_p3");
+      let c4_instance = new P_C4();
+      c4_instance.info = 300;
+      val_p3 = c4_instance;
+      assertEQ((val_p3 as P_C4).info, 300);
+
+  - desc: P4 - Union including null, assigning object literal compatible with a class.
+    dec1: |-
+      class P_C5 { item: string = ""; }
+      let val_p4: P_C5 | null;
+    check: |-
+      val_p4 = { item: "world_p4" };
+      assertEQ((val_p4 as P_C5).item, "world_p4");
+      val_p4 = null;
+      assertEQ(val_p4, null);
+
+  - desc: P5 - Union including undefined, assigning object literal compatible with an interface.
+    dec1: |-
+      interface P_I3 { key: number; }
+      let val_p5: P_I3 | undefined;
+    check: |-
+      val_p5 = { key: 777 };
+      assertEQ((val_p5 as P_I3).key, 777);
+      val_p5 = undefined;
+      assertEQ(val_p5, undefined);
+
+  - desc: P_Guard_InstanceOf - Class union, use instanceof for cast-less access.
+    dec1: |-
+      class G_C1 { c1_data: string = "c1"; constructor(data:string){this.c1_data=data;} }
+      class G_C2 { c2_val: number = 0; constructor(val:number){this.c2_val=val;} }
+    check: |-
+      let val_guard_c: G_C1 | G_C2;
+
+      val_guard_c = new G_C1("data for c1");
+      assertEQ(val_guard_c.c1_data, "data for c1");
+
+      val_guard_c = new G_C2(123);
+      assertEQ(val_guard_c.c2_val, 123);
+
+  - desc: P_DirectAccess_MultiClass - Union of three classes, direct property access after assignment.
+    dec1: |-
+      class DA_C1 { propA: string = "defaultA"; constructor(pa: string){ this.propA = pa; } }
+      class DA_C2 { propB: number = 0; constructor(pb: number){ this.propB = pb; } }
+      class DA_C3 { propC: boolean = false; constructor(pc: boolean){ this.propC = pc; } }
+    check: |-
+      let val_da_mc: DA_C1 | DA_C2 | DA_C3;
+
+      val_da_mc = new DA_C1("valA");
+      assertEQ(val_da_mc.propA, "valA");
+
+      val_da_mc = new DA_C2(101);
+      assertEQ(val_da_mc.propB, 101);
+
+      val_da_mc = new DA_C3(true);
+      assertEQ(val_da_mc.propC, true);
+
+  - desc: P_DirectAccess_ClassMethod - Union of classes with methods, direct method call after assignment.
+    dec1: |-
+      class DA_M1 {
+        private data: string;
+        constructor(d: string) { this.data = d; }
+        get_m1_data(): string { return "M1:" + this.data; }
+      }
+      class DA_M2 {
+        private val: number;
+        constructor(v: number) { this.val = v; }
+        get_m2_val(): number { return this.val * 2; }
+      }
+    check: |-
+      let val_da_m: DA_M1 | DA_M2;
+
+      val_da_m = new DA_M1("test");
+      assertEQ(val_da_m.get_m1_data(), "M1:test");
+
+      val_da_m = new DA_M2(50);
+      assertEQ(val_da_m.get_m2_val(), 100);
+
+  - desc: P_DirectAccess_SharedPropNameDifferentTypes - Union of classes with shared property name but different types, direct access after assignment.
+    dec1: |-
+      class DA_S1 { shared_prop: string = "s1_default"; constructor(p: string) { this.shared_prop = p; } }
+      class DA_S2 { shared_prop: number = 0; constructor(p: number) { this.shared_prop = p; } }
+      class DA_S3 { shared_prop: boolean = false; constructor(p: boolean) { this.shared_prop = p; } }
+    check: |-
+      let val_da_s: DA_S1 | DA_S2 | DA_S3;
+
+      val_da_s = new DA_S1("value_is_string");
+      assertEQ(val_da_s.shared_prop, "value_is_string"); // val_da_s is DA_S1 here
+
+      val_da_s = new DA_S2(999);
+      assertEQ(val_da_s.shared_prop, 999); // val_da_s is DA_S2 here
+      
+      val_da_s = new DA_S3(true);
+      assertEQ(val_da_s.shared_prop, true); // val_da_s is DA_S3 here
+
+  - desc: P_DirectAccess_ClassWithOptionalAndPrimitive - Union with class having optional property, and primitives.
+    dec1: |-
+      class DA_Opt {
+        name: string;
+        value?: number;
+        constructor(name: string, value?: number) {
+          this.name = name;
+          if (value !== undefined) {
+            this.value = value;
+          }
+        }
+      }
+    check: |-
+      let val_da_op: DA_Opt | string | null;
+
+      val_da_op = new DA_Opt("obj1", 10);
+      assertEQ(val_da_op.name, "obj1");   // Direct access: val_da_op is DA_Opt
+      assertEQ(val_da_op.value, 10);    // Direct access: val_da_op is DA_Opt
+
+      val_da_op = new DA_Opt("obj2");
+      assertEQ(val_da_op.name, "obj2");   // Direct access: val_da_op is DA_Opt
+      assertEQ(val_da_op.value, undefined); // Direct access: val_da_op is DA_Opt
+
+      val_da_op = "a string value";
+      assertEQ(val_da_op, "a string value"); // val_da_op is string
+
+      val_da_op = null;
+      assertEQ(val_da_op, null); // val_da_op is null
