@@ -56,7 +56,7 @@ function jsvalObjectToStr(): String {
     try {
         let z: String = x.toString();
         assertTrue(false);
-    } catch (z: ESError) {
+    } catch (z: TypeError) {
         let y = castToObject(x);
         return y + "A";
     }

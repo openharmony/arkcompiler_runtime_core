@@ -252,8 +252,8 @@ function testTypecheckGetProp(): boolean {
     obj.prop = 1.23;
     try {
         obj.prop as String;
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -261,8 +261,8 @@ function testTypecheckGetProp(): boolean {
 function testTypecheckJscall(): boolean {
     try {
         identity(123) as String;
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -274,8 +274,8 @@ function testTypecheckCallets(): boolean {
         }
 
         applyArgs(etsfn, 123);
-    } catch (e: ESError) {
-        return "object:TypeError: String expected" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: String expected" == vstringify(e);
     }
     throw unreachable();
 }
@@ -303,8 +303,8 @@ function testSetThrows(): boolean {
 function testJscallResolutionThrows1(): boolean {
     try {
         nonexisting();
-    } catch (e: ESError) {
-        return "object:TypeError: call target is not a function" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: call target is not a function" == vstringify(e);
     }
     throw unreachable();
 }
@@ -312,8 +312,8 @@ function testJscallResolutionThrows1(): boolean {
 function testJscallResolutionThrows2(): boolean {
     try {
         nonexisting.nonexisting();
-    } catch (e: ESError) {
-        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e.getJsError());
+    } catch (e: TypeError) {
+        return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e);
     }
     throw unreachable();
 }

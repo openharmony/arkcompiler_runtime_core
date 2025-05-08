@@ -67,7 +67,7 @@ function CheckBuiltinExceptionInStatic():boolean{
         staticFunctionWithBuiltinException()
         return false
     } catch(e: Error) {
-        return e instanceof ESError
+        return e instanceof TypeError
     }
 
 }

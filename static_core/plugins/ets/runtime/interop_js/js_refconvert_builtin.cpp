@@ -146,7 +146,6 @@ private:
             std::make_tuple("Lstd/core/DivideByZeroError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/NullPointerError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/UncaughtExceptionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/RangeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ArithmeticError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/ClassCastError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/IndexOutOfBoundsError;", NO_MIRROR, &W_ERROR_OVERLOADS),
@@ -223,6 +222,31 @@ private:
         };
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
+    }
+
+    void RegisterError()
+    {
+        wRangeError_ = RegisterClassWithLeafMatcher(descriptors::RANGE_ERROR, "RangeError");
+        wReferenceError_ = RegisterClassWithLeafMatcher(descriptors::REFERENCE_ERROR, "ReferenceError");
+        wSyntaxError_ = RegisterClassWithLeafMatcher(descriptors::SYNTAX_ERROR, "SyntaxError");
+        wURIError_ = RegisterClassWithLeafMatcher(descriptors::URI_ERROR, "URIError");
+        wTypeError_ = RegisterClassWithLeafMatcher(descriptors::TYPE_ERROR, "TypeError");
+        ASSERT(wRangeError_ != nullptr);
+        ASSERT(wReferenceError_ != nullptr);
+        ASSERT(wSyntaxError_ != nullptr);
+        ASSERT(wURIError_ != nullptr);
+        ASSERT(wTypeError_ != nullptr);
+
+        ctorRangeError_ = StdCtorRef(ctx_, "RangeError");
+        ctorReferenceError_ = StdCtorRef(ctx_, "ReferenceError");
+        ctorSyntaxError_ = StdCtorRef(ctx_, "SyntaxError");
+        ctorURIError_ = StdCtorRef(ctx_, "URIError");
+        ctorTypeError_ = StdCtorRef(ctx_, "TypeError");
+        ASSERT(ctorRangeError_ != nullptr);
+        ASSERT(ctorReferenceError_ != nullptr);
+        ASSERT(ctorSyntaxError_ != nullptr);
+        ASSERT(ctorURIError_ != nullptr);
+        ASSERT(ctorTypeError_ != nullptr);
     }
 
     void RegisterMap()
@@ -319,19 +343,25 @@ private:
                 return NotAssignable("Error");
             }
         }
-        // NOTE(vpukhov): compat: remove when compat/Error is implemented
-        return BuiltinConvert<JSConvertESError>(ctxx, env, jsValue);
 
-        if (CheckInstanceof(env, jsValue, ctorTypeError_)) {
-            NotImplemented("TypeError");
-        }
         if (CheckInstanceof(env, jsValue, ctorRangeError_)) {
-            NotImplemented("RangeError");
+            return wRangeError_->CreateJSBuiltinProxy(ctxx, jsValue);
         }
         if (CheckInstanceof(env, jsValue, ctorReferenceError_)) {
-            NotImplemented("ReferenceError");
+            return wReferenceError_->CreateJSBuiltinProxy(ctxx, jsValue);
         }
-        NotImplemented("Error");
+        if (CheckInstanceof(env, jsValue, ctorSyntaxError_)) {
+            return wSyntaxError_->CreateJSBuiltinProxy(ctxx, jsValue);
+        }
+        if (CheckInstanceof(env, jsValue, ctorURIError_)) {
+            return wURIError_->CreateJSBuiltinProxy(ctxx, jsValue);
+        }
+        if (CheckInstanceof(env, jsValue, ctorTypeError_)) {
+            return wTypeError_->CreateJSBuiltinProxy(ctxx, jsValue);
+        }
+
+        // NOTE(vpukhov): compat: remove when compat/Error is implemented
+        return BuiltinConvert<JSConvertESError>(ctxx, env, jsValue);
     }
 
     EtsObject *MObjectObject(InteropCtx *ctxx, napi_value jsValue)
@@ -447,19 +477,12 @@ public:
         RegisterSet();
 
         RegisterClassWithLeafMatcher(descriptors::ARRAY_ENTRIES_ITERATOR_T, nullptr);
-
         RegisterClassWithLeafMatcher(descriptors::ITERATOR_RESULT, nullptr);
-
         RegisterClassWithLeafMatcher(descriptors::ARRAY_KEYS_ITERATOR, nullptr);
-
         RegisterClassWithLeafMatcher(descriptors::ARRAY_VALUES_ITERATOR_T, nullptr);
 
+        RegisterError();
         RegisterArray();
-
-        // NOTE(vpukhov): compat: obtain from class wrappers when implemented
-        ctorTypeError_ = StdCtorRef(ctx_, "TypeError");
-        ctorRangeError_ = StdCtorRef(ctx_, "RangeError");
-        ctorReferenceError_ = StdCtorRef(ctx_, "ReferenceError");
 
         ASSERT(wError_ != nullptr);
         wError_->SetJSBuiltinMatcher(
@@ -489,10 +512,17 @@ private:
     ets_proxy::EtsClassWrapper *wDate_ {};
     ets_proxy::EtsClassWrapper *wMap_ {};
     ets_proxy::EtsClassWrapper *wSet_ {};
+    ets_proxy::EtsClassWrapper *wRangeError_ {};
+    ets_proxy::EtsClassWrapper *wReferenceError_ {};
+    ets_proxy::EtsClassWrapper *wSyntaxError_ {};
+    ets_proxy::EtsClassWrapper *wURIError_ {};
+    ets_proxy::EtsClassWrapper *wTypeError_ {};
 
     napi_ref ctorTypeError_ {nullptr};
     napi_ref ctorRangeError_ {nullptr};
     napi_ref ctorReferenceError_ {nullptr};
+    napi_ref ctorSyntaxError_ = {nullptr};
+    napi_ref ctorURIError_ = {nullptr};
 };
 
 static_assert(std::is_trivially_copy_constructible_v<CompatConvertorsRegisterer>);
