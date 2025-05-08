@@ -14,3 +14,8 @@
 ani_helpers_add_gtest(ani_helpers_test_ani_signature_builder
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_signature_builder_test.cpp
 )
+
+ani_helpers_add_gtest(ani_helpers_runtime_test_ani_signature_builder
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_signature_builder_runtime_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ani_signature_builder_runtime_test.ets
+)
