@@ -415,6 +415,10 @@ function makeResolvedPromise(v: String): Promise<Object> {
     });
 }
 
+async function testAwaitJsPromiseSimple(p: Promise<Object>): Promise<void> {
+    let res: String = (await p) as String;
+}
+
 async function testAwaitJsPromise(pendingP: Promise<Object>): Promise<Object> {
     globalTest = new Test();
 
