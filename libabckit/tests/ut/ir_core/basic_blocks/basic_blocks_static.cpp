@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -795,7 +795,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBisTryEnd)
 {
     helpers::InspectMethod(INPUT_PATH, "test3", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *endBB = g_implG->gGetEndBasicBlock(graph);
-        AbckitBasicBlock *tryEnd = g_implG->bbGetPredBlock(g_implG->bbGetPredBlock(endBB, 1), 1);
+        AbckitBasicBlock *tryEnd = g_implG->bbGetPredBlock(g_implG->bbGetPredBlock(endBB, 2), 0);
         ASSERT_TRUE(g_implG->bbIsTryEnd(tryEnd));
     });
 }

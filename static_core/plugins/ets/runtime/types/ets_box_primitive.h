@@ -32,6 +32,11 @@ public:
 
     static EtsClass *GetEtsBoxClass(EtsCoroutine *coro);
 
+    static T Unbox(EtsObject *obj)
+    {
+        return EtsBoxPrimitive<T>::FromCoreType(obj)->GetValue();
+    }
+
     static constexpr EtsBoxPrimitive *FromCoreType(EtsObject *obj)
     {
         ASSERT(obj->GetClass()->IsBoxed());

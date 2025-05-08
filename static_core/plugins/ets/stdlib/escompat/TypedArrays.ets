@@ -107,7 +107,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength as int)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).byteValue())
+                this.setUnsafe(i, arr.$_get(i).toByte())
             }
         } else {
           let x = Int8Array.from(elements)
@@ -131,7 +131,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset.intValue()
+            intByteOffset = byteOffset.toInt()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -152,7 +152,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length.intValue()
+            intLength = length.toInt()
             if (intLength > intByteLength / Int8Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -267,7 +267,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).byteValue())
+                this.setUnsafe(i, arr.$_get(i).toByte())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -2029,7 +2029,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength as int)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).shortValue())
+                this.setUnsafe(i, arr.$_get(i).toShort())
             }
         } else {
           let x = Int16Array.from(elements)
@@ -2053,7 +2053,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset.intValue()
+            intByteOffset = byteOffset.toInt()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -2081,7 +2081,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length.intValue()
+            intLength = length.toInt()
             if (intLength > intByteLength / Int16Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -2196,7 +2196,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).shortValue())
+                this.setUnsafe(i, arr.$_get(i).toShort())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -3962,7 +3962,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength as int)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).intValue())
+                this.setUnsafe(i, arr.$_get(i).toInt())
             }
         } else {
           let x = Int32Array.from(elements)
@@ -3986,7 +3986,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset.intValue()
+            intByteOffset = byteOffset.toInt()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -4014,7 +4014,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length.intValue()
+            intLength = length.toInt()
             if (intLength > intByteLength / Int32Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -4129,7 +4129,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).intValue())
+                this.setUnsafe(i, arr.$_get(i).toInt())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -5884,7 +5884,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset.intValue()
+            intByteOffset = byteOffset.toInt()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -5912,7 +5912,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
 
         let intLength: int
         if (length != undefined) {
-            intLength = length.intValue()
+            intLength = length.toInt()
             if (intLength > intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -6027,7 +6027,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).longValue())
+                this.setUnsafe(i, arr.$_get(i).toLong())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -7776,7 +7776,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength as int)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).floatValue())
+                this.setUnsafe(i, arr.$_get(i).toFloat())
             }
         } else {
           let x = Float32Array.from(elements)
@@ -7800,7 +7800,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset.intValue()
+            intByteOffset = byteOffset.toInt()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -7828,7 +7828,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length.intValue()
+            intLength = length.toInt()
             if (intLength > intByteLength / Float32Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -7943,7 +7943,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).floatValue())
+                this.setUnsafe(i, arr.$_get(i).toFloat())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -9672,7 +9672,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             this.buffer = new ArrayBuffer(this.byteLength as int)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).doubleValue())
+                this.setUnsafe(i, arr.$_get(i).toDouble())
             }
         } else {
           let x = Float64Array.from(elements)
@@ -9696,7 +9696,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset.intValue()
+            intByteOffset = byteOffset.toInt()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -9724,7 +9724,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length.intValue()
+            intLength = length.toInt()
             if (intLength > intByteLength / Float64Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -9839,7 +9839,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).doubleValue())
+                this.setUnsafe(i, arr.$_get(i).toDouble())
             }
         } else {
             throw new Error("unexpected type of buf")

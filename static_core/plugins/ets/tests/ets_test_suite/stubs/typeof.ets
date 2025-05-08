@@ -162,12 +162,12 @@ class A implements Function {
     unsafeCall(...r: FixedArray<NullishType>): NullishType { return null }
 }
 class B extends Numeric {
-    public byteValue(): byte { return 1 };
-    public intValue(): int { return 1 };
-    public shortValue(): short { return 1 };
-    public longValue(): long { return 1 };
-    public floatValue(): float { return 1.1 };
-    public doubleValue(): double { return 1.1 };
+    public toByte(): byte { return 1 };
+    public toInt(): int { return 1 };
+    public toShort(): short { return 1 };
+    public toLong(): long { return 1 };
+    public toFloat(): float { return 1.1 };
+    public toDouble(): double { return 1.1 };
 }
 
 function testClass() {

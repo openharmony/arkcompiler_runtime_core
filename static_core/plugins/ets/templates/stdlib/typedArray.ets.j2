@@ -128,7 +128,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 {%- if N == 'BigInt64' %}
                 this.setUnsafe(i, arr.$_get(i).getLong())
                 {%- else %}
-                this.setUnsafe(i, arr.$_get(i).{{T}}Value())
+                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}())
                 {%- endif %}
             }
         } else {
@@ -153,7 +153,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset.intValue()
+            intByteOffset = byteOffset.toInt()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -181,7 +181,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 {% endif %}
         let intLength: int
         if (length != undefined) {
-            intLength = length.intValue()
+            intLength = length.toInt()
             if (intLength > intByteLength / {{N}}Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -296,7 +296,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
-                this.setUnsafe(i, arr.$_get(i).{{T}}Value())
+                this.setUnsafe(i, arr.$_get(i).to{{T.capitalize()}}())
             }
         } else {
             throw new Error("unexpected type of buf")

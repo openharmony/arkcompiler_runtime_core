@@ -48,6 +48,10 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcRuntimeLinker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Byte.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Short.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Int.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Long.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Double.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Float.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_SyncPrimitives.cpp

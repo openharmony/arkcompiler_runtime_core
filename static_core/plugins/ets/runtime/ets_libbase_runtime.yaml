@@ -2521,6 +2521,61 @@ intrinsics:
     llvm_codegen_func: EmitIsSafeInteger
     safe_intrinsic: true
 
+  - name: StdCoreFloatToByte
+    space: ets
+    class_name: std.core.Float
+    method_name: toByte
+    static: true
+    signature:
+      ret: i8
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdCoreFloatToByte
+    safe_intrinsic: true
+
+  - name: StdCoreFloatToShort
+    space: ets
+    class_name: std.core.Float
+    method_name: toShort
+    static: true
+    signature:
+      ret: i16
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdCoreFloatToShort
+    safe_intrinsic: true
+
+  - name: StdCoreFloatToInt
+    space: ets
+    class_name: std.core.Float
+    method_name: toInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdCoreFloatToInt
+    safe_intrinsic: true
+
+  - name: StdCoreFloatToLong
+    space: ets
+    class_name: std.core.Float
+    method_name: toLong
+    static: true
+    signature:
+      ret: i64
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdCoreFloatToLong
+    safe_intrinsic: true
+
+  - name: StdCoreFloatToDouble
+    space: ets
+    class_name: std.core.Float
+    method_name: toDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdCoreFloatToDouble
+    safe_intrinsic: true
+
 ###################
 # std.core.Double #
 ###################
@@ -2675,6 +2730,61 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreDoubleIsSafeInteger
     codegen_func: CreateFloatIsSafeInteger
     llvm_codegen_func: EmitIsSafeInteger
+    safe_intrinsic: true
+
+  - name: StdCoreDoubleToByte
+    space: ets
+    class_name: std.core.Double
+    method_name: toByte
+    static: true
+    signature:
+      ret: i8
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdCoreDoubleToByte
+    safe_intrinsic: true
+
+  - name: StdCoreDoubleToShort
+    space: ets
+    class_name: std.core.Double
+    method_name: toShort
+    static: true
+    signature:
+      ret: i16
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdCoreDoubleToShort
+    safe_intrinsic: true
+
+  - name: StdCoreDoubleToInt
+    space: ets
+    class_name: std.core.Double
+    method_name: toInt
+    static: true
+    signature:
+      ret: i32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdCoreDoubleToInt
+    safe_intrinsic: true
+
+  - name: StdCoreDoubleToLong
+    space: ets
+    class_name: std.core.Double
+    method_name: toLong
+    static: true
+    signature:
+      ret: i64
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdCoreDoubleToLong
+    safe_intrinsic: true
+
+  - name: StdCoreDoubleToFloat
+    space: ets
+    class_name: std.core.Double
+    method_name: toFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdCoreDoubleToFloat
     safe_intrinsic: true
 
 ############
@@ -6334,3 +6444,283 @@ intrinsics:
       args:
         - std.core.Object
     impl: ark::ets::intrinsics::EtsLaunchSameWorker
+
+################
+# std.core.Byte #
+################
+
+  - name: StdCoreByteToShort
+    space: ets
+    class_name: std.core.Byte
+    method_name: toShort
+    static: true
+    signature:
+      ret: i16
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::StdCoreByteToShort
+    safe_intrinsic: true
+
+  - name: StdCoreByteToInt
+    space: ets
+    class_name: std.core.Byte
+    method_name: toInt
+    static: true
+    signature:
+      ret: i32
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::StdCoreByteToInt
+    safe_intrinsic: true
+
+  - name: StdCoreByteToLong
+    space: ets
+    class_name: std.core.Byte
+    method_name: toLong
+    static: true
+    signature:
+      ret: i64
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::StdCoreByteToLong
+    safe_intrinsic: true
+
+  - name: StdCoreByteToFloat
+    space: ets
+    class_name: std.core.Byte
+    method_name: toFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::StdCoreByteToFloat
+    safe_intrinsic: true
+
+  - name: StdCoreByteToDouble
+    space: ets
+    class_name: std.core.Byte
+    method_name: toDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::StdCoreByteToDouble
+    safe_intrinsic: true
+
+  - name: StdCoreByteToChar
+    space: ets
+    class_name: std.core.Byte
+    method_name: toChar
+    static: true
+    signature:
+      ret: u16
+      args: [ i8 ]
+    impl: ark::ets::intrinsics::StdCoreByteToChar
+    safe_intrinsic: true
+
+################
+# std.core.Short #
+################
+
+  - name: StdCoreShortToByte
+    space: ets
+    class_name: std.core.Short
+    method_name: toByte
+    static: true
+    signature:
+      ret: i8
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::StdCoreShortToByte
+    safe_intrinsic: true
+
+  - name: StdCoreShortToInt
+    space: ets
+    class_name: std.core.Short
+    method_name: toInt
+    static: true
+    signature:
+      ret: i32
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::StdCoreShortToInt
+    safe_intrinsic: true
+
+  - name: StdCoreShortToLong
+    space: ets
+    class_name: std.core.Short
+    method_name: toLong
+    static: true
+    signature:
+      ret: i64
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::StdCoreShortToLong
+    safe_intrinsic: true
+
+  - name: StdCoreShortToFloat
+    space: ets
+    class_name: std.core.Short
+    method_name: toFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::StdCoreShortToFloat
+    safe_intrinsic: true
+
+  - name: StdCoreShortToDouble
+    space: ets
+    class_name: std.core.Short
+    method_name: toDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::StdCoreShortToDouble
+    safe_intrinsic: true
+
+  - name: StdCoreShortToChar
+    space: ets
+    class_name: std.core.Short
+    method_name: toChar
+    static: true
+    signature:
+      ret: u16
+      args: [ i16 ]
+    impl: ark::ets::intrinsics::StdCoreShortToChar
+    safe_intrinsic: true
+
+################
+# std.core.Int #
+################
+
+  - name: StdCoreIntToByte
+    space: ets
+    class_name: std.core.Int
+    method_name: toByte
+    static: true
+    signature:
+      ret: i8
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreIntToByte
+    safe_intrinsic: true
+
+  - name: StdCoreIntToShort
+    space: ets
+    class_name: std.core.Int
+    method_name: toShort
+    static: true
+    signature:
+      ret: i16
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreIntToShort
+    safe_intrinsic: true
+
+  - name: StdCoreIntToLong
+    space: ets
+    class_name: std.core.Int
+    method_name: toLong
+    static: true
+    signature:
+      ret: i64
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreIntToLong
+    safe_intrinsic: true
+
+  - name: StdCoreIntToFloat
+    space: ets
+    class_name: std.core.Int
+    method_name: toFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreIntToFloat
+    safe_intrinsic: true
+
+  - name: StdCoreIntToDouble
+    space: ets
+    class_name: std.core.Int
+    method_name: toDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreIntToDouble
+    safe_intrinsic: true
+
+  - name: StdCoreIntToChar
+    space: ets
+    class_name: std.core.Int
+    method_name: toChar
+    static: true
+    signature:
+      ret: u16
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreIntToChar
+    safe_intrinsic: true
+
+################
+# std.core.Long #
+################
+
+  - name: StdCoreLongToByte
+    space: ets
+    class_name: std.core.Long
+    method_name: toByte
+    static: true
+    signature:
+      ret: i8
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::StdCoreLongToByte
+    safe_intrinsic: true
+
+  - name: StdCoreLongToShort
+    space: ets
+    class_name: std.core.Long
+    method_name: toShort
+    static: true
+    signature:
+      ret: i16
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::StdCoreLongToShort
+    safe_intrinsic: true
+
+  - name: StdCoreLongToInt
+    space: ets
+    class_name: std.core.Long
+    method_name: toInt
+    static: true
+    signature:
+      ret: i32
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::StdCoreLongToInt
+    safe_intrinsic: true
+
+  - name: StdCoreLongToFloat
+    space: ets
+    class_name: std.core.Long
+    method_name: toFloat
+    static: true
+    signature:
+      ret: f32
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::StdCoreLongToFloat
+    safe_intrinsic: true
+
+  - name: StdCoreLongToDouble
+    space: ets
+    class_name: std.core.Long
+    method_name: toDouble
+    static: true
+    signature:
+      ret: f64
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::StdCoreLongToDouble
+    safe_intrinsic: true
+
+  - name: StdCoreLongToChar
+    space: ets
+    class_name: std.core.Long
+    method_name: toChar
+    static: true
+    signature:
+      ret: u16
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::StdCoreLongToChar
+    safe_intrinsic: true

@@ -89,7 +89,7 @@ function main(): int {
         console.println();
         continue;
       }
-        actual = tmp.doubleValue();
+        actual = tmp.toDouble();
         {%- else %}
         actual = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
         {%- endif %}

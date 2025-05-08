@@ -68,10 +68,10 @@ function isEqual<T>(s: String, number: T): boolean {
         if (Double.isNaN(number)) {
             return s == "NaN";
         }
-        let eps = Math.abs(number.doubleValue()) * 2 * Double.EPSILON;
+        let eps = Math.abs(number.toDouble()) * 2 * Double.EPSILON;
         if (eps < 1e-307) {
             // parsing of small doubles is inaccurate by now
-            eps = Math.abs(number.doubleValue()) * (1e4 * Double.EPSILON);
+            eps = Math.abs(number.toDouble()) * (1e4 * Double.EPSILON);
 
             if (eps == 0) {
                 eps = 4.9e-308;
@@ -80,7 +80,7 @@ function isEqual<T>(s: String, number: T): boolean {
         let parsed = Double.parseFloat(s);
         if (Math.abs(parsed - number) > eps) {
             console.println(`double parsed: ${parsed}, bitCastToLong: ${Double.bitCastToLong(parsed)}, eps: ${eps}, delta: ${parsed - number}`)
-            console.println(`number: ${number.doubleValue()}, bitCastToLong: ${Double.bitCastToLong(number.doubleValue())}`)
+            console.println(`number: ${number.toDouble()}, bitCastToLong: ${Double.bitCastToLong(number.toDouble())}`)
             return false;
         }
         return true;
@@ -89,12 +89,12 @@ function isEqual<T>(s: String, number: T): boolean {
         if (Float.isNaN(number)) {
             return s == "NaN";
         }
-        let eps: float = Math.abs(number.floatValue()) * 2 * Float.EPSILON as float;
+        let eps: float = Math.abs(number.toFloat()) * 2 * Float.EPSILON as float;
         let parsed = Double.parseFloat(s) as float;
-        let delta: float = parsed - number.floatValue();
+        let delta: float = parsed - number.toFloat();
         if (Math.abs(delta) > eps) {
             console.println(`float parsed: ${parsed}, bitCastToInt: ${Float.bitCastToInt(parsed as float)} eps: ${eps} delta: ${delta}`)
-            console.println(`number: ${number.floatValue()}, bitCastToInt: ${Float.bitCastToInt(number.floatValue())}`)
+            console.println(`number: ${number.toFloat()}, bitCastToInt: ${Float.bitCastToInt(number.toFloat())}`)
             return false;
         }
         return true;

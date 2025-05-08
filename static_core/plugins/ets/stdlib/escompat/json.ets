@@ -1292,7 +1292,7 @@ class JSONValueParser {
         } else if (typ instanceof DoubleType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value)
         } else if (typ instanceof IntType && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
-            return new Double(value.value).intValue()
+            return new Double(value.value).toInt()
         } else if (typ instanceof LongType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
             return new Long().createFromJSONValue(value)
         } else if (typ instanceof ShortType && (this.bigIntMode === 0 || this.bigIntMode === 1)) {

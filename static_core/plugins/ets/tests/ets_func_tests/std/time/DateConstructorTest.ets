@@ -142,7 +142,7 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
 function testDoubleMsConstructor(): void {
     for(let i: int = 0; i < doubleYears.length; i++) {
         let cd = new Date(doubleYears[i]);
-        assertEQ(Double.valueOf(doubleYears[i]).intValue(), cd.valueOf())
+        assertEQ(Double.valueOf(doubleYears[i]).toInt(), cd.valueOf())
     }
 }
 
@@ -206,7 +206,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): void {
         let millis: double = doubleMinutes[i] * 10;
 
         let cd = new Date(doubleYears[i], doubleMonths[i], day, doubleHours[i], doubleMinutes[i], doubleMinutes[i], millis);
-        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day), 
+        let utc = Date.UTC(doubleYears[i], doubleMonths[i], new Double(day),
                 new Double(doubleHours[i]), new Double(doubleMinutes[i]), new Double(doubleMinutes[i]), new Double(millis));
 
         assertEQ(utc as long, (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long)

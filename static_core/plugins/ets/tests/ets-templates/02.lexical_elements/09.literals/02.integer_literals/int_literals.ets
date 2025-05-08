@@ -25,6 +25,6 @@ let b{{loop.index}} = new Int({{c['lit']}})
 function main(): void {
 {% for c in cases %}
     assertEQ(v{{loop.index}}, {{c['val']}})
-    assertEQ(b{{loop.index}}.intValue(), {{c['val']}})
+    assertEQ(b{{loop.index}}.toInt(), {{c['val']}})
 {% endfor %}
 }

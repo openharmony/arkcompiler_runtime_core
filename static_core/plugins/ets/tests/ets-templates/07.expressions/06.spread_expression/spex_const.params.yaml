@@ -414,7 +414,7 @@ cases:
               fld: double
               constructor(...p: (Double|Short|Byte)[]) {
                   let res = 0.0
-                  for (let el of p) res += (el as Numeric).doubleValue()
+                  for (let el of p) res += (el as Numeric).toDouble()
                   this.fld = res
               }
           }

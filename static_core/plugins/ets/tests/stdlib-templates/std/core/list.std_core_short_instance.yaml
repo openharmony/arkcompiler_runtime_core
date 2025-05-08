@@ -26,7 +26,7 @@
     verify_test_result_function: comparePrimitiveValue,
   }
 - {
-    method_name: byteValue,
+    method_name: toByte,
     object_type: Short,
     init_object_data_type: "FixedArray<short>",
     init_object_data: "[0 as short, 1 as short, Byte.MIN_VALUE as short, Byte.MAX_VALUE as short]",
@@ -40,7 +40,7 @@
     verify_test_result_function: comparePrimitiveValue,
   }
 - {
-    method_name: shortValue,
+    method_name: toShort,
     object_type: Short,
     init_object_data_type: "FixedArray<short>",
     init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
@@ -54,7 +54,7 @@
     verify_test_result_function: comparePrimitiveValue,
   }
 - {
-    method_name: intValue,
+    method_name: toInt,
     object_type: Short,
     init_object_data_type: "FixedArray<short>",
     init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
@@ -68,7 +68,7 @@
     verify_test_result_function: comparePrimitiveValue,
   }
 - {
-    method_name: longValue,
+    method_name: toLong,
     object_type: Short,
     init_object_data_type: "FixedArray<short>",
     init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
@@ -82,7 +82,7 @@
     verify_test_result_function: comparePrimitiveValue,
   }
 - {
-    method_name: floatValue,
+    method_name: toFloat,
     object_type: Short,
     init_object_data_type: "FixedArray<short>",
     init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",
@@ -96,7 +96,7 @@
     verify_test_result_function: compareFloatPointValue
   }
 - {
-    method_name: doubleValue,
+    method_name: toDouble,
     object_type: Short,
     init_object_data_type: "FixedArray<short>",
     init_object_data: "[0 as short, 1 as short, Short.MIN_VALUE as short, Short.MAX_VALUE as short]",

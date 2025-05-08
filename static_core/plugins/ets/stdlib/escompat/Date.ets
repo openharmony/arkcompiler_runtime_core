@@ -959,10 +959,10 @@ export class Date {
     public setUTCFullYear(value: number, month?: number, date?: number): number {
         this.setUTCFullYear(value as int);
         if (month !== undefined) {
-            this.setUTCMonth(month.intValue());
+            this.setUTCMonth(month.toInt());
         }
         if (date !== undefined) {
-            this.setUTCDate(date.byteValue());
+            this.setUTCDate(date.toByte());
         }
         return this.ms as number;
     }
@@ -1005,10 +1005,10 @@ export class Date {
     public setFullYear(value: number, month?: Number, date?: Number): number {
         this.setFullYear(value as int);
         if (month !== undefined) {
-            this.setMonth(month.intValue());
+            this.setMonth(month.toInt());
         }
         if (date !== undefined) {
-            this.setDate(date.byteValue());
+            this.setDate(date.toByte());
         }
         return this.ms as number;
     }
@@ -1073,13 +1073,13 @@ export class Date {
     public setHours(value: number, min?: number, sec?: number, ms?: number): number {
         this.setHours(value as byte);
         if (min !== undefined) {
-            this.setMinutes(min.byteValue());
+            this.setMinutes(min.toByte());
         }
         if (sec !== undefined) {
-            this.setSeconds(sec.byteValue());
+            this.setSeconds(sec.toByte());
         }
         if (ms !== undefined) {
-            this.setMilliseconds(ms.shortValue());
+            this.setMilliseconds(ms.toShort());
         }
         return this.ms as number;
     }
@@ -1104,13 +1104,13 @@ export class Date {
     public setUTCHours(value: number, min?: number, sec?: number, ms?: number): number {
         this.setUTCHours(value as byte);
         if (min !== undefined) {
-            this.setUTCMinutes(min.byteValue());
+            this.setUTCMinutes(min.toByte());
         }
         if (sec !== undefined) {
-            this.setUTCSeconds(sec.byteValue());
+            this.setUTCSeconds(sec.toByte());
         }
         if (ms !== undefined) {
-            this.setUTCMilliseconds(ms.shortValue());
+            this.setUTCMilliseconds(ms.toShort());
         }
         return this.ms as number;
     }
@@ -1286,7 +1286,7 @@ export class Date {
     public setSeconds(value: number, ms?: number): number {
         this.setSeconds(value as byte);
         if (ms !== undefined) {
-            this.setMilliseconds(ms.shortValue());
+            this.setMilliseconds(ms.toShort());
         }
         return this.ms as number;
     }
@@ -1323,7 +1323,7 @@ export class Date {
     public setUTCSeconds(value: number, ms?: number): number {
         this.setUTCSeconds(value as byte);
         if (ms !== undefined) {
-            this.setUTCMilliseconds(ms.shortValue());
+            this.setUTCMilliseconds(ms.toShort());
         }
         return this.ms as number;
     }
@@ -1366,10 +1366,10 @@ export class Date {
     public setUTCMinutes(value: number, sec?: Number, ms?: Number): number {
         this.setUTCMinutes(value as byte);
         if (sec !== undefined) {
-            this.setUTCSeconds(sec.byteValue());
+            this.setUTCSeconds(sec.toByte());
         }
         if (ms !== undefined) {
-            this.setUTCMilliseconds(ms.shortValue());
+            this.setUTCMilliseconds(ms.toShort());
         }
         return this.ms as number;
     }
@@ -1403,10 +1403,10 @@ export class Date {
     public setMinutes(value: number, sec?: number, ms?: number): number {
         this.setMinutes(value as byte);
         if (sec !== undefined) {
-            this.setSeconds(sec.byteValue());
+            this.setSeconds(sec.toByte());
         }
         if (ms !== undefined) {
-            this.setMilliseconds(ms.shortValue());
+            this.setMilliseconds(ms.toShort());
         }
         return this.ms as number;
     }
@@ -1449,7 +1449,7 @@ export class Date {
     public setMonth(month: number, date?: number): number {
         this.setMonth(month as int);
         if (date !== undefined) {
-            this.setDate(date.byteValue());
+            this.setDate(date.toByte());
         }
         return this.ms as number;
     }
@@ -1475,7 +1475,7 @@ export class Date {
     public setUTCMonth(month: number, date?: number): number {
         this.setUTCMonth(month as int);
         if (date !== undefined) {
-            this.setUTCDate(date.byteValue());
+            this.setUTCDate(date.toByte());
         }
         return this.ms as number;
     }

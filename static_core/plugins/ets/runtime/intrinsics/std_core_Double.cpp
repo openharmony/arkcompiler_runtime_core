@@ -117,7 +117,7 @@ double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
 
 EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 {
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -150,7 +150,7 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 
 EtsString *StdCoreDoubleToExponentialWithNoDigit(ObjectHeader *obj)
 {
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -194,7 +194,7 @@ EtsString *StdCoreDoubleToExponentialWithNoDigit(ObjectHeader *obj)
 
 EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 {
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -237,7 +237,7 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
         return nullptr;
     }
 
-    double objValue = helpers::GetStdDoubleArgument(obj);
+    EtsDouble objValue = EtsBoxPrimitive<EtsDouble>::Unbox(EtsObject::FromCoreType(obj));
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -308,6 +308,31 @@ double StdCoreDoubleNumberFromString(EtsString *s)
     flags |= helpers::flags::EMPTY_IS_ZERO;
     flags |= helpers::flags::ERROR_IN_EXPONENT_IS_NAN;
     return ParseFloat(s, flags);
+}
+
+EtsInt StdCoreDoubleToInt(EtsDouble val)
+{
+    return CastFloatToInt<EtsDouble, EtsInt>(val);
+}
+
+EtsByte StdCoreDoubleToByte(EtsDouble val)
+{
+    return static_cast<int8_t>(StdCoreDoubleToInt(val));
+}
+
+EtsShort StdCoreDoubleToShort(EtsDouble val)
+{
+    return static_cast<int16_t>(StdCoreDoubleToInt(val));
+}
+
+EtsLong StdCoreDoubleToLong(EtsDouble val)
+{
+    return CastFloatToInt<EtsDouble, EtsLong>(val);
+}
+
+EtsFloat StdCoreDoubleToFloat(EtsDouble val)
+{
+    return static_cast<float>(val);
 }
 
 }  // namespace ark::ets::intrinsics
