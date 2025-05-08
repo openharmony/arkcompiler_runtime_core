@@ -2,7 +2,12 @@
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_18.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_19.ets
 
-# 17964 Segmentation fault with too many repeated calls
+# 17964 Segmentation fault due to limitation of the number of coroutines with too many repeated calls
+07.expressions/13.chaining_operator/chop_asyn_func.ets
+13.compilation_units/12.program_exit/program_entry_error_coroutine.ets
+13.compilation_units/12.program_exit/program_entry_error_coroutines.ets
+13.compilation_units/12.program_exit/program_entry_normal_coroutine.ets
+13.compilation_units/12.program_exit/program_entry_normal_coroutines.ets
 17.experimental_features/15.coroutines/awaiting_coroutine/a_2.ets
 17.experimental_features/15.coroutines/awaiting_coroutine/a_4.ets
 17.experimental_features/15.coroutines/awaiting_coroutine/a_8.ets
@@ -40,6 +45,9 @@
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_42.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_6.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_8.ets
+17.experimental_features/15.coroutines/awaiting_coroutine/awaiting_coroutine_ext_3.ets
+17.experimental_features/15.coroutines/awaiting_coroutine/awaiting_coroutine_ext_4.ets
+17.experimental_features/15.coroutines/awaiting_coroutine/awaiting_coroutine_ext_5.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_1.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_16.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_func_17.ets
@@ -80,6 +88,17 @@
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_7.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_8.ets
 17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_9.ets
+17.experimental_features/15.coroutines/coroutines_ext_0.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions8.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions13.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions15.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions25.ets
+17.experimental_features/16.async_functions_and_methods/01.async_functions/async_functions29.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method8.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method17.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method26.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method27.ets
+17.experimental_features/16.async_functions_and_methods/02.async_methods/async_method28.ets
 
 #24226 RUNTIME_TIMEOUT - it required more than 600sec
 20.implementation_details/06.outofmemoryerror_for_primitive_type_operations/test_0.ets

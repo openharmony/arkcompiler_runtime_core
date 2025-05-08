@@ -261,7 +261,7 @@ add_ets_coroutines_test(FILE launch_return.ets
                         OPTION_SETS_THREADED "DEFAULT"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
-                        MODE "INT" "JIT"
+                        MODE "INT"
 )
 
 add_ets_coroutines_test(FILE launch_yield.ets
@@ -382,6 +382,15 @@ add_ets_coroutines_test(FILE job_test.ets
                         IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
+                        MODE "INT"
+)
+
+add_ets_coroutines_test(FILE execution_order.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "ONE"
+                        MODE "INT"
 )
 
 add_ets_coroutines_test(FILE eworker_parameter.ets

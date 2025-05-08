@@ -18,6 +18,7 @@
 #include "libpandabase/os/mutex.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/coroutine.h"
+#include "runtime/coroutines/priority_queue.h"
 #include "runtime/include/value.h"
 
 namespace ark {
@@ -44,9 +45,9 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode) override;
+                CoroutineLaunchMode mode, CoroutinePriority priority) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           CoroutineLaunchMode mode) override;
+                           CoroutineLaunchMode mode, CoroutinePriority priority) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -91,12 +92,12 @@ protected:
 
 private:
     bool LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                    bool startSuspended = true);
+                    CoroutinePriority priority, bool startSuspended = true);
     void ScheduleImpl();
     void UnblockWaitersImpl(CoroutineEvent *blocker) REQUIRES(coroSwitchLock_);
 
     /* runnables queue management */
-    void PushToRunnableQueue(Coroutine *co);
+    void PushToRunnableQueue(Coroutine *co, CoroutinePriority priority);
     Coroutine *PopFromRunnableQueue();
 #ifndef NDEBUG
     void PrintRunnableQueue(const PandaString &requester);
@@ -118,9 +119,9 @@ private:
     // all registered coros
     PandaSet<Coroutine *> coroutines_ GUARDED_BY(coroListLock_);
     // ready coros
-    PandaDeque<Coroutine *> runnablesQueue_;
+    PriorityQueue runnablesQueue_;
     // blocked coros: Coroutine AWAITS CoroutineEvent
-    PandaMultiMap<CoroutineEvent *, Coroutine *> waiters_;
+    PandaMap<CoroutineEvent *, Coroutine *> waiters_;
 
     os::memory::ConditionVariable cvAwaitAll_;
     os::memory::Mutex cvAwaitAllMutex_;

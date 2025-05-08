@@ -28,6 +28,9 @@ export function clearTimer(id: TimerId) {
     EventLoop.clearTimer(id);
 }
 
+// NOTE(panferovi): fix signature after #25420
+native function launchSameWorker(callback: Object): void;
+
 class EventLoop {
     constructor(workerId: WorkerId) {
         this.workerId = workerId;
@@ -48,7 +51,7 @@ class EventLoop {
     }
 
     public init() {
-        this.pollLoop();
+        launchSameWorker(() => { this.pollLoop(); } as Object);
     }
 
     public registerTimer(timer: Timer) {
@@ -56,7 +59,7 @@ class EventLoop {
         ConcurrencyHelpers.eventFire(this.initEvent);
     }
 
-    private async pollLoop() {
+    private pollLoop() {
         ConcurrencyHelpers.eventWait(this.initEvent);
         this.pollTimers();
         EventLoop.registry.removeEventLoop(this.workerId);
@@ -150,8 +153,8 @@ class Timer {
         return this.delay <= this.elapsedTime;
     }
 
-    public async invoke() {
-        this.callback();
+    public invoke() {
+        launchSameWorker(this.callback as Object);
     }
 
     public getId(): TimerId {

@@ -22,6 +22,20 @@
 
 namespace ark {
 
+/**
+ * THE ORDER HAS MEANING
+ * ASCEDING ORDER - HIGHER PRIORITY
+ * DO NOT CHANGE INITIALIZATION VALUES
+ */
+enum class CoroutinePriority {
+    LOW_PRIORITY,
+    MEDIUM_PRIORITY,
+    DEFAULT_PRIORITY = MEDIUM_PRIORITY,
+    HIGH_PRIORITY,
+    CRITICAL_PRIORITY,
+    PRIORITY_COUNT
+};
+
 /// Represents a coroutine worker, which can host multiple coroutines and schedule them.
 class CoroutineWorker {
 public:

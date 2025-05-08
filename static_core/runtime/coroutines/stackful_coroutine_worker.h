@@ -21,6 +21,7 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/coroutine_stats.h"
+#include "runtime/coroutines/priority_queue.h"
 #include "runtime/include/external_callback_poster.h"
 
 namespace ark {
@@ -170,12 +171,7 @@ public:
      * should be used only for debugging purposes AND ONLY IF YOU KNOW WHAT EXACTLY ARE YOU DOING.
      * @param type the type of coroutines to count
      */
-    size_t GetRunnablesCount(Coroutine::Type type)
-    {
-        os::memory::LockHolder lock(runnablesLock_);
-        return std::count_if(runnables_.begin(), runnables_.end(),
-                             [type](Coroutine *c) { return (c->GetType() == type); });
-    }
+    size_t GetRunnablesCount(Coroutine::Type type);
 
     /* profiling tools */
     CoroutineWorkerStats &GetPerfStats()
@@ -218,7 +214,7 @@ private:
     static void ScheduleLoopProxy(void *worker);
 
     /* runnables queue management */
-    void PushToRunnableQueue(Coroutine *co) REQUIRES(runnablesLock_);
+    void PushToRunnableQueue(Coroutine *co, CoroutinePriority priority) REQUIRES(runnablesLock_);
     Coroutine *PopFromRunnableQueue();
     bool RunnableCoroutinesExist() const;
     void WaitForRunnables() REQUIRES(runnablesLock_);
@@ -282,7 +278,7 @@ private:
     // runnable coroutines-related members
     mutable os::memory::RecursiveMutex runnablesLock_;
     os::memory::ConditionVariable runnablesCv_;
-    PandaDeque<Coroutine *> runnables_ GUARDED_BY(runnablesLock_);
+    PriorityQueue runnables_ GUARDED_BY(runnablesLock_);
     // blocked coros-related members: Coroutine AWAITS CoroutineEvent
     mutable os::memory::Mutex waitersLock_;
     PandaMap<CoroutineEvent *, Coroutine *> waiters_ GUARDED_BY(waitersLock_);

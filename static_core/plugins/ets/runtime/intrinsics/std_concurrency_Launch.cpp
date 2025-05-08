@@ -138,7 +138,7 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr)
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
 
     bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
-                                                            CoroutineLaunchMode::DEFAULT);
+                                                            CoroutineLaunchMode::DEFAULT, EtsCoroutine::LAUNCH);
     if (UNLIKELY(!launchResult)) {
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         ThrowOutOfMemoryError("OOM");
@@ -152,6 +152,20 @@ extern "C" {
 EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr)
 {
     return static_cast<EtsJob *>(Launch<EtsJob>(func, arr));
+}
+
+void EtsLaunchSameWorker(EtsObject *callback)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    EtsHandleScope scope(coro);
+    VMHandle<EtsObject> hCallback(coro, callback->GetCoreType());
+    PandaVector<Value> args = {Value(hCallback->GetCoreType())};
+    auto *method = ResolveInvokeMethod(coro, hCallback);
+    auto *coroMan = coro->GetCoroutineManager();
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
+    [[maybe_unused]] auto launched = coroMan->Launch(evt, method->GetPandaMethod(), std::move(args),
+                                                     CoroutineLaunchMode::SAME_WORKER, EtsCoroutine::TIMER_CALLBACK);
+    ASSERT(launched);
 }
 }
 }  // namespace ark::ets::intrinsics

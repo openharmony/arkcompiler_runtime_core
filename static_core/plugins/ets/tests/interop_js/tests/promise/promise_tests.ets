@@ -400,6 +400,8 @@ function testAwaitPromise(): int {
     let p1: Promise<Object | null> = asyncFuncAwait();
     let p2: Promise<Object | null> = asyncLambdaAwait();
     let p3: Promise<Object | null> = asyncFuncAwaitRejected();
+    // execute async func (post await part) before check
+    await Promise.all([p1, p2, p3]);
     if (unresolved1 != "resolved" || unresolved2 != "resolved") {
         globalTest!.fail();
     }
