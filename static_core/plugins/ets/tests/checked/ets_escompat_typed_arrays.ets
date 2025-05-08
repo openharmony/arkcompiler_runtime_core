@@ -1788,3 +1788,263 @@ function assertEquals(expected: float, actual: float): void {
 function assertEquals(expected: BigInt, actual: BigInt): void {
     if (expected != actual) throw new AssertionError(`${expected} != ${actual}`)
 }
+
+//! CHECKER       Int8Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int8ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_int8array_copy_within() {
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Int8Array.of(1,1,2,3,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Int8Array.of(1,1,2,3,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Int8Array.of(1,1,2,3,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Int8Array.of(1,1,2,3,4))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Int8Array.of(1,2,3,4,5))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Int8Array.of(1,1,2,3,4))
+    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Int8Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Int16Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int16ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_int16array_copy_within() {
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Int16Array.of(1,1,2,3,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Int16Array.of(1,1,2,3,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Int16Array.of(1,1,2,3,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Int16Array.of(1,1,2,3,4))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Int16Array.of(1,2,3,4,5))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Int16Array.of(1,1,2,3,4))
+    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Int16Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Int32Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Int32ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_int32array_copy_within() {
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Int32Array.of(1,1,2,3,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Int32Array.of(1,1,2,3,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Int32Array.of(1,1,2,3,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Int32Array.of(1,1,2,3,4))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Int32Array.of(1,2,3,4,5))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Int32Array.of(1,1,2,3,4))
+    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Int32Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       BigInt64Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.BigInt64ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_bigint64array_copy_within() {
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), BigInt64Array.of(1,1,2,3,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), BigInt64Array.of(1,1,2,3,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), BigInt64Array.of(1,1,2,3,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), BigInt64Array.of(1,1,2,3,4))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), BigInt64Array.of(1,2,3,4,5))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), BigInt64Array.of(1,1,2,3,4))
+    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), BigInt64Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Float32Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Float32ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_float32array_copy_within() {
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Float32Array.of(1,1,2,3,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Float32Array.of(1,1,2,3,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Float32Array.of(1,1,2,3,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Float32Array.of(1,1,2,3,4))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Float32Array.of(1,2,3,4,5))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Float32Array.of(1,1,2,3,4))
+    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Float32Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Float64Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.Float64ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_float64array_copy_within() {
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Float64Array.of(1,1,2,3,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Float64Array.of(1,1,2,3,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Float64Array.of(1,1,2,3,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Float64Array.of(1,1,2,3,4))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Float64Array.of(1,2,3,4,5))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Float64Array.of(1,1,2,3,4))
+    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Float64Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Uint8Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt8ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint8array_copy_within() {
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint8Array.of(1,1,2,3,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint8Array.of(1,1,2,3,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint8Array.of(1,1,2,3,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint8Array.of(1,1,2,3,4))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint8Array.of(1,2,3,4,5))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint8Array.of(1,1,2,3,4))
+    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint8Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Uint16Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt16ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint16array_copy_within() {
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint16Array.of(1,1,2,3,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint16Array.of(1,1,2,3,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint16Array.of(1,1,2,3,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint16Array.of(1,1,2,3,4))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint16Array.of(1,2,3,4,5))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint16Array.of(1,1,2,3,4))
+    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint16Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       Uint32Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt32ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint32array_copy_within() {
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint32Array.of(1,1,2,3,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint32Array.of(1,1,2,3,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint32Array.of(1,1,2,3,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint32Array.of(1,1,2,3,4))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint32Array.of(1,2,3,4,5))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint32Array.of(1,1,2,3,4))
+    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint32Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       BigUint64Array copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.BigUInt64ArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_biguint64array_copy_within() {
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), BigUint64Array.of(1,1,2,3,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), BigUint64Array.of(1,1,2,3,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), BigUint64Array.of(1,1,2,3,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), BigUint64Array.of(1,1,2,3,4))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), BigUint64Array.of(1,2,3,4,5))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), BigUint64Array.of(1,1,2,3,4))
+    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), BigUint64Array.of(1,1,2,3,4))
+}
+
+//! CHECKER       AOT Uint8ClampedArray copyWithin
+//! RUN_PAOC      options: "--compiler-regex=.*::test_uint8clampedarray_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST_NOT      /Call.*Array::copyWithin/
+//! RUN           entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+
+//! CHECKER       Uint8ClampedArray copyWithin
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_copy_within"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.UInt8ClampedArrayCopyWithin"
+//! INST_NOT      /Call.*Array::copyWithin/
+function test_uint8clampedarray_copy_within() {
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  3), Uint8ClampedArray.of(1,1,2,3,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-5,  0,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-6,  0,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 9,  0,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1, -1,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1, -5,  3), Uint8ClampedArray.of(1,1,2,3,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1, -6,  3), Uint8ClampedArray.of(1,1,2,3,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  5,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  9,  3), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0, -1), Uint8ClampedArray.of(1,1,2,3,4))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0, -5), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0, -6), Uint8ClampedArray.of(1,2,3,4,5))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint8ClampedArray.of(1,1,2,3,4))
+    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint8ClampedArray.of(1,1,2,3,4))
+}

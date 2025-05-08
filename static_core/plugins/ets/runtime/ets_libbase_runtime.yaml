@@ -2267,6 +2267,115 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverse
 
+  - name: Int8ArrayCopyWithin
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Int8Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayCopyWithin
+
+  - name: Int16ArrayCopyWithin
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Int16Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayCopyWithin
+
+  - name: Int32ArrayCopyWithin
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Int32Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayCopyWithin
+
+  - name: BigInt64ArrayCopyWithin
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.BigInt64Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayCopyWithin
+
+  - name: Float32ArrayCopyWithin
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Float32Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayCopyWithin
+
+  - name: Float64ArrayCopyWithin
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Float64Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayCopyWithin
+
+  - name: UInt8ArrayCopyWithin
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Uint8Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayCopyWithin
+
+  - name: UInt16ArrayCopyWithin
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Uint16Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayCopyWithin
+
+  - name: UInt32ArrayCopyWithin
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Uint32Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayCopyWithin
+
+  - name: BigUInt64ArrayCopyWithin
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.BigUint64Array
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayCopyWithin
+
+  - name: UInt8ClampedArrayCopyWithin
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: copyWithin
+    static: false
+    signature:
+      ret: escompat.Uint8ClampedArray
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayCopyWithin
 
 ########################
 # escompat.taskpool #

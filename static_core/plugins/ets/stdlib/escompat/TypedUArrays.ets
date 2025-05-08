@@ -519,29 +519,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: int, start: int, end: int): Uint8ClampedArray {
-        let toPos = normalizeIndex(target, this.lengthInt)
-        let fromPos = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
-        let count: int = finalPos - fromPos
-        if (count > (this.lengthInt - toPos)) {
-            count = this.lengthInt - toPos
-        }
-        let direction: int = 1
-        if ((fromPos < toPos) && (toPos < fromPos + count)) {
-            fromPos = fromPos + count - 1
-            toPos   = toPos   + count - 1
-            direction = -1
-        }
-        while (count > 0) {
-            const value = this.getUnsafe(fromPos)
-            this.setUnsafe(toPos, value)
-            fromPos = fromPos + direction
-            toPos = toPos + direction
-            --count
-        }
-        return this
-    }
+    public native copyWithin(target: int, start: int, end: int): Uint8ClampedArray
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint8ClampedArray.
@@ -2455,29 +2433,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: int, start: int, end: int): Uint8Array {
-        let toPos = normalizeIndex(target, this.lengthInt)
-        let fromPos = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
-        let count: int = finalPos - fromPos
-        if (count > (this.lengthInt - toPos)) {
-            count = this.lengthInt - toPos
-        }
-        let direction: int = 1
-        if ((fromPos < toPos) && (toPos < fromPos + count)) {
-            fromPos = fromPos + count - 1
-            toPos   = toPos   + count - 1
-            direction = -1
-        }
-        while (count > 0) {
-            const value = this.getUnsafe(fromPos)
-            this.setUnsafe(toPos, value)
-            fromPos = fromPos + direction
-            toPos = toPos + direction
-            --count
-        }
-        return this
-    }
+    public native copyWithin(target: int, start: int, end: int): Uint8Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint8Array.
@@ -4399,29 +4355,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: int, start: int, end: int): Uint16Array {
-        let toPos = normalizeIndex(target, this.lengthInt)
-        let fromPos = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
-        let count: int = finalPos - fromPos
-        if (count > (this.lengthInt - toPos)) {
-            count = this.lengthInt - toPos
-        }
-        let direction: int = 1
-        if ((fromPos < toPos) && (toPos < fromPos + count)) {
-            fromPos = fromPos + count - 1
-            toPos   = toPos   + count - 1
-            direction = -1
-        }
-        while (count > 0) {
-            const value = this.getUnsafe(fromPos)
-            this.setUnsafe(toPos, value)
-            fromPos = fromPos + direction
-            toPos = toPos + direction
-            --count
-        }
-        return this
-    }
+    public native copyWithin(target: int, start: int, end: int): Uint16Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint16Array.
@@ -6348,29 +6282,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: int, start: int, end: int): Uint32Array {
-        let toPos = normalizeIndex(target, this.lengthInt)
-        let fromPos = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
-        let count: int = finalPos - fromPos
-        if (count > (this.lengthInt - toPos)) {
-            count = this.lengthInt - toPos
-        }
-        let direction: int = 1
-        if ((fromPos < toPos) && (toPos < fromPos + count)) {
-            fromPos = fromPos + count - 1
-            toPos   = toPos   + count - 1
-            direction = -1
-        }
-        while (count > 0) {
-            const value = this.getUnsafe(fromPos)
-            this.setUnsafe(toPos, value)
-            fromPos = fromPos + direction
-            toPos = toPos + direction
-            --count
-        }
-        return this
-    }
+    public native copyWithin(target: int, start: int, end: int): Uint32Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of Uint32Array.
@@ -8311,29 +8223,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(target: int, start: int, end: int): BigUint64Array {
-        let toPos = normalizeIndex(target, this.lengthInt)
-        let fromPos = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
-        let count: int = finalPos - fromPos
-        if (count > (this.lengthInt - toPos)) {
-            count = this.lengthInt - toPos
-        }
-        let direction: int = 1
-        if ((fromPos < toPos) && (toPos < fromPos + count)) {
-            fromPos = fromPos + count - 1
-            toPos   = toPos   + count - 1
-            direction = -1
-        }
-        while (count > 0) {
-            const value = this.getUnsafe(fromPos)
-            this.setUnsafe(toPos, value)
-            fromPos = fromPos + direction
-            toPos = toPos + direction
-            --count
-        }
-        return this
-    }
+    public native copyWithin(target: int, start: int, end: int): BigUint64Array
 
     /**
      * Makes a copy of internal elements to targetPos from begin to end of BigUint64Array.
