@@ -18,11 +18,16 @@
 
 namespace ark::ets::interop::js::testing {
 
-class DatestsToEtsTest : public EtsInteropTest {};
+class DateEtsToTsTest : public EtsInteropTest {};
 
-TEST_F(DatestsToEtsTest, check_date)
+TEST_F(DateEtsToTsTest, check_date)
 {
     ASSERT_TRUE(RunJsTestSuite("test_date.ts"));
+}
+
+TEST_F(DateEtsToTsTest, DISABLED_check_date)
+{
+    ASSERT_TRUE(RunJsTestSuite("disable_test_date.ts"));
 }
 
 }  // namespace ark::ets::interop::js::testing

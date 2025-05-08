@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
-const datestr = '2025-03-01T01:02:03.000Z';
-const timestamp = 1609459200000;
+package date.test;
 
-let firstdate = new Date(2025,2,1,1,2,3,4);
-let datestring = new Date(datestr);
-let datetimestamp = new Date(timestamp);
+const DATASTR = '2025-03-01T01:02:03.000Z';
+const TIMESTAMP = 1609459200000;
+
+let etsDate: Date;
+let strDate: Date;
+let stampDate: Date;
+{
+    etsDate = new Date(2025, 2, 1, 1, 2, 3, 4);
+    strDate = new Date(DATASTR);
+    stampDate = new Date(TIMESTAMP);
+}
