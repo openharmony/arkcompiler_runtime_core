@@ -21,8 +21,16 @@
 #include "runtime/coroutines/coroutine_worker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
+#ifdef ARK_HYBRID
+#include "thread/thread_holder.h"
+#endif
 
 namespace ark {
+#ifdef ARK_HYBRID
+using CommonRootVisitor = panda::CommonRootVisitor;
+
+extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
+#endif
 
 class CoroutineContext;
 class CompletionEvent;
@@ -304,6 +312,13 @@ public:
     /* event handlers */
     virtual void OnHostWorkerChanged() {};
     virtual void OnStatusChanged(Status oldStatus, Status newStatus);
+
+#ifdef ARK_HYBRID
+    void Visit(CommonRootVisitor visitor)
+    {
+        visitor(nullptr);
+    }
+#endif
 
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
