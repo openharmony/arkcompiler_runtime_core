@@ -707,28 +707,50 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
     }
 
+    private move_undefined_end(): int {
+        let writeIndex: int = 0
+        for (let i = 0; i < this.actualLength; i++) {
+            let val = this.$_get_unsafe(i)
+            if (val !== undefined) {
+                if(writeIndex != i) {
+                    this.$_set_unsafe(writeIndex, val)
+                }
+                writeIndex++
+            }
+        }
+        for (let i = writeIndex; i < this.actualLength; i++) {
+            this.$_set_unsafe(i, undefined as T)
+        }
+        return writeIndex
+    }
+
     /**
      * Reorders elements of `this` using comparator function.
      *
+     * @see ECMA-262, 23.1.3.30
+     *
      * @param comparator function that defines the sort order.
+     *
+     * @returns `this` instance of `Array` class.
      *
      * @note Mutating method
      *
      * NOTE clarify UTF-16 or UTF-8
      */
     public sort(comparator?: (a: T, b: T) => number): this {
-        let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
-            return Array.defaultComparator(l, r)
-        }
-        let sortTo = this.actualLength
-        if (comparator !== undefined) {
-            cmp = (l: NullishType, r: NullishType): number => {
-                return comparator!(l as T, r as T)
-            }
-            sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
-        } else {
+        if (this.actualLength <= 1)
+            return this
+
+        if (comparator == undefined) {
             this.wrap_default_sort()
+            return this
         }
+
+        const compareTo = this.move_undefined_end()
+        let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
+            return comparator!(l as T, r as T)
+        }
+        sort_stable<NullishType>(this.buffer, 0, compareTo, cmp)
         return this
     }
 
