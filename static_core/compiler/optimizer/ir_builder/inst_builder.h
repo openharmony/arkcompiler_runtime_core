@@ -251,6 +251,7 @@ private:
     public:
         BuildCallHelper(const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput = nullptr);
 
+        bool TryBuildIntrinsic();
         void BuildIntrinsic();
         void BuildDefaultIntrinsic(RuntimeInterface::IntrinsicId intrinsicId, bool isVirtual);
         void BuildDefaultStaticIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);

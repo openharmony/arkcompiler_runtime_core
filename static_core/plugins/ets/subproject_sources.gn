@@ -24,6 +24,7 @@ srcs_compiler = [
   "compiler/ir_build_intrinsics_ets.cpp",
   "compiler/optimizer/ir_builder/ets_inst_builder.cpp",
   "compiler/optimizer/ets_codegen_extensions.cpp",
+  "compiler/optimizer/ets_intrinsics_inlining_expansion.cpp",
   "compiler/optimizer/ets_intrinsics_peephole.cpp",
 ]
 

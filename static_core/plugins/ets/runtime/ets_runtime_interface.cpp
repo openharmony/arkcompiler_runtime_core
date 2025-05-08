@@ -204,6 +204,11 @@ bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
     return ClassCast(klass)->GetName() == "std.core.StringBuilder";
 }
 
+bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetName() == "escompat.Array";
+}
+
 uint32_t EtsRuntimeInterface::GetClassOffsetObjectsArray(MethodPtr method) const
 {
     auto pf = MethodCast(method)->GetPandaFile();
@@ -219,6 +224,11 @@ uint32_t EtsRuntimeInterface::GetClassOffsetObject(MethodPtr method) const
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
 {
     return PlatformTypes(PandaEtsVM::GetCurrent())->coreStringBuilder->GetRuntimeClass();
+}
+
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayClass() const
+{
+    return PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray->GetRuntimeClass();
 }
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
@@ -260,6 +270,18 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderCompress
 {
     ASSERT(IsClassStringBuilder(klass));
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("compress"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayActualLength(ClassPtr klass) const
+{
+    ASSERT(IsClassEscompatArray(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("actualLength"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBuffer(ClassPtr klass) const
+{
+    ASSERT(IsClassEscompatArray(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("buffer"));
 }
 
 bool EtsRuntimeInterface::IsFieldStringBuilderBuffer(FieldPtr field) const

@@ -47,8 +47,9 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildC
         // Do not move "GetMethodId" ouside this if! Success of "IsMethodIntrinsic" guarantees that class and method are
         // loaded. Thus value of "method_" is not nullptr and can be used in BuildIntrinsic.
         method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
-        BuildIntrinsic();
-        return;
+        if (TryBuildIntrinsic()) {
+            return;
+        }
     }
     // Here "GetMethodById" can be used without additional checks, result may be nullptr and it is normal situation
     method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
@@ -541,6 +542,23 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
     ASSERT(Builder()->GetMethodReturnType(methodId_) == DataType::VOID);
     ASSERT(Builder()->GetMethodArgumentsCount(methodId_) == 1);
     Builder()->BuildMonitor(bcInst_, Builder()->GetArgDefinition(bcInst_, 0, ACC_READ), isEnter);
+}
+
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+bool InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::TryBuildIntrinsic()
+{
+    auto runtime = GetRuntime();
+    auto isMethodStatic = runtime->IsMethodStatic(method_);
+    auto isMethodFinal = runtime->IsMethodFinal(method_);
+    auto isClassFinal = runtime->IsClassFinal(runtime->GetClass(method_));
+    if (isMethodStatic || isMethodFinal || isClassFinal) {
+        BuildIntrinsic();
+        return true;
+    }
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Skips building intrinsic '"
+                                    << GetIntrinsicName(runtime->GetIntrinsicId(method_))
+                                    << "' since the method and class is not final.";
+    return false;
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)

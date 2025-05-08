@@ -18,8 +18,6 @@
 void BuildIsFiniteIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead);
 void BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
-void BuildEscompatArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
-void BuildEscompatArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
 void BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type,
                                         bool accRead);
