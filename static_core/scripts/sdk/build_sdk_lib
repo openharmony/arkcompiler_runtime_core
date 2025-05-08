@@ -65,6 +65,15 @@ function copy_into_sdk() {
     done
 }
 
+function copy_abc_files() {
+    local build_dir="$1"
+    mkdir -p "$PANDA_SDK_PATH"/ets
+    if [[ -f "$build_dir"/plugins/ets/sdk/etssdk.abc ]]; then
+        [[ -f "$PANDA_SDK_PATH"/ets/etssdk.abc ]] || cp "$build_dir"/plugins/ets/sdk/etssdk.abc "$PANDA_SDK_PATH"/ets
+    fi
+    [[ -f "$PANDA_SDK_PATH"/ets/etsstdlib.abc ]] || cp "$build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+}
+
 function linux_arm64_tools() {
     echo "> Building linux arm64 tools..."
     local extra_llvm_opts=""
@@ -91,6 +100,7 @@ function linux_arm64_tools() {
     local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative verifier ani_helpers aspt_converter"
     build_panda "$linux_arm64_build_dir" "$linux_arm64_cmake_args" "$linux_arm64_build_targets"
     copy_into_sdk "$linux_arm64_build_dir" "$PANDA_SDK_PATH/linux_arm64_host_tools" "$SCRIPT_DIR"/linux_arm64_host_tools.txt
+    copy_abc_files "$linux_arm64_build_dir"
 }
 
 function linux_tools() {
@@ -121,7 +131,7 @@ function linux_tools() {
     local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda etssdk e2p_test_plugin etsnative verifier ani_helpers aspt_converter"
     build_panda "$linux_build_dir" "$linux_cmake_args" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
-    cp -r "$linux_build_dir"/plugins/ets/sdk/etssdk.abc "$PANDA_SDK_PATH"/ets
+    copy_abc_files "$linux_build_dir"
 }
 
 function windows_tools() {
@@ -170,9 +180,7 @@ function ohos_arm64() {
     copy_into_sdk "$ARK_ROOT" "$headers_dst" "$SCRIPT_DIR"/headers.txt '\(\.h$\|\.inl$\|\.inc$\)'
     # Generated headers
     copy_into_sdk "$ohos_build_dir" "$headers_dst" "$SCRIPT_DIR"/gen_headers.txt '\(\.h$\|\.inl$\|\.inc$\|\.idl$\)'
-    # Copy compiled etsstdlib into Panda SDK
-    mkdir -p "$PANDA_SDK_PATH"/ets
-    cp -r "$ohos_build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
+    copy_abc_files "$ohos_build_dir"
 }
 
 function ohos_arm32() {
@@ -190,6 +198,7 @@ function ohos_arm32() {
     local ohos_build_targets="ark arkruntime arkassembler ets_interop_js_napi etsnative ani_helpers aspt_converter"
     build_panda "$ohos_build_dir" "$target_cmake_args" "$ohos_build_targets"
     copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm32.txt
+    copy_abc_files "$ohos_build_dir"
 }
 
 function ts_linter() {
