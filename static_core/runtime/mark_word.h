@@ -186,7 +186,10 @@ public:
         return MarkWord(temp | monitorInPlace | (STATUS_HEAVYWEIGHT_LOCK << STATUS_SHIFT));
     }
 
-    PANDA_PUBLIC_API MarkWord DecodeFromHash(uint32_t hash);
+    PANDA_PUBLIC_API MarkWord DecodeFromHash(uint32_t hash)
+    {
+        return DecodeFromHashWide(static_cast<MarkWordSize>(hash));
+    }
 
     MarkWord DecodeFromForwardingAddress(MarkWordSize forwardingAddress)
     {
@@ -319,6 +322,15 @@ public:
 
     friend class MarkWordTest;
     friend class ObjectHeader;
+
+protected:
+    MarkWord DecodeFromHashWide(MarkWordSize hash)
+    {
+        // Clear hash and status bits
+        MarkWordSize temp = Value() & (~(HASH_MASK_IN_PLACE | STATUS_MASK_IN_PLACE));
+        MarkWordSize hashInPlace = (hash & HASH_MASK) << HASH_SHIFT;
+        return MarkWord(temp | hashInPlace | (STATUS_HASHED << STATUS_SHIFT));
+    }
 
 private:
     // The only field in MarkWord class.
