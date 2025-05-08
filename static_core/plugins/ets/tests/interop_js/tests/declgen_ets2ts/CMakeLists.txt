@@ -261,14 +261,16 @@ endfunction()
 
 add_subdirectory(async)
 add_subdirectory(basic_var)
-add_subdirectory(classes)
+# NOTE: Need support new situation, #25368
+# add_subdirectory(classes)
 add_subdirectory(enums)
 add_subdirectory(fields)
 add_subdirectory(functions)
 add_subdirectory(generics)
 add_subdirectory(getters_setters)
 add_subdirectory(imports)
-add_subdirectory(interface)
+# NOTE: Need support new situation, #25368
+# add_subdirectory(interface)
 add_subdirectory(methods)
 add_subdirectory(unions)
 add_subdirectory(depend_export)
