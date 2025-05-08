@@ -300,6 +300,91 @@ function testUrlUsername005() {
 	assertEQ(result, 'usme')
 }
 
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_19700
+* @tc.name: testUrlHostName001
+* @tc.desc: Gets and sets the hostname portion of the URL.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlHostName001() {
+	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
+	let result = params.hostname;
+	assertEQ(result, 'host');
+    params.hostname = 'www.test.com';
+    assertEQ(params.hostname, 'www.test.com');
+    assertEQ(params.host, 'www.test.com:8080');
+}
+
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_19800
+* @tc.name: testUrlHostName002
+* @tc.desc: Gets and sets the hostname portion of the URL.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlHostName002() {
+	let params = url.URL.parseURL('http://usme@host1:8080/directory/file?query#fragment');
+	let result = params.hostname;
+	assertEQ(result, 'host1');
+    params.hostname = 'www.test.com';
+    assertEQ(params.host, 'www.test.com:8080');
+    assertEQ(params.href, 'http://usme@www.test.com:8080/directory/file?query#fragment');
+}
+
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_19900
+* @tc.name: testUrlHost001
+* @tc.desc: Gets and sets the host portion of the URL.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlHost001() {
+	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
+	let result = params.host;
+	assertEQ(result, 'host:8080');
+    params.host = 'www.test:99';
+    assertEQ(params.host, 'www.test:99');
+    assertEQ(params.hostname, 'www.test');
+    assertEQ(params.port, '99');
+}
+
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_20000
+* @tc.name: testUrlPort001
+* @tc.desc: Gets and sets the port portion of the URL.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlPort001() {
+	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
+	let result = params.port;
+	assertEQ(result, '8080');
+    params.port = '77';
+    assertEQ(params.host, 'host:77');
+}
+
+/**
+* @tc.number: SUB_COMMONLIBRARY_ETSUTILS_URL_20100
+* @tc.name: testUrlGetHost001
+* @tc.desc: Gets and sets the host portion of the URL.
+* @tc.size: MediumTest
+* @tc.type: Function
+* @tc.level: Level 2
+*/
+function testUrlGetHost001() {
+	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
+	let result = params.host;
+	assertEQ(result, 'host:8080');
+    params.port = '77';
+    params.hostname = 'www.test.com';
+    assertEQ(params.host, 'www.test.com:77');
+    assertEQ(params.toString(), 'http://usme@www.test.com:77/directory/file?query#fragment');
+}
 
 function main(): int {
 	let suite = new ArkTestsuite("URL UT tests");
@@ -323,7 +408,11 @@ function main(): int {
 	suite.addTest("testUrlUsername003", testUrlUsername003);
 	suite.addTest("testUrlUsername004", testUrlUsername004);
 	suite.addTest("testUrlUsername005", testUrlUsername005);
-	
+    suite.addTest("testUrlHostName001", testUrlHostName001);
+    suite.addTest("testUrlHostName002", testUrlHostName002);
+    suite.addTest("testUrlHost001", testUrlHost001);
+    suite.addTest("testUrlPort001", testUrlPort001);
+    suite.addTest("testUrlGetHost001", testUrlGetHost001);
 
 	//passed
 	return suite.run();
