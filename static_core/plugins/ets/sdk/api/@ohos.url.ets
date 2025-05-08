@@ -1757,6 +1757,7 @@ export namespace url {
             hostname = deleteTabOrNewline(hostname)
             this.urlInner.setHostName(hostname);
             this.cHostname = this.urlInner.getHostName();
+            this.cHost = this.urlInner.getHost();
             this.setHref();
         }
 
@@ -1784,6 +1785,7 @@ export namespace url {
             port = deleteTabOrNewline(port)
             this.urlInner.setPort(port);
             this.cPort = this.urlInner.getPort();
+            this.cHost = this.urlInner.getHost();
             this.setHref();
         }
 
