@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -202,8 +202,7 @@ public:
         // Atomic with acquire order reason: data race with flags with dependecies on reads after
         // the load which should become visible
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        uint32_t resInt = fts_.asAtomic.load(std::memory_order_acquire);
-        return static_cast<enum ThreadStatus>(resInt >> THREAD_STATUS_OFFSET);
+        return static_cast<enum ThreadStatus>(fts_.asAtomic.status.load(std::memory_order_acquire));
     }
 
     static PandaString ThreadStatusAsString(enum ThreadStatus status);
@@ -476,7 +475,7 @@ public:
         // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
         // where threads observe all modifications in the same order
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        fts_.asAtomic.fetch_or(flag, std::memory_order_seq_cst);
+        fts_.asAtomic.flags.fetch_or(flag, std::memory_order_seq_cst);
     }
 
     void ClearFlag(ThreadFlag flag)
@@ -484,7 +483,7 @@ public:
         // Atomic with seq_cst order reason: data race with flags with requirement for sequentially consistent order
         // where threads observe all modifications in the same order
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        fts_.asAtomic.fetch_and(UINT32_MAX ^ flag, std::memory_order_seq_cst);
+        fts_.asAtomic.flags.fetch_and(UINT16_MAX ^ flag, std::memory_order_seq_cst);
     }
 
     // Separate functions for NO_THREAD_SANITIZE to suppress TSAN data race report
@@ -492,6 +491,13 @@ public:
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         return fts_.asInt;
+    }
+
+    // Separate functions for NO_THREAD_SANITIZE to suppress TSAN data race report
+    NO_THREAD_SANITIZE uint32_t ReadFlagsUnsafe()
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return fts_.asStruct.flags;
     }
 
     bool IsManagedCodeAllowed() const
@@ -820,25 +826,22 @@ private:
     template <SafepointFlag SAFEPOINT = DONT_CHECK_SAFEPOINT, ReadlockFlag READLOCK_FLAG = NO_READLOCK>
     void StoreStatus(ThreadStatus status) NO_THREAD_SAFETY_ANALYSIS
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-union-access)
         while (true) {
             union FlagsAndThreadStatus oldFts {
             };
             union FlagsAndThreadStatus newFts {
             };
-            oldFts.asInt = ReadFlagsAndThreadStatusUnsafe();  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            oldFts.asInt = ReadFlagsAndThreadStatusUnsafe();
 
             // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
             if constexpr (SAFEPOINT == CHECK_SAFEPOINT) {  // NOLINT(bugprone-suspicious-semicolon)
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-                if (oldFts.asStruct.flags != initialThreadFlag_) {
+                if (oldFts.asStructNonvolatile.flags != initialThreadFlag_) {
                     // someone requires a safepoint
                     SafepointPoll();
                     continue;
                 }
             }
-
-            newFts.asStruct.flags = oldFts.asStruct.flags;  // NOLINT(cppcoreguidelines-pro-type-union-access)
-            newFts.asStruct.status = status;                // NOLINT(cppcoreguidelines-pro-type-union-access)
 
             // mutator lock should be acquired before change status
             // to avoid blocking in running state
@@ -849,10 +852,30 @@ private:
 
             // clang-format conflicts with CodeCheckAgent, so disable it here
             // clang-format off
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            if (fts_.asAtomic.compare_exchange_weak(
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-                oldFts.asNonvolatileInt, newFts.asNonvolatileInt, std::memory_order_release)) {
+            // If it's not required to check safepoint, CAS would behave the same as
+            // regular STORE, just will do extra attempts, in this case it makes sense
+            // to use STORE for just thread status 16-bit word.
+            if constexpr (SAFEPOINT == DONT_CHECK_SAFEPOINT) {
+                auto newStatus = static_cast<uint16_t>(status);
+                // Atomic with release order reason: data race with other mutators
+                fts_.asAtomic.status.store(newStatus, std::memory_order_release);
+                break;
+            }
+
+            // if READLOCK, there's chance, someone changed the flags
+            // in parallel, let's check before the CAS.
+            if constexpr (READLOCK_FLAG == READLOCK) {
+                if (ReadFlagsUnsafe() != oldFts.asStructNonvolatile.flags) {
+                    GetMutatorLock()->Unlock();
+                    continue;
+                }
+            }
+
+            newFts.asStructNonvolatile.flags = oldFts.asStructNonvolatile.flags;
+            newFts.asStructNonvolatile.status = status;
+            // Atomic with release order reason: data race with other mutators
+            if (fts_.asAtomicInt.compare_exchange_weak(
+            oldFts.asNonvolatileInt, newFts.asNonvolatileInt, std::memory_order_release)) {
                 // If CAS succeeded, we set new status and no request occurred here, safe to proceed.
                 break;
             }
@@ -863,6 +886,7 @@ private:
                 GetMutatorLock()->Unlock();
             }
         }
+        // NOLINTEND(cppcoreguidelines-pro-type-union-access)
     }
 
 #ifdef PANDA_WITH_QUICKENER

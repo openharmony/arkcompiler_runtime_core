@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -341,13 +341,25 @@ protected:
     union __attribute__((__aligned__(4))) FlagsAndThreadStatus {
         FlagsAndThreadStatus() = default;
         ~FlagsAndThreadStatus() = default;
+
+        volatile uint32_t asInt;
+        uint32_t asNonvolatileInt;
+        std::atomic_uint32_t asAtomicInt;
+
         struct __attribute__((packed)) {
             volatile uint16_t flags;
             volatile enum ThreadStatus status;
         } asStruct;
-        volatile uint32_t asInt;
-        uint32_t asNonvolatileInt;
-        std::atomic_uint32_t asAtomic;
+
+        struct __attribute__((packed)) {
+            uint16_t flags;
+            enum ThreadStatus status;
+        } asStructNonvolatile;
+
+        struct {
+            std::atomic_uint16_t flags;
+            std::atomic_uint16_t status;
+        } asAtomic;
 
         NO_COPY_SEMANTIC(FlagsAndThreadStatus);
         NO_MOVE_SEMANTIC(FlagsAndThreadStatus);
