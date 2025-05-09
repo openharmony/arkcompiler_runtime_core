@@ -20,6 +20,12 @@
 #include "runtime/include/panda_vm.h"
 
 namespace ark {
+#ifdef ARK_HYBRID
+extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
+{
+    reinterpret_cast<Coroutine *>(coroutine)->Visit(visitor);
+}
+#endif
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
                              std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority)

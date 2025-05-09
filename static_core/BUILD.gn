@@ -323,6 +323,10 @@ config("ark_config") {
     configs += [ sdk_libc_secshared_config ]
   }
 
+  if (ark_hybrid) {
+    defines += [ "ARK_HYBRID" ]
+  }
+
   if (current_cpu == "arm") {
     cflags_cc += [
       "-march=armv7-a",
