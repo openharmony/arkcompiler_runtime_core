@@ -793,7 +793,7 @@ options:
 
 - name: boot-an-location
   type: std::string
-  default: "/data/service/el1/public/framework_ark_cache"
+  default: "/data/service/el1/public/for-all-app/framework_ark_cache"
   description: default path to .an files for boot panda files, try to load ARK .an file from this dir if not empty when enable-an
 
 - name: enable-an
@@ -921,3 +921,4 @@ options:
   type: bool
   default: false
   description: Load entrypoint panda file in boot-panda-files
+
