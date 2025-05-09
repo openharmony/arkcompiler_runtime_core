@@ -150,7 +150,7 @@ private:
         return state_.language_ == Language::STATIC;
     }
 
-    inline bool IsDynamic()
+    inline bool IsDynamic() const
     {
         return state_.language_ == Language::DYNAMIC;
     }

@@ -112,6 +112,11 @@ public:
     void UnregisterCoroutine(Coroutine *coroutine);
     void VisitAllThreads(CommonRootVisitor visitor);
 
+    JSThread* GetJSThread() const
+    {
+        return jsThread_;
+    }
+
     void *GetMutator() const
     {
         return mutatorBase_->mutator;

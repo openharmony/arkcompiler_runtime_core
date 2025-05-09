@@ -114,6 +114,16 @@ public:
         state_.SetForwardState(state);
     }
 
+    ALWAYS_INLINE_CC bool IsDynamic() const
+    {
+        return state_.IsDynamic();
+    }
+
+    ALWAYS_INLINE_CC bool IsStatic() const
+    {
+        return state_.IsStatic();
+    }
+
     template <typename T>
     Field<T> &GetField(uint32_t offset) const
     {
