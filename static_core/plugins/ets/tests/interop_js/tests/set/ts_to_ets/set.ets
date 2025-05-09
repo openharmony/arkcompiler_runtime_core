@@ -16,94 +16,99 @@
 package set.test;
 
 export function TestSetAdd(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.add(4);
-  set.add(4);
-  set.add(5);
-  res = set.has(1) && set.has(2) && set.has(3) &&
-        set.has(4) && set.has(5) && (set.size === 5);
-  return res;
+    let res: boolean = true;
+    set.add(4);
+    set.add(4);
+    set.add(5);
+    res = set.has(1) && set.has(2) && set.has(3) &&
+          set.has(4) && set.has(5) && (set.size === 5);
+    return res;
 }
 
 export function TestSetHas(set: Set<number>): boolean {
-  let res: boolean = true;
-  res = set.has(1) && set.has(2) && set.has(3) &&
-        set.has(4) && set.has(5) && !set.has(999);
-  return res;
+    let res: boolean = true;
+    res = set.has(1) && set.has(2) && set.has(3) &&
+          set.has(4) && set.has(5) && !set.has(999);
+    return res;
 }
 
 export function TestSetDelete(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.delete(4);
-  res = !set.has(4);
-  return res;
+    let res: boolean = true;
+    set.delete(4);
+    res = !set.has(4);
+    return res;
 }
 
 export function TestSetSize(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.add(4);
-  res = (set.size === 5);
-  return res;
+    let res: boolean = true;
+    set.add(4);
+    res = (set.size === 5);
+    return res;
 }
 
 export function TestSetKeys(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.add(4);
-  set.add(5);
-  let keys: number[] = [];
-  let ss: Set<number> = set as Set<number>;
-  for (let key of ss.keys()) {
-    keys.push(key);
-  }
-  res = keys.includes(1) && keys.includes(2) &&
-        keys.includes(3) && keys.includes(4) &&
-        keys.includes(5) && keys.length === 5;
-  return res;
+    let res: boolean = true;
+    set.add(4);
+    set.add(5);
+    let keys: number[] = [];
+    let ss: Set<number> = set as Set<number>;
+    for (let key of ss.keys()) {
+        keys.push(key);
+    }
+    res = keys.includes(1) && keys.includes(2) &&
+          keys.includes(3) && keys.includes(4) &&
+          keys.includes(5) && keys.length === 5;
+    return res;
 }
 
 export function TestSetValues(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.add(4);
-  set.add(5);
-  let values: number[] = [];
-  let ss: Set<number> = set as Set<number>;
-  for (let value of ss.values()) {
-    values.push(value);
-  }
-  res = values.includes(1) && values.includes(2) &&
-        values.includes(3) && values.includes(4) &&
-        values.includes(5) && values.length === 5;
-  return res;
+    let res: boolean = true;
+    set.add(4);
+    set.add(5);
+    let values: number[] = [];
+    let ss: Set<number> = set as Set<number>;
+    for (let value of ss.values()) {
+        values.push(value);
+    }
+    res = values.includes(1) && values.includes(2) &&
+          values.includes(3) && values.includes(4) &&
+          values.includes(5) && values.length === 5;
+    return res;
 }
 
 export function TestSetEntries(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.add(4);
-  set.add(5);
-  set.entries();
-  return res;
+    let res: boolean = true;
+    set.add(4);
+    set.add(5);
+    for (let item of set.entries()) {
+        if (item[0] != item[1]) {
+            res = false;
+            break;
+        }
+    }
+    return res;
 }
 
 export function TestSetForEach(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.add(4);
-  set.add(5);
-  let items: number[] = [];
-  const processElement = (value: number, valueAgain: number, setObj: Set<number>): void => {
-    items.push(value);
-  };
-  set.forEach(processElement);
-  res = items.includes(1) && items.includes(2) &&
-        items.includes(3) && items.includes(4) &&
-        items.includes(5) && items.length === 5;
-  return res;
+    let res: boolean = true;
+    set.add(4);
+    set.add(5);
+    let items: number[] = [];
+    const processElement = (value: number, valueAgain: number, setObj: Set<number>): void => {
+        items.push(value);
+    };
+    set.forEach(processElement);
+    res = items.includes(1) && items.includes(2) &&
+          items.includes(3) && items.includes(4) &&
+          items.includes(5) && items.length === 5;
+    return res;
 }
 
 export function TestSetClear(set: Set<number>): boolean {
-  let res: boolean = true;
-  set.add(4);
-  set.add(5);
-  set.clear();
-  res = (set.size === 0);
-  return res;
+    let res: boolean = true;
+    set.add(4);
+    set.add(5);
+    set.clear();
+    res = (set.size === 0);
+    return res;
 }

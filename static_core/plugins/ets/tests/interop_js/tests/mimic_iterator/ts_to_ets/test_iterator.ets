@@ -72,3 +72,31 @@ function testMimicIteratorBoolean() {
     }
     return true;
 }
+
+function testMimicIteratorBooleanEntries() {
+    for (let elem of booArr.entries()) {
+        if (elem[1] !== booArr[elem[0]]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function testMimicIteratorStringEntries() {
+    for (let elem of strArr.entries()) {
+        if (elem[1] !== strArr[elem[0]]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function testMimicIteratorNumberEntries() {
+    for (let elem of numArr.entries()) {
+        if (elem[1] !== numArr[elem[0]]) {
+            return false;
+        }
+    }
+    return true;
+}
+
