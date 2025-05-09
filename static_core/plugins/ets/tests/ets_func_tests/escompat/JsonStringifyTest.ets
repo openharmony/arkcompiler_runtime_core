@@ -230,6 +230,24 @@ function jsonStringifyCyclicRecord(): void {
     }
 }
 
+function jsonStringifyControlCharacter(): void {
+    let res: FixedArray<String> = ['"\\u0000"', '"\\u0001"', '"\\u0002"', '"\\u0003"', '"\\u0004"', '"\\u0005"', '"\\u0006"', '"\\u0007"',
+                                    '"\\b"', '"\\t"', '"\\n"', '"\\u000b"', '"\\f"', '"\\r"', '"\\u000e"', '"\\u000f"', '"\\u0010"',
+                                    '"\\u0011"', '"\\u0012"', '"\\u0013"', '"\\u0014"', '"\\u0015"', '"\\u0016"', '"\\u0017"', '"\\u0018"',
+                                    '"\\u0019"', '"\\u001a"', '"\\u001b"', '"\\u001c"', '"\\u001d"', '"\\u001e"', '"\\u001f"'];
+    for (let i = 0; i < 32; i++) {
+        assertTrue(JSON.stringify(String.fromCharCode(i)) == res[i]);
+    }
+}
+
+function jsonStringifyEscapeCharacter(): void {
+    let arr: FixedArray<String> = ["\a", "\b", "\f", "\n", "\r", "\t", "\v", "\\", "\'", "\"", "\?", "\0"];
+    let res: FixedArray<String> = ['"a"', '"\\b"', '"\\f"', '"\\n"', '"\\r"', '"\\t"', '"\\u000b"', '"\\\\"', "\"'\"", '"\\""', '"?"', '"\\u0000"'];
+    for (let i = 0; i < arr.length; i++) {
+        assertTrue(JSON.stringify(arr[i]) == res[i]);
+    }
+}
+
 function main(): int {
     const suite = new ArkTestsuite("Json stringify for ArrayLike tests ")
     suite.addTest("JSON.stringify for Uint8Array", jsonStringifyUint8Array)
@@ -253,6 +271,8 @@ function main(): int {
     suite.addTest("JSON.stringify for Record with null", jsonStringifyRecordWithNull);
     suite.addTest("JSON.stringify for nested Map", jsonStringifyNestedMap);
     suite.addTest("JSON.stringify for cyclic Record", jsonStringifyCyclicRecord);
+    suite.addTest("JSON.stringify for control character", jsonStringifyControlCharacter);
+    suite.addTest("JSON.stringify for escape character", jsonStringifyEscapeCharacter);
 
     return suite.run()
 }
