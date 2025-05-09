@@ -245,5 +245,5 @@ cases:
           // conditional expression
           let expr1 = foo('A')
           let expr2 = foo('B')
-          assertTrue((await a instanceof A ? expr1 : expr2) == 'AA')
-          assertTrue((await ! (a instanceof A) ? expr1 : expr2) == 'BB')
+          assertTrue(await (a instanceof A ? expr1 : expr2) == 'AA')
+          assertTrue(await (!(a instanceof A) ? expr1 : expr2) == 'BB')

@@ -70,7 +70,7 @@ export function main(): int {
         return value
     });
     await byteP;
-    await pThen as Promise<Object>;
+    await (pThen as Promise<Object>);
     check("byteFunc");
 
     reset();
@@ -84,7 +84,7 @@ export function main(): int {
         return value
     });
     await charP;
-    await pThen as Promise<Object>;
+    await (pThen as Promise<Object>);
     check("charFunc");
 
     reset();
@@ -98,7 +98,7 @@ export function main(): int {
         return value
     });
     await shortP;
-    await pThen as Promise<Object>;
+    await (pThen as Promise<Object>);
     check("shortFunc");
 
     reset();
@@ -112,7 +112,7 @@ export function main(): int {
         return value
     });
     await intP;
-    await pThen as Promise<Object>;
+    await (pThen as Promise<Object>);
     check("intFunc");
 
     reset();
@@ -127,7 +127,7 @@ export function main(): int {
         return value
     });
     await longP;
-    await pThen as Promise<Object>;
+    await (pThen as Promise<Object>);
     check("longFunc");
 
     reset();
@@ -142,7 +142,7 @@ export function main(): int {
         return value
     });
     await floatP;
-    await pThen as Promise<Object>;
+    await (pThen as Promise<Object>);
     check("floatFunc");
 
     reset();
@@ -156,7 +156,7 @@ export function main(): int {
         return value
     });
     await doubleP;
-    await pThen as Promise<Object>;
+    await (pThen as Promise<Object>);
     check("doubleFunc");
     return 0;
 }
