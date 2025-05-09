@@ -1,7 +1,3 @@
-#24419: Resizable arrays implementation
-03.types/16.array_types/01.resizable_array_types/put_to_empty_form_1.ets
-03.types/16.array_types/01.resizable_array_types/put_to_empty_form_2.ets
-
 #25060 Function.unsafeCall(...) works improperly with extra args
 03.types/18.function_types/01.type_function/negative_rt_1.ets
 03.types/18.function_types/01.type_function/negative_rt_2.ets
