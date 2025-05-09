@@ -275,6 +275,8 @@ class Checker
         aborted_sig = value
       when :env
         env = value
+      when :aot_file
+        @aot_file = value
       end
     end
     raise ":abort and :result cannot be set at the same time, :abort = #{aborted_sig}, :result = #{expected_result}" if aborted_sig != 0 && expected_result != 0

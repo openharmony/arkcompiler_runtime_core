@@ -253,3 +253,7 @@ panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/check_verifier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/xor_to_compare_to_xor.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inline-external-constructor.pa EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
+
+if (NOT PANDA_TARGET_ARM32)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/boot_an_location.pa)
+endif()
