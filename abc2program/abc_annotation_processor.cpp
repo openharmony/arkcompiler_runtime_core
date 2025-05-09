@@ -33,6 +33,7 @@ void AbcAnnotationProcessor::FillProgramData()
     if (annotation_name_.empty()) {
         return;
     }
+    entity_container_.ModifyRecordName(annotation_name_);
     FillAnnotation();
 }
 
