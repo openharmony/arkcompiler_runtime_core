@@ -257,8 +257,19 @@ public:
         return originalRank_;
     }
 
+    virtual void SetDependencyMark()
+    {
+        dependencyMarked_ = true;
+    }
+
+    bool GetDependencyMark() const
+    {
+        return dependencyMarked_;
+    }
+
 private:
     bool needsEmit_ {true};
+    bool dependencyMarked_ {false};
     uint32_t offset_ {0};
     uint32_t order_ {INVALID_INDEX};
     std::list<IndexedItem *> indexDeps_;
@@ -512,6 +523,8 @@ protected:
 
     PANDA_PUBLIC_API bool Write(Writer *writer) override;
 
+    PANDA_PUBLIC_API void SetDependencyMark() override;
+
 private:
     BaseClassItem *class_;
     StringItem *name_;
@@ -580,6 +593,8 @@ public:
     {
         return &runtimeTypeAnnotations_;
     }
+
+    void SetDependencyMark() override;
 
     DEFAULT_MOVE_SEMANTIC(FieldItem);
     DEFAULT_COPY_SEMANTIC(FieldItem);
@@ -765,6 +780,17 @@ public:
 
     void Dump(std::ostream &os) const override;
 
+    void SetDependencyMark() override
+    {
+        BaseItem::SetDependencyMark();
+        if (program_ != nullptr) {
+            program_->SetDependencyMark();
+        }
+        for (auto &item : parameters_) {
+            item->SetDependencyMark();
+        }
+    }
+
 private:
     size_t lineNum_ {0};
     LineNumberProgramItem *program_;
@@ -815,6 +841,8 @@ protected:
     PANDA_PUBLIC_API size_t CalculateSize() const override;
 
     PANDA_PUBLIC_API bool Write(Writer *writer) override;
+
+    PANDA_PUBLIC_API void SetDependencyMark() override;
 
 private:
     BaseClassItem *class_;
@@ -1025,6 +1053,8 @@ public:
         return profileSize_;
     }
 
+    void SetDependencyMark() override;
+
 private:
     bool WriteRuntimeAnnotations(Writer *writer);
 
@@ -1226,6 +1256,7 @@ public:
     {
         return ifaces_;
     }
+    void SetDependencyMark() override;
 
     DEFAULT_MOVE_SEMANTIC(ClassItem);
     DEFAULT_COPY_SEMANTIC(ClassItem);
@@ -1417,6 +1448,8 @@ public:
     {
         return referenceTypes_;
     }
+
+    void SetDependencyMark() override;
 
 private:
     static constexpr size_t SHORTY_ELEM_SIZE = 4;
@@ -1757,6 +1790,11 @@ public:
         return items_;
     }
 
+    std::vector<ScalarValueItem> *GetMutableItems()
+    {
+        return &items_;
+    }
+
 private:
     size_t GetComponentSize() const;
 
@@ -1831,6 +1869,8 @@ public:
 
     bool Write(Writer *writer) override;
 
+    void SetDependencyMark() override;
+
 private:
     Type type_;
     std::variant<uint8_t, uint16_t, uint32_t, uint64_t, StringItem *, MethodItem *, LiteralArrayItem *> value_;
@@ -1879,6 +1919,8 @@ public:
         return index_;
     }
 
+    void SetDependencyMark() override;
+
 private:
     std::vector<LiteralItem> items_;
     uint32_t index_ {0};
@@ -1911,6 +1953,16 @@ public:
         void SetValue(ValueItem *item)
         {
             value_ = item;
+        }
+
+        void SetDependencyMark()
+        {
+            if (name_ != nullptr) {
+                name_->SetDependencyMark();
+            }
+            if (value_ != nullptr) {
+                value_->SetDependencyMark();
+            }
         }
 
     private:
@@ -1985,6 +2037,7 @@ public:
     {
         tags_ = std::move(tags);
     }
+    void SetDependencyMark() override;
 
 private:
     BaseClassItem *class_;

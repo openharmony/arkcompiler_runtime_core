@@ -395,6 +395,42 @@ bool ClassItem::Write(Writer *writer)
     return true;
 }
 
+void ClassItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    for (auto &iface : ifaces_) {
+        iface->SetDependencyMark();
+    }
+    if (superClass_ != nullptr) {
+        superClass_->SetDependencyMark();
+    }
+    if (sourceFile_ != nullptr) {
+        sourceFile_->SetDependencyMark();
+    }
+    for (auto &item : annotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : runtimeAnnotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : typeAnnotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : runtimeTypeAnnotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &field : fields_) {
+        if (!field->GetDependencyMark()) {
+            field->SetDependencyMark();
+        }
+    }
+    for (auto &method : methods_) {
+        if (!method->GetDependencyMark()) {
+            method->SetDependencyMark();
+        }
+    }
+}
+
 ParamAnnotationsItem::ParamAnnotationsItem(MethodItem *method, bool isRuntimeAnnotations)
 {
     for (const auto &param : method->GetParams()) {
@@ -501,6 +537,14 @@ bool ProtoItem::Write(Writer *writer)
     return true;
 }
 
+void ProtoItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    for (auto item : referenceTypes_) {
+        item->SetDependencyMark();
+    }
+}
+
 BaseMethodItem::BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags)
     : class_(cls), name_(name), proto_(proto), accessFlags_(accessFlags)
 {
@@ -537,6 +581,26 @@ bool BaseMethodItem::Write(Writer *writer)
     }
 
     return writer->WriteUleb128(accessFlags_);
+}
+
+void BaseMethodItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    if (class_ != nullptr) {
+        if (!class_->GetDependencyMark()) {
+            class_->SetDependencyMark();
+        }
+    }
+    if (name_ != nullptr) {
+        name_->SetDependencyMark();
+    }
+    if (proto_ != nullptr) {
+        proto_->SetDependencyMark();
+    }
+    auto deps = GetIndexDependencies();
+    for (auto dep : deps) {
+        dep->SetDependencyMark();
+    }
 }
 
 MethodItem::MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags,
@@ -675,6 +739,29 @@ bool MethodItem::Write(Writer *writer)
     }
 
     return WriteTaggedData(writer);
+}
+
+void MethodItem::SetDependencyMark()
+{
+    BaseMethodItem::SetDependencyMark();
+    if (code_ != nullptr) {
+        code_->SetDependencyMark();
+    }
+    if (debugInfo_ != nullptr) {
+        debugInfo_->SetDependencyMark();
+    }
+    for (auto &item : annotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : runtimeAnnotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : typeAnnotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : runtimeTypeAnnotations_) {
+        item->SetDependencyMark();
+    }
 }
 
 size_t CodeItem::CatchBlock::CalculateSize() const
@@ -1110,6 +1197,18 @@ File::EntityId LiteralItem::GetLiteralArrayFileId() const
     return File::EntityId(GetValue<LiteralArrayItem *>()->GetOffset());
 }
 
+void LiteralItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    if (type_ == Type::STRING) {
+        auto stringItem = GetValue<StringItem *>();
+        stringItem->SetDependencyMark();
+    } else if (type_ == Type::METHOD) {
+        auto methodItem = GetValue<MethodItem *>();
+        methodItem->SetDependencyMark();
+    }
+}
+
 bool LiteralItem::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
@@ -1194,6 +1293,14 @@ bool LiteralArrayItem::Write(Writer *writer)
     return true;
 }
 
+void LiteralArrayItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    for (auto &it : items_) {
+        it.SetDependencyMark();
+    }
+}
+
 BaseFieldItem::BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags = 0U)
     : class_(cls), name_(name), type_(type), accessFlags_(accessFlags)
 {
@@ -1226,6 +1333,22 @@ bool BaseFieldItem::Write(Writer *writer)
     }
 
     return writer->WriteUleb128(accessFlags_);
+}
+
+void BaseFieldItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    if (class_ != nullptr) {
+        if (!class_->GetDependencyMark()) {
+            class_->SetDependencyMark();
+        }
+    }
+    if (name_ != nullptr) {
+        name_->SetDependencyMark();
+    }
+    if (type_ != nullptr) {
+        type_->SetDependencyMark();
+    }
 }
 
 FieldItem::FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags)
@@ -1344,6 +1467,26 @@ bool FieldItem::Write(Writer *writer)
     return WriteTaggedData(writer);
 }
 
+void FieldItem::SetDependencyMark()
+{
+    BaseFieldItem::SetDependencyMark();
+    if (value_ != nullptr) {
+        value_->SetDependencyMark();
+    }
+    for (auto &item : annotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : runtimeAnnotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : typeAnnotations_) {
+        item->SetDependencyMark();
+    }
+    for (auto &item : runtimeTypeAnnotations_) {
+        item->SetDependencyMark();
+    }
+}
+
 size_t AnnotationItem::CalculateSize() const
 {
     // class id + count + (name id + value id) * count + tag size * count
@@ -1409,6 +1552,19 @@ bool AnnotationItem::Write(Writer *writer)
     }
 
     return true;
+}
+
+void AnnotationItem::SetDependencyMark()
+{
+    BaseItem::SetDependencyMark();
+    if (class_ != nullptr) {
+        if (!class_->GetDependencyMark()) {
+            class_->SetDependencyMark();
+        }
+    }
+    for (auto &it : elements_) {
+        it.SetDependencyMark();
+    }
 }
 
 void LineNumberProgramItemBase::EmitEnd()
