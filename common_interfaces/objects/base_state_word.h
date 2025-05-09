@@ -24,6 +24,11 @@ using StateWordType = uint64_t;
 using MAddress = uint64_t;
 class TypeInfo;
 
+enum class Language : uint64_t {
+    DYNAMIC = 0,
+    STATIC = 1,
+};
+
 class BaseStateWord {
 public:
     static constexpr size_t PADDING_WIDTH = 60;
@@ -38,11 +43,6 @@ public:
         FORWARDING,
         FORWARDED,
         TO_VERSION
-    };
-
-    enum class Language : uint64_t {
-        DYNAMIC = 0,
-        STATIC = 1,
     };
 
     inline void SetForwarding()
@@ -140,19 +140,14 @@ private:
         return state_.forwardState_ == ForwardState::FORWARDED;
     }
 
-    inline void SetStatic()
+    inline void SetLanguage(Language language)
     {
-        state_.language_ = Language::STATIC;
+        state_.language_ = language;
     }
 
     inline bool IsStatic() const
     {
         return state_.language_ == Language::STATIC;
-    }
-
-    inline void SetDynamic()
-    {
-        state_.language_ = Language::DYNAMIC;
     }
 
     inline bool IsDynamic()

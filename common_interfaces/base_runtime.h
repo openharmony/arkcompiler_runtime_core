@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef COMMON_INTERFACES_BASE_RUNTIME_H
 #define COMMON_INTERFACES_BASE_RUNTIME_H
 
@@ -28,16 +28,16 @@ public:
     BaseRuntime() = default;
     ~BaseRuntime() = default;
 
-    static BaseRuntime *GetInstance();
+    static PUBLIC_API BaseRuntime *GetInstance();
     static void DestroyInstance();
 
     void PreFork(ThreadHolder *holder);
     void PostFork();
 
-    static void WriteBarrier(void* obj, void* field, void* ref);
-    static void* ReadBarrier(void* obj, void* field);
-    static void* ReadBarrier(void* field);
-    static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
+    static PUBLIC_API void WriteBarrier(void* obj, void* field, void* ref);
+    static PUBLIC_API void* ReadBarrier(void* obj, void* field);
+    static PUBLIC_API void* ReadBarrier(void* field);
+    static PUBLIC_API void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
 
     RuntimeParam GetRuntimeParam()
     {
