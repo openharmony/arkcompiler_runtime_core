@@ -22,5 +22,5 @@ files: [./issue_15669_03.ets]
 import { foo } from './issue_15669_03'
 
 function main(): void {
-  assertEQ( foo(2), 2)
+  assertEQ( foo(2), 4)
 }

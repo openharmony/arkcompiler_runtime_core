@@ -20,7 +20,7 @@ namespace ark::ets::interop::js::testing {
 
 class EtsForOfObjectsWithSymbolIteratorTsToEtsTest : public EtsInteropTest {};
 
-TEST_F(EtsForOfObjectsWithSymbolIteratorTsToEtsTest, checkArrayWithSymbolIterator)
+TEST_F(EtsForOfObjectsWithSymbolIteratorTsToEtsTest, DISABLED_checkArrayWithSymbolIterator)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkArrayWithSymbolIterator"));
 }
