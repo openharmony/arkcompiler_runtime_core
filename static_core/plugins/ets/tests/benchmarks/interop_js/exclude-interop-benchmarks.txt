@@ -43,6 +43,4 @@ MapCallbackS2d_test
 ReduceCallbackS2d_test
 StringifyArrayS2d_test
 StringifyObjectS2d_test
-callImportFunctionD2s_test
 equalityExtraD2s_test
-stringifyArrayD2s_test

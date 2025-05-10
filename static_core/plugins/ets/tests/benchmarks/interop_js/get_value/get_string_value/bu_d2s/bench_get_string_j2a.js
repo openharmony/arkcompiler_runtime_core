@@ -33,13 +33,14 @@ function getStringD2s() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
         const stsObj = this.getObj();
 
         const stringVal = stsObj.etsString;
 
-        return;
+        return stringVal;
     };
 
     return;

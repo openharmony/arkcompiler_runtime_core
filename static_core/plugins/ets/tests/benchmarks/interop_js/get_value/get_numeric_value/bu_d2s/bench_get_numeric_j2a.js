@@ -39,6 +39,7 @@ function getNumericD2s() {
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         const stsObj = this.getObj();
@@ -51,7 +52,7 @@ function getNumericD2s() {
         const floatVal = stsObj.etsFloat;
         const doubleVal = stsObj.etsDouble;
 
-        return;
+        return doubleVal;
     };
 
     return;

@@ -59,10 +59,11 @@ function mapCallbackD2d() {
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         newTestArray = testArray.map(addPrefix);
-        return;
+        return newTestArray;
     };
 
     return;

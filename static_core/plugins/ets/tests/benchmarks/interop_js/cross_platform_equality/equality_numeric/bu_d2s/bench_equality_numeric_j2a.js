@@ -43,15 +43,15 @@ function equalityNumericD2s() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
-        comparison(this.bench.etsNum, this.bench.etsNum, equal, 'number ');
-        return;
+        return comparison(this.bench.etsNum, this.bench.etsNum, equal, 'number ');
     };
 
     return;

@@ -42,10 +42,11 @@ function conversionOctalD2d() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
         result = octalStringToNumberToString(octalString);
-        return;
+        return result;
     };
 
     return;

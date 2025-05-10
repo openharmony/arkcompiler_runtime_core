@@ -36,14 +36,16 @@ function benchD2s() {
 
     /**
      * @Benchmark
+     * @returns {Obj} // returning value is important, see VMB docs
      */
     this.test1 = function() {
-        this.bench.testFunction();
-        return;
+        let res = this.bench.testFunction();
+        return res;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj} // returning value is important, see VMB docs
      */
     this.test2 = function() {
         return this.bench.testFunction();

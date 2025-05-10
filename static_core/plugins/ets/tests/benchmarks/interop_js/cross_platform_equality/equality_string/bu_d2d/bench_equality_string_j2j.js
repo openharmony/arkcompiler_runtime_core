@@ -30,15 +30,15 @@ function equalityStringD2d() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
-        comparison(jsStr, jsStr, equal, 'string ');
-        return;
+        return comparison(jsStr, jsStr, equal, 'string ');
     };
 
     return;

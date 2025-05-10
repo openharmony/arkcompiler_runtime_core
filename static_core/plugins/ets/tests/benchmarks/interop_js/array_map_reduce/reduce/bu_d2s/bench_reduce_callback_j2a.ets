@@ -42,7 +42,8 @@
         this.generateRandomArray(this.arrayLength, this.min, this.max, this.testArray);
     }
 
-    test(): void {
+    test(): number {
         this.sumArray = this.testArray.reduce(this.sumFunction,0);
+        return this.sumArray;
     }
 }

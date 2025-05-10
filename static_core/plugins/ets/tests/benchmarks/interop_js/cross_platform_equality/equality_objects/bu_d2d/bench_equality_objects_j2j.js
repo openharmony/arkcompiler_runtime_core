@@ -34,20 +34,19 @@ function equalityObjectsD2d() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         comparison(jsObj, jsObj, equal, 'object ');
 
         comparison(jsObj, jsObjCopy, equal, 'object by link ');
 
-        comparison(jsObj, jsObjOther, noEqual, 'object different object ');
-
-        return;
+        return comparison(jsObj, jsObjOther, noEqual, 'object different object ');
     };
 
     return;

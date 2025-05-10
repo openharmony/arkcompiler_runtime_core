@@ -36,10 +36,10 @@ function conversionOctalD2s() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
-        this.bench.test();
-        return;
+        return this.bench.test();
     };
 
     return;

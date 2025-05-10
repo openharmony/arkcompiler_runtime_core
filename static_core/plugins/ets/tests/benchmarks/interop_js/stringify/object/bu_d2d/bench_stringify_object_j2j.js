@@ -27,10 +27,10 @@ function stringifyObjectD2d() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
-        JSON.stringify(obj);
-        return;
+        return JSON.stringify(obj);
     };
 
     return;

@@ -31,15 +31,16 @@ class BenchS2s {
     /**
      * @Benchmark
      */
-    public test1(): void {
-        this.test_function();
+    public test1(): number {
+        let res: number = this.test_function();
+        return res; // returning value is important, see VMB docs
     }
 
     /**
      * @Benchmark
      */
     public test2(): number {
-        return this.test_function();
+        return this.test_function(); // returning value is important, see VMB docs
     }
 
     test_function(): number {

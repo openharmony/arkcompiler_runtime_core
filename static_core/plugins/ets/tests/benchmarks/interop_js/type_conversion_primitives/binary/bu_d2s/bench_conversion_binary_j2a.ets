@@ -24,7 +24,7 @@ export class ConversionBinaryD2s {
         return;
     }
 
-    test(data: string) {
+    test(data: string): string {
         return this.binaryStringToNumberToString(data);
     }
 }

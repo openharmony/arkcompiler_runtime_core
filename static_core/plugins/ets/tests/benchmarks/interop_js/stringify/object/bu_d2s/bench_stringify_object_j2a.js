@@ -35,10 +35,10 @@ function stringifyObjectD2s() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
-        JSON.stringify(this.obj);
-        return;
+        return JSON.stringify(this.obj);
     };
 
     return;

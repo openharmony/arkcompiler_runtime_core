@@ -30,12 +30,12 @@ function classInitByRestD2d() {
     };
 
     function init(arg) {
-        new UnlimitedArguments(arg);
-        return;
+        return new UnlimitedArguments(arg);
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         init(createArgArray(0));
@@ -50,9 +50,7 @@ function classInitByRestD2d() {
 
         init(createArgArray(100));
 
-        init(createArgArray(200));
-
-        return;
+        return init(createArgArray(200));
     };
 
     return;

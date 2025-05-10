@@ -50,9 +50,11 @@ function reduceCallbackD2d() {
 
     /**
      * @Benchmark
+     * @returns {Int}
      */
     this.test = function() {
         sumArray = testArray.reduce(sumFunction, 0);
+        return sumArray;
     };
 
     return;

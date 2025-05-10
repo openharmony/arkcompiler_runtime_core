@@ -26,13 +26,14 @@ import {
 function getSpecificD2d() {
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         let bigintVal = jsBigint;
         let boolVal = jsBoolean;
         let nullVal = jsNull;
         let undefinedVal = jsUndefined;
-        return;
+        return undefinedVal;
     };
 
     return;

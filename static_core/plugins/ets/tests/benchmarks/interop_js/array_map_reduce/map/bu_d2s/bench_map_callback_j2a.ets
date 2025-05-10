@@ -49,7 +49,8 @@ export class MapCallbackD2s {
         this.generateRandomArray(this.arrayLength, this.stringLength, this.testArray);
     }
 
-    test(): void {
+    test(): Array<string> {
         this.newTestArray = this.testArray.map(this.addPrefix);
+        return this.newTestArray;
     }
 }

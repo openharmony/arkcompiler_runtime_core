@@ -29,7 +29,7 @@ export class ConversionOctalD2s {
         return Math.floor((seed / modulus) * 100); 
       }
 
-    octalStringToNumberToString(str: string):string {
+    octalStringToNumberToString(str: string): string {
         const res = parseInt(str, 8);
         return String(res);
     }
@@ -39,7 +39,8 @@ export class ConversionOctalD2s {
         this.octalString = data.toString(8);
     }
 
-    test(): void {
+    test(): string {
         this.result = this.octalStringToNumberToString(this.octalString);
+        return this.result;
     }
 }

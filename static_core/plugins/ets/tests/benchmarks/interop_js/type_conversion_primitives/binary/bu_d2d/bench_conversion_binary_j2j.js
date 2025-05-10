@@ -42,10 +42,11 @@ function conversionBinaryD2d() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
         result = binaryStringToNumberToString(binaryString);
-        return;
+        return result;
     };
 
     return;

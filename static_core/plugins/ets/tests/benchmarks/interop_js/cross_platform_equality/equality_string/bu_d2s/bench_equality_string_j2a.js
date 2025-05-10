@@ -43,15 +43,15 @@ function equalityStringD2s() {
         if (compare === noEqual && valueA === valueB) {
             throw Error();
         }
-        return;
+        return equal;
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
-        comparison(this.bench.etsString, this.bench.etsString, equal, 'string ');
-        return;
+        return comparison(this.bench.etsString, this.bench.etsString, equal, 'string ');
     };
 
     return;

@@ -50,10 +50,10 @@ function conversionBinaryD2s() {
 
     /**
      * @Benchmark
+     * @returns {Char}
      */
     this.test = function() {
-        this.bench.test(this.binaryString);
-        return;
+        return this.bench.test(this.binaryString);
     };
 
     return;

@@ -28,7 +28,7 @@ function classInitByRestD2s() {
 
         this.UnlimitedArguments = stsVm.getClass('Lbench_unlimited_arguments/UnlimitedArguments;');
 
-        return 0;
+        return;
     };
 
     function createArgArray(count) {
@@ -42,31 +42,27 @@ function classInitByRestD2s() {
     };
 
     function init(arg) {
-        new UnlimitedArguments(...arg);
-        return;
+        return new UnlimitedArguments(...arg);
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
-       // NOTE: issue(17965) enable below after fix global reference storage
-        if (false) {
-            init(createArgArray(0));
+        init(createArgArray(0));
 
-            init(createArgArray(5));
+        init(createArgArray(5));
 
-            init(createArgArray(10));
+        init(createArgArray(10));
 
-            init(createArgArray(20));
+        init(createArgArray(20));
 
-            init(createArgArray(50));
+        init(createArgArray(50));
 
-            init(createArgArray(100));
+        init(createArgArray(100));
 
-            init(createArgArray(200));
-        }
-        return;
+        return init(createArgArray(200));
     };
 
     return;

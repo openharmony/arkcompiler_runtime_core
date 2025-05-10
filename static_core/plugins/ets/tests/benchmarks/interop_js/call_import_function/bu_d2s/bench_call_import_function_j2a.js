@@ -33,21 +33,19 @@ function callImportFunctionD2s() {
     };
 
     function callFunction(fun, target) {
-        fun(1000000, 1000000);
-        return;
+        return fun(1000000, 1000000);
     };
 
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         let anonymous = this.returnAnonymous();
 
         callFunction(anonymous, 'anonymous fu');
 
-        callFunction(this.etsVoid, 'function');
-
-        return;
+        return callFunction(this.etsVoid, 'function');
     };
 
     return;

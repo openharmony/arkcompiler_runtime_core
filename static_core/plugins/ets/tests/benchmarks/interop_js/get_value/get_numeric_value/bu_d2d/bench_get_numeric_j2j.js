@@ -29,6 +29,7 @@ import {
 function getNumericD2d() {
     /**
      * @Benchmark
+     * @returns {Obj}
      */
     this.test = function() {
         let numVal = jsNumber;
@@ -38,7 +39,7 @@ function getNumericD2d() {
         let longVal = jsLong;
         let floatVal = jsFloat;
         let doubleVal = jsDouble;
-        return;
+        return doubleVal;
     };
 
     return;
