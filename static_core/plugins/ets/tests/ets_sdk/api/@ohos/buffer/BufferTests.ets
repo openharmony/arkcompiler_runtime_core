@@ -103,6 +103,49 @@ function testToString() {
         const res = buf.toString('base64', 0, -Infinity); // ''
         assertEQ(res, '')
     }
+    {
+        let array = new Uint8Array([252, 11, 3, 67, 237, 118, 91, 177, 43]);
+        let buf = buffer.from(array);
+        let strUrl = buf.toString("base64url");
+        let str = buf.toString("base64");
+        assertEQ(strUrl, "_AsDQ-12W7Er");
+        assertEQ(str, "/AsDQ+12W7Er");
+
+        array = new Uint8Array([2, 192, 254, 253, 5, 132, 69]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        assertEQ(String(strUrl), 'AsD-_QWERQ');
+        assertEQ(str, "AsD+/QWERQ==");
+
+        array = new Uint8Array([215, 109, 211, 97, 72, 142, 167, 241]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        assertEQ(strUrl, "123TYUiOp_E");
+        assertEQ(str, "123TYUiOp/E=");
+
+        array = new Uint8Array([252]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        assertEQ(strUrl, "_A");
+        assertEQ(str, "/A==");
+
+        array = new Uint8Array([252, 97]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        assertEQ(strUrl, "_GE");
+        assertEQ(str, "/GE=");
+
+        array = new Uint8Array([252, 97, 142]);
+        buf = buffer.from(array);
+        strUrl = buf.toString("base64url");
+        str = buf.toString("base64");
+        assertEQ(strUrl, "_GGO");
+        assertEQ(str, "/GGO");
+    }
 }
 
 function main(): int {

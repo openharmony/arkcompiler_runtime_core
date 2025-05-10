@@ -274,6 +274,10 @@ PandaString ConvertBase64Encoding(const PandaVector<uint8_t> &bytes, std::string
     if (encoding == "base64url") {
         std::replace(output.begin(), output.end(), '+', '-');
         std::replace(output.begin(), output.end(), '/', '_');
+        size_t lastValidCharPos = output.find_last_not_of('=');
+        if (lastValidCharPos != PandaString::npos) {
+            output.erase(lastValidCharPos + 1);
+        }
     }
     return output;
 }
