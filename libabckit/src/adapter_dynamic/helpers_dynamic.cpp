@@ -557,7 +557,8 @@ bool IsAnonymousName(const std::string &funcName)
 
 static std::string DemangleScopeName(const std::string &mangled, const AbckitLiteralArray *scopeNames)
 {
-    size_t scopeIdx = stoi(mangled);
+    const int base = 16;
+    size_t scopeIdx = stoi(mangled, nullptr, base);
     auto *litArr = scopeNames->GetDynamicImpl();
     ASSERT(litArr->literals_.size() % 2U == 0);
     ASSERT(scopeIdx < litArr->literals_.size());
