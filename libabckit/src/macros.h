@@ -100,4 +100,16 @@
         /* CC-OFFNXT(G.PRE.05) code generation */           \
         return;                                             \
     }
+// CC-OFFNXT(G.PRE.09) code generation
+// CC-OFFNXT(G.PRE.02) necessary macro
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_CONCAT_INNER(x, y) x##y
+// CC-OFFNXT(G.PRE.09) code generation
+// CC-OFFNXT(G.PRE.02) necessary macro
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_CONCAT(x, y) LIBABCKIT_CONCAT_INNER(x, y)
+// CC-OFFNXT(G.PRE.09) code generation
+// CC-OFFNXT(G.PRE.02) necessary macro
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_UNIQUE_VAR(name) LIBABCKIT_CONCAT(_##name##_, LIBABCKIT_LINE)
 #endif

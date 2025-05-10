@@ -26,6 +26,7 @@
 #include "libabckit/src/mem_manager/mem_manager.h"
 #include "libabckit/src/logger.h"
 #include "libabckit/src/abckit_options.h"
+#include "scoped_timer.h"
 
 #include <cstddef>
 #include <iostream>
@@ -40,6 +41,7 @@ libabckit::Options g_abckitOptions("");
 extern "C" AbckitStatus GetAbckitLastError()
 {
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     return statuses::GetLastError();
 }
 
@@ -47,6 +49,7 @@ extern "C" AbckitFile *OpenAbc(const char *path, size_t len)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(path, nullptr);
     LIBABCKIT_ZERO_ARGUMENT(len, nullptr);
@@ -83,6 +86,7 @@ extern "C" void WriteAbc(AbckitFile *file, const char *path, size_t len)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(file)
     LIBABCKIT_BAD_ARGUMENT_VOID(path)
@@ -102,6 +106,7 @@ extern "C" void CloseFile(AbckitFile *file)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(file);
 
@@ -119,6 +124,7 @@ extern "C" void DestroyGraph(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(graph);
 
