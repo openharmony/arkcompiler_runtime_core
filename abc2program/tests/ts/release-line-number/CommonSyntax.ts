@@ -145,3 +145,11 @@ async function fetchAndDisplayData() {
     }
 }
 fetchAndDisplayData();
+
+class testA {
+	constructor(public value: number) {}
+}
+
+export class classA {
+	a = new testA(100);
+}

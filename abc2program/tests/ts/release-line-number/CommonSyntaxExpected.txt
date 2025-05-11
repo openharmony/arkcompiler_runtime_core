@@ -3,21 +3,25 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_1582 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_1759 { 8 [ i32:0, i32:0, i32:0, i32:1, string:"classA", string:"classA", i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_1568 { 4 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", ]}
+_ESScopeNamesRecord_1735 { 8 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", tag_value:5, string:"testA", tag_value:5, string:"classA", ]}
 
-_GLOBAL_1610 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
+_GLOBAL_1795 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
 
-_GLOBAL_1624 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1809 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1643 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1828 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1680 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
+_GLOBAL_1865 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
 
-_GLOBAL_1704 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1889 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1908 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+
+_GLOBAL_1930 { 2 [ tag_value:2, i32:0, ]}
+
+_GLOBAL_1939 { 2 [ tag_value:2, i32:0, ]}
 
 
 
@@ -310,18 +314,49 @@ _GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	returnundefined                          # line: 118           # column: 0
 }
 
+.function_kind FunctionKind::NONE
+ _ESSlotNumberAnnotation
+ SlotNumber 2
+.language ECMAScript
+.function any .#~@2=#testA(any a0, any a1, any a2, any a3) {
+	lda a3                                   # line: 149           # column: 0
+	stobjbyname 0x0, value, a2               # line: 149           # column: 0
+	lda a2                                   # line: 149           # column: 0
+	return                                   # line: 149           # column: 0
+}
+
+.function_kind FunctionKind::FUNCTION
+ _ESExpectedPropertyCountAnnotation
+ ExpectedPropertyCount 1
+ _ESSlotNumberAnnotation
+ SlotNumber 4
+.language ECMAScript
+.function any .#~@3=#classA(any a0, any a1, any a2) {
+	ldlexvar 0x0, 0x1                        # line: 153           # column: 0
+	sta v0                                   # line: 153           # column: 0
+	throw.undefinedifholewithname testA      # line: 153           # column: 0
+	ldai 0x64                                # line: 153           # column: 0
+	sta v1                                   # line: 153           # column: 0
+	mov v2, v0                               # line: 153           # column: 0
+	mov v3, v1                               # line: 153           # column: 0
+	newobjrange 0x0, 0x2, v2                 # line: 153           # column: 0
+	stobjbyname 0x2, a, a2                   # line: 153           # column: 0
+	lda a2                                   # line: 153           # column: 0
+	return                                   # line: 153           # column: 0
+}
+
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
- SlotNumber 123
+ SlotNumber 129
 .language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
 	ldai 0x19                                # line: 18446744073709551615           # column: 0
 	sta v0                                   # line: 18446744073709551615           # column: 0
-	newlexenv 0x3                            # line: 18446744073709551615           # column: 0
+	newlexenv 0x4                            # line: 18446744073709551615           # column: 0
 	lda a1                                   # line: 18446744073709551615           # column: 0
-	stlexvar 0x0, 0x1                        # line: 18446744073709551615           # column: 0
-	lda a2                                   # line: 18446744073709551615           # column: 0
 	stlexvar 0x0, 0x2                        # line: 18446744073709551615           # column: 0
+	lda a2                                   # line: 18446744073709551615           # column: 0
+	stlexvar 0x0, 0x3                        # line: 18446744073709551615           # column: 0
 	definefunc 0x0, .#*#defaultGreet, 0x0    # line: 18446744073709551615           # column: 0
 	sta v1                                   # line: 18446744073709551615           # column: 0
 	definefunc 0x1, .#*#fetchAndDisplayData, 0x0 # line: 18446744073709551615           # column: 0
@@ -341,9 +376,9 @@ _GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v7                                   # line: 22           # column: 0
 	ldbigint 10                              # line: 23           # column: 0
 	sta v8                                   # line: 23           # column: 0
-	createobjectwithbuffer 0x6, _GLOBAL_1610 # line: 24           # column: 0
+	createobjectwithbuffer 0x6, _GLOBAL_1795 # line: 24           # column: 0
 	sta v9                                   # line: 24           # column: 0
-	createarraywithbuffer 0x7, _GLOBAL_1624  # line: 27           # column: 0
+	createarraywithbuffer 0x7, _GLOBAL_1809  # line: 27           # column: 0
 	sta v10                                  # line: 27           # column: 0
 	definefunc 0x8, .#*#sum, 0x2             # line: 29           # column: 0
 	sta v11                                  # line: 29           # column: 0
@@ -488,7 +523,7 @@ _GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 79           # column: 0
 	lda v5                                   # line: 79           # column: 0
 	callarg1 0x4a, v6                        # line: 79           # column: 0
-	createobjectwithbuffer 0x4c, _GLOBAL_1643 # line: 82           # column: 0
+	createobjectwithbuffer 0x4c, _GLOBAL_1828 # line: 82           # column: 0
 	sta v5                                   # line: 82           # column: 0
 	ldobjbyname 0x4d, greet                  # line: 89           # column: 0
 	callthis0 0x4f, v5                       # line: 89           # column: 0
@@ -501,14 +536,14 @@ _GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 93           # column: 0
 	lda.str !                                # line: 93           # column: 0
 	add2 0x52, v6                            # line: 93           # column: 0
-	createobjectwithbuffer 0x53, _GLOBAL_1680 # line: 96           # column: 0
+	createobjectwithbuffer 0x53, _GLOBAL_1865 # line: 96           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x54, gender                 # line: 97           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x56, grade                  # line: 97           # column: 0
 	lda v1                                   # line: 103           # column: 0
 	callarg0 0x58                            # line: 103           # column: 0
-	createarraywithbuffer 0x5a, _GLOBAL_1704 # line: 106           # column: 0
+	createarraywithbuffer 0x5a, _GLOBAL_1889 # line: 106           # column: 0
 	sta v1                                   # line: 106           # column: 0
 	createemptyarray 0x5b                    # line: 107           # column: 0
 	sta v5                                   # line: 107           # column: 0
@@ -528,7 +563,7 @@ _GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	inc 0x63                                 # line: 107           # column: 0
 	ldhole                                   # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
-	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1723, 0x2, v1 # line: 110           # column: 0
+	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1908, 0x2, v1 # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
 	ldobjbyname 0x65, prototype              # line: 110           # column: 0
 	lda.str Alice                            # line: 120           # column: 0
@@ -558,6 +593,20 @@ _GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	callthis1 0x77, v0, v3                   # line: 132           # column: 0
 	lda v2                                   # line: 146           # column: 0
 	callarg0 0x79                            # line: 146           # column: 0
+	ldhole                                   # line: 148           # column: 0
+	sta v0                                   # line: 148           # column: 0
+	defineclasswithbuffer 0x7b, .#~@2=#testA, _GLOBAL_1930, 0x1, v0 # line: 148           # column: 0
+	sta v0                                   # line: 148           # column: 0
+	ldobjbyname 0x7c, prototype              # line: 148           # column: 0
+	lda v0                                   # line: 148           # column: 0
+	stlexvar 0x0, 0x1                        # line: 148           # column: 0
+	ldhole                                   # line: 152           # column: 0
+	sta v0                                   # line: 152           # column: 0
+	defineclasswithbuffer 0x7e, .#~@3=#classA, _GLOBAL_1939, 0x0, v0 # line: 152           # column: 0
+	sta v0                                   # line: 152           # column: 0
+	ldobjbyname 0x7f, prototype              # line: 152           # column: 0
+	lda v0                                   # line: 152           # column: 0
+	stmodulevar 0x0                          # line: 152           # column: 0
 	returnundefined                          # line: 18446744073709551615           # column: 0
 }
 
@@ -574,6 +623,8 @@ _GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 .#*@1*#
 .#*@1**#
 .#~@0=#Person
+.#~@2=#testA
+.#~@3=#classA
 10
 Adult
 Alice
@@ -590,6 +641,7 @@ Monday
 Promise
 Start of the week
 Symbol
+a
 age
 catch
 console
@@ -603,4 +655,6 @@ log
 name
 prototype
 setTimeout
+testA
 then
+value

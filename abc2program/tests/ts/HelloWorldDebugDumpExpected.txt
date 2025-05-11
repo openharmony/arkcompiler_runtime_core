@@ -570,10 +570,10 @@ _GLOBAL_2070 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
 	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	lda v2                                   # line: 0           # column: 0
-	sta v4                                   # line: 0           # column: 0
+	lda v2                                   # line: 22           # column: 2
+	sta v4                                   # line: 22           # column: 2
 	lda.str HelloWorld                       # line: 22           # column: 8
-	stobjbyname 0x0, str, v4                 # line: 0           # column: 0
+	stobjbyname 0x0, str, v4                 # line: 22           # column: 2
 	lda v2                                   # line: 18446744073709551615           # column: 4294967295
 	return                                   # line: 0           # column: 0
 
@@ -663,10 +663,10 @@ _GLOBAL_2070 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
 	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
 	lda.str use sendable                     # line: 33           # column: 4
-	lda v2                                   # line: 0           # column: 0
-	sta v4                                   # line: 0           # column: 0
+	lda v2                                   # line: 30           # column: 2
+	sta v4                                   # line: 30           # column: 2
 	ldai 0x1                                 # line: 30           # column: 16
-	stobjbyname 0x0, num, v4                 # line: 0           # column: 0
+	stobjbyname 0x0, num, v4                 # line: 30           # column: 2
 	lda v2                                   # line: 18446744073709551615           # column: 4294967295
 	return                                   # line: 34           # column: 3
 
