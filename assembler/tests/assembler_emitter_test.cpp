@@ -1213,7 +1213,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
 
         std::string descriptor;
         const std::string filename_api11 = "source_021_api11.abc";
-        auto is_emitted = AsmEmitter::EmitPrograms(filename_api11, progs, false, 11);
+        EmitterConfig emitConfig {11};
+        auto is_emitted = AsmEmitter::EmitPrograms(filename_api11, progs, false, emitConfig);
         EXPECT_TRUE(is_emitted);
         auto pf = panda_file::OpenPandaFile(filename_api11);
         EXPECT_NE(pf, nullptr);
@@ -1245,7 +1246,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
 
         std::string descriptor;
         const std::string filename_api12 = "source_021_api12.abc";
-        auto is_emitted = AsmEmitter::EmitPrograms(filename_api12, progs, false, 12);
+        EmitterConfig emitConfig {12};
+        auto is_emitted = AsmEmitter::EmitPrograms(filename_api12, progs, false, emitConfig);
         EXPECT_TRUE(is_emitted);
         auto pf = panda_file::OpenPandaFile(filename_api12);
         EXPECT_NE(pf, nullptr);
