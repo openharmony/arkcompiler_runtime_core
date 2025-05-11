@@ -3059,6 +3059,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::taskpool::IsUsingLaunchMode
 
+  - name: TaskpoolIsSupportInterop
+    space: ets
+    class_name: escompat.taskpool
+    method_name: isSupportingInterop
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::taskpool::IsSupportingInterop
+
   - name: TaskpoolGenerateSequenceRunnerId
     space: ets
     class_name: escompat.taskpool.SequenceRunner
@@ -5088,6 +5098,16 @@ intrinsics:
       ret: i32
       args: []
     impl: ark::intrinsics::SystemCoroutineGetWorkerId
+
+  - name: StdTaskPoolIsSupportingInterop
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: isTaskpoolSupportingInterop
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::taskpool::IsSupportingInterop
 
   - name: StdTaskPoolIsUsingLaunchMode
     space: ets
