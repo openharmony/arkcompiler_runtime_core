@@ -366,10 +366,6 @@
 08.statements/11.continue_statements/continue_for_of3l.ets
 08.statements/11.continue_statements/continue_for_of5l.ets
 
-#25341
-08.statements/14.throw_statements/throw_4.ets
-08.statements/14.throw_statements/throw_6.ets
-
 #23050
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_1.ets
 
