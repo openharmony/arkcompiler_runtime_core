@@ -359,9 +359,19 @@ export final class BigInt {
         return this
     }
 
+    public static asIntN(bits: Number, num: BigInt): BigInt {
+        return BigInt.asIntN(bits as long, num)
+    }
+
     public static asIntN(bits: long, num: BigInt): BigInt {
-        if (bits == 0) {
+        if (bits == 0 || num.isZero()) {
             return 0n
+        }
+        if (bits < 0 || bits > Double.MAX_SAFE_INTEGER) {
+            throw new RangeError('bits < 0 or bits > Double.MAX_SAFE_INTEGER')
+        }
+        if (bits >= num.length() * BigInt.shiftSys) {
+            return num
         }
         // operatorLeftShift temporary has limitations to 255 on rhs
         // in this case must be bits <= 255
@@ -377,7 +387,20 @@ export final class BigInt {
         return masked >= half ? masked - (mask + 1n) : masked
     }
 
+    public static asUintN(bits: Number, num: BigInt): BigInt {
+        return BigInt.asUintN(bits as long, num)
+    }
+
     public static asUintN(bits: long, num: BigInt): BigInt {
+        if (bits == 0 || num.isZero()) {
+            return 0n
+        }
+        if (bits < 0 || bits > Double.MAX_SAFE_INTEGER) {
+            throw new RangeError('bits < 0 or bits > Double.MAX_SAFE_INTEGER')
+        }
+        if (bits >= num.length() * BigInt.shiftSys && num.positive()) {
+            return num
+        }
         // operatorLeftShift temporary has limitations to 255 on rhs
         // in this case must be bits <= 255
         // please check `operatorLeftShift` implementation
