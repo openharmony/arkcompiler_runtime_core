@@ -104,7 +104,7 @@ static void BindNativeDecoder(ani_env *env, ani_object object, ani_string aniEnc
 
 static ani_status BindTextDecoder(ani_env *env)
 {
-    const char *className = "Lapi/util/TextDecoder;";
+    const char *className = "L@ohos/util/util/TextDecoder;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -127,7 +127,7 @@ static ani_status BindTextDecoder(ani_env *env)
 [[maybe_unused]] static ani_status BindTextEncoder(ani_env *env)
 {
     ani_class cls;
-    const char *className = "Lapi/util/TextEncoder;";
+    const char *className = "L@ohos/util/util/TextEncoder;";
     if (ANI_OK != env->FindClass(className, &cls)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         LOG_ERROR_SDK("TextEncoder:: Not found %{public}s", className);
@@ -141,7 +141,7 @@ static ani_status BindTextDecoder(ani_env *env)
         },
         ani_native_function {
             "doEncodeInfoUint8Array",
-            "Lstd/core/String;Lstd/core/String;Lescompat/Uint8Array;:Lapi/util/EncodeIntoUint8ArrayInfo;",
+            "Lstd/core/String;Lstd/core/String;Lescompat/Uint8Array;:L@ohos/util/util/EncodeIntoUint8ArrayInfo;",
             reinterpret_cast<void *>(ark::ets::sdk::util::DoEncodeIntoUint8Array),
         },
     };
@@ -156,7 +156,7 @@ static ani_status BindTextDecoder(ani_env *env)
 
 static ani_status BindUtilHelper(ani_env *env)
 {
-    const char *className = "Lapi/util/UtilHelper;";
+    const char *className = "L@ohos/util/util/UtilHelper;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         auto msg = std::string("Cannot find \"") + className + std::string("\" class!");

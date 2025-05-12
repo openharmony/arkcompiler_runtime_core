@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { url, BusinessError } from "api"
+import {url} from "@ohos.url"
 
 function testParamsGet001() {
 	let params = new url.URLParams("key1=value1&key2=value2");

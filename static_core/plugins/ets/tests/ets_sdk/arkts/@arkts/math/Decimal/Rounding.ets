@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Rounding} from "arkts"
+import {Modulo, Rounding} from "@arkts.math.Decimal"
 
 function main(): int {
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package api;
+import LightWeightMap from '@ohos.util.LightWeightMap';
 
 /**
  * The PlainArray class is a collection of key-value pairs.

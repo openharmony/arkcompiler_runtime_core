@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { buffer } from "api/@ohos.buffer.ets";
+import buffer from "@ohos.buffer";
 
 function main(): int {
     const suite = new ArkTestsuite("Buffer search methods")

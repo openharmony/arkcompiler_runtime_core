@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Modulo} from "arkts"
+import {Modulo} from "@arkts.math.Decimal"
 
 function main(): int {
 

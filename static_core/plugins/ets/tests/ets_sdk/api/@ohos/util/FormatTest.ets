@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- import {util} from "api"
+import {util} from "@ohos.util";
 
 const success: int = 0;
 const fail: int = 1;

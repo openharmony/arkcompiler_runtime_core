@@ -13,10 +13,19 @@
  * limitations under the License.
  */
 
-package api;
+import { BusinessError } from "@ohos.base";
 
+const OutOfBoundsErrorCodeId: number = 10200001;
 
-export class Deque<T> implements Iterable<T> {
+function createBusinessError(code: number, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'BusinessError';
+    err.message = message;
+    return err;
+}
+
+export default class Deque<T> implements Iterable<T> {
     private readonly DEFAULT_CAPACITY = 8;
     internal capacity: int = this.DEFAULT_CAPACITY;
     internal buffer: Array<T>;
@@ -218,7 +227,7 @@ export class Deque<T> implements Iterable<T> {
      */
     public $_get(index: number): T {
         if (index >= this.length || index < 0) {
-            throw new BusinessError(`The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`, OutOfBoundsErrorCodeId);
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
         }
 
         return this.buffer[this.getRealIndex(index)];
@@ -234,7 +243,7 @@ export class Deque<T> implements Iterable<T> {
      */
     public $_set(index: number, val: T): void {
         if (index >= this.length || index < 0) {
-            throw new BusinessError(`The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`, OutOfBoundsErrorCodeId);
+            throw createBusinessError(OutOfBoundsErrorCodeId, `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: ${index}`);
         }
 
         this.buffer[this.getRealIndex(index)] = val;

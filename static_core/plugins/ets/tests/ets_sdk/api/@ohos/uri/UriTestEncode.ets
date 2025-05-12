@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { uri, BusinessError } from "api"
-
-
+import { uri } from "@ohos.uri"
 
 function testUriEncodedUserInfo001() {
     let route = new uri.URI('http://username:name@www.test.com/');
