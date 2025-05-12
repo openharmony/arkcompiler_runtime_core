@@ -19,7 +19,6 @@
 
 % visitors.each do |visitor|
 <%= visitor_sig(visitor.ir_op) %> {
-    pandasm::Ins ins;
     [[maybe_unused]] auto enc = static_cast<BytecodeGen*>(v);
     [[maybe_unused]] auto inst = inst_base->CastTo<%= visitor.ir_op %>();
 <%= visitor.switch.encode %>

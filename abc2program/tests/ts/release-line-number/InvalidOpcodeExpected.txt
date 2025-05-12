@@ -1,11 +1,11 @@
-# source binary: out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/InvalidOpcode.abc
+# source binary: openharmony/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/InvalidOpcode.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_608 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_613 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_604 
+_ESScopeNamesRecord_609 
 
 
 
@@ -19,13 +19,13 @@ _ESScopeNamesRecord_604
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_608
+	u32 openharmony/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_613
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_604
+	u32 openharmony/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_609
 }
 .record.source_file 
 
@@ -59,7 +59,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 18           # column: 0
 	lda v1                                   # line: 18           # column: 0
 	callarg1 0x2, v2                         # line: 18           # column: 0
-	label@11: lda v0                         # line: 20           # column: 0
+	label@11:                                # line: 0           # column: 0
+	lda v0                                   # line: 20           # column: 0
 	tonumeric 0x4                            # line: 20           # column: 0
 	inc 0x5                                  # line: 20           # column: 0
 	sta v0                                   # line: 20           # column: 0
@@ -72,7 +73,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 22           # column: 0
 	lda v1                                   # line: 22           # column: 0
 	callarg1 0x8, v2                         # line: 22           # column: 0
-	label@24: lda v0                         # line: 24           # column: 0
+	label@24:                                # line: 0           # column: 0
+	lda v0                                   # line: 24           # column: 0
 	tonumeric 0xa                            # line: 24           # column: 0
 	inc 0xb                                  # line: 24           # column: 0
 	sta v0                                   # line: 24           # column: 0
@@ -85,7 +87,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 26           # column: 0
 	lda v1                                   # line: 26           # column: 0
 	callarg1 0xe, v2                         # line: 26           # column: 0
-	label@37: lda v0                         # line: 28           # column: 0
+	label@37:                                # line: 0           # column: 0
+	lda v0                                   # line: 28           # column: 0
 	tonumeric 0x10                           # line: 28           # column: 0
 	inc 0x11                                 # line: 28           # column: 0
 	sta v0                                   # line: 28           # column: 0
@@ -98,7 +101,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 30           # column: 0
 	lda v1                                   # line: 30           # column: 0
 	callarg1 0x14, v2                        # line: 30           # column: 0
-	label@50: lda v0                         # line: 32           # column: 0
+	label@50:                                # line: 0           # column: 0
+	lda v0                                   # line: 32           # column: 0
 	tonumeric 0x16                           # line: 32           # column: 0
 	inc 0x17                                 # line: 32           # column: 0
 	sta v0                                   # line: 32           # column: 0
@@ -111,7 +115,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 34           # column: 0
 	lda v1                                   # line: 34           # column: 0
 	callarg1 0x1a, v2                        # line: 34           # column: 0
-	label@63: lda v0                         # line: 36           # column: 0
+	label@63:                                # line: 0           # column: 0
+	lda v0                                   # line: 36           # column: 0
 	tonumeric 0x1c                           # line: 36           # column: 0
 	inc 0x1d                                 # line: 36           # column: 0
 	sta v0                                   # line: 36           # column: 0
@@ -124,7 +129,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 38           # column: 0
 	lda v1                                   # line: 38           # column: 0
 	callarg1 0x20, v2                        # line: 38           # column: 0
-	label@76: ldai 0x7                       # line: 38           # column: 0
+	label@76:                                # line: 0           # column: 0
+	ldai 0x7                                 # line: 38           # column: 0
 	sta v1                                   # line: 38           # column: 0
 	lda v0                                   # line: 40           # column: 0
 	tonumeric 0x22                           # line: 40           # column: 0
@@ -139,7 +145,8 @@ _ESScopeNamesRecord_604
 	sta v3                                   # line: 42           # column: 0
 	lda v2                                   # line: 42           # column: 0
 	callarg1 0x26, v3                        # line: 42           # column: 0
-	label@91: lda v0                         # line: 44           # column: 0
+	label@91:                                # line: 0           # column: 0
+	lda v0                                   # line: 44           # column: 0
 	tonumeric 0x28                           # line: 44           # column: 0
 	inc 0x29                                 # line: 44           # column: 0
 	sta v0                                   # line: 44           # column: 0
@@ -152,7 +159,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 46           # column: 0
 	lda v1                                   # line: 46           # column: 0
 	callarg1 0x2c, v2                        # line: 46           # column: 0
-	label@104: lda v0                        # line: 48           # column: 0
+	label@104:                               # line: 0           # column: 0
+	lda v0                                   # line: 48           # column: 0
 	tonumeric 0x2e                           # line: 48           # column: 0
 	inc 0x2f                                 # line: 48           # column: 0
 	sta v0                                   # line: 48           # column: 0
@@ -165,7 +173,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 50           # column: 0
 	lda v1                                   # line: 50           # column: 0
 	callarg1 0x32, v2                        # line: 50           # column: 0
-	label@117: lda v0                        # line: 52           # column: 0
+	label@117:                               # line: 0           # column: 0
+	lda v0                                   # line: 52           # column: 0
 	tonumeric 0x34                           # line: 52           # column: 0
 	inc 0x35                                 # line: 52           # column: 0
 	sta v0                                   # line: 52           # column: 0
@@ -178,7 +187,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 54           # column: 0
 	lda v1                                   # line: 54           # column: 0
 	callarg1 0x38, v2                        # line: 54           # column: 0
-	label@130: lda v0                        # line: 56           # column: 0
+	label@130:                               # line: 0           # column: 0
+	lda v0                                   # line: 56           # column: 0
 	tonumeric 0x3a                           # line: 56           # column: 0
 	inc 0x3b                                 # line: 56           # column: 0
 	sta v0                                   # line: 56           # column: 0
@@ -191,7 +201,8 @@ _ESScopeNamesRecord_604
 	sta v2                                   # line: 58           # column: 0
 	lda v1                                   # line: 58           # column: 0
 	callarg1 0x3e, v2                        # line: 58           # column: 0
-	label@143: lda v0                        # line: 60           # column: 0
+	label@143:                               # line: 0           # column: 0
+	lda v0                                   # line: 60           # column: 0
 	tonumeric 0x40                           # line: 60           # column: 0
 	inc 0x41                                 # line: 60           # column: 0
 	sta v0                                   # line: 60           # column: 0
@@ -204,7 +215,8 @@ _ESScopeNamesRecord_604
 	sta v1                                   # line: 62           # column: 0
 	lda v0                                   # line: 62           # column: 0
 	callarg1 0x44, v1                        # line: 62           # column: 0
-	label@156: tryldglobalbyname 0x46, JSON  # line: 64           # column: 0
+	label@156:                               # line: 0           # column: 0
+	tryldglobalbyname 0x46, JSON             # line: 64           # column: 0
 	sta v0                                   # line: 64           # column: 0
 	ldobjbyname 0x47, parse                  # line: 64           # column: 0
 	sta v1                                   # line: 64           # column: 0

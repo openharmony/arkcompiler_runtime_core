@@ -66,7 +66,7 @@ HWTEST_F(Abc2ProgramLineNumberTest, abc2program_release_line_number_common_synta
     driver_.Dump(COMMON_SYNTAX_DUMP_RESULT_FILE_NAME);
     EXPECT_TRUE(Abc2ProgramTestUtils::ValidateDumpResult(COMMON_SYNTAX_DUMP_RESULT_FILE_NAME,
                                                          COMMON_SYNTAX_DUMP_EXPECTED_FILE_NAME));
-    Abc2ProgramTestUtils::RemoveDumpResultFile(COMMON_SYNTAX_DUMP_RESULT_FILE_NAME);
+    // Abc2ProgramTestUtils::RemoveDumpResultFile(COMMON_SYNTAX_DUMP_RESULT_FILE_NAME);
 }
 
 HWTEST_F(Abc2ProgramLineNumberTest, abc2program_release_line_number_invalid_opcode_test, TestSize.Level1)

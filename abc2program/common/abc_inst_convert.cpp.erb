@@ -19,12 +19,13 @@
 
 namespace panda::abc2program {
 
-pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
+pandasm::Ins *AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                                        panda_file::File::EntityId method_id) const
 {
-    pandasm::Ins ins{};
-
-    ins.opcode = BytecodeOpcodeToPandasmOpcode(bc_ins.GetOpcode());
+    auto opcode = BytecodeOpcodeToPandasmOpcode(bc_ins.GetOpcode());
+    std::vector<uint16_t> regs;
+    std::vector<pandasm::IType> imms;
+    std::vector<std::string> ids;
 
     const BytecodeInstruction::Format format = bc_ins.GetFormat();
 
@@ -37,22 +38,24 @@ pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeI
 %
 %   i.operands.each do |operand|
 %     if operand.imm?
-%       if operand.is_float_imm?
-            ins.imms.push_back(bit_cast<double>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>, true>()));
+%       if i.jump?
+            ids.push_back(std::to_string(static_cast<int32_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>, true>())));
+%       elsif operand.is_float_imm?
+            imms.push_back(bit_cast<double>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>, true>()));
 %       elsif operand.is_signed_imm?
-            ins.imms.push_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>, true>()));
+            imms.push_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>, true>()));
 %       elsif operand.is_unsigned_imm?
-            ins.imms.push_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>, false>()));
+            imms.push_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>, false>()));
 %       else
 %            raise "Incorrect imm type #{operand.type}"
 %       end
 %         imm_count += 1
 %
 %     elsif operand.reg?
-            ins.regs.push_back(bc_ins.GetVReg(<%=reg_count%>));
+            regs.push_back(bc_ins.GetVReg(<%=reg_count%>));
 %         reg_count += 1
 %     elsif operand.id?
-            ins.ids.push_back(IDToString(bc_ins, method_id, <%=id_count%>));
+            ids.push_back(IDToString(bc_ins, method_id, <%=id_count%>));
 %         id_count += 1
 %     end   
 %   end
@@ -62,7 +65,7 @@ pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeI
             break;
     }
 
-    if (ins.IsCall()) {
+    if ((pandasm::INST_FLAGS_TABLE[static_cast<size_t>(opcode)] & pandasm::InstFlags::CALL) != 0) {
         // clearing excessive arguments if there are any
         // if format has ID in it - receive it. else instruction is indirect call and id = method_id
         panda_file::File::EntityId id;
@@ -80,26 +83,28 @@ pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeI
         int overhead;
 
         if (mda.IsStatic()) {
-            overhead = ins.regs.size() - pda.GetNumArgs();
+            overhead = regs.size() - pda.GetNumArgs();
         } else {
-            overhead = ins.regs.size() - pda.GetNumArgs() - 1;
+            overhead = regs.size() - pda.GetNumArgs() - 1;
         }
-        if (overhead < 0 || overhead > static_cast<int>(ins.regs.size())) {
+        if (overhead < 0 || overhead > static_cast<int>(regs.size())) {
+            auto *ins = pandasm::Ins::CreateIns(opcode, regs, imms, ids);
             LOG(ERROR, ABC2PROGRAM)
                 << "> error encountered in code of " << std::dec << method_id.GetOffset() << " ("
-                << "0x" << std::hex << method_id.GetOffset() << ") while disassembling call <" << ins.ToString("")
+                << "0x" << std::hex << method_id.GetOffset() << ") while disassembling call <" << ins->ToString("")
                 << ">. Invalid method id given or corrupted: calculated overhead (difference "
                    "between amount of registers specified by instruction format and amount of function's arguments) "
                    "exceeds number of registers specified in ISA or is lesser than 0!";
-            return ins;
+            delete ins;
+            return nullptr;
         }
 
         for (int i = 0; i < overhead; i++) {
-            ins.regs.pop_back();
+            regs.pop_back();
         }
     }
 
-    return ins;
+    return pandasm::Ins::CreateIns(opcode, regs, imms, ids);
 }
 
 }  // namespace panda::abc2program

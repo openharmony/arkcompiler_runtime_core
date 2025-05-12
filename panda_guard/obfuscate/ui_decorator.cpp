@@ -184,7 +184,7 @@ void panda::guard::UiDecorator::Update()
 
     this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->name_);
     for (auto &inst : defineInsList_) {
-        inst.ins_->ids[INDEX_0] = this->obfName_;
+        inst.ins_->GetId(INDEX_0) = this->obfName_;
     }
     this->program_->prog_->strings.emplace(this->obfName_);
 }
@@ -219,7 +219,7 @@ void panda::guard::UiDecorator::HandleInstInFuncMain0()
         return;
     }
 
-    this->name_ = param.ins_->ids[INDEX_0];
+    this->name_ = param.ins_->GetId(INDEX_0);
     this->AddDefineInsList(param);
 
     LOG(INFO, PANDAGUARD) << TAG << "func_main0 found ui decorator property name:" << this->name_
@@ -256,10 +256,10 @@ void panda::guard::UiDecorator::HandleStObjByNameIns()
     if (!baseInst_.function_->component_) {
         return;
     }
-    if (!StringUtil::IsPrefixMatched(baseInst_.ins_->ids[INDEX_0], UI_DECORATOR_PREFIX.data())) {
+    if (!StringUtil::IsPrefixMatched(baseInst_.ins_->GetId(INDEX_0), UI_DECORATOR_PREFIX.data())) {
         return;
     }
-    this->name_ = baseInst_.ins_->ids[INDEX_0].substr(UI_DECORATOR_PREFIX.size());
+    this->name_ = baseInst_.ins_->GetId(INDEX_0).substr(UI_DECORATOR_PREFIX.size());
 
     InstructionInfo input;
     GraphAnalyzer::GetStObjByNameInput(baseInst_, input);
@@ -328,9 +328,9 @@ void panda::guard::UiDecorator::BuildCreatedByMemberMethodDecorator(const Instru
 
 void panda::guard::UiDecorator::BuildMonitorDecorator()
 {
-    uint32_t maxParamCnt = baseInst_.ins_->regs.size();
+    uint32_t maxParamCnt = baseInst_.ins_->Regs().size();
     if (baseInst_.ins_->opcode == pandasm::Opcode::CALLRANGE) {
-        maxParamCnt = std::get<int64_t>(baseInst_.ins_->imms[INDEX_1]);
+        maxParamCnt = std::get<int64_t>(baseInst_.ins_->GetImm(INDEX_1));
     }
     for (uint32_t index = 0; index < maxParamCnt; index++) {
         InstructionInfo param;
@@ -339,7 +339,7 @@ void panda::guard::UiDecorator::BuildMonitorDecorator()
             this->type_ = UiDecoratorType::NONE;
             return;
         }
-        LOG(INFO, PANDAGUARD) << TAG << "found monitor ui decorator: " << param.ins_->ids[INDEX_0];
+        LOG(INFO, PANDAGUARD) << TAG << "found monitor ui decorator: " << param.ins_->GetId(INDEX_0);
         this->AddDefineInsList(param);
     }
 }
@@ -377,7 +377,7 @@ void panda::guard::UiDecorator::BuildCreatedByMemberFieldDecorator()
         return;
     }
 
-    this->name_ = param.ins_->ids[INDEX_0];
+    this->name_ = param.ins_->GetId(INDEX_0);
     this->AddDefineInsList(param);
 }
 
@@ -393,7 +393,7 @@ void panda::guard::UiDecorator::BuildEventDecorator()
         return;
     }
 
-    this->name_ = out[INDEX_0].ins_->ids[INDEX_0];
+    this->name_ = out[INDEX_0].ins_->GetId(INDEX_0);
     this->type_ = UiDecoratorType::EVENT;
     this->AddDefineInsList(out);
 }
@@ -401,7 +401,7 @@ void panda::guard::UiDecorator::BuildEventDecorator()
 void panda::guard::UiDecorator::UpdateMonitorDecorator()
 {
     for (auto &inst : defineInsList_) {
-        auto nameList = StringUtil::Split(inst.ins_->ids[INDEX_0], MONITOR_UI_DECORATOR_DELIMITER.data());
+        auto nameList = StringUtil::Split(inst.ins_->GetId(INDEX_0), MONITOR_UI_DECORATOR_DELIMITER.data());
         if (nameList.empty()) {
             continue;
         }
@@ -411,9 +411,9 @@ void panda::guard::UiDecorator::UpdateMonitorDecorator()
             obfName += MONITOR_UI_DECORATOR_DELIMITER;
         }
         obfName = obfName.substr(0, obfName.length() - 1);
-        LOG(INFO, PANDAGUARD) << TAG << "update monitor ui decorator: " << inst.ins_->ids[INDEX_0] << " --> "
+        LOG(INFO, PANDAGUARD) << TAG << "update monitor ui decorator: " << inst.ins_->GetId(INDEX_0) << " --> "
                               << obfName;
-        inst.ins_->ids[INDEX_0] = obfName;
+        inst.ins_->GetId(INDEX_0) = obfName;
         this->program_->prog_->strings.emplace(obfName);
     }
 }
@@ -443,7 +443,7 @@ void panda::guard::UiDecorator::BuildReusableV2Decorator()
         return;
     }
 
-    const std::string &literalArrayIdx = createObjectInst.ins_->ids[0];
+    const std::string &literalArrayIdx = createObjectInst.ins_->GetId(0);
     auto outerProperty = GetObjectOuterProperty(literalArrayIdx);
     if (!outerProperty) {
         LOG(DEBUG, PANDAGUARD) << TAG << "object not find outer property:" << literalArrayIdx;
@@ -457,7 +457,7 @@ void panda::guard::UiDecorator::BuildReusableV2Decorator()
         return;
     }
 
-    auto func = Function(this->program_, defineFuncInst.ins_->ids[0]);
+    auto func = Function(this->program_, defineFuncInst.ins_->GetId(0));
     func.EnumerateIns([&](const InstructionInfo &inst) -> void { EnumerateIns(inst); });
 }
 
@@ -488,7 +488,7 @@ void panda::guard::UiDecorator::EnumerateIns(const panda::guard::InstructionInfo
         return;
     }
 
-    this->name_ = inst.ins_->ids[INDEX_0];
+    this->name_ = inst.ins_->GetId(INDEX_0);
     this->type_ = UiDecoratorType::REUSABLE_V2;
     this->AddDefineInsList(inst);
 }

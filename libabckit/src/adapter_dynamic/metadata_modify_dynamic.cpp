@@ -84,7 +84,7 @@ void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG_DUMP((reinterpret_cast<pandasm::Function *>(fw))->DebugDump(), DEBUG);
 
     auto *newFunc = reinterpret_cast<pandasm::Function *>(fw);
-    func->ins = newFunc->ins;
+    func->ins = std::move(newFunc->ins);
     func->catch_blocks = newFunc->catch_blocks;
     func->regs_num = newFunc->regs_num;
 

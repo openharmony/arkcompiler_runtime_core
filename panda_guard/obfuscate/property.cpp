@@ -18,12 +18,14 @@
 #include "configs/guard_context.h"
 #include "program.h"
 #include "util/assert_util.h"
+#include "util/string_util.h"
 #include "graph_analyzer.h"
 
 namespace {
 using OpcodeList = std::vector<panda::pandasm::Opcode>;
 
 constexpr std::string_view TAG = "[Property]";
+constexpr std::string_view STATE_VARIABLE_PREFIX = "__";
 
 const OpcodeList PROPERTY_TYPE_LIST_NORMAL = {
     panda::pandasm::Opcode::STOBJBYNAME,          panda::pandasm::Opcode::STSUPERBYNAME,
@@ -65,8 +67,17 @@ void panda::guard::Property::Update()
     PANDA_GUARD_ASSERT_PRINT(!this->defineInsList_[0].IsValid() || !this->nameInfo_.IsValid(), TAG,
                              ErrorCode::GENERIC_ERROR, "get bad insInfo for ins" << this->name_);
 
-    this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->name_);
-    this->nameInfo_.ins_->ids[0] = this->obfName_;
+    if (!StringUtil::IsPrefixMatched(this->name_, STATE_VARIABLE_PREFIX.data())) {
+        this->obfName_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->name_);
+    } else {
+        auto tmpName = this->name_.substr(STATE_VARIABLE_PREFIX.size());
+        auto obfTmpName = GuardContext::GetInstance()->GetNameMapping()->GetName(tmpName);
+        this->obfName_ = STATE_VARIABLE_PREFIX;
+        this->obfName_ += obfTmpName;
+        GuardContext::GetInstance()->GetNameMapping()->AddNameMapping(this->name_, this->obfName_);
+    }
+
+    this->nameInfo_.ins_->GetId(0) = this->obfName_;
     this->program_->prog_->strings.emplace(this->obfName_);
 
     for (auto &defineIns : this->defineInsList_) {
@@ -76,7 +87,7 @@ void panda::guard::Property::Update()
         }
 
         if (!IsGetLdaStrPropertyIns(defineIns)) {
-            defineIns.ins_->ids[0] = this->obfName_;
+            defineIns.ins_->GetId(0) = this->obfName_;
         }
     }
 }

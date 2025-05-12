@@ -79,21 +79,21 @@ bool IsWhiteListFunction(const std::string &functionIdx)
     return IsEntryMethod(functionIdx) || IsImplicitMethod(functionIdx);
 }
 
-bool GetConsoleLogInfoForStart(const std::vector<panda::pandasm::Ins> &insList, size_t &start, uint16_t &reg)
+bool GetConsoleLogInfoForStart(const std::vector<panda::pandasm::InsPtr> &insList, size_t &start, uint16_t &reg)
 {
     size_t i = 0;
     while (i < insList.size()) {
         auto &ins = insList[i];
-        if (ins.opcode == panda::pandasm::Opcode::TRYLDGLOBALBYNAME && ins.ids[0] == CONSOLE_INS_VAR) {
+        if (ins->opcode == panda::pandasm::Opcode::TRYLDGLOBALBYNAME && ins->GetId(0) == CONSOLE_INS_VAR) {
             size_t nextInsIndex = i + 1;
             PANDA_GUARD_ASSERT_PRINT(nextInsIndex >= insList.size(), TAG, panda::guard::ErrorCode::GENERIC_ERROR,
                                      "get console next ins get bad index:" << nextInsIndex);
 
             auto &nextIns = insList[nextInsIndex];
-            PANDA_GUARD_ASSERT_PRINT(nextIns.opcode != panda::pandasm::Opcode::STA, TAG,
+            PANDA_GUARD_ASSERT_PRINT(nextIns->opcode != panda::pandasm::Opcode::STA, TAG,
                                      panda::guard::ErrorCode::GENERIC_ERROR, "get console next ins get bad ins type");
 
-            reg = nextIns.regs[0];
+            reg = nextIns->GetReg(0);
             start = i;
             return true;
         }
@@ -103,13 +103,14 @@ bool GetConsoleLogInfoForStart(const std::vector<panda::pandasm::Ins> &insList, 
     return false;
 }
 
-bool HasMovInstForRange(const std::vector<panda::pandasm::Ins> &insList, size_t start, size_t end, uint16_t oriReg,
+bool HasMovInstForRange(const std::vector<panda::pandasm::InsPtr> &insList, size_t start, size_t end, uint16_t oriReg,
                         uint16_t rangeReg)
 {
     size_t i = end - 1;
     while (i > start) {
         auto &ins = insList[i];
-        if ((ins.opcode == panda::pandasm::Opcode::MOV) && (ins.regs[0] == rangeReg) && (ins.regs[1] == oriReg)) {
+        if ((ins->opcode == panda::pandasm::Opcode::MOV) && (ins->GetReg(0) == rangeReg) &&
+            (ins->GetReg(1) == oriReg)) {
             return true;
         }
         i--;
@@ -117,20 +118,20 @@ bool HasMovInstForRange(const std::vector<panda::pandasm::Ins> &insList, size_t 
     return false;
 }
 
-int GetConsoleLogInfoForEnd(const std::vector<panda::pandasm::Ins> &insList, size_t start, uint16_t reg, size_t &end)
+int GetConsoleLogInfoForEnd(const std::vector<panda::pandasm::InsPtr> &insList, size_t start, uint16_t reg, size_t &end)
 {
     size_t i = start + 1;
     while (i < insList.size()) {
         auto &ins = insList[i];
-        if ((ins.opcode == panda::pandasm::Opcode::CALLTHIS1 || ins.opcode == panda::pandasm::Opcode::CALLTHIS2 ||
-             ins.opcode == panda::pandasm::Opcode::CALLTHIS3) &&
-            ins.regs[0] == reg) {
+        if ((ins->opcode == panda::pandasm::Opcode::CALLTHIS1 || ins->opcode == panda::pandasm::Opcode::CALLTHIS2 ||
+             ins->opcode == panda::pandasm::Opcode::CALLTHIS3) &&
+            ins->GetReg(0) == reg) {
             end = i + 1;
             return true;
         }
 
-        if ((ins.opcode == panda::pandasm::Opcode::CALLTHISRANGE) &&
-            HasMovInstForRange(insList, start, i, reg, ins.regs[0])) {
+        if ((ins->opcode == panda::pandasm::Opcode::CALLTHISRANGE) &&
+            HasMovInstForRange(insList, start, i, reg, ins->GetReg(0))) {
             end = i + 1;
             return true;
         }
@@ -148,7 +149,7 @@ int GetConsoleLogInfoForEnd(const std::vector<panda::pandasm::Ins> &insList, siz
  * @param end console instruction end index(not included)
  * @return result code
  */
-bool GetConsoleLogInfo(const std::vector<panda::pandasm::Ins> &insList, size_t &start, size_t &end)
+bool GetConsoleLogInfo(const std::vector<panda::pandasm::InsPtr> &insList, size_t &start, size_t &end)
 {
     size_t startIndex = 0;
     uint16_t reg = 0;  // console variable stored reg
@@ -165,20 +166,6 @@ bool GetConsoleLogInfo(const std::vector<panda::pandasm::Ins> &insList, size_t &
     end = endIndex;
 
     return true;
-}
-
-void ReplaceJumpInsLabel(std::vector<panda::pandasm::Ins> &insList, const std::string &oldLabel,
-                         const std::string &newLabel)
-{
-    size_t i = 0;
-    while (i < insList.size()) {
-        auto &ins = insList[i];
-        if (!ins.ids.empty() && ins.ids[0] == oldLabel) {
-            ins.ids[0] = newLabel;
-            LOG(INFO, PANDAGUARD) << TAG << "replace label at index:" << i << " " << oldLabel << "-->" << newLabel;
-        }
-        i++;
-    }
 }
 }  // namespace
 
@@ -251,7 +238,7 @@ void panda::guard::Function::InitBaseInfo()
     } else {
         size_t startLineIndex = 0;
         while (startLineIndex < func.ins.size()) {
-            const size_t lineNumber = func.ins[startLineIndex].ins_debug.line_number;
+            const size_t lineNumber = func.ins[startLineIndex]->ins_debug.line_number;
             if (lineNumber < MAX_LINE_NUMBER) {
                 this->startLine_ = lineNumber;
                 break;
@@ -261,7 +248,7 @@ void panda::guard::Function::InitBaseInfo()
 
         size_t endLineIndex = func.ins.size() - 1;
         while (endLineIndex >= startLineIndex) {
-            const size_t lineNumber = func.ins[endLineIndex].ins_debug.line_number;
+            const size_t lineNumber = func.ins[endLineIndex]->ins_debug.line_number;
             if (lineNumber < MAX_LINE_NUMBER) {
                 this->endLine_ = lineNumber + 1;
                 break;
@@ -271,7 +258,7 @@ void panda::guard::Function::InitBaseInfo()
     }
 }
 
-void panda::guard::Function::SetFunctionType(const char functionTypeCode)
+void panda::guard::Function::SetFunctionType(char functionTypeCode)
 {
     PANDA_GUARD_ASSERT_PRINT(FUNCTION_TYPE_MAP.find(functionTypeCode) == FUNCTION_TYPE_MAP.end(), TAG,
                              ErrorCode::GENERIC_ERROR, "unsupported function type code:" << functionTypeCode);
@@ -318,7 +305,7 @@ void panda::guard::Function::EnumerateIns(const std::function<InsTraver> &callba
 {
     auto &func = this->GetOriginFunction();
     for (size_t i = 0; i < func.ins.size(); i++) {
-        InstructionInfo info(this, &func.ins[i], i);
+        InstructionInfo info(this, func.ins[i].get(), i);
         callback(info);
     }
     this->FreeGraph();
@@ -363,6 +350,7 @@ void panda::guard::Function::UpdateAnnotationReference()
             auto entry = recordTable.extract(annotationFullName);
             entry.key() = obfAnnoName;
             entry.mapped().name = obfAnnoName;
+            entry.mapped().metadata->SetAccessFlags(panda::ACC_ANNOTATION);
             recordTable.insert(std::move(entry));
         }
     });
@@ -378,16 +366,6 @@ void panda::guard::Function::RemoveConsoleLog()
         LOG(INFO, PANDAGUARD) << TAG << "found console ins range:[" << start << ", " << end << ")";
         PANDA_GUARD_ASSERT_PRINT(end >= insList.size(), TAG, ErrorCode::GENERIC_ERROR,
                                  "bad end ins index for console:" << end);
-        if (insList[start].set_label) {
-            if (insList[end].set_label) {
-                // replace jump ins label
-                ReplaceJumpInsLabel(insList, insList[start].label, insList[end].label);
-            } else {
-                // add label to end ins
-                insList[end].set_label = true;
-                insList[end].label = insList[start].label;
-            }
-        }
         insList.erase(insList.begin() + start, insList.begin() + end);
     }
 }
@@ -395,18 +373,18 @@ void panda::guard::Function::RemoveConsoleLog()
 void panda::guard::Function::RemoveLineNumber()
 {
     for (auto &inst : this->GetOriginFunction().ins) {
-        inst.ins_debug.line_number = 1;
+        inst->ins_debug.line_number = 1;
     }
 }
 
-void panda::guard::Function::FillInstInfo(const size_t index, InstructionInfo &instInfo)
+void panda::guard::Function::FillInstInfo(size_t index, InstructionInfo &instInfo)
 {
     auto &func = this->GetOriginFunction();
     PANDA_GUARD_ASSERT_PRINT(index >= func.ins.size(), TAG, ErrorCode::GENERIC_ERROR, "out of range index: " << index);
 
     instInfo.function_ = this;
-    instInfo.ins_ = &func.ins[index];
     instInfo.index_ = index;
+    instInfo.ins_ = func.ins[index].get();
 }
 
 void panda::guard::Function::ExtractNames(std::set<std::string> &strings) const
@@ -427,7 +405,7 @@ void panda::guard::Function::ExtractNames(std::set<std::string> &strings) const
     }
 }
 
-void panda::guard::Function::SetExportAndRefreshNeedUpdate(const bool isExport)
+void panda::guard::Function::SetExportAndRefreshNeedUpdate(bool isExport)
 {
     for (const auto &[_, property] : this->propertyTable_) {
         property->SetExportAndRefreshNeedUpdate(isExport);
@@ -483,7 +461,7 @@ void panda::guard::Function::UpdateDefine() const
                                      defineIns.ins_->opcode != pandasm::Opcode::DEFINEMETHOD,
                                  TAG, ErrorCode::GENERIC_ERROR, "get bad ins type");
 
-        defineIns.ins_->ids[0] = this->obfIdx_;
+        defineIns.ins_->GetId(0) = this->obfIdx_;
         obfuscated = true;
     }
 
@@ -548,11 +526,16 @@ void panda::guard::Function::BuildPcInsMap(const compiler::Graph *graph)
 
     auto instructionsBuf = graph->GetRuntime()->GetMethodCode(methodPtr);
     compiler::BytecodeInstructions instructions(instructionsBuf, graph->GetRuntime()->GetMethodCodeSize(methodPtr));
-    size_t idx = 0;
-    for (auto inst : instructions) {
-        this->pcInstMap_.emplace(instructions.GetPc(inst), idx);
-        idx++;
-        if (idx >= funcSize) {
+    compiler::BytecodeIterator ins_iter = instructions.begin();
+
+    for (size_t idx = 0; idx < this->GetOriginFunction().ins.size(); idx++) {
+        auto ins = this->GetOriginFunction().ins[idx].get();
+        if (ins->opcode == pandasm::Opcode::INVALID) {
+            continue;
+        }
+        this->pcInstMap_.emplace(instructions.GetPc(*ins_iter), idx);
+        ++ins_iter;
+        if (ins_iter == instructions.end()) {
             break;
         }
     }

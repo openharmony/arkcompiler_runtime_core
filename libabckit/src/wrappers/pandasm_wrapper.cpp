@@ -54,17 +54,21 @@ void FunctionWrapper::Update()
     func->value_of_first_param = valueOfFirstParam;
     func->slots_num = slotsNum;
     for (auto insWrap : ins) {
-        auto insDebug = pandasm::debuginfo::Ins(insWrap.insDebug.lineNumber, insWrap.insDebug.wholeLine,
-                                                insWrap.insDebug.boundLeft, insWrap.insDebug.boundRight);
-        auto insn = pandasm::Ins();
-        insn.opcode = OpcFromName(insWrap.opcode);
-        insn.regs = std::move(insWrap.regs);
-        insn.ids = std::move(insWrap.ids);
-        insn.imms = std::move(insWrap.imms);
-        insn.label = std::move(insWrap.label);
-        insn.set_label = insWrap.setLabel;
-        insn.ins_debug = insDebug;
-        func->ins.push_back(insn);
+        auto insDebug = pandasm::debuginfo::Ins(insWrap.insDebug.lineNumber);
+        auto opcode = OpcFromName(insWrap.opcode);
+        auto regs = std::move(insWrap.regs);
+        auto ids = std::move(insWrap.ids);
+        auto imms = std::move(insWrap.imms);
+        auto label = std::move(insWrap.label);
+        auto setLabel = insWrap.setLabel;
+        pandasm::Ins *insn {nullptr};
+        if (setLabel) {
+            insn = new pandasm::LabelIns(label);
+        } else {
+            insn = pandasm::Ins::CreateIns(opcode, regs, imms, ids);
+        }
+        insn->ins_debug = insDebug;
+        func->ins.emplace_back(insn);
     }
     for (auto cbWrap : catchBlocks) {
         auto catchBlock = pandasm::Function::CatchBlock();

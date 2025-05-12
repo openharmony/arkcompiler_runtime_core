@@ -80,15 +80,15 @@ std::string PandasmDumperUtils::LiteralTagToString(const panda_file::LiteralTag 
     return it->second;
 }
 
-bool PandasmDumperUtils::IsMatchLiteralId(const pandasm::Ins &pa_ins)
+bool PandasmDumperUtils::IsMatchLiteralId(const pandasm::InsPtr &pa_ins)
 {
-    auto it = opcode_literal_id_index_map_.find(pa_ins.opcode);
+    auto it = opcode_literal_id_index_map_.find(pa_ins->opcode);
     return (it != opcode_literal_id_index_map_.end());
 }
 
-size_t PandasmDumperUtils::GetLiteralIdIndex4Ins(const pandasm::Ins &pa_ins)
+size_t PandasmDumperUtils::GetLiteralIdIndex4Ins(const pandasm::InsPtr &pa_ins)
 {
-    auto it = opcode_literal_id_index_map_.find(pa_ins.opcode);
+    auto it = opcode_literal_id_index_map_.find(pa_ins->opcode);
     ASSERT(it != opcode_literal_id_index_map_.end());
     return it->second;
 }
@@ -101,26 +101,6 @@ std::string PandasmDumperUtils::GetMappedLabel(const std::string &label, const L
     } else {
         return "";
     }
-}
-
-pandasm::Ins PandasmDumperUtils::DeepCopyIns(const pandasm::Ins &input)
-{
-    pandasm::Ins res{};
-    res.opcode = input.opcode;
-    res.regs=input.regs;
-    res.ids=input.ids;
-    for (size_t i = 0; i < input.imms.size(); ++i) {
-        pandasm::Ins::IType new_imm = input.imms[i];
-        res.imms.emplace_back(new_imm);
-    }
-    res.label = input.label;
-    res.set_label = input.set_label;
-    auto &debug_ins = res.ins_debug;
-    debug_ins.line_number = input.ins_debug.line_number;
-    debug_ins.column_number = input.ins_debug.column_number;
-    debug_ins.bound_left = input.ins_debug.bound_left;
-    debug_ins.bound_right = input.ins_debug.bound_right;
-    return res;
 }
 
 pandasm::Function::CatchBlock PandasmDumperUtils::DeepCopyCatchBlock(

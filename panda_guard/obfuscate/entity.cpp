@@ -80,7 +80,7 @@ void panda::guard::Entity::UpdateLiteralArrayTableIdx(const std::string &originI
     this->program_->prog_->literalarray_table.insert(std::move(entry));
 }
 
-void panda::guard::Entity::SetExportAndRefreshNeedUpdate(const bool isExport)
+void panda::guard::Entity::SetExportAndRefreshNeedUpdate(bool isExport)
 {
     this->export_ = isExport;
     this->RefreshNeedUpdate();

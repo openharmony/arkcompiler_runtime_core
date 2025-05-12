@@ -169,7 +169,7 @@ void panda::guard::Class::UpdateLiteralArrayIdx()
     this->literalArrayIdx_ = updatedLiteralArrayIdx;
 
     for (auto &inst : this->defineInsList_) {
-        inst.ins_->ids[INDEX_1] = updatedLiteralArrayIdx;
+        inst.ins_->GetId(INDEX_1) = updatedLiteralArrayIdx;
     }
 
     for (auto &method : this->methods_) {

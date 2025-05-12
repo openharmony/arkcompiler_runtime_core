@@ -1888,20 +1888,20 @@ void Disassembler::SerializeInstructions(const pandasm::Function &method, std::o
     size_t width = 0;
     if (print_method_info) {
         for (const auto &i : method.ins) {
-            size_t ins_size = i.ToString().size();
-            if (i.set_label) {
-                ins_size = ins_size - i.label.size() - delim.length();
+            size_t ins_size = i->ToString().size();
+            if (i->IsLabel()) {
+                ins_size = i->Label().size() - delim.length();
             }
 
             if (ins_size > width && ins_size < ark::INSTRUCTION_WIDTH_LIMIT) {
-                width = i.ToString().size();
+                width = i->ToString().size();
             }
         }
     }
 
     for (size_t i = 0; i < method.ins.size(); i++) {
-        std::string ins = method.ins[i].ToString("", true, method.regs_num);
-        if (method.ins[i].set_label) {
+        std::string ins = method.ins[i]->ToString("", true, method.regs_num);
+        if (method.ins[i]->IsLabel()) {
             size_t pos = ins.find(delim);
             std::string label = ins.substr(0, pos);
             ins.erase(0, pos + delim.length());
@@ -2165,7 +2165,7 @@ static void translateImmToLabel(pandasm::Ins *pa_ins, LabelTable *label_table, c
                                 BytecodeInstruction bc_ins, BytecodeInstruction bc_ins_last,
                                 panda_file::File::EntityId code_id)
 {
-    const int32_t jmp_offset = std::get<int64_t>(pa_ins->imms.at(0));
+    const int32_t jmp_offset = std::stoi(pa_ins->Ids().at(0));
     const auto bc_ins_dest = bc_ins.JumpTo(jmp_offset);
     if (bc_ins_last.GetAddress() > bc_ins_dest.GetAddress()) {
         size_t idx = getBytecodeInstructionNumber(BytecodeInstruction(ins_arr), bc_ins_dest);
@@ -2176,8 +2176,7 @@ static void translateImmToLabel(pandasm::Ins *pa_ins, LabelTable *label_table, c
                 (*label_table)[idx] = ss.str();
             }
 
-            pa_ins->imms.clear();
-            pa_ins->ids.push_back(label_table->at(idx));
+            pa_ins->SetId(0, label_table->at(idx));
         } else {
             LOG(ERROR, DISASSEMBLER) << "> error encountered at " << code_id << " (0x" << std::hex << code_id
                                      << "). incorrect instruction at offset: 0x" << (bc_ins.GetAddress() - ins_arr)
@@ -2189,6 +2188,27 @@ static void translateImmToLabel(pandasm::Ins *pa_ins, LabelTable *label_table, c
                                  << "). incorrect instruction at offset: 0x" << (bc_ins.GetAddress() - ins_arr)
                                  << ": invalid jump offset 0x" << jmp_offset << " - jumping out of bounds!";
     }
+}
+
+static void AddLabels(pandasm::Function *func, LabelTable &label_table)
+{
+    std::vector<pandasm::InsPtr> new_ins;
+    new_ins.reserve(func->ins.size() + label_table.size());
+
+    for (size_t i = 0; i < func->ins.size(); i++) {
+        if (label_table.find(i) != label_table.end()) {
+            new_ins.emplace_back(new pandasm::LabelIns(label_table[i]));
+        }
+        new_ins.emplace_back(std::move(func->ins[i]));
+    }
+
+    // In some case, the end label can be after the last instruction
+    // Creating an invalid instruction for the label to make sure it can be serialized
+    if (label_table.find(func->ins.size()) != label_table.end()) {
+        new_ins.emplace_back(new pandasm::LabelIns(""));
+    }
+
+    func->ins.swap(new_ins);
 }
 
 IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File::EntityId method_id,
@@ -2218,8 +2238,8 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
         }
 
         auto pa_ins = BytecodeInstructionToPandasmInstruction(bc_ins, method_id);
-        if (pa_ins.IsJump()) {
-            translateImmToLabel(&pa_ins, &label_table, ins_arr, bc_ins, bc_ins_last, code_id);
+        if (pa_ins->IsJump()) {
+            translateImmToLabel(pa_ins, &label_table, ins_arr, bc_ins, bc_ins_last, code_id);
         }
 
         // check if method id is unknown external method. if so, emplace it in table
@@ -2236,7 +2256,7 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
             }
         }
 
-        method->AddInstruction(pa_ins);
+        method->ins.emplace_back(pa_ins);
         bc_ins = bc_ins.GetNext();
     }
 
@@ -2245,20 +2265,10 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
         if (pair.first > instruction_count) {
             LOG(ERROR, DISASSEMBLER) << "> Wrong label index got, count of instructions is " << instruction_count
                                      << ", but the label index is " << pair.first;
-            continue;
         }
-
-        // In some case, the end label can be after the last instruction
-        // Creating an invalid instruction for the label to make sure it can be serialized
-        if (pair.first == instruction_count) {
-            pandasm::Ins ins {};
-            ins.opcode = pandasm::Opcode::INVALID;
-            method->AddInstruction(ins);
-        }
-
-        method->ins[pair.first].label = pair.second;
-        method->ins[pair.first].set_label = true;
     }
+
+    AddLabels(method, label_table);
 
     return unknown_external_methods;
 }
