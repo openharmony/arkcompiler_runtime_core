@@ -162,7 +162,7 @@ AbckitArktsModule *FileAddExternalArkTsV1Module(AbckitFile *file,
     auto modulePayloadDyn = AbckitModulePayloadDyn();
     modulePayloadDyn.absPaths = false;
     m->GetArkTSImpl()->impl.GetDynModule() = modulePayloadDyn;
-    file->externalModules.insert({params->name, std::move(m)});
+    file->externalModules[params->name] = std::move(m);
     return file->externalModules[params->name]->GetArkTSImpl();
 }
 
@@ -217,8 +217,12 @@ void AddNewModuleRequest(AbckitCoreModule *m, AbckitCoreModule *newModule)
     m->md.push_back(newModule);
     auto requestsIdxNum = std::get<uint32_t>(moduleLitArr->literals_[mPayload->moduleRequestsOffset - 1].value_);
     moduleLitArr->literals_[mPayload->moduleRequestsOffset - 1].value_ = requestsIdxNum + 1;
-    auto literalModuleRequest = pandasm::LiteralArray::Literal {panda_file::LiteralTag::STRING,
-                                                                "./" + std::string(newModule->moduleName->impl)};
+
+    std::string moduleRequest = std::string(newModule->moduleName->impl);
+    if (moduleRequest[0] != '@') {
+        moduleRequest = "./" + moduleRequest;
+    }
+    auto literalModuleRequest = pandasm::LiteralArray::Literal {panda_file::LiteralTag::STRING, moduleRequest};
     moduleLitArr->literals_.insert(moduleLitArr->literals_.begin() + m->md.size(), std::move(literalModuleRequest));
 
     mPayload->regularImportsOffset = mPayload->regularImportsOffset + 1;
