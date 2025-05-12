@@ -2048,3 +2048,273 @@ function test_uint8clampedarray_copy_within() {
     check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  5), Uint8ClampedArray.of(1,1,2,3,4))
     check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin( 1,  0,  9), Uint8ClampedArray.of(1,1,2,3,4))
 }
+
+//! CHECKER       Int8Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_index_of"
+function test_int8array_index_of() {
+    let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3 ,  0),  2.);
+    assertEQ(array.indexOf(3 ,  6), -1.);
+    assertEQ(array.indexOf(3 ,  8), -1.);
+    assertEQ(array.indexOf(3., -1), -1.);
+    assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Int16Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_index_of"
+function test_int16array_index_of() {
+    let array = new Int16Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3 ,  0),  2.);
+    assertEQ(array.indexOf(3 ,  6), -1.);
+    assertEQ(array.indexOf(3.,  8), -1.);
+    assertEQ(array.indexOf(3., -1), -1.);
+    assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Int32Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_index_of"
+function test_int32array_index_of() {
+    let array = new Int32Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3.,  0),  2.);
+    assertEQ(array.indexOf(3.,  6), -1.);
+    assertEQ(array.indexOf(3 ,  8), -1.);
+    assertEQ(array.indexOf(3 , -1), -1.);
+    assertEQ(array.indexOf(3 , -7),  2.);
+}
+
+//! CHECKER       BigInt64Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_index_of"
+function test_bigint64array_index_of() {
+    let array = new BigInt64Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(new BigInt(3),  0),  2.);
+    assertEQ(array.indexOf(new BigInt(3),  6), -1.);
+    assertEQ(array.indexOf(3,  8), -1.);
+    assertEQ(array.indexOf(3, -1), -1.);
+    assertEQ(array.indexOf(3, -7),  2.);
+}
+
+//! CHECKER       Float32Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_index_of"
+function test_float32array_index_of() {
+    let array = new Float32Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3.,  0),  2.);
+    assertEQ(array.indexOf(3.,  6), -1.);
+    assertEQ(array.indexOf(3 ,  8), -1.);
+    assertEQ(array.indexOf(3 , -1), -1.);
+    assertEQ(array.indexOf(3 , -7),  2.);
+}
+
+//! CHECKER       Float64Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_index_of"
+function test_float64array_index_of() {
+    let array = new Float64Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3,   0),  2.);
+    assertEQ(array.indexOf(3,   6), -1.);
+    assertEQ(array.indexOf(3.,  8), -1.);
+    assertEQ(array.indexOf(3., -1), -1.);
+    assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Uint8Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_index_of"
+function test_uint8array_index_of() {
+    let array = new Uint8Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3 ,  0),  2.);
+    assertEQ(array.indexOf(3 ,  6), -1.);
+    assertEQ(array.indexOf(3 ,  8), -1.);
+    assertEQ(array.indexOf(3., -1), -1.);
+    assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Uint16Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_index_of"
+function test_uint16array_index_of() {
+    let array = new Uint16Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3 ,  0),  2.);
+    assertEQ(array.indexOf(3 ,  6), -1.);
+    assertEQ(array.indexOf(3.,  8), -1.);
+    assertEQ(array.indexOf(3., -1), -1.);
+    assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Uint32Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_index_of"
+function test_uint32array_index_of() {
+    let array = new Uint32Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3.,  0),  2.);
+    assertEQ(array.indexOf(3.,  6), -1.);
+    assertEQ(array.indexOf(3 ,  8), -1.);
+    assertEQ(array.indexOf(3 , -1), -1.);
+    assertEQ(array.indexOf(3 , -7),  2.);
+}
+
+//! CHECKER       BigUint64Array indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_index_of"
+function test_biguint64array_index_of() {
+    let array = new BigUint64Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(new BigInt(3),  0),  2.);
+    assertEQ(array.indexOf(new BigInt(3),  6), -1.);
+    assertEQ(array.indexOf(3,  8), -1.);
+    assertEQ(array.indexOf(3, -1), -1.);
+    assertEQ(array.indexOf(3, -7),  2.);
+}
+
+//! CHECKER       UInt8ClampedArray indexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_index_of"
+function test_uint8clampedarray_index_of() {
+    let array = new Uint8ClampedArray([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.indexOf(3 ,  0),  2.);
+    assertEQ(array.indexOf(3 ,  6), -1.);
+    assertEQ(array.indexOf(3 ,  8), -1.);
+    assertEQ(array.indexOf(3., -1), -1.);
+    assertEQ(array.indexOf(3., -7),  2.);
+}
+
+//! CHECKER       Int8Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int8array_last_index_of"
+function test_int8array_last_index_of() {
+    let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    assertEQ(array.lastIndexOf(3., -1),  4.);
+    assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Int16Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int16array_last_index_of"
+function test_int16array_last_index_of() {
+    let array = new Int16Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3.,  0), -1.);
+    assertEQ(array.lastIndexOf(3.,  6),  4.);
+    assertEQ(array.lastIndexOf(3.,  8),  4.);
+    assertEQ(array.lastIndexOf(3 , -1),  4.);
+    assertEQ(array.lastIndexOf(3 , -7), -1.);
+}
+
+//! CHECKER       Int32Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_int32array_last_index_of"
+function test_int32array_last_index_of() {
+    let array = new Int32Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3.,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    assertEQ(array.lastIndexOf(3 , -1),  4.);
+    assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       BigInt64Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_bigint64array_last_index_of"
+function test_bigint64array_last_index_of() {
+    let array = new BigInt64Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(new BigInt(3),  0), -1.);
+    assertEQ(array.lastIndexOf(new BigInt(3),  6),  4.);
+    assertEQ(array.lastIndexOf(3,  8),  4.);
+    assertEQ(array.lastIndexOf(3, -1),  4.);
+    assertEQ(array.lastIndexOf(3, -7), -1.);
+}
+
+//! CHECKER       Float32Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float32array_last_index_of"
+function test_float32array_last_index_of() {
+    let array = new Float32Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3.,  0), -1.);
+    assertEQ(array.lastIndexOf(3.,  6),  4.);
+    assertEQ(array.lastIndexOf(3.,  8),  4.);
+    assertEQ(array.lastIndexOf(3 , -1),  4.);
+    assertEQ(array.lastIndexOf(3 , -7), -1.);
+}
+
+//! CHECKER       Float64Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_float64array_last_index_of"
+function test_float64array_last_index_of() {
+    let array = new Float64Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    assertEQ(array.lastIndexOf(3., -1),  4.);
+    assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Uint8Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8array_last_index_of"
+function test_uint8array_last_index_of() {
+    let array = new Uint8Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    assertEQ(array.lastIndexOf(3., -1),  4.);
+    assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Uint16Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint16array_last_index_of"
+function test_uint16array_last_index_of() {
+    let array = new Uint16Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    assertEQ(array.lastIndexOf(3., -1),  4.);
+    assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       Uint32Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint32array_last_index_of"
+function test_uint32array_last_index_of() {
+    let array = new Uint32Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    assertEQ(array.lastIndexOf(3., -1),  4.);
+    assertEQ(array.lastIndexOf(3., -7), -1.);
+}
+
+//! CHECKER       BigUint64Array lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_biguint64array_last_index_of"
+function test_biguint64array_last_index_of() {
+    let array = new BigUint64Array([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(new BigInt(3),  8),  4.);
+    assertEQ(array.lastIndexOf(new BigInt(3), -1),  4.);
+    assertEQ(array.lastIndexOf(new BigInt(3), -7), -1.);
+}
+
+//! CHECKER       AOT Uint8ClampedArray lastIndexOf
+//! RUN_PAOC      options: "--compiler-regex=.*::test_uint8clampedarray_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+//! PASS_AFTER    "IrBuilder"
+//! RUN           entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+
+//! CHECKER       Uint8ClampedArray lastIndexOf
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+//! METHOD        "ets_escompat_typed_arrays.ETSGLOBAL::test_uint8clampedarray_last_index_of"
+function test_uint8clampedarray_last_index_of() {
+    let array = new Uint8ClampedArray([1, 2, 3, 3, 3, 4, 5])
+    assertEQ(array.lastIndexOf(3 ,  0), -1.);
+    assertEQ(array.lastIndexOf(3 ,  6),  4.);
+    assertEQ(array.lastIndexOf(3 ,  8),  4.);
+    assertEQ(array.lastIndexOf(3., -1),  4.);
+    assertEQ(array.lastIndexOf(3., -7), -1.);
+}
