@@ -92,20 +92,15 @@ extern "C" ets_int EtsStringBytesLength(EtsString *strObj, EtsString *encodingOb
 }
 
 /// @brief Creates ArrayBuffer from encoded string
-extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromEncodedString(EtsString *strObj, EtsString *encodingObj,
-                                                                   ets_int length)
+extern "C" EtsEscompatArrayBuffer *EtsArrayBufferFromEncodedString(EtsString *strObj, EtsString *encodingObj)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     PandaVector<uint8_t> bytes = ConvertEtsStringToBytes(strObj, encodingObj, coro, ctx);
     auto byteLength = static_cast<EtsInt>(bytes.size());
-    if (length < 0 || length > byteLength) {
-        ThrowException(ctx, coro, ctx.GetIndexOutOfBoundsExceptionClassDescriptor(),
-                       utf::CStringAsMutf8("Length is out of bounds"));
-        return nullptr;
-    }
     [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsEscompatArrayBuffer> newBuffer = CreateArrayBuffer(coro, length, length > 0 ? bytes.data() : nullptr);
+    EtsHandle<EtsEscompatArrayBuffer> newBuffer =
+        CreateArrayBuffer(coro, byteLength, byteLength > 0 ? bytes.data() : nullptr);
     if (newBuffer.GetPtr() == nullptr) {
         ASSERT(coro->HasPendingException());
         return nullptr;

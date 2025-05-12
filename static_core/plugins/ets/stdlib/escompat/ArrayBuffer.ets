@@ -318,7 +318,7 @@ export class ArrayBuffer extends Buffer
     * @param {int} length - The desired length of the resulting ArrayBuffer.
     * @returns {ArrayBuffer} A new ArrayBuffer containing the encoded string data.
     */
-    public static native from(str: string, encoding: string, length: int): ArrayBuffer;
+    public static native from(str: string, encoding: string): ArrayBuffer;
 
     /**
     * Creates a new ArrayBuffer by copying a segment from an existing ArrayBuffer.
@@ -381,7 +381,7 @@ export class ArrayBuffer extends Buffer
     */
     public static fromObject(obj: Object, byteOffsetOrEncoding: number | string, length: number): ArrayBuffer {
         if (obj instanceof string && byteOffsetOrEncoding instanceof string) {
-            return ArrayBuffer.from(obj, byteOffsetOrEncoding as string, length as int);
+            return ArrayBuffer.from(obj, byteOffsetOrEncoding as string);
         }
         if (!(obj instanceof ArrayBuffer)) {
             throw Error("Incorrect args");
