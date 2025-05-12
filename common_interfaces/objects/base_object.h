@@ -24,6 +24,10 @@
 #include "objects/base_state_word.h"
 
 namespace panda {
+#ifndef USE_CMC_GC
+class BaseObject {
+};
+#else
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
@@ -194,5 +198,6 @@ protected:
     static BaseObjectOperator operator_;
     BaseStateWord state_;
 };
+#endif
 }  // namespace panda
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
