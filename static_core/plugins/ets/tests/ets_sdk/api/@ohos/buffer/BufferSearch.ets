@@ -30,6 +30,7 @@ function main(): int {
     suite.addTest("Test indexOf and lastIndexOf with OutOfBounds", testLastIndexOfOutOfBounds)
     suite.addTest("Test indexOf and lastIndexOf with buffers", testIndexOfPartialMatch)
     suite.addTest("Test indexOf and lastIndexOf with buffers", testLastIndexOfPartialMatch)
+    suite.addTest("Test lastIndexOf with base64", testLastIndexOfBase64)
     
     return suite.run()
 }
@@ -112,4 +113,11 @@ function testLastIndexOfPartialMatch() {
     assertEQ(buf.lastIndexOf("nan"), 2)
     assertEQ(buf.lastIndexOf("na"), 4)
     assertEQ(buf.lastIndexOf("anaa"), -1)
+}
+
+function testLastIndexOfBase64() {
+    let buf = buffer.from("Hello World")
+    let value = "World"
+    const index = buf.lastIndexOf(value, 1, "base64")
+    assertEQ(index, -1)
 }

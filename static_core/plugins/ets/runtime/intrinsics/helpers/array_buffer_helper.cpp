@@ -335,10 +335,6 @@ PandaVector<uint8_t> ConvertUtf16ToBytes(std::string_view input)
 
 Result<PandaVector<uint8_t>> ConvertBase64ToBytes(const PandaString &input, std::string_view encoding)
 {
-    if (!base64::ValidateBase64Input(input)) {
-        return Err<PandaString>(PandaString("Invalid Base64 string"));
-    }
-
     PandaString decoded;
     if (encoding == "base64url") {
         PandaString temp = input;
@@ -409,9 +405,6 @@ Result<int32_t> CalculateStringBytesLength(std::string_view input, std::string_v
         return static_cast<int32_t>(input.size() * kUtf16Multiplier);
     }
     if (encoding == "base64" || encoding == "base64url") {
-        if (!base64::ValidateBase64Input(input)) {
-            return Err<PandaString>(PandaString("Invalid Base64 string"));
-        }
         size_t len = input.size();
         size_t pad = ((len != 0U) && input.back() == '=') ? 1 : 0;
         size_t offsetTwo = 2;
