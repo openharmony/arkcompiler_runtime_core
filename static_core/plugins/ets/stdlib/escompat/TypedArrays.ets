@@ -1047,26 +1047,27 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Converts all elements of an array to strings and joins them using the specified separator.
+     *
+     * @param separator - separates one element of an array from the next in the resulting String.
+     *
+     * @returns joined representation
+     */
+    private final native joinInternal(separator: String): string;
+
+    /**
      * Adds all the elements of an array separated by the specified separator string
      *
      * @param separator A string used to separate one element of an array from the next in the
-     * resulting String. If omitted, the array elements are separated with a comma
+     * resulting String. If omitted, the array elements are separated with a comma.
      *
      * @returns joined representation
      */
     public join(separator?: String): string {
         if (separator == undefined) {
-            return this.join(",")
+            return this.joinInternal(",")
         }
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(this.getUnsafe(i) as number)
-            res.append(separator)
-        }
-        if (this.lengthInt > 0) {
-            res.append(this.getUnsafe(this.lengthInt - 1) as number)
-        }
-        return res.toString()
+        return this.joinInternal(separator)
     }
 
     /**
@@ -2911,26 +2912,27 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Converts all elements of an array to strings and joins them using the specified separator.
+     *
+     * @param separator - separates one element of an array from the next in the resulting String.
+     *
+     * @returns joined representation
+     */
+    private final native joinInternal(separator: String): string;
+
+    /**
      * Adds all the elements of an array separated by the specified separator string
      *
      * @param separator A string used to separate one element of an array from the next in the
-     * resulting String. If omitted, the array elements are separated with a comma
+     * resulting String. If omitted, the array elements are separated with a comma.
      *
      * @returns joined representation
      */
     public join(separator?: String): string {
         if (separator == undefined) {
-            return this.join(",")
+            return this.joinInternal(",")
         }
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(this.getUnsafe(i) as number)
-            res.append(separator)
-        }
-        if (this.lengthInt > 0) {
-            res.append(this.getUnsafe(this.lengthInt - 1) as number)
-        }
-        return res.toString()
+        return this.joinInternal(separator)
     }
 
     /**
@@ -4742,26 +4744,27 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Converts all elements of an array to strings and joins them using the specified separator.
+     *
+     * @param separator - separates one element of an array from the next in the resulting String.
+     *
+     * @returns joined representation
+     */
+    private final native joinInternal(separator: String): string;
+
+    /**
      * Adds all the elements of an array separated by the specified separator string
      *
      * @param separator A string used to separate one element of an array from the next in the
-     * resulting String. If omitted, the array elements are separated with a comma
+     * resulting String. If omitted, the array elements are separated with a comma.
      *
      * @returns joined representation
      */
     public join(separator?: String): string {
         if (separator == undefined) {
-            return this.join(",")
+            return this.joinInternal(",")
         }
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(this.getUnsafe(i) as number)
-            res.append(separator)
-        }
-        if (this.lengthInt > 0) {
-            res.append(this.getUnsafe(this.lengthInt - 1) as number)
-        }
-        return res.toString()
+        return this.joinInternal(separator)
     }
 
     /**
@@ -6593,26 +6596,27 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
+     * Converts all elements of an array to strings and joins them using the specified separator.
+     *
+     * @param separator - separates one element of an array from the next in the resulting String.
+     *
+     * @returns joined representation
+     */
+    private final native joinInternal(separator: String): string;
+
+    /**
      * Adds all the elements of an array separated by the specified separator string
      *
      * @param separator A string used to separate one element of an array from the next in the
-     * resulting String. If omitted, the array elements are separated with a comma
+     * resulting String. If omitted, the array elements are separated with a comma.
      *
      * @returns joined representation
      */
     public join(separator?: String): string {
         if (separator == undefined) {
-            return this.join(",")
+            return this.joinInternal(",")
         }
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new BigInt(this.getUnsafe(i)))
-            res.append(separator)
-        }
-        if (this.lengthInt > 0) {
-            res.append(new BigInt(this.getUnsafe(this.lengthInt - 1)))
-        }
-        return res.toString()
+        return this.joinInternal(separator)
     }
 
     /**
@@ -8426,26 +8430,27 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Converts all elements of an array to strings and joins them using the specified separator.
+     *
+     * @param separator - separates one element of an array from the next in the resulting String.
+     *
+     * @returns joined representation
+     */
+    private final native joinInternal(separator: String): string;
+
+    /**
      * Adds all the elements of an array separated by the specified separator string
      *
      * @param separator A string used to separate one element of an array from the next in the
-     * resulting String. If omitted, the array elements are separated with a comma
+     * resulting String. If omitted, the array elements are separated with a comma.
      *
      * @returns joined representation
      */
     public join(separator?: String): string {
         if (separator == undefined) {
-            return this.join(",")
+            return this.joinInternal(",")
         }
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(this.getUnsafe(i) as number)
-            res.append(separator)
-        }
-        if (this.lengthInt > 0) {
-            res.append(this.getUnsafe(this.lengthInt - 1) as number)
-        }
-        return res.toString()
+        return this.joinInternal(separator)
     }
 
     /**
@@ -10123,26 +10128,27 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Converts all elements of an array to strings and joins them using the specified separator.
+     *
+     * @param separator - separates one element of an array from the next in the resulting String.
+     *
+     * @returns joined representation
+     */
+    private final native joinInternal(separator: String): string;
+
+    /**
      * Adds all the elements of an array separated by the specified separator string
      *
      * @param separator A string used to separate one element of an array from the next in the
-     * resulting String. If omitted, the array elements are separated with a comma
+     * resulting String. If omitted, the array elements are separated with a comma.
      *
      * @returns joined representation
      */
     public join(separator?: String): string {
         if (separator == undefined) {
-            return this.join(",")
+            return this.joinInternal(",")
         }
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(this.getUnsafe(i) as number)
-            res.append(separator)
-        }
-        if (this.lengthInt > 0) {
-            res.append(this.getUnsafe(this.lengthInt - 1) as number)
-        }
-        return res.toString()
+        return this.joinInternal(separator)
     }
 
     /**
