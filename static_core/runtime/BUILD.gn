@@ -43,6 +43,14 @@ config("arkruntime_public_config") {
 
   include_dirs += platform_include_dirs
 
+  if (ark_hybrid) {
+    include_dirs += [ "$ark_root/../common_interfaces" ]
+    cflags_cc = [
+      "-Wno-gnu-anonymous-struct",
+      "-Wno-nested-anon-types",
+    ]
+  }
+
   configs = [
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
@@ -191,6 +199,8 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/gc/g1/update_remset_task_queue.cpp",
     "mem/gc/g1/update_remset_thread.cpp",
     "mem/gc/g1/update_remset_worker.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp",
+    "mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp",
     "mem/gc/gc-hung/gc_hung.cpp",
     "mem/gc/gc.cpp",
     "mem/gc/gc_adaptive_marking_stack.cpp",

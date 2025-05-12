@@ -19,8 +19,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include "common_interfaces/base/common.h"
-#include "common_interfaces/objects/ref_field.h"
+#include "base/common.h"
+#include "objects/ref_field.h"
 
 namespace panda {
 class BaseObject;
@@ -33,5 +33,7 @@ void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
 // Static VM Roots scanning
 void VisitStaticRoots(const RefFieldVisitor &visitor);
+void UpdateStaticRoots(const RefFieldVisitor &visitor);
+void SweepStaticRoots(const WeakRefFieldVisitor &visitor);
 }  // namespace panda
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H

@@ -32,6 +32,7 @@
 #include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
+#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 
 namespace ark::mem {
 
@@ -61,6 +62,10 @@ bool HeapManager::Initialize(GCType gcType, MTModeT multithreadingMode, bool use
         }
         case GCType::G1_GC: {
             ret = Initialize<GCType::G1_GC>(memStats, multithreadingMode, createPygoteSpace);
+            break;
+        }
+        case GCType::CMC_GC: {
+            ret = Initialize<GCType::CMC_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         default:

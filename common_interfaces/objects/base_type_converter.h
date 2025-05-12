@@ -16,8 +16,8 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
 #define COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
 
-#include "common_interfaces/objects/base_type.h"
-#include "common_interfaces/thread/thread_holder.h"
+#include "objects/base_type.h"
+#include "thread/thread_holder.h"
 
 namespace panda {
 // Type Converter implemented for dynamic vm.

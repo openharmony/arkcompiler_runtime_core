@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -626,7 +626,7 @@ template <InternalAllocatorConfig CONFIG>
 using InternalAllocatorT = AllocatorSingleT<InternalAllocator<CONFIG>, AllocatorPurpose::ALLOCATOR_PURPOSE_INTERNAL>;
 
 template <MTModeT MT_MODE = MT_MODE_MULTI>
-class ObjectAllocatorNoGen final : public ObjectAllocatorBase {
+class ObjectAllocatorNoGen : public ObjectAllocatorBase {
     using ObjectAllocator = RunSlotsAllocator<ObjectAllocConfig>;       // Allocator used for middle size allocations
     using LargeObjectAllocator = FreeListAllocator<ObjectAllocConfig>;  // Allocator used for large objects
     using HumongousObjectAllocator = HumongousObjAllocator<ObjectAllocConfig>;  // Allocator used for humongous objects
@@ -637,13 +637,13 @@ public:
 
     explicit ObjectAllocatorNoGen(MemStatsType *memStats, bool createPygoteSpaceAllocator);
 
-    ~ObjectAllocatorNoGen() final;
+    ~ObjectAllocatorNoGen() override;
 
     [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                                 ObjMemInitPolicy objInit, bool pinned) final;
+                                 ObjMemInitPolicy objInit, bool pinned) override;
 
     [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
-                                           ObjMemInitPolicy objInit) final;
+                                           ObjMemInitPolicy objInit) override;
 
     void VisitAndRemoveAllPools(const MemVisitor &memVisitor) final;
 

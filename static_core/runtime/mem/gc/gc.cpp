@@ -33,6 +33,7 @@
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
+#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #include "runtime/mem/gc/workers/gc_workers_task_queue.h"
 #include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
 #include "runtime/mem/pygote_space_allocator-inl.h"
@@ -427,6 +428,9 @@ GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettin
             break;
         case GCType::G1_GC:
             ret = allocator->New<G1GC<LanguageConfig>>(objectAllocator, settings);
+            break;
+        case GCType::CMC_GC:
+            ret = allocator->New<CMCGCAdapter<LanguageConfig>>(objectAllocator, settings);
             break;
         default:
             LOG(FATAL, GC) << "Unknown GC type";
@@ -945,36 +949,6 @@ void GC::SetForwardAddress(ObjectHeader *src, ObjectHeader *dst)
             markWord.DecodeFromForwardingAddress(static_cast<MarkWord::MarkWordSize>(ToUintPtr(dst)));
         updateRes = src->AtomicSetMark<false>(markWord, fwdMarkWord);
     } while (!updateRes);
-}
-
-void GC::UpdateRefsInVRegs(ManagedThread *thread)
-{
-    LOG_DEBUG_GC << "Update frames for thread: " << thread->GetId();
-    for (auto pframe = StackWalker::Create(thread); pframe.HasFrame(); pframe.NextFrame()) {
-        LOG_DEBUG_GC << "Frame for method " << pframe.GetMethod()->GetFullName();
-        auto iterator = [&pframe, this](auto &regInfo, auto &vreg) {
-            ObjectHeader *objectHeader = vreg.GetReference();
-            if (objectHeader == nullptr) {
-                return true;
-            }
-            MarkWord markWord = objectHeader->AtomicGetMark();
-            if (markWord.GetState() != MarkWord::ObjectState::STATE_GC) {
-                return true;
-            }
-            MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
-            LOG_DEBUG_GC << "Update vreg, vreg old val = " << std::hex << objectHeader << ", new val = 0x" << addr;
-            LOG_IF(regInfo.IsAccumulator(), DEBUG, GC) << "^ acc reg";
-            if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
-                LOG_DEBUG_GC << "^ acc updated";
-                vreg.SetReference(reinterpret_cast<ObjectHeader *>(addr));
-            } else {
-                pframe.template SetVRegValue<std::is_same_v<decltype(vreg), interpreter::DynamicVRegisterRef &>>(
-                    regInfo, reinterpret_cast<ObjectHeader *>(addr));
-            }
-            return true;
-        };
-        pframe.IterateObjectsWithInfo(iterator);
-    }
 }
 
 const ObjectHeader *GC::PopObjectFromStack(GCMarkingStackType *objectsStack)

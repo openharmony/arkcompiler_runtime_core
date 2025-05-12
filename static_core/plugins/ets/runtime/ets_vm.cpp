@@ -49,6 +49,7 @@
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+#include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
 #include "plugins/ets/runtime/ets_object_state_table.h"
 
@@ -74,6 +75,8 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
     mem::GCSettings gcSettings(options, panda_file::SourceLang::ETS);
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
+
+    mem::StaticObjectOperator::Initialize();
 
     return mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
 }
@@ -608,11 +611,6 @@ void PandaEtsVM::HandleUncaughtException()
     LOG(ERROR, RUNTIME) << logStream.str();
     // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
     _exit(1);
-}
-
-void PandaEtsVM::SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
-{
-    PandaVM::SweepVmRefs(gcObjectVisitor);
 }
 
 void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisitor &visitor,

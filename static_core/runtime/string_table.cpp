@@ -240,18 +240,14 @@ void StringTable::Table::Sweep(const GCObjectVisitor &gcObjectVisitor)
     LOG(DEBUG, GC) << "StringTable iterate over: " << table_.size() << " elements in string table";
     for (auto it = table_.begin(), end = table_.end(); it != end;) {
         auto *object = it->second;
-        if (object->IsForwarded()) {
-            ASSERT(gcObjectVisitor(object) != ObjectStatus::DEAD_OBJECT);
-            ObjectHeader *fwdString = ark::mem::GetForwardAddress(object);
-            it->second = static_cast<coretypes::String *>(fwdString);
+        if (gcObjectVisitor(object) == ObjectStatus::ALIVE_OBJECT) {
+            // All references in the string table must be updated before.
+            ASSERT(!object->IsForwarded());
             ++it;
-            LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwdString;
         } else if (gcObjectVisitor(object) == ObjectStatus::DEAD_OBJECT) {
             LOG(DEBUG, GC) << "StringTable: delete string " << std::hex << object
                            << ", val = " << ConvertToString(object);
             table_.erase(it++);
-        } else {
-            ++it;
         }
     }
     LOG(DEBUG, GC) << "StringTable size after sweep = " << table_.size();

@@ -205,6 +205,13 @@ srcs_runtime = [
   "stdlib/native/core/IntlLanguageTag.cpp",
 ]
 
+if (ark_hybrid) {
+  srcs_runtime += [
+    "runtime/hybrid/mem/external-gc.cpp",
+    "runtime/hybrid/mem/static_object_operator.cpp",
+  ]
+}
+
 if (is_ohos) {
   srcs_runtime += [ "runtime/platform/ohos/logger.cpp" ]
 }

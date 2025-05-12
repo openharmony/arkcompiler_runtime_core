@@ -16,9 +16,9 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H
 #define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H
 
-#include "common_interfaces/objects/base_object.h"
-#include "common_interfaces/objects/base_type.h"
-#include "common_interfaces/thread/thread_holder.h"
+#include "objects/base_object.h"
+#include "objects/base_type.h"
+#include "thread/thread_holder.h"
 
 namespace panda::ecmascript {
 class HandlerBase;

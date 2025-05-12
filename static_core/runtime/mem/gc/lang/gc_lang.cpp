@@ -72,30 +72,6 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
 
-    auto cb = [this](ManagedThread *thread) {
-        UpdateRefsInVRegs(thread);
-        return true;
-    };
-    // Update refs in vregs
-    GetPandaVm()->GetThreadManager()->EnumerateThreads(cb);
-    if constexpr (LanguageConfig::MT_MODE != MT_MODE_SINGLE) {  // NOLINT
-        // Update refs inside monitors
-        GetPandaVm()->GetMonitorPool()->EnumerateMonitors([this](Monitor *monitor) {
-            ObjectHeader *objectHeader = monitor->GetObject();
-            if (objectHeader == nullptr) {
-                return true;
-            }
-            MarkWord markWord = objectHeader->AtomicGetMark();
-            if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
-                MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
-                LOG_DEBUG_GC << "Update monitor " << std::hex << monitor << " object, old val = 0x" << std::hex
-                             << objectHeader << ", new val = 0x" << addr;
-                monitor->SetObject(reinterpret_cast<ObjectHeader *>(addr));
-            }
-            return true;
-        });
-    }
-
     auto gcRootUpdaterCallback = [](ObjectHeader **object) {
         if ((*object)->IsForwarded()) {
             *object = GetForwardAddress(*object);
@@ -104,7 +80,7 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
         return false;
     };
 
-    UpdateRootRefsToMovedObjects(gcRootUpdaterCallback);
+    rootManager_.UpdateRefsToMovedObjects(gcRootUpdaterCallback);
 }
 
 template <class LanguageConfig>

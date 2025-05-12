@@ -16,12 +16,12 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H
 #define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DISPATCHER_H
 
-#include "common_interfaces/objects/base_type.h"
-#include "common_interfaces/objects/base_object.h"
-#include "common_interfaces/objects/base_object_accessor.h"
-#include "common_interfaces/objects/base_object_descriptor.h"
-#include "common_interfaces/objects/base_type_converter.h"
-#include "common_interfaces/thread/thread_holder.h"
+#include "objects/base_type.h"
+#include "objects/base_object.h"
+#include "objects/base_object_accessor.h"
+#include "objects/base_object_descriptor.h"
+#include "objects/base_type_converter.h"
+#include "thread/thread_holder.h"
 
 namespace panda {
 class BaseObjectDispatcher {

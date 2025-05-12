@@ -18,7 +18,7 @@
 
 #include <atomic>
 #include <mutex>
-#include "common_interfaces/base/common.h"
+#include "base/common.h"
 
 namespace panda {
 class ThreadHolder;

@@ -123,7 +123,7 @@ DEFINE_VALUE(OBJECT_HEADER_CLASS_POINTER_OFFSET, ark::ObjectHeader::GetClassOffs
 DEFINE_VALUE(OBJECT_HEADER_MARK_WORD_OFFSET, ark::ObjectHeader::GetMarkWordOffset())
 
 // ObjectHeader masks
-DEFINE_VALUE_WITH_TYPE(OBJECT_HEADER_CLASS_POINTER_MASK, ark::ObjectHeader::GetClassMask(), unsigned int)
+DEFINE_VALUE_WITH_TYPE(OBJECT_HEADER_CLASS_POINTER_MASK, ark::ObjectHeader::GetClassMask(), size_t)
 
 // Class offsets
 DEFINE_VALUE(BASE_CLASS_MANAGED_OBJECT_OFFSET, BaseClass::GetManagedObjectOffset())

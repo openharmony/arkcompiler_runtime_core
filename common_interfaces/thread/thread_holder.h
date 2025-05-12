@@ -20,10 +20,10 @@
 #include <mutex>
 #include <unordered_set>
 
-#include "common_interfaces/base/common.h"
-#include "common_interfaces/heap/heap_visitor.h"
-#include "common_interfaces/thread/mutator_base.h"
-#include "common_interfaces/thread/thread_state.h"
+#include "base/common.h"
+#include "heap/heap_visitor.h"
+#include "thread/mutator_base.h"
+#include "thread/thread_state.h"
 
 namespace panda::ecmascript {
 class JSThread;

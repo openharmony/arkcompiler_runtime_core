@@ -16,8 +16,8 @@
 #ifndef COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H
 #define COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H
 
-#include "common_interfaces/base/common.h"
-#include "common_interfaces/thread/mutator_base.h"
+#include "base/common.h"
+#include "thread/mutator_base.h"
 
 namespace panda {
 inline void MutatorBase::DoEnterSaferegion()

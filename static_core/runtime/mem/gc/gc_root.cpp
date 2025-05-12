@@ -253,6 +253,28 @@ void RootManager<LanguageConfig>::VisitClassRoots(const GCRootVisitor &gcRootVis
 template <class LanguageConfig>
 void RootManager<LanguageConfig>::UpdateRefsToMovedObjects(const GCRootUpdater &gcRootUpdater)
 {
+    auto cb = [this, &gcRootUpdater](ManagedThread *thread) {
+        UpdateRefsInVRegs(thread, gcRootUpdater);
+        return true;
+    };
+    // Update refs in vregs
+    vm_->GetThreadManager()->EnumerateThreads(cb);
+    if constexpr (LanguageConfig::MT_MODE != MT_MODE_SINGLE) {
+        // Update refs inside monitors
+        vm_->GetMonitorPool()->EnumerateMonitors([&gcRootUpdater](Monitor *monitor) {
+            ObjectHeader *objectHeader = monitor->GetObject();
+            if (objectHeader == nullptr) {
+                return true;
+            }
+            ObjectHeader *newObjectHeader = objectHeader;
+            if (gcRootUpdater(&newObjectHeader)) {
+                LOG(DEBUG, GC) << "Update monitor " << std::hex << monitor << " object, old val = " << objectHeader
+                               << ", new val = " << newObjectHeader;
+                monitor->SetObject(reinterpret_cast<ObjectHeader *>(newObjectHeader));
+            }
+            return true;
+        });
+    }
     if (vm_->UpdateMovedStrings(gcRootUpdater)) {
         // AOT string slots are pointing to strings from the StringTable,
         // so we should update it only if StringTable's pointers were updated.
@@ -266,6 +288,36 @@ void RootManager<LanguageConfig>::UpdateRefsToMovedObjects(const GCRootUpdater &
     UpdateClassLinkerContextRoots(gcRootUpdater);
     // Update global refs
     UpdateGlobalObjectStorage(gcRootUpdater);
+}
+
+template <class LanguageConfig>
+void RootManager<LanguageConfig>::UpdateRefsInVRegs(ManagedThread *thread, const GCRootUpdater &gcRootUpdater)
+{
+    LOG(DEBUG, GC) << "Update frames for thread: " << thread->GetId();
+    for (auto pframe = StackWalker::Create(thread); pframe.HasFrame(); pframe.NextFrame()) {
+        LOG(DEBUG, GC) << "Frame for method " << pframe.GetMethod()->GetFullName();
+        auto iterator = [&pframe, &gcRootUpdater](auto &regInfo, auto &vreg) {
+            ObjectHeader *objectHeader = vreg.GetReference();
+            if (objectHeader == nullptr) {
+                return true;
+            }
+            ObjectHeader *newObjectHeader = objectHeader;
+            if (!gcRootUpdater(&newObjectHeader)) {
+                return true;
+            }
+            LOG(DEBUG, GC) << "Update vreg, vreg old val = " << objectHeader << ", new val = " << newObjectHeader;
+            LOG_IF(regInfo.IsAccumulator(), DEBUG, GC) << "^ acc reg";
+            if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
+                LOG(DEBUG, GC) << "^ acc updated";
+                vreg.SetReference(newObjectHeader);
+            } else {
+                pframe.template SetVRegValue<std::is_same_v<decltype(vreg), interpreter::DynamicVRegisterRef &>>(
+                    regInfo, newObjectHeader);
+            }
+            return true;
+        };
+        pframe.IterateObjectsWithInfo(iterator);
+    }
 }
 
 template <class LanguageConfig>
