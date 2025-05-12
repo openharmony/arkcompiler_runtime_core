@@ -107,7 +107,8 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     // All non-boot contexts are represented by EtsClassLinkerContext.
     auto *etsLinkerContext = reinterpret_cast<EtsClassLinkerContext *>(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
-    if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker) {
+    if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
+        runtimeLinker->GetClass() != PlatformTypes()->memoryRuntimeLinker) {
         // Must call managed implementation.
         return false;
     }

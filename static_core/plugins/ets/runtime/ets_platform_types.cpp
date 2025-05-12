@@ -97,7 +97,7 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     coreBootRuntimeLinker = findType(BOOT_RUNTIME_LINKER);
     coreAbcFile = findType(ABC_FILE);
     coreAbcRuntimeLinker = findType(ABC_RUNTIME_LINKER);
-
+    memoryRuntimeLinker = findType(MEMORY_RUNTIME_LINKER);
     corePromise = findType(PROMISE);
     corePromiseSubscribeOnAnotherPromise =
         FindMethod<false>(corePromise, "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V");
