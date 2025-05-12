@@ -674,6 +674,11 @@
 #25187
 10.interfaces/07.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
 
+#25679
+17.experimental_features/02.fixed_array_types/far4a.ets
+17.experimental_features/02.fixed_array_types/far4c.ets
+17.experimental_features/02.fixed_array_types/far4d.ets
+
 #25170
 17.experimental_features/18.generics_experimental/generics_nonull_return_ext_0.ets
 17.experimental_features/18.generics_experimental/generics_nonull_return_ext_1.ets
