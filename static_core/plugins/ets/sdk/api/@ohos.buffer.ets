@@ -34,6 +34,13 @@ function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
     return value.buffer;
 }
 
+function fillInPaddingBase64(str: string): string {
+    let base64Divisible: int = 4;
+    let remainder: int = str.length % base64Divisible as int;
+    const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
+    return str.padRight(c'=', str.length as int + paddingCount);
+}
+
 /**
  * Namespace containing Buffer implementation and related utilities
  * for handling binary data and various encoding operations.
@@ -133,8 +140,11 @@ export default namespace buffer {
      */
     export function from(string: String, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
-        const byteLength: int = ArrayBuffer.bytesLength(string, resolvedEncoding);
-        return new Buffer(ArrayBuffer.from(string, resolvedEncoding, byteLength));
+        let resolvedString = string;
+        if (encoding == 'base64' || encoding == 'base64url') {
+            resolvedString = fillInPaddingBase64(string);
+        }
+        return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
     }
 
     /**
@@ -369,8 +379,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         const resolvedSource = getArrayBufferFrom(source);
         const sourceBytesLength = resolvedSource.byteLength as int;
         const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
-        const newBytesLength = ArrayBuffer.bytesLength(str, toEnc);
-        const newBytes = ArrayBuffer.from(str, toEnc, newBytesLength);
+        const newBytes = ArrayBuffer.from(str, toEnc);
         return new Buffer(newBytes);
     }
 
@@ -751,10 +760,8 @@ Received value is: ${resolvedEnd}`)
 
             switch (klass) {
                 case "string":
-                    const bytesSize = ArrayBuffer.bytesLength(value as string, resolvedEncoding as string);
                     let buff = ArrayBuffer.from(value as string,
-                                                resolvedEncoding as string,
-                                                bytesSize);
+                                                resolvedEncoding as string);
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
                         this.buffer.set(i, buff.at((i % buff.byteLength) as int) as byte);
                     }
@@ -920,13 +927,6 @@ Received value is: ${value}`)
         */
         private getDataView(): DataView {
             return new DataView(this.buffer, 0, this.length);
-        }
-
-        private fillInPaddingBase64(str: string): string {
-            let base64Divisible: int = 4
-            let remainder: int = str.length % base64Divisible as int
-            const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0
-            return str.padRight(c'=', str.length as int + paddingCount)
         }
 
         /**
@@ -1104,18 +1104,25 @@ Received value is: ${value}`)
         * @param {number} [length] - Maximum number of bytes to write
         * @param {string} [encoding='utf8'] - Character encoding of the string
         * @returns {number} Number of bytes written
+        * @throws { BusinessError } 10200001 - The value of "[offset/length]" is out of range. It mast be >= 0 and
+            <= buf.length. Received value is: [offset/length]
         */
         public write(str: string, offset: number = 0, length?: number, encoding: string = 'utf8'): number {
             if (offset < 0 || offset > this.length - 1) {
-                throw createBusinessError(OutOfBoundsErrorCodeId, "Offset value is out of range")
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "offset" is out of range. \
+It must be >= 0 and <= ${this.length}. Received value is: ${offset}`)
             }
 
             const resolvedEncoding = encoding as buffer.BufferEncoding;
             const tmpLength = length ?? this.length - offset
+            if (tmpLength < 0 || tmpLength > this.length) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
+It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
+            }
             const resolvedLength = Math.min(tmpLength, this.length - offset)
             let resolvedString = str
             if (encoding == 'base64' || encoding == 'base64url') {
-                resolvedString = this.fillInPaddingBase64(str)
+                resolvedString = fillInPaddingBase64(str)
             }
             const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
             const strBuffer = buffer.from(resolvedString, resolvedEncoding);
@@ -1718,7 +1725,7 @@ Received value is: ${value}`)
 
         private toArrayBuffer(): ArrayBuffer {
             const str = this.getString()
-            return ArrayBuffer.from(str, "utf-8", ArrayBuffer.bytesLength(str, "utf-8"))
+            return ArrayBuffer.from(str, "utf-8");
         }
 
         private getString(): string {

@@ -1634,7 +1634,7 @@ intrinsics:
     static: true
     signature:
       ret: escompat.ArrayBuffer
-      args: [std.core.String, std.core.String, i32]
+      args: [std.core.String, std.core.String]
     impl: ark::ets::intrinsics::EtsArrayBufferFromEncodedString
 
   - name: EscompatArrayBufferFromBufferSlice
