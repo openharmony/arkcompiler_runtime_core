@@ -10,6 +10,13 @@ koala-related-benchmarks/arkts-phase1.ets
 #19807
 regression/12581_custom_class_Engine_array.ets
 
+#25112
+regression/25112.ets
+
+#25425
+regression/15278_0.ets
+regression/15278_1.ets
+
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_8.ets
@@ -397,3 +404,10 @@ std/math/std_math_clz64_long.ets
 
 #18766
 spec/partial_type/partialType_main.ets
+
+std/containers/concurrent_hash_map/ConcurrentHashMap_MoreTypeTest.ets
+
+#25053
+std/core/IntlPluralRulesTest.ets
+std/core/dateformat/IntlDateFormatRangeToPartsOptionsTest.ets
+std/core/dateformat/IntlDateFormatToPartsOptionsTest.ets
