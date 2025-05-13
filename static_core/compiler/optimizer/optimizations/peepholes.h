@@ -230,6 +230,7 @@ private:
     bool IsNegationPattern(Inst *inst);
     bool TrySimplifyNegationPattern(Inst *inst);
     static bool TryOptimizeBoxedLoadStoreObject(Inst *inst);
+    static bool TryOptimizeXorChain(Inst *inst);
 
 private:
     // Each peephole application has own unique index, it will be used in peepholes dumps

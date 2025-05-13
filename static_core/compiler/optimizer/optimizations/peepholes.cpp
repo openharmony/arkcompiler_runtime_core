@@ -869,6 +869,31 @@ void Peepholes::VisitXor([[maybe_unused]] GraphVisitor *v, Inst *inst)
     static_cast<Peepholes *>(v)->TrySwapInputs(inst);
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
+
+    // Remove two consecutive xor using the same constant,
+    // the remaining xor without users will be removed at the next Cleanup
+    // 0.i64 Const   -> (2,3)
+    // 1. ...        -> (2)
+    // 2. Xor v1, v0 -> (3)
+    // 3. Xor v1, v0 -> (4)
+    // 4. ...
+    // ===>
+    // 0.i64 Const   -> (2,3)
+    // 1. ...        -> (2,4)
+    // 2. Xor v1, v0 -> (3)
+    // 3. Xor v1, v0
+    // 4. ...
+    //
+    // Finding patterns from inputs is better, but here we start with the first Xor.
+    // If we began with the second Xor, Peepholes::VisitXor would have already converted
+    // the first Xor into a Compare (via CreateCompareInsteadOfXorAdd) and added it after
+    // the first Xor. We must delete the Xor->Xor chain before this happens, as the
+    // Compare only appears when the Xor becomes useless.
+    if (TryOptimizeXorChain(inst)) {
+        PEEPHOLE_IS_APPLIED(visitor, inst);
+        return;
+    }
+
     if (input1->IsConst()) {
         uint64_t val = input1->CastToConstant()->GetIntValue();
         if (static_cast<int64_t>(val) == -1) {
@@ -2913,6 +2938,44 @@ bool Peepholes::TryOptimizeBoxedLoadStoreObject(Inst *inst)
     if (klass != nullptr && runtime->IsBoxedClass(klass)) {
         inst->ClearFlag(compiler::inst_flags::NO_CSE);
         inst->ClearFlag(compiler::inst_flags::NO_HOIST);
+        return true;
+    }
+    return false;
+}
+
+bool Peepholes::TryOptimizeXorChain(Inst *inst)
+{
+    auto xorInput = inst->GetInput(0).GetInst();
+    auto xorConstInput = inst->GetInput(1).GetInst();
+    if (!xorConstInput->IsConst()) {
+        return false;
+    }
+    // Output of Xor1 should be only used by Xor2
+    if (!inst->HasSingleUser()) {
+        return false;
+    }
+    auto nextXor = inst->GetFirstUser()->GetInst();
+    if (nextXor->GetOpcode() != Opcode::Xor) {
+        return false;
+    }
+    // Check that both XORs have the same type
+    if (inst->GetType() != nextXor->GetType()) {
+        return false;
+    }
+    // Both Xors should use the same constant as input
+    if (nextXor->GetInput(0).GetInst() != xorConstInput && nextXor->GetInput(1).GetInst() != xorConstInput) {
+        return false;
+    }
+    bool isPossible = true;
+    for (auto &i : nextXor->GetUsers()) {
+        if (SkipThisPeepholeInOSR(i.GetInst(), xorInput)) {
+            isPossible = false;
+            break;
+        }
+    }
+    if (isPossible) {
+        // Replace all uses of Xor2 output with the input0 of Xor1
+        nextXor->ReplaceUsers(xorInput);
         return true;
     }
     return false;

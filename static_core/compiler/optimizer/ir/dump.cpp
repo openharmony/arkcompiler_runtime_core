@@ -1133,6 +1133,7 @@ void Inst::DumpSourceLine(std::ostream *out) const
 
 void Inst::Dump(std::ostream *out, bool newLine) const
 {
+    // issue: #25677 - if GetBasicBlock() returns nullptr there will be segfault in GetBasicBlock()->GetGraph()
     if (g_options.IsCompilerDumpCompact() && (IsSaveState() || GetOpcode() == Opcode::NOP)) {
         return;
     }
