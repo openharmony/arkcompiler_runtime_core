@@ -63,17 +63,11 @@ private:
     void DumpAnnotationData(std::ostream &os, const pandasm::AnnotationData &anno) const;
     void DumpArrayValue(std::ostream &os, const pandasm::ArrayValue &array) const;
     void DumpScalarValue(std::ostream &os, const pandasm::ScalarValue &scalar) const;
-    void GetOriginalDumpIns(const pandasm::Function &function);
-    void GetFinalDumpIns();
-    void GetInvalidOpLabelMap();
-    void HandleInvalidopInsLabel(size_t invalid_op_idx, pandasm::Ins &invalid_op_ins);
-    pandasm::Ins *GetNearestValidopIns4InvalidopIns(size_t invalid_op_ins_idx);
-    void GetFinalLabelMap();
-    void UpdateLabels4DumpIns(std::vector<pandasm::Ins*> &dump_ins, const LabelMap &label_map) const;
-    void UpdateLabels4DumpInsAtIndex(size_t idx, std::vector<pandasm::Ins*> &dump_ins,
+    void GetFinalDumpIns(const pandasm::Function &function);
+    void UpdateLabels4DumpIns(std::vector<pandasm::InsPtr> &dump_ins, const LabelMap &label_map) const;
+    void UpdateLabels4DumpInsAtIndex(size_t idx, std::vector<pandasm::InsPtr> &dump_ins,
                                      const LabelMap &label_map) const;
     std::string GetMappedLabel(const std::string &label, const LabelMap &label_map) const;
-    void HandleFinalLabelAtIndex(size_t idx);
     void DumpFinalIns(std::ostream &os);
     void DumpFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const;
     void DumpOriginalFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const;
@@ -81,7 +75,7 @@ private:
     void DumpCatchBlock(std::ostream &os, const pandasm::Function::CatchBlock &catch_block) const;
     void UpdateCatchBlock(pandasm::Function::CatchBlock &catch_block) const;
     std::string GetUpdatedCatchBlockLabel(const std::string &orignal_label) const;
-    void ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const;
+    void ReplaceLiteralId4Ins(pandasm::InsPtr &pa_ins) const;
     void DumpStrings(std::ostream &os) const;
     std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array, uint32_t id) const;
     void SerializeLiterals(const pandasm::LiteralArray &lit_array, std::stringstream &os) const;
@@ -93,15 +87,11 @@ private:
     // of function annotation and the record with name '_ESSlotNumberAnnotation'
     bool is_debug_ = false;
     std::string abc_file_path_;
-    std::vector<pandasm::Ins> original_dump_ins_;
-    std::vector<pandasm::Ins*> original_dump_ins_ptrs_;
-    std::vector<pandasm::Ins*> final_dump_ins_ptrs_;
-    LabelMap invalid_op_label_map_;
-    LabelMap final_label_map_;
+    std::vector<pandasm::InsPtr> final_dump_ins_ptrs_;
+    std::unordered_map<uint32_t, uint32_t> original_to_final_index_map_;
+    LabelMap label_map_;
     const pandasm::Program *program_ = nullptr;
     size_t regs_num_ = 0;
-    std::unordered_map<pandasm::Ins*, uint32_t> original_ins_index_map_;
-    std::unordered_map<pandasm::Ins*, uint32_t> final_ins_index_map_;
     mutable std::unordered_set<uint32_t> processing_literal_array_id_set_;
 };
 

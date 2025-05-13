@@ -56,22 +56,19 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_001, TestSize.Level1)
     auto it = item.Value().function_table.find(func_name);
     EXPECT_NE(it, item.Value().function_table.end());
     const auto &func_value = item.Value().function_table.at(func_name).ins;
-    size_t user_size = 6;
     size_t json_size = 280;
-    EXPECT_EQ(func_value[3].OperandListLength(), 2ULL);
-    EXPECT_EQ(func_value[3].HasFlag(InstFlags::TYPE_ID), false);
-    EXPECT_EQ(func_value[3].CanThrow(), true);
-    EXPECT_EQ(func_value[3].IsJump(), false);
-    EXPECT_EQ(func_value[3].IsConditionalJump(), false);
-    EXPECT_EQ(func_value[3].IsCall(), false);
-    EXPECT_EQ(func_value[3].IsCallRange(), false);
-    EXPECT_EQ(func_value[3].IsPseudoCall(), false);
-    EXPECT_EQ(func_value[7].IsReturn(), true);
-    EXPECT_EQ(func_value[7].MaxRegEncodingWidth(), 0);
-    EXPECT_EQ(func_value[7].HasDebugInfo(), true);
-    EXPECT_EQ(func_value[7].Uses().size(), user_size);
-    EXPECT_EQ(func_value[7].Def(), std::nullopt);
-    EXPECT_EQ(func_value[7].IsValidToEmit(), true);
+    EXPECT_EQ(func_value[3]->OperandListLength(), 2ULL);
+    EXPECT_EQ(func_value[3]->HasFlag(InstFlags::TYPE_ID), false);
+    EXPECT_EQ(func_value[3]->CanThrow(), true);
+    EXPECT_EQ(func_value[3]->IsJump(), false);
+    EXPECT_EQ(func_value[3]->IsConditionalJump(), false);
+    EXPECT_EQ(func_value[3]->IsCall(), false);
+    EXPECT_EQ(func_value[3]->IsCallRange(), false);
+    EXPECT_EQ(func_value[3]->IsPseudoCall(), false);
+    EXPECT_EQ(func_value[7]->IsReturn(), true);
+    EXPECT_EQ(func_value[7]->MaxRegEncodingWidth(), 0);
+    EXPECT_EQ(func_value[7]->HasDebugInfo(), true);
+    EXPECT_EQ(func_value[7]->IsValidToEmit(), true);
     EXPECT_EQ(item.Value().JsonDump().size(), json_size);
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
@@ -99,19 +96,19 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
     auto it = item.Value().function_table.find(func_name);
     EXPECT_NE(it, item.Value().function_table.end());
     const auto &function_value = item.Value().function_table.at(func_name).ins;
-    std::string ret = function_value[0].ToString("test", true, 0);
+    std::string ret = function_value[0]->ToString("test", true, 0);
     EXPECT_EQ(ret, "sta a4test");
-    ret = function_value[0].ToString("test", false, 0);
+    ret = function_value[0]->ToString("test", false, 0);
     EXPECT_EQ(ret, "sta v4test");
 
-    ret = function_value[1].ToString("test", true, 0);
+    ret = function_value[1]->ToString("test", true, 0);
     EXPECT_EQ(ret, "lda.str xxxtest");
-    ret = function_value[1].ToString("test", false, 0);
+    ret = function_value[1]->ToString("test", false, 0);
     EXPECT_EQ(ret, "lda.str xxxtest");
 
-    ret = function_value[2].ToString("test", true, 0);
+    ret = function_value[2]->ToString("test", true, 0);
     EXPECT_EQ(ret, "ldglobalvar 0x7, oDivtest");
-    ret = function_value[2].ToString("test", false, 0);
+    ret = function_value[2]->ToString("test", false, 0);
     EXPECT_EQ(ret, "ldglobalvar 0x7, oDivtest");
 }
 
@@ -123,79 +120,38 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_002, TestSize.Level1)
  */
 HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
 {
-    panda::pandasm::Ins ins;
     uint16_t reg1 = 2U;
     uint16_t reg2 = 3U;
-    ins.opcode = Opcode::DEPRECATED_LDMODULEVAR;
-    ins.regs.push_back(reg1);
-    ins.regs.push_back(reg2);
-    ins.imms.push_back(Ins::IType(int64_t(0x1)));
-    ins.ids.push_back("a1");
-    ins.set_label = false;
-    ins.label = "label";
+    auto opcode = Opcode::DEPRECATED_LDMODULEVAR;
+    std::vector<uint16_t> regs;
+    regs.push_back(reg1);
+    regs.push_back(reg2);
+    std::vector<IType> imms;
+    imms.push_back(IType(int64_t(0x1)));
+    std::vector<std::string> ids;
+    ids.push_back("a1");
+    panda::pandasm::Ins *ins = Ins::CreateIns(opcode, regs, imms, ids);
 
-    std::string ret = ins.ToString("test", true, 0);
+    std::string ret = ins->ToString("test", true, 0);
     EXPECT_EQ(ret, "deprecated.ldmodulevar a1, 0x1test");
-    ret = ins.ToString("test", false, 0);
+    ret = ins->ToString("test", false, 0);
     EXPECT_EQ(ret, "deprecated.ldmodulevar a1, 0x1test");
+    delete ins;
 
-    ins.opcode = Opcode::MOVX;
-    ret = ins.ToString("test", true, 0);
-    EXPECT_EQ(ret, "MOVX a2, a3, 0x1, a1test");
-    ret = ins.ToString("test", false, 0);
-    EXPECT_EQ(ret, "MOVX v2, v3, 0x1, a1test");
+    opcode = Opcode::DEFINEFUNC;
+    imms.push_back(IType(int64_t(0x2)));
+    ins = Ins::CreateIns(opcode, regs, imms, ids);
+    ret = ins->ToString("test", true, 0);
+    EXPECT_EQ(ret, "definefunc 0x1, a1, 0x2test");
+    ret = ins->ToString("test", false, 0);
+    EXPECT_EQ(ret, "definefunc 0x1, a1, 0x2test");
+    EXPECT_TRUE(ins->CanThrow());
+    delete ins;
 
-    ins.opcode = Opcode::DEFINEFUNC;
-    ret = ins.ToString("test", true, 0);
-    EXPECT_EQ(ret, "definefunc 0x1, a1test");
-    ret = ins.ToString("test", false, 0);
-    EXPECT_EQ(ret, "definefunc 0x1, a1test");
-    EXPECT_TRUE(ins.CanThrow());
-
-    ins.opcode = Opcode::JEQZ;
-    EXPECT_TRUE(ins.IsConditionalJump());
-
-    ins.opcode = Opcode::SUPERCALLARROWRANGE;
-    ret = ins.ToString("test", true, 0);
-    EXPECT_EQ(ret, "supercallarrowrange 0x1, a2test");
-    ret = ins.ToString("test", false, 0);
-    EXPECT_EQ(ret, "supercallarrowrange 0x1, v2test");
-
-    ins.opcode = Opcode::NEWOBJRANGE;
-    ret = ins.ToString("test", true, 0);
-    EXPECT_EQ(ret, "newobjrange 0x1, a2test");
-    ret = ins.ToString("test", false, 0);
-    EXPECT_EQ(ret, "newobjrange 0x1, v2test");
-
-    ins.imms.clear();
-    ins.opcode = Opcode::DEFINECLASSWITHBUFFER;
-    ret = ins.ToString("test", true, 0);
-    EXPECT_EQ(ret, "defineclasswithbuffer, a1, a2test");
-    ret = ins.ToString("test", false, 0);
-    EXPECT_EQ(ret, "defineclasswithbuffer, a1, v2test");
-
-    ins.opcode = Opcode::CALLX;
-    auto unit = ins.Uses();
-    EXPECT_GT(unit.size(), 0);
-
-    ins.regs.clear();
-    ins.opcode = Opcode::STOBJBYVALUE;
-    ret = ins.ToString("test", true, 0);
-    EXPECT_EQ(ret, "stobjbyvaluetest");
-    ret = ins.ToString("test", false, 0);
-    EXPECT_EQ(ret, "stobjbyvaluetest");
-
-    EXPECT_EQ(ins.Def(), std::nullopt);
-
-    ins.opcode = Opcode::INVALID;
-    ret = ins.MaxRegEncodingWidth();
-    auto unit1 = ins.Uses();
-    EXPECT_EQ(unit1.size(), 0);
-
-    EXPECT_EQ(ins.Def(), std::nullopt);
-
-    ins.regs.push_back(1);
-    EXPECT_FALSE(ins.IsValidToEmit());
+    opcode = Opcode::JEQZ;
+    ins = Ins::CreateIns(opcode, regs, imms, ids);
+    EXPECT_TRUE(ins->IsConditionalJump());
+    delete ins;
 }
 
 /**
@@ -206,16 +162,6 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_003, TestSize.Level1)
  */
 HWTEST_F(AssemblerInsTest, assembler_ins_test_004, TestSize.Level1)
 {
-    panda::pandasm::Ins ins;
-    uint16_t reg1 = 2U;
-    uint16_t reg2 = 3U;
-    ins.opcode = Opcode::DEPRECATED_LDMODULEVAR;
-    ins.regs.push_back(reg1);
-    ins.regs.push_back(reg2);
-    ins.imms.push_back(Ins::IType(int64_t(0x1)));
-    ins.ids.push_back("a1");
-    ins.set_label = false;
-    ins.label = "label";
     panda::pandasm::Program pro;
     std::string ret = pro.JsonDump();
     EXPECT_EQ(ret, "{ \"functions\": [  ], \"records\": [  ] }");
@@ -237,11 +183,6 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_004, TestSize.Level1)
 
     std::string name = "test";
     EXPECT_FALSE(panda::pandasm::Type::IsStringType(name, language));
-    ins.opcode = Opcode::CALLRANGE;
-    size_t ins_def = 65535;
-    EXPECT_EQ(ins.Def(), ins_def);
-    auto unit2 = ins.Uses();
-    EXPECT_GT(unit2.size(), 0);
 
     component_name = "test";
     rank = 0;
@@ -288,9 +229,9 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_005, TestSize.Level1)
     ret = JsonSerializeProgramItems(function_table);
     EXPECT_EQ(ret, "[ { \"name\": \"fun\" } ]");
 
-    ret = item.Value().function_table.at(func_name).ins[3].ToString("test", true, 0);
+    ret = item.Value().function_table.at(func_name).ins[3]->ToString("test", true, 0);
     EXPECT_EQ(ret, "callarg1 0x1, a0test");
-    ret = item.Value().function_table.at(func_name).ins[3].ToString("test", false, 0);
+    ret = item.Value().function_table.at(func_name).ins[3]->ToString("test", false, 0);
     EXPECT_EQ(ret, "callarg1 0x1, v0test");
 }
 

@@ -1,23 +1,23 @@
-# source binary: out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/CommonSyntax.abc
+# source binary: openharmony/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/CommonSyntax.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_1577 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_1582 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_1563 { 4 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", ]}
+_ESScopeNamesRecord_1568 { 4 [ tag_value:5, string:"Person", tag_value:5, string:"fetchData", ]}
 
-_GLOBAL_1605 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
+_GLOBAL_1610 { 4 [ tag_value:5, string:"mySymbol", tag_value:5, string:"prop", ]}
 
-_GLOBAL_1619 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1624 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1638 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1643 { 14 [ tag_value:5, string:"name", tag_value:5, string:"Alice", tag_value:5, string:"age", tag_value:2, i32:25, tag_value:5, string:"greet", tag_value:6, method:.#*#greet^1, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1675 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
+_GLOBAL_1680 { 8 [ tag_value:5, string:"gender", tag_value:5, string:"男", tag_value:5, string:"grade", tag_value:5, string:"2", ]}
 
-_GLOBAL_1699 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
+_GLOBAL_1704 { 6 [ tag_value:2, i32:1, tag_value:2, i32:2, tag_value:2, i32:3, ]}
 
-_GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1723 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
 
 
@@ -31,13 +31,13 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESModuleRecord_1577
+	u32 openharmony/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESModuleRecord_1582
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESScopeNamesRecord_1563
+	u32 openharmony/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/CommonSyntax.ts _ESScopeNamesRecord_1568
 }
 .record.source_file 
 
@@ -93,7 +93,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	jeqz label@5                             # line: 100           # column: 0
 	lda.str js                               # line: 100           # column: 0
 	sta a3                                   # line: 100           # column: 0
-	label@5: tryldglobalbyname 0x1, console  # line: 101           # column: 0
+	label@5:                                 # line: 0           # column: 0
+	tryldglobalbyname 0x1, console           # line: 101           # column: 0
 	sta v0                                   # line: 101           # column: 0
 	ldobjbyname 0x2, log                     # line: 101           # column: 0
 	sta v1                                   # line: 101           # column: 0
@@ -115,7 +116,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	nop                                      # line: 18446744073709551615           # column: 0
 	asyncfunctionenter                       # line: 18446744073709551615           # column: 0
 	sta v0                                   # line: 18446744073709551615           # column: 0
-	label@3: mov v1, v0                      # line: 18446744073709551615           # column: 0
+	label@3:                                 # line: 0           # column: 0
+	mov v1, v0                               # line: 18446744073709551615           # column: 0
 	ldlexvar 0x0, 0x0                        # line: 140           # column: 0
 	callarg0 0x0                             # line: 140           # column: 0
 	asyncfunctionawaituncaught v0            # line: 140           # column: 0
@@ -131,12 +133,15 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	jeqz label@19                            # line: 140           # column: 0
 	lda v4                                   # line: 140           # column: 0
 	throw                                    # line: 140           # column: 0
-	label@19: tryldglobalbyname 0x3, console # line: 141           # column: 0
+	label@19:                                # line: 0           # column: 0
+	tryldglobalbyname 0x3, console           # line: 141           # column: 0
 	sta v5                                   # line: 141           # column: 0
 	ldobjbyname 0x4, log                     # line: 141           # column: 0
 	callthis1 0x6, v5, v4                    # line: 141           # column: 0
-	label@23: jmp label@34                   # line: 141           # column: 0
-	label@24: sta v3                         # line: 142           # column: 0
+	label@23:                                # line: 0           # column: 0
+	jmp label@34                             # line: 141           # column: 0
+	label@24:                                # line: 0           # column: 0
+	sta v3                                   # line: 142           # column: 0
 	mov v1, v0                               # line: 142           # column: 0
 	tryldglobalbyname 0x8, console           # line: 143           # column: 0
 	sta v4                                   # line: 143           # column: 0
@@ -146,11 +151,13 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 143           # column: 0
 	lda v5                                   # line: 143           # column: 0
 	callthis2 0xb, v4, v6, v3                # line: 143           # column: 0
-	label@34: mov v1, v0                     # line: 143           # column: 0
+	label@34:                                # line: 0           # column: 0
+	mov v1, v0                               # line: 143           # column: 0
 	ldundefined                              # line: 18446744073709551615           # column: 0
 	asyncfunctionresolve v0                  # line: 18446744073709551615           # column: 0
 	return                                   # line: 145           # column: 0
-	label@38: sta v2                         # line: 138           # column: 0
+	label@38:                                # line: 0           # column: 0
+	sta v2                                   # line: 138           # column: 0
 	lda v2                                   # line: 138           # column: 0
 	asyncfunctionreject v1                   # line: 138           # column: 0
 	return                                   # line: 145           # column: 0
@@ -334,9 +341,9 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v7                                   # line: 22           # column: 0
 	ldbigint 10                              # line: 23           # column: 0
 	sta v8                                   # line: 23           # column: 0
-	createobjectwithbuffer 0x6, _GLOBAL_1605 # line: 24           # column: 0
+	createobjectwithbuffer 0x6, _GLOBAL_1610 # line: 24           # column: 0
 	sta v9                                   # line: 24           # column: 0
-	createarraywithbuffer 0x7, _GLOBAL_1619  # line: 27           # column: 0
+	createarraywithbuffer 0x7, _GLOBAL_1624  # line: 27           # column: 0
 	sta v10                                  # line: 27           # column: 0
 	definefunc 0x8, .#*#sum, 0x2             # line: 29           # column: 0
 	sta v11                                  # line: 29           # column: 0
@@ -381,7 +388,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	lda v4                                   # line: 40           # column: 0
 	callthis1 0x19, v3, v5                   # line: 40           # column: 0
 	jmp label@81                             # line: 40           # column: 0
-	label@73: tryldglobalbyname 0x1b, console # line: 42           # column: 0
+	label@73:                                # line: 0           # column: 0
+	tryldglobalbyname 0x1b, console          # line: 42           # column: 0
 	sta v3                                   # line: 42           # column: 0
 	ldobjbyname 0x1c, log                    # line: 42           # column: 0
 	sta v4                                   # line: 42           # column: 0
@@ -389,7 +397,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v5                                   # line: 42           # column: 0
 	lda v4                                   # line: 42           # column: 0
 	callthis1 0x1e, v3, v5                   # line: 42           # column: 0
-	label@81: lda.str Monday                 # line: 46           # column: 0
+	label@81:                                # line: 0           # column: 0
+	lda.str Monday                           # line: 46           # column: 0
 	sta v3                                   # line: 46           # column: 0
 	lda.str Monday                           # line: 48           # column: 0
 	strictnoteq 0x20, v3                     # line: 48           # column: 0
@@ -398,7 +407,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	strictnoteq 0x21, v3                     # line: 51           # column: 0
 	jeqz label@99                            # line: 51           # column: 0
 	jmp label@108                            # line: 51           # column: 0
-	label@90: tryldglobalbyname 0x22, console # line: 49           # column: 0
+	label@90:                                # line: 0           # column: 0
+	tryldglobalbyname 0x22, console          # line: 49           # column: 0
 	sta v3                                   # line: 49           # column: 0
 	ldobjbyname 0x23, log                    # line: 49           # column: 0
 	sta v4                                   # line: 49           # column: 0
@@ -407,7 +417,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	lda v4                                   # line: 49           # column: 0
 	callthis1 0x25, v3, v5                   # line: 49           # column: 0
 	jmp label@116                            # line: 49           # column: 0
-	label@99: tryldglobalbyname 0x27, console # line: 52           # column: 0
+	label@99:                                # line: 0           # column: 0
+	tryldglobalbyname 0x27, console          # line: 52           # column: 0
 	sta v3                                   # line: 52           # column: 0
 	ldobjbyname 0x28, log                    # line: 52           # column: 0
 	sta v4                                   # line: 52           # column: 0
@@ -416,7 +427,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	lda v4                                   # line: 52           # column: 0
 	callthis1 0x2a, v3, v5                   # line: 52           # column: 0
 	jmp label@116                            # line: 52           # column: 0
-	label@108: tryldglobalbyname 0x2c, console # line: 55           # column: 0
+	label@108:                               # line: 0           # column: 0
+	tryldglobalbyname 0x2c, console          # line: 55           # column: 0
 	sta v3                                   # line: 55           # column: 0
 	ldobjbyname 0x2d, log                    # line: 55           # column: 0
 	sta v4                                   # line: 55           # column: 0
@@ -424,12 +436,14 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v5                                   # line: 55           # column: 0
 	lda v4                                   # line: 55           # column: 0
 	callthis1 0x2f, v3, v5                   # line: 55           # column: 0
-	label@116: ldai 0x5                      # line: 55           # column: 0
+	label@116:                               # line: 0           # column: 0
+	ldai 0x5                                 # line: 55           # column: 0
 	sta v3                                   # line: 55           # column: 0
 	ldai 0x0                                 # line: 55           # column: 0
 	sta v4                                   # line: 55           # column: 0
 	mov v5, v4                               # line: 55           # column: 0
-	label@121: lda v3                        # line: 59           # column: 0
+	label@121:                               # line: 0           # column: 0
+	lda v3                                   # line: 59           # column: 0
 	less 0x31, v5                            # line: 59           # column: 0
 	jeqz label@133                           # line: 59           # column: 0
 	tryldglobalbyname 0x32, console          # line: 60           # column: 0
@@ -441,8 +455,10 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	inc 0x38                                 # line: 59           # column: 0
 	sta v5                                   # line: 59           # column: 0
 	jmp label@121                            # line: 59           # column: 0
-	label@133: mov v5, v4                    # line: 59           # column: 0
-	label@134: lda v3                        # line: 65           # column: 0
+	label@133:                               # line: 0           # column: 0
+	mov v5, v4                               # line: 59           # column: 0
+	label@134:                               # line: 0           # column: 0
+	lda v3                                   # line: 65           # column: 0
 	less 0x39, v5                            # line: 65           # column: 0
 	jeqz label@146                           # line: 65           # column: 0
 	tryldglobalbyname 0x3a, console          # line: 66           # column: 0
@@ -454,7 +470,8 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	inc 0x40                                 # line: 67           # column: 0
 	sta v5                                   # line: 67           # column: 0
 	jmp label@134                            # line: 67           # column: 0
-	label@146: tryldglobalbyname 0x41, console # line: 71           # column: 0
+	label@146:                               # line: 0           # column: 0
+	tryldglobalbyname 0x41, console          # line: 71           # column: 0
 	sta v6                                   # line: 71           # column: 0
 	ldobjbyname 0x42, log                    # line: 71           # column: 0
 	callthis1 0x44, v6, v5                   # line: 71           # column: 0
@@ -471,7 +488,7 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 79           # column: 0
 	lda v5                                   # line: 79           # column: 0
 	callarg1 0x4a, v6                        # line: 79           # column: 0
-	createobjectwithbuffer 0x4c, _GLOBAL_1638 # line: 82           # column: 0
+	createobjectwithbuffer 0x4c, _GLOBAL_1643 # line: 82           # column: 0
 	sta v5                                   # line: 82           # column: 0
 	ldobjbyname 0x4d, greet                  # line: 89           # column: 0
 	callthis0 0x4f, v5                       # line: 89           # column: 0
@@ -484,14 +501,14 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	sta v6                                   # line: 93           # column: 0
 	lda.str !                                # line: 93           # column: 0
 	add2 0x52, v6                            # line: 93           # column: 0
-	createobjectwithbuffer 0x53, _GLOBAL_1675 # line: 96           # column: 0
+	createobjectwithbuffer 0x53, _GLOBAL_1680 # line: 96           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x54, gender                 # line: 97           # column: 0
 	lda v5                                   # line: 97           # column: 0
 	ldobjbyname 0x56, grade                  # line: 97           # column: 0
 	lda v1                                   # line: 103           # column: 0
 	callarg0 0x58                            # line: 103           # column: 0
-	createarraywithbuffer 0x5a, _GLOBAL_1699 # line: 106           # column: 0
+	createarraywithbuffer 0x5a, _GLOBAL_1704 # line: 106           # column: 0
 	sta v1                                   # line: 106           # column: 0
 	createemptyarray 0x5b                    # line: 107           # column: 0
 	sta v5                                   # line: 107           # column: 0
@@ -511,7 +528,7 @@ _GLOBAL_1718 { 8 [ tag_value:5, string:"greet", tag_value:6, method:.#~@0>#greet
 	inc 0x63                                 # line: 107           # column: 0
 	ldhole                                   # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
-	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1718, 0x2, v1 # line: 110           # column: 0
+	defineclasswithbuffer 0x64, .#~@0=#Person, _GLOBAL_1723, 0x2, v1 # line: 110           # column: 0
 	sta v1                                   # line: 110           # column: 0
 	ldobjbyname 0x65, prototype              # line: 110           # column: 0
 	lda.str Alice                            # line: 120           # column: 0

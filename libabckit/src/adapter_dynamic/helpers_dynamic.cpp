@@ -120,12 +120,12 @@ size_t IterateRequestIdxSectionBeforeUpdate(ModuleIterateData *data)
     return idx;
 }
 
-bool CheckRegularImport(ModuleUpdateData *updateData, panda::pandasm::Ins *inst)
+bool CheckRegularImport(ModuleUpdateData *updateData, panda::pandasm::InsPtr &inst)
 {
     if (updateData->isRegularImportsChange) {
         if (inst->opcode == pandasm::Opcode::LDEXTERNALMODULEVAR ||
             inst->opcode == pandasm::Opcode::WIDE_LDEXTERNALMODULEVAR) {
-            auto imm = static_cast<uint32_t>(std::get<int64_t>(inst->imms[0]));
+            auto imm = static_cast<uint32_t>(std::get<int64_t>(inst->GetImm(0)));
             auto foundIdx = updateData->regularImportsIdxMap.find(imm);
             if (foundIdx == updateData->regularImportsIdxMap.end()) {
                 LIBABCKIT_LOG(DEBUG) << "There is an instruction '" << inst->ToString()
@@ -133,19 +133,20 @@ bool CheckRegularImport(ModuleUpdateData *updateData, panda::pandasm::Ins *inst)
                 statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
                 return false;
             }
-            inst->imms[0] = (int64_t)foundIdx->second;
+            auto idx = (int64_t)foundIdx->second;
+            inst->SetImm(0, idx);
         }
     }
     return true;
 }
 
-bool CheckLocalExports(ModuleUpdateData *updateData, panda::pandasm::Ins *inst)
+bool CheckLocalExports(ModuleUpdateData *updateData, panda::pandasm::InsPtr &inst)
 {
     if (updateData->isLocalExportsChange) {
         auto op = inst->opcode;
         if (op == pandasm::Opcode::LDLOCALMODULEVAR || op == pandasm::Opcode::WIDE_LDLOCALMODULEVAR ||
             op == pandasm::Opcode::STMODULEVAR || op == pandasm::Opcode::WIDE_STMODULEVAR) {
-            auto imm = static_cast<uint32_t>(std::get<int64_t>(inst->imms[0]));
+            auto imm = static_cast<uint32_t>(std::get<int64_t>(inst->GetImm(0)));
             auto foundIdx = updateData->localExportsIdxMap.find(imm);
             if (foundIdx == updateData->localExportsIdxMap.end()) {
                 LIBABCKIT_LOG(DEBUG) << "There is an instruction '" << inst->ToString()
@@ -153,7 +154,8 @@ bool CheckLocalExports(ModuleUpdateData *updateData, panda::pandasm::Ins *inst)
                 statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
                 return false;
             }
-            inst->imms[0] = (int64_t)foundIdx->second;
+            auto idx = (int64_t)foundIdx->second;
+            inst->SetImm(0, idx);
         }
     }
     return true;
@@ -166,11 +168,11 @@ bool UpdateInsImms(pandasm::Program *program, ModuleUpdateData *updateData, cons
             continue;
         }
         for (auto &inst : func.ins) {
-            if (!CheckRegularImport(updateData, &inst)) {
+            if (!CheckRegularImport(updateData, inst)) {
                 return false;
             }
 
-            if (!CheckLocalExports(updateData, &inst)) {
+            if (!CheckLocalExports(updateData, inst)) {
                 return false;
             }
         }

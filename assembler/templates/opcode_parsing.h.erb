@@ -72,7 +72,7 @@ bool Parser::ParseOperands()
                     p = context_.GiveToken();
                     p.remove_prefix(1);
                     number = ToNumber(p);
-                    size_t reg_width = curr_func_->ins.back().MaxRegEncodingWidth();
+                    size_t reg_width = panda::pandasm::INST_WIDTH_TABLE[static_cast<size_t>(opcode_)];
                     if ((1ull << reg_width) <= number) {
                         context_.err = GetError("Register width mismatch.", Error::ErrorType::ERR_BAD_OPERAND);
                     }

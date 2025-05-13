@@ -31,7 +31,29 @@ void AbcCodeProcessor::FillProgramData()
     FillFunctionRegsNum();
     FillIns();
     FillCatchBlocks();
+    AddLabels();
     FillLocalVariableTable();
+}
+
+void AbcCodeProcessor::AddLabels()
+{
+    std::vector<pandasm::InsPtr> new_ins;
+    new_ins.reserve(function_.ins.size() + inst_idx_label_map_.size());
+
+    size_t inserted_label_cnt = 0;
+    for (size_t i = 0; i <= function_.ins.size(); i++) {
+        if (inst_idx_label_map_.find(i) != inst_idx_label_map_.end()) {
+            new_ins.emplace_back(new pandasm::LabelIns(inst_idx_label_map_[i]));
+            inserted_label_cnt++;
+        }
+        // Update inst_pc_idx_map_ to fill function's local_variable_debug correctly
+        inst_pc_idx_map_[inst_idx_pc_map_[i]] += inserted_label_cnt;
+        if (i < function_.ins.size()) {
+            new_ins.emplace_back(std::move(function_.ins[i]));
+        }
+    }
+
+    function_.ins.swap(new_ins);
 }
 
 void AbcCodeProcessor::FillFunctionRegsNum()
@@ -62,11 +84,10 @@ void AbcCodeProcessor::FillInsWithoutLabels()
         inst_cnt++;
         bc_ins = bc_ins.GetNext();
     }
-    inst_cnt++;  // AbcCodeProcessor::AddDummyEndIns() may add an instruction.
     function_.ins.reserve(inst_cnt);
     bc_ins = BytecodeInstruction(ins_arr);
     while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
-        pandasm::Ins pa_ins = code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
+        pandasm::Ins *pa_ins = code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
         /*
          * Private field jump_inst_idx_vec_ store all jump inst idx in a pandasm::Function.
          * For example, a pandasm::Function has 100 pandasm::Ins with only 4 jump pandasm::Ins.
@@ -75,10 +96,10 @@ void AbcCodeProcessor::FillInsWithoutLabels()
          * while no need to enumerate the whole 100 pandasm::Ins.
          * It will improve our compile performance.
         */
-        if (pa_ins.IsJump()) {
+        if (pa_ins->IsJump()) {
             jump_inst_idx_vec_.emplace_back(inst_idx);
         }
-        function_.AddInstruction(pa_ins);
+        function_.ins.emplace_back(pa_ins);
         inst_pc_idx_map_.emplace(inst_pc, inst_idx);
         inst_idx_pc_map_.emplace(inst_idx, inst_pc);
         inst_idx++;
@@ -106,13 +127,9 @@ bool AbcCodeProcessor::NeedToAddDummyEndIns() const
 void AbcCodeProcessor::AddDummyEndIns()
 {
     uint32_t inst_idx = static_cast<uint32_t>(function_.ins.size());
-    pandasm::Ins dummy_end_ins{};
-    dummy_end_ins.opcode = pandasm::Opcode::INVALID;
-    dummy_end_ins.label = AbcFileUtils::GetLabelNameByInstIdx(inst_idx);
-    dummy_end_ins.set_label = true;
     inst_pc_idx_map_.emplace(ins_size_, inst_idx);
     inst_idx_pc_map_.emplace(inst_idx, ins_size_);
-    function_.AddInstruction(dummy_end_ins);
+    AddLabel4InsAtIndex(inst_idx);
 }
 
 uint32_t AbcCodeProcessor::GetInstIdxByInstPc(uint32_t inst_pc) const
@@ -138,21 +155,19 @@ uint32_t AbcCodeProcessor::GetInstPcByInstIdx(uint32_t inst_idx) const
 void AbcCodeProcessor::AddJumpLabels() const
 {
     for (uint32_t jump_inst_idx : jump_inst_idx_vec_) {
-        pandasm::Ins &jump_pa_ins = function_.ins[jump_inst_idx];
+        pandasm::InsPtr &jump_pa_ins = function_.ins[jump_inst_idx];
         AddJumpLabel4InsAtIndex(jump_inst_idx, jump_pa_ins);
     }
 }
 
-void AbcCodeProcessor::AddJumpLabel4InsAtIndex(uint32_t curr_inst_idx, pandasm::Ins &curr_pa_ins) const
+void AbcCodeProcessor::AddJumpLabel4InsAtIndex(uint32_t curr_inst_idx, pandasm::InsPtr &curr_pa_ins) const
 {
     uint32_t curr_inst_pc = GetInstPcByInstIdx(curr_inst_idx);
-    const int32_t jmp_offset = std::get<int64_t>(curr_pa_ins.imms.at(0));
+    const int32_t jmp_offset = std::stoi(curr_pa_ins->Ids().at(0));
     uint32_t dst_inst_pc = curr_inst_pc + jmp_offset;
     uint32_t dst_inst_idx = GetInstIdxByInstPc(dst_inst_pc);
-    pandasm::Ins &dst_pa_ins = function_.ins[dst_inst_idx];
     AddLabel4InsAtIndex(dst_inst_idx);
-    curr_pa_ins.imms.clear();
-    curr_pa_ins.ids.emplace_back(dst_pa_ins.label);
+    curr_pa_ins->SetId(0, inst_idx_label_map_.at(dst_inst_idx));
 }
 
 void AbcCodeProcessor::FillCatchBlocks()
@@ -209,12 +224,7 @@ void AbcCodeProcessor::FillExceptionRecord(panda_file::CodeDataAccessor::CatchBl
 
 void AbcCodeProcessor::AddLabel4InsAtIndex(uint32_t inst_idx) const
 {
-    pandasm::Ins &pa_ins = function_.ins[inst_idx];
-    if (pa_ins.set_label) {
-        return;
-    }
-    pa_ins.label = AbcFileUtils::GetLabelNameByInstIdx(inst_idx);
-    pa_ins.set_label = true;
+    inst_idx_label_map_.emplace(inst_idx, AbcFileUtils::GetLabelNameByInstIdx(inst_idx));
 }
 
 void AbcCodeProcessor::AddLabel4InsAtPc(uint32_t inst_pc) const
@@ -266,7 +276,7 @@ void AbcCodeProcessor::FillInsDebug()
     for (uint32_t inst_idx = 0; inst_idx < function_.ins.size(); inst_idx++) {
         SkipToNextEntryIfNeeded(line_idx, offset_start, offset_end, inst_idx, line_table);
         line = line_idx > 0 ? line_table[line_idx - 1].line : line;
-        function_.ins[inst_idx].ins_debug.line_number = line;
+        function_.ins[inst_idx]->ins_debug.line_number = line;
     }
 
     // Column table may be empty if all ins of current function has default column number
@@ -276,7 +286,7 @@ void AbcCodeProcessor::FillInsDebug()
     for (uint32_t inst_idx = 0; inst_idx < function_.ins.size(); inst_idx++) {
         SkipToNextEntryIfNeeded(column_idx, offset_start, offset_end, inst_idx, column_table);
         column = column_idx > 0 ? column_table[column_idx - 1].column : column;
-        function_.ins[inst_idx].ins_debug.column_number = column;
+        function_.ins[inst_idx]->ins_debug.column_number = column;
     }
 }
 

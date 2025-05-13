@@ -520,13 +520,14 @@ bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const Annotat
 }
 
 template <class T>
-static bool AddDependencyByIndex(MethodItem *method, const Ins &insn,
+static bool AddDependencyByIndex(MethodItem *method, const InsPtr &insn,
                                  const std::unordered_map<std::string, T *> &items, size_t idx = 0)
 {
-    if (idx >= insn.ids.size()) {
+    auto ids = insn->Ids();
+    if (idx >= ids.size()) {
         return false;
     };
-    const auto &id = insn.ids[idx];
+    const auto &id = ids[idx];
     auto it = items.find(id);
     ASSERT(it != items.cend());
     auto *item = it->second;
@@ -539,11 +540,11 @@ static bool AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
                                          const AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &insn : func.ins) {
-        if (insn.opcode == Opcode::INVALID) {
+        if (insn->opcode == Opcode::INVALID) {
             continue;
         }
 
-        if (insn.opcode == Opcode::DEFINECLASSWITHBUFFER) {
+        if (insn->opcode == Opcode::DEFINECLASSWITHBUFFER) {
             if (!AddDependencyByIndex(method, insn, entities.method_items)) {
                 return false;
             }
@@ -553,7 +554,7 @@ static bool AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
             continue;
         }
 
-        if (insn.opcode == Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
+        if (insn->opcode == Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
             if (!AddDependencyByIndex(method, insn, entities.method_items)) {
                 return false;
             }
@@ -563,21 +564,21 @@ static bool AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
             continue;
         }
 
-        if (insn.HasFlag(InstFlags::METHOD_ID)) {
+        if (insn->HasFlag(InstFlags::METHOD_ID)) {
             if (!AddDependencyByIndex(method, insn, entities.method_items)) {
                 return false;
             }
             continue;
         }
 
-        if (insn.HasFlag(InstFlags::STRING_ID)) {
+        if (insn->HasFlag(InstFlags::STRING_ID)) {
             if (!AddDependencyByIndex(method, insn, entities.string_items)) {
                 return false;
             }
             continue;
         }
 
-        if (insn.HasFlag(InstFlags::LITERALARRAY_ID)) {
+        if (insn->HasFlag(InstFlags::LITERALARRAY_ID)) {
             if (!AddDependencyByIndex(method, insn, entities.literalarray_items)) {
                 return false;
             }
@@ -1323,7 +1324,7 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
         code->SetNumArgs(func.GetParamsNum());
 
         auto num_ins = static_cast<size_t>(
-            std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; }));
+            std::count_if(func.ins.begin(), func.ins.end(), [](auto &it) { return it->opcode != Opcode::INVALID; }));
         code->SetNumInstructions(num_ins);
 
         auto *bytes = code->GetInstructions();
@@ -1539,20 +1540,20 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     auto labels = std::unordered_map<std::string_view, panda::Label> {};
 
     for (const auto &insn : ins) {
-        if (insn.set_label) {
-            labels.insert_or_assign(insn.label, emitter.CreateLabel());
+        if (insn->IsLabel()) {
+            labels.insert_or_assign(insn->Label(), emitter.CreateLabel());
         }
     }
 
     for (const auto &insn : ins) {
-        if (insn.set_label) {
-            auto search = labels.find(insn.label);
+        if (insn->IsLabel()) {
+            auto search = labels.find(insn->Label());
             ASSERT(search != labels.end());
             emitter.Bind(search->second);
         }
 
-        if (insn.opcode != Opcode::INVALID) {
-            if (!insn.Emit(emitter, method, methods, fields, classes, strings, literalarrays, labels)) {
+        if (insn->opcode != Opcode::INVALID) {
+            if (!Ins::Emit(emitter, insn, method, methods, fields, classes, strings, literalarrays, labels)) {
                 return false;
             }
         }
@@ -1599,12 +1600,12 @@ void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, con
 
 size_t Function::GetLineNumber(size_t i) const
 {
-    return ins[i].ins_debug.line_number;
+    return ins[i]->ins_debug.line_number;
 }
 
 uint32_t Function::GetColumnNumber(size_t i) const
 {
-    return ins[i].ins_debug.column_number;
+    return ins[i]->ins_debug.column_number;
 }
 
 void Function::EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
@@ -1702,10 +1703,10 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
              * If you change the continue condition of this loop, you need to synchronously modify the same condition
              * of the BuildMapFromPcToIns method in the optimizer-bytecode.cpp.
              **/
-            if (ins[i].opcode == Opcode::INVALID) {
+            if (ins[i]->opcode == Opcode::INVALID) {
                 continue;
             }
-            if (emit_debug_info || ins[i].CanThrow()) {
+            if (emit_debug_info || ins[i]->CanThrow()) {
                 EmitLineNumber(program, constant_pool, prev_line_number, pc_inc, i);
             }
             if (emit_debug_info) {
@@ -1753,13 +1754,13 @@ Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> 
     size_t pc_offset = 0;
 
     for (size_t i = 0; i < ins.size(); i++) {
-        if (ins[i].set_label) {
-            auto it = try_catch_labels.find(ins[i].label);
+        if (ins[i]->IsLabel()) {
+            auto it = try_catch_labels.find(ins[i]->Label());
             if (it != try_catch_labels.cend()) {
-                try_catch_labels[ins[i].label] = pc_offset;
+                try_catch_labels[ins[i]->Label()] = pc_offset;
             }
         }
-        if (ins[i].opcode == Opcode::INVALID) {
+        if (ins[i]->opcode == Opcode::INVALID) {
             continue;
         }
 
@@ -1819,7 +1820,7 @@ void Function::DebugDump() const
 {
     std::cerr << "name: " << name << std::endl;
     for (const auto &i : ins) {
-        std::cerr << i.ToString("\n", true, regs_num);
+        std::cerr << i->ToString("\n", true, regs_num);
     }
 }
 

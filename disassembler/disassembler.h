@@ -76,7 +76,7 @@ public:
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;
-    pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
+    pandasm::Ins *BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;
 
     const ProgInfo &GetProgInfo() const

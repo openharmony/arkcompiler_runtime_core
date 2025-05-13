@@ -38,6 +38,8 @@ public:
 
     void AddNameMapping(const std::string &name);
 
+    void AddNameMapping(const std::string &origin, const std::string &name);
+
     void AddNameMapping(const std::set<std::string> &nameList);
 
     void AddFileNameMapping(const std::string &name);

@@ -17,18 +17,19 @@
 #include "mangling.h"
 
 namespace panda::pandasm {
-bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
+bool Ins::Emit(BytecodeEmitter &emitter, const InsPtr &ins, panda_file::MethodItem *method,
     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
     const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
     const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
     const std::unordered_map<std::string, panda_file::StringItem *> &strings,
     const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
-    const std::unordered_map<std::string_view, panda::Label>& labels) const {
-    if (!IsValidToEmit()) {
-        std::cerr << "Invalid instruction: " << ToString() << std::endl;
+    const std::unordered_map<std::string_view, panda::Label>& labels)
+{
+    if (!ins->IsValidToEmit()) {
+        std::cerr << "Invalid instruction: " << ins->ToString() << std::endl;
         LOG(FATAL, ASSEMBLER);
     }
-    switch(opcode) {
+    switch(ins->opcode) {
 % instruction_hash = Panda::instructions.map { |i| [i.mnemonic, i] }.to_h
 %
 % Panda::instructions.group_by(&:mnemonic).each_pair do |mn, group|
@@ -96,6 +97,9 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %   ops
 % end
     case Opcode::<%= insn.asm_token %>: {
+        auto ids = ins->Ids();
+        auto imms = ins->Imms();
+        auto regs = ins->Regs();
 % if insn.jump?
         if ((ids.size() == 0) || (labels.find(ids[0]) == labels.cend())) {
             return false;

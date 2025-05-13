@@ -71,6 +71,7 @@ group("arkassembler_header_deps") {
   deps = [
     ":ark_asm_meta_gen_h",
     ":ark_asm_register_extensions_h",
+    ":isa_gen_libarkassembler_assembly-ins_h",
     ":isa_gen_libarkassembler_ins_create_api_h",
     ":isa_gen_libarkassembler_ins_emit_h",
     ":isa_gen_libarkassembler_isa_h",
@@ -191,6 +192,7 @@ ark_isa_gen("isa_gen_libarkassembler") {
     "ins_create_api.h.erb",
     "opcode_parsing.h.erb",
     "operand_types_print.h.erb",
+    "assembly-ins.h.erb",
   ]
   sources = "templates"
   destination = "$target_gen_dir"

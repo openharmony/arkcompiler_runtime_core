@@ -157,7 +157,7 @@ void panda::guard::Object::UpdateLiteralArrayIdx()
     this->literalArrayIdx_ = updatedLiteralArrayIdx;
 
     for (auto &inst : this->defineInsList_) {
-        inst.ins_->ids[INDEX_0] = updatedLiteralArrayIdx;
+        inst.ins_->GetId(INDEX_0) = updatedLiteralArrayIdx;
     }
 
     for (auto &property : this->properties_) {

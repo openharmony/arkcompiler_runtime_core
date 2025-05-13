@@ -107,7 +107,7 @@ void panda::guard::OuterMethod::Build()
 {
     Function::Build();
     if (this->nameInfo_.IsValid()) {
-        this->nameDefine_ = this->nameInfo_.ins_->ids[0];
+        this->nameDefine_ = this->nameInfo_.ins_->GetId(0);
     } else {
         this->nameDefine_ = this->name_;
     }
@@ -125,7 +125,7 @@ void panda::guard::OuterMethod::UpdateNameDefine()
 {
     if (this->nameInfo_.IsValid()) {
         this->obfNameDefine_ = GuardContext::GetInstance()->GetNameMapping()->GetName(this->nameDefine_);
-        this->nameInfo_.ins_->ids[0] = this->obfNameDefine_;
+        this->nameInfo_.ins_->GetId(0) = this->obfNameDefine_;
         this->program_->prog_->strings.emplace(this->obfNameDefine_);
     } else {
         this->obfNameDefine_ = this->obfName_;
