@@ -54,6 +54,9 @@ public:
     uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
     bool IsFieldStringBuilderBuffer(FieldPtr field) const override;
     bool IsFieldStringBuilderIndex(FieldPtr field) const override;
+    bool IsFieldArrayActualLength(FieldPtr field) const override;
+    bool IsFieldArrayBuffer(FieldPtr field) const override;
+    bool IsFieldArray(ArrayField kind, FieldPtr field) const override;
     FieldPtr GetFieldStringBuilderBuffer(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderIndex(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderLength(ClassPtr klass) const override;

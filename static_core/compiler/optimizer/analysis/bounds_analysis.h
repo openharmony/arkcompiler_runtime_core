@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,33 @@ public:
     {
         return lenArray_;
     }
+
+    void SetRange(int64_t left, int64_t right)
+    {
+        left_ = left;
+        right_ = right;
+    }
+
+    void SetActualLengthLoop(Loop *loop)
+    {
+        actualLengthLoop_ = loop;
+    }
+
+    Loop *GetActualLengthLoop() const
+    {
+        return actualLengthLoop_;
+    }
+
+    bool HasActualLengthLoop() const
+    {
+        return actualLengthLoop_ != nullptr;
+    }
+
+    bool IsWithinActualLengthRange() const
+    {
+        return HasActualLengthLoop() && GetLeft() >= 0 && GetRight() < ACTUAL_LENGTH_VALUE;
+    }
+
     int64_t GetLeft() const;
 
     int64_t GetRight() const;
@@ -137,6 +164,7 @@ public:
 
     static constexpr int64_t MAX_RANGE_VALUE = INT64_MAX;
     static constexpr int64_t MIN_RANGE_VALUE = INT64_MIN;
+    static constexpr int64_t ACTUAL_LENGTH_VALUE = INT32_MAX;
 
     bool operator==(const BoundsRange &rhs) const
     {
@@ -150,6 +178,9 @@ public:
         if (lenArray_ != nullptr) {
             out << ", len_array = " << lenArray_->GetId();
         }
+        if (actualLengthLoop_ != nullptr) {
+            out << ", actual_length_loop = " << actualLengthLoop_;
+        }
         out << "\n";
     }
 
@@ -157,6 +188,7 @@ private:
     int64_t left_ = MIN_RANGE_VALUE;
     int64_t right_ = MAX_RANGE_VALUE;
     const Inst *lenArray_ {nullptr};
+    Loop *actualLengthLoop_ {nullptr};
 };
 
 class BoundsRangeInfo {
@@ -231,6 +263,8 @@ public:
     static void VisitIfImm(GraphVisitor *v, Inst *inst);
     static void VisitPhi(GraphVisitor *v, Inst *inst);
     static void VisitNullCheck(GraphVisitor *v, Inst *inst);
+    static void VisitBoundsCheck(GraphVisitor *v, Inst *inst);
+    static void VisitLoadObject(GraphVisitor *v, Inst *inst);
 
 #include "optimizer/ir/visitor.inc"
 private:
