@@ -744,7 +744,7 @@ export namespace util {
             if (!flag) {
                 throw createBusinessError(TypeErrorCodeId, `Wrong encoding format, the current '${encoding}' format is not support.`)
             }
-            this.encoding_ = tempString;
+            this.encoding_ = encoding;
         }
 
         static create(encoding?: string): TextEncoder
