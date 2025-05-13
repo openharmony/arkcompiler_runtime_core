@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,9 +14,9 @@
 ---
 cases:
     - decl: |-
-          const a: int = 2147483647
-          const b: int = 2147483647 - 1
-          let c: int = 2147483647 - 2   // not a constant expression
+          const a: int = 2147483647.0
+          const b: int = 2147483647.0 - 1
+          let c: int = 2147483647.0 - 2   // not a constant expression
           enum Enum { first = a, second = b, third = c }
       use: |-
           arktest.assertEQ( Enum.first.valueOf(), a )
@@ -24,31 +24,35 @@ cases:
           arktest.assertEQ( Enum.third.valueOf(), c )
 
     - decl: |-
-          enum Enum { first = 1, second = 1.2, third }  // wrong init type
+          enum Enum { first = 1.0, second = 1, third }  // wrong init type
       use: |-
-          arktest.assertEQ( Enum.second.valueOf(), 1.2 )
+          arktest.assertEQ( Enum.first.valueOf(), 1.0 )
+
+    - decl: |-
+          enum Enum { first = 1.0, second = "A", third }  // wrong init type
+      use: |-
+          arktest.assertEQ( Enum.first.valueOf(), 1.0 )
 
     - decl: |-
           enum Enum { first = true, second = false }  // wrong init type
       use: |-
-          arktest.assertTrue( true )
+          assertTrue( true )
 
     - decl: |-
-          enum Enum1 { first = 42, second }
+          enum Enum1 { first = 42.32, second }
           enum Enum2 { first = Enum1.first.valueOf(), second }  // not a constant expression
       use: |-
-          arktest.assertEQ( Enum2.first.valueOf(), 42 )
-          arktest.assertEQ( Enum2.second.valueOf(), 43 )
+          arktest.assertEQ( Enum2.first.valueOf(), 42.32 )
 
     - decl: |-
-          enum Enum1 { first = 42, second }
-          enum Enum2 { first = 42, second }
+          enum Enum1 { first = 42.32, second }
+          enum Enum2 { first = 42.32, second }
       use: |-
           let v: Enum2 = Enum1.first  // wrong type
 
     - decl: |-
-          enum Enum1 { first = -1, second, third = -42 }
-          enum Enum2 { first = -1, second, third = -42 }
+          enum Enum1 { first = -1.4, second = -42.32 }
+          enum Enum2 { first = -1.4, second = -42.32 }
       use: |-
           let v: Enum1 = Enum1.first
           let q: Enum2 = v as Enum2   // not allowed conversion
