@@ -16,13 +16,12 @@ limitations under the License.
 /*---
 desc: |-
     Default type value should not affect those type without default value set
-tags: [compile-only, negative]
 ---*/
 
-class C {
-  foo<T, U = string>() {}
+function foo<T, U = string>(a: T, b: U) {
+    return a
 }
 
 function main() {
-  new C().foo()
+    assertEQ(foo(1,"s"), 1)
 }

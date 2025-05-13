@@ -394,7 +394,8 @@ cases:
     result: 2
 
   # override-compatible argument (covariance)
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo( i: Base[] ): void {
           res = 1;
       }
@@ -549,7 +550,8 @@ cases:
     result: 2
 
   # override-compatible argument (covariance)
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(i: [Object, Object]): void {
           res = 1;
       }
@@ -563,7 +565,8 @@ cases:
     result: 2
 
   # override-compatible argument (covariance)
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(i: [Object, Object]): void {
           res = 1;
       }
