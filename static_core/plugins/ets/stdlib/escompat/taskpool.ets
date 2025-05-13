@@ -26,16 +26,13 @@ export namespace taskpool {
             }).Await();
         }
 
-        internal performTask(): void {
+        internal performTask(): boolean {
             let task: Task | undefined = getTask();
             if (task == undefined) {
-                return;
+                return false;
             }
             this.currentPriority = task.priority;
             let job = this.run<NullishType>((): NullishType => {
-                ConcurrencyHelpers.lockGuard(workersMutex, () => {
-                    idleWorkers.delete(this);
-                })
                 let res = task?.execute();
                 return res;
             });
@@ -53,11 +50,11 @@ export namespace taskpool {
             }).finally(() => {
                 this.currentPriority = undefined;
             })
+            return true;
         }
 
         internal notifyTaskFinished(task: Task): void {
             task?.tryTriggerRunner();
-            restoreWorker(this);
             if (getTaskNum()) {
                 notifyExecuteTask();
             }
@@ -1282,7 +1279,6 @@ export namespace taskpool {
         }
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             workers.clear();
-            idleWorkers.clear();
         })
     }
 
@@ -1302,7 +1298,6 @@ export namespace taskpool {
             for (let i = workersNum; i < num; ++i) {
                 let w = new TaskPoolWorker();
                 workers.add(w);
-                idleWorkers.add(w);
             }
         })
     }
@@ -1323,7 +1318,6 @@ export namespace taskpool {
             for (let i = 0; i < initialWorkersNumber; ++i) {
                 let w = new TaskPoolWorker();
                 workers.add(w);
-                idleWorkers.add(w);
             }
         })
     }
@@ -1337,21 +1331,14 @@ export namespace taskpool {
      */
     function notifyExecuteTask(): void {
         ConcurrencyHelpers.mutexLock(workersMutex);
-        for (let w : TaskPoolWorker of idleWorkers) {
-            w.performTask();
+        for (let w : TaskPoolWorker of workers) {
+            if (!w.performTask() && getTaskNum() > 0) {
+                // Current getTask may get an undefined task when higher priority task hit the continueCount
+                // So here we try to performTask again to avoid task cannot be executed
+                w.performTask();
+            }
         }
         ConcurrencyHelpers.mutexUnlock(workersMutex);
-    }
-
-    /**
-     * @brief Restore the worker to idleWorkers container.
-     * @param worker worker that need to be restored
-     * @see taskpool.TaskPoolWorker.notifyTaskFinished
-     */
-    function restoreWorker(worker: TaskPoolWorker): void {
-        ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            idleWorkers.add(worker);
-        })
     }
 
     /**
@@ -1477,7 +1464,6 @@ export namespace taskpool {
 
     const workersMutex = ConcurrencyHelpers.mutexCreate();
     const workers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
-    const idleWorkers: Set<TaskPoolWorker> = new Set<TaskPoolWorker>();
     let isWorkersInitialized: boolean = false;
 
     const taskQueuesMutex = ConcurrencyHelpers.mutexCreate();
