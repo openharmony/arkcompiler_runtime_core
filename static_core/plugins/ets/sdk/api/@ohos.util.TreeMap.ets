@@ -204,6 +204,52 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
         }
     }
 
+    private adjustUpward(current: TreeMapEntry<K, V>): void {
+        while (current !== this.rootEntry) {
+            const parent = current.parent!;
+            const isLeftChild = current === parent.left;
+            const brother = isLeftChild ? parent.right! : parent.left!;
+            if (!brother.isBlack) {
+                brother.isBlack = true;
+                parent.isBlack = false;
+                if (isLeftChild) {
+                    this.rotateLeft(parent);
+                } else {
+                    this.rotateRight(parent);
+                }
+            } else {
+                if ((brother.left === undefined || brother.left!.isBlack) &&
+                    (brother.right === undefined || brother.right!.isBlack)) {
+                    brother.isBlack = false;
+                    current = parent;
+                } else {
+                    if (isLeftChild) {
+                        if (brother.right === undefined || brother.right!.isBlack) {
+                            brother.left!.isBlack = true;
+                            brother.isBlack = false;
+                            this.rotateRight(brother);
+                        }
+                        brother.isBlack = parent.isBlack;
+                        parent.isBlack = true;
+                        brother.right!.isBlack = true;
+                        this.rotateLeft(parent);
+                    } else {
+                        if (brother.left === undefined || brother.left!.isBlack) {
+                            brother.right!.isBlack = true;
+                            brother.isBlack = false;
+                            this.rotateLeft(brother);
+                        }
+                        brother.isBlack = parent.isBlack;
+                        parent.isBlack = true;
+                        brother.left!.isBlack = true;
+                        this.rotateRight(parent);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     private iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {
         while (true) {
             const v = x.next();
@@ -525,9 +571,9 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
                         current.parent!.left!.isBlack = false;
                     }
                 } else {
-                    const parent = current.parent!;
+                    let parent = current.parent!;
                     if (current === parent.left) {
-                        const brother = parent.right!;
+                        let brother = parent.right!;
                         parent.left = undefined;
                         if (!brother.isBlack) {
                             brother.isBlack = true;
@@ -537,8 +583,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
                             if ((brother.left === undefined) && (brother.right === undefined)) {
                                 brother.isBlack = false;
                                 if (parent !== this.rootEntry) {
-                                    current = parent;
-                                    continue;
+                                    this.adjustUpward(parent);
                                 }
                             } else if (brother.right !== undefined) {
                                 brother.right!.isBlack = true;
@@ -550,7 +595,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
                             }
                         }
                     } else {
-                        const brother = parent.left!;
+                        let brother = parent.left!;
                         parent.right = undefined;
                         if (!brother.isBlack) {
                             brother.isBlack = true;
@@ -560,8 +605,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
                             if ((brother.left === undefined) && (brother.right === undefined)) {
                                 brother.isBlack = false;
                                 if (parent !== this.rootEntry) {
-                                    current = parent;
-                                    continue;
+                                    this.adjustUpward(parent);
                                 }
                             } else if (brother.left !== undefined) {
                                 brother.left!.isBlack = true;
@@ -655,9 +699,6 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
                 } else {
                     if (current === parent!.right) {
                         this.rotateLeft(parent!);
-                        if (uncle !== undefined) {
-                            uncle.isBlack = false;
-                        }
                         parent!.isBlack = false;
                         current!.isBlack = true;
                     }
@@ -673,9 +714,6 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
                 } else {
                     if (current === parent!.left) {
                         this.rotateRight(parent!);
-                        if (uncle !== undefined) {
-                            uncle.isBlack = false;
-                        }
                         parent!.isBlack = false;
                         current!.isBlack = true;
                     }
