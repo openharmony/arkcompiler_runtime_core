@@ -74,8 +74,11 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
         ScopedNativeCodeThread nativeScope(coro);
         NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
     }
+
+    // NOTE(MockMockBlack, #IC59ZS): put proxy to SharedReferenceStorage more prettily
     if (this->needProxy_) {
-        jsValue = CreateProxy(env, jsValue, this);
+        ASSERT(storage->HasReference(etsObject, env));
+        return storage->GetJsObject(etsObject, env);
     }
     return jsValue;
 }
@@ -864,9 +867,17 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
     EtsObject *etsObject = ctx->AcquirePendingNewInstance();
 
     if (LIKELY(etsObject != nullptr)) {
+        // proxy $get and $set
+        napi_value jsObject = nullptr;
+        if (etsClassWrapper->needProxy_) {
+            jsObject = CreateProxy(env, jsThis, etsClassWrapper);
+        } else {
+            jsObject = jsThis;
+        }
+
         // Create shared reference for existing ets object
         SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-        if (UNLIKELY(!storage->CreateETSObjectRef(ctx, etsObject, jsThis))) {
+        if (UNLIKELY(!storage->CreateETSObjectRef(ctx, etsObject, jsObject))) {
             ASSERT(InteropCtx::SanityJSExceptionPending());
             return nullptr;
         }
@@ -924,6 +935,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
         return false;
     }
 
+    // NOTE(MockMockBlack, #IC59ZS): put proxy to SharedReferenceStorage more prettily
     SharedReference *sharedRef;
     if (LIKELY(notExtensible)) {
         sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject.GetPtr(), jsThis);
