@@ -17,7 +17,7 @@
 #include "../../src/mock/mock_values.h"
 
 #include "../../include/c/metadata_core.h"
-#include "../../src/include_v2/c/isa/isa_static.h"
+#include "../../include/c/isa/isa_static.h"
 
 #include <cstdint>
 #include <cstring>

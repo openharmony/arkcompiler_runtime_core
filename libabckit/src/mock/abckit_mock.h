@@ -22,7 +22,7 @@
 #include "../../include/c/abckit.h"
 #include "../../include/c/metadata_core.h"
 #include "../../include/c/isa/isa_dynamic.h"
-#include "../../src/include_v2/c/isa/isa_static.h"
+#include "../../include/c/isa/isa_static.h"
 #include "../../include/c/extensions/arkts/metadata_arkts.h"
 #include "../../include/c/extensions/js/metadata_js.h"
 

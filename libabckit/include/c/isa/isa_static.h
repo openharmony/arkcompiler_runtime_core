@@ -25,9 +25,9 @@
 #include <cstdint>
 #endif
 
-#include "../../../../include/c/metadata_core.h"
-#include "../../../../include/c/ir_core.h"
-#include "../../../../include/c/abckit.h"
+#include "../metadata_core.h"
+#include "../ir_core.h"
+#include "../abckit.h"
 
 #ifdef __cplusplus
 extern "C" {
