@@ -37,6 +37,7 @@
 #include "runtime/include/thread.h"
 
 #include "runtime/osr.h"
+#include "source_language.h"
 
 namespace ark {
 
@@ -276,17 +277,22 @@ public:
 
     bool IsClassExternal(MethodPtr method, ClassPtr calleeClass) const override;
 
-    bool IsMethodIntrinsic(MethodPtr method) const override
-    {
-        return MethodCast(method)->IsIntrinsic();
-    }
-
     bool IsMethodAbstract(MethodPtr method) const override
     {
         return MethodCast(method)->IsAbstract();
     }
 
-    bool IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const override;
+    bool IsMethodIntrinsic(MethodPtr method) const override
+    {
+        return MethodCast(method)->IsIntrinsic();
+    }
+
+    bool IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const override
+    {
+        return GetMethodAsIntrinsic(parentMethod, id) != nullptr;
+    }
+
+    MethodPtr GetMethodAsIntrinsic(MethodPtr parentMethod, MethodId id) const override;
 
     bool IsMethodFinal(MethodPtr method) const override
     {
@@ -819,7 +825,9 @@ private:
 };
 
 #ifndef PANDA_PRODUCT_BUILD
-uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceLang sourceLang);
+// Exists only for tests purposes, must not be used in release builds
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, ClassLinkerContext *ctx);
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, SourceLanguage sourceLang);
 #endif
 
 }  // namespace ark

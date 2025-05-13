@@ -398,7 +398,7 @@ bool PandaRuntimeInterface::IsMemoryBarrierRequired(MethodPtr method) const
     return false;
 }
 
-bool PandaRuntimeInterface::IsMethodIntrinsic(MethodPtr parentMethod, MethodId id) const
+PandaRuntimeInterface::MethodPtr PandaRuntimeInterface::GetMethodAsIntrinsic(MethodPtr parentMethod, MethodId id) const
 {
     Method *caller = MethodCast(parentMethod);
     auto *pf = caller->GetPandaFile();
@@ -407,11 +407,13 @@ bool PandaRuntimeInterface::IsMethodIntrinsic(MethodPtr parentMethod, MethodId i
     auto *className = pf->GetStringData(mda.GetClassId()).data;
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    auto *klass = classLinker->FindLoadedClass(className, caller->GetClass()->GetLoadContext());
+    // Support intrinsics only from boot context
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
+    auto *klass = classLinker->FindLoadedClass(className, classLinker->GetExtension(ctx)->GetBootContext());
 
     // Class should be loaded during intrinsics initialization
     if (klass == nullptr) {
-        return false;
+        return nullptr;
     }
 
     auto name = pf->GetStringData(mda.GetNameId());
@@ -423,11 +425,11 @@ bool PandaRuntimeInterface::IsMethodIntrinsic(MethodPtr parentMethod, MethodId i
         if (isArrayClone) {
             method = klass->GetClassMethod(name.data, proto);
         } else {
-            return false;
+            return nullptr;
         }
     }
 
-    return method->IsIntrinsic();
+    return IsMethodIntrinsic(method) ? method : nullptr;
 }
 
 std::string PandaRuntimeInterface::GetBytecodeString(MethodPtr method, uintptr_t pc) const
@@ -1020,7 +1022,24 @@ ObjectPointerType PandaRuntimeInterface::GetNonMovableString(MethodPtr method, S
 }
 
 #ifndef PANDA_PRODUCT_BUILD
-uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceLang sourceLang)
+// Exists only for tests purposes, must not be used in release builds
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, SourceLanguage sourceLang)
+{
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(ManagedThread::GetCurrent());
+    VMHandle<coretypes::String> handle(ManagedThread::GetCurrent(), fullMethodName);
+    ClassLinkerContext *ctx = nullptr;
+    auto walker = StackWalker::Create(ManagedThread::GetCurrent());
+    if (LIKELY(walker.HasFrame())) {
+        ctx = walker.GetMethod()->GetClass()->GetLoadContext();
+    } else {
+        ClassLinkerExtension *ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(sourceLang);
+        ctx = ext->GetBootContext();
+    }
+    ASSERT(ctx->GetSourceLang() == sourceLang);
+    return CompileMethodImpl(handle.GetPtr(), ctx);
+}
+
+uint8_t CompileMethodImpl(coretypes::String *fullMethodName, ClassLinkerContext *ctx)
 {
     auto name = ConvertToString(fullMethodName);
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
@@ -1036,8 +1055,7 @@ uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceL
     auto classNameBytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
     auto methodNameBytes = utf::CStringAsMutf8(methodName.c_str());
 
-    ClassLinkerExtension *ext = classLinker->GetExtension(sourceLang);
-    Class *cls = classLinker->GetClass(classNameBytes, true, ext->GetBootContext());
+    Class *cls = classLinker->GetClass(classNameBytes, true, ctx);
     if (cls == nullptr) {
         static constexpr uint8_t CLASS_IS_NULL = 2;
         return CLASS_IS_NULL;
