@@ -306,10 +306,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(other: Int8Array) {
         if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
             this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
         } else {
             throw new Error("unexpected type of buffer")
         }
@@ -2235,10 +2235,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(other: Int16Array) {
         if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
             this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
         } else {
             throw new Error("unexpected type of buffer")
         }
@@ -4168,10 +4168,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(other: Int32Array) {
         if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
             this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
         } else {
             throw new Error("unexpected type of buffer")
         }
@@ -6066,10 +6066,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public constructor(other: BigInt64Array) {
         if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
             this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
         } else {
             throw new Error("unexpected type of buffer")
         }
@@ -7982,10 +7982,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(other: Float32Array) {
         if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
             this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
         } else {
             throw new Error("unexpected type of buffer")
         }
@@ -9878,10 +9878,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(other: Float64Array) {
         if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
             this.arrayBufferBacked = true
         } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
         } else {
             throw new Error("unexpected type of buffer")
         }
