@@ -18,8 +18,7 @@
 desc: >-
     If the signatures of two methods with the same name are not
     override-equivalent, then the return types of those
-    methods, or the throws or rethrows clauses of those methods can have
-    any kind of relationship.
+    methods can have any kind of relationship.
 tags: [{{c.tags}}]
 ---*/
 {{c.decl}}

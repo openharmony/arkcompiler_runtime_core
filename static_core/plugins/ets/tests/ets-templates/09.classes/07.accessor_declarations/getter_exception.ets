@@ -17,31 +17,28 @@
 desc: Getter throw error.
 ---*/
 
-class TestException extends Exception {}
+class TestError extends Error {}
 
 class A {
   private _age: int = 0;
 
   get age(): int {
-    if (this._age == 0) { 
-      throw new TestException();
+    if (this._age == 0) {
+      throw new TestError();
     }
 
     return this._age;
   }
 }
 
-function main(): void {
+function main() {
   let instance: A = new A();
-  let catchCode = 0;
 
   try {
     let a = instance.age;
-  } catch (e: TestException) {
-    catchCode = 1;
-  } catch (any) {
-    assertTrue( false );
+  } catch (e) {
+    assertTrue(e instanceof TestError)
+    return
   }
-
-  assertEQ( catchCode, 1 );
+  assertTrue(false, "Expected error wasn't caught")
 }

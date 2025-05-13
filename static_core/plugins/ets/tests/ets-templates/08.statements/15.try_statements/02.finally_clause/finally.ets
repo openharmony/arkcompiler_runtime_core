@@ -27,7 +27,7 @@ let t1 = 1, t2 = 2  // global vars, never changed in tests
 
 {{t.defs}}
 
-function main(): int throws {
+function main(): int {
     {{t.use|indent}}
 }
 {% endfor %}

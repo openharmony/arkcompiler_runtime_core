@@ -40,6 +40,11 @@
 #23134
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_15.ets
 
+#25498
+04.names_declarations_and_scopes/08.function_declarations/throws_clause_1.ets
+04.names_declarations_and_scopes/08.function_declarations/throws_clause_2.ets
+04.names_declarations_and_scopes/08.function_declarations/throws_clause_3.ets
+
 #24363 missing CTE if unspecified non-default generic type in method (while having default type)
 05.generics/01.type_parameters/02.type_parameter_default/generic_methods/wrong_method_missing_nondefault_parameter.ets
 05.generics/01.type_parameters/02.type_parameter_default/generic_functions/wrong_function_missing_nondefault_parameter.ets
@@ -379,11 +384,19 @@
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_6.ets
 09.classes/05.field_declarations/04.overriding_fields/overriding_fields_8.ets
 
+#25498
+09.classes/06.method_declarations/throws_clause_1.ets
+09.classes/06.method_declarations/throws_clause_2.ets
+
 #23238 Method returning 'this' returns wrong instance
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.ets
 
 #24507
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_24.ets
+
+#25498
+09.classes/09.constructor_declaration/throws_clause_1.ets
+09.classes/09.constructor_declaration/throws_clause_2.ets
 
 #23832 missing CTE for static constructor
 09.classes/09.constructor_declaration/static_constructor_declaration.ets
@@ -401,6 +414,10 @@
 10.interfaces/04.interface_members/methods_overriding.ets
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
 10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.ets
+
+#25498
+10.interfaces/06.interface_method_declarations/throws_clause_1.ets
+10.interfaces/06.interface_method_declarations/throws_clause_2.ets
 
 #23856
 13.compilation_units/09.export_directives/01.selective_export_directive/t01/c.ets
@@ -516,7 +533,7 @@
 17.experimental_features/03.array_creation_expressions/expr_n_12.ets
 
 #22816
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_4.ets
 
 #18763 es2panda aborts on for-of over a union type array
 17.experimental_features/05.iterable_types/it_11.ets
@@ -541,9 +558,9 @@
 #15600 overloading methods with tuples in parameters
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_10.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_9.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_9.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_6.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_14.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_11.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_8.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_4.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_4.ets
 
@@ -553,8 +570,8 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_13.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_15.ets
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_16.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_10.ets
-17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_12.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_7.ets
+17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over2_9.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_0_18.ets
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_a_18.ets
 
@@ -634,6 +651,10 @@
 17.experimental_features/08.function_method_and_constructor_overloading/02.class_method_overloading/cm_over1_7.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co1_over_8.ets
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_7.ets
+
+#25498
+17.experimental_features/09.native_functions_and_methods/01.native_functions/nat7.ets
+17.experimental_features/09.native_functions_and_methods/01.native_functions/nat8.ets
 
 #25172
 03.types/19.union_types/united_switch_ext_1.ets
