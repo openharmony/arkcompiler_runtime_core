@@ -174,7 +174,7 @@ export final class BigInt {
     }
 
     /**
-     * Returns a locale string representing the specified array and its elements.
+     * Converts a number to a string by using the current or specified locale.
      *
      * @param locales
      *
@@ -182,10 +182,19 @@ export final class BigInt {
      *
      * @returns string representation
      */
-    public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: BigIntToLocaleStringOptions): string {
+    public toLocaleString(locales?: Intl.LocalesArgument, options?: BigIntToLocaleStringOptions): string {
         const numFmtOptions = BigInt.toNumberFormatOptions(options)
         const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), numFmtOptions)
         return formatter.format(this)
+    }
+
+    /**
+     * Converts a number to a string by using current locale
+     *
+     * @returns string representation
+     */
+    public toLocaleString(): string {
+        return this.toLocaleString(undefined)
     }
 
     private static toNumberFormatOptions(options?: BigIntToLocaleStringOptions): Intl.NumberFormatOptions | undefined {
@@ -257,15 +266,6 @@ export final class BigInt {
         numFmtOptions.useGrouping = options.useGrouping
 
         return numFmtOptions
-    }
-
-    /**
-     * Returns a locale string representing the specified array and its elements.
-     *
-     * @returns string representation
-     */
-    public toLocaleString(): string {
-        return new Intl.NumberFormat().format(this)
     }
 
     public override toString(): string {

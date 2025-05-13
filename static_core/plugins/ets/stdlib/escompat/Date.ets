@@ -675,8 +675,7 @@ export class Date {
      * @returns a language-sensitive representation of the time portion of the date.
      */
     public toLocaleTimeString(): string {
-        const formatter = new Intl.DateTimeFormat(undefined, Date.TIME_FORMAT_OPTIONS)
-        return formatter.format(this.getTime())
+        return this.toLocaleTimeString(undefined)
     }
 
     private appendDefaultTimeOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
@@ -705,7 +704,7 @@ export class Date {
      *
      * @returns a language-sensitive representation of the time portion of the date with respect to locale.
      */
-    public toLocaleTimeString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.DateTimeFormatOptions): string {
+    public toLocaleTimeString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         if (options && options.dateStyle) {
             throw new TypeError("Invalid option : dateStyle")
         }
@@ -715,25 +714,24 @@ export class Date {
     }
 
     /**
-     * Gets a string with a language-sensitive representation of this date.
-     *
-     * @returns a language-sensitive representation of this date.
-     */
-    public toLocaleString(): string {
-        const formatter = new Intl.DateTimeFormat(undefined, Date.DATE_TIME_FORMAT_OPTIONS)
-        return formatter.format(this.getTime())
-    }
-
-    /**
      * Gets a string with a language-sensitive representation of this date with respect to locale.
      *
      * @param locale
      *
      * @returns a language-sensitive representation of this date.
      */
-    public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.DateTimeFormatOptions): string {
+    public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         const formatter = new Intl.DateTimeFormat(intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
         return formatter.format(this.getTime())
+    }
+
+    /**
+     * Gets a string with a language-sensitive representation of this date.
+     *
+     * @returns a language-sensitive representation of this date.
+     */
+    public toLocaleString(): string {
+        return this.toLocaleString(undefined)
     }
 
     /**
@@ -744,8 +742,7 @@ export class Date {
      * of the date portion of the specified date in the user agent's timezone.
      */
     public toLocaleDateString(): string {
-        const formatter = new Intl.DateTimeFormat(undefined, Date.DATE_FORMAT_OPTIONS)
-        return formatter.format(this.getTime())
+        return this.toLocaleDateString(undefined)
     }
 
     private appendDefaultDateOptions(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
@@ -770,7 +767,7 @@ export class Date {
      * @returns a string with a language-sensitive representation
      * of the date portion of the specified date in the user agent's timezone.
      */
-    public toLocaleDateString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.DateTimeFormatOptions): string {
+    public toLocaleDateString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         if (options && options.timeStyle) {
             throw new TypeError("Invalid option : timeStyle")
         }

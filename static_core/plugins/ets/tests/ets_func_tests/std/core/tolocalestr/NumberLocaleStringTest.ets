@@ -25,6 +25,7 @@ function testNumberToLocaleString(): void {
 
     assertEQ(num.toLocaleString(langTag), "45,678")
     assertEQ(num.toLocaleString(locale), "45,678")
+    assertEQ(num.toLocaleString(), num.toLocaleString(undefined))
 }
 
 function testNaNToLocaleString(): void {
