@@ -499,8 +499,12 @@ export default class LightWeightMap<K, V> implements ReadonlyLightWeightMap<K, V
         }
 
         const keyHash: int = key!.$_hashCode();
-        const t = keyHash >> LightWeightMap.SHIFT_COUNT;
-        return ((keyHash ^ t) - t);
+        const positiveMask: int = 1 << LightWeightMap.SHIFT_COUNT;
+        if (keyHash >= 0) {
+            return (keyHash | positiveMask)
+        } else {
+            return (keyHash & (~positiveMask))
+        }
     }
 
     private binarySearchHashes(hashArray: Array<int>, hashCode: int, size: int): int {
