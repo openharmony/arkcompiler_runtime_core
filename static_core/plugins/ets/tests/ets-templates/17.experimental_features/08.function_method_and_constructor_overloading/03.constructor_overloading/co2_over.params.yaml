@@ -128,9 +128,9 @@ cases:
               constructor() {}
               constructor(p: Object) { this.t = "should never be called" }
               constructor(p: FixedArray<A>) { this.t = "A" }
+              constructor(p: FixedArray<char>) { this.t = "char" }
               constructor(p: FixedArray<byte>) { this.t = "byte" }
               constructor(p: FixedArray<int>) { this.t = "int" }
-              constructor(p: FixedArray<char>) { this.t = "char" }
               constructor(p: FixedArray<boolean>) { this.t = "boolean" }
               constructor(p: FixedArray<Double>) { this.t = "Double" }
           }
