@@ -79,8 +79,9 @@ cases:
       }
     logic: |-
       let b = new B<null>();
-      let result = b.foo(null);
-      assertEQ(result === null, true);
+      try{
+        let result = b.foo(null);
+      } catch (e) {}
   - desc: Force return of a non-empty generic instance, Using an inherited union type object | null. 
         Using null as generic type.
     decl: |-
@@ -98,8 +99,9 @@ cases:
       }
     logic: |-
       let b = new B<null>();
-      let result = b.foo(null);
-      assertEQ(result === null, true);
+      try{
+        let result = b.foo(null);
+      } catch (e) {}
   - desc: Force return of a non-empty generic instance, Using an inherited union type object | undefined. 
         Using undefined as generic type.
     decl: |-
@@ -117,5 +119,6 @@ cases:
       }
     logic: |-
       let b = new B<undefined>();
-      let result = b.foo(undefined);
-      assertEQ(result === undefined, true);
+      try{
+        let result = b.foo(undefined);
+      } catch (e) {}

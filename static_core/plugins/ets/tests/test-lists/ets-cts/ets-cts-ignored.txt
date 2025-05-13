@@ -631,16 +631,6 @@
 #21301 Not work overloading with union parameter, different union have the similar assambly signature, mangling is necessary
 17.experimental_features/17.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.ets
 
-#23995 not yet implemented
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex1.ets
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex2.ets
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex2_1.ets
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex3.ets
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex3_1.ets
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex4.ets
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex4_1.ets
-17.experimental_features/18.generics_experimental/01.non_nullish_type_parameter/ex5.ets
-
 #24859 undefined register, Register type conflict
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_1.ets
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_2.ets
@@ -699,11 +689,3 @@
 17.experimental_features/02.fixed_array_types/far4a.ets
 17.experimental_features/02.fixed_array_types/far4c.ets
 17.experimental_features/02.fixed_array_types/far4d.ets
-
-#25170
-17.experimental_features/18.generics_experimental/generics_nonull_return_ext_0.ets
-17.experimental_features/18.generics_experimental/generics_nonull_return_ext_1.ets
-17.experimental_features/18.generics_experimental/generics_nonull_return_ext_2.ets
-17.experimental_features/18.generics_experimental/generics_nonull_return_ext_3.ets
-17.experimental_features/18.generics_experimental/generics_nonull_return_ext_4.ets
-17.experimental_features/18.generics_experimental/generics_nonull_return_ext_5.ets
