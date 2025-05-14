@@ -14,15 +14,15 @@
  */
 
 const enum E {
-    A = "Hello",
-    B = "world"
+    A = 'Hello',
+    B = 'world'
 }
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: E[][][] = [[new Array<E>(2)]];
 }
 
-@__$$ETS_ANNOTATION$$__Anno({a: [[["Hello", "world", "Hello"]]]})
+@__$$ETS_ANNOTATION$$__Anno({a: [[['Hello', 'world', 'Hello']]]})
 class A {
     @__$$ETS_ANNOTATION$$__Anno({a: [[new Array<E>(3)]]})
     foo() {}

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Anno1, Anno2 } from "./a"
+import { Anno1, Anno2 } from './a';
 
 @__$$ETS_ANNOTATION$$__Anno1
 class A {}
@@ -24,5 +24,5 @@ class B {}
 @__$$ETS_ANNOTATION$$__Anno1({})
 class C {}
 
-@__$$ETS_ANNOTATION$$__Anno2({a: 1, b: "string"})
+@__$$ETS_ANNOTATION$$__Anno2({a: 1, b: 'string'})
 class D {}

@@ -16,7 +16,7 @@ import bar from 'modules/module'
 
 export class B {}
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: number = 3
 }
 

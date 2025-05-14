@@ -20,11 +20,11 @@ const enum E {
 }
 
 const enum E1 {
-    A = "Hello",
-    B = "world"
+    A = 'Hello',
+    B = 'world'
 } 
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
     a: number
     b: number[] = [13, -10]
     c: string

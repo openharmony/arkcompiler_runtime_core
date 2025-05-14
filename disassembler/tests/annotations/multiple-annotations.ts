@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     a: number = 1;
 }
 
-@interface Anno2 {
-    b: string = "string"
+@interface __$$ETS_ANNOTATION$$__Anno2 {
+    b: string = 'string'
 }
 
-@interface Anno3 {
+@interface __$$ETS_ANNOTATION$$__Anno3 {
     c: boolean[] = [true, false];
 }
 
 @__$$ETS_ANNOTATION$$__Anno1({a: 42})
-@__$$ETS_ANNOTATION$$__Anno2({b: "abc"})
+@__$$ETS_ANNOTATION$$__Anno2({b: 'abc'})
 @__$$ETS_ANNOTATION$$__Anno3({c: [false, true]})
 class A {
     @__$$ETS_ANNOTATION$$__Anno1({a: 42})
-    @__$$ETS_ANNOTATION$$__Anno2({b: "abc"})
+    @__$$ETS_ANNOTATION$$__Anno2({b: 'abc'})
     @__$$ETS_ANNOTATION$$__Anno3({c: [false, true]})
     foo() {}
 }

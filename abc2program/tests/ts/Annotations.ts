@@ -19,7 +19,7 @@ const enum E {
   C = 3
 }
 
-@interface Anno {
+@interface __$$ETS_ANNOTATION$$__Anno {
   a: number = 7
   b: number[] = [13, 10]
   c: string = "abc"

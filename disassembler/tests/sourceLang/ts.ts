@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-@interface TsAnno { }
+@interface __$$ETS_ANNOTATION$$__TsAnno { }
 function TS() {
     print("source language test")
 }

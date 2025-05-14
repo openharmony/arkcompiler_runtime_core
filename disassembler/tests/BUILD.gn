@@ -369,6 +369,6 @@ group("host_unittest") {
     ":DisasmReleaseTestAction",
     ":DisasmScriptTestAction",
     ":DisasmSourceLangTestAction",
-    ":DisasmUserAnnotationsTest",
+    ":DisasmUserAnnotationsTestAction",
   ]
 }

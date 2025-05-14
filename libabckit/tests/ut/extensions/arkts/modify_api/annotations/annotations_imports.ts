@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-export @interface Anno3 {
+export @interface __$$ETS_ANNOTATION$$__Anno3 {
     a: string
 }
 
-export @interface Anno4 {
+export @interface __$$ETS_ANNOTATION$$__Anno4 {
     a: string
 }

@@ -1,3 +1,4 @@
+
 /**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +14,22 @@
  * limitations under the License.
  */
 
-import * as Namespace1 from "./a"
+import * as Namespace1 from './a';
 
-@__$$ETS_ANNOTATION$$__Namespace1.Anno()
+@Namespace1.__$$ETS_ANNOTATION$$__Anno()
 class A {}
 
-@__$$ETS_ANNOTATION$$__Namespace1.Anno
+@Namespace1.__$$ETS_ANNOTATION$$__Anno
 class B {}
 
-@__$$ETS_ANNOTATION$$__Namespace1.Anno1({a: 1, b: "string"})
+@Namespace1.__$$ETS_ANNOTATION$$__Anno1({a: 1, b: 'string'})
 class C {}
 
-@__$$ETS_ANNOTATION$$__Namespace1.Namespace2.Namespace3.Anno2()
+@Namespace1.Namespace2.Namespace3.__$$ETS_ANNOTATION$$__Anno2()
 class D {}
 
-@__$$ETS_ANNOTATION$$__Namespace1.Namespace2.Namespace3.Anno2
+@Namespace1.Namespace2.Namespace3.__$$ETS_ANNOTATION$$__Anno2
 class E {}
 
-@__$$ETS_ANNOTATION$$__Namespace1.Namespace2.Namespace3.Anno3({a: 1, b: "string"})
+@Namespace1.Namespace2.Namespace3.__$$ETS_ANNOTATION$$__Anno3({a: 1, b: 'string'})
 class F {}

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-import {Anno3, Anno4} from "./annotations_imports"
+import {__$$ETS_ANNOTATION$$__Anno3, __$$ETS_ANNOTATION$$__Anno4} from "./annotations_imports"
 
-@interface Anno1 {
+@interface __$$ETS_ANNOTATION$$__Anno1 {
     a: number = 3
     b: number[] = [13, 9]
     d: boolean = false
 }
 
-@interface Anno2 {
+@interface __$$ETS_ANNOTATION$$__Anno2 {
     a: number = 5
     b: number[] = [12, 4]
     d: boolean = true
