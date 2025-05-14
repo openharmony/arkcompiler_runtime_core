@@ -270,6 +270,9 @@ template <typename FRead>
     // start slowpath
     VMHandle<ObjectHeader> handle(EtsCoroutine::GetCurrent(), ref);
     auto refconv = JSRefConvertResolve(ctx, klass);
+    if (refconv == nullptr) {
+        return false;
+    }
     return setResult(refconv->Wrap(ctx, EtsObject::FromCoreType(handle.GetPtr())));
 }
 
