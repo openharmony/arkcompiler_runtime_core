@@ -1,0 +1,203 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
+#define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
+
+#include <stdint.h>
+#include <stdio.h>
+
+#include "base/common.h"
+#include "objects/base_object_operator.h"
+#include "objects/base_state_word.h"
+
+namespace panda {
+#ifndef USE_CMC_GC
+class BaseObject {
+};
+#else
+class BaseObject {
+public:
+    BaseObject() : state_(0) {}
+
+    static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
+    static void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
+
+    inline size_t GetSize() const
+    {
+        if (IsForwarded()) {
+            return GetSizeForwarded();
+        } else {
+            return GetOperator()->GetSize(this);
+        }
+    }
+
+    inline bool IsValidObject() const
+    {
+        return GetOperator()->IsValidObject(this);
+    }
+
+    void ForEachRefField(const RefFieldVisitor &visitor)
+    {
+        GetOperator()->ForEachRefField(this, visitor);
+    }
+
+    inline BaseObject *GetForwardingPointer() const
+    {
+        if (IsForwarded()) {
+            return GetOperator()->GetForwardingPointer(this);
+        }
+        return nullptr;
+    }
+
+    inline void SetForwardingPointerExclusive(BaseObject *fwdPtr)
+    {
+        GetOperator()->SetForwardingPointerExclusive(this, fwdPtr);
+        state_.SetForwarded();
+    }
+
+    inline void SetSizeForwarded(size_t size)
+    {
+        // Set size in old obj when forwarded, forwardee obj size may changed.
+        size_t objectHeaderSize = sizeof(BaseStateWord);
+        DCHECK_CC(size >= objectHeaderSize + sizeof(size_t));
+        auto addr = reinterpret_cast<MAddress>(this) + objectHeaderSize;
+        *reinterpret_cast<size_t*>(addr) = size;
+    }
+
+    inline size_t GetSizeForwarded() const
+    {
+        auto addr = reinterpret_cast<MAddress>(this) + sizeof(BaseStateWord);
+        return *reinterpret_cast<size_t*>(addr);
+    }
+
+    inline bool IsForwarding() const
+    {
+        return state_.IsForwarding();
+    }
+
+    inline bool IsForwarded() const
+    {
+        return state_.IsForwarded();
+    }
+
+    template <typename T>
+    Field<T> &GetField(uint32_t offset) const
+    {
+        auto addr = reinterpret_cast<MAddress>(this) + offset;
+        return *reinterpret_cast<Field<T> *>(addr);
+    }
+
+    template <bool isVolatile = false>
+    RefField<isVolatile> &GetRefField(uint32_t offset) const
+    {
+        auto addr = reinterpret_cast<MAddress>(this) + offset;
+        return *reinterpret_cast<RefField<isVolatile> *>(addr);
+    }
+
+    inline bool CompareExchangeRefField([[maybe_unused]] const RefField<> &field,
+                                        [[maybe_unused]] const RefField<> oldRef,
+                                        [[maybe_unused]] const RefField<> newRef)
+    {
+        return true;
+    }
+
+    static inline intptr_t FieldOffset(BaseObject *object, const void *field)
+    {
+        return reinterpret_cast<intptr_t>(field) - reinterpret_cast<intptr_t>(object);
+    }
+
+    // The interfaces following only use for common code compiler. It will be deleted later.
+    TypeInfo *GetComponentTypeInfo() const
+    {
+        return reinterpret_cast<TypeInfo *>(const_cast<BaseObject *>(this));
+    }
+
+    inline bool HasRefField() const
+    {
+        return true;
+    }
+
+    inline TypeInfo *GetTypeInfo() const
+    {
+        return reinterpret_cast<TypeInfo *>(const_cast<BaseObject *>(this));
+    }
+
+    bool IsRawArray() const
+    {
+        return true;
+    }
+
+    void ForEachRefInStruct([[maybe_unused]] const RefFieldVisitor &visitor, [[maybe_unused]] MAddress aggStart,
+                            [[maybe_unused]] MAddress aggEnd)
+    {
+    }
+
+    BaseStateWord GetBaseStateWord() const
+    {
+        return state_.AtomicGetBaseStateWord();
+    }
+
+    void SetClassInfo([[maybe_unused]] TypeInfo *klassRef) {}
+
+    void SetForwardState(BaseStateWord::ForwardState state)
+    {
+        state_.SetForwardState(state);
+    }
+
+    bool IsInTraceRegion() const
+    {
+        return true;
+    }
+
+    bool TryLockObject(const BaseStateWord state)
+    {
+        return state_.TryLockBaseStateWord(state);
+    }
+
+    void UnlockObject(const BaseStateWord::ForwardState newState)
+    {
+        state_.UnlockStateWord(newState);
+    }
+
+    void OnFinalizerCreated() {}
+
+    bool IsToVersion() const
+    {
+        return state_.IsToVersion();
+    }
+    // The interfaces above only use for common code compiler. It will be deleted later.
+
+protected:
+    static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
+    {
+        auto ref = reinterpret_cast<BaseObject *>(address);
+        return ref;
+    }
+
+    inline BaseObjectOperatorInterfaces *GetOperator() const
+    {
+        if (state_.IsStatic()) {
+            return operator_.staticObjOp_;
+        }
+        return operator_.dynamicObjOp_;
+    }
+
+    static BaseObjectOperator operator_;
+    BaseStateWord state_;
+};
+#endif
+}  // namespace panda
+#endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
