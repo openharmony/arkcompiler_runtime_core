@@ -187,25 +187,25 @@ cases:
           class A {
               meth(p: Object): string { return "" } // should never be called
               meth(p: FixedArray<A>): string { return "A" }
+              meth(p: FixedArray<Color>): string { return "Color" }
+              meth(p: FixedArray<Size>): string { return "Size" }
               meth(p: FixedArray<Object>): string { return "Object" }
+              meth(p: FixedArray<char>): string { return "char" }
               meth(p: FixedArray<byte>): string { return "byte" }
               meth(p: FixedArray<short>): string { return "short" }
               meth(p: FixedArray<int>): string { return "int" }
               meth(p: FixedArray<long>): string { return "long" }
-              meth(p: FixedArray<char>): string { return "char" }
               meth(p: FixedArray<boolean>): string { return "boolean" }
-              meth(p: FixedArray<float>): string { return "float" }
               meth(p: FixedArray<double>): string { return "double" }
-              meth(p: FixedArray<Byte>): string { return "Byte" }
-              meth(p: FixedArray<Short>): string { return "Short" }
+              meth(p: FixedArray<float>): string { return "float" }
               meth(p: FixedArray<Int>): string { return "Int" }
+              meth(p: FixedArray<Short>): string { return "Short" }
+              meth(p: FixedArray<Byte>): string { return "Byte" }          
               meth(p: FixedArray<Long>): string { return "Long" }
               meth(p: FixedArray<Char>): string { return "Char" }
               meth(p: FixedArray<Boolean>): string { return "Boolean" }
               meth(p: FixedArray<Float>): string { return "Float" }
               meth(p: FixedArray<Double>): string { return "Double" }
-              meth(p: FixedArray<Color>): string { return "Color" }
-              meth(p: FixedArray<Size>): string { return "Size" }
           }
       use: |-
           let a: A = new A()
