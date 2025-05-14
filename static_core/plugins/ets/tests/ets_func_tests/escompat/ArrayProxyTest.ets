@@ -123,6 +123,13 @@ function verifyArrayProxyOps(array: Array<string>, handler: StringArrayProxyHand
     arktest.assertEQ(arrayTail.length, 1, "unexpected Array.splice() result length")
     arktest.assertEQ(arrayProxy.length, 1, "unexpected array length after splice")
 
+    arrayProxy.push("5", "6")
+    arktest.assertEQ(arrayProxy.length, 3, "unexpected arrayProxy.length")
+    const lastElem2 = arrayProxy.pop()
+    arktest.assertEQ(lastElem2, "6", "unexpected Array.pop() after Array.push() result")
+    const lastElem3 = arrayProxy.pop()
+    arktest.assertEQ(lastElem3, "5", "unexpected Array.pop() after Array.push() result")
+
     const lengthAfterUnshift = arrayProxy.unshift("I", "II")
     arktest.assertTrue(handler.unshiftTrapped)
     arktest.assertEQ(arrayProxy.length, 3)

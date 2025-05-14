@@ -824,7 +824,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns new length
      */
-    public push(...val: T[]): number {
+    public pushArray(...val: T[]): number {
         this.ensureUnusedCapacity(val.length.toInt())
         for (let i = 0; i < val.length; i++) {
             this.buffer[this.actualLength + i] = val[i]
@@ -834,9 +834,22 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private pushSingle(value: T): void {
-        this.push(value)
+        this.pushOne(value)
     }
 
+    /**
+     * Adds the specified element to the end of an array and returns the new length of the array.
+     *
+     * @returns new length
+     */
+    public pushOne(val: T): number {
+        this.ensureUnusedCapacity(1)
+        return this.pushImpl(val)
+    }
+
+    private final native pushImpl(val: T): number;
+
+    overload push{ pushOne, pushArray }
     /**
      * Adds the specified elements to the end of an array and returns the new length of the array.
      *

@@ -73,6 +73,11 @@ public:
         return ObjectAccessor::GetFieldPrimitive<uint32_t>(this, GetActualLengthOffset(), std::memory_order_relaxed);
     }
 
+    void SetActualLength(uint32_t newLength)
+    {
+        SetFieldPrimitive(GetActualLengthOffset(), newLength);
+    }
+
     static constexpr size_t GetBufferOffset()
     {
         return MEMBER_OFFSET(EtsEscompatArray, buffer_);
