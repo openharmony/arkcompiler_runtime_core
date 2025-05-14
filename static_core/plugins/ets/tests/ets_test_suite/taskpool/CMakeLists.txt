@@ -20,7 +20,11 @@ file(GLOB test_files "${taskpool_test_in_dir}/*.ets")
 foreach(filename ${test_files})
     get_filename_component(test_file "${filename}" NAME)
     get_filename_component(test_name "${test_file}" NAME_WE)
-    if (NOT "${test_file}" STREQUAL "group_tasks.ets" OR NOT PANDA_ENABLE_ADDRESS_SANITIZER OR NOT PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER)
+    # NOTE(sarychevkonstantin): flaky out of memory bug. Issues #23836 #25776 #24759
+    if (NOT PANDA_TARGET_ARM32 AND (NOT "${test_file}" STREQUAL "group_tasks.ets" 
+                                    OR NOT PANDA_ENABLE_ADDRESS_SANITIZER
+                                    OR NOT PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER)
+        )
         add_ets_test(ets_test_suite_taskpool
                     SKIP_ARM32_COMPILER
                     FILE ${test_file}
