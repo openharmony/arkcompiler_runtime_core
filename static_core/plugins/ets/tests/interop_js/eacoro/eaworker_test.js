@@ -22,7 +22,6 @@ function runTest() {
         'gc-trigger-type': 'heap-trigger',
         'compiler-enable-jit': 'false',
         'run-gc-in-place': 'true',
-        'coroutine-enable-external-scheduling': 'true',
         'coroutine-workers-count': '1',
     });
     if (!etsVmRes) {

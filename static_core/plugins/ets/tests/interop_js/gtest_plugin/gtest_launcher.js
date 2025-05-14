@@ -72,7 +72,6 @@ function main() {
 		'panda-files': gtestAbcPath,
 		'gc-trigger-type': 'heap-trigger',
 		'compiler-enable-jit': 'false',
-        'coroutine-enable-external-scheduling': 'true',
 	});
 
 	if (!etsVmRes) {

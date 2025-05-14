@@ -75,14 +75,9 @@ public:
         callbackPoster_ = std::move(poster);
     }
 
-    void SetExternalSchedulingEnabled()
-    {
-        externalSchedulingEnabled_ = true;
-    }
-
     bool IsExternalSchedulingEnabled() const
     {
-        return externalSchedulingEnabled_;
+        return callbackPoster_ != nullptr;
     }
 
     template <typename PosterCallback>
@@ -103,7 +98,6 @@ private:
     // event loop poster
     os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> callbackPoster_;
-    bool externalSchedulingEnabled_ = false;
 };
 
 }  // namespace ark
