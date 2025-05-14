@@ -313,8 +313,8 @@ EtsClassWrapper *EtsClassWrapper::Get(InteropCtx *ctx, EtsClass *etsClass)
     ASSERT(!etsClass->IsPrimitive() && etsClass->GetComponentType() == nullptr);
     ASSERT(ctx->GetRefConvertCache()->Lookup(etsClass->GetRuntimeClass()) == nullptr);
 
-    if (IsStdClass(etsClass) && !etsClass->IsInterface() &&
-        !etsClass->IsEtsEnum()) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
+    if (IsStdClass(etsClass) && !etsClass->IsInterface() && !etsClass->IsEtsEnum() &&
+        !IsSubClassOfError(etsClass)) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
         return nullptr;
     }
     ASSERT(!js_proxy::JSProxy::IsProxyClass((etsClass->GetRuntimeClass())));
