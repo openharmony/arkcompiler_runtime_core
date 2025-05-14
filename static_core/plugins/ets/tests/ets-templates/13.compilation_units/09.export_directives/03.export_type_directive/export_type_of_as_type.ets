@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Export type directive, type is applied to classes and interfaces
-tags: [compile-only, negative]
 ---*/
 
 import { FOO } from './const_as_type'
