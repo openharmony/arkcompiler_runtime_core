@@ -284,7 +284,7 @@ function testAllSupportedEncodings() {
     assertEQ(testBuffer.toString('utf8'), 'Test123')
     assertEQ(testBuffer.toString('utf-8'), 'Test123')
     assertEQ(testBuffer.toString('base64'), 'VGVzdDEyMw==')
-    assertEQ(testBuffer.toString('base64url'), 'VGVzdDEyMw==')
+    assertEQ(testBuffer.toString('base64url'), 'VGVzdDEyMw')
     assertEQ(testBuffer.toString('hex'), '54657374313233')
 }
 
