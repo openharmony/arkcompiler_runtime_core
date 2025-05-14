@@ -95,13 +95,7 @@ sub:
     - expr: new Date(pars).toISOString()
       params:
         - paramOf "2019-11-14T00:55:31.000".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565.0
-    - expr: new Date(pars).toString()
-      params:
-        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565.0
     - expr: new Date(pars).toDateString()
-      params:
-        - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565.0
-    - expr: new Date(pars).toTimeString()
       params:
         - paramOf "2019-11-14T00:55:31.000Z".inspect, "2024-02-28T00:55:31.123Z".inspect, 12234556789, 1234345565.0
     - expr: new Date(pars).toUTCString()

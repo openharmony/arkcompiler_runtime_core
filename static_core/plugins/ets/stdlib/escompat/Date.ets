@@ -292,6 +292,31 @@ function ecmaMakeTime(hr: double, min: double, sec: double, ms: double): long {
     return ecmaMakeTime(hh, mm, ss, mi);
 }
 
+/**
+ * @see ECMA-262, 21.4.1.30
+ *
+ * @param year
+ *
+ * @returns returns the full year associated with the integer part of year
+ */
+function ecmaMakeFullYear(year: long): long {
+    if (0 <= year && year <= 99) {
+        year = year + 1900;
+    }
+    return year;
+}
+
+/**
+ * @see ECMA-262, 21.4.1.30
+ *
+ * @param year
+ *
+ * @returns returns the full year associated with the integer part of year
+ */
+function ecmaMakeFullYear(year: double): long {
+    let y = trunc(year)  as long;
+    return ecmaMakeFullYear(y)
+}
 
 /**
  * @see ECMA-262, 21.4.1.15
@@ -617,7 +642,7 @@ export class Date {
     constructor(year: number, monthIndex: number, day?: number, hours?: number, minutes?: number, seconds?: number, ms?: number) {
         this.ms = ecmaMakeDate(
             ecmaMakeDay(
-                year,
+                ecmaMakeFullYear(year),
                 monthIndex,
                 day != undefined ? day as number: 1
             ),
@@ -1157,7 +1182,7 @@ export class Date {
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
     public static UTC(year: number): number {
-        return ecmaMakeDate(ecmaMakeDay(year, 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0)) as number
+        return ecmaMakeDate(ecmaMakeDay(ecmaMakeFullYear(year), 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0)) as number
     }
 
     /**
@@ -1185,7 +1210,7 @@ export class Date {
     public static UTC(year: number, month: number, day?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): number {
         return ecmaMakeDate(
             ecmaMakeDay(
-                year,
+                ecmaMakeFullYear(year),
                 month,
                 day != undefined ? day as number: 1.0
             ),
@@ -1786,9 +1811,6 @@ export class Date {
             sb.append("0");
         }
         sb.append(minutes);
-        sb.append(" (");
-        sb.append(Date.getTimezoneName(this.ms));
-        sb.append(")");
 
         return sb.toString();
     }

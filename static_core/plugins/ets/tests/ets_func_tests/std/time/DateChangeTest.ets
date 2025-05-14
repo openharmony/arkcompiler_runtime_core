@@ -24,6 +24,7 @@ function main(): int {
     failures += test(testDateChangeSeconds(), "Try to set new seconds");
     failures += test(testSetFromLeapYear(), "Set nonleap year from leap year");
     failures += test(testSetToLeapYear(), "Set leap year from nonleap year");
+    failures += test(testSetUTCFullYear(), "Set UTC full year");
 
 
     // next test raises assertTrue( "Invalid year/month pair")
@@ -146,4 +147,16 @@ function testDateChangeSeconds(): int {
 
     if(date.getSeconds() == newSeconds) return 0;
     return 1;    
+}
+
+function testSetUTCFullYear(): int {
+    let date: Date =  new Date(Date.UTC(96, 1, 2, 3, 4, 5));
+    assertEQ(date.getUTCFullYear(), 1996);
+    assertEQ(date.valueOf(), 823230245000);
+    assertEQ(date.toUTCString(), "Fri, 02 Feb 1996 03:04:05 GMT");
+    date.setUTCFullYear(96);
+    assertEQ(date.getUTCFullYear(), 96);
+    assertEQ(date.valueOf(), -59134913755000);
+    assertEQ(date.toUTCString(), "Thu, 02 Feb 0096 03:04:05 GMT");
+    return 0;
 }

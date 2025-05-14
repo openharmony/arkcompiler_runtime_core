@@ -48,15 +48,17 @@ function test(result: int, message: String ): int {
 }
 
 const msPerMinute: long = 60000;
-const longYears: long[] = [-300, -72, 1, 1900, 1969, 1970, 1971, 1980, 2000, 2020, 2023, 2024, 2030, 2038, 2039];
-const longMonths: long[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2];
-const longHours: long[] =  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 17, 22];
-const longMinutes: long[] = [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56];
+const longYears: long[] = [-300, -72, 1, 0, 99, 100, 1900, 1969, 1970, 1971, 1980, 2000, 2020, 2023, 2024, 2030, 2038, 2039];
+const longMonths: long[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5];
+const longHours: long[] =  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 17, 18, 19, 20, 21];
+const longMinutes: long[] = [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 0, 4, 8];
+const valueLongYears: long[] = [-300, -72, 1901, 1900, 1999, 100, 1900, 1969, 1970, 1971, 1980, 2000, 2020, 2023, 2024, 2030, 2038, 2039];
 
-const doubleYears: double[] = [-300, -72.0, 1.0, 1900.5, 1969.9, 1970.0, 1971.1, 1980.0, 2000.0, 2020.20, 2023.9, 2024.6, 2030.3, 2038.5, 2039.9];
-const doubleMonths: double[] = [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 0.2, 1.1, 2.2];
-const doubleHours: double[] = [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 15.5, 17.7, 22.22];
-const doubleMinutes: double[] = [0.0, 4.4, 8.8, 12.12, 16.16, 20.20, 24.24, 28.28, 32.32, 36.36, 40.40, 44.44, 48.48, 52.52, 56.56];
+const doubleYears: double[] = [-300, -72.0, 1.0, 0.0, 99.9, 100.0, 1900.5, 1969.9, 1970.0, 1971.1, 1980.0, 2000.0, 2020.20, 2023.9, 2024.6, 2030.3, 2038.5, 2039.9];
+const doubleMonths: double[] = [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 0.2, 1.1, 2.2, 3.3, 4.4, 5.5];
+const doubleHours: double[] = [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 15.5, 17.7, 20.22, 21.33, 22.22, 23.99];
+const doubleMinutes: double[] = [0.0, 4.4, 8.8, 12.12, 16.16, 20.20, 24.24, 28.28, 32.32, 36.36, 40.40, 44.44, 48.48, 52.52, 56.56, 0.0, 4.4, 8.8];
+const valueDoubleYears: double[] = [-300, -72.0, 1901.0, 1900.0, 1999.9, 100.3, 1900.5, 1969.9, 1970.0, 1971.1, 1980.0, 2000.0, 2020.20, 2023.9, 2024.6, 2030.3, 2038.5, 2039.9];
 
 const dateString: string[] = ["2019-11-14T00:55:31.820Z", "2024-02-29T00:55:31.950Z", "2000-01-01T00:00:00.001Z"]
 
@@ -91,7 +93,7 @@ function testIntYearMonthConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithLongYMD(cd, longYears[i], md[i], 1);
+        failures += checkDateWithLongYMD(cd, valueLongYears[i], md[i], 1);
     }
 
     return failures;
@@ -111,7 +113,7 @@ function testIntYearMonthDayConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithLongYMD(cd, longYears[i], md[i], day);
+        failures += checkDateWithLongYMD(cd, valueLongYears[i], md[i], day);
     }
 
     return failures;
@@ -132,7 +134,7 @@ function testIntYearMonthDayHoursConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithLongYMDH(cd, longYears[i], md[i], day, ht[i]);
+        failures += checkDateWithLongYMDH(cd, valueLongYears[i], md[i], day, ht[i]);
     }
 
     return failures;
@@ -154,7 +156,7 @@ function testIntYearMonthDayHoursMinutesConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithLongYMDHM(cd, longYears[i], md[i], day, ht[i], mh[i]);
+        failures += checkDateWithLongYMDHM(cd, valueLongYears[i], md[i], day, ht[i], mh[i]);
     }
 
     return failures;
@@ -177,7 +179,7 @@ function testIntYearMonthDayHoursMinutesSecondsConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithLongYMDHMS(cd, longYears[i], md[i], day, ht[i], mh[i], mh[i]);
+        failures += checkDateWithLongYMDHMS(cd, valueLongYears[i], md[i], day, ht[i], mh[i], mh[i]);
     }
 
     return failures;
@@ -201,7 +203,7 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithLongYMDHMSM(cd, longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
+        failures += checkDateWithLongYMDHMSM(cd, valueLongYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
     }
 
     return failures;
@@ -215,7 +217,7 @@ function testDoubleMsConstructor(): int {
         let cd = new Date(id[i]);
         
         try {
-            if(Double.valueOf(id[i]).intValue() != cd.valueOf()) failures++;
+            if(Double.valueOf(doubleYears[i]).intValue() != cd.valueOf()) failures++;
         } catch (e) {
             return 1;
         }
@@ -238,7 +240,7 @@ function testDoubleYearMonthConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithDoubleYMD(cd, id[i], md[i], 1);
+        failures += checkDateWithDoubleYMD(cd, valueDoubleYears[i], md[i], 1);
     }
 
     return failures;
@@ -258,7 +260,7 @@ function testDoubleYearMonthDayConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithDoubleYMD(cd, id[i], md[i], day);
+        failures += checkDateWithDoubleYMD(cd, valueDoubleYears[i], md[i], day);
     }
 
     return failures;
@@ -279,7 +281,7 @@ function testDoubleYearMonthDayHoursConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithDoubleYMDH(cd, id[i], md[i], day, ht[i]);
+        failures += checkDateWithDoubleYMDH(cd, valueDoubleYears[i], md[i], day, ht[i]);
     }
 
     return failures;
@@ -302,7 +304,7 @@ function testDoubleYearMonthDayHoursMinutesConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithDoubleYMDHM(cd, id[i], md[i], day, ht[i], mh[i]);
+        failures += checkDateWithDoubleYMDHM(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i]);
     }
 
     return failures;
@@ -326,7 +328,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithDoubleYMDHMS(cd, id[i], md[i], day, ht[i], mh[i], mh[i]);
+        failures += checkDateWithDoubleYMDHMS(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i]);
     }
 
     return failures;
@@ -351,7 +353,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithDoubleYMDHMSM(cd, id[i], md[i], day, ht[i], mh[i], mh[i], millis);
+        failures += checkDateWithDoubleYMDHMSM(cd, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
     }
 
     return failures;
@@ -388,7 +390,7 @@ function testDateConstructor(): int {
         } catch (e) {
             return 1;
         }
-        failures += checkDateWithDoubleYMDHMS(tmp, id[i], md[i], day, ht[i], mh[i], mh[i]);
+        failures += checkDateWithDoubleYMDHMS(tmp, valueDoubleYears[i], md[i], day, ht[i], mh[i], mh[i]);
     }
 
     return failures;
