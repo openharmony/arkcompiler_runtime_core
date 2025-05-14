@@ -252,12 +252,11 @@ static_assert(Array::GetLengthOffset() == sizeof(ObjectHeader));
 static_assert(Array::GetDataOffset() == AlignUp(Array::GetLengthOffset() + sizeof(ArraySizeT), sizeof(uint64_t)));
 static_assert(Array::GetDataOffset() % sizeof(uint64_t) == 0);
 
-#ifdef PANDA_TARGET_64
-constexpr uint32_t ARRAY_LENGTH_OFFSET = 8U;
+constexpr uint32_t ARRAY_LENGTH_OFFSET = sizeof(ObjectHeader);
 static_assert(ARRAY_LENGTH_OFFSET == ark::coretypes::Array::GetLengthOffset());
-constexpr uint32_t ARRAY_DATA_OFFSET = 16U;
+constexpr uint32_t ARRAY_DATA_OFFSET = ARRAY_LENGTH_OFFSET + sizeof(uint64_t);
 static_assert(ARRAY_DATA_OFFSET == ark::coretypes::Array::GetDataOffset());
-#endif
+
 }  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_

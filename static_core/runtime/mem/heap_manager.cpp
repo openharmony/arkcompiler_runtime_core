@@ -118,7 +118,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
             return nullptr;
         }
     }
-    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size;
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object at " << mem << " size: " << size << " cls: " << cls;
     ObjectHeader *object = InitObjectHeaderAtMem(cls, mem);
     bool isObjectFinalizable = IsObjectFinalized(cls);
     if (UNLIKELY(isObjectFinalizable || GetNotificationManager()->HasAllocationListeners())) {
@@ -219,7 +219,7 @@ ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size,
         }
         return nullptr;
     }
-    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc non-movable object at " << mem << " size: " << size;
+    LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc non-movable object at " << mem << " size: " << size << " cls: " << cls;
     auto *object = InitObjectHeaderAtMem(cls, mem);
     // cls can be null for first class creation, when we create ClassRoot::Class
     // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
