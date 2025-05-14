@@ -26,7 +26,6 @@
                 "ets_runtime",
                 "hilog",
                 "init",
-                "json",
                 "napi",
                 "toolchain",
                 "zlib",
@@ -35,7 +34,6 @@
                 "libuv"
             ],
             "third_party": [
-                "json",
                 "musl"
             ]
         },
