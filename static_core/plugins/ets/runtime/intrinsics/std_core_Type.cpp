@@ -31,6 +31,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "types/ets_array.h"
@@ -228,7 +229,7 @@ static EtsTypeAPIField *CreateField(const EtsClass *sourceClass, EtsField *field
     // Set field's type, field's owner class type and name
     typeapiField->SetFieldType(fieldTypeHandle.GetPtr());
     typeapiField->SetOwnerType(ownerTypeHandle.GetPtr());
-    auto name = field->GetNameString();
+    auto name = ManglingUtils::GetDisplayNameStringFromField(field);
     typeapiField->SetName(name);
 
     // Set Access Modifier
@@ -279,7 +280,7 @@ ObjectHeader *TypeAPIGetOwnFieldPtr(EtsClass *cls, EtsLong idx)
 static EtsField *GetField(EtsClass *cls, EtsString *name)
 {
     auto fieldName = name->GetMutf8();
-    auto instanceField = cls->GetFieldIDByName(fieldName.c_str());
+    auto instanceField = ManglingUtils::GetFieldIDByDisplayName(cls, fieldName);
     if (instanceField != nullptr) {
         return instanceField;
     }
