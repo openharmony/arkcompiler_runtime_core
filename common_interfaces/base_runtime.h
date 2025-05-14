@@ -17,60 +17,79 @@
 #define COMMON_INTERFACES_BASE_RUNTIME_H
 
 #include <atomic>
+#include <functional>
 #include <mutex>
 
-#include "thread/thread_holder_manager.h"
-#include "common_interfaces/heap/heap.h"
+#include "base/runtime_param.h"
 
 namespace panda {
-class BaseRuntime {
+class BaseObject;
+class HeapManager;
+class LogManager;
+class MutatorManager;
+class ThreadHolderManager;
+class ThreadHolder;
+
+enum class GcType : uint8_t {
+    ASYNC,
+    SYNC,
+    FULL,  // Waiting finish
+};
+using HeapVisitor = const std::function<void(BaseObject*)>;
+
+class PUBLIC_API BaseRuntime {
 public:
     BaseRuntime() = default;
     ~BaseRuntime() = default;
 
-    static PUBLIC_API BaseRuntime *GetInstance();
+    static BaseRuntime *GetInstance();
     static void DestroyInstance();
 
     void PreFork(ThreadHolder *holder);
     void PostFork();
 
-    static PUBLIC_API void WriteBarrier(void* obj, void* field, void* ref);
-    static PUBLIC_API void* ReadBarrier(void* obj, void* field);
-    static PUBLIC_API void* ReadBarrier(void* field);
-    static PUBLIC_API void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
+    void Init();
+    void Fini();
 
-    RuntimeParam GetRuntimeParam()
-    {
-        return param_;
-    }
+    // Need refactor, move to other file
+    static void WriteBarrier(void* obj, void* field, void* ref);
+    static void* ReadBarrier(void* obj, void* field);
+    static void* ReadBarrier(void* field);
+    static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
+    static void RequestGC(GcType type);
+    static bool ForEachObj(HeapVisitor& visitor, bool safe);
 
-    HeapParam GetHeapParam()
+    HeapParam &GetHeapParam()
     {
         return param_.heapParam;
     }
 
-    GCParam GetGCParam()
+    GCParam &GetGCParam()
     {
         return param_.gcParam;
     }
 
-    panda::common::Heap &GetHeap()
+    MutatorManager &GetMutatorManager()
     {
-        return heap_;
+        return *mutatorManager_;
     }
 
     ThreadHolderManager &GetThreadHolderManager()
     {
-        return threadHolderManager_;
+        return *threadHolderManager_;
     }
 
 private:
     RuntimeParam param_ {};
-    ThreadHolderManager threadHolderManager_ {};
-    panda::common::Heap heap_ {};
+
+    HeapManager* heapManager_ = nullptr;
+    LogManager* logManager_ = nullptr;
+    MutatorManager* mutatorManager_ = nullptr;
+    ThreadHolderManager* threadHolderManager_  = nullptr;
 
     static std::mutex vmCreationLock_;
     static BaseRuntime *baseRuntimeInstance_;
+    static bool initialized_;
 };
 }  // namespace panda
 #endif // COMMON_INTERFACES_BASE_RUNTIME_H
