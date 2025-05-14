@@ -102,15 +102,6 @@ export class Declgen {
     return compile(this.rootFiles, this.compilerOptions, this.hookedHost);
   }
 
-  private checkProgram(program: ts.Program): CheckerResult {
-    const checker = new Checker(program.getTypeChecker());
-
-    void checker;
-    void this;
-
-    return [];
-  }
-  
   private processDeclarationFiles(program: ts.Program): void {
     const typeChecker = program.getTypeChecker();
 
@@ -143,21 +134,21 @@ export class Declgen {
     const result = ts.transform(
       sourceFile,
       [
-        (context: ts.TransformationContext) => {
+        (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
           const autofixer = new Autofixer(typeChecker, context);
           const visit = (node: ts.Node): ts.Node | undefined => {
             const fixedNode = autofixer.fixNode(node);
 
             if (fixedNode === undefined) {
-              return undefined;
+              return node;
             } else if (Array.isArray(fixedNode)) {
               return context.factory.createBlock(fixedNode as readonly ts.Statement[]);
             } else {
               return ts.visitEachChild(fixedNode, visit, context);
             }
           };
-          return (node: ts.Node) => {
-            return visit(node) ?? node;
+          return (sourceFile: ts.SourceFile): ts.SourceFile => {
+            return visit(sourceFile) as ts.SourceFile;
           };
         }
       ],
@@ -166,7 +157,7 @@ export class Declgen {
 
     return result;
   }
-  
+
   private static createHookedCompilerHost(
     sourceFileMap: Map<string, ts.SourceFile>,
     compilerOptions: ts.CompilerOptions,
