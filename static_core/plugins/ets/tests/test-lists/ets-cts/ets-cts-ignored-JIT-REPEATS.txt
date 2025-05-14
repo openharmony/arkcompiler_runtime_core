@@ -21,6 +21,7 @@
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union_0.ets
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union_4.ets
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union_6.ets
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_2.ets
 05.generics/03.utility_types/03.readonly_utility_type/readonly_type_6.ets 
 
 #25658
