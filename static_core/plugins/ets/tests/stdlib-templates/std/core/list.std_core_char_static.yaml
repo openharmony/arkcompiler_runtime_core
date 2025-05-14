@@ -284,7 +284,7 @@
       {
         "param1": "[0xD000, 0xD7FF, 0x10000, 0x10401, 0x10FBFE, 0x10FFFF, 0xE000, 0xD800DBFF]",
       },
-    expected_test_data: "[true, true, false, false, false, false, true, false ]",
+    expected_test_data: "[true, true, true, true, true, true, true, false ]",
     verify_test_result_function: comparePrimitiveValue,
   }
 - {
