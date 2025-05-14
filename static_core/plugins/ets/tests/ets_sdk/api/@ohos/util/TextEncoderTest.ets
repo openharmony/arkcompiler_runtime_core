@@ -36,6 +36,12 @@ function main() {
     suite.addTest("test_encoder_encode_into_uint8array_escape", test_encoder_encode_into_uint8array_escape);
     suite.addTest("test_encoder_encode_into_uint8array_enstr", test_encoder_encode_into_uint8array_enstr);
     suite.addTest("test_encoder_encode_into_uint8array_enstrbe", test_encoder_encode_into_uint8array_enstrbe);
+    suite.addTest("test_encoding_utf8", test_encoding_utf8);
+    suite.addTest("test_encoding_gb18030", test_encoding_gb18030);
+    suite.addTest("test_encoding_gbk", test_encoding_gbk);
+    suite.addTest("test_encoding_gb2312", test_encoding_gb2312);
+    suite.addTest("test_encoding_utf16le", test_encoding_utf16le);
+    suite.addTest("test_encoding_iso88593", test_encoding_iso88593);
     return suite.run()
 }
 
@@ -179,4 +185,67 @@ function test_encoder_encode_into_uint8array_enstrbe()
     for (let i = 0; i < bytes.length; i++) {
          assertEQ(bytes[i], typedArray[i]);
     }
+}
+
+function test_encoding_utf8()
+{
+    let enc = new util.TextEncoder();
+    let str = enc.encoding;
+    assertEQ(str, 'utf-8');
+}
+
+function test_encoding_gb18030()
+{
+    let enc = new util.TextEncoder('gb18030');
+    let str = enc.encoding;
+    assertEQ(str, 'gb18030');
+    enc = new util.TextEncoder('GB18030');
+    str = enc.encoding;
+    assertEQ(str, 'GB18030');
+}
+
+function test_encoding_gbk()
+{
+    let enc = new util.TextEncoder('gbk');
+    let str = enc.encoding;
+    assertEQ(str, 'gbk');
+    enc = new util.TextEncoder('GBK');
+    str = enc.encoding;
+    assertEQ(str, 'GBK');
+    enc = new util.TextEncoder('GbK');
+    str = enc.encoding;
+    assertEQ(str, 'GbK');
+}
+
+function test_encoding_gb2312()
+{
+    let enc = new util.TextEncoder('gb2312');
+    let str = enc.encoding;
+    assertEQ(str, 'gb2312');
+    enc = new util.TextEncoder('GB2312');
+    str = enc.encoding;
+    assertEQ(str, 'GB2312');
+    enc = new util.TextEncoder('gB2312');
+    str = enc.encoding;
+    assertEQ(str, 'gB2312');
+}
+
+function test_encoding_utf16le()
+{
+    let enc = new util.TextEncoder('utf-16le');
+    let str = enc.encoding;
+    assertEQ(str, 'utf-16le');
+    enc = new util.TextEncoder('Utf-16le');
+    str = enc.encoding;
+    assertEQ(str, 'Utf-16le');
+}
+
+function test_encoding_iso88593()
+{
+    let enc = new util.TextEncoder('ISO-8859-3');
+    let str = enc.encoding;
+    assertEQ(str, 'ISO-8859-3');
+    enc = new util.TextEncoder('IBM866');
+    str = enc.encoding;
+    assertEQ(str, 'IBM866');
 }
