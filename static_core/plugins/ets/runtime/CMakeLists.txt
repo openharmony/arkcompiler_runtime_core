@@ -96,7 +96,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_typeapi_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
-    ${ETS_EXT_SOURCES}/types/ets_shared_memory.cpp
     ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp

@@ -22,8 +22,8 @@ let arr: Int8Array
 let arr_u32: Int32Array
 
 function main() {
-    let buf = new SharedArrayBuffer(4);
-    let buf_2 = new SharedArrayBuffer(4);
+    let buf = new ArrayBuffer(4);
+    let buf_2 = new ArrayBuffer(4);
     arr = new Int8Array(buf, 0, 1);
     arr_u32 = new Int32Array(buf_2, 0, 1);
     arr_u32[0] = N

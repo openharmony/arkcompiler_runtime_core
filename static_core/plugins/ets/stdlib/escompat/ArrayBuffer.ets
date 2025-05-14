@@ -16,7 +16,7 @@
 package escompat;
 
 /**
- * Either ArrayBuffer or SharedArrayBuffer
+ * Either ArrayBuffer 
  */
 // NOTE (kprokopenko): make abstract after abstract overloads get to work
 abstract class Buffer {
@@ -31,7 +31,7 @@ export interface ArrayBufferView {
     /**
      * The ArrayBuffer instance referenced by the array.
      */
-    readonly buffer: ArrayBufferLike
+    readonly buffer: ArrayBuffer
 
     /**
      * The length in bytes of the array.
@@ -426,122 +426,6 @@ export class ArrayBuffer extends Buffer
     */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
 
-}
-
-type Resolver = (value: string) => void;
-
-class Waiter {
-    public readonly static okStatus: string = "ok";
-    public readonly static notEqualStatus: string = "not-equal";
-    public readonly static timeOutStatus: string = "timed-out";
-
-    public wait(val: long, check: long, timeout?: long): Promise<string> {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-
-        if (val != check) {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-            return Promise.resolve<string>(Waiter.notEqualStatus);
-        }
-        if(!(timeout instanceof undefined)) {
-            setTimeout((waiter: Waiter) => {
-                waiter.notify(Waiter.timeOutStatus);
-            }, timeout, this);
-        }
-
-        let resolver: Resolver | undefined = undefined;
-        let p = new Promise<string>((resolve: Resolver) => {
-            resolver = resolve;
-        });
-        this.promiseQueue.push(resolver!);
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return p;
-    }
-
-    public notify(val: string): boolean {
-        ConcurrencyHelpers.mutexLock(this.mutex);
-        let res = this.promiseQueue.poll();
-        if(res instanceof null) {
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
-            return false;
-        }
-        res!(val);
-        ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return true;
-    }
-    
-    private mutex: Object =  ConcurrencyHelpers.mutexCreate();
-    private promiseQueue: BlockingQueue<Resolver> = new LinkedBlockingQueue<Resolver>();
-}
-
-/**
- * Internal non-movable memory of a SharedArrayBuffer
- */
-class SharedMemory {
-    private data: FixedArray<byte> = [];
-    private offsetToWaiterQueue: ConcurrentHashMap<int, Waiter> = new ConcurrentHashMap<int, Waiter>;
-    private creationWaitersMutex: Object =  ConcurrencyHelpers.mutexCreate();
-
-    public constructor(byteLength: int) {
-        this.data = new byte[byteLength];
-    }
-
-    internal native static create(byteLength: int): SharedMemory;
-
-    internal at(i: int): byte {
-        return this.data[i]
-    }
-
-    internal set(i: int, value: byte): void {
-        this.data[i] = value
-    }
-
-    internal getByteLength(): int {
-        return this.data.length as int
-    }
-
-    internal wait(byteOffset: int, waitValue: long, useInt: boolean, timeout?: long): Promise<string> {
-        // Getting correct waiter
-        let waiter = this.offsetToWaiterQueue.get(byteOffset)
-        if (waiter instanceof undefined) {
-            ConcurrencyHelpers.mutexLock(this.creationWaitersMutex)
-            waiter = this.offsetToWaiterQueue.get(byteOffset)
-            if (waiter instanceof undefined) {
-                waiter = new Waiter()
-                this.offsetToWaiterQueue.set(byteOffset, waiter!)
-            }
-            ConcurrencyHelpers.mutexUnlock(this.creationWaitersMutex)
-        }
-        // Check condition to wait
-        let value: long = 0;
-        if(useInt) {
-            value = this.atomicLoadI32(byteOffset);
-        } else {
-            value = this.atomicLoadI64(byteOffset);
-        }
-        return waiter!.wait(value, waitValue, timeout);
-    }
-
-    internal notify(byteOffset: int, count: int = 1): int {
-        let waiter = this.offsetToWaiterQueue.get(byteOffset)
-        if (waiter instanceof undefined) {
-            ConcurrencyHelpers.mutexLock(this.creationWaitersMutex)
-            waiter = this.offsetToWaiterQueue.get(byteOffset)
-            if (waiter instanceof undefined) {
-                waiter = new Waiter()
-                this.offsetToWaiterQueue.set(byteOffset, waiter!)
-            }
-            ConcurrencyHelpers.mutexUnlock(this.creationWaitersMutex)
-        }
-        
-        let notified = 0;
-        for(let i = 0; i < count; i++) {
-            if (waiter!.notify(Waiter.okStatus)) {
-                notified++;
-            }
-        }
-        return notified;
-    }
-
     internal native atomicAddI8(index: int, value: byte): byte;
 
     internal native atomicAndI8(index: int, value: byte): byte;
@@ -687,107 +571,4 @@ class SharedMemory {
     internal native atomicXorU64(index: int, value: long): long;
 }
 
-export class SharedArrayBuffer extends Buffer {
-    private sharedMemory: SharedMemory
-
-    public constructor(byteLength: int) {
-        super()
-        this.sharedMemory = new SharedMemory(byteLength)
-    }
-
-    internal getSharedMemory(): SharedMemory {
-        return this.sharedMemory
-    }
-
-    override getByteLength(): int {
-        return this.sharedMemory.getByteLength()
-    }
-
-    /**
-     * Returns data at specified index.
-     * No such method in JS library, required for TypedArrays
-     *
-     * @param i index
-     *
-     * @returns byte at index
-     */
-    override at(i: int): byte {
-        return this.sharedMemory.at(i)
-    }
-
-    /**
-     * Sets data at specified index.
-     * No such method in JS library, required for TypedArrays
-     *
-     * @param b new value
-     *
-     * @param i index
-     */
-    override set(i: int, b: byte) {
-        this.sharedMemory.set(i, b)
-    }
-
-    override sliceInternal(begin: int, end: int): Buffer {
-        // TODO(egor-porsev): code duplication
-        let byteLength = this.getByteLength()
-        if (begin < -byteLength) {
-            begin = 0
-        }
-        if (begin < 0) {
-            begin = byteLength + begin
-        }
-        if (begin >= byteLength) {
-            begin = byteLength
-        }
-
-        if (end < -byteLength) {
-            end = 0
-        }
-        if (end < 0) {
-            end = byteLength + end
-        }
-        if (end >= byteLength) {
-            end = byteLength
-        }
-
-        if (end <= begin) {
-            return new SharedArrayBuffer(0)
-        }
-
-        let len = end - begin
-        if (len < 0) {
-            len = 0
-        }
-        let res = new SharedArrayBuffer(len);
-        for (let i = 0; i < len; ++i) {
-            res.set(i, this.at(begin + i))
-        }
-        return res
-    }
-
-    /**
-     * Creates a new ArrayBuffer with copy of bytes in range [begin;end)
-     *
-     * @param begin an inclusive index to start copying with
-     *
-     * @param end a last exclusive index to stop copying
-     *
-     * @returns data taken from current ArrayBuffer with respect to begin and end parameters
-     */
-    public slice(begin: int, end: int): SharedArrayBuffer {
-        return this.sliceInternal(begin, end) as SharedArrayBuffer
-    }
-
-    public grow(newLength: int) {
-        // grow() cannot shrink the array and cannot expand it beyond 'maxByteLength'.
-        // Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer/grow
-        // This is because the underlying SharedMemory object is non-movable and cannot be reallocated.
-        //
-        // Possible implementation: when SharedArrayBuffer(curByteLength, { maxByteLength }) is constructed
-        // preallocate a SharedMemory object of size 'maxByteLength' but the user should observe the length to be 'curByteLength'.
-        // In other words, SharedMemory may be implemented as (pointer to data, current length, max capacity).
-        throw new Error("not implemented");
-    }
-}
-
-export type ArrayBufferLike = ArrayBuffer | SharedArrayBuffer
+export type ArrayBufferLike = ArrayBuffer

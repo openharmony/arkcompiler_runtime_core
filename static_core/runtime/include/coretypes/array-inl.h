@@ -213,7 +213,7 @@ inline std::enable_if_t<std::is_arithmetic_v<T>, T> Array::GetAndAdd(ArraySizeT 
                                                                      std::memory_order memoryOrder)
 {
     size_t offset = GetElementSize<T, false>() * idx;
-    return ObjectAccessor::GetAndAddFieldPrimitive<T>(this, GetDataOffset() + offset, value, memoryOrder);
+    return ObjectAccessor::GetAndAddFieldPrimitive<T, true>(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <class T>

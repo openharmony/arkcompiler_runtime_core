@@ -164,7 +164,6 @@ srcs_runtime = [
   "runtime/types/ets_job.cpp",
   "runtime/types/ets_promise.cpp",
   "runtime/types/ets_promise_ref.cpp",
-  "runtime/types/ets_shared_memory.cpp",
   "runtime/types/ets_object.cpp",
   "runtime/types/ets_sync_primitives.cpp",
   "runtime/types/ets_string_builder.cpp",

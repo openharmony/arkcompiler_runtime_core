@@ -14,10 +14,10 @@
  */
 
 function main() {
-    let buf = new SharedArrayBuffer(4);
+    let buf = new ArrayBuffer(4);
     let arr = new Int32Array(buf, 0, 1);
 
-    let x = Atomics.wait(arr, 0, 1)
+    let x = Atomics.wait(arr, 0, new BigInt(1))
     assertEQ(x, "not-equal")
 }
 

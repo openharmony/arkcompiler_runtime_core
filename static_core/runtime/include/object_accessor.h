@@ -100,7 +100,7 @@ public:
     static ObjectHeader *GetAndSetFieldObject(void *obj, size_t offset, ObjectHeader *value,
                                               std::memory_order memoryOrder);
 
-    template <typename T>
+    template <typename T, bool USE_UBYTE_ARITHMETIC = false>
     static T GetAndAddFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T, bool USE_UBYTE_ARITHMETIC = false>

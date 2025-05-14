@@ -15,7 +15,7 @@
 
 import { launch } from "std/concurrency"
 
-let buf = new SharedArrayBuffer(4);
+let buf = new ArrayBuffer(4);
 let flag: Int8Array = new Int8Array(buf, 0, 4);
 let reFlag = 0;
 

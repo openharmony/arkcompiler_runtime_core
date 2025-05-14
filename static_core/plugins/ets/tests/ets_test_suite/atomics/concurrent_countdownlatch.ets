@@ -20,16 +20,16 @@ type L = StdDebug.Logger
 
 let N = 9
 
-let buf_1: SharedArrayBuffer;
-let buf_2: SharedArrayBuffer;
+let buf_1: ArrayBuffer;
+let buf_2: ArrayBuffer;
 let arr_1: Int32Array;
 let arr_2: BigInt64Array;
 let bytearr_i8: Int8Array;
 let bytearr_i64: BigInt64Array;
 
 function main() {
-    buf_1 = new SharedArrayBuffer(4)
-    buf_2 = new SharedArrayBuffer(8)
+    buf_1 = new ArrayBuffer(4)
+    buf_2 = new ArrayBuffer(8)
     arr_1 = new Int32Array(buf_1, 0, 1)
     arr_2 = new BigInt64Array(buf_2, 0, 1)
     bytearr_i8 = new Int8Array(buf_1, 0, 4)
@@ -41,7 +41,7 @@ function main() {
     let cur: byte = Atomics.load(bytearr_i8, 0) as byte
     while (cur != N) {
         L.log("waiting, finished tasks: " + cur)
-        Atomics.wait(arr_1, 0, cur)
+        Atomics.wait(arr_1, 0, new BigInt(cur))
         cur = Atomics.load(bytearr_i8, 0) as byte
     }
 
@@ -51,7 +51,7 @@ function main() {
     let cur_64: long = Atomics.load(bytearr_i64, 0).getLong()
     while (cur_64 != N) {
         L.log("waiting, finished tasks: " + cur_64)
-        Atomics.wait(arr_2, 0, cur_64)
+        Atomics.wait(arr_2, 0, new BigInt(cur_64))
         cur_64 = Atomics.load(bytearr_i64, 0).getLong()
     }
     L.log("all tasks have finished")

@@ -19,20 +19,20 @@
 
 import { launch } from "std/concurrency"
 
-let buf: SharedArrayBuffer;
+let buf: ArrayBuffer;
 let arr: Int32Array;
 let bytearr: Int8Array;
 
 function main() {
     let c = new Console()
 
-    buf = new SharedArrayBuffer(4);
+    buf = new ArrayBuffer(4);
     arr = new Int32Array(buf, 0, 1);
     bytearr = new Int8Array(buf, 0, 4)
 
     launch<Int, () => Int>(writer)
 
-    let res = Atomics.wait(arr, 0, 0) as string
+    let res = Atomics.wait(arr, 0, new BigInt(0)) as string
     c.println(res)
     assertTrue(res == "ok" || res == "not-equal")
 }

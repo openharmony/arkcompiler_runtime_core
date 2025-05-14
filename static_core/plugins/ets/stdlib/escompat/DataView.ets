@@ -17,13 +17,13 @@ package escompat;
 
 export final class DataView implements ArrayBufferView {
     /** Underlying buffer */
-    private readonly buffer_: ArrayBufferLike
+    private readonly buffer_: ArrayBuffer
     /** Count of bytes in a view */
     private readonly byteLength_: int
     /** Offset from start of {@link buffer} */
     private readonly byteOffset_: int
 
-    public get buffer(): ArrayBufferLike {
+    public get buffer(): ArrayBuffer {
         return this.buffer_
     }
 
@@ -43,7 +43,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset offset to start from
      * @throws RangeError if offset is out of array
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset: int) {
+    public constructor(buffer: ArrayBuffer, byteOffset: int) {
         this(buffer, byteOffset, (buffer as Buffer).getByteLength() - byteOffset)
     }
 
@@ -54,7 +54,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteLength lenth of bytes to take
      * @throws RangeError if provided indicies are invalid
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset: int, byteLength: int) {
+    public constructor(buffer: ArrayBuffer, byteOffset: int, byteLength: int) {
         this.buffer_ = buffer
         this.actualBuffer = buffer
         const bufLen = this.actualBuffer.getByteLength()
@@ -72,7 +72,7 @@ export final class DataView implements ArrayBufferView {
      * @param byteLength lenth of bytes to take
      * @throws RangeError if provided indicies are invalid
      */
-    public constructor(buffer: ArrayBufferLike, byteOffset?: Number, byteLength?: Number) {
+    public constructor(buffer: ArrayBuffer, byteOffset?: Number, byteLength?: Number) {
         this(buffer, asIntOrDefault(byteOffset, 0), asIntOrDefault(byteLength, (buffer as Buffer).getByteLength() - asIntOrDefault(byteOffset, 0)))
     }
     // === Int8 ===

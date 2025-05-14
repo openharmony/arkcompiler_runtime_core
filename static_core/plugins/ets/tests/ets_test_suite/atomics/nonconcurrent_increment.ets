@@ -17,7 +17,7 @@ let N = 200
 let RESULT = N as byte
 
 function main() {
-    let buf = new SharedArrayBuffer(4);
+    let buf = new ArrayBuffer(4);
     let arr = new Int8Array(buf, 0, 1);
 
     for (let i = 0; i < N; i++) {

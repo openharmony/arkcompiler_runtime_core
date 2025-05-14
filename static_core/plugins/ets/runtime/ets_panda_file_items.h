@@ -190,7 +190,6 @@ static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/a
 static constexpr std::string_view ANNOTATION_MODULE                    = "Lets/annotation/Module;";
 
 // escompat
-static constexpr std::string_view SHARED_MEMORY                        = "Lescompat/SharedMemory;";
 static constexpr std::string_view DATE                                 = "Lescompat/Date;";
 static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
 static constexpr std::string_view ITERATOR_RESULT                      = "Lescompat/IteratorResult;";

@@ -138,7 +138,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
           this.buffer = x.buffer
           this.byteOffset = x.byteOffset
         }
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -150,7 +149,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param length size of elements of type {{T}} in newly created {{N}}Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
             intByteOffset = byteOffset.intValue()
@@ -158,22 +157,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
         }
-        let intByteLength: int
-        if (buf instanceof ArrayBuffer) {
-            intByteLength = (buf as ArrayBuffer).getByteLength()
-            this.arrayBufferBacked = true
-        } else if (buf instanceof SharedArrayBuffer) {
-            intByteLength = (buf as SharedArrayBuffer).getByteLength()
-        } else {
-            throw new Error("unexpected type of ArrayBufferLike")
-        }
-        intByteLength = intByteLength - intByteOffset
+        let intByteLength: int = buf.getByteLength() - intByteOffset
         if (intByteLength < 0) {
             throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
         }
 {% if S != 1 %}
         if (intByteLength % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBufferLike.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
+            throw new RangeError("ArrayBuffer.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
         }
         if (intByteOffset % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
@@ -209,7 +199,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param length size of elements of type {{T}} in newly created {{N}}Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+    public constructor(buf: ArrayBuffer, byteOffset: Number | undefined) {
         this(buf, byteOffset, undefined)
     }
 
@@ -222,7 +212,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param length size of elements of type {{T}} in newly created {{N}}Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number, length: number) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -235,7 +225,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param length size of elements of type {{T}} in newly created {{N}}Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+    public constructor(buf: ArrayBuffer, byteOffset: number) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -248,7 +238,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param length size of elements of type {{T}} in newly created {{N}}Array
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int, length: int) {
         this(buf, new Number(byteOffset), new Number(length))
     }
 
@@ -259,7 +249,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+    public constructor(buf: ArrayBuffer, byteOffset: int) {
         this(buf, new Number(byteOffset), undefined)
     }
 
@@ -268,23 +258,14 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @param buf data initializer
      */
-    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+    public constructor(buf: ArrayLike<Number> | ArrayBuffer) {
         if (buf instanceof ArrayBuffer) {
             this.byteLength = (buf as ArrayBuffer).getByteLength()
             if (this.byteLength % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
+               throw new RangeError("ArrayBuffer.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
             }
             this.lengthInt = this.byteLength / {{N}}Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
-            this.arrayBufferBacked = true
-            this.byteOffset = 0
-        } else if (buf instanceof SharedArrayBuffer) {
-            this.byteLength = (buf as SharedArrayBuffer).getByteLength()
-            if (this.byteLength % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
-               throw new RangeError("ArrayBufferLike.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
-            }
-            this.lengthInt = this.byteLength / {{N}}Array.BYTES_PER_ELEMENT as int
-            this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
             // NOTE (ikorobkov): dealing with this overload is tricky
@@ -293,7 +274,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             this.byteLength = arr.length as int * {{N}}Array.BYTES_PER_ELEMENT as int
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
-            this.arrayBufferBacked = true
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).{{T}}Value())
@@ -325,7 +305,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         this.byteLength = this.lengthInt * {{N}}Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.arrayBufferBacked = true
     }
 
     /**
@@ -334,14 +313,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @param other data initializer
      */
     public constructor(other: {{N}}Array) {
-        if (other.buffer instanceof ArrayBuffer) {
-            this.buffer = (other.buffer as ArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
-            this.arrayBufferBacked = true
-        } else if (other.buffer instanceof SharedArrayBuffer) {
-            this.buffer = (other.buffer as SharedArrayBuffer).slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as SharedArrayBuffer
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        this.buffer = other.buffer.slice(other.byteOffset as int, (other.byteOffset + other.byteLength) as int) as ArrayBuffer
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
@@ -1493,15 +1465,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (count < 0) {
             count = 0
         }
-        if (this.buffer instanceof ArrayBuffer) {
-            let buf = (this.buffer as ArrayBuffer).slice(relStart * {{N}}Array.BYTES_PER_ELEMENT as int, relEnd * {{N}}Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
-            return new {{N}}Array(buf)
-        } else if (this.buffer instanceof SharedArrayBuffer) {
-            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * {{N}}Array.BYTES_PER_ELEMENT as int, relEnd * {{N}}Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
-            return new {{N}}Array(buf)
-        } else {
-            throw new Error("unexpected type of buffer")
-        }
+        let buf = this.buffer.slice(relStart * {{N}}Array.BYTES_PER_ELEMENT as int, relEnd * {{N}}Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+        return new {{N}}Array(buf)
     }
 
     /**
@@ -1527,65 +1492,65 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
 
     /**
-     * Creates a {{N}}Array with the same underlying ArrayBufferLike
+     * Creates a {{N}}Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new {{N}}Array with the same underlying ArrayBufferLike
+     * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
     public subarray(begin?: number, end?: number): {{N}}Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Creates a {{N}}Array with the same underlying ArrayBufferLike
+     * Creates a {{N}}Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new {{N}}Array with the same underlying ArrayBufferLike
+     * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: number): {{N}}Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a {{N}}Array with the same underlying ArrayBufferLike
+     * Creates a {{N}}Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new {{N}}Array with the same underlying ArrayBufferLike
+     * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
     public subarray(begin: number, end: int): {{N}}Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a {{N}}Array with the same underlying ArrayBufferLike
+     * Creates a {{N}}Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new {{N}}Array with the same underlying ArrayBufferLike
+     * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: number): {{N}}Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a {{N}}Array with the same underlying ArrayBufferLike
+     * Creates a {{N}}Array with the same underlying ArrayBuffer
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new {{N}}Array with the same underlying ArrayBufferLike
+     * @returns new {{N}}Array with the same underlying ArrayBuffer
      */
     public subarray(begin: int, end: int): {{N}}Array {
         const len: int = this.lengthInt
@@ -1599,22 +1564,22 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
 
     /**
-     * Creates a {{N}}Array with the same ArrayBufferLike
+     * Creates a {{N}}Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new {{N}}Array with the same ArrayBufferLike
+     * @returns new {{N}}Array with the same ArrayBuffer
      */
     public subarray(begin: number): {{N}}Array {
         return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
-     * Creates a {{N}}Array with the same ArrayBufferLike
+     * Creates a {{N}}Array with the same ArrayBuffer
      *
      * @param begin start index, inclusive
      *
-     * @returns new {{N}}Array with the same ArrayBufferLike
+     * @returns new {{N}}Array with the same ArrayBuffer
      */
     public subarray(begin: int): {{N}}Array {
         return this.subarray(begin as int, this.lengthInt)
@@ -1767,7 +1732,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     /**
      * Sorts in-place
      *
-     * @param compareFn comparator —  used to determine the order of the elements.
+     * @param compareFn comparator _  used to determine the order of the elements.
      * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
@@ -2096,24 +2061,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         let res : {{ET}} = 0
         let byteVal : {{ET}}
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                    {%- if ET != "byte" %}
-                    byteVal &= 0xff
-                    {%- endif %}
-                    res = (res | byteVal << (8 * i)) as {{ET}}
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
-                    {%- if ET != "byte" %}
-                    byteVal &= 0xff
-                    {%- endif %}
-                    res = (res | byteVal << (8 * i)) as {{ET}}
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                {%- if ET != "byte" %}
+                byteVal &= 0xff
+                {%- endif %}
+                res = (res | byteVal << (8 * i)) as {{ET}}
             }
             {%- if T == "float" %}
             return Float.bitCastFromInt(res)
@@ -2123,24 +2076,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             return res
             {%- endif %}
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + {{S - 1}} - i)
-                    {%- if ET != "byte" %}
-                    byteVal &= 0xff
-                    {%- endif %}
-                    res = (res | byteVal << (8 * i)) as {{ET}}
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                    byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + {{S - 1}} - i)
-                    {%- if ET != "byte" %}
-                    byteVal &= 0xff
-                    {%- endif %}
-                    res = (res | byteVal << (8 * i)) as {{ET}}
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = this.buffer.at(byteIndex as int + {{S - 1}} - i)
+                {%- if ET != "byte" %}
+                byteVal &= 0xff
+                {%- endif %}
+                res = (res | byteVal << (8 * i)) as {{ET}}
             }
             {%- if T == "float" %}
             return Float.bitCastFromInt(res)
@@ -2162,46 +2103,26 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         let bits = val
         {%- endif %}
         if (IS_LITTLE_ENDIAN) {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + i, byteVal)
             }
         } else {
-            if (this.buffer instanceof ArrayBuffer) {
-                for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as ArrayBuffer).set(startByte + {{S - 1}} - i, byteVal)
-                }
-            } else if (this.buffer instanceof SharedArrayBuffer) {
-                for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; i++) {
-                    let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-                    (this.buffer as SharedArrayBuffer).set(startByte + {{S - 1}} - i, byteVal)
-                }
-            } else {
-                throw new Error("unexpected type of ArrayBufferLike")
+            for (let i = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; i++) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                this.buffer.set(startByte + {{S - 1}} - i, byteVal)
             }
         }
     }
 
-    /** Underlying ArrayBufferLike */
-    public readonly buffer: ArrayBufferLike
+    /** Underlying ArrayBuffer */
+    public readonly buffer: ArrayBuffer
 
-    /** Byte offset within the underlying ArrayBufferLike */
+    /** Byte offset within the underlying ArrayBuffer */
     public readonly byteOffset: number
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    private readonly arrayBufferBacked: boolean
 
     /** String \"{{N}}Array\" */
     public readonly name = "{{N}}Array"

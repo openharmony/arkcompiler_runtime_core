@@ -47,11 +47,6 @@ public:
         return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, lengthInt_);
     }
 
-    static constexpr size_t GetArrayBufferBackedOffset()
-    {
-        return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, arrayBufferBacked_);
-    }
-
     ObjectPointer<EtsObject> GetBuffer()
     {
         return buffer_;
@@ -77,11 +72,6 @@ public:
         return lengthInt_;
     }
 
-    bool IsArrayBufferBacked()
-    {
-        return arrayBufferBacked_ != 0;
-    }
-
     ObjectPointer<EtsString> GetName()
     {
         return name_;
@@ -94,7 +84,6 @@ private:
     EtsInt byteOffset_;
     EtsInt byteLength_;
     EtsInt lengthInt_;
-    EtsBoolean arrayBufferBacked_;
 };
 
 template <typename T>
