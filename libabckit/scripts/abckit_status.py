@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -327,6 +327,10 @@ def collect_api(path, extension):
                                signature.strip()).group(1)
             domain = f'{domain}Impl'
 
+        elif re.search(r'struct (.+) Abckit(.*)Api(.*)\s\{', signature):
+            domain = re.search(r'struct (.+) Abckit(.*)\s\{', signature.strip()).group(2)
+            domain = f'{domain}Impl'
+
         elif re.match(r'class .+ {', signature):
             if match := re.search(r'class (.+) .+ : .+ {', signature,
                                   re.IGNORECASE):
@@ -348,8 +352,6 @@ def collect_api(path, extension):
             else:
                 continue
             apis[f'{domain}::{api_name}'] = API(api_name, domain, signature, extension)
-        else:
-            continue
     return apis
 
 

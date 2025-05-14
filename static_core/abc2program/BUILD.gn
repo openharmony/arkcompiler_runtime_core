@@ -52,7 +52,31 @@ abc2program_configs = [
 ]
 
 ohos_shared_library("arkts_abc2program") {
-  deps = [ ":arkts_abc2program_frontend_static" ]
+  stack_protector_ret = false
+  sources = abc2program_sources
+
+  include_dirs = [
+    "$ark_root/abc2program",
+    "$target_gen_dir",
+  ]
+
+  configs = abc2program_configs
+
+  deps = [
+    ":abc2program_plugins_inc",
+    ":abc_type_convert_cpp",
+    ":get_language_specific_metadata_inc",
+    ":isa_gen_abc2program_abc_inst_convert_cpp",
+    ":isa_gen_abc2program_abc_opcode_convert_cpp",
+    "$ark_root/assembler:libarktsassembler_frontend_static",
+    "$ark_root/libpandafile:libarktsfile_frontend_static",
+  ]
+  
+  if (is_mingw) {
+     deps += [ "$ark_root/libpandabase:libarktsbase" ]
+  } else {
+     deps += [ "$ark_root/libpandabase:libarktsbase_frontend_static" ]
+  }
 
   if (!is_standard_system) {
     relative_install_dir = "ark"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -104,9 +104,10 @@ build_and_run_tests() {
 
     if [ "$COVERAGE" = "true" ]; then
         export LLVM_PROFILE_FILE="abckit%m.profraw"
+        export LIBABCKIT_DEBUG_MODE="1"
     fi
 
-    LD_LIBRARY_PATH=./arkcompiler/runtime_core/:./arkcompiler/ets_runtime/:./thirdparty/icu/:./thirdparty/zlib/ \
+    LD_LIBRARY_PATH=./arkcompiler/runtime_core/:./arkcompiler/ets_runtime/:./thirdparty/icu/:./thirdparty/zlib/:./thirdparty/libuv/:./arkui/napi/:./thirdparty/bounds_checking_function/:./arkui/napi/ \
         LSAN_OPTIONS="$LSAN_OPTIONS" \
         ASAN_OPTIONS=verify_asan_link_order=0 \
         ./tests/unittest/arkcompiler/runtime_core/libabckit/abckit_gtests
@@ -115,10 +116,7 @@ build_and_run_tests() {
         ninja abckit_stress_tests_package
 
         if [ "$TARGET" = "x64.debug" ]; then
-            ../../arkcompiler/runtime_core/libabckit/tests/stress/stress.py --build-dir $(realpath .)
-            ../../arkcompiler/runtime_core/libabckit/tests/stress/stress_ets.py --build-dir $(realpath .)
-            ../../arkcompiler/runtime_core/libabckit/tests/stress/stress_hermes.py --build-dir $(realpath .)
-            ../../arkcompiler/runtime_core/libabckit/tests/stress/stress_node_js.py --build-dir $(realpath .)
+            ../../arkcompiler/runtime_core/libabckit/tests/stress/runner.py --build-dir $(realpath .)
         else
             ninja ark_js_vm
             ../../arkcompiler/runtime_core/libabckit/tests/stress/stress_js_full.py --build-dir $(realpath .)

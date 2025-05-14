@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ extern "C" {
 /**
  * @brief Struct that holds the pointers to the top-level Abckit API.
  */
-struct AbckitApi {
+struct CAPI_EXPORT AbckitApi {
     /**
      * @brief Version of the Abckit API. Used for versioning the support for certain binary file features.
      */
@@ -93,7 +93,7 @@ struct AbckitApi {
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitApi const *AbckitGetApiImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitApi const *AbckitGetApiImpl(enum AbckitApiVersion version);
 
 #ifdef __cplusplus
 }

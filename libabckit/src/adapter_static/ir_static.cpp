@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -803,13 +803,14 @@ bool BBisCatchStatic(AbckitBasicBlock *basicBlock)
     return basicBlock->impl->IsCatch();
 }
 
-void BBdumpStatic(AbckitBasicBlock *basicBlock, int /*fd*/)
+void BBdumpStatic(AbckitBasicBlock *basicBlock, int fd)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
 
     std::stringstream ss;
-    LIBABCKIT_LOG_DUMP(basicBlock->impl->Dump(&ss), DEBUG);
+    basicBlock->impl->Dump(&ss);
+    write(fd, ss.str().data(), ss.str().size());
 }
 
 bool BBcheckDominanceStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominator)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -264,7 +264,7 @@ enum AbckitIsaApiDynamicConditionCode {
  * @brief Struct that holds the pointers to the API used to work with dynamic ISA.
  * @note Valid targets: `ABCKIT_TARGET_TS`, `ABCKIT_TARGET_JS`, `ABCKIT_TARGET_ARK_TS_V1`.
  */
-struct AbckitIsaApiDynamic {
+struct CAPI_EXPORT AbckitIsaApiDynamic {
     /**
      * @brief Retruns Module for `inst`.
      * @return Pointer to `AbckitCoreModule`.
@@ -3165,7 +3165,7 @@ struct AbckitIsaApiDynamic {
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitIsaApiDynamic const *AbckitGetIsaApiDynamicImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitIsaApiDynamic const *AbckitGetIsaApiDynamicImpl(enum AbckitApiVersion version);
 
 #ifdef __cplusplus
 }

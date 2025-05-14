@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ extern "C" {
 /**
  * @brief Struct that holds the pointers to the non-modifying API for Arkts-specific Abckit types.
  */
-struct AbckitArktsInspectApi {
+struct CAPI_EXPORT AbckitArktsInspectApi {
     /* ========================================
      * Language-independent abstractions
      * ======================================== */
@@ -430,7 +430,7 @@ struct AbckitArktsV1ExternalModuleCreateParams {
 /**
  * @brief Struct that holds the pointers to the modifying API for Arkts-specific Abckit types.
  */
-struct AbckitArktsModifyApi {
+struct CAPI_EXPORT AbckitArktsModifyApi {
     /* ========================================
      * File
      * ======================================== */
@@ -666,7 +666,7 @@ struct AbckitArktsModifyApi {
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitArktsInspectApi const *AbckitGetArktsInspectApiImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitArktsInspectApi const *AbckitGetArktsInspectApiImpl(enum AbckitApiVersion version);
 
 /**
  * @brief Instantiates modifying API for Arkts-specific Abckit types.
@@ -674,7 +674,7 @@ struct AbckitArktsInspectApi const *AbckitGetArktsInspectApiImpl(enum AbckitApiV
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitArktsModifyApi const *AbckitGetArktsModifyApiImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitArktsModifyApi const *AbckitGetArktsModifyApiImpl(enum AbckitApiVersion version);
 
 #ifdef __cplusplus
 }

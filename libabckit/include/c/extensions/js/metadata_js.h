@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ extern "C" {
 /**
  * @brief Struct that holds the pointers to the non-modifying API for Js-specific Abckit types.
  */
-struct AbckitJsInspectApi {
+struct CAPI_EXPORT AbckitJsInspectApi {
     /* ========================================
      * Language-independent abstractions
      * ======================================== */
@@ -250,7 +250,7 @@ struct AbckitJsExternalModuleCreateParams {
 /**
  * @brief Struct that holds the pointers to the modifying API for Js-specific Abckit types.
  */
-struct AbckitJsModifyApi {
+struct CAPI_EXPORT AbckitJsModifyApi {
     /* ========================================
      * File
      * ======================================== */
@@ -366,7 +366,7 @@ struct AbckitJsModifyApi {
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitJsInspectApi const *AbckitGetJsInspectApiImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitJsInspectApi const *AbckitGetJsInspectApiImpl(enum AbckitApiVersion version);
 
 /**
  * @brief Instantiates modifying API for Js-specific Abckit types.
@@ -374,7 +374,7 @@ struct AbckitJsInspectApi const *AbckitGetJsInspectApiImpl(enum AbckitApiVersion
  * @param [ in ] version - Version of the API to instantiate.
  * @note Set `ABCKIT_STATUS_UNKNOWN_API_VERSION` error if `version` value is not in the `AbckitApiVersion` enum.
  */
-struct AbckitJsModifyApi const *AbckitGetJsModifyApiImpl(enum AbckitApiVersion version);
+CAPI_EXPORT struct AbckitJsModifyApi const *AbckitGetJsModifyApiImpl(enum AbckitApiVersion version);
 
 #ifdef __cplusplus
 }
