@@ -24,6 +24,7 @@
 
 namespace panda {
 class BaseObject;
+using CommonRootVisitor = void (*)(void *root);
 using RefFieldVisitor = std::function<void(RefField<> &)>;
 using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
 
@@ -32,10 +33,5 @@ void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
 // Static VM Roots scanning
 void VisitStaticRoots(const RefFieldVisitor &visitor);
-
-// Dynamic VM Roots scanning
-PUBLIC_API void VisitDynamicRoots(const RefFieldVisitor &visitor, bool isMark);
-PUBLIC_API void VisitDynamicWeakRoots(const WeakRefFieldVisitor &visitorFunc);
-
 }  // namespace panda
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H
