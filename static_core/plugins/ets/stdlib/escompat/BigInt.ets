@@ -202,7 +202,7 @@ export final class BigInt {
             return undefined
         }
 
-        const numFmtOptions = new Intl.NumberFormatOptions()
+        const numFmtOptions: Intl.NumberFormatOptions = {}
 
         if (options.compactDisplay) {
             if (!(options.compactDisplay == "short" || options.compactDisplay == "long")) {
