@@ -14,26 +14,9 @@
 
 cases:
   - decl: |-
-      @SomeAnnotation({field2: "Some string"})
-      @SomeAnnotation({field2: "Some string"})
-      class SomeClass {}
+      abstract class SomeAbstractClass {
+        @SomeAnnotation({field2: "Some string" })
+        foo() {}      
+      }
     value: |-
-       = 100
-  - decl: |-
-      @SomeAnnotation({field2: "Some_string"})
-      class SomeClass {}
-  - decl: |-
-      @SomeAnnotation({field1: l + 100, field2: "Some_string"})
-      class SomeClass {}
-  - decl: |-
-      @SomeAnnotation({field1: c + 100, field2: "Some_string"})
-      class SomeClass {}
-  - decl: |-
-      @SomeAnnotation({field1: c, field2: "Some_string"})
-      class SomeClass {}
-  - value: |-
-       = l + 100
-  - value: |-
-       = c + 100
-  - value: |-
-       = c
+      = 100
