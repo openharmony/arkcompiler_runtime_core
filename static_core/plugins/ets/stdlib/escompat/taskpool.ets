@@ -709,6 +709,7 @@ export namespace taskpool {
 
         internal readonly id: long;
         internal tasks: Array<Task>;
+        internal isTaskAlreadySubmitted: boolean = false;
     }
 
     class SeqRunnerImpl {
@@ -896,11 +897,15 @@ export namespace taskpool {
      * @returns Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<NullishType>> {
+        if (group.isTaskAlreadySubmitted) {
+            throw new Error("taskpool:: groupTask has been executed");
+        }
         let tasksCount = group.tasks.length as int;
         if (tasksCount == 0) {
             return Promise.resolve<Array<NullishType>>(new Array<NullishType>());
         }
         taskGroupSubmitted(group.id, tasksCount);
+        group.isTaskAlreadySubmitted = true;
         const promises: Array<Promise<NullishType>> = new Array<Promise<NullishType>>();
         group.tasks.forEach((task: Task) => {
             taskSubmitted(task);

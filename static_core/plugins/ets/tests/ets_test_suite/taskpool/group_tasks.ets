@@ -114,6 +114,40 @@ function grouptaskExecutePeriodicallyTest(): void {
     }, new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically"));
 }
 
+function groupTaskExecuteRepeat(): void {
+    let task : taskpool.Task = new taskpool.Task(sum, 100, 300);
+    let group = new taskpool.TaskGroup();
+    group.addTask(task);
+
+    let a = await taskpool.execute(group);
+    assertEQ(a[0], 400);
+    expectError(() => {
+        taskpool.execute(group);
+    }, new Error("taskpool:: groupTask has been executed"));
+}
+
+function taskExecuteGroupTaskTest():void {
+    let group = new taskpool.TaskGroup();
+    let task : taskpool.Task = new taskpool.Task(()=>{
+        taskpool.execute(group);
+    })
+    group.addTask(task);
+    expectError(() => {
+        await taskpool.execute(group);
+    }, new Error("taskpool:: groupTask has been executed"));
+}
+
+function taskGroupNestedTaskTest(): void {
+    let group = new taskpool.TaskGroup();
+    let task : taskpool.Task = new taskpool.Task(()=>{
+        taskpool.execute(group);
+    })
+    group.addTask(task);
+    expectError(() => {
+        await taskpool.execute(task);
+    }, new Error("taskpool:: groupTask cannot execute outside"));
+}
+
 function main(): int {
     let taskGroupTestsuite = new ArkTestsuite("taskpool.TaskGroup");
     taskGroupTestsuite.addTest("RunOneGroupTest", () =>
@@ -347,6 +381,9 @@ function main(): int {
     taskGroupTestsuite.addTest("ExecuteDelayedTest", executeDelayedTest);
     taskGroupTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);
     taskGroupTestsuite.addTest("GrouptaskExecutePeriodicallyTest", grouptaskExecutePeriodicallyTest);
+    taskGroupTestsuite.addTest("GroupTaskExecuteRepeatTest", groupTaskExecuteRepeat);
+    taskGroupTestsuite.addTest("taskExecuteGroupTaskTest", taskExecuteGroupTaskTest);
+    taskGroupTestsuite.addTest("taskGroupNestedTaskTest", taskGroupNestedTaskTest);
     let res = taskGroupTestsuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
