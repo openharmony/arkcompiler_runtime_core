@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPED_UNSIGNED_ARRAYS_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
 class EtsEscompatTypedUArrayBase : public EtsObject {
@@ -47,34 +48,35 @@ public:
         return MEMBER_OFFSET(EtsEscompatTypedUArrayBase, lengthInt_);
     }
 
-    ObjectPointer<EtsObject> GetBuffer()
+    ObjectPointer<EtsObject> GetBuffer() const
     {
-        return buffer_;
+        return EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetBufferOffset()));
     }
 
-    EtsDouble GetByteOffset()
+    EtsDouble GetByteOffset() const
     {
         return byteOffset_;
     }
 
-    EtsDouble GetByteLength()
+    EtsDouble GetByteLength() const
     {
         return byteLength_;
     }
 
-    EtsDouble GetBytesPerElement()
+    EtsDouble GetBytesPerElement() const
     {
         return bytesPerElement_;
     }
 
-    EtsInt GetLengthInt()
+    EtsInt GetLengthInt() const
     {
         return lengthInt_;
     }
 
-    ObjectPointer<EtsString> GetName()
+    ObjectPointer<EtsString> GetName() const
     {
-        return name_;
+        return reinterpret_cast<EtsString *>(
+            ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsEscompatTypedUArrayBase, name_)));
     }
 
 private:

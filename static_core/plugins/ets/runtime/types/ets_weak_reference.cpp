@@ -20,7 +20,7 @@ namespace ark::ets {
 
 void EtsWeakReference::ClearReferent()
 {
-    referent_ = nullptr;
+    ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsWeakReference, referent_), nullptr);
 }
 
 void EtsWeakReference::SetReferent(EtsObject *addr)

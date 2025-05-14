@@ -32,17 +32,17 @@ public:
     EtsArray() = delete;
     ~EtsArray() = delete;
 
-    PANDA_PUBLIC_API size_t GetLength()
+    PANDA_PUBLIC_API size_t GetLength() const
     {
         return GetCoreType()->GetLength();
     }
 
-    size_t GetElementSize()
+    size_t GetElementSize() const
     {
         return GetCoreType()->ClassAddr<Class>()->GetComponentSize();
     }
 
-    size_t ObjectSize()
+    size_t ObjectSize() const
     {
         return GetCoreType()->ObjectSize(GetElementSize());
     }
@@ -53,12 +53,18 @@ public:
         return reinterpret_cast<T *>(GetCoreType()->GetData());
     }
 
-    EtsClass *GetClass()
+    template <class T>
+    const T *GetData() const
+    {
+        return reinterpret_cast<const T *>(GetCoreType()->GetData());
+    }
+
+    EtsClass *GetClass() const
     {
         return EtsClass::FromRuntimeClass(GetCoreType()->ClassAddr<Class>());
     }
 
-    bool IsPrimitive()
+    bool IsPrimitive() const
     {
         auto componentType = GetCoreType()->ClassAddr<Class>()->GetComponentType();
         ASSERT(componentType != nullptr);
@@ -91,6 +97,11 @@ public:
         return reinterpret_cast<coretypes::Array *>(this);
     }
 
+    const coretypes::Array *GetCoreType() const
+    {
+        return reinterpret_cast<const coretypes::Array *>(this);
+    }
+
     NO_COPY_SEMANTIC(EtsArray);
     NO_MOVE_SEMANTIC(EtsArray);
 
@@ -113,7 +124,7 @@ protected:
     }
 
     template <class T, bool IS_VOLATILE = false>
-    T GetImpl(uint32_t idx)
+    T GetImpl(uint32_t idx) const
     {
         return GetCoreType()->Get<T, true, false, IS_VOLATILE>(idx);
     }
@@ -189,7 +200,7 @@ public:
         }
     }
 
-    PANDA_PUBLIC_API Component *Get(uint32_t index)
+    PANDA_PUBLIC_API Component *Get(uint32_t index) const
     {
         return reinterpret_cast<Component *>(
             GetImpl<std::invoke_result_t<decltype(&Component::GetCoreType), Component>>(index));
@@ -201,7 +212,7 @@ public:
         GetCoreType()->SetObject(offset, element == nullptr ? nullptr : element->GetCoreType(), memoryOrder);
     }
 
-    Component *Get(uint32_t index, std::memory_order memoryOrder)
+    Component *Get(uint32_t index, std::memory_order memoryOrder) const
     {
         auto offset = index * sizeof(ObjectPointerType);
         return Component::FromCoreType(GetCoreType()->GetObject(offset, memoryOrder));
@@ -218,13 +229,13 @@ public:
         return reinterpret_cast<EtsTypedObjectArray *>(objectHeader);
     }
 
-    void CopyDataTo(EtsTypedObjectArray *dst)
+    void CopyDataTo(EtsTypedObjectArray *dst) const
     {
         ASSERT(dst != nullptr);
         ASSERT(GetLength() <= dst->GetLength());
 
         if (std::size_t count = GetLength() * OBJECT_POINTER_SIZE) {
-            Span<uint8_t> srcSpan(GetData<uint8_t>(), count);
+            Span<const uint8_t> srcSpan(GetData<uint8_t>(), count);
             Span<uint8_t> dstSpan(dst->GetData<uint8_t>(), count);
             CopyData(srcSpan, dstSpan);
             // Call barriers.
@@ -249,7 +260,7 @@ private:
 
     static constexpr const std::size_t WORD_SIZE = sizeof(WordType);
 
-    void CopyData(Span<uint8_t> &src, Span<uint8_t> &dst)
+    void CopyData(Span<const uint8_t> &src, Span<uint8_t> &dst) const
     {
         ASSERT((src.Size() % OBJECT_POINTER_SIZE) == 0);
         ASSERT(src.Size() <= dst.Size());
@@ -261,13 +272,15 @@ private:
         std::size_t stop = (src.Size() / WORD_SIZE) * WORD_SIZE;
         for (; i < stop; i += WORD_SIZE) {
             // Atomic with parameterized order reason: memory order defined as constexpr
-            reinterpret_cast<AtomicWord *>(&dst[i])->store(reinterpret_cast<AtomicWord *>(&src[i])->load(ORDER), ORDER);
+            reinterpret_cast<AtomicWord *>(&dst[i])->store(reinterpret_cast<const AtomicWord *>(&src[i])->load(ORDER),
+                                                           ORDER);
         }
         // 2. copy by references if any
         stop = src.Size();
         for (; i < stop; i += OBJECT_POINTER_SIZE) {
             // Atomic with parameterized order reason: memory order defined as constexpr
-            reinterpret_cast<AtomicRef *>(&dst[i])->store(reinterpret_cast<AtomicRef *>(&src[i])->load(ORDER), ORDER);
+            reinterpret_cast<AtomicRef *>(&dst[i])->store(reinterpret_cast<const AtomicRef *>(&src[i])->load(ORDER),
+                                                          ORDER);
         }
     }
 };
@@ -279,6 +292,16 @@ class EtsPrimitiveArray : public EtsArray {
 public:
     using ValueType = ClassType;
 
+    static constexpr const EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *FromCoreType(const ObjectHeader *object)
+    {
+        return reinterpret_cast<const EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *>(object);
+    }
+
+    static constexpr EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *FromEtsObject(EtsObject *object)
+    {
+        return reinterpret_cast<EtsPrimitiveArray<ClassType, ETS_CLASS_ROOT> *>(object);
+    }
+
     static EtsPrimitiveArray *Create(uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT,
                                      bool pinned = false)
     {
@@ -289,7 +312,7 @@ public:
     {
         SetImpl(index, element);
     }
-    ClassType Get(uint32_t index)
+    ClassType Get(uint32_t index) const
     {
         return GetImpl<ClassType>(index);
     }
@@ -297,7 +320,7 @@ public:
     {
         SetImpl<ClassType, true>(index, element);
     }
-    ClassType GetVolatile(uint32_t index)
+    ClassType GetVolatile(uint32_t index) const
     {
         return GetImpl<ClassType, true>(index);
     }
