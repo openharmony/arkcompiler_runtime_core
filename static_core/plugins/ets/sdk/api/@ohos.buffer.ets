@@ -57,7 +57,17 @@ export default namespace buffer {
         | 'hex';
 
     type TypedArray = Int8Array;
-    type TypedArrayOrigin = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array
+    type TypedArrayOrigin = Int8Array
+        | Uint8Array
+        | Uint8ClampedArray
+        | Int16Array
+        | Uint16Array
+        | Int32Array
+        | Uint32Array
+        | Float32Array
+        | Float64Array
+        | BigInt64Array
+        | BigUint64Array;
 
     const U32_MAX: long = 4294967295 as long;
 
@@ -139,7 +149,7 @@ export default namespace buffer {
      * 1. Mandatory parameters are left unspecified;
      */
     export function byteLength(
-        doc: string | Buffer | TypedArray | DataView | ArrayBuffer,
+        doc: string | Buffer | TypedArrayOrigin | DataView | ArrayBuffer,
         encoding?: BufferEncoding
     ): number {
         if (doc instanceof string) {
@@ -156,6 +166,26 @@ export default namespace buffer {
                 return (doc as Buffer).length;
             case "Int8Array":
                 return (doc as Int8Array).byteLength;
+            case "Uint8Array":
+                return (doc as Uint8Array).byteLength;
+            case "Uint8ClampedArray":
+                return (doc as Uint8ClampedArray).byteLength;
+            case "Int16Array":
+                return (doc as Int16Array).byteLength;
+            case "Uint16Array":
+                return (doc as Uint16Array).byteLength;
+            case "Int32Array":
+                return (doc as Int32Array).byteLength;
+            case "Uint32Array":
+                return (doc as Uint32Array).byteLength;
+            case "Float32Array":
+                return (doc as Float32Array).byteLength;
+            case "Float64Array":
+                return (doc as Float64Array).byteLength;
+            case "BigInt64Array":
+                return (doc as BigInt64Array).byteLength;
+            case "BigUint64Array":
+                return (doc as BigUint64Array).byteLength;
             case "DataView":
                 return (doc as DataView).byteLength;
             case "ArrayBuffer":
@@ -338,7 +368,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
     export function transcode(source: Buffer | Uint8Array, fromEnc: string, toEnc: string): Buffer {
         const resolvedSource = getArrayBufferFrom(source);
         const sourceBytesLength = resolvedSource.byteLength as int;
-        const str = ArrayBuffer.stringify(resolvedSource, fromEnc, 0, sourceBytesLength);
+        const str = ArrayBuffer.stringify(resolvedSource, toEnc, 0, sourceBytesLength);
         const newBytesLength = ArrayBuffer.bytesLength(str, toEnc);
         const newBytes = ArrayBuffer.from(str, toEnc, newBytesLength);
         return new Buffer(newBytes);
@@ -425,10 +455,10 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
             this.buffer = buffer;
             this.byteOffset = 0;
         }
-    
+
         /**
          * Returns a string decoded from the buffer's contents.
-         * 
+         *
          * @returns {string} The decoded string
          */
         public toString(): string {
@@ -892,6 +922,13 @@ Received value is: ${value}`)
             return new DataView(this.buffer, 0, this.length);
         }
 
+        private fillInPaddingBase64(str: string): string {
+            let base64Divisible: int = 4
+            let remainder: int = str.length % base64Divisible as int
+            const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0
+            return str.padRight(c'=', str.length as int + paddingCount)
+        }
+
         /**
         * Writes a signed integer to the buffer at the specified offset using big-endian format
         *
@@ -1069,10 +1106,19 @@ Received value is: ${value}`)
         * @returns {number} Number of bytes written
         */
         public write(str: string, offset: number = 0, length?: number, encoding: string = 'utf8'): number {
+            if (offset < 0 || offset > this.length - 1) {
+                throw createBusinessError(OutOfBoundsErrorCodeId, "Offset value is out of range")
+            }
+
             const resolvedEncoding = encoding as buffer.BufferEncoding;
-            const byteLen = buffer.byteLength(str, resolvedEncoding);
-            const resolvedLength = length ?? byteLen;
-            const strBuffer = buffer.from(str, resolvedEncoding);
+            const tmpLength = length ?? this.length - offset
+            const resolvedLength = Math.min(tmpLength, this.length - offset)
+            let resolvedString = str
+            if (encoding == 'base64' || encoding == 'base64url') {
+                resolvedString = this.fillInPaddingBase64(str)
+            }
+            const byteLen = buffer.byteLength(resolvedString, resolvedEncoding);
+            const strBuffer = buffer.from(resolvedString, resolvedEncoding);
             for (let i = 0; i < resolvedLength && i < byteLen; i++) {
                 this.buffer.set((offset + i) as int, strBuffer.at(i));
             }

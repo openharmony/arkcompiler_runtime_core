@@ -26,6 +26,7 @@ using namespace std::string_view_literals;
 constexpr std::array UTF8_ENCODINGS = {"utf8"sv, "utf-8"sv, "ascii"sv};
 constexpr std::array UTF16_ENCODINGS = {"utf16le"sv, "ucs2"sv, "ucs-2"sv};
 constexpr std::array BASE64_ENCODINGS = {"base64"sv, "base64url"sv};
+constexpr std::array LATIN_ENCODINGS = {"latin1"sv, "binary"sv};
 
 namespace ark::ets::intrinsics {
 
@@ -225,6 +226,8 @@ extern "C" EtsString *EtsArrayBufferToString(EtsEscompatArrayBuffer *buffer, Ets
         output = helpers::encoding::ConvertBase64Encoding(bytes, encoding);
     } else if (encoding == "hex") {
         output = helpers::encoding::ConvertHexEncoding(bytes);
+    } else if (std::find(LATIN_ENCODINGS.begin(), LATIN_ENCODINGS.end(), encoding) != LATIN_ENCODINGS.end()) {
+        output = helpers::encoding::ConvertLatinEncoding(bytes);
     } else {
         PandaString errMsg = "Unsupported encoding: " + encoding;
         ThrowException(ctx, coro, ctx.GetIllegalArgumentExceptionClassDescriptor(),
