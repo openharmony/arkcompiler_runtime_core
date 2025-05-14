@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,16 @@
  * limitations under the License.
  */
 
-package std.annotations;
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
 
-export namespace functions {
-    @Retention("RUNTIME")
-    export @interface OptionalParametersAnnotation {
-        minArgCount: int
-    };
+namespace ark::ets::interop::js::testing {
+
+class EtsOptionalParametersEtsToTsTest : public EtsInteropTest {};
+
+TEST_F(EtsOptionalParametersEtsToTsTest, test_optional_params_ets_to_ts)
+{
+    ASSERT_TRUE(RunJsTestSuite("test_optional_params_ets_to_ts.ts"));
 }
+
+}  // namespace ark::ets::interop::js::testing
