@@ -202,6 +202,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/loop_unswitch.cpp
         optimizer/optimizations/loop_unroll.cpp
         optimizer/optimizations/lse.cpp
+        optimizer/optimizations/lower_boxed_boolean.cpp
         optimizer/optimizations/memory_barriers.cpp
         optimizer/optimizations/memory_coalescing.cpp
         optimizer/optimizations/native_call_optimization.cpp

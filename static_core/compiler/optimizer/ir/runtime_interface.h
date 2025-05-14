@@ -462,6 +462,21 @@ public:
         UNREACHABLE();
     }
 
+    virtual bool IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldBooleanTrue([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldBooleanValue([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
     virtual bool IsFieldStringBuilderBuffer([[maybe_unused]] FieldPtr field) const
     {
         return false;
@@ -546,6 +561,11 @@ public:
     }
 
     virtual bool IsBoxedClass([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassBoxedBoolean([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
