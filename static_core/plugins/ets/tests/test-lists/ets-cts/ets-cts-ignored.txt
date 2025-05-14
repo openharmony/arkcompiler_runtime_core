@@ -965,8 +965,7 @@
 #24289
 17.experimental_features/08.function_method_and_constructor_overloading/03.constructor_overloading/co2_over_10.ets
 
-#23049
-17.experimental_features/11.default_interface_method_declarations/private_interface_methods1.ets
+#24919
 17.experimental_features/11.default_interface_method_declarations/private_interface_methods2.ets
 
 #22471

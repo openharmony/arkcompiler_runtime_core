@@ -266,13 +266,17 @@ private:
         RegisterFinalizationInfo(coro, arrayBufferHandle, finalizerFunction, finalizerHint);
     }
 
-    /// Checks position is inside array, throws ets exception if not.
+    /**
+     * @brief Checks position is inside array, throws ets exception if not.
+     * NOTE: behavior of this method must repeat initialization from managed `doBoundaryCheck`.
+     */
     bool DoBoundaryCheck(EtsInt pos)
     {
         if (pos < 0 || pos >= byteLength_) {
+            PandaString message = "ArrayBuffer position ";
+            message.append(std::to_string(pos)).append(" is out of bounds");
             ThrowEtsException(EtsCoroutine::GetCurrent(),
-                              panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_ERROR,
-                              "ArrayBuffer position is out of bounds");
+                              panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_ERROR, message.c_str());
             return false;
         }
         return true;

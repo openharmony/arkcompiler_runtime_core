@@ -36,7 +36,7 @@ TEST_F(EtsNativePromiseTest, PromiseResolve)
 
     ets_boolean result;
 
-    CallEtsFuntion(&result, "promise_test", "check_resolve", promise);
+    CallEtsFunction(&result, "promise_test", "check_resolve", promise);
     ASSERT_EQ(result, true);
 }
 
@@ -52,7 +52,7 @@ TEST_F(EtsNativePromiseTest, PromiseReject)
     ASSERT_EQ(env_->DeferredReject(deferred, exception), ETS_OK);
 
     ets_boolean result;
-    CallEtsFuntion(&result, "promise_test", "check_reject", promise);
+    CallEtsFunction(&result, "promise_test", "check_reject", promise);
     ASSERT_EQ(result, true);
 }
 

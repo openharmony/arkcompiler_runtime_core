@@ -20,7 +20,7 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, cast
 
 import pytz
 from dotenv import load_dotenv
@@ -65,7 +65,7 @@ def main_cycle(config: Config, logger: Log) -> int:
 
     failed_tests = 0
 
-    if config.test_suite.repeats_by_time is None:
+    if config.test_suite.repeats_by_time == 0:
         for repeat in range(1, config.test_suite.repeats + 1):
             repeat_str = f"Run #{repeat} of {config.test_suite.repeats}"
             failed_tests += launch_runners(runner, logger, config, repeat, repeat_str)
@@ -128,7 +128,7 @@ def load_config(args: Dict[str, Any]) -> Log:
     if test_suite_const not in args:
         raise InvalidConfiguration(f"Incorrect configuration: cannot file element '{test_suite_const}'")
     test_suite = args[test_suite_const]
-    work_dir = os.path.join(str(os.getenv("WORK_DIR")), test_suite)
+    work_dir = Path(cast(str, os.getenv("WORK_DIR")), test_suite)
 
     return Log.setup(verbose, work_dir)
 

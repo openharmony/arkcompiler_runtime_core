@@ -32,8 +32,8 @@ export class ArraySort {
    */
   distribution: String = "sorted";
 
-  ints: int[] = new int[0];
-  intsInitial: int[] = new int[0];
+  ints: FixedArray<int> = [];
+  intsInitial: FixedArray<int> = [];
 
   /**
    * Prepare array depending on the distribution variant.

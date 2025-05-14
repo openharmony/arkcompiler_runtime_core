@@ -140,6 +140,10 @@ def add_other_test_suite_args(parser: argparse.ArgumentParser) -> None:
         '--srcdumper', action='store_true', dest='srcdumper',
         default=None,
         help='run src dumper tests')
+    parser.add_argument(
+        '--recheck', action='store_true', dest='recheck',
+        default=None,
+        help='run recheck tests')
 
 
 def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
@@ -511,6 +515,9 @@ def add_coverage_args(parser: argparse.ArgumentParser) -> None:
         '--llvm-cov-html-out-path', dest='llvm_cov_html_out_path', default=None,
         type=make_dir_if_not_exist,
         help='Stacks files in the specified directory')
+    parser.add_argument(
+        '--llvm-cov-report-by-components', action='store_true', dest='llvm_cov_report_by_components',
+        default=None, help='Creates a separate coverage report for each binary running')
 
 
 def add_declgen_ets2ts_args(parser: argparse.ArgumentParser) -> None:

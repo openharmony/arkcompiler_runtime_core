@@ -40,7 +40,7 @@ _LOGGER = Log.get_logger(__file__)
 
 
 class TestSuite:
-    CONST_COMMENT = ["#"]
+    CONST_COMMENT: ClassVar[str] = "#"
     TEST_COMMENT_EXPR = re.compile(r"^\s*(?P<test>[^# ]+)?(\s*#\s*(?P<comment>.+))?", re.MULTILINE)
 
     def __init__(self, test_env: TestEnv) -> None:

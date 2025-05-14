@@ -358,6 +358,10 @@ void ThrowOutOfMemoryError(ManagedThread *thread, const PandaString &msg)
     auto ctx = GetLanguageContext(thread);
 
     if (thread->IsThrowingOOM()) {
+        // In case of OOM try to allocate exception object first,
+        // because allocator still may have some space that will be enough for allocating OOM exception.
+        // If during allocation allocator throws OOM once again, we use preallocate object without collecting stack
+        // trace.
         thread->SetUsePreAllocObj(true);
     }
 
