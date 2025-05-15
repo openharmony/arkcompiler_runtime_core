@@ -28,6 +28,10 @@ function main(): int {
 
     suite.addTest("Testing XML ParseInfo getNamespace with namespace is not existent.", testXmlParseInfoGetNamespace0002)
     suite.addTest("Testing XML ParseInfo getNamespace with namespace is existent.", testXmlParseInfoGetNamespace0001)
+    suite.addTest("Testing XML ParseInfo isWhitespace.", testXmlIsWhitespace0001)
+    suite.addTest("Testing XML ParseInfo getAttributeCount testCase0001", testXmlGetAttributeCount0001)
+    suite.addTest("Testing XML ParseInfo getAttributeCount testCase0002", testXmlGetAttributeCount0002)
+    suite.addTest("Testing XML ParseInfo getAttributeCount testCase0003", testXmlGetAttributeCount0003)
 
     return suite.run()
 }
@@ -80,7 +84,7 @@ function testXmlParseInfoGetNamespace0001() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: false, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:http://www.w3.org"));
     } catch (err) {
         const TAG = 'testXmlParseInfoGetNamespace0001';
@@ -105,7 +109,7 @@ function testXmlParseInfoGetNamespace0002() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:"));
     } catch (err) {
         const TAG = 'testXmlParseInfoGetNamespace0002';
@@ -131,7 +135,7 @@ function testXmlParseInfoGetPrefix0001() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: false, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:h"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -152,7 +156,7 @@ function testXmlParseInfoGetText0001() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:4 value:Happy"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -173,7 +177,7 @@ function testXmlParseInfoGetText0002() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:4 value:Ha$ppy"));
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -198,7 +202,7 @@ function testXmlIsEmptyElementTag0001() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:true"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -218,7 +222,7 @@ function testXmlIsEmptyElementTag0002() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:4 value:false"))
     } catch (err) {
         const TAG = 'testXmlIsEmptyElementTag0002';
@@ -245,7 +249,7 @@ function testXmlIsEmptyElementTag0003() {
             let options: xml.ParseOptions = {
                 supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
             }
-            parser.parse(options);
+            parser.parseXml(options);
             assertTrue(false)
     } catch (err) {
             assertTrue(err instanceof BusinessError)
@@ -271,7 +275,7 @@ function testXmlIsWhitespace0001() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:true"));
     } catch (err) {
         const TAG = 'testXmlIsWhitespace0001';
@@ -294,7 +298,7 @@ function testXmlGetAttributeCount0001() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:1"));
     } catch (err) {
         const TAG = 'testXmlGetAttributeCount0001';
@@ -318,7 +322,7 @@ function testXmlGetAttributeCount0002() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:2"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -339,7 +343,7 @@ function testXmlGetAttributeCount0003() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
