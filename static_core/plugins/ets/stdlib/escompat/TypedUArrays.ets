@@ -641,11 +641,11 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         value = Uint8ClampedArray.clamp(value)
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: int, start: int, end: int): void
 
     /**
      * Assigns val as element on index.
@@ -2490,11 +2490,11 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: int, start: int, end: int): Uint8Array {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: int, start: int, end: int): void
 
     /**
      * Assigns val as element on index.
@@ -4343,11 +4343,11 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: int, start: int, end: int): Uint16Array {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: int, start: int, end: int): void
 
     /**
      * Assigns val as element on index.
@@ -6201,11 +6201,11 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: long, start: int, end: int): Uint32Array {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: long, start: int, end: int): void
 
     /**
      * Assigns val as element on index.
@@ -8068,11 +8068,11 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     public fill(value: long, start: int, end: int): BigUint64Array {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: long, start: int, end: int): void
 
     /**
      * Assigns val as element on index.

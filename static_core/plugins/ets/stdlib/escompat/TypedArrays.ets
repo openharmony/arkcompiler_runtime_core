@@ -672,11 +672,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: byte, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: byte, start: int, end: int): void
 
     /**
      * Assigns val as element on insertPos.
@@ -2532,11 +2532,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: short, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: short, start: int, end: int): void
 
     /**
      * Assigns val as element on insertPos.
@@ -4374,11 +4374,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: int, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: int, start: int, end: int): void
 
     /**
      * Assigns val as element on insertPos.
@@ -6195,11 +6195,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public fill(value: long, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: long, start: int, end: int): void
 
     /**
      * Assigns val as element on insertPos.
@@ -8026,11 +8026,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: float, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: float, start: int, end: int): void
 
     /**
      * Assigns val as element on insertPos.
@@ -9766,14 +9766,14 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns modified Float64Array
      */
-    public fill(value: number, start: int, end: int): this {
+    public fill(value: double, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: double, start: int, end: int): void
 
     /**
      * Assigns val as element on insertPos.

@@ -1746,6 +1746,19 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatInt8ArraySort
 
+  - name: Int8ArrayFillInternal
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i8, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayFillInternal
+    codegen_func: CreateInt8ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitInt8ArrayFillInternal
+
   - name: Int16ArraySetInt
     space: ets
     class_name: escompat.Int16Array
@@ -1816,6 +1829,19 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySort
 
+  - name: Int16ArrayFillInternal
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i16, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayFillInternal
+    codegen_func: CreateInt16ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitInt16ArrayFillInternal
+
   - name: Int32ArraySetInt
     space: ets
     class_name: escompat.Int32Array
@@ -1875,6 +1901,19 @@ intrinsics:
       ret: escompat.Uint32Array
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySort
+
+  - name: Int32ArrayFillInternal
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayFillInternal
+    codegen_func: CreateInt32ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitInt32ArrayFillInternal
 
   - name: BigInt64ArraySetLong
     space: ets
@@ -1936,6 +1975,19 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySort
 
+  - name: BigInt64ArrayFillInternal
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i64, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayFillInternal
+    codegen_func: CreateBigInt64ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitBigInt64ArrayFillInternal
+
   - name: Float32ArraySetFloat
     space: ets
     class_name: escompat.Float32Array
@@ -1985,6 +2037,19 @@ intrinsics:
       ret: escompat.Float32Array
       args: []
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArraySort
+
+  - name: Float32ArrayFillInternal
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [f32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayFillInternal
+    codegen_func: CreateFloat32ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitFloat32ArrayFillInternal
 
   - name: Float64ArraySetDouble
     space: ets
@@ -2036,6 +2101,19 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArraySort
 
+  - name: Float64ArrayFillInternal
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [f64, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayFillInternal
+    codegen_func: CreateFloat64ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitFloat64ArrayFillInternal
+
   - name: UInt8ClampedArraySetInt
     space: ets
     class_name: escompat.Uint8ClampedArray
@@ -2085,6 +2163,19 @@ intrinsics:
       ret: escompat.Uint8ClampedArray
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArraySort
+
+  - name: UInt8ClampedArrayFillInternal
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayFillInternal
+    codegen_func: CreateUInt8ClampedArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitUInt8ClampedArrayFillInternal
 
   - name: UInt8ArraySetInt
     space: ets
@@ -2136,6 +2227,19 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArraySort
 
+  - name: UInt8ArrayFillInternal
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayFillInternal
+    codegen_func: CreateUInt8ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitUInt8ArrayFillInternal
+
   - name: UInt16ArraySetInt
     space: ets
     class_name: escompat.Uint16Array
@@ -2175,6 +2279,19 @@ intrinsics:
       ret: void
       args: [escompat.Uint16Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySetValuesWithOffset
+
+  - name: UInt16ArrayFillInternal
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i32, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayFillInternal
+    codegen_func: CreateUInt16ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitUInt16ArrayFillInternal
 
   - name: UInt32ArraySetInt
     space: ets
@@ -2226,6 +2343,19 @@ intrinsics:
       args: [escompat.Uint32Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySetValuesWithOffset
 
+  - name: UInt32ArrayFillInternal
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i64, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayFillInternal
+    codegen_func: CreateUInt32ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitUInt32ArrayFillInternal
+
   - name: BigUInt64ArraySetInt
     space: ets
     class_name: escompat.BigUint64Array
@@ -2275,6 +2405,19 @@ intrinsics:
       ret: void
       args: [escompat.BigUint64Array, f64]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySetValuesWithOffset
+
+  - name: BigUInt64ArrayFillInternal
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: fillInternal
+    static: false
+    signature:
+      ret: void
+      args: [i64, i32, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayFillInternal
+    codegen_func: CreateBigUInt64ArrayFillInternal
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitBigUInt64ArrayFillInternal
 
   - name: Int8ArrayReverse
     space: ets

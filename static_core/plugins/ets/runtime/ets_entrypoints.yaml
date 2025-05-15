@@ -888,3 +888,245 @@
   - const ark::Method*
   - ark::ObjectHeader*
   - size_t
+
+- name: Int8ArrayFillInternalFastPath
+  entrypoint: Int8ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int8_t
+    - int32_t
+    - int32_t
+
+- name: Int8ArrayFillInternalUsual
+  entrypoint: EtsEscompatInt8ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int8_t
+    - int32_t
+    - int32_t
+
+- name: Int16ArrayFillInternalFastPath
+  entrypoint: Int16ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int16_t
+    - int32_t
+    - int32_t
+
+- name: Int16ArrayFillInternalUsual
+  entrypoint: EtsEscompatInt16ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int16_t
+    - int32_t
+    - int32_t
+
+- name: Int32ArrayFillInternalFastPath
+  entrypoint: Int32ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: Int32ArrayFillInternalUsual
+  entrypoint: EtsEscompatInt32ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: BigInt64ArrayFillInternalFastPath
+  entrypoint: BigInt64ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: BigInt64ArrayFillInternalUsual
+  entrypoint: EtsEscompatBigInt64ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: Float32ArrayFillInternalFastPath
+  entrypoint: Float32ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: Float32ArrayFillInternalUsual
+  entrypoint: EtsEscompatFloat32ArrayFillInternalInt
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: Float64ArrayFillInternalFastPath
+  entrypoint: Float64ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: Float64ArrayFillInternalUsual
+  entrypoint: EtsEscompatFloat64ArrayFillInternalInt
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ClampedArrayFillInternalFastPath
+  entrypoint: UInt8ClampedArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ClampedArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt8ClampedArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ArrayFillInternalFastPath
+  entrypoint: UInt8ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt8ArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt8ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt16ArrayFillInternalFastPath
+  entrypoint: UInt16ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt16ArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt16ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: UInt32ArrayFillInternalFastPath
+  entrypoint: UInt32ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: UInt32ArrayFillInternalUsual
+  entrypoint: EtsEscompatUInt32ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: BigUInt64ArrayFillInternalFastPath
+  entrypoint: BigUInt64ArrayFillInternalFastPath
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t
+
+- name: BigUInt64ArrayFillInternalUsual
+  entrypoint: EtsEscompatBigUInt64ArrayFillInternal
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - int64_t
+    - int32_t
+    - int32_t

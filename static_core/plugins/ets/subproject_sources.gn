@@ -65,7 +65,10 @@ inst_templates_yaml_path =
 
 entrypoints_yaml_path = "runtime/ets_entrypoints.yaml"
 
-irtoc_scripts = [ "irtoc_scripts/to_string_cache.irt" ]
+irtoc_scripts = [
+  "irtoc_scripts/to_string_cache.irt",
+  "irtoc_scripts/typed_arrays.irt",
+]
 
 irtoc_plugins = [
   "irtoc_scripts/interpreter_handlers.irt",
