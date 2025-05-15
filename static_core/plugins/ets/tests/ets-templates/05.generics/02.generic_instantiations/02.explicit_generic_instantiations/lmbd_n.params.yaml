@@ -21,10 +21,10 @@ cases:
           let a = 42
           assertEQ((<T> (p: T, q: T): T => p ?? q)(a, new Object()), 42)
     - use: |-
-          let a = new Object()
+          let a = 42
           let b = "abc"
           assertTrue((<T> (p: T, q: T): T => p ?? q)(a, b) instanceof String)
     - use: |-
-          let a = new Object()
+          let a = 42
           let b = "abc"
           assertTrue((<T> (p: T, q: T): T => p ?? q)(b, a) instanceof String)

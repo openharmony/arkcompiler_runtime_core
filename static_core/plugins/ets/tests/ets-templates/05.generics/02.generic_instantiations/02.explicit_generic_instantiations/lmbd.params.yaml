@@ -25,7 +25,7 @@ cases:
         assertTrue(typeof y == 'object' && typeof y[0] == 'object' && typeof y[1] == 'string')
         assertTrue(y[0] instanceof Error && y[1] == "abc")
 
-        let x = foo<[number, boolean], [Error, string]>(z, y)
+        let x = foo<[Double, Boolean], [Error, string]>(z, y)
         assertTrue(x[0][0] == 1.0 && x[0][1] && x[1][0] instanceof Error && x[1][1] == "abc")
 
         let w = foo<null, undefined>(null, undefined)
@@ -34,7 +34,7 @@ cases:
         // no constraints, function arguments with tuple
         let foo = <T, U> (p: T, q: U): [T, U] => [p, q]
 
-        let v = foo<function, function>((p: number): number => p * p, (p: number): number => p + p)
+        let v = foo<(p: number) => number, (p: number) => number>((p: number): number => p * p, (p: number): number => p + p)
         assertTrue(v[0](5.0) == 25.0 && v[1](42.0) == 84.0)
     - use: |-
         // no constraints, union
@@ -46,7 +46,10 @@ cases:
         assertTrue(v as number == 11.0)
 
         let w = foo<[string, string, string, string], [number, number]>(["a", "b", "c", "d"], [1, 2])
-        assertTrue((w as string[]).length == 4)
+        assertEQ((w as [string, string, string, string])[0], "a")
+        assertEQ((w as [string, string, string, string])[1], "b")
+        assertEQ((w as [string, string, string, string])[2], "c")
+        assertEQ((w as [string, string, string, string])[3], "d")
 
     - use: |-
         let bar = <T> (p: T): Array<T> => Array<T>(5).fill(p)
