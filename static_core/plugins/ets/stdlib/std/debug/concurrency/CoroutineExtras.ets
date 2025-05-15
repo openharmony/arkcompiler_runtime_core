@@ -39,4 +39,6 @@ export final class CoroutineExtras {
     public static native stopTaskpool(): void;
     // increase taskpool workers
     public static native increaseTaskpoolWorkersToN(workersNum: int): void;
+    // checks if worker has external scheduler
+    public static native workerHasExternalScheduler(): boolean;
 }
