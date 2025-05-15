@@ -15,26 +15,9 @@
 
 import {TreeSet} from "@ohos.util.TreeSet";
 
-const success = 0;
-const fail = 1;
-
 function main(): int {
-    const suite = new ArkTestsuite("TreeSet Remove Clear ForEach Values API tests")
+    const suite = new ArkTestsuite("TreeSet ForEach Values API tests")
 
-    suite.addTest("TreeSet remove value",
-        testRemoveExistingValue)
-    suite.addTest("TreeSet remove not set value",
-        testRemoveNonExistingValue)
-    suite.addTest("TreeSet remove value from the null treeSet",
-        testRemoveValueFromEmptyTreeSet)
-    suite.addTest("TreeSet remove empty string value when treeSet is empty",
-        testRemoveEmptyStringValueFromEmptyTreeSet)
-    suite.addTest("TreeSet clear data",
-        testClearData)
-    suite.addTest("TreeSet clear the null treeSet",
-        testClearEmptyTreeSet)
-    suite.addTest("TreeSet add data after clear the TreeSet",
-        testAddDataAfterClearTreeSet)
     suite.addTest("TreeSet forEach the treeSet with no reference",
         testForEachNoReference)
     suite.addTest("TreeSet forEach the treeSet with reference is value",
@@ -49,76 +32,6 @@ function main(): int {
         testValuesReturnIteratorByValueWithEmptyTreeSet)
 
     return suite.run()
-}
-
-function testRemoveExistingValue() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
-    treeSet.add("aa");
-    let result1 = treeSet.remove("aa");
-    let result2 = treeSet.has("aa");
-    assertEQ(result1, true, "The treeSet should remove the value");
-    assertEQ(result2, false, "The treeSet should not has the value");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-}
-
-function testRemoveNonExistingValue() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
-    treeSet.add("aa");
-    let result = treeSet.remove("bb");
-    assertEQ(result, false, "The treeSet should return false for the value that is not set");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1");
-}
-
-function testRemoveValueFromEmptyTreeSet() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
-    let result = treeSet.remove("aa");
-    assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-}
-
-function testRemoveEmptyStringValueFromEmptyTreeSet() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
-    let result = treeSet.remove("");
-    assertEQ(result, false, "The treeSet should return undefined for a value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-}
-
-function testClearData() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
-    treeSet.add("aa");
-    treeSet.clear();
-    let result1 = treeSet.has("aa");
-    let result2 = treeSet.isEmpty();
-    assertEQ(result1, false, "The treeSet should not has the value");
-    assertEQ(result2, true, "The treeSet should be empty");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-}
-
-function testClearEmptyTreeSet() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return secondValue.compareTo(firstValue) });
-    treeSet.clear();
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-}
-
-function testAddDataAfterClearTreeSet() {
-    let treeSet: TreeSet<string> = new TreeSet<string>((firstValue: string,
-        secondValue: string): number => { return firstValue.compareTo(secondValue) });
-    treeSet.add("aa");
-    treeSet.add("bb");
-    treeSet.clear();
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0");
-    treeSet.add("cc");
-    treeSet.add("dd");
-    treeSet.add("ee");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3");
-    assertEQ(treeSet.getFirstValue(), "ee", "The treeMap first value should be ee");
-    assertEQ(treeSet.getLastValue(), "cc", "The treeMap last value should be cc");
 }
 
 function testForEachNoReference() {
