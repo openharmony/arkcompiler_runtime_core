@@ -422,15 +422,15 @@ bool Runtime::Destroy()
     }
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
-
-    if (instance_->SaveProfileInfo()) {
+    if (instance_->SaveProfileInfo() && instance_->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
         ProfilingSaver profileSaver;
         auto isAotVerifyAbsPath = instance_->GetOptions().IsAotVerifyAbsPath();
         auto classCtxStr = instance_->GetClassLinker()->GetClassContextForAot(isAotVerifyAbsPath);
         auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto profiledMethodsFinal = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
         auto profiledPandaFiles = instance_->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
-        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledPandaFiles);
+        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledMethodsFinal, profiledPandaFiles);
     }
 
     if (GetOptions().ShouldLoadBootPandaFiles()) {

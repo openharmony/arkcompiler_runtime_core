@@ -36,10 +36,11 @@ public:
     void CreateBranchData(pgo::AotProfilingData::AotMethodProfilingData *profilingData,
                           Span<BranchData> &runtimeBranch);
     void CreateThrowData(pgo::AotProfilingData::AotMethodProfilingData *profilingData, Span<ThrowData> &runtimeThrow);
-    void AddMethod(pgo::AotProfilingData *profileData, const Method *method, int32_t pandaFileIdx);
-    void AddProfiledMethods(pgo::AotProfilingData *profileData, PandaVector<const Method *> &profiledMethods);
+    void AddMethod(pgo::AotProfilingData *profileData, Method *method, int32_t pandaFileIdx);
+    void AddProfiledMethods(pgo::AotProfilingData *profileData, PandaList<Method *> &profiledMethods,
+                            PandaList<Method *>::const_iterator profiledMethodsFinal);
     void SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
-                     PandaVector<const Method *> profiledMethods,
+                     PandaList<Method *> &profiledMethods, PandaList<Method *>::const_iterator profiledMethodsFinal,
                      PandaUnorderedSet<std::string_view> &profiledPandaFiles);
 };
 }  // namespace ark

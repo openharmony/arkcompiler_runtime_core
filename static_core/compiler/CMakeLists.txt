@@ -369,6 +369,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/vn_test.cpp
     tests/class_hash_table_test.cpp
     tests/linear_order_test.cpp
+    tests/profiling_merger_test.cpp
     tests/profiling_runner_test.cpp
 )
 set_source_files_properties(tests/loop_unroll_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")
