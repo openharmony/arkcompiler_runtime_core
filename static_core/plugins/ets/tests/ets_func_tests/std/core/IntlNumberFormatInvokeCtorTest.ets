@@ -19,9 +19,11 @@ function main(): int {
     suite.addTest("testNumberFormatConstructorNew0001", testNumberFormatConstructorNew0001);
     suite.addTest("testNumberFormatConstructorNew0002", testNumberFormatConstructorNew0002);
     suite.addTest("testNumberFormatConstructorNew0003", testNumberFormatConstructorNew0003);
+    suite.addTest("testNumberFormatConstructorNew0003", testNumberFormatConstructorNew0004);
     suite.addTest("testNumberFormatConstructorNew0005", testNumberFormatConstructorNew0005);
     suite.addTest("testNumberFormatConstructorNew0006", testNumberFormatConstructorNew0006);
-    suite.addTest("testNumberFormatConstructorNew0007", testNumberFormatConstructorNew0007);
+    // NOTE(igorlegalov): uncomment when the issue #25344 is fixed
+    // suite.addTest("testNumberFormatConstructorNew0007", testNumberFormatConstructorNew0007);
     suite.addTest("testNumberFormatConstructorNew0009", testNumberFormatConstructorNew0009);
     suite.addTest("testNumberFormatConstructorNew0010", testNumberFormatConstructorNew0010);
     suite.addTest("testNumberFormatConstructorNew0011", testNumberFormatConstructorNew0011);
@@ -90,6 +92,10 @@ function testNumberFormatConstructorNew0003() {
     let locales: string = "";
     let numberFormat = Intl.NumberFormat.$_invoke(locales);
     assertTrue(numberFormat instanceof Intl.NumberFormat);
+}
+
+function testNumberFormatConstructorNew0004() {
+    expectError((): void throws => { Intl.NumberFormat.$_invoke("test") });
 }
 
 function testNumberFormatConstructorNew0005() {

@@ -331,7 +331,7 @@ std/containers/BuiltinArrayMapTest.ets
 #25605
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
-#24700
+#25344
 std/core/IntlNumberFormatSupportedLocalesOfTest2.ets
 std/core/IntlNumberFormatFaultLocaleTest.ets
 

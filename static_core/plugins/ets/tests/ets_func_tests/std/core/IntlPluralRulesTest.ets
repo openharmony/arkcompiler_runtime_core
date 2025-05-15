@@ -210,7 +210,7 @@ function testSupportedLocalesOf() {
         fakeLocale,
         undefined,
         [
-            intlBestFitLocale("fakeLocale")
+            intlBestFitLocale(fakeLocale)
         ]
     )
     runSupportedLocalesTest(
@@ -252,7 +252,7 @@ function testSupportedLocalesOf() {
         fakeLocale,
         { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
         [
-            intlLookUpLocale("fakeLocale")
+            intlLookUpLocale(fakeLocale)
         ]
     )
 

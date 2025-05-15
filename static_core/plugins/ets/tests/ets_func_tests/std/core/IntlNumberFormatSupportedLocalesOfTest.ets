@@ -20,6 +20,7 @@ function main(): int {
     suite.addTest("supportedLocalesOfUndefined", testSupportedLocalesOfUndefined);
     // Tests are from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
     suite.addTest("testSupportedLocalesOf0002", testSupportedLocalesOf0002);
+    suite.addTest("testSupportedLocalesOf0003", testSupportedLocalesOf0003);
     suite.addTest("testSupportedLocalesOf0003", testSupportedLocalesOf0004);
     return suite.run();
 }
@@ -50,6 +51,11 @@ function testSupportedLocalesOfUndefined() {
 
 function testSupportedLocalesOf0002() {
     let locales: string = '';
+    expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
+}
+
+function testSupportedLocalesOf0003() {
+    let locales: string = 'test';
     expectError((): void throws => { Intl.NumberFormat.supportedLocalesOf(locales) });
 }
 

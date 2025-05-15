@@ -15,6 +15,7 @@
 
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
 #include "plugins/ets/stdlib/native/core/IntlCommon.h"
+#include "plugins/ets/stdlib/native/core/IntlLanguageTag.h"
 #include "libpandabase/macros.h"
 #include "unicode/locid.h"
 #include "unicode/localematcher.h"
@@ -27,8 +28,17 @@
 #include <string>
 #include <array>
 #include <set>
+#include <sstream>
 
 namespace ark::ets::stdlib {
+
+template <typename... Args>
+static void ThrowRangeError(ani_env *env, Args &&...args)
+{
+    std::stringstream message;
+    (message << ... << args);
+    ThrowNewError(env, "Lstd/core/RangeError;", message.str().c_str(), "Lstd/core/String;:V");
+}
 
 std::string GetDefaultLocaleTag()
 {
@@ -86,6 +96,9 @@ ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class kla
 {
     UErrorCode success = U_ZERO_ERROR;
     auto locTag = ConvertFromAniString(env, locale);
+    if (!intl::IsStructurallyValidLanguageTag(locTag)) {
+        ThrowRangeError(env, "Incorrect locale information provided");
+    }
     auto str =
         BuildLocaleMatcher(success).getBestMatchForListString(locTag, success)->toLanguageTag<std::string>(success);
     if (UNLIKELY(U_FAILURE(success))) {
@@ -142,6 +155,9 @@ ani_string StdCoreIntlLookupLocale(ani_env *env, [[maybe_unused]] ani_class klas
         ANI_FATAL_IF_ERROR(env->Array_Get_Ref(locales, i, &locale));
 
         auto locTag = ConvertFromAniString(env, reinterpret_cast<ani_string>(locale));
+        if (!intl::IsStructurallyValidLanguageTag(locTag)) {
+            ThrowRangeError(env, "Incorrect locale information provided");
+        }
 
         bestLoc = LookupLocale(locTag, availableLocales, availableCount);
         if (!bestLoc.empty()) {
