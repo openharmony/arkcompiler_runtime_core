@@ -64,10 +64,17 @@ r[{{i}}]{% if not loop.last %}, {% endif %}
 
 {%- macro invokeName(narg, suffix) %}invoke{{suffix}}{{narg}}{% endmacro %}
 
+native function getFunctionObjectNameFromAnnotation(func: Object): string;
+
+export @interface NamedFunctionObject {
+    name: string;
+}
+
 type __T = object | null | undefined;
 
 export interface Function {
     unsafeCall(...r: FixedArray<__T>): __T
+    get name(): string;
 }
 
 export interface FunctionN<R> extends Function {
@@ -100,6 +107,11 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
 {{ defineChainingHelper("FunctionR", narg, narg + 1) }} {}
 {{ defineChainingHelper("Function", narg, narg) }} {}
 {{ defineLambdaHelper("LambdaR", "FunctionR", narg) }} {
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
     abstract {{invokeName(narg, "R")}}{{erasedSignature(narg, True)}};
 {%- if narg == 0 %}
     final unsafeCall(...r: FixedArray<__T>): __T {
@@ -125,6 +137,11 @@ export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
         if (r.length < {{narg}}) { throw new ArgumentsUnderapplicationError() }
         return this.{{invokeName(narg)}}({{listArgArrayLoads(narg)}})
     }
+
+    get name(): string {
+        return getFunctionObjectNameFromAnnotation(this as Object)
+    }
+
 {%- for extNarg in range(narg + 1, maxarity + 1) %}
     final {{invokeName(extNarg)}} {{erasedSignature(extNarg, False)}} {
         return this.{{invokeName(narg)}}({{listArgs(0, narg)}})

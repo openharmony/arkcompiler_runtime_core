@@ -78,6 +78,7 @@
   "plugins/ets/tests/ets_test_suite/stubs": "*",
   "plugins/ets/tests/ets_test_suite/taskpool/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_test_suite/unions": "*",
+  "plugins/ets/tests/ets_test_suite/functions/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_warnings_tests": "*",
   "plugins/ets/tests/integrational": "*",
   "plugins/ets/tests/interop_js/tests/constructor_as_arg/main.js": {"G.NAM.01": "*"},

@@ -4756,6 +4756,16 @@ intrinsics:
         - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvokeConstructor
 
+  - name: TypeAPIGetFunctionObjectNameFromAnnotation
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: getFunctionObjectNameFromAnnotation
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::TypeAPIGetFunctionObjectNameFromAnnotation
+
 #########################
 # std.core.FunctionType #
 #########################

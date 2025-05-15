@@ -18,11 +18,13 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include "class_data_accessor.h"
 #include "file.h"
 #include "handle_scope.h"
 #include "include/coretypes/class.h"
 #include "include/mem/panda_string.h"
 #include "include/mtmanaged_thread.h"
+#include "include/object_header.h"
 #include "intrinsics.h"
 #include "macros.h"
 #include "mem/mem.h"
@@ -621,6 +623,37 @@ EtsClass *TypeAPIGetDeclaringClass(ObjectHeader *functionType)
 {
     auto *function = GetEtsMethod(EtsTypeAPIType::FromCoreType(functionType));
     return (function != nullptr) ? function->GetClass() : nullptr;
+}
+
+EtsString *TypeAPIGetFunctionObjectNameFromAnnotation(EtsObject *functionObj)
+{
+    static constexpr std::string_view ANNO_NAME = "Lstd/core/NamedFunctionObject;";
+
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+
+    auto *etsClass = functionObj->GetClass();
+    auto *runtimeClass = etsClass->GetRuntimeClass();
+    const panda_file::File &pf = *runtimeClass->GetPandaFile();
+    panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
+    VMHandle<EtsString> retStrHandle;
+    cda.EnumerateAnnotations([&pf, &retStrHandle, &thread](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
+        if (className == ANNO_NAME) {
+            const auto value = ada.GetElement(0).GetScalarValue();
+            const auto id = value.Get<panda_file::File::EntityId>();
+            auto stringData = pf.GetStringData(id);
+            retStrHandle = VMHandle<EtsString>(
+                thread, EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(stringData.data))->GetCoreType());
+        }
+    });
+
+    if (retStrHandle.GetPtr() == nullptr) {
+        retStrHandle = VMHandle<EtsString>(thread, EtsString::CreateNewEmptyString()->GetCoreType());
+    }
+
+    return retStrHandle.GetPtr();
 }
 
 }  // namespace ark::ets::intrinsics

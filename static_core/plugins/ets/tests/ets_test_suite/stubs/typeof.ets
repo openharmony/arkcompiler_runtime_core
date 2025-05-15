@@ -160,6 +160,9 @@ function testUnion() {
 
 class A implements Function {
     unsafeCall(...r: FixedArray<NullishType>): NullishType { return null }
+    get name() {
+        return "A";
+    }
 }
 class B extends Numeric {
     public byteValue(): byte { return 1 };
