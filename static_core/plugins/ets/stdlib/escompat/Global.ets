@@ -622,7 +622,7 @@ export function clearInterval(timerId: number): void {
 function startTimer(func: () => void, delayMs: number, repeat: boolean): number
 {
     const realDelayMs = delayMs as int; 
-    if (CoroutineExtras.isMainWorker()) {
+    if (CoroutineExtras.workerHasExternalScheduler()) {
         return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat) as number;
     }
     return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat) as number;
