@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+# -- coding: utf-8 --
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import logging
+import re
+from os import path
+from pathlib import Path
+from typing import List, Any
+
+from runner.enum_types.params import TestEnv
+from runner.test_file_based import TestFileBased
+
+_LOGGER = logging.getLogger(
+    "runner.plugins.declgen_ets2ets_isolated.test_declgenets2etsisolated"
+)
+
+
+class TestDeclgenIsolated(TestFileBased):
+    def __init__(
+        self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str
+    ) -> None:
+        super().__init__(test_env, test_path, flags, test_id)
+        base_path = path.splitext(self.path)[0]
+        self.source_path = f"{base_path}.ets"
+        self.expected_path = f"{base_path}-expected.txt"
+
+    @property
+    def default_work_dir_root(self) -> Path:
+        return Path("/tmp") / "declgen_ets2ets_isolated"
+
+    def do_run(self) -> TestFileBased:
+        self._prepare_work_dirs()
+
+        decl_filename = f"{Path(self.source_path).stem}.d.ets"
+
+        generated_decl_path = self.default_work_dir_root / decl_filename
+
+        self.passed, self.report, self.fail_kind = self.run_es2panda(
+            flags=[
+                "--generate-decl:enable-isolated",
+                f"--generate-decl:path={generated_decl_path}",
+            ],
+            test_abc="",
+            result_validator=self.compare_decl_output,
+        )
+
+        if not self.passed:
+            return self
+
+        return self
+
+    def compare_decl_output(self, _: str, __: Any, ___: int) -> bool:
+        decl_path = self.default_work_dir_root / f"{Path(self.source_path).stem}.d.ets"
+        try:
+            with open(self.expected_path, encoding="utf-8") as expected_file:
+                expected = expected_file.read()
+
+            with open(decl_path, encoding="utf-8") as actual_file:
+                actual = actual_file.read()
+
+            expected_cleaned = self._strip_leading_comments(expected).rstrip()
+            actual_cleaned = self._strip_leading_comments(actual).rstrip()
+            expected_compact = "".join(expected_cleaned.split())
+            actual_compact = "".join(actual_cleaned.split())
+            return expected_compact == actual_compact
+        except (FileNotFoundError, PermissionError) as error:
+            _LOGGER.error(f"Declgen compare failed: {error}")
+            return False
+
+    def _strip_leading_comments(self, text: str) -> str:
+        pattern = r"""
+            ^\s*(
+                (/\*\*[^*]*\*+(?:[^/*][^*]*\*+)*/\s*) |
+                (/\*.*?\*/\s*) |
+                ((//[^\n]*\n)+)
+            )+
+        """
+
+        cleaned = re.sub(pattern, "", text, flags=re.DOTALL | re.VERBOSE)
+        return cleaned.strip()
+
+    def _prepare_work_dirs(self) -> None:
+        self.default_work_dir_root.mkdir(parents=True, exist_ok=True)
+
+    def _ensure_parent_dirs(self, paths: List[Path]) -> None:
+        for file_path in paths:
+            file_path.parent.mkdir(parents=True, exist_ok=True)

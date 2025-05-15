@@ -30,8 +30,24 @@ from runner.plugins_registry import PluginsRegistry
 from runner.runner_base import Runner
 
 
+def set_plugin(test_suite: str) -> str:
+    if test_suite.startswith("declgen_ets2ts"):
+        return "declgenets2ts"
+    if test_suite.startswith("declgen_ts2ets"):
+        return "declgents2ets"
+    if test_suite.startswith("declgen_ets2etsisolated"):
+        return "declgenets2etsisolated"
+    if test_suite.startswith("declgen_ets2ets"):
+        return "declgenets2ets"
+    return (
+        "ets"
+        if test_suite.startswith("ets") or test_suite.startswith("ets")
+        else test_suite
+    )
+
+
 def main() -> None:
-    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+    dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
 
@@ -47,19 +63,16 @@ def main() -> None:
     runners: List[Runner] = []
 
     if config.general.processes == 1:
-        Log.default(logger, "Attention: tests are going to take only 1 process. The execution can be slow. "
-                            "You can set the option `--processes` to wished processes quantity "
-                            "or use special value `all` to use all available cores.")
+        Log.default(
+            logger,
+            "Attention: tests are going to take only 1 process. The execution can be slow. "
+            "You can set the option `--processes` to wished processes quantity "
+            "or use special value `all` to use all available cores.",
+        )
     start = datetime.now(pytz.UTC)
     for test_suite in config.test_suites:
-        if test_suite.startswith("declgen_ets2ts"):
-            plugin = "declgenets2ts"
-        elif test_suite.startswith("declgen_ts2ets"):
-            plugin = "declgents2ets"
-        elif test_suite.startswith("declgen_ets2ets"):
-            plugin = "declgenets2ets"
-        else:
-            plugin = "ets" if test_suite.startswith("ets") or test_suite.startswith("ets") else test_suite
+
+        plugin = set_plugin(test_suite)
         runner_class = registry.get_runner(plugin)
         if runner_class is not None:
             runners.append(runner_class(config))
@@ -79,7 +92,10 @@ def main() -> None:
                 runner.create_coverage_html()
 
     finish = datetime.now(pytz.UTC)
-    Log.default(logger, f"Runner has been working for {round((finish-start).total_seconds())} sec")
+    Log.default(
+        logger,
+        f"Runner has been working for {round((finish-start).total_seconds())} sec",
+    )
 
     registry.cleanup()
     sys.exit(0 if failed_tests == 0 else 1)
