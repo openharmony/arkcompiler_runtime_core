@@ -30,6 +30,7 @@ from runner.enum_types.configuration_kind import (
 )
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
+from runner.options.step import Step, StepKind
 from runner.utils import correct_path, detect_architecture, detect_operating_system
 
 _LOGGER = Log.get_logger(__file__)
@@ -139,17 +140,14 @@ class TestLists:
             return SanitizerKind.TSAN
         return SanitizerKind.NONE
 
-    def is_aot(self) -> bool:
-        aot_args = cast(list | None, self.config.workflow.get_value("parameters.aot-args"))
-        aot_full_args = cast(list | None, self.config.workflow.get_value("parameters.aot-full-args"))
-        return (aot_args is not None and len(aot_args) > 0) or (aot_full_args is not None and len(aot_full_args) > 0)
+    def is_aot(self) -> Step | None:
+        return next((step for step in self.config.workflow.steps if step.step_kind == StepKind.AOT), None)
 
-    def is_aot_full(self) -> bool:
-        aot_args = cast(list[str] | None, self.config.workflow.get_value("parameters.aot-args"))
-        aot_full_args = cast(list[str] | None, self.config.workflow.get_value("parameters.aot-full-args"))
-        is_full1 = len(self.__search_option_in_list("--compiler-inline-full-intrinsics=true", aot_args)) > 0
-        is_full2 = len(self.__search_option_in_list("--compiler-inline-full-intrinsics=true", aot_full_args)) > 0
-        return is_full1 or is_full2
+    def is_aot_full(self, step: Step) -> bool:
+        return len(self.__search_option_in_list("--compiler-inline-full-intrinsics=true", step.args)) > 0
+
+    def is_aot_pgo(self, step: Step) -> bool:
+        return len(self.__search_option_in_list("--paoc-use-profile:path=", step.args)) > 0
 
     def is_jit(self) -> bool:
         jit = str(self.config.workflow.get_parameter("compiler-enable-jit"))
@@ -168,9 +166,11 @@ class TestLists:
         return "default"
 
     def detect_conf(self) -> ConfigurationKind:
-        if self.is_aot():
-            if self.is_aot_full():
+        if (step := self.is_aot()) is not None:
+            if self.is_aot_full(step):
                 return ConfigurationKind.AOT_FULL
+            if self.is_aot_pgo(step):
+                return ConfigurationKind.AOT_PGO
             return ConfigurationKind.AOT
 
         if self.is_jit():
