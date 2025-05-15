@@ -15,8 +15,21 @@
 
 package std.core;
 
-const MAX_CODE_POINT = 0x10FFFF
+const MAX_CODE_POINT = 0x10FFFF // Unicode maximum allowed code points
 const MAX_CODE_UNIT = 0xFFFF
+const REPLACEMENT_CHARACTER = '\uFFFD'; // Unicode character replacement
+
+// High Surrogate Range (UTF-16)
+const HIGH_SURROGATE_MIN = 0xD800;   // Start of the high surrogate range (U+D800)
+const HIGH_SURROGATE_MAX = 0xDBFF;   // End of the high surrogate range (U+DBFF)
+
+// Low Surrogate Range
+const LOW_SURROGATE_MIN = 0xDC00;    // Start of the low surrogate range (U+DC00)
+const LOW_SURROGATE_MAX = 0xDFFF;    // End of the low surrogate range (U+DFFF)
+
+// Unicode proxy for calculating related offsets
+const SURROGATE_OFFSET = 0x400;      // Offset between high and low surrogates (0x10000 >> 10)
+const SURROGATE_BASE = 0x10000;      // Base value for supplementary Unicode planes (e.g., U+10000)
 
 type StringOrRegExp = String | RegExp
 
@@ -1826,21 +1839,62 @@ export final class String extends Object implements Comparable<String>, JSONable
         }
     }
 
-    /*
+    /**
+     * Check if low order proxy items are paired when the current character is a high proxy pair
+     *
+     * @param currentIndex Index of the current high-level proxy item
+     * @param highSurrogateCode Symbol value of high-level proxy term
+     * @param totalLength Total length of string
+     *
+     * @returns If pairing is successful, return valid characters; otherwise, return null
+     */
+    private processHighSurrogatePair(currentIndex: int, highSurrogateCode: int, totalLength: int): string | null {
+        // Check if low level proxy items are paired
+        if (currentIndex + 1 >= totalLength) {
+            return null;
+        }
+        const nextCodeUnit = this.charCodeAt(currentIndex + 1);
+        if (nextCodeUnit < LOW_SURROGATE_MIN || nextCodeUnit > LOW_SURROGATE_MAX) {
+            return null;
+        }
+        // Calculate joint code points
+        const codePoint = SURROGATE_BASE +
+            (highSurrogateCode - HIGH_SURROGATE_MIN) * SURROGATE_OFFSET +
+            (nextCodeUnit - LOW_SURROGATE_MIN);
+        // Verify whether the joint code points are legal
+        return Char.isValidCodePoint(codePoint) ? String.fromCodePoint(codePoint) : null;
+    }
+
+    /**
      * The toWellFormed() method of String values returns a string where all lone surrogates of
      * this string are replaced with the Unicode replacement character U+FFFD.
      */
-    public toWellFormed(): String {
-        let res = new StringBuilder()
-        for (let i: int = 0; i < this.getLength(); i++) {
-   	        let c = this.codePointAt(i)
-   	        if (!Char.isValidCodePoint(c! as int)) {
-   	            res.append(c'\uFFFD')
-   	        } else {
-   	            res.append(String.fromCharCode(c! as int))
-   	        }
+    public toWellFormed(): string {
+        let res = new StringBuilder();
+        let length = this.getLength();
+        for (let i = 0; i < length; i++) {
+            let codeUnit = this.charCodeAt(i);
+            // Currently, it is a high-level proxy item
+            if (codeUnit >= HIGH_SURROGATE_MIN && codeUnit <= HIGH_SURROGATE_MAX) { 
+                // Check if low level proxy items are paired
+                const processedChar = this.processHighSurrogatePair(i, codeUnit, length);
+                if (processedChar !== null) {
+                    res.append(processedChar);
+                    i++; // Skip processed low-level proxy items
+                    continue;
+                }
+                res.append(REPLACEMENT_CHARACTER);
+            // Currently, it is a low-level proxy item
+            } else if (codeUnit >= LOW_SURROGATE_MIN && codeUnit <= LOW_SURROGATE_MAX) {
+                res.append(REPLACEMENT_CHARACTER);
+            // Regular Characters
+            } else if (Char.isValidCodePoint(codeUnit)) {
+                res.append(this.charAt(i) as char);
+            } else {
+                res.append(REPLACEMENT_CHARACTER);
+            }
         }
-        return res.toString()
+        return res.toString();
     }
 
     private static native codePointToChar(cp: int): int
