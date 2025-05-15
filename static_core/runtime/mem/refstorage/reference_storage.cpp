@@ -333,10 +333,10 @@ void ReferenceStorage::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::Roo
     }
 }
 
-void ReferenceStorage::UpdateMovedRefs()
+void ReferenceStorage::UpdateMovedRefs(const GCRootUpdater &gcRootUpdater)
 {
     for (const auto &frame : *localStorage_) {
-        frame->UpdateMovedRefs();
+        frame->UpdateMovedRefs(gcRootUpdater);
     }
 }
 

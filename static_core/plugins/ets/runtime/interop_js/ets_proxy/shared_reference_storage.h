@@ -79,7 +79,7 @@ public:
     void VisitRoots(const GCRootVisitor &visitor) override;
 
     /// Update ref in the storage for EtsObject-s after moving phase
-    void UpdateRefs() override;
+    void UpdateRefs(const GCRootUpdater &gcRootUpdater) override;
 
     /// Remove all unmarked refs after XGC (can be run concurrently)
     void SweepUnmarkedRefs();

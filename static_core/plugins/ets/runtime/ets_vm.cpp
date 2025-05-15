@@ -687,7 +687,7 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
 }
 
 template <bool REF_CAN_BE_NULL>
-void PandaEtsVM::UpdateMovedVmRef(Value &ref)
+void PandaEtsVM::UpdateMovedVmRef(Value &ref, const GCRootUpdater &gcRootUpdater)
 {
     ASSERT(ref.IsReference());
     ObjectHeader *arg = ref.GetAs<ObjectHeader *>();
@@ -698,14 +698,14 @@ void PandaEtsVM::UpdateMovedVmRef(Value &ref)
     } else {
         ASSERT(arg != nullptr);
     }
-    if (arg->IsForwarded()) {
-        ObjectHeader *forwardAddress = mem::GetForwardAddress(arg);
-        ref = Value(forwardAddress);
-        LOG(DEBUG, GC) << "Forward root object: " << arg << " -> " << forwardAddress;
+
+    if (gcRootUpdater(&arg)) {
+        ref = Value(arg);
+        LOG(DEBUG, GC) << "Forwarded root object: " << arg;
     }
 }
 
-void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine)
+void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine, const GCRootUpdater &gcRootUpdater)
 {
     PandaVector<Value> &arguments = coroutine->GetManagedEntrypointArguments();
     if (!arguments.empty()) {
@@ -719,12 +719,12 @@ void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine)
         ++it;  // skip return type
         if (!entrypoint->IsStatic()) {
             // handle 'this' argument
-            UpdateMovedVmRef<false>(arguments[argIdx]);
+            UpdateMovedVmRef<false>(arguments[argIdx], gcRootUpdater);
             ++argIdx;
         }
         while (it != panda_file::ShortyIterator()) {
             if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
-                UpdateMovedVmRef<true>(arguments[argIdx]);
+                UpdateMovedVmRef<true>(arguments[argIdx], gcRootUpdater);
             }
             ++it;
             ++argIdx;
@@ -732,32 +732,32 @@ void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine)
     }
 }
 
-void PandaEtsVM::UpdateVmRefs()
+void PandaEtsVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
 {
-    GetThreadManager()->EnumerateThreads([](ManagedThread *thread) {
+    GetThreadManager()->EnumerateThreads([&gcRootUpdater](ManagedThread *thread) {
         auto coroutine = EtsCoroutine::CastFromThread(thread);
         if (auto etsNapiEnv = coroutine->GetEtsNapiEnv()) {
             auto etsStorage = etsNapiEnv->GetEtsReferenceStorage();
-            etsStorage->GetAsReferenceStorage()->UpdateMovedRefs();
+            etsStorage->GetAsReferenceStorage()->UpdateMovedRefs(gcRootUpdater);
         }
         if (!coroutine->HasManagedEntrypoint()) {
             return true;
         }
-        UpdateManagedEntrypointArgRefs(coroutine);
+        UpdateManagedEntrypointArgRefs(coroutine, gcRootUpdater);
         return true;
     });
 
-    objStateTable_->EnumerateObjectStates([](EtsObjectStateInfo *info) {
+    objStateTable_->EnumerateObjectStates([&gcRootUpdater](EtsObjectStateInfo *info) {
         auto *obj = info->GetEtsObject()->GetCoreType();
-        if (obj->IsForwarded()) {
-            info->SetEtsObject(EtsObject::FromCoreType(ark::mem::GetForwardAddress(obj)));
+        if (gcRootUpdater(&obj)) {
+            info->SetEtsObject(EtsObject::FromCoreType(obj));
         }
     });
 
     {
         os::memory::LockHolder lock(rootProviderlock_);
         for (auto *rootProvider : rootProviders_) {
-            rootProvider->UpdateRefs();
+            rootProvider->UpdateRefs(gcRootUpdater);
         }
     }
 }

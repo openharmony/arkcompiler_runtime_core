@@ -478,7 +478,7 @@ void SharedReferenceStorage::VisitRoots(const GCRootVisitor &visitor)
     }
 }
 
-void SharedReferenceStorage::UpdateRefs()
+void SharedReferenceStorage::UpdateRefs(const GCRootUpdater &gcRootUpdater)
 {
     // No need lock, because we visit roots on pause and we wait XGC ConcurrentSweep for local GCs
     size_t capacity = Capacity();
@@ -488,8 +488,8 @@ void SharedReferenceStorage::UpdateRefs()
             continue;
         }
         ObjectHeader *obj = ref->GetEtsObject()->GetCoreType();
-        if (obj->IsForwarded()) {
-            ref->SetETSObject(EtsObject::FromCoreType(ark::mem::GetForwardAddress(obj)));
+        if (gcRootUpdater(&obj)) {
+            ref->SetETSObject(EtsObject::FromCoreType(obj));
         }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,9 +105,8 @@ size_t HeapVerifier<LanguageConfig>::VerifyHeap() const
 template <class LanguageConfig>
 size_t HeapVerifier<LanguageConfig>::VerifyRoot() const
 {
-    RootManager<LanguageConfig> rootManager;
+    RootManager<LanguageConfig> rootManager(heap_->GetPandaVM());
     size_t failCount = 0;
-    rootManager.SetPandaVM(heap_->GetPandaVM());
     rootManager.VisitNonHeapRoots([this, &failCount](const GCRoot &root) {
         if (root.GetType() == RootType::ROOT_FRAME || root.GetType() == RootType::ROOT_THREAD) {
             auto *baseCls = root.GetObjectHeader()->ClassAddr<BaseClass>();
@@ -193,8 +192,7 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     heap_->IterateOverObjects(collectObjects);
     failsCount += this->CheckHeap(heapObjects, referentObjects);
     // Stack verifier
-    RootManager<LanguageConfig> rootManager;
-    rootManager.SetPandaVM(heap_->GetPandaVM());
+    RootManager<LanguageConfig> rootManager(heap_->GetPandaVM());
     auto rootVerifier = [&heapObjects, &failsCount](const GCRoot &root) {
         const auto *rootObjHeader = root.GetObjectHeader();
         auto *baseCls = rootObjHeader->ClassAddr<BaseClass>();

@@ -97,6 +97,11 @@ public:
         object_ = objNew;
     }
 
+    ALWAYS_INLINE void UpdateObject(const GCRootUpdater &gcRootUpdater)
+    {
+        gcRootUpdater(&object_);
+    }
+
     inline void *GetStack() const
     {
         return stack_;
