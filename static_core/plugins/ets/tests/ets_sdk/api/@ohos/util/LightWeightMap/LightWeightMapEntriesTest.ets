@@ -25,6 +25,8 @@ function main(): int {
         testEntriesReturnIteratorByKeyValue)
     suite.addTest("LightWeightMap entries return iterator by key and value with null LightWeightMap",
         testEntriesReturnIteratorByKeyValueWithEmptyMap)
+    suite.addTest("LightWeightMap entries return iterator by key and value with LightWeightMap when key is long string",
+        testEntriesReturnIteratorByKeyValue)
 
     return suite.run()
 }
@@ -52,4 +54,17 @@ function testEntriesReturnIteratorByKeyValueWithEmptyMap() {
     let iteratorSetValues = lightWeightMap.entries();
     assertEQ(iteratorSetValues.next().value, undefined,
         "The lightWeightMap entries iterator should return undefined for an empty map");
+}
+
+function testEntriesReturnIteratorByLongStrKey() {
+    let lightWeightMap: LightWeightMap<string, string> = new LightWeightMap<string, string>();
+    lightWeightMap.set("sparrow", "123");
+    lightWeightMap.set("squirrel", "357");
+    let iterator = lightWeightMap.entries();
+    let str = "";
+    for (let i: int = 0; i < 2; i++) {
+        str += iterator.next().value!.toString();
+    }
+    let strAll = "sparrow123squirrel357";
+    assertEQ(str, strAll, "The lightWeightMap entries iterator should return the correct key-value pairs");
 }
