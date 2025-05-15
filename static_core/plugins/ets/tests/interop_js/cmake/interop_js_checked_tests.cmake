@@ -112,7 +112,7 @@ function(panda_ets_interop_js_checked_test)
     if(NOT DEFINED ARG_PACKAGE_NAME AND DEFINED ARG_FILE)
         get_filename_component(ARG_PACKAGE_NAME ${ARG_FILE} NAME_WE)
     elseif(NOT DEFINED ARG_PACKAGE_NAME)
-        message("Please provide PACKAGE_NAME for ${TARGET}")
+        message(FATAL_ERROR "Please provide PACKAGE_NAME for ${TARGET}")
     endif()
     set(RUN_COMMAND
         "/usr/bin/env"
