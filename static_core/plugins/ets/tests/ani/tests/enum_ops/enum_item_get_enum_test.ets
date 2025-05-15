@@ -29,3 +29,6 @@ enum ColorString {
 enum OneItem {
     ONE
 }
+
+class A {
+}

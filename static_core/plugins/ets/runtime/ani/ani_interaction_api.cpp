@@ -6092,6 +6092,8 @@ NO_UB_SANITIZE static ani_status EnumItem_GetEnum(ani_env *env, ani_enum_item en
     EtsObject *internalEnumItem = s.ToInternalType(enum_item);
     EtsClass *enumClass = internalEnumItem->GetClass();
 
+    ANI_CHECK_RETURN_IF_NE(enumClass->IsEtsEnum(), true, ANI_INVALID_TYPE);
+
     return s.AddLocalRef(reinterpret_cast<EtsObject *>(enumClass), reinterpret_cast<ani_ref *>(result));
 }
 
