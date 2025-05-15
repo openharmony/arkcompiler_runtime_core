@@ -24,11 +24,12 @@ arkplatform/ @ctw-ian @dmitriitr @udav @ipetrov @molotkovmikhail @Prof1983 @igel
 
 static_core/ @dmitriitr @Prof1983 @igelhaus @ragnvald
 
+static_core/abc2program/              @nazarovkonstantin @oatuwwutao @hufeng20 ^igelhaus
 static_core/assembler/                @nazarovkonstantin ^igelhaus
 static_core/bytecode_optimizer/       @mbolshov ^igelhaus
 static_core/cmake/                    @igelhaus
 static_core/compiler/                 @Prof1983 @dingding5 @chernykhsergey
-static_core/disassembler/             @nazarovkonstantin ^igelhaus
+static_core/disassembler/             @nazarovkonstantin @oatuwwutao @hufeng20 ^igelhaus
 static_core/docs/                     @igelhaus
 static_core/docs/memory-management*   @dmitriitr
 static_core/docs/task_manager.md      @dmitriitr
@@ -139,8 +140,8 @@ static_core/plugins/ets/tests/interop_js/                                     ^i
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @kuchkovairina
 static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @kuchkovairina @dreamdoomwalker
-static_core/plugins/ets/tools/declgen_ts2sts/                                 @dreamdoomwalker ^trubachevilya ^hufeng20 @nazarovkonstantin
-static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @dreamdoomwalker ^amate @sergeyandreev @anton-sysoev
+static_core/plugins/ets/tools/declgen_ts2sts/                                 @dreamdoomwalker ^trubachevilya ^hufeng20 @nazarovkonstantin @zenghang11 @lihao000
+static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 @dreamdoomwalker ^amate @sergeyandreev @anton-sysoev @lihao000 @hufeng20
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @aleksander-sotov ^ivan-tyulyandin @dreamdoomwalker
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
@@ -181,21 +182,22 @@ static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^i
 static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                @dreamdoomwalker ^igelhaus ^trubachevilya @ivagin ^hufeng20 ^Prof1983
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 
-/abc2program/ @ctw-ian @chenqy930
+/abc2program/ @oatuwwutao @hufeng20 @chenqy930
 /assembler/ @ctw-ian
 /bytecode_optimizer/ @ctw-ian
 /common_interfaces/ @wuzhefengh @weng-changcheng @igelhaus @dmitriitr ^yingguofeng ^Prof1983
 /compiler/ @ctw-ian
-/disassembler/ @ctw-ian
+/disassembler/ @oatuwwutao @hufeng20
 /isa/ @ctw-ian @chenqy930
 /ldscripts/ @gitee-dakeQI
-/libabckit/ @nazarovkonstantin @oatuwwutao
-/libark_defect_scan_aux/ @gitee-dakeQI
+/libabckit/ @nazarovkonstantin @oatuwwutao @hufeng20
+/libark_defect_scan_aux/ @gitee-dakeQI @oatuwwutao @hufeng20
 /libpandabase/ @gitee-dakeQI
 /libpandafile/ @gitee-dakeQI @chenqy930
 /libziparchive/ @gitee-dakeQI
 /panda/ @gitee-dakeQI
+/panda_guard/ @zenghang11 @hufeng20
 /pandastdlib/ @ctw-ian
 /platforms/ @gitee-dakeQI
 /templates/ @ctw-ian
-/verifier/ @ctw-ian
+/verifier/ @oatuwwutao @hufeng20
