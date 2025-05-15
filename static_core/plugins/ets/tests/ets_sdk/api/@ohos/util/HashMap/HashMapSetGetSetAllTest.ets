@@ -14,6 +14,7 @@
  */
 
 import HashMap from "@ohos.util.HashMap";
+import { BusinessError } from "@ohos.base";
 
 const success = 0;
 const fail = 1;
@@ -23,6 +24,7 @@ function main(): int {
 
     suite.addTest("HashMap set valid data", testSetValidData)
     suite.addTest("HashMap set empty string", testSetEmptyString)
+    suite.addTest("HashMap set undefined", testSetUndefined)
     suite.addTest("HashMap set key length 1024", testSetKeyLength1024)
     suite.addTest("HashMap set data loop 1000", testSetDataLoop1000)
     suite.addTest("HashMap get valid key", testGetValidKey)
@@ -51,6 +53,17 @@ function testSetEmptyString() {
     let result = hashMap.get("")
     assertEQ(result, 356, "The hashMap should return the correct value for the key");
     assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+}
+
+function testSetUndefined() {
+    let hashMap: HashMap<string|undefined, number|undefined> = new HashMap<string|undefined, number|undefined>();
+    try {
+        hashMap.set(undefined, 356);
+    } catch (e: BusinessError) {
+        assertEQ(e.code, 401, "The HashMap should throw a BusinessError when key is undefined");
+        return;
+    }
+    assertEQ(0, 1, "The key cannot be undefined");
 }
 
 function testSetKeyLength1024() {

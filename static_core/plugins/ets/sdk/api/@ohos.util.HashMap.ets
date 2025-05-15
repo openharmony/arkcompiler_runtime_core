@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+
 interface ReadonlyHashMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the HashMap
@@ -145,6 +149,10 @@ export default class HashMap<K, V> implements ReadonlyHashMap<K, V> {
      * @returns the HashMap object
      */
     set(key: K, value: V): Object {
+        if (key === undefined) {
+            throw new BusinessError(TypeErrorCodeId, new Error('BusinessError',
+                `The type of \"key\" must be Key of JS. Received value is: ${key}`, undefined))
+        }
         this.buckets.set(key, value);
         return this;
     }
