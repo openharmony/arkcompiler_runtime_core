@@ -18,7 +18,6 @@
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
-#include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
@@ -58,7 +57,7 @@ static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, Ets
     return std::nullopt;
 }
 
-static bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2)
+bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2)
 {
     auto bytes1 = obj1->GetBytes();
     auto bytes2 = obj2->GetBytes();
