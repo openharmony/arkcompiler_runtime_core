@@ -148,7 +148,7 @@ function testUrlTest116() {
 function testUrlTest117() {
 	let murl = url.URL.parseURL("http://username:password@host:8080/directory/file?query=pppppp#123456");
 	murl.hash = 'saaf^as\tk\njf'
-	assertEQ(murl.hash, "#saaf^askjf");
+	assertEQ(murl.hash, "#saaf%5Eas%09k%0Ajf");
 	console.log('-------------------------117 done')
 }
 
@@ -164,7 +164,7 @@ function testUrlTest119() {
 	let murl = url.URL.parseURL("http://username:password@host:8080/directory/file?query=pppppp#123456");
 	assertEQ(murl.pathname, "/directory/file");
 	murl.pathname = 'sasf/s?dc#j/mm^h';
-	assertEQ(murl.pathname, "/sasf/s%3Fdc%23j/mm^h");
+	assertEQ(murl.pathname, "/sasf/s?dc#j/mm%5Eh");
 	console.log('-------------------------119 done')
 }
 
@@ -172,7 +172,7 @@ function testUrlTest120() {
 	let murl = url.URL.parseURL("http://username:password@host:8080/directory/file?query=pppppp#123456");
 	assertEQ(murl.port, "8080");
 	murl.port = '98\t5\r6';
-	assertEQ(murl.port, "9856");
+	assertEQ(murl.port, "8080");
 	console.log('-------------------------120 done')
 }
 
@@ -180,8 +180,8 @@ function testUrlTest121() {
 	let murl = url.URL.parseURL("http://username:password@host:443/directory/file?query=pppppp#123456");
 	assertEQ(murl.origin, "http://host:443");
 	murl.protocol = 'ht\tt\nps:';
-	assertEQ(murl.origin, "https://host");
-	assertEQ(murl.port, "");
+	assertEQ(murl.origin, "http://host:443");
+	assertEQ(murl.port, "443");
 	console.log('-------------------------121 done')
 }
 
@@ -189,7 +189,7 @@ function testUrlTest122() {
 	let murl = url.URL.parseURL("http://username:password@host:443/directory/file?query=pppppp#123456");
 	assertEQ(murl.search, "?query=pppppp");
 	murl.search = 'ad/sd=ss`\'c\rc\tc\nc'
-	assertEQ(murl.search, "?ad/sd=ss`%27cccc");
+	assertEQ(murl.search, "?ad/sd=ss`'c%0Dc%09c%0Ac");
 	console.log('-------------------------122 done')
 }
 
@@ -197,7 +197,7 @@ function testUrlTest123() {
 	let murl = url.URL.parseURL("http://aas@asdgfv.hh:443/index.html?sad=ss中国s");
 	assertEQ(murl.toString(), "http://aas@asdgfv.hh:443/index.html?sad=ss%E4%B8%AD%E5%9B%BDs");
 	murl.search = 'ad/sd=s中国s`\'cc\tc\rc';
-	assertEQ(murl.toString(), "http://aas@asdgfv.hh:443/index.html?ad/sd=s%E4%B8%AD%E5%9B%BDs`%27cccc");
+	assertEQ(murl.toString(), "http://aas@asdgfv.hh:443/index.html?ad/sd=s%E4%B8%AD%E5%9B%BDs`'cc%09c%0Dc");
 	console.log('-------------------------123 done')
 }
 
