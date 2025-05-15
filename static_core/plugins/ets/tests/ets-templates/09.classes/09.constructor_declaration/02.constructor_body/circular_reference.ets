@@ -19,8 +19,8 @@ tags: [compile-only, negative]
 ---*/
 
 class A {
-  public a?: Object
-  public b?: Object
+  public a: String
+  public b: String
 
   public constructor() {
     this.a = this.b

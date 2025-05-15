@@ -29,7 +29,8 @@ cases:
       assertEQ( res, 2 )
     params: override-compatible with itself parameter
 
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(i: Base[]) {
           res = 1
       }
@@ -44,7 +45,8 @@ cases:
       assertEQ( res, 2 )
     params: override-compatible parameter (covariance)
 
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(i: Derived[]) {
           res = 1
       }
@@ -146,3 +148,33 @@ cases:
           return [new Base()]
       }
     params: override-incompatible return value (contravariance), overload-equivalent
+
+  - base: |-
+      foo(i: FixedArray<Base>) {
+          res = 1
+      }
+    derived: |-
+      foo(i: FixedArray<Derived>) {
+          res = 2
+      }
+    call: |-
+      new Derived().foo([new Base()])
+      assertEQ( res, 1 )
+      new Derived().foo([new Derived()])
+      assertEQ( res, 2 )
+    params: override-compatible parameter (covariance)
+
+  - base: |-
+      foo(i: FixedArray<Derived>) {
+          res = 1
+      }
+    derived: |-
+      foo(i: FixedArray<Base>) {
+          res = 2
+      }
+    call: |-
+      new Derived().foo([new Base()])
+      assertEQ( res, 2 )
+      new Derived().foo([new Derived()])
+      assertEQ( res, 1 )
+    params: override-incompatible parameter (contravariance), not overload-equivalent

@@ -18,10 +18,10 @@ desc: Use generic interfaces and class implementations to verify the correctness
 tags: [compile-only, negative]
 ---*/
 
-interface Box<T> {
+interface BBox<T> {
     value: T;
 }
 
-class StringBox implements Box<string> {
+class StringBBox implements BBox<string> {
     value = 123;
 }

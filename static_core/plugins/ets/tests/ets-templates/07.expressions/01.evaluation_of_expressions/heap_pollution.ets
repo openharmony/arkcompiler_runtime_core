@@ -20,7 +20,7 @@ desc: >-
     pollution occurs
 ---*/
 
-class Box<T> {
+class BBox<T> {
     private v: T;
 
     public set(v: T): void {
@@ -33,14 +33,14 @@ class Box<T> {
 }
 
 function main(): int {
-    let intBox: Box<Int> = new Box<Int>();
-    intBox.set(42);
+    let intBBox: BBox<Int> = new BBox<Int>();
+    intBBox.set(42);
 
-    let obj: Object = intBox;
-    let stringBox: Box<String> = obj as Box<String>;
+    let obj: Object = intBBox;
+    let stringBBox: BBox<String> = obj as BBox<String>;
 
     try {
-        let s: String = stringBox.get();
+        let s: String = stringBBox.get();
     } catch (e: ClassCastError) {
         return 0;
     }

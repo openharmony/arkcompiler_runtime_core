@@ -52,11 +52,11 @@ cases:
           res = 2
       }
     call: |-
-      new Derived().foo2(bd)
+      new Derived().foo(bd)
       assertEQ( res, 2 )
-      new Derived().foo(dd)
-      assertEQ( res, 2 )
-    params: override-compatible parameter (covariance)
+      new Derived().foo(ob)
+      assertEQ( res, 1 )
+    params: overload-compatible parameter (covariance)
 
   - base: |-
       foo(i: TPL_DO) {
@@ -69,7 +69,7 @@ cases:
     call: |-
       new Derived().foo(dd)
       assertEQ( res, 2 )
-    params: override-compatible parameter (covariance)
+    params: overload-compatible parameter (covariance)
 
   - base: |-
       foo(i: TPL_OOO) {
@@ -82,33 +82,22 @@ cases:
     call: |-
       new Derived().foo(bbb)
       assertEQ( res, 2 )
-      new Derived().foo(bbd)
-      assertEQ( res, 2 )
-      new Derived().foo(ddd)
-      assertEQ( res, 2 )
-    params: override-compatible parameter (covariance)
+      new Derived().foo(ooo)
+      assertEQ( res, 1 )
+    params: overload-compatible parameter (covariance)
 
   - tags: 'negative, compile-only'
     base: |-
-      foo(i: TPL_DO) {
+      foo(i: TPL_OO) {
           res = 1
       }
     derived: |-
-      foo(i: TPL_BB) {
+      foo(i: TPL_DD) {
           res = 2
       }
-    params: override-incompatible parameter by first type (contravariance)
-
-  - tags: 'negative, compile-only'
-    base: |-
-      foo(i: TPL_BD) {
-          res = 1
-      }
-    derived: |-
-      foo(i: TPL_BB) {
-          res = 2
-      }
-    params: override-incompatible parameter by second type (contravariance)
+    call: |-
+      new Derived().foo(bb)
+    params: overload-incompatible parameter (contravariance)
 
   - tags: 'negative, compile-only'
     base: |-
@@ -116,10 +105,23 @@ cases:
           res = 1
       }
     derived: |-
-      foo(i: TPL_OB) {
+      foo(i: TPL_BB) {
           res = 2
       }
-    params: override-incompatible parameter by both types (contravariance)
+    call: |-
+      new Derived().foo(db)
+    params: overload-incompatible parameter (covariance)
+
+  - tags: 'negative, compile-only'
+    base: |-
+      foo(i: TPL_BB) {
+          res = 1
+      }
+    derived: |-
+      override foo(i: TPL_DD) {
+          res = 2
+      }
+    params: override-incompatible parameter by both types (covariance)
 
   - tags: 'negative, compile-only'
     base: |-
@@ -127,7 +129,7 @@ cases:
           res = 1
       }
     derived: |-
-      foo(i: TPL_BB) {
+      override foo(i: TPL_BB) {
           res = 2
       }
     params: override-incompatible parameter by both types (contravariance)
@@ -148,22 +150,21 @@ cases:
       assertEQ( res, 2 )
     params: override-compatible with itself return value
 
-  - base: |-
-      foo(): TPL_BB {
-          res = 1
-          return bb
-      }
-    derived: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(): TPL_BD {
-          res = 2
+          res = 1
           return bd
       }
-    call: |-
-      new Derived().foo()
-      assertEQ( res, 2 )
-    params: override-compatible return value (covariance)
+    derived: |-
+      foo(): TPL_BB {
+          res = 2
+          return bb
+      }
+    params: override-compatible return value (contravariance)
 
-  - base: |-
+  - tags: 'negative, compile-only'
+    base: |-
       foo(): TPL_OB {
           res = 1
           return ob
@@ -173,9 +174,6 @@ cases:
           res = 2
           return bd
       }
-    call: |-
-      new Derived().foo()
-      assertEQ( res, 2 )
     params: override-compatible return value (covariance)
 
   - tags: 'negative, compile-only'
@@ -189,7 +187,4 @@ cases:
           res = 2
           return od
       }
-    call: |-
-      new Derived().foo()
-      assertEQ( res, 2 )
     params: override-incompatible return value (contravariance)

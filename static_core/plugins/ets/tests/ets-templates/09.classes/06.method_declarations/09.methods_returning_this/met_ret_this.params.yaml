@@ -551,7 +551,7 @@ cases:
           class A {
               fld: int
               bar(): Promise<this> {
-                  return launch this.foo().foo().foo()
+                  return Promise.resolve(this.foo().foo().foo())
               }
           }
 
