@@ -63,8 +63,7 @@ export default namespace buffer {
         | 'binary'
         | 'hex';
 
-    type TypedArray = Int8Array;
-    type TypedArrayOrigin = Int8Array
+    type TypedArray = Int8Array
         | Uint8Array
         | Uint8ClampedArray
         | Int16Array
@@ -159,7 +158,7 @@ export default namespace buffer {
      * 1. Mandatory parameters are left unspecified;
      */
     export function byteLength(
-        doc: string | Buffer | TypedArrayOrigin | DataView | ArrayBuffer,
+        doc: string | Buffer | TypedArray | DataView | ArrayBuffer,
         encoding?: BufferEncoding
     ): number {
         if (doc instanceof string) {
@@ -1573,38 +1572,21 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         endings: 'transparent'|'native'
     };
 
-    type SrcType = FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>
-    type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob
-    type ArrSrcType = Array<string> | Array<ArrayBuffer> | Array<TypedArray> | Array<DataView> | Array<Blob>
-
-    function typeKey(sources: SrcType): string {
-        if (sources instanceof FixedArray<string>) {
-            return "string"
-        } else if (sources instanceof FixedArray<ArrayBuffer>) {
-            return "ArrayBuffer"
-        } else if (sources instanceof FixedArray<TypedArray>) {
-            return "TypedArray"
-        } else if (sources instanceof FixedArray<DataView>) {
-            return "DataView"
-        } else if (sources instanceof FixedArray<Blob>) {
-            return "Blob"
-        }
-        return ""
-    }
-
+    type SrcType = FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>;
+    type SrcItemType = string | ArrayBuffer | TypedArray | DataView | Blob;
+    type ArrSrcType =  Array<TypedArray> | Array<string> | Array<ArrayBuffer> | Array<DataView> | Array<Blob>;
     function toString(src: SrcItemType): string {
         if (src instanceof string) {
             return src
         } else if (src instanceof ArrayBuffer) {
             return buffer.from(src as ArrayBuffer).toString()
         } else if (src instanceof TypedArray) {
-            return (src as TypedArray).join('')
+            return buffer.from(src.buffer as ArrayBuffer).toString()
         } else if (src instanceof DataView) {
             return buffer.from((src as DataView).buffer as ArrayBuffer).toString()
         }
         return ""
     }
-
     /**
     * A Blob encapsulates immutable, raw data that can be safely shared across multiple worker threads.
     */
@@ -1616,8 +1598,8 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
          * @param {FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>} [sources] - An array of string, <ArrayBuffer>, <TypedArray>, <DataView>, or <Blob> objects, or any mix of such objects, that will be stored within the Blob.
          * @param {BlobOptions} [options] - options
          */
-        constructor(sources: FixedArray<string> | FixedArray<ArrayBuffer> | FixedArray<TypedArray> | FixedArray<DataView> | FixedArray<Blob>, options?: BlobOptions) {
-            this.typeKey = typeKey(sources)
+        constructor(sources: SrcType, options?: BlobOptions) {
+            this.checkParameters(sources)
             this.createArray(sources)
             if (options != undefined) {
                 this.type = options!.type ? options!.type! : ''
@@ -1627,15 +1609,19 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             this.calcSize()
         }
 
-        private constructor(sources: ArrSrcType, typeKey: string, type?: string) {
+        constructor(sources: ArrSrcType, options?: BlobOptions | string) {
+            this.checkParameters(sources)
             this.arr = sources
-            this.typeKey = typeKey
-            this.calcSize()
-            if (type != undefined) {
-                this.type = type
+            if (options != undefined) {
+                if (options instanceof string) {
+                    this.type = options;
+                } else {
+                    this.type = options!.type ? options!.type! : ''
+                }
             } else {
                 this.type = ''
             }
+            this.calcSize()
         }
 
         private constructor(blob: Blob) {
@@ -1645,12 +1631,33 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             this.typeKey = blob.typeKey
         }
 
+        private checkParameters(sources: ArrSrcType | SrcType) {
+            for (const element of sources) {
+                if (element instanceof string) {
+                    this.typeKey = "string"
+                   break;
+                } else if (element instanceof ArrayBuffer) {
+                    this.typeKey = "ArrayBuffer"
+                    break;
+                } else if (element instanceof DataView) {
+                    this.typeKey = "DataView"
+                    break;
+                } else if (element instanceof TypedArray) {
+                    this.typeKey = "TypedArray"
+                    break;
+                } else if (element instanceof Blob) {
+                    this.typeKey = "Blob"
+                    break;
+                }
+            }
+        }
+
         private calcSize(): number {
             this.size = 0
             switch (this.typeKey) {
                 case "string": {
                     for (const item of this.arr as Array<string>) {
-                        this.size += item.length
+                        this.size += ArrayBuffer.bytesLength(item, "utf8")
                     }
                 } break
                 case "ArrayBuffer": {
@@ -1709,23 +1716,23 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             switch (this.typeKey) {
                 case "string": {
                     let arr: Array<string> = (this.arr as Array<string>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
+                    return new Blob(arr, type)
                 }
                 case "ArrayBuffer": {
                     let arr: Array<ArrayBuffer> = (this.arr as Array<ArrayBuffer>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
+                    return new Blob(arr, type)
                 }
                 case "TypedArray": {
                     let arr: Array<TypedArray> = (this.arr as Array<TypedArray>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
+                    return new Blob(arr, type)
                 }
                 case "DataView": {
                     let arr: Array<DataView> = (this.arr as Array<DataView>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
+                    return new Blob(arr, type)
                 }
                 case "Blob": {
                     let arr: Array<Blob> = (this.arr as Array<Blob>).slice(start, end)
-                    return new Blob(arr, this.typeKey, type)
+                    return new Blob(arr, type)
                 }
             }
             return new Blob(this)
@@ -1786,6 +1793,5 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             }
             return b.toString()
         }
-
     }
 }
