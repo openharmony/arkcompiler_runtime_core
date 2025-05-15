@@ -756,9 +756,6 @@
 #25179
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_11.ets
 
-#25181
-10.interfaces/07.interface_inheritance/boundary_situation/null_interface_inheritance/other_interface_09.ets
-
 #25177
 10.interfaces/07.interface_inheritance/multi_layer_interface/type_system/type_system_15.ets
 
