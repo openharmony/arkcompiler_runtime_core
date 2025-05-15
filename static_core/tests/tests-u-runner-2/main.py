@@ -23,20 +23,27 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytz
-from dotenv import load_dotenv
 
 from runner.common_exceptions import InvalidConfiguration, RunnerException
 from runner.enum_types.verbose_format import VerboseKind
+from runner.environment import RunnerEnv
+from runner.init_runner import InitRunner
 from runner.logger import Log
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.runner_base import Runner
 from runner.suites.runner_standard_flow import RunnerStandardFlow
-from runner.utils import check_obligatory_env, pretty_divider
+from runner.utils import pretty_divider
 
 
 def main() -> None:
-    load_environment()
+    init_runner = InitRunner()
+    if init_runner.should_runner_initialize(sys.argv):
+        init_runner.initialize(RunnerEnv.get_mandatory_props())
+        sys.exit(0)
+    local_env = Path(__file__).with_name(".env")
+    urunner_path = Path(__file__).parent
+    RunnerEnv(local_env=local_env, urunner_path=urunner_path).load_environment()
 
     args = get_args()
     logger = load_config(args)
@@ -103,21 +110,6 @@ def launch_runners(runner: Runner, logger: Log, config: Config, repeat: int, rep
     if config.general.coverage.use_llvm_cov:
         runner.create_coverage_html()
     return failed_tests
-
-
-def load_environment() -> None:
-    home_path = Path.home().joinpath('.urunner.env')
-    if home_path.exists():
-        load_dotenv(home_path)
-
-    dotenv_path = Path(__file__).with_name('.env')
-    if dotenv_path.exists():
-        load_dotenv(dotenv_path)
-
-    check_obligatory_env('PANDA_SOURCE_PATH')
-    check_obligatory_env('PANDA_BUILD')
-    check_obligatory_env('WORK_DIR')
-    os.environ['URUNNER_PATH'] = str(Path(__file__).parent)
 
 
 def load_config(args: dict[str, Any]) -> Log:

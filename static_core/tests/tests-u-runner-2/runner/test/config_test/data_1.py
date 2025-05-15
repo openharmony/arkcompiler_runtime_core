@@ -68,7 +68,7 @@ args = {
     },
     'test_suite1.parameters.filter': '*',
     'test_suite1.parameters.repeats': 1,
-    'test_suite1.parameters.repeats-by-time': None,
+    'test_suite1.parameters.repeats-by-time': 0,
     'test_suite1.parameters.with-js': 'with-js',
     'test_suite1.parameters.test-list': None,
     'test_suite1.parameters.test-file': None,

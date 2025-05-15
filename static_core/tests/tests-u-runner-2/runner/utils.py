@@ -399,8 +399,3 @@ def prepend_list(pre_list: list[Any], post_list: list[Any]) -> list[Any]:
     result = pre_list[:]
     result.extend(post_list)
     return result
-
-
-def check_obligatory_env(var_name: str) -> None:
-    if os.getenv(var_name) is None:
-        raise InvalidConfiguration(f"Obligatory environment variable '{var_name}' is not set")

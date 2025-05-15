@@ -13,8 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import random
 import unittest
+from collections.abc import Callable
 from typing import Any, TypeVar
 
 from runner import utils
@@ -65,3 +66,19 @@ def get_method(cls: type[CLASSTYPE], name: str) -> MethodType:
         if key in [name, f"_{cls.__name__}{name}"] and callable(value):
             return value
     raise InvalidConfiguration(f"Cannot find method '{name}' at class CliOptions")
+
+
+def assert_not_raise(test_case: unittest.TestCase, cls: type[Exception], function: Callable, params: list) -> None:
+    exception_occurs = False
+    exception_message = ""
+    try:
+        function(*params)
+    except cls as ex:
+        exception_occurs = True
+        exception_message = f"Unexpected exception has occured: {ex}"
+    finally:
+        test_case.assertFalse(exception_occurs, exception_message)
+
+
+def random_suffix() -> str:
+    return str(round(random.random() * 1000_000))

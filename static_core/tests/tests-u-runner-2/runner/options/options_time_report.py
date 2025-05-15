@@ -17,13 +17,13 @@
 
 import argparse
 from functools import cached_property
-from typing import Any
+from typing import Any, ClassVar
 
 from runner.options.options import IOptions
 
 
 class TimeReportOptions(IOptions):
-    __DEFAULT_EDGES = (1, 5, 10)
+    __DEFAULT_EDGES: ClassVar[list[int]] = [1, 5, 10]
     __TIME_REPORT = "enable-time-report"
     __TIME_EDGES = "time-edges"
 
