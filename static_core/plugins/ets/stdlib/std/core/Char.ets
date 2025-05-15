@@ -151,14 +151,11 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     }
 
     public static readonly CHAR_BIT_SIZE = 16;
+    public static readonly MAX_CODE_POINT = 0x10FFFF;
     public static readonly HIGH_SURROGATE_MIN: char = c'\uD800';
     public static readonly HIGH_SURROGATE_MAX: char = c'\uDBFF';
     public static readonly LOW_SURROGATE_MIN: char = c'\uDC00';
     public static readonly LOW_SURROGATE_MAX: char = c'\uDFFF';
-    private static readonly HIGHEST_16_BITS_MASK: int = 0xFFFF0000;
-    private static readonly LOWEST_16_BITS_MASK:  int = 0x0000FFFF;
-    private static readonly HIGH_SURROGATE_BITS: int = (Char.HIGH_SURROGATE_MIN as int) << Char.CHAR_BIT_SIZE;
-    private static readonly LOW_SURROGATE_BITS: int = Char.LOW_SURROGATE_MIN as int;
     private static readonly BMP_BORDER: UTF_16_CodePoint = 0x10000;
 
     /**
@@ -214,11 +211,10 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      *
      * @returns true if the code point is not malformed.
      */
-    public static isValidCodePoint(value: UTF_16_CodePoint): boolean {
-        return (Char.isInBasicMultilingualPlane(value))
-                || ((value & Char.HIGH_SURROGATE_BITS) == Char.HIGH_SURROGATE_BITS)
-                    && ((value & Char.LOW_SURROGATE_BITS) == Char.LOW_SURROGATE_BITS);
-    }
+    public static isValidCodePoint(codePoint: UTF_16_CodePoint): boolean {
+        return (codePoint >= 0 && codePoint <= Char.MAX_CODE_POINT &&
+            !(codePoint >= (Char.HIGH_SURROGATE_MIN as int) && codePoint <= (Char.LOW_SURROGATE_MAX as int)));
+     }
 
     /**
      * codeUnitsToEncode(UTF_16_CodePoint) counts a number of code units to encode the UTF-16 code point.
