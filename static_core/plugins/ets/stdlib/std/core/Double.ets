@@ -308,18 +308,29 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Without an argument method returns just toString value
+     * Converts a number to a string by using the current locale
      *
-     * @returns result of the conversion
+     * @param locales
      *
+     * @param options
+     *
+     * @returns string representation
      */
     public toLocaleString(): String {
-        return new Intl.NumberFormat().format(this.value)
+        return this.toLocaleString(undefined)
     }
 
-    public toLocaleString(locales: string | Intl.Locale | readonly (string | Intl.Locale)[], options?: Intl.NumberFormatOptions): string {
-        const formatter = new Intl.NumberFormat(intlLocalesToLanguageTags(locales), options)
-        return formatter.format(this.value)
+    /**
+     * Converts a number to a string by using the current or specified locale.
+     *
+     * @param locales
+     *
+     * @param options
+     *
+     * @returns string representation
+     */
+    public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): string {
+        return new Intl.NumberFormat(intlLocalesToLanguageTags(locales), options).format(this.value)
     }
 
     /**

@@ -21,6 +21,7 @@ function testDateToLocaleString(): void {
 
     assertEQ(date.toLocaleString(langTag), "2024/2/19 10:00:00")
     assertEQ(date.toLocaleString(locale), "2024/2/19 10:00:00")
+    assertEQ(date.toLocaleString(), date.toLocaleString(undefined))
 
     const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" }
     assertEQ(date.toLocaleString(locale, options), "10:00:00")
@@ -45,6 +46,7 @@ function testDateToLocaleTimeString(): void {
 
     assertEQ(date.toLocaleTimeString(langTag, options), "24/02/19 10:00")
     assertEQ(date.toLocaleTimeString(locale, options), "24/02/19 10:00")
+    assertEQ(date.toLocaleTimeString(), date.toLocaleTimeString(undefined))
 
     assertEQ(date.toLocaleTimeString(langTag, { hour: "2-digit", minute: "2-digit" }), "10:00")
     assertEQ(date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }), "10:00")
@@ -66,6 +68,7 @@ function testDateToLocaleDateString(): void {
 
     assertEQ(date.toLocaleDateString(langTag), "2024/2/19")
     assertEQ(date.toLocaleDateString(locale), "2024/2/19")
+    assertEQ(date.toLocaleDateString(), date.toLocaleDateString(undefined))
 
     const timeOptions: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" }
     assertEQ(date.toLocaleDateString(langTag, timeOptions), "2024/2/19 10:00:00")

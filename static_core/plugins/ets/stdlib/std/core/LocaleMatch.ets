@@ -50,7 +50,11 @@ export function intlBestFitLocale(locale: Intl.BCP47LanguageTag | Intl.BCP47Lang
     return LocaleMatch.bestFitLocale(localesToString(locale))
 }
 
-export function intlLocalesToLanguageTags(locales: string | Intl.Locale | ReadonlyArray<string | Intl.Locale>): string[] {
+export function intlLocalesToLanguageTags(locales: string | Intl.Locale | ReadonlyArray<string | Intl.Locale> | undefined): string[] {
+    if (locales === undefined) {
+        return []
+    }
+
     if (locales instanceof string) {
         return [locales]
     } else if (locales instanceof Intl.Locale) {
