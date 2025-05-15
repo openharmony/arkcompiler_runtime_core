@@ -146,5 +146,5 @@ declare namespace NN1 {
 }
 declare namespace image {
     interface PixelMap {
-}
+    }
 }
