@@ -15,7 +15,7 @@
 
 /*---
 desc: Method signature of the same name is compatible.
-tags: [compile-only, negative]
+tags: [compile-only, positive]
 ---*/
 
 interface Parent1 {
