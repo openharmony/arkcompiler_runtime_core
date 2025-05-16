@@ -328,7 +328,7 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-#25605
+#25851
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
 #25344
