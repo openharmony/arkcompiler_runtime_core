@@ -110,7 +110,7 @@ function testStreamReadableUnpipe001() {
 // this test case will be completed future
 function testStreamReadableOn001() {
     let readableStream = new stream.Readable();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};
     readableStream.on("data", callback);
     assertTrue(true);
 }
@@ -118,7 +118,7 @@ function testStreamReadableOn001() {
 // this test case will be completed future
 function testStreamReadableOff001() {
     let readableStream = new stream.Readable();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};;
     readableStream.off("data", callback);
     assertTrue(true);
 }

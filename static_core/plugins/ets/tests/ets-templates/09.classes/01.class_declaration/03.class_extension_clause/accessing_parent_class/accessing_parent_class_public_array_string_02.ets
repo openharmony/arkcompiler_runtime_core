@@ -24,7 +24,7 @@ class Base {
   }
 }
 
-let check_value: string;
+let check_value: string | undefined;
 
 class Sub extends Base {
   constructor() {

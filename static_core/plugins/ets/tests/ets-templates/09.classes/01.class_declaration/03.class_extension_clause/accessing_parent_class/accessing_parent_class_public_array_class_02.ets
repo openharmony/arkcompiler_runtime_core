@@ -31,7 +31,7 @@ class Base {
   }
 }
 
-let check_value: User;
+let check_value: User | undefined;
 
 class Sub extends Base {
   constructor() {
@@ -46,5 +46,5 @@ class Sub extends Base {
 function main(): void {
   const instanceB = new Sub();
   instanceB.checkAccess();
-  assertEQ(check_value.name, "test_name");
+  assertEQ(check_value!.name, "test_name");
 }

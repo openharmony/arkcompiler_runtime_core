@@ -18,8 +18,8 @@
 let N = 200
 let RESULT = N as byte
 
-let arr: Int8Array
-let arr_u32: Int32Array
+let arr: Int8Array = new Int8Array;
+let arr_u32: Int32Array = new Int32Array;
 
 function main() {
     let buf = new ArrayBuffer(4);

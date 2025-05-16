@@ -25,7 +25,7 @@ class A {
 }
 
 function main(): void {
-  let x: A;
+  let x: A = new A();
   try {
     x.foo();
     assertTrue( false )

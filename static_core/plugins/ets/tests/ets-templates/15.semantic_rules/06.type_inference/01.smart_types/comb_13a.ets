@@ -21,7 +21,7 @@ desc: >-
     and allow operations which are specific to such narrowed type.
 ---*/
 
-let str: string
+let str: string = "";
 
 function foo(p: null|number|string): number {
     if (p != null && !(p instanceof Number)) {

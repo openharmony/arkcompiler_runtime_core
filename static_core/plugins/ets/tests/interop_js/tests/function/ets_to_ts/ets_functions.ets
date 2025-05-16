@@ -15,7 +15,7 @@
 
 package ets_functions;
 
-let callback_ets_function_js: JSValue;
+let callback_ets_function_js: JSValue = 0;
 
 function testCallBackEtsFunctionLambda(): number {
     return callback_ets_function_js((x: number) => x + 1);

@@ -26,7 +26,7 @@ class Base {
   }
 }
 
-let check_value: Date;
+let check_value: Date | undefined;
 
 class Sub extends Base {
   constructor() {

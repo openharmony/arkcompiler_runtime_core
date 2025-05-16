@@ -19,9 +19,9 @@
 
 import { launch } from "std/concurrency"
 
-let buf: ArrayBuffer;
-let arr: Int32Array;
-let bytearr: Int8Array;
+let buf: ArrayBuffer = new ArrayBuffer(0);
+let arr: Int32Array = new Int32Array;
+let bytearr: Int8Array = new Int8Array;
 
 function main() {
     let c = new Console()

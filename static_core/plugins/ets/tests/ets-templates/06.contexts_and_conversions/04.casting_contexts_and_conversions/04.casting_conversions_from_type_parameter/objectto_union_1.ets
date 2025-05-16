@@ -30,7 +30,7 @@ class Frog {
 }
 
 type Animal = Cat | Dog | Frog | number;
-let animal: Animal;
+let animal: Animal = 5;
 
 function main(): void {
   let obj1: object = animal;

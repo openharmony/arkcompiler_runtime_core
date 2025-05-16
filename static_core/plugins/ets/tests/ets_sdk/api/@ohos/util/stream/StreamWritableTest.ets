@@ -80,7 +80,7 @@ function testStreamWritableUncork001() {
 // this test case will be completed future
 function testStreamWritableOn001() {
     let writableStream = new stream.Writable();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};
     writableStream.on("data", callback);
     assertTrue(true);
 }
@@ -88,7 +88,7 @@ function testStreamWritableOn001() {
 // this test case will be completed future
 function testStreamWritableOff001() {
     let writableStream = new stream.Writable();
-    let callback: CallbackFnType;
+    let callback: CallbackFnType = (...params: Object[]) => {};
     writableStream.off("data", callback);
     assertTrue(true);
 }
