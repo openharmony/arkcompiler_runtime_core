@@ -19,7 +19,6 @@ export declare let w2: string;
 export declare let w3: number;
 export declare let w4: number;
 export declare let d2: Date;
-export declare let ab: ArrayBuffer;
 export declare const a: number;
 export declare const b: number;
 export declare const c: number;

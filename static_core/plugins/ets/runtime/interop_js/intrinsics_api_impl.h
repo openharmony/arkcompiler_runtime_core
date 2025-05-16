@@ -77,6 +77,11 @@ EtsString *JSONStringify(JSValue *jsvalue);
 EtsString *CompilerConvertLocalToString(void *value);
 EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value);
 JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyValue);
+EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object);
+EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffer);
+EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
+                                   double byteOffset);
+EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset);
 
 template <typename T>
 typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)

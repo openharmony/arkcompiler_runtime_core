@@ -368,40 +368,6 @@ JSCONVERT_UNWRAP(Promise)
     return hpromise.GetPtr();
 }
 
-JSCONVERT_DEFINE_TYPE(ArrayBuffer, EtsEscompatArrayBuffer *);
-
-JSCONVERT_WRAP(ArrayBuffer)
-{
-    napi_value buf;
-    void *data;
-    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
-    NAPI_CHECK_FATAL(napi_create_arraybuffer(env, etsVal->GetByteLength(), &data, &buf));
-    std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()), etsVal->GetByteLength(),
-                reinterpret_cast<uint8_t *>(data));
-    return buf;
-}
-
-JSCONVERT_UNWRAP(ArrayBuffer)
-{
-    bool isArraybuf = false;
-    NAPI_CHECK_FATAL(napi_is_arraybuffer(env, jsVal, &isArraybuf));
-    if (!isArraybuf) {
-        InteropCtx::Fatal("Passed object is not an ArrayBuffer!");
-        UNREACHABLE();
-    }
-    void *data = nullptr;
-    size_t byteLength = 0;
-    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
-    NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, jsVal, &data, &byteLength));
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope s(currentCoro);
-    void *etsData = nullptr;
-    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(currentCoro, byteLength, &etsData);
-    EtsHandle<EtsEscompatArrayBuffer> hbuffer(currentCoro, arrayBuffer);
-    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, reinterpret_cast<uint8_t *>(etsData));
-    return hbuffer.GetPtr();
-}
-
 JSCONVERT_DEFINE_TYPE(EtsNull, EtsObject *);
 JSCONVERT_WRAP(EtsNull)
 {

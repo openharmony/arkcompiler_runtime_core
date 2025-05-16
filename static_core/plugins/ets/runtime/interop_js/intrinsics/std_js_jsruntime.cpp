@@ -15,8 +15,10 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
+#include "plugins/ets/runtime/interop_js/js_value.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "interop_js/call/call.h"
 
@@ -385,6 +387,28 @@ void PromiseInteropResolveIntrinsic(EtsObject *value, EtsLong deferred)
 void PromiseInteropRejectIntrinsic(EtsObject *value, EtsLong deferred)
 {
     PromiseInteropReject(value, deferred);
+}
+
+EtsEscompatArrayBuffer *InteropTransferHelperTransferArrayBufferToStaticImplIntrinsic(ESValue *object)
+{
+    return TransferArrayBufferToStatic(object);
+}
+
+EtsObject *InteropTransferHelperTransferArrayBufferToDynamicImplIntrinsic(EtsEscompatArrayBuffer *object)
+{
+    return TransferArrayBufferToDynamic(object);
+}
+
+EtsObject *InteropTransferHelperCreateDynamicTypedArrayIntrinsic(EtsEscompatArrayBuffer *object, int32_t typedArrayType,
+                                                                 double length, double byteOffset)
+{
+    return CreateDynamicTypedArray(object, typedArrayType, length, byteOffset);
+}
+
+EtsObject *InteropTransferHelperCreateDynamicDataViewIntrinsic(EtsEscompatArrayBuffer *object, double length,
+                                                               double byteOffset)
+{
+    return CreateDynamicDataView(object, length, byteOffset);
 }
 
 }  // namespace ark::ets::interop::js::intrinsics

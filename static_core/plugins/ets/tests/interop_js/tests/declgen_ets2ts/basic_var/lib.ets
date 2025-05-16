@@ -26,8 +26,6 @@ export let w4 = new Byte()
 
 export let d2 = new Date()
 
-export let ab = new ArrayBuffer(128)
-
 export const a: number = 1
 export const b: byte = 1
 export const c: short = 1

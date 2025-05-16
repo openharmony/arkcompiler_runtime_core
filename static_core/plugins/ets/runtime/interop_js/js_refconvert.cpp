@@ -81,9 +81,9 @@ JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass)
     }
     auto conv = JSRefConvertCreateImpl(ctx, klass);
     if (UNLIKELY(conv == nullptr)) {
-        ctx->ThrowETSError(EtsCoroutine::GetCurrent(), std::string("Convertor for class ") +
+        ctx->ThrowETSError(EtsCoroutine::GetCurrent(), std::string("Seamless conversion for class ") +
                                                            utf::Mutf8AsCString(klass->GetDescriptor()) +
-                                                           std::string(" have not implement yet"));
+                                                           std::string(" is not supported"));
         return nullptr;
     }
     return ctx->GetRefConvertCache()->Insert(klass, std::move(conv));

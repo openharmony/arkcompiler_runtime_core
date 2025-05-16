@@ -17,7 +17,7 @@ const etsVm = globalThis.gtest.etsVm;
 let getWeakMap = etsVm.getFunction('Lbuiltin_not_implement/ETSGLOBAL;', 'getWeakMap');
 let Foo = etsVm.getClass('Lbuiltin_not_implement/Foo;');
 
-const errorString = 'Error: Convertor for class Lescompat/WeakMap; have not implement yet';
+const errorString = 'Error: Seamless conversion for class Lescompat/WeakMap; is not supported';
 
 function testThorw(func) {
     let res = false;

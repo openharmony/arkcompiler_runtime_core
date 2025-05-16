@@ -372,14 +372,6 @@ private:
         if (isInstanceof) {
             return MArray(ctxx, jsValue);
         }
-        NAPI_CHECK_FATAL(napi_is_arraybuffer(env, jsValue, &isInstanceof));
-        if (isInstanceof) {
-            return BuiltinConvert<JSConvertArrayBuffer>(ctxx, env, jsValue);
-        }
-        NAPI_CHECK_FATAL(napi_is_typedarray(env, jsValue, &isInstanceof));
-        if (isInstanceof) {
-            NotImplemented("TypedArray");
-        }
         NAPI_CHECK_FATAL(napi_is_map(env, jsValue, &isInstanceof));
         if (isInstanceof) {
             return MMap(ctxx, jsValue);
@@ -399,10 +391,6 @@ private:
         NAPI_CHECK_FATAL(napi_is_date(env, jsValue, &isInstanceof));
         if (isInstanceof) {
             return MDate(ctxx, jsValue);
-        }
-        NAPI_CHECK_FATAL(napi_is_dataview(env, jsValue, &isInstanceof));
-        if (isInstanceof) {
-            NotImplemented("DataView");
         }
         if (IsConstructor(env, jsValue, CONSTRUCTOR_NAME_NUMBER)) {
             return BuiltinConvert<JSConvertStdlibDouble>(ctxx, env, jsValue);
@@ -551,7 +539,6 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertString>(cache, ctx->GetStringClass());
     RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, ctx->GetBigIntClass());
     RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
-    RegisterBuiltinRefConvertor<JSConvertArrayBuffer>(cache, ctx->GetArrayBufferClass());
     RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, ctx->GetNullValueClass());
 
     RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, ptypes->coreBoolean->GetRuntimeClass());

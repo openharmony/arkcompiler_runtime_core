@@ -148,6 +148,11 @@ JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
     NapiScope jsHandleScope(env);
 
     auto refconv = JSRefConvertResolve(ctx, v->GetClass()->GetRuntimeClass());
+    if (UNLIKELY(refconv == nullptr)) {
+        // For builtin without supported converter
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
     auto result = refconv->Wrap(ctx, v);
 
     auto res = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, result);
@@ -1197,6 +1202,113 @@ JSValue *JSRuntimeGetPropertyJSValueyByKey(JSValue *objectValue, JSValue *keyVal
     }
 
     return res.value();
+}
+
+EtsEscompatArrayBuffer *TransferArrayBufferToStatic(ESValue *object)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return nullptr;
+    }
+    INTEROP_CODE_SCOPE_ETS(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    napi_value dynamicArrayBuffer = object->GetEo()->GetNapiValue(ctx->GetJSEnv());
+
+    bool isArrayBuffer = false;
+    NAPI_CHECK_FATAL(napi_is_arraybuffer(env, dynamicArrayBuffer, &isArrayBuffer));
+    if (!isArrayBuffer) {
+        ctx->ThrowETSError(coro, "Dynamic object is not arraybuffer");
+    }
+
+    void *data = nullptr;
+    size_t byteLength = 0;
+    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
+    NAPI_CHECK_FATAL(napi_get_arraybuffer_info(env, dynamicArrayBuffer, &data, &byteLength));
+
+    [[maybe_unused]] EtsHandleScope s(coro);
+    void *etsData = nullptr;
+    auto *arrayBuffer = EtsEscompatArrayBuffer::Create(coro, byteLength, &etsData);
+    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, reinterpret_cast<uint8_t *>(etsData));
+    return arrayBuffer;
+}
+
+EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffer)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
+    INTEROP_CODE_SCOPE_ETS(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    napi_value dynamicArrayBuffer = nullptr;
+    void *data;
+    // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
+    NAPI_CHECK_FATAL(napi_create_arraybuffer(env, staticArrayBuffer->GetByteLength(), &data, &dynamicArrayBuffer));
+    std::copy_n(reinterpret_cast<const uint8_t *>(staticArrayBuffer->GetData()), staticArrayBuffer->GetByteLength(),
+                reinterpret_cast<uint8_t *>(data));
+
+    JSValue *etsJSValue = JSValue::Create(coro, ctx, dynamicArrayBuffer);
+    return reinterpret_cast<EtsObject *>(etsJSValue);
+}
+
+EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
+                                   double byteOffset)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
+    INTEROP_CODE_SCOPE_ETS(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    napi_value dynamicArrayBuffer = nullptr;
+    void *data;
+    NAPI_CHECK_FATAL(napi_create_arraybuffer(env, staticArrayBuffer->GetByteLength(), &data, &dynamicArrayBuffer));
+    std::copy_n(reinterpret_cast<const uint8_t *>(staticArrayBuffer->GetData()), staticArrayBuffer->GetByteLength(),
+                reinterpret_cast<uint8_t *>(data));
+
+    napi_value dynamicTypedArray = nullptr;
+    napi_create_typedarray(env, static_cast<napi_typedarray_type>(typedArrayType), length, dynamicArrayBuffer,
+                           byteOffset, &dynamicTypedArray);
+
+    JSValue *etsJSValue = JSValue::Create(coro, ctx, dynamicTypedArray);
+    return reinterpret_cast<EtsObject *>(etsJSValue);
+}
+
+EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return {};
+    }
+    INTEROP_CODE_SCOPE_ETS(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    napi_value dynamicArrayBuffer = nullptr;
+    void *data;
+    NAPI_CHECK_FATAL(napi_create_arraybuffer(env, staticArrayBuffer->GetByteLength(), &data, &dynamicArrayBuffer));
+    std::copy_n(reinterpret_cast<const uint8_t *>(staticArrayBuffer->GetData()), staticArrayBuffer->GetByteLength(),
+                reinterpret_cast<uint8_t *>(data));
+
+    napi_value dynamicDataView = nullptr;
+    napi_create_dataview(env, byteLength, dynamicArrayBuffer, byteOffset, &dynamicDataView);
+
+    JSValue *etsJSValue = JSValue::Create(coro, ctx, dynamicDataView);
+    return reinterpret_cast<EtsObject *>(etsJSValue);
 }
 
 }  // namespace ark::ets::interop::js
