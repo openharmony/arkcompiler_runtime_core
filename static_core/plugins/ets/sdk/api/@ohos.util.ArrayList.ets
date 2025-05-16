@@ -84,7 +84,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @param index - the index.
      */
     public insert(element: T, index: number): void {
-        this.checkIndexType(index);
         this.checkIndex(index, this.length);
 
         if (this.length + 1 <= this.capacity) {
@@ -155,7 +154,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @returns the deleted element.
      */
     public removeByIndex(index: number): T {
-        this.checkIndexType(index);
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
@@ -317,9 +315,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      * @returns The element at the specified index.
      */
     public $_get(index: number): T {
-        if (index > Int.MAX_VALUE) {
-            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
-        }
         this.checkEmptyContainer();
         this.checkIndex(index, this.length - 1);
 
@@ -335,9 +330,6 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
      */
     public $_set(index: number, val: T): void {
         this.checkEmptyContainer();
-        if (index < 0 || index > Int.MAX_VALUE) {
-            return;
-        }
         this.checkIndex(index, this.length - 1);
 
         this.buffer[index] = val;
@@ -398,15 +390,15 @@ export class ArrayList<T> implements Iterable<T>, JsonReplacer {
         }
     }
 
-    private checkIndexType(index: number): void {
+    private checkIndex(index: number, length: number): void {
         if (index > Int.MAX_VALUE) {
             throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
         }
-    }
-
-    private checkIndex(index: number, length: number): void {
         if (index > length || index < 0) {
             this.createBusinessError('index', length, index);
+        }
+        if (!isInteger(index)) {
+            throw new BusinessError(TypeErrorCodeId, new Error(`Index must be an integer. Received value is: ${index}`));
         }
     }
 

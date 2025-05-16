@@ -222,6 +222,6 @@ function exceptionCheckEmptyContainer(e: Error | Exception): boolean | string {
 }
 
 function exceptionCheckType(e: Error | Exception): boolean | string {
-    return (e instanceof BusinessError) && ((e as BusinessError).message ==
-        `The type of \"index\" must be small integer.`) && ((e as BusinessError).code == TypeErrorCodeId);
+    return (e instanceof BusinessError) && ((e as BusinessError).message.startsWith(`The type of \"index\" must be small integer.`)) &&
+        ((e as BusinessError).code == TypeErrorCodeId);
 }

@@ -15,7 +15,7 @@
 
 /*---
 desc: Test the array index negative index access.
-tags: [negative]
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {

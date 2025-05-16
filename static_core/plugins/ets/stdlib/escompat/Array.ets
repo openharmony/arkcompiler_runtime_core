@@ -83,10 +83,16 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     public override $_get(index: number): T {
+        if (!isInteger(index)) {
+            throw new NonIntegralIndexError("Index must be an integer")
+        }
         return this.$_get(index.toInt())
     }
 
     public $_set(i: number, val: T): void {
+        if (!isInteger(i)) {
+            throw new NonIntegralIndexError("Index must be an integer")
+        }
         this.$_set(i.toInt(), val)
     }
 

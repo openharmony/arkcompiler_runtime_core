@@ -123,9 +123,6 @@
 05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_8.ets
 05.generics/03.utility_types/03.readonly_utility_type/method_excluded_from_readonly_9.ets
 
-#14001
-06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_access_7.ets
-
 #25175
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_9.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_12.ets
@@ -267,10 +264,6 @@
 
 #23062
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_23.ets
-
-#14001 Type number cannot be used as an index type
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_0.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
 
 #26256 Uninitialized value access
 07.expressions/17.typeof_expression/tof_const_11.ets

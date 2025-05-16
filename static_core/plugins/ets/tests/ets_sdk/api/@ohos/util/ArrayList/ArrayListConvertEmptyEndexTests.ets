@@ -16,6 +16,7 @@
 import {ArrayList} from "@ohos.util.ArrayList";
 import {BusinessError} from "@ohos.base";
 
+const TypeErrorCodeId: number = 401;
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
@@ -181,13 +182,23 @@ function testIndexOutOfRange() {
 function testIndexWithDoubleIndex() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arktest.assertEQ(arrayList[TestData.testDouble1], arrayList[0], "Element mismatch during index operation with double index");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble1}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    expectThrow(() => {arrayList[TestData.testDouble1]}, exceptionCheck);
 }
 
 function testIndexWithDoubleIndex2() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arktest.assertEQ(arrayList[TestData.testDouble2], arrayList[0], "Element mismatch during index operation with double index");
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `Index must be an integer. Received value is: ${TestData.testDouble2}`) &&
+            ((e as BusinessError).code == TypeErrorCodeId);
+    }
+    expectThrow(() => {arrayList[TestData.testDouble2]}, exceptionCheck);
 }
 
 function testIndexForOfLoop() {

@@ -16,6 +16,8 @@
 const success : int = 0;
 const fail    : int = 1;
 
+const negative : int = -1;
+
 function main(): int {
     let failures: int = 0;
     failures += check((): int => { return testReadonlyArrayGet() }, "ReadonlyArray $_get");
@@ -45,7 +47,7 @@ function testReadonlyArrayGetInvalidIndex(): int {
     let b = a as ReadonlyArray<number>
     let compRes: boolean;
     try {
-        compRes = (b[-1] == undefined);
+        compRes = (b[negative] == undefined);
     } catch (e: Error) {
         if (e instanceof RangeError) {
             return success;
@@ -71,7 +73,7 @@ function testArrayLikeGetInvalidIndex(): int {
     let b = a as ArrayLike<number>
     let compRes: boolean;
     try {
-        compRes = (b[-1] == undefined);
+        compRes = (b[negative] == undefined);
     } catch (e: Error) {
         if (e instanceof RangeError) {
             return success;
@@ -97,7 +99,7 @@ function testConcatArrayGetInvalidIndex(): int {
     let b = a as ConcatArray<number>
     let compRes: boolean;
     try {
-        compRes = (b[-1] == undefined);
+        compRes = (b[negative] == undefined);
     } catch (e: Error) {
         if (e instanceof RangeError) {
             return success;

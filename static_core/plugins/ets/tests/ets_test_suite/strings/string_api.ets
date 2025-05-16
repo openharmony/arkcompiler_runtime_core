@@ -140,19 +140,19 @@ function main(): void {
     arktest.assertEQ(str4[8], c's', "Eighth character must be `s`");
     arktest.assertEQ(str4[str4.length - 1], c'g', "Last character must be `g`");
 
-    try {
-        let failedCase = str4[-1];
-        arktest.assertTrue(false, "")
-    } catch(err) {
-        arktest.assertTrue(err instanceof StringIndexOutOfBoundsError, "It should be instance of StringIndexOutOfBoundsError")
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof StringIndexOutOfBoundsError);
     }
+    expectThrow(() => {
+        let i = -1;
+        let failedCase = str4[i];
+        assertTrue(false, "")
+    }, exceptionCheck);
 
-    try {
+    expectThrow(() => {
         let failedCase = str4[str4.length];
-        arktest.assertTrue(false, "")
-    } catch(err) {
-        arktest.assertTrue(err instanceof StringIndexOutOfBoundsError, "It should be instance of StringIndexOutOfBoundsError")
-    }
+        assertTrue(false, "")
+    }, exceptionCheck);
 
     let str5: String = "函数式编程";
     arktest.assertEQ(str5[0], c'函', "First character must be `函`");
