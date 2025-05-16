@@ -495,12 +495,12 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
     return ANI_OK;
 }
 
+// Descriptor should conform to rules of runtime internal descriptors
 template <bool IS_MODULE, typename T>
 static ani_status DoFind(PandaEnv *pandaEnv, const char *descriptor, ScopedManagedCodeFix &s, T *result)
 {
-    PandaString desc = Mangle::ConvertDescriptor(descriptor);
     EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-    EtsClass *klass = classLinker->GetClass(desc.c_str(), true, GetClassLinkerContext(s.GetCoroutine()));
+    EtsClass *klass = classLinker->GetClass(descriptor, true, GetClassLinkerContext(s.GetCoroutine()));
     if (UNLIKELY(pandaEnv->HasPendingException())) {
         EtsThrowable *currentException = pandaEnv->GetThrowable();
         std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
@@ -925,8 +925,9 @@ NO_UB_SANITIZE static ani_status FindNamespace(ani_env *env, const char *namespa
     CHECK_PTR_ARG(namespaceDescriptor);
     CHECK_PTR_ARG(result);
 
+    PandaString desc = Mangle::ConvertDescriptor(namespaceDescriptor);
     // NOTE: Check that results is namespace, #22400
-    return DoFind<true>(env, namespaceDescriptor, result);
+    return DoFind<true>(env, desc.c_str(), result);
 }
 
 NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescriptor, ani_class *result)
@@ -935,9 +936,10 @@ NO_UB_SANITIZE static ani_status FindClass(ani_env *env, const char *classDescri
     CHECK_ENV(env);
     CHECK_PTR_ARG(classDescriptor);
     CHECK_PTR_ARG(result);
+    PandaString desc = Mangle::ConvertDescriptor(classDescriptor, true);
 
     // NOTE: Check that results is class, #22400
-    return DoFind<false>(env, classDescriptor, result);
+    return DoFind<false>(env, desc.c_str(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -5957,8 +5959,9 @@ NO_UB_SANITIZE static ani_status FindEnum(ani_env *env, const char *enumDescript
     CHECK_PTR_ARG(enumDescriptor);
     CHECK_PTR_ARG(result);
 
+    PandaString enumDesc = Mangle::ConvertDescriptor(enumDescriptor);
     // NOTE: Check that result is enum, #22400
-    return DoFind<false>(env, enumDescriptor, result);
+    return DoFind<false>(env, enumDesc.c_str(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
