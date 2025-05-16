@@ -16,7 +16,6 @@
 function main(): int {
     let suite = new arktest.ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
     // Tests are from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
-    // NOTE (ilyakorobkov): when #25239 will be fixed, remove these tests from /test-lists/ets-func-tests/ets-func-tests-ignored.txt
     suite.addTest("testSupportedLocalesOf0001", testSupportedLocalesOf0001);
     suite.addTest("testSupportedLocalesOf0005", testSupportedLocalesOf0005);
     suite.addTest("testSupportedLocalesOf0006", testSupportedLocalesOf0006);

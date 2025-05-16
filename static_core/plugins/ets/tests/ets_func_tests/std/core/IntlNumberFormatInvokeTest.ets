@@ -48,7 +48,7 @@ function testInvokeUndefinedLocale() {
     arktest.assertTrue(numberFormat != undefined && numberFormat != null);
     let getOptions = numberFormat.resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    arktest.assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
+    arktest.assertEQ(getOptions.locale, Intl.Locale.defaultTag(), "Error. Got: " + s);
     arktest.assertEQ(getOptions.numberingSystem,"latn", "Error. Got: " + s);
     arktest.assertEQ(getOptions.style,"decimal", "Error. Got: " + s);
     arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
@@ -64,7 +64,7 @@ function testInvokeUndefinedLocaleUndefinedOptions() {
     arktest.assertTrue(numberFormat != undefined && numberFormat != null);
     let getOptions = numberFormat.resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    arktest.assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
+    arktest.assertEQ(getOptions.locale, Intl.Locale.defaultTag(), "Error. Got: " + s);
     arktest.assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
     arktest.assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
     arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);

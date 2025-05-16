@@ -136,57 +136,37 @@ function testSupportedLocalesOf() {
     runSupportedLocalesStringTest(
         "en",
         undefined,
-        [
-            intlBestFitLocale("en")
-        ]
+        intlBestFitLocales("en")
     )
     runSupportedLocalesStringTest(
         fakeLocale,
         undefined,
-        [
-            intlBestFitLocale(fakeLocale)
-        ]
+        intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesStringTest(
         "en",
         { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        [
-            intlLookUpLocale("en")
-        ]
+        intlLookUpLocales("en")
     )
     runSupportedLocalesArrayTest(
         ["fr", "ru"],
         undefined,
-        [
-            intlBestFitLocale("fr"),
-            intlBestFitLocale("ru")
-        ]
+        intlBestFitLocales(["fr", "ru"])
     )
     runSupportedLocalesArrayTest(
         ["ru-RU", "zh-CN", "en-US"],
         undefined,
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
     runSupportedLocalesArrayTest(
         ["ru-RU", "zh-CN", "en-US"],
         { localeMatcher: "best fit" } as Intl.RelativeTimeFormatOptions,
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
 
     runSupportedLocalesArrayTest(
         ["ru-RU", "en-US"],
         { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        [
-            intlLookUpLocale("ru-RU"),
-            intlLookUpLocale("en-US")
-        ]
+        intlLookUpLocales(["ru-RU", "en-US"])
     )
 }

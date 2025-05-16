@@ -137,7 +137,7 @@ function initFormatResults(): void {
             {year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',  hour12: false, timeZone: "UTC"}, 
             "23/10/11 00:20")
 
-    FORMAT_RESULTS_UNDEF_OPTS = FORMAT_RESULTS.filter((res: FormatResult) => res === undefined)
+    FORMAT_RESULTS_UNDEF_OPTS = FORMAT_RESULTS.filter((res: FormatResult) => res[1] === undefined)
     FORMAT_RESULTS_CUSTOM_OPTS = FORMAT_RESULTS.filter((res: FormatResult) => res[1] !== undefined)
 }
 

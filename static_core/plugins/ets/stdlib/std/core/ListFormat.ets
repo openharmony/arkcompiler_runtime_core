@@ -64,24 +64,14 @@ export namespace Intl {
         }
 
         public static supportedLocalesOf(locales: string | string[], options?: ListFormatLocaleMatcher): string[] {
-            const localeArray = ListFormat.toArray(locales)
-            for (let i = 0; i < localeArray.length; i++) {
-                if (options === "lookup") {
-                    localeArray[i] = intlLookUpLocale(localeArray[i])
-                } else {
-                    localeArray[i] = intlBestFitLocale(localeArray[i])
-                }
-            }
-            return localeArray
+            return options === "lookup" ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
         }
 
         private resolveLocale(locales?: string | string[], localeMatcher?: ListFormatLocaleMatcher): string {
-            const localeArray = ListFormat.toArray(locales)[0]
-            if (localeMatcher === "lookup") {
-                return intlLookUpLocale(localeArray)
-            } else {
-                return intlBestFitLocale(localeArray)
+            if (locales === undefined) {
+                return Locale.defaultTag()
             }
+            return localeMatcher === "lookup" ? intlLookUpLocale(locales!) : intlBestFitLocale(locales!)
         }
 
         private static iterableToArray(list: Iterable<string>): string[] {
@@ -101,18 +91,6 @@ export namespace Intl {
             }
             return result
         }
-
-        private static toArray(locales?: string | string[]): string[] {
-            if (!locales) {
-                return [ListFormat.defaultLocaleNative()]
-            }
-            if (locales instanceof string) {
-                return [locales as string]
-            }
-            return locales as string[]
-        }
-
-        private static native defaultLocaleNative(): string
 
         private static native formatToPartsNative(
             list: string[], locale: string, style: string, type: string): Object

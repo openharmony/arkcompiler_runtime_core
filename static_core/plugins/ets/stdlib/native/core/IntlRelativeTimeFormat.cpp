@@ -299,63 +299,15 @@ static ani_array_ref StdCoreIntlRelativeTimeFormatFormatToPartsImpl(ani_env *env
     return result;
 }
 
-static ani_array_ref StdCoreIntlRelativeTimeFormatSupportedLocalesOfImpl(ani_env *env, [[maybe_unused]] ani_class klass,
-                                                                         ani_array_ref locales, ani_object options)
-{
-    std::string matcher = CallOptionGetter(env, options, "localeMatcher");
-    bool useLookup = (matcher == "lookup");
-
-    ani_size len = 0;
-    env->Array_GetLength(locales, &len);
-
-    ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
-    ani_string defaultElement;
-    env->String_NewUTF8("", 0, &defaultElement);
-
-    ani_array_ref result;
-    env->Array_New_Ref(stringClass, len, defaultElement, &result);
-
-    for (ani_size i = 0; i < len; i++) {
-        ani_ref localeRef = nullptr;
-        env->Array_Get_Ref(locales, i, &localeRef);
-
-        if (localeRef == nullptr) {
-            env->Array_Set_Ref(result, i, defaultElement);
-            continue;
-        }
-
-        ani_string canonicalLocale = nullptr;
-        if (useLookup) {
-            ani_array_ref singleLocaleArr;
-            env->Array_New_Ref(stringClass, 1, static_cast<ani_string>(localeRef), &singleLocaleArr);
-            canonicalLocale = StdCoreIntlLookupLocale(env, nullptr, singleLocaleArr);
-        } else {
-            canonicalLocale = StdCoreIntlBestFitLocale(env, nullptr, static_cast<ani_string>(localeRef));
-        }
-        if (canonicalLocale == nullptr) {
-            canonicalLocale = defaultElement;
-        }
-        env->Array_Set_Ref(result, i, canonicalLocale);
-    }
-
-    return result;
-}
-
 ani_status RegisterIntlRelativeTimeFormatMethods(ani_env *env)
 {
-    // CC-OFFNXT(G.NAM.03-CPP) project code style
-    constexpr size_t K_RTF_METHOD_COUNT = 4;
-    std::array<ani_native_function, K_RTF_METHOD_COUNT> methods = {
-        {ani_native_function {"formatImpl", "DLstd/core/String;:Lstd/core/String;",
-                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatImpl)},
-         ani_native_function {"formatToPartsImpl", "DLstd/core/String;:[Lstd/core/Intl/RelativeTimeFormatPart;",
-                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatToPartsImpl)},
-         ani_native_function {"resolvedOptionsImpl", ":Lstd/core/Intl/ResolvedRelativeTimeFormatOptions;",
-                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatResolvedOptionsImpl)},
-         ani_native_function {"supportedLocalesOfImpl",
-                              "[Lstd/core/String;Lstd/core/Intl/RelativeTimeFormatOptions;:[Lstd/core/String;",
-                              reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatSupportedLocalesOfImpl)}}};
+    std::array methods = {
+        ani_native_function {"formatImpl", "DLstd/core/String;:Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatImpl)},
+        ani_native_function {"formatToPartsImpl", "DLstd/core/String;:[Lstd/core/Intl/RelativeTimeFormatPart;",
+                             reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatFormatToPartsImpl)},
+        ani_native_function {"resolvedOptionsImpl", ":Lstd/core/Intl/ResolvedRelativeTimeFormatOptions;",
+                             reinterpret_cast<void *>(StdCoreIntlRelativeTimeFormatResolvedOptionsImpl)}};
     ani_class rtfClass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/RelativeTimeFormat;", &rtfClass));
 
