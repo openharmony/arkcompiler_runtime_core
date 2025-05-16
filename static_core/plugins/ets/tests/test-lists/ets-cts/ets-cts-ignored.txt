@@ -489,9 +489,6 @@
 09.classes/09.constructor_declaration/throws_clause_1.ets
 09.classes/09.constructor_declaration/throws_clause_2.ets
 
-#23832 missing CTE for static constructor
-09.classes/09.constructor_declaration/static_constructor_declaration.ets
-
 #23764 Constructor body doesn't cause CTE
 09.classes/09.constructor_declaration/02.constructor_body/this_argument_neg.ets
 
