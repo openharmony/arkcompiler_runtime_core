@@ -58,9 +58,6 @@ function testSegmenterOptions(): void {
 function testWordSegmentation(): void {
     const seg = new Intl.Segmenter(en_US, { granularity: "word" } as Intl.SegmenterOptions);
 
-    console.log("Testing word segmentation");
-    console.log(`Requested locale: ${en_US}`);
-
     const text = "Hello world!";
     const segments = Array.from(seg.segment(text) as Iterable<Intl.SegmentData>);
 
@@ -85,10 +82,6 @@ function testWordSegmentation(): void {
 
 function testGraphemeSegmentation(): void {
     const seg = new Intl.Segmenter(en_US, { granularity: "grapheme" } as Intl.SegmenterOptions);
-
-    console.log("Testing grapheme segmentation");
-    console.log(`Requested locale: ${en_US}`);
-
 
     const text = "123";
     const segments = Array.from(seg.segment(text) as Iterable<Intl.SegmentData>);
@@ -116,24 +109,17 @@ function testGraphemeSegmentation(): void {
 function testSentenceSegmentation(): void {
     const seg = new Intl.Segmenter(en_US, { granularity: "sentence" } as Intl.SegmenterOptions);
 
-    console.log("Testing sentence segmentation");
-    console.log(`Requested locale: ${en_US}`);
-
     const text = "Hello, how are you? I am fine.";
     const segments = Array.from(seg.segment(text) as Iterable<Intl.SegmentData>);
-    for (let segment of segments) {
-        console.log(segment.segment);
-    }
-    assertEQ(segments.length, 2);
+    arktest.assertEQ(segments.length, 2);
 }
 
 function testLocaleHandling(): void {
     // Test supportedLocalesOf
     const sBa = Intl.Segmenter.supportedLocalesOf([en_US, "invalid"]);
     let supported = Array.from<String>(sBa);
-    console.log(sBa);
-    assertTrue(supported.includes(en_US));
-    assertFalse(supported.includes("invalid"));
+    arktest.assertTrue(supported.includes(en_US));
+    arktest.assertFalse(supported.includes("invalid"));
 }
 
 function testSegmentContaining(): void {

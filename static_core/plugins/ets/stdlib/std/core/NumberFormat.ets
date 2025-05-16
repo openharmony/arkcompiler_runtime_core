@@ -227,8 +227,7 @@ export namespace Intl {
             newOptions._currencySign = options?.currencySign ?? undefined
             newOptions._currency = options?.currency ?? undefined
             newOptions._currencyDisplay = options?.currencyDisplay ?? undefined
-            let locMatcher = options?.localeMatcher ?? "best fit"
-            newOptions._locale = locMatcher == "lookup" ? intlLookUpLocale("") : intlBestFitLocale("")
+            newOptions._locale = Locale.defaultTag()
             newOptions._maximumFractionDigits = options?.maximumFractionDigits ?? 3
             newOptions._minimumFractionDigits = options?.minimumFractionDigits ?? 0
             if (newOptions._maximumFractionDigits < newOptions._minimumFractionDigits) {
@@ -417,17 +416,7 @@ export namespace Intl {
             if (loc.includes("")) {
                 throw new Error("Incorrect locale information provided")
             }
-
-            let result: string[]
-            if (locales instanceof string) {
-                result = [locales]
-            } else {
-                result = locales
-            }
-            for (let i = 0; i < result.length; ++i) {
-                result[i] = locMatcher == "lookup" ? intlLookUpLocale(result[i]) : intlBestFitLocale(result[i])
-            }
-            return result
+            return locMatcher == "best fit" ? intlBestFitLocales(loc) : intlLookUpLocales(loc)
         }
 
         private readonly options: ResolvedNumberFormatOptionsImpl

@@ -165,7 +165,7 @@
         */
         public constructor(locales?: string | string[], options?: CollatorOptions) {
             this.options = {caseFirst: "false", collation: "default", ignorePunctuation: false,
-            locale: intlBestFitLocale(""),
+            locale: Locale.defaultTag(),
             numeric: false,
             sensitivity: "variant",
             usage: "sort"}
@@ -216,7 +216,7 @@
             }
             let lookup = (options != undefined) ? options.localeMatcher == "lookup" : false
             try {
-                return [lookup ? intlLookUpLocale(locales) : intlBestFitLocale(locales)]
+                return lookup ? intlLookUpLocales(locales) : intlBestFitLocales(locales)
             }
             catch(e) {
                 if (e instanceof Error) {

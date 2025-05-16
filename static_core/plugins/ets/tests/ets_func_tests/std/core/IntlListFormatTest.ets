@@ -186,68 +186,43 @@ function testSupportedLocalesOf() {
     runSupportedLocalesTest(
         "en",
         undefined,
-        [
-            intlBestFitLocale("en")
-        ]
+        intlBestFitLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         undefined,
-        [
-            intlBestFitLocale(fakeLocale)
-        ]
+        intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesTest(
         ["fr", fakeLocale, "ru"],
         undefined,
-        [
-            intlBestFitLocale("fr"),
-            intlBestFitLocale(fakeLocale),
-            intlBestFitLocale("ru")
-        ]
+        intlBestFitLocales(["fr", fakeLocale, "ru"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         undefined,
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", "en-US"],
         "best fit",
-        [
-            intlBestFitLocale("ru-RU"),
-            intlBestFitLocale("zh-CN"),
-            intlBestFitLocale("en-US")
-        ]
+        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
 
     runSupportedLocalesTest(
         "en",
         "lookup",
-        [
-            intlLookUpLocale("en")
-        ]
+        intlLookUpLocales("en")
     )
     runSupportedLocalesTest(
         fakeLocale,
         "lookup",
-        [
-            intlLookUpLocale(fakeLocale)
-        ]
+        intlLookUpLocales(fakeLocale)
     )
 
     runSupportedLocalesTest(
         ["ru-RU", "zh-CN", fakeLocale, "en-US"],
         "lookup",
-        [
-            intlLookUpLocale("ru-RU"),
-            intlLookUpLocale("zh-CN"),
-            intlLookUpLocale(fakeLocale),
-            intlLookUpLocale("en-US")
-        ]
+        intlLookUpLocales(["ru-RU", "zh-CN", fakeLocale, "en-US"])
     )
 }

@@ -21,6 +21,7 @@
 #include "libpandabase/macros.h"
 
 #include <cassert>
+#include <cstring>
 #include <set>
 #include <array>
 #include <sstream>
@@ -230,6 +231,24 @@ ani_ref StdCoreIntlLocaleParseTag(ani_env *env, [[maybe_unused]] ani_class klass
     return StdStrToAni(env, res);
 }
 
+ani_string StdCoreIntlLocaleDefaultTag(ani_env *env)
+{
+    auto defaultLocale = icu::Locale::getDefault();
+    auto defaultLocaleName = defaultLocale.getName();
+    if (strcmp(defaultLocaleName, "en_US_POSIX") == 0 || strcmp(defaultLocaleName, "c") == 0) {
+        return StdStrToAni(env, "en-US");
+    }
+    auto status = UErrorCode::U_ZERO_ERROR;
+    auto tag = defaultLocale.toLanguageTag<std::string>(status);
+    if (UNLIKELY(U_FAILURE(status))) {
+        std::string message = "Error receiving default locale language tag: ";
+        message += u_errorName(status);
+        ThrowNewError(env, "Lstd/core/RuntimeException;", message.c_str(), "Lstd/core/String;:V");
+        return nullptr;
+    }
+    return StdStrToAni(env, tag);
+}
+
 ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
 {
     const auto methods = std::array {
@@ -246,7 +265,9 @@ ani_status RegisterIntlLocaleNativeMethods(ani_env *env)
         ani_native_function {"isTagValid", "Lstd/core/String;:I",
                              reinterpret_cast<void *>(StdCoreIntlLocaleIsTagValid)},
         ani_native_function {"parseTagImpl", "Lstd/core/String;:Lstd/core/String;",
-                             reinterpret_cast<void *>(StdCoreIntlLocaleParseTag)}};
+                             reinterpret_cast<void *>(StdCoreIntlLocaleParseTag)},
+        ani_native_function {"defaultTag", ":Lstd/core/String;",
+                             reinterpret_cast<void *>(StdCoreIntlLocaleDefaultTag)}};
 
     ani_class localeClass;
     ANI_FATAL_IF_ERROR(env->FindClass("Lstd/core/Intl/Locale;", &localeClass));
