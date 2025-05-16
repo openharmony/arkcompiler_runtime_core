@@ -16,7 +16,6 @@
 #ifndef LIBABCKIT_STD_METADATA_INSPECT_IMPL_H
 #define LIBABCKIT_STD_METADATA_INSPECT_IMPL_H
 
-#include "libabckit/src/include_v2/c/isa/field.h"
 #include "libabckit/include/c/metadata_core.h"
 #include <cstdint>
 #include <variant>

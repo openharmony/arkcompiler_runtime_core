@@ -19,7 +19,7 @@
 #include "libabckit/include/c/abckit.h"
 #include "libabckit/include/c/ir_core.h"
 #include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
+#include "libabckit/include/c/isa/isa_static.h"
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/adapter_static/runtime_adapter_static.h"
 

@@ -22,16 +22,43 @@ namespace abckit {
 
 class Graph;
 
+/**
+ * @brief DynamicIsa class containing API's for dynamic ISA manipulation
+ */
 class StaticIsa final {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief To access private constructor
     friend class Graph;
 
 public:
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     StaticIsa(const StaticIsa &other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     StaticIsa &operator=(const StaticIsa &other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     StaticIsa(StaticIsa &&other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     StaticIsa &operator=(StaticIsa &&other) = delete;
+
+    /**
+     * @brief Destructor
+     */
     ~StaticIsa() = default;
 
 private:

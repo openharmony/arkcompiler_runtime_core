@@ -432,13 +432,13 @@ abckit_standalone_canary("abckit_canary_cpp_hash_specializations") {
 
 abckit_standalone_canary("abckit_canary_cpp_headers_core_field") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/src/include_v2/cpp/headers/core/field.h"
+  input_file = "$abckit_root/include/cpp/headers/core/field.h"
   extension = "cpp"
 }
 
 abckit_standalone_canary("abckit_canary_cpp_headers_arkts_field") {
   configs = [ ":abckit_canary_cpp_config" ]
-  input_file = "$abckit_root/src/include_v2/cpp/headers/arkts/field.h"
+  input_file = "$abckit_root/include/cpp/headers/arkts/field.h"
   extension = "cpp"
 }
 
