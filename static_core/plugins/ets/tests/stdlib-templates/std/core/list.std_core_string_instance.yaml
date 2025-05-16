@@ -1848,6 +1848,25 @@
   }
 
 - {
+    method_name: toWellFormed,
+    object_type: String,
+
+    init_object_data_type: "FixedArray<String>",
+    init_object_data: '["\ude25\ud83d\ude00", "unicode\u20ad\u20a5\u2605", "ABC\u006d\u0065", "\ud83dA\u3042あ", "\uDBFF\u0041", "\uD800\uDBFF", "\u662f\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67\u200d\ud83d\udc66\ud83e\udd3a\u5417"]',
+
+    param_types: {},
+    param_nature: {},
+    param_init_data_types: {},
+    param_list: {},
+
+    method_return_type: "String",
+    expected_test_data_item_type: "String",
+    expected_data_type: "FixedArray<String>",
+    expected_test_data: '["�😀", "unicode₭₥★", "ABCme", "�Aああ", "�A", "��", "是👨‍👩‍👧‍👦🤺吗"]',
+    verify_test_result_function: compareStringTrivial
+  }
+
+- {
     method_name: search,
     object_type: String,
     init_object_data_type: "FixedArray<String>",
