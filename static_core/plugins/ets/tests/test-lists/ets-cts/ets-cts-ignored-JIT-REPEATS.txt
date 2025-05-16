@@ -33,7 +33,7 @@
 #24200 test behavior need to corrected for JIT mode.
 13.compilation_units/06.compilation_unit_initialization/package/init_once/test.ets
 
-#24930
+#26027
 17.experimental_features/03.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_5.ets
 
 #24004 ASSERTION FAILED: ic != nullptr
