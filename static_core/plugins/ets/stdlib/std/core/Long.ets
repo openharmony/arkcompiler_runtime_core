@@ -38,15 +38,6 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
     }
 
     /**
-     * Constructs a new Long instance with provided initial value
-     *
-     * @param value the initial value
-     */
-    public constructor(value: Long) {
-        this.value = value.longValue();
-    }
-
-    /**
      * Returns value of this instance as a primitive
      *
      * @returns value of this instance
@@ -92,8 +83,8 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as long
      */
-    public override byteValue(): byte {
-        return this.value as byte;
+    public override toByte(): byte {
+        return Long.toByte(this.value);
     }
 
     /**
@@ -101,8 +92,8 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as short
      */
-    public override shortValue(): short {
-        return this.value as short;
+    public override toShort(): short {
+        return Long.toShort(this.value);
     }
 
     /**
@@ -110,8 +101,8 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as int
      */
-    public override intValue(): int {
-        return this.value as int;
+    public override toInt(): int {
+        return Long.toInt(this.value);
     }
 
     /**
@@ -119,7 +110,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as long
      */
-    public override longValue(): long {
+    public override toLong(): long {
         return this.value;
     }
 
@@ -128,8 +119,8 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as long
      */
-    public override floatValue(): float {
-        return this.value as float;
+    public override toFloat(): float {
+        return Long.toFloat(this.value);
     }
 
     /**
@@ -137,9 +128,72 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      *
      * @returns value as double
      */
-    public override doubleValue(): double {
-        return this.value as double;
+    public override toDouble(): double {
+        return Long.toDouble(this.value);
     }
+
+    /**
+     * Returns value of this instance
+     *
+     * @returns value as char
+     */
+    public toChar(): char {
+        return Long.toChar(this.value);
+    }
+
+    /**
+     * Returns the primitive as byte value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toByte(value: long): byte;
+
+    /**
+     * Returns the primitive as short value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toShort(value: long): short;
+
+    /**
+     * Returns the primitive as int value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toInt(value: long): int;
+
+    /**
+     * Returns the primitive as float value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toFloat(value: long): float;
+
+    /**
+     * Returns the primitive as double value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toDouble(value: long): double;
+
+    /**
+     * Returns the primitive as char value
+     *
+     * @param value value to cast
+     *
+     * @returns casted value
+     */
+    public static native toChar(value: long): char;
 
     /**
      * Compares this instance to other Long object
@@ -206,7 +260,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns representation of this instance
      */
     public override $_hashCode(): int {
-        return this.intValue();
+        return this.toInt();
     }
 
     /**
@@ -237,7 +291,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the addition
      */
     public add(other: Long): Long {
-        return Long.valueOf((this.value + other.longValue()) as long)
+        return Long.valueOf((this.value + other.toLong()) as long)
     }
 
     /**
@@ -248,7 +302,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the subtraction
      */
     public sub(other: Long): Long {
-        return Long.valueOf((this.value - other.longValue()) as long)
+        return Long.valueOf((this.value - other.toLong()) as long)
     }
 
     /**
@@ -259,7 +313,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the multiplication
      */
     public mul(other: Long): Long {
-        return Long.valueOf((this.value * other.longValue()) as long)
+        return Long.valueOf((this.value * other.toLong()) as long)
     }
 
     /**
@@ -270,7 +324,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns Result of the division
      */
     public div(other: Long): Long {
-        return Long.valueOf((this.value / other.longValue()) as long)
+        return Long.valueOf((this.value / other.toLong()) as long)
     }
 
     /**
@@ -281,7 +335,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is less than provided, false otherwise
      */
     public isLessThan(other: Long): boolean {
-        return this.value < other.longValue();
+        return this.value < other.toLong();
     }
 
     /**
@@ -292,7 +346,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is less than or equal to provided, false otherwise
      */
     public isLessEqualThan(other: Long): boolean {
-        return this.value <= other.longValue();
+        return this.value <= other.toLong();
     }
 
     /**
@@ -303,7 +357,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is greater than provided, false otherwise
      */
     public isGreaterThan(other: Long): boolean {
-        return this.value > other.longValue();
+        return this.value > other.toLong();
     }
 
     /**
@@ -314,7 +368,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<L
      * @returns true if this value is greater than or equal to provided, false otherwise
      */
     public isGreaterEqualThan(other: Long): boolean {
-        return this.value >= other.longValue();
+        return this.value >= other.toLong();
     }
 
     /**

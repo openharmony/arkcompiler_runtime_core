@@ -383,7 +383,7 @@ cases:
           class A {
               foo(...p: (Double|Short|Byte)[]): double {
                   let res = 0.0
-                  for (let el of p) res += (el as Numeric).doubleValue()
+                  for (let el of p) res += (el as Numeric).toDouble()
                   return res
               }
           }

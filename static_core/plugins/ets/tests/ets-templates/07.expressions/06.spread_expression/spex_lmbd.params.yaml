@@ -233,7 +233,7 @@ cases:
           let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
           assertTrue(((...p: (Double|Short|Byte)[]): double => {
               let res = 0.0
-              for (let el of p) res += (el as Numeric).doubleValue()
+              for (let el of p) res += (el as Numeric).toDouble()
               return res
           })(...ar) == 42.0)
 

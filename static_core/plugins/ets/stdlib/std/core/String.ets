@@ -416,7 +416,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (fromIndex == undefined) {
             return this.startsWith(prefix, 0)
         }
-        return this.startsWith(prefix, fromIndex.intValue())
+        return this.startsWith(prefix, fromIndex.toInt())
     }
 
     /**
@@ -474,7 +474,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (fromIndex == undefined) {
             return this.indexOf(str, 0)
         }
-        return this.indexOf(str, fromIndex.intValue())
+        return this.indexOf(str, fromIndex.toInt())
     }
 
     /**
@@ -535,7 +535,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (fromIndex == undefined || isNaN(fromIndex)) {
             return this.lastIndexOf(str, Int.MAX_VALUE as int)
         }
-        return this.lastIndexOf(str, fromIndex.intValue())
+        return this.lastIndexOf(str, fromIndex.toInt())
     }
 
     /**
@@ -1248,7 +1248,7 @@ export final class String extends Object implements Comparable<String>, JSONable
         if (position == undefined) {
             return this.indexOf(searchString) == -1 ? false : true;
         }
-        return this.indexOf(searchString, position.intValue()) == -1 ? false : true;
+        return this.indexOf(searchString, position.toInt()) == -1 ? false : true;
     }
 
     /**

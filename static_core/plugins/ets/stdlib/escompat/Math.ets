@@ -242,7 +242,7 @@ export class Math {
      * ```
      */
     public static clz32(x: Int): Int {
-        return new Int(clz32(x.intValue()));
+        return new Int(clz32(x.toInt()));
     }
 
     /**

@@ -1156,7 +1156,7 @@ export final class ByteType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).byteValue()
+        return (obj as Numeric).toByte()
     }
 }
 
@@ -1251,7 +1251,7 @@ export final class ShortType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).shortValue()
+        return (obj as Numeric).toShort()
     }
 }
 
@@ -1346,7 +1346,7 @@ export final class IntType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).intValue()
+        return (obj as Numeric).toInt()
     }
 }
 
@@ -1441,7 +1441,7 @@ export final class LongType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).longValue()
+        return (obj as Numeric).toLong()
     }
 }
 
@@ -1536,7 +1536,7 @@ export final class FloatType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).floatValue()
+        return (obj as Numeric).toFloat()
     }
 }
 
@@ -1631,7 +1631,7 @@ export final class DoubleType extends Type {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        return (obj as Numeric).doubleValue()
+        return (obj as Numeric).toDouble()
     }
 }
 

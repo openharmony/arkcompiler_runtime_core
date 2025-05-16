@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,6 +70,31 @@ extern "C" EtsBoolean StdCoreFloatIsInteger(float v)
 extern "C" EtsBoolean StdCoreFloatIsSafeInteger(float v)
 {
     return ToEtsBoolean(IsInteger(v) && (std::fabs(v) <= helpers::MaxSafeInteger<float>()));
+}
+
+EtsInt StdCoreFloatToInt(EtsFloat val)
+{
+    return CastFloatToInt<EtsFloat, EtsInt>(val);
+}
+
+EtsShort StdCoreFloatToShort(EtsFloat val)
+{
+    return static_cast<int16_t>(StdCoreFloatToInt(val));
+}
+
+EtsByte StdCoreFloatToByte(EtsFloat val)
+{
+    return static_cast<int8_t>(StdCoreFloatToInt(val));
+}
+
+EtsLong StdCoreFloatToLong(EtsFloat val)
+{
+    return CastFloatToInt<EtsFloat, EtsLong>(val);
+}
+
+EtsDouble StdCoreFloatToDouble(EtsFloat val)
+{
+    return static_cast<double>(val);
 }
 
 }  // namespace ark::ets::intrinsics

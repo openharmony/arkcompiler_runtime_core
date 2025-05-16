@@ -26,17 +26,17 @@
     expected_test_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
     verify_test_result_function: comparePrimitiveValue
   }
-  
+
 
 - {
-    method_name: byteValue,
+    method_name: toByte,
     object_type: Long,
     init_object_data_type: "FixedArray<long>",
     init_object_type: long,
     init_object_type_nature: primitive,
     param_init_data_types: {} ,
     param_types: {},
-    param_list: {},    
+    param_list: {},
     method_return_type: byte,
     init_object_data: "[0 as long, 1 as long, Byte.MIN_VALUE as long, Byte.MAX_VALUE as long]",
     expected_data_type: "FixedArray<byte>",
@@ -44,7 +44,7 @@
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: shortValue,
+    method_name: toShort,
     object_type: Long,
     init_object_data_type: "FixedArray<long>",
     init_object_type: long,
@@ -59,13 +59,13 @@
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: intValue,
+    method_name: toInt,
     object_type: Long,
     init_object_data_type: "FixedArray<long>",
     init_object_type: long,
     init_object_type_nature: primitive,
     param_init_data_types: {} ,
-    param_types: {},    
+    param_types: {},
     param_list: {},
     method_return_type: int,
     init_object_data: "[0 as long, 1 as long, -1 as long, Int.MIN_VALUE as long, Int.MAX_VALUE as long]",
@@ -74,7 +74,7 @@
     verify_test_result_function: comparePrimitiveValue
   }
 - {
-    method_name: longValue,
+    method_name: toLong,
     object_type: Long,
     init_object_data_type: "FixedArray<long>",
     init_object_type: long,
@@ -87,9 +87,9 @@
     expected_data_type: "FixedArray<long>",
     expected_test_data: "[0 as long, 1 as long, -1 as long, Long.MIN_VALUE as long, Long.MAX_VALUE as long]",
     verify_test_result_function: comparePrimitiveValue
-  } 
+  }
 - {
-    method_name: floatValue,
+    method_name: toFloat,
     object_type: Long,
     init_object_data_type: "FixedArray<long>",
     init_object_type: long,
@@ -102,9 +102,9 @@
     expected_data_type: "FixedArray<float>",
     expected_test_data: "[0 as float, 1 as float, -1 as float, Long.MIN_VALUE as float, Long.MAX_VALUE as float]",
     verify_test_result_function: compareFloatPointValue
-  } 
+  }
 - {
-    method_name: doubleValue,
+    method_name: toDouble,
     object_type: Long,
     init_object_data_type: "FixedArray<long>",
     init_object_type: long,
@@ -132,7 +132,7 @@
     expected_data_type: "FixedArray<int>",
     expected_test_data: '[0 as int, 1 as int, -1 as int, Int.MIN_VALUE as int, Int.MAX_VALUE as int]',
     verify_test_result_function: comparePrimitiveValue
-  } 
+  }
 - {
     method_name: toString,
     object_type: Long,
@@ -159,12 +159,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: Long,
-    
+
     expected_data_item_type: long,
     expected_data_type: "FixedArray<long>",
-    
+
 
     expected_test_data: "[0 as long, 2 as long, (-2) as long]",
     verify_test_result_function: compareWrapperObjectValue,
@@ -180,16 +180,16 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: Long,
-    
+
     expected_data_item_type: long,
     expected_data_type: "FixedArray<long>",
-    
+
 
     expected_test_data: "[0 as long, 0 as long, 0 as long]",
     verify_test_result_function: compareWrapperObjectValue,
-  }    
+  }
 - {
     method_name: mul,
     object_type: Long,
@@ -201,16 +201,16 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: Long,
-    
+
     expected_data_item_type: long,
     expected_data_type: "FixedArray<long>",
-    
+
 
     expected_test_data: "[0 as long, 1 as long, 1 as long]",
     verify_test_result_function: compareWrapperObjectValue,
-  }   
+  }
 - {
     method_name: div,
     object_type: Long,
@@ -222,12 +222,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: Long,
-    
+
     expected_data_item_type: long,
     expected_data_type: "FixedArray<long>",
-    
+
 
     expected_test_data: "[0 as long, 1 as long, (-1) as long]",
     verify_test_result_function: compareWrapperObjectValue,
@@ -243,12 +243,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
     expected_data_type: "FixedArray<boolean>",
-    
+
 
     expected_test_data: "[false, true, false, true, true, true, false, true, false, false]",
     verify_test_result_function: comparePrimitiveValue,
@@ -264,12 +264,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
     expected_data_type: "FixedArray<boolean>",
-    
+
 
     expected_test_data: "[false, true, true, true, true, true, false, true, false, true]",
     verify_test_result_function: comparePrimitiveValue,
@@ -285,12 +285,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
     expected_data_type: "FixedArray<boolean>",
-    
+
 
     expected_test_data: "[true, false, false, false, false, false, true, false, true, false]",
     verify_test_result_function: comparePrimitiveValue,
@@ -306,12 +306,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
     expected_data_type: "FixedArray<boolean>",
-    
+
 
     expected_test_data: "[true, false, true, false, false, false, true, false, true, true]",
     verify_test_result_function: comparePrimitiveValue,
@@ -327,12 +327,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: boolean,
-    
+
     expected_data_item_type: boolean,
     expected_data_type: "FixedArray<boolean>",
-    
+
 
     expected_test_data: "[false, false, true, false, false, false, false, false, false, true]",
     verify_test_result_function: comparePrimitiveValue,
@@ -348,12 +348,12 @@
     param_init_data_types: {"param1": "FixedArray<long>"} ,
     param_types: {"param1": Long},
     param_nature: {"param1": object},
-    
+
     method_return_type: int,
-    
+
     expected_data_item_type: int,
     expected_data_type: "FixedArray<int>",
-    
+
 
     expected_test_data: "[1, 0, -1, 0]",
     verify_test_result_function: compareCompareToResult,

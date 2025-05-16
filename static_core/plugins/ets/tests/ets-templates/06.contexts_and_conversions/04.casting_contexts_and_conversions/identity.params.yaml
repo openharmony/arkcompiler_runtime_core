@@ -22,7 +22,7 @@ cases:
       - { type: float, expr: 0.00001 as float, op: '!=' }
       - { type: double, expr: 0.00000000001 as double, op: '!=' }
       - { type: Boolean, expr: new Boolean(true), op: '!==' }
-      - { type: Byte, expr: new Byte(new Int(1).byteValue()), op: '!==' }
+      - { type: Byte, expr: new Byte(new Int(1).toByte()), op: '!==' }
       - { type: Char, expr: new Char(c'A'), op: '!==' }
       - { type: 'char[]', expr: "[c'A', c'B']", op: '!==' }
       - { type: '(x: Char) => char', expr: '(p: Char): char => { return p.unboxed(); }', op: '!==' }
