@@ -70,7 +70,7 @@ function main(): int {
         let task = new taskpool.Task(returnAbc);
         taskpool.execute(task);
         expectError(() => { runner.execute(task) },
-                    new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask"));
+                    new Error("taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask"));
     });
     seqRunnerSuite.addTest("ExecuteSeqRunnerTaskTest", (): void throws =>
     {
@@ -79,7 +79,7 @@ function main(): int {
         let task = new taskpool.Task(returnAbc);
         runner1.execute(task);
         expectError(() => { runner2.execute(task) },
-                    new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask"));
+                    new Error("taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask"));
     });
     seqRunnerSuite.addTest("ExecuteGroupTaskTest", (): void throws => {
         let runner = new taskpool.SequenceRunner();
@@ -87,7 +87,7 @@ function main(): int {
         let task = new taskpool.Task(returnAbc);
         group.addTask(task);
         expectError(() => { runner.execute(task) },
-                    new Error("taskpool:: SequenceRunner cannot execute groupTask"));
+                    new Error("taskpool:: sequenceRunner cannot execute groupTask"));
     });
     seqRunnerSuite.addTest("CancelNonStartedTaskTest", (): void throws =>
     {
@@ -140,7 +140,7 @@ function main(): int {
         let task2 = new taskpool.Task(returnAbc);
         task1.addDependency(task2);
         let runner = new taskpool.SequenceRunner();
-        expectError(() => { runner.execute(task1) }, new Error("seqRunner:: dependent task not allowed."));
+        expectError(() => { runner.execute(task1) }, new Error("taskpool:: sequenceRunner dependent task not allowed."));
     });
     seqRunnerSuite.addTest("AddDependencyExecutedTaskTest", (): void throws =>
     {
