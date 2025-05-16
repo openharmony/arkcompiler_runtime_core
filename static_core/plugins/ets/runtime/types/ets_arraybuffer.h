@@ -58,7 +58,7 @@ public:
         return EtsByteArray::Create(length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT)->GetCoreType();
     }
 
-    ALWAYS_INLINE static EtsLong GetAddress(EtsByteArray *array)
+    ALWAYS_INLINE static EtsLong GetAddress(const EtsByteArray *array)
     {
         return reinterpret_cast<EtsLong>(array->GetData<void>());
     }
@@ -112,7 +112,7 @@ public:
     }
 
     /// @brief Returns non-null data for a non-detached buffer
-    void *GetData()
+    void *GetData() const
     {
         ASSERT(!WasDetached());
         return reinterpret_cast<void *>(nativeData_);
@@ -136,7 +136,7 @@ public:
 
     bool IsExternal() const
     {
-        return managedData_ == nullptr;
+        return ObjectAccessor::GetObject(this, GetManagedDataOffset()) == nullptr;
     }
 
     bool IsDetachable() const
@@ -144,7 +144,7 @@ public:
         return !WasDetached() && IsExternal();
     }
 
-    EtsByte At(EtsInt pos)
+    EtsByte At(EtsInt pos) const
     {
         if (!DoBoundaryCheck(pos)) {
             return 0;
@@ -268,10 +268,10 @@ private:
      */
     void InitializeByDefault(EtsCoroutine *coro, size_t length)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_),
-                                  AllocateNonMovableArray(length));
+        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), AllocateNonMovableArray(length));
         byteLength_ = length;
-        nativeData_ = GetAddress(managedData_);
+        nativeData_ =
+            GetAddress(EtsByteArray::FromCoreType(ObjectAccessor::GetObject(coro, this, GetManagedDataOffset())));
         ASSERT(nativeData_ != 0);
         isResizable_ = ToEtsBoolean(false);
     }
@@ -280,7 +280,7 @@ private:
     void InitBufferByExternalData(EtsCoroutine *coro, const EtsHandle<EtsEscompatArrayBuffer> &arrayBufferHandle,
                                   void *data, EtsFinalize finalizerFunction, void *finalizerHint, size_t length)
     {
-        managedData_ = nullptr;
+        ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), nullptr);
         byteLength_ = length;
         nativeData_ = reinterpret_cast<EtsLong>(data);
         ASSERT(nativeData_ != 0);
@@ -293,7 +293,7 @@ private:
      * @brief Checks position is inside array, throws ets exception if not.
      * NOTE: behavior of this method must repeat initialization from managed `doBoundaryCheck`.
      */
-    bool DoBoundaryCheck(EtsInt pos)
+    bool DoBoundaryCheck(EtsInt pos) const
     {
         if (pos < 0 || pos >= byteLength_) {
             PandaString message = "ArrayBuffer position ";
