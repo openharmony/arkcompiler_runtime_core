@@ -14,6 +14,7 @@
  */
 
 #include <charconv>
+#include <type_traits>
 #include "ets_handle.h"
 #include "libpandabase/utils/utf.h"
 #include "libpandabase/utils/utils.h"
@@ -707,7 +708,7 @@ TO_REVERSED_CALL_DECL(BigUInt64)
 
 #undef TO_REVERSED_CALL_DECL
 
-int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
+static int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
 {
     if (idx < -arrayLength) {
         return 0;
@@ -851,6 +852,30 @@ extern "C" ark::ets::EtsEscompatFloat64Array *EtsEscompatFloat64ArraySort(ark::e
     return EtsEscompatTypedArraySort(thisArray);
 }
 
+template <typename Array, typename = std::enable_if_t<std::is_floating_point_v<typename Array::ElementType>>>
+static bool EtsEscompatTypedArrayContainsNaN(Array *array, EtsInt pos)
+{
+    using ElementType = typename Array::ElementType;
+    auto length = array->GetLengthInt();
+    auto byteOffset = static_cast<size_t>(array->GetByteOffset());
+    uint32_t normalIndex = NormalizeIndex(pos, length);
+    auto *data = GetNativeData(array);
+    auto *begin = ToVoidPtr(ToUintPtr(data) + byteOffset);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    Span<ElementType> span(static_cast<ElementType *>(begin) + normalIndex, length - normalIndex);
+    return std::any_of(span.begin(), span.end(), [](ElementType elem) { return elem != elem; });
+}
+
+extern "C" EtsBoolean EtsEscompatFloat32ArrayContainsNaN(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
+{
+    return ToEtsBoolean(EtsEscompatTypedArrayContainsNaN(thisArray, pos));
+}
+
+extern "C" EtsBoolean EtsEscompatFloat64ArrayContainsNaN(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
+{
+    return ToEtsBoolean(EtsEscompatTypedArrayContainsNaN(thisArray, pos));
+}
+
 extern "C" ark::ets::EtsEscompatUInt8ClampedArray *EtsEscompatUInt8ClampedArraySort(
     ark::ets::EtsEscompatUInt8ClampedArray *thisArray)
 {
@@ -880,15 +905,15 @@ extern "C" ark::ets::EtsEscompatBigUInt64Array *EtsEscompatBigUInt64ArraySort(
 
 #define INVALID_INDEX (-1.0)
 
-template <typename T1, typename T2>
-static EtsDouble EtsEscompatArrayIndexOfLong(T1 *thisArray, T2 searchElement, EtsInt fromIndex)
+template <typename T, typename Pred>
+static EtsDouble EtsEscompatArrayIndexOf(T *thisArray, EtsInt fromIndex, Pred pred)
 {
     auto *data = GetNativeData(thisArray);
     if (UNLIKELY(data == nullptr)) {
         return INVALID_INDEX;
     }
 
-    using ElementType = typename T1::ElementType;
+    using ElementType = typename T::ElementType;
     /**
      * False-positive static-analyzer report:
      * GC can happen only on ThrowException in GetNativeData.
@@ -901,14 +926,19 @@ static EtsDouble EtsEscompatArrayIndexOfLong(T1 *thisArray, T2 searchElement, Et
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto arrayLength = thisArray->GetLengthInt();
     fromIndex = NormalizeIndex(fromIndex, arrayLength);
-    auto element = static_cast<ElementType>(searchElement);
-    for (int i = fromIndex; i < arrayLength; i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (array[i] == element) {
-            return static_cast<double>(i);
-        }
-    }
-    return INVALID_INDEX;
+    Span<ElementType> span(static_cast<ElementType *>(array), arrayLength);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    const auto idxIt = std::find_if(span.begin() + fromIndex, span.end(), pred);
+    return idxIt == span.end() ? INVALID_INDEX : std::distance(span.begin(), idxIt);
+}
+
+template <typename T, typename SE>
+static EtsDouble EtsEscompatArrayIndexOfLong(T *thisArray, SE searchElement, EtsInt fromIndex)
+{
+    using ElementType = typename T::ElementType;
+    return EtsEscompatArrayIndexOf(
+        thisArray, fromIndex,
+        [element = static_cast<ElementType>(searchElement)](ElementType e) { return e == element; });
 }
 
 template <typename T>

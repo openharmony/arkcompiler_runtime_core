@@ -2072,6 +2072,16 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayJoin
 
+  - name: Float32ArrayContainsNaN
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: containsNaN
+    static: false
+    signature:
+      ret: u1
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayContainsNaN
+
   - name: Float64ArraySetDouble
     space: ets
     class_name: escompat.Float64Array
@@ -2154,6 +2164,16 @@ intrinsics:
       ret: std.core.String
       args: [std.core.String]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayJoin
+
+  - name: Float64ArrayContainsNaN
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: containsNaN
+    static: false
+    signature:
+      ret: u1
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayContainsNaN
 
   - name: UInt8ClampedArraySetInt
     space: ets
@@ -4260,7 +4280,6 @@ intrinsics:
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
     need_param_locations: true
-
 
 ############
 # std.core #
