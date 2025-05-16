@@ -16,7 +16,7 @@ set(atomics_tests
     nonconcurrent_store_load_islockfree
     nonconcurrent_increment
     nonconcurrent_compare_exchange
-    # nonconcurrent_wait_timeout
+    nonconcurrent_wait_timeout
 
     # --- Concurrent tests without synchronization
     concurrent_store_load
