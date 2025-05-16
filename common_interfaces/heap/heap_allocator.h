@@ -18,19 +18,20 @@
 
 #include <cstddef>
 #include <cstdint>
+#include "objects/base_state_word.h"
 
 namespace panda {
+using Address32 = uint32_t;
+using Address = uint64_t;
+
 class HeapAllocator {
 public:
-    using Address32 = uint32_t;
-    using Address = uint64_t;
-
-    static Address Allocate(size_t size);
-    static Address32 Allocate32(size_t size);
-    static Address AllocateInOld(size_t size);
-    static Address AllocateInHuge(size_t size);
-    static Address AllocateInNonmove(size_t size);
-    static Address AllocateInReadOnly(size_t size);
+    static Address Allocate(size_t size, Language language);
+    static Address AllocateInNonmove(size_t size, Language language);
+    static Address32 Allocate32(size_t size, Language language);
+    static Address AllocateInOld(size_t size, Language language);
+    static Address AllocateInHuge(size_t size, Language language);
+    static Address AllocateInReadOnly(size_t size, Language language);
     // below interface used for serialize
     static Address AllocateNoGC(size_t size);
     static Address AllocatePinNoGC(size_t size);

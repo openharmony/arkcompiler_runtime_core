@@ -27,6 +27,10 @@ namespace panda {
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
+    static BaseObject *Cast(MAddress address)
+    {
+        return reinterpret_cast<BaseObject *>(address);
+    }
 
     static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
     static void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
@@ -58,9 +62,10 @@ public:
         return nullptr;
     }
 
-    inline void SetForwardingPointerExclusive(BaseObject *fwdPtr)
+    inline void SetForwardingPointerAfterExclusive(BaseObject *fwdPtr)
     {
-        GetOperator()->SetForwardingPointerExclusive(this, fwdPtr);
+        CHECK_CC(IsForwarding());
+        GetOperator()->SetForwardingPointerAfterExclusive(this, fwdPtr);
         state_.SetForwarded();
     }
 
@@ -89,6 +94,26 @@ public:
         return state_.IsForwarded();
     }
 
+    inline bool IsToVersion() const
+    {
+        return state_.IsToVersion();
+    }
+
+    inline void SetLanguage(Language language)
+    {
+        state_.SetLanguage(language);
+    }
+
+    BaseStateWord GetBaseStateWord() const
+    {
+        return state_.AtomicGetBaseStateWord();
+    }
+
+    void SetForwardState(BaseStateWord::ForwardState state)
+    {
+        state_.SetForwardState(state);
+    }
+
     template <typename T>
     Field<T> &GetField(uint32_t offset) const
     {
@@ -96,18 +121,16 @@ public:
         return *reinterpret_cast<Field<T> *>(addr);
     }
 
-    template <bool isVolatile = false>
-    RefField<isVolatile> &GetRefField(uint32_t offset) const
+    // Locking means that this object forwardstate is forwarding.
+    // Any other gc coping thread or mutator thread will be wait if copy the same object.
+    bool TryLockExclusive(const BaseStateWord state)
     {
-        auto addr = reinterpret_cast<MAddress>(this) + offset;
-        return *reinterpret_cast<RefField<isVolatile> *>(addr);
+        return state_.TryLockBaseStateWord(state);
     }
 
-    inline bool CompareExchangeRefField([[maybe_unused]] const RefField<> &field,
-                                        [[maybe_unused]] const RefField<> oldRef,
-                                        [[maybe_unused]] const RefField<> newRef)
+    void UnlockExclusive(const BaseStateWord::ForwardState newState)
     {
-        return true;
+        state_.UnlockStateWord(newState);
     }
 
     static inline intptr_t FieldOffset(BaseObject *object, const void *field)
@@ -140,49 +163,9 @@ public:
                             [[maybe_unused]] MAddress aggEnd)
     {
     }
-
-    BaseStateWord GetBaseStateWord() const
-    {
-        return state_.AtomicGetBaseStateWord();
-    }
-
-    void SetClassInfo([[maybe_unused]] TypeInfo *klassRef) {}
-
-    void SetForwardState(BaseStateWord::ForwardState state)
-    {
-        state_.SetForwardState(state);
-    }
-
-    bool IsInTraceRegion() const
-    {
-        return true;
-    }
-
-    bool TryLockObject(const BaseStateWord state)
-    {
-        return state_.TryLockBaseStateWord(state);
-    }
-
-    void UnlockObject(const BaseStateWord::ForwardState newState)
-    {
-        state_.UnlockStateWord(newState);
-    }
-
-    void OnFinalizerCreated() {}
-
-    bool IsToVersion() const
-    {
-        return state_.IsToVersion();
-    }
     // The interfaces above only use for common code compiler. It will be deleted later.
 
 protected:
-    static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
-    {
-        auto ref = reinterpret_cast<BaseObject *>(address);
-        return ref;
-    }
-
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
         if (state_.IsStatic()) {
@@ -191,7 +174,7 @@ protected:
         return operator_.dynamicObjOp_;
     }
 
-    static BaseObjectOperator operator_;
+    static PUBLIC_API BaseObjectOperator operator_;
     BaseStateWord state_;
 };
 }  // namespace panda

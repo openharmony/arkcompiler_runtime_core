@@ -38,7 +38,7 @@ public:
     // Get forwarding pointer.
     virtual BaseObject *GetForwardingPointer(const BaseObject *object) const = 0;
     // Set forwarding pointer.
-    virtual void SetForwardingPointerExclusive(BaseObject *object, BaseObject *fwdPtr) = 0;
+    virtual void SetForwardingPointerAfterExclusive(BaseObject *object, BaseObject *fwdPtr) = 0;
 
     virtual ~BaseObjectOperatorInterfaces() = default;
 };
