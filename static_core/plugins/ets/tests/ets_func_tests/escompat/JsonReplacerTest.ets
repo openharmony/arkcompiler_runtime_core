@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-const RESULT_SUCCESS = 0
-const RESULT_FAILURE = 1
-
 function dummyReplacer(key: string, value: NullishType): NullishType {
     return value
 }
@@ -52,17 +49,20 @@ class N {
     u = undefined
 }
 
-function jsonStringifyObjectWithFunctionReplacer(): int {
-    Assertions.assertEquals(`{"id":1,"name":"A"}`, JSON.stringify(new A(), dummyReplacer))
-    Assertions.assertEquals(`{\n\t"id": 1,\n\t"name": "A"\n}`, JSON.stringify(new A(), dummyReplacer, "\t"))
-    Assertions.assertEquals(`{\n "id": 1,\n "name": "A"\n}`, JSON.stringify(new A(), dummyReplacer, 1))
-    Assertions.assertEquals(`{"id":"1","name":"A"}`, JSON.stringify(new A(), toStringReplacer))
-    Assertions.assertEquals(`{"n":"null","u":"undefined"}`, JSON.stringify(new N(), toStringReplacer))
-
-    return RESULT_SUCCESS
+function jsonStringifyObjectWithFunctionReplacer(): void {
+    assertEQ(JSON.stringify(new A(), dummyReplacer), `{"id":1,"name":"A"}`)
+    assertEQ(JSON.stringify(new A(), dummyReplacer, "\t"), `{\n\t"id": 1,\n\t"name": "A"\n}`)
+    assertEQ(JSON.stringify(new A(), dummyReplacer, 1), `{\n "id": 1,\n "name": "A"\n}`)
+    assertEQ(JSON.stringify(new A(), toStringReplacer), `{"id":"1","name":"A"}`)
+    assertEQ(JSON.stringify(new N(), toStringReplacer), `{"n":"null","u":"undefined"}`)
 }
 
-function jsonStringifyArrayWithFunctionReplacer(): int {
+function jsonStringifyRecordWithFunctionReplacer(): void {
+    const record: Record<string, NullishType> = { "id": 1, "name": "R" }
+    assertEQ(JSON.stringify(record, dummyReplacer), `{"id":1,"name":"R"}`)
+}
+
+function jsonStringifyArrayWithFunctionReplacer(): void {
     const replacer = (key: string, value: NullishType): NullishType => {
         if (key == "" || key == "0") {
             return value
@@ -72,112 +72,79 @@ function jsonStringifyArrayWithFunctionReplacer(): int {
     }
 
     const array: Array<A> = Array.of(new A(), new A())
-    Assertions.assertEquals(`[{"id":1,"name":"A"},{"id":1,"name":"A"}]`, JSON.stringify(array, dummyReplacer))
-    Assertions.assertEquals(`["A(1)","A(1)"]`, JSON.stringify(array, toStringReplacer))
-    Assertions.assertEquals(`[\n\t"A(1)",\n\t"A(1)"\n]`, JSON.stringify(array, toStringReplacer, "\t"))
-    Assertions.assertEquals(`[\n "A(1)",\n "A(1)"\n]`, JSON.stringify(array, toStringReplacer, 1))
-    Assertions.assertEquals(`[{},null]`, JSON.stringify(array, replacer))
+    assertEQ(JSON.stringify(array, dummyReplacer), `[{"id":1,"name":"A"},{"id":1,"name":"A"}]`)
+    assertEQ(JSON.stringify(array, toStringReplacer), `["A(1)","A(1)"]`)
+    assertEQ(JSON.stringify(array, toStringReplacer, "\t"), `[\n\t"A(1)",\n\t"A(1)"\n]`)
+    assertEQ(JSON.stringify(array, toStringReplacer, 1), `[\n "A(1)",\n "A(1)"\n]`)
+    assertEQ(JSON.stringify(array, replacer), `[{},null]`)
 
     const ar = [new A(), new A()]
-    Assertions.assertEquals(`[{"id":1,"name":"A"},{"id":1,"name":"A"}]`, JSON.stringify(ar, dummyReplacer))
-    Assertions.assertEquals(`["A(1)","A(1)"]`, JSON.stringify(ar, toStringReplacer))
-    Assertions.assertEquals(`[\n\t"A(1)",\n\t"A(1)"\n]`, JSON.stringify(ar, toStringReplacer, "\t"))
-    Assertions.assertEquals(`[\n "A(1)",\n "A(1)"\n]`, JSON.stringify(ar, toStringReplacer, 1))
-    Assertions.assertEquals(`[{},null]`, JSON.stringify(ar, replacer))
+    assertEQ(JSON.stringify(ar, dummyReplacer), `[{"id":1,"name":"A"},{"id":1,"name":"A"}]`)
+    assertEQ(JSON.stringify(ar, toStringReplacer), `["A(1)","A(1)"]`)
+    assertEQ(JSON.stringify(ar, toStringReplacer, "\t"), `[\n\t"A(1)",\n\t"A(1)"\n]`)
+    assertEQ(JSON.stringify(ar, toStringReplacer, 1), `[\n "A(1)",\n "A(1)"\n]`)
+    assertEQ(JSON.stringify(ar, replacer), `[{},null]`)
 
     const reverser = (key: string, value: NullishType): NullishType => 
             Array.isArray(value) ? Array.from(value as FixedArray<Object>).reverse() : value
 
-    Assertions.assertEquals(`[{"id":2,"name":"A"},{"id":1,"name":"A"}]`, JSON.stringify([new A(1), new A(2)] as FixedArray<A>, reverser))
+    assertEQ(JSON.stringify([new A(1), new A(2)] as FixedArray<A>, reverser), `[{"id":2,"name":"A"},{"id":1,"name":"A"}]`)
 
     const numbers: FixedArray<number> = [1, 2, 3]
-    Assertions.assertEquals(`[1,2,3]`, JSON.stringify(numbers, dummyReplacer))
-    Assertions.assertEquals(`["1","2","3"]`, JSON.stringify(numbers, toStringReplacer))
+    assertEQ(JSON.stringify(numbers, dummyReplacer), `[1,2,3]`)
+    assertEQ(JSON.stringify(numbers, toStringReplacer), `["1","2","3"]`)
 
-    Assertions.assertEquals("1", JSON.stringify(1, toStringReplacer))
-
-    return RESULT_SUCCESS
+    assertEQ(JSON.stringify(1, toStringReplacer), "1")
 }
 
 const EMPTY_ARRAY: FixedArray<string> = []
 
-function jsonStringifyWithArrayReplacer(): int {
-    Assertions.assertEquals(`{}`, JSON.stringify(new A(), EMPTY_ARRAY))
-    Assertions.assertEquals(`{"id":1}`, JSON.stringify(new A(), ["id"]))
-    Assertions.assertEquals(`{"name":"A","id":1}`, JSON.stringify(new A(), ["name", "id"]))
+function jsonStringifyWithArrayReplacer(): void {
+    const rec: Record<string, NullishType> = { "id": 1, "name": "R" }
+    assertEQ(JSON.stringify(new A(), EMPTY_ARRAY), `{}`)
+    assertEQ(JSON.stringify(rec, EMPTY_ARRAY), `{}`)
+    assertEQ(JSON.stringify(new A(), ["id"]), `{"id":1}`)
+    assertEQ(JSON.stringify(rec, ["id"]), `{"id":1}`)
+    assertEQ(JSON.stringify(new A(), ["name", "id"]), `{"name":"A","id":1}`)
+    assertEQ(JSON.stringify(rec, ["name", "id"]), `{"name":"R","id":1}`)
 
-    Assertions.assertEquals(`[true]`, JSON.stringify([new Boolean(true)], EMPTY_ARRAY))
+    assertEQ(JSON.stringify([new Boolean(true)], EMPTY_ARRAY), `[true]`)
 
     const filter: FixedArray<string | number> = ["id", 0]
-    Assertions.assertEquals(`{"id":1}`, JSON.stringify(new A(), filter))
+    assertEQ(JSON.stringify(new A(), filter), `{"id":1}`)
+    assertEQ(JSON.stringify(rec, filter), `{"id":1}`)
 
     // space cases
-    Assertions.assertEquals(`{}`, JSON.stringify(new A(), EMPTY_ARRAY, "\t"))
-    Assertions.assertEquals(`{\n\t"id": 1\n}`, JSON.stringify(new A(), ["id"], "\t"))
-    Assertions.assertEquals(`{\n\t"a": {}\n}`, JSON.stringify(new R(), ["a"], "\t"))
-    Assertions.assertEquals(`[\n\t{},\n\t{}\n]`, JSON.stringify([new A(), new A()], EMPTY_ARRAY, "\t"))
-
-    return RESULT_SUCCESS
+    assertEQ(JSON.stringify(new A(), EMPTY_ARRAY, "\t"), `{}`)
+    assertEQ(JSON.stringify(new A(), ["id"], "\t"), `{\n\t"id": 1\n}`)
+    assertEQ(JSON.stringify(rec, ["id"], "\t"), `{\n\t"id": 1\n}`)
+    assertEQ(JSON.stringify(new R(), ["a"], "\t"), `{\n\t"a": {}\n}`)
+    assertEQ(JSON.stringify([new A(), new A()], EMPTY_ARRAY, "\t"), `[\n\t{},\n\t{}\n]`)
+    assertEQ(JSON.stringify([rec, rec], EMPTY_ARRAY, "\t"), `[\n\t{},\n\t{}\n]`)
 }
 
-function jsonStringifyWithNullReplacer(): int {
-    Assertions.assertEquals(`{"id":1,"name":"A"}`, JSON.stringify(new A(), null))
-    Assertions.assertEquals(`{}`, JSON.stringify(new E(), null, "  "))
-
-    return RESULT_SUCCESS
+function jsonStringifyWithNullReplacer(): void {
+    assertEQ(JSON.stringify(new A(), null), `{"id":1,"name":"A"}`)
+    const rec: Record<string, NullishType> = { "id": 1, "name": "R" }
+    assertEQ(JSON.stringify(rec, null), `{"id":1,"name":"R"}`)
+    assertEQ(JSON.stringify(new E(), null, "  "), `{}`)
+    const emptyRec: Record<string, NullishType> = {}
+    assertEQ(JSON.stringify(emptyRec, null, "  "), `{}`)
 }
 
-function jsonStringifyWithUndefinedReplacer(): int {
-    Assertions.assertEquals(`{"id":1,"name":"A"}`, JSON.stringify(new A(), undefined))
-
-    return RESULT_SUCCESS
+function jsonStringifyWithUndefinedReplacer(): void {
+    assertEQ(JSON.stringify(new A(), undefined), `{"id":1,"name":"A"}`)
+    const rec: Record<string, NullishType> = { "id": 1, "name": "R" }
+    assertEQ(JSON.stringify(rec, undefined), `{"id":1,"name":"R"}`)
 }
 
 function main(): int {
-    let failures = 0
-
-    failures += test(jsonStringifyObjectWithFunctionReplacer, "JSON.stringify object with function replacer")
-    failures += test(jsonStringifyArrayWithFunctionReplacer, "JSON.stringify array with function replacer")
-    failures += test(jsonStringifyWithArrayReplacer, "JSON.stringify with array replacer")
-    failures += test(jsonStringifyWithNullReplacer, "JSON.stringify with 'null' replacer")
-    failures += test(jsonStringifyWithUndefinedReplacer, "JSON.stringify with 'undefined' replacer")
-
-    if (failures == RESULT_SUCCESS) {
-        console.println("PASSED: All tests run")
-    } else {
-        console.println("FAILED: All tests run")
-    }
-
-    return failures
-}
-
-function test(testAction: () => int, testName: string): int {
-    try {
-        const testResult = testAction()
-
-        if (testResult == RESULT_SUCCESS) {
-            console.println(`PASSED: "${testName}"`)
-        } else {
-            console.println(`FAILED: "${testName}"`)
-        }
-
-        return testResult
-    } catch (e) {
-        if (e instanceof AssertionError) {
-            const assertionError = e as AssertionError
-
-            const errorMessage = assertionError.message
-            console.println(`FAILED: "${testName}" failed with error: ${errorMessage}`)
-        } else {
-            console.println(`FAILED: "${testName}" failed with exception ${e}`)
-        }
-
-        return RESULT_FAILURE
-    }
-}
-
-class Assertions {
-    static assertEquals(expected: string, actual: string): void {
-        assertEQ(expected,  actual,  `expected "${expected}" but was "${actual}"`)
-    }
+    const suite = new ArkTestsuite("JSON.stringify")
+    suite.addTest("object with function replacer", jsonStringifyObjectWithFunctionReplacer)
+    suite.addTest("record with function replacer", jsonStringifyRecordWithFunctionReplacer)
+    suite.addTest("array with function replacer", jsonStringifyArrayWithFunctionReplacer)
+    suite.addTest("with array replacer", jsonStringifyWithArrayReplacer)
+    suite.addTest("with 'null' replacer", jsonStringifyWithNullReplacer)
+    suite.addTest("with 'undefined' replacer", jsonStringifyWithUndefinedReplacer)
+    return suite.run()
 }
