@@ -87,7 +87,6 @@ foreach(t ${ets_tests_list})
     # Run tests
     add_custom_target(etsnapi_run_${t}
         COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} ${testing_dir}/${t}.abc ${t}.ETSGLOBAL::main
-        COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc ${testing_dir}/${t}.abc ${t}.ETSGLOBAL::main
         COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw ${testing_dir}/${t}.abc ${t}.ETSGLOBAL::main
         WORKING_DIRECTORY "${GEN_ETSNAPI_LIB_DIR}"
         DEPENDS ark etsstdlib es2panda_${t}

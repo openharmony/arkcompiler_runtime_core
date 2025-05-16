@@ -830,7 +830,6 @@ add_gtests(
     tests/histogram_test.cpp
     tests/mem_stats_additional_info_test.cpp
     tests/mem_stats_gc_test.cpp
-    tests/mem_stats_gen_gc_test.cpp
     tests/mem_stats_test.cpp
 )
 
@@ -863,12 +862,6 @@ add_gtests(
 add_gtests(
     arkruntime_memory_management_malloc-proxy-allocator-test
     tests/malloc-proxy-allocator-test.cpp
-)
-
-add_gtests(
-    arkruntime_memory_management_pygote_space_allocator_gen_test
-    tests/pygote_space_allocator_test_base.cpp
-    tests/pygote_space_allocator_gen_test.cpp
 )
 
 add_gtests(

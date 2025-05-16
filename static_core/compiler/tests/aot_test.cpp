@@ -572,8 +572,8 @@ TEST_F(AotTest, FileManagerLoadAbc)
         auto gcTypeName = "--gc-type=epsilon";
         if (gcType == mem::GCType::STW_GC) {
             gcTypeName = "--gc-type=stw";
-        } else if (gcType == mem::GCType::GEN_GC) {
-            gcTypeName = "--gc-type=gen-gc";
+        } else if (gcType == mem::GCType::G1_GC) {
+            gcTypeName = "--gc-type=g1-gc";
         } else {
             ASSERT_TRUE(gcType == mem::GCType::EPSILON_GC || gcType == mem::GCType::EPSILON_G1_GC)
                 << "Invalid GC type\n";

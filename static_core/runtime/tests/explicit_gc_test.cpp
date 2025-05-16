@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,65 +135,9 @@ TEST_F(ExplicitGC, TestG1GCPhases)
     }
 }
 
-TEST_F(ExplicitGC, TestGenGCPhases)
-{
-    SetupRuntime("gen-gc", true);
-
-    Runtime *runtime = Runtime::GetCurrent();
-    GC *gc = runtime->GetPandaVM()->GetGC();
-    MTManagedThread *thread = MTManagedThread::GetCurrent();
-    ScopedManagedCodeThread s(thread);
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    ObjectAllocator objectAllocator;
-
-    std::string expectedLog;
-    std::string log;
-
-    VMHandle<ObjectHeader> obj;
-    obj = VMHandle<ObjectHeader>(thread, objectAllocator.AllocObjectInYoung());
-
-    {
-        ScopedNativeCodeThread sn(thread);
-        testing::internal::CaptureStderr();
-        GCTask task(GCTaskCause::EXPLICIT_CAUSE);
-        task.Run(*gc);  // run young
-        expectedLog = "[YOUNG (Explicit)]";
-        log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
-    }
-}
-
 TEST_F(ExplicitGC, TestG1GCWithFullExplicit)
 {
     SetupRuntime("g1-gc", false);
-
-    Runtime *runtime = Runtime::GetCurrent();
-    GC *gc = runtime->GetPandaVM()->GetGC();
-    MTManagedThread *thread = MTManagedThread::GetCurrent();
-    ScopedManagedCodeThread s(thread);
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    ObjectAllocator objectAllocator;
-
-    std::string expectedLog;
-    std::string log;
-
-    VMHandle<ObjectHeader> obj;
-    obj = VMHandle<ObjectHeader>(thread, objectAllocator.AllocObjectInYoung());
-
-    {
-        ScopedNativeCodeThread sn(thread);
-        testing::internal::CaptureStderr();
-        GCTask task(GCTaskCause::EXPLICIT_CAUSE);
-        task.Run(*gc);  // run full
-        expectedLog = "[FULL (Explicit)]";
-        log = testing::internal::GetCapturedStderr();
-        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
-    }
-}
-
-TEST_F(ExplicitGC, TestGenGCWithFullExplicit)
-{
-    SetupRuntime("gen-gc", false);
 
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
