@@ -26,7 +26,7 @@
 
 namespace ark::ets::intrinsics {
 
-EtsBoolean StdCoreRuntimeGetPlatformIsLittleEndian()
+EtsBoolean StdCoreRuntimeIsLittleEndianPlatform()
 {
     ASSERT(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ || __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__);
     return __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__;
