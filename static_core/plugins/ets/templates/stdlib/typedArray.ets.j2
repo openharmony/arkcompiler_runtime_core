@@ -726,6 +726,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return this
     }
 
+    {%- if N != 'Float64' %}
+
     /**
      * Fills the {{N}}Array with specified value
      *
@@ -734,22 +736,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns modified {{N}}Array
      */
     public fill(value: {{elementCompat}}, start: int, end: int): this {
-        {%- if N != 'Float64' %}
         {%- if N not in ['Float32', 'BigInt64'] %}
         value = this.zeroIfInfinity(value)
         {%- endif %}
         this.fill(value{{fromElementCompat}}, start as int, end as int)
         return this
-        {%- else %}
-        const k = normalizeIndex(start, this.lengthInt)
-        const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
-        return this
-        {%- endif %}
     }
-    {%- if N != 'Float64' %}
 
     /**
      * Fills the {{N}}Array with specified value
@@ -799,6 +791,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return this
     }
 
+    {%- endif %}
+
     /**
      * Fills the {{N}}Array with specified value
      *
@@ -809,12 +803,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public fill(value: {{T}}, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
-    {%- endif %}
+
+    private final native fillInternal(value: {{T}}, start: int, end: int): void
 
     /**
      * Assigns val as element on insertPos.

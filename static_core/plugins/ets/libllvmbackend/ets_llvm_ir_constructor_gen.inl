@@ -435,3 +435,32 @@ bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
     ValueMapAdd(inst, call);
     return true;
 }
+
+bool LLVMIrConstructor::EmitFloat32ArrayFillInternal(Inst *inst)
+{
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_FILL_INTERNAL_FAST_PATH,
+                                      builder_.getInt32Ty());
+}
+
+bool LLVMIrConstructor::EmitFloat64ArrayFillInternal(Inst *inst)
+{
+    return EmitFloatArrayFillInternal(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_FILL_INTERNAL_FAST_PATH,
+                                      builder_.getInt64Ty());
+}
+
+bool LLVMIrConstructor::EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface::EntrypointId eid,
+                                                   llvm::IntegerType *bitcastType)
+{
+    if (GetGraph()->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+    auto val = GetInputValue(inst, 1U);
+    auto bitcast = builder_.CreateBitCast(val, bitcastType);
+
+    auto ref = GetInputValue(inst, 0);
+    auto beginPos = GetInputValue(inst, 2U);
+    auto endPos = GetInputValue(inst, 3U);
+    ArenaVector<llvm::Value *> args({ref, bitcast, beginPos, endPos}, GetGraph()->GetLocalAllocator()->Adapter());
+    CreateFastPathCall(inst, eid, args);
+    return true;
+}

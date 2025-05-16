@@ -189,6 +189,7 @@ set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)
 if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
     irtoc_compile(TARGET_NAME irtoc_ets_fastpath
                   INPUT_FILES ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
+                              ${IRTOC_ETS_SCRIPTS}/typed_arrays.irt
                   TARGET_VARIABLE IRTOC_ETS_FASTPATH_OBJ
                   TARGET_VARIABLE_LLVM IRTOC_ETS_FASTPATH_LLVM_OBJ)
 

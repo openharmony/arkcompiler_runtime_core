@@ -47,3 +47,42 @@ bool EmitStringRepeat(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_REPEAT, 2U);
 }
+bool EmitInt8ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitInt16ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT16_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitInt32ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT32_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitBigInt64ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitFloat32ArrayFillInternal(Inst *inst);
+bool EmitFloat64ArrayFillInternal(Inst *inst);
+bool EmitFloatArrayFillInternal(Inst *inst, RuntimeInterface::EntrypointId eid, llvm::IntegerType *bitcastType);
+bool EmitUInt8ClampedArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_CLAMPED_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitUInt8ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT8_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitUInt16ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT16_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitUInt32ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::U_INT32_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}
+bool EmitBigUInt64ArrayFillInternal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_U_INT64_ARRAY_FILL_INTERNAL_FAST_PATH, 4U);
+}

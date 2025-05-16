@@ -17,3 +17,4 @@ add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/interpreter_main_loop.
 add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/string_builder.irt)
 add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/string.irt)
 add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/to_string_cache.irt)
+add_irtoc_plugin(${PANDA_ETS_PLUGIN_SOURCE}/irtoc_scripts/typed_arrays.irt)

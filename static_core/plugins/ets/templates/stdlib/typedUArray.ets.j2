@@ -775,11 +775,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         {%- endif %}
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
-        for (let i: int = k; i < finalPos; ++i) {
-            this.setUnsafe(i, value)
-        }
+        this.fillInternal(value, k, finalPos)
         return this
     }
+
+    private final native fillInternal(value: {{element['primitiveType']}}, start: int, end: int): void
 
     /**
      * Assigns val as element on index.
