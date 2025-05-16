@@ -97,13 +97,15 @@ ark_isa_yaml = "$isa_gen_dir/isa.yaml"
 
 enable_irtoc = true
 enable_codegen = true
+if (is_mingw) {
+  enable_irtoc = false
+  enable_codegen = false
+}
 if (ark_standalone_build ||
     ((!ark_static_standalone_build &&
       (target_cpu == "x64" || target_cpu == "x86_64")) ||
      (current_os == "win" || current_os == "mingw" ||
       current_os == "winuwp"))) {
-  enable_irtoc = false
-  enable_codegen = false
   is_llvmbackend = false
   is_llvm_interpreter = false
   is_llvm_fastpath = false

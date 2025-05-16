@@ -60,6 +60,7 @@ template("ohos_shared_library") {
                "subsystem_name",
                "relative_install_dir",
                "install_enable",
+               "license_file",
              ])
 
   shared_library("${target_name}") {
