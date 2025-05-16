@@ -275,8 +275,10 @@
  *
  * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-<%= access_public %> <%= override %> every<%= this_generic %>(<%= this_arg %>predicate: (value: <%= el_type %><%= lambda_params %>) => boolean): boolean {
-    for (let i = 0; i < <%= this_len_int %>; i++) {
+<%= access_public %> <%= override %> every<%= this_generic %>(<%= this_arg %>predicate: (value: <%= el_type %><%= lambda_params %>) => boolean): boolean {<% if this_arg == "" %>
+    let curArrLength = <%= this_len_int %>
+    for (let i = 0; i < curArrLength && i < <%= this_len_int %>; i++) {<% else %>
+    for (let i = 0; i < <%= this_len_int %>; i++) {<% end %>
         if (!predicate(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
             return false
         }
