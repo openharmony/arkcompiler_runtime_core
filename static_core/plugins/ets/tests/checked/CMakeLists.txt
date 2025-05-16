@@ -18,7 +18,7 @@ add_subdirectory(jitinterface)
 function(panda_add_checked_test_ets)
     set(prefix ARG)
     set(options SUPPORT_RELEASE JITINTERFACE NATIVE BOOT)
-    set(singleValues NAME FILE LIBCORE)
+    set(singleValues NAME FILE LIBCORE OPT_LEVEL)
     set(multiValues AUX_FILES EXT_FILES)
     cmake_parse_arguments(${prefix} "${options}" "${singleValues}" "${multiValues}" ${ARGN})
 
@@ -48,9 +48,12 @@ function(panda_add_checked_test_ets)
 
     file(MAKE_DIRECTORY "${TEST_DIR}")
     set(ABC_TARGET ${TEST_NAME}-ets-es2panda)
-    get_filename_component(TEST_TYPE "${ARG_FILE}" EXT)
+    get_filename_component(TEST_TYPE "${ARG_FILE}" EXT)        
+    if (NOT DEFINED ARG_OPT_LEVEL)
+        set(ARG_OPT_LEVEL 2)
+    endif()
     if (${TEST_TYPE} MATCHES "ets")
-        compile_ets_code(${ARG_FILE} ${BINARY_FILE} ${ABC_TARGET})
+        compile_ets_code(${ARG_FILE} ${BINARY_FILE} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
     else()
     # Compile assembly file
         add_custom_command(OUTPUT "${BINARY_FILE}"
@@ -319,3 +322,4 @@ panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ani/quick_native.ets
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_object_boxed.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_static_const_folding.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/lower_boxed_boolean.ets)
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_doubled_xor.ets OPT_LEVEL 0)
