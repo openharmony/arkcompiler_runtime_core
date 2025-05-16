@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 
+#include "ets_platform_types.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
@@ -134,6 +135,20 @@ private:
     static std::atomic_uint32_t qnameBufferSize_;
 };
 
+class CommonJSObjectCache {  // NOLINT(cppcoreguidelines-special-member-functions)
+public:
+    explicit CommonJSObjectCache(InteropCtx *ctx);
+    ~CommonJSObjectCache();
+
+    napi_value GetProxy() const;
+
+private:
+    void InitializeCache();
+
+    InteropCtx *ctx_ = nullptr;
+    napi_ref proxyRef_ {};
+};
+
 class InteropCtx final {
 public:
     NO_COPY_SEMANTIC(InteropCtx);
@@ -208,6 +223,11 @@ public:
     Method *GetRegisterFinalizerMethod() const
     {
         return jsvalueFregistryRegister_;
+    }
+
+    CommonJSObjectCache *GetCommonJSObjectCache()
+    {
+        return &commonJSObjectCache_;
     }
 
     // NOTE(vpukhov): implement in native code
@@ -575,6 +595,7 @@ private:
     ConstStringStorage constStringStorage_;
     LocalScopesStorage localScopesStorage_ {};
     JSRefConvertCache refconvertCache_;
+    CommonJSObjectCache commonJSObjectCache_;
 
     // finalization registry for JSValues
     mem::Reference *jsvalueFregistryRef_ {};

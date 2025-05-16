@@ -204,6 +204,13 @@ inline napi_value GetGlobal(napi_env env)
     return jsValueGlobal;
 }
 
+inline napi_value GetBooleanValue(napi_env env, bool val)
+{
+    napi_value jsValueBoolean {};
+    NAPI_CHECK_FATAL(napi_get_boolean(env, val, &jsValueBoolean));
+    return jsValueBoolean;
+}
+
 inline bool IsNull(napi_env env, napi_value val)
 {
     return GetValueType(env, val) == napi_null;

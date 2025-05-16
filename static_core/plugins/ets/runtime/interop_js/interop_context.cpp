@@ -204,6 +204,39 @@ napi_value ConstStringStorage::InitBuffer(size_t length)
     return jsArr;
 }
 
+CommonJSObjectCache::CommonJSObjectCache(InteropCtx *ctx) : ctx_(ctx)
+{
+    InitializeCache();
+}
+
+CommonJSObjectCache::~CommonJSObjectCache()
+{
+    if (proxyRef_ != nullptr) {
+        napi_env env = ctx_->GetJSEnv();
+        napi_delete_reference(env, proxyRef_);
+    }
+}
+
+napi_value CommonJSObjectCache::GetProxy() const
+{
+    if (proxyRef_ == nullptr) {
+        const_cast<CommonJSObjectCache *>(this)->InitializeCache();
+    }
+    return GetReferenceValue(ctx_->GetJSEnv(), proxyRef_);
+}
+
+void CommonJSObjectCache::InitializeCache()
+{
+    napi_env env = ctx_->GetJSEnv();
+
+    napi_value global;
+    NAPI_CHECK_FATAL(napi_get_global(env, &global));
+
+    napi_value proxy;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Proxy", &proxy));
+    NAPI_CHECK_FATAL(napi_create_reference(env, proxy, 1, &proxyRef_));
+}
+
 InteropCtx *ConstStringStorage::Ctx()
 {
     ASSERT(ctx_ != nullptr);
@@ -342,6 +375,7 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     : sharedEtsVmState_(SharedEtsVmState::GetInstance(coro->GetPandaVM())),
       jsEnv_(env),
       constStringStorage_(this),
+      commonJSObjectCache_(this),
       stackInfoManager_(this, coro)
 {
     stackInfoManager_.InitStackInfoIfNeeded();
