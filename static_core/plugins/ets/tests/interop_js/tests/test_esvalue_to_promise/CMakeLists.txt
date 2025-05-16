@@ -11,20 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-create_declgen_ets2ts_test(esobject
-    ROOT_DIR
-        ${CMAKE_CURRENT_SOURCE_DIR}
-    BINARY_ROOT_DIR
-        ${CMAKE_CURRENT_BINARY_DIR}
-    TS_MAIN
-        ${CMAKE_CURRENT_SOURCE_DIR}/main.ts
-    ETS_VM_LAUNCHER
-        ${CMAKE_CURRENT_SOURCE_DIR}/../ets_vm_launcher.ts
-    TS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/esobject.ts
-        ${CMAKE_CURRENT_SOURCE_DIR}/export.ts
-    ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib.ets
-    DECLS_EXPECTED
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib.expected
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
+
+panda_ets_interop_js_gtest(ets_interop_js_test_esvalue_to_promise
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_to_promise_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_to_promise_test.ets
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esvalue_to_promise_test.ts
+    ETS_CONFIG ${ETS_CONFIG}
 )

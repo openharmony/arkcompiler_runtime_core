@@ -13,4 +13,7 @@
  * limitations under the License.
  */
 
-export let eo = ESObject.load('./export.js').getProperty('a')
+import { helper, etsVm } from './ets_vm_launcher';
+import { main } from './esvalue';
+
+main();

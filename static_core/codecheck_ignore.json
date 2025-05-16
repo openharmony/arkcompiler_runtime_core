@@ -94,7 +94,7 @@
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/classes/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/depend_export/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/export_error/CMakeLists.txt": {"bc-40001": "*"},
-  "plugins/ets/tests/interop_js/tests/declgen_ets2ts/esobject/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/interop_js/tests/declgen_ets2ts/esvalue/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/export_default/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/enums/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/fields/CMakeLists.txt": {"bc-40001": "*"},

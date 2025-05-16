@@ -15,7 +15,7 @@
 
 import {
     A,
-} from 'esobjectwithstringkey_js';
+} from 'esvaluewithstringkey_js';
 
 
 function check_field_access_by_dot(): int {
@@ -30,7 +30,7 @@ function check_field_access_by_dot(): int {
 }
 
 
-function check_esobject_with_string_literal(): int {
+function check_esvalue_with_string_literal(): int {
     let e: JSValue = new A();
     let res = e['Ekko'];
     if (res == 'ekko') {
@@ -41,7 +41,7 @@ function check_esobject_with_string_literal(): int {
     }
 }
 
-function check_esobject_with_string_key() : int {
+function check_esvalue_with_string_key() : int {
     let e:  JSValue = new A();
     let string_key: string = 'Ekko';
     let res = e[string_key];
@@ -58,7 +58,7 @@ function foo (es: JSValue, str: string): string {
     return es[str];
 }
 
-function check_esobject_with_string_from_foo() : int {
+function check_esvalue_with_string_from_foo() : int {
     let es:  JSValue = new A();
     let string_key: string = 'Ekko';
     let res: string = foo(es, string_key);
@@ -71,7 +71,7 @@ function check_esobject_with_string_from_foo() : int {
     }
 }
 
-function check_esobject_with_expression(): int {
+function check_esvalue_with_expression(): int {
     let es:  JSValue = new A();
     let string_key: string = 'Ekk';
     let res = es[string_key + 'o'];
@@ -84,7 +84,7 @@ function check_esobject_with_expression(): int {
     }
 }
 
-function check_esobject_with_expression_str_literals(): int {
+function check_esvalue_with_expression_str_literals(): int {
     let es:  JSValue = new A();
     let res = es['Ekk' + 'o'];
 
@@ -96,7 +96,7 @@ function check_esobject_with_expression_str_literals(): int {
     }
 }
 
-function check_esobject_with_expression_strings(): int {
+function check_esvalue_with_expression_strings(): int {
     let es:  JSValue = new A();
     let string_key_1: string = 'Ekk';
     let string_key_2: string = 'o';

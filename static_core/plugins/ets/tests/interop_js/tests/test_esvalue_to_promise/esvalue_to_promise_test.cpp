@@ -18,11 +18,11 @@
 
 namespace ark::ets::interop::js::testing {
 
-class EtsESObjectToPromiseJsToEtsTest : public EtsInteropTest {};
+class EtsESValueToPromiseJsToEtsTest : public EtsInteropTest {};
 
-TEST_F(EtsESObjectToPromiseJsToEtsTest, test_esobject_to_promise)
+TEST_F(EtsESValueToPromiseJsToEtsTest, test_esvalue_to_promise)
 {
-    ASSERT_TRUE(RunJsTestSuite("esobject_to_promise_test.ts"));
+    ASSERT_TRUE(RunJsTestSuite("esvalue_to_promise_test.ts"));
 }
 
 }  // namespace ark::ets::interop::js::testing
