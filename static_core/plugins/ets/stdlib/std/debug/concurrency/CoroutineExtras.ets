@@ -41,4 +41,6 @@ export final class CoroutineExtras {
     public static native increaseTaskpoolWorkersToN(workersNum: int): void;
     // checks if worker has external scheduler
     public static native workerHasExternalScheduler(): boolean;
+    // is taskpool using launch mode
+    public static native isTaskpoolUsingLaunchMode(): boolean;
 }

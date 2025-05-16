@@ -223,6 +223,16 @@ options:
   default: false
   description: Collect coroutine stats and dump it at the end of the program
 
+- name: taskpool-mode
+  lang:
+    - ets
+  type: std::string
+  default: eaworker
+  possible_values:
+    - eaworker
+    - launch
+  description: taskpool using eaworker or launch as execution engine
+
 - name: native-library-path
   lang:
     - ets

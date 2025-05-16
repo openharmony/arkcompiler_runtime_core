@@ -213,9 +213,13 @@ function taskWithDependencyExecutePeriodicallyTest(): void {
 function testTaskpoolInfo(){
     // Check non empty threadInfo without tasks
     let emptyThreadInfo = taskpool.getTaskPoolInfo();
-    assertNE(emptyThreadInfo.threadInfos.length, 0);
     let flagForTask = new Event();
     let isRunTask = new Event();
+    // When taskpool using launch we do not have default worker for it
+    // So the behavior is little bit different with taskpool using EAWorker
+    if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        assertNE(emptyThreadInfo.threadInfos.length, 0);
+    }
     let funcForTask = (): string => {
         isRunTask.fire();
         flagForTask.wait();
@@ -224,7 +228,9 @@ function testTaskpoolInfo(){
     let task = new taskpool.Task("task_name", funcForTask);
     let info1 = taskpool.getTaskPoolInfo();
     // Obtain the worker pool info, and the behavior is the same as 1.0 taskpool
-    assertNE(info1.threadInfos.length, 0);
+    if (!CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        assertNE(info1.threadInfos.length, 0);
+    }
     let p = taskpool.execute(task, taskpool.Priority.HIGH);
     // wait for task started
     isRunTask.wait();
