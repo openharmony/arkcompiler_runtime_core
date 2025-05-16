@@ -139,21 +139,11 @@ public:
         return reinterpret_cast<ObjectHeader *>(v) != nullptr;
     }
 
-    static bool IsHeapObject(coretypes::TaggedType v)
-    {
-        return coretypes::TaggedValue(v).IsHeapObject();
-    }
-
     static ObjectHeader *DecodeNotNull(ObjectPointerType v)
     {
         auto *p = reinterpret_cast<ObjectHeader *>(v);
         ASSERT(p != nullptr);
         return p;
-    }
-
-    static ObjectHeader *DecodeNotNull(coretypes::TaggedType v)
-    {
-        return coretypes::TaggedValue(v).GetHeapObject();
     }
 
     template <typename P>
@@ -173,10 +163,23 @@ public:
         *ref = EncodeObjectPointerType(val);
     }
 
+// NOTE(ipetrov): Hack for 128 bit ObjectHeader
+#if !defined(ARK_HYBRID)
+    static bool IsHeapObject(coretypes::TaggedType v)
+    {
+        return coretypes::TaggedValue(v).IsHeapObject();
+    }
+
+    static ObjectHeader *DecodeNotNull(coretypes::TaggedType v)
+    {
+        return coretypes::TaggedValue(v).GetHeapObject();
+    }
+
     static void Store(coretypes::TaggedType *ref, ObjectHeader *val)
     {
         *ref = EncodeTaggedType(val);
     }
+#endif
 
 private:
     template <class T, bool IS_VOLATILE>

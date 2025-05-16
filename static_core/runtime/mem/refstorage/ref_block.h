@@ -73,7 +73,7 @@ class RefBlock {
         }
     };
 
-    static constexpr unsigned int REFS_IN_BLOCK = 60;
+    static constexpr unsigned int REFS_IN_BLOCK = 240U / sizeof(ObjectPointerType);
     static constexpr SlotBitMap START_VALUE = std::numeric_limits<SlotBitMap>::max();
     static constexpr SlotBitMap FINAL_VALUE =
         std::numeric_limits<SlotBitMap>::max() & (~((static_cast<SlotBitMap>(1U) << REFS_IN_BLOCK) - 1U));

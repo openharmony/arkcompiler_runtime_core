@@ -306,6 +306,16 @@ private:
     }
 
 private:
+    // ClassLinker reorders fileds based on them size. Object pointer size can be different for different configs
+#if defined(PANDA_TARGET_64) && !defined(PANDA_USE_32_BIT_POINTER)
+    // Managed array used in this `ArrayBuffer`, null if buffer is external
+    ObjectPointer<EtsByteArray> managedData_;
+    // Contains pointer to either managed non-movable data or external data.
+    // Null if `ArrayBuffer` was detached, non-null otherwise
+    EtsLong nativeData_;
+    EtsInt byteLength_;
+    EtsBoolean isResizable_;
+#else
     // Managed array used in this `ArrayBuffer`, null if buffer is external
     ObjectPointer<EtsByteArray> managedData_;
     EtsInt byteLength_;
@@ -313,6 +323,7 @@ private:
     // Null if `ArrayBuffer` was detached, non-null otherwise
     EtsLong nativeData_;
     EtsBoolean isResizable_;
+#endif
 
     friend class test::EtsArrayBufferTest;
     friend class test::EtsEscompatArrayBufferMembers;
