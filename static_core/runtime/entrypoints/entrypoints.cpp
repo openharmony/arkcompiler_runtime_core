@@ -129,7 +129,7 @@ extern "C" void AnnotateSanitizersEntrypoint([[maybe_unused]] void const *addr, 
     TSAN_ANNOTATE_HAPPENS_BEFORE(const_cast<void *>(addr));
 #endif
 #ifdef PANDA_ASAN_ON
-    __asan_unpoison_memory_region(addr, size);
+    ASAN_UNPOISON_MEMORY_REGION(addr, size);
 #endif
 }
 
