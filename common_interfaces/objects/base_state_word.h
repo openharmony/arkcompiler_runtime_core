@@ -29,11 +29,20 @@ enum class Language : uint64_t {
     STATIC = 1,
 };
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
 class BaseStateWord {
 public:
-    static constexpr size_t PADDING_WIDTH = 60;
+#ifdef BASE_CLASS_32BITS
+    static constexpr size_t BASECLASS_WIDTH = 32;
+    static constexpr size_t PADDING_WIDTH = 28;
+#else
+    static constexpr size_t BASECLASS_WIDTH = 48;
+    static constexpr size_t PADDING_WIDTH = 12;
+#endif
     static constexpr size_t FORWARD_WIDTH = 2;
     static constexpr size_t LANGUAGE_WIDTH = 2;
+    static constexpr uint64_t LOW_32_BITS_MASK = 0xFFFFFFFF;
+    static constexpr uint64_t HIGH_32_BITS_MASK = ~LOW_32_BITS_MASK;
 
     BaseStateWord() = default;
     // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
@@ -96,12 +105,24 @@ public:
         return state_.forwardState_;
     }
 
+    StateWordType GetBaseClassAddress() const
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return state_.bascClass_;
+    }
+
+    void SetFullBaseClassAddress(StateWordType address)
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        state_.bascClass_ = address;
+    }
 private:
     // Little endian
     // NOLINTBEGIN(readability-identifier-naming)
     struct State {
-        StateWordType padding_ : PADDING_WIDTH;
-        Language language_ : LANGUAGE_WIDTH;
+        StateWordType bascClass_   : BASECLASS_WIDTH;
+        StateWordType padding_     : PADDING_WIDTH;
+        Language language_         : LANGUAGE_WIDTH;
         ForwardState forwardState_ : FORWARD_WIDTH;
     };
 

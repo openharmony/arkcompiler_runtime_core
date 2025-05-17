@@ -20,6 +20,7 @@
 #include <cstdio>
 
 #include "base/common.h"
+#include "objects/base_class.h"
 #include "objects/base_object_operator.h"
 #include "objects/base_state_word.h"
 
@@ -186,6 +187,27 @@ public:
     }
     // The interfaces above only use for common code compiler. It will be deleted later.
 
+    void SetFullBaseClassWithoutBarrier(BaseClass* cls)
+    {
+        state_ = 0;
+        state_.SetFullBaseClassAddress(reinterpret_cast<StateWordType>(cls));
+    }
+
+    BaseClass *GetBaseClass() const
+    {
+        return reinterpret_cast<BaseClass *>(state_.GetBaseClassAddress());
+    }
+
+    // Size of object header
+    static constexpr size_t BaseObjectSize()
+    {
+        return sizeof(BaseObject);
+    }
+
+    bool IsString() const
+    {
+        return GetBaseClass()->IsString();
+    }
 protected:
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
@@ -198,5 +220,7 @@ protected:
     static PUBLIC_API BaseObjectOperator operator_;
     BaseStateWord state_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
+
+static_assert(sizeof(BaseObject) == sizeof(BaseClass::HeaderType));
 }  // namespace panda
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
