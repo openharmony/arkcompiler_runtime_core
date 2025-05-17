@@ -22,13 +22,16 @@
 
 namespace ark::abc2program {
 
-constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "ets/HelloWorld.abc";
-constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "ets/Functions.abc";
-constexpr std::string_view LITERAL_ARRAY_ABC_TEST_FILE_NAME = "ets/LiteralArray.abc";
-constexpr std::string_view TYPE_ABC_TEST_FILE_NAME = "ets/Type.abc";
-constexpr std::string_view RECORD_ABC_TEST_FILE_NAME = "ets/Record.abc";
-constexpr std::string_view INS_ABC_TEST_FILE_NAME = "ets/Ins.abc";
 constexpr std::string_view FIELD_ABC_TEST_FILE_NAME = "ets/Field.abc";
+constexpr std::string_view FUNCTIONS_ABC_TEST_FILE_NAME = "ets/Functions.abc";
+constexpr std::string_view HELLO_WORLD_ABC_TEST_FILE_NAME = "ets/HelloWorld.abc";
+constexpr std::string_view INS_ABC_TEST_FILE_NAME = "ets/Ins.abc";
+constexpr std::string_view LITERAL_ARRAY_ABC_TEST_FILE_NAME = "ets/LiteralArray.abc";
+constexpr std::string_view METADATA_ABC_TEST_FILE_NAME = "ets/Metadata.abc";
+constexpr std::string_view RECORD_ABC_TEST_FILE_NAME = "ets/Record.abc";
+constexpr std::string_view TYPE_ABC_TEST_FILE_NAME = "ets/Type.abc";
+constexpr size_t ANNOTATION_ID_SIZE = 1;
+constexpr size_t ANNOTATION_ID_PREFIX_SIZE = 3;
 
 class Abc2ProgramTest : public testing::Test {
 public:
@@ -58,6 +61,63 @@ public:
         for (const std::string &expectedString : expectedStrings) {
             const auto stringIter = std::find(strings.begin(), strings.end(), expectedString);
             if (stringIter == strings.end()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    template <typename T>
+    bool ValidateVector(const T &vec, const T &expectedVec)
+    {
+        if (vec.size() != expectedVec.size()) {
+            return false;
+        }
+        for (size_t i = 0; i < vec.size(); i++) {
+            if (vec[i] != expectedVec[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool ValidateAnnotationId(const std::vector<std::string> &id)
+    {
+        if (id.size() != ANNOTATION_ID_SIZE) {
+            return false;
+        }
+        return id[0].size() > ANNOTATION_ID_PREFIX_SIZE && id[0].substr(0, ANNOTATION_ID_PREFIX_SIZE) == "id_";
+    }
+
+    bool ValidateBoolAttributes(const std::unordered_set<std::string> &boolAttributes,
+                                const std::unordered_set<std::string> &expectedBoolAttributes)
+    {
+        if (boolAttributes.size() != expectedBoolAttributes.size()) {
+            return false;
+        }
+        for (const auto &attr : boolAttributes) {
+            if (expectedBoolAttributes.find(attr) == expectedBoolAttributes.end()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool ValidateAttributes(const std::unordered_map<std::string, std::vector<std::string>> &attributes,
+                            const std::unordered_map<std::string, std::vector<std::string>> &expectedAttributes)
+    {
+        for (const auto &[key, values] : attributes) {
+            if (key == "ets.annotation.id") {
+                if (!ValidateAnnotationId(values)) {
+                    return false;
+                }
+                continue;
+            }
+            auto expectValuesIter = expectedAttributes.find(key);
+            if (expectValuesIter == expectedAttributes.end()) {
+                return false;
+            }
+            if (!ValidateVector(values, expectValuesIter->second)) {
                 return false;
             }
         }
@@ -127,6 +187,15 @@ public:
     void SetUp() override
     {
         (void)driver.Compile(FIELD_ABC_TEST_FILE_NAME.data());
+        prog = &(driver.GetProgram());
+    }
+};
+
+class Abc2ProgramMetadataTest : public Abc2ProgramTest {
+public:
+    void SetUp() override
+    {
+        (void)driver.Compile(METADATA_ABC_TEST_FILE_NAME.data());
         prog = &(driver.GetProgram());
     }
 };
@@ -354,6 +423,162 @@ TEST_F(Abc2ProgramFieldTest, Field)
     }
     bool result = ContainString(existingField, expectedField);
     EXPECT_TRUE(result);
+}
+
+TEST_F(Abc2ProgramMetadataTest, Record1)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {"ets.annotation", "ets.abstract"};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {{"access.record", {"public"}}};
+    for (const auto &it : prog->recordTable) {
+        EXPECT_TRUE(it.first == it.second.name);
+        if (it.second.name != "Metadata.Anno") {
+            continue;
+        }
+        auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+        auto attributes = it.second.metadata->GetAttributes();
+        EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+    }
+}
+
+TEST_F(Abc2ProgramMetadataTest, Record2)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {"ets.abstract", "ets.interface"};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"ets.extends", {"std.core.Object"}}, {"access.record", {"public"}}};
+    for (const auto &it : prog->recordTable) {
+        EXPECT_TRUE(it.first == it.second.name);
+        if (it.second.name != "Metadata.Iface") {
+            continue;
+        }
+        auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+        auto attributes = it.second.metadata->GetAttributes();
+        EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+    }
+}
+
+TEST_F(Abc2ProgramMetadataTest, Record3)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"ets.annotation.element.value", {"\"Cls\""}},
+        {"ets.annotation.class", {"Metadata.Anno"}},
+        {"ets.annotation.type", {"class"}},
+        {"ets.implements", {"Metadata.Iface"}},
+        {"ets.annotation.element.type", {"string"}},
+        {"ets.annotation.element.name", {"name"}},
+        {"ets.extends", {"std.core.Object"}},
+        {"access.record", {"public"}}};
+    for (const auto &it : prog->recordTable) {
+        EXPECT_TRUE(it.first == it.second.name);
+        if (it.second.name != "Metadata.Cls") {
+            continue;
+        }
+        auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+        auto attributes = it.second.metadata->GetAttributes();
+        EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+    }
+}
+
+TEST_F(Abc2ProgramMetadataTest, Record4)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {"ets.abstract"};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"ets.annotation.element.value", {""}},
+        {"ets.annotation.class", {"ets.annotation.Module"}},
+        {"ets.annotation.type", {"class"}},
+        {"ets.annotation.element.type", {"array"}},
+        {"ets.annotation.element.name", {"exported"}},
+        {"ets.extends", {"std.core.Object"}},
+        {"access.record", {"public"}}};
+    for (const auto &it : prog->recordTable) {
+        EXPECT_TRUE(it.first == it.second.name);
+        if (it.second.name != "Metadata.Ns") {
+            continue;
+        }
+        auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+        auto attributes = it.second.metadata->GetAttributes();
+        EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+    }
+}
+
+TEST_F(Abc2ProgramMetadataTest, Field)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"ets.annotation.element.type", {"string"}},
+        {"ets.annotation.element.name", {"name"}},
+        {"ets.annotation.class", {"Metadata.Anno"}},
+        {"ets.annotation.element.value", {"\"foo\""}},
+        {"access.field", {"public"}}};
+    for (const auto &it : prog->recordTable) {
+        EXPECT_TRUE(it.first == it.second.name);
+        if (it.second.name != "Metadata.Cls") {
+            continue;
+        }
+        for (const auto &r : it.second.fieldList) {
+            if (r.name != "foo") {
+                continue;
+            }
+            auto boolAttributes = it.second.metadata->GetBoolAttributes();
+            EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+            auto attributes = r.metadata->GetAttributes();
+            EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+        }
+    }
+}
+
+TEST_F(Abc2ProgramMetadataTest, Method1)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {
+        {"ets.annotation.element.type", {"string"}},
+        {"ets.annotation.element.name", {"name"}},
+        {"ets.annotation.class", {"Metadata.Anno"}},
+        {"ets.annotation.element.value", {"\"bar\""}},
+        {"access.function", {"public"}}};
+    for (const auto &it : prog->functionInstanceTable) {
+        if (it.second.name != "Metadata.Cls.bar") {
+            continue;
+        }
+        auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+        auto attributes = it.second.metadata->GetAttributes();
+        EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+    }
+}
+
+TEST_F(Abc2ProgramMetadataTest, Method2)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {"static"};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {{"access.function", {"public"}}};
+    for (const auto &it : prog->functionStaticTable) {
+        if (it.second.name != "Metadata.Ns.add") {
+            continue;
+        }
+        auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+        auto attributes = it.second.metadata->GetAttributes();
+        EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+    }
+}
+
+TEST_F(Abc2ProgramMetadataTest, Method3)
+{
+    std::unordered_set<std::string> expectedBoolAttributes = {"ctor"};
+    std::unordered_map<std::string, std::vector<std::string>> expectedAttributes = {{"access.function", {"public"}}};
+    for (const auto &it : prog->functionInstanceTable) {
+        if (it.second.name != "Metadata.Cls._ctor_") {
+            continue;
+        }
+        auto boolAttributes = it.second.metadata->GetBoolAttributes();
+        EXPECT_TRUE(ValidateBoolAttributes(boolAttributes, expectedBoolAttributes));
+        auto attributes = it.second.metadata->GetAttributes();
+        EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
+    }
 }
 
 }  // namespace ark::abc2program
