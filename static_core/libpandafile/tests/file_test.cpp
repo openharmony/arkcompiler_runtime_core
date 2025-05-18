@@ -24,6 +24,7 @@
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 
+#include <array>
 #include <cstdint>
 #ifdef PANDA_TARGET_MOBILE
 #include <unistd.h>
@@ -34,6 +35,8 @@
 #include <gtest/gtest.h>
 
 namespace ark::panda_file::test {
+
+static constexpr const char *ABC_FILE = "test_file.abc";
 
 static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> *data)
 {
@@ -160,6 +163,23 @@ TEST(File, OpenPandaFile)
     remove(zipFilename);
 }
 
+TEST(File, OpenPandaFileFromMemory)
+{
+    auto pf = OpenPandaFileFromMemory(nullptr, -1);
+    EXPECT_EQ(pf, nullptr);
+
+    pf = OpenPandaFileFromMemory(nullptr, 1U);
+    EXPECT_EQ(pf, nullptr);
+
+    std::string tag = "ArkTS Code";
+    pf = OpenPandaFileFromMemory(nullptr, -1, tag);
+    EXPECT_EQ(pf, nullptr);
+
+    tag = "";
+    pf = OpenPandaFileFromMemory(nullptr, 1U, tag);
+    EXPECT_EQ(pf, nullptr);
+}
+
 TEST(File, OpenPandaFileFromZipNameAnonMem)
 {
     // Create ZIP
@@ -196,6 +216,175 @@ TEST(File, OpenPandaFileOrZip)
     EXPECT_NE(pf, nullptr);
     EXPECT_STREQ((pf->GetFilename()).c_str(), zipFilename);
     remove(zipFilename);
+}
+
+TEST(File, OpenPandaFileFromZipErrorHandler)
+{
+    const char *fileName = "test_file_empty.panda";
+    {
+        auto writer = FileWriter(fileName);
+        ASSERT_TRUE(writer);
+    }
+    auto pf = OpenPandaFile(fileName);
+    EXPECT_EQ(pf, nullptr);
+
+    const char *fileNameZip = "test_file_empty.zip";
+    {
+        auto writer = FileWriter(fileName);
+        ASSERT_TRUE(writer);
+        const std::vector<uint8_t> magic = {'P', 'K'};
+        ASSERT_TRUE(writer.WriteBytes(magic));
+    }
+    pf = OpenPandaFile(fileNameZip);
+    EXPECT_EQ(pf, nullptr);
+
+    // Create ZIP
+    const char *fileNameZipWithEntry = "test_file_with_entry.zip";
+    std::vector<uint8_t> data = {};
+    int ret = CreateOrAddZipPandaFile(&data, fileNameZipWithEntry, ARCHIVE_FILENAME, APPEND_STATUS_CREATE,
+                                      Z_BEST_COMPRESSION);
+    ASSERT_EQ(ret, 0);
+    pf = OpenPandaFile(fileNameZipWithEntry);
+    EXPECT_EQ(pf, nullptr);
+
+    auto fp = fopen(fileNameZipWithEntry, "ae");
+    EXPECT_NE(fp, nullptr);
+    const char *appendStr = "error";
+    EXPECT_EQ(fwrite(appendStr, 1U, 1U, fp), 1U);
+    fclose(fp);
+    pf = OpenPandaFile(fileNameZipWithEntry);
+    EXPECT_EQ(pf, nullptr);
+
+    remove(fileName);
+    remove(fileNameZip);
+    remove(fileNameZipWithEntry);
+}
+
+TEST(File, HandleArchive)
+{
+    {
+        ItemContainer container;
+        auto writer = FileWriter(ARCHIVE_FILENAME);
+        ASSERT_TRUE(container.Write(&writer));
+        ASSERT_TRUE(writer.Align(4U));  // to 4 bytes align
+    }
+
+    std::vector<uint8_t> data;
+    {
+        std::ifstream in(ARCHIVE_FILENAME, std::ios::binary);
+        data.insert(data.end(), (std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+        ASSERT_TRUE(!data.empty() && data.size() % 4U == 0U);
+    }
+
+    // Create ZIP
+    const char *zipFilename = "__HandleArchive__.zip";
+    int ret = CreateOrAddZipPandaFile(&data, zipFilename, ARCHIVE_FILENAME, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
+    ASSERT_EQ(ret, 0);
+    auto pf = OpenPandaFile(zipFilename);
+    EXPECT_NE(pf, nullptr);
+
+    remove(ARCHIVE_FILENAME);
+    remove(zipFilename);
+}
+
+TEST(File, CheckHeader1)
+{
+    // Write panda file to disk
+    ItemContainer container;
+
+    auto writer = FileWriter(ABC_FILE);
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk
+    auto fp = fopen(ABC_FILE, "rbe");
+    EXPECT_NE(fp, nullptr);
+
+    os::mem::ConstBytePtr ptr = os::mem::MapFile(os::file::File(fileno(fp)), os::mem::MMAP_PROT_READ,
+                                                 os::mem::MMAP_FLAG_PRIVATE, writer.GetOffset())
+                                    .ToConst();
+    EXPECT_NE(ptr.Get(), nullptr);
+    EXPECT_TRUE(CheckHeader(ptr, ABC_FILE));
+    fclose(fp);
+
+    remove(ABC_FILE);
+}
+
+TEST(File, GetMode)
+{
+    // Write panda file to disk
+    ItemContainer container;
+
+    auto writer = FileWriter(ABC_FILE);
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk
+    EXPECT_NE(File::Open(ABC_FILE), nullptr);
+    EXPECT_EQ(File::Open(ABC_FILE, File::OpenMode::WRITE_ONLY), nullptr);
+
+    remove(ABC_FILE);
+}
+
+TEST(File, Open)
+{
+    EXPECT_EQ(File::Open(ABC_FILE), nullptr);
+
+    auto fp = fopen(ABC_FILE, "we");
+    EXPECT_NE(fp, nullptr);
+    const char *writeStr = "error";
+    EXPECT_EQ(fwrite(writeStr, 1U, 1U, fp), 1U);
+    fclose(fp);
+    EXPECT_EQ(File::Open(ABC_FILE), nullptr);
+    EXPECT_EQ(File::Open(ABC_FILE, File::OpenMode::WRITE_ONLY), nullptr);
+
+    remove(ABC_FILE);
+}
+
+TEST(File, OpenUncompressedArchive)
+{
+    // Invalid FD
+    EXPECT_EQ(File::OpenUncompressedArchive(-1, ABC_FILE, 0U, 0U), nullptr);
+
+    // Invalid Size
+    EXPECT_EQ(File::OpenUncompressedArchive(1, ABC_FILE, 0U, 0U), nullptr);
+
+    // Invalid Max Size
+    EXPECT_EQ(File::OpenUncompressedArchive(1, ABC_FILE, -1, 0U), nullptr);
+
+    // Invalid ABC File
+    auto data = GetEmptyPandaFileBytes();
+    auto fp = fopen(ARCHIVE_FILENAME, "w+e");
+    EXPECT_NE(fp, nullptr);
+    data[0] = 0U;
+    EXPECT_EQ(fwrite(data.data(), sizeof(uint8_t), data.size(), fp), data.size());
+    (void)fseek(fp, 0, SEEK_SET);
+    EXPECT_EQ(File::OpenUncompressedArchive(fileno(fp), ARCHIVE_FILENAME, sizeof(File::Header), 0U), nullptr);
+    fclose(fp);
+
+    remove(ABC_FILE);
+}
+
+TEST(File, CheckLiteralArray)
+{
+    // Write panda file to disk
+    ItemContainer container;
+
+    auto writer = FileWriter(ABC_FILE);
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk
+    auto fp = fopen(ABC_FILE, "rbe");
+    EXPECT_NE(fp, nullptr);
+
+    os::mem::ConstBytePtr ptr =
+        os::mem::MapFile(os::file::File(fileno(fp)), os::mem::MMAP_PROT_READ | os::mem::MMAP_PROT_WRITE,
+                         os::mem::MMAP_FLAG_PRIVATE, writer.GetOffset())
+            .ToConst();
+    EXPECT_NE(ptr.Get(), nullptr);
+    EXPECT_TRUE(CheckHeader(ptr, ABC_FILE));
+
+    fclose(fp);
+
+    remove(ABC_FILE);
 }
 
 TEST(File, OpenPandaFileUncompressed)
@@ -282,6 +471,19 @@ TEST(File, CheckHeader)
 
     res = ark::panda_file::CheckHeader(f->GetPtr(), std::string_view(), data.size());
     EXPECT_EQ(res, false);
+}
+
+TEST(File, OpenPandaFileFromSecureMemory)
+{
+    // test buffer is nullptr
+    auto pf = OpenPandaFileFromSecureMemory(nullptr, -1);
+    EXPECT_EQ(pf, nullptr);
+
+    // test buff is not nullptr
+    const size_t bufferSize = 1024;
+    std::array<uint8_t, bufferSize> buffer = {0};
+    pf = OpenPandaFileFromSecureMemory(buffer.data(), bufferSize);
+    EXPECT_EQ(pf, nullptr);
 }
 
 }  // namespace ark::panda_file::test

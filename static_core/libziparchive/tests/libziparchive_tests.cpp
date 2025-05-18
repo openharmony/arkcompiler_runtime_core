@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -647,5 +647,27 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile)
 
     remove(archivename);
     GTEST_COUT << "Success.\n";
+}
+
+TEST(LIBZIPARCHIVE, IllegalPathTest)
+{
+    static const char *archivename = "__LIBZIPARCHIVE__ILLEGALPATHTEST__.zip";
+    int ret =
+        CreateOrAddFileIntoZip(archivename, "illegal_path.abc", nullptr, APPEND_STATUS_ADDINZIP, Z_NO_COMPRESSION);
+    ASSERT_EQ(ret, ZIPARCHIVE_ERR);
+    ZipArchiveHandle zipfile = nullptr;
+    ASSERT_EQ(OpenArchive(zipfile, archivename), ZIPARCHIVE_ERR);
+    GlobalStat gi = GlobalStat();
+    ASSERT_EQ(GetGlobalFileInfo(zipfile, &gi), ZIPARCHIVE_ERR);
+    ASSERT_EQ(GoToNextFile(zipfile), ZIPARCHIVE_ERR);
+    ASSERT_EQ(LocateFile(zipfile, "illegal_path.abc"), ZIPARCHIVE_ERR);
+    EntryFileStat entry = EntryFileStat();
+    ASSERT_EQ(GetCurrentFileInfo(zipfile, &entry), ZIPARCHIVE_ERR);
+    ASSERT_EQ(CloseArchive(zipfile), ZIPARCHIVE_ERR);
+
+    ASSERT_EQ(OpenArchiveFile(zipfile, nullptr), ZIPARCHIVE_ERR);
+    ASSERT_EQ(OpenCurrentFile(zipfile), ZIPARCHIVE_ERR);
+    ASSERT_EQ(CloseCurrentFile(zipfile), ZIPARCHIVE_ERR);
+    ASSERT_EQ(CloseArchiveFile(zipfile), ZIPARCHIVE_ERR);
 }
 }  // namespace ark::test

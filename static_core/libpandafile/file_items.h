@@ -123,6 +123,7 @@ enum class ItemTypes {
     VALUE_ITEM
 };
 
+std::string ItemTypeToString(ItemTypes type);
 constexpr std::string_view STRING_ITEM = "string_item";
 constexpr std::string_view CLASS_ITEM = "class_item";
 constexpr std::string_view CODE_ITEM = "code_item";

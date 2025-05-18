@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -417,6 +417,37 @@ TEST(Logger, LogDfx)
 
     DfxController::Destroy();
     EXPECT_FALSE(DfxController::IsInitialized());
+}
+
+TEST(Logger, ProcessLogLevelFromString1)
+{
+    Logger::InitializeStdLogging(Logger::Level::INFO, ark::LOGGER_COMPONENT_MASK_ALL);
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
+    testing::internal::CaptureStderr();
+    std::string s = "info";
+    Logger::ProcessLogLevelFromString(s);
+
+    std::string err = testing::internal::GetCapturedStderr();
+    std::string res = helpers::string::Format("");
+    EXPECT_EQ(err, res);
+    Logger::Destroy();
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
+}
+
+TEST(Logger, ProcessLogLevelFromString2)
+{
+    Logger::InitializeStdLogging(Logger::Level::INFO, ark::LOGGER_COMPONENT_MASK_ALL);
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
+    testing::internal::CaptureStderr();
+
+    std::string s = "hello";
+    Logger::ProcessLogLevelFromString(s);
+    std::string err = testing::internal::GetCapturedStderr();
+    uint32_t tid = os::thread::GetCurrentThreadId();
+    std::string res = helpers::string::Format("[TID %06x] E/runtime: Unknown level hello\n", tid);
+    EXPECT_EQ(err, res);
+    Logger::Destroy();
+    EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
 }
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)
