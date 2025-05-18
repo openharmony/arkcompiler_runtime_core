@@ -58,7 +58,8 @@ export class Autofixer {
         this[FaultID.DuplicatedDeclaration].bind(this),
         this[FaultID.DuplicatedEnum].bind(this),
         this[FaultID.EnumWithMixedType].bind(this),
-        this[FaultID.LimitExtends].bind(this)
+        this[FaultID.LimitExtends].bind(this),
+        this[FaultID.AddDeclareToTopLevelInterfaces].bind(this)
       ]
     ],
     [ts.SyntaxKind.LiteralType, [this[FaultID.NumbericLiteral].bind(this)]],
@@ -89,8 +90,7 @@ export class Autofixer {
       ts.SyntaxKind.InterfaceDeclaration, 
       [
         this[FaultID.NoETSKeyword].bind(this),
-        this[FaultID.DefaultExport].bind(this),
-        this[FaultID.CallorOptionFuncs].bind(this),
+        this[FaultID.CallorOptionFuncs].bind(this)
       ]
     ],
     [ts.SyntaxKind.Identifier, [this[FaultID.WrapperToPrimitive].bind(this)]],
@@ -961,7 +961,7 @@ export class Autofixer {
    * Rule: `arkts-ESObject-to-object-type`
    */
   private [FaultID.DefaultExport](node: ts.Node): ts.VisitResult<ts.Node> {
-    if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)) {
+    if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) {
       return exportDefaultAssignment(node,this.context);
     }
   
@@ -1171,6 +1171,42 @@ export class Autofixer {
     }
 
     return node;
+  }
+
+  /**
+   * Rule: `arkts:add-declare-to-top-level-interfaces`
+   */
+  private [FaultID.AddDeclareToTopLevelInterfaces](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!ts.isSourceFile(node)) {
+      return node;
+    }
+
+    const statements = node.statements.map(stmt => {
+      if (ts.isInterfaceDeclaration(stmt) && stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
+        // If 'declare' already exists, do not add it again
+        if (stmt.modifiers.some(m => m.kind === ts.SyntaxKind.DeclareKeyword)) {
+          return stmt;
+        }
+
+        // Transform interface nodes by adding the declare keyword
+        const newModifiers = [
+          ...stmt.modifiers.filter(m => ts.isModifier(m)),
+          this.context.factory.createModifier(ts.SyntaxKind.DeclareKeyword)
+        ] as ts.Modifier[];
+
+        return this.context.factory.updateInterfaceDeclaration(
+          stmt,
+          newModifiers,
+          stmt.name,
+          stmt.typeParameters,
+          stmt.heritageClauses,
+          stmt.members
+        );
+      }
+      return stmt;
+    });
+
+    return this.context.factory.updateSourceFile(node, statements);
   }
 }
 
@@ -1998,7 +2034,7 @@ function restrictDeclarationName(
 }
 
 function exportDefaultAssignment(
-  node: ts.FunctionDeclaration | ts.ClassDeclaration | ts.InterfaceDeclaration,
+  node: ts.FunctionDeclaration | ts.ClassDeclaration,
   context: ts.TransformationContext
 ): ts.VisitResult<ts.Node> {
   const modifiers = node.modifiers;
@@ -2029,8 +2065,6 @@ function updateNodeWithModifiers(
     return updateFunctionDeclarationWithModifiers(node, modifiers, context);
   } else if (ts.isClassDeclaration(node)) {
     return updateClassDeclarationWithModifiers(node, modifiers, context);
-  } else if (ts.isInterfaceDeclaration(node)) {
-    return updateInterfaceDeclarationWithModifiers(node, modifiers, context);
   }
 
   return node;
@@ -2216,3 +2250,4 @@ function updatePropertyAccessExpression(node: ts.PropertyAccessExpression, conte
 
   return undefined;
 }
+
