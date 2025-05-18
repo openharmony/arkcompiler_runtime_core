@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-import platform
 import re
 from glob import glob
 from os import path
@@ -25,15 +24,13 @@ from typing import cast
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.configuration_kind import (
-    ArchitectureKind,
     BuildTypeKind,
     ConfigurationKind,
-    OSKind,
     SanitizerKind,
 )
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
-from runner.utils import correct_path
+from runner.utils import correct_path, detect_architecture, detect_operating_system
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -53,19 +50,10 @@ class TestLists:
 
         self.cache: list[str] = self.__cmake_cache()
         self.sanitizer = self.search_sanitizer()
-        self.architecture = self.search_architecture()
-        self.operating_system = self.detect_operating_system()
+        self.architecture = detect_architecture()
+        self.operating_system = detect_operating_system()
         self.build_type = self.search_build_type()
         self.conf_kind = self.detect_conf()
-
-    @staticmethod
-    def detect_operating_system() -> OSKind:
-        system = platform.system().lower()
-        if system == "linux":
-            return OSKind.LIN
-        if system == "windows":
-            return OSKind.WIN
-        return OSKind.MAC
 
     @staticmethod
     def __search_option_in_list(option: str, arg_list: list[str] | None) -> list[str]:
@@ -96,13 +84,13 @@ class TestLists:
         test_name = test_name if test_name else self.config.test_suite.suite_name
 
         short_template_name = f"{test_name}*-{kind}*.txt"
-        conf_kind = self.conf_kind.value \
-            if self.conf_kind != ConfigurationKind.OTHER_INT \
-            else self.get_interpreter()
+        conf_kind = self.conf_kind.value.upper()
+        interpreter = self.get_interpreter().upper()
         full_template_name = f"{test_name}.*-{kind}" + \
                              f"(-{self.operating_system.value})?" \
                              f"(-{self.architecture.value})?" \
-                             f"(-{conf_kind.upper()})?"
+                             f"(-{conf_kind})?" \
+                             f"(-{interpreter})?"
         if self.sanitizer != SanitizerKind.NONE:
             full_template_name += f"(-{self.sanitizer.value})?"
         opt_level = self.opt_level()
@@ -114,6 +102,8 @@ class TestLists:
             full_template_name += "(-FULLASTV)?"
         if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats():
             full_template_name += "(-(repeats|REPEATS))?"
+        gc_type = cast(str, self.config.workflow.get_parameter('gc-type', 'g1-gc')).upper()
+        full_template_name += f"(-({gc_type}))?"
         full_template_name += f"(-{self.build_type.value})?"
         full_template_name += ".txt"
         full_pattern = re.compile(full_template_name)
@@ -149,9 +139,6 @@ class TestLists:
             return SanitizerKind.TSAN
         return SanitizerKind.NONE
 
-    def search_architecture(self) -> ArchitectureKind:
-        return self.config.test_suite.test_lists.architecture
-
     def is_aot(self) -> bool:
         aot_args = cast(list | None, self.config.workflow.get_value("parameters.aot-args"))
         aot_full_args = cast(list | None, self.config.workflow.get_value("parameters.aot-full-args"))
@@ -173,11 +160,12 @@ class TestLists:
         return utils.to_bool(jit_with_repeats) if jit_with_repeats is not None else False
 
     def get_interpreter(self) -> str:
-        ark_args = self.config.workflow.get_parameter("ark-args")
+        result: list[str] | str | None = self.config.workflow.get_parameter("ark-args")
+        ark_args: list[str] = [] if result is None else result if isinstance(result, list) else [result]
         is_int = self.__search_option_in_list("--interpreter-type", ark_args)
         if is_int:
             return is_int[0].split('=')[-1]
-        return "int"
+        return "default"
 
     def detect_conf(self) -> ConfigurationKind:
         if self.is_aot():
@@ -188,10 +176,7 @@ class TestLists:
         if self.is_jit():
             return ConfigurationKind.JIT
 
-        if self.get_interpreter() == "int":
-            return ConfigurationKind.INT
-
-        return ConfigurationKind.OTHER_INT
+        return ConfigurationKind.INT
 
     def opt_level(self) -> int | None:
         level = self.config.workflow.get_parameter("opt-level")

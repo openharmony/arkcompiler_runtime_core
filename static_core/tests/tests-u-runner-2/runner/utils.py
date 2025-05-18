@@ -17,6 +17,7 @@
 
 import importlib
 import os
+import platform
 import random
 import re
 import shutil
@@ -45,6 +46,7 @@ from runner.common_exceptions import (
     YamlException,
 )
 from runner.enum_types.base_enum import EnumT
+from runner.enum_types.configuration_kind import ArchitectureKind, OSKind
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
@@ -132,8 +134,14 @@ def copy(source_path: Path, dest_path: Path, remove_if_exist: bool = True) -> No
     if source_path == dest_path:
         return
     if dest_path.exists() and remove_if_exist:
-        shutil.rmtree(dest_path)
-    shutil.copytree(source_path, dest_path, dirs_exist_ok=not remove_if_exist)
+        if dest_path.is_file():
+            dest_path.unlink(missing_ok=True)
+        else:
+            shutil.rmtree(dest_path)
+    if source_path.is_file():
+        shutil.copy(source_path, dest_path)
+    else:
+        shutil.copytree(source_path, dest_path, dirs_exist_ok=not remove_if_exist)
 
 
 def read_file(file_path: Path | str) -> str:
@@ -399,3 +407,19 @@ def prepend_list(pre_list: list[Any], post_list: list[Any]) -> list[Any]:
     result = pre_list[:]
     result.extend(post_list)
     return result
+
+
+def detect_architecture() -> ArchitectureKind:
+    arch = platform.machine().lower()
+    if arch == "aarch64":
+        return ArchitectureKind.ARM64
+    return ArchitectureKind.AMD64
+
+
+def detect_operating_system() -> OSKind:
+    system = platform.system().lower()
+    if system == "linux":
+        return OSKind.LIN
+    if system == "windows":
+        return OSKind.WIN
+    return OSKind.MAC
