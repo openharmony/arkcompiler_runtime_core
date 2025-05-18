@@ -49,6 +49,21 @@ static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptorP
     return proxyDescriptorData;
 }
 
+static void GetAllInterfaceMethod(Class *interfaceCls, PandaVector<Method *> &methodPtrs, PandaSet<Class *> &methodPSet)
+{
+    if (methodPSet.count(interfaceCls) != 0) {
+        return;
+    }
+    methodPSet.insert(interfaceCls);
+    auto methods = interfaceCls->GetMethods();
+    for (auto &method : methods) {
+        methodPtrs.push_back(&method);
+    }
+    for (auto *itf : interfaceCls->GetInterfaces()) {
+        GetAllInterfaceMethod(itf, methodPtrs, methodPSet);
+    }
+}
+
 static void InitProxyMethod(Class *cls, Method *src, Method *proxy, void *entryPoint)
 {
     new (proxy) Method(src);
@@ -137,11 +152,9 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
     if (proxyFunctionCls == nullptr) {
         uint32_t accessFlags = objectClass->GetAccessFlags() | ACC_PROXY | ACC_FINAL;
 
-        auto methods = interfaceCls->GetMethods();
+        PandaSet<Class *> methodPSet;
         PandaVector<Method *> methodPtrs;
-        for (auto &method : methods) {
-            methodPtrs.push_back(&method);
-        }
+        GetAllInterfaceMethod(interfaceCls, methodPtrs, methodPSet);
 
         // build proxy methods
         // proxy invokeN(eg. invoke1) method to JSFunctionCallBackBridge
