@@ -14,8 +14,7 @@
  */
 
 /*---
-desc: Local classes and interfaces are prohibited in ArkTS
-tags: [compile-only, negative]
+desc: Local classes in method. 
 ---*/
 
 class A {
@@ -34,5 +33,5 @@ class A {
 }
 
 function main() {
-    assertEQ(new A.meth(), 42)
+    assertEQ((new A()).meth(), 42)
 }

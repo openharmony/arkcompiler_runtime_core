@@ -39,10 +39,7 @@ cases:
           res = 2
       }
     call: |-
-      new Derived().foo([new Base()])
-      assertEQ( res, 2 )
       new Derived().foo([new Derived()])
-      assertEQ( res, 2 )
     params: override-compatible parameter (covariance)
 
   - tags: 'negative, compile-only'
@@ -55,10 +52,7 @@ cases:
           res = 2
       }
     call: |-
-      new Derived().foo([new Base()])
-      assertEQ( res, 2 )
       new Derived().foo([new Derived()])
-      assertEQ( res, 1 )
     params: override-incompatible parameter (contravariance), not overload-equivalent
 
   - tags: 'negative, compile-only'
@@ -177,4 +171,30 @@ cases:
       assertEQ( res, 2 )
       new Derived().foo([new Derived()])
       assertEQ( res, 1 )
+    params: override-incompatible parameter (contravariance), not overload-equivalent
+
+  - base: |-
+      foo(i: Base[]) {
+          res = 1
+      }
+    derived: |-
+      foo(i: Derived[]) {
+          res = 2
+      }
+    call: |-
+      new Derived().foo([new Base()])
+      assertEQ( res, 2 )
+    params: override-compatible parameter (covariance)
+
+  - base: |-
+      foo(i: Derived[]) {
+          res = 1
+      }
+    derived: |-
+      foo(i: Base[]) {
+          res = 2
+      }
+    call: |-
+      new Derived().foo([new Base()])
+      assertEQ( res, 2 )
     params: override-incompatible parameter (contravariance), not overload-equivalent

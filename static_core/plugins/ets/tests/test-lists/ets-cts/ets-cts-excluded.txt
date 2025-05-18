@@ -1,7 +1,0 @@
-#24697 deprecated
-08.statements/04.local_declarations/local_class.ets
-09.classes/01.class_declaration/local_class_in_func_neg.ets
-09.classes/01.class_declaration/local_interface_in_func_neg_1.ets
-09.classes/01.class_declaration/local_interface_in_func_neg_2.ets
-09.classes/01.class_declaration/local_interface_in_meth_neg_1.ets
-09.classes/01.class_declaration/local_interface_in_meth_neg_2.ets
