@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include <fstream>
 #include <regex>
 #include <streambuf>
-
+#include <sstream>
 #include <gtest/gtest.h>
 
 namespace ark::taskmanager {
@@ -86,6 +86,27 @@ TEST(TaskSchedulerMetrics, NoInfoLoggingTest)
 
     tm->UnregisterAndDestroyTaskQueue(queue);
     TaskScheduler::Destroy();
+}
+
+TEST(TaskTimeStatsTest, OperatorLessThanLessTest)
+{
+    {
+        std::stringstream stream;
+        stream << TaskTimeStatsType::NO_STATISTICS;
+        EXPECT_EQ(stream.str(), "TaskTimeStatsType::NO_STATISTICS");
+    }
+
+    {
+        std::stringstream stream;
+        stream << TaskTimeStatsType::LIGHT_STATISTICS;
+        EXPECT_EQ(stream.str(), "TaskTimeStatsType::LIGHT_STATISTICS");
+    }
+}
+
+TEST(TaskTimeStatsTest, StringToTaskTimeStatsTest)
+{
+    EXPECT_EQ(StringToTaskTimeStats("no-task-stats"), TaskTimeStatsType::NO_STATISTICS);
+    EXPECT_EQ(StringToTaskTimeStats("light-task-stats"), TaskTimeStatsType::LIGHT_STATISTICS);
 }
 
 }  // namespace ark::taskmanager

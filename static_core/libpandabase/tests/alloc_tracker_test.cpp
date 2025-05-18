@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,6 +156,23 @@ TEST(DetailAllocTrackerTest, MultithreadedAlloc)
     ASSERT_FALSE(out.eof());
     ASSERT_EQ(NUM_THREADS * NUM_ITERS, hdr.numItems);
     ASSERT_EQ(1U, hdr.numStacktraces);
+}
+
+TEST(DetailAllocTrackerTest, NullptrAlloc)
+{
+    DetailAllocTracker tracker;
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    tracker.TrackAlloc(nullptr, 20U, SpaceType::SPACE_TYPE_INTERNAL);
+    tracker.TrackFree(nullptr);
+    std::stringstream out;
+    tracker.Dump(out);
+    out.seekg(0U);
+
+    Header hdr;
+    out.read(reinterpret_cast<char *>(&hdr), sizeof(hdr));
+    ASSERT_FALSE(out.eof());
+    ASSERT_EQ(0U, hdr.numItems);
+    ASSERT_EQ(0U, hdr.numStacktraces);
 }
 
 }  // namespace ark
