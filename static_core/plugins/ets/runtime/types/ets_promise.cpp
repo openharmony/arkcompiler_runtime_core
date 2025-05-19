@@ -38,12 +38,19 @@ EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
 
 void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 {
-    // Unblock awaitee coros
-    GetEvent(coro)->Fire();
-
     auto *cbQueue = GetCallbackQueue(coro);
     auto *launchModeQueue = GetLaunchModeQueue(coro);
     auto queueSize = GetQueueSize();
+    ASSERT(queueSize == 0 || cbQueue != nullptr);
+    ASSERT(queueSize == 0 || launchModeQueue != nullptr);
+
+    if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) &&
+        state_ == STATE_REJECTED && queueSize == 0) {
+        coro->GetPandaVM()->AddUnhandledRejectedPromise(this);
+    }
+
+    // Unblock awaitee coros
+    GetEvent(coro)->Fire();
 
     for (int idx = 0; idx < queueSize; ++idx) {
         auto *thenCallback = cbQueue->Get(idx);

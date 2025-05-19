@@ -127,6 +127,8 @@ public:
     void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;
 
+    void ListUnhandledEventsOnProgramExit() override;
+
     LocalStorage &GetLocalStorage()
     {
         return localStorage_;
@@ -153,6 +155,9 @@ private:
 
     void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
     void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
+
+    void ListUnhandledJobs();
+    void ListUnhandledPromises();
 
     PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};

@@ -73,7 +73,7 @@ static EtsMethod *FindMethod(EtsClass *klass, char const *name, char const *sign
     return method;
 }
 
-// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 {
     // NOLINTNEXTLINE(google-build-using-namespace)
@@ -136,6 +136,11 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     escompatRecord = findType(RECORD);
     escompatRecordGetter = FindMethod<false>(escompatRecord, GET_INDEX_METHOD, nullptr);
     escompatRecordSetter = FindMethod<false>(escompatRecord, SET_INDEX_METHOD, nullptr);
+
+    escompatProcess = findType(PROCESS);
+    escompatProcessListUnhandledJobs = FindMethod<true>(escompatProcess, "listUnhandledJobs", "Lescompat/Array;:V");
+    escompatProcessListUnhandledPromises =
+        FindMethod<true>(escompatProcess, "listUnhandledPromises", "Lescompat/Array;:V");
 }
 
 }  // namespace ark::ets

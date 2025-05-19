@@ -86,6 +86,10 @@ public:
     EtsMethod *escompatRecordGetter;
     EtsMethod *escompatRecordSetter;
 
+    EtsClass *escompatProcess;
+    EtsMethod *escompatProcessListUnhandledJobs;
+    EtsMethod *escompatProcessListUnhandledPromises;
+
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;

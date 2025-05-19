@@ -52,6 +52,9 @@ export namespace StdProcess {
 
     const MAX_BUFFER_SIZE: int = 1024 * 1024;
 
+    const DEFAULT_JOB_HANDLER_CALLBACK = (error: Object) => { console.log("Unhandled Job fail:", error) };
+    const DEFAULT_PROMISE_HANDLER_CALLBACK = (error: Object) => { console.log("Unhandled Promise rejection: ", error) };
+
     /**
      * @class Represents child process created by executing process.runCmd()
      */
@@ -176,7 +179,7 @@ export namespace StdProcess {
 
 
     /**
-     * @class Wrapper for parameters used by process.RunCmd function to create a ChildProcess 
+     * @class Wrapper for parameters used by process.RunCmd function to create a ChildProcess
      */
     export final class ConditionType {
         /**
@@ -408,6 +411,14 @@ export namespace StdProcess {
          *
          */
         static on(type: string, listener: EventListener): void {
+            if (type == "unhandledJobRejection") {
+                process.setFailedJobHandler(listener);
+                return;
+            }
+            if (type == "unhandledPromiseRejection") {
+                process.setRejectedPromiseHandler(listener);
+                return;
+            }
             throw new Error("not implemented");
         }
 
@@ -420,11 +431,19 @@ export namespace StdProcess {
          *
          */
         static off(type: string): boolean {
+            if (type == "unhandledJobRejection") {
+                process.setFailedJobHandler(DEFAULT_JOB_HANDLER_CALLBACK);
+                return true;
+            }
+            if (type == "unhandledPromiseRejection") {
+                process.setRejectedPromiseHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
+                return true;
+            }
             throw new Error("not implemented");
         }
 
         /**
-         * Get the current working directory of the program 
+         * Get the current working directory of the program
          *
          * @returns current working directory as string
          *
@@ -432,7 +451,7 @@ export namespace StdProcess {
         static native cwd(): string;
 
         /**
-         * Change the current working directory of the program 
+         * Change the current working directory of the program
          *
          * @param path working directory
          *
@@ -484,6 +503,59 @@ export namespace StdProcess {
             return [timeout, killSignal, maxBuffer];
         }
 
+        /**
+         * This method updates handler that is applied to
+         * unhandled failed jobs at the program exit
+         *
+         * @param listener user-provided handler
+         *
+         */
+        private static setFailedJobHandler(listener: EventListener): void {
+            process.failedJobHandler.reset(listener);
+        }
+
+        /**
+         * This method updates handler that is applied to
+         * unhandled rejected promises at the program exit
+         *
+         * @param listener user-provided handler
+         *
+         */
+        private static setRejectedPromiseHandler(listener: EventListener): void {
+            process.rejectedPromiseHandler.reset(listener);
+        }
+
+
+        /**
+         * This method applies default or user-provided handler to
+         * all unhandled failed job results
+         *
+         * @param errors results of failed jobs
+         *
+         */
+        private static listUnhandledJobs(errors: Object[]): void {
+            for (let error of errors) {
+                process.failedJobHandler.apply(error);
+            }
+        }
+
+        /**
+         * This method applies default or user-provided handler to
+         * all unhandled rejected promise results
+         *
+         * @param errors results of rejected promises
+         *
+         */
+        public static listUnhandledPromises(errors: NullishType[]): void {
+            for (let error of errors) {
+                if (error instanceof Object) {
+                    process.rejectedPromiseHandler.apply(error);
+                } else {
+                    process.rejectedPromiseHandler.apply(new Error());
+                }
+            }
+        }
+
         private static native getEgidImpl(): number;
         private static native getEuidImpl(): number;
         private static native getGidImpl(): number;
@@ -492,5 +564,8 @@ export namespace StdProcess {
         private static native getPidImpl(): number;
         private static native getPpidImpl(): number;
         private static native getTidImpl(): number;
+
+        private static failedJobHandler: RejectedHandler = new RejectedHandler(DEFAULT_JOB_HANDLER_CALLBACK);
+        private static rejectedPromiseHandler: RejectedHandler = new RejectedHandler(DEFAULT_PROMISE_HANDLER_CALLBACK);
     }
 }

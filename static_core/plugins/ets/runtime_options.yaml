@@ -252,3 +252,15 @@ options:
   type: bool
   default: false
   description: Load entrypoint panda file in boot-panda-files
+
+- name: list-unhandled-on-exit
+  description: Collect rejected promises/jobs and throw if there is at least one unhandled on program exit
+  sub_options:
+  - name: promises
+    type: bool
+    default: false
+    description: "promises"
+  - name: jobs
+    type: bool
+    default: false
+    description: "jobs"
