@@ -991,16 +991,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) as number == searchElement) {
-                return i
-            }
-        }
-        return -1
+            return this.indexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -1014,14 +1005,32 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) == searchElement as byte) {
-                return i
-            }
-        }
-        return -1
+        return this.indexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the first occurrence of a value in Int8Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the first occurrence of a value in Int8Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the first occurrence of a value in Int8Array.
@@ -1108,23 +1117,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) as number == searchElement) {
-                return k
-            }
-            k--
-        }
-        return -1
+            return this.lastIndexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -1138,21 +1131,32 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) == searchElement as byte) {
-                return k
-            }
-            k--
-        }
-        return -1
+        return this.lastIndexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the last occurrence of a value in Int8Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the last occurrence of a value in Int8Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the last occurrence of a value in Int8Array.
@@ -2851,16 +2855,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) as number == searchElement) {
-                return i
-            }
-        }
-        return -1
+            return this.indexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -2874,14 +2869,32 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) == searchElement as short) {
-                return i
-            }
-        }
-        return -1
+        return this.indexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the first occurrence of a value in Int16Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the first occurrence of a value in Int16Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the first occurrence of a value in Int16Array.
@@ -2968,23 +2981,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) as number == searchElement) {
-                return k
-            }
-            k--
-        }
-        return -1
+            return this.lastIndexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -2998,21 +2995,32 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) == searchElement as short) {
-                return k
-            }
-            k--
-        }
-        return -1
+        return this.lastIndexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the last occurrence of a value in Int16Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the last occurrence of a value in Int16Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the last occurrence of a value in Int16Array.
@@ -4678,16 +4686,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) as number == searchElement) {
-                return i
-            }
-        }
-        return -1
+            return this.indexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -4701,14 +4700,32 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) == searchElement) {
-                return i
-            }
-        }
-        return -1
+        return this.indexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the first occurrence of a value in Int32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the first occurrence of a value in Int32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the first occurrence of a value in Int32Array.
@@ -4795,23 +4812,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) as number == searchElement) {
-                return k
-            }
-            k--
-        }
-        return -1
+            return this.lastIndexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -4825,21 +4826,32 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) == searchElement) {
-                return k
-            }
-            k--
-        }
-        return -1
+        return this.lastIndexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the last occurrence of a value in Int32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the last occurrence of a value in Int32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the last occurrence of a value in Int32Array.
@@ -6525,13 +6537,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: BigInt, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (new BigInt(this.getUnsafe(i)) == searchElement) {
-                return i
-            }
-        }
-        return -1
+            return this.indexOfImpl(searchElement.getLong(), fromIndex)
     }
 
     /**
@@ -6545,14 +6551,32 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) == searchElement as long) {
-                return i
-            }
-        }
-        return -1
+        return this.indexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the first occurrence of a value in BigInt64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the first occurrence of a value in BigInt64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the first occurrence of a value in BigInt64Array.
@@ -6639,20 +6663,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: BigInt, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (new BigInt(this.getUnsafe(k)) == searchElement) {
-                return k
-            }
-            k--
-        }
-        return -1
+            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex)
     }
 
     /**
@@ -6666,21 +6677,32 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) == searchElement as long) {
-                return k
-            }
-            k--
-        }
-        return -1
+        return this.lastIndexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the last occurrence of a value in BigInt64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the last occurrence of a value in BigInt64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the last occurrence of a value in BigInt64Array.
@@ -8348,16 +8370,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) as number == searchElement) {
-                return i
-            }
-        }
-        return -1
+            return this.indexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -8371,14 +8384,32 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) == searchElement as float) {
-                return i
-            }
-        }
-        return -1
+        return this.indexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the first occurrence of a value in Float32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the first occurrence of a value in Float32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the first occurrence of a value in Float32Array.
@@ -8465,23 +8496,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) as number == searchElement) {
-                return k
-            }
-            k--
-        }
-        return -1
+            return this.lastIndexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -8495,21 +8510,32 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) == searchElement as float) {
-                return k
-            }
-            k--
-        }
-        return -1
+        return this.lastIndexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the last occurrence of a value in Float32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the last occurrence of a value in Float32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the last occurrence of a value in Float32Array.
@@ -10041,16 +10067,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) == searchElement) {
-                return i
-            }
-        }
-        return -1
+            return this.indexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -10064,14 +10081,32 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            if (this.getUnsafe(i) == searchElement as double) {
-                return i
-            }
-        }
-        return -1
+        return this.indexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the first occurrence of a value in Float64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the first occurrence of a value in Float64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the first occurrence of a value in Float64Array.
@@ -10158,23 +10193,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: number, fromIndex: int): number {
-        if (isNaN(searchElement)) {
-            return -1
-        }
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) == searchElement) {
-                return k
-            }
-            k--
-        }
-        return -1
+            return this.lastIndexOfImpl(searchElement, fromIndex)
     }
 
     /**
@@ -10188,21 +10207,32 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            if (this.getUnsafe(k) == searchElement as double) {
-                return k
-            }
-            k--
-        }
-        return -1
+        return this.lastIndexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the last occurrence of a value in Float64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the last occurrence of a value in Float64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the last occurrence of a value in Float64Array.

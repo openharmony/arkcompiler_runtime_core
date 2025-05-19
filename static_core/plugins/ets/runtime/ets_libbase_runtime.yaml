@@ -2476,6 +2476,446 @@ intrinsics:
       args: [i32, i32, i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayCopyWithin
 
+  - name: Int8ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayIndexOfNumber
+
+  - name: Int16ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayIndexOfNumber
+
+  - name: Int32ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayIndexOfNumber
+
+  - name: BigInt64ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayIndexOfNumber
+
+  - name: Float32ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayIndexOfNumber
+
+  - name: Float64ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayIndexOfNumber
+
+  - name: UInt8ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayIndexOfNumber
+
+  - name: UInt16ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayIndexOfNumber
+
+  - name: UInt32ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayIndexOfNumber
+
+  - name: BigUInt64ArrayIndexOfNumber
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayIndexOfNumber
+
+  - name: UInt8ClampedArrayIndexOfNumber
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayIndexOfNumber
+
+  - name: Int8ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayIndexOfLong
+
+  - name: Int16ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayIndexOfLong
+
+  - name: Int32ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayIndexOfLong
+
+  - name: BigInt64ArrayIndexOfLong
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayIndexOfLong
+
+  - name: Float32ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayIndexOfLong
+
+  - name: Float64ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayIndexOfLong
+
+  - name: UInt8ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayIndexOfLong
+
+  - name: UInt16ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayIndexOfLong
+
+  - name: UInt32ArrayIndexOfLong
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayIndexOfLong
+
+  - name: BigUInt64ArrayIndexOfLong
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayIndexOfLong
+
+  - name: UInt8ClampedArrayIndexOfLong
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: indexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayIndexOfLong
+
+  - name: Int8ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayLastIndexOfNumber
+
+  - name: Int16ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayLastIndexOfNumber
+
+  - name: Int32ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayLastIndexOfNumber
+
+  - name: BigInt64ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayLastIndexOfNumber
+
+  - name: Float32ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayLastIndexOfNumber
+
+  - name: Float64ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayLastIndexOfNumber
+
+  - name: UInt8ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayLastIndexOfNumber
+
+  - name: UInt16ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayLastIndexOfNumber
+
+  - name: UInt32ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayLastIndexOfNumber
+
+  - name: BigUInt64ArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayLastIndexOfNumber
+
+  - name: UInt8ClampedArrayLastIndexOfNumber
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [f64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayLastIndexOfNumber
+
+  - name: Int8ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayLastIndexOfLong
+
+  - name: Int16ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayLastIndexOfLong
+
+  - name: Int32ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayLastIndexOfLong
+
+  - name: BigInt64ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayLastIndexOfLong
+
+  - name: Float32ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayLastIndexOfLong
+
+  - name: Float64ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayLastIndexOfLong
+
+  - name: UInt8ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayLastIndexOfLong
+
+  - name: UInt16ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayLastIndexOfLong
+
+  - name: UInt32ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayLastIndexOfLong
+
+  - name: BigUInt64ArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayLastIndexOfLong
+
+  - name: UInt8ClampedArrayLastIndexOfLong
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: lastIndexOfImpl
+    static: false
+    signature:
+      ret: f64
+      args: [i64, i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayLastIndexOfLong
+
 ########################
 # escompat.taskpool #
 ########################

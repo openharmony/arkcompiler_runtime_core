@@ -1164,22 +1164,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: {{elementCompat}}, fromIndex: int): number {
-        {%- if elementCompat == 'number' %}
-        if (isNaN(searchElement)) {
-            return -1
-        }
+        {%- if elementCompat == 'BigInt' %}
+            return this.indexOfImpl(searchElement.getLong(), fromIndex)
         {%- endif %}
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            {%- if T == 'double' %}
-            if (this.getUnsafe(i) == searchElement) {
-            {%- else %}
-            if ({{asElementCompat % 'this.getUnsafe(i)'}} == searchElement) {
-            {%- endif %}
-                return i
-            }
-        }
-        return -1
+        {%- if elementCompat == 'number' %}
+            return this.indexOfImpl(searchElement, fromIndex)
+        {%- endif %}
+        {%- if elementCompat == 'int' %}
+            return this.indexOfImpl(searchElement as long, fromIndex)
+        {%- endif %}
     }
 
     /**
@@ -1193,18 +1186,32 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(searchElement: int, fromIndex: int): number {
-        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
-        for (let i = fromIndex; i < this.lengthInt; i++) {
-            {%- if T == 'int' %}
-            if (this.getUnsafe(i) == searchElement) {
-            {%- else %}
-            if (this.getUnsafe(i) == searchElement as {{T}}) {
-            {%- endif %}
-                return i
-            }
-        }
-        return -1
+        return this.indexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the first occurrence of a value in {{N}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the first occurrence of a value in {{N}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
+     *
+     * @returns index of element if it presents, -1 otherwise
+     */
+    private final native indexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the first occurrence of a value in {{N}}Array.
@@ -1291,29 +1298,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: {{elementCompat}}, fromIndex: int): number {
-        {%- if elementCompat == 'number' %}
-        if (isNaN(searchElement)) {
-            return -1
-        }
+        {%- if elementCompat == 'BigInt' %}
+            return this.lastIndexOfImpl(searchElement.getLong(), fromIndex)
         {%- endif %}
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            {%- if T == 'double' %}
-            if (this.getUnsafe(k) == searchElement) {
-            {%- else %}
-            if ({{asElementCompat % 'this.getUnsafe(k)'}} == searchElement) {
-            {%- endif %}
-                return k
-            }
-            k--
-        }
-        return -1
+        {%- if elementCompat == 'number' %}
+            return this.lastIndexOfImpl(searchElement, fromIndex)
+        {%- endif %}
+        {%- if elementCompat == 'int' %}
+            return this.lastIndexOfImpl(searchElement as long, fromIndex)
+        {%- endif %}
     }
 
     /**
@@ -1327,25 +1320,32 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
     public lastIndexOf(searchElement: int, fromIndex: int): number {
-        if (this.lengthInt == 0) {
-            return -1
-        }
-        let k: int = this.lengthInt + fromIndex
-        if (fromIndex >= 0) {
-            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
-        }
-        while (k >= 0) {
-            {%- if T == 'int' %}
-            if (this.getUnsafe(k) == searchElement) {
-            {%- else %}
-            if (this.getUnsafe(k) == searchElement as {{T}}) {
-            {%- endif %}
-                return k
-            }
-            k--
-        }
-        return -1
+        return this.lastIndexOfImpl(searchElement as long, fromIndex)
     }
+
+    /**
+     * Returns the index of the last occurrence of a value in {{N}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: number, fromIndex: int): number
+
+    /**
+     * Returns the index of the last occurrence of a value in {{N}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    private final native lastIndexOfImpl(searchElement: long, fromIndex: int): number
 
     /**
      * Returns the index of the last occurrence of a value in {{N}}Array.

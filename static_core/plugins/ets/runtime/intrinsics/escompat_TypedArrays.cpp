@@ -658,4 +658,205 @@ extern "C" ark::ets::EtsEscompatBigUInt64Array *EtsEscompatBigUInt64ArraySort(
     return EtsEscompatTypedArraySort(thisArray);
 }
 
+#define INVALID_INDEX (-1.0)
+
+template <typename T1, typename T2>
+static EtsDouble EtsEscompatArrayIndexOfLong(T1 *thisArray, T2 searchElement, EtsInt fromIndex)
+{
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
+        return INVALID_INDEX;
+    }
+
+    using ElementType = typename T1::ElementType;
+    auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
+    auto arrayLength = thisArray->GetLengthInt();
+    fromIndex = NormalizeIndex(fromIndex, arrayLength);
+    auto element = static_cast<ElementType>(searchElement);
+    for (int i = fromIndex; i < arrayLength; i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (array[i] == element) {
+            return static_cast<double>(i);
+        }
+    }
+    return INVALID_INDEX;
+}
+
+template <typename T>
+static EtsDouble EtsEscompatArrayIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex)
+{
+    if (std::isnan(searchElement)) {
+        return INVALID_INDEX;
+    }
+
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
+        return INVALID_INDEX;
+    }
+
+    using ElementType = typename T::ElementType;
+    auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
+    auto arrayLength = thisArray->GetLengthInt();
+    fromIndex = NormalizeIndex(fromIndex, arrayLength);
+    for (int i = fromIndex; i < arrayLength; i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (static_cast<double>(array[i]) == searchElement) {
+            return static_cast<double>(i);
+        }
+    }
+    return INVALID_INDEX;
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ETS_ESCOMPAT_INDEX_OF_NUMBER(Type)                                                                    \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                       \
+    extern "C" EtsDouble EtsEscompat##Type##ArrayIndexOfNumber(ark::ets::EtsEscompat##Type##Array *thisArray, \
+                                                               EtsDouble searchElement, EtsInt fromIndex)     \
+    {                                                                                                         \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
+        return EtsEscompatArrayIndexOfNumber(thisArray, searchElement, fromIndex);                            \
+    }  // namespace ark::ets::intrinsics
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ETS_ESCOMPAT_INDEX_OF_LONG(Type)                                                                    \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                     \
+    extern "C" EtsDouble EtsEscompat##Type##ArrayIndexOfLong(ark::ets::EtsEscompat##Type##Array *thisArray, \
+                                                             EtsLong searchElement, EtsInt fromIndex)       \
+    {                                                                                                       \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                              \
+        return EtsEscompatArrayIndexOfLong(thisArray, searchElement, fromIndex);                            \
+    }  // namespace ark::ets::intrinsics
+
+ETS_ESCOMPAT_INDEX_OF_NUMBER(Int8)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(Int16)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(Int32)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(BigInt64)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(Float32)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(Float64)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt8)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt16)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt32)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(BigUInt64)
+ETS_ESCOMPAT_INDEX_OF_NUMBER(UInt8Clamped)
+ETS_ESCOMPAT_INDEX_OF_LONG(Int8)
+ETS_ESCOMPAT_INDEX_OF_LONG(Int16)
+ETS_ESCOMPAT_INDEX_OF_LONG(Int32)
+ETS_ESCOMPAT_INDEX_OF_LONG(BigInt64)
+ETS_ESCOMPAT_INDEX_OF_LONG(Float32)
+ETS_ESCOMPAT_INDEX_OF_LONG(Float64)
+ETS_ESCOMPAT_INDEX_OF_LONG(UInt8)
+ETS_ESCOMPAT_INDEX_OF_LONG(UInt16)
+ETS_ESCOMPAT_INDEX_OF_LONG(UInt32)
+ETS_ESCOMPAT_INDEX_OF_LONG(BigUInt64)
+ETS_ESCOMPAT_INDEX_OF_LONG(UInt8Clamped)
+
+template <typename T1, typename T2>
+static EtsDouble EtsEscompatArrayLastIndexOfLong(T1 *thisArray, T2 searchElement, EtsInt fromIndex)
+{
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
+        return INVALID_INDEX;
+    }
+
+    int arrayLength = thisArray->GetLengthInt();
+    if (arrayLength == 0) {
+        return INVALID_INDEX;
+    }
+
+    int startIndex = arrayLength + fromIndex;
+    if (fromIndex >= 0) {
+        startIndex = (arrayLength - 1 < fromIndex) ? arrayLength - 1 : fromIndex;
+    }
+
+    using ElementType = typename T1::ElementType;
+    auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
+    auto element = static_cast<ElementType>(searchElement);
+    for (int i = startIndex; i >= 0; i--) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (array[i] == element) {
+            return static_cast<double>(i);
+        }
+    }
+
+    return INVALID_INDEX;
+}
+
+template <typename T>
+static EtsDouble EtsEscompatArrayLastIndexOfNumber(T *thisArray, double searchElement, EtsInt fromIndex)
+{
+    if (std::isnan(searchElement)) {
+        return INVALID_INDEX;
+    }
+
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
+        return INVALID_INDEX;
+    }
+
+    int arrayLength = thisArray->GetLengthInt();
+    if (arrayLength == 0) {
+        return INVALID_INDEX;
+    }
+
+    int startIndex = arrayLength + fromIndex;
+    if (fromIndex >= 0) {
+        startIndex = (arrayLength - 1 < fromIndex) ? arrayLength - 1 : fromIndex;
+    }
+
+    using ElementType = typename T::ElementType;
+    auto *array = reinterpret_cast<ElementType *>(ToUintPtr(data) + static_cast<int>(thisArray->GetByteOffset()));
+    for (int i = startIndex; i >= 0; i--) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (static_cast<double>(array[i]) == searchElement) {
+            return static_cast<double>(i);
+        }
+    }
+
+    return INVALID_INDEX;
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Type)                                                                   \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                           \
+    extern "C" EtsDouble EtsEscompat##Type##ArrayLastIndexOfNumber(ark::ets::EtsEscompat##Type##Array *thisArray, \
+                                                                   EtsDouble searchElement, EtsInt fromIndex)     \
+    {                                                                                                             \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                    \
+        return EtsEscompatArrayLastIndexOfNumber(thisArray, searchElement, fromIndex);                            \
+    }  // namespace ark::ets::intrinsics
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Type)                                                                   \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                                         \
+    extern "C" EtsDouble EtsEscompat##Type##ArrayLastIndexOfLong(ark::ets::EtsEscompat##Type##Array *thisArray, \
+                                                                 EtsLong searchElement, EtsInt fromIndex)       \
+    {                                                                                                           \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                  \
+        return EtsEscompatArrayLastIndexOfLong(thisArray, searchElement, fromIndex);                            \
+    }  // namespace ark::ets::intrinsics
+
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Int8)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Int16)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Int32)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(BigInt64)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Float32)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(Float64)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt8)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt16)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt32)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(BigUInt64)
+ETS_ESCOMPAT_LAST_INDEX_OF_NUMBER(UInt8Clamped)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Int8)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Int16)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Int32)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(BigInt64)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Float32)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(Float64)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt8)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt16)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt32)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(BigUInt64)
+ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt8Clamped)
+
+#undef INVALID_INDEX
 }  // namespace ark::ets::intrinsics
