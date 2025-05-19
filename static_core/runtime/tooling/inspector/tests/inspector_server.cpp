@@ -140,7 +140,10 @@ TEST_F(ServerTest, DebuggerEnable)
         auto res = handler(g_sessionId, empty);
         ResultHolder result;
         GetResult(std::move(res), result);
-        ASSERT_THAT(*result, JsonProperties(JsonProperty<JsonObject::NumT> {"debuggerId", 0}));
+        std::vector<testing::Matcher<JsonObject::JsonObjPointer>> protocols;
+        ASSERT_THAT(*result,
+                    JsonProperties(JsonProperty<JsonObject::NumT> {"debuggerId", 0},
+                                   JsonProperty<JsonObject::ArrayT> {"protocols", JsonElementsAreArray(protocols)}));
     });
     InspectorServer inspector_server1(server1);
 }
@@ -286,7 +289,7 @@ TEST_F(ServerTest, OnCallDebuggerGetPossibleBreakpoints)
     size_t end = 5;
 
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
-    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, DefaultFrameEnumerator);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, PauseReason::OTHER, DefaultFrameEnumerator);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getPossibleBreakpoints", testing::_))
         .WillOnce(std::bind(g_getPossibleBreakpointsHandler, scriptId, start, end,  // NOLINT(modernize-avoid-bind)
@@ -334,7 +337,7 @@ TEST_F(ServerTest, OnCallDebuggerGetScriptSource)
     EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.scriptParsed", testing::_)).Times(1);
 
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
-    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, DefaultFrameEnumerator);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, PauseReason::OTHER, DefaultFrameEnumerator);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getScriptSource", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
@@ -420,7 +423,7 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpoint)
     size_t start = 5;
 
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
-    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, DefaultFrameEnumerator);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, PauseReason::OTHER, DefaultFrameEnumerator);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder params;
@@ -791,14 +794,14 @@ TEST_F(ServerTest, OnCallDebuggerGetPossibleAndSetBreakpointByUrl)
             GetResult(std::move(res), result);
 
             std::vector<testing::Matcher<JsonObject::JsonObjPointer>> locations;
-            locations.push_back(testing::Pointee(JsonProperties(
-                JsonProperty<JsonObject::NumT> {"scriptId", scriptId},
-                JsonProperty<JsonObject::NumT> {"lineNumber", start1 + 1},
-                JsonProperty<JsonObject::NumT> {"columnNumber", 0}, JsonProperty<JsonObject::StringT> {"id", "6"})));
-            locations.push_back(testing::Pointee(JsonProperties(
-                JsonProperty<JsonObject::NumT> {"scriptId", scriptId},
-                JsonProperty<JsonObject::NumT> {"lineNumber", start2 + 1},
-                JsonProperty<JsonObject::NumT> {"columnNumber", 0}, JsonProperty<JsonObject::StringT> {"id", "7"})));
+            locations.push_back(testing::Pointee(JsonProperties(JsonProperty<JsonObject::NumT> {"scriptId", scriptId},
+                                                                JsonProperty<JsonObject::NumT> {"lineNumber", start1},
+                                                                JsonProperty<JsonObject::NumT> {"columnNumber", 0},
+                                                                JsonProperty<JsonObject::StringT> {"id", "6"})));
+            locations.push_back(testing::Pointee(JsonProperties(JsonProperty<JsonObject::NumT> {"scriptId", scriptId},
+                                                                JsonProperty<JsonObject::NumT> {"lineNumber", start2},
+                                                                JsonProperty<JsonObject::NumT> {"columnNumber", 0},
+                                                                JsonProperty<JsonObject::StringT> {"id", "7"})));
             auto expected =
                 JsonProperties(JsonProperty<JsonObject::ArrayT> {"locations", JsonElementsAreArray(locations)});
 

@@ -70,9 +70,6 @@ Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart
     });
 
     RegisterMethodHandlers();
-
-    serverThread_ = std::thread(&InspectorServer::Run, &inspectorServer_);
-    os::thread::SetThreadName(serverThread_.native_handle(), "InspectorServer");
 }
 
 Inspector::~Inspector()
@@ -82,6 +79,17 @@ Inspector::~Inspector()
     inspectorServer_.Kill();
     serverThread_.join();
     HandleError(debugger_.UnregisterHooks());
+}
+
+void Inspector::Run()
+{
+    serverThread_ = std::thread(&InspectorServer::Run, &inspectorServer_);
+    os::thread::SetThreadName(serverThread_.native_handle(), "InspectorServer");
+}
+
+void Inspector::Stop()
+{
+    serverThread_.join();
 }
 
 void Inspector::ConsoleCall(PtThread thread, ConsoleCallType type, uint64_t timestamp,
@@ -140,13 +148,19 @@ void Inspector::LoadModule(std::string_view fileName)
         !fileName.empty());
 }
 
-void Inspector::SingleStep(PtThread thread, Method * /* method */, const PtLocation &location)
+void Inspector::SingleStep(PtThread thread, Method *method, const PtLocation &location)
 {
     os::memory::ReadLockHolder lock(debuggerEventsLock_);
 
+    auto sourceFile = debugInfoCache_.GetSourceFile(method);
+    // NOTE(fangting, #IC98Z2): etsstdlib.ets should not call loadModule in pytest.
+    if ((sourceFile == nullptr) || (strcmp(sourceFile, "etsstdlib.ets") == 0)) {
+        return;
+    }
+
     auto *debuggableThread = GetDebuggableThread(thread);
     ASSERT(debuggableThread != nullptr);
-    debuggableThread->OnSingleStep(location);
+    debuggableThread->OnSingleStep(location, sourceFile);
 }
 
 void Inspector::ThreadStart(PtThread thread)
@@ -160,7 +174,7 @@ void Inspector::ThreadStart(PtThread thread)
     // NOLINTBEGIN(modernize-avoid-bind)
     auto callbacks = DebuggableThread::SuspensionCallbacks {
         [](auto &, auto &, auto) {},
-        std::bind(&Inspector::DebuggableThreadPostSuspend, this, thread, _1, _2, _3),
+        std::bind(&Inspector::DebuggableThreadPostSuspend, this, thread, _1, _2, _3, _4),
         [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.Unlock(); },
         [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.ReadLock(); },
         []() {},
@@ -220,6 +234,15 @@ void Inspector::RunIfWaitingForDebugger(PtThread thread)
     if (debuggableThread != nullptr) {
         debuggableThread->Touch();
     }
+
+    os::memory::LockHolder<os::memory::Mutex> lockHolder(waitDebuggerMutex_);
+    waitDebuggerCond_.Signal();
+}
+
+void Inspector::WaitForDebugger()
+{
+    os::memory::LockHolder<os::memory::Mutex> lock(waitDebuggerMutex_);
+    waitDebuggerCond_.Wait(&waitDebuggerMutex_);
 }
 
 void Inspector::Pause(PtThread thread)
@@ -521,13 +544,14 @@ std::string Inspector::GetSourceCode(std::string_view sourceFile)
 }
 
 void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &objectRepository,
-                                            const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception)
+                                            const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception,
+                                            PauseReason pauseReason)
 {
     auto exceptionRemoteObject = exception != nullptr ? objectRepository.CreateObject(TypedValue::Reference(exception))
                                                       : std::optional<RemoteObject>();
 
     inspectorServer_.CallDebuggerPaused(
-        thread, hitBreakpoints, exceptionRemoteObject, [this, thread, &objectRepository](auto &handler) {
+        thread, hitBreakpoints, exceptionRemoteObject, pauseReason, [this, thread, &objectRepository](auto &handler) {
             FrameId frameId = 0;
             HandleError(debugger_.EnumerateFrames(thread, [this, &objectRepository, &handler,
                                                            &frameId](const PtFrame &frame) {
@@ -535,6 +559,9 @@ void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &o
                 std::string_view methodName;
                 size_t lineNumber;
                 debugInfoCache_.GetSourceLocation(frame, sourceFile, methodName, lineNumber);
+                if (sourceFile.empty()) {
+                    return false;
+                }
 
                 std::optional<RemoteObject> objThis;
                 auto frameObject = objectRepository.CreateFrameObject(frame, debugInfoCache_.GetLocals(frame), objThis);

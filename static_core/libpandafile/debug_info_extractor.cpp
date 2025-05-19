@@ -133,6 +133,7 @@ public:
     {
         state_->AdvancePc(pcOffset);
         state_->AdvanceLine(lineOffset);
+        // NOTE(fangting, #IC98Z2): make line numbers do not repeat
         lnt_.push_back({state_->GetAddress(), state_->GetLine()});
         return true;
     }

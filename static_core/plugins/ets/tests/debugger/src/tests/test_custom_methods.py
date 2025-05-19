@@ -92,8 +92,7 @@ async def test_get_possible_and_set_breakpoint_by_url(
                     for line_number in meta_breakpoints_lines
                 ]
             )
-            # Decrease, as debugger returns 1-based line numbers
-            assert meta_breakpoints_lines == set(bp.line_number - 1 for bp in set_breakpoints)
+            assert meta_breakpoints_lines == set(bp.line_number for bp in set_breakpoints)
 
         process.terminate()
     assert process.returncode == -SIGTERM

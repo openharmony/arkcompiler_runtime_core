@@ -50,8 +50,10 @@ public:
 
     std::vector<std::string> GetPandaFiles(const std::function<bool(std::string_view)> &sourceFileFilter);
 
+    const char *GetSourceFile(Method *method);
+
 private:
-    const panda_file::DebugInfoExtractor &GetDebugInfo(const panda_file::File *file);
+    const panda_file::DebugInfoExtractor *GetDebugInfo(const panda_file::File *file);
 
     template <typename PFF, typename MF, typename H>
     void EnumerateLineEntries(PFF &&pandaFileFilter, MF &&methodFilter, H &&handler)

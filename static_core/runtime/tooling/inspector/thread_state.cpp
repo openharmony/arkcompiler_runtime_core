@@ -55,12 +55,14 @@ void ThreadState::BreakOnStart()
     if (!paused_) {
         stepKind_ = StepKind::BREAK_ON_START;
     }
+    breakOnStart_ = true;
 }
 
 void ThreadState::Continue()
 {
     stepKind_ = StepKind::NONE;
     paused_ = false;
+    pauseReason_ = PauseReason::OTHER;
 }
 
 void ThreadState::ContinueTo(std::unordered_set<PtLocation, HashLocation> locations)
@@ -68,6 +70,7 @@ void ThreadState::ContinueTo(std::unordered_set<PtLocation, HashLocation> locati
     stepKind_ = StepKind::CONTINUE_TO;
     stepLocations_ = std::move(locations);
     paused_ = false;
+    pauseReason_ = PauseReason::OTHER;
 }
 
 void ThreadState::StepInto(std::unordered_set<PtLocation, HashLocation> locations)
@@ -76,6 +79,7 @@ void ThreadState::StepInto(std::unordered_set<PtLocation, HashLocation> location
     methodEntered_ = false;
     stepLocations_ = std::move(locations);
     paused_ = false;
+    pauseReason_ = PauseReason::STEP;
 }
 
 void ThreadState::StepOver(std::unordered_set<PtLocation, HashLocation> locations)
@@ -84,6 +88,7 @@ void ThreadState::StepOver(std::unordered_set<PtLocation, HashLocation> location
     methodEntered_ = false;
     stepLocations_ = std::move(locations);
     paused_ = false;
+    pauseReason_ = PauseReason::STEP;
 }
 
 void ThreadState::StepOut()
@@ -91,6 +96,7 @@ void ThreadState::StepOut()
     stepKind_ = StepKind::STEP_OUT;
     methodEntered_ = true;
     paused_ = false;
+    pauseReason_ = PauseReason::STEP;
 }
 
 void ThreadState::Pause()
@@ -171,6 +177,9 @@ void ThreadState::OnException(bool uncaught)
             paused_ = true;
             break;
     }
+    if (paused_) {
+        pauseReason_ = PauseReason::EXCEPTION;
+    }
 }
 
 void ThreadState::OnFramePop()
@@ -214,9 +223,20 @@ bool ThreadState::OnMethodEntry()
     UNREACHABLE();
 }
 
-void ThreadState::OnSingleStep(const PtLocation &location)
+void ThreadState::OnSingleStep(const PtLocation &location, const char *sourceFile)
 {
     ASSERT(!paused_);
+
+    if (breakOnStart_) {
+        std::string_view file = sourceFile;
+        if (sourceFiles_.find(file) == sourceFiles_.end()) {
+            sourceFiles_.emplace(file);
+            stepKind_ = StepKind::BREAK_ON_START;
+            paused_ = true;
+            pauseReason_ = PauseReason::BREAK_ON_START;
+            return;
+        }
+    }
 
     if (ShouldStopAtBreakpoint(location)) {
         paused_ = true;
