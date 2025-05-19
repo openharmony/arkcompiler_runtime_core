@@ -210,7 +210,7 @@ function taskWithDependencyExecutePeriodicallyTest(): void {
     }, new Error("taskpool:: the task with dependency cannot executePeriodically"));
 }
 
-function testTaskpoolInfo(){
+function testTaskpoolInfo() {
     // Check non empty threadInfo without tasks
     let emptyThreadInfo = taskpool.getTaskPoolInfo();
     let flagForTask = new Event();
@@ -253,10 +253,30 @@ function testTaskpoolInfo(){
     assertEQ(await p, "result");
 }
 
+function returnNumber(): int {
+    return 100;
+}
+
+async function executeNestedTask():Promise<int> {
+    let count = 0; 
+    for(let a = 0; a < 10; a++) {
+        let res = await taskpool.execute(returnNumber);
+        assertEQ(res, 100);
+        count++;
+    }
+    return count
+}
+
+function exceedContinueTaskTest() {
+    let res = await taskpool.execute(executeNestedTask);
+    assertEQ(res, 10)
+}
+
 function main(): int {
     let commonTaskSuite = new ArkTestsuite("taskpool.CommonTask");
     let commonTaskSuiteDisabled = new ArkTestsuite("taskpool.CommonTask.DISABLED");
     commonTaskSuite.addTest("GetTaskpoolInfoTest", testTaskpoolInfo);
+    commonTaskSuite.addTest("ExceedContinueTaskCountTest", exceedContinueTaskTest);
     commonTaskSuite.addTest("OneTaskExecutionTest", () =>
     {
         let Sum = (): int => {
