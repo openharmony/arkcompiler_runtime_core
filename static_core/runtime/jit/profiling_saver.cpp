@@ -19,7 +19,7 @@ namespace ark {
 void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInlineCache *ic,
                                         std::vector<Class *> &runtimeClasses, pgo::AotProfilingData *profileData)
 {
-    for (uint32_t i = 0; i < runtimeClasses.size();) {
+    for (uint32_t i = 0; i < runtimeClasses.size(); i++) {
         auto storedClass = ic->classes[i];
 
         auto runtimeCls = runtimeClasses[i];
@@ -38,7 +38,6 @@ void ProfilingSaver::UpdateInlineCaches(pgo::AotProfilingData::AotCallSiteInline
         auto clsIdx = runtimeCls->GetFileId().GetOffset();
 
         ic->classes[i] = {clsIdx, pfIdx};
-        i++;
     }
 }
 
