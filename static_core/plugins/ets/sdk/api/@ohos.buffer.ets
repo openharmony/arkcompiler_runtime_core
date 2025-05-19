@@ -1565,6 +1565,14 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         }
     }
 
+    enum TypeParameters {
+        StringType = "string",
+        ArrayBufferType = "ArrayBuffer",
+        DataViewType = "DataView",
+        TypedArrayType = "TypedArray",
+        BlobType = "Blob"
+    }
+
     export interface BlobOptions {
         /** The Blob content-type. The intent is for type to convey the MIME media type of the data, however no validation of the type format is performed. */
         type: string
@@ -1609,19 +1617,26 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             this.calcSize()
         }
 
-        constructor(sources: ArrSrcType, options?: BlobOptions | string) {
+        constructor(sources: ArrSrcType, options?: BlobOptions) {
             this.checkParameters(sources)
             this.arr = sources
             if (options != undefined) {
-                if (options instanceof string) {
-                    this.type = options;
-                } else {
-                    this.type = options!.type ? options!.type! : ''
-                }
+                this.type = options!.type ? options!.type! : ''
             } else {
                 this.type = ''
             }
             this.calcSize()
+        }
+
+        private constructor(sources: ArrSrcType, typeKey: string, type?: string) {
+            this.arr = sources
+            this.typeKey = typeKey
+            this.calcSize()
+            if (type != undefined) {
+                this.type = type
+            } else {
+                this.type = ''
+            }
         }
 
         private constructor(blob: Blob) {
@@ -1634,19 +1649,19 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
         private checkParameters(sources: ArrSrcType | SrcType) {
             for (const element of sources) {
                 if (element instanceof string) {
-                    this.typeKey = "string"
+                    this.typeKey = TypeParameters.StringType
                    break;
                 } else if (element instanceof ArrayBuffer) {
-                    this.typeKey = "ArrayBuffer"
+                    this.typeKey = TypeParameters.ArrayBufferType
                     break;
                 } else if (element instanceof DataView) {
-                    this.typeKey = "DataView"
+                    this.typeKey = TypeParameters.DataViewType
                     break;
                 } else if (element instanceof TypedArray) {
-                    this.typeKey = "TypedArray"
+                    this.typeKey = TypeParameters.TypedArrayType
                     break;
                 } else if (element instanceof Blob) {
-                    this.typeKey = "Blob"
+                    this.typeKey = TypeParameters.BlobType
                     break;
                 }
             }
@@ -1716,23 +1731,23 @@ It must be >= 0 and <= ${this.length}. Received value is: ${tmpLength}`)
             switch (this.typeKey) {
                 case "string": {
                     let arr: Array<string> = (this.arr as Array<string>).slice(start, end)
-                    return new Blob(arr, type)
+                    return new Blob(arr, this.typeKey, type)
                 }
                 case "ArrayBuffer": {
                     let arr: Array<ArrayBuffer> = (this.arr as Array<ArrayBuffer>).slice(start, end)
-                    return new Blob(arr, type)
+                    return new Blob(arr, this.typeKey, type)
                 }
                 case "TypedArray": {
                     let arr: Array<TypedArray> = (this.arr as Array<TypedArray>).slice(start, end)
-                    return new Blob(arr, type)
+                    return new Blob(arr, this.typeKey, type)
                 }
                 case "DataView": {
                     let arr: Array<DataView> = (this.arr as Array<DataView>).slice(start, end)
-                    return new Blob(arr, type)
+                    return new Blob(arr, this.typeKey, type)
                 }
                 case "Blob": {
                     let arr: Array<Blob> = (this.arr as Array<Blob>).slice(start, end)
-                    return new Blob(arr, type)
+                    return new Blob(arr, this.typeKey, type)
                 }
             }
             return new Blob(this)
