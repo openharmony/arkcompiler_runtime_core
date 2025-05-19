@@ -146,10 +146,43 @@ async function fetchAndDisplayData() {
 }
 fetchAndDisplayData();
 
-class testA {
+class TestA {
 	constructor(public value: number) {}
 }
 
-export class classA {
-	a = new testA(100);
+export class ClassA {
+	a = new TestA(100);
 }
+
+// Exception Handling Statement
+a.then(result => {
+	console.error('YY start throw error');
+	console.log('yy execute then');
+}).catch((error: Error) => {
+	console.error('yy occur error');
+}).finally(()=>{
+	console.error('yy occur finally');
+})
+
+// Chain Expression
+let result = obj.
+foo().
+bar[0].
+baz()
+
+// SuperExpression
+class Parent {
+    sayHello() {
+        return "Hello from Parent";
+    }
+}
+
+class Child extends Parent {
+    sayHello() {
+        return super.
+        sayHello() + " and Child";
+    }
+}
+
+const d = new Child();
+console.log(d.sayHello());
