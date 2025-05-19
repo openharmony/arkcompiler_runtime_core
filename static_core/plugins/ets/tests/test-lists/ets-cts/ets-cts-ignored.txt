@@ -31,9 +31,6 @@
 04.names_declarations_and_scopes/08.function_declarations/throws_clause_2.ets
 04.names_declarations_and_scopes/08.function_declarations/throws_clause_3.ets
 
-#25667
-05.generics/01.type_parameters/01.type_parameter_constraint/example2.ets
-
 #25662
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_11.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_12.ets
