@@ -39,11 +39,11 @@ function main() {
     let v: {{t.type}} = arr[0]
     try {
         v = arr[1]
-        assertTrue(false, 'ClassCastError expected')
+        arktest.assertTrue(false, 'ClassCastError expected')
     } catch (e) {
-        assertTrue(e instanceof ClassCastError, 'ClassCastError expected')
+        arktest.assertTrue(e instanceof ClassCastError, 'ClassCastError expected')
     }
-    assertEQ(v, {{t.val}})
+    arktest.assertEQ(v, {{t.val}})
 }
 {%- endif %}
 {% endfor %}

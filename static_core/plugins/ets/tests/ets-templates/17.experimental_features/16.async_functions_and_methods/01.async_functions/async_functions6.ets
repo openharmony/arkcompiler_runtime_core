@@ -26,8 +26,8 @@ async function testAsync(a: number): Promise<string | number> {
 async function startTest() {
     let result1: string | number = await testAsync(10);
     let result2: string | number = await testAsync(1);
-    assertEQ(result1, "text");
-    assertEQ(result2, 20);
+    arktest.assertEQ(result1, "text");
+    arktest.assertEQ(result2, 20);
 }
 
 function main(): void {

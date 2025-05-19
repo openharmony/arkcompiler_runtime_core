@@ -22,7 +22,7 @@ cases:
               return p + 1
           }
       use: |-
-          assertTrue(foo(bar(1)) == 2)
+          arktest.assertTrue(foo(bar(1)) == 2)
 
     - decl: |-
           // Error in launch function propagates outside
@@ -38,11 +38,11 @@ cases:
       use: |-
           try {
               foo(bar(1))
-              assertTrue(false)
+              arktest.assertTrue(false)
           } catch (e: Error) {
-              assertTrue(e.message == 'ABC')  // expected
+              arktest.assertTrue(e.message == 'ABC')  // expected
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - decl: |-
@@ -59,11 +59,11 @@ cases:
       use: |-
           try {
               foo(bar(1), 1)
-              assertTrue(false)
+              arktest.assertTrue(false)
           } catch (e: Error) {
-              assertTrue(e.message == 'ABC')  // expected
+              arktest.assertTrue(e.message == 'ABC')  // expected
           } catch (e) {
-              assertTrue(false)
+              arktest.assertTrue(false)
           }
 
     - decl: |-
@@ -88,7 +88,7 @@ cases:
           let res = ''
           arr = [foo(1), foo(2), foo(3)]
           for (let v of arr) res += bar(v)
-          assertTrue(res == '1X3')
+          arktest.assertTrue(res == '1X3')
 
     - decl: |-
           async function foo(p: string): Promise<string> {
@@ -112,42 +112,42 @@ cases:
       use: |-
           // array element
           let arr: Promise<string>[] = [foo('A')]
-          assertTrue((await arr[0]) == 'AA')
+          arktest.assertTrue((await arr[0]) == 'AA')
 
           // tuple element
           let tup: [boolean, Promise<string>] = [false, foo('A')]
-          assertTrue((await tup[1]) == 'AA')
+          arktest.assertTrue((await tup[1]) == 'AA')
 
           // union type
           let ut: boolean|number|Promise<string> = foo('A')
-          assertTrue((await (ut as Promise<string>)) == 'AA')
+          arktest.assertTrue((await (ut as Promise<string>)) == 'AA')
 
           // nullish type
           let nt: Promise<string>|null|undefined = p1()
-          assertTrue((await nt!) == 'AA')
+          arktest.assertTrue((await nt!) == 'AA')
 
           nt = p2()
           try {
               await nt!
-              assertTrue(false)
+              arktest.assertTrue(false)
           } catch (e) {
               // OK
           }
 
           // function call
           let f: (p: Promise<string>) => Promise<string> = (p: Promise<string>): Promise<string> => p
-          assertTrue((await f(foo('A'))) == 'AA')
+          arktest.assertTrue((await f(foo('A'))) == 'AA')
 
           // instance field
           let a: A = { fld: foo('A') }
-          assertTrue((await a.fld) == 'AA')
+          arktest.assertTrue((await a.fld) == 'AA')
 
           // method call
           let b: A = new A(foo('A'))
-          assertTrue((await b.meth()) == 'AA')
+          arktest.assertTrue((await b.meth()) == 'AA')
 
           // conditional expression
           let expr1 = foo('A')
           let expr2 = foo('B')
-          assertTrue(await (a instanceof A ? expr1 : expr2) == 'AA')
-          assertTrue(await (!(a instanceof A) ? expr1 : expr2) == 'BB')
+          arktest.assertTrue(await (a instanceof A ? expr1 : expr2) == 'AA')
+          arktest.assertTrue(await (!(a instanceof A) ? expr1 : expr2) == 'BB')

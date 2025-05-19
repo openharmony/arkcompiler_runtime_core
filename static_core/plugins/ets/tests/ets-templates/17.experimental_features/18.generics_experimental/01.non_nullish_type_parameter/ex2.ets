@@ -29,5 +29,5 @@ class A<T extends MyBase | null> {
 function main() {
     let a = new A<MyBase>
     let result: MyBase = a.foo(new MyBase)
-    assertNE(result, null);
+    arktest.assertNE(result, null);
 }

@@ -21,9 +21,9 @@ cases:
       for (let n of numbers) res += n
       return res;
     call: |-
-      assertEQ(sum(), 0)
-      assertEQ(sum(1), 1)
-      assertEQ(sum(1, 2, 3), 6)
+      arktest.assertEQ(sum(), 0)
+      arktest.assertEQ(sum(1), 1)
+      arktest.assertEQ(sum(1, 2, 3), 6)
 
   # 1. array of arrays
   - sig: |-
@@ -38,9 +38,9 @@ cases:
       let a1: int[] = [1, 2, 3]
       let a2: int[] = [5, 6, 7]
       let a3: int[] = [9, 9, 9]
-      assertEQ(sum(a1), 6)
-      assertEQ(sum(a1, a2), 24)
-      assertEQ(sum(a3, a2, a1), 51)
+      arktest.assertEQ(sum(a1), 6)
+      arktest.assertEQ(sum(a1, a2), 24)
+      arktest.assertEQ(sum(a3, a2, a1), 51)
 
   # 2. return the array
   - sig: |-
@@ -49,10 +49,10 @@ cases:
       return p;
     call: |-
       let v: int[] = foo(10, 20, 30)
-      assertEQ(v.length, 3)
-      assertEQ(v[0], 10)
-      assertEQ(v[1], 20)
-      assertEQ(v[2], 30)
+      arktest.assertEQ(v.length, 3)
+      arktest.assertEQ(v[0], 10)
+      arktest.assertEQ(v[1], 20)
+      arktest.assertEQ(v[2], 30)
 
   # 3. array of nullables
   - sig: |-
@@ -62,8 +62,8 @@ cases:
       for (let n: Int|null of p) res += n??0
       return res;
     call: |-
-      assertEQ(sum(1, null, 2), 3)
-      assertEQ(sum(null, null, 99, null), 99)
+      arktest.assertEQ(sum(1, null, 2), 3)
+      arktest.assertEQ(sum(null, null, 99, null), 99)
 
   # 4. array and extra argument
   - sig: |-
@@ -72,8 +72,8 @@ cases:
       return p;
     call: |-
       let v: int[] = foo(10, 20)
-      assertEQ(v.length, 1)
-      assertEQ(v[0], 20)
+      arktest.assertEQ(v.length, 1)
+      arktest.assertEQ(v[0], 20)
 
   # 5. array and extra arguments
   - sig: |-
@@ -82,7 +82,7 @@ cases:
       return x + y + p.length;
     call: |-
       let v = foo(10, 20, 30, 40, 50, 60, 70, 80, 90)
-      assertEQ(v, 37)
+      arktest.assertEQ(v, 37)
 
   # 6. empty array
   - sig: |-
@@ -91,7 +91,7 @@ cases:
       return p;
     call: |-
       let v: int[] = foo()
-      assertEQ(v.length, 0)
+      arktest.assertEQ(v.length, 0)
 
   # 7. empty array with extra argument
   - sig: |-
@@ -100,7 +100,7 @@ cases:
       return p;
     call: |-
       let v: int[] = foo(10)
-      assertEQ(v.length, 0)
+      arktest.assertEQ(v.length, 0)
 
   # 8. array in extra argument
   - sig: |-
@@ -112,7 +112,7 @@ cases:
       return res;
     call: |-
       let v: int = foo([1, 2], 10, 20)
-      assertEQ(v, 33)
+      arktest.assertEQ(v, 33)
 
   # 9. passing different types
   - sig: |-
@@ -123,7 +123,7 @@ cases:
       return res;
     call: |-
       let v = foo(1.5, false, c'A', c'B')
-      assertEQ(v, "1.5false2AB")
+      arktest.assertEQ(v, "1.5false2AB")
 
   # 10. generic function
   - sig: |-
@@ -133,19 +133,19 @@ cases:
     call: |-
       let v: string[] = foo<string>("X", "A", "B", "C")
       let q: Int[] = foo<Int>(1, 2)
-      assertEQ(v.length, 3)
-      assertTrue("A".equals(v[0]))
-      assertTrue("B".equals(v[1]))
-      assertTrue("C".equals(v[2]))
-      assertEQ(q.length, 1)
-      assertEQ(q[0], new Int(2))
+      arktest.assertEQ(v.length, 3)
+      arktest.assertTrue("A".equals(v[0]))
+      arktest.assertTrue("B".equals(v[1]))
+      arktest.assertTrue("C".equals(v[2]))
+      arktest.assertEQ(q.length, 1)
+      arktest.assertEQ(q[0], new Int(2))
       // TODO: when the error with generic function return type will be fixed, the more usual form can be used:
-      // assertEQ(v.length, 3)
-      assertEQ(v[0], "A")
-      assertEQ(v[1], "B")
-      assertEQ(v[2], "C")
-      assertEQ(q.length, 1)
-      assertEQ(q[0], 2)
+      // arktest.assertEQ(v.length, 3)
+      arktest.assertEQ(v[0], "A")
+      arktest.assertEQ(v[1], "B")
+      arktest.assertEQ(v[2], "C")
+      arktest.assertEQ(q.length, 1)
+      arktest.assertEQ(q[0], 2)
 
   # 11. generic function with nullable argument
   - sig: |-
@@ -154,7 +154,7 @@ cases:
       return p;
     call: |-
       let v: (Object|null)[] = foo<Object|null>(null, new Long(), new Short(), new Object(), null)
-      assertEQ(v.length, 5)
+      arktest.assertEQ(v.length, 5)
 
   # 12. spread tuple
   - sig: |-
@@ -163,7 +163,7 @@ cases:
       return numbers[0] + numbers[1] + numbers[2];
     call: |-
       let x: [number, number, number] = [1, 2, 3]
-      assertEQ(sum(...x), 6)
+      arktest.assertEQ(sum(...x), 6)
 
   # 13. spread Array
   - sig: |-
@@ -176,7 +176,7 @@ cases:
 
     call: |-
       let x: Array<number> = [1, 2, 3]
-      assertEQ(sum(...x), 6)
+      arktest.assertEQ(sum(...x), 6)
 
   # 14. spread FixedArray
   - sig: |-
@@ -189,7 +189,7 @@ cases:
 
     call: |-
       let x: FixedArray<number> = [1, 2, 3]
-      assertEQ(sum(...x), 6)
+      arktest.assertEQ(sum(...x), 6)
 
   # 15. spread 2 arrays
   - sig: |-

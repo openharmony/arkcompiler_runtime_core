@@ -25,7 +25,7 @@ type ML = (param: NullableInt) => void;
 
 function main(): void {
     let mi: ML = (param: NullableInt): void => {
-        assertTrue( param === null)
+        arktest.assertTrue( param === null)
     }
     mi(null);
 

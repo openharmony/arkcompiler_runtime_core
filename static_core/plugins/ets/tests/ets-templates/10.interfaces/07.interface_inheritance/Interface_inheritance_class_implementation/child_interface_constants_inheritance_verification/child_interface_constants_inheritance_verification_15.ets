@@ -27,5 +27,5 @@ class UndefinedConstantChild implements UndefinedConstantInterface {
 
 function main(): void {
   const instance = new UndefinedConstantChild();
-  assertEQ(instance.CONST, undefined);
+  arktest.assertEQ(instance.CONST, undefined);
 }

@@ -36,5 +36,5 @@ class StrategyA implements CombinedInterface {
 function main(): void {
   const strategy: CombinedInterface = new StrategyA();
   strategy.execute();
-  assertEQ(result, "StrategyA");
+  arktest.assertEQ(result, "StrategyA");
 }

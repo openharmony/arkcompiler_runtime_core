@@ -19,7 +19,7 @@ const success = 0;
 const fail = 1;
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap RemoveAt API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap RemoveAt API tests")
 
     suite.addTest("LightWeightMap removeAt data by index", testRemoveAtValidIndex)
     suite.addTest("LightWeightMap removeAt data by boundary index", testRemoveAtBoundaryIndex)
@@ -38,8 +38,8 @@ function testRemoveAtValidIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.removeAt(1);
-    assertEQ(result, true, "The lightWeightMap should remove the element at the specified index");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightMap should remove the element at the specified index");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
 }
 
 function testRemoveAtBoundaryIndex() {
@@ -48,8 +48,8 @@ function testRemoveAtBoundaryIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.removeAt(2);
-    assertEQ(result, true, "The lightWeightMap should remove the element at the boundary index");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightMap should remove the element at the boundary index");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
 }
 
 function testRemoveAtLeftExceededIndex() {
@@ -58,8 +58,8 @@ function testRemoveAtLeftExceededIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.removeAt(-1);
-    assertEQ(result, false, "The lightWeightMap should not remove the element at the left exceeded index");
-    assertEQ(lightWeightMap.length, 3, "The lightWeightMap length should be 3");
+    arktest.assertEQ(result, false, "The lightWeightMap should not remove the element at the left exceeded index");
+    arktest.assertEQ(lightWeightMap.length, 3, "The lightWeightMap length should be 3");
 }
 
 function testRemoveAtRightExceededIndex() {
@@ -68,8 +68,8 @@ function testRemoveAtRightExceededIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.removeAt(5);
-    assertEQ(result, false, "The lightWeightMap should not remove the element at the right exceeded index");
-    assertEQ(lightWeightMap.length, 3, "The lightWeightMap length should be 3");
+    arktest.assertEQ(result, false, "The lightWeightMap should not remove the element at the right exceeded index");
+    arktest.assertEQ(lightWeightMap.length, 3, "The lightWeightMap length should be 3");
 }
 
 function testRemoveAtIndexOfEmptyMap() {
@@ -77,7 +77,7 @@ function testRemoveAtIndexOfEmptyMap() {
     try {
         lightWeightMap.removeAt(5);
     } catch (err: Error) {
-        assertEQ(err.message, "The value of index is out of range.");
+        arktest.assertEQ(err.message, "The value of index is out of range.");
     }
 }
 
@@ -87,8 +87,8 @@ function testRemoveAtLeftFloatIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.removeAt(Math.floor(1.2));
-    assertEQ(result, true, "The lightWeightMap should remove the element at the floored left float index");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightMap should remove the element at the floored left float index");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
 }
 
 function testRemoveAtRightFloatIndex() {
@@ -97,6 +97,6 @@ function testRemoveAtRightFloatIndex() {
     lightWeightMap.set("gull", 111);
     lightWeightMap.set("test", 456);
     let result = lightWeightMap.removeAt(Math.floor(1.8));
-    assertEQ(result, true, "The lightWeightMap should remove the element at the floored right float index");
-    assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
+    arktest.assertEQ(result, true, "The lightWeightMap should remove the element at the floored right float index");
+    arktest.assertEQ(lightWeightMap.length, 2, "The lightWeightMap length should be 2");
 }

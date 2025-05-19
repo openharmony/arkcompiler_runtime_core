@@ -38,6 +38,6 @@ function main(): void {
   let a = animal.introduce();
   let b = animal.name;
 
-  assertEQ(a, "I'm a Dog");
-  assertEQ(b, "Dog");
+  arktest.assertEQ(a, "I'm a Dog");
+  arktest.assertEQ(b, "Dog");
 }

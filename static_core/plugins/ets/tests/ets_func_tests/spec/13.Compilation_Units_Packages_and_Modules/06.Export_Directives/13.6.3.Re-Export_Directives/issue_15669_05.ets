@@ -23,6 +23,6 @@ files: [./issue_15669_03.ets]
 import { bar } from './issue_15669_03'
 
 function main(): void {
-  assertEQ( bar(2), 4)
-  assertEQ( bar(2), 2)
+   arktest.assertEQ( bar(2), 4)
+   arktest.assertEQ( bar(2), 2)
 }

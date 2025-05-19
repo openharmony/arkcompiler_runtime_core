@@ -19,7 +19,7 @@ const success = 0;
 const fail = 1;
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeSet GetFirstValue GetLastValue API tests")
+    const suite = new arktest.ArkTestsuite("TreeSet GetFirstValue GetLastValue API tests")
 
     suite.addTest("TreeSet getFirstValue getLastVallue first and last value",
         testGetFirstValueGetLastValueSingleElement)
@@ -52,9 +52,9 @@ function testGetFirstValueGetLastValueSingleElement() {
     treeSet.add("bb");
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
-    assertEQ(result1, "aa", "The treeSet should return the correct first value");
-    assertEQ(result2, "bb", "The treeSet should return the correct last value");
-    assertEQ(treeSet.length, 2, "The treeSet length should be 2")
+    arktest.assertEQ(result1, "aa", "The treeSet should return the correct first value");
+    arktest.assertEQ(result2, "bb", "The treeSet should return the correct last value");
+    arktest.assertEQ(treeSet.length, 2, "The treeSet length should be 2")
 }
 
 function testGetFirstValueGetLastValueEmptyTreeSet() {
@@ -62,9 +62,9 @@ function testGetFirstValueGetLastValueEmptyTreeSet() {
         secondValue: string): number => { return secondValue.compareTo(firstValue) });
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
-    assertEQ(result1, undefined, "The treeSet should return undefined for the first value in an empty set");
-    assertEQ(result2, undefined, "The treeSet should return undefined for the last value in an empty set");
-    assertEQ(treeSet.length, 0, "The treeSet length should be 0")
+    arktest.assertEQ(result1, undefined, "The treeSet should return undefined for the first value in an empty set");
+    arktest.assertEQ(result2, undefined, "The treeSet should return undefined for the last value in an empty set");
+    arktest.assertEQ(treeSet.length, 0, "The treeSet length should be 0")
 }
 
 function testGetFirstValueGetLastValueMultipleElements() {
@@ -73,9 +73,9 @@ function testGetFirstValueGetLastValueMultipleElements() {
     treeSet.add("aa");
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
-    assertEQ(result1, "aa", "The treeSet should return the correct first value");
-    assertEQ(result2, "aa", "The treeSet should return the correct last value");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1")
+    arktest.assertEQ(result1, "aa", "The treeSet should return the correct first value");
+    arktest.assertEQ(result2, "aa", "The treeSet should return the correct last value");
+    arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1")
 }
 
 function testGetFirstValueGetLastValueDescendingOrder() {
@@ -87,9 +87,9 @@ function testGetFirstValueGetLastValueDescendingOrder() {
     treeSet.add("dd");
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
-    assertEQ(result1, "dd", "The treeSet should return the correct first value");
-    assertEQ(result2, "aa", "The treeSet should return the correct last value");
-    assertEQ(treeSet.length, 4, "The treeSet length should be 4")
+    arktest.assertEQ(result1, "dd", "The treeSet should return the correct first value");
+    arktest.assertEQ(result2, "aa", "The treeSet should return the correct last value");
+    arktest.assertEQ(treeSet.length, 4, "The treeSet length should be 4")
 }
 
 function testGetFirstValueGetLastValueObjectValues() {
@@ -105,9 +105,9 @@ function testGetFirstValueGetLastValueObjectValues() {
     treeSet.add(obj_trd);
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
-    assertEQ(result1, obj, "The treeSet should return the correct first value");
-    assertEQ(result2, obj_trd, "The treeSet should return the correct last value");
-    assertEQ(treeSet.length, 3, "The treeSet length should be 3")
+    arktest.assertEQ(result1, obj, "The treeSet should return the correct first value");
+    arktest.assertEQ(result2, obj_trd, "The treeSet should return the correct last value");
+    arktest.assertEQ(treeSet.length, 3, "The treeSet length should be 3")
 }
 
 function testGetFirstValueGetLastValueMultipleObjectValues() {
@@ -119,7 +119,7 @@ function testGetFirstValueGetLastValueMultipleObjectValues() {
     treeSet.add(obj);
     let result1 = treeSet.getFirstValue();
     let result2 = treeSet.getLastValue();
-    assertEQ(result1, obj, "The treeSet should return the correct first value");
-    assertEQ(result2, obj, "The treeSet should return the correct last value");
-    assertEQ(treeSet.length, 1, "The treeSet length should be 1")
+    arktest.assertEQ(result1, obj, "The treeSet should return the correct first value");
+    arktest.assertEQ(result2, obj, "The treeSet should return the correct last value");
+    arktest.assertEQ(treeSet.length, 1, "The treeSet length should be 1")
 }

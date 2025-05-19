@@ -23,5 +23,5 @@ function boolConditionTest(isTrue: boolean) {
 
 function main(): void {
     const result = boolConditionTest(true);
-    assertEQ(result, "It's true");
+    arktest.assertEQ(result, "It's true");
 }

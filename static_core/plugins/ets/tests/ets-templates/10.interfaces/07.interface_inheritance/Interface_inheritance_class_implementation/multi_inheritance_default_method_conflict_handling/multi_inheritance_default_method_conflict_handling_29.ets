@@ -38,5 +38,5 @@ class Derived implements NS1.IBase1, NS2.IBase2 {
 function main(): void {
   const test = new Derived();
   const result = test.method();
-  assertEQ(result, null);
+  arktest.assertEQ(result, null);
 }

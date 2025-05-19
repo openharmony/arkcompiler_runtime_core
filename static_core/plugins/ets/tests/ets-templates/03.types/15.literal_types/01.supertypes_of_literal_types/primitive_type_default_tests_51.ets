@@ -24,5 +24,5 @@ function returnString(str: "hello") {
 function main(): void {
     const input = "hello";
     const result = returnString(input);
-    assertEQ(result, "hello");
+    arktest.assertEQ(result, "hello");
 }

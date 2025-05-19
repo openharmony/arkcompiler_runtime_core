@@ -21,7 +21,7 @@ const stressNum: int = 100;
 let sMTQueueInt: LinkedBlockingQueue<int> = new LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueuePollTest");
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePollTest");
 
     LinkedBlockingQueueTestsuite.addTest("ThreadsPollStressTest003", () =>
     {
@@ -39,7 +39,7 @@ function main(): int {
         for (let i: int = 0; i < 100; i++) {
             jobs[i].Await();
         }
-        assertEQ(sMTQueueInt.size, 0);
+        arktest.assertEQ(sMTQueueInt.size, 0);
     });
 
     return LinkedBlockingQueueTestsuite.run();

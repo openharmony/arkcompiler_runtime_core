@@ -24,5 +24,5 @@ function processString(str: string) {
 function main(): void {
     const input = "test";
     const result = processString(input);
-    assertEQ(result, "TEST");
+    arktest.assertEQ(result, "TEST");
 }

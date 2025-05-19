@@ -19,5 +19,5 @@ desc: Variable declaration with inferred type.
 
 function main(): void {
     let tmp = (tmp1: number) => tmp1 * 2;
-    assertTrue(tmp(5) == 10);
+    arktest.assertTrue(tmp(5) == 10);
 }

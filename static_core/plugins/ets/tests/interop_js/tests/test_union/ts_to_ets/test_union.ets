@@ -25,24 +25,24 @@ function testUnion() {
   let result = false;
   try {
     dynamicObj.setProperty('unionProp', ESValue.wrapNumber(123));
-    assertTrue(dynamicObj.getProperty('unionProp').toNumber() === 123);
+    arktest.assertTrue(dynamicObj.getProperty('unionProp').toNumber() === 123);
 
     dynamicObj.setProperty('unionProp', ESValue.wrapString('123'));
-    assertTrue(dynamicObj.getProperty('unionProp').toString() === '123');
+    arktest.assertTrue(dynamicObj.getProperty('unionProp').toString() === '123');
 
     dynamicObj.setProperty('unionProp', ESValue.wrapBoolean(true));
-    assertTrue(dynamicObj.getProperty('unionProp').toBoolean() === true);
+    arktest.assertTrue(dynamicObj.getProperty('unionProp').toBoolean() === true);
 
     let testInstance = TestClass.instantiate();
     dynamicObj.setProperty('unionProp', testInstance);
-    assertTrue(dynamicObj.getProperty('unionProp').getProperty('name').toString() === 'aaa');
+    arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('name').toString() === 'aaa');
 
     dynamicObj.setProperty('unionProp', ESValue.wrap(new NewTestClass()));
-    assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
+    arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
 
     result = true;
   } catch (error) {
-    assertFalse(result);
+    arktest.assertFalse(result);
   }
   return result;
 }

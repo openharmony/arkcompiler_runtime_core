@@ -35,6 +35,6 @@ class Fish extends Animal implements Swimmable {
 
 function main(): void {
     const fish: Fish = new Fish();
-    assertEQ(fish.move(), "Moving!");
-    assertEQ(fish.swim(), "Swimming!");
+    arktest.assertEQ(fish.move(), "Moving!");
+    arktest.assertEQ(fish.swim(), "Swimming!");
 }

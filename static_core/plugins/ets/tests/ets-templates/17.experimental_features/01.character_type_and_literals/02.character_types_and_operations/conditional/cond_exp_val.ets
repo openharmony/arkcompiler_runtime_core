@@ -25,6 +25,6 @@ class A {
 }
 
 function main() {
-    assertEQ((A.r - (A.b ? {{v.v1}} : {{v.v2}})).toChar(), c'\u0000')
+    arktest.assertEQ((A.r - (A.b ? {{v.v1}} : {{v.v2}})).toChar(), c'\u0000')
 }
 {%- endfor %}

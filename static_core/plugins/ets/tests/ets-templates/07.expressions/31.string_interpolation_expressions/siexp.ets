@@ -24,6 +24,6 @@ desc: >-
 
 function main() {
     {{c.use|indent}}
-    assertEQ( v, expected )
+    arktest.assertEQ( v, expected )
 }
 {%- endfor %}

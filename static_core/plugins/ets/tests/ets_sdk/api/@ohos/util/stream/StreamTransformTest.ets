@@ -18,7 +18,7 @@ import {stream} from "@ohos.util.stream";
 type CallbackFnType = (...params: Object[]) => void;
 
 function main(): int {
-    const suite = new ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests")
 
     suite.addTest("Create a transform stream", testStreamTransformConstructor001);
     suite.addTest("Test stream transform read", testStreamTransformRead001);
@@ -48,43 +48,43 @@ function main(): int {
 // this test case will be completed future
 function testStreamTransformConstructor001() {
     let transform = new stream.Transform();
-    assertEQ(typeof transform, "object");
-    assertNE(transform, undefined);
+    arktest.assertEQ(typeof transform, "object");
+    arktest.assertNE(transform, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformRead001() {
     let transformStream = new stream.Transform();
     let ret = transformStream.read(1);
-    assertEQ(ret, null);
+    arktest.assertEQ(ret, null);
 }
 
 // this test case will be completed future
 function testStreamTransformResume001() {
     let transformStream = new stream.Transform();
     let ret: stream.Readable = transformStream.resume();
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformPause001() {
     let transformStream = new stream.Transform();
     let ret: stream.Readable = transformStream.pause();
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformSetEncoding001() {
     let transformStream = new stream.Transform();
     let ret: boolean = transformStream.setEncoding("utf8");
-    assertTrue(ret);
+    arktest.assertTrue(ret);
 }
 
 // this test case will be completed future
 function testStreamTransformIsPaused001() {
     let transformStream = new stream.Transform();
     let ret: boolean = transformStream.isPaused();
-    assertFalse(ret);
+    arktest.assertFalse(ret);
 }
 
 // this test case will be completed future
@@ -92,7 +92,7 @@ function testStreamTransformPipe001() {
     let transformStream = new stream.Transform();
     let writable = new stream.Writable();
     let ret: stream.Writable = transformStream.pipe(writable);
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
@@ -100,7 +100,7 @@ function testStreamTransformUnpipe001() {
     let transformStream = new stream.Transform();
     let writable = new stream.Writable();
     let ret: stream.Readable = transformStream.unpipe(writable);
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
@@ -108,7 +108,7 @@ function testStreamTransformOn001() {
     let transformStream = new stream.Transform();
     let callback: CallbackFnType = (...params: Object[]) => {};
     transformStream.on("data", callback);
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
@@ -116,82 +116,82 @@ function testStreamTransformOff001() {
     let transformStream = new stream.Transform();
     let callback: CallbackFnType = (...params: Object[]) => {};
     transformStream.off("data", callback);
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamTransformDoInitialize001() {
     let transformStream = new stream.Transform();
     transformStream.doInitialize(() => {});
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamTransformDoRead001() {
     let transformStream = new stream.Transform();
     transformStream.doRead(1);
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamTransformWrite001() {
     let transformStream = new stream.Transform();
     let ret: boolean = transformStream.write("data", "utf-8", () => {});
-    assertFalse(ret);
+    arktest.assertFalse(ret);
 }
 
 // this test case will be completed future
 function testStreamTransformEnd001() {
     let transformStream = new stream.Transform();
     let ret: stream.Writable = transformStream.end("data", "utf-8", () => {});
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
 function testStreamTransformSetDefaultEncoding001() {
     let transformStream = new stream.Transform();
     let ret: boolean = transformStream.setDefaultEncoding("utf-8");
-    assertFalse(ret);
+    arktest.assertFalse(ret);
 }
 
 // this test case will be completed future
 function testStreamTransformCrok001() {
     let transformStream = new stream.Transform();
     let ret: boolean = transformStream.cork();
-    assertFalse(ret);
+    arktest.assertFalse(ret);
 }
 
 // this test case will be completed future
 function testStreamTransformUncrok001() {
     let transformStream = new stream.Transform();
     let ret: boolean = transformStream.uncork();
-    assertFalse(ret);
+    arktest.assertFalse(ret);
 }
 
 // this test case will be completed future
 function testStreamTransformDoWrite001() {
     let transformStream = new stream.Transform();
     transformStream.doWrite("test", "utf8", () => {});
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamTransformDoWritev001() {
     let transformStream = new stream.Transform();
     transformStream.doWritev(["test"], () => {});
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamTransformDoTransform001() {
     let transformStream = new stream.Transform();
     transformStream.doTransform("test", "utf8", () => {});
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamTransformDoFlush001() {
     let transformStream = new stream.Transform();
     transformStream.doFlush(() => {});
-    assertTrue(true);
+    arktest.assertTrue(true);
 }

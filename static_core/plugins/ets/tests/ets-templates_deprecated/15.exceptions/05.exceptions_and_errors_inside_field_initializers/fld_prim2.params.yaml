@@ -23,7 +23,7 @@ cases:
           }
       use: |-
           let a: A = { fld: 8.0 + foo(4.0) }
-          assertEQ( a.fld, 16.0 )
+          arktest.assertEQ( a.fld, 16.0 )
       tags: 'compile-only, negative'
 
     # positive, throws error
@@ -36,7 +36,7 @@ cases:
           }
       use: |-
           let a: A = { fld: 8.0 + foo(4.0) }
-          assertEQ( a.fld, 16.0 )
+          arktest.assertEQ( a.fld, 16.0 )
 
     # negative, exception throwing lambda
     - use: |-
@@ -46,7 +46,7 @@ cases:
               }
               return p * 2
           })(4.0) }
-          assertEQ( a.fld, 16.0 )
+          arktest.assertEQ( a.fld, 16.0 )
       tags: 'compile-only, negative'
 
     # positive, error throwing lambda
@@ -57,7 +57,7 @@ cases:
               }
               return p * 2
           })(4.0) }
-          assertEQ( a.fld, 16.0 )
+          arktest.assertEQ( a.fld, 16.0 )
 
     # negative, rethrows with non-throwing argument
     - decl: |-
@@ -69,7 +69,7 @@ cases:
           }
       use: |-
           let a: A = { fld: 8.0 + bar(foo, 2.0) }
-          assertEQ( a.fld, 18.0 )
+          arktest.assertEQ( a.fld, 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with throwing argument
@@ -85,7 +85,7 @@ cases:
           }
       use: |-
           let a: A = { fld: 8.0 + bar(foo, 2.0) }
-          assertEQ( a.fld, 18.0 )
+          arktest.assertEQ( a.fld, 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with non-throwing lambda argument
@@ -95,7 +95,7 @@ cases:
           }
       use: |-
           let a: A = { fld: 8.0 + bar((p: number): number => p * 2, 2.0) }
-          assertEQ( a.fld, 18.0 )
+          arktest.assertEQ( a.fld, 18.0 )
       tags: 'compile-only, negative'
 
     # negative, rethrows with throwing lambda argument
@@ -110,5 +110,5 @@ cases:
               }
               return p * 2
           }, 2.0) }
-          assertEQ( a.fld, 18.0 )
+          arktest.assertEQ( a.fld, 18.0 )
       tags: 'compile-only, negative'

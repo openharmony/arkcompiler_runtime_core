@@ -29,6 +29,6 @@ function main(): void {
     name: "Alice",
     age: 25
   };
-  assertEQ(obj.name, "Alice");
-  assertEQ(obj.age, 25);
+  arktest.assertEQ(obj.name, "Alice");
+  arktest.assertEQ(obj.age, 25);
 }

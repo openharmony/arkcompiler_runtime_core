@@ -40,84 +40,84 @@ function test_bundle_enum_BundleFlag_with_DEFAULT() {
     const first = ohosBundle.BundleFlag.GET_BUNDLE_DEFAULT;
 
     console.log("BundleFlag.GET_BUNDLE_DEFAULT is : " + first);
-    assertEQ(first, ohosBundle.BundleFlag.GET_BUNDLE_DEFAULT);
+    arktest.assertEQ(first, ohosBundle.BundleFlag.GET_BUNDLE_DEFAULT);
 }
 
 function test_bundle_enum_BundleFlag_with_INFO() {
     const first = ohosBundle.BundleFlag.GET_ALL_APPLICATION_INFO;
 
     console.log("BundleFlag.GET_ALL_APPLICATION_INFO is : " + first);
-    assertEQ(first, ohosBundle.BundleFlag.GET_ALL_APPLICATION_INFO);
+    arktest.assertEQ(first, ohosBundle.BundleFlag.GET_ALL_APPLICATION_INFO);
 }
 
 function test_bundle_enum_BundleFlag_with_DISABLE() {
     const first = ohosBundle.BundleFlag.GET_APPLICATION_INFO_WITH_DISABLE;
 
     console.log("BundleFlag.GET_APPLICATION_INFO_WITH_DISABLE is : " + first);
-    assertEQ(first, ohosBundle.BundleFlag.GET_APPLICATION_INFO_WITH_DISABLE);
+    arktest.assertEQ(first, ohosBundle.BundleFlag.GET_APPLICATION_INFO_WITH_DISABLE);
 }
 
 function test_bundle_enum_with_colorMode() {
     const first = ohosBundle.ColorMode.AUTO_MODE;
 
     console.log("ColorMode.AUTO_MODE is : " + first);
-    assertEQ(first, ohosBundle.ColorMode.AUTO_MODE);
+    arktest.assertEQ(first, ohosBundle.ColorMode.AUTO_MODE);
 }
 
 function test_bundle_enum_with_grantStatus() {
     const first = ohosBundle.GrantStatus.PERMISSION_DENIED;
 
     console.log("GrantStatus.PERMISSION_DENIED is : " + first);
-    assertEQ(first, ohosBundle.GrantStatus.PERMISSION_DENIED);
+    arktest.assertEQ(first, ohosBundle.GrantStatus.PERMISSION_DENIED);
 }
 
 function test_bundle_enum_with_abilityType() {
     let first = ohosBundle.AbilityType.UNKNOWN;
 
     console.log("AbilityType.UNKNOWN is : " + first);
-    assertEQ(first, ohosBundle.AbilityType.UNKNOWN);
+    arktest.assertEQ(first, ohosBundle.AbilityType.UNKNOWN);
 }
 
 function test_bundle_enum_with_abilitySubType() {
     const first = ohosBundle.AbilitySubType.UNSPECIFIED;
 
     console.log("AbilitySubType.UNSPECIFIED is : " + first);
-    assertEQ(first, ohosBundle.AbilitySubType.UNSPECIFIED);
+    arktest.assertEQ(first, ohosBundle.AbilitySubType.UNSPECIFIED);
 }
 
 function test_bundle_enum_with_displayOrientation() {
     const first = ohosBundle.DisplayOrientation.UNSPECIFIED;
 
     console.log("DisplayOrientation.UNSPECIFIED is : " + first);
-    assertEQ(first, ohosBundle.DisplayOrientation.UNSPECIFIED);
+    arktest.assertEQ(first, ohosBundle.DisplayOrientation.UNSPECIFIED);
 }
 
 function test_bundle_enum_with_launchMode() {
     const first = ohosBundle.LaunchMode.SINGLETON;
 
     console.log("LaunchMode.SINGLETON is : " + first);
-    assertEQ(first, ohosBundle.LaunchMode.SINGLETON);
+    arktest.assertEQ(first, ohosBundle.LaunchMode.SINGLETON);
 }
 
 function test_bundle_enum_with_installErrorCode_SUCCESS() {
     const first = ohosBundle.InstallErrorCode.SUCCESS;
 
     console.log("InstallErrorCode.SUCCESS is : " + first);
-    assertEQ(first, ohosBundle.InstallErrorCode.SUCCESS);
+    arktest.assertEQ(first, ohosBundle.InstallErrorCode.SUCCESS);
 }
 
 function test_bundle_enum_with_installErrorCode_TIMEOUT() {
     const first = ohosBundle.InstallErrorCode.STATUS_INSTALL_FAILURE_DOWNLOAD_TIMEOUT;
 
     console.log("InstallErrorCode.STATUS_INSTALL_FAILURE_DOWNLOAD_TIMEOUT is : " + first);
-    assertEQ(first, ohosBundle.InstallErrorCode.STATUS_INSTALL_FAILURE_DOWNLOAD_TIMEOUT);
+    arktest.assertEQ(first, ohosBundle.InstallErrorCode.STATUS_INSTALL_FAILURE_DOWNLOAD_TIMEOUT);
 }
 
 function test_bundle_enum_with_installErrorCode_FOUND() {
     const first = ohosBundle.InstallErrorCode.STATUS_ABILITY_NOT_FOUND;
 
     console.log("InstallErrorCode.STATUS_ABILITY_NOT_FOUND is : " + first);
-    assertEQ(first, ohosBundle.InstallErrorCode.STATUS_ABILITY_NOT_FOUND);
+    arktest.assertEQ(first, ohosBundle.InstallErrorCode.STATUS_ABILITY_NOT_FOUND);
 }
 
 let bundleOpt: ohosBundle.BundleOptions = ohosBundle.getBundleOptions();
@@ -125,7 +125,7 @@ function test_bundle_interface_bundleOptions_with_userId_noSet() {
     let id = bundleOpt.userId;
 
     console.log("BundleOptions userId is : " + id);
-    assertEQ(id, undefined);
+    arktest.assertEQ(id, undefined);
 }
 
 function test_bundle_interface_bundleOptions_with_userId() {  
@@ -133,7 +133,7 @@ function test_bundle_interface_bundleOptions_with_userId() {
     let id = bundleOpt.userId;
 
     console.log("BundleOptions userId is : " + id);
-    assertEQ(id, userId);
+    arktest.assertEQ(id, userId);
 }
 
 function test_bundle_function_with_getBundleInfo() {  
@@ -242,147 +242,147 @@ function test_abilityinfo_with_bundleName(){
     let info = abInfo.bundleName;
 
     console.log("abInfo.bundleName is : " + info);
-    assertEQ(info, "AbilityInfo::getBundleName");
+    arktest.assertEQ(info, "AbilityInfo::getBundleName");
 }
 
 function test_abilityinfo_with_name(){
     let info = abInfo.name;
 
     console.log("abInfo.name is : " + info);
-    assertEQ(info, "AbilityInfo::getName");
+    arktest.assertEQ(info, "AbilityInfo::getName");
 }
 
 function test_abilityinfo_with_label(){
     let info = abInfo.label;
 
     console.log("abInfo.label is : " + info);
-    assertEQ(info, "AbilityInfo::getLabel");
+    arktest.assertEQ(info, "AbilityInfo::getLabel");
 }
 
 function test_abilityinfo_with_description(){
     let info = abInfo.description;
 
     console.log("abInfo.description is : " + info);
-    assertEQ(info, "AbilityInfo::getDescription");
+    arktest.assertEQ(info, "AbilityInfo::getDescription");
 }
 
 function test_abilityinfo_with_icon(){
     let info = abInfo.icon;
 
     console.log("abInfo.icon is : " + info);
-    assertEQ(info, "AbilityInfo::getIcon");
+    arktest.assertEQ(info, "AbilityInfo::getIcon");
 }
 
 function test_abilityinfo_with_labelId(){
     let info = abInfo.labelId;
 
     console.log("abInfo.labelId is : " + info);
-    assertEQ(info, 100 as short);
+    arktest.assertEQ(info, 100 as short);
 }
 
 function test_abilityinfo_with_descriptionId(){
     let info = abInfo.descriptionId;
 
     console.log("abInfo.descriptionId is : " + info);
-    assertEQ(info, 100 as short);
+    arktest.assertEQ(info, 100 as short);
 }
 
 function test_abilityinfo_with_iconId(){
     let info = abInfo.iconId;
 
     console.log("abInfo.iconId is : " + info);
-    assertEQ(info, 100 as short);
+    arktest.assertEQ(info, 100 as short);
 }
 
 function test_abilityinfo_with_moduleName(){
     let info = abInfo.moduleName;
 
     console.log("abInfo.moduleName is : " + info);
-    assertEQ(info, "AbilityInfo::getModuleName");
+    arktest.assertEQ(info, "AbilityInfo::getModuleName");
 }
 
 function test_abilityinfo_with_process(){
     let info = abInfo.process;
 
     console.log("abInfo.process is : " + info);
-    assertEQ(info, "AbilityInfo::getProcess");
+    arktest.assertEQ(info, "AbilityInfo::getProcess");
 }
 
 function test_abilityinfo_with_targetAbility(){
     let info = abInfo.targetAbility;
 
     console.log("abInfo.targetAbility is : " + info);
-    assertEQ(info, "AbilityInfo::getTargetAbility");
+    arktest.assertEQ(info, "AbilityInfo::getTargetAbility");
 }
 
 function test_abilityinfo_with_backgroundModes(){
     let info = abInfo.backgroundModes;
 
     console.log("abInfo.backgroundModes is : " + info);
-    assertEQ(info, 100 as short);
+    arktest.assertEQ(info, 100 as short);
 }
 
 function test_abilityinfo_with_isVisible(){
     let info = abInfo.isVisible;
 
     console.log("abInfo.isVisible is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_abilityinfo_with_formEnabled(){
     let info = abInfo.formEnabled;
 
     console.log("abInfo.formEnabled is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_abilityinfo_with_permissions(){
     let info = abInfo.permissions[0];
 
     console.log("abInfo.permissions is : " + info);
-    assertEQ(info, "AbilityInfo::getTargetAbility");
+    arktest.assertEQ(info, "AbilityInfo::getTargetAbility");
 }
 
 function test_abilityinfo_with_deviceTypes(){
     let info = abInfo.deviceTypes[0];
 
     console.log("abInfo.deviceTypes is : " + info);
-    assertEQ(info, "AbilityInfo::getDeviceTypes");
+    arktest.assertEQ(info, "AbilityInfo::getDeviceTypes");
 }
 
 function test_abilityinfo_with_deviceCapabilities(){
     let info = abInfo.deviceCapabilities[0];
 
     console.log("abInfo.deviceCapabilities is : " + info);
-    assertEQ(info, "AbilityInfo::getDeviceCapabilities");
+    arktest.assertEQ(info, "AbilityInfo::getDeviceCapabilities");
 }
 
 function test_abilityinfo_with_readPermission(){
     let info = abInfo.readPermission;
 
     console.log("abInfo.readPermission is : " + info);
-    assertEQ(info, "AbilityInfo::getReadPermission");
+    arktest.assertEQ(info, "AbilityInfo::getReadPermission");
 }
 
 function test_abilityinfo_with_writePermission(){
     let info = abInfo.writePermission;
 
     console.log("abInfo.writePermission is : " + info);
-    assertEQ(info, "AbilityInfo::getWritePermission");
+    arktest.assertEQ(info, "AbilityInfo::getWritePermission");
 }
 
 function test_abilityinfo_with_uri(){
     let info = abInfo.uri;
 
     console.log("abInfo.uri is : " + info);
-    assertEQ(info, "AbilityInfo::getUri");
+    arktest.assertEQ(info, "AbilityInfo::getUri");
 }
 
 function test_abilityinfo_with_enabled(){
     let info = abInfo.enabled;
 
     console.log("abInfo.enabled is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 //bundleInfo.d.ts
@@ -395,7 +395,7 @@ function test_bundleinfo_interface_usedScene_with_abilities(){
     let info = usedScene.abilities[2];
 
     console.log("usedScene.abilities is : " + info);
-    assertEQ(info, "abilities");
+    arktest.assertEQ(info, "abilities");
 }
 
 function test_bundleinfo_interface_usedScene_with_when(){
@@ -403,7 +403,7 @@ function test_bundleinfo_interface_usedScene_with_when(){
     let info = usedScene.when;
 
     console.log("usedScene.when is : " + info);
-    assertEQ(info, "this is when");
+    arktest.assertEQ(info, "this is when");
 }
 
 function test_bundleinfo_interface_reqperdetail_with_name(){
@@ -411,7 +411,7 @@ function test_bundleinfo_interface_reqperdetail_with_name(){
     let info = reqPerDetail.name;
 
     console.log("reqPerDetail.name is : " + info);
-    assertEQ(info, "this is name");
+    arktest.assertEQ(info, "this is name");
 }
 
 function test_bundleinfo_interface_reqperdetail_with_reason(){
@@ -419,140 +419,140 @@ function test_bundleinfo_interface_reqperdetail_with_reason(){
     let info = reqPerDetail.reason;
 
     console.log("reqPerDetail.reason is : " + info);
-    assertEQ(info, "this is reason");
+    arktest.assertEQ(info, "this is reason");
 }
 
 function test_bundleinfo_interface_with_name(){
     let info = bunInfo.name;
 
     console.log("bunInfo.name is : " + info);
-    assertEQ(info, "bundleInfo::getName");
+    arktest.assertEQ(info, "bundleInfo::getName");
 }
 
 function test_bundleinfo_interface_with_type(){
     let info = bunInfo.type;
 
     console.log("bunInfo.type is : " + info);
-    assertEQ(info, "bundleInfo::getType");
+    arktest.assertEQ(info, "bundleInfo::getType");
 }
 
 function test_bundleinfo_interface_with_appId(){
     let info = bunInfo.appId;
 
     console.log("bunInfo.appId is : " + info);
-    assertEQ(info, "bundleInfo::getAppId");
+    arktest.assertEQ(info, "bundleInfo::getAppId");
 }
 
 function test_bundleinfo_interface_withuid(){
     let info = bunInfo.uid;
 
     console.log("bunInfo.uid is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 function test_bundleinfo_interface_with_installTime(){
     let info = bunInfo.installTime;
 
     console.log("bunInfo.installTime is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 function test_bundleinfo_interface_with_updateTime(){
     let info = bunInfo.updateTime;
 
     console.log("bunInfo.updateTime is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 function test_bundleinfo_interface_with_reqPermissions(){
     let info = bunInfo.reqPermissions[0];
 
     console.log("bunInfo.reqPermissions is : " + info);
-    assertEQ(info, "bundleInfo::getReqPermissions");
+    arktest.assertEQ(info, "bundleInfo::getReqPermissions");
 }
 
 function test_bundleinfo_interface_with_vendor(){
     let info = bunInfo.vendor;
 
     console.log("bunInfo.vendor is : " + info);
-    assertEQ(info, "bundleInfo::getVendor");
+    arktest.assertEQ(info, "bundleInfo::getVendor");
 }
 
 function test_bundleinfo_interface_with_versionCode(){
     let info = bunInfo.versionCode;
 
     console.log("bunInfo.versionCode is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 function test_bundleinfo_interface_with_versionName(){
     let info = bunInfo.versionName;
 
     console.log("bunInfo.versionName is : " + info);
-    assertEQ(info, "bundleInfo::getVersionName");
+    arktest.assertEQ(info, "bundleInfo::getVersionName");
 }
 
 function test_bundleinfo_interface_with_compatibleVersion(){
     let info = bunInfo.compatibleVersion;
 
     console.log("bunInfo.compatibleVersion is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 function test_bundleinfo_interface_with_targetVersion(){
     let info = bunInfo.targetVersion;
 
     console.log("bunInfo.targetVersion is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 function test_bundleinfo_interface_with_isCompressNativeLibs(){
     let info = bunInfo.isCompressNativeLibs;
 
     console.log("bunInfo.isCompressNativeLibs is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundleinfo_interface_with_entryModuleName(){
     let info = bunInfo.entryModuleName;
 
     console.log("bunInfo.entryModuleName is : " + info);
-    assertEQ(info, "bundleInfo::getEntryModuleName");
+    arktest.assertEQ(info, "bundleInfo::getEntryModuleName");
 }
 
 function test_bundleinfo_interface_with_cpuAbi(){
     let info = bunInfo.cpuAbi;
 
     console.log("bunInfo.cpuAbi is : " + info);
-    assertEQ(info, "bundleInfo::getCpuAbi");
+    arktest.assertEQ(info, "bundleInfo::getCpuAbi");
 }
 
 function test_bundleinfo_interface_with_isSilentInstallation(){
     let info = bunInfo.isSilentInstallation;
 
     console.log("bunInfo.isSilentInstallation is : " + info);
-    assertEQ(info, "bundleInfo::getIsSilentInstallation");
+    arktest.assertEQ(info, "bundleInfo::getIsSilentInstallation");
 }
 
 function test_bundleinfo_interface_with_minCompatibleVersionCode(){
     let info = bunInfo.minCompatibleVersionCode;
 
     console.log("bunInfo.minCompatibleVersionCode is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 function test_bundleinfo_interface_with_entryInstallationFree(){
     let info = bunInfo.entryInstallationFree;
 
     console.log("bunInfo.entryInstallationFree is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundleinfo_interface_with_reqPermissionStates(){
     let info = bunInfo.reqPermissionStates[0];
 
     console.log("bunInfo.reqPermissionStates is : " + info);
-    assertEQ(info, 127 as short);
+    arktest.assertEQ(info, 127 as short);
 }
 
 //customizeData.d.ts
@@ -562,7 +562,7 @@ function test_bundleinfo_interface_custdata_with_name(){
     let info = custData.name;
 
     console.log("custData.name is : " + info);
-    assertEQ(info, "tom");
+    arktest.assertEQ(info, "tom");
 }
 
 function test_bundleinfo_interface_custdata_with_value(){
@@ -570,7 +570,7 @@ function test_bundleinfo_interface_custdata_with_value(){
     let info = custData.value;
 
     console.log("custData.value is : " + info);
-    assertEQ(info, "tom");
+    arktest.assertEQ(info, "tom");
 }
 
 function test_bundleinfo_interface_custdata_with_extra(){
@@ -578,7 +578,7 @@ function test_bundleinfo_interface_custdata_with_extra(){
     let info = custData.extra;
 
     console.log("custData.extra is : " + info);
-    assertEQ(info, "tom");
+    arktest.assertEQ(info, "tom");
 }
 
 //hapModuleInfo.d.ts
@@ -587,98 +587,98 @@ function test_bundle_interface_hapModuleInfo_with_name() {
     let info = hapInfo.name;
 
     console.log("hapInfo.name is : " + info);
-    assertEQ(info, "HapModuleInfo::getName");
+    arktest.assertEQ(info, "HapModuleInfo::getName");
 }
 
 function test_bundle_interface_hapModuleInfo_with_description() {  
     let info = hapInfo.description;
 
     console.log("hapInfo.description is : " + info);
-    assertEQ(info, "HapModuleInfo::getDescription");
+    arktest.assertEQ(info, "HapModuleInfo::getDescription");
 }
 
 function test_bundle_interface_hapModuleInfo_with_descriptionid() {  
     let info = hapInfo.descriptionId;
 
     console.log("hapInfo.descriptionId is : " + info);
-    assertEQ(info, 1024 as short);
+    arktest.assertEQ(info, 1024 as short);
 }
 
 function test_bundle_interface_hapModuleInfo_with_icon() {  
     let info = hapInfo.icon;
 
     console.log("hapInfo.icon is : " + info);
-    assertEQ(info, "HapModuleInfo::getIcon");
+    arktest.assertEQ(info, "HapModuleInfo::getIcon");
 }
 
 function test_bundle_interface_hapModuleInfo_with_label() {  
     let info = hapInfo.label;
 
     console.log("hapInfo.label is : " + info);
-    assertEQ(info, "HapModuleInfo::getLabel");
+    arktest.assertEQ(info, "HapModuleInfo::getLabel");
 }
 
 function test_bundle_interface_hapModuleInfo_with_labelid() {  
     let info = hapInfo.labelId;
 
     console.log("hapInfo.labelId is : " + info);
-    assertEQ(info, 1024 as short);
+    arktest.assertEQ(info, 1024 as short);
 }
 
 function test_bundle_interface_hapModuleInfo_with_iconid() {  
     let info = hapInfo.iconId;
 
     console.log("hapInfo.iconId is : " + info);
-    assertEQ(info, 1024 as short);
+    arktest.assertEQ(info, 1024 as short);
 }
 
 function test_bundle_interface_hapModuleInfo_with_backgroundImg() {  
     let info = hapInfo.backgroundImg;
 
     console.log("hapInfo.backgroundImg is : " + info);
-    assertEQ(info, "HapModuleInfo::getBackgroundImg");
+    arktest.assertEQ(info, "HapModuleInfo::getBackgroundImg");
 }
 
 function test_bundle_interface_hapModuleInfo_with_supportedModes() {  
     let info = hapInfo.supportedModes;
 
     console.log("hapInfo.supportedModes is : " + info);
-    assertEQ(info, 1024 as short);
+    arktest.assertEQ(info, 1024 as short);
 }
 
 function test_bundle_interface_hapModuleInfo_with_reqCapabilities() {  
     let info = hapInfo.reqCapabilities[0];
 
     console.log("hapInfo.reqCapabilities is : " + info);
-    assertEQ(info, "HapModuleInfo::getReqCapabilities");
+    arktest.assertEQ(info, "HapModuleInfo::getReqCapabilities");
 }
 
 function test_bundle_interface_hapModuleInfo_with_deviceTypes() {  
     let info = hapInfo.deviceTypes[0];
 
     console.log("hapInfo.deviceTypes is : " + info);
-    assertEQ(info, "HapModuleInfo::getDeviceTypes");
+    arktest.assertEQ(info, "HapModuleInfo::getDeviceTypes");
 }
 
 function test_bundle_interface_hapModuleInfo_with_moduleName() {  
     let info = hapInfo.moduleName;
 
     console.log("hapInfo.moduleName is : " + info);
-    assertEQ(info, "HapModuleInfo::getModuleName");
+    arktest.assertEQ(info, "HapModuleInfo::getModuleName");
 }
 
 function test_bundle_interface_hapModuleInfo_with_mainAbilityName() {  
     let info = hapInfo.mainAbilityName;
 
     console.log("hapInfo.mainAbilityName is : " + info);
-    assertEQ(info, "HapModuleInfo::getMainAbilityName");
+    arktest.assertEQ(info, "HapModuleInfo::getMainAbilityName");
 }
 
 function test_bundle_interface_hapModuleInfo_with_installationFree() {  
     let info = hapInfo.installationFree;
 
     console.log("hapInfo.installationFree is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 //moduleInfo.d.ts
@@ -687,14 +687,14 @@ function test_bundle_interface_moduleInfo_with_moduleName() {
     let info = moInfo.moduleName;
 
     console.log("moInfo.moduleName is : " + info);
-    assertEQ(info, "this is moduleinfo with name");
+    arktest.assertEQ(info, "this is moduleinfo with name");
 }
 
 function test_bundle_interface_moduleInfo_with_moduleSourceDir() {
     let info = moInfo.moduleSourceDir;
 
     console.log("moInfo.moduleSourceDir is : " + info);
-    assertEQ(info, "this is moduleinfo with moduleSourceDir");
+    arktest.assertEQ(info, "this is moduleinfo with moduleSourceDir");
 }
 
 //shortcutInfo.d.ts
@@ -703,77 +703,77 @@ function test_bundle_interface_shortcutInfo_with_id() {
     let info = shortInfo.id;
 
     console.log("shortInfo.id is : " + info);
-    assertEQ(info, "ShortcutInfo::GetId");
+    arktest.assertEQ(info, "ShortcutInfo::GetId");
 }
 
 function test_bundle_interface_shortcutInfo_with_bundleName() {
     let info = shortInfo.bundleName;
 
     console.log("shortInfo.bundleName is : " + info);
-    assertEQ(info, "ShortcutInfo::GetBundleName");
+    arktest.assertEQ(info, "ShortcutInfo::GetBundleName");
 }
 
 function test_bundle_interface_shortcutInfo_with_hostAbility() {
     let info = shortInfo.hostAbility;
 
     console.log("shortInfo.hostAbility is : " + info);
-    assertEQ(info, "ShortcutInfo::GetHostAbility");
+    arktest.assertEQ(info, "ShortcutInfo::GetHostAbility");
 }
 
 function test_bundle_interface_shortcutInfo_with_icon() {
     let info = shortInfo.icon;
 
     console.log("shortInfo.icon is : " + info);
-    assertEQ(info, "ShortcutInfo::GetIcon");
+    arktest.assertEQ(info, "ShortcutInfo::GetIcon");
 }
 
 function test_bundle_interface_shortcutInfo_with_iconId() {
     let info = shortInfo.iconId;
 
     console.log("shortInfo.iconId is : " + info);
-    assertEQ(info, 4096);
+    arktest.assertEQ(info, 4096);
 }
 
 function test_bundle_interface_shortcutInfo_with_label() {  
     let info = shortInfo.label;
 
     console.log("shortInfo.label is : " + info);
-    assertEQ(info, "ShortcutInfo::GetLabel");
+    arktest.assertEQ(info, "ShortcutInfo::GetLabel");
 }
 
 function test_bundle_interface_shortcutInfo_with_labelId() {  
     let info = shortInfo.labelId;
 
     console.log("shortInfo.labelId is : " + info);
-    assertEQ(info, 4096);
+    arktest.assertEQ(info, 4096);
 }
 
 function test_bundle_interface_shortcutInfo_with_disableMessage() {  
     let info = shortInfo.disableMessage;
 
     console.log("shortInfo.disableMessage is : " + info);
-    assertEQ(info, "ShortcutInfo::GetDisableMessage");
+    arktest.assertEQ(info, "ShortcutInfo::GetDisableMessage");
 }
 
 function test_bundle_interface_shortcutInfo_with_isStatic() {  
     let info = shortInfo.isStatic;
 
     console.log("shortInfo.isStatic is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundle_interface_shortcutInfo_with_isHomeShortcut() {  
     let info = shortInfo.isHomeShortcut;
 
     console.log("shortInfo.isHomeShortcut is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 function test_bundle_interface_shortcutInfo_with_isEnabled() {  
     let info = shortInfo.isEnabled;
 
     console.log("shortInfo.isEnabled is : " + info);
-    assertEQ(info, true);
+    arktest.assertEQ(info, true);
 }
 
 //elementName.d.ts
@@ -781,7 +781,7 @@ function test_bundle_interface_elementName_with_deviceId_noSet() {
     let eleName: elementName.ElementName = elementName.getElementName()
     let info = eleName.deviceId;
     console.log("eleName.deviceId: " + info)
-    assertEQ(info, undefined);
+    arktest.assertEQ(info, undefined);
 }
 
 function test_bundle_interface_elementName_with_deviceId() {
@@ -789,7 +789,7 @@ function test_bundle_interface_elementName_with_deviceId() {
     eleName.deviceId = "ID20250422";
     let info = eleName.deviceId;
     console.log("eleName.deviceId: " + info)
-    assertEQ(info, "ID20250422");
+    arktest.assertEQ(info, "ID20250422");
 }
 
 function test_bundle_interface_elementName_with_bundleName() {
@@ -797,7 +797,7 @@ function test_bundle_interface_elementName_with_bundleName() {
     eleName.bundleName = "ID20250422";
     let info = eleName.bundleName;
 
-    assertEQ(info, "ID20250422");
+    arktest.assertEQ(info, "ID20250422");
 }
 
 function test_bundle_interface_elementName_with_abilityName() {
@@ -805,14 +805,14 @@ function test_bundle_interface_elementName_with_abilityName() {
     eleName.abilityName = "ID20250422";
     let info = eleName.abilityName;
 
-    assertEQ(info, "ID20250422");
+    arktest.assertEQ(info, "ID20250422");
 }
 
 function test_bundle_interface_elementName_with_uri_noSet() {
     let eleName: elementName.ElementName = elementName.getElementName()
     let info = eleName.uri;
 
-    assertEQ(info, undefined);
+    arktest.assertEQ(info, undefined);
 }
 
 function test_bundle_interface_elementName_with_uri() {
@@ -820,14 +820,14 @@ function test_bundle_interface_elementName_with_uri() {
     eleName.uri = "ID20250422";
     let info = eleName.uri;
 
-    assertEQ(info, "ID20250422");
+    arktest.assertEQ(info, "ID20250422");
 }
 
 function test_bundle_interface_elementName_with_shortName_noSet() {
     let eleName: elementName.ElementName = elementName.getElementName()
     let info = eleName.shortName;
 
-    assertEQ(info, undefined);
+    arktest.assertEQ(info, undefined);
 }
 
 function test_bundle_interface_elementName_with_shortName() {
@@ -835,7 +835,7 @@ function test_bundle_interface_elementName_with_shortName() {
     eleName.shortName = "ID20250422";
     let info = eleName.shortName;
 
-    assertEQ(info, "ID20250422");
+    arktest.assertEQ(info, "ID20250422");
 }
 
 //applicationInfo.d.ts
@@ -843,115 +843,115 @@ let appInfo: applicationInfo.ApplicationInfo = applicationInfo.getApplicationInf
 function test_bundle_interface_applicationInfo_with_name() {
     let info = appInfo.name;
 
-    assertEQ(info, "ApplicationInfo::getName")
+    arktest.assertEQ(info, "ApplicationInfo::getName")
 }
 
 function test_bundle_interface_applicationInfo_with_description() {
     let info = appInfo.description;
 
-    assertEQ(info, "ApplicationInfo::getDescription")
+    arktest.assertEQ(info, "ApplicationInfo::getDescription")
 }
 
 function test_bundle_interface_applicationInfo_with_descriptionId() {
     let info = appInfo.descriptionId;
 
-    assertEQ(info, 102 as short)
+    arktest.assertEQ(info, 102 as short)
 }
 
 function test_bundle_interface_applicationInfo_with_systemApp() {
     let info = appInfo.systemApp;
 
-    assertEQ(info, true)
+    arktest.assertEQ(info, true)
 }
 
 function test_bundle_interface_applicationInfo_with_enabled() {
     let info = appInfo.enabled;
 
-    assertEQ(info, true)
+    arktest.assertEQ(info, true)
 }
 
 function test_bundle_interface_applicationInfo_with_label() {
     let info = appInfo.label;
 
-    assertEQ(info, "ApplicationInfo::getLabel")
+    arktest.assertEQ(info, "ApplicationInfo::getLabel")
 }
 
 function test_bundle_interface_applicationInfo_with_labelId() {
     let info = appInfo.labelId;
 
-    assertEQ(info, "ApplicationInfo::getLabelId")
+    arktest.assertEQ(info, "ApplicationInfo::getLabelId")
 }
 
 function test_bundle_interface_applicationInfo_with_icon() {
     let info = appInfo.icon;
 
-    assertEQ(info, "ApplicationInfo::getIcon")
+    arktest.assertEQ(info, "ApplicationInfo::getIcon")
 }
 
 function test_bundle_interface_applicationInfo_with_iconId() {
     let info = appInfo.iconId;
 
-    assertEQ(info, 102 as short)
+    arktest.assertEQ(info, 102 as short)
 }
 
 function test_bundle_interface_applicationInfo_with_process() {
     let info = appInfo.process;
 
-    assertEQ(info, "ApplicationInfo::getProcess")
+    arktest.assertEQ(info, "ApplicationInfo::getProcess")
 }
 
 function test_bundle_interface_applicationInfo_with_supportedModes() {
     let info = appInfo.supportedModes;
 
-    assertEQ(info, 102 as short)
+    arktest.assertEQ(info, 102 as short)
 }
 
 function test_bundle_interface_applicationInfo_with_moduleSourceDirs() {
     let info = appInfo.moduleSourceDirs[0];
 
-    assertEQ(info, "ApplicationInfo::getProcess")
+    arktest.assertEQ(info, "ApplicationInfo::getProcess")
 }
 
 function test_bundle_interface_applicationInfo_with_permissions() {
     let info = appInfo.permissions[0];
 
-    assertEQ(info, "ApplicationInfo::getPermissions")
+    arktest.assertEQ(info, "ApplicationInfo::getPermissions")
 }
 
 function test_bundle_interface_applicationInfo_with_entryDir() {
     let info = appInfo.entryDir;
 
-    assertEQ(info, "ApplicationInfo::getEntryDir")
+    arktest.assertEQ(info, "ApplicationInfo::getEntryDir")
 }
 
 function test_bundle_interface_applicationInfo_with_codePath() {
     let info = appInfo.codePath;
 
-    assertEQ(info, "ApplicationInfo::getCodePath")
+    arktest.assertEQ(info, "ApplicationInfo::getCodePath")
 }
 
 function test_bundle_interface_applicationInfo_with_removable() {
     let info = appInfo.removable;
 
-    assertEQ(info, true)
+    arktest.assertEQ(info, true)
 }
 
 function test_bundle_interface_applicationInfo_with_accessTokenId() {
     let info = appInfo.accessTokenId;
 
-    assertEQ(info, 102 as short)
+    arktest.assertEQ(info, 102 as short)
 }
 
 function test_bundle_interface_applicationInfo_with_uid() {
     let info = appInfo.uid;
 
-    assertEQ(info, 102 as short)
+    arktest.assertEQ(info, 102 as short)
 }
 
 function test_bundle_interface_applicationInfo_with_entityType() {
     let info = appInfo.entityType;
 
-    assertEQ(info, "ApplicationInfo::getEntityType")
+    arktest.assertEQ(info, "ApplicationInfo::getEntityType")
 }
 
 //ohos.app.ability.Want.d.ts
@@ -959,7 +959,7 @@ function test_bundle_class_want_with_bundleName_noSet() {
     let wantTest = new Want();
     let info = wantTest.bundleName;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_bundleName() {
@@ -967,14 +967,14 @@ function test_bundle_class_want_with_bundleName() {
     wantTest.bundleName = bundleName;
     let info = wantTest.bundleName;
 
-    assertEQ(info, bundleName)
+    arktest.assertEQ(info, bundleName)
 }
 
 function test_bundle_class_want_with_abilityName_noSet() {
     let wantTest = new Want();
     let info = wantTest.abilityName;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_abilityName() {
@@ -982,14 +982,14 @@ function test_bundle_class_want_with_abilityName() {
     wantTest.abilityName = bundleName;
     let info = wantTest.abilityName;
 
-    assertEQ(info, bundleName)
+    arktest.assertEQ(info, bundleName)
 }
 
 function test_bundle_class_want_with_deviceId_noSet() {
     let wantTest = new Want();
     let info = wantTest.deviceId;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_deviceId() {
@@ -997,14 +997,14 @@ function test_bundle_class_want_with_deviceId() {
     wantTest.deviceId = bundleName;
     let info = wantTest.deviceId;
 
-    assertEQ(info, bundleName)
+    arktest.assertEQ(info, bundleName)
 }
 
 function test_bundle_class_want_with_uri_noSet() {
     let wantTest = new Want();
     let info = wantTest.uri;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_uri() {
@@ -1012,14 +1012,14 @@ function test_bundle_class_want_with_uri() {
     wantTest.uri = bundleName;
     let info = wantTest.uri;
 
-    assertEQ(info, bundleName)
+    arktest.assertEQ(info, bundleName)
 }
 
 function test_bundle_class_want_with_type_noSet() {
     let wantTest = new Want();
     let info = wantTest.type;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_type() {
@@ -1027,14 +1027,14 @@ function test_bundle_class_want_with_type() {
     wantTest.type = bundleName;
     let info = wantTest.type;
 
-    assertEQ(info, bundleName)
+    arktest.assertEQ(info, bundleName)
 }
 
 function test_bundle_class_want_with_flags_noSet() {
     let wantTest = new Want();
     let info = wantTest.flags;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_flags() {
@@ -1042,14 +1042,14 @@ function test_bundle_class_want_with_flags() {
     wantTest.flags = 16.08;
     let info = wantTest.flags;
 
-    assertEQ(info, 16.08 as float)
+    arktest.assertEQ(info, 16.08 as float)
 }
 
 function test_bundle_class_want_with_action_noSet() {
     let wantTest = new Want();
     let info = wantTest.action;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_action() {
@@ -1057,14 +1057,14 @@ function test_bundle_class_want_with_action() {
     wantTest.action = bundleName;
     let info = wantTest.action;
 
-    assertEQ(info, bundleName);
+    arktest.assertEQ(info, bundleName);
 }
 
 function test_bundle_class_want_with_parameters_noSet() {
     let wantTest = new Want();
     let info = wantTest.parameters;
     
-    assertEQ(info, undefined);
+    arktest.assertEQ(info, undefined);
 }
 
 class A {
@@ -1082,14 +1082,14 @@ function test_bundle_class_want_with_parameters() {
     wantTest.parameters = Settings;
     let info: Record<string, object>|undefined = wantTest.parameters;
 
-    assertEQ(info?.["theme"], Settings["theme"]);
+    arktest.assertEQ(info?.["theme"], Settings["theme"]);
 }
 
 function test_bundle_class_want_with_entities_noSet() {
     let wantTest = new Want();
     let info = wantTest.entities;
 
-    assertEQ(info, undefined);
+    arktest.assertEQ(info, undefined);
 }
 
 function test_bundle_class_want_with_entities() {
@@ -1097,14 +1097,14 @@ function test_bundle_class_want_with_entities() {
     wantTest.entities = arrString;
     let info = wantTest.entities;
 
-    assertEQ(info?.[0], arrString[0])
+    arktest.assertEQ(info?.[0], arrString[0])
 }
 
 function test_bundle_class_want_with_moduleName_noSet() {
     let wantTest = new Want();
     let info = wantTest.moduleName;
 
-    assertEQ(info, undefined)
+    arktest.assertEQ(info, undefined)
 }
 
 function test_bundle_class_want_with_moduleName() {
@@ -1112,12 +1112,12 @@ function test_bundle_class_want_with_moduleName() {
     wantTest.moduleName = bundleName;
     let info = wantTest.moduleName;
 
-    assertEQ(info, bundleName)
+    arktest.assertEQ(info, bundleName)
 }
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("BundleTest Tests");
+    const suite = new arktest.ArkTestsuite("BundleTest Tests");
    
     //abilityInfo.d.ts
     suite.addTest("test bundle abilityInfo with bundleName", test_abilityinfo_with_bundleName)

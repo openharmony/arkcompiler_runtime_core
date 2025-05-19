@@ -42,6 +42,6 @@ class ChildClass implements Child {
 
 function main(): void {
   const child = new ChildClass();
-  assertEQ(child.process("Hello"), "Hello");
-  assertEQ(child.process(42), 42);
+  arktest.assertEQ(child.process("Hello"), "Hello");
+  arktest.assertEQ(child.process(42), 42);
 }

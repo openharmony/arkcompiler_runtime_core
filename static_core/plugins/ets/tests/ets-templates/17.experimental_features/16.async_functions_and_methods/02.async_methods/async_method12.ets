@@ -27,7 +27,7 @@ class MethodReturnUndefined {
 async function startTest() {
     const example = new MethodReturnUndefined();
     const result = await example.methodReturnUndefined();
-    assertEQ(result === undefined, true)
+    arktest.assertEQ(result === undefined, true)
 }
 
 function main(): void {

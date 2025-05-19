@@ -19,5 +19,5 @@ desc: Test the array index expression to Usage of the chaining operator.
 
 function main(): void {
   let nullableArray: (string | null)[] = ["Hello", "World"];
-  assertEQ(nullableArray?.[1], "World");
+  arktest.assertEQ(nullableArray?.[1], "World");
 }

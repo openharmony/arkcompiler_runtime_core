@@ -26,5 +26,5 @@ class NumberConstructorClass {
 
 function main(): void {
     const obj = new NumberConstructorClass(25);
-    assertEQ(obj.num, 25);
+    arktest.assertEQ(obj.num, 25);
 }

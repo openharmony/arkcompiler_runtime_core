@@ -326,18 +326,18 @@ function _1_phi_2_append4(cond: boolean): String {
 }
 
 function main() : int {
-    assertEQ(_0_toString_8_append8(), "01234567", 'Wrong result at _0_toString_8_append8()');
-    assertEQ(_1_toString_7_append8(), "01234567", 'Wrong result at _1_toString_7_append8()');
-    assertEQ(_2_toString_6_append8(), "01234567", 'Wrong result at _2_toString_6_append8()');
-    assertEQ(_3_toString_5_append8(), "01234567", 'Wrong result at _3_toString_5_append8()');
-    assertEQ(_4_toString_4_append8(), "01234567", 'Wrong result at _4_toString_4_append8()');
-    assertEQ(_5_toString_3_append8(), "01234567", 'Wrong result at _5_toString_3_append8()');
-    assertEQ(_6_toString_2_append8(), "01234567", 'Wrong result at _6_toString_2_append8()');
-    assertEQ(_7_toString_1_append8(), "01234567", 'Wrong result at _7_toString_1_append8()');
+    arktest.assertEQ(_0_toString_8_append8(), "01234567", 'Wrong result at _0_toString_8_append8()');
+    arktest.assertEQ(_1_toString_7_append8(), "01234567", 'Wrong result at _1_toString_7_append8()');
+    arktest.assertEQ(_2_toString_6_append8(), "01234567", 'Wrong result at _2_toString_6_append8()');
+    arktest.assertEQ(_3_toString_5_append8(), "01234567", 'Wrong result at _3_toString_5_append8()');
+    arktest.assertEQ(_4_toString_4_append8(), "01234567", 'Wrong result at _4_toString_4_append8()');
+    arktest.assertEQ(_5_toString_3_append8(), "01234567", 'Wrong result at _5_toString_3_append8()');
+    arktest.assertEQ(_6_toString_2_append8(), "01234567", 'Wrong result at _6_toString_2_append8()');
+    arktest.assertEQ(_7_toString_1_append8(), "01234567", 'Wrong result at _7_toString_1_append8()');
 
-    assertEQ(_1_append_2_append4(), "0123", 'Wrong result at _1_append_2_append4');
-    assertEQ(_1_phi_2_append4(false), "0123", 'Wrong result at _1_phi_2_append4(false)');
-    assertEQ(_1_phi_2_append4(true), "023", 'Wrong result at _1_phi_2_append4(true)');
+    arktest.assertEQ(_1_append_2_append4(), "0123", 'Wrong result at _1_append_2_append4');
+    arktest.assertEQ(_1_phi_2_append4(false), "0123", 'Wrong result at _1_phi_2_append4(false)');
+    arktest.assertEQ(_1_phi_2_append4(true), "023", 'Wrong result at _1_phi_2_append4(true)');
 
     return 0
 }

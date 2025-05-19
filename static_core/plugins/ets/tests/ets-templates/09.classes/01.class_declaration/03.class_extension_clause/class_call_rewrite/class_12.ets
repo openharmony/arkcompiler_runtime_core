@@ -39,5 +39,5 @@ function main(): void {
   let aInstance: A = new A();
   let a = aInstance.method();
    
-  assertEQ(a, "Method from A");
+  arktest.assertEQ(a, "Method from A");
 }

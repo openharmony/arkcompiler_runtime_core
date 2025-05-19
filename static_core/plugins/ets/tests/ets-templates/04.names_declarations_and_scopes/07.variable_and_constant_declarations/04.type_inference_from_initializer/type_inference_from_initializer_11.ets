@@ -20,5 +20,5 @@ desc: Declare variable with string literal.
 function main(): void {
   const cond: boolean = true;
   const tmp = cond ? 1 : "one";
-  assertEQ(tmp, 1);
+  arktest.assertEQ(tmp, 1);
 }

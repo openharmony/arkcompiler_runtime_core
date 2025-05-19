@@ -34,7 +34,7 @@ class C implements I2 {
 
 function main() {
     let c: C = new C();
-    assertEQ( c.foo(), 2)
-    assertEQ( c.bar(), "NoYahoo")
+    arktest.assertEQ( c.foo(), 2)
+    arktest.assertEQ( c.bar(), "NoYahoo")
 
 }

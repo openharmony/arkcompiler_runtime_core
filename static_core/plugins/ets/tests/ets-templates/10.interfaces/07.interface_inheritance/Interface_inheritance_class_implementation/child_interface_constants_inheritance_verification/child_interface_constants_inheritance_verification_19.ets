@@ -28,5 +28,5 @@ class ReturnDateConstantChild implements ReturnDateConstantInterface {
 function main(): void {
   const instance = new ReturnDateConstantChild();
   const actualDate = instance.CONST().toISOString().split('T')[0];
-  assertEQ(actualDate, '2023-01-01');
+  arktest.assertEQ(actualDate, '2023-01-01');
 }

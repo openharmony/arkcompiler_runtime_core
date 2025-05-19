@@ -26,6 +26,6 @@ function processValue(value: MyTupleType): MyTupleType {
 function main(): void {
   let result = processValue([42, "Hello"]);
 
-  assertEQ(result[0], 42);
-  assertEQ(result[1], "Hello");
+  arktest.assertEQ(result[0], 42);
+  arktest.assertEQ(result[1], "Hello");
 }

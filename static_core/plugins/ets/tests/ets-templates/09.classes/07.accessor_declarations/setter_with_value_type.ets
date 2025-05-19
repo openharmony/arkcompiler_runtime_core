@@ -33,5 +33,5 @@ function main(): void {
   let instance: A = new A();
 
   instance.age = 10;
-  assertEQ( instance.age, 10 );
+  arktest.assertEQ( instance.age, 10 );
 }

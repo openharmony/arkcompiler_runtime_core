@@ -33,5 +33,5 @@ function main(): void {
   let vehicle: Vehicle = new Car();
   let movement = vehicle.move();
 
-  assertEQ(movement, 'The car is moving on the road.');
+  arktest.assertEQ(movement, 'The car is moving on the road.');
 }

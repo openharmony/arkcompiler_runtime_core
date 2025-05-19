@@ -35,7 +35,7 @@ class A {
 
 function main() {
 {%- for t in c['values'] %}
-    assertTrue( new A(s{{loop.index}}).fld == {{t.expr|safe}} )
+    arktest.assertTrue( new A(s{{loop.index}}).fld == {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

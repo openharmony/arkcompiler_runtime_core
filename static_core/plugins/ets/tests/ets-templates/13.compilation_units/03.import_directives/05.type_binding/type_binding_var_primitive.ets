@@ -23,5 +23,5 @@ import type {T_INT} from "../../07.top-level_declarations/01.exported_declaratio
 
 function main(): void {
     let i: T_INT = 4;
-    assertEQ(i, 4);
+    arktest.assertEQ(i, 4);
 }

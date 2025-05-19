@@ -23,5 +23,5 @@ function main(): void {
     return x + y;
   };
   const obj1: object = add;
-  assertTrue(obj1 == add);
+  arktest.assertTrue(obj1 == add);
 }

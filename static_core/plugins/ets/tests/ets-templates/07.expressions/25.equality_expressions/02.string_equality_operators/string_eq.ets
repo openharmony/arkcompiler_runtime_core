@@ -24,7 +24,7 @@ params: |
 function main(): void {
   let a: String = {{eq.left}};
   let b: String = {{eq.right}};
-  assertEQ( (a {{eq.op}} b), {{eq.result}} );
+  arktest.assertEQ( (a {{eq.op}} b), {{eq.result}} );
 }
 
 {% endfor %}

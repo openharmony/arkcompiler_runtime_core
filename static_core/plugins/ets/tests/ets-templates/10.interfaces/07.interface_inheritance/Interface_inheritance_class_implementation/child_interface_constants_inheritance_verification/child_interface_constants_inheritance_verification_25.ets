@@ -27,6 +27,6 @@ class Int16ArrayConstantChild implements Int16ArrayConstantInterface {
 
 function main(): void {
   const instance = new Int16ArrayConstantChild();
-  assertEQ(instance.CONST[0], -1);
-  assertEQ(instance.CONST[1], 1);
+  arktest.assertEQ(instance.CONST[0], -1);
+  arktest.assertEQ(instance.CONST[1], 1);
 }

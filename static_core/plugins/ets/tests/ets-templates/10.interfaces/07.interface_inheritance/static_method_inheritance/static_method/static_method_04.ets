@@ -33,6 +33,6 @@ class MyClass implements MyInterface {
 
 function main(): void {
   const instance = new MyClass("This is an instance property.");
-  assertEQ(instance.instanceProperty, "This is an instance property.");
-  assertEQ(MyClass.staticProperty, "This is a static property.");
+  arktest.assertEQ(instance.instanceProperty, "This is an instance property.");
+  arktest.assertEQ(MyClass.staticProperty, "This is a static property.");
 }

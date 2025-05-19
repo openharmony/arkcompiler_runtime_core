@@ -30,8 +30,8 @@ cases:
         }
       }
     logic: |-
-      assertEQ(unitedSwitch(12), "number");
-      assertEQ(unitedSwitch(new Cat()), "object");
+      arktest.assertEQ(unitedSwitch(12), "number");
+      arktest.assertEQ(unitedSwitch(new Cat()), "object");
   - desc: Boolean union type. If false is passed in, the case is expected to match false.
     decl: |-
       function unitedSwitch(input: boolean): string {
@@ -45,7 +45,7 @@ cases:
         }
       }
     logic: |-
-      assertEQ(unitedSwitch(false), "false");
+      arktest.assertEQ(unitedSwitch(false), "false");
   - desc: Class and string combined type(string).
     decl: |-
       class Cat {}
@@ -62,7 +62,7 @@ cases:
         }
       }
     logic: |-
-      assertEQ(unitedSwitch(new Cat()), 'not string');
+      arktest.assertEQ(unitedSwitch(new Cat()), 'not string');
   - desc: Number and String combined type(number).
     decl: |-
       function unitedSwitch(input: number | string): string {
@@ -77,7 +77,7 @@ cases:
       }
     logic: |-
       let input = 1;
-      assertEQ(unitedSwitch(input), '1');
+      arktest.assertEQ(unitedSwitch(input), '1');
   - desc: Null and undefined combined type(null).
     decl: |-
       function unitedSwitch(input: null | undefined): string {
@@ -92,7 +92,7 @@ cases:
       }
     logic: |-
       let input = null;
-      assertEQ(unitedSwitch(input), 'null');
+      arktest.assertEQ(unitedSwitch(input), 'null');
   - desc: Null and undefined combined type(undefined).
     decl: |-
       function unitedSwitch(input: null | undefined): string {
@@ -107,7 +107,7 @@ cases:
       }
     logic: |-
       let input = undefined;
-      assertEQ(unitedSwitch(input), 'undefined');
+      arktest.assertEQ(unitedSwitch(input), 'undefined');
   - desc: Int and null combined type(int).
     decl: |-
       function unitedSwitch(input: int | null): string {
@@ -122,7 +122,7 @@ cases:
       }
     logic: |-
       let input = 1;
-      assertEQ(unitedSwitch(input), '1');
+      arktest.assertEQ(unitedSwitch(input), '1');
   - desc: Null and long combined type.
     decl: |-
       function unitedSwitch(input: long | null): string {
@@ -137,7 +137,7 @@ cases:
       }
     logic: |-
       let input = 1;
-      assertEQ(unitedSwitch(input), '1');
+      arktest.assertEQ(unitedSwitch(input), '1');
   - desc: Undefined and short combined type.
     decl: |-
       function unitedSwitch(input: short | undefined): string {
@@ -152,7 +152,7 @@ cases:
       }
     logic: |-
       let input = 1;
-      assertEQ(unitedSwitch(input), '1');
+      arktest.assertEQ(unitedSwitch(input), '1');
   - desc: Test string and null union types.
     decl: |-
       function unitedSwitch(input: 'test' | null): string {
@@ -167,7 +167,7 @@ cases:
       }
     logic: |-
       let input = 'test';
-      assertEQ(unitedSwitch(input), 'test');
+      arktest.assertEQ(unitedSwitch(input), 'test');
   - desc: Test the combination of string and undefined types.
     decl: |-
       function unitedSwitch(input: 'test' | undefined): string {
@@ -182,7 +182,7 @@ cases:
       }
     logic: |-
       let input = 'test';
-      assertEQ(unitedSwitch(input), 'test');
+      arktest.assertEQ(unitedSwitch(input), 'test');
   - desc: Boolean base match.
     decl: |-
       function unitedSwitch(value: boolean | number): string {
@@ -197,7 +197,7 @@ cases:
       }
     logic: |-
       let value: boolean | number = true;
-      assertEQ(unitedSwitch(value), 'Boolean case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'Boolean case triggered');
   - desc: Number base match.
     decl: |-
       function unitedSwitch(value: boolean | number): string {
@@ -212,7 +212,7 @@ cases:
       }
     logic: |-
       let value: boolean | number = 100;
-      assertEQ(unitedSwitch(value), 'Number case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'Number case triggered');
   - desc: String and Boolean combination(boolean).
     decl: |-
       function unitedSwitch(value: boolean | string): string {
@@ -227,7 +227,7 @@ cases:
       }
     logic: |-
       let value: boolean | number = false;
-      assertEQ(unitedSwitch(value), 'Boolean case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'Boolean case triggered');
   - desc: String and Boolean combination(string).
     decl: |-
       function unitedSwitch(value: boolean | string): string {
@@ -242,7 +242,7 @@ cases:
       }
     logic: |-
       let value: boolean | string = 'test';
-      assertEQ(unitedSwitch(value), 'String case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'String case triggered');
   - desc: Three-type combination match (string).
     decl: |-
       function unitedSwitch(value: number | string | boolean): string {
@@ -257,7 +257,7 @@ cases:
       }
     logic: |-
       let value: number | string | boolean = "test";
-      assertEQ(unitedSwitch(value), 'String case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'String case triggered');
   - desc: Three-type combination match (boolean).
     decl: |-
       function unitedSwitch(value: number | string | boolean): string {
@@ -274,7 +274,7 @@ cases:
       }
     logic: |-
       let value: number | string | boolean = true;
-      assertEQ(unitedSwitch(value), 'Boolean case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'Boolean case triggered');
   - desc: Four-type combination match (string).
     decl: |-
       function unitedSwitch(value: number | string | boolean | null): string {
@@ -295,7 +295,7 @@ cases:
       }
     logic: |-
       let value: number | string | boolean | null = 'text';
-      assertEQ(unitedSwitch(value), 'String case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'String case triggered');
   - desc: Four-type combination match (boolean).
     decl: |-
       function unitedSwitch(value: number | string | boolean | null): string {
@@ -316,7 +316,7 @@ cases:
       }
     logic: |-
       let value: number | string | boolean | null = true;
-      assertEQ(unitedSwitch(value), 'Boolean case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'Boolean case triggered');
   - desc: Four-type combination match (number).
     decl: |-
       function unitedSwitch(value: number | string | boolean | null): string {
@@ -337,7 +337,7 @@ cases:
       }
     logic: |-
       let value: number | string | boolean | null = 24;
-      assertEQ(unitedSwitch(value), 'Number case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'Number case triggered');
   - desc: Four-type joint matching (null).
     decl: |-
       function unitedSwitch(value: number | string | boolean | null): string {
@@ -358,7 +358,7 @@ cases:
       }
     logic: |-
       let value: number | string | boolean | null = null;
-      assertEQ(unitedSwitch(value), 'Null case');
+      arktest.assertEQ(unitedSwitch(value), 'Null case');
   - desc: Bigint type match.
     decl: |-
       function unitedSwitch(value: bigint | number): string {
@@ -373,7 +373,7 @@ cases:
       }
     logic: |-
       let value: bigint | number = 123n;
-      assertEQ(unitedSwitch(value), 'bigint case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'bigint case triggered');
   - desc: short type match.
     decl: |-
       function unitedSwitch(value: short | string): string {
@@ -388,7 +388,7 @@ cases:
       }
     logic: |-
       let value: short | string = 1;
-      assertEQ(unitedSwitch(value),'short case triggered');
+      arktest.assertEQ(unitedSwitch(value),'short case triggered');
   - desc: The bigint and string types match.
     decl: |-
       function unitedSwitch(value: bigint | string): string {
@@ -403,7 +403,7 @@ cases:
       }
     logic: |-
       let value: bigint | string = 'test';
-      assertEQ(unitedSwitch(value),'string case triggered');
+      arktest.assertEQ(unitedSwitch(value),'string case triggered');
   - desc: The byte and string types match.
     decl: |-
       function unitedSwitch(value: byte | string): string {
@@ -418,7 +418,7 @@ cases:
       }
     logic: |-
       let value: byte | string = 'test';
-      assertEQ(unitedSwitch(value),'string case triggered');
+      arktest.assertEQ(unitedSwitch(value),'string case triggered');
   - desc: The bigint and boolean types match.
     decl: |-
       function unitedSwitch(value: bigint | boolean): string {
@@ -433,7 +433,7 @@ cases:
       }
     logic: |-
       let value: bigint | boolean = false;
-      assertEQ(unitedSwitch(value), 'boolean case triggered');
+      arktest.assertEQ(unitedSwitch(value), 'boolean case triggered');
   - desc: The byte and string types match.
     decl: |-
       function unitedSwitch(value: byte | string): string {
@@ -448,4 +448,4 @@ cases:
       }
     logic: |-
       let value: byte | string = 123;
-      assertEQ(unitedSwitch(value),'byte case triggered');
+      arktest.assertEQ(unitedSwitch(value),'byte case triggered');

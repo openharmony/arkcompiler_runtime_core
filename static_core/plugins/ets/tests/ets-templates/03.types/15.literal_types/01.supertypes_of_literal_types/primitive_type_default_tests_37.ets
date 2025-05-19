@@ -24,5 +24,5 @@ function addPrefix(str: string): string {
 function main(): void {
     const input = "test";
     const result = addPrefix(input);
-    assertEQ(result, "Prefix - test");
+    arktest.assertEQ(result, "Prefix - test");
 }

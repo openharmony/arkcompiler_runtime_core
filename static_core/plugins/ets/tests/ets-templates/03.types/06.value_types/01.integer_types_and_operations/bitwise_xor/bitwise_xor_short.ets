@@ -21,7 +21,7 @@ desc: check bitwise XOR of two short integers
 function main(): void {
     const a: short = {{v.left}}
     const b: short = {{v.right}}
-    assertEQ( (a ^ b), {{v.result}} )
+    arktest.assertEQ( (a ^ b), {{v.result}} )
 }
 
 {% endfor %}

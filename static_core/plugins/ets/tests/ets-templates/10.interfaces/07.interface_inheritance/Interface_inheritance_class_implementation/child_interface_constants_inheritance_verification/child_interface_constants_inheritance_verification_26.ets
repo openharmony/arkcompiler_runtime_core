@@ -27,6 +27,6 @@ class Float64ArrayConstantChild implements Float64ArrayConstantInterface {
 
 function main(): void {
   const instance = new Float64ArrayConstantChild();
-  assertEQ(instance.CONST[0], 1.1);
-  assertEQ(instance.CONST[1], 2.2);
+  arktest.assertEQ(instance.CONST[0], 1.1);
+  arktest.assertEQ(instance.CONST[1], 2.2);
 }

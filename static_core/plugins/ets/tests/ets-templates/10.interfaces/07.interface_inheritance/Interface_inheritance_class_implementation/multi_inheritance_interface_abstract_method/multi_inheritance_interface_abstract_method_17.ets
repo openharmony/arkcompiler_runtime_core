@@ -34,6 +34,6 @@ function main(): void {
   const obj = new StaticClass();
   const result = obj.instanceMethod();
   const result1 = StaticClass.staticMethod();
-  assertEQ(result, 1);
-  assertEQ(result1, 2);
+  arktest.assertEQ(result, 1);
+  arktest.assertEQ(result1, 2);
 }

@@ -37,5 +37,5 @@ function isMarked(obj: EmptyInterface):boolean  {
 
 function main(): void {
   const obj = new MarkedClass(42);
-  assertEQ(isMarked(obj), true);
+  arktest.assertEQ(isMarked(obj), true);
 }

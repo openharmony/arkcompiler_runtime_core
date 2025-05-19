@@ -28,7 +28,7 @@ async function startTest() {
   const example = new MethodReturnArray();
   const result = await example.methodReturnArray();
   const resTemp = new Array<number>(1,2, 3);
-  assertEQ(result === resTemp, true);
+  arktest.assertEQ(result === resTemp, true);
 }
 
 function main(): void {

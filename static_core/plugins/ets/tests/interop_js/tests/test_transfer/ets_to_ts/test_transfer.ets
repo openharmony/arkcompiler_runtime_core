@@ -158,7 +158,7 @@ function testNoSeamlessForClass(func: ESValue, arg: Object, className: String): 
     } catch (err) {
         res = err.toString() === errStrPre + className + errStrPost;
     }
-    assertTrue(res);
+    arktest.assertTrue(res);
 }
 
 function testDirectTransferStaticToDynamic(): void {

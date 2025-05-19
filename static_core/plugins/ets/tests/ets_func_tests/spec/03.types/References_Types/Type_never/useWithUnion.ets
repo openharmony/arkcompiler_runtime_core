@@ -33,6 +33,6 @@ function get(is_return_string: boolean): string | never {
 
 function main(): void {
     let str = get(true);
-    assertEQ(str, "this is string")
-    assertTrue((str instanceof string))
+    arktest.assertEQ(str, "this is string")
+    arktest.assertTrue((str instanceof string))
 }

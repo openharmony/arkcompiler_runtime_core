@@ -26,8 +26,8 @@ function with_param(a: int, fn_not_lm: () => void,  fn: () => void) {
 }
 
 function main(): void {
-    with_param(5, (): void => { assertTrue(false, "Not expected execution here") }) {
-        assertEQ( a, 5)
+    with_param(5, (): void => { arktest.assertTrue(false, "Not expected execution here") }) {
+        arktest.assertEQ( a, 5)
     }
 }
 

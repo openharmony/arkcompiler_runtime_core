@@ -32,5 +32,5 @@ class MyClass implements ChildInterface {
 function main(): void {
   let instance = new MyClass();
   let tmp = instance.CONSTANT;
-  assertEQ(tmp, "Childletant");
+  arktest.assertEQ(tmp, "Childletant");
 }

@@ -40,6 +40,6 @@ function main(): void {
   const dog = new Dog();
   const speakOutput = dog.speak();
   const moveOutput = dog.move();
-  assertEQ(speakOutput, "Dog barks.");
-  assertEQ(moveOutput, "Mammal is walking.");
+  arktest.assertEQ(speakOutput, "Dog barks.");
+  arktest.assertEQ(moveOutput, "Mammal is walking.");
 }

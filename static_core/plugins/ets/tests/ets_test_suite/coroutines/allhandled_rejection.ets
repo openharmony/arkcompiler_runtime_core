@@ -27,19 +27,19 @@ function SingleRejectedJob(): null {
 
 function main(): void {
     StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-        assertTrue(false, "Job handler didn't switch");
+        arktest.assertTrue(false, "Job handler didn't switch");
     });
     StdProcess.on("unhandledPromiseRejection", (obj: Object): void => {
-        assertTrue(false, "All promises should be handled");
+        arktest.assertTrue(false, "All promises should be handled");
     });
 
     StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-        assertTrue(obj instanceof Error, "not Erorr is not expected")
+        arktest.assertTrue(obj instanceof Error, "not Erorr is not expected")
 
-        assertEQ((obj as Error).message, "I'm your single rejected job");
+        arktest.assertEQ((obj as Error).message, "I'm your single rejected job");
 
         StdProcess.on("unhandledJobRejection", (obj: Object): void => {
-            assertTrue(false, "All jobs should be handled");
+            arktest.assertTrue(false, "All jobs should be handled");
         });
     });
 

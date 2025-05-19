@@ -25,7 +25,7 @@ tags: [{{c.tags}}]
 function main() {
 {% for t in c['to'] %}
     let w{{loop.index}}: {{t.type}} = foo
-    assertTrue( w{{loop.index}}{{t.call}} )
+    arktest.assertTrue( w{{loop.index}}{{t.call}} )
 {% endfor %}
 }
 {%- endfor %}

@@ -36,8 +36,8 @@ class C {
 }
 
 function foo(i: Readonly<A|C>, a: number, b: string) {
-  assertEQ(i.i, a)
-  assertEQ(i.j, b)
+  arktest.assertEQ(i.i, a)
+  arktest.assertEQ(i.j, b)
 }
 
 function main() {

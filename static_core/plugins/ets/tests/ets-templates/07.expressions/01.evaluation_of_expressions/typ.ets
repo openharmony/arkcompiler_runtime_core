@@ -79,6 +79,6 @@ function foo(a: FixedArray<boolean>): int {
 {{c.defs}}
 
 function main() {
-  assertEQ(foo({{c.exp}}), {{c.res}})
+  arktest.assertEQ(foo({{c.exp}}), {{c.res}})
 }
 {% endfor %}

@@ -26,7 +26,7 @@ async function startTest() {
     try {
         await rejectImmediately();
     } catch (error) {
-        assertEQ(error, "Rejected immediately");
+        arktest.assertEQ(error, "Rejected immediately");
     }
 }
 

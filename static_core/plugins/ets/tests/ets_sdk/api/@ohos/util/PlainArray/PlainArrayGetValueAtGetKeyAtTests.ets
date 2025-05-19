@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 
 function main(): int {
-    const suite = new ArkTestsuite("PlainArray API tests");
+    const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
     suite.addTest("PlainArray getKeyAt", testGetKeyAtValidIndex);
     suite.addTest("PlainArray getKeyAt key by boundary index", testGetKeyAtBoundaryIndex);
@@ -47,15 +47,15 @@ class TestData {
 function testGetKeyAtValidIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.getKeyAt(TestData.testNumber1), TestData.testNumber1,
+    arktest.assertEQ(plainArray.getKeyAt(TestData.testNumber1), TestData.testNumber1,
         "The plainArray should return the correct key at the specified index");
 }
 
 function testGetKeyAtBoundaryIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.getKeyAt(0), 0, "The plainArray should return the correct key at index 0");
-    assertEQ(plainArray.getKeyAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
+    arktest.assertEQ(plainArray.getKeyAt(0), 0, "The plainArray should return the correct key at index 0");
+    arktest.assertEQ(plainArray.getKeyAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
         "The plainArray should return the correct key at index length - 1");
 }
 
@@ -66,20 +66,20 @@ function testGetKeyAtExceededIndex() {
     try {
         plainArray.getKeyAt(-TestData.testNumber1);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         count++;
     }
     try {
         plainArray.getKeyAt(TestData.testNumber6);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         count++;
     }
-    assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+    arktest.assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
 }
 
 function testGetKeyAtIndexOfEmpty() {
@@ -87,26 +87,26 @@ function testGetKeyAtIndexOfEmpty() {
     try {
         plainArray.getKeyAt(0);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    arktest.assertTrue(false, "The result should be 'RangeError'");
 }
 
 function testGetValueAtValidIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.getValueAt(TestData.testNumber1), TestData.testNumber2,
+    arktest.assertEQ(plainArray.getValueAt(TestData.testNumber1), TestData.testNumber2,
         "The plainArray should return the correct value at the specified index");
 }
 
 function testGetValueAtBoundaryIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.getValueAt(0), 0, "The plainArray should return the correct value at index 0");
-    assertEQ(plainArray.getValueAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
+    arktest.assertEQ(plainArray.getValueAt(0), 0, "The plainArray should return the correct value at index 0");
+    arktest.assertEQ(plainArray.getValueAt(TestData.forNumber2.length - TestData.testNumber1), TestData.testNumber4,
         "The plainArray should return the correct value at index length - 1");
 }
 
@@ -117,20 +117,20 @@ function testGetValueAtExceededIndex() {
     try {
         plainArray.getValueAt(-TestData.testNumber1);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         count++;
     }
     try {
         plainArray.getValueAt(TestData.testNumber6);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         count++;
     }
-    assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+    arktest.assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
 }
 
 function testGetValueAtWithEmpty() {
@@ -138,10 +138,10 @@ function testGetValueAtWithEmpty() {
     try {
         plainArray.getValueAt(0);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    arktest.assertTrue(false, "The result should be 'RangeError'");
 }

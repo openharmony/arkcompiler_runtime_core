@@ -19,5 +19,5 @@ desc: Test with an left-operand that is not a reference type
 
 function main(): void {
   let num: int = 10
-  assertTrue( num instanceof Int )
+  arktest.assertTrue( num instanceof Int )
 }

@@ -40,22 +40,22 @@ function test_parameter(x : C0) {
 
 function main() : void {
    let x0: C0 = ([{x0: true}])[0];
-   assertTrue(x0.x0, "Incorrect class composite property #1!");
+   arktest.assertTrue(x0.x0, "Incorrect class composite property #1!");
 
    let x1: C0 = (([[{x0: true}]])[0])[0];
-   assertTrue(x1.x0, "Incorrect class composite property #2!");
+   arktest.assertTrue(x1.x0, "Incorrect class composite property #2!");
 
    let x2: C0 = ((([[[{x0: true}]]])[0])[0])[0];
-   assertTrue(x2.x0, "Incorrect class composite property #3!");
+   arktest.assertTrue(x2.x0, "Incorrect class composite property #3!");
 
    let f1: C0 = test_1();
-   assertTrue(f1.x0, "Incorrect class composite property #4!");
+   arktest.assertTrue(f1.x0, "Incorrect class composite property #4!");
 
    let f2: C0 = test_2();
-   assertTrue(f2.x0, "Incorrect class composite property #5!");
+   arktest.assertTrue(f2.x0, "Incorrect class composite property #5!");
 
    let f3: C0 = test_3();
-   assertTrue(f3.x0, "Incorrect class composite property #6!");
+   arktest.assertTrue(f3.x0, "Incorrect class composite property #6!");
 
    test_parameter(([{x0: true}])[0]);
    test_parameter((([[{x0: true}]])[0])[0]);

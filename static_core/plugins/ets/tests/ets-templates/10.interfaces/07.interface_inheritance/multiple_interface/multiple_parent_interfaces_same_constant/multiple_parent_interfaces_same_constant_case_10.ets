@@ -24,6 +24,6 @@ import { CONSTANT_A } from "./moduleA.ets";
 import { CONSTANT_A as CONSTANT_A_MODULE_B } from "./moduleB.ets";
 
 function main(): void {
-    assertEQ(CONSTANT_A, "ValueA");
-    assertEQ(CONSTANT_A_MODULE_B, "ValueB");
+    arktest.assertEQ(CONSTANT_A, "ValueA");
+    arktest.assertEQ(CONSTANT_A_MODULE_B, "ValueB");
 }

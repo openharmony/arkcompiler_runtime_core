@@ -31,8 +31,8 @@ cases:
           let u1: J|I = new A
           let u2: I|J = new B
       use: |-
-          assertTrue(u1.fld === undefined)
-          assertTrue(u2.fld === null)
+          arktest.assertTrue(u1.fld === undefined)
+          arktest.assertTrue(u2.fld === null)
 
     - decl: |-
           // interfaces, properties of number type
@@ -51,8 +51,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld, 42.0)
-          assertEQ(u2.fld, 0e0)
+          arktest.assertEQ(u1.fld, 42.0)
+          arktest.assertEQ(u2.fld, 0e0)
 
     - decl: |-
           // interfaces, properties of bigint type
@@ -71,8 +71,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld, 42n)
-          assertEQ(u2.fld, 33n)
+          arktest.assertEQ(u1.fld, 42n)
+          arktest.assertEQ(u2.fld, 33n)
 
     - decl: |-
           // interfaces, properties of Integral type
@@ -89,8 +89,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld, 42)
-          assertEQ(u2.fld, 33)
+          arktest.assertEQ(u1.fld, 42)
+          arktest.assertEQ(u2.fld, 33)
 
     - decl: |-
           // interfaces, properties of Error type
@@ -110,8 +110,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld.message, 'a')
-          assertEQ(u2.fld.message, 'b')
+          arktest.assertEQ(u1.fld.message, 'a')
+          arktest.assertEQ(u2.fld.message, 'b')
 
     - decl: |-
           // interfaces, properties of union literal type
@@ -131,8 +131,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld, 'a')
-          assertEQ(u2.fld, 'b')
+          arktest.assertEQ(u1.fld, 'a')
+          arktest.assertEQ(u2.fld, 'b')
 
     - decl: |-
           // interfaces, properties of union type
@@ -151,8 +151,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld, 42.0)
-          assertEQ(u2.fld, undefined)
+          arktest.assertEQ(u1.fld, 42.0)
+          arktest.assertEQ(u2.fld, undefined)
 
     - decl: |-
           // interfaces, properties of array type
@@ -171,8 +171,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld[0], 'a')
-          assertEQ(u2.fld[2], 'e')
+          arktest.assertEQ(u1.fld[0], 'a')
+          arktest.assertEQ(u2.fld[2], 'e')
 
     - decl: |-
           // interfaces, properties of tuple type
@@ -192,8 +192,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld[0], 42.0)
-          assertEQ(u2.fld[1], 'b')
+          arktest.assertEQ(u1.fld[0], 42.0)
+          arktest.assertEQ(u2.fld[1], 'b')
 
     - decl: |-
           // interfaces, properties of Record type
@@ -212,8 +212,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld['a'], 11.0)
-          assertEQ(u2.fld['b'], 22.0)
+          arktest.assertEQ(u1.fld['a'], 11.0)
+          arktest.assertEQ(u2.fld['b'], 22.0)
 
     - decl: |-
           // interfaces, properties of function type
@@ -234,8 +234,8 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld('abc'), 4.0)
-          assertEQ(u2.fld('abc'), 13.0)
+          arktest.assertEQ(u1.fld('abc'), 4.0)
+          arktest.assertEQ(u2.fld('abc'), 13.0)
 
     - decl: |-
           // interfaces, properties of type parameters
@@ -257,8 +257,8 @@ cases:
           let u1: I<string>|J = new A<string>('a')
           let u2: J|I<string> = new B
       use: |-
-          assertEQ(u1.fld, 'a')
-          assertEQ(u2.fld, 'b')
+          arktest.assertEQ(u1.fld, 'a')
+          arktest.assertEQ(u2.fld, 'b')
 
     - decl: |-
           // interfaces, properties of enum type
@@ -279,5 +279,5 @@ cases:
           let u1: I|J = new A
           let u2: I|J = new B
       use: |-
-          assertEQ(u1.fld, Color.Green)
-          assertEQ(u2.fld, Color.Blue)
+          arktest.assertEQ(u1.fld, Color.Green)
+          arktest.assertEQ(u2.fld, Color.Blue)

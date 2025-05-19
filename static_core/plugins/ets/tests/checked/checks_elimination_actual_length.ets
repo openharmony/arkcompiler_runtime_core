@@ -149,7 +149,7 @@ class Derived extends Array<int> {
                 has_error = true
             }
         }
-        assertTrue(has_error)
+        arktest.assertTrue(has_error)
         return sum
     }
 
@@ -165,7 +165,7 @@ class Derived extends Array<int> {
                 break
             }
         }
-        assertTrue(has_error)
+        arktest.assertTrue(has_error)
         return sum
     }
 
@@ -180,7 +180,7 @@ class Derived extends Array<int> {
                 has_error = true
             }
         }
-        assertTrue(has_error)
+        arktest.assertTrue(has_error)
         return sum
     }
 
@@ -195,7 +195,7 @@ class Derived extends Array<int> {
                 has_error = true
             }
         }
-        assertTrue(has_error)
+        arktest.assertTrue(has_error)
         return sum
     }
 
@@ -245,23 +245,23 @@ function main() {
 
     // --------------------- Positive tests ---------------------- //
 
-    assertEQ(a.func1(), 6)
-    assertEQ(a.func2(), 6)
-    assertEQ(a.func3(), 1)
-    assertEQ(a.func4(), 6)
+    arktest.assertEQ(a.func1(), 6)
+    arktest.assertEQ(a.func2(), 6)
+    arktest.assertEQ(a.func3(), 1)
+    arktest.assertEQ(a.func4(), 6)
 
     let b = func11(a as Array<int>)
     b = func12(b)
     for (let i : int = 0; i < 4; i++) {
-        assertEQ(b[i], i)
+        arktest.assertEQ(b[i], i)
     }
 
     // --------------------- Negative tests ---------------------- //
 
-    assertEQ(a.func5(), 6)
-    assertEQ(a.func6(), 0)
-    assertEQ(a.func7(), 6)
-    assertEQ(a.func8(), 6)
-    assertEQ(a.func9(), 1)
-    assertEQ(a2.func10(), 3)
+    arktest.assertEQ(a.func5(), 6)
+    arktest.assertEQ(a.func6(), 0)
+    arktest.assertEQ(a.func7(), 6)
+    arktest.assertEQ(a.func8(), 6)
+    arktest.assertEQ(a.func9(), 1)
+    arktest.assertEQ(a2.func10(), 3)
 }

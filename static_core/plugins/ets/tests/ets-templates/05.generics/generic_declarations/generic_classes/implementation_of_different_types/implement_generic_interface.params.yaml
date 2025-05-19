@@ -18,163 +18,163 @@ cases:
     desc: Test the generic implementation class to handle a single small positive integer.
     values: 10
     expected: |-
-      assertEQ(result, 10);
+      arktest.assertEQ(result, 10);
 
   - type: number
     desc: Test the generic implementation class to handle a single large positive integer.
     values: 1000000
     expected: |-
-      assertEQ(result, 1000000);
+      arktest.assertEQ(result, 1000000);
 
   - type: number
     desc: Test the generic implementation class to handle a single small negative integer.
     values: -10
     expected: |-
-      assertEQ(result, -10);
+      arktest.assertEQ(result, -10);
 
   - type: number
     desc: Test the generic implementation class to handle a single large negative integer.
     values: -1000000
     expected: |-
-      assertEQ(result, -1000000);
+      arktest.assertEQ(result, -1000000);
 
   - type: number
     desc: Test the generic implementation class to handle the integer zero.
     values: 0
     expected: |-
-      assertEQ(result, 0);
+      arktest.assertEQ(result, 0);
 
   - type: number
     desc: Test the generic implementation class to handle a single small positive floating - point number.
     values: 0.1
     expected: |-
-      assertEQ(result, 0.1);
+      arktest.assertEQ(result, 0.1);
 
   - type: number
     desc: Test the generic implementation class to handle a single large positive floating - point number.
     values: 1000000.1
     expected: |-
-      assertEQ(result, 1000000.1);
+      arktest.assertEQ(result, 1000000.1);
 
   - type: number
     desc: Test the generic implementation class to handle a single small negative floating - point number.
     values: -0.1
     expected: |-
-      assertEQ(result, -0.1);
+      arktest.assertEQ(result, -0.1);
 
   - type: number
     desc: Test the generic implementation class to handle a single large negative floating - point number.
     values: -1000000.1
     expected: |-
-      assertEQ(result, -1000000.1);
+      arktest.assertEQ(result, -1000000.1);
 
   - type: number
     desc: Test the generic implementation class to handle the floating - point number zero.
     values: 0.0
     expected: |-
-      assertEQ(result, 0.0);
+      arktest.assertEQ(result, 0.0);
 
   - type: boolean
     desc: Test the generic implementation class to handle the boolean value true.
     values: "true"
     expected: |-
-      assertEQ(result, true);
+      arktest.assertEQ(result, true);
 
   - type: string
     desc: Test the generic implementation class to handle a single short string.
     values: "\"abc\""
     expected: |-
-      assertEQ(result, "abc");
+      arktest.assertEQ(result, "abc");
 
   - type: string
     desc: Test the generic implementation class to handle an empty string.
     values: "\"\""
     expected: |-
-      assertEQ(result, "");
+      arktest.assertEQ(result, "");
 
   - type: "null"
     desc: Test the generic implementation class to handle the null value.
     values: "null"
     expected: |-
-      assertEQ(result, null);
+      arktest.assertEQ(result, null);
 
   - type: "undefined"
     desc: Test the generic implementation class to handle the undefined value.
     values: "undefined"
     expected: |-
-      assertEQ(result, undefined);
+      arktest.assertEQ(result, undefined);
 
   - type: number
     desc: Test the generic implementation class to handle the maximum safe integer.
     values: Number.MAX_SAFE_INTEGER
     expected: |-
-      assertEQ(result, Number.MAX_SAFE_INTEGER);
+      arktest.assertEQ(result, Number.MAX_SAFE_INTEGER);
 
   - type: number
     desc: Test the generic implementation class to handle the minimum safe integer.
     values: Number.MIN_SAFE_INTEGER
     expected: |-
-      assertEQ(result, Number.MIN_SAFE_INTEGER);
+      arktest.assertEQ(result, Number.MIN_SAFE_INTEGER);
 
   - type: number
     desc: Test the generic implementation class to handle the maximum positive floating - point number.
     values: Number.MAX_VALUE
     expected: |-
-      assertEQ(result, Number.MAX_VALUE);
+      arktest.assertEQ(result, Number.MAX_VALUE);
 
   - type: number
     desc: Test the generic implementation class to handle the minimum positive floating - point number.
     values: Number.MIN_VALUE
     expected: |-
-      assertEQ(result, Number.MIN_VALUE);
+      arktest.assertEQ(result, Number.MIN_VALUE);
 
   - type: string
     desc: Test the generic implementation class to handle a single uppercase letter character.
     values: "'A'"
     expected: |-
-      assertEQ(result, 'A');
+      arktest.assertEQ(result, 'A');
 
   - type: number
     desc: Test the generic implementation class to handle the Infinity value.
     values: Infinity
     expected: |-
-      assertEQ(result, Infinity);
+      arktest.assertEQ(result, Infinity);
 
   - type: number
     desc: Test the generic implementation class to handle a floating - point number with extremely small precision.
     values: Number.MIN_VALUE * 10
     expected: |-
-      assertEQ(result, Number.MIN_VALUE * 10);
+      arktest.assertEQ(result, Number.MIN_VALUE * 10);
 
   - type: number
     desc: Test the generic implementation class to handle the NaN value.
     values: NaN
     expected: |-
-      assertEQ(isNaN(result), true);
+      arktest.assertEQ(isNaN(result), true);
 
   - type: number
     desc: Test generic implementation classes to handle single binary small positive integers.
     values: 0b10
     expected: |-
-      assertEQ(result, 2);
+      arktest.assertEQ(result, 2);
 
   - type: number
     desc: Test generic implementation classes to handle a single octal small positive integer.
     values: 0o10
     expected: |-
-      assertEQ(result, 8);
+      arktest.assertEQ(result, 8);
 
   - type: number
     desc: Test generic implementation classes to handle a single hexadecimal small positive integer.
     values: 0x10
     expected: |-
-      assertEQ(result, 16);
+      arktest.assertEQ(result, 16);
 
   - type: bigint
     desc: Test the generic implementation class to handle a single BigInt value.
     values: 12345678901234567890n
     expected: |-
-      assertEQ(result, 12345678901234567890n);
+      arktest.assertEQ(result, 12345678901234567890n);
 
   - type: string
     desc: Test the generic implementation class to handle a string containing escape characters.
@@ -182,31 +182,31 @@ cases:
       const escapeStr = 'Hello\nWorld';
     values: escapeStr
     expected: |-
-      assertEQ(result, escapeStr);
+      arktest.assertEQ(result, escapeStr);
 
   - type: string
     desc: Test the generic implementation class to handle a string with consecutive identical characters.
     values: "'aaaaa'"
     expected: |-
-      assertEQ(result, 'aaaaa');
+      arktest.assertEQ(result, 'aaaaa');
 
   - type: string
     desc: Test the generic implementation class to handle a numeric string containing a minus sign.
     values: "\"-123\""
     expected: |-
-      assertEQ(result, "-123");
+      arktest.assertEQ(result, "-123");
 
   - type: string
     desc: Test the generic implementation class to handle a numeric string containing a decimal point.
     values: "\"3.14\""
     expected: |-
-      assertEQ(result, "3.14");
+      arktest.assertEQ(result, "3.14");
 
   - type: string
     desc: Test the generic implementation class to handle a numeric string containing scientific notation.
     values: "\"1.23e+5\""
     expected: |-
-      assertEQ(result, "1.23e+5");
+      arktest.assertEQ(result, "1.23e+5");
 
   - type: string
     desc: Test the generic implementation class to handle a multi - line string containing line breaks.
@@ -214,31 +214,31 @@ cases:
       const escapeStr = 'Line 1\nLine 2\nLine 3';
     values: escapeStr
     expected: |-
-      assertEQ(result, escapeStr);
+      arktest.assertEQ(result, escapeStr);
 
   - type: string
     desc: Test the generic implementation class to handle a string containing a mix of numbers and letters.
     values: "\"abc123\""
     expected: |-
-      assertEQ(result, "abc123");
+      arktest.assertEQ(result, "abc123");
 
   - type: string
     desc: Test the generic implementation class to handle a string containing special symbols (e.g., @, #).
     values: "\"Special@#Symbols$%Test\""
     expected: |-
-      assertEQ(result, "Special@#Symbols$%Test");
+      arktest.assertEQ(result, "Special@#Symbols$%Test");
 
   - type: string
     desc: Test the generic implementation class to handle a string containing consecutive special symbols.
     values: "\"!!@@##$$%\""
     expected: |-
-      assertEQ(result, "!!@@##$$%");
+      arktest.assertEQ(result, "!!@@##$$%");
 
   - type: string
     desc: Test the generic implementation class to handle a string containing special symbols and spaces.
     values: "\"Hello! This is a #test string @ with spaces.\""
     expected: |-
-      assertEQ(result, "Hello! This is a #test string @ with spaces.");
+      arktest.assertEQ(result, "Hello! This is a #test string @ with spaces.");
 
   - type: number[]
     desc: Test the generic implementation class to handle an integer array with a single element.
@@ -247,7 +247,7 @@ cases:
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
-        assertEQ(result[i], arr[i]);
+        arktest.assertEQ(result[i], arr[i]);
       }
 
   - type: number[]
@@ -257,7 +257,7 @@ cases:
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
-        assertEQ(result[i], arr[i]);
+        arktest.assertEQ(result[i], arr[i]);
       }
 
   - type: number[]
@@ -267,7 +267,7 @@ cases:
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
-        assertEQ(result[i], arr[i]);
+        arktest.assertEQ(result[i], arr[i]);
       }
 
   - type: number[]
@@ -277,7 +277,7 @@ cases:
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
-        assertEQ(result[i], arr[i]);
+        arktest.assertEQ(result[i], arr[i]);
       }
 
   - type: boolean[]
@@ -287,7 +287,7 @@ cases:
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
-        assertEQ(result[i], arr[i]);
+        arktest.assertEQ(result[i], arr[i]);
       }
 
   - type: string[]
@@ -297,7 +297,7 @@ cases:
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
-        assertEQ(result[i], arr[i]);
+        arktest.assertEQ(result[i], arr[i]);
       }
 
   - type: string[]
@@ -307,7 +307,7 @@ cases:
     values: arr
     expected: |-
       for (let i = 0; i < arr.length; i++) {
-        assertEQ(result[i], arr[i]);
+        arktest.assertEQ(result[i], arr[i]);
       }
 
   - type: string[]
@@ -317,7 +317,7 @@ cases:
     values: charArr
     expected: |-
       for (let i = 0; i < charArr.length; i++) {
-        assertEQ(result[i], charArr[i]);
+        arktest.assertEQ(result[i], charArr[i]);
       }
 
   - type: string[]
@@ -327,7 +327,7 @@ cases:
     values: charArr
     expected: |-
       for (let i = 0; i < charArr.length; i++) {
-        assertEQ(result[i], charArr[i]);
+        arktest.assertEQ(result[i], charArr[i]);
       }
 
   - type: string[]
@@ -337,7 +337,7 @@ cases:
     values: charArr
     expected: |-
       for (let i = 0; i < charArr.length; i++) {
-        assertEQ(result[i], charArr[i]);
+        arktest.assertEQ(result[i], charArr[i]);
       }
 
   - type: string[]
@@ -347,7 +347,7 @@ cases:
     values: emptyStrArr
     expected: |-
       for (let i = 0; i < emptyStrArr.length; i++) {
-        assertEQ(result[i], emptyStrArr[i]);
+        arktest.assertEQ(result[i], emptyStrArr[i]);
       }
 
   - type: bigint[]
@@ -357,7 +357,7 @@ cases:
     values: bigIntArr
     expected: |-
       for (let i = 0; i < bigIntArr.length; i++) {
-        assertEQ(result[i], bigIntArr[i]);
+        arktest.assertEQ(result[i], bigIntArr[i]);
       }
 
   - type: CustomClassWithPrivateProp
@@ -376,7 +376,7 @@ cases:
       let customObj = new CustomClassWithPrivateProp(10);
     values: customObj
     expected: |-
-      assertEQ(result.getValue(), customObj.getValue());
+      arktest.assertEQ(result.getValue(), customObj.getValue());
 
   - type: undefined[]
     desc: Test the generic implementation class to handle an array filled with undefined values.
@@ -385,7 +385,7 @@ cases:
     values: undefinedArr
     expected: |-
       for (let i = 0; i < undefinedArr.length; i++) {
-        assertEQ(result[i], undefinedArr[i]);
+        arktest.assertEQ(result[i], undefinedArr[i]);
       }
 
   - type: Date[]
@@ -397,7 +397,7 @@ cases:
     values: dateArr
     expected: |-
       for (let i = 0; i < dateArr.length; i++) {
-        assertEQ(result[i].getTime(), dateArr[i].getTime());
+        arktest.assertEQ(result[i].getTime(), dateArr[i].getTime());
       }
 
   - type: CustomClassWithProtectedProp
@@ -416,5 +416,5 @@ cases:
       let customObj = new CustomClassWithProtectedProp(10);
     values: customObj
     expected: |-
-      assertEQ(result.getValue(), customObj.getValue());
+      arktest.assertEQ(result.getValue(), customObj.getValue());
 

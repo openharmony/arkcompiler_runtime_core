@@ -32,5 +32,5 @@ class Child extends Parent {
 
 function main(): void {
   const obj = new Child();
-  assertEQ(obj.check(), "static method");
+  arktest.assertEQ(obj.check(), "static method");
 }

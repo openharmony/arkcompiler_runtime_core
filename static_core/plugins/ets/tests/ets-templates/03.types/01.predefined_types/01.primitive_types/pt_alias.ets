@@ -23,7 +23,7 @@ desc: >-
 function main() {
     let i: number = {{c.i}};
     let j: double = {{c.j}};
-    assertTrue( i == j );
+    arktest.assertTrue( i == j );
 }
 
 {% endfor %}

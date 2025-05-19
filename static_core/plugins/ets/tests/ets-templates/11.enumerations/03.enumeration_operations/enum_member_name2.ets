@@ -21,8 +21,8 @@ enum Color { Red = -32768, Green, Blue = -1_000_000 }
 
 function main() {
     let v = Color.Green
-    assertEQ( Color[v], "Green" )
+    arktest.assertEQ( Color[v], "Green" )
     v = Color.Red
-    assertEQ( Color[v], "Red" )
-    assertEQ( Color[Color.Blue], "Blue" )
+    arktest.assertEQ( Color[v], "Red" )
+    arktest.assertEQ( Color[Color.Blue], "Blue" )
 }

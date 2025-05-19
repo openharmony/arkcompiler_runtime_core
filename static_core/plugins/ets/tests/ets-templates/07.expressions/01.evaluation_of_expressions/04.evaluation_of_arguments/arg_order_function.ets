@@ -22,39 +22,39 @@ let b: boolean = false;
 let c: boolean = false;
 
 function ta(): int {
-  assertTrue( !a );
-  assertTrue( !b );
-  assertTrue( !c );
+  arktest.assertTrue( !a );
+  arktest.assertTrue( !b );
+  arktest.assertTrue( !c );
   a = true;
   return 0;
 }
 
 function tb(): int {
-  assertTrue( a );
-  assertTrue( !b );
-  assertTrue( !c );
+  arktest.assertTrue( a );
+  arktest.assertTrue( !b );
+  arktest.assertTrue( !c );
   b = true;
   return 1;
 }
 
 function tc(): int {
-  assertTrue( a );
-  assertTrue( b );
-  assertTrue( !c );
+  arktest.assertTrue( a );
+  arktest.assertTrue( b );
+  arktest.assertTrue( !c );
   c = true;
   return 2;
 }
 
 function td(): int {
-  assertTrue( a );
-  assertTrue( b );
-  assertTrue( c );
+  arktest.assertTrue( a );
+  arktest.assertTrue( b );
+  arktest.assertTrue( c );
   return 3;
 }
 
 
 function test(a: int, b: int, c: int, d: int): void {
-  assertTrue( a == 0 && b == 1 && c == 2 && d == 3 );
+  arktest.assertTrue( a == 0 && b == 1 && c == 2 && d == 3 );
 }
 
 function main(): void {

@@ -26,7 +26,7 @@ cases:
           }
       use: |-
           // select the most-specific function
-          assertEQ( foo(new Number()), "N" )
+          arktest.assertEQ( foo(new Number()), "N" )
 
 
     - tags: negative, compile-only
@@ -40,7 +40,7 @@ cases:
           }
       use: |-
           // select the most-specific function
-          assertEQ( foo(new Number()), "UT" )
+          arktest.assertEQ( foo(new Number()), "UT" )
 
 
     - tags: negative, compile-only
@@ -57,7 +57,7 @@ cases:
           }
       use: |-
           // select the most-specific function without boxing/unboxing
-          assertEQ( foo(new Number()), "UT" )
+          arktest.assertEQ( foo(new Number()), "UT" )
 
     # step1_3
     - decl: |-
@@ -70,8 +70,8 @@ cases:
       tags: 'compile-only'
       use: |-
           // select the most-specific function without boxing/unboxing
-          assertEQ( foo(0.0), "n" )
-          assertEQ( foo(null), "NN" )
+          arktest.assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(null), "NN" )
 
 
     - decl: |-
@@ -80,8 +80,8 @@ cases:
           }
       use: |-
           // select function with with unboxing
-          assertEQ( foo(0.0), "n" )
-          assertEQ( foo(new Number()), "n" )
+          arktest.assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(new Number()), "n" )
 
 
     - decl: |-
@@ -93,8 +93,8 @@ cases:
           }
       use: |-
           // select function with boxing
-          assertEQ( foo(0.0), "N" )
-          assertEQ( foo(new Number()), "N" )
+          arktest.assertEQ( foo(0.0), "N" )
+          arktest.assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -109,8 +109,8 @@ cases:
           }
       use: |-
           // select function with rest parameter
-          assertEQ( foo(0.0), "nR" )
-          assertEQ( foo(new Number()), "NR" )
+          arktest.assertEQ( foo(0.0), "nR" )
+          arktest.assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -119,8 +119,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and unboxing
-          assertEQ( foo(0.0), "nR" )
-          assertEQ( foo(new Number()), "nR" )
+          arktest.assertEQ( foo(0.0), "nR" )
+          arktest.assertEQ( foo(new Number()), "nR" )
 
 
     - decl: |-
@@ -132,8 +132,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and boxing
-          assertEQ( foo(0.0), "NR" )
-          assertEQ( foo(new Number()), "NR" )
+          arktest.assertEQ( foo(0.0), "NR" )
+          arktest.assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -149,8 +149,8 @@ cases:
       tags: 'compile-only, negative'
       use: |-
           // select function with default parameter
-          assertEQ( foo(0.0), "nD1" )
-          assertEQ( foo(new Number()), "ND1" )
+          arktest.assertEQ( foo(0.0), "nD1" )
+          arktest.assertEQ( foo(new Number()), "ND1" )
 
 
     - decl: |-
@@ -159,8 +159,8 @@ cases:
           }
       use: |-
           // select function with default parameter and unboxing
-          assertEQ( foo(0.0), "nD1" )
-          assertEQ( foo(new Number()), "nD1" )
+          arktest.assertEQ( foo(0.0), "nD1" )
+          arktest.assertEQ( foo(new Number()), "nD1" )
 
 
     - decl: |-
@@ -172,8 +172,8 @@ cases:
           }
       use: |-
           // select function with default parameter and boxing
-          assertEQ( foo(0.0), "ND1" )
-          assertEQ( foo(new Number()), "ND1" )
+          arktest.assertEQ( foo(0.0), "ND1" )
+          arktest.assertEQ( foo(new Number()), "ND1" )
 
 
     - decl: |-
@@ -189,8 +189,8 @@ cases:
       tags: 'compile-only, negative'
       use: |-
           // select function with undefined parameter
-          assertEQ( foo(0.0), "nD2" )
-          assertEQ( foo(new Number()), "ND2" )
+          arktest.assertEQ( foo(0.0), "nD2" )
+          arktest.assertEQ( foo(new Number()), "ND2" )
 
 
     - decl: |-
@@ -199,8 +199,8 @@ cases:
           }
       use: |-
           // select function with undefined parameter and unboxing
-          assertEQ( foo(0.0), "nD2" )
-          assertEQ( foo(new Number()), "nD2" )
+          arktest.assertEQ( foo(0.0), "nD2" )
+          arktest.assertEQ( foo(new Number()), "nD2" )
 
 
     - decl: |-
@@ -212,8 +212,8 @@ cases:
           }
       use: |-
           // select function with undefined parameter and boxing
-          assertEQ( foo(0.0), "ND2" )
-          assertEQ( foo(new Number()), "ND2" )
+          arktest.assertEQ( foo(0.0), "ND2" )
+          arktest.assertEQ( foo(new Number()), "ND2" )
 
     #step1_15
     - decl: |-
@@ -229,9 +229,9 @@ cases:
       tags: 'compile-only'
       use: |-
           // select function with rest parameter and default parameter
-          assertEQ( foo(0.0), "nR" )
-          assertEQ( foo(1, 2), "ND1" )
-          assertEQ( foo(null), "NND1" )
+          arktest.assertEQ( foo(0.0), "nR" )
+          arktest.assertEQ( foo(1, 2), "ND1" )
+          arktest.assertEQ( foo(null), "NND1" )
 
 
     #step1_16
@@ -248,9 +248,9 @@ cases:
       tags: 'compile-only'
       use: |-
           // select function with rest parameter and undefined parameter
-          assertEQ( foo(0.0), "nR" )
-          assertEQ( foo(1, 2), "ND2" )
-          assertEQ( foo(null), "NND2" )
+          arktest.assertEQ( foo(0.0), "nR" )
+          arktest.assertEQ( foo(1, 2), "ND2" )
+          arktest.assertEQ( foo(null), "NND2" )
 
 
     - decl: |-
@@ -265,8 +265,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and default parameter
-          assertEQ( foo(0.0), "nD1" )
-          assertEQ( foo(new Number()), "NR" )
+          arktest.assertEQ( foo(0.0), "nD1" )
+          arktest.assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -281,8 +281,8 @@ cases:
           }
       use: |-
           // select function with rest parameter and default parameter
-          assertEQ( foo(0.0), "nD2" )
-          assertEQ( foo(new Number()), "NR" )
+          arktest.assertEQ( foo(0.0), "nD2" )
+          arktest.assertEQ( foo(new Number()), "NR" )
 
 
     - decl: |-
@@ -301,8 +301,8 @@ cases:
       tags: 'compile-only, negative'
       use: |-
           // select function without boxing/unboxing and without rest
-          assertEQ( foo(0.0), "n" )
-          assertEQ( foo(new Number()), "N" )
+          arktest.assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -317,8 +317,8 @@ cases:
           }
       use: |-
           // select function with unboxing and without rest
-          assertEQ( foo(0.0), "n" )
-          assertEQ( foo(new Number()), "n" )
+          arktest.assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(new Number()), "n" )
 
 
     - decl: |-
@@ -333,8 +333,8 @@ cases:
           }
       use: |-
           // select function with boxing and without rest
-          assertEQ( foo(0.0), "N" )
-          assertEQ( foo(new Number()), "N" )
+          arktest.assertEQ( foo(0.0), "N" )
+          arktest.assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -352,8 +352,8 @@ cases:
           }
       use: |-
           // select function with boxing and without undefined parameter
-          assertEQ( foo(0.0), "N" )
-          assertEQ( foo(new Number()), "N" )
+          arktest.assertEQ( foo(0.0), "N" )
+          arktest.assertEQ( foo(new Number()), "N" )
 
 
     - decl: |-
@@ -397,16 +397,16 @@ cases:
           }
       use: |-
           // value types
-          assertEQ( foo(true), "b" )
-          assertEQ( foo(true, false), "bR" )
-          assertEQ( foo(true, false, true), "bR" )
+          arktest.assertEQ( foo(true), "b" )
+          arktest.assertEQ( foo(true, false), "bR" )
+          arktest.assertEQ( foo(true, false, true), "bR" )
 
           // reference types
-          assertEQ( foo(new Boolean(true)), "B" )
-          assertEQ( foo(new Boolean(true), new Boolean(true)), "BR" )
-          assertEQ( foo(new Boolean(true), new Boolean(true), new Boolean(true)), "BR" )
+          arktest.assertEQ( foo(new Boolean(true)), "B" )
+          arktest.assertEQ( foo(new Boolean(true), new Boolean(true)), "BR" )
+          arktest.assertEQ( foo(new Boolean(true), new Boolean(true), new Boolean(true)), "BR" )
 
-          assertTrue( foo() == "b1" || foo() == "b2" || foo() == "bR" || foo() == "B1" || foo() == "B2" || foo() == "BR" )
+          arktest.assertTrue( foo() == "b1" || foo() == "b2" || foo() == "bR" || foo() == "B1" || foo() == "B2" || foo() == "BR" )
 
     - decl: |-
           function foo(p: number): string {
@@ -420,7 +420,7 @@ cases:
           }
       use: |-
           // more than one applicable function
-          assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(0.0), "n" )
 
     - decl: |-
           function foo(p: number): string {
@@ -434,7 +434,7 @@ cases:
           }
       use: |-
           // more than one applicable function
-          assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(0.0), "n" )
 
     # step1_26
     - decl: |-
@@ -448,8 +448,8 @@ cases:
 
       use: |-
           // duplicate functions
-          assertEQ( foo(1.0), "N" )
-          assertEQ( foo(1 as int), "UT" )
+          arktest.assertEQ( foo(1.0), "N" )
+          arktest.assertEQ( foo(1 as int), "UT" )
 
     # step1_27
     - decl: |-
@@ -461,8 +461,8 @@ cases:
               return "ND1"
           }
       use: |-
-          assertEQ( foo(0.0), "n" )
-          assertEQ( foo(1, 2), "ND1" )
+          arktest.assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(1, 2), "ND1" )
 
     # step1_28
     - decl: |-
@@ -473,8 +473,8 @@ cases:
               return "ND1"
           }
       use: |-
-          assertEQ( foo(0.0), "n" )
-          assertEQ( foo(1 ,2), "ND1" )
+          arktest.assertEQ( foo(0.0), "n" )
+          arktest.assertEQ( foo(1 ,2), "ND1" )
 
     # step1_29
     - decl: |-
@@ -485,5 +485,5 @@ cases:
               return "nD1"
           }
       use: |-
-          assertEQ( foo(0.0), "N" )
-          assertEQ( foo(1, 2), "nD1" )
+          arktest.assertEQ( foo(0.0), "N" )
+          arktest.assertEQ( foo(1, 2), "nD1" )

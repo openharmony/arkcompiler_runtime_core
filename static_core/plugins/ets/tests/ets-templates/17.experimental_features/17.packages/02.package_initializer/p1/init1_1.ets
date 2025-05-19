@@ -29,5 +29,5 @@ static {
 }
 
 function main() {
-    assertEQ(var1, 5)
+    arktest.assertEQ(var1, 5)
 }

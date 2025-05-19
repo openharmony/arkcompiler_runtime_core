@@ -41,6 +41,6 @@ class Wolf extends Animal {
 
 function main(): void {
     const animal: Animal = new Wolf("Luna", 3);
-    assertEQ((animal as Wolf).packSize, 3);
-    assertEQ((animal as Wolf).name, "Luna");
+    arktest.assertEQ((animal as Wolf).packSize, 3);
+    arktest.assertEQ((animal as Wolf).name, "Luna");
 }

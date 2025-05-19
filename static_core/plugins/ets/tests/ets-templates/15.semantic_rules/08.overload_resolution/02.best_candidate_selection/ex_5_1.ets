@@ -31,5 +31,5 @@ function main(): void {
     candidate = 0;
     let x: int = 1
     foo(1)
-    assertEQ(candidate, 1)
+    arktest.assertEQ(candidate, 1)
 }

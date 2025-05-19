@@ -27,5 +27,5 @@ class NullConstantChild implements NullConstantInterface {
 
 function main(): void {
   const instance = new NullConstantChild();
-  assertEQ(instance.CONST, null);
+  arktest.assertEQ(instance.CONST, null);
 }

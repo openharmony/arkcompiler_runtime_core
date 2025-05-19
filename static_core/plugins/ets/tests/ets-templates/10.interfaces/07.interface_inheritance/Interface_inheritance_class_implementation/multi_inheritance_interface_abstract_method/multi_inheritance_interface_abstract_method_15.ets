@@ -38,5 +38,5 @@ class FileManager implements Reader, Writer {
 function main(): void {
   const fm = new FileManager();
   const result = fm.read(null)
-  assertEQ(result, null);
+  arktest.assertEQ(result, null);
 }

@@ -21,5 +21,5 @@ function main(): void {
   let a: float = 10.5f;
   let b: float = 20.5f;
 
-  assertFalse(a >= b);
+  arktest.assertFalse(a >= b);
 }

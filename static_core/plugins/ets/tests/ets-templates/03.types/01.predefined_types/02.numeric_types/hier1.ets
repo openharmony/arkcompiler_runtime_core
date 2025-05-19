@@ -25,7 +25,7 @@ function main(): void {
     {
         let larger: {{c.lg}}
         larger {{op.op}} smaller
-        assertTrue( larger == {{op.val}} )
+        arktest.assertTrue( larger == {{op.val}} )
     }
     {%- endfor %}
 }

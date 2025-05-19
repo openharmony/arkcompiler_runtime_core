@@ -21,99 +21,99 @@ function sumArray() {
     let numbers: int[] = [1, 2, 3, 4, 5];
     let sum = ArrayTest.sumArray(numbers, 100)
     console.log("sum is " + sum)
-    assertEQ(sum, 115)
+    arktest.assertEQ(sum, 115)
 }
 
 function getArrayValue() {
     let nums: long[] = [35, 45, 55];
     let res = ArrayTest.getArrayValue(nums, 2)
     console.log("index 2 is " + res)
-    assertEQ(res, 55)
+    arktest.assertEQ(res, 55)
 }
 
 function toStingArray() {
     let nums: int[] = [35, 45, 55];
     let res = ArrayTest.toStingArray(nums)
     console.log("new array is " + res)
-    assertEQ(res.length, nums.length)
+    arktest.assertEQ(res.length, nums.length)
     for (let i = 0; i < res.length; i++) {
-        assertEQ(res[i], `${nums[i]}`)
+        arktest.assertEQ(res[i], `${nums[i]}`)
     }
 }
 
 function makeIntArray() {
     let arr = ArrayTest.makeIntArray(5, 3)
     console.log("new array is " + arr)
-    assertEQ(arr.length, 3)
+    arktest.assertEQ(arr.length, 3)
     for (let i = 0; i < arr.length; i++) {
-        assertEQ(arr[i], 5)
+        arktest.assertEQ(arr[i], 5)
     }
 }
 
 function makeEnumArray() {
     let arr = ArrayTest.makeEnumArray(ArrayTest.Color.GREEN, 5)
     console.log("new array is " + arr)
-    assertEQ(arr.length, 5)
+    arktest.assertEQ(arr.length, 5)
     for (let i = 0; i < arr.length; i++) {
-        assertEQ(arr[i], ArrayTest.Color.GREEN)
+        arktest.assertEQ(arr[i], ArrayTest.Color.GREEN)
     }
 }
 
 function makeRecordArray() {
     let arr = ArrayTest.makeRecordArray("k", 128, 3)
     console.log("new array is " + arr)
-    assertEQ(arr.length, 3)
+    arktest.assertEQ(arr.length, 3)
     for (let i = 0; i < arr.length; i++) {
-        assertEQ(arr[i]["k"], 128)
+        arktest.assertEQ(arr[i]["k"], 128)
     }
 }
 
 function makeStructArray() {
     let arr = ArrayTest.makeStructArray("a", "b", 5, 3)
     console.log("new array is " + arr)
-    assertEQ(arr.length, 3)
+    arktest.assertEQ(arr.length, 3)
     for (let i = 0; i < arr.length; i++) {
-        assertEQ(arr[i].a, "a")
-        assertEQ(arr[i].b, "b")
-        assertEQ(arr[i].c, 5)
+        arktest.assertEQ(arr[i].a, "a")
+        arktest.assertEQ(arr[i].b, "b")
+        arktest.assertEQ(arr[i].c, 5)
     }
 }
 
 function makeIntArray2() {
     let arr = ArrayTest.makeIntArray(5, 3);
     let arr2 = ArrayTest.makeIntArray2(arr, 3);
-    assertEQ(arr2.length, 3);
+    arktest.assertEQ(arr2.length, 3);
     for (let i = 0; i < arr2.length; i++) {
-        assertEQ(arr2[i].length, 3)
+        arktest.assertEQ(arr2[i].length, 3)
     }
 }
 
 function changeEnumArray() {
     let arr = ArrayTest.makeEnumArray(ArrayTest.Color.GREEN, 5);
     let arr2 = ArrayTest.changeEnumArray(arr, ArrayTest.Color.BLUE);
-    assertEQ(arr.length, arr2.length)
+    arktest.assertEQ(arr.length, arr2.length)
     for (let i = 0; i < arr2.length; i++) {
-        assertEQ(arr2[i], ArrayTest.Color.BLUE)
+        arktest.assertEQ(arr2[i], ArrayTest.Color.BLUE)
     }
 }
 
 function changeRecordArray() {
     let arr = ArrayTest.makeRecordArray("k", 128, 3)
     let arr2 = ArrayTest.changeRecordArray(arr, "v", 21);
-    assertEQ(arr.length, arr2.length)
+    arktest.assertEQ(arr.length, arr2.length)
     for (let i = 0; i < arr2.length; i++) {
-        assertEQ(arr2[i]["v"], 21)
+        arktest.assertEQ(arr2[i]["v"], 21)
     }
 }
 
 function changeStructArray() {
     let arr = ArrayTest.makeStructArray("a", "b", 5, 3)
     let arr2 = ArrayTest.changeStructArray(arr, "aa", "bb", 3);
-    assertEQ(arr.length, arr2.length)
+    arktest.assertEQ(arr.length, arr2.length)
     for (let i = 0; i < arr2.length; i++) {
-        assertEQ(arr2[i].a, "aa")
-        assertEQ(arr2[i].b, "bb")
-        assertEQ(arr2[i].c, 3)
+        arktest.assertEQ(arr2[i].a, "aa")
+        arktest.assertEQ(arr2[i].b, "bb")
+        arktest.assertEQ(arr2[i].c, 3)
     }
 }
 
@@ -134,19 +134,19 @@ function fetchBinaryData() {
     } catch (e) {
         error = e as BusinessError;
     }
-    assertEQ(data.length, 5);
+    arktest.assertEQ(data.length, 5);
 }
 
 function makeStructArrayArray() {
     let arr = ArrayTest.makeStructArrayArray("a", "b", 5, 2, 3)
     console.log("new array is " + arr)
-    assertEQ(arr.length, 3)
-    assertEQ(arr[0].length, 2)
+    arktest.assertEQ(arr.length, 3)
+    arktest.assertEQ(arr[0].length, 2)
     for (let i = 0; i < arr.length; i++) {
         for (let j = 0; j < arr[i].length; j++) {
-            assertEQ(arr[i][j].a, "a")
-            assertEQ(arr[i][j].b, "b")
-            assertEQ(arr[i][j].c, 5)
+            arktest.assertEQ(arr[i][j].a, "a")
+            arktest.assertEQ(arr[i][j].b, "b")
+            arktest.assertEQ(arr[i][j].c, 5)
         }
     }
 }
@@ -156,7 +156,7 @@ function test_ani_array_with_arrayi8() {
     let info = arrayi8.arrayI8Value(127 as byte);
 
     console.log("arrayi8.arrayI8Value is: " + info);
-    assertEQ(info[0], 127 as byte);
+    arktest.assertEQ(info[0], 127 as byte);
 }
 
 function test_ani_array_with_arrayi16() {
@@ -164,7 +164,7 @@ function test_ani_array_with_arrayi16() {
     let info = arrayi16.arrayI16Value(-32768 as short);
 
     console.log("arrayi16.arrayI16Value is: " + info);
-    assertEQ(info[0], -32768 as short);
+    arktest.assertEQ(info[0], -32768 as short);
 }
 
 function test_ani_array_with_arrayi32() {
@@ -172,7 +172,7 @@ function test_ani_array_with_arrayi32() {
     let info = arrayi32.arrayI32Value(2147483647 as int);
 
     console.log("arrayi32.arrayI32Value is: " + info);
-    assertEQ(info[0], 2147483647 as int);
+    arktest.assertEQ(info[0], 2147483647 as int);
 }
 
 function test_ani_array_with_arrayi64() {
@@ -180,7 +180,7 @@ function test_ani_array_with_arrayi64() {
     let info = arrayi64.arrayI64Value(-9223372036854775808 as long);
 
     console.log("arrayi64.arrayI64Value is: " + info);
-    assertEQ(info[0], -9223372036854775808 as long);
+    arktest.assertEQ(info[0], -9223372036854775808 as long);
 }
 
 function test_ani_array_with_arrayf32() {
@@ -188,7 +188,7 @@ function test_ani_array_with_arrayf32() {
     let info = arrayf32.arrayF32Value(202510.25 as float);
 
     console.log("arrayf32.arrayF32Value is: " + info);
-    assertEQ(info[0], 202510.25 as float);
+    arktest.assertEQ(info[0], 202510.25 as float);
 }
 
 function test_ani_array_with_arrayf64() {
@@ -196,7 +196,7 @@ function test_ani_array_with_arrayf64() {
     let info = arrayf64.arrayF64Value(20250521.1027 as double);
 
     console.log("arrayf64.arrayF64Value is: " + info);
-    assertEQ(info[0], 20250521.1027 as double);
+    arktest.assertEQ(info[0], 20250521.1027 as double);
 }
 
 function test_ani_array_with_arrayString() {
@@ -204,7 +204,7 @@ function test_ani_array_with_arrayString() {
     let info = arrayString.arrayStringValue("20250521.1035");
 
     console.log("arrayString.arrayStringValue is: " + info);
-    assertEQ(info[0], "20250521.1035");
+    arktest.assertEQ(info[0], "20250521.1035");
 }
 
 function test_ani_array_with_arrayBool() {
@@ -212,7 +212,7 @@ function test_ani_array_with_arrayBool() {
     let info = arrayBool.arrayBoolValue(true);
 
     console.log("arrayBool.arrayBoolValue is: " + info);
-    assertEQ(info[0], true);
+    arktest.assertEQ(info[0], true);
 }
 
 function test_ani_array_with_arrayEnum() {
@@ -220,7 +220,7 @@ function test_ani_array_with_arrayEnum() {
     let info = arr.arrayEnumValue("Color");
 
     console.log("arr.arrayEnumValue is: " + info);
-    assertEQ(info[0], ArrayTest.Color.RED);
+    arktest.assertEQ(info[0], ArrayTest.Color.RED);
 }
 
 function test_ani_array_with_arrayRecord() {
@@ -228,7 +228,7 @@ function test_ani_array_with_arrayRecord() {
     let info = arr.arrayRecordValue("Color", 255 as long);
 
     console.log("arr.arrayRecordValue is: " + info);
-    assertEQ(info[0].size, 1);
+    arktest.assertEQ(info[0].size, 1);
 }
 
 function test_ani_array_with_arrayRecord_stri8() {
@@ -236,7 +236,7 @@ function test_ani_array_with_arrayRecord_stri8() {
     let info = arr.arrayRecordValue("Color", 127 as byte);
 
     console.log("arr.arrayRecordValue is: " + info);
-    assertEQ(info[0].size, 1);
+    arktest.assertEQ(info[0].size, 1);
 }
 
 function test_ani_array_with_arrayRecord_strf32() {
@@ -244,7 +244,7 @@ function test_ani_array_with_arrayRecord_strf32() {
     let info = arr.arrayRecordValue("Color", 52115.24 as float);
 
     console.log("arr.arrayRecordValue is: " + info);
-    assertEQ(info[0].size, 1);
+    arktest.assertEQ(info[0].size, 1);
 }
 
 function test_ani_array_with_arrayRecord_strf64() {
@@ -252,7 +252,7 @@ function test_ani_array_with_arrayRecord_strf64() {
     let info = arr.arrayRecordValue("Color", 202552115.24 as double);
 
     console.log("arr.arrayRecordValue is: " + info);
-    assertEQ(info[0].size, 1);
+    arktest.assertEQ(info[0].size, 1);
 }
 
 function test_ani_array_with_arrayRecord_strbool() {
@@ -260,7 +260,7 @@ function test_ani_array_with_arrayRecord_strbool() {
     let info = arr.arrayRecordValue("Color", true);
 
     console.log("arr.arrayRecordValue is: " + info);
-    assertEQ(info[0].size, 1);
+    arktest.assertEQ(info[0].size, 1);
 }
 
 function test_ani_array_with_union() {
@@ -268,7 +268,7 @@ function test_ani_array_with_union() {
     let info = arr.arrayValue("Color");
 
     console.log("arr.arrayValue is: " + info);
-    assertEQ(info[0], "Color");
+    arktest.assertEQ(info[0], "Color");
 }
 
 let arrI8: ArrayTest.ArrayPromiseI8 = ArrayTest.getArrayPromiseI8();
@@ -291,7 +291,7 @@ function test_ani_array_with_PromiseI8() {
     }
 
     console.log("arr.fetchDataI8 is: " + info);
-    assertEQ(info[0], -128 as byte);
+    arktest.assertEQ(info[0], -128 as byte);
 }
 
 function test_ani_array_with_PromiseI8_sync() {
@@ -312,7 +312,7 @@ function test_ani_array_with_PromiseI8_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -128 as byte);
+    arktest.assertEQ(info[0], -128 as byte);
 }
 
 function test_ani_array_with_PromiseI8_promise() {
@@ -323,7 +323,7 @@ function test_ani_array_with_PromiseI8_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -128 as byte);
+    arktest.assertEQ(info[0], -128 as byte);
 }
 
 function test_ani_array_with_PromiseI16() {
@@ -336,7 +336,7 @@ function test_ani_array_with_PromiseI16() {
     }
 
     console.log("arr.fetchDataI16 is: " + info);
-    assertEQ(info[0], -32768 as short);
+    arktest.assertEQ(info[0], -32768 as short);
 }
 
 function test_ani_array_with_PromiseI16_sync() {
@@ -357,7 +357,7 @@ function test_ani_array_with_PromiseI16_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -32768 as short);
+    arktest.assertEQ(info[0], -32768 as short);
 }
 
 function test_ani_array_with_PromiseI16_promise() {
@@ -368,7 +368,7 @@ function test_ani_array_with_PromiseI16_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -32768 as short);
+    arktest.assertEQ(info[0], -32768 as short);
 }
 
 function test_ani_array_with_PromiseI32() {
@@ -381,7 +381,7 @@ function test_ani_array_with_PromiseI32() {
     }
 
     console.log("arr.fetchDataI32 is: " + info);
-    assertEQ(info[0], -2147483648);
+    arktest.assertEQ(info[0], -2147483648);
 }
 
 function test_ani_array_with_PromiseI32_sync() {
@@ -402,7 +402,7 @@ function test_ani_array_with_PromiseI32_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -2147483648);
+    arktest.assertEQ(info[0], -2147483648);
 }
 
 function test_ani_array_with_PromiseI32_promise() {
@@ -413,7 +413,7 @@ function test_ani_array_with_PromiseI32_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -2147483648);
+    arktest.assertEQ(info[0], -2147483648);
 }
 
 function test_ani_array_with_PromiseI64() {
@@ -426,7 +426,7 @@ function test_ani_array_with_PromiseI64() {
     }
 
     console.log("arr.fetchDataI64 is: " + info);
-    assertEQ(info[0], -9223372036854775807 as long);
+    arktest.assertEQ(info[0], -9223372036854775807 as long);
 }
 
 function test_ani_array_with_PromiseI64_sync() {
@@ -447,7 +447,7 @@ function test_ani_array_with_PromiseI64_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -9223372036854775807 as long);
+    arktest.assertEQ(info[0], -9223372036854775807 as long);
 }
 
 function test_ani_array_with_PromiseI64_promise() {
@@ -458,7 +458,7 @@ function test_ani_array_with_PromiseI64_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -9223372036854775807 as long);
+    arktest.assertEQ(info[0], -9223372036854775807 as long);
 }
 
 function test_ani_array_with_PromiseF32() {
@@ -471,7 +471,7 @@ function test_ani_array_with_PromiseF32() {
     }
 
     console.log("arr.fetchDataF32 is: " + info);
-    assertEQ(info[0], -202505.22 as float);
+    arktest.assertEQ(info[0], -202505.22 as float);
 }
 
 function test_ani_array_with_PromiseF32_sync() {
@@ -492,7 +492,7 @@ function test_ani_array_with_PromiseF32_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -202505.22 as float);
+    arktest.assertEQ(info[0], -202505.22 as float);
 }
 
 function test_ani_array_with_PromiseF32_promise() {
@@ -503,7 +503,7 @@ function test_ani_array_with_PromiseF32_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -202505.22 as float);
+    arktest.assertEQ(info[0], -202505.22 as float);
 }
 
 function test_ani_array_with_PromiseF64() {
@@ -516,7 +516,7 @@ function test_ani_array_with_PromiseF64() {
     }
 
     console.log("arr.fetchDataF64 is: " + info);
-    assertEQ(info[0], -202505.221539 as double);
+    arktest.assertEQ(info[0], -202505.221539 as double);
 }
 
 function test_ani_array_with_PromiseF64_sync() {
@@ -537,7 +537,7 @@ function test_ani_array_with_PromiseF64_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -202505.221539 as double);
+    arktest.assertEQ(info[0], -202505.221539 as double);
 }
 
 function test_ani_array_with_PromiseF64_promise() {
@@ -548,7 +548,7 @@ function test_ani_array_with_PromiseF64_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], -202505.221539 as double);
+    arktest.assertEQ(info[0], -202505.221539 as double);
 }
 
 function test_ani_array_with_PromiseString() {
@@ -561,7 +561,7 @@ function test_ani_array_with_PromiseString() {
     }
 
     console.log("arr.fetchDataString is: " + info);
-    assertEQ(info[0], "String");
+    arktest.assertEQ(info[0], "String");
 }
 
 function test_ani_array_with_PromiseString_sync() {
@@ -582,7 +582,7 @@ function test_ani_array_with_PromiseString_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], "String");
+    arktest.assertEQ(info[0], "String");
 }
 
 function test_ani_array_with_PromiseString_promise() {
@@ -593,7 +593,7 @@ function test_ani_array_with_PromiseString_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], "String");
+    arktest.assertEQ(info[0], "String");
 }
 
 function test_ani_array_with_PromiseBool() {
@@ -606,7 +606,7 @@ function test_ani_array_with_PromiseBool() {
     }
 
     console.log("arr.fetchDataBool is: " + info);
-    assertEQ(info[0], true);
+    arktest.assertEQ(info[0], true);
 }
 
 function test_ani_array_with_PromiseBool_sync() {
@@ -627,7 +627,7 @@ function test_ani_array_with_PromiseBool_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], true);
+    arktest.assertEQ(info[0], true);
 }
 
 function test_ani_array_with_PromiseBool_promise() {
@@ -638,7 +638,7 @@ function test_ani_array_with_PromiseBool_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[0], true);
+    arktest.assertEQ(info[0], true);
 }
 
 function test_ani_array_with_PromiseU8() { 
@@ -652,7 +652,7 @@ function test_ani_array_with_PromiseU8() {
     }
 
     console.log("arr.fetchDataPro is: " + info);
-    assertEQ(info[1], 255);
+    arktest.assertEQ(info[1], 255);
 }
 
 function test_ani_array_with_PromiseU8_sync() {
@@ -673,7 +673,7 @@ function test_ani_array_with_PromiseU8_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[1], 255);
+    arktest.assertEQ(info[1], 255);
 }
 
 function test_ani_array_with_PromiseU8_promise() {
@@ -684,7 +684,7 @@ function test_ani_array_with_PromiseU8_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[1], 255);
+    arktest.assertEQ(info[1], 255);
 }
 
 function test_ani_array_with_PromiseU16() { 
@@ -697,7 +697,7 @@ function test_ani_array_with_PromiseU16() {
     }
 
     console.log("arr.fetchDataPro is: " + info);
-    assertEQ(info[1], 65535);
+    arktest.assertEQ(info[1], 65535);
 }
 
 function test_ani_array_with_PromiseU16_sync() {
@@ -718,7 +718,7 @@ function test_ani_array_with_PromiseU16_sync() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[1], 65535);
+    arktest.assertEQ(info[1], 65535);
 }
 
 function test_ani_array_with_PromiseU16_promise() {
@@ -729,7 +729,7 @@ function test_ani_array_with_PromiseU16_promise() {
     } catch (e) {
         err = e as BusinessError;
     }
-    assertEQ(info[1], 65535);
+    arktest.assertEQ(info[1], 65535);
 }
 
 let arrNest: ArrayTest.ArrayNest = ArrayTest.getArrayNest();
@@ -737,35 +737,35 @@ function test_ani_array_with_nest_i8() {
     let info = arrNest.arrayNestI8(120 as byte);
 
     console.log("arrNest.ArrayNestI8 is: " + info);
-    assertEQ(info.length, 4);
+    arktest.assertEQ(info.length, 4);
 }
 
 function test_ani_array_with_nest_i16() {
     let info = arrNest.arrayNestI16(32700 as short);
 
     console.log("arrNest.ArrayNestI16 is: " + info);
-    assertEQ(info.length, 4);
+    arktest.assertEQ(info.length, 4);
 }
 
 function test_ani_array_with_nest_f32() {
     let info = arrNest.arrayNestF32(202505.28 as float);
 
     console.log("arrNest.ArrayNestF32 is: " + info);
-    assertEQ(info.length, 4);
+    arktest.assertEQ(info.length, 4);
 }
 
 function test_ani_array_with_nest_string() {
     let info = arrNest.arrayNestStrng("0528");
 
     console.log("arrNest.ArrayNestStrng is: " + info);
-    assertEQ(info.length, 4);
+    arktest.assertEQ(info.length, 4);
 }
 
 function test_ani_array_with_nest_bool() {
     let info = arrNest.arrayNestBool(true);
 
     console.log("arrNest.ArrayNestBool is: " + info);
-    assertEQ(info.length, 3);
+    arktest.assertEQ(info.length, 3);
 }
 
 function test_ani_array_with_optional() {
@@ -773,12 +773,12 @@ function test_ani_array_with_optional() {
     let info = arrOpt.arrayOpt("optional");
 
     console.log("arrOpt.arrayOpt is: " + info);
-    assertEQ(info?.[0], "optional");
+    arktest.assertEQ(info?.[0], "optional");
 }
 
 function main() {
     console.log("run main ... ArrayTest ...")
-    const suite = new ArkTestsuite("ArrayTest")
+    const suite = new arktest.ArkTestsuite("ArrayTest")
 
     suite.addTest("sumArray", sumArray)
     suite.addTest("getArrayValue", getArrayValue)

@@ -19,5 +19,5 @@ desc: It is the only value of the type undefined (see The undefined Type), and i
 
 function main() {
     let x: undefined = undefined;
-    assertTrue( x === undefined )
+    arktest.assertTrue( x === undefined )
 }

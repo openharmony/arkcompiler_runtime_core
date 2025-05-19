@@ -33,5 +33,5 @@ class InterfacePropConflictChild extends InterfacePropConflictClass implements I
 
 function main(): void {
   const instance = new InterfacePropConflictChild();
-  assertEQ(instance.CONST, 13);
+  arktest.assertEQ(instance.CONST, 13);
 }

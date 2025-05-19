@@ -24,6 +24,6 @@ import { NamespaceA } from "./namespaceA.ets";
 import { NamespaceB } from "./namespaceB.ets";
 
 function main(): void {
-    assertEQ(NamespaceA.CONSTANT_A, "ValueA");
-    assertEQ(NamespaceB.CONSTANT_A, "ValueB");
+    arktest.assertEQ(NamespaceA.CONSTANT_A, "ValueA");
+    arktest.assertEQ(NamespaceB.CONSTANT_A, "ValueB");
 }

@@ -40,8 +40,8 @@ function main() {
     const sci = new StateContextImpl
 
     sci.attach(undefined)
-    assertEQ(12, data)
+    arktest.assertEQ(12, data)
     let clean: TCleanup | undefined = () => { data = 0 }
     sci.attach(clean)
-    assertEQ(0, data)
+    arktest.assertEQ(0, data)
 }

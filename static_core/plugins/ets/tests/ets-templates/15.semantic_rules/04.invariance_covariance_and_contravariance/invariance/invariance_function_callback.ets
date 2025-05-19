@@ -30,5 +30,5 @@ function logExt( callback: (e: Base) => Base, b: Base): Base {
 
 function main(): void {
   let b: Base = [1.2];
-  assertEQ( logBase(b), logExt(logBase, b) );
+  arktest.assertEQ( logBase(b), logExt(logBase, b) );
 }

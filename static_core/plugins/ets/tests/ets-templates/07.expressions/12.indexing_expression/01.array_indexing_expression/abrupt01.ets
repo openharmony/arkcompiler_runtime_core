@@ -31,7 +31,7 @@ function arrRef(exc: boolean): number[] {
 function main(): int {
     let indexingExpressionEvaluated: boolean = false
     try {
-        assertTrue( arrRef(true)[(():int => { indexingExpressionEvaluated = true; return 2 })()] == 3 )
+        arktest.assertTrue( arrRef(true)[(():int => { indexingExpressionEvaluated = true; return 2 })()] == 3 )
     } catch (e: Error) {
         return (indexingExpressionEvaluated ? 1 : 0)
     }

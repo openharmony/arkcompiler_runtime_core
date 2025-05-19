@@ -29,7 +29,7 @@ let s{{loop.index}}: {{v.type}} = {{v.expr}};
 function main() {
 {%- for v in c['values'] %}
     let d{{loop.index}}: A = { fld: s{{loop.index}} };
-    assertTrue(d{{loop.index}}.fld == {{v.val or v.expr}})
+    arktest.assertTrue(d{{loop.index}}.fld == {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

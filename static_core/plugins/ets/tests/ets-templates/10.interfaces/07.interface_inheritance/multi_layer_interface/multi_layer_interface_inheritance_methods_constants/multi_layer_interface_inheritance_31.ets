@@ -42,8 +42,8 @@ function main(): void {
   const obj: ChildInterface = new ConcreteClass();
 
   let tmp1: string[] = obj.grandparentMethod();
-  assertEQ(tmp1[0], "a");
+  arktest.assertEQ(tmp1[0], "a");
 
   let tmp2: string[] = obj.parentMethod();
-  assertEQ(tmp2[1], "d");
+  arktest.assertEQ(tmp2[1], "d");
 }

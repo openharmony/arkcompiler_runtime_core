@@ -24,5 +24,5 @@ let arr: number[] = [1, 2, 3]
 
 function main() {
     arr[new Char(c'\u0001')] = 0;
-    assertEQ(arr[1], 0);
+    arktest.assertEQ(arr[1], 0);
 }

@@ -21,5 +21,5 @@ let numLiteral: number = 2;
 let arithmeticResult = numLiteral + 3;
 
 function main(): void {
-    assertEQ(arithmeticResult, 5);
+    arktest.assertEQ(arithmeticResult, 5);
 }

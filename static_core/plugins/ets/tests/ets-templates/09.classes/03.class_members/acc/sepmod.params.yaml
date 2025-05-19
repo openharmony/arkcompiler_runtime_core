@@ -21,7 +21,7 @@ cases:
           // separate module, positive case with public accessor
           let a = new A
           a.foo = 42
-          assertEQ( a.foo, 42 )
+          arktest.assertEQ( a.foo, 42 )
 
     - files: './dir_pub_2/file_B.ets'
       decl: |-
@@ -30,7 +30,7 @@ cases:
           // separate module, positive case with public accessor, from subclass
           let b = new B
           b.foo = 42
-          assertEQ( b.foo, 44 )
+          arktest.assertEQ( b.foo, 44 )
 
     # protected access modifier
     - files: './dir_prot_1/file_A.ets'
@@ -41,7 +41,7 @@ cases:
           // separate module, negative case with protected accessor
           let a = new A
           a.foo = 42
-          assertEQ( a.foo, 42 )
+          arktest.assertEQ( a.foo, 42 )
 
     - files: './dir_prot_2/file_B.ets'
       decl: |-
@@ -50,7 +50,7 @@ cases:
           // separate module, positive case with protected accessor, from subclass
           let b = new B
           b.foo = 42
-          assertEQ( b.foo, 44 )
+          arktest.assertEQ( b.foo, 44 )
 
     # private access modifier
     - files: './dir_priv_1/file_A.ets'
@@ -61,7 +61,7 @@ cases:
           // separate module, negative case with private accessor
           let a = new A
           a.foo = 42
-          assertEQ( a.foo, 42 )
+          arktest.assertEQ( a.foo, 42 )
 
     - files: './dir_priv_2/file_B.ets'
       tags: 'negative, compile-only'
@@ -71,4 +71,4 @@ cases:
           // separate module, negative case with private accessor, from subclass
           let b = new B
           b.foo = 42
-          assertEQ( b.foo, 44 )
+          arktest.assertEQ( b.foo, 44 )

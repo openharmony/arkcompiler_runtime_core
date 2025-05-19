@@ -24,12 +24,12 @@ let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHash
 
 function main(): int {
 
-    let concurrentHashMapTestsuite = new ArkTestsuite("concurrentHashMapPressureTest");
+    let concurrentHashMapTestsuite = new arktest.ArkTestsuite("concurrentHashMapPressureTest");
 
     concurrentHashMapTestsuite.addTest("removePressureTest_004", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         for (let i: int = 0; i < 100; i++) {
             let j: string = `${i}`;
             concurrentHashMapOne.set(i, j);
@@ -43,10 +43,10 @@ function main(): int {
         for (let i: int = 0; i < 100; i++) {
             jobs[i].Await();
         }
-        assertEQ(concurrentHashMapOne.size, 0);
+        arktest.assertEQ(concurrentHashMapOne.size, 0);
         for (let i: int = 0; i < 100; i++) {
             let j = `${i}`;
-            assertEQ(arrValuesTest[i], j);
+            arktest.assertEQ(arrValuesTest[i], j);
         }
     });
 

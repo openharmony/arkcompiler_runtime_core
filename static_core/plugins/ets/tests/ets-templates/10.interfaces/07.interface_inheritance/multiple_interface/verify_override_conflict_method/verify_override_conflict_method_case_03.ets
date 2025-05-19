@@ -37,5 +37,5 @@ class ChildImpl implements Child {
 
 function main(): void {
     const child = new ChildImpl();
-    assertEQ(child.greet(), "Child says: Hello from Parent (default)");
+    arktest.assertEQ(child.greet(), "Child says: Hello from Parent (default)");
 }

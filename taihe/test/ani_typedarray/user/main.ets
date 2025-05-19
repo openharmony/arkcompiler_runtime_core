@@ -19,85 +19,85 @@ loadLibrary("ani_typedarray");
 
 function checkUint8Array() {
     let arr = bar.newUint8Array(2, 0x01 as byte);
-    assertEQ(arr.length, 2);
-    assertEQ(arr.at(0), 0x01);
-    assertEQ(arr.at(1), 0x01);
+    arktest.assertEQ(arr.length, 2);
+    arktest.assertEQ(arr.at(0), 0x01);
+    arktest.assertEQ(arr.at(1), 0x01);
     let res = bar.sumUint8Array(arr);
-    assertEQ(res, 0x01 * 2);
+    arktest.assertEQ(res, 0x01 * 2);
 }
 
 function checkUint16Array() {
     let arr = bar.newUint16Array(2, 0x0123 as short);
-    assertEQ(arr.at(0), 0x0123);
-    assertEQ(arr.at(1), 0x0123);
+    arktest.assertEQ(arr.at(0), 0x0123);
+    arktest.assertEQ(arr.at(1), 0x0123);
     let res = bar.sumUint16Array(arr);
-    assertEQ(res, 0x0123 * 2);
+    arktest.assertEQ(res, 0x0123 * 2);
 }
 
 function checkUint32Array() {
     let arr = bar.newUint32Array(2, 0x01234567 as int);
-    assertEQ(arr.at(0), 0x01234567);
-    assertEQ(arr.at(1), 0x01234567);
+    arktest.assertEQ(arr.at(0), 0x01234567);
+    arktest.assertEQ(arr.at(1), 0x01234567);
     let res = bar.sumUint32Array(arr);
-    assertEQ(res, 0x01234567 * 2);
+    arktest.assertEQ(res, 0x01234567 * 2);
 }
 
 function checkBigUint64Array() {
     let arr = bar.newBigUint64Array(2, 21 as long);
-    assertEQ(arr.at(0), 21n);
-    assertEQ(arr.at(1), 21n);
+    arktest.assertEQ(arr.at(0), 21n);
+    arktest.assertEQ(arr.at(1), 21n);
     let res = bar.sumBigUint64Array(arr);
-    assertEQ(res, 42);
+    arktest.assertEQ(res, 42);
 }
 
 function checkInt8Array() {
     let arr = bar.newInt8Array(2, 0x01 as byte);
-    assertEQ(arr.at(0), 0x01);
-    assertEQ(arr.at(1), 0x01);
+    arktest.assertEQ(arr.at(0), 0x01);
+    arktest.assertEQ(arr.at(1), 0x01);
     let res = bar.sumInt8Array(arr);
-    assertEQ(res, 0x01 * 2);
+    arktest.assertEQ(res, 0x01 * 2);
 }
 
 function checkInt16Array() {
     let arr = bar.newInt16Array(2, 0x0123 as short);
-    assertEQ(arr.at(0), 0x0123);
-    assertEQ(arr.at(1), 0x0123);
+    arktest.assertEQ(arr.at(0), 0x0123);
+    arktest.assertEQ(arr.at(1), 0x0123);
     let res = bar.sumInt16Array(arr);
-    assertEQ(res, 0x0123 * 2);
+    arktest.assertEQ(res, 0x0123 * 2);
 }
 
 function checkInt32Array() {
     let arr = bar.newInt32Array(2, 0x01234567 as int);
-    assertEQ(arr.at(0), 0x01234567);
-    assertEQ(arr.at(1), 0x01234567);
+    arktest.assertEQ(arr.at(0), 0x01234567);
+    arktest.assertEQ(arr.at(1), 0x01234567);
     let res = bar.sumInt32Array(arr);
-    assertEQ(res, 0x01234567 * 2);
+    arktest.assertEQ(res, 0x01234567 * 2);
 }
 
 function checkBigInt64Array() {
     let arr = bar.newBigInt64Array(2, 21 as long);
-    assertEQ(arr.at(0), 21n);
-    assertEQ(arr.at(1), 21n);
+    arktest.assertEQ(arr.at(0), 21n);
+    arktest.assertEQ(arr.at(1), 21n);
     let res = bar.sumBigInt64Array(arr);
-    assertEQ(res, 42);
+    arktest.assertEQ(res, 42);
 }
 
 function checkFloat32Array() {
     let arr = bar.newFloat32Array(2, 0.1 as float);
     let tolerance = 0.00001 as float;
-    assertEQ(Math.abs(arr.at(0)! - 0.1) < tolerance, true);
-    assertEQ(Math.abs(arr.at(1)! - 0.1) < tolerance, true);
+    arktest.assertEQ(Math.abs(arr.at(0)! - 0.1) < tolerance, true);
+    arktest.assertEQ(Math.abs(arr.at(1)! - 0.1) < tolerance, true);
     let res = bar.sumFloat32Array(arr);
-    assertEQ(Math.abs(res - 0.1 * 2) < tolerance, true);
+    arktest.assertEQ(Math.abs(res - 0.1 * 2) < tolerance, true);
 }
 
 function checkFloat64Array() {
     let arr = bar.newFloat64Array(2, 0.1 as double);
     let tolerance = 0.00001 as double;
-    assertEQ(Math.abs(arr.at(0)! - 0.1) < tolerance, true);
-    assertEQ(Math.abs(arr.at(1)! - 0.1) < tolerance, true);
+    arktest.assertEQ(Math.abs(arr.at(0)! - 0.1) < tolerance, true);
+    arktest.assertEQ(Math.abs(arr.at(1)! - 0.1) < tolerance, true);
     let res = bar.sumFloat64Array(arr);
-    assertEQ(Math.abs(res - 0.1 * 2) < tolerance, true);
+    arktest.assertEQ(Math.abs(res - 0.1 * 2) < tolerance, true);
 }
 
 //bar.d.ts
@@ -108,7 +108,7 @@ function test_bar_with_createAndPrintUint8Array() {
     typedArrInfo.createUint8Array(arr);
     let res = typedArrInfo.printUint8Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetUint8Array() {
@@ -116,7 +116,7 @@ function test_bar_with_setAndgetUint8Array() {
     let res = typedArrInfo.Uint8Array;
     let arr = new Uint8Array([1, 2, 3, 4, 5]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintInt8Array() {
@@ -124,7 +124,7 @@ function test_bar_with_createAndPrintInt8Array() {
     typedArrInfo.createInt8Array(arr);
     let res = typedArrInfo.printInt8Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetInt8Array() {
@@ -132,7 +132,7 @@ function test_bar_with_setAndgetInt8Array() {
     let res = typedArrInfo.Int8Array;
     let arr = new Int8Array([1, -2, 3, -4, 5]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintUint16Array() {
@@ -140,7 +140,7 @@ function test_bar_with_createAndPrintUint16Array() {
     typedArrInfo.createUint16Array(arr);
     let res = typedArrInfo.printUint16Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetUint16Array() {
@@ -148,7 +148,7 @@ function test_bar_with_setAndgetUint16Array() {
     let res = typedArrInfo.Uint16Array;
     let arr = new Uint16Array([10, 20, 30, 40, 50]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintInt16Array() {
@@ -156,7 +156,7 @@ function test_bar_with_createAndPrintInt16Array() {
     typedArrInfo.createInt16Array(arr);
     let res = typedArrInfo.printInt16Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetInt16Array() {
@@ -164,7 +164,7 @@ function test_bar_with_setAndgetInt16Array() {
     let res = typedArrInfo.Int16Array;
     let arr = new Int16Array([10, -20, 30, -40, 50]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintUint32Array() {
@@ -172,7 +172,7 @@ function test_bar_with_createAndPrintUint32Array() {
     typedArrInfo.createUint32Array(arr);
     let res = typedArrInfo.printUint32Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetUint32Array() {
@@ -180,7 +180,7 @@ function test_bar_with_setAndgetUint32Array() {
     let res = typedArrInfo.Uint32Array;
     let arr = new Uint32Array([100, 200, 300, 400, 500]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintInt32Array() {
@@ -188,7 +188,7 @@ function test_bar_with_createAndPrintInt32Array() {
     typedArrInfo.createInt32Array(arr);
     let res = typedArrInfo.printInt32Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetInt32Array() {
@@ -196,7 +196,7 @@ function test_bar_with_setAndgetInt32Array() {
     let res = typedArrInfo.Int32Array;
     let arr = new Int32Array([100, -200, 300, -400, 500]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintUint64Array() {
@@ -204,7 +204,7 @@ function test_bar_with_createAndPrintUint64Array() {
     typedArrInfo.createUint64Array(arr);
     let res = typedArrInfo.printUint64Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetUint64Array() {
@@ -212,7 +212,7 @@ function test_bar_with_setAndgetUint64Array() {
     let res = typedArrInfo.Uint64Array;
     let arr = new BigUint64Array([1000n, 2000n, 3000n, 4000n, 5000n]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintInt64Array() {
@@ -220,7 +220,7 @@ function test_bar_with_createAndPrintInt64Array() {
     typedArrInfo.createInt64Array(arr);
     let res = typedArrInfo.printInt64Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetInt64Array() {
@@ -228,7 +228,7 @@ function test_bar_with_setAndgetInt64Array() {
     let res = typedArrInfo.Int64Array;
     let arr = new BigInt64Array([1000n, -2000n, 3000n, -4000n, 5000n]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => value === res[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintFloat32Array() {
@@ -236,7 +236,7 @@ function test_bar_with_createAndPrintFloat32Array() {
     typedArrInfo.createFloat32Array(arr);
     let res = typedArrInfo.printFloat32Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => Math.abs(value - res[index]) < 1e-6);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetFloat32Array() {
@@ -244,7 +244,7 @@ function test_bar_with_setAndgetFloat32Array() {
     let res = typedArrInfo.Float32Array;
     let arr = new Float32Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => Math.abs(value - res[index]) < 1e-6);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_createAndPrintFloat64Array() {
@@ -252,7 +252,7 @@ function test_bar_with_createAndPrintFloat64Array() {
     typedArrInfo.createFloat64Array(arr);
     let res = typedArrInfo.printFloat64Array(arr);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => Math.abs(value - res[index]) < 1e-15);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_setAndgetFloat64Array() {
@@ -260,7 +260,7 @@ function test_bar_with_setAndgetFloat64Array() {
     let res = typedArrInfo.Float64Array;
     let arr = new Float64Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     let arraysAreEqual = arr.length === res.length && arr.every((value, index) => Math.abs(value - res[index]) < 1e-15);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_convertToInt64Array() {
@@ -272,7 +272,7 @@ function test_bar_with_convertToInt64Array() {
     let res = typedArrInfo.convertToInt64Array(uint8Arr, uint16Arr, uint32Arr, uint64Arr, int8Arr);
     let exceptArr: BigInt64Array = new BigInt64Array([1112n, 2220n, 3336n, 4440n, 5560n]);
     let arraysAreEqual = res.length === exceptArr.length && res.every((value, index) => value === exceptArr[index]);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_convertToFloat64Array() {
@@ -284,7 +284,7 @@ function test_bar_with_convertToFloat64Array() {
     let res = typedArrInfo.convertToFloat64Array(int16Arr, int32Arr, int64Arr, float32Arr, float64Arr);
     let exceptArr: Float64Array = new Float64Array([1112.0, -2216.0, 3336.0, -4432.0, 5560.0]);
     let arraysAreEqual = res.length === exceptArr.length && res.every((value, index) => Math.abs(value - exceptArr[index]) < 1e-6);
-    assertEQ(arraysAreEqual, true);
+    arktest.assertEQ(arraysAreEqual, true);
 }
 
 function test_bar_with_getUint8ArrayOptional_1() {
@@ -471,81 +471,81 @@ function test_bar_with_union() {
     //union null
     bar.showMyUnion(null);
     let union0 = bar.makeMyUnion(0);
-    assertEQ(union0, null);
+    arktest.assertEQ(union0, null);
 
     //union u8
     let u8Arr: Uint8Array = new Uint8Array([1, 2, 3, 4, 5]);
     bar.showMyUnion(u8Arr);
     let union1 = bar.makeMyUnion(1);
     let u8Expected: Uint8Array = union1 as Uint8Array;
-    assertEQ(u8Arr.toString(), u8Expected.toString());
+    arktest.assertEQ(u8Arr.toString(), u8Expected.toString());
 
     //union i8
     let i8Arr: Int8Array = new Int8Array([1, -2, 3, -4, 5]);
     bar.showMyUnion(i8Arr);
     let union2 = bar.makeMyUnion(2);
     let i8Expected: Int8Array = union2 as Int8Array;
-    assertEQ(i8Arr.toString(), i8Expected.toString());
+    arktest.assertEQ(i8Arr.toString(), i8Expected.toString());
 
     //union u16
     let u16Arr: Uint16Array = new Uint16Array([10, 20, 30, 40, 50]);
     bar.showMyUnion(u16Arr);
     let union3 = bar.makeMyUnion(3);
     let u16Expected: Uint16Array = union3 as Uint16Array;
-    assertEQ(u16Arr.toString(), u16Expected.toString());
+    arktest.assertEQ(u16Arr.toString(), u16Expected.toString());
 
     //union i16
     let i16Arr: Int16Array = new Int16Array([10, -20, 30, -40, 50]);
     bar.showMyUnion(i16Arr);
     let union4 = bar.makeMyUnion(4);
     let i16Expected: Int16Array = union4 as Int16Array;
-    assertEQ(i16Arr.toString(), i16Expected.toString());
+    arktest.assertEQ(i16Arr.toString(), i16Expected.toString());
 
     //union u32
     let u32Arr: Uint32Array = new Uint32Array([100, 200, 300, 400, 500]);
     bar.showMyUnion(u32Arr);
     let union5 = bar.makeMyUnion(5);
     let u32Expected: Uint32Array = union5 as Uint32Array;
-    assertEQ(u32Arr.toString(), u32Expected.toString());
+    arktest.assertEQ(u32Arr.toString(), u32Expected.toString());
 
     //union i32
     let i32Arr: Int32Array = new Int32Array([100, -200, 300, -400, 500]);
     bar.showMyUnion(i32Arr);
     let union6 = bar.makeMyUnion(6);
     let i32Expected: Int32Array = union6 as Int32Array;
-    assertEQ(i32Arr.toString(), i32Expected.toString());
+    arktest.assertEQ(i32Arr.toString(), i32Expected.toString());
 
     //union u64
     let u64Arr: BigUint64Array = new BigUint64Array([1000n, 2000n, 3000n, 4000n, 5000n]);
     bar.showMyUnion(u64Arr);
     let union7 = bar.makeMyUnion(7);
     let u64Expected: BigUint64Array = union7 as BigUint64Array;
-    assertEQ(u64Arr.toString(), u64Expected.toString());
+    arktest.assertEQ(u64Arr.toString(), u64Expected.toString());
 
     //union i64
     let i64Arr: BigInt64Array = new BigInt64Array([1000n, -2000n, 3000n, -4000n, 5000n]);
     bar.showMyUnion(i64Arr);
     let union8 = bar.makeMyUnion(8);
     let i64Expected: BigInt64Array = union8 as BigInt64Array;
-    assertEQ(i64Arr.toString(), i64Expected.toString());
+    arktest.assertEQ(i64Arr.toString(), i64Expected.toString());
 
     //union f32
     let f32Arr: Float32Array = new Float32Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     bar.showMyUnion(f32Arr);
     let union9 = bar.makeMyUnion(9);
     let f32Expected: Float32Array = union9 as Float32Array;
-    assertEQ(f32Arr.toString(), f32Expected.toString());
+    arktest.assertEQ(f32Arr.toString(), f32Expected.toString());
 
     //union f64
     let f64Arr: Float64Array = new Float64Array([1.0, 2.0, 3.0, 4.0, 5.0]);
     bar.showMyUnion(f64Arr);
     let union10 = bar.makeMyUnion(10);
     let f64Expected: Float64Array = union10 as Float64Array;
-    assertEQ(f64Arr.toString(), f64Expected.toString());
+    arktest.assertEQ(f64Arr.toString(), f64Expected.toString());
 }
 
 function main() {
-    const suite = new ArkTestsuite("ani_typedarray ut")
+    const suite = new arktest.ArkTestsuite("ani_typedarray ut")
     suite.addTest("checkUint8Array", checkUint8Array);
     suite.addTest("checkUint16Array", checkUint16Array);
     suite.addTest("checkUint32Array", checkUint32Array);

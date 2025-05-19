@@ -27,7 +27,7 @@ class Int8ArrayConstantChild implements Int8ArrayConstantInterface {
 
 function main(): void {
   const instance = new Int8ArrayConstantChild();
-  assertEQ(instance.CONST[0], -128);
-  assertEQ(instance.CONST[1], 0);
-  assertEQ(instance.CONST[2], 127);
+  arktest.assertEQ(instance.CONST[0], -128);
+  arktest.assertEQ(instance.CONST[1], 0);
+  arktest.assertEQ(instance.CONST[2], 127);
 }

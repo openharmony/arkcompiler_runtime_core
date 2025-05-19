@@ -19,7 +19,7 @@ desc: Variable declaration with mixed types.
 
 function main(): void {
     let tmp: number = 6, tmp1 = 1, tmp2 = "hello";
-    assertTrue(tmp == 6);
-    assertTrue(tmp1==1);
-    assertTrue(tmp2 == "hello");
+    arktest.assertTrue(tmp == 6);
+    arktest.assertTrue(tmp1==1);
+    arktest.assertTrue(tmp2 == "hello");
 }

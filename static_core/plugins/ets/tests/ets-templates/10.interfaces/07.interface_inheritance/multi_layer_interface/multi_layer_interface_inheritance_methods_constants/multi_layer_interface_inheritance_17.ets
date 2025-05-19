@@ -37,6 +37,6 @@ class ConcreteClass implements ChildInterface {
 
 function main(): void {
   const obj: ChildInterface = new ConcreteClass();
-  assertEQ(obj.GRANDPARENT_CONST, true);
-  assertEQ(obj.PARENT_CONST, false);
+  arktest.assertEQ(obj.GRANDPARENT_CONST, true);
+  arktest.assertEQ(obj.PARENT_CONST, false);
 }

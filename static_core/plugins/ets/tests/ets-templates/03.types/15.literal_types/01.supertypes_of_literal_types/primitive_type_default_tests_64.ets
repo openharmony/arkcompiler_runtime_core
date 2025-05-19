@@ -24,5 +24,5 @@ function assignBasedOnCondition(isLarge: boolean) {
 function main(): void {
     const input = true;
     const result = assignBasedOnCondition(input);
-    assertEQ(result, "large");
+    arktest.assertEQ(result, "large");
 }

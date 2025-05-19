@@ -31,7 +31,7 @@ function main(): int {
         map.set(arrKeys[i], arrValues[i]);
     }
 
-    let concurrentHashMapOneTestsuite = new ArkTestsuite("concurrentHashMapDeleteTest");
+    let concurrentHashMapOneTestsuite = new arktest.ArkTestsuite("concurrentHashMapDeleteTest");
 
     concurrentHashMapOneTestsuite.addTest("deleteTest_001", () =>
     {
@@ -39,9 +39,9 @@ function main(): int {
         let value: string | undefined = concurrentHashMap.get(1);
         let del: boolean = concurrentHashMap.delete(1);
         let valueDel: string | undefined = concurrentHashMap.get(1);
-        assertEQ(value, "one");
-        assertTrue(del);
-        assertEQ(valueDel, undefined);
+        arktest.assertEQ(value, "one");
+        arktest.assertTrue(del);
+        arktest.assertEQ(valueDel, undefined);
     });
     concurrentHashMapOneTestsuite.addTest("deleteTest_002", () =>
     {
@@ -49,9 +49,9 @@ function main(): int {
         let value: string | undefined = concurrentHashMap.get(10);
         let del: boolean = concurrentHashMap.delete(10);
         let valueDel: string | undefined = concurrentHashMap.get(10);
-        assertEQ(value, undefined);
-        assertFalse(del);
-        assertEQ(valueDel, undefined);
+        arktest.assertEQ(value, undefined);
+        arktest.assertFalse(del);
+        arktest.assertEQ(valueDel, undefined);
     });
     concurrentHashMapOneTestsuite.addTest("deleteTest_003", () =>
     {
@@ -59,9 +59,9 @@ function main(): int {
         let value: string | undefined = concurrentHashMap.get(1);
         let del: boolean = concurrentHashMap.delete(1);
         let valueDel: string | undefined = concurrentHashMap.get(1);
-        assertEQ(value, undefined);
-        assertFalse(del);
-        assertEQ(valueDel, undefined);
+        arktest.assertEQ(value, undefined);
+        arktest.assertFalse(del);
+        arktest.assertEQ(valueDel, undefined);
     });
     concurrentHashMapOneTestsuite.addTest("deleteTest_003", () =>
     {
@@ -70,67 +70,67 @@ function main(): int {
         let value: number | undefined = concurrentHashMap.get("zero");
         let del: boolean = concurrentHashMap.delete("zero");
         let valueDel: number | undefined = concurrentHashMap.get("zero");
-        assertEQ(value, 0);
-        assertTrue(del);
-        assertEQ(valueDel, undefined);
+        arktest.assertEQ(value, 0);
+        arktest.assertTrue(del);
+        arktest.assertEQ(valueDel, undefined);
     });
     concurrentHashMapOneTestsuite.addTest("twiceTest_004", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(deleteAll);
         let p2 = launch<void, () => void>(deleteAllBack);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 0);
+        arktest.assertEQ(concurrentHashMapOne.size, 0);
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
         let p1 = launch<void, () => void>(deleteAll);
         let p2 = launch<void, () => void>(replaceAll);
         p1.Await();
         p2.Await();
-        assertTrue(Atomics.load(flag, 0) >= 10);
+        arktest.assertTrue(Atomics.load(flag, 0) >= 10);
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_002", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
         let p1 = launch<void, () => void>(deleteAll);
         let p2 = launch<void, () => void>(isEmptyFun);
         p1.Await();
         p2.Await();
-        assertEQ(Atomics.load(flag, 0), 10);
+        arktest.assertEQ(Atomics.load(flag, 0), 10);
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_003", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(deleteAll);
         let p2 = launch<void, () => void>(clearAll);
         p1.Await();
         p2.Await();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapOneTestsuite.addTest("deleteAndTest_004", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(removeAll);
         let p2 = launch<void, () => void>(deleteAllBack);
         p1.Await();
         p2.Await();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
 
     return concurrentHashMapOneTestsuite.run();

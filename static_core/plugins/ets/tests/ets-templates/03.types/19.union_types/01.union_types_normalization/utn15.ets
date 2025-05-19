@@ -20,7 +20,7 @@ desc: Test the removal of string literal type hanged when the union type contain
 function main(): void {
     type A = "1" | "2" | string | number;
     let a: A = "test";
-    assertTrue(typeof a === "string");
+    arktest.assertTrue(typeof a === "string");
     let b: A = 10;
-    assertTrue(typeof b === "number");
+    arktest.assertTrue(typeof b === "number");
 }

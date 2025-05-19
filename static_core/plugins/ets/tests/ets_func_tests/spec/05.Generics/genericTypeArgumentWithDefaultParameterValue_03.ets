@@ -42,9 +42,9 @@ class B<T> {
 function main(): void {
     let b = new B<String>("hello")
     let a = b.foo<Helper>(true);
-    assertTrue( a instanceof A)
-    assertEQ( a.isData, true)
+    arktest.assertTrue( a instanceof A)
+    arktest.assertEQ( a.isData, true)
     a.data = new Helper()
-    assertTrue( a.data instanceof Helper)
+    arktest.assertTrue( a.data instanceof Helper)
 }
 

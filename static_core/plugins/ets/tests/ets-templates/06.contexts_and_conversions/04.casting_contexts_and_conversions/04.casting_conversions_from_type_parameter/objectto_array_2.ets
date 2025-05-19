@@ -20,5 +20,5 @@ desc: Convert to obj-namedarray type.
 function main(): void {
   let names: string[] = ['Alice', 'Bob', 'Carol'];
   const obj1: object = names;
-  assertTrue(obj1 == names);
+  arktest.assertTrue(obj1 == names);
 }

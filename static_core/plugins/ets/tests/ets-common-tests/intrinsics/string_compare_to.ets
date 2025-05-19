@@ -26,7 +26,7 @@ function test_latin() {
         strs.push(`${i}ww`);
         what = `${i}ww`;
         let found = strs.find(finder);
-        assertEQ(found, what, "The string should be found");
+        arktest.assertEQ(found, what, "The string should be found");
         if (strs.length > 3) {
             strs.unshift();
         }
@@ -53,11 +53,11 @@ function test_corner_cases() {
         let e = tuple[2];
         let r = a.compareTo(b);
         if (e > 0) {
-            assertLT(0, r);
+            arktest.assertLT(0, r);
         } else if (e < 0) {
-            assertLT(r, 0);
+            arktest.assertLT(r, 0);
         } else {
-            assertEQ(r, 0);
+            arktest.assertEQ(r, 0);
         }
     }
 }
@@ -67,7 +67,7 @@ let prefix = "";
 function mixed_finder(s: String) {
     let r = s.compareTo(what);
     if (s.startsWith(prefix)) {
-        assertLT(r, 0);
+        arktest.assertLT(r, 0);
     }
     return r == 0;
 }
@@ -80,7 +80,7 @@ function test_mixed() {
         strs.push(`${i}w`);
         what = `${i}я`;
         let found = strs.find(mixed_finder);
-        assertEQ(found, undefined, "The string should not be found");
+        arktest.assertEQ(found, undefined, "The string should not be found");
         if (strs.length > 3) {
             strs.unshift();
         }
@@ -96,7 +96,7 @@ function test_utf16() {
         strs.push(`${i}я`);
         what = `${i}я`;
         let found = strs.find(finder);
-        assertEQ(found, what, "The string should be found");
+        arktest.assertEQ(found, what, "The string should be found");
         if (strs.length > 3) {
             strs.unshift();
         }

@@ -36,6 +36,6 @@ class ClassForTwo implements InterfaceTwo {
 function main() {
   const instanceOne = new ClassForOne();
   const instanceTwo = new ClassForTwo();
-  assertEQ(typeof instanceOne.SAME_NAME_CONSTANT, 'number');
-  assertEQ(typeof instanceTwo.SAME_NAME_CONSTANT, 'string');
+  arktest.assertEQ(typeof instanceOne.SAME_NAME_CONSTANT, 'number');
+  arktest.assertEQ(typeof instanceTwo.SAME_NAME_CONSTANT, 'string');
 }

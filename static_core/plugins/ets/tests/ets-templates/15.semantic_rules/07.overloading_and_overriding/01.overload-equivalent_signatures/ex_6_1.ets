@@ -30,7 +30,7 @@ function foo(value?: string) {
 
 function main() {
     foo();
-    assertEQ(2, candidate);
+    arktest.assertEQ(2, candidate);
 }
 
 

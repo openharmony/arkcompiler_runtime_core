@@ -28,7 +28,7 @@ cases:
       use: |-
           // more than one applicable method
           let c: C = new C()
-          assertEQ( c.met(0.0),  "n" )
+          arktest.assertEQ( c.met(0.0),  "n" )
 
     - decl: |-
           class C {
@@ -48,4 +48,4 @@ cases:
       use: |-
           // no applicable method
           let c: C = new C()
-          assertEQ( c.met(),  "n" )
+          arktest.assertEQ( c.met(),  "n" )

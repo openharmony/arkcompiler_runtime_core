@@ -28,5 +28,5 @@ class CollatorConstantChild implements CollatorConstantInterface {
 function main(): void {
   const instance = new CollatorConstantChild();
   const result = instance.CONST.compare('a', 'b');
-  assertEQ(typeof result, 'number');
+  arktest.assertEQ(typeof result, 'number');
 }

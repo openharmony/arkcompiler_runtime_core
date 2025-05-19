@@ -30,7 +30,7 @@ export class CustomLong {
 
     public static main() {
         let l: long = 128;
-        assertEQ(CustomLong.calculateNumberOfTrailingZeros(l), 6);
-        assertEQ(CustomLong.calculateNumberOfLeadingZeros(l), 56);
+        arktest.assertEQ(CustomLong.calculateNumberOfTrailingZeros(l), 6);
+        arktest.assertEQ(CustomLong.calculateNumberOfLeadingZeros(l), 56);
     }
 }

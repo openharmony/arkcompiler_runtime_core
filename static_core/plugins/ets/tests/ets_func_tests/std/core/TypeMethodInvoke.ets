@@ -30,7 +30,7 @@ function testSum(sum: Method): void {
     args[0] = Int.MAX_VALUE
     args[1] = 30
     const res = sum.invoke(null, args)
-    assertEQ( res, (Int.MAX_VALUE.toLong() + 30))
+    arktest.assertEQ( res, (Int.MAX_VALUE.toLong() + 30))
 }
 
 function testGetIsEvenPlusX(getIsEvenPlusX: Method): void {
@@ -39,13 +39,13 @@ function testGetIsEvenPlusX(getIsEvenPlusX: Method): void {
     const args : FixedArray<NullishType> = new NullishType[1]
 
     args[0] = 13
-    assertEQ( getIsEvenPlusX.invoke(c, args), true)
+    arktest.assertEQ( getIsEvenPlusX.invoke(c, args), true)
 
     c.a = 14
-    assertEQ( getIsEvenPlusX.invoke(c, args), false)
+    arktest.assertEQ( getIsEvenPlusX.invoke(c, args), false)
 
     args[0] = 30
-    assertEQ( getIsEvenPlusX.invoke(c, args), true)
+    arktest.assertEQ( getIsEvenPlusX.invoke(c, args), true)
 }
 
 function main(): void {
@@ -64,5 +64,5 @@ function main(): void {
             got++
         }
     }
-    assertEQ( got, 2)
+    arktest.assertEQ( got, 2)
 }

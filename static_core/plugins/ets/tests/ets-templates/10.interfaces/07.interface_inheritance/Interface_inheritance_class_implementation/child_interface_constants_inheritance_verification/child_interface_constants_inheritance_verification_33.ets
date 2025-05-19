@@ -27,7 +27,7 @@ class Int32ArrayConstantChild implements Int32ArrayConstantInterface {
 
 function main(): void {
   const instance = new Int32ArrayConstantChild();
-  assertEQ(instance.CONST[0], -2147483648);
-  assertEQ(instance.CONST[1], 0);
-  assertEQ(instance.CONST[2], 2147483647);
+  arktest.assertEQ(instance.CONST[0], -2147483648);
+  arktest.assertEQ(instance.CONST[1], 0);
+  arktest.assertEQ(instance.CONST[2], 2147483647);
 }

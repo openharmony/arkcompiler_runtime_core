@@ -21,7 +21,7 @@ function doFullGC() {
     try {
         GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
     } catch (e) {
-        assertTrue(false, "Unexpected exception during GC");
+        arktest.assertTrue(false, "Unexpected exception during GC");
     }
 }
 
@@ -42,13 +42,13 @@ function test_finalization() {
     doFullGC()
     Coroutine.Schedule()
 
-    assertEQ(flag, 42);
+    arktest.assertEQ(flag, 42);
 }
 
 function main() {
     console.log("begin")
 
-    const suite = new ArkTestsuite("FuncTest Test");
+    const suite = new arktest.ArkTestsuite("FuncTest Test");
 
     suite.addTest("test finalization", test_finalization);
 

@@ -46,6 +46,6 @@ function getSound(animal: Animal): string | number {
 function main(): void {
     const dog = new Dog();
     const cat = new Cat();
-    assertEQ(getSound(dog), "Woof!")
-    assertEQ(getSound(cat), 123.0);
+    arktest.assertEQ(getSound(dog), "Woof!")
+    arktest.assertEQ(getSound(cat), 123.0);
 }

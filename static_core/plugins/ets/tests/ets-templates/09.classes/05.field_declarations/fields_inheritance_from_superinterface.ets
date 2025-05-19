@@ -34,6 +34,6 @@ class B implements A, C{
 function main(): void {
     let instance: B = new B();
 
-    assertEQ( instance.x, 0 );
-    assertEQ( instance.y, false );
+    arktest.assertEQ( instance.x, 0 );
+    arktest.assertEQ( instance.y, false );
 }

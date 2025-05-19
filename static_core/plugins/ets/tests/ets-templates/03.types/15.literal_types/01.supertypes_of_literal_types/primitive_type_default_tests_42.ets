@@ -20,6 +20,6 @@ desc: Type compatibility test for number type in tuple type.
 let numTuple: [number, number] = [1, 2];
 
 function main(): void {
-    assertEQ(numTuple[0], 1);
-    assertEQ(numTuple[1], 2);
+    arktest.assertEQ(numTuple[0], 1);
+    arktest.assertEQ(numTuple[1], 2);
 }

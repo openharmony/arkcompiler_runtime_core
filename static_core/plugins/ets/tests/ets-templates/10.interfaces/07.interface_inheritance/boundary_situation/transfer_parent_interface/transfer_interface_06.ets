@@ -32,5 +32,5 @@ function main(): void {
     id: 123
   };
 
-  assertEQ(isParentInterface(obj), true);
+  arktest.assertEQ(isParentInterface(obj), true);
 }

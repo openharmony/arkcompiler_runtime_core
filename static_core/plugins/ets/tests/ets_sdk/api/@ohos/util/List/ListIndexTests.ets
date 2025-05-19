@@ -16,7 +16,7 @@
 import { List } from '@ohos.util.List';
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List index getter", testIndexGetter);
     suite.addTest("List index setter", testIndexSetter);
@@ -38,7 +38,7 @@ function testIndexGetter() {
     let list = new List<number>();
     initializeList(list, testNumbers);
     for (let i: int = 0; i < list.length; i++) {
-        assertEQ(list[i], testNumbers[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list[i], testNumbers[i], `Element at index ${i} should match`);
     }
 }
 
@@ -50,21 +50,21 @@ function testIndexSetter() {
     }
     let forEachCount = 0;
     list.forEach((value: number) => {
-        assertEQ(value, 5, `Element should match`);
+        arktest.assertEQ(value, 5, `Element should match`);
         forEachCount++;
     });
-    assertEQ(list.length, forEachCount, "List length should match forEach count");
+    arktest.assertEQ(list.length, forEachCount, "List length should match forEach count");
 }
 
 function testIndexOutOfRange() {
     let list = new List<number>();
     initializeList(list, testNumbers);
     let result = list[testNumbers.length + 1];
-    assertEQ(result, undefined, "The result should be undefined");
+    arktest.assertEQ(result, undefined, "The result should be undefined");
     
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof RangeError) && ((e as RangeError).message ==
             `The value of index is out of range.`)
     }
-    expectThrow(() => {list[testNumbers.length + 1] = 1}, exceptionCheck);
+    arktest.expectThrow(() => {list[testNumbers.length + 1] = 1}, exceptionCheck);
 }

@@ -31,5 +31,5 @@ function main(): void {
     }
   } 
   const obj = new Example();
-  assertEQ(obj.getThis(), obj);
+  arktest.assertEQ(obj.getThis(), obj);
 }

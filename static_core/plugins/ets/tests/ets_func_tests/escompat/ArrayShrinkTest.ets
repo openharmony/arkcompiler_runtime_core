@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Array API tests for SDK");
+    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
     suite.addTest("Array shrinkTo with negative length ", testShrinkToNegLength);
     suite.addTest("Array shrinkTo with normal length ", testShrinkToLength);
     suite.addTest("Array shrinkTo with out length ", testShrinkToOutLength);
@@ -39,21 +39,21 @@ function testShrinkToNegLength() {
     let a = Array.from<number>(TestData.src);
     a.shrinkTo(TestData.arrayLength1);
     let result: boolean = equaled(TestData.expected1, a);
-    assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected1);
+    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected1);
 }
 
 function testShrinkToLength() {
     let a = Array.from<number>(TestData.src);
     a.shrinkTo(TestData.arrayLength2);
     let result: boolean = equaled(TestData.expected2, a);
-    assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
+    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
 }
 
 function testShrinkToOutLength() {
     let a = Array.from<number>(TestData.src);
     a.shrinkTo(TestData.arrayLength3);
     let result: boolean = equaled(TestData.expected3, a);
-    assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected3);
+    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected3);
 }
 
 function testShrinkToIntMinValue() {
@@ -61,7 +61,7 @@ function testShrinkToIntMinValue() {
     for (let i: number = 0; i < TestData.limit4; ++i) {
         a.shrinkTo(TestData.arrayLength4 + i);
         let result: boolean = equaled(TestData.expected4, a);
-        assertTrue(result, "Error. " + i + " Got: " + a + ". Expected: " + TestData.expected4);
+        arktest.assertTrue(result, "Error. " + i + " Got: " + a + ". Expected: " + TestData.expected4);
     }
 }
 

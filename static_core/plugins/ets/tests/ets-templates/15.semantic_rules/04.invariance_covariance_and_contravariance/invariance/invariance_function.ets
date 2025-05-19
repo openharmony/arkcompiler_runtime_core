@@ -27,7 +27,7 @@ function foo( i: {{f.argtype}}): {{f.argtype}} {
 
 function main() {
   let i:{{f.argtype}} = {{f.input}};
-  assertEQ( foo(i), i );
+  arktest.assertEQ( foo(i), i );
 }
 
 {% endfor %}

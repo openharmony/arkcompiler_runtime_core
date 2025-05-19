@@ -24,7 +24,7 @@ let numberRecord: Record<number, string> = {
 };
 
 function main(): void {
-  assertEQ(numberRecord[1], "one");
-  assertEQ(numberRecord[2], "two");
-  assertEQ(numberRecord[3], "three");
+  arktest.assertEQ(numberRecord[1], "one");
+  arktest.assertEQ(numberRecord[2], "two");
+  arktest.assertEQ(numberRecord[3], "three");
 }

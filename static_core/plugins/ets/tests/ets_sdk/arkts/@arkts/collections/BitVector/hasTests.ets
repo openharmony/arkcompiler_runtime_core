@@ -20,7 +20,7 @@ const OutOfBoundsErrorCodeId: number = 10200001;
 const TypeErrorCodeId: number = 401;
 
 function main() {
-    const suite = new ArkTestsuite("BitVector has API tests");
+    const suite = new arktest.ArkTestsuite("BitVector has API tests");
 
     suite.addTest("Verify if bit vector correctly identifies bit values within a specified range.", BitVector_has_Func_001);
     suite.addTest("Verify that bit vector throws an error when toIndex is negative.", BitVector_has_Func_002);
@@ -54,10 +54,10 @@ function BitVector_has_Func_001() {
     bitVector.push(1);
     bitVector.push(1);
     bitVector.push(1);
-    assertEQ(bitVector.has(1, 3, 6), true, "BitVector should contain 1 in range 3-6");
-    assertEQ(bitVector.has(1, 0, 2), false, "BitVector should not contain 1 in range 0-2");
-    assertEQ(bitVector.has(0, 3, 5), false, "BitVector should not contain 0 in range 3-5");
-    assertEQ(bitVector.has(0, 0, 3), true, "BitVector should contain 0 in range 0-3");
+    arktest.assertEQ(bitVector.has(1, 3, 6), true, "BitVector should contain 1 in range 3-6");
+    arktest.assertEQ(bitVector.has(1, 0, 2), false, "BitVector should not contain 1 in range 0-2");
+    arktest.assertEQ(bitVector.has(0, 3, 5), false, "BitVector should not contain 0 in range 3-5");
+    arktest.assertEQ(bitVector.has(0, 0, 3), true, "BitVector should contain 0 in range 0-3");
 }
 
 /**
@@ -83,7 +83,7 @@ function BitVector_has_Func_002() {
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`);
     }
-    expectThrow(() => { bitVector.has(0, 8, -3); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.has(0, 8, -3); }, exceptionCheck);
 }
 
 /**
@@ -109,7 +109,7 @@ function BitVector_has_Func_003() {
             ((e as BusinessError).code === TypeErrorCodeId &&
                 (e as BusinessError).message === `The type of "fromIndex" must be integer. Received value is: 0.1`);
     }
-    expectThrow(() => { bitVector.has(0, 0.1, 6.1); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.has(0, 0.1, 6.1); }, exceptionCheck);
 }
 
 /**
@@ -135,7 +135,7 @@ function BitVector_has_Func_004() {
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "toIndex" is out of range. It must be >= 0 && <= 8. Received value is: -3`);
     }
-    expectThrow(() => { bitVector.has(0, -3, -3); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.has(0, -3, -3); }, exceptionCheck);
 }
 
 /**
@@ -161,7 +161,7 @@ function BitVector_has_Func_005() {
             ((e as BusinessError).code === OutOfBoundsErrorCodeId &&
                 (e as BusinessError).message === `The value of "fromIndex" is out of range. It must be >= 0 && <= 7. Received value is: -3`);
     }
-    expectThrow(() => { bitVector.has(0, -3, 8); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.has(0, -3, 8); }, exceptionCheck);
 }
 
 /**
@@ -177,13 +177,13 @@ function BitVector_has_Func_006() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(i >= 32 ? 1 : 0);
-        assertTrue(res, "Push should return true");
+        arktest.assertTrue(res, "Push should return true");
     }
-    assertEQ(bitVector.length, 64, "BitVector length should be 64");
-    assertEQ(bitVector.has(1, 0, 31), false, "BitVector should not contain 1 in range 0-31");
-    assertEQ(bitVector.has(1, 32, 64), true, "BitVector should contain 1 in range 32-64");
-    assertEQ(bitVector.has(0, 0, 32), true, "BitVector should contain 0 in range 0-32");
-    assertEQ(bitVector.has(0, 32, 63), false, "BitVector should not contain 0 in range 32-63");
+    arktest.assertEQ(bitVector.length, 64, "BitVector length should be 64");
+    arktest.assertEQ(bitVector.has(1, 0, 31), false, "BitVector should not contain 1 in range 0-31");
+    arktest.assertEQ(bitVector.has(1, 32, 64), true, "BitVector should contain 1 in range 32-64");
+    arktest.assertEQ(bitVector.has(0, 0, 32), true, "BitVector should contain 0 in range 0-32");
+    arktest.assertEQ(bitVector.has(0, 32, 63), false, "BitVector should not contain 0 in range 32-63");
 }
 
 /**
@@ -199,13 +199,13 @@ function BitVector_has_Func_007() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(i >= 32 ? 1 : 0);
-        assertTrue(res, "Push should return true");
+        arktest.assertTrue(res, "Push should return true");
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
-    assertEQ(bitVector.has(1, 10, 41), false, "BitVector should not contain 1 in range 10-41");
-    assertEQ(bitVector.has(1, 42, bitVectorLength + 10), true, "BitVector should contain 1 in range 42-74");
-    assertEQ(bitVector.has(0, 10, 42), true, "BitVector should contain 0 in range 10-42");
-    assertEQ(bitVector.has(0, 42, bitVectorLength + 9), false, "BitVector should not contain 0 in range 42-73");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
+    arktest.assertEQ(bitVector.has(1, 10, 41), false, "BitVector should not contain 1 in range 10-41");
+    arktest.assertEQ(bitVector.has(1, 42, bitVectorLength + 10), true, "BitVector should contain 1 in range 42-74");
+    arktest.assertEQ(bitVector.has(0, 10, 42), true, "BitVector should contain 0 in range 10-42");
+    arktest.assertEQ(bitVector.has(0, 42, bitVectorLength + 9), false, "BitVector should not contain 0 in range 42-73");
 }
 
 /**
@@ -226,7 +226,7 @@ function BitVector_has_Func_008() {
             (e as BusinessError).code === OutOfBoundsErrorCodeId &&
             (e as BusinessError).message === `The value of "fromIndex" is out of range. It must be >= 0 && <= 1. Received value is: 2`;
     };
-    expectThrow(() => { bitVector.has(1, 2, 2); }, exceptionCheck);
+    arktest.expectThrow(() => { bitVector.has(1, 2, 2); }, exceptionCheck);
 }
 
 /**
@@ -240,8 +240,8 @@ function BitVector_has_Func_008() {
 function BitVector_has_Func_010() {
     let bitVector = new collections.BitVector(0);
     bitVector.push(1);
-    assertEQ(bitVector.has(1, 0, 1), true, "BitVector should contain 1 in range 0-1");
-    assertEQ(bitVector.has(0, 0, 1), false, "BitVector should not contain 0 in range 0-1");
+    arktest.assertEQ(bitVector.has(1, 0, 1), true, "BitVector should contain 1 in range 0-1");
+    arktest.assertEQ(bitVector.has(0, 0, 1), false, "BitVector should not contain 0 in range 0-1");
 }
 
 /**
@@ -257,9 +257,9 @@ function BitVector_has_Func_011() {
     for (let i = 0; i < 64; i++) {
         bitVector.push(i < 32 ? 0 : 1);
     }
-    assertEQ(bitVector.has(1, 31, 33), true, "BitVector should contain 1 in range 31-33");
-    assertEQ(bitVector.has(0, 30, 32), true, "BitVector should contain 0 in range 30-32");
-    assertEQ(bitVector.has(1, 0, 31), false, "BitVector should not contain 1 in range 0-31");
+    arktest.assertEQ(bitVector.has(1, 31, 33), true, "BitVector should contain 1 in range 31-33");
+    arktest.assertEQ(bitVector.has(0, 30, 32), true, "BitVector should contain 0 in range 30-32");
+    arktest.assertEQ(bitVector.has(1, 0, 31), false, "BitVector should not contain 1 in range 0-31");
 }
 
 /**
@@ -275,8 +275,8 @@ function BitVector_has_Func_012() {
     for (let i = 0; i < 64; i++) {
         bitVector.push(i % 2);
     }
-    assertEQ(bitVector.has(1, 0, 64), true, "BitVector should contain 1 in range 0-64");
-    assertEQ(bitVector.has(0, 0, 64), true, "BitVector should contain 0 in range 0-64");
+    arktest.assertEQ(bitVector.has(1, 0, 64), true, "BitVector should contain 1 in range 0-64");
+    arktest.assertEQ(bitVector.has(0, 0, 64), true, "BitVector should contain 0 in range 0-64");
 }
 
 /**
@@ -292,11 +292,11 @@ function BitVector_has_Func_013() {
     let bitVectorLength = 20;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(i >= 10 ? 1 : 0);
-        assertTrue(res, "Push should return true");
+        arktest.assertTrue(res, "Push should return true");
     }
-    assertEQ(bitVector.length, 20, "BitVector length should be 20");
-    assertEQ(bitVector.has(1, 0, 10), false, "BitVector should contain 1 in range 0-10");
-    assertEQ(bitVector.has(1, 0, 9), false, "BitVector should not contain 1 in range 0-9");
-    assertEQ(bitVector.has(0, 10, 19), false, "BitVector should not contain 0 in range 10-19");
-    assertEQ(bitVector.has(0, 0, 19), true, "BitVector should contain 0 in range 0-19");
+    arktest.assertEQ(bitVector.length, 20, "BitVector length should be 20");
+    arktest.assertEQ(bitVector.has(1, 0, 10), false, "BitVector should contain 1 in range 0-10");
+    arktest.assertEQ(bitVector.has(1, 0, 9), false, "BitVector should not contain 1 in range 0-9");
+    arktest.assertEQ(bitVector.has(0, 10, 19), false, "BitVector should not contain 0 in range 10-19");
+    arktest.assertEQ(bitVector.has(0, 0, 19), true, "BitVector should contain 0 in range 0-19");
 };

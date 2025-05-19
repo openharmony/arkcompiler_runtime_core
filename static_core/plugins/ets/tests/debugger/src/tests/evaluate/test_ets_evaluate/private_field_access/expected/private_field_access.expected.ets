@@ -40,10 +40,10 @@ class evalPatchFunction {
     private static evalPatchFunction() {
         let a_obj = new A(c'c', 123.321);
 
-        assertEQ(a_obj.a, c'c');
-        assertEQ(a_obj.b, 123.321);
+        arktest.assertEQ(a_obj.a, c'c');
+        arktest.assertEQ(a_obj.b, 123.321);
 
-        assertEQ(a_obj.foo(42), 100 * 42);
-        assertEQ(a_obj.goo(42.42), 200 * 42.42);
+        arktest.assertEQ(a_obj.foo(42), 100 * 42);
+        arktest.assertEQ(a_obj.goo(42.42), 200 * 42.42);
     }
 }

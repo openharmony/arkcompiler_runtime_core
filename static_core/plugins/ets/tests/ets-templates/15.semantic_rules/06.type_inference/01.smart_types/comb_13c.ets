@@ -35,7 +35,7 @@ function foo(p: number|number[]|undefined): number {
 }
 
 function main() {
-    assertTrue(foo(42) == 1 && num == 84)
-    assertTrue(foo([1.0, 2.0, 3.0, 4.0, 5.0]) == 2 && num == 5)
-    assertTrue(foo(undefined) == 3)
+    arktest.assertTrue(foo(42) == 1 && num == 84)
+    arktest.assertTrue(foo([1.0, 2.0, 3.0, 4.0, 5.0]) == 2 && num == 5)
+    arktest.assertTrue(foo(undefined) == 3)
 }

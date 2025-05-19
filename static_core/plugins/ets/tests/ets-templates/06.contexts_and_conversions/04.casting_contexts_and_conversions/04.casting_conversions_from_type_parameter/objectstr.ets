@@ -20,7 +20,7 @@ desc: Object conversion to string type.
 function checkType(type: string, o: object): void {
     switch (type) {
         case "str":
-            assertEQ(o as string,"Hello, World!");
+            arktest.assertEQ(o as string,"Hello, World!");
             break;
         default:
             console.log("Unknown type");

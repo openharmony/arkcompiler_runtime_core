@@ -29,6 +29,6 @@ function getGrade(score: number): string {
 }
 
 function main(): void {
-  assertEQ(getGrade(90), "A");
+  arktest.assertEQ(getGrade(90), "A");
   console.log(getGrade(60));
 }

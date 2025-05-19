@@ -39,6 +39,6 @@ function main(): void {
   const human = new Human();
   const result = human.speak('Hello!');
   const result1 = human.run(10);
-  assertEQ(result, "Human says: Hello!");
-  assertEQ(result1, 10);
+  arktest.assertEQ(result, "Human says: Hello!");
+  arktest.assertEQ(result1, 10);
 }

@@ -41,6 +41,6 @@ class Child extends Parent {
 function main(): void {
   const child = new Child();
   const result = child.callParentCreateObject();
-  assertEQ(result.key, "example");
-  assertEQ(result.value, 42);
+  arktest.assertEQ(result.key, "example");
+  arktest.assertEQ(result.value, 42);
 }

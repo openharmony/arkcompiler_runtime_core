@@ -25,5 +25,5 @@ class C implements I {}
 
 function main(): void {
     let a = new C();
-    assertTrue(a instanceof I);
+    arktest.assertTrue(a instanceof I);
 }

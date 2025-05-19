@@ -21,7 +21,7 @@ desc: check right shift operation for bigint
 function main(): void {
     const a: bigint = {{v.left}}
     const b: bigint = {{v.right}}
-    assertEQ( (a >> b), {{v.result}})
+    arktest.assertEQ( (a >> b), {{v.result}})
 }
 
 {% endfor %}

@@ -50,14 +50,14 @@ function main(): void {
   const obj: ChildInterface = new ConcreteClass();
 
   let tmp1: string = obj.grandparentMethod();
-  assertEQ(tmp1, "grandparentMethod");
+  arktest.assertEQ(tmp1, "grandparentMethod");
 
   let tmp2: string = obj.parentMethod();
-  assertEQ(tmp2, "parentMethod");
+  arktest.assertEQ(tmp2, "parentMethod");
 
   let tmp3: number = obj.grandparentMethod_1();
-  assertEQ(tmp3, 1);
+  arktest.assertEQ(tmp3, 1);
 
   let tmp4: number = obj.parentMethod_1();
-  assertEQ(tmp4, 2);
+  arktest.assertEQ(tmp4, 2);
 }

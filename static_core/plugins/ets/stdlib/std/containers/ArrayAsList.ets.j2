@@ -116,7 +116,7 @@ export class ArrayAsList{{T}} implements List{{T}} {
      * @returns popped value
      */
     public override popFront(): {{T}} {
-        assertLT(0, this.curSize, "No data to popFront from ArrayAsList!")
+        arktest.assertLT(0, this.curSize, "No data to popFront from ArrayAsList!")
         let res: {{T}} = this.data[0];
         for (let i = 1; i < this.curSize; ++i) {
             this.data[i-1] = this.data[i];
@@ -148,7 +148,7 @@ export class ArrayAsList{{T}} implements List{{T}} {
      * @returns popped value
      */
     public override popBack(): {{T}} {
-        assertLT(0, this.curSize, "No data to popBack in ArrayAsList!")
+        arktest.assertLT(0, this.curSize, "No data to popBack in ArrayAsList!")
         --this.curSize;
         return this.data[this.curSize];
     }

@@ -35,5 +35,5 @@ function main(): void {
   const y : boolean[] = [true, false, true];
   let child = new Child(y);
   let x: boolean[] = child.constructorPublicVar;
-  assertEQ(x[0], true);
+  arktest.assertEQ(x[0], true);
 }

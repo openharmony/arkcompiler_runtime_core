@@ -27,7 +27,7 @@ class TestNode {
   constructor() {}
 
   check() {
-    assertEQ( this.onChildInserted, undefined)
+    arktest.assertEQ( this.onChildInserted, undefined)
   }
 }
 

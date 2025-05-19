@@ -24,5 +24,5 @@ import type {C} from "../../07.top-level_declarations/01.exported_declarations/t
 function main(): void {
     let test_class = new C();
 
-    assertEQ(test_class.test(), "Hello World");
+    arktest.assertEQ(test_class.test(), "Hello World");
 }

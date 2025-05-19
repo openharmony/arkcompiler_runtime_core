@@ -120,7 +120,7 @@ cases:
                 .catch((p: EN): string => p!.message)
                 .then((p: string): string => p + p)
             
-            assertTrue((await r) == 'EE')
+            arktest.assertTrue((await r) == 'EE')
 
     - decl: |-
             type EN = Error|null
@@ -136,7 +136,7 @@ cases:
                 .then((p: string): string => { throw new Error(p) })
                 .catch((p: EN): string => p!.message + p!.message)
             
-            assertTrue((await r) == 'AAAA')
+            arktest.assertTrue((await r) == 'AAAA')
 
     - decl: |-
             type EN = Error|null
@@ -158,7 +158,7 @@ cases:
             try {
                 await r
             } catch (e: Error) {
-                assertTrue(e.message == 'E')
+                arktest.assertTrue(e.message == 'E')
                 return
             }
-            assertTrue(false)
+            arktest.assertTrue(false)

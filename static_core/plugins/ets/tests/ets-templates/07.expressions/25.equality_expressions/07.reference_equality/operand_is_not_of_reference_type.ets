@@ -25,7 +25,7 @@ function main(): void {
   let a: int = 1;
   let b: String = "Hello";
   let c: String = "Hello";
-  assertTrue( {{eq.left}} {{eq.op}} {{eq.right}} )
+  arktest.assertTrue( {{eq.left}} {{eq.op}} {{eq.right}} )
 }
 
 {% endfor %}

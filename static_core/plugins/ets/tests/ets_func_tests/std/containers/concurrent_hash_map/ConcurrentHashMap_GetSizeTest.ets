@@ -22,43 +22,43 @@ function main(): int {
         map.set(arrKeys[i], arrValues[i]);
     }
 
-    let concurrentHashMapSizeTestsuite = new ArkTestsuite("concurrentHashMapSizeTest");
+    let concurrentHashMapSizeTestsuite = new arktest.ArkTestsuite("concurrentHashMapSizeTest");
 
     concurrentHashMapSizeTestsuite.addTest("sizeTest_001", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        assertEQ(concurrentHashMap.size, 0);
+        arktest.assertEQ(concurrentHashMap.size, 0);
     });
     concurrentHashMapSizeTestsuite.addTest("sizeTest_002", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
     });
     concurrentHashMapSizeTestsuite.addTest("sizeTest_003", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrKeys[i], arrValues[i]);
-            assertEQ(concurrentHashMap.size, i + 1);
+            arktest.assertEQ(concurrentHashMap.size, i + 1);
         }
         for (let i: int = 0; i < 8; i++) {
             concurrentHashMap.delete(i);
-            assertEQ(concurrentHashMap.size, 9 - i);
+            arktest.assertEQ(concurrentHashMap.size, 9 - i);
         }
-        assertEQ(concurrentHashMap.size, 2);
+        arktest.assertEQ(concurrentHashMap.size, 2);
     });
     concurrentHashMapSizeTestsuite.addTest("sizeTest_004", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<string, number> = new ConcurrentHashMap<string, number>();
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
-            assertEQ(concurrentHashMap.size, i + 1);
+            arktest.assertEQ(concurrentHashMap.size, i + 1);
         }
         for (let i: int = 0; i < 8; i++) {
             concurrentHashMap.delete(arrValues[i]);
-            assertEQ(concurrentHashMap.size, 9 - i);
+            arktest.assertEQ(concurrentHashMap.size, 9 - i);
         }
-        assertEQ(concurrentHashMap.size, 2);
+        arktest.assertEQ(concurrentHashMap.size, 2);
     });
 
     return concurrentHashMapSizeTestsuite.run();

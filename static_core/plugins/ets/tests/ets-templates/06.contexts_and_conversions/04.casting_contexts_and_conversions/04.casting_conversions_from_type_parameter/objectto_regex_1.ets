@@ -20,5 +20,5 @@ desc: Convert to obj-regex type.
 function main(): void {
   const regex = new RegExp('ab+c');
   const obj1: object = regex;
-  assertTrue(obj1 == regex);
+  arktest.assertTrue(obj1 == regex);
 }

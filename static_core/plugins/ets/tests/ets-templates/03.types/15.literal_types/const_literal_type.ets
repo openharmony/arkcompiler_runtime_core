@@ -22,5 +22,5 @@ desc: >-
 const a: "some str" = "some str"
 
 function main() {
-    assertEQ( a, "some str")
+    arktest.assertEQ( a, "some str")
 }

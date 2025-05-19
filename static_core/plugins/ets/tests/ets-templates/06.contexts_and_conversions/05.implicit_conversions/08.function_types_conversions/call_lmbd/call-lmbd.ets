@@ -28,7 +28,7 @@ type FT{{loop.index}} = {{t.type}}
 
 function main() {
 {% for t in c['to'] %}
-    assertTrue( ((p: FT{{loop.index}}): FT{{loop.index}} => { return p })(foo){{t.call}} )
+    arktest.assertTrue( ((p: FT{{loop.index}}): FT{{loop.index}} => { return p })(foo){{t.call}} )
 {% endfor %}
 }
 {%- endfor %}

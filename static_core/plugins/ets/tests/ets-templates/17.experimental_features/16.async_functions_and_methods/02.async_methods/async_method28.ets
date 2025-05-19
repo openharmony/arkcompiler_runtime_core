@@ -39,7 +39,7 @@ class MethodWithAny {
 async function startTest() {
   const example = new MethodWithAny();
   const result = await example.methodWithAny();
-  assertEQ(result, "Resolved after 100ms");
+  arktest.assertEQ(result, "Resolved after 100ms");
 }
 
 function main(): void {

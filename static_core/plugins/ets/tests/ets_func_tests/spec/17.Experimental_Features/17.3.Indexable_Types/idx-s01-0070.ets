@@ -39,17 +39,17 @@ class Bar {
 
 function main() {
     let x : Bar = new Bar([new Foo(1), new Foo(2), new Foo(3)]);
-    assertEQ(x[0].i, 1)
-    assertEQ(x[1].i, 2)
-    assertEQ(x[2].i, 3)
+    arktest.assertEQ(x[0].i, 1)
+    arktest.assertEQ(x[1].i, 2)
+    arktest.assertEQ(x[2].i, 3)
 
     x[0] = new Foo(5);
     x[1] = new Foo(6);
     x[2] = new Foo(7);
 
-    assertEQ(x[0].i, 5)
-    assertEQ(x[1].i, 6)
-    assertEQ(x[2].i, 7)
+    arktest.assertEQ(x[0].i, 5)
+    arktest.assertEQ(x[1].i, 6)
+    arktest.assertEQ(x[2].i, 7)
 
     return 0;
 }

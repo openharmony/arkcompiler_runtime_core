@@ -19,5 +19,5 @@ desc: Variable declaration with initializer.
 
 function main(): void {
   let tmp = 1;
-  assertTrue(tmp == 1);
+  arktest.assertTrue(tmp == 1);
 }

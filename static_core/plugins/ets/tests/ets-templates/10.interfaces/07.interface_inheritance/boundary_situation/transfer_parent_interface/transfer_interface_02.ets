@@ -37,5 +37,5 @@ function main(): void {
   };
 
   let result = printInfo(item);
-  assertEQ(result, "ID: 1, Description: This is an item");
+  arktest.assertEQ(result, "ID: 1, Description: This is an item");
 }

@@ -33,5 +33,5 @@ class C extends A implements B {
 
 function main(): void {
     const c = new C();
-    assertEQ(c.greet(), "Hello from C");
+    arktest.assertEQ(c.greet(), "Hello from C");
 }

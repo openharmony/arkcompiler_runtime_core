@@ -24,5 +24,5 @@ function getNum(): number {
 let numResult = getNum();
 
 function main(): void {
-    assertEQ(numResult, 7);
+    arktest.assertEQ(numResult, 7);
 }

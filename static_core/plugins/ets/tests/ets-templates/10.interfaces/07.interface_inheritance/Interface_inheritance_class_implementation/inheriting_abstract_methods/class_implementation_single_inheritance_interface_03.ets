@@ -50,7 +50,7 @@ function main(): void {
   const speakOutput = parrot.speak();
   const moveOutput = parrot.move();
   const flyOutput = parrot.fly();
-  assertEQ(speakOutput, "Parrot squawks.");
-  assertEQ(moveOutput, "Bird is flying.");
-  assertEQ(flyOutput, "Parrot flies.");
+  arktest.assertEQ(speakOutput, "Parrot squawks.");
+  arktest.assertEQ(moveOutput, "Bird is flying.");
+  arktest.assertEQ(flyOutput, "Parrot flies.");
 }

@@ -21,11 +21,11 @@ cases:
         static sfoo: T = 0x79 as byte;
     check: |-
         function main() {
-            assertEQ(A.sfoo, 0x79 as byte);
+            arktest.assertEQ(A.sfoo, 0x79 as byte);
             let a: A = new A();
-            assertEQ(a.foo, 0x80 as byte);
-            assertEQ(a.bar(A.sfoo), 0x79 as byte);
-            assertEQ(A.sbar(a.foo), 0x80 as byte);
+            arktest.assertEQ(a.foo, 0x80 as byte);
+            arktest.assertEQ(a.bar(A.sfoo), 0x79 as byte);
+            arktest.assertEQ(A.sbar(a.foo), 0x80 as byte);
         }
 
   - decl: |-
@@ -35,11 +35,11 @@ cases:
         static sfoo: T = 0x7FFF as short;
     check: |-
         function main() {
-            assertEQ(A.sfoo, 0x7FFF as short);
+            arktest.assertEQ(A.sfoo, 0x7FFF as short);
             let a: A = new A();
-            assertEQ(a.foo, 0x7FFF as short);
-            assertEQ(a.bar(a.foo), 0x7FFF as short);
-            assertEQ(A.sbar(a.foo), 0x7FFF as short);
+            arktest.assertEQ(a.foo, 0x7FFF as short);
+            arktest.assertEQ(a.bar(a.foo), 0x7FFF as short);
+            arktest.assertEQ(A.sbar(a.foo), 0x7FFF as short);
         }
 
   - decl: |-
@@ -49,11 +49,11 @@ cases:
         static sfoo: T = 127 as int;
     check: |-
         function main() {
-            assertEQ(A.sfoo, 127 as int);
+            arktest.assertEQ(A.sfoo, 127 as int);
             let a: A = new A();
-            assertEQ(a.foo, 127 as int);
-            assertEQ(a.bar(a.foo), 127 as int);
-            assertEQ(A.sbar(a.foo), 127 as int);
+            arktest.assertEQ(a.foo, 127 as int);
+            arktest.assertEQ(a.bar(a.foo), 127 as int);
+            arktest.assertEQ(A.sbar(a.foo), 127 as int);
         }
 
   - decl: |-
@@ -63,11 +63,11 @@ cases:
         static sfoo: T = 127 as long;
     check: |-
         function main() {
-            assertEQ(A.sfoo, 127 as long);
+            arktest.assertEQ(A.sfoo, 127 as long);
             let a: A = new A();
-            assertEQ(a.foo, 127 as long);
-            assertEQ(a.bar(a.foo), 127 as long);
-            assertEQ(A.sbar(a.foo), 127 as long);
+            arktest.assertEQ(a.foo, 127 as long);
+            arktest.assertEQ(a.bar(a.foo), 127 as long);
+            arktest.assertEQ(A.sbar(a.foo), 127 as long);
         }
 
   - decl: |-
@@ -77,11 +77,11 @@ cases:
         static sfoo: T = +0.0 as float;
     check: |-
         function main() {
-            assertEQ(A.sfoo, +0.0 as float);
+            arktest.assertEQ(A.sfoo, +0.0 as float);
             let a: A = new A();
-            assertEQ(a.foo, +0.0 as float);
-            assertEQ(a.bar(a.foo), +0.0 as float);
-            assertEQ(A.sbar(a.foo), +0.0 as float);
+            arktest.assertEQ(a.foo, +0.0 as float);
+            arktest.assertEQ(a.bar(a.foo), +0.0 as float);
+            arktest.assertEQ(A.sbar(a.foo), +0.0 as float);
         }
 
   - decl: |-
@@ -91,11 +91,11 @@ cases:
         static sfoo: T = +0.0 as double;
     check: |-
         function main() {
-            assertEQ(A.sfoo, +0.0 as double);
+            arktest.assertEQ(A.sfoo, +0.0 as double);
             let a: A = new A();
-            assertEQ(a.foo, +0.0 as double);
-            assertEQ(a.bar(a.foo), +0.0 as double);
-            assertEQ(A.sbar(a.foo), +0.0 as double);
+            arktest.assertEQ(a.foo, +0.0 as double);
+            arktest.assertEQ(a.bar(a.foo), +0.0 as double);
+            arktest.assertEQ(A.sbar(a.foo), +0.0 as double);
         }
 
   - decl: |-
@@ -105,11 +105,11 @@ cases:
         static sfoo: T = +0.0 as number;
     check: |-
         function main() {
-            assertEQ(A.sfoo, +0.0 as number);
+            arktest.assertEQ(A.sfoo, +0.0 as number);
             let a: A = new A();
-            assertEQ(a.foo, +0.0 as number);
-            assertEQ(a.bar(a.foo), +0.0 as number);
-            assertEQ(A.sbar(a.foo), +0.0 as number);
+            arktest.assertEQ(a.foo, +0.0 as number);
+            arktest.assertEQ(a.bar(a.foo), +0.0 as number);
+            arktest.assertEQ(A.sbar(a.foo), +0.0 as number);
         }
 
   - decl: |-
@@ -119,11 +119,11 @@ cases:
         static sfoo: T = c'a';
     check: |-
         function main() {
-            assertEQ(A.sfoo, c'a');
+            arktest.assertEQ(A.sfoo, c'a');
             let a: A = new A();
-            assertEQ(a.foo, c'a');
-            assertEQ(a.bar(a.foo), c'a');
-            assertEQ(A.sbar(a.foo), c'a');
+            arktest.assertEQ(a.foo, c'a');
+            arktest.assertEQ(a.bar(a.foo), c'a');
+            arktest.assertEQ(A.sbar(a.foo), c'a');
         }
 
   - decl: |-
@@ -133,11 +133,11 @@ cases:
         static sfoo: T = false;
     check: |-
         function main() {
-            assertEQ(A.sfoo, false);
+            arktest.assertEQ(A.sfoo, false);
             let a: A = new A();
-            assertEQ(a.foo, false);
-            assertEQ(a.bar(a.foo), false);
-            assertEQ(A.sbar(a.foo), false);
+            arktest.assertEQ(a.foo, false);
+            arktest.assertEQ(a.bar(a.foo), false);
+            arktest.assertEQ(A.sbar(a.foo), false);
         }
 
   # Boxed
@@ -148,11 +148,11 @@ cases:
         static sfoo: T = new Byte(0x7F as byte);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), 0x7F as byte);
+            arktest.assertEQ(A.sfoo.unboxed(), 0x7F as byte);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), 0x7F as byte);
-            assertEQ(a.bar(a.foo).unboxed(), 0x7F as byte);
-            assertEQ(A.sbar(a.foo).unboxed(), 0x7F as byte);
+            arktest.assertEQ(a.foo.unboxed(), 0x7F as byte);
+            arktest.assertEQ(a.bar(a.foo).unboxed(), 0x7F as byte);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), 0x7F as byte);
         }
 
   - decl: |-
@@ -162,11 +162,11 @@ cases:
         static sfoo: T = new Short(2 as short);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), 2 as short);
+            arktest.assertEQ(A.sfoo.unboxed(), 2 as short);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), 2 as short);
-            assertEQ(a.bar(a.foo).unboxed(), 2 as short);
-            assertEQ(A.sbar(a.foo).unboxed(), 2 as short);
+            arktest.assertEQ(a.foo.unboxed(), 2 as short);
+            arktest.assertEQ(a.bar(a.foo).unboxed(), 2 as short);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), 2 as short);
         }
 
   - decl: |-
@@ -176,11 +176,11 @@ cases:
         static sfoo: T = new Int(3 as int);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), 3 as int);
+            arktest.assertEQ(A.sfoo.unboxed(), 3 as int);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), 3 as int);
-            assertEQ(a.bar(a.foo).unboxed(), 3 as int);
-            assertEQ(A.sbar(a.foo).unboxed(), 3 as int);
+            arktest.assertEQ(a.foo.unboxed(), 3 as int);
+            arktest.assertEQ(a.bar(a.foo).unboxed(), 3 as int);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), 3 as int);
         }
 
   - decl: |-
@@ -190,11 +190,11 @@ cases:
         static sfoo: T = new Long(4 as long);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), 4 as long);
+            arktest.assertEQ(A.sfoo.unboxed(), 4 as long);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), 4 as long);
-            assertEQ(a.bar(a.foo).unboxed(), 4 as long);
-            assertEQ(A.sbar(a.foo).unboxed(), 4 as long);
+            arktest.assertEQ(a.foo.unboxed(), 4 as long);
+            arktest.assertEQ(a.bar(a.foo).unboxed(), 4 as long);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), 4 as long);
         }
 
   - decl: |-
@@ -204,11 +204,11 @@ cases:
         static sfoo: T = new Float(0.1 as float);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), 0.1 as float);
+            arktest.assertEQ(A.sfoo.unboxed(), 0.1 as float);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), 0.1 as float);
-            assertEQ(a.bar(a.foo).unboxed(), 0.1 as float);
-            assertEQ(A.sbar(a.foo).unboxed(), 0.1 as float);
+            arktest.assertEQ(a.foo.unboxed(), 0.1 as float);
+            arktest.assertEQ(a.bar(a.foo).unboxed(), 0.1 as float);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), 0.1 as float);
         }
 
   - decl: |-
@@ -218,11 +218,11 @@ cases:
         static sfoo: T = new Double(0.1 as double);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), 0.1 as double);
+            arktest.assertEQ(A.sfoo.unboxed(), 0.1 as double);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), 0.1 as double);
-            assertEQ(a.bar(a.foo).unboxed(), 0.1 as double);
-            assertEQ(A.sbar(a.foo).unboxed(), 0.1 as double);
+            arktest.assertEQ(a.foo.unboxed(), 0.1 as double);
+            arktest.assertEQ(a.bar(a.foo).unboxed(), 0.1 as double);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), 0.1 as double);
         }
 
   - decl: |-
@@ -232,11 +232,11 @@ cases:
         static sfoo: T = new Number(0.1 as number);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), 0.1 as number);
+            arktest.assertEQ(A.sfoo.unboxed(), 0.1 as number);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), 0.1 as number);
-            assertEQ(a.bar(a.foo).unboxed(), 0.1 as number);
-            assertEQ(A.sbar(a.foo).unboxed(), 0.1 as number);
+            arktest.assertEQ(a.foo.unboxed(), 0.1 as number);
+            arktest.assertEQ(a.bar(a.foo).unboxed(), 0.1 as number);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), 0.1 as number);
         }
 
   - decl: |-
@@ -246,11 +246,11 @@ cases:
         static sfoo: T = new Char(c'b');
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), c'b');
+            arktest.assertEQ(A.sfoo.unboxed(), c'b');
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), c'b');
-            assertEQ(a.bar(a.foo).unboxed(), c'b');
-            assertEQ(A.sbar(a.foo).unboxed(), c'b');
+            arktest.assertEQ(a.foo.unboxed(), c'b');
+            arktest.assertEQ(a.bar(a.foo).unboxed(), c'b');
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), c'b');
         }
 
   - decl: |-
@@ -260,11 +260,11 @@ cases:
         static sfoo: T = "some string";
     check: |-
         function main() {
-            assertEQ(A.sfoo, "some string");
+            arktest.assertEQ(A.sfoo, "some string");
             let a: A = new A();
-            assertEQ(a.foo, "some string");
-            assertEQ(a.bar(a.foo), "some string");
-            assertEQ(A.sbar(a.foo), "some string");
+            arktest.assertEQ(a.foo, "some string");
+            arktest.assertEQ(a.bar(a.foo), "some string");
+            arktest.assertEQ(A.sbar(a.foo), "some string");
         }
 
   - decl: |-
@@ -274,11 +274,11 @@ cases:
         static sfoo: T = new String("some string");
     check: |-
         function main() {
-            assertEQ(A.sfoo, "some string");
+            arktest.assertEQ(A.sfoo, "some string");
             let a: A = new A();
-            assertEQ(a.foo, "some string");
-            assertEQ(a.bar(a.foo), "some string");
-            assertEQ(A.sbar(a.foo), "some string");
+            arktest.assertEQ(a.foo, "some string");
+            arktest.assertEQ(a.bar(a.foo), "some string");
+            arktest.assertEQ(A.sbar(a.foo), "some string");
         }
 
   - decl: |-
@@ -288,11 +288,11 @@ cases:
         static sfoo: T = new Boolean(true);
     check: |-
         function main() {
-            assertEQ(A.sfoo.unboxed(), true);
+            arktest.assertEQ(A.sfoo.unboxed(), true);
             let a: A = new A();
-            assertEQ(a.foo.unboxed(), false);
-            assertEQ(a.bar(A.sfoo).unboxed(), true);
-            assertEQ(A.sbar(a.foo).unboxed(), false);
+            arktest.assertEQ(a.foo.unboxed(), false);
+            arktest.assertEQ(a.bar(A.sfoo).unboxed(), true);
+            arktest.assertEQ(A.sbar(a.foo).unboxed(), false);
         }
 
     # Custom
@@ -303,19 +303,19 @@ cases:
       static sfoo: T = [2, -3];
     check: |-
       function main() {
-          assertEQ(A.sfoo.length, 2);
-          assertEQ(A.sfoo[0], 2);
-          assertEQ(A.sfoo[1], -3);
+          arktest.assertEQ(A.sfoo.length, 2);
+          arktest.assertEQ(A.sfoo[0], 2);
+          arktest.assertEQ(A.sfoo[1], -3);
           let a: A = new A();
-          assertEQ(a.foo.length, 2);
-          assertEQ(a.foo[0], 1);
-          assertEQ(a.foo[1], -2);
-          assertEQ(a.bar(A.sfoo).length, 2);
-          assertEQ(a.bar(A.sfoo)[0], 2);
-          assertEQ(a.bar(A.sfoo)[1], -3);
-          assertEQ(A.sbar(a.foo).length, 2);
-          assertEQ(A.sbar(a.foo)[0], 1);
-          assertEQ(A.sbar(a.foo)[1], -2);
+          arktest.assertEQ(a.foo.length, 2);
+          arktest.assertEQ(a.foo[0], 1);
+          arktest.assertEQ(a.foo[1], -2);
+          arktest.assertEQ(a.bar(A.sfoo).length, 2);
+          arktest.assertEQ(a.bar(A.sfoo)[0], 2);
+          arktest.assertEQ(a.bar(A.sfoo)[1], -3);
+          arktest.assertEQ(A.sbar(a.foo).length, 2);
+          arktest.assertEQ(A.sbar(a.foo)[0], 1);
+          arktest.assertEQ(A.sbar(a.foo)[1], -2);
       }
 
   - decl: |-
@@ -325,34 +325,34 @@ cases:
       static sfoo: T = [[new Int(2), new Int(4)], [new Int(-5)]];
     check: |-
       function main() {
-          assertEQ(A.sfoo.length, 2);
-          assertEQ(A.sfoo[0].length, 2);
-          assertEQ(A.sfoo[1].length, 1);
-          assertEQ(A.sfoo[0][0], 2);
-          assertEQ(A.sfoo[0][1], 4);
-          assertEQ(A.sfoo[1][0], -5);
+          arktest.assertEQ(A.sfoo.length, 2);
+          arktest.assertEQ(A.sfoo[0].length, 2);
+          arktest.assertEQ(A.sfoo[1].length, 1);
+          arktest.assertEQ(A.sfoo[0][0], 2);
+          arktest.assertEQ(A.sfoo[0][1], 4);
+          arktest.assertEQ(A.sfoo[1][0], -5);
           let a: A = new A();
 
-          assertEQ(a.foo.length, 2);
-          assertEQ(a.foo[0].length, 1);
-          assertEQ(a.foo[1].length, 2);
-          assertEQ(a.foo[0][0], 1);
-          assertEQ(a.foo[1][0], -2);
-          assertEQ(a.foo[1][1], 3);
+          arktest.assertEQ(a.foo.length, 2);
+          arktest.assertEQ(a.foo[0].length, 1);
+          arktest.assertEQ(a.foo[1].length, 2);
+          arktest.assertEQ(a.foo[0][0], 1);
+          arktest.assertEQ(a.foo[1][0], -2);
+          arktest.assertEQ(a.foo[1][1], 3);
 
-          assertEQ(a.bar(A.sfoo).length, 2);
-          assertEQ(a.bar(A.sfoo)[0].length, 2);
-          assertEQ(a.bar(A.sfoo)[1].length, 1);
-          assertEQ(a.bar(A.sfoo)[0][0], 2);
-          assertEQ(a.bar(A.sfoo)[0][1], 4);
-          assertEQ(a.bar(A.sfoo)[1][0], -5);
+          arktest.assertEQ(a.bar(A.sfoo).length, 2);
+          arktest.assertEQ(a.bar(A.sfoo)[0].length, 2);
+          arktest.assertEQ(a.bar(A.sfoo)[1].length, 1);
+          arktest.assertEQ(a.bar(A.sfoo)[0][0], 2);
+          arktest.assertEQ(a.bar(A.sfoo)[0][1], 4);
+          arktest.assertEQ(a.bar(A.sfoo)[1][0], -5);
 
-          assertEQ(A.sbar(a.foo).length, 2);
-          assertEQ(A.sbar(a.foo)[0].length, 1);
-          assertEQ(A.sbar(a.foo)[1].length, 2);
-          assertEQ(A.sbar(a.foo)[0][0], 1);
-          assertEQ(A.sbar(a.foo)[1][0], -2);
-          assertEQ(A.sbar(a.foo)[1][1], 3);
+          arktest.assertEQ(A.sbar(a.foo).length, 2);
+          arktest.assertEQ(A.sbar(a.foo)[0].length, 1);
+          arktest.assertEQ(A.sbar(a.foo)[1].length, 2);
+          arktest.assertEQ(A.sbar(a.foo)[0][0], 1);
+          arktest.assertEQ(A.sbar(a.foo)[1][0], -2);
+          arktest.assertEQ(A.sbar(a.foo)[1][1], 3);
       }
 
   - decl: |-
@@ -363,11 +363,11 @@ cases:
       static sfoo: T = Colors.Red;
     check: |-
       function main() {
-          assertEQ(A.sfoo, Colors.Red);
+          arktest.assertEQ(A.sfoo, Colors.Red);
           let a: A = new A();
-          assertEQ(a.foo, Colors.Blue);
-          assertEQ(a.bar(A.sfoo), Colors.Red);
-          assertEQ(A.sbar(a.foo), Colors.Blue);
+          arktest.assertEQ(a.foo, Colors.Blue);
+          arktest.assertEQ(a.bar(A.sfoo), Colors.Red);
+          arktest.assertEQ(A.sbar(a.foo), Colors.Blue);
       }
 
   - decl: |-
@@ -381,15 +381,15 @@ cases:
       }
     check: |-
       function main() {
-          assertTrue(A.sfoo instanceof S);
-          assertEQ(A.sfoo[0], 4.1);
-          assertEQ(A.sfoo[1], "rts");
+          arktest.assertTrue(A.sfoo instanceof S);
+          arktest.assertEQ(A.sfoo[0], 4.1);
+          arktest.assertEQ(A.sfoo[1], "rts");
           let a: A = new A();
-          assertTrue(a.foo instanceof T);
-          assertEQ(a.foo[0], "str");
-          assertEQ(a.foo[1], 1.4);
-          assertEQ(a.bar2(A.sfoo)[0], 4.1);
-          assertEQ(a.bar2(A.sfoo)[1], "rts");
-          assertEQ(A.sbar(a.foo)[0], "str");
-          assertEQ(A.sbar(a.foo)[1], 1.4);
+          arktest.assertTrue(a.foo instanceof T);
+          arktest.assertEQ(a.foo[0], "str");
+          arktest.assertEQ(a.foo[1], 1.4);
+          arktest.assertEQ(a.bar2(A.sfoo)[0], 4.1);
+          arktest.assertEQ(a.bar2(A.sfoo)[1], "rts");
+          arktest.assertEQ(A.sbar(a.foo)[0], "str");
+          arktest.assertEQ(A.sbar(a.foo)[1], 1.4);
       }

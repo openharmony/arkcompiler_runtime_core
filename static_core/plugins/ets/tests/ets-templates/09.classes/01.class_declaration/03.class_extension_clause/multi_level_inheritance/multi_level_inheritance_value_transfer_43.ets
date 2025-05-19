@@ -41,7 +41,7 @@ class D extends C {
 
 class E extends D {
   test() {
-    assertEQ(this._publicVar, null);
+    arktest.assertEQ(this._publicVar, null);
   }
 }
 

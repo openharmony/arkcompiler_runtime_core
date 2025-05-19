@@ -23,5 +23,5 @@ interface Person {
 
 function main(): void {
   let tmp: Person= {name: "aa"};
-  assertEQ (tmp.name, "aa");
+  arktest.assertEQ (tmp.name, "aa");
 }

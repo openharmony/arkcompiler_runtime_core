@@ -42,8 +42,8 @@ function main(): void {
   const obj: ChildInterface = new ConcreteClass();
 
   let tmp1: float = obj.grandparentMethod();
-  assertEQ(tmp1, 1);
+  arktest.assertEQ(tmp1, 1);
 
   let tmp2: float = obj.parentMethod();
-  assertEQ(tmp2, 2);
+  arktest.assertEQ(tmp2, 2);
 }

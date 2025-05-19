@@ -26,7 +26,7 @@ import { url } from "@ohos.url";
 function testUrlGet001() {
 	let params = new url.URLParams("key1=value1&key2=value2")
 	let result = params.get("1")
-	assertEQ(result, undefined)
+ arktest.assertEQ(result, undefined)
 }
 
 /**
@@ -40,7 +40,7 @@ function testUrlGet001() {
 function testUrlGet002() {
 	let params = new url.URLParams("key1=value1&key2=value2")
 	let result = params.get("key2")
-	assertEQ(result, "value2")
+ arktest.assertEQ(result, "value2")
 }
 
 /**
@@ -55,7 +55,7 @@ function testUrlGet003() {
 	let params = new url.URLParams("key1=value1&key2=value2")
 	params.append("5", "JKL")
 	let result = params.get("5")
-	assertEQ(result, "JKL")
+ arktest.assertEQ(result, "JKL")
 }
 
 /**
@@ -69,7 +69,7 @@ function testUrlGet003() {
 function testUrlGet004() {
 	let params = new url.URLParams("key1=value1&key2=value2")
 	let result = params.get("key1")
-	assertEQ(result, "value1")
+ arktest.assertEQ(result, "value1")
 }
 
 /**
@@ -84,7 +84,7 @@ function testUrlGet005() {
 	let params = new url.URLParams("key1=value1&key2=value2")
 	params.append("jss", "JL")
 	let result = params.get("jss")
-	assertEQ(result, "JL")
+ arktest.assertEQ(result, "JL")
 }
 
 /**
@@ -99,7 +99,7 @@ function testUrlGetAll001() {
 	let params = new url.URLParams("key1=value1&key2=value2")
 	params.append("key1", "AAA")
 	let result = params.getAll("key1")
-	assertEQ(result.toString(), "value1,AAA")
+ arktest.assertEQ(result.toString(), "value1,AAA")
 }
 
 /**
@@ -114,7 +114,7 @@ function testUrlGetAll002() {
 	let params = new url.URLParams("key1=value1&8=DEF")
 	params.append("8", "A8A")
 	let result = params.getAll("8")
-	assertEQ(result.toString(), "DEF,A8A")
+ arktest.assertEQ(result.toString(), "DEF,A8A")
 }
 
 /**
@@ -129,7 +129,7 @@ function testUrlGetAll003() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=da")
 	params.append("key3", "A3A")
 	let result = params.getAll("key3")
-	assertEQ(result.toString(), "da,A3A")
+ arktest.assertEQ(result.toString(), "da,A3A")
 }
 
 /**
@@ -144,7 +144,7 @@ function testUrlGetAll004() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=大")
 	params.append("key3", "A3A")
 	let result = params.getAll("key4")
-	assertEQ(result.toString(), '')
+ arktest.assertEQ(result.toString(), '')
 }
 
 /**
@@ -159,7 +159,7 @@ function testUrlGetAll005() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=大")
 	params.append("key3", "A3A")
 	let result = params.getAll("key2")
-	assertEQ(result.toString(), "value2")
+ arktest.assertEQ(result.toString(), "value2")
 }
 
 /**
@@ -173,7 +173,7 @@ function testUrlGetAll005() {
 function testUrlHas001() {
 	let params = new url.URLParams("key1=value1&key2=value2&key3=大")
 	let result = params.has("2")
-	assertEQ(result, false)
+ arktest.assertEQ(result, false)
 }
 
 /**
@@ -187,7 +187,7 @@ function testUrlHas001() {
 function testUrlHas002() {
 	let params = new url.URLParams("小=value1&key2=value2&key3=大")
 	let result = params.has("小")
-	assertEQ(result, true)
+ arktest.assertEQ(result, true)
 }
 
 /**
@@ -202,7 +202,7 @@ function testUrlHas003() {
 	let params = new url.URLParams("小=value1&￥=value2&key3=大")
 	params.append("￥", "ACA")
 	let result = params.has("￥")
-	assertEQ(result, true)
+ arktest.assertEQ(result, true)
 }
 
 /**
@@ -216,7 +216,7 @@ function testUrlHas003() {
 function testUrlHas004() {
 	let params = new url.URLParams("小=value1&key2=value2&key3=大")
 	let result = params.has("无")
-	assertEQ(result, false)
+ arktest.assertEQ(result, false)
 }
 
 /**
@@ -231,7 +231,7 @@ function testUrlHas005() {
 	let params = new url.URLParams("小=value1&￥=value2&key3=大")
 	params.append("￥", "ACA")
 	let result = params.has("￥11")
-	assertEQ(result, false)
+ arktest.assertEQ(result, false)
 }
 
 /**
@@ -249,9 +249,9 @@ function testUrlHas006() {
 	//     let a = 1;
 	//     params.has(a);
 	// } catch(e) {
-	//     assertEQ(e.toString(),`BusinessError: Parameter error. The type of ${a} must be string`);
-	//     assertEQ(e.code,401)
-	//     assertEQ(e.message,`Parameter error. The type of ${a} must be string`);
+	//     arktest.assertEQ(e.toString(),`BusinessError: Parameter error. The type of ${a} must be string`);
+	//     arktest.assertEQ(e.code,401)
+	//     arktest.assertEQ(e.message,`Parameter error. The type of ${a} must be string`);
 	// }
 }
 
@@ -271,7 +271,7 @@ function testUrlKeys001() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[0], "小");
+ arktest.assertEQ(arr[0], "小");
 }
 
 /**
@@ -290,7 +290,7 @@ function testUrlKeys002() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[1], "￥");
+ arktest.assertEQ(arr[1], "￥");
 }
 
 /**
@@ -309,7 +309,7 @@ function testUrlKeys003() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[2], "key3");
+ arktest.assertEQ(arr[2], "key3");
 }
 
 /**
@@ -328,7 +328,7 @@ function testUrlKeys004() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[3], "key4");
+ arktest.assertEQ(arr[3], "key4");
 }
 
 /**
@@ -347,7 +347,7 @@ function testUrlKeys005() {
 		arr.push(key);
 		i++
 	}
-	assertEQ(arr[4], "key5");
+ arktest.assertEQ(arr[4], "key5");
 }
 
 /**
@@ -365,7 +365,7 @@ function testUrlSet001() {
 	// params.append("11","ACA");
 	params.set("11", "CCC");
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&11=CCC");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&11=CCC");
 }
 
 /**
@@ -382,13 +382,13 @@ function testUrlSet002() {
 	let params = new url.URLParams("1=value1&2=value2&key3=3");
 	params.set('10', 'BBB');
 	let res = params.toString();
-	assertEQ(res, "1=value1&2=value2&key3=3&10=BBB");
+ arktest.assertEQ(res, "1=value1&2=value2&key3=3&10=BBB");
 }
 
 
 
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlGet001", testUrlGet001);
 	suite.addTest("testUrlGet002", testUrlGet002);
 	suite.addTest("testUrlGet003", testUrlGet003);

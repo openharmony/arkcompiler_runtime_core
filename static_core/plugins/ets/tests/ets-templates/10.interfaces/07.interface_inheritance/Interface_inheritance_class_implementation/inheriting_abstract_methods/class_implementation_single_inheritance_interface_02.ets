@@ -40,6 +40,6 @@ function main(): void {
   let cat = new Cat();
   const speakOutput = cat.speak();
   const moveOutput = cat.move();
-  assertEQ(speakOutput, "Cat meows.");
-  assertEQ(moveOutput, "Mammal is walking.");
+  arktest.assertEQ(speakOutput, "Cat meows.");
+  arktest.assertEQ(moveOutput, "Mammal is walking.");
 }

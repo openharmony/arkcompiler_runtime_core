@@ -17,7 +17,7 @@ import {util} from "@ohos.util";
 import {BusinessError} from "@ohos.base";
 
 function main() {
-    const suite = new ArkTestsuite("CommonUtil RationalNumber ParseRationalNumber CreateRationalFromString API tests");
+    const suite = new arktest.ArkTestsuite("CommonUtil RationalNumber ParseRationalNumber CreateRationalFromString API tests");
 
     suite.addTest("Parses two integers (2 and 1) into a RationalNumber and verifies its value.",
         testParseRationalNumber001)
@@ -68,7 +68,7 @@ function main() {
 function testParseRationalNumber001() {
     let res = util.RationalNumber.parseRationalNumber(2, 1);
     let result = res.valueOf();
-    assertEQ(result, 2, "The value of the RationalNumber should be 2");
+    arktest.assertEQ(result, 2, "The value of the RationalNumber should be 2");
 }
 
 /**
@@ -82,7 +82,7 @@ function testParseRationalNumber001() {
 function testCreateRationalFromString001() {
     let res = util.RationalNumber.createRationalFromString('-1:2');
     let result = res.valueOf();
-    assertEQ(result, -0.5, "The RationalNumber value should be -0.5");
+    arktest.assertEQ(result, -0.5, "The RationalNumber value should be -0.5");
 }
 
 /**
@@ -96,7 +96,7 @@ function testCreateRationalFromString001() {
 function testCreateRationalFromString002() {
     let res = util.RationalNumber.createRationalFromString('+3/4');
     let result = res.valueOf();
-    assertEQ(result, 0.75, "The RationalNumber value should be 0.75");
+    arktest.assertEQ(result, 0.75, "The RationalNumber value should be 0.75");
 }
 
 /**
@@ -110,7 +110,7 @@ function testCreateRationalFromString002() {
 function testCreateRationalFromString003() {
     let res = util.RationalNumber.createRationalFromString('+3:-4');
     let result = res.valueOf();
-    assertEQ(result, -0.75, "The RationalNumber value should be -0.75");
+    arktest.assertEQ(result, -0.75, "The RationalNumber value should be -0.75");
 }
 
 /**
@@ -124,7 +124,7 @@ function testCreateRationalFromString003() {
 function testCreateRationalFromString004() {
     let res = util.RationalNumber.createRationalFromString('+2:4');
     let result = res.valueOf();
-    assertEQ(result, 0.5, "The RationalNumber value should be 0.5");
+    arktest.assertEQ(result, 0.5, "The RationalNumber value should be 0.5");
 }
 
 /**
@@ -138,7 +138,7 @@ function testCreateRationalFromString004() {
 function testCreateRationalFromString005() {
     let res = util.RationalNumber.createRationalFromString('+2:-4');
     let result = res.valueOf();
-    assertEQ(result, -0.5, "The RationalNumber value should be -0.5");
+    arktest.assertEQ(result, -0.5, "The RationalNumber value should be -0.5");
 }
 
 /**
@@ -152,7 +152,7 @@ function testCreateRationalFromString005() {
 function testCreateRationalFromString006() {
     let res = util.RationalNumber.createRationalFromString('-2:-4');
     let result1 = res.valueOf();
-    assertEQ(result1, 0.5, "The RationalNumber value should be 0.5");
+    arktest.assertEQ(result1, 0.5, "The RationalNumber value should be 0.5");
 }
 
 /**
@@ -168,7 +168,7 @@ function testCreateRationalFromString007() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of 123 must be effective string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123') }, exceptionCheck);
 }
 
 /**
@@ -184,7 +184,7 @@ function testCreateRationalFromString008() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of abc must be effective string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc') }, exceptionCheck);
 }
 
 /**
@@ -200,7 +200,7 @@ function testCreateRationalFromString009() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of 123abc must be effective string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123abc') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123abc') }, exceptionCheck);
 }
 
 /**
@@ -216,7 +216,7 @@ function testCreateRationalFromString010() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of abc: must be character string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc:') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc:') }, exceptionCheck);
 }
 
 /**
@@ -232,7 +232,7 @@ function testCreateRationalFromString011() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of :abc must be character string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString(':abc') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString(':abc') }, exceptionCheck);
 }
 
 /**
@@ -248,7 +248,7 @@ function testCreateRationalFromString012() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of abc/ must be character string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/') }, exceptionCheck);
 }
 
 /**
@@ -264,7 +264,7 @@ function testCreateRationalFromString013() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of 123:abc must be character string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123:abc') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('123:abc') }, exceptionCheck);
 }
 
 /**
@@ -280,7 +280,7 @@ function testCreateRationalFromString014() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of abc/123 must be character string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/123') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/123') }, exceptionCheck);
 }
 
 /**
@@ -296,7 +296,7 @@ function testCreateRationalFromString015() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of abc/abcd must be character string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/abcd') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('abc/abcd') }, exceptionCheck);
 }
 
 /**
@@ -312,5 +312,5 @@ function testCreateRationalFromString016() {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
             "Parameter error. The type of  must be effective string") && ((e as BusinessError).code == 401);
     }
-    expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('') }, exceptionCheck);
+    arktest.expectThrow(() => { let rational = util.RationalNumber.createRationalFromString('') }, exceptionCheck);
 }

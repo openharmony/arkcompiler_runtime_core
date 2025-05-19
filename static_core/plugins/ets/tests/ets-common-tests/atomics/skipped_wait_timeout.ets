@@ -21,10 +21,10 @@ function main() {
         buf = new ArrayBuffer(4);
         arr = new Int32Array(buf, 0, 1);
     } catch (e) {
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 
     let reason = Atomics.wait(arr, 0, 0, 10)
     console.println("reason is " + reason)
-    assertEQ(reason, "timed-out")
+    arktest.assertEQ(reason, "timed-out")
 }

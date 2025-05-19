@@ -16,7 +16,7 @@
 function foo(): Void { return Void.void_instance }
 
 function test(a: Object): void {
-	assertTrue((a instanceof Void))
+ arktest.assertTrue((a instanceof Void))
 }
 
 class C {

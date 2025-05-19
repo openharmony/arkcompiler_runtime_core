@@ -26,5 +26,5 @@ class InstanceMethodClass {
 function main(): void {
     const obj = new InstanceMethodClass();
     const result = obj.calculate();
-    assertEQ(result, 25);
+    arktest.assertEQ(result, 25);
 }

@@ -20,6 +20,6 @@ desc: >-
 ---*/
 function main() {
 {%- for v in  vals %}
-    assertEQ( {{v.expr}}, {{v.res}} )
+    arktest.assertEQ( {{v.expr}}, {{v.res}} )
 {%- endfor %}
 }

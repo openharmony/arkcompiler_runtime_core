@@ -27,7 +27,7 @@ class MethodReturnString {
 function startTest() {
     const example = new MethodReturnString();
     const result = await example.methodReturnString();
-    assertEQ(result, "Hello, World!");
+    arktest.assertEQ(result, "Hello, World!");
 }
 
 function main(): void {

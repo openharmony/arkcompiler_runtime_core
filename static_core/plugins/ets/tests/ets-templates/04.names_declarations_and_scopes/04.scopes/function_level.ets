@@ -28,13 +28,13 @@ function f1(p: int) {
         if (true) {
             let x = 20
             let p = 30
-            assertTrue( x == 20 && p == 30 )
+            arktest.assertTrue( x == 20 && p == 30 )
         }
-        assertTrue( x == 10 && p == 9 )
+        arktest.assertTrue( x == 10 && p == 9 )
     }
 }
 
 function main() {
     f1(x)
-    assertEQ( x, 9 )
+    arktest.assertEQ( x, 9 )
 }

@@ -26,5 +26,5 @@ function main(): void {
     let cond = false;
     let o = cond ? a : b;
     
-    assertTrue( o instanceof B)
+    arktest.assertTrue( o instanceof B)
 }

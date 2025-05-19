@@ -21,5 +21,5 @@ function main(): void {
     type A = A[] | string;
     let a: A = "test";
 
-    assertTrue(typeof a === "string");
+    arktest.assertTrue(typeof a === "string");
 }

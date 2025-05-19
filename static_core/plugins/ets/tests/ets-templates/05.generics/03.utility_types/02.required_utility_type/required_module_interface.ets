@@ -36,7 +36,7 @@ function foo(i: Required<IOPT>) {
 }
 
 function main() {
-  assertTrue( foo( {{c.argument}} ) == {{c.result}} )
+  arktest.assertTrue( foo( {{c.argument}} ) == {{c.result}} )
 }
 
 {% endfor %}

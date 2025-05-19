@@ -26,13 +26,13 @@ function foo2(v: int | object) {
 };
 
 function testNumerics() {
-    assertEQ(typeof (() => { let v: byte = 1; return v })(), "number");
-    assertEQ(typeof (() => { let v: short = 1; return v })(), "number");
-    assertEQ(typeof (() => { let v: int = 1; return v })(), "number");
-    assertEQ(typeof (() => { let v: long = 123456789123; return v })(), "number");
-    assertEQ(typeof (() => { let v: float = 1.1f; return v })(), "number");
-    assertEQ(typeof (() => { let v: double = 1.1; return v })(), "number");
-    assertEQ(typeof (() => { let v: char = c'a'; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: byte = 1; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: short = 1; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: int = 1; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: long = 123456789123; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: float = 1.1f; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: double = 1.1; return v })(), "number");
+    arktest.assertEQ(typeof (() => { let v: char = c'a'; return v })(), "number");
 }
 
 function testNumerics2() {
@@ -43,34 +43,34 @@ function testNumerics2() {
     let a5: float = 1.1f;
     let a6: double = 1.1;
     let a7: char = c'a';
-    assertEQ(typeof erase(a1), "number");
-    assertEQ(typeof erase(a2), "number");
-    assertEQ(typeof erase(a3), "number");
-    assertEQ(typeof erase(a4), "number");
-    assertEQ(typeof erase(a5), "number");
-    assertEQ(typeof erase(a6), "number");
-    assertEQ(typeof erase(a7), "number");
+    arktest.assertEQ(typeof erase(a1), "number");
+    arktest.assertEQ(typeof erase(a2), "number");
+    arktest.assertEQ(typeof erase(a3), "number");
+    arktest.assertEQ(typeof erase(a4), "number");
+    arktest.assertEQ(typeof erase(a5), "number");
+    arktest.assertEQ(typeof erase(a6), "number");
+    arktest.assertEQ(typeof erase(a7), "number");
 }
 
 function testString() {
-    assertEQ(typeof (() => { let v: string = "Hello World"; return v })(), "string");
-    assertEQ(typeof (() => { let v: String = "Hello World"; return v })(), "string");
-    assertEQ(typeof erase(new string("Hello World")), "string");
-    assertEQ(typeof erase(new String("Hello World")), "string");
+    arktest.assertEQ(typeof (() => { let v: string = "Hello World"; return v })(), "string");
+    arktest.assertEQ(typeof (() => { let v: String = "Hello World"; return v })(), "string");
+    arktest.assertEQ(typeof erase(new string("Hello World")), "string");
+    arktest.assertEQ(typeof erase(new String("Hello World")), "string");
 }
 
 function testBoolean() {
-    assertEQ(typeof (() => { let v: boolean = true; return v })(), "boolean");
-    assertEQ(typeof (() => { let v: Boolean = false; return v })(), "boolean");
-    assertEQ(typeof erase(true), "boolean");
-    assertEQ(typeof erase(false), "boolean");
+    arktest.assertEQ(typeof (() => { let v: boolean = true; return v })(), "boolean");
+    arktest.assertEQ(typeof (() => { let v: Boolean = false; return v })(), "boolean");
+    arktest.assertEQ(typeof erase(true), "boolean");
+    arktest.assertEQ(typeof erase(false), "boolean");
 }
 
 function testBigInt() {
-    assertEQ(typeof (() => { let v: BigInt = new BigInt(10000000000000); return v })(), "bigint");
-    assertEQ(typeof (() => { let v: bigint = new bigint(99999999999999); return v })(), "bigint");
-    assertEQ(typeof erase(new BigInt(10000000000000)), "bigint");
-    assertEQ(typeof erase(new bigint(99999999999999)), "bigint");
+    arktest.assertEQ(typeof (() => { let v: BigInt = new BigInt(10000000000000); return v })(), "bigint");
+    arktest.assertEQ(typeof (() => { let v: bigint = new bigint(99999999999999); return v })(), "bigint");
+    arktest.assertEQ(typeof erase(new BigInt(10000000000000)), "bigint");
+    arktest.assertEQ(typeof erase(new bigint(99999999999999)), "bigint");
 }
 
 function testObject() {
@@ -80,17 +80,17 @@ function testObject() {
     let obj4: Object = new Date();
     let obj5: Object = 123;
 
-    assertEQ(typeof obj1, "object");
-    assertEQ(typeof obj2, "object");
-    assertEQ(typeof obj3, "function");
-    assertEQ(typeof obj4, "object");
-    assertEQ(typeof obj5, "number");
+    arktest.assertEQ(typeof obj1, "object");
+    arktest.assertEQ(typeof obj2, "object");
+    arktest.assertEQ(typeof obj3, "function");
+    arktest.assertEQ(typeof obj4, "object");
+    arktest.assertEQ(typeof obj5, "number");
 
-    assertEQ(typeof erase(obj1), "object");
-    assertEQ(typeof erase(obj2), "object");
-    assertEQ(typeof erase(obj3), "function");
-    assertEQ(typeof erase(obj4), "object");
-    assertEQ(typeof erase(obj5), "number");
+    arktest.assertEQ(typeof erase(obj1), "object");
+    arktest.assertEQ(typeof erase(obj2), "object");
+    arktest.assertEQ(typeof erase(obj3), "function");
+    arktest.assertEQ(typeof erase(obj4), "object");
+    arktest.assertEQ(typeof erase(obj5), "number");
 }
 
 let f1: () => void = () => {
@@ -103,23 +103,23 @@ function normalFuction() {
 
 function testFunction() {
     let f2 = normalFuction;
-    assertEQ(typeof f1, "function");
-    assertEQ(typeof f2, "function");
+    arktest.assertEQ(typeof f1, "function");
+    arktest.assertEQ(typeof f2, "function");
 
-    assertEQ(typeof erase(f1), "function");
-    assertEQ(typeof erase(f2), "function");
+    arktest.assertEQ(typeof erase(f1), "function");
+    arktest.assertEQ(typeof erase(f2), "function");
 }
 
 function testUndefined() {
     let v = undefined;
-    assertEQ(typeof v, "undefined");
-    assertEQ(typeof erase(v), "undefined");
+    arktest.assertEQ(typeof v, "undefined");
+    arktest.assertEQ(typeof erase(v), "undefined");
 }
 
 function testNull() {
     let v = null;
-    assertEQ(typeof v, "object");
-    assertEQ(typeof erase(v), "object");
+    arktest.assertEQ(typeof v, "object");
+    arktest.assertEQ(typeof erase(v), "object");
 }
 
 enum Direction {
@@ -138,24 +138,24 @@ enum Status {
 function testEnum() {
     let dir: Direction = Direction.Up;
     let status: Status = Status.Active;
-    assertEQ(typeof dir, "number");
-    assertEQ(typeof status, "string");
+    arktest.assertEQ(typeof dir, "number");
+    arktest.assertEQ(typeof status, "string");
     // The enum is wrapped as an object type when calling erase
-    assertEQ(typeof erase(dir), "number");
-    assertEQ(typeof erase(status), "string");
-    assertEQ(typeof foo(dir), "number");
+    arktest.assertEQ(typeof erase(dir), "number");
+    arktest.assertEQ(typeof erase(status), "string");
+    arktest.assertEQ(typeof foo(dir), "number");
     // The union type will convert all its members into object
-    assertEQ(typeof foo2(dir), "number");
+    arktest.assertEQ(typeof foo2(dir), "number");
 }
 
 let v1: string | number | boolean = "abc";
 let v2: string | number | null | undefined = 123;
 
 function testUnion() {
-    assertEQ(typeof v1, "string");
-    assertEQ(typeof v2, "number");
-    assertEQ(typeof erase(v1), "string");
-    assertEQ(typeof erase(v2), "number");
+    arktest.assertEQ(typeof v1, "string");
+    arktest.assertEQ(typeof v2, "number");
+    arktest.assertEQ(typeof erase(v1), "string");
+    arktest.assertEQ(typeof erase(v2), "number");
 }
 
 class A implements Function {
@@ -176,10 +176,10 @@ class B extends Numeric {
 function testClass() {
     let a = new A();
     let b = new B();
-    assertEQ(typeof a, "function");
-    assertEQ(typeof b, "object");
-    assertEQ(typeof erase(a), "function");
-    assertEQ(typeof erase(b), "object");
+    arktest.assertEQ(typeof a, "function");
+    arktest.assertEQ(typeof b, "object");
+    arktest.assertEQ(typeof erase(a), "function");
+    arktest.assertEQ(typeof erase(b), "object");
 }
 
 interface User {
@@ -190,8 +190,8 @@ function testInterface() {
     let u: User = {
         id: 1
     }
-    assertEQ(typeof u, "object");
-    assertEQ(typeof erase(u), "object");
+    arktest.assertEQ(typeof u, "object");
+    arktest.assertEQ(typeof erase(u), "object");
 }
 
 function main() {

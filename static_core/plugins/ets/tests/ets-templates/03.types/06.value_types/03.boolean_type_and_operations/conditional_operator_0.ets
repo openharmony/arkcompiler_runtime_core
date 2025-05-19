@@ -22,5 +22,5 @@ function main(): void {
 
   let x = a ? 3 : 5;
 
-  assertEQ( x, 3 )
+  arktest.assertEQ( x, 3 )
 }

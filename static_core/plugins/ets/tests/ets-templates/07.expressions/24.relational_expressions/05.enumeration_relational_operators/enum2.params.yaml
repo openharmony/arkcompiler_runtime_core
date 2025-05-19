@@ -29,7 +29,7 @@ cases:
       tags: [compile-only, negative]
       use: |-
           // different enum types
-          assertTrue(foo1(0) >= foo2(0))
+          arktest.assertTrue(foo1(0) >= foo2(0))
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -37,7 +37,7 @@ cases:
       tags: [compile-only, negative]
       use: |-
           // different enum types
-          assertTrue(Color.Red <= Size.XL)
+          arktest.assertTrue(Color.Red <= Size.XL)
 
     - decl: |-
           enum Color { Red = "1", Green = "2", Blue = "3" }
@@ -46,19 +46,19 @@ cases:
       tags: [compile-only, negative]
       use: |-
           // string values, different enum types
-          assertTrue(c > Size.S)
+          arktest.assertTrue(c > Size.S)
 
     - decl: |-
           enum Size { XS, S, M, L, XL, XXL }
       use: |-
           // compare enum to int
-          assertTrue(0 >= Size.XS)
+          arktest.assertTrue(0 >= Size.XS)
 
     - decl: |-
           enum Color { Red = "1", Green = "2", Blue = "3" }
       use: |-
           // compare enum to string
-          assertTrue(Color.Blue > "2")
+          arktest.assertTrue(Color.Blue > "2")
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -68,4 +68,4 @@ cases:
       tags: [compile-only, negative]
       use: |-
           // compare enums in unions
-          assertTrue((c as Color) < (s as Size))
+          arktest.assertTrue((c as Color) < (s as Size))

@@ -67,5 +67,5 @@
 //! EVENT         "EtsCache,Slowpath: create string from number without cache"
 
 function main() : void {
-    assertEQ((123 as Long).toString(), "123")
+    arktest.assertEQ((123 as Long).toString(), "123")
 }

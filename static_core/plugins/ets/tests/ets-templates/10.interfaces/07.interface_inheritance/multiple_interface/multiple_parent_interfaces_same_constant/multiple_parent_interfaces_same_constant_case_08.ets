@@ -22,5 +22,5 @@ namespace NamespaceA {
 }
 
 function main(): void {
-    assertEQ(NamespaceA.VALUE, "ValueA");
+    arktest.assertEQ(NamespaceA.VALUE, "ValueA");
 }

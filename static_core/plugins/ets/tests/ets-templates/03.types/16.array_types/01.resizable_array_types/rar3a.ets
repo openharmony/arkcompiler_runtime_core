@@ -36,17 +36,17 @@ function main() {
     ab.push(b)
     aa.push(a)
 
-    assertEQ(aa.length, 4)
+    arktest.assertEQ(aa.length, 4)
 
-    assertEQ(aa.pop(), a)
-    assertEQ(aa.length, 3)
+    arktest.assertEQ(aa.pop(), a)
+    arktest.assertEQ(aa.length, 3)
 
-    assertEQ(ab.pop(), b)
-    assertEQ(aa.length, 2)
+    arktest.assertEQ(ab.pop(), b)
+    arktest.assertEQ(aa.length, 2)
 
-    assertEQ(aa.pop(), a)
-    assertEQ(aa.length, 1)
+    arktest.assertEQ(aa.pop(), a)
+    arktest.assertEQ(aa.length, 1)
 
-    assertEQ(ab.pop(), b)
-    assertEQ(aa.length, 0)
+    arktest.assertEQ(ab.pop(), b)
+    arktest.assertEQ(aa.length, 0)
   }

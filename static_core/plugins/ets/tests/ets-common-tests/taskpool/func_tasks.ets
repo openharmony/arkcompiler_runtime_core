@@ -19,7 +19,7 @@ function SumInt(value1: int, value2: int): int {
 
 function TaskpoolFuncTestSumInt() {
     let result = await taskpool.execute(SumInt, 10, 20);
-    assertEQ(result, 30);
+    arktest.assertEQ(result, 30);
 }
 
 function TaskpoolFuncTestAnd() {
@@ -30,7 +30,7 @@ function TaskpoolFuncTestAnd() {
         return false;
     }
     let result = await taskpool.execute(And, true, true);
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }
 
 function TaskpoolFuncTestStrCat() {
@@ -38,7 +38,7 @@ function TaskpoolFuncTestStrCat() {
         return value1 + value2;
     }
     let result = await taskpool.execute(StrCat, "abc", "def");
-    assertEQ(result, "abcdef");
+    arktest.assertEQ(result, "abcdef");
 }
 
 function TaskpoolFuncTestStrCat2() {
@@ -47,7 +47,7 @@ function TaskpoolFuncTestStrCat2() {
     }
     let result = await taskpool.execute(StrCat, "abc", "def");
     result = await taskpool.execute(StrCat, "abc", "def");
-    assertEQ(result, "abcdef");
+    arktest.assertEQ(result, "abcdef");
 }
 
 function TaskpoolFuncTestStrCat3() {
@@ -58,7 +58,7 @@ function TaskpoolFuncTestStrCat3() {
         return value1 + StrCat(value2, "hello");
     }
     let result = await taskpool.execute(Sum, "abc", "def");
-    assertEQ(result, "abcdefhello");
+    arktest.assertEQ(result, "abcdefhello");
 }
 
 function TaskpoolFuncTestArraySum() {
@@ -69,8 +69,8 @@ function TaskpoolFuncTestArraySum() {
         return result;
     }
     let result = (await taskpool.execute(Sum, [1, 2], [3, 4])) as int[];
-    assertEQ(result[0], 4);
-    assertEQ(result[1], 6);
+    arktest.assertEQ(result[0], 4);
+    arktest.assertEQ(result[1], 6);
 }
 
 class A {
@@ -88,22 +88,22 @@ function TaskpoolFuncTestClassFieldsSum() {
         return result;
     }
     let result = (await taskpool.execute(Sum, new A(1, 2), new A(3, 4))) as A;
-    assertEQ(result.a, 4);
-    assertEQ(result.b, 6);
+    arktest.assertEQ(result.a, 4);
+    arktest.assertEQ(result.b, 6);
 }
 
 function TaskpoolFuncTestSumInt2() {
     let result1 = await taskpool.execute(SumInt, 10, 20);
     let result2 = await taskpool.execute(SumInt, 30, 40);
-    assertEQ(result1, 30);
-    assertEQ(result2, 70);
+    arktest.assertEQ(result1, 30);
+    arktest.assertEQ(result2, 70);
 }
 
 function TaskpoolFuncTestSumInt2SameArguments() {
     let result1 = await taskpool.execute(SumInt, 10, 20);
     let result2 = await taskpool.execute(SumInt, 10, 20);
-    assertEQ(result1, 30);
-    assertEQ(result2, 30);
+    arktest.assertEQ(result1, 30);
+    arktest.assertEQ(result2, 30);
 }
 
 function TaskpoolFuncTestSumAndMulti() {
@@ -114,10 +114,10 @@ function TaskpoolFuncTestSumAndMulti() {
     let result2 = await taskpool.execute(MultiInt, 10, 20);
     let result3 = await taskpool.execute(SumInt, 10, 30);
     let result4 = await taskpool.execute(MultiInt, 20, 20);
-    assertEQ(result1, 30);
-    assertEQ(result2, 200);
-    assertEQ(result3, 40);
-    assertEQ(result4, 400);
+    arktest.assertEQ(result1, 30);
+    arktest.assertEQ(result2, 200);
+    arktest.assertEQ(result3, 40);
+    arktest.assertEQ(result4, 400);
 }
 
 function main(): int {

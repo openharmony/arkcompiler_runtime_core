@@ -34,32 +34,32 @@ members:
     params: "overriding with different static status"
     main: >
       let a: Base = new A(); 
-      assertEQ(a.field, 7);
-      assertEQ(Base.field, 5);
+      arktest.assertEQ(a.field, 7);
+      arktest.assertEQ(Base.field, 5);
   #4
   - base: "static field: int = 5"
     child: "field: int = 7"
     params: "overriding with different static status"
     main: >
       let a: Base = new A(); 
-      assertEQ(a.field, 7);
-      assertEQ(A.field, 5);
+      arktest.assertEQ(a.field, 7);
+      arktest.assertEQ(A.field, 5);
   #5
   - base: "static field: int = 5"
     child: "field: int = 7"
     params: "overriding with different static status"
     main: >-
       let a: A = new A(); 
-      assertEQ(a.field, 7);
-      assertEQ(A.field, 5);
+      arktest.assertEQ(a.field, 7);
+      arktest.assertEQ(A.field, 5);
   #6
   - base: "field: int = 7"
     child: "static field: int = 5"
     params: "overriding with different static status"
     main: >-
       let a: Base = new A(); 
-      assertEQ(a.field, 7);
-      assertEQ(A.field, 5);
+      arktest.assertEQ(a.field, 7);
+      arktest.assertEQ(A.field, 5);
   #7
   - base: "field: int = 7"
     child: "static field: int = 5"
@@ -67,48 +67,48 @@ members:
     tags: "compile-only, negative"
     main: >-
       let a: A = new A(); 
-      assertEQ(a.field, 7);
-      assertEQ(Base.field, 5);
+      arktest.assertEQ(a.field, 7);
+      arktest.assertEQ(Base.field, 5);
   #8
   - base: "field: int = 7"
     child: "static field: int = 5"
     params: "overriding with different static status"
     main: >-
       let a: A = new A(); 
-      assertEQ(a.field, 7);
-      assertEQ(A.field, 5);
+      arktest.assertEQ(a.field, 7);
+      arktest.assertEQ(A.field, 5);
   #9
   - base: "field: int = 5"
     child: "field: int = 5"
     params: "simple overriding"
     main: >-
         let a: Base = new A(); 
-        assertEQ(a.field, 5);
+        arktest.assertEQ(a.field, 5);
   #10
   - base: "field: int = 5"
     child: "field: int = 7"
     params: "simple overriding, different values"
     main: >-
         let a: Base = new A();
-        assertEQ(a.field, 7);
+        arktest.assertEQ(a.field, 7);
   #11
   - base: "static field: int = 5"
     child: "static field: int = 7"
     params: "simple overriding, different values with static"
     main: >-
-        assertEQ(A.field, 7);
-        assertEQ(Base.field, 5);
+        arktest.assertEQ(A.field, 7);
+        arktest.assertEQ(Base.field, 5);
   #12
   - base: "field: int = 5"
     child: "override field: int = 7"
     params: "simple overriding with override keyword"
     main: >-
         let a: Base = new A();
-        assertEQ(a.field, 7);
+        arktest.assertEQ(a.field, 7);
   #13
   - base: "static field: int = 5"
     child: "override static field: int = 7"
     params: "simple overriding, different values with static and override keywords"
     main: >-
-        assertEQ(A.field, 7);
-        assertEQ(Base.field, 5);
+        arktest.assertEQ(A.field, 7);
+        arktest.assertEQ(Base.field, 5);

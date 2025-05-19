@@ -38,10 +38,10 @@ function main () {
     let foo = new Foo()
     let child = new ChildFoo()
     let x1 = foo.castInferType()
-    assertTrue(x1() instanceof Int)
+    arktest.assertTrue(x1() instanceof Int)
 
     let y = child.castNarrowing()
-    assertTrue(y(child) instanceof ChildFoo)
+    arktest.assertTrue(y(child) instanceof ChildFoo)
     let y1 = child.castWidening()
-    assertTrue(y1(foo) instanceof ChildFoo)
+    arktest.assertTrue(y1(foo) instanceof ChildFoo)
 }

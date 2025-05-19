@@ -26,5 +26,5 @@ class A<T> {
 function main(): void {
   let a = new A<Object>();
   let result = a.foo(new Object());
-  assertEQ(result !== null && result !== undefined, true);
+  arktest.assertEQ(result !== null && result !== undefined, true);
 }

@@ -32,5 +32,5 @@ class Dog implements Animal {
 function main(): void {
   const dog = new Dog();
   dog.makeSound();
-  assertEQ(result, "woof");
+  arktest.assertEQ(result, "woof");
 }

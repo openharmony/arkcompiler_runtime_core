@@ -22,5 +22,5 @@ function main(): void {
   let matrix: Matrix = [["aa", "bb"], ["cc", "dd"]];
   let a: string = matrix[1][1];
 
-  assertEQ(a, "dd");
+  arktest.assertEQ(a, "dd");
 }

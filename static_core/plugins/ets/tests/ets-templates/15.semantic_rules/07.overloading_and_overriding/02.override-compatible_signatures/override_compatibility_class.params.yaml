@@ -24,9 +24,9 @@ cases:
       }
     call: |-
       new Derived().foo(new Base())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     doc: Class/Interface type
     params: override-compatible parameter (contravariance)
 
@@ -52,9 +52,9 @@ cases:
       }
     call: |-
       new Derived().foo(new Base())
-      assertEQ( res, 1 )
+      arktest.assertEQ( res, 1 )
       new Derived().foo(new Derived())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     doc: Class/Interface type
     params: overload-compatible parameter (covariance)
 
@@ -71,9 +71,9 @@ cases:
       }
     call: |-
       new Derived().foo(new Base())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new Derived())
-      assertEQ( res, 3 )
+      arktest.assertEQ( res, 3 )
     doc: Class/Interface type
     params: overload-compatible with itself parameter
 
@@ -90,7 +90,7 @@ cases:
       }
     call: |-
       new Derived().foo();
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     doc: Class/Interface type
     params: override-compatible return value (covariance)
 
@@ -142,9 +142,9 @@ cases:
       }
     call: |-
       new Derived().foo()
-      assertEQ( res, 3 )
+      arktest.assertEQ( res, 3 )
       new Derived().bar()
-      assertEQ( res, 4 )
+      arktest.assertEQ( res, 4 )
     doc: Class/Interface type
     params: override-compatible with itself return value
 
@@ -164,9 +164,9 @@ cases:
       }
     call: |-
       new Derived().foo(new A())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
       new Derived().foo(new B())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     doc: Class/Interface type
     params: override-compatible parameter (contravariance)
 
@@ -202,9 +202,9 @@ cases:
       }
     call: |-
       new Derived().foo(new A())
-      assertEQ( res, 1 )
+      arktest.assertEQ( res, 1 )
       new Derived().foo(new B())
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     doc: Class/Interface type
     params: override-incompatible parameter (covariance), not overload-equivalent
 
@@ -229,9 +229,9 @@ cases:
       }
     call: |-
       new Derived().foo(new A())
-      assertEQ( res, 3 )
+      arktest.assertEQ( res, 3 )
       new Derived().foo(new B())
-      assertEQ( res, 4 )
+      arktest.assertEQ( res, 4 )
     doc: Class/Interface type
     params: override-compatible with itself parameter
 
@@ -253,7 +253,7 @@ cases:
       }
     call: |-
       new Derived().foo();
-      assertEQ( res, 2 )
+      arktest.assertEQ( res, 2 )
     doc: Class/Interface type
     params: override-compatible return value (covariance)
 
@@ -320,8 +320,8 @@ cases:
       }
     call: |-
       new Derived().foo()
-      assertEQ( res, 3 )
+      arktest.assertEQ( res, 3 )
       new Derived().bar()
-      assertEQ( res, 4 )
+      arktest.assertEQ( res, 4 )
     doc: Class/Interface type
     params: override-compatible with itself return value

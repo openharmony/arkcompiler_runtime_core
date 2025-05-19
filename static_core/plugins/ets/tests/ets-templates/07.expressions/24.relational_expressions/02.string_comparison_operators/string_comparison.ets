@@ -23,8 +23,8 @@ function main(): void {
   let x: string = "{{str.left}}"
   let y: string = "{{str.right}}"
   let z: String = new String("{{str.right}}")
-  assertEQ( ( x {{str.op}} y), {{str.result}} )
-  assertEQ( ( x {{str.op}} z), {{str.result}} )
+  arktest.assertEQ( ( x {{str.op}} y), {{str.result}} )
+  arktest.assertEQ( ( x {{str.op}} z), {{str.result}} )
 }
 
 {% endfor %}

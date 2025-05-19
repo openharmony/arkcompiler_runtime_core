@@ -37,8 +37,8 @@ function main() {
   try {
     let a = instance.age;
   } catch (e) {
-    assertTrue(e instanceof TestError)
+    arktest.assertTrue(e instanceof TestError)
     return
   }
-  assertTrue(false, "Expected error wasn't caught")
+  arktest.assertTrue(false, "Expected error wasn't caught")
 }

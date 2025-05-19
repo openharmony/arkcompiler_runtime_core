@@ -33,21 +33,21 @@ class TestClass2 extends TestClass {
 class TestClass3 extends TestClass1 {
 }
 function test(a: TestClass2 | TestClass3) {
-    assertEQ(a.prop1, "123", "expected \"123\", but got " + a.prop1);
+    arktest.assertEQ(a.prop1, "123", "expected \"123\", but got " + a.prop1);
     a.prop1 = "234"
-    assertEQ(a.prop1, "234", "expected \"234\", but got " + a.prop1);
-    assertEQ(a.prop2, 123, "expected 123, but got " + a.prop2);
+    arktest.assertEQ(a.prop1, "234", "expected \"234\", but got " + a.prop1);
+    arktest.assertEQ(a.prop2, 123, "expected 123, but got " + a.prop2);
     a.prop2 = 234
-    assertEQ(a.prop2, 234, "expected 234, but got " + a.prop2);
-    assertEQ(a.prop3, 12, "expected 12, but got " + a.prop3);
+    arktest.assertEQ(a.prop2, 234, "expected 234, but got " + a.prop2);
+    arktest.assertEQ(a.prop3, 12, "expected 12, but got " + a.prop3);
     a.prop3 = 13
-    assertEQ(a.prop3, 13, "expected 13, but got " + a.prop3);
-    assertEQ(a.prop4, 456, "expected 456, but got " + a.prop4);
+    arktest.assertEQ(a.prop3, 13, "expected 13, but got " + a.prop3);
+    arktest.assertEQ(a.prop4, 456, "expected 456, but got " + a.prop4);
     a.prop4 = 567
-    assertEQ(a.prop4, 567, "expected 567, but got " + a.prop4);
-    assertEQ(a.prop5, 13, "expected 13, but got " + a.prop5);
+    arktest.assertEQ(a.prop4, 567, "expected 567, but got " + a.prop4);
+    arktest.assertEQ(a.prop5, 13, "expected 13, but got " + a.prop5);
     a.prop5 = 14
-    assertEQ(a.prop5, 14, "expected 14, but got " + a.prop5);
+    arktest.assertEQ(a.prop5, 14, "expected 14, but got " + a.prop5);
     return 0;
 }
 

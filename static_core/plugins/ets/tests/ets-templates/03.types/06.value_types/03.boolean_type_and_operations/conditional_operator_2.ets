@@ -19,5 +19,5 @@ desc: The conditional operator ? that operator with boolean type.
 
 function main(): void {
   let x = 1 ? 3 : 5;
-  assertEQ(x, 3)
+  arktest.assertEQ(x, 3)
 }

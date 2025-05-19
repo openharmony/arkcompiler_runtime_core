@@ -24,8 +24,8 @@ let x: {{i.type}} = {{i.value}};
 function main(): void {
   let y: {{i.type}} = {{i.value}};
 
-  assertTrue(x == {{i.value}})
-  assertTrue( y == {{i.value}})
+  arktest.assertTrue(x == {{i.value}})
+  arktest.assertTrue( y == {{i.value}})
 }
 
 {% endfor %}

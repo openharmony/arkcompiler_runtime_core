@@ -30,5 +30,5 @@ function main(): void {
   const bob = new Person("Bob");
   const age = bob.age ?? 30;
   bob.age = 25;
-  assertEQ(bob.age ?? 30, 25);
+  arktest.assertEQ(bob.age ?? 30, 25);
 }

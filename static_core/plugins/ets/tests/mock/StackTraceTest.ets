@@ -20,7 +20,7 @@ class StackTraceTest {
         } catch (e: Exception)  {
             console.println(e.toString());
         } catch (e) {
-            assertTrue(false, "Unexpected catch clause");
+            arktest.assertTrue(false, "Unexpected catch clause");
         }
     }
 

@@ -25,7 +25,7 @@ function main() {
 {%- for t in c['values'] %}
     u = {{t.expr|safe}}
     u = new BigInt(u as {{c.from_type}})
-    assertTrue( u as bigint == {{t.val}})
+    arktest.assertTrue( u as bigint == {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

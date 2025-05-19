@@ -26,5 +26,5 @@ function orConditionTest() {
 
 function main(): void {
     const finalResult = orConditionTest();
-    assertEQ(finalResult, true);
+    arktest.assertEQ(finalResult, true);
 }

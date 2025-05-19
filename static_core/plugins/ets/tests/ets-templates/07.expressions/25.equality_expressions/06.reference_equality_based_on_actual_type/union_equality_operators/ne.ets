@@ -47,6 +47,6 @@ function main() {
 {%- endif %}
 {%- endfor %}
 {%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
+    arktest.assertTrue(failed == '', 'Failed operations: ' + failed)
 }
 {%- endfor %}

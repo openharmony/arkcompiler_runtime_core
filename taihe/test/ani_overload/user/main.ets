@@ -21,29 +21,29 @@ loadLibrary("ani_overload");
 
 function test_add_numbers() {
     const result = OverloadTest.add(1, 2);
-    assertEQ(result, 3);
+    arktest.assertEQ(result, 3);
 }
 
 function test_add_strings() {
     const result = OverloadTest.add("1", "2");
-    assertEQ(result, "12");
+    arktest.assertEQ(result, "12");
 }
 
 function test_Foo_bar_number(foo: OverloadTest.Foo) {
     const result = foo.bar(123);
-    assertEQ(result, 123);
+    arktest.assertEQ(result, 123);
 }
 
 function test_Foo_bar_string(foo: OverloadTest.Foo) {
     const result = foo.bar("Hello");
-    assertEQ(result, "Hello");
+    arktest.assertEQ(result, "Hello");
 }
 // 测试 byte (i8)
 function testByte() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, 5 as byte);
-    assertEQ(res, 5);
+    arktest.assertEQ(res, 5);
 }
 
 // 测试 short (i16)
@@ -51,7 +51,7 @@ function testShort() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(42 as short, 42 as short);
-    assertEQ(res, 42);
+    arktest.assertEQ(res, 42);
 }
 
 // 测试 int (i32)
@@ -59,7 +59,7 @@ function testInt() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(1000 as int, 1000 as int);
-    assertEQ(res, 1000);
+    arktest.assertEQ(res, 1000);
 }
 
 // 测试 long (i64)
@@ -67,7 +67,7 @@ function testLong() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(1000000 as long, 1000000 as long);
-    assertEQ(res, 1000000);
+    arktest.assertEQ(res, 1000000);
 }
 
 // 测试 float (f32)
@@ -75,7 +75,7 @@ function testFloat() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(3.14 as float, 3.14 as float);
-    assertEQ(res, 3.14 as float);
+    arktest.assertEQ(res, 3.14 as float);
 }
 
 // 测试 double (f64)
@@ -83,7 +83,7 @@ function testDouble() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(2.71828 as double, 2.71828 as double);
-    assertEQ(res, 2.71828);
+    arktest.assertEQ(res, 2.71828);
 }
 
 // 测试 String
@@ -91,7 +91,7 @@ function testString() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc("123", "123");
-    assertEQ(res, "123");
+    arktest.assertEQ(res, "123");
 }
 
 // 测试 i8 与 i16
@@ -99,21 +99,21 @@ function testByte_Short() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, 42 as short);
-    assertEQ(res, 5);
+    arktest.assertEQ(res, 5);
 }
 // 测试 i8 与 f32
 function testByte_Float() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, 3.14 as float);
-    assertEQ(res, 5);
+    arktest.assertEQ(res, 5);
 }
 // 测试i8 与String
 function testByte_String() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(5 as byte, "123");
-    assertEQ(res, 5);
+    arktest.assertEQ(res, 5);
 }
 
 // 测试传入enum类型
@@ -122,7 +122,7 @@ function test_enum() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(color);
-    assertEQ(res, 1 as int);
+    arktest.assertEQ(res, 1 as int);
 }
 
 // 测试自定义的struct类型
@@ -134,7 +134,7 @@ function test_struct() {
     let instance: test_overload.OverloadInterface =
         test_overload.get_interface();
     let res = instance.overloadFunc(mystruct)
-    assertEQ(res, "path/to/source")
+    arktest.assertEQ(res, "path/to/source")
 }
 
 ////多参数组合
@@ -303,7 +303,7 @@ function test_Array() {
 
     let numbers: int[] = [1, 2, 3, 4, 5];
     let ocp = instance.overloadFunc(numbers)
-    assertEQ(ocp, 1 as int);
+    arktest.assertEQ(ocp, 1 as int);
 }
 
 function test_buffer() {
@@ -315,7 +315,7 @@ function test_buffer() {
         arrbuf1.set(i, numbersU8[i]);
     }
     let res = instance.overloadFunc(arrbuf1)
-    assertEQ(res, 15);
+    arktest.assertEQ(res, 15);
 }
 
 function test_enum_record() {
@@ -345,7 +345,7 @@ function test_array_record() {
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("Overload Test");
+    const suite = new arktest.ArkTestsuite("Overload Test");
 
     suite.addTest("test add numbers", test_add_numbers);
     suite.addTest("test add strings", test_add_strings);

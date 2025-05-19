@@ -31,5 +31,5 @@ class ConstructorParamConflictClass implements ConstructorParamConflictInterface
 
 function main(): void {
   const instance = new ConstructorParamConflictClass(23);
-  assertEQ(instance.CONST, 23);
+  arktest.assertEQ(instance.CONST, 23);
 }

@@ -15,133 +15,133 @@
 cases:
     - use: |-
         let a: undefined;
-        assertEQ( a, undefined )
+        arktest.assertEQ( a, undefined )
 
     - use: |-
         let a: undefined|null;
-        assertEQ( a, undefined )
+        arktest.assertEQ( a, undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assertEQ( a, undefined )
+        arktest.assertEQ( a, undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assertTrue( a == null )
+        arktest.assertTrue( a == null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assertTrue( a === undefined )
+        arktest.assertTrue( a === undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assertTrue( a !== null )
+        arktest.assertTrue( a !== null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null = new A();
-        assertNE( a, null )
+        arktest.assertNE( a, null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null = new A();
-        assertNE( a, undefined )
+        arktest.assertNE( a, undefined )
 
     - use: |-
-        assertNE( ((): void => {}), null )
+        arktest.assertNE( ((): void => {}), null )
 
     - use: |-
-        assertNE( ((): void => {}), undefined )
+        arktest.assertNE( ((): void => {}), undefined )
 
     - use: |-
-        assertNE( 3, null )
+        arktest.assertNE( 3, null )
 
     - use: |-
-        assertNE( 3, undefined )
+        arktest.assertNE( 3, undefined )
 
     - decl: |-
         function foo(x: string | null): boolean {
           return x == null;
         }
       use: |-
-        assertTrue( foo(null) )
+        arktest.assertTrue( foo(null) )
 
     - decl: |-
         function foo(x: String | undefined): boolean {
           return x == undefined;
         }
       use: |-
-        assertTrue( foo(undefined) )
+        arktest.assertTrue( foo(undefined) )
 
     - decl: |-
         function foo(x: string | null | undefined): boolean {
           return x == null;
         }
       use: |-
-        assertTrue( foo(null) )
+        arktest.assertTrue( foo(null) )
 
     - decl: |-
         function foo(x: Object | null | undefined): boolean {
           return x == null;
         }
       use: |-
-        assertTrue( foo(undefined) )
+        arktest.assertTrue( foo(undefined) )
 
     - decl: |-
         function foo(x: String | null | undefined): boolean {
           return x == null;
         }
       use: |-
-        assertTrue( !foo("") )
+        arktest.assertTrue( !foo("") )
 
     - use: |-
         let a: Float;
-        assertTrue( a != null );
+        arktest.assertTrue( a != null );
 
     - use: |-
         let a: Float;
-        assertTrue( a != undefined );
+        arktest.assertTrue( a != undefined );
 
     - use: |-
         let a: Object = new Object();
-        assertNE( a, null )
+        arktest.assertNE( a, null )
 
     - use: |-
         let a: Object = new Object();
-        assertNE( a, undefined )
+        arktest.assertNE( a, undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A;
-        assertTrue( a != null )
+        arktest.assertTrue( a != null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A;
-        assertTrue( a != undefined );
+        arktest.assertTrue( a != undefined );
 
     - decl: |-
         function foo(x: string | undefined): boolean {
           return x == undefined
         }
       use: |-
-        assertTrue( foo(undefined) )
+        arktest.assertTrue( foo(undefined) )
 
     - decl: |-
         function foo(x: String | null): boolean {
           return x == null
         }
       use: |-
-        assertTrue( foo(null) )
+        arktest.assertTrue( foo(null) )

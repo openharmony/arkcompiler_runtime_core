@@ -26,6 +26,6 @@ class A {
 
 function main(): void {
   let i: A = new A();
-  assertEQ( i.foo, 2 );
-  assertEQ( A.foo(), 1 );
+  arktest.assertEQ( i.foo, 2 );
+  arktest.assertEQ( A.foo(), 1 );
 }

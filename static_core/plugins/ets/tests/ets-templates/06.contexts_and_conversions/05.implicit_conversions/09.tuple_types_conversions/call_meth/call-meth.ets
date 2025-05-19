@@ -29,6 +29,6 @@ class Z {
 
 function main() {
     let res: [{% for t in c['values'] %}{{t.type}}{% if not loop.last %}, {% endif %}{% endfor %}] = new Z().meth([{% for t in c['values'] %}{{t.expr|safe}}{% if not loop.last %}, {% endif %}{% endfor %}])
-    assertTrue( {% for t in c['values'] %}res[{{loop.index0}}] {{t.eq}} {{t.expr|safe}}{% if not loop.last %} && {% endif %}{% endfor %} )
+    arktest.assertTrue( {% for t in c['values'] %}res[{{loop.index0}}] {{t.eq}} {{t.expr|safe}}{% if not loop.last %} && {% endif %}{% endfor %} )
 }
 {%- endfor %}

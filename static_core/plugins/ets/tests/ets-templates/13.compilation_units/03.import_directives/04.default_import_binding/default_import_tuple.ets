@@ -23,6 +23,6 @@ import TPL from "../../07.top-level_declarations/01.exported_declarations/defaul
 
 function main(): void {
     let a: TPL = [new Number(), new String()];
-    assertTrue(a[0] instanceof Number);
-    assertTrue(a[1] instanceof String);
+    arktest.assertTrue(a[0] instanceof Number);
+    arktest.assertTrue(a[1] instanceof String);
 }

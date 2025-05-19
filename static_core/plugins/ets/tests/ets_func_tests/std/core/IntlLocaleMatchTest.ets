@@ -30,18 +30,18 @@ function main() throws {
 function testBestFitLocaleMatchList() {
     const result = intlBestFitLocale(localeList);
     // First existing locale should be selected
-    assertEQ(result, ru_RU)
+    arktest.assertEQ(result, ru_RU)
 }
 
 function testLookupLocaleMatchSingle() {
     const result = intlLookUpLocale(en_US);
-    assertEQ(result, en_US)
+    arktest.assertEQ(result, en_US)
 }
 
 function testLookupLocaleMatchList() {
     let result = intlLookUpLocale(localeList);
     // First existing locale should be selected
-    assertEQ(result, ru_RU)
+    arktest.assertEQ(result, ru_RU)
 }
 
 function negativeTestLanguageTag() {

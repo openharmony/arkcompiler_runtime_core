@@ -34,7 +34,7 @@ function main() {
     let z: Z = new Z()
 {%- for t in c['values'] %}
     z.fld = s{{loop.index}}
-    assertTrue( z.fld as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( z.fld as {{t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

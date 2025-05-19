@@ -27,5 +27,5 @@ class Y extends X {
 }
 
 function main(): void {
-  assertEQ( Y.foo(), 1 );
+  arktest.assertEQ( Y.foo(), 1 );
 }

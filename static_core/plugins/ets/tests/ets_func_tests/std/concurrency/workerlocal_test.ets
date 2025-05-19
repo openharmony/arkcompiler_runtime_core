@@ -16,17 +16,17 @@
 function test_init() {
     let str = 'workerLocal';
     let wl = new WorkerLocal<string>(() => str);
-    assertEQ(wl.get(), str);
+    arktest.assertEQ(wl.get(), str);
     wl.set('main');
-    assertEQ(wl.get(), 'main');
+    arktest.assertEQ(wl.get(), 'main');
     await taskpool.execute(() => {
-        assertEQ(wl.get(), str);
+        arktest.assertEQ(wl.get(), str);
         wl.set('subWorker');
-        assertEQ(wl.get(), 'subWorker');
+        arktest.assertEQ(wl.get(), 'subWorker');
         wl.delete();
-        assertEQ(wl.get(), str);
+        arktest.assertEQ(wl.get(), str);
     })
-    assertEQ(wl.get(), 'main');
+    arktest.assertEQ(wl.get(), 'main');
 }
 
 function test_without_init() {
@@ -35,32 +35,32 @@ function test_without_init() {
         wl.get();
         throw new Error('Call get() before set() without \'init\' should throw an error');
     } catch(err: Error) {
-        assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
+        arktest.assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
     }
     wl.set(1);
-    assertEQ(wl.get(), 1);
+    arktest.assertEQ(wl.get(), 1);
     wl.set(wl.get() + 1);
-    assertEQ(wl.get(), 2);
+    arktest.assertEQ(wl.get(), 2);
     await taskpool.execute(() => {
         try {
             wl.get();
             throw new Error('Call get() before set() without \'init\' should throw an error');
         } catch(err: Error) {
-            assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
+            arktest.assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
         }
         wl.set(1);
-        assertEQ(wl.get(), 1);
+        arktest.assertEQ(wl.get(), 1);
         wl.set(wl.get() + 1);
-        assertEQ(wl.get(), 2);
+        arktest.assertEQ(wl.get(), 2);
         wl.delete()
         try {
             wl.get();
             throw new Error('Call get() after delete() without \'init\' should throw an error');
         } catch(err: Error) {
-            assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
+            arktest.assertEQ(err.message, 'WorkerLocal value not initialized. Call set() first or provide an init function.');
         }
     })
-    assertEQ(wl.get(), 2);
+    arktest.assertEQ(wl.get(), 2);
 }
 
 function main() {

@@ -71,7 +71,7 @@ function testJSONStringifyESObjectInstance(): boolean {
     const name: string = "Nora"
     const esObj = createObjFn.invoke(id, name)
 
-    assertEQ(JSON.stringify(esObj), `{"id":1,"name":"Nora","male":false}`)
+    arktest.assertEQ(JSON.stringify(esObj), `{"id":1,"name":"Nora","male":false}`)
 
     esObj.setProperty("self", esObj)
     expectError(() => {
@@ -80,7 +80,7 @@ function testJSONStringifyESObjectInstance(): boolean {
     esObj.setProperty("self", ESObject.instantiateEmptyObject())
 
     const esObjName = esObj.getProperty("name")
-    assertEQ(JSON.stringify(esObjName), '"Nora"')
+    arktest.assertEQ(JSON.stringify(esObjName), '"Nora"')
 
     // testing that object entries of type 'function' are ignored
     const withFnObj = ESObject.instantiateEmptyObject()
@@ -89,10 +89,10 @@ function testJSONStringifyESObjectInstance(): boolean {
     const moduleFn = moduleObj.getProperty("doNothing")
     withFnObj.setProperty("fn", moduleFn)
 
-    assertEQ(JSON.stringify(withFnObj), `{"name":"foo"}`)
+    arktest.assertEQ(JSON.stringify(withFnObj), `{"name":"foo"}`)
 
     const c = new C(42, esObj)
-    assertEQ(JSON.stringify(c), `{"hash":42,"val":{"id":1,"name":"Nora","male":false,"self":{}}}`)
+    arktest.assertEQ(JSON.stringify(c), `{"hash":42,"val":{"id":1,"name":"Nora","male":false,"self":{}}}`)
 
     return true
 }
@@ -108,7 +108,7 @@ function testJSONStringifyESObjectArray(): boolean {
     const evalArrFn = moduleObj.getProperty("evaluateArray")
     const arrEsObj = evalArrFn.invoke(arr, arr.length)
 
-    assertEQ(JSON.stringify(arrEsObj), "[1,3,7]")
+    arktest.assertEQ(JSON.stringify(arrEsObj), "[1,3,7]")
 
     arrEsObj.setProperty(3, arrEsObj)
     expectError(() => {
@@ -119,7 +119,7 @@ function testJSONStringifyESObjectArray(): boolean {
     nestedArrEsObj.setProperty(0, ESObject.wrapString("foo"))
 
     arrEsObj.setProperty(3, nestedArrEsObj)
-    assertEQ(JSON.stringify(arrEsObj), `[1,3,7,["foo"]]`)
+    arktest.assertEQ(JSON.stringify(arrEsObj), `[1,3,7,["foo"]]`)
 
     return true
 }

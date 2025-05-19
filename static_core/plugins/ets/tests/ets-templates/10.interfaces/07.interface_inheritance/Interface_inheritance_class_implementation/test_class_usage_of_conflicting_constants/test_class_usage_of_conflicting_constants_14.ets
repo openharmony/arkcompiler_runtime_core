@@ -34,6 +34,6 @@ class ProtectedPropConflictSubClass extends ProtectedPropConflictBaseClass {
 
 function main(): void {
   const instance = new ProtectedPropConflictSubClass();
-  assertEQ(instance.getProtectedValue(), 51);
-  assertEQ(instance.CONST, 52);
+  arktest.assertEQ(instance.getProtectedValue(), 51);
+  arktest.assertEQ(instance.CONST, 52);
 }

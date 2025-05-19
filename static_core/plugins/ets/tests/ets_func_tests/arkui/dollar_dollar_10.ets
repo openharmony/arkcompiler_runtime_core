@@ -29,6 +29,6 @@ function main(): void {
   try{
     increment($$n)
   }catch(e){
-    assertEQ(n,  5)
+    arktest.assertEQ(n,  5)
   }
 }

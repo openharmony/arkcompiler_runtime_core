@@ -28,14 +28,14 @@ function RegisterNativeAllocation(): void {
     } catch(error: NegativeArraySizeError) {
         exception_catched = true;
     }
-    assertTrue(exception_catched, "Didn't catch the exception");
+    arktest.assertTrue(exception_catched, "Didn't catch the exception");
     exception_catched = false;
     try {
         GC.registerNativeFree(-size);
     } catch(error: NegativeArraySizeError) {
         exception_catched = true;
     }
-    assertTrue(exception_catched, "Didn't catch the exception");
+    arktest.assertTrue(exception_catched, "Didn't catch the exception");
 
     for (let i = 0; i < 2048; i++) {
         GC.registerNativeAllocation(size);
@@ -55,9 +55,9 @@ function main(): int {
         // Calling RegisterNativeAllocation to trigger GC
         RegisterNativeAllocation();
     } catch(e) {
-        assertTrue(false, "Unexpected exception");
+        arktest.assertTrue(false, "Unexpected exception");
     }
 
-    assertTrue(weak_ref_string.deref() === undefined, "String referent must be collected after GC was triggered");
+    arktest.assertTrue(weak_ref_string.deref() === undefined, "String referent must be collected after GC was triggered");
     return 0;
 }

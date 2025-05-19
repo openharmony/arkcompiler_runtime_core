@@ -35,9 +35,9 @@ class C<T extends Number> {
 function main(): void {
     let c: C<Number> = new C<Number>(1.0);
 
-    assertEQ( c.foo(2.0), 2.0 )
-    assertEQ( c.fld, 1.0 )
+    arktest.assertEQ( c.foo(2.0), 2.0 )
+    arktest.assertEQ( c.fld, 1.0 )
 
     // module level scope is not affected
-    assertEQ( T, "str" )
+    arktest.assertEQ( T, "str" )
 }

@@ -41,11 +41,11 @@ class D extends C {
 
 class E extends D {
   constructor() {
-    assertEQ(this._publicVar, false);
+    arktest.assertEQ(this._publicVar, false);
   }
 
   test() {
-    assertEQ(this._publicVar, false);
+    arktest.assertEQ(this._publicVar, false);
   }
 }
 

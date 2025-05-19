@@ -22,6 +22,6 @@ params: |
 ---*/
 
 function main(): void {
-  assertEQ( ({{sc.x}} + {{sc.y}}), {{sc.result}} );
+  arktest.assertEQ( ({{sc.x}} + {{sc.y}}), {{sc.result}} );
 }
 {% endfor %}

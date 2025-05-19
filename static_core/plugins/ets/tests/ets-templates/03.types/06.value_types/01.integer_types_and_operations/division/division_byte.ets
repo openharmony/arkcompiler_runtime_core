@@ -21,7 +21,7 @@ desc: check division for byte operands
 function main(): void {
     const a: byte = {{v.left}}
     const b: byte = {{v.right}}
-    assertEQ( (a / b), {{v.result}} )
+    arktest.assertEQ( (a / b), {{v.result}} )
 }
 
 {% endfor %}

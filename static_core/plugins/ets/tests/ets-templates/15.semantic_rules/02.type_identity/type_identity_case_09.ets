@@ -27,6 +27,6 @@ function main(): void {
   let result1 = processStringOrNumber("Hello");
   let result2 = processStringOrNumber(42);
 
-  assertEQ(result1, "Hello");
-  assertEQ(result2, 42);
+  arktest.assertEQ(result1, "Hello");
+  arktest.assertEQ(result2, 42);
 }

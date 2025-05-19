@@ -25,5 +25,5 @@ function main(): void {
     let a = new Base();
     let b = new Derived();
 
-    assertEQ(a instanceof A, true);
+    arktest.assertEQ(a instanceof A, true);
 }

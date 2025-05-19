@@ -35,6 +35,6 @@ class Cat implements Animal {
 
 function main(): void {
     const animals: Animal[] = [new Dog(), new Cat()];
-    assertEQ(animals[0].sound(), "Woof!");
-    assertEQ(animals[1].sound(), "Meow!");
+    arktest.assertEQ(animals[0].sound(), "Woof!");
+    arktest.assertEQ(animals[1].sound(), "Meow!");
 }

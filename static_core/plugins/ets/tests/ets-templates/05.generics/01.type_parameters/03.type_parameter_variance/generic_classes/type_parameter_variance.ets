@@ -30,9 +30,9 @@ class A<T> {
 function main(): void {
   let arg: {{c.type}} = {{c.value}}
   let a: A<{{c.type}}> = new A<{{c.type}}>(arg)
-  assertEQ(a.f(arg), {{c.value}})
-  assertEQ(a.f1(arg), {{c.value1}})
-  assertEQ(a.f2(), {{c.value}})
+  arktest.assertEQ(a.f(arg), {{c.value}})
+  arktest.assertEQ(a.f1(arg), {{c.value1}})
+  arktest.assertEQ(a.f2(), {{c.value}})
 }
 
 {% endfor %}

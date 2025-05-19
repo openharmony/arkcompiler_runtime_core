@@ -19,7 +19,7 @@
 
 import {foo, foo2} from "./d"
 function main() {
-    assertEQ(foo(), "hello")
-    assertEQ(foo2(), "default")
+    arktest.assertEQ(foo(), "hello")
+    arktest.assertEQ(foo2(), "default")
 }
 

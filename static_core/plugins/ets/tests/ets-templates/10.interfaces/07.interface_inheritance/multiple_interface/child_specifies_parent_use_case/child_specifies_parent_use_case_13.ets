@@ -34,5 +34,5 @@ class ChildWithDefaultParentClass extends Parent1 implements ChildWithDefaultPar
 
 function main(): void {
     const childWithDefaultParent = new ChildWithDefaultParentClass();
-    assertEQ(childWithDefaultParent.greet(), "Hello from Parent1");
+    arktest.assertEQ(childWithDefaultParent.greet(), "Hello from Parent1");
 }

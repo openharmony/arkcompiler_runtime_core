@@ -20,5 +20,5 @@ desc: Concatenation using template strings.
 function main(): void {
     let tmp: "stringliteral" = "stringliteral";
     let tmp1: string = tmp.toUpperCase();
-    assertTrue(tmp1 === 'STRINGLITERAL');
+    arktest.assertTrue(tmp1 === 'STRINGLITERAL');
 }

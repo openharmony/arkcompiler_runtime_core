@@ -48,7 +48,7 @@ export final class ArrayBackedConstructor {
 
 function main(): void {
     let xx: ArrayBackedConstructor  = new ArrayBackedConstructor(new Array<{{.item.type}}>());
-    assertNE(xx, null);
+    arktest.assertNE(xx, null);
 }
 
 {%- endfor %}

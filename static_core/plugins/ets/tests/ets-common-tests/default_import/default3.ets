@@ -21,7 +21,7 @@ files:
 import {foo as f, default as c, bar as b} from "./export.ets";
 
 function main(){
-    assertEQ(c, 10)
-    assertEQ(f, 5)
-    assertEQ(b, 7)
+    arktest.assertEQ(c, 10)
+    arktest.assertEQ(f, 5)
+    arktest.assertEQ(b, 7)
 }

@@ -19,5 +19,5 @@ desc: Test with left-operand being a reference type
 
 function main(): void {
   let str: String = "Hello"
-  assertTrue( str instanceof String )
+  arktest.assertTrue( str instanceof String )
 }

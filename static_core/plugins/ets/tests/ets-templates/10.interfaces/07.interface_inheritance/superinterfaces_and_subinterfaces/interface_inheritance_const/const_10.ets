@@ -30,5 +30,5 @@ class Child extends Parent {}
 function main(): void {
   let childInstance = new Child();
   let tmp = childInstance.myConstant;
-  assertEQ(tmp, 'parent value');
+  arktest.assertEQ(tmp, 'parent value');
 }

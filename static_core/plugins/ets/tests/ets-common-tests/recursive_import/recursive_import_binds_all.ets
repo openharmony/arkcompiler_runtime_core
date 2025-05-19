@@ -21,5 +21,5 @@ files:
 import * as all from "./packages/recursive";
 
 function main(): void {
-    assertEQ(all.a, "hello");
+    arktest.assertEQ(all.a, "hello");
 }

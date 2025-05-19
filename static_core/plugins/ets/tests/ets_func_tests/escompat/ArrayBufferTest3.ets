@@ -19,32 +19,32 @@
 function createResizableArrayBuffer(): void {
     let a = new ArrayBuffer(10)
     // ArrayBuffer is resizable only if `maxByteLength` was passed
-    assertFalse(a.resizable)
-    assertEQ(a.byteLength, 10)
-    assertFalse(a.detached)
+    arktest.assertFalse(a.resizable)
+    arktest.assertEQ(a.byteLength, 10)
+    arktest.assertFalse(a.detached)
 
     a = new ArrayBuffer(10, 10)
-    assertTrue(a.resizable)
-    assertEQ(a.byteLength, 10)
-    assertFalse(a.detached)
+    arktest.assertTrue(a.resizable)
+    arktest.assertEQ(a.byteLength, 10)
+    arktest.assertFalse(a.detached)
 
     a = new ArrayBuffer(0, 10)
-    assertTrue(a.resizable)
-    assertEQ(a.byteLength, 0)
-    assertFalse(a.detached)
+    arktest.assertTrue(a.resizable)
+    arktest.assertEQ(a.byteLength, 0)
+    arktest.assertFalse(a.detached)
 
     const errorCheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    expectThrow((): void throws => { let a1 = new ArrayBuffer(11, -10) }, errorCheck)
-    expectThrow((): void throws => { let a1 = new ArrayBuffer(11, 10) }, errorCheck)
+    arktest.expectThrow((): void throws => { let a1 = new ArrayBuffer(11, -10) }, errorCheck)
+    arktest.expectThrow((): void throws => { let a1 = new ArrayBuffer(11, 10) }, errorCheck)
 }
 
 function checkCreatedArrayBuffer(a: ArrayBuffer, bytes: FixedArray<byte>): void {
-    assertEQ(a.byteLength, bytes.length)
-    assertFalse(a.resizable)
-    assertFalse(a.detached)
+    arktest.assertEQ(a.byteLength, bytes.length)
+    arktest.assertFalse(a.resizable)
+    arktest.assertFalse(a.detached)
 
     for (let idx = 0; idx < bytes.length; idx++) {
-        assertEQ(bytes[idx], a.at(idx))
+        arktest.assertEQ(bytes[idx], a.at(idx))
     }
 }
 
@@ -77,37 +77,37 @@ function createArrayBufferFrom(): void {
 function resizeArrayBuffer(): void {
     let a = new ArrayBuffer(10)
     let errorCheck = (e: Error | Exception) => { return (e instanceof TypeError) }
-    expectThrow((): void throws => { a.resize(5) }, errorCheck)
+    arktest.expectThrow((): void throws => { a.resize(5) }, errorCheck)
 
     a = new ArrayBuffer(10, 10);
 
     // Shrink length
     a.resize(5);
-    assertEQ(a.byteLength, 5)
+    arktest.assertEQ(a.byteLength, 5)
 
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-    expectThrow((): void throws => { a.set(5, 0 .toByte()) }, errorCheck)
-    expectThrow((): void throws => { a.at(5) }, errorCheck)
+    arktest.expectThrow((): void throws => { a.set(5, 0 .toByte()) }, errorCheck)
+    arktest.expectThrow((): void throws => { a.at(5) }, errorCheck)
 
     // Return previous length
     a.resize(10);
-    assertEQ(a.byteLength, 10)
+    arktest.assertEQ(a.byteLength, 10)
     const VALUE = 42 .toByte()
     a.set(5, VALUE)
-    assertEQ(a.at(5), VALUE)
+    arktest.assertEQ(a.at(5), VALUE)
 
     errorCheck = (e: Error | Exception) => { return (e instanceof RangeError) }
-    expectThrow((): void throws => { a.resize(11) }, errorCheck)
-    expectThrow((): void throws => { a.resize(-11) }, errorCheck)
+    arktest.expectThrow((): void throws => { a.resize(11) }, errorCheck)
+    arktest.expectThrow((): void throws => { a.resize(-11) }, errorCheck)
 
     a = new ArrayBuffer(10, 12)
     errorCheck = (e: Error | Exception) => { return (e instanceof IndexOutOfBoundsError) }
-    expectThrow((): void throws => { a.set(10, 0 .toByte()) }, errorCheck)
-    expectThrow((): void throws => { a.at(10) }, errorCheck)
+    arktest.expectThrow((): void throws => { a.set(10, 0 .toByte()) }, errorCheck)
+    arktest.expectThrow((): void throws => { a.at(10) }, errorCheck)
 
     a.resize(11)
     a.set(10, VALUE)
-    assertEQ(a.at(10), VALUE)
+    arktest.assertEQ(a.at(10), VALUE)
 }
 
 function testManagedAccessors(): void {
@@ -121,24 +121,24 @@ function testManagedAccessors(): void {
 
     for (let i = 0; i < a.getByteLength(); i++) {
         a.set(i, expectedBytes[i])
-        assertEQ(a.at(i), expectedBytes[i])
+        arktest.assertEQ(a.at(i), expectedBytes[i])
     }
 
     // Shrink length and check that non-shrinked bytes were not changed
     a.resize(REDUCED_LENGTH)
     for (let i = 0; i < a.getByteLength(); i++) {
-        assertEQ(a.at(i), expectedBytes[i])
+        arktest.assertEQ(a.at(i), expectedBytes[i])
     }
 
     // Return the initial length, check that only previously kept (5) bytes were not changed
     a.resize(FULL_LENGTH)
     for (let i = 0; i < REDUCED_LENGTH; i++) {
-        assertEQ(a.at(i), expectedBytes[i])
+        arktest.assertEQ(a.at(i), expectedBytes[i])
     }
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("ArrayBuffer properties")
+    const suite = new arktest.ArkTestsuite("ArrayBuffer properties")
 
     suite.addTest("Resizable ArrayBuffer creation", createResizableArrayBuffer)
     suite.addTest("ArrayBuffer factory methods", createArrayBufferFrom)

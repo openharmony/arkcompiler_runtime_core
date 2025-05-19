@@ -52,5 +52,5 @@ function main() {
     // that bar coroutines are waiting for its awakening
     event.Fire();
     let result = p1.Await();
-    assertEQ(result, 42);
+    arktest.assertEQ(result, 42);
 }

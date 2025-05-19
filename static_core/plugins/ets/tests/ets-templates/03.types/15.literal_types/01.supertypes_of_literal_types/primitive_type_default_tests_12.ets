@@ -24,5 +24,5 @@ function testFunc2(str: string = "") {
 
 function main(): void {
     let result = testFunc2();
-    assertEQ(result, "");
+    arktest.assertEQ(result, "");
 }

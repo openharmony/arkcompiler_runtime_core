@@ -31,7 +31,7 @@ class MethodWithLoop {
 async function startTest() {
     const example = new MethodWithLoop();
     const result = await example.methodWithLoop();
-    assertEQ(result, 15);
+    arktest.assertEQ(result, 15);
 }
 
 function main(): void {

@@ -39,5 +39,5 @@ class Child extends Parent {
 
 function main(): void {
   const child = new Child();
-  assertEQ(child.callParentChain(), "Step 1 from Child -> Step 2 from Parent");
+  arktest.assertEQ(child.callParentChain(), "Step 1 from Child -> Step 2 from Parent");
 }

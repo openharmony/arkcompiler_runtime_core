@@ -33,6 +33,6 @@ class ChildClass implements ChildInterface {
 function main(): void {
   let parentInstance = new ParentClass();
   let childInstance = new ChildClass();
-  assertEQ(parentInstance.CONSTANT_VALUE, true);
-  assertEQ(childInstance.CONSTANT_VALUE, false);
+  arktest.assertEQ(parentInstance.CONSTANT_VALUE, true);
+  arktest.assertEQ(childInstance.CONSTANT_VALUE, false);
 }

@@ -21,6 +21,6 @@ function main(): void {
   let numbers: Array<number> = new Array<number>(1, 2, 3, 4, 5);
 
   numbers.forEach((value, index) => {
-    assertEQ(numbers[index], value);
+    arktest.assertEQ(numbers[index], value);
   });
 }

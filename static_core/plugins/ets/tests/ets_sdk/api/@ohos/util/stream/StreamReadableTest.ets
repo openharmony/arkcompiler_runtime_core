@@ -18,7 +18,7 @@ import {stream} from "@ohos.util.stream";
 type CallbackFnType = (...params: Object[]) => void;
 
 function main(): int {
-    const suite = new ArkTestsuite("Stream API tests")
+    const suite = new arktest.ArkTestsuite("Stream API tests")
 
     suite.addTest("Create a readable stream", testStreamReadableConstructor001);
     suite.addTest("Create a readable stream", testStreamReadableConstructor002);
@@ -42,8 +42,8 @@ function main(): int {
 // this test case will be completed future
 function testStreamReadableConstructor001() {
     let readable = new stream.Readable();
-    assertEQ(typeof readable, "object");
-    assertNE(readable, undefined);
+    arktest.assertEQ(typeof readable, "object");
+    arktest.assertNE(readable, undefined);
 }
 
 // this test case will be completed future
@@ -52,43 +52,43 @@ function testStreamReadableConstructor002() {
         encoding: "utf-8"
     };
     let readable = new stream.Readable(readableOptions);
-    assertEQ(typeof readable, "object");
-    assertNE(readable, undefined);
+    arktest.assertEQ(typeof readable, "object");
+    arktest.assertNE(readable, undefined);
 }
 
 // this test case will be completed future
 function testStreamReadableRead001() {
     let readableStream = new stream.Readable();
     let ret = readableStream.read(1);
-    assertEQ(ret, null);
+    arktest.assertEQ(ret, null);
 }
 
 // this test case will be completed future
 function testStreamReadableResume001() {
     let readableStream = new stream.Readable();
     let ret: stream.Readable = readableStream.resume();
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
 function testStreamReadablePause001() {
     let readableStream = new stream.Readable();
     let ret: stream.Readable = readableStream.pause();
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
 function testStreamReadableSetEncoding001() {
     let readableStream = new stream.Readable();
     let ret: boolean = readableStream.setEncoding("utf8");
-    assertTrue(ret);
+    arktest.assertTrue(ret);
 }
 
 // this test case will be completed future
 function testStreamReadableIsPaused001() {
     let readableStream = new stream.Readable();
     let ret: boolean = readableStream.isPaused();
-    assertFalse(ret);
+    arktest.assertFalse(ret);
 }
 
 // this test case will be completed future
@@ -96,7 +96,7 @@ function testStreamReadablePipe001() {
     let readableStream = new stream.Readable();
     let writable = new stream.Writable();
     let ret: stream.Writable = readableStream.pipe(writable);
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
@@ -104,7 +104,7 @@ function testStreamReadableUnpipe001() {
     let readableStream = new stream.Readable();
     let writable = new stream.Writable();
     let ret: stream.Readable = readableStream.unpipe(writable);
-    assertNE(ret, undefined);
+    arktest.assertNE(ret, undefined);
 }
 
 // this test case will be completed future
@@ -112,7 +112,7 @@ function testStreamReadableOn001() {
     let readableStream = new stream.Readable();
     let callback: CallbackFnType = (...params: Object[]) => {};
     readableStream.on("data", callback);
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
@@ -120,28 +120,28 @@ function testStreamReadableOff001() {
     let readableStream = new stream.Readable();
     let callback: CallbackFnType = (...params: Object[]) => {};;
     readableStream.off("data", callback);
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamReadableDoInitialize001() {
     let readableStream = new stream.Readable();
     readableStream.doInitialize(() => {});
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamReadableDoRead001() {
     let readableStream = new stream.Readable();
     readableStream.doRead(1);
-    assertTrue(true);
+    arktest.assertTrue(true);
 }
 
 // this test case will be completed future
 function testStreamReadablePush001() {
     let readableStream = new stream.Readable();
     let ret: boolean = readableStream.push("test", "utf8");
-    assertFalse(ret);
+    arktest.assertFalse(ret);
 }
 
 // this test case will be completed future
@@ -155,5 +155,5 @@ function testStreamReadablePush002() {
     array[0] = 1;
     array[1] = 2;
     let ret: boolean = readableStream.push(array, "utf8");
-    assertTrue(ret);
+    arktest.assertTrue(ret);
 }

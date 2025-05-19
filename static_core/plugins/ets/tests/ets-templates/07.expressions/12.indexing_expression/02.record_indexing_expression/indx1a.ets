@@ -25,6 +25,6 @@ function refNotNullish(): Record<string, number> {
 }
 
 function main() {
-    assertTrue(refNotNullish()["magic"] == 42)
-    assertTrue(refNotNullish()?.["magic"] == 42)
+    arktest.assertTrue(refNotNullish()["magic"] == 42)
+    arktest.assertTrue(refNotNullish()?.["magic"] == 42)
 }

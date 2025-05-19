@@ -59,10 +59,10 @@ function executeDelayedTest(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     try {
         let res = await launchImpl(testDelayFunc);
-        assertEQ(res, 30);
+        arktest.assertEQ(res, 30);
     } catch(e: Error) {
         // NOTE(wangzhaoyong, #25035): del try catch when fix stackoverflow and invalid error message
-        assertEQ(e instanceof StackOverflowError, true);
+        arktest.assertEQ(e instanceof StackOverflowError, true);
     }
     let task = new taskpool.LongTask(sum, 10, 80);
     await taskpool.execute(task);
@@ -81,12 +81,12 @@ function executePeriodicallyTest(): void {
 }
 
 function main(): int {
-    let longTaskTestsuite = new ArkTestsuite("taskpool.LongTask");
+    let longTaskTestsuite = new arktest.ArkTestsuite("taskpool.LongTask");
     longTaskTestsuite.addTest("ExecuteTest", () =>
     {
         let task = new taskpool.LongTask(sumFunc);
         let result = await taskpool.execute(task);
-        assertEQ(result, 30);
+        arktest.assertEQ(result, 30);
     });
     longTaskTestsuite.addTest("DoubleExecutionTest", (): void throws =>
     {
@@ -99,7 +99,7 @@ function main(): int {
     {
         let task = new taskpool.LongTask(sum, 100, 200);
         let res = await taskpool.execute(task);
-        assertEQ(res, 300);
+        arktest.assertEQ(res, 300);
     });
     longTaskTestsuite.addTest("ExecuteDelayedTest", executeDelayedTest);
     longTaskTestsuite.addTest("ExecutePeriodicallyTest", executePeriodicallyTest);

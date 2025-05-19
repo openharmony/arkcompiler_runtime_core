@@ -39,7 +39,7 @@ class Derived extends Base {
 function main() {
   let a = new Base();
   let b = new Derived();
-  assertTrue( a.foo(b) instanceof Base );
-  assertFalse( a.foo(b) instanceof Derived );
-  assertTrue( b.foo(b) instanceof Derived );
+  arktest.assertTrue( a.foo(b) instanceof Base );
+  arktest.assertFalse( a.foo(b) instanceof Derived );
+  arktest.assertTrue( b.foo(b) instanceof Derived );
 }

@@ -20,5 +20,5 @@ desc: Mixed operations of string literal types with other types.
 function main(): void {
     let tmp: "stringliteral" = "stringliteral";
     let arr: string[] = [tmp, "extra"];
-    assertTrue(arr[0] === "stringliteral");
+    arktest.assertTrue(arr[0] === "stringliteral");
 }

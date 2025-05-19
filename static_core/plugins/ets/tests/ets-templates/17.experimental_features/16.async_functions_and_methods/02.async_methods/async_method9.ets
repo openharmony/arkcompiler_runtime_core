@@ -37,7 +37,7 @@ class MethodChaining {
 async function startTest() {
     const example = new MethodChaining();
     const result = await example.methodChaining();
-    assertEQ(result, "Hello 42")
+    arktest.assertEQ(result, "Hello 42")
 }
 
 function main(): void {

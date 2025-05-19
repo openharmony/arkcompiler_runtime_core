@@ -29,5 +29,5 @@ function main() {
             res += String.fromCharCode(Char.toDouble(Char.getLowSurrogate(i)))
         }
     }
-    assertEQ(s, res)
+    arktest.assertEQ(s, res)
 }

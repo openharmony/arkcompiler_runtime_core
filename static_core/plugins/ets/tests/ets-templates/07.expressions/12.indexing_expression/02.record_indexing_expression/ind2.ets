@@ -49,6 +49,6 @@ function main() {
     } catch (e) {
         res += " failed " + v
     }
-    assertTrue(res == {{c.res}})
+    arktest.assertTrue(res == {{c.res}})
 }
 {% endfor %}

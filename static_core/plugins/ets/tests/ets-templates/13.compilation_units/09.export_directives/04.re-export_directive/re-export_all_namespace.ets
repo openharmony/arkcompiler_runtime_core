@@ -23,33 +23,33 @@ import { name } from "./module_b_re-export"
 function main() : void
 {
     // Export function
-    assertEQ(name.bar(), 100);
+    arktest.assertEQ(name.bar(), 100);
 
     // Export class
     let foo_cls : name.foo = new name.foo();
-    assertEQ(foo_cls.foo_bar(), 101);
-    assertEQ(name.foo.foo_bar_s(), 102);
+    arktest.assertEQ(foo_cls.foo_bar(), 101);
+    arktest.assertEQ(name.foo.foo_bar_s(), 102);
 
     // Export interface
     let foo_inter : name.foo_Inter = {fld1: 10, fld2: "Hi"};
-    assertEQ(foo_inter.fld1, 10);
-    assertEQ(foo_inter.fld2, "Hi");
+    arktest.assertEQ(foo_inter.fld1, 10);
+    arktest.assertEQ(foo_inter.fld2, "Hi");
 
     // Export enum
-    assertEQ(name.Color.Red.valueOf(), 10);
-    assertEQ(name.Color.Blue.valueOf(), 20);
+    arktest.assertEQ(name.Color.Red.valueOf(), 10);
+    arktest.assertEQ(name.Color.Blue.valueOf(), 20);
 
     // Export namespace
-    assertEQ(name.NS.Color.Red.valueOf(), 5);
-    assertEQ(name.NS.Color.Blue.valueOf(), 10);
+    arktest.assertEQ(name.NS.Color.Red.valueOf(), 5);
+    arktest.assertEQ(name.NS.Color.Blue.valueOf(), 10);
 
     // Export variable
-    assertEQ(name.numExported, 111);
+    arktest.assertEQ(name.numExported, 111);
 
     // Export annotation
     @name.MyAnno let anno : int = 10;
 
     // Export type alias
     let foo_cls1 : name.fooCls = new name.foo();
-    assertEQ(foo_cls1.foo_bar(), 101);
+    arktest.assertEQ(foo_cls1.foo_bar(), 101);
 }

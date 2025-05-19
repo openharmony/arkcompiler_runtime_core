@@ -24,7 +24,7 @@ type ML = (required: String, param: Int = 42) => void;
 
 function main(): void {
     let mi: ML = (required: String, param: Int = 42): void => {
-        assertEQ( param, 42)
+        arktest.assertEQ( param, 42)
     }
     mi("Hello World");
 

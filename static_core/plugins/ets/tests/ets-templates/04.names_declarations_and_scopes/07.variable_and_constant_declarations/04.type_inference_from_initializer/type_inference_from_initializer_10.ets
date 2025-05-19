@@ -20,5 +20,5 @@ desc: Declare variable with literal type.
 function main(): void {
   const cond: boolean = true;
   const tmp = cond ? "one" : "two";
-  assertEQ(tmp ,"one");
+  arktest.assertEQ(tmp ,"one");
 }

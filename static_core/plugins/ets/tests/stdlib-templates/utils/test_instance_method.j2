@@ -160,6 +160,6 @@ function main(): int {
         console.println();
       {% if item.method_throws == true %}}{%- endif %}
     }
-  assertEQ(passed_counter, max_test)
+  arktest.assertEQ(passed_counter, max_test)
   return 0;
   }

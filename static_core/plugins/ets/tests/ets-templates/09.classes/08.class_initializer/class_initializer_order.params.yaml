@@ -14,26 +14,26 @@
 --- # List of access modifiers
 cases:
   - main: |-
-      assertEQ( B.b, 2 );
-      assertEQ( res, "AB" );
+      arktest.assertEQ( B.b, 2 );
+      arktest.assertEQ( res, "AB" );
   - main: |-
-      assertEQ( B.b, 2 );
-      assertEQ( res, "AB" );
+      arktest.assertEQ( B.b, 2 );
+      arktest.assertEQ( res, "AB" );
   - main: |-
-      assertEQ( C.c, 3 );
-      assertEQ( res, "AC" );
+      arktest.assertEQ( C.c, 3 );
+      arktest.assertEQ( res, "AC" );
   - main: |-
-      assertEQ( D.d, 4 );
-      assertEQ( res, "ACD" );
-  - main: |-
-      // with abstract class
-      assertEQ( E.e, 5 );
-      assertEQ( res, "E" );
+      arktest.assertEQ( D.d, 4 );
+      arktest.assertEQ( res, "ACD" );
   - main: |-
       // with abstract class
-      assertEQ( F.f, 6 );
-      assertEQ( res, "EF" );
+      arktest.assertEQ( E.e, 5 );
+      arktest.assertEQ( res, "E" );
   - main: |-
       // with abstract class
-      assertEQ( G.g, 7 );
-      assertEQ( res, "EFG" );
+      arktest.assertEQ( F.f, 6 );
+      arktest.assertEQ( res, "EF" );
+  - main: |-
+      // with abstract class
+      arktest.assertEQ( G.g, 7 );
+      arktest.assertEQ( res, "EFG" );

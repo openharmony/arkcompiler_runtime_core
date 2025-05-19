@@ -22,5 +22,5 @@ function main(): void {
   if (i > 0) {
     i--;
   }
-  assertEQ(i, 0)
+  arktest.assertEQ(i, 0)
 }

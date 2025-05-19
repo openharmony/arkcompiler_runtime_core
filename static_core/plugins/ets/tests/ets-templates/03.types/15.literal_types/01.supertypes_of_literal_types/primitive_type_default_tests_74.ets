@@ -23,5 +23,5 @@ function getReturnString(): "returnStr" {
 
 function main(): void {
     const result = getReturnString();
-    assertEQ(result, "returnStr");
+    arktest.assertEQ(result, "returnStr");
 }

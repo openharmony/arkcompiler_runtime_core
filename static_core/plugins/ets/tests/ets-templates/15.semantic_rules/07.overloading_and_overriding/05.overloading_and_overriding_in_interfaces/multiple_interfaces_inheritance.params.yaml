@@ -27,8 +27,8 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assertTrue(a.foo(1.1 as number) == 1);
-      assertTrue(a.foo("some string") == 2);
+      arktest.assertTrue(a.foo(1.1 as number) == 1);
+      arktest.assertTrue(a.foo("some string") == 2);
 
   - tags: 'negative, compile-only'
     decl: |-
@@ -45,7 +45,7 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assertTrue(a.foo(1.1 as number) == 2);
+      arktest.assertTrue(a.foo(1.1 as number) == 2);
 
   - decl: |-
       interface I {
@@ -61,8 +61,8 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assertTrue(a.foo(1.1 as number) == 1);
-      assertTrue(a.foo("some string") == 2);
+      arktest.assertTrue(a.foo(1.1 as number) == 1);
+      arktest.assertTrue(a.foo("some string") == 2);
 
   - tags: 'negative, compile-only'
     decl: |-
@@ -79,7 +79,7 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assertTrue(a.foo(1.1 as number) == 2);
+      arktest.assertTrue(a.foo(1.1 as number) == 2);
 
   - tags: 'negative, compile-only'
     decl: |-
@@ -96,4 +96,4 @@ cases:
       class A implements J, I {}
     call: |-
       let a = new A();
-      assertTrue(a.foo(1.1 as number) == 1);
+      arktest.assertTrue(a.foo(1.1 as number) == 1);

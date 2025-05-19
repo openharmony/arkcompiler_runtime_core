@@ -27,6 +27,6 @@ function main() {
     const v1 = new Char({{v.v1}})
     const v2 = new Char({{v.v2}})
 
-    assertEQ( ({{v.exp}}), {{v.r}} )
+    arktest.assertEQ( ({{v.exp}}), {{v.r}} )
 }
 {%- endfor %}

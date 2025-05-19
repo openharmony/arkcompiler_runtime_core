@@ -61,5 +61,5 @@ function main(): void {
   const child = new ChildClass(parent1, parent2);
 
   console.log(child.calculate(5));
-  assertEQ(child.calculate(15), 30);
+  arktest.assertEQ(child.calculate(15), 30);
 }

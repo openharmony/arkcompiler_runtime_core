@@ -30,5 +30,5 @@ function main(): void {
     const condition1 = true;
     const condition2 = false;
     const result = nestedConditionCheck(condition1, condition2);
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }

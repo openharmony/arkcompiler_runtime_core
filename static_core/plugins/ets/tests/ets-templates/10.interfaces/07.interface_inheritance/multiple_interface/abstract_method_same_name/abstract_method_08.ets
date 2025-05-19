@@ -43,5 +43,5 @@ class ChildClass implements Child {
 function main(): void {
     const child = new ChildClass();
     console.log(child.processString("Hello"));
-    assertEQ(child.processNumber(21), 42);
+    arktest.assertEQ(child.processNumber(21), 42);
 }

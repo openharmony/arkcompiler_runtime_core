@@ -25,9 +25,9 @@ function main(): void {
     let ss: NullableSupplier = (): Int | null => { return 42; }
 
     let rs: Int | null = ss();
-    assertEQ( rs, 42)
+    arktest.assertEQ( rs, 42)
     ss = (): Int | null => { return null; }
     rs = ss();
-    assertTrue( rs === null)
+    arktest.assertTrue( rs === null)
 
 }

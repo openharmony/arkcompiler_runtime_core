@@ -32,7 +32,7 @@ function foo(count: {{.item.type2}}): EasingCurve {
 function main(): void {
   let curve: EasingCurve = foo({{.item.value2}} as {{.item.type2}})
   let value = curve({{.item.value1}} as {{.item.type1}})
-  assertEQ(value {{.item.casting}}, {{.item.result}}, "value = " + value)
+  arktest.assertEQ(value {{.item.casting}}, {{.item.result}}, "value = " + value)
 }
 
 {%- endfor %}

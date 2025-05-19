@@ -27,10 +27,10 @@ let d: {{c.to_type}}
 function main() {
 {%- for v in c['values'] %}
     d = {{v.expr|safe}}.to{{c.to_type}}() // literal constant value
-    assertEQ(d, {{v.val}})
+    arktest.assertEQ(d, {{v.val}})
 
     d = c{{loop.index}}.to{{c.to_type}}()  // constant
-    assertEQ(d, {{v.val}})
+    arktest.assertEQ(d, {{v.val}})
 {%- endfor %}
 }
 {%- endfor %}

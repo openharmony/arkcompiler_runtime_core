@@ -17,27 +17,27 @@ let flag: int = 0;
 const arr: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 function main() {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueueConstructorTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueConstructorTest");
 
     ArrayBlockingQueueTestsuite.addTest("ConstructorTestInt001", () =>
     {
         let queueIntA: ArrayBlockingQueue<int> = new ArrayBlockingQueue<int>(200);
-        assertEQ(queueIntA.isEmpty(), true);
-        assertEQ(queueIntA.size, 0);
+        arktest.assertEQ(queueIntA.isEmpty(), true);
+        arktest.assertEQ(queueIntA.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConstructorTestInt002", () =>
     {
         let array = Array.from<number>(arr);
         let ConcurrentSetTest: ConcurrentSet<number> = new ConcurrentSet<number>(array);
-        assertEQ(ConcurrentSetTest.size, 10);
+        arktest.assertEQ(ConcurrentSetTest.size, 10);
         flag = 0;
         ConcurrentSetTest.forEach((val: number) => {
-            assertEQ(val, flag++);
+            arktest.assertEQ(val, flag++);
         });
         let iter = ConcurrentSetTest.keys();
         let queueIntA: ArrayBlockingQueue<number> = new ArrayBlockingQueue<number>(200, iter);
         for (let i = 0; i < 10; i++) {
-            assertEQ(queueIntA.pop(), i);
+            arktest.assertEQ(queueIntA.pop(), i);
         }
     });
 

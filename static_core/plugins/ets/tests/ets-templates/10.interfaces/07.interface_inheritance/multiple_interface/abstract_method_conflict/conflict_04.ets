@@ -42,6 +42,6 @@ function main(): void {
   const robot = new Robot();
   robot.makeSound();
   robot.start();
-  assertEQ(result, "Beep");
-  assertEQ(result1, "Starting");
+  arktest.assertEQ(result, "Beep");
+  arktest.assertEQ(result1, "Starting");
 }

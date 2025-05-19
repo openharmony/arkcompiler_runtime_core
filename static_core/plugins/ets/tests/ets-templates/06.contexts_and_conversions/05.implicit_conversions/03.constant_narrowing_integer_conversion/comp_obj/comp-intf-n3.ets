@@ -27,7 +27,7 @@ interface J { fld: {{c.to_type}} }
 function main() {
 {%- for v in c['values'] %}
     let d{{loop.index}}: J = { fld: c{{loop.index}}.to{{c.to_type}}() }
-    assertEQ(d{{loop.index}}.fld, {{v.val}})
+    arktest.assertEQ(d{{loop.index}}.fld, {{v.val}})
 {% endfor %}
 }
 {%- endfor %}

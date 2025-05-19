@@ -27,7 +27,7 @@ class MethodReturnNull {
 async function startTest() {
     const example = new MethodReturnNull();
     const result = await example.methodReturnNull();
-    assertEQ(result === null, true)
+    arktest.assertEQ(result === null, true)
 }
 
 function main(): void {

@@ -68,6 +68,6 @@ function main(): void {
   let v: {{c.type}} = {{c.val}};
   let r: {{c.rt}} = {{c.rv}};
   let result: int = foo(v {{c.op}} r);
-  assertEQ(result, {{c.res}})
+  arktest.assertEQ(result, {{c.res}})
 }
 {% endfor %}

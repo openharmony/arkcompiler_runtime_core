@@ -38,5 +38,5 @@ class Bird implements Flyable, Swimmable {
 function main(): void {
   const tetsBird = new Bird();
   const result = tetsBird.fly();
-  assertEQ(result, "Bird is flying.");
+  arktest.assertEQ(result, "Bird is flying.");
 }

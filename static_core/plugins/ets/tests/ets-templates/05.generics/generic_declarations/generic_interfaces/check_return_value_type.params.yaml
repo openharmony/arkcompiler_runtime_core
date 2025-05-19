@@ -26,7 +26,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue<number>(66), "Hello, ArkTS! with: 66");
+      arktest.assertEQ(stringValue.getValue<number>(66), "Hello, ArkTS! with: 66");
 
   - desc: The return value type of a generic interface method is the same as the type parameter(no parameters).
     decl: |-
@@ -41,7 +41,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue(), "Hello, ArkTS!");
+      arktest.assertEQ(stringValue.getValue(), "Hello, ArkTS!");
 
   - desc: The return value type of a generic interface method is the same as the type parameter(double).
     decl: |-
@@ -56,7 +56,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue<double>(3.141592653589793), "Hello, ArkTS! with: 3.141592653589793");
+      arktest.assertEQ(stringValue.getValue<double>(3.141592653589793), "Hello, ArkTS! with: 3.141592653589793");
 
   - desc: The return value type of a generic interface method is the same as the type parameter(float).
     decl: |-
@@ -71,7 +71,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue<number>(3.14), "Hello, ArkTS! with: 3.14");
+      arktest.assertEQ(stringValue.getValue<number>(3.14), "Hello, ArkTS! with: 3.14");
 
   - desc: The return value type of a generic interface method is the same as the type parameter(string).
     decl: |-
@@ -86,7 +86,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue<string>('66'), "Hello, ArkTS! with: 66");
+      arktest.assertEQ(stringValue.getValue<string>('66'), "Hello, ArkTS! with: 66");
 
   - desc: The return type of a generic interface method is inconsistent with the type parameter.
     decl: |-
@@ -101,7 +101,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue(), "123");
+      arktest.assertEQ(stringValue.getValue(), "123");
 
   - desc: The return type of a generic interface method is a complex type.
     decl: |-
@@ -120,7 +120,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name, "Animal");
+      arktest.assertEQ(stringValue.getValue().name, "Animal");
   
   - desc: The return type of a generic interface method is inconsistent with the type parameter(boolean).
     decl: |-
@@ -135,7 +135,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue(), "true");
+      arktest.assertEQ(stringValue.getValue(), "true");
 
   - desc: The return type of a generic interface method is a complex type(int).
     decl: |-
@@ -154,7 +154,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name as int, 66);
+      arktest.assertEQ(stringValue.getValue().name as int, 66);
 
   - desc: The return type of a generic interface method is a complex type(float).
     decl: |-
@@ -173,7 +173,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertNE(stringValue.getValue().name as float, 66.66);
+      arktest.assertNE(stringValue.getValue().name as float, 66.66);
 
   - desc: The return type of a generic interface method is a complex type(double).
     decl: |-
@@ -192,7 +192,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name as double, 66.666666666);
+      arktest.assertEQ(stringValue.getValue().name as double, 66.666666666);
 
   - desc: The return type of a generic interface method is a complex type(boolean).
     decl: |-
@@ -211,7 +211,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name as boolean, true);
+      arktest.assertEQ(stringValue.getValue().name as boolean, true);
 
   - desc: The return type of a generic interface method is a complex type(readonly).
     decl: |-
@@ -230,7 +230,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name, "Animal");
+      arktest.assertEQ(stringValue.getValue().name, "Animal");
 
   - desc: The return type of a generic interface method is a complex type(union).
     decl: |-
@@ -249,7 +249,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name, "active");
+      arktest.assertEQ(stringValue.getValue().name, "active");
 
   - desc: The return type of a generic interface method is a complex type(null).
     decl: |-
@@ -268,7 +268,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name, null);
+      arktest.assertEQ(stringValue.getValue().name, null);
 
   - desc: The return type of a generic interface method is a complex type(undefined).
     decl: |-
@@ -287,7 +287,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue().name, undefined);
+      arktest.assertEQ(stringValue.getValue().name, undefined);
 
   - desc: The return type of a generic interface method is optional.
     decl: |-
@@ -302,7 +302,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue(), "Hello, ArkTS!");
+      arktest.assertEQ(stringValue.getValue(), "Hello, ArkTS!");
 
   - desc: The return type of a generic interface method is class type.
     decl: |-
@@ -317,7 +317,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertNE(stringValue.getValue(), stringValue);
+      arktest.assertNE(stringValue.getValue(), stringValue);
 
   - desc: The return value type of a generic interface method is a function.
     decl: |-
@@ -332,7 +332,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue()(), 66);
+      arktest.assertEQ(stringValue.getValue()(), 66);
 
   - desc: The return value type of a generic interface method is a function(double).
     decl: |-
@@ -347,7 +347,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue()(), 3.14);
+      arktest.assertEQ(stringValue.getValue()(), 3.14);
 
   - desc: The return value type of a generic interface method is a function(string).
     decl: |-
@@ -362,7 +362,7 @@ cases:
       }
     logic: |-
       let stringValue = new GenericClass();
-      assertEQ(stringValue.getValue()(), 'hello');
+      arktest.assertEQ(stringValue.getValue()(), 'hello');
 
   - desc: The return value type of a generic interface method is a enum type.
     decl: |-
@@ -383,7 +383,7 @@ cases:
       }
     logic: |-
       let stringValue = new EnumValue();
-      assertEQ(Int.toDouble(stringValue.getEnumValue()), 1);
+      arktest.assertEQ(Int.toDouble(stringValue.getEnumValue()), 1);
 
   - desc: The return value type of a generic interface method is a enum type(string).
     decl: |-
@@ -402,7 +402,7 @@ cases:
       }
     logic: |-
       let stringValue = new EnumValue();
-      assertEQ(stringValue.getEnumValue() as string, 'Red');
+      arktest.assertEQ(stringValue.getEnumValue() as string, 'Red');
 
   - desc: The return type of a generic interface method is a calculate function type.
     decl: |-
@@ -417,7 +417,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(33), 66);
+      arktest.assertEQ(stringValue.getFunctionValue()(33), 66);
 
   - desc: The return type of a generic interface method is a function type(return value is different types).
     decl: |-
@@ -432,7 +432,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertNE(stringValue.getFunctionValue()(33) + "", 'str');
+      arktest.assertNE(stringValue.getFunctionValue()(33) + "", 'str');
 
   - desc: The return type of a generic interface method is a function type(return value is different types-null).
     decl: |-
@@ -447,7 +447,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertNE(stringValue.getFunctionValue()(33), null);
+      arktest.assertNE(stringValue.getFunctionValue()(33), null);
 
   - desc: The return type of a generic interface method is a function type(return value is different types-undefined).
     decl: |-
@@ -462,4 +462,4 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertNE(stringValue.getFunctionValue()(33), undefined);
+      arktest.assertNE(stringValue.getFunctionValue()(33), undefined);

@@ -21,5 +21,5 @@ let strLiteral: "hello" = "hello";
 let templateStr = `The value is ${strLiteral}`;
 
 function main(): void {
-    assertEQ(templateStr, "The value is hello");
+    arktest.assertEQ(templateStr, "The value is hello");
 }

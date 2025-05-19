@@ -27,6 +27,6 @@ function main(): void {
   let tuple: MyTuple = [42, "Hello"];
   let result = processTuple(tuple);
 
-  assertEQ(result[0], 42);
-  assertEQ(result[1], "Hello");
+  arktest.assertEQ(result[0], 42);
+  arktest.assertEQ(result[1], "Hello");
 }

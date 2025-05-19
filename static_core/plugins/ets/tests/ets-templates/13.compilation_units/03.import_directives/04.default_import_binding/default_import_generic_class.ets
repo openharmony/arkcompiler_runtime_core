@@ -24,5 +24,5 @@ import GENC from "../../07.top-level_declarations/01.exported_declarations/defau
 function main(): void {
     let a = new GENC<Number>();
     let b = new Number(3);
-    assertEQ(a.foo(b), b);
+    arktest.assertEQ(a.foo(b), b);
 }

@@ -22,5 +22,5 @@ function foo<T>(x: T): T {
 }
 
 function main() {
-  assertEQ( foo(undefined), undefined )
+  arktest.assertEQ( foo(undefined), undefined )
 }

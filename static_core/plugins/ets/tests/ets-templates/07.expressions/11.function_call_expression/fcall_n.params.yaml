@@ -18,21 +18,21 @@ cases:
               return p.toString().length
           }
       use: |-
-          assertEQ( foo<out>(0.0), 1 ) // CTE: wildcard in type arguments
+          arktest.assertEQ( foo<out>(0.0), 1 ) // CTE: wildcard in type arguments
 
     - decl: |-
           function foo<T extends Object>(p: T): number {
               return p.toString().length
           }
       use: |-
-          assertEQ( foo<out Number>(0.0), 1 ) // CTE: wildcard in type arguments
+          arktest.assertEQ( foo<out Number>(0.0), 1 ) // CTE: wildcard in type arguments
 
     - decl: |-
           function foo<T extends Object>(p: T): number {
               return p.toString().length
           }
       use: |-
-          assertEQ( foo<in Number>(0.0), 1 ) // CTE: wildcard in type arguments
+          arktest.assertEQ( foo<in Number>(0.0), 1 ) // CTE: wildcard in type arguments
 
     - decl: |-
           function bar(p: string): string {
@@ -40,7 +40,7 @@ cases:
           }
           let ft = "bar"
       use: |-
-          assertEQ( ft("A"), "AA" ) // CTE: not a function type called
+          arktest.assertEQ( ft("A"), "AA" ) // CTE: not a function type called
 
     - decl: |-
           function bar(p: string): string {
@@ -48,7 +48,7 @@ cases:
           }
           let ft: ((p: string) => string)|null = bar
       use: |-
-          assertEQ( ft("A"), "AA" ) // CTE: no ?. for nullish expression
+          arktest.assertEQ( ft("A"), "AA" ) // CTE: no ?. for nullish expression
 
     - decl: |-
           function foo() {}

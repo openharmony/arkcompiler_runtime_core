@@ -19,5 +19,5 @@ desc: Variable declaration with union of literal types.
 
 function main(): void {
   let tmp = undefined;
-  assertEQ(tmp, undefined);
+  arktest.assertEQ(tmp, undefined);
 }

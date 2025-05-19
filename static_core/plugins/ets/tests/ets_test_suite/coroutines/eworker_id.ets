@@ -19,16 +19,16 @@ function main() {
     let w = new EAWorker();
     let p1 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     let p2 = w.run<int>(():int => {
         let runId = CoroutineExtras.getWorkerId();
-        assertNE(runId, mainId);
+        arktest.assertNE(runId, mainId);
         return runId;
     });
     w.join();
     let runId1 = p1.Await();
     let runId2 = p2.Await();
-    assertEQ(runId1, runId2);
+    arktest.assertEQ(runId1, runId2);
 }

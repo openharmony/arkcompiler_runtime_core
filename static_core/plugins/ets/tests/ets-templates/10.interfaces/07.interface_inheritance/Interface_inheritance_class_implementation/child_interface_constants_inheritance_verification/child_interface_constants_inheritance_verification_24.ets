@@ -27,7 +27,7 @@ class Uint8ArrayConstantChild implements Uint8ArrayConstantInterface {
 
 function main(): void {
   const instance = new Uint8ArrayConstantChild();
-  assertEQ(instance.CONST[0], 1);
-  assertEQ(instance.CONST[1], 2);
-  assertEQ(instance.CONST[2], 3);
+  arktest.assertEQ(instance.CONST[0], 1);
+  arktest.assertEQ(instance.CONST[1], 2);
+  arktest.assertEQ(instance.CONST[2], 3);
 }

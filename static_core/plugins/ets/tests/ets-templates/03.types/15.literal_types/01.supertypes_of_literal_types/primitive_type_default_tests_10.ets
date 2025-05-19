@@ -24,5 +24,5 @@ class MyClass5 {
 
 function main(): void {
     let obj = new MyClass5();
-    assertEQ(obj.u, undefined);
+    arktest.assertEQ(obj.u, undefined);
 }

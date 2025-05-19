@@ -26,5 +26,5 @@ function main() {
     }
 
     console.log(testStr);
-    assertEQ(teststr, "abcdefghijklnmabcdefghijklnm")
+    arktest.assertEQ(teststr, "abcdefghijklnmabcdefghijklnm")
 }

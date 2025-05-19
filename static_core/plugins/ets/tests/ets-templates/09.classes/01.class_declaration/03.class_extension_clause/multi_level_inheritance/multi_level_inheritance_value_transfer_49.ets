@@ -44,7 +44,7 @@ class E extends D {
 
 class F extends E {
   test() {
-    assertEQ(this._publicVar, 'Multi-level inheritance');
+    arktest.assertEQ(this._publicVar, 'Multi-level inheritance');
   }
 }
 

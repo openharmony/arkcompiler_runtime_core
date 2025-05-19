@@ -28,5 +28,5 @@ import { C } from "../Test02/class_c"
 
 function main() {
     let c: C = new C();
-    assertEQ(c.foo(), 1) // Expected CTE
+    arktest.assertEQ(c.foo(), 1) // Expected CTE
 }

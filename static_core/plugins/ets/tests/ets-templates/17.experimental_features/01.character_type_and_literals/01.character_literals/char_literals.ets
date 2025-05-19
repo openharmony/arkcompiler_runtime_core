@@ -22,7 +22,7 @@ function main() {
     let escaped_chars: Char[] = [ c'\b', c'\f', c'\n', c'\r', c'\t', c'\v', c'\\', c'\'', c'\"' ]
     let escaped_vals: Int[] = [ 8, 12, 10, 13, 9, 11, 92, 39, 34 ]
     for (let i = 0; i < escaped_chars.length; i++) {
-        assertEQ( escaped_chars[i], escaped_vals[i].toChar() )
+        arktest.assertEQ( escaped_chars[i], escaped_vals[i].toChar() )
     }
 
     // check hex-formatted characters
@@ -43,7 +43,7 @@ function main() {
         c'\x7c', c'\x7d', c'\x7e', c'\x7f'
     ]
     for (let i: Int = 0; i < 128; i++) {
-        assertEQ( hex_chars[i], i.toChar() )
+        arktest.assertEQ( hex_chars[i], i.toChar() )
     }
 
     // check unicode-formatted characters
@@ -59,6 +59,6 @@ function main() {
     ]
     let j = 0;
     for (let i: Int = 65; i < 65536; i += 1000) {
-        assertEQ( unicode_chars[j++], i.toChar() )
+        arktest.assertEQ( unicode_chars[j++], i.toChar() )
     }
 }

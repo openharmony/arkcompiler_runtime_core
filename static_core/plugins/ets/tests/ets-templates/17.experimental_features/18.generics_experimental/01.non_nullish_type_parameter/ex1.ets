@@ -28,6 +28,6 @@ class A<T> {
 function main() {
     let a = new A<Object>
     let result: Object = a.foo("String is an Object")
-    assertEQ(result, "String is an Object");
+    arktest.assertEQ(result, "String is an Object");
 
 }

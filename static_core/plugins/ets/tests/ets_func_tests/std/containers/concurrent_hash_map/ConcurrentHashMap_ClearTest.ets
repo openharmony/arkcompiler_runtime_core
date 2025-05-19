@@ -27,21 +27,21 @@ function main(): int {
         map.set(arrKeys[i], arrValues[i]);
     }
 
-    let concurrentHashMapClearTestsuite = new ArkTestsuite("concurrentHashMapClearTest");
+    let concurrentHashMapClearTestsuite = new arktest.ArkTestsuite("concurrentHashMapClearTest");
 
     concurrentHashMapClearTestsuite.addTest("clearTest_001", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        assertTrue(concurrentHashMap.isEmpty());
+        arktest.assertTrue(concurrentHashMap.isEmpty());
         concurrentHashMap.clear();
-        assertTrue(concurrentHashMap.isEmpty());
+        arktest.assertTrue(concurrentHashMap.isEmpty());
     });
     concurrentHashMapClearTestsuite.addTest("clearTest_003", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
-        assertFalse(concurrentHashMap.isEmpty());
+        arktest.assertFalse(concurrentHashMap.isEmpty());
         concurrentHashMap.clear();
-        assertTrue(concurrentHashMap.isEmpty());
+        arktest.assertTrue(concurrentHashMap.isEmpty());
     });
     concurrentHashMapClearTestsuite.addTest("clearTest_002", () =>
     {
@@ -49,21 +49,21 @@ function main(): int {
         for (let i = 0; i < 10 ; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
         }
-        assertFalse(concurrentHashMap.isEmpty());
+        arktest.assertFalse(concurrentHashMap.isEmpty());
         concurrentHashMap.clear();
-        assertTrue(concurrentHashMap.isEmpty());
+        arktest.assertTrue(concurrentHashMap.isEmpty());
     });
     concurrentHashMapClearTestsuite.addTest("clearAndTest_001", () =>
     {
         arrValuesTest = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(removeAll);
         let p2 = launch<void, () => void>(clearAll);
         p1.Await();
         p2.Await();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
 
     return concurrentHashMapClearTestsuite.run();

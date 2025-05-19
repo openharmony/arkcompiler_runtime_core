@@ -19,7 +19,7 @@ const success = 0;
 const fail = 1;
 
 function main(): int {
-    const suite = new ArkTestsuite("LightWeightMap ToString IncreaseCapacityTo API tests")
+    const suite = new arktest.ArkTestsuite("LightWeightMap ToString IncreaseCapacityTo API tests")
 
     suite.addTest("LightWeightMap toString output data as a string",
         testToStringOutputData)
@@ -44,13 +44,13 @@ function testToStringOutputData() {
     lightWeightMap.set("sparrow", 123);
     lightWeightMap.set("gull", 111);
     let result = lightWeightMap.toString();
-    assertEQ(result, "gull:111,sparrow:123", "The lightWeightMap should return the correct string representation");
+    arktest.assertEQ(result, "gull:111,sparrow:123", "The lightWeightMap should return the correct string representation");
 }
 
 function testToStringEmptyMap() {
     let lightWeightMap: LightWeightMap<string, number> = new LightWeightMap<string, number>();
     let result = lightWeightMap.toString();
-    assertEQ(result, '', "The lightWeightMap should return the correct string representation");
+    arktest.assertEQ(result, '', "The lightWeightMap should return the correct string representation");
 }
 
 function testToStringInLoop() {
@@ -60,7 +60,7 @@ function testToStringInLoop() {
         lightWeightMap.set(i, VALUE);
     }
     let result = lightWeightMap.toString();
-    assertEQ(result, '0:VALUE,1:VALUE,2:VALUE,3:VALUE,4:VALUE',
+    arktest.assertEQ(result, '0:VALUE,1:VALUE,2:VALUE,3:VALUE,4:VALUE',
         "The lightWeightMap should return the correct string representation");
 }
 
@@ -72,7 +72,7 @@ function testIncreaseCapacity() {
         lightWeightMap.increaseCapacityTo(2);
         lightWeightMap.increaseCapacityTo(10);
     } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should increase the capacity");
+        arktest.assertEQ(err.message, "The lightWeightMap should increase the capacity");
     }
 }
 
@@ -83,7 +83,7 @@ function testIncreaseCapacityLessThanLength() {
     try {
         lightWeightMap.increaseCapacityTo(1);
     } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should not increase the capacity less than the length");
+        arktest.assertEQ(err.message, "The lightWeightMap should not increase the capacity less than the length");
     }
 }
 
@@ -94,7 +94,7 @@ function testIncreaseCapacityLeftFloat() {
     try {
         lightWeightMap.increaseCapacityTo(Math.floor(1.2));
     } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should not increase the left float capacity");
+        arktest.assertEQ(err.message, "The lightWeightMap should not increase the left float capacity");
     }
 }
 
@@ -105,6 +105,6 @@ function testIncreaseCapacityRightFloat() {
     try {
         lightWeightMap.increaseCapacityTo(Math.floor(3.8));
     } catch (err: Error) {
-        assertEQ(err.message, "The lightWeightMap should increase the right float capacity");
+        arktest.assertEQ(err.message, "The lightWeightMap should increase the right float capacity");
     }
 }

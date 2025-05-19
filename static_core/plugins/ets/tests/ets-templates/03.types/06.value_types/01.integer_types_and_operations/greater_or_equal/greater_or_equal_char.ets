@@ -21,7 +21,7 @@ desc: check greater or equal for two chars
 function main(): void {
   const a: char = {{v.left}}
   const b: char = {{v.right}}
-  assertEQ( (a >= b), {{v.result}})
+  arktest.assertEQ( (a >= b), {{v.result}})
 }
 
 {% endfor %}

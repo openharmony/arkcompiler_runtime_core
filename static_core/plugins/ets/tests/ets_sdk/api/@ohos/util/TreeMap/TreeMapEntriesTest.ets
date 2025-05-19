@@ -16,7 +16,7 @@
 import TreeMap from "@ohos.util.TreeMap";
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeMap Entries API tests")
+    const suite = new arktest.ArkTestsuite("TreeMap Entries API tests")
 
     suite.addTest("TreeMap entries return iterator by key and value",
         testEntriesReturnIteratorByKeyValue)
@@ -44,7 +44,7 @@ function testEntriesReturnIteratorByKeyValue() {
         }
     }
     let strAll = "aa,123,bb,456,cc,789,dd,112";
-    assertEQ(str, strAll, "The treeMap should return the correct entries");
+    arktest.assertEQ(str, strAll, "The treeMap should return the correct entries");
 }
 
 function testEntriesReturnIteratorByKeyValueWithEmptyTreeMap() {

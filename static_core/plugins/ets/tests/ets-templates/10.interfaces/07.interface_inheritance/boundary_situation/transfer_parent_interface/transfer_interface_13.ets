@@ -37,5 +37,5 @@ class MyClass implements ParentInterface, EmptyInterface {
 
 function main(): void {
   const instance = MyClass.createInstance(100);  
-  assertEQ(instance.id, 100);
+  arktest.assertEQ(instance.id, 100);
 }

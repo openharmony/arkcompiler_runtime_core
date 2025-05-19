@@ -20,7 +20,7 @@ generic_in_out:
     check: |-
       const a: A<number> = { value: 42 };
       const b: A<object> = a;
-      assertEQ(b.value, 42);
+      arktest.assertEQ(b.value, 42);
 
   - desc: Verify the covariance of the 'out' keyword, and act on the function.
     dec1: |-
@@ -33,7 +33,7 @@ generic_in_out:
     check: |-
       const numberA = createA(42);
       const objectA: A<object> = numberA;
-      assertEQ(objectA.value, 42);
+      arktest.assertEQ(objectA.value, 42);
 
   - desc: To verify the covariance of an array.
     dec1: |-
@@ -46,7 +46,7 @@ generic_in_out:
     check: |-
       const numberWrapper = createArrayWrapper<int>([1, 2, 3]);
       const anyWrapper: ArrayWrapper<object> = numberWrapper;
-      assertEQ(JSON.stringify(anyWrapper.values), JSON.stringify([1, 2, 3]));
+      arktest.assertEQ(JSON.stringify(anyWrapper.values), JSON.stringify([1, 2, 3]));
 
   - desc: Verify the application of the covariance of the 'out' keyword to the function return value.
     dec1: |-
@@ -59,7 +59,7 @@ generic_in_out:
     check: |-
       const numberFunctionWrapper = createFunctionWrapper(() => 42);
       const anyFunctionWrapper: FunctionWrapper<object> = numberFunctionWrapper;
-      assertEQ(anyFunctionWrapper.func(), 42);
+      arktest.assertEQ(anyFunctionWrapper.func(), 42);
 
   - desc: Verify the combined use of the keywords in and out.
     dec1: |-
@@ -72,7 +72,7 @@ generic_in_out:
     check: |-
       const numberFunctionWrapper = createFunctionWrapper<number, number>((value: number) => value * 2);
       const anyFunctionWrapper: FunctionWrapper<number, object> = numberFunctionWrapper;
-      assertEQ(anyFunctionWrapper.func(42), 84);
+      arktest.assertEQ(anyFunctionWrapper.func(42), 84);
 
   - desc: Verify the application of the covariance of the out keyword in readonlyArray.
     dec1: |-
@@ -85,7 +85,7 @@ generic_in_out:
     check: |-
       const numberWrapper = createReadonlyArrayWrapper<int>([1, 2, 3]);
       const anyWrapper: ReadonlyArrayWrapper<object> = numberWrapper;
-      assertEQ(JSON.stringify(anyWrapper.values), JSON.stringify([1, 2, 3]));
+      arktest.assertEQ(JSON.stringify(anyWrapper.values), JSON.stringify([1, 2, 3]));
 
   - desc: Shows the covariant behavior of generics on return types.
     dec1: |-
@@ -107,7 +107,7 @@ generic_in_out:
     check: |-
       const fruitProducer: Producer<Fruit> = new AppleProducer();
       const fruit: Fruit = fruitProducer.produce();
-      assertTrue(fruit instanceof Apple);
+      arktest.assertTrue(fruit instanceof Apple);
 
   - desc: Show covariance of generic classes in return types.
     dec1: |-
@@ -122,7 +122,7 @@ generic_in_out:
     check: |-
       const a: A<string> = new C();
       const c: A<object> = a;
-      assertEQ(c.getValue(), "Hello");
+      arktest.assertEQ(c.getValue(), "Hello");
 
   - desc: Verify the invariability of the'in' keyword.
     dec1: |-
@@ -137,7 +137,7 @@ generic_in_out:
     check: |-
       const anyConsumer: Consumer<object> = new A();
       const numberConsumer: Consumer<number> = anyConsumer;
-      assertEQ(numberConsumer.consume(42), 42);
+      arktest.assertEQ(numberConsumer.consume(42), 42);
 
   - desc: Verify the application of the contravariance of the in keyword in callback functions.
     dec1: |-
@@ -154,7 +154,7 @@ generic_in_out:
       });
       const numberCallbackWrapper: CallbackWrapper<number> = anyCallbackWrapper;
       numberCallbackWrapper.callback(42.0);
-      assertEQ(a, 43);
+      arktest.assertEQ(a, 43);
 
   - desc: Shows the inverse behavior of generics on input parameters.
     dec1: |-
@@ -176,8 +176,8 @@ generic_in_out:
     check: |-
       const animalConsumer: Consumer<Dog> = new AnimalConsumer();
       const result = animalConsumer.consume(new Dog());
-      assertEQ(result instanceof Animal, true);
-      assertEQ(result instanceof Dog, true);
+      arktest.assertEQ(result instanceof Animal, true);
+      arktest.assertEQ(result instanceof Dog, true);
 
   - desc: Verify the combination of covariance and inversion.
     dec1: |-
@@ -199,11 +199,11 @@ generic_in_out:
     check: |-
       const numberA = createA(42);
       const anyA: A<object> = numberA;
-      assertEQ(anyA.value, 42);
+      arktest.assertEQ(anyA.value, 42);
       const anyConsumer = new AnyConsumer();
       const numberConsumer: Consumer<number> = anyConsumer;
       numberConsumer.consume(anyA.value);
-      assertEQ(a, 11);
+      arktest.assertEQ(a, 11);
 
   - desc: Verify the application of contravariance of the in keyword 'in' function parameters.
     dec1: |-
@@ -219,9 +219,9 @@ generic_in_out:
         a = 11;
       });
       const numberFunctionWrapper: FunctionWrapper<number> = anyFunctionWrapper;
-      assertEQ(a, 10);
+      arktest.assertEQ(a, 10);
       numberFunctionWrapper.func(42);
-      assertEQ(a, 11);
+      arktest.assertEQ(a, 11);
 
   - desc: Verify the covariance of the 'out' keyword.
     dec1: |-
@@ -231,4 +231,4 @@ generic_in_out:
     check: |-
       const a: A<string> = { value: 'hello' };
       const b: A<object> = a;
-      assertEQ(b.value, 'hello');
+      arktest.assertEQ(b.value, 'hello');

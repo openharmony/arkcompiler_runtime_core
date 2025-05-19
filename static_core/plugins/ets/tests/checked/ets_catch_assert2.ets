@@ -36,7 +36,7 @@ function main(): int {
             if (b >= c) {
                 if (c >= d) {
                     foo();
-                    assertTrue(false);
+                    arktest.assertTrue(false);
                 }
             }
         }

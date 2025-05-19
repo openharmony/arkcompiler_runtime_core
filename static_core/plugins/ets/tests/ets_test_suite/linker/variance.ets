@@ -28,7 +28,7 @@ function assert_stub(f: () => void) {
     } catch (e: StubError) {
         return;
     }
-    assertTrue(false, "exception expected");
+    arktest.assertTrue(false, "exception expected");
 }
 
 class T0 { }

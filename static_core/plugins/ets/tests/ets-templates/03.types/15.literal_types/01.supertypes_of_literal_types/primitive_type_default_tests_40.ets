@@ -24,5 +24,5 @@ function doubleNumber(num: number): number {
 function main(): void {
     const input = 5;
     const result = doubleNumber(input);
-    assertEQ(result, 10);
+    arktest.assertEQ(result, 10);
 }

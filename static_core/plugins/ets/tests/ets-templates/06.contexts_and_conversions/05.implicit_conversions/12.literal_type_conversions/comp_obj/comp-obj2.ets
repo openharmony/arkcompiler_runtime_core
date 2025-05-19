@@ -25,7 +25,7 @@ class A { fld: {{c.to_type}} {%- if c.init_value is defined %} = {{c.init_value}
 {%- for v in c['values'] %}
 function cvt{{loop.index}}(p: {{v.type}}) {
     let d: A = { fld: p };
-    assertEQ(d.fld, {{v.val or v.expr}})
+    arktest.assertEQ(d.fld, {{v.val or v.expr}})
 }
 {%- endfor %}
 

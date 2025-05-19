@@ -42,7 +42,7 @@ cases:
     logic: |-
       const instance = new MyClass<number, string>(42);
       instance.processValue("Hello");
-      assertEQ(instance.getValue(), 42);
+      arktest.assertEQ(instance.getValue(), 42);
 
   - desc: Two generic interfaces, using string and boolean as type parameters.
     decl: |-
@@ -73,7 +73,7 @@ cases:
     logic: |-
       const instance = new MyClass<string, boolean>("TypeScript");
       instance.processValue(true);
-      assertEQ(instance.getValue(), "TypeScript");
+      arktest.assertEQ(instance.getValue(), "TypeScript");
 
   - desc: Two generic interfaces, using boolean and number as type parameters.
     decl: |-
@@ -104,7 +104,7 @@ cases:
     logic: |-
       const instance = new MyClass<boolean, number>(true);
       instance.processValue(100);
-      assertEQ(instance.getValue(), true);
+      arktest.assertEQ(instance.getValue(), true);
 
   - desc: Generic storage class, store and retrieve strings.
     decl: |-
@@ -127,7 +127,7 @@ cases:
     logic: |-
       const stringStorage = new Storage<string>();
       stringStorage.setItem("name", "Alice");
-      assertEQ(stringStorage.getItem("name"), "Alice");
+      arktest.assertEQ(stringStorage.getItem("name"), "Alice");
 
   - desc: Generic storage class, store and retrieve numbers.
     decl: |-
@@ -150,7 +150,7 @@ cases:
     logic: |-
       const numberStorage = new Storage<number>();
       numberStorage.setItem("age", 25);
-      assertEQ(numberStorage.getItem("age"), 25);
+      arktest.assertEQ(numberStorage.getItem("age"), 25);
 
   - desc: Generic storage class, store and retrieve objects.
     decl: |-
@@ -180,8 +180,8 @@ cases:
       objectStorage.setItem("user", { id: 1, name: "Bob" });
       const user = objectStorage.getItem("user");
       if (user) {
-        assertEQ(user.id, 1);
-        assertEQ(user.name, "Bob");
+        arktest.assertEQ(user.id, 1);
+        arktest.assertEQ(user.name, "Bob");
       }
 
   - desc: Generic chained call, chained operation string.
@@ -212,7 +212,7 @@ cases:
     logic: |-
       const chainableString = new Chainable<string>();
       chainableString.set("hello").transform((value) => value.toUpperCase());
-      assertEQ(chainableString.get(), "HELLO");
+      arktest.assertEQ(chainableString.get(), "HELLO");
 
   - desc: Generic chained call, chained operation number.
     decl: |-
@@ -242,7 +242,7 @@ cases:
     logic: |-
       const chainableNumber = new Chainable<number>();
       chainableNumber.set(10).transform((value) => value * 2);
-      assertEQ(chainableNumber.get(), 20);
+      arktest.assertEQ(chainableNumber.get(), 20);
 
   - desc: Generic processor, handle strings as numbers.
     decl: |-
@@ -263,7 +263,7 @@ cases:
       }
     logic: |-
       const stringProcessor = new Processor<string, number>((input) => input.length);
-      assertEQ(stringProcessor.process("hello"), 5);
+      arktest.assertEQ(stringProcessor.process("hello"), 5);
 
   - desc: Generic processor, processing numbers as boolean values.
     decl: |-
@@ -284,8 +284,8 @@ cases:
       }
     logic: |-
       const numberProcessor = new Processor<number, boolean>((input) => input > 0);
-      assertEQ(numberProcessor.process(10), true);
-      assertEQ(numberProcessor.process(-5), false);
+      arktest.assertEQ(numberProcessor.process(10), true);
+      arktest.assertEQ(numberProcessor.process(-5), false);
 
   - desc: Generic composite class, combined class's logging and verification functions.
     decl: |-
@@ -311,9 +311,9 @@ cases:
     logic: |-
       const combo = new ComboClass<string>();
       combo.log("hello")
-      assertEQ(result, "Log: hello");
-      assertEQ(combo.validate("valid"), true);
-      assertEQ(combo.validate(""), false);
+      arktest.assertEQ(result, "Log: hello");
+      arktest.assertEQ(combo.validate("valid"), true);
+      arktest.assertEQ(combo.validate(""), false);
 
   - desc: Generic factory class, create string instance.
     decl: |-
@@ -334,7 +334,7 @@ cases:
       }
     logic: |-
       const stringFactory = new Factory<string>(() => "Hello");
-      assertEQ(stringFactory.create(), "Hello");
+      arktest.assertEQ(stringFactory.create(), "Hello");
 
   - desc: Generic factory class, create number instance.
     decl: |-
@@ -355,7 +355,7 @@ cases:
       }
     logic: |-
       const numberFactory = new Factory<number>(() => 1);
-      assertEQ(numberFactory.create(), 1);
+      arktest.assertEQ(numberFactory.create(), 1);
 
   - desc: Generic factory class, create objects instance.
     decl: |-
@@ -381,4 +381,4 @@ cases:
     logic: |- 
       const objectFactory = new Factory<IObjectWithId>(() => ({ id: 1 }));
       const createdObject = objectFactory.create();
-      assertEQ(createdObject.id, 1);
+      arktest.assertEQ(createdObject.id, 1);

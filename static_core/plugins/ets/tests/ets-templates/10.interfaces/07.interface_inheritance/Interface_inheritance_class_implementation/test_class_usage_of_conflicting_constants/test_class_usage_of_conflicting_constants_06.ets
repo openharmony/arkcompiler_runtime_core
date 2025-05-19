@@ -36,5 +36,5 @@ class ClassB implements InterfaceB {
 function main(): void {
   const instanceA = new ClassA();
   const instanceB = new ClassB();
-  assertNE((instanceA.CONFLICT_CONSTANT + ""), instanceB.CONFLICT_CONSTANT);
+  arktest.assertNE((instanceA.CONFLICT_CONSTANT + ""), instanceB.CONFLICT_CONSTANT);
 }

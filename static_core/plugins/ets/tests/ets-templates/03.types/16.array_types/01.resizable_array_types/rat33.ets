@@ -25,5 +25,5 @@ function main(): void {
   let a: number[] = [1, 2, 3];
   let b = printArray(a);
 
-  assertTrue(a === b);
+  arktest.assertTrue(a === b);
 }

@@ -51,8 +51,8 @@ class Student implements IStudent {
 function main() : void{
   let s0 : Student = new Student("Klara", 18, "an excellent student", new Teacher("Anna"));
 
-  assertEQ( s0.name, "Klara")
-  assertEQ( s0.age, 18)
-  assertEQ( s0.desc, "an excellent student")
-  assertEQ( s0.teacher?.name, "Anna")
+  arktest.assertEQ( s0.name, "Klara")
+  arktest.assertEQ( s0.age, 18)
+  arktest.assertEQ( s0.desc, "an excellent student")
+  arktest.assertEQ( s0.teacher?.name, "Anna")
 }

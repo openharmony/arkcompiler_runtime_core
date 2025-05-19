@@ -28,6 +28,6 @@ class InterfaceStaticConflictClass implements InterfaceStaticConflictInterface {
 
 function main(): void {
   const instance = new InterfaceStaticConflictClass();
-  assertEQ(InterfaceStaticConflictClass.CONST, 16);
-  assertEQ(instance.CONST, 17);
+  arktest.assertEQ(InterfaceStaticConflictClass.CONST, 16);
+  arktest.assertEQ(instance.CONST, 17);
 }

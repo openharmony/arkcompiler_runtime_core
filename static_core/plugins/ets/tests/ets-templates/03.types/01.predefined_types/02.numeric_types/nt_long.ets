@@ -21,6 +21,6 @@ function main(): void {
   let minLong: long = -9223372036854775808;
   let maxLong: long = 9223372036854775807;
 
-  assertTrue(minLong === -9223372036854775808);
-  assertTrue(maxLong === 9223372036854775807);
+  arktest.assertTrue(minLong === -9223372036854775808);
+  arktest.assertTrue(maxLong === 9223372036854775807);
 }

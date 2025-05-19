@@ -21,5 +21,5 @@ enum Color {Red = 1, Green = 2, Blue}
 
 function main(): void {
   let c: Color = Color.Green
-  assertEQ( c.toString(), (c.valueOf() as Int).toString() )
+  arktest.assertEQ( c.toString(), (c.valueOf() as Int).toString() )
 }

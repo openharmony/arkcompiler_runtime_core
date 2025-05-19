@@ -31,7 +31,7 @@ function foo{{loop.index}}(p: bigint = new BigInt(prim{{loop.index}})): bigint {
 
 function main() {
 {%- for t in c['values'] %}
-    assertTrue( foo{{loop.index}}() == foo{{loop.index}}({{t.val}}))
+    arktest.assertTrue( foo{{loop.index}}() == foo{{loop.index}}({{t.val}}))
 {%- endfor %}
 }
 {%- endfor %}

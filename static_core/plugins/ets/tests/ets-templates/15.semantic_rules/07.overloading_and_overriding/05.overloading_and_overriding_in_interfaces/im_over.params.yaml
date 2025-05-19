@@ -87,22 +87,22 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(new Byte(-1 as byte)), 11)
-          assertEQ( i.meth(new Short(-1 as short)), 12)
-          assertEQ( i.meth(new Int(-1 as int)), 13)
-          assertEQ( i.meth(new Long(-1 as long)), 14)
-          assertEQ( i.meth(new Char(c'A')), 16)
-          assertEQ( i.meth(new Boolean(false)), 17)
-          assertEQ( i.meth(new Float(3.14 as float)), 18)
-          assertEQ( i.meth(new Double(3.14)), 19)
-          assertEQ( i.meth(-1 as long), 4)
-          assertEQ( i.meth(-1 as int), 3)
-          assertEQ( i.meth(-1 as short), 2)
-          assertEQ( i.meth(-1 as byte), 1)
-          assertEQ( i.meth(c'A'), 6)
-          assertEQ( i.meth(false), 7)
-          assertEQ( i.meth(3.14), 9)
-          assertEQ( i.meth(3.14 as float), 8)
+          arktest.assertEQ( i.meth(new Byte(-1 as byte)), 11)
+          arktest.assertEQ( i.meth(new Short(-1 as short)), 12)
+          arktest.assertEQ( i.meth(new Int(-1 as int)), 13)
+          arktest.assertEQ( i.meth(new Long(-1 as long)), 14)
+          arktest.assertEQ( i.meth(new Char(c'A')), 16)
+          arktest.assertEQ( i.meth(new Boolean(false)), 17)
+          arktest.assertEQ( i.meth(new Float(3.14 as float)), 18)
+          arktest.assertEQ( i.meth(new Double(3.14)), 19)
+          arktest.assertEQ( i.meth(-1 as long), 4)
+          arktest.assertEQ( i.meth(-1 as int), 3)
+          arktest.assertEQ( i.meth(-1 as short), 2)
+          arktest.assertEQ( i.meth(-1 as byte), 1)
+          arktest.assertEQ( i.meth(c'A'), 6)
+          arktest.assertEQ( i.meth(false), 7)
+          arktest.assertEQ( i.meth(3.14), 9)
+          arktest.assertEQ( i.meth(3.14 as float), 8)
 
     - decl: |-
           // primitives and boxed, with default methods
@@ -128,22 +128,22 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(new Byte(-1 as byte)), 11)
-          assertEQ( i.meth(new Short(-1 as short)), 12)
-          assertEQ( i.meth(new Int(-1 as int)), 13)
-          assertEQ( i.meth(new Long(-1 as long)), 14)
-          assertEQ( i.meth(new Char(c'A')), 16)
-          assertEQ( i.meth(new Boolean(false)), 17)
-          assertEQ( i.meth(new Float(3.14 as float)), 18)
-          assertEQ( i.meth(new Double(3.14)), 19)
-          assertEQ( i.meth(-1 as long), 4)
-          assertEQ( i.meth(-1 as int), 3)
-          assertEQ( i.meth(-1 as short), 2)
-          assertEQ( i.meth(-1 as byte), 1)
-          assertEQ( i.meth(c'A'), 6)
-          assertEQ( i.meth(false), 7)
-          assertEQ( i.meth(3.14), 9)
-          assertEQ( i.meth(3.14 as float), 8)
+          arktest.assertEQ( i.meth(new Byte(-1 as byte)), 11)
+          arktest.assertEQ( i.meth(new Short(-1 as short)), 12)
+          arktest.assertEQ( i.meth(new Int(-1 as int)), 13)
+          arktest.assertEQ( i.meth(new Long(-1 as long)), 14)
+          arktest.assertEQ( i.meth(new Char(c'A')), 16)
+          arktest.assertEQ( i.meth(new Boolean(false)), 17)
+          arktest.assertEQ( i.meth(new Float(3.14 as float)), 18)
+          arktest.assertEQ( i.meth(new Double(3.14)), 19)
+          arktest.assertEQ( i.meth(-1 as long), 4)
+          arktest.assertEQ( i.meth(-1 as int), 3)
+          arktest.assertEQ( i.meth(-1 as short), 2)
+          arktest.assertEQ( i.meth(-1 as byte), 1)
+          arktest.assertEQ( i.meth(c'A'), 6)
+          arktest.assertEQ( i.meth(false), 7)
+          arktest.assertEQ( i.meth(3.14), 9)
+          arktest.assertEQ( i.meth(3.14 as float), 8)
 
     - decl: |-
           // primitives and boxed, with overridden default methods
@@ -187,22 +187,22 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(new Byte(-1 as byte)), 11)
-          assertEQ( i.meth(new Short(-1 as short)), 12)
-          assertEQ( i.meth(new Int(-1 as int)), 13)
-          assertEQ( i.meth(new Long(-1 as long)), 14)
-          assertEQ( i.meth(new Char(c'A')), 16)
-          assertEQ( i.meth(new Boolean(false)), 17)
-          assertEQ( i.meth(new Float(3.14 as float)), 18)
-          assertEQ( i.meth(new Double(3.14)), 19)
-          assertEQ( i.meth(-1 as long), 4)
-          assertEQ( i.meth(-1 as int), 3)
-          assertEQ( i.meth(-1 as short), 2)
-          assertEQ( i.meth(-1 as byte), 1)
-          assertEQ( i.meth(c'A'), 6)
-          assertEQ( i.meth(false), 7)
-          assertEQ( i.meth(3.14), 9)
-          assertEQ( i.meth(3.14 as float), 8)
+          arktest.assertEQ( i.meth(new Byte(-1 as byte)), 11)
+          arktest.assertEQ( i.meth(new Short(-1 as short)), 12)
+          arktest.assertEQ( i.meth(new Int(-1 as int)), 13)
+          arktest.assertEQ( i.meth(new Long(-1 as long)), 14)
+          arktest.assertEQ( i.meth(new Char(c'A')), 16)
+          arktest.assertEQ( i.meth(new Boolean(false)), 17)
+          arktest.assertEQ( i.meth(new Float(3.14 as float)), 18)
+          arktest.assertEQ( i.meth(new Double(3.14)), 19)
+          arktest.assertEQ( i.meth(-1 as long), 4)
+          arktest.assertEQ( i.meth(-1 as int), 3)
+          arktest.assertEQ( i.meth(-1 as short), 2)
+          arktest.assertEQ( i.meth(-1 as byte), 1)
+          arktest.assertEQ( i.meth(c'A'), 6)
+          arktest.assertEQ( i.meth(false), 7)
+          arktest.assertEQ( i.meth(3.14), 9)
+          arktest.assertEQ( i.meth(3.14 as float), 8)
 
     - decl: |-
           // enums
@@ -228,12 +228,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(-1), 1)
-          assertEQ( i.meth(Color.Red), 3)
-          assertEQ( i.meth(-2 as short), 1)
-          assertEQ( i.meth("abc"), 2)
-          assertEQ( i.meth(Size.L), 4)
-          assertEQ( i.meth(42 as byte), 1)
+          arktest.assertEQ( i.meth(-1), 1)
+          arktest.assertEQ( i.meth(Color.Red), 3)
+          arktest.assertEQ( i.meth(-2 as short), 1)
+          arktest.assertEQ( i.meth("abc"), 2)
+          arktest.assertEQ( i.meth(Size.L), 4)
+          arktest.assertEQ( i.meth(42 as byte), 1)
 
     - decl: |-
           // enums, with default methods
@@ -249,12 +249,12 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(-1), 1)
-          assertEQ( i.meth(Color.Red), 3)
-          assertEQ( i.meth(-2 as short), 1)
-          assertEQ( i.meth("abc"), 2)
-          assertEQ( i.meth(Size.L), 4)
-          assertEQ( i.meth(42 as byte), 1)
+          arktest.assertEQ( i.meth(-1), 1)
+          arktest.assertEQ( i.meth(Color.Red), 3)
+          arktest.assertEQ( i.meth(-2 as short), 1)
+          arktest.assertEQ( i.meth("abc"), 2)
+          arktest.assertEQ( i.meth(Size.L), 4)
+          arktest.assertEQ( i.meth(42 as byte), 1)
 
     - decl: |-
           // enums, with overridden default methods
@@ -275,12 +275,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(-1), 1)
-          assertEQ( i.meth(Color.Red), 3)
-          assertEQ( i.meth(-2 as short), 1)
-          assertEQ( i.meth("abc"), 2)
-          assertEQ( i.meth(Size.L), 4)
-          assertEQ( i.meth(42 as byte), 1)
+          arktest.assertEQ( i.meth(-1), 1)
+          arktest.assertEQ( i.meth(Color.Red), 3)
+          arktest.assertEQ( i.meth(-2 as short), 1)
+          arktest.assertEQ( i.meth("abc"), 2)
+          arktest.assertEQ( i.meth(Size.L), 4)
+          arktest.assertEQ( i.meth(42 as byte), 1)
 
     - decl: |-
           // arrays
@@ -341,26 +341,26 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth([-1 as byte]), 1)
-          assertEQ( i.meth([-1 as short]), 2)
-          assertEQ( i.meth([-1 as int]), 3)
-          assertEQ( i.meth([-1 as long]), 4)
-          assertEQ( i.meth([c'A']), 5)
-          assertEQ( i.meth([false]), 6)
-          assertEQ( i.meth([3.14 as float]), 7)
-          assertEQ( i.meth([3.14]), 8)
-          assertEQ( i.meth([new Byte(-1 as byte)]), 9)
-          assertEQ( i.meth([new Short(-1 as short)]), 10)
-          assertEQ( i.meth([new Int(-1)]), 11)
-          assertEQ( i.meth([new Long(-1 as long)]), 12)
-          assertEQ( i.meth([new Char(c'A')]), 13)
-          assertEQ( i.meth([new Boolean(false)]), 14)
-          assertEQ( i.meth([new Float(3.14 as float)]), 15)
-          assertEQ( i.meth([new Double(3.14)]), 16)
-          assertEQ( i.meth([new Object()]), 17)
-          assertEQ( i.meth([Color.Red]), 18)
-          assertEQ( i.meth([Size.M]), 19)
-          assertEQ( i.meth(new A[1]), 20)
+          arktest.assertEQ( i.meth([-1 as byte]), 1)
+          arktest.assertEQ( i.meth([-1 as short]), 2)
+          arktest.assertEQ( i.meth([-1 as int]), 3)
+          arktest.assertEQ( i.meth([-1 as long]), 4)
+          arktest.assertEQ( i.meth([c'A']), 5)
+          arktest.assertEQ( i.meth([false]), 6)
+          arktest.assertEQ( i.meth([3.14 as float]), 7)
+          arktest.assertEQ( i.meth([3.14]), 8)
+          arktest.assertEQ( i.meth([new Byte(-1 as byte)]), 9)
+          arktest.assertEQ( i.meth([new Short(-1 as short)]), 10)
+          arktest.assertEQ( i.meth([new Int(-1)]), 11)
+          arktest.assertEQ( i.meth([new Long(-1 as long)]), 12)
+          arktest.assertEQ( i.meth([new Char(c'A')]), 13)
+          arktest.assertEQ( i.meth([new Boolean(false)]), 14)
+          arktest.assertEQ( i.meth([new Float(3.14 as float)]), 15)
+          arktest.assertEQ( i.meth([new Double(3.14)]), 16)
+          arktest.assertEQ( i.meth([new Object()]), 17)
+          arktest.assertEQ( i.meth([Color.Red]), 18)
+          arktest.assertEQ( i.meth([Size.M]), 19)
+          arktest.assertEQ( i.meth(new A[1]), 20)
 
     - decl: |-
           // arrays with default methods
@@ -392,26 +392,26 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assertEQ( i.meth([-1 as byte]), 1)
-          assertEQ( i.meth([-1 as short]), 2)
-          assertEQ( i.meth([-1 as int]), 3)
-          assertEQ( i.meth([-1 as long]), 4)
-          assertEQ( i.meth([c'A']), 5)
-          assertEQ( i.meth([false]), 6)
-          assertEQ( i.meth([3.14 as float]), 7)
-          assertEQ( i.meth([3.14]), 8)
-          assertEQ( i.meth([new Byte(-1 as byte)]), 9)
-          assertEQ( i.meth([new Short(-1 as short)]), 10)
-          assertEQ( i.meth([new Int(-1)]), 11)
-          assertEQ( i.meth([new Long(-1 as long)]), 12)
-          assertEQ( i.meth([new Char(c'A')]), 13)
-          assertEQ( i.meth([new Boolean(false)]), 14)
-          assertEQ( i.meth([new Float(3.14 as float)]), 15)
-          assertEQ( i.meth([new Double(3.14)]), 16)
-          assertEQ( i.meth([new Object()]), 17)
-          assertEQ( i.meth([Color.Red]), 18)
-          assertEQ( i.meth([Size.M]), 19)
-          assertEQ( i.meth(new A[1]), 20)
+          arktest.assertEQ( i.meth([-1 as byte]), 1)
+          arktest.assertEQ( i.meth([-1 as short]), 2)
+          arktest.assertEQ( i.meth([-1 as int]), 3)
+          arktest.assertEQ( i.meth([-1 as long]), 4)
+          arktest.assertEQ( i.meth([c'A']), 5)
+          arktest.assertEQ( i.meth([false]), 6)
+          arktest.assertEQ( i.meth([3.14 as float]), 7)
+          arktest.assertEQ( i.meth([3.14]), 8)
+          arktest.assertEQ( i.meth([new Byte(-1 as byte)]), 9)
+          arktest.assertEQ( i.meth([new Short(-1 as short)]), 10)
+          arktest.assertEQ( i.meth([new Int(-1)]), 11)
+          arktest.assertEQ( i.meth([new Long(-1 as long)]), 12)
+          arktest.assertEQ( i.meth([new Char(c'A')]), 13)
+          arktest.assertEQ( i.meth([new Boolean(false)]), 14)
+          arktest.assertEQ( i.meth([new Float(3.14 as float)]), 15)
+          arktest.assertEQ( i.meth([new Double(3.14)]), 16)
+          arktest.assertEQ( i.meth([new Object()]), 17)
+          arktest.assertEQ( i.meth([Color.Red]), 18)
+          arktest.assertEQ( i.meth([Size.M]), 19)
+          arktest.assertEQ( i.meth(new A[1]), 20)
 
     - decl: |-
           // arrays with overridden default methods
@@ -464,26 +464,26 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth([-1 as byte]), 1)
-          assertEQ( i.meth([-1 as short]), 2)
-          assertEQ( i.meth([-1 as int]), 3)
-          assertEQ( i.meth([-1 as long]), 4)
-          assertEQ( i.meth([c'A']), 5)
-          assertEQ( i.meth([false]), 6)
-          assertEQ( i.meth([3.14 as float]), 7)
-          assertEQ( i.meth([3.14]), 8)
-          assertEQ( i.meth([new Byte(-1 as byte)]), 9)
-          assertEQ( i.meth([new Short(-1 as short)]), 10)
-          assertEQ( i.meth([new Int(-1)]), 11)
-          assertEQ( i.meth([new Long(-1 as long)]), 12)
-          assertEQ( i.meth([new Char(c'A')]), 13)
-          assertEQ( i.meth([new Boolean(false)]), 14)
-          assertEQ( i.meth([new Float(3.14 as float)]), 15)
-          assertEQ( i.meth([new Double(3.14)]), 16)
-          assertEQ( i.meth([new Object()]), 17)
-          assertEQ( i.meth([Color.Red]), 18)
-          assertEQ( i.meth([Size.M]), 19)
-          assertEQ( i.meth(new A[1]), 20)
+          arktest.assertEQ( i.meth([-1 as byte]), 1)
+          arktest.assertEQ( i.meth([-1 as short]), 2)
+          arktest.assertEQ( i.meth([-1 as int]), 3)
+          arktest.assertEQ( i.meth([-1 as long]), 4)
+          arktest.assertEQ( i.meth([c'A']), 5)
+          arktest.assertEQ( i.meth([false]), 6)
+          arktest.assertEQ( i.meth([3.14 as float]), 7)
+          arktest.assertEQ( i.meth([3.14]), 8)
+          arktest.assertEQ( i.meth([new Byte(-1 as byte)]), 9)
+          arktest.assertEQ( i.meth([new Short(-1 as short)]), 10)
+          arktest.assertEQ( i.meth([new Int(-1)]), 11)
+          arktest.assertEQ( i.meth([new Long(-1 as long)]), 12)
+          arktest.assertEQ( i.meth([new Char(c'A')]), 13)
+          arktest.assertEQ( i.meth([new Boolean(false)]), 14)
+          arktest.assertEQ( i.meth([new Float(3.14 as float)]), 15)
+          arktest.assertEQ( i.meth([new Double(3.14)]), 16)
+          arktest.assertEQ( i.meth([new Object()]), 17)
+          arktest.assertEQ( i.meth([Color.Red]), 18)
+          arktest.assertEQ( i.meth([Size.M]), 19)
+          arktest.assertEQ( i.meth(new A[1]), 20)
 
     - decl: |-
           // tuples, sub/super interfaces
@@ -509,11 +509,11 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth([3.14, "abc"]), 1)
-          assertEQ( i.meth([3.14, false]), 2)
-          assertEQ( i.meth([3.14]), 3)
-          assertEQ( i.meth(["abc"]), 4)
-          assertEQ( i.meth(true), 5)
+          arktest.assertEQ( i.meth([3.14, "abc"]), 1)
+          arktest.assertEQ( i.meth([3.14, false]), 2)
+          arktest.assertEQ( i.meth([3.14]), 3)
+          arktest.assertEQ( i.meth(["abc"]), 4)
+          arktest.assertEQ( i.meth(true), 5)
 
     - decl: |-
           // tuples, sub/super interfaces, default methods
@@ -529,11 +529,11 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assertEQ( i.meth([3.14, "abc"]), 1)
-          assertEQ( i.meth([3.14, false]), 2)
-          assertEQ( i.meth([3.14]), 3)
-          assertEQ( i.meth(["abc"]), 4)
-          assertEQ( i.meth(true), 5)
+          arktest.assertEQ( i.meth([3.14, "abc"]), 1)
+          arktest.assertEQ( i.meth([3.14, false]), 2)
+          arktest.assertEQ( i.meth([3.14]), 3)
+          arktest.assertEQ( i.meth(["abc"]), 4)
+          arktest.assertEQ( i.meth(true), 5)
 
     - decl: |-
           // tuples, sub/super interfaces, overridden default methods
@@ -555,11 +555,11 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth([3.14, "abc"]), 1)
-          assertEQ( i.meth([3.14, false]), 2)
-          assertEQ( i.meth([3.14]), 3)
-          assertEQ( i.meth(["abc"]), 4)
-          assertEQ( i.meth(true), 5)
+          arktest.assertEQ( i.meth([3.14, "abc"]), 1)
+          arktest.assertEQ( i.meth([3.14, false]), 2)
+          arktest.assertEQ( i.meth([3.14]), 3)
+          arktest.assertEQ( i.meth(["abc"]), 4)
+          arktest.assertEQ( i.meth(true), 5)
 
     - decl: |-
           // unions with sub/super interfaces
@@ -580,12 +580,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(3.14), 4)
-          assertEQ( i.meth(""), 3)
+          arktest.assertEQ( i.meth(3.14), 4)
+          arktest.assertEQ( i.meth(""), 3)
           let t1: string|Number|null = "xyz"
-          assertEQ( i.meth(t1), 1)
+          arktest.assertEQ( i.meth(t1), 1)
           let t2: Boolean|undefined = undefined
-          assertEQ( i.meth(t2), 2)
+          arktest.assertEQ( i.meth(t2), 2)
 
     - decl: |-
           // unions with sub/super interfaces, default methods
@@ -599,12 +599,12 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(3.14), 4)
-          assertEQ( i.meth(""), 3)
+          arktest.assertEQ( i.meth(3.14), 4)
+          arktest.assertEQ( i.meth(""), 3)
           let t1: string|Number|null = "xyz"
-          assertEQ( i.meth(t1), 1)
+          arktest.assertEQ( i.meth(t1), 1)
           let t2: Boolean|undefined = undefined
-          assertEQ( i.meth(t2), 2)
+          arktest.assertEQ( i.meth(t2), 2)
 
     - decl: |-
           // unions with sub/super interfaces, overridden default methods
@@ -623,12 +623,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(3.14), 4)
-          assertEQ( i.meth(""), 3)
+          arktest.assertEQ( i.meth(3.14), 4)
+          arktest.assertEQ( i.meth(""), 3)
           let t1: string|Number|null = "xyz"
-          assertEQ( i.meth(t1), 1)
+          arktest.assertEQ( i.meth(t1), 1)
           let t2: Boolean|undefined = undefined
-          assertEQ( i.meth(t2), 2)
+          arktest.assertEQ( i.meth(t2), 2)
 
     - decl: |-
           // function types
@@ -656,14 +656,14 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertTrue( false )
+              arktest.assertTrue( false )
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(foo), 1)
-          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 )}), 2)
-          assertEQ( i.meth(fff), 3)
-          assertEQ( i.meth(eee), 4)
+          arktest.assertEQ( i.meth(foo), 1)
+          arktest.assertEQ( i.meth((v: number): void => { arktest.assertEQ( v, 0.0 )}), 2)
+          arktest.assertEQ( i.meth(fff), 3)
+          arktest.assertEQ( i.meth(eee), 4)
       tags: negative, compile-only
 
     - decl: |-
@@ -685,15 +685,15 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertTrue( false )
+              arktest.assertTrue( false )
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(foo), 1)
-          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 )}), 2)
-          assertEQ( i.meth(fff), 3)
+          arktest.assertEQ( i.meth(foo), 1)
+          arktest.assertEQ( i.meth((v: number): void => { arktest.assertEQ( v, 0.0 )}), 2)
+          arktest.assertEQ( i.meth(fff), 3)
           let v: EE = eee
-          assertEQ( i.meth(v), 4)
+          arktest.assertEQ( i.meth(v), 4)
       tags: negative, compile-only
 
     - decl: |-
@@ -720,15 +720,15 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertTrue( false )
+              arktest.assertTrue( false )
           }
       use: |-
           let i: I = new A()
-          assertEQ( i.meth(foo), 1)
-          assertEQ( i.meth((v: number): void => { assertEQ( v, 0.0 )}), 2)
-          assertEQ( i.meth(fff), 3)
+          arktest.assertEQ( i.meth(foo), 1)
+          arktest.assertEQ( i.meth((v: number): void => { arktest.assertEQ( v, 0.0 )}), 2)
+          arktest.assertEQ( i.meth(fff), 3)
           let v: EE = eee
-          assertEQ( i.meth(v), 4)
+          arktest.assertEQ( i.meth(v), 4)
       tags: negative, compile-only
 
     - decl: |-
@@ -755,19 +755,19 @@ cases:
       use: |-
           let a: A = new A()
           let s: S = "ABC"
-          assertEQ( a.meth(s), 4)
+          arktest.assertEQ( a.meth(s), 4)
           let sn: SN = "ABC"
-          assertEQ( a.meth(sn), 1)
+          arktest.assertEQ( a.meth(sn), 1)
           let su: SU = "ABC"
-          assertEQ( a.meth(su), 2)
+          arktest.assertEQ( a.meth(su), 2)
           let snu: SNU = "ABC"
-          assertEQ( a.meth(snu), 3)
+          arktest.assertEQ( a.meth(snu), 3)
           sn = null
-          assertEQ( a.meth(sn), 1)
+          arktest.assertEQ( a.meth(sn), 1)
           su = undefined
-          assertEQ( a.meth(su), 2)
+          arktest.assertEQ( a.meth(su), 2)
           snu = undefined
-          assertEQ( a.meth(snu), 3)
+          arktest.assertEQ( a.meth(snu), 3)
 
     - decl: |-
           // nullish types with default methods
@@ -787,19 +787,19 @@ cases:
       use: |-
           let i: A = new A()
           let s: S = "ABC"
-          assertEQ( i.meth(s), 4)
+          arktest.assertEQ( i.meth(s), 4)
           let sn: SN = "ABC"
-          assertEQ( i.meth(sn), 1)
+          arktest.assertEQ( i.meth(sn), 1)
           let su: SU = "ABC"
-          assertEQ( i.meth(su), 2)
+          arktest.assertEQ( i.meth(su), 2)
           let snu: SNU = "ABC"
-          assertEQ( i.meth(snu), 3)
+          arktest.assertEQ( i.meth(snu), 3)
           sn = null
-          assertEQ( i.meth(sn), 1)
+          arktest.assertEQ( i.meth(sn), 1)
           su = undefined
-          assertEQ( i.meth(su), 2)
+          arktest.assertEQ( i.meth(su), 2)
           snu = undefined
-          assertEQ( i.meth(snu), 3)
+          arktest.assertEQ( i.meth(snu), 3)
 
     - decl: |-
           // nullish types with overridden default methods
@@ -822,16 +822,16 @@ cases:
       use: |-
           let i: I = new A()
           let s: S = "ABC"
-          assertEQ( i.meth(s), 4)
+          arktest.assertEQ( i.meth(s), 4)
           let sn: SN = "ABC"
-          assertEQ( i.meth(sn), 1)
+          arktest.assertEQ( i.meth(sn), 1)
           let su: SU = "ABC"
-          assertEQ( i.meth(su), 2)
+          arktest.assertEQ( i.meth(su), 2)
           let snu: SNU = "ABC"
-          assertEQ( i.meth(snu), 3)
+          arktest.assertEQ( i.meth(snu), 3)
           sn = null
-          assertEQ( i.meth(sn), 1)
+          arktest.assertEQ( i.meth(sn), 1)
           su = undefined
-          assertEQ( i.meth(su), 2)
+          arktest.assertEQ( i.meth(su), 2)
           snu = undefined
-          assertEQ( i.meth(snu), 3)
+          arktest.assertEQ( i.meth(snu), 3)

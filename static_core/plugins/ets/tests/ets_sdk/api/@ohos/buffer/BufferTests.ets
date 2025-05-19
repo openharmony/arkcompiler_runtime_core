@@ -22,7 +22,7 @@ function testToString() {
             buf1.writeInt8(i + 97, i);
         }
         const res = buf1.toString('base64'); // YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=
-        assertEQ(res, "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=");
+        arktest.assertEQ(res, "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=");
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -30,7 +30,7 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', 30); // '';
-        assertEQ(str, '')
+        arktest.assertEQ(str, '')
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -38,7 +38,7 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', 5, 3); // ''
-        assertEQ(str, '');
+        arktest.assertEQ(str, '');
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -46,7 +46,7 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', -1); // abcdefghijklmnopqrstuvwxyz
-        assertEQ(str, 'abcdefghijklmnopqrstuvwxyz');
+        arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz');
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -54,7 +54,7 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', Infinity); // ''
-        assertEQ(str, '');
+        arktest.assertEQ(str, '');
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -62,7 +62,7 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', -Infinity); // abcdefghijklmnopqrstuvwxyz
-        assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
+        arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -70,7 +70,7 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', undefined, Infinity) // abcdefghijklmnopqrstuvwxyz
-        assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
+        arktest.assertEQ(str, 'abcdefghijklmnopqrstuvwxyz')
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -78,7 +78,7 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', 0, -Infinity); // ''
-        assertEQ(str, '')
+        arktest.assertEQ(str, '')
     }
     {
         let buf = buffer.allocUninitializedFromPool(26);
@@ -86,70 +86,70 @@ function testToString() {
             buf.writeInt8(i + 97, i);
         }
         const str = buf.toString('utf8', undefined, -1); // ''
-        assertEQ(str, '')
+        arktest.assertEQ(str, '')
     }
     {
         const buf = buffer.from('hello');
         const res = buf.toString('base64', 0, -1); // ''
-        assertEQ(res, '')
+        arktest.assertEQ(res, '')
     }
     {
         const buf = buffer.from('hello');
         const res = buf.toString('base64', 0, Infinity); // aGVsbG8=
-        assertEQ(res, 'aGVsbG8=')
+        arktest.assertEQ(res, 'aGVsbG8=')
     }
     {
         const buf = buffer.from('hello');
         const res = buf.toString('base64', 0, -Infinity); // ''
-        assertEQ(res, '')
+        arktest.assertEQ(res, '')
     }
     {
         let array = new Uint8Array([252, 11, 3, 67, 237, 118, 91, 177, 43]);
         let buf = buffer.from(array);
         let strUrl = buf.toString("base64url");
         let str = buf.toString("base64");
-        assertEQ(strUrl, "_AsDQ-12W7Er");
-        assertEQ(str, "/AsDQ+12W7Er");
+        arktest.assertEQ(strUrl, "_AsDQ-12W7Er");
+        arktest.assertEQ(str, "/AsDQ+12W7Er");
 
         array = new Uint8Array([2, 192, 254, 253, 5, 132, 69]);
         buf = buffer.from(array);
         strUrl = buf.toString("base64url");
         str = buf.toString("base64");
-        assertEQ(String(strUrl), 'AsD-_QWERQ');
-        assertEQ(str, "AsD+/QWERQ==");
+        arktest.assertEQ(String(strUrl), 'AsD-_QWERQ');
+        arktest.assertEQ(str, "AsD+/QWERQ==");
 
         array = new Uint8Array([215, 109, 211, 97, 72, 142, 167, 241]);
         buf = buffer.from(array);
         strUrl = buf.toString("base64url");
         str = buf.toString("base64");
-        assertEQ(strUrl, "123TYUiOp_E");
-        assertEQ(str, "123TYUiOp/E=");
+        arktest.assertEQ(strUrl, "123TYUiOp_E");
+        arktest.assertEQ(str, "123TYUiOp/E=");
 
         array = new Uint8Array([252]);
         buf = buffer.from(array);
         strUrl = buf.toString("base64url");
         str = buf.toString("base64");
-        assertEQ(strUrl, "_A");
-        assertEQ(str, "/A==");
+        arktest.assertEQ(strUrl, "_A");
+        arktest.assertEQ(str, "/A==");
 
         array = new Uint8Array([252, 97]);
         buf = buffer.from(array);
         strUrl = buf.toString("base64url");
         str = buf.toString("base64");
-        assertEQ(strUrl, "_GE");
-        assertEQ(str, "/GE=");
+        arktest.assertEQ(strUrl, "_GE");
+        arktest.assertEQ(str, "/GE=");
 
         array = new Uint8Array([252, 97, 142]);
         buf = buffer.from(array);
         strUrl = buf.toString("base64url");
         str = buf.toString("base64");
-        assertEQ(strUrl, "_GGO");
-        assertEQ(str, "/GGO");
+        arktest.assertEQ(strUrl, "_GGO");
+        arktest.assertEQ(str, "/GGO");
     }
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Buffer API tests")
+    const suite = new arktest.ArkTestsuite("Buffer API tests")
     suite.addTest("Test buffer toString", testToString)
     return suite.run()
 }

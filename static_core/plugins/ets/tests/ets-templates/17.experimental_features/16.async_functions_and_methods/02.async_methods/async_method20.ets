@@ -28,7 +28,7 @@ class MethodAwaitResolve {
 async function startTest() {
     const example = new MethodAwaitResolve();
     const result = await example.methodAwaitResolve();
-    assertEQ(result, "Resolved!");
+    arktest.assertEQ(result, "Resolved!");
 }
 
 function main(): void {

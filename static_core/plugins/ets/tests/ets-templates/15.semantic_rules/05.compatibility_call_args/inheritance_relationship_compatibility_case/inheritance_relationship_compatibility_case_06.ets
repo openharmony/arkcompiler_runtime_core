@@ -33,6 +33,6 @@ function main() {
     let b = new Derived();
     let resultA = a.methodOne(a);
     let resultB = b.methodOne(a);
-    assertEQ(resultA, resultB);
+    arktest.assertEQ(resultA, resultB);
 }
 main();

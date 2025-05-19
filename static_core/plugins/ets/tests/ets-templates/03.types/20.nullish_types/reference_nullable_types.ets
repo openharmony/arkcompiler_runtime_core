@@ -25,7 +25,7 @@ class A {}
 function main(): void {
   let x: {{n.type}} = {{n.value}};
 
-  assertTrue(x == {{n.value}})
+  arktest.assertTrue(x == {{n.value}})
 }
 
 {% endfor %}

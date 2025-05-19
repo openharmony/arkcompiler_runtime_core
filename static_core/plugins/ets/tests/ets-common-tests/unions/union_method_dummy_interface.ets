@@ -36,7 +36,7 @@ class A3 extends A2 {
 function test(c: A1 | Dummy, a: I3): String { return c.m(a) }
 
 function main() {
-  assertEQ(test(new A1(), {}), "A1");
-  assertEQ(test(new A2(), {}), "A2");
-  assertEQ(test(new A3(), {}), "A2");
+  arktest.assertEQ(test(new A1(), {}), "A1");
+  arktest.assertEQ(test(new A2(), {}), "A2");
+  arktest.assertEQ(test(new A3(), {}), "A2");
 }

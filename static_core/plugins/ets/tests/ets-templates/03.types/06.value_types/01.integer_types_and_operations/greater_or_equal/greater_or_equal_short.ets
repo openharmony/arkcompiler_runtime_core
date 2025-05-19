@@ -21,7 +21,7 @@ desc: check greater or equal for two short integers
 function main(): void {
   const a: short = {{v.left}}
   const b: short = {{v.right}}
-  assertEQ( (a >= b), {{v.result}})
+  arktest.assertEQ( (a >= b), {{v.result}})
 }
 
 {% endfor %}

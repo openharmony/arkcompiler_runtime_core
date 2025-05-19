@@ -31,6 +31,6 @@ function main(): void {
     name: "Alice",
   };
 
-  assertEQ(person.name, "Alice");
-  assertEQ(person.age, undefined);
+  arktest.assertEQ(person.name, "Alice");
+  arktest.assertEQ(person.age, undefined);
 }

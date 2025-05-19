@@ -21,5 +21,5 @@ params: boolean, false
 let z: boolean;
 
 function main(): void {
-    assertEQ(z, false);
+    arktest.assertEQ(z, false);
 }

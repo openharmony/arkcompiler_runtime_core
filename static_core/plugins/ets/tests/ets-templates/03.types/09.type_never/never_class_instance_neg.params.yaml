@@ -18,7 +18,7 @@ types:
 
     - use: |-
           let x: never = {} as never
-          assertTrue( x != null)
+          arktest.assertTrue( x != null)
 
     - use: |-
           let x: never = new Object()
@@ -37,7 +37,7 @@ types:
 
     - use: |-
           let x: never[] = new never[10]
-          assertTrue( x.length == 10)
+          arktest.assertTrue( x.length == 10)
 
     - use: |-
           let x: never[] = [new never] as never[]

@@ -22,5 +22,5 @@ let boolLogic2: boolean = false;
 let logicalResult = boolLogic1 && boolLogic2;
 
 function main(): void {
-    assertEQ(logicalResult, false);
+    arktest.assertEQ(logicalResult, false);
 }

@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isTypedArray() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isTypedArray() API tests")
 
     suite.addTest("Verify Float64Array is a TypedArray", testIsTypedArray001)
     suite.addTest("Verify Uint8Array is a TypedArray", testIsTypedArray002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsTypedArray001() {
     let proc = new util.types();
     let result = proc.isTypedArray(new Float64Array());
-    assertTrue(result, "The Float64Array should be of the same type as the Float64Array");
+    arktest.assertTrue(result, "The Float64Array should be of the same type as the Float64Array");
 }
 
 /**
@@ -52,7 +52,7 @@ function testIsTypedArray001() {
 function testIsTypedArray002() {
     let proc = new util.types();
     let result = proc.isTypedArray(new Uint8Array());
-    assertTrue(result, "The Uint8Array should be of the same type as the Uint8Array");
+    arktest.assertTrue(result, "The Uint8Array should be of the same type as the Uint8Array");
 }
 
 /**
@@ -66,7 +66,7 @@ function testIsTypedArray002() {
 function testIsTypedArray003() {
     let proc = new util.types();
     let result = proc.isTypedArray(new Uint16Array());
-    assertTrue(result, "The Uint16Array should be of the same type as the Uint16Array");
+    arktest.assertTrue(result, "The Uint16Array should be of the same type as the Uint16Array");
 }
 
 /**
@@ -80,7 +80,7 @@ function testIsTypedArray003() {
 function testIsTypedArray004() {
     let proc = new util.types();
     let result = proc.isTypedArray(new Uint32Array());
-    assertTrue(result, "The Uint32Array should be of the same type as the Uint32Array");
+    arktest.assertTrue(result, "The Uint32Array should be of the same type as the Uint32Array");
 }
 
 /**
@@ -94,5 +94,5 @@ function testIsTypedArray004() {
 function testIsTypedArray005() {
     let proc = new util.types();
     let result = proc.isTypedArray(new ArrayBuffer(96));
-    assertTrue(result == false, "The ArrayBuffer should be of the same type as the ArrayBuffer");
+    arktest.assertTrue(result == false, "The ArrayBuffer should be of the same type as the ArrayBuffer");
 }

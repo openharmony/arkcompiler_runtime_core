@@ -42,7 +42,7 @@ cases:
       a[1] = 7
       let y = a[1]
       let count = a.length // get the number of array elements
-      assertEQ(y, 7)
-      assertEQ(count, 3)
+      arktest.assertEQ(y, 7)
+      arktest.assertEQ(count, 3)
   - use: |-
       let n = [1, "abc", 2]

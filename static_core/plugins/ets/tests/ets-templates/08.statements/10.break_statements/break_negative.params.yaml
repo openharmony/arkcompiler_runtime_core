@@ -16,4 +16,4 @@ break_statements:
   - use: |
       let i = 2;
       break;
-      assertEQ(i, 2)
+      arktest.assertEQ(i, 2)

@@ -33,7 +33,7 @@ cases:
       let a: t = "bar"
       a = "foo"
       a = "jay"
-      assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, string)
 
   - decl: |-
       final class A<T,V> {
@@ -49,7 +49,7 @@ cases:
       let a: t = "bar"
       a = "foo"
       a = "jay"
-      assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, string)
 
   - decl: |-
       abstract class A<T,V> {
@@ -63,7 +63,7 @@ cases:
       let a: t = "bar"
       a = "foo"
       a = "jay"
-      assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, string)
 
   - decl: |-
       interface I<T,V> {
@@ -77,4 +77,4 @@ cases:
       let a: t = "bar"
       a = "foo"
       a = "jay"
-      assertEQ(typeof a, string)
+      arktest.assertEQ(typeof a, string)

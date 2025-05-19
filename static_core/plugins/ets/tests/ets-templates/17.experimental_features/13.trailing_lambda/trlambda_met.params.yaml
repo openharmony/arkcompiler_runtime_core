@@ -27,7 +27,7 @@ cases:
           new A().foo(10.0, () => {
               A.globl = 3.0
           })
-          assertEQ( A.globl, 13.0 )
+          arktest.assertEQ( A.globl, 13.0 )
 
     - decl: |-
           class A {
@@ -42,10 +42,10 @@ cases:
           new A().foo(10.0, () => {
               A.globl = 3.0
           })
-          assertEQ( A.globl, 13.0 )
+          arktest.assertEQ( A.globl, 13.0 )
 
           new A().foo(10.0)
-          assertEQ( A.globl, 23.0 )
+          arktest.assertEQ( A.globl, 23.0 )
 
     # trailing lambda cases
     - decl: |-
@@ -61,7 +61,7 @@ cases:
           {
               A.globl = 3.0
           }
-          assertEQ( A.globl, 13.0 )
+          arktest.assertEQ( A.globl, 13.0 )
 
     - decl: |-
           type FF = () => void
@@ -77,10 +77,10 @@ cases:
           {
               A.globl = 3.0
           }
-          assertEQ( A.globl, 13.0 )
+          arktest.assertEQ( A.globl, 13.0 )
 
           new A().foo(10.0)
-          assertEQ( A.globl, 23.0 )
+          arktest.assertEQ( A.globl, 23.0 )
 
     # regular lambda cases with extra block afterwards
     - decl: |-
@@ -97,7 +97,7 @@ cases:
           {
               A.globl = 4.0
           }
-          assertEQ( A.globl, 4.0 )
+          arktest.assertEQ( A.globl, 4.0 )
 
     - decl: |-
           type FF = () => void
@@ -114,16 +114,16 @@ cases:
           {
               A.globl = 4.0
           }
-          assertEQ( A.globl, 4.0 )
+          arktest.assertEQ( A.globl, 4.0 )
 
           new A().foo(10.0) // trailing lambda
           {
               A.globl = 5.0
           }
-          assertEQ( A.globl, 15.0 )
+          arktest.assertEQ( A.globl, 15.0 )
 
           new A().foo(10.0)  // no trailing lambda
-          assertEQ( A.globl, 25.0 )
+          arktest.assertEQ( A.globl, 25.0 )
 
     # regular lambda cases with extra block afterwards separated by a semicolon
     - decl: |-
@@ -138,7 +138,7 @@ cases:
       use: |-
           // not a trailing lambda, block separated by semicolon
           new A().foo(10.0, () => { A.globl = 3.0 }); { A.globl = 4.0 }
-          assertEQ( A.globl, 4.0 )
+          arktest.assertEQ( A.globl, 4.0 )
 
     - decl: |-
           class A {
@@ -151,13 +151,13 @@ cases:
       use: |-
           // not a trailing lambda, block separated by semicolon
           new A().foo(10.0, () => { A.globl = 3.0 }); { A.globl = 4.0 }
-          assertEQ( A.globl, 4.0 )
+          arktest.assertEQ( A.globl, 4.0 )
 
           new A().foo(10.0) { A.globl = 4.0 } // trailing lambda
-          assertEQ( A.globl, 14.0 )
+          arktest.assertEQ( A.globl, 14.0 )
 
           new A().foo(10.0); { A.globl = 4.0 } // not a trailing lambda
-          assertEQ( A.globl, 4.0 )
+          arktest.assertEQ( A.globl, 4.0 )
 
     # case without last function parameter with extra block afterwards separated by a semicolon
     - decl: |-
@@ -170,4 +170,4 @@ cases:
       use: |-
           A.globl = 1.0
           new A().foo(10.0); { A.globl = 4.0 } // no last function parameter
-          assertEQ( A.globl, 4.0 )
+          arktest.assertEQ( A.globl, 4.0 )

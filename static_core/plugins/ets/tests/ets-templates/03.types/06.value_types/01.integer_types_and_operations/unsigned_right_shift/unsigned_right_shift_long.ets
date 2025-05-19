@@ -21,7 +21,7 @@ desc: check unsigned right shift operation for long integer
 function main(): void {
     const a: long = {{v.left}}
     const b: int = {{v.right}}
-    assertEQ( (a >>> b), {{v.result}})
+    arktest.assertEQ( (a >>> b), {{v.result}})
 }
 
 {% endfor %}

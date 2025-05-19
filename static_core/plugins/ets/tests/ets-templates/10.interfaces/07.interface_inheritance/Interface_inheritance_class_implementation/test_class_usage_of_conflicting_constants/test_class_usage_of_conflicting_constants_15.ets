@@ -27,5 +27,5 @@ class TemplateStringConflictClass implements TemplateStringConflictInterface {
 
 function main(): void {
   const instance = new TemplateStringConflictClass();
-  assertEQ(instance.CONST, 'Value: 56');
+  arktest.assertEQ(instance.CONST, 'Value: 56');
 }

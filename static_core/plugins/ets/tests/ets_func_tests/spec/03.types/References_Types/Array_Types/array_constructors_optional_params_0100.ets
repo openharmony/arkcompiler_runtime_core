@@ -34,6 +34,6 @@ class C {
 function main() {
     let c  = new C[10]
     for (let i: int = 0; i < 10; i++) {
-        assertEQ( c[i].getE().ee, 10)
+        arktest.assertEQ( c[i].getE().ee, 10)
     }
 }

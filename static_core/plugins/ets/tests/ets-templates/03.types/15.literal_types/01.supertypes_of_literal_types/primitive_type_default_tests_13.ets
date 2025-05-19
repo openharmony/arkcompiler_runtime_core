@@ -24,5 +24,5 @@ function testFunc3(bool: boolean = false) {
 
 function main(): void {
     let result = testFunc3();
-    assertEQ(result, false);
+    arktest.assertEQ(result, false);
 }

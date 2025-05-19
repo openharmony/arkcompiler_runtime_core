@@ -23,6 +23,6 @@ desc: A constant declaration introduces a named entity with mandatory initial va
 
 function main(): void {
     {{c.use}}
-    assertTrue( {{c.assert}} )
+    arktest.assertTrue( {{c.assert}} )
 }
 {% endfor %}

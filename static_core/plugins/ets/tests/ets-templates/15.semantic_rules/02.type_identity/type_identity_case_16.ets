@@ -27,5 +27,5 @@ function main(): void {
   let func: MyFunctionType = myFunction;
   let result = func(42, "Hello");
 
-  assertEQ(result, "42 Hello");
+  arktest.assertEQ(result, "42 Hello");
 }

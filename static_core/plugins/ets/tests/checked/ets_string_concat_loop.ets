@@ -1528,46 +1528,46 @@ function bugfix_concat_loop1(size: int, charset: string): string {
 }
 
 function main() {
-    assertEQ(concat_loop0("a", 4), "aaaa", "Wrong result at concat_loop0");
-    assertEQ(concat_loop1("a", 4), "aaaa", "Wrong result at concat_loop1");
-    assertEQ(concat_loop2("a", 4), "aaaa", "Wrong result at concat_loop2");
-    assertEQ(concat_loop3("a", 4), "aaaa", "Wrong result at concat_loop3");
-    assertEQ(concat_loop4(["a", "b", "c", "d"]), "abcd", "Wrong result at concat_loop4");
-    assertEQ(concat_loop5(["a", "b", "c", "d"]), "aaabacad", "Wrong result at concat_loop5");
-    assertEQ(concat_loop7("a", "b", 4), "abababab", "Wrong result at concat_loop7");
-    assertEQ(equivalent_concat_loop7("a", "b", 4), "abababab", "Wrong result at equivalent_concat_loop7");
-    assertEQ(concat_loop8("a", "b", 4), "a1ba1ba1ba1b.b2ab2ab2ab2a", "Wrong result at concat_loop8");
-    assertEQ(nested_concat_loop0("a", 2), "aaaaaaaa", "Wrong result at nested_concat_loop0");
-    assertEQ(try_catch_concat_loop0("a", 4), "aaaaaaaaaaaa", "Wrong result at try_catch_concat_loop0");
-    assertEQ(try_catch_concat_loop1("a", 4), "aaaa", "Wrong result at try_catch_concat_loop1");
-    assertEQ(try_catch_concat_loop2("a", 4), "aaaaaaaa", "Wrong result at try_catch_concat_loop2");
-    assertEQ(try_catch_concat_loop3("a", 2), "aaaa", "Wrong result at try_catch_concat_loop3");
-    assertEQ(try_catch_concat_loop4("a", 4), "aaaa", "Wrong result at try_catch_concat_loop4");
-    assertEQ(try_catch_concat_loop5("a", 4), "aaaaaaaaaaaa", "Wrong result at try_catch_concat_loop5");
-    assertEQ(if_concat_loop0("a", "b", 4), "a1ba1ba2ba2b", "Wrong result at if_concat_loop0");
-    assertEQ(if_concat_loop1("a", 4), "a1a1a2a2", "Wrong result at if_concat_loop1");
-    assertEQ(if_concat_loop2("a", "b", 4), "a1ba1babab", "Wrong result at if_concat_loop2");
-    assertEQ(if_concat_loop3("a", "b", 4), "ababa2ba2b", "Wrong result at if_concat_loop3");
-    assertEQ(if_concat_loop4("b", 4), "1b1b2b2b", "Wrong result at if_concat_loop4");
-    assertEQ(if_concat_loop5("a", 4), "a1a1aa", "Wrong result at if_concat_loop5");
-    assertEQ(if_concat_loop6("a", 4), "aaa2a2", "Wrong result at if_concat_loop6");
-    assertEQ(if_concat_loop7(4), "1122", "Wrong result at if_concat_loop7");
-    assertEQ(if_concat_loop8("b", 4), "bb2b2b", "Wrong result at if_concat_loop8");
-    assertEQ(if_concat_loop9("b", 4), "1b1bbb", "Wrong result at if_concat_loop9");
-    assertEQ(if_concat_loop10(4), "11", "Wrong result at if_concat_loop10");
-    assertEQ(if_concat_loop11(4), "22", "Wrong result at if_concat_loop11");
-    assertEQ(switch_concat_loop0("a", "b", 4), "a0ba1ba2ba3b", "Wrong result at switch_concat_loop0");
-    assertEQ(switch_concat_loop1("a", "b", 4), "a0120ba121ba22ba3b", "Wrong result at switch_concat_loop1");
-    assertEQ(reuse_concat_loop0("a", 4), "aaaaaaaaaaaaaaa", "Wrong result at reuse_concat_loop0");
-    assertEQ(reuse_concat_loop1("a", 4), "0a2a4a6a", "Wrong result at reuse_concat_loop1");
-    assertEQ(reuse_concat_loop2("a", 4), "0a2a4a6a", "Wrong result at reuse_concat_loop2");
-    assertEQ(reuse_concat_loop3("a", 4), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "Wrong result at reuse_concat_loop3");
-    assertEQ(reuse_concat_loop4("a", 4), "a1a3a5a7", "Wrong result at reuse_concat_loop4");
-    assertEQ(reuse_concat_loop5("a", 4), "a1a3a5a7", "Wrong result at reuse_concat_loop5");
-    assertEQ(args_concat_loop0(1.5, false, c'A', c'B'), "1.5false2AB", "Wrong result at args_concat_loop0");
-    assertEQ(bugfix_concat_loop0(), "12345678", "Wrong result at bugfix_concat_loop0");
-    assertEQ(bugfix_concat_loop1(4, "ISO-8859-1"), "CCCC", "Wrong result at bugfix_concat_loop1");
-    assertEQ(bugfix_concat_loop1(4, "UTF-16"), "힙힙힙힙", "Wrong result at bugfix_concat_loop1");
+    arktest.assertEQ(concat_loop0("a", 4), "aaaa", "Wrong result at concat_loop0");
+    arktest.assertEQ(concat_loop1("a", 4), "aaaa", "Wrong result at concat_loop1");
+    arktest.assertEQ(concat_loop2("a", 4), "aaaa", "Wrong result at concat_loop2");
+    arktest.assertEQ(concat_loop3("a", 4), "aaaa", "Wrong result at concat_loop3");
+    arktest.assertEQ(concat_loop4(["a", "b", "c", "d"]), "abcd", "Wrong result at concat_loop4");
+    arktest.assertEQ(concat_loop5(["a", "b", "c", "d"]), "aaabacad", "Wrong result at concat_loop5");
+    arktest.assertEQ(concat_loop7("a", "b", 4), "abababab", "Wrong result at concat_loop7");
+    arktest.assertEQ(equivalent_concat_loop7("a", "b", 4), "abababab", "Wrong result at equivalent_concat_loop7");
+    arktest.assertEQ(concat_loop8("a", "b", 4), "a1ba1ba1ba1b.b2ab2ab2ab2a", "Wrong result at concat_loop8");
+    arktest.assertEQ(nested_concat_loop0("a", 2), "aaaaaaaa", "Wrong result at nested_concat_loop0");
+    arktest.assertEQ(try_catch_concat_loop0("a", 4), "aaaaaaaaaaaa", "Wrong result at try_catch_concat_loop0");
+    arktest.assertEQ(try_catch_concat_loop1("a", 4), "aaaa", "Wrong result at try_catch_concat_loop1");
+    arktest.assertEQ(try_catch_concat_loop2("a", 4), "aaaaaaaa", "Wrong result at try_catch_concat_loop2");
+    arktest.assertEQ(try_catch_concat_loop3("a", 2), "aaaa", "Wrong result at try_catch_concat_loop3");
+    arktest.assertEQ(try_catch_concat_loop4("a", 4), "aaaa", "Wrong result at try_catch_concat_loop4");
+    arktest.assertEQ(try_catch_concat_loop5("a", 4), "aaaaaaaaaaaa", "Wrong result at try_catch_concat_loop5");
+    arktest.assertEQ(if_concat_loop0("a", "b", 4), "a1ba1ba2ba2b", "Wrong result at if_concat_loop0");
+    arktest.assertEQ(if_concat_loop1("a", 4), "a1a1a2a2", "Wrong result at if_concat_loop1");
+    arktest.assertEQ(if_concat_loop2("a", "b", 4), "a1ba1babab", "Wrong result at if_concat_loop2");
+    arktest.assertEQ(if_concat_loop3("a", "b", 4), "ababa2ba2b", "Wrong result at if_concat_loop3");
+    arktest.assertEQ(if_concat_loop4("b", 4), "1b1b2b2b", "Wrong result at if_concat_loop4");
+    arktest.assertEQ(if_concat_loop5("a", 4), "a1a1aa", "Wrong result at if_concat_loop5");
+    arktest.assertEQ(if_concat_loop6("a", 4), "aaa2a2", "Wrong result at if_concat_loop6");
+    arktest.assertEQ(if_concat_loop7(4), "1122", "Wrong result at if_concat_loop7");
+    arktest.assertEQ(if_concat_loop8("b", 4), "bb2b2b", "Wrong result at if_concat_loop8");
+    arktest.assertEQ(if_concat_loop9("b", 4), "1b1bbb", "Wrong result at if_concat_loop9");
+    arktest.assertEQ(if_concat_loop10(4), "11", "Wrong result at if_concat_loop10");
+    arktest.assertEQ(if_concat_loop11(4), "22", "Wrong result at if_concat_loop11");
+    arktest.assertEQ(switch_concat_loop0("a", "b", 4), "a0ba1ba2ba3b", "Wrong result at switch_concat_loop0");
+    arktest.assertEQ(switch_concat_loop1("a", "b", 4), "a0120ba121ba22ba3b", "Wrong result at switch_concat_loop1");
+    arktest.assertEQ(reuse_concat_loop0("a", 4), "aaaaaaaaaaaaaaa", "Wrong result at reuse_concat_loop0");
+    arktest.assertEQ(reuse_concat_loop1("a", 4), "0a2a4a6a", "Wrong result at reuse_concat_loop1");
+    arktest.assertEQ(reuse_concat_loop2("a", 4), "0a2a4a6a", "Wrong result at reuse_concat_loop2");
+    arktest.assertEQ(reuse_concat_loop3("a", 4), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "Wrong result at reuse_concat_loop3");
+    arktest.assertEQ(reuse_concat_loop4("a", 4), "a1a3a5a7", "Wrong result at reuse_concat_loop4");
+    arktest.assertEQ(reuse_concat_loop5("a", 4), "a1a3a5a7", "Wrong result at reuse_concat_loop5");
+    arktest.assertEQ(args_concat_loop0(1.5, false, c'A', c'B'), "1.5false2AB", "Wrong result at args_concat_loop0");
+    arktest.assertEQ(bugfix_concat_loop0(), "12345678", "Wrong result at bugfix_concat_loop0");
+    arktest.assertEQ(bugfix_concat_loop1(4, "ISO-8859-1"), "CCCC", "Wrong result at bugfix_concat_loop1");
+    arktest.assertEQ(bugfix_concat_loop1(4, "UTF-16"), "힙힙힙힙", "Wrong result at bugfix_concat_loop1");
 }
 
 //! CHECKER       Invalid save states AOT (I9NI8P/16707)
@@ -1652,12 +1652,12 @@ function bugfix_concat_loop2_test5(): string {
 
 function bugfix_concat_loop2() {
     for(let i = 0; i < 5000; i++) {
-        assertEQ(bugfix_concat_loop2_test0(), expected);
-        assertEQ(bugfix_concat_loop2_test1(), expected);
-        assertEQ(bugfix_concat_loop2_test2(), expected);
-        assertEQ(bugfix_concat_loop2_test3(), expected);
-        assertEQ(bugfix_concat_loop2_test4(), expected);
-        assertEQ(bugfix_concat_loop2_test5(), expected);
+        arktest.assertEQ(bugfix_concat_loop2_test0(), expected);
+        arktest.assertEQ(bugfix_concat_loop2_test1(), expected);
+        arktest.assertEQ(bugfix_concat_loop2_test2(), expected);
+        arktest.assertEQ(bugfix_concat_loop2_test3(), expected);
+        arktest.assertEQ(bugfix_concat_loop2_test4(), expected);
+        arktest.assertEQ(bugfix_concat_loop2_test5(), expected);
     }
 }
 
@@ -1680,5 +1680,5 @@ function bugfix_concat_loop3() {
         }
     }
 
-    assertEQ(str, "ddd");
+    arktest.assertEQ(str, "ddd");
 }

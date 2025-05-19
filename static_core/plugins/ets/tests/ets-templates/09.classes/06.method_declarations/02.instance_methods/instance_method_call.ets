@@ -26,5 +26,5 @@ class A {
 
 function main(): void {
   let instance: A = new A();
-  assertEQ( instance.foo(), 5 );
+  arktest.assertEQ( instance.foo(), 5 );
 }

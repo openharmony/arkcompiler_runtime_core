@@ -22,5 +22,5 @@ files:
 import {sum} from "./compilation_units_in_host_system_export0.ets"
 
 function main(): void {
-    assertEQ(sum(1, 2), 3);
+    arktest.assertEQ(sum(1, 2), 3);
 }

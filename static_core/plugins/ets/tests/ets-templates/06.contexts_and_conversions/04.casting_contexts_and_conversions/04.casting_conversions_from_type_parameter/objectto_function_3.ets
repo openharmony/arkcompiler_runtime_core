@@ -23,5 +23,5 @@ function main(): void {
   const fuu : StringOrNumberFunction = (input: string | number): string | number => {
   };
   const obj1: object = fuu;
-  assertTrue(obj1 == fuu);
+  arktest.assertTrue(obj1 == fuu);
 }

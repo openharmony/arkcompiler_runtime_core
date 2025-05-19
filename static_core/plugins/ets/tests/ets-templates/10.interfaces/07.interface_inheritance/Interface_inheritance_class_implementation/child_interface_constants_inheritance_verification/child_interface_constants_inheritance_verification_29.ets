@@ -27,5 +27,5 @@ class RangeErrorConstantChild implements RangeErrorConstantInterface {
 
 function main(): void {
   const instance = new RangeErrorConstantChild();
-  assertEQ(instance.CONST.message, 'Range error');
+  arktest.assertEQ(instance.CONST.message, 'Range error');
 }

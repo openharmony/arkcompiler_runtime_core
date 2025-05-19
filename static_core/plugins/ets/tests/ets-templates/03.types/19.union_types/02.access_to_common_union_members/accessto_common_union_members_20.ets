@@ -22,10 +22,10 @@ type Primitive = number | boolean;
 function main(): void {
   let tmp: Primitive = 7;
   if (typeof tmp === 'number') {
-      assertTrue(tmp === 7);
+      arktest.assertTrue(tmp === 7);
   } else if (typeof tmp === 'boolean') {
-      assertTrue(!tmp);
+      arktest.assertTrue(!tmp);
   }
   tmp = true;
-  assertTrue(tmp);
+  arktest.assertTrue(tmp);
 }

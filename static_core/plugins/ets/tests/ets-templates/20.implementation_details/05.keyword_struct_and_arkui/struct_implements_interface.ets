@@ -42,8 +42,8 @@ struct StructClass implements Test{
 
 function main() {
     let structClass = new StructClass(100, 50.5)
-    assertEQ(structClass.field, 100)
-    assertEQ(structClass.amount, 50.5)
-    assertEQ(structClass.method(11), 111)
-    assertEQ(structClass.getHalfAmount(), 25.25)
+    arktest.assertEQ(structClass.field, 100)
+    arktest.assertEQ(structClass.amount, 50.5)
+    arktest.assertEQ(structClass.method(11), 111)
+    arktest.assertEQ(structClass.getHalfAmount(), 25.25)
 }

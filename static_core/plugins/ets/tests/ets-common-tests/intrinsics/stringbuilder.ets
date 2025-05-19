@@ -47,7 +47,7 @@ function getString(kind: StringKind)
     } else if (kind == StringKind.Empty) {
         return new String("");
     }
-    assertEQ(kind, StringKind.Null);
+    arktest.assertEQ(kind, StringKind.Null);
     return nullString;
 }
 

@@ -24,7 +24,7 @@ cases:
       }
     call: |-
       new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
     params: override-compatible with itself parameter
 
   - base: |-
@@ -37,9 +37,9 @@ cases:
       }
     call: |-
       new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
       new Derived().foo( ( i:Derived ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
     params: override-compatible parameter (covariance)
 
   - base: |-
@@ -52,13 +52,13 @@ cases:
       }
     call: |-
       new Derived().foo( ( i:Base ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
       new Derived().foo( ( i:Derived ): Derived => { return new Derived() } )
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
       new Derived().foo( ( i:Base ): Base => { return new Base() } )
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
       new Derived().foo( ( i:Derived ): Base => { return new Base() } )
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
     params: override-compatible parameter (covariance)
 
   - tags: 'negative, compile-only'
@@ -106,7 +106,7 @@ cases:
     call: |-
       let func = (j: Base) : Derived => new Derived()
       new Derived().foo(func)
-      assertEQ(res, 2)
+      arktest.assertEQ(res, 2)
     params: override-incompatible parameter, overloading is also unavailable
 
   - tags: 'negative, compile-only'
@@ -140,7 +140,7 @@ cases:
       }
     call: |-
       new Derived().foo()
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
     params: override-compatible with itself return value
 
   - tags: 'negative, compile-only'
@@ -182,5 +182,5 @@ cases:
       }
     call: |-
       new Derived().foo()
-      assertEQ( res, 2)
+      arktest.assertEQ( res, 2)
     params: override-compatible return value (contravariance)

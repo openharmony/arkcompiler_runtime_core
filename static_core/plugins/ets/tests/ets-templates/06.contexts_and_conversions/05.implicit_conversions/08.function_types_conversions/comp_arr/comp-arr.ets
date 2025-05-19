@@ -26,7 +26,7 @@ function main() {
 {% for t in c['to'] %}
     let w{{loop.index}}: ({{t.type}})[] = [foo, foo]
     w{{loop.index}} = [foo]
-    assertTrue( w{{loop.index}}[0]{{t.call}} )
+    arktest.assertTrue( w{{loop.index}}[0]{{t.call}} )
 {% endfor %}
 }
 {%- endfor %}

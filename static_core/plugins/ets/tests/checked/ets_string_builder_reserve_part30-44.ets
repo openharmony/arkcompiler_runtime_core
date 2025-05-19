@@ -352,26 +352,26 @@ function store_reserve44() : string
 }
 
 function main_events_check() : int {
-    assertEQ(try_finally_reserve31(), "01", "Wrong result at try_finally_reserve31");
-    assertEQ(out_reserve32().append(1).toString(), "01", "Wrong result at out_reserve32");
-    assertEQ(in_reserve33(new StringBuilder().append(0)), "01", "Wrong result at in_reserve33");
-    assertEQ(global_reserve34(), "0", "Wrong result at in_reserve34");
-    assertEQ(chain_reserve35(), "01", "Wrong result at chain_reserve35");
-    assertEQ(more_types_reserve36(), "!@#$% abcΣΨΩ0123456789 true false 57 127 32767 128934675 701234987654321 null", "Wrong result at more_types_reserve36");
-    assertEQ(nested_loop_reserve37(), "223456789103234567891042345678910523456789106234567891072345678910", "Wrong result at nested_loop_reserve37");
-    assertEQ(store_reserve39(), "012", "Wrong result at store_reserve39");
-    assertEQ(chain_reserve40(), "012", "Wrong result at chain_reserve40");
-    assertEQ(chain_reserve41("0"), "012", "Wrong result at chain_reserve41");
-    assertEQ(store_reserve43(), "01", "Wrong result at store_reserve43");
-    assertEQ(store_reserve44(), "01", "Wrong result at store_reserve44");
+    arktest.assertEQ(try_finally_reserve31(), "01", "Wrong result at try_finally_reserve31");
+    arktest.assertEQ(out_reserve32().append(1).toString(), "01", "Wrong result at out_reserve32");
+    arktest.assertEQ(in_reserve33(new StringBuilder().append(0)), "01", "Wrong result at in_reserve33");
+    arktest.assertEQ(global_reserve34(), "0", "Wrong result at in_reserve34");
+    arktest.assertEQ(chain_reserve35(), "01", "Wrong result at chain_reserve35");
+    arktest.assertEQ(more_types_reserve36(), "!@#$% abcΣΨΩ0123456789 true false 57 127 32767 128934675 701234987654321 null", "Wrong result at more_types_reserve36");
+    arktest.assertEQ(nested_loop_reserve37(), "223456789103234567891042345678910523456789106234567891072345678910", "Wrong result at nested_loop_reserve37");
+    arktest.assertEQ(store_reserve39(), "012", "Wrong result at store_reserve39");
+    arktest.assertEQ(chain_reserve40(), "012", "Wrong result at chain_reserve40");
+    arktest.assertEQ(chain_reserve41("0"), "012", "Wrong result at chain_reserve41");
+    arktest.assertEQ(store_reserve43(), "01", "Wrong result at store_reserve43");
+    arktest.assertEQ(store_reserve44(), "01", "Wrong result at store_reserve44");
 
     return 0
 }
 
 function main_compile_check() : int {
-    assertTrue(try_catch_reserve30(false).startsWith("0"), "Wrong result at try_catch_reserve30");
-    assertTrue(try_catch_reserve30(true).startsWith("01Exception"), "Wrong result at try_catch_reserve30");
-    assertEQ(arg_reserve42(), "012", "Wrong result at arg_reserve42");
+    arktest.assertTrue(try_catch_reserve30(false).startsWith("0"), "Wrong result at try_catch_reserve30");
+    arktest.assertTrue(try_catch_reserve30(true).startsWith("01Exception"), "Wrong result at try_catch_reserve30");
+    arktest.assertEQ(arg_reserve42(), "012", "Wrong result at arg_reserve42");
     return 0
 }
 

@@ -20,8 +20,8 @@ tags: []
 
 function main() : int {
     let x : Array<String> = new Array<String>(10);
-    assertEQ( x.length, 10)
+    arktest.assertEQ( x.length, 10)
     x.length = 5;
-    assertEQ( x.length, 5)
+    arktest.assertEQ( x.length, 5)
     return 0;
 }

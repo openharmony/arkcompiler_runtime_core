@@ -21,5 +21,5 @@ function main(): void {
   let a: int = 10;
   let b: int = 20;
 
-  assertEQ((a >= b), false);
+  arktest.assertEQ((a >= b), false);
 }

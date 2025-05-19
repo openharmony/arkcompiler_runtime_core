@@ -353,7 +353,7 @@ function testClearTimerCrossWorker()
         let isCleared = new AtomicFlag(false);
         let workerTimerCb = () => {
             setTimeout(() => { while (!isCleared.get()) {} }, 0);
-            return setTimeout(() => { assertTrue(false); }, delay);
+            return setTimeout(() => { arktest.assertTrue(false); }, delay);
         };
         let id = launch<number, () => number>(workerTimerCb).Await();
         clearTimeout(id);
@@ -363,13 +363,13 @@ function testClearTimerCrossWorker()
     /// Clear main timer from worker
     {
         let triedToClear = false;
-        let id = setTimeout(() => { assertTrue(triedToClear); }, delay);
+        let id = setTimeout(() => { arktest.assertTrue(triedToClear); }, delay);
         try {
             launch<void, (id: number) => void>(clearTimeout, id).Await();
         } catch (e) {
-            assertEQ(e.toString(), "Error: Failed to clear timer. Unable to clear interop timer from non-interop worker");
+            arktest.assertEQ(e.toString(), "Error: Failed to clear timer. Unable to clear interop timer from non-interop worker");
             triedToClear = true;
         }
-        assertTrue(triedToClear);
+        arktest.assertTrue(triedToClear);
     }
 }

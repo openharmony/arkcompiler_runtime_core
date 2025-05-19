@@ -26,18 +26,18 @@ enum Size { S, M, L }
 let a: {{a.type}} = {{a.val}};  // {% if a.truthy %}truthy{% else %}falsy{% endif %}
 
 function main() {
-    assertTrue(!a ? {% if a.truthy %}false : true{% else %}true : false{% endif %});
+    arktest.assertTrue(!a ? {% if a.truthy %}false : true{% else %}true : false{% endif %});
 
 {%- for b in cases %}
 {%- if a != b %}
     {
         let b: {{b.type}} = {{b.val}};  // {% if b.truthy %}truthy{% else %}falsy{% endif %}
 {%- if a.truthy %}
-        assertTrue((a && b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
-        assertTrue((a || b) ? true : false);
+        arktest.assertTrue((a && b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
+        arktest.assertTrue((a || b) ? true : false);
 {%- else %}
-        assertTrue((a && b) ? false : true);
-        assertTrue((a || b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
+        arktest.assertTrue((a && b) ? false : true);
+        arktest.assertTrue((a || b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
 {%- endif %}
     }
 {%- endif %}

@@ -34,10 +34,10 @@ class C extends B {
 
 function main(): void {
     const b: A<string, Boolean> = new B();
-    assertEQ(b.a, "B");
-    assertEQ(b.b, true);
+     arktest.assertEQ(b.a, "B");
+     arktest.assertEQ(b.b, true);
 
     const c: B = new C();
-    assertEQ(c.a, "C");
-    assertEQ(c.b, false);
+    arktest.assertEQ(c.a, "C");
+    arktest.assertEQ(c.b, false);
 }

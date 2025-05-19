@@ -23,7 +23,7 @@ cases:
       }
     logic: |-
       let result = processType<string>("hello");
-      assertEQ(result, "HELLO");
+      arktest.assertEQ(result, "HELLO");
 
   - desc: Tests that when the generic is int of string type, supporting + operation.
     decl: |-
@@ -35,7 +35,7 @@ cases:
       }
     logic: |-
       let result = processType<string>("hello");
-      assertEQ(result, "hello1");
+      arktest.assertEQ(result, "hello1");
 
   - desc: Tests that when the generic is int of number type.
     decl: |-
@@ -44,7 +44,7 @@ cases:
       }
     logic: |-
       let result = processType<number>(2);
-      assertEQ(result, 2);
+      arktest.assertEQ(result, 2);
 
   - desc: Tests that when the generic is float of number type.
     decl: |-
@@ -53,7 +53,7 @@ cases:
       }
     logic: |-
       let result = processType<number>(2.1f);
-      assertEQ(result, 2.1f);
+      arktest.assertEQ(result, 2.1f);
 
   - desc: Tests that when the generic is double of number type.
     decl: |-
@@ -62,7 +62,7 @@ cases:
       }
     logic: |-
       let result = processType<number>(2.0001);
-      assertEQ(result, 2.0001);
+      arktest.assertEQ(result, 2.0001);
 
   - desc: Tests that when the generic is of type float.
     decl: |-
@@ -72,7 +72,7 @@ cases:
       }
     logic: |-
       let result = processType<float>(2.1f);
-      assertEQ(result, 2.1f);
+      arktest.assertEQ(result, 2.1f);
 
   - desc: Tests that when the generic is of type double.
     decl: |-
@@ -82,7 +82,7 @@ cases:
       }
     logic: |-
       let result = processType<double>(2.0001);
-      assertEQ(result, 2.0001);
+      arktest.assertEQ(result, 2.0001);
 
   - desc: Tests that when the generic is of type Date.
     decl: |-
@@ -92,4 +92,4 @@ cases:
     logic: |-
       const date1 = new Date('2023-01-01');
       let result = processType<Date>(date1);
-      assertEQ(result.getTime(), date1.getTime());
+      arktest.assertEQ(result.getTime(), date1.getTime());

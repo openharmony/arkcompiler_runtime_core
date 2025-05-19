@@ -35,5 +35,5 @@ function main(): void {
 
     const result = checkTypeIdentity(val1, val2);
 
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }

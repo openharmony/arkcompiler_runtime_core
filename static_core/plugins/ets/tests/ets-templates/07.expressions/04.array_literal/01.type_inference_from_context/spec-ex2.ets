@@ -23,5 +23,5 @@ desc: >-
 
 function main() {
     let tuple: [number, string] = [1, "hello"] // ok
-    assertTrue( tuple[0] == 1 && tuple[1] == "hello" )
+    arktest.assertTrue( tuple[0] == 1 && tuple[1] == "hello" )
 }

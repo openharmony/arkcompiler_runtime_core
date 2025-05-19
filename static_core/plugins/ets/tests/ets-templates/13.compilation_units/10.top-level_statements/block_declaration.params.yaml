@@ -17,7 +17,7 @@ statements:
   - block: 'let i: int = 1;'
   - block: |-
           if (check())
-            assertTrue(true);
+            arktest.assertTrue(true);
   - block: 'class Point {}'
   - block: 'interface A {}'
   - block: 'enum Enum { v1, v2 }'
@@ -41,10 +41,10 @@ statements:
             x = v;
   - block: |-
           switch (x) {
-            case 0: { assertEQ( x, 0 ); break; }
-            case 1: { assertEQ( x, 1 ); break; }
-            case 2: { assertEQ( x, 2 ); break; }
-          default: { assertTrue( false ); break; }
+            case 0: { arktest.assertEQ( x, 0 ); break; }
+            case 1: { arktest.assertEQ( x, 1 ); break; }
+            case 2: { arktest.assertEQ( x, 2 ); break; }
+          default: { arktest.assertTrue( false ); break; }
           }
   - block: 'assertTrue( true )'
   - block: |-

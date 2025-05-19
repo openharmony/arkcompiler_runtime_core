@@ -22,7 +22,7 @@ function main(): void {
   {
     class A {}
     let a: A = new A;
-    assertNE(a, null)
+    arktest.assertNE(a, null)
   }
-  assertNE(a, null)
+  arktest.assertNE(a, null)
 }

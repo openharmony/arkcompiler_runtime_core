@@ -23,5 +23,5 @@ files:
 import {NS2 as NS2} from "./namespace_storage"
 
 function main() {
-    assertEQ(NS2.sayHello(), "Hello from NS2")
+    arktest.assertEQ(NS2.sayHello(), "Hello from NS2")
 }

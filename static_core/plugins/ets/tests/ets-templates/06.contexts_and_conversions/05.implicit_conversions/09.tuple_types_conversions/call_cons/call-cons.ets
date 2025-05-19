@@ -33,6 +33,6 @@ class Z {
 function main() {
     let t: TUP = [{% for t in c['values'] %}{{t.expr|safe}}{% if not loop.last %}, {% endif %}{% endfor %}]
     let z: Z = new Z(t)
-    assertTrue( {% for t in c['values'] %}z.fld[{{loop.index0}}] {{t.eq}} {{t.expr|safe}}{% if not loop.last %} && {% endif %}{% endfor %} )
+    arktest.assertTrue( {% for t in c['values'] %}z.fld[{{loop.index0}}] {{t.eq}} {{t.expr|safe}}{% if not loop.last %} && {% endif %}{% endfor %} )
 }
 {%- endfor %}

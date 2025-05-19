@@ -20,10 +20,10 @@ cases:
       try {
           if (t1 != t2) throw p as Error;
       } catch (e) {
-          assertTrue( e instanceof Err )
+          arktest.assertTrue( e instanceof Err )
           return
       }
-      assertTrue(false, "No expected error")
+      arktest.assertTrue(false, "No expected error")
 
   - defs: |-
       interface Ie {}
@@ -33,10 +33,10 @@ cases:
       try {
           if (t1 != t2) throw p as Error;
       } catch (e) {
-          assertTrue( e instanceof Ie )
+          arktest.assertTrue( e instanceof Ie )
           return
       }
-      assertTrue(false, "No expected error")
+      arktest.assertTrue(false, "No expected error")
 
   - defs: |-
       class Err extends Error {}
@@ -44,10 +44,10 @@ cases:
       try {
           if (t1 != t2) throw new Err();
       } catch (e) {
-          assertTrue( e instanceof Err )
+          arktest.assertTrue( e instanceof Err )
           return
       }
-      assertTrue(false, "No expected error")
+      arktest.assertTrue(false, "No expected error")
 
   - defs: |-
       class Err extends Error {}
@@ -67,7 +67,7 @@ cases:
               v++
           }
       }
-      assertEQ(v, 2)
+      arktest.assertEQ(v, 2)
 
   - defs: |-
       class Err extends Error {}
@@ -92,10 +92,10 @@ cases:
       try {
           foo()
       } catch (e) {
-          assertEQ(e, err)
+          arktest.assertEQ(e, err)
           return
       }
-      assertTrue(false, "No expected error")
+      arktest.assertTrue(false, "No expected error")
 
   - defs: |-
       class A extends Error {}
@@ -104,10 +104,10 @@ cases:
       try {
           if (t1 != t2) throw p!;
       } catch (e) {
-          assertEQ(e, p)
+          arktest.assertEQ(e, p)
           return
       }
-      assertTrue(false, "No expected error")
+      arktest.assertTrue(false, "No expected error")
 
   - defs: |-
       class Err extends Error {}
@@ -124,7 +124,7 @@ cases:
       try {
           foo()
       } catch (e) {
-          assertEQ(e, err)
+          arktest.assertEQ(e, err)
           return
       }
-      assertTrue(false, "No expected error")
+      arktest.assertTrue(false, "No expected error")

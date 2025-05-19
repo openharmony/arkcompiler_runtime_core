@@ -26,5 +26,5 @@ namespace myNamespace {
 }
 
 function main() {
-    assertEQ(myNamespace.returnConst(), 53)
+    arktest.assertEQ(myNamespace.returnConst(), 53)
 }

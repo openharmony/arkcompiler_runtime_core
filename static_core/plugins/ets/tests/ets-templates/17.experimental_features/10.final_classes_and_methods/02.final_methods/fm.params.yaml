@@ -26,8 +26,8 @@ cases:
               }
           }
       use: |-
-          assertEQ( new A().meth("x", 1), "x1A" )
-          assertEQ( new F().meth("y", 2), "y2F" )
+          arktest.assertEQ( new A().meth("x", 1), "x1A" )
+          arktest.assertEQ( new F().meth("y", 2), "y2F" )
 
     # duplicate final keyword
     - tags: 'compile-only, negative'

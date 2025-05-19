@@ -26,7 +26,7 @@ enum Size { S, M, L }
 let a: {{a.type}} = {{a.val}};  // {% if a.truthy %}truthy{% else %}falsy{% endif %}
 
 function main() {
-    assertTrue(!a == {% if a.truthy %}false{% else %}true{% endif %});
+    arktest.assertTrue(!a == {% if a.truthy %}false{% else %}true{% endif %});
 
 {%- for b in cases %}
 {%- if a != b %}
@@ -34,21 +34,21 @@ function main() {
         let b: {{b.type}} = {{b.val}};  // {% if b.truthy %}truthy{% else %}falsy{% endif %}
 {%- if a.truthy %}
     {%- if b.nan %}
-        assertTrue(Number.isNaN((a && b) as Number));
+        arktest.assertTrue(Number.isNaN((a && b) as Number));
     {%- else %}
-        assertTrue((a && b) == b);
+        arktest.assertTrue((a && b) == b);
     {%- endif %}
-        assertTrue((a || b) == a);
+        arktest.assertTrue((a || b) == a);
 {%- else %}
     {%- if a.nan %}
-        assertTrue(Number.isNaN((a && b) as Number));
+        arktest.assertTrue(Number.isNaN((a && b) as Number));
     {%- else %}
-        assertTrue((a && b) == a);
+        arktest.assertTrue((a && b) == a);
     {%- endif %}
     {%- if b.nan %}
-        assertTrue(Number.isNaN((a || b) as Number));
+        arktest.assertTrue(Number.isNaN((a || b) as Number));
     {%- else %}
-        assertTrue((a || b) == b);
+        arktest.assertTrue((a || b) == b);
     {%- endif %}
 {%- endif %}
     }

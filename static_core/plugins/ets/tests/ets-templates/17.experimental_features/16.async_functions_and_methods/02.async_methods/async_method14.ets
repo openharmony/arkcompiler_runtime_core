@@ -27,7 +27,7 @@ class MethodReturnBoolean {
 async function startTest() {
     const example = new MethodReturnBoolean();
     const result = await example.methodReturnBoolean();
-    assertEQ(result === true, true)
+    arktest.assertEQ(result === true, true)
 }
 
 function main(): void {

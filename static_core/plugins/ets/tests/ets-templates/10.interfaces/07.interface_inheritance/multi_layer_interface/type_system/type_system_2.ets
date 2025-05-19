@@ -39,6 +39,6 @@ class Duck implements DuckLike {
 
 function main(): void {
     const duck: DuckLike = new Duck();
-    assertEQ(duck.fly(), "Flying!");
-    assertEQ(duck.swim(), "Swimming!");
+    arktest.assertEQ(duck.fly(), "Flying!");
+    arktest.assertEQ(duck.swim(), "Swimming!");
 }

@@ -21,5 +21,5 @@ params: undefined, undefined
 let b: undefined;
 
 function main(): void {
-    assertEQ(b, undefined);
+    arktest.assertEQ(b, undefined);
 }

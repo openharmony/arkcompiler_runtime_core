@@ -32,5 +32,5 @@ class A {
 function main(): void {
     let instance: A = new A();
 
-    assertEQ( instance.getAge(), 5 );
+    arktest.assertEQ( instance.getAge(), 5 );
 }

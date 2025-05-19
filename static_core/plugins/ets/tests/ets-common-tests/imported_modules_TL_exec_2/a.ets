@@ -22,5 +22,5 @@ import * as c from "./c.ets"
 
 
 function main() : void {
-    assertEQ(c.c, 42);
+    arktest.assertEQ(c.c, 42);
 }

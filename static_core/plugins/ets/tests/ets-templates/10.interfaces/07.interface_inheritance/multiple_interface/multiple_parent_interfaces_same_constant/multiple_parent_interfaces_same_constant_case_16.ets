@@ -26,6 +26,6 @@ namespace NamespaceB {
 }
 
 function main(): void {
-    assertEQ(NamespaceA.VALUE, "ValueA");
-    assertEQ(NamespaceB.VALUE, "ValueB");
+    arktest.assertEQ(NamespaceA.VALUE, "ValueA");
+    arktest.assertEQ(NamespaceB.VALUE, "ValueB");
 }

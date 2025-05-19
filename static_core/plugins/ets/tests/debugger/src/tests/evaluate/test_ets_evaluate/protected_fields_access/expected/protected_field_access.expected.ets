@@ -47,10 +47,10 @@ class evalPatchFunction {
     private static evalPatchFunction() {
         let b = new B(10, 123.456);
 
-        assertEQ(b.a, 10);
-        assertEQ(b.b, 123.456);
+        arktest.assertEQ(b.a, 10);
+        arktest.assertEQ(b.b, 123.456);
 
-        assertEQ(b.foo(10), 100 * 10);
-        assertEQ(b.goo(10.11), 200 * 10.11);
+        arktest.assertEQ(b.foo(10), 100 * 10);
+        arktest.assertEQ(b.goo(10.11), 200 * 10.11);
     }
 }

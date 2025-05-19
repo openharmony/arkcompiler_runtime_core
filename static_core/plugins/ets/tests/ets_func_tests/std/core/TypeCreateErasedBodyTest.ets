@@ -26,7 +26,7 @@ class C {
 
 
 function erasedM(recv: NullishType, args: FixedArray<NullishType>): NullishType {
-	assertEQ( args.length, 1)
+	arktest.assertEQ( args.length, 1)
 	return (args[0]?.toString()) + "123" + (recv as C).dat
 }
 
@@ -67,7 +67,7 @@ function main(): void throws {
 		)
 	const ty = creator.create()
 	const i = ty.make() as C
-	assertEQ(i.c(10, 11, true), 10)
-	assertEQ(i.c(10, 11, false), 11)
-	assertEQ(i.m("abc"), "abc123DATA!")
+ arktest.assertEQ(i.c(10, 11, true), 10)
+ arktest.assertEQ(i.c(10, 11, false), 11)
+ arktest.assertEQ(i.m("abc"), "abc123DATA!")
 }

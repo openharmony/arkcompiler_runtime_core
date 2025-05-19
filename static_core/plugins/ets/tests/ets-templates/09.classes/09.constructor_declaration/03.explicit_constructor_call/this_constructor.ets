@@ -33,6 +33,6 @@ function main(): void {
   let i1: A = new A();
   let i2: A = new A(7);
 
-  assertEQ( i1.x, 5 );
-  assertEQ( i2.x, 7 );
+  arktest.assertEQ( i1.x, 5 );
+  arktest.assertEQ( i2.x, 7 );
 }

@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isInt16Array() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isInt16Array() API tests")
 
     suite.addTest("Verify Int16Array is identified as Int16Array", testIsInt16Array001)
     suite.addTest("Verify Int8Array is not identified as Int16Array", testIsInt16Array002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsInt16Array001() {
   let proc = new util.types();
   let result = proc.isInt16Array(new Int16Array());
-  assertTrue(result, "The Int16Array should be of the same type as the Int16Array");
+  arktest.assertTrue(result, "The Int16Array should be of the same type as the Int16Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0085
@@ -51,7 +51,7 @@ function testIsInt16Array001() {
 function testIsInt16Array002() {
   let proc = new util.types();
   let result = proc.isInt16Array(new Int8Array());
-  assertTrue(result == false, "The Int8Array should not be of the same type as the Int16Array");
+  arktest.assertTrue(result == false, "The Int8Array should not be of the same type as the Int16Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0086
@@ -64,7 +64,7 @@ function testIsInt16Array002() {
 function testIsInt16Array003() {
   let proc = new util.types();
   let result = proc.isInt16Array(new Int32Array());
-  assertTrue(result == false, "The Int32Array should not be of the same type as the Int16Array");
+  arktest.assertTrue(result == false, "The Int32Array should not be of the same type as the Int16Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0087
@@ -77,7 +77,7 @@ function testIsInt16Array003() {
 function testIsInt16Array004() {
   let proc = new util.types();
   let result = proc.isInt16Array(new Uint8Array());
-  assertTrue(result == false, "The Uint8Array should not be of the same type as the Int16Array");
+  arktest.assertTrue(result == false, "The Uint8Array should not be of the same type as the Int16Array");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0088
@@ -90,5 +90,5 @@ function testIsInt16Array004() {
 function testIsInt16Array005() {
   let proc = new util.types();
   let result = proc.isInt16Array(new Float64Array());
-  assertTrue(result == false, "The Float64Array should not be of the same type as the Int16Array");
+  arktest.assertTrue(result == false, "The Float64Array should not be of the same type as the Int16Array");
 }

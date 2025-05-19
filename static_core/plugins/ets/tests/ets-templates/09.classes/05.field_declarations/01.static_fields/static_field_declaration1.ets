@@ -36,19 +36,19 @@ function main(): void {
     A.x = 42 // reset due to jit mode warmup
 
     // no instances created
-    assertTrue( A.x == 42 )
+    arktest.assertTrue( A.x == 42 )
 
     // two instances created
     let i1: A = new A()
     let i2: A = new A()
 
-    assertTrue( A.x == 42 );
+    arktest.assertTrue( A.x == 42 );
 
     i2.addX()
 
-    assertTrue( i1.getX() == 43 )
+    arktest.assertTrue( i1.getX() == 43 )
 
     A.x = A.x + 5
 
-    assertTrue( i2.getX() == 48 )
+    arktest.assertTrue( i2.getX() == 48 )
 }

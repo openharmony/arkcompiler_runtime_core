@@ -40,8 +40,8 @@ function main() : int {
         idx++;
     }
 
-    assertEQ(idx, expectedArray.length)
-    assertEQ(result, 0)
+    arktest.assertEQ(idx, expectedArray.length)
+    arktest.assertEQ(result, 0)
     return 0;
 }
 

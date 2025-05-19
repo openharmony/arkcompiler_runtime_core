@@ -24,5 +24,5 @@ import type {MyClass as MyC} from "../../07.top-level_declarations/01.exported_d
 function main(): void {
     let test_class = new MyC();
 
-    assertEQ(test_class.test(), "Hello World");
+    arktest.assertEQ(test_class.test(), "Hello World");
 }

@@ -26,9 +26,9 @@ function callbackFunctionEtsTwoParam(fn: Function) {
 }
 
 function callbackFunctionEtsTestSum(sumFunc: Function): boolean {
-    assertTrue(sumFunc.unsafeCall() === 0);
-    assertTrue(sumFunc.unsafeCall(1) === 1);
-    assertTrue(sumFunc.unsafeCall(1, 2) === 3);
-    assertTrue(sumFunc.unsafeCall(1, 2, 3) === 6);
+    arktest.assertTrue(sumFunc.unsafeCall() === 0);
+    arktest.assertTrue(sumFunc.unsafeCall(1) === 1);
+    arktest.assertTrue(sumFunc.unsafeCall(1, 2) === 3);
+    arktest.assertTrue(sumFunc.unsafeCall(1, 2, 3) === 6);
     return true;
 }

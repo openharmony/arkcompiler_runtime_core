@@ -17,15 +17,15 @@ cases:
           const index: number = 1.01
       use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[index] == true ) // only int indices allowed
+          arktest.assertTrue( e[index] == true ) // only int indices allowed
 
     - use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[2] == true ) // wrong index
+          arktest.assertTrue( e[2] == true ) // wrong index
 
     - use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[-1] == true ) // wrong index
+          arktest.assertTrue( e[-1] == true ) // wrong index
 
     - decl: |-
           let index = 40
@@ -34,29 +34,29 @@ cases:
           }
       use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[42 / getIndex()] == true ) // only const indices allowed
+          arktest.assertTrue( e[42 / getIndex()] == true ) // only const indices allowed
 
     - decl: |-
           let index: int = 1
       use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[index] == true ) // only const indices allowed
+          arktest.assertTrue( e[index] == true ) // only const indices allowed
 
     - decl: |-
           const index: int = -1
       use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[index] == true ) // negative index
+          arktest.assertTrue( e[index] == true ) // negative index
 
     - decl: |-
           const index: int = 2
       use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[index] == true ) // out of range index
+          arktest.assertTrue( e[index] == true ) // out of range index
 
     - use: |-
           let e: [] = []  // empty tuple
-          assertTrue( e[0] instanceof Object ) // out of range index
+          arktest.assertTrue( e[0] instanceof Object ) // out of range index
 
     - use: |-
           let e: [] = []  // empty tuple
@@ -86,9 +86,9 @@ cases:
           let p: [boolean] = t as [boolean]  // wrong cast
     - use: |-
           let v: [string]|null = ():[string]|null => { let x = ["A"]; return x; }(); // when no target type is given, array expression is always inferred as an array
-          assertTrue( v?.[0] == "A" )
+          arktest.assertTrue( v?.[0] == "A" )
           v = ():[string]|null => { return null; }();
-          assertTrue( v?.[0] === undefined )
+          arktest.assertTrue( v?.[0] === undefined )
 
     - decl: |-
           type TT = [int|string, string|int]
@@ -109,5 +109,5 @@ cases:
           let a: A = new A(["0", "0"])
           a.meth([1, "X"])
           let res = a.getFld()
-          assertEQ( res[0], "01" )
-          assertEQ( res[1], "0X" )
+          arktest.assertEQ( res[0], "01" )
+          arktest.assertEQ( res[1], "0X" )

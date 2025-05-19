@@ -23,9 +23,9 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.i, "some str" )
-          assertEQ( a.j, undefined )
-          assertEQ( a.k, null )
+          arktest.assertEQ( a.i, "some str" )
+          arktest.assertEQ( a.j, undefined )
+          arktest.assertEQ( a.k, null )
 
     - doc: |-
           Set class field of literal type via custom constructor without arguments
@@ -43,9 +43,9 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.i, "some str" )
-          assertEQ( a.j, undefined )
-          assertEQ( a.k, null )
+          arktest.assertEQ( a.i, "some str" )
+          arktest.assertEQ( a.j, undefined )
+          arktest.assertEQ( a.k, null )
 
     - doc: |-
           Set class field of literal type via custom constructor with arguments
@@ -72,9 +72,9 @@ cases:
           let j: undefined = undefined
           let k: null = null
           let b: A = new A(i, j, k)
-          assertEQ( b.i, "some str" )
-          assertEQ( b.j, undefined )
-          assertEQ( b.k, null )
+          arktest.assertEQ( b.i, "some str" )
+          arktest.assertEQ( b.j, undefined )
+          arktest.assertEQ( b.k, null )
 
     - tags: |-
         negative, compile-only
@@ -121,8 +121,8 @@ cases:
         }
       use: |-
         let a = new A()
-        assertEQ( a.foo(new string("some str")), "some str" )
-        assertEQ( a.foo("some str"), "some str" )
+        arktest.assertEQ( a.foo(new string("some str")), "some str" )
+        arktest.assertEQ( a.foo("some str"), "some str" )
 
     - tags: |-
           negative, compile-only
@@ -145,11 +145,11 @@ cases:
       use: |-
           let a = new A()
           let b: string = a.foo()
-          assertEQ( b, "1" )
+          arktest.assertEQ( b, "1" )
           let c: "1" = a.foo()
-          assertEQ( c, "1" )
+          arktest.assertEQ( c, "1" )
           let d: string = a.bar()
-          assertEQ( d, "2" )
+          arktest.assertEQ( d, "2" )
 
     - tags: |-
           negative, compile-only
@@ -169,7 +169,7 @@ cases:
               readonly i: "some str" = "some str"
           }
       use: |-
-          assertEQ( new A().i, "some str")
+          arktest.assertEQ( new A().i, "some str")
 
     - tags: |-
           negative, compile-only

@@ -33,12 +33,12 @@ function main(): void {
     reset();
     foo((): void => {
     });
-    assertTrue(void_called);
-    assertFalse(int_called);
+    arktest.assertTrue(void_called);
+    arktest.assertFalse(int_called);
 
     reset();
     foo((x: int): void => {
     });
-    assertFalse(void_called);
-    assertTrue(int_called);
+    arktest.assertFalse(void_called);
+    arktest.assertTrue(int_called);
 }

@@ -43,6 +43,6 @@ function main(): void {
   let c: D = new D();
   let b: D = new D();
 
-  assertEQ( c.foo(), 5 );
-  assertEQ( b.bar(), 10 );
+  arktest.assertEQ( c.foo(), 5 );
+  arktest.assertEQ( b.bar(), 10 );
 }

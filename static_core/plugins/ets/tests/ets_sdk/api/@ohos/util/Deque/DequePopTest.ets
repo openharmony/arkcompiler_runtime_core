@@ -16,7 +16,7 @@
 import Deque from "@ohos.util.Deque";
 
 function main() {
-    const suite = new ArkTestsuite("Deque API tests");
+    const suite = new arktest.ArkTestsuite("Deque API tests");
 
     suite.addTest("Test popLast and verify the new last element", testPopLastAndVerifyNewLast);
     suite.addTest("Test popLast after expansion and reset of rear to zero", testPopLastAfterExpansionAndReset);
@@ -33,7 +33,7 @@ function testPopLastAndVerifyNewLast() {
     deque.insertFront(3);
     deque.popLast();
     let result = deque.getLast();
-    assertEQ(result, 1, "The result should be 1");
+    arktest.assertEQ(result, 1, "The result should be 1");
 }
 
 function testPopLastAfterExpansionAndReset() {
@@ -50,5 +50,5 @@ function testPopLastAfterExpansionAndReset() {
     deque.popLast();
     deque.popLast();
     let result = deque.getLast();
-    assertEQ(result, 1, "The result should be 1");
+    arktest.assertEQ(result, 1, "The result should be 1");
 }

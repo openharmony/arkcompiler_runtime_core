@@ -28,13 +28,13 @@ function main(): int {
     for (let i: int = 0; i < 10 ; i++) {
         map.set(arrKeys[i], arrValues[i]);
     }
-    let concurrentHashMapIteratorTestsuite = new ArkTestsuite("concurrentHashMapIteratorTest");
+    let concurrentHashMapIteratorTestsuite = new arktest.ArkTestsuite("concurrentHashMapIteratorTest");
 
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_001", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
-        assertEQ(iter_$.next().value, undefined);
+        arktest.assertEQ(iter_$.next().value, undefined);
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_002", () =>
     {
@@ -47,14 +47,14 @@ function main(): int {
                 str += ",";
             }
         }
-        assertEQ(str, strAll);
-        assertEQ(iter_$.next().value, undefined);
+        arktest.assertEQ(str, strAll);
+        arktest.assertEQ(iter_$.next().value, undefined);
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_003", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
         let iter_$: IterableIterator<[Number, string]> = concurrentHashMap.$_iterator();
-        assertEQ(iter_$.next().value, undefined);
+        arktest.assertEQ(iter_$.next().value, undefined);
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrKeys[i], arrValues[i]);
         }
@@ -66,8 +66,8 @@ function main(): int {
                 str += ",";
             }
         }
-        assertEQ(str, strAll);
-        assertEQ(iter_$.next().value, undefined);
+        arktest.assertEQ(str, strAll);
+        arktest.assertEQ(iter_$.next().value, undefined);
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorTest_004", () =>
     {
@@ -80,41 +80,41 @@ function main(): int {
             let iterNext = iter.next();
             let k = iterNext.value![0];
             let v = iterNext.value![1];
-            assertEQ(k, arrValues[i]);
-            assertEQ(v, arrKeys[i]);
+            arktest.assertEQ(k, arrValues[i]);
+            arktest.assertEQ(v, arrKeys[i]);
         }
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>($_iteratorAll);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorAndTest_002", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(deleteAll);
         let p2 = launch<void, () => void>($_iteratorAll);
         p1.Await();
         p2.Await();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
     concurrentHashMapIteratorTestsuite.addTest("$_iteratorAndTest_003", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(clearAll);
         let p2 = launch<void, () => void>($_iteratorAll);
         p1.Await();
         p2.Await();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
     });
 
     return concurrentHashMapIteratorTestsuite.run();

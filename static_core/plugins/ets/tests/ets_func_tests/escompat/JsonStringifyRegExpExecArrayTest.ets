@@ -18,7 +18,7 @@ function testRegExpExecArray() {
     const regexp = new RegExp('(?<animal>fox|cat) jumps over')
     const found = str.match(regexp)
     let str1 = JSON.stringify(found)
-    assertEQ(str1, '["fox jumps over","fox"]')
+    arktest.assertEQ(str1, '["fox jumps over","fox"]')
 }
 
 function main() {

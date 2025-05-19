@@ -27,7 +27,7 @@ async function outerFunction(): Promise<string> {
 
 async function startTest() {
   const res = await outerFunction();
-  assertEQ(res === "Inner function result", true);
+  arktest.assertEQ(res === "Inner function result", true);
 }
 
 function main(): void {

@@ -44,23 +44,23 @@ class C {
 
 function main() {
   let z: Readonly<I> = {i: 1.8, j: "some str"}
-  assertTrue(z.i == 1.8)
-  assertTrue(z.j == "some str")
+  arktest.assertTrue(z.i == 1.8)
+  arktest.assertTrue(z.j == "some str")
   z = new A(1.9, "new str")
-  assertTrue(z.i == 1.9)
-  assertTrue(z.j == "new str")
+  arktest.assertTrue(z.i == 1.9)
+  arktest.assertTrue(z.j == "new str")
 
   let x: Readonly<A> = new A(1.8, "some str")
-  assertTrue(x.i == 1.8)
-  assertTrue(x.j == "some str")
+  arktest.assertTrue(x.i == 1.8)
+  arktest.assertTrue(x.j == "some str")
   x = {i: 1.9, j: "new str"}
-  assertTrue(x.i == 1.9)
-  assertTrue(x.j == "new str")
+  arktest.assertTrue(x.i == 1.9)
+  arktest.assertTrue(x.j == "new str")
 
   let y: Readonly<C> = {i: 1.8, j: "some str"}
-  assertTrue(y.i == 1.8)
-  assertTrue(y.j == "some str")
+  arktest.assertTrue(y.i == 1.8)
+  arktest.assertTrue(y.j == "some str")
   y = new C( 1.5, "new str")
-  assertTrue(y.i == 1.5)
-  assertTrue(y.j == "new str")
+  arktest.assertTrue(y.i == 1.5)
+  arktest.assertTrue(y.j == "new str")
 }

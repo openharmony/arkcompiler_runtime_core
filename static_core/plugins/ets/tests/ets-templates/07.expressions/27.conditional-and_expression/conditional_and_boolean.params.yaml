@@ -17,18 +17,18 @@ cases:
     decl: |-
       let a: Boolean = true;
       let b: Boolean = true;
-      assertTrue((a && b) == true);
+      arktest.assertTrue((a && b) == true);
 
   - doc: Conditional AND for 2x Boolean - true false
     decl: |-
       let a: Boolean = true;
       let b: Boolean = false;
-      assertTrue((a && b) == false);
+      arktest.assertTrue((a && b) == false);
 
   - doc: Conditional AND for 2x Boolean - false unknown
     decl: |-
       let a: Boolean = false;
-      assertTrue((a && fail()) == false);
+      arktest.assertTrue((a && fail()) == false);
 
   - doc: Conditional AND for 4x Boolean - true true true true
     decl: |-
@@ -36,7 +36,7 @@ cases:
       let b: Boolean = true;
       let c: Boolean = true;
       let d: Boolean = true;
-      assertTrue((a && b && c && d) == true)
+      arktest.assertTrue((a && b && c && d) == true)
 
   - doc: Conditional AND for 4x Boolean - true true true false
     decl: |-
@@ -44,23 +44,23 @@ cases:
       let b: Boolean = true;
       let c: Boolean = true;
       let d: Boolean = false;
-      assertTrue((a && b && c && d) == false)
+      arktest.assertTrue((a && b && c && d) == false)
 
   - doc: Conditional AND for 4x Boolean - true true false unknown
     decl: |-
       let a: Boolean = true;
       let b: Boolean = true;
       let c: Boolean = false;
-      assertTrue((a && b && c && fail()) == false)
+      arktest.assertTrue((a && b && c && fail()) == false)
 
   - doc: Conditional AND for 4x Boolean - true false unknown...
     decl: |-
       let a: Boolean = true;
       let b: Boolean = false;
-      assertTrue((a && b && fail() && fail()) == false)
+      arktest.assertTrue((a && b && fail() && fail()) == false)
 
   - doc: Conditional AND for 4x Boolean - false unknown...
     decl: |-
       let a: Boolean = false;
-      assertTrue((a && fail() && fail() && fail()) == false)
+      arktest.assertTrue((a && fail() && fail() && fail()) == false)
 

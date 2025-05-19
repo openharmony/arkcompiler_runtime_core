@@ -40,5 +40,5 @@ class C extends A<string> implements B {
 
 function main(): void {
     const c: B = new C("Hello");
-    assertEQ(c.print(), "Hello");
+    arktest.assertEQ(c.print(), "Hello");
 }

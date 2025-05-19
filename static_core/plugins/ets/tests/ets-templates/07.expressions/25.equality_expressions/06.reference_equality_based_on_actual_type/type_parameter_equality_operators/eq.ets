@@ -43,6 +43,6 @@ function main() {
     failed += ne<Object, Object>({{p}}, {{q}}, "{{p|replace('\\', '\\\\')}}", "{{q|replace('\\', '\\\\')}}")
 {%- endfor %}
 {%- endfor %}
-    assertTrue(failed == '', 'Failed operations: ' + failed)
+    arktest.assertTrue(failed == '', 'Failed operations: ' + failed)
 }
 {%- endfor %}

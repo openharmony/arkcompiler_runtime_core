@@ -23,5 +23,5 @@ function greet(p: string = "hello"): string {
 
 function main() {
     const result = greet("hello");
-    assertEQ(result, "hello");
+    arktest.assertEQ(result, "hello");
 }

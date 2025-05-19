@@ -34,5 +34,5 @@ class MyClass implements MyInterface {
 
 function main(): void {
   const result = MyClass.staticMethod();
-  assertEQ(result, "This is a static method.");
+  arktest.assertEQ(result, "This is a static method.");
 }

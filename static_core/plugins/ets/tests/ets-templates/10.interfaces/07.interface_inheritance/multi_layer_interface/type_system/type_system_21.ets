@@ -36,6 +36,6 @@ class SmallDog implements Dog {
 
 function main(): void {
     const dog: Animal = new SmallDog('merry', 14.0);
-    assertEQ(typeof dog.name, "string");
-    assertEQ(dog instanceof Animal, true);
+    arktest.assertEQ(typeof dog.name, "string");
+    arktest.assertEQ(dog instanceof Animal, true);
 }

@@ -37,20 +37,20 @@ function main(): void {
     let a1 = new A()
     a1.setF((p: number): number => { return p + 33 })
     let f1: Func = a1.getF()
-    assertEQ( f1(11), 44 )
+    arktest.assertEQ( f1(11), 44 )
 
     let a2 = new A()
     let f2: Func = a2.getF()
-    assertEQ( f2(22), 55 )
+    arktest.assertEQ( f2(22), 55 )
 
-    assertTrue( f1 === f2 )
+    arktest.assertTrue( f1 === f2 )
 
     a1.setF((p: number): number => { return p + 1 })
     f1 = a1.getF()
-    assertEQ( f1(11), 12 )
+    arktest.assertEQ( f1(11), 12 )
 
     f2 = a2.getF()
-    assertEQ( f2(22), 23 )
+    arktest.assertEQ( f2(22), 23 )
 
-    assertTrue( f1 === f2 )
+    arktest.assertTrue( f1 === f2 )
 }

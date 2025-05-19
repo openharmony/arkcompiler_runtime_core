@@ -30,7 +30,7 @@ function xgc(): void {
     try {
         GC.waitForFinishGC(JSRuntime.xgc());
     } catch(e) {
-        assertTrue(false, "Unexpected exception during XGC");
+        arktest.assertTrue(false, "Unexpected exception during XGC");
     }
 }
 
@@ -112,7 +112,7 @@ function triggerFullGC(): void {
     try {
         GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     } catch(e) {
-        assertTrue(false, "Unexpected exception during full GC");
+        arktest.assertTrue(false, "Unexpected exception during full GC");
     }
 }
 

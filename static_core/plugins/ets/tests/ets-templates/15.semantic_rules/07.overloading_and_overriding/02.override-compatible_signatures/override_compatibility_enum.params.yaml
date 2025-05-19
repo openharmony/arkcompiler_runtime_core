@@ -28,9 +28,9 @@ cases:
       }
     call: |-
       new Derived().foo(HARBOUR.Flippers)
-      assertEQ( res , 2 )
+      arktest.assertEQ( res , 2 )
       new Derived().foo(SHIPYARD.Flippers)
-      assertEQ( res , 1 )
+      arktest.assertEQ( res , 1 )
     params: enum is not override-compatible, overload is used
 
   - tags: 'negative, compile-only'
@@ -60,8 +60,8 @@ cases:
           }
       }
     call: |-
-      assertEQ( new Derived().foo(), SHIPYARD.SwimRing )
-      assertEQ( new Base().foo(), SHIPYARD.Flippers )
+      arktest.assertEQ( new Derived().foo(), SHIPYARD.SwimRing )
+      arktest.assertEQ( new Base().foo(), SHIPYARD.Flippers )
     params: override-compatible with itself return value (invariance)
 
   - tags: 'negative, compile-only'

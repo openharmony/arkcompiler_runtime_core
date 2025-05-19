@@ -31,7 +31,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ(sub.CONSTANT_VALUE.value, 11);
+      arktest.assertEQ(sub.CONSTANT_VALUE.value, 11);
 
   - desc: Verify whether the constant values UnionTypeClass_boolean remain consistent in the subclass interface.
     decl: |-
@@ -51,7 +51,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ(typeof sub.CONSTANT_VALUE.value, 'boolean');
+      arktest.assertEQ(typeof sub.CONSTANT_VALUE.value, 'boolean');
 
   - desc: Verify whether the constant values UnionTypeClass_class remain consistent in the subclass interface.
     decl: |-
@@ -80,7 +80,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ(sub.CONSTANT_VALUE.value.value_name, "test_name");
+      arktest.assertEQ(sub.CONSTANT_VALUE.value.value_name, "test_name");
 
       
 
@@ -112,7 +112,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ(sub.CONSTANT_VALUE.value.user_name, "Object1");
+      arktest.assertEQ(sub.CONSTANT_VALUE.value.user_name, "Object1");
 
   - desc: Verify whether the constant values UnionTypeClass_Date remain consistent in the subclass interface.
     decl: |-
@@ -136,7 +136,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ(sub.CONSTANT_VALUE.enum_value, date);
+      arktest.assertEQ(sub.CONSTANT_VALUE.enum_value, date);
 
   - desc: Verify whether the constant values UnionTypeClass_Date remain consistent in the subclass interface.
     decl: |-
@@ -160,7 +160,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ(sub.CONSTANT_VALUE.enum_value, MyConstants.enum_value);
+      arktest.assertEQ(sub.CONSTANT_VALUE.enum_value, MyConstants.enum_value);
 #未解决
   - desc: Verify whether the constant values UnionTypeClass_null[] remain consistent in the subclass interface.
     decl: |-
@@ -181,7 +181,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.value as null[])[0], null);
+      arktest.assertEQ((sub.CONSTANT_VALUE.value as null[])[0], null);
 
 
   - desc: Verify whether the constant values UnionTypeClass_undefined[] remain consistent in the subclass interface.
@@ -203,7 +203,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.value as undefined[])[0], undefined);
+      arktest.assertEQ((sub.CONSTANT_VALUE.value as undefined[])[0], undefined);
 
   - desc: Verify whether the constant values UnionTypeClass_int[] remain consistent in the subclass interface.
     decl: |-
@@ -224,7 +224,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.value as int[])[0], 1);
+      arktest.assertEQ((sub.CONSTANT_VALUE.value as int[])[0], 1);
 
   - desc: Verify whether the constant values UnionTypeClass_string[] remain consistent in the subclass interface.
     decl: |-
@@ -245,7 +245,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.value as string[])[0], "a");
+      arktest.assertEQ((sub.CONSTANT_VALUE.value as string[])[0], "a");
 
   - desc: Verify whether the constant values UnionTypeClass_number[] remain consistent in the subclass interface.
     decl: |-
@@ -266,7 +266,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.value as number[])[0], 2);
+      arktest.assertEQ((sub.CONSTANT_VALUE.value as number[])[0], 2);
 
   - desc: Verify whether the constant values UnionTypeClass_boolean[] remain consistent in the subclass interface.
     decl: |-
@@ -287,7 +287,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.value as boolean[])[0], true);
+      arktest.assertEQ((sub.CONSTANT_VALUE.value as boolean[])[0], true);
 
   - desc: Verify whether the constant values UnionTypeClass_interface[] remain consistent in the subclass interface.
     decl: |-
@@ -319,7 +319,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.user_name as SomeInterface[])[0].user_name, "Object1");
+      arktest.assertEQ((sub.CONSTANT_VALUE.user_name as SomeInterface[])[0].user_name, "Object1");
 
   - desc: Verify whether the constant values UnionTypeClass_interface[] remain consistent in the subclass interface.
     decl: |-
@@ -349,7 +349,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.value as User[])[0].user_name, "test_name");
+      arktest.assertEQ((sub.CONSTANT_VALUE.value as User[])[0].user_name, "test_name");
 
   - desc: Verify whether the constant values UnionTypeClass_Date[] remain consistent in the subclass interface.
     decl: |-
@@ -374,7 +374,7 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.enum_value as Date[])[0], date);
+      arktest.assertEQ((sub.CONSTANT_VALUE.enum_value as Date[])[0], date);
 
   - desc: Verify whether the constant values UnionTypeClass_Date[] remain consistent in the subclass interface.
     decl: |-
@@ -398,4 +398,4 @@ cases:
       class SubClass extends MyClass {}
     logic: |-
       const sub = new SubClass();
-      assertEQ((sub.CONSTANT_VALUE.enum_value as MyConstants[])[0], MyConstants.enum_value);
+      arktest.assertEQ((sub.CONSTANT_VALUE.enum_value as MyConstants[])[0], MyConstants.enum_value);

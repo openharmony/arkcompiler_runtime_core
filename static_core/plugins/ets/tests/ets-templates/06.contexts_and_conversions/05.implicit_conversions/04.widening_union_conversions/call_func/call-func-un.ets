@@ -32,7 +32,7 @@ function foo(p: {{c.to_type}}): {{c.to_type}} {
 
 function main() {
 {%- for t in c['values'] %}
-    assertTrue( foo(s{{loop.index}}) {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
+    arktest.assertTrue( foo(s{{loop.index}}) {{'as ' + t.ref_type if t.ref_type}} {{t.eq}} {{t.expr|safe}} )
 {%- endfor %}
 }
 {%- endfor %}

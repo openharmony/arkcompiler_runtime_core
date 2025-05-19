@@ -29,5 +29,5 @@ function main() {
   let myDog = new Dog();
   let sound = myDog.speak();
 
-  assertEQ(sound, 'Some generic animal sound');
+  arktest.assertEQ(sound, 'Some generic animal sound');
 }

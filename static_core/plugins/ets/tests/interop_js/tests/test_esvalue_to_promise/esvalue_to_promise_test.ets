@@ -21,5 +21,5 @@ async function checkToPromise() {
     let p = (sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise()) as Promise<ESValue>;
     let res = await p;
 
-    assertTrue(res.toNumber() === 0xcafe);
+    arktest.assertTrue(res.toNumber() === 0xcafe);
 }

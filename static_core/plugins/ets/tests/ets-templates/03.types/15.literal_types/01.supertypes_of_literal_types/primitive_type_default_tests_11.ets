@@ -24,5 +24,5 @@ function testFunc1(num: number = 0) {
 
 function main(): void {
     let result = testFunc1();
-    assertEQ(result, 0);
+    arktest.assertEQ(result, 0);
 }

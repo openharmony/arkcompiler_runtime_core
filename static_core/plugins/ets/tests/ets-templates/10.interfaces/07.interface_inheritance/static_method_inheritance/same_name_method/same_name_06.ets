@@ -40,6 +40,6 @@ function main(): void {
   const instance = new ChildClass();
   instance.instanceMethod();
 
-  assertEQ(ChildClass.staticMethod(), "ChildClass staticMethod");
-  assertEQ(instance.instanceMethod(), "ChildClass instanceMethod");
+  arktest.assertEQ(ChildClass.staticMethod(), "ChildClass staticMethod");
+  arktest.assertEQ(instance.instanceMethod(), "ChildClass instanceMethod");
 }

@@ -28,6 +28,6 @@ function foo<T extends {{case.type}}>(p: T): {{case.ptype}} {
 
 function main() {
   let res: {{case.ptype}} = foo<{{case.type}}>(new {{case.type}}({{case.val|safe}}));
-  assertEQ(res, {{case.res|safe}})
+  arktest.assertEQ(res, {{case.res|safe}})
 }
 {% endfor %}

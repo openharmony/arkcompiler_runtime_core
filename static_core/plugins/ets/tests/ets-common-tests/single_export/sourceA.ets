@@ -22,6 +22,6 @@ import {v} from "./sourceB.ets"
 import * as all from "./sourceB.ets"
 
 function main() : void {
-    assertEQ(5, v());
-    assertEQ(10, all.m);
+    arktest.assertEQ(5, v());
+    arktest.assertEQ(10, all.m);
 }

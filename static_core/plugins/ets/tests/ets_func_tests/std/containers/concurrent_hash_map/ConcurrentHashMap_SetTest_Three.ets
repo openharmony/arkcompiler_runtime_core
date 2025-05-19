@@ -26,91 +26,91 @@ let concurrentHashMapOne: ConcurrentHashMap<number, string> = new ConcurrentHash
 
 function main(): int {
 
-    let concurrentHashMapTestsuite = new ArkTestsuite("concurrentHashMapSetTest");
+    let concurrentHashMapTestsuite = new arktest.ArkTestsuite("concurrentHashMapSetTest");
 
     concurrentHashMapTestsuite.addTest("keysAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>(keysAll);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("ValuesAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>(valuesAll);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("$_iteratorAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>($_iteratorAll);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("EntriesAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>(entriesAll);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("forEachWithoutAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         flag = 0;
         let p1 = launch<void, () => void>(forEachZero);
         let p2 = launch<void, () => void>(setAll);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("forEachWithOneAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         flag = 0;
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>(forEachOne);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("forEachWithTwoAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         flag = 0;
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>(forEachTwo);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
     concurrentHashMapTestsuite.addTest("forEachWithThreeAndTest_001", () =>
     {
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         flag = 0;
         let p1 = launch<void, () => void>(setAll);
         let p2 = launch<void, () => void>(forEachThree);
         p1.Await();
         p2.Await();
-        assertEQ(concurrentHashMapOne.size, 10);
+        arktest.assertEQ(concurrentHashMapOne.size, 10);
     });
 
     return concurrentHashMapTestsuite.run();

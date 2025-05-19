@@ -32,6 +32,6 @@ function plus(p: Char): Char {
 function main() {
     const v1 = new Char({{v.v1}})
 
-    assertEQ( ({{v.exp}}), {{v.r}} )
+    arktest.assertEQ( ({{v.exp}}), {{v.r}} )
 }
 {%- endfor %}

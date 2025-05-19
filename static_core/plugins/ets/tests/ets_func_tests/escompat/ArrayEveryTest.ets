@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Array every tests for SDK");
+    const suite = new arktest.ArkTestsuite("Array every tests for SDK");
     suite.addTest("Array.every testBasic ", testBasic);
     suite.addTest("Array.every testEmptyArray ", testEmptyArray);
     suite.addTest("Array.every testModifyDuringIteration ", testModifyDuringIteration);
@@ -29,16 +29,16 @@ function main(): int {
 function testBasic() {
     const arr: number[] = [1, 2, 3, 4, 5];
     const result1 = arr.every(x => x < 10);
-    assertEQ(result1, true)
+    arktest.assertEQ(result1, true)
     const result2 = arr.every(x => x % 2 === 0);
-    assertEQ(result2, false)
+    arktest.assertEQ(result2, false)
 }
 
 
 function testEmptyArray() {
     const arr: number[] = [];
     const result = arr.every(x => x > 10);
-    assertEQ(result, true)
+    arktest.assertEQ(result, true)
 }
 
 
@@ -50,14 +50,14 @@ function testModifyDuringIteration() {
         arr1.push(4);
         return true;
     });
-    assertEQ(result1, true)
-    assertEQ(iterations1, 3)
-    assertEQ(arr1[0], 1)
-    assertEQ(arr1[1], 2)
-    assertEQ(arr1[2], 3)
-    assertEQ(arr1[3], 4)
-    assertEQ(arr1[4], 4)
-    assertEQ(arr1[5], 4)
+    arktest.assertEQ(result1, true)
+    arktest.assertEQ(iterations1, 3)
+    arktest.assertEQ(arr1[0], 1)
+    arktest.assertEQ(arr1[1], 2)
+    arktest.assertEQ(arr1[2], 3)
+    arktest.assertEQ(arr1[3], 4)
+    arktest.assertEQ(arr1[4], 4)
+    arktest.assertEQ(arr1[5], 4)
 
     const arr2: number[] = [1,2,3]
     let iterations2 = 0;
@@ -67,9 +67,9 @@ function testModifyDuringIteration() {
         arr2.shift()
         return true;
     });
-    assertEQ(result2, true)
-    assertEQ(iterations2, 1)
-    assertEQ(arr2[0], 3)
+    arktest.assertEQ(result2, true)
+    arktest.assertEQ(iterations2, 1)
+    arktest.assertEQ(arr2[0], 3)
 
     const arr3: number[] = [1,2,3]
     let iterations3 = 0;
@@ -84,11 +84,11 @@ function testModifyDuringIteration() {
         arr3.push(4)
         return true;
     });
-    assertEQ(result3, true)
-    assertEQ(iterations3, 3)
-    assertEQ(arr3[0], 4)
-    assertEQ(arr3[1], 4)
-    assertEQ(arr3[2], 4)
+    arktest.assertEQ(result3, true)
+    arktest.assertEQ(iterations3, 3)
+    arktest.assertEQ(arr3[0], 4)
+    arktest.assertEQ(arr3[1], 4)
+    arktest.assertEQ(arr3[2], 4)
 }
 
 
@@ -105,10 +105,10 @@ function testObjectArray() {
     ];
     
     const allAdults = people.every(p => p.age >= 18);
-    assertEQ(allAdults, true)
+    arktest.assertEQ(allAdults, true)
     
     const allNamesStartWithA = people.every(p => p.name.startsWith('A'));
-    assertEQ(allNamesStartWithA, false)
+    arktest.assertEQ(allNamesStartWithA, false)
 }
 
 
@@ -120,10 +120,10 @@ function testEarlyTermination() {
         visited.push(x);
         return x < 3;
     });
-    assertEQ(result, false)
-    assertEQ(visited[0], 1)
-    assertEQ(visited[1], 2)
-    assertEQ(visited[2], 3)
+    arktest.assertEQ(result, false)
+    arktest.assertEQ(visited[0], 1)
+    arktest.assertEQ(visited[1], 2)
+    arktest.assertEQ(visited[2], 3)
 }
 
 
@@ -137,7 +137,7 @@ function testCallbackError() {
             return true;
         });
     } catch (e) {
-        assertEQ(e.toString(), 'Error: Not number')
+        arktest.assertEQ(e.toString(), 'Error: Not number')
     }
 }
 
@@ -150,7 +150,7 @@ function testImpureCallback() {
         externalState += x;
         return externalState < 10;
     });
-    assertEQ(result, false)
-    assertEQ(externalState, 10)
+    arktest.assertEQ(result, false)
+    arktest.assertEQ(externalState, 10)
 }
 

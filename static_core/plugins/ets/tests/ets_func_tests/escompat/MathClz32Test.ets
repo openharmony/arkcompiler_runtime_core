@@ -14,89 +14,89 @@
  */
 
 function testNaN() {
-    assertEQ(Math.clz32(NaN), 32)
+    arktest.assertEQ(Math.clz32(NaN), 32)
 }
 
 function testInfinity() {
-    assertEQ(Math.clz32(Infinity), 32)
-    assertEQ(Math.clz32(-Infinity), 32)
+    arktest.assertEQ(Math.clz32(Infinity), 32)
+    arktest.assertEQ(Math.clz32(-Infinity), 32)
 }
 
 function testZero() {
-    assertEQ(Math.clz32(0), 32)
-    assertEQ(Math.clz32(0.0), 32)
-    assertEQ(Math.clz32(-0), 32)
-    assertEQ(Math.clz32(-0.0), 32)
+    arktest.assertEQ(Math.clz32(0), 32)
+    arktest.assertEQ(Math.clz32(0.0), 32)
+    arktest.assertEQ(Math.clz32(-0), 32)
+    arktest.assertEQ(Math.clz32(-0.0), 32)
 }
 
 function testOne() {
-    assertEQ(Math.clz32(1), 31)
-    assertEQ(Math.clz32(-1), 0)
+    arktest.assertEQ(Math.clz32(1), 31)
+    arktest.assertEQ(Math.clz32(-1), 0)
 }
 
 function testNegative() {
-    assertEQ(Math.clz32(-333), 0)
-    assertEQ(Math.clz32(-333.333), 0)
+    arktest.assertEQ(Math.clz32(-333), 0)
+    arktest.assertEQ(Math.clz32(-333.333), 0)
 }
 
 function testInUint32Range() {
-    assertEQ(Math.clz32(123), 25)
-    assertEQ(Math.clz32(123.456), 25)
+    arktest.assertEQ(Math.clz32(123), 25)
+    arktest.assertEQ(Math.clz32(123.456), 25)
 }
 
 function testLargeScaleNumber() {
-    assertEQ(Math.clz32(1234567890), 1)
-    assertEQ(Math.clz32(1.23e123), 32)
-    assertEQ(Math.clz32(-1.23e123), 32)
-    assertEQ(Math.clz32(Number.MAX_VALUE), 32)
-    assertEQ(Math.clz32(-Number.MAX_VALUE), 32)
+    arktest.assertEQ(Math.clz32(1234567890), 1)
+    arktest.assertEQ(Math.clz32(1.23e123), 32)
+    arktest.assertEQ(Math.clz32(-1.23e123), 32)
+    arktest.assertEQ(Math.clz32(Number.MAX_VALUE), 32)
+    arktest.assertEQ(Math.clz32(-Number.MAX_VALUE), 32)
 }
 
 function testSmallScaleNumber() {
-    assertEQ(Math.clz32(0.23), 32)
-    assertEQ(Math.clz32(1.23), 31)
-    assertEQ(Math.clz32(1.23e-123), 32)
-    assertEQ(Math.clz32(-1.23e-123), 32)
-    assertEQ(Math.clz32(Number.MIN_VALUE), 32)
-    assertEQ(Math.clz32(-Number.MIN_VALUE), 32)
+    arktest.assertEQ(Math.clz32(0.23), 32)
+    arktest.assertEQ(Math.clz32(1.23), 31)
+    arktest.assertEQ(Math.clz32(1.23e-123), 32)
+    arktest.assertEQ(Math.clz32(-1.23e-123), 32)
+    arktest.assertEQ(Math.clz32(Number.MIN_VALUE), 32)
+    arktest.assertEQ(Math.clz32(-Number.MIN_VALUE), 32)
 
 }
 
 function testInt32CornerCase() {
-    assertEQ(Math.clz32(2147483646), 1)
-    assertEQ(Math.clz32(2147483647), 1)
-    assertEQ(Math.clz32(2147483648), 0)
+    arktest.assertEQ(Math.clz32(2147483646), 1)
+    arktest.assertEQ(Math.clz32(2147483647), 1)
+    arktest.assertEQ(Math.clz32(2147483648), 0)
 
-    assertEQ(Math.clz32(-2147483649), 1)
-    assertEQ(Math.clz32(-2147483648), 0)
-    assertEQ(Math.clz32(-2147483647), 0)
+    arktest.assertEQ(Math.clz32(-2147483649), 1)
+    arktest.assertEQ(Math.clz32(-2147483648), 0)
+    arktest.assertEQ(Math.clz32(-2147483647), 0)
 }
 
 function testInt64CornerCase() {
-    assertEQ(Math.clz32(9.223372036854775806e18), 32)
-    assertEQ(Math.clz32(9.223372036854775807e18), 32)
-    assertEQ(Math.clz32(9.223372036854775808e18), 32)
+    arktest.assertEQ(Math.clz32(9.223372036854775806e18), 32)
+    arktest.assertEQ(Math.clz32(9.223372036854775807e18), 32)
+    arktest.assertEQ(Math.clz32(9.223372036854775808e18), 32)
 
-    assertEQ(Math.clz32(-9.223372036854775809e18), 32)
-    assertEQ(Math.clz32(-9.223372036854775808e18), 32)
-    assertEQ(Math.clz32(-9.223372036854775807e18), 32)
+    arktest.assertEQ(Math.clz32(-9.223372036854775809e18), 32)
+    arktest.assertEQ(Math.clz32(-9.223372036854775808e18), 32)
+    arktest.assertEQ(Math.clz32(-9.223372036854775807e18), 32)
 }
 
 function testRandomCase() {
-    assertEQ(Math.clz32(0.195767e-38), 32)
-    assertEQ(Math.clz32(-0.624245e2), 0)
-    assertEQ(Math.clz32(-0.949956e-2), 32)
-    assertEQ(Math.clz32(0.878439e-18), 32)
-    assertEQ(Math.clz32(-0.625398e15), 2)
-    assertEQ(Math.clz32(-0.821849e-26), 32)
-    assertEQ(Math.clz32(-0.180494e-20), 32)
-    assertEQ(Math.clz32(-0.655483e-2), 32)
-    assertEQ(Math.clz32(-0.365771e-6), 32)
-    assertEQ(Math.clz32(0.995405e53), 32)
+    arktest.assertEQ(Math.clz32(0.195767e-38), 32)
+    arktest.assertEQ(Math.clz32(-0.624245e2), 0)
+    arktest.assertEQ(Math.clz32(-0.949956e-2), 32)
+    arktest.assertEQ(Math.clz32(0.878439e-18), 32)
+    arktest.assertEQ(Math.clz32(-0.625398e15), 2)
+    arktest.assertEQ(Math.clz32(-0.821849e-26), 32)
+    arktest.assertEQ(Math.clz32(-0.180494e-20), 32)
+    arktest.assertEQ(Math.clz32(-0.655483e-2), 32)
+    arktest.assertEQ(Math.clz32(-0.365771e-6), 32)
+    arktest.assertEQ(Math.clz32(0.995405e53), 32)
 }
 
 function main() {
-    const suite = new ArkTestsuite("Math.clz32 tests")
+    const suite = new arktest.ArkTestsuite("Math.clz32 tests")
     suite.addTest("Test NaN", testNaN)
     suite.addTest("Test Infinity", testInfinity)
     suite.addTest("Test Zero", testZero)

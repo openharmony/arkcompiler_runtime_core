@@ -21,5 +21,5 @@ files: ['./a.ets', './b.ets']
 import { describe } from "./b";
 
 function main() {
-    assertEQ(describe, 1)
+    arktest.assertEQ(describe, 1)
 }

@@ -63,9 +63,9 @@ class Bar {
 function main(): int {
     let x : Bar = new Bar(1,2,3);
     try {
-        assertEQ(x[0], 1)
-        assertEQ(x[1], 2)
-        assertEQ(x[2], 3)
+        arktest.assertEQ(x[0], 1)
+        arktest.assertEQ(x[1], 2)
+        arktest.assertEQ(x[2], 3)
     } catch (e) {
         console.log("1");
         return 1;
@@ -81,9 +81,9 @@ function main(): int {
     }
 
     try {
-        assertEQ(x[0], 4)
-        assertEQ(x[1], 5)
-        assertEQ(x[2], 6)
+        arktest.assertEQ(x[0], 4)
+        arktest.assertEQ(x[1], 5)
+        arktest.assertEQ(x[2], 6)
     } catch (e) {
         console.log("3");
         return 1;

@@ -22,7 +22,7 @@ desc: Uniqueness of functional objects - compare a function with itself
 function foo{{c}}
 
 function main() {
-    assertEQ(foo, foo)
+    arktest.assertEQ(foo, foo)
 }
 
 {% endfor %}

@@ -30,8 +30,8 @@ function main() {
     let x = 3
     if (true) {
         let x: int
-        assertEQ( f1(), 1 )
-        assertEQ( x, 0 )
+        arktest.assertEQ( f1(), 1 )
+        arktest.assertEQ( x, 0 )
     }
-    assertEQ( x, 3 )
+    arktest.assertEQ( x, 3 )
 }

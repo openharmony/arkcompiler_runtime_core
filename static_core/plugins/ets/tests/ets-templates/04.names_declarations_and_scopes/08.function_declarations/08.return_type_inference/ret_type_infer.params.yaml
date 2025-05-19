@@ -18,7 +18,7 @@ cases:
                 return 127 as byte;
             }
       call: |-
-            assertTrue(foo() == 127 as byte);
+            arktest.assertTrue(foo() == 127 as byte);
 
     - decl: |-
             function foo() {  // infer Byte
@@ -26,15 +26,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Byte);
-            assertTrue(b.unboxed() == 127 as byte);
+            arktest.assertTrue(b instanceof Byte);
+            arktest.assertTrue(b.unboxed() == 127 as byte);
 
     - decl: |-
             function foo() {  // infer short
                 return 2 as short;
             }
       call: |-
-            assertTrue(foo() == 2 as short);
+            arktest.assertTrue(foo() == 2 as short);
 
     - decl: |-
             function foo() {  // infer Short
@@ -42,8 +42,8 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Short);
-            assertTrue(b.unboxed() == 2 as short);
+            arktest.assertTrue(b instanceof Short);
+            arktest.assertTrue(b.unboxed() == 2 as short);
 
     - decl: |-
             function foo() {  // infer Int
@@ -51,15 +51,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Int);
-            assertTrue(b.unboxed() == 2 as int);
+            arktest.assertTrue(b instanceof Int);
+            arktest.assertTrue(b.unboxed() == 2 as int);
 
     - decl: |-
             function foo() {  // infer long
                 return 3 as long;
             }
       call: |-
-            assertTrue(foo() == 3 as long);
+            arktest.assertTrue(foo() == 3 as long);
 
     - decl: |-
             function foo() {  // infer Long
@@ -67,15 +67,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Long);
-            assertTrue(b.unboxed() == 3 as long);
+            arktest.assertTrue(b instanceof Long);
+            arktest.assertTrue(b.unboxed() == 3 as long);
 
     - decl: |-
             function foo() {  // infer float
                 return 4.2 as float;
             }
       call: |-
-            assertTrue(foo() == 4.2 as float);
+            arktest.assertTrue(foo() == 4.2 as float);
 
     - decl: |-
             function foo() {  // infer Float
@@ -83,15 +83,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Float);
-            assertTrue(b.unboxed() == 4.3 as float);
+            arktest.assertTrue(b instanceof Float);
+            arktest.assertTrue(b.unboxed() == 4.3 as float);
 
     - decl: |-
             function foo() {  // infer double
                 return 5.3 as double;
             }
       call: |-
-            assertTrue(foo() == 5.3 as double);
+            arktest.assertTrue(foo() == 5.3 as double);
 
     - decl: |-
             function foo() {  // infer Double
@@ -99,8 +99,8 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Double);
-            assertTrue(b.unboxed() == 5.4 as double);
+            arktest.assertTrue(b instanceof Double);
+            arktest.assertTrue(b.unboxed() == 5.4 as double);
 
     - decl: |-
             function foo() {  // infer Number
@@ -108,15 +108,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Number);
-            assertTrue(b.unboxed() == 6.4 as number);
+            arktest.assertTrue(b instanceof Number);
+            arktest.assertTrue(b.unboxed() == 6.4 as number);
 
     - decl: |-
             function foo() {  // infer char
                 return c'A';
             }
       call: |-
-            assertTrue(foo() == c'A');
+            arktest.assertTrue(foo() == c'A');
 
     - decl: |-
             function foo() {  // infer Char
@@ -124,8 +124,8 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Char);
-            assertTrue(b.unboxed() == c'b');
+            arktest.assertTrue(b instanceof Char);
+            arktest.assertTrue(b.unboxed() == c'b');
 
     - decl: |-
             function foo() {  // infer String
@@ -133,15 +133,15 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof String);
-            assertTrue(b == "some str");
+            arktest.assertTrue(b instanceof String);
+            arktest.assertTrue(b == "some str");
 
     - decl: |-
             function foo() {  // infer boolean
                 return true;
             }
       call: |-
-            assertTrue(foo());
+            arktest.assertTrue(foo());
 
     - decl: |-
             function foo() {  // infer Boolean
@@ -149,22 +149,22 @@ cases:
             }
       call: |-
             let b = foo();
-            assertTrue(b instanceof Boolean);
-            assertTrue(b.unboxed() == false);
+            arktest.assertTrue(b instanceof Boolean);
+            arktest.assertTrue(b.unboxed() == false);
 
     - decl: |-
             function foo() {  // infer null
                 return null;
             }
       call: |-
-            assertTrue(foo() == null);
+            arktest.assertTrue(foo() == null);
 
     - decl: |-
             function foo() {  // infer undefined
                 return undefined;
             }
       call: |-
-            assertTrue(foo() == undefined);
+            arktest.assertTrue(foo() == undefined);
 
     - decl: |-
             function foo() {  // infer undefined|null
@@ -172,7 +172,7 @@ cases:
                 return i;
             }
       call: |-
-            assertTrue(foo() == undefined);
+            arktest.assertTrue(foo() == undefined);
 
     - decl: |-
             function foo() {  // infer undefined|null
@@ -180,7 +180,7 @@ cases:
                 return i;
             }
       call: |-
-            assertTrue(foo() == undefined);
+            arktest.assertTrue(foo() == undefined);
 
     - decl: |-
             function foo() {  // infer union number|undefined|null
@@ -189,7 +189,7 @@ cases:
             }
       call: |-
             let i: number = foo();
-            assertTrue(i == 1.1 as number);
+            arktest.assertTrue(i == 1.1 as number);
 
     - decl: |-
             abstract class AC {  // infer abstract class
@@ -209,11 +209,11 @@ cases:
             }
       call: |-
             let i = foo(true);
-            assertTrue(i instanceof A);
-            assertTrue(!(i instanceof B));
+            arktest.assertTrue(i instanceof A);
+            arktest.assertTrue(!(i instanceof B));
             let j = foo(false);
-            assertTrue(j instanceof B);
-            assertTrue(!(j instanceof A));
+            arktest.assertTrue(j instanceof B);
+            arktest.assertTrue(!(j instanceof A));
 
     - decl: |-
             interface I {} // infer interface
@@ -229,18 +229,18 @@ cases:
             }
       call: |-
             let i = foo(true);
-            assertTrue(i instanceof II);
-            assertTrue(!(i instanceof III));
+            arktest.assertTrue(i instanceof II);
+            arktest.assertTrue(!(i instanceof III));
             let j = foo(false);
-            assertTrue(j instanceof III);
-            assertTrue(!(j instanceof II));
+            arktest.assertTrue(j instanceof III);
+            arktest.assertTrue(!(j instanceof II));
 
     - decl: |-
             function foo() {  // infer std::Array
                 return new Array<int>(2);
             }
       call: |-
-            assertTrue(foo() instanceof Array);
+            arktest.assertTrue(foo() instanceof Array);
 
     - decl: |-
             enum ENM {Red, Blue}  // infer enum
@@ -249,7 +249,7 @@ cases:
             }
       call: |-
             let i: ENM = foo()
-            assertTrue(i == ENM.Blue);
+            arktest.assertTrue(i == ENM.Blue);
 
     - decl: |-
             type TPL = [number, string]  // infer tuple
@@ -259,7 +259,7 @@ cases:
             }
       call: |-
             let i = foo()
-            assertTrue(i instanceof TPL);
+            arktest.assertTrue(i instanceof TPL);
 
     - decl: |-
           type A = Byte  // infer custom type
@@ -269,8 +269,8 @@ cases:
           }
       call: |-
           let i = foo();
-          assertTrue(i instanceof Byte);
-          assertTrue(i.unboxed() == 2 as byte);
+          arktest.assertTrue(i instanceof Byte);
+          arktest.assertTrue(i.unboxed() == 2 as byte);
 
     - decl: |-
           const cstr = "some string"  // infer string/char
@@ -279,8 +279,8 @@ cases:
               return c'A'
           }
       call: |-
-          assertTrue(foo(true) == cstr);
-          assertTrue(foo(false) == c'A');
+          arktest.assertTrue(foo(true) == cstr);
+          arktest.assertTrue(foo(false) == c'A');
 
     - decl: |-
           const cstr = "some string"  // infer boxing conversion + union Number|String|undefined|null
@@ -297,13 +297,13 @@ cases:
               }
           }
       call: |-
-          assertTrue(foo(1) == 1)
-          assertTrue(foo(2) == 2)
-          assertTrue(foo(3) == 3)
-          assertTrue(foo(4) == 4)
-          assertTrue(foo(5) == 5)
-          assertTrue(foo(6) == 6)
-          assertTrue(foo(7) == "B")
+          arktest.assertTrue(foo(1) == 1)
+          arktest.assertTrue(foo(2) == 2)
+          arktest.assertTrue(foo(3) == 3)
+          arktest.assertTrue(foo(4) == 4)
+          arktest.assertTrue(foo(5) == 5)
+          arktest.assertTrue(foo(6) == 6)
+          arktest.assertTrue(foo(7) == "B")
 
     - decl: |-
           function foo(i: int) {  // infer string of different size
@@ -315,6 +315,6 @@ cases:
               }
           }
       call: |-
-          assertTrue(foo(1) == "\u{D800}\u{D801}")
-          assertTrue(foo(2) == "\u{A123}")
-          assertTrue(foo(3) == "\u{00000069}")
+          arktest.assertTrue(foo(1) == "\u{D800}\u{D801}")
+          arktest.assertTrue(foo(2) == "\u{A123}")
+          arktest.assertTrue(foo(3) == "\u{00000069}")

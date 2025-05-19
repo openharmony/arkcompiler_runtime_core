@@ -25,14 +25,14 @@ cases:
       let a: string | number = await result;
       let result1 = multiplePromises(2);
       let b: string | number = await result1;
-      assertEQ(a, "string");
-      assertEQ(b, 20);
+      arktest.assertEQ(a, "string");
+      arktest.assertEQ(b, 20);
   - desc: Start a coroutine using an normal function.
     decl: |-
       function testAwaitBasic(): void {
         let promise: Promise<number> = new Promise<number>((resolve:  (p: number) => void) => resolve(20));
         let res = await promise;
-        assertEQ(res, 20);
+        arktest.assertEQ(res, 20);
       }
     logic: |-
       testAwaitBasic();
@@ -45,8 +45,8 @@ cases:
     logic: |-
       let result1: string | number = await testAwaitUnion(10);
       let result2: string | number = await testAwaitUnion(1);
-      assertEQ(result1, "text");
-      assertEQ(result2, 20);
+      arktest.assertEQ(result1, "text");
+      arktest.assertEQ(result2, 20);
   - desc: Use await to eliminate the multi-layer nesting of promise types.
     decl: |-
       function asyncOperation1(): Promise<string> {
@@ -78,7 +78,7 @@ cases:
           let result1 = await asyncOperation1();
           let result2 = await asyncOperation2(result1);
           let result3 = await asyncOperation3(result2);
-          assertEQ(result3, "Hello World!");
+          arktest.assertEQ(result3, "Hello World!");
         } catch (error) {
         }
       }
@@ -99,7 +99,7 @@ cases:
       async function testAwaitBasic(): Promise<void> {
         let promise: Promise<number> = new Promise<number>((resolve:  (p: number) => void) => resolve(20));
         let res = await promise;
-        assertEQ(res, 20);
+        arktest.assertEQ(res, 20);
       }
     logic: |-
       testAwaitBasic();

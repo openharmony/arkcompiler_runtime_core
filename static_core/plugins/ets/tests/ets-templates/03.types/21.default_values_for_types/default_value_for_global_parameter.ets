@@ -23,7 +23,7 @@ params: {{i.type}}, {{i.value}}
 let x: {{i.type}};
 
 function main(): void {
-  assertEQ( x, {{i.value}} )
+  arktest.assertEQ( x, {{i.value}} )
 }
 
 {% endfor %}

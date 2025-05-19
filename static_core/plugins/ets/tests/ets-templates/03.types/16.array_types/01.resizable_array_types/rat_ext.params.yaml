@@ -17,25 +17,25 @@ cases:
     logic: |-
         let array1: Array<number> = [4, 5, 6];
         let a: number = array1[0];
-        assertEQ(a, 4);
+        arktest.assertEQ(a, 4);
   - desc: Test assigning values to elements at specific positions in an array(Array<number>).
     logic: |-
         let array1: Array<number> = [0, 0, 0, 0, 0];
         array1[0] = 4;
         let a: number = array1[0];
-        assertEQ(a, 4);
+        arktest.assertEQ(a, 4);
   - desc: Test to reduce the array length(Array<number>).
     logic: |-
         let array1: Array<number> = [0, 1, 2, 3];
         let a: number = array1.length;
-        assertEQ(a, 4);
+        arktest.assertEQ(a, 4);
   - desc: Assignment between test object type variables and arrays(Array<string).
     logic: |-
         let array: Array<string> = ["aa", "bb", "cc"];
         let a: Object = array;
-        assertEQ(a, array);
+        arktest.assertEQ(a, array);
   - desc: Assignment between test object type variables and arrays(Array<number>).
     logic: |-
         let array: Array<number> = [1, 2, 3];
         let a: Object = array;
-        assertEQ(a, array);
+        arktest.assertEQ(a, array);

@@ -34,6 +34,6 @@ class NamespaceConflictClass implements NamespaceConflictInterface {
 
 function main(): void {
   const instance = new NamespaceConflictClass();
-  assertEQ(instance.CONST, 62);
-  assertEQ(instance.getNamespaceValue(), 'namespaceValue');
+  arktest.assertEQ(instance.CONST, 62);
+  arktest.assertEQ(instance.getNamespaceValue(), 'namespaceValue');
 }

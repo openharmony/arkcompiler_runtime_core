@@ -22,7 +22,7 @@ cases:
         }
     call: |-
         let x: (i: int) => int = bar;
-        assertEQ(x(1), 2);
+        arktest.assertEQ(x(1), 2);
 
   - decl: |-
         function foo(i: int) {
@@ -33,7 +33,7 @@ cases:
         }
     call: |-
         let x: (i: int) => int = bar;
-        assertEQ(x(1), 2);
+        arktest.assertEQ(x(1), 2);
 
   - decl: |-
         function foo(i: int, j: string) {
@@ -44,7 +44,7 @@ cases:
         }
     call: |-
         let x: (i: int, j: string) => int = bar;
-        assertEQ(x(1, "knock-knock"), 2);
+        arktest.assertEQ(x(1, "knock-knock"), 2);
 
   - decl: |-
         function foo(i: int, j: string) {
@@ -55,4 +55,4 @@ cases:
         }
     call: |-
         let x: (i: int, j: string) => int = bar;
-        assertEQ(x(1, "who`s there"), 2);
+        arktest.assertEQ(x(1, "who`s there"), 2);

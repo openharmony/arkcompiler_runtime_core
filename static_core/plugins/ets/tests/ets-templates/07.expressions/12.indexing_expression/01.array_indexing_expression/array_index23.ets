@@ -22,5 +22,5 @@ function main(): void {
   enum Color { Red, Green, Blue }
   let colorValues: Array <number> = new Array <number>(10, 20, 30);
   colorValues[Color.Green];
-  assertEQ(colorValues[Color.Green], 20);
+  arktest.assertEQ(colorValues[Color.Green], 20);
 }

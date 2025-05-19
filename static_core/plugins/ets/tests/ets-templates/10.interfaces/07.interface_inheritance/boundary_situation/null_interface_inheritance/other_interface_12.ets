@@ -27,6 +27,6 @@ function main(): void {
   const obj: EmptyInterface = {
     data: ["Alice", 25]
   };
-  assertEQ(obj.data[0], "Alice");
-  assertEQ(obj.data[1], 25);
+  arktest.assertEQ(obj.data[0], "Alice");
+  arktest.assertEQ(obj.data[1], 25);
 }

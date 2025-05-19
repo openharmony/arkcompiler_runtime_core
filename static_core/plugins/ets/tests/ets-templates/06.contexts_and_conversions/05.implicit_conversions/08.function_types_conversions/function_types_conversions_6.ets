@@ -32,5 +32,5 @@ class Derived extends Base {
 
 function main(): void {
   let Derived_new: Derived = new Derived();
-  assertEQ(Derived_new.foo(), new Derived());
+  arktest.assertEQ(Derived_new.foo(), new Derived());
 }

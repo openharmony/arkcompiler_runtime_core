@@ -20,40 +20,40 @@ loadLibrary("ani_union");
 
 function test_printMyUnion_with_undefined() {
     let res = UnionTest.printMyUnion(undefined);
-    assertEQ(res, "u")
+    arktest.assertEQ(res, "u")
 }
 
 function test_printMyUnion_with_string() {
     let res = UnionTest.printMyUnion("name");
-    assertEQ(res, "s")
+    arktest.assertEQ(res, "s")
 }
 
 function test_printMyUnion_with_number() {
     let res = UnionTest.printMyUnion(123.456 as float);
-    assertEQ(res, "f")
+    arktest.assertEQ(res, "f")
 }
 
 function test_printMyUnion_with_pair() {
     let pair: UnionTest.Pair = {a: "a", b: "b"};
     let res = UnionTest.printMyUnion(pair);
-    assertEQ(res, "p")
+    arktest.assertEQ(res, "p")
 }
 
 function test_makeMyUnion_string() {
     const result = UnionTest.makeMyUnion("s");
-    assertEQ(result, "string");
+    arktest.assertEQ(result, "string");
 }
 
 function test_makeMyUnion_number() {
     const result = UnionTest.makeMyUnion("f");
-    assertEQ(result, 123);
+    arktest.assertEQ(result, 123);
 }
 
 function test_makeMyUnion_pair() {
     const result = UnionTest.makeMyUnion("p");
     if (result instanceof UnionTest.Pair) {
-        assertEQ(result.a, "a");
-        assertEQ(result.b, "b");
+        arktest.assertEQ(result.a, "a");
+        arktest.assertEQ(result.b, "b");
     } else {
         throw new Error("Result type error");
     }
@@ -61,7 +61,7 @@ function test_makeMyUnion_pair() {
 
 function test_makeMyUnion_undefined() {
     const result = UnionTest.makeMyUnion("u");
-    assertEQ(result, undefined);
+    arktest.assertEQ(result, undefined);
 }
 
 function test_primitives() {
@@ -574,46 +574,46 @@ function test_union_with_makeAndShowTypedArrayUnion(){
     //u8
     let u8Arr: Uint8Array = new Uint8Array([1, 2, 3]);
     let u8ArrResult = UnionTest.makeAndShowTypedArrayUnion(u8Arr) as Uint8Array;
-    assertEQ(u8ArrResult.toString(), u8Arr.toString());
+    arktest.assertEQ(u8ArrResult.toString(), u8Arr.toString());
     //i8
     let i8Arr: Int8Array = new Int8Array([-1, -2, -3]);
     let i8ArrResult = UnionTest.makeAndShowTypedArrayUnion(i8Arr) as Int8Array;
-    assertEQ(i8ArrResult.toString(), i8Arr.toString());
+    arktest.assertEQ(i8ArrResult.toString(), i8Arr.toString());
     //u16
     let u16Arr: Uint16Array = new Uint16Array([10, 20, 30]);
     let u16ArrResult = UnionTest.makeAndShowTypedArrayUnion(u16Arr) as Uint16Array;
-    assertEQ(u16ArrResult.toString(), u16Arr.toString());
+    arktest.assertEQ(u16ArrResult.toString(), u16Arr.toString());
     //i16
     let i16Arr: Int16Array = new Int16Array([-10, -20, -30]);
     let i16ArrResult = UnionTest.makeAndShowTypedArrayUnion(i16Arr) as Int16Array;
-    assertEQ(i16ArrResult.toString(), i16Arr.toString());
+    arktest.assertEQ(i16ArrResult.toString(), i16Arr.toString());
     //u32
     let u32Arr: Uint32Array = new Uint32Array([100, 200, 300]);
     let u32ArrResult = UnionTest.makeAndShowTypedArrayUnion(u32Arr) as Uint32Array;
-    assertEQ(u32ArrResult.toString(), u32Arr.toString());
+    arktest.assertEQ(u32ArrResult.toString(), u32Arr.toString());
     //i32
     let i32Arr: Int32Array = new Int32Array([-100, -200, -300]);
     let i32ArrResult = UnionTest.makeAndShowTypedArrayUnion(i32Arr) as Int32Array;
-    assertEQ(i32ArrResult.toString(), i32Arr.toString());
+    arktest.assertEQ(i32ArrResult.toString(), i32Arr.toString());
     //u64
     let u64Arr: BigUint64Array = new BigUint64Array([1000n, 2000n, 3000n]);
     let u64ArrResult = UnionTest.makeAndShowTypedArrayUnion(u64Arr) as BigUint64Array;
-    assertEQ(u64ArrResult.toString(), u64Arr.toString());
+    arktest.assertEQ(u64ArrResult.toString(), u64Arr.toString());
     //i64
     let i64Arr: BigInt64Array = new BigInt64Array([-1000n, -2000n, -3000n]);
     let i64ArrResult = UnionTest.makeAndShowTypedArrayUnion(i64Arr) as BigInt64Array;
-    assertEQ(i64ArrResult.toString(), i64Arr.toString());
+    arktest.assertEQ(i64ArrResult.toString(), i64Arr.toString());
     //f32
     let f32Arr: Float32Array = new Float32Array([1.23, -2.14, 3.16]);
     let f32ArrResult = UnionTest.makeAndShowTypedArrayUnion(f32Arr) as Float32Array;
-    assertEQ(f32ArrResult.toString(), f32Arr.toString());
+    arktest.assertEQ(f32ArrResult.toString(), f32Arr.toString());
     //f64
     let f64Arr: Float64Array = new Float64Array([1.234567, -2.145789, 3.161862]);
     let f64ArrResult = UnionTest.makeAndShowTypedArrayUnion(f64Arr) as Float64Array;
-    assertEQ(f64ArrResult.toString(), f64Arr.toString());
+    arktest.assertEQ(f64ArrResult.toString(), f64Arr.toString());
     //null
     let nullResult = UnionTest.makeAndShowTypedArrayUnion(null);
-    assertEQ(nullResult, null);
+    arktest.assertEQ(nullResult, null);
 }
 
 function test_union_with_makeAndShowArrayUnion(){
@@ -648,7 +648,7 @@ function test_union_with_makeAndShowStructUnion(){
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("UnionTest Tests");
+    const suite = new arktest.ArkTestsuite("UnionTest Tests");
 
     suite.addTest("test printMyUnion with undefined", test_printMyUnion_with_undefined);
     suite.addTest("test printMyUnion with string", test_printMyUnion_with_string);

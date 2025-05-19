@@ -25,5 +25,5 @@ function foo(i: Base) {
 }
 
 function main() {
-  assertEQ( foo(new Base()), foo(new Derived()) );
+  arktest.assertEQ( foo(new Base()), foo(new Derived()) );
 }

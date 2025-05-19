@@ -27,6 +27,6 @@ class ChildClass1 implements ParentInterface1 {
 
 function main(): void {
   const instance = new ChildClass1();
-  assertEQ(instance.VALUE, 100);
-  assertEQ(typeof instance.VALUE, 'number');
+  arktest.assertEQ(instance.VALUE, 100);
+  arktest.assertEQ(typeof instance.VALUE, 'number');
 }

@@ -21,5 +21,5 @@ function main(): void {
   let a: Int | null = new Int(1);
   let b: Int = a as Int;
 
-  assertEQ( b, 1 )
+  arktest.assertEQ( b, 1 )
 }

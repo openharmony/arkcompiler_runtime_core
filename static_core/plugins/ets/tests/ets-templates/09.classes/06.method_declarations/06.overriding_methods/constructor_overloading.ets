@@ -44,8 +44,8 @@ function main(): void {
   let i3: A = new A(7, c's');
   let i4: A = new A(7, c's', true);
 
-  assertEQ( i1.x, 5 );
-  assertEQ( i2.x, 7 );
-  assertEQ( i3.x, 10 );
-  assertEQ( i4.x, 15 );
+  arktest.assertEQ( i1.x, 5 );
+  arktest.assertEQ( i2.x, 7 );
+  arktest.assertEQ( i3.x, 10 );
+  arktest.assertEQ( i4.x, 15 );
 }

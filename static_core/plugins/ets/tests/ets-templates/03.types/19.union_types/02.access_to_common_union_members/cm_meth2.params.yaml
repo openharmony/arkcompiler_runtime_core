@@ -31,8 +31,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertTrue(u1.meth() === undefined)
-          assertTrue(u2.meth() === null)
+          arktest.assertTrue(u1.meth() === undefined)
+          arktest.assertTrue(u2.meth() === null)
 
     - decl: |-
           // classes, methods of number type
@@ -55,8 +55,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth(), 42.0)
-          assertEQ(u2.meth(), 0e0)
+          arktest.assertEQ(u1.meth(), 42.0)
+          arktest.assertEQ(u2.meth(), 0e0)
 
     - decl: |-
           // classes, methods of bigint type
@@ -75,8 +75,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth(''), 42n)
-          assertEQ(u2.meth(''), 33n)
+          arktest.assertEQ(u1.meth(''), 42n)
+          arktest.assertEQ(u2.meth(''), 33n)
 
     - decl: |-
           // classes, methods of Integral type
@@ -105,10 +105,10 @@ cases:
           let u3: A|B = new A
           let u4: A|B = new B
       use: |-
-          assertEQ(u1.meth(), 42)
-          assertEQ(u2.meth(), 33)
-          assertEQ(u3.meth(), 'A')
-          assertEQ(u4.meth(), 'B')
+          arktest.assertEQ(u1.meth(), 42)
+          arktest.assertEQ(u2.meth(), 33)
+          arktest.assertEQ(u3.meth(), 'A')
+          arktest.assertEQ(u4.meth(), 'B')
 
     - decl: |-
           // classes, methods of Error type
@@ -123,8 +123,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth(42).message, '42')
-          assertEQ(u2.meth(33).message, '33')
+          arktest.assertEQ(u1.meth(42).message, '42')
+          arktest.assertEQ(u2.meth(33).message, '33')
 
     - decl: |-
           // classes, methods of union literal type
@@ -151,10 +151,10 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth(), 'a')
-          assertEQ(u2.meth(), 'b')
-          assertEQ(u1.meth2(), 'c')
-          assertEQ(u2.meth2(), 'a')
+          arktest.assertEQ(u1.meth(), 'a')
+          arktest.assertEQ(u2.meth(), 'b')
+          arktest.assertEQ(u1.meth2(), 'c')
+          arktest.assertEQ(u2.meth2(), 'a')
 
     - decl: |-
           // classes, methods of union type
@@ -181,8 +181,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth(), 42.0)
-          assertEQ(u2.meth(), null)
+          arktest.assertEQ(u1.meth(), 42.0)
+          arktest.assertEQ(u2.meth(), null)
 
     - decl: |-
           // classes, methods of array type
@@ -202,8 +202,8 @@ cases:
           let u2: AA|BB = new BB
       use: |-
           let arr: string[] = []
-          assertEQ(u1.meth(arr)[0], 'a')
-          assertEQ(u2.meth(arr)[2], 'e')
+          arktest.assertEQ(u1.meth(arr)[0], 'a')
+          arktest.assertEQ(u2.meth(arr)[2], 'e')
 
     - decl: |-
           // classes, methods of tuple type
@@ -222,8 +222,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth()[0], 42.0)
-          assertEQ(u2.meth()[1], 'b')
+          arktest.assertEQ(u1.meth()[0], 42.0)
+          arktest.assertEQ(u2.meth()[1], 'b')
 
     - decl: |-
           // classes, methods of Record type
@@ -242,8 +242,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth()['a'], 11.0)
-          assertEQ(u2.meth()['b'], 22.0)
+          arktest.assertEQ(u1.meth()['a'], 11.0)
+          arktest.assertEQ(u2.meth()['b'], 22.0)
 
     - decl: |-
           // classes, methods of function type
@@ -262,8 +262,8 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth(11)('abc'), 14)
-          assertEQ(u2.meth(22)('abc'), 26)
+          arktest.assertEQ(u1.meth(11)('abc'), 14)
+          arktest.assertEQ(u2.meth(22)('abc'), 26)
 
     - decl: |-
           // classes, methods of type parameters
@@ -290,8 +290,8 @@ cases:
           let u1: AA|BB = new AA('a')
           let u2: BB|AA = new BB
       use: |-
-          assertEQ(u1.meth(), 'a')
-          assertEQ(u2.meth(), 'b')
+          arktest.assertEQ(u1.meth(), 'a')
+          arktest.assertEQ(u2.meth(), 'b')
 
     - decl: |-
           // classes, methods of enum type
@@ -315,5 +315,5 @@ cases:
           let u1: AA|BB = new AA
           let u2: AA|BB = new BB
       use: |-
-          assertEQ(u1.meth(), Color.Green)
-          assertEQ(u2.meth(), Color.Blue)
+          arktest.assertEQ(u1.meth(), Color.Green)
+          arktest.assertEQ(u2.meth(), Color.Blue)

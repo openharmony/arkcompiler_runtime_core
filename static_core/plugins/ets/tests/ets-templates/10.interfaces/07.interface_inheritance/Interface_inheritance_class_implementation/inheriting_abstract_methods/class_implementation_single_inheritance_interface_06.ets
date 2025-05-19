@@ -34,5 +34,5 @@ class Parrot extends AbstractBird {
 function main(): void {
   let parrot = new Parrot();
   let result = parrot.speak();
-  assertEQ(result, "Parrot squawks.");
+  arktest.assertEQ(result, "Parrot squawks.");
 }

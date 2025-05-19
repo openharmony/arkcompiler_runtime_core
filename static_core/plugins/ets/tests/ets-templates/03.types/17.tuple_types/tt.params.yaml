@@ -20,40 +20,40 @@ cases:
           let e2: [] = []
           let e1a = e1
           let e2a = e2
-          assertTrue( e1a instanceof Object )
-          assertTrue( e2a instanceof Object )
-          assertTrue( e1 == e1a && e2 == e2a && e1a != e2a )
+          arktest.assertTrue( e1a instanceof Object )
+          arktest.assertTrue( e2a instanceof Object )
+          arktest.assertTrue( e1 == e1a && e2 == e2a && e1a != e2a )
 
     - use: |-
           let e: [boolean, string] = [true, "A"]
-          assertTrue( e instanceof [boolean, string] )
-          assertTrue( e instanceof Object )
+          arktest.assertTrue( e instanceof [boolean, string] )
+          arktest.assertTrue( e instanceof Object )
 
     - decl: |-
           type TUPLE = [boolean, string]
       use: |-
           let e: TUPLE = [true, "A"]
-          assertTrue( e instanceof TUPLE )
-          assertTrue( e instanceof Object )
+          arktest.assertTrue( e instanceof TUPLE )
+          arktest.assertTrue( e instanceof Object )
 
     - use: |-
           let e: [][] = []  // array of empty tuples
           let f: [][] = [[]]
           let g: [][] = [[],[]]
-          assertTrue( e.length == 0 )
-          assertTrue( f.length == 1 )
-          assertTrue( g.length == 2 )
+          arktest.assertTrue( e.length == 0 )
+          arktest.assertTrue( f.length == 1 )
+          arktest.assertTrue( g.length == 2 )
 
     - use: |-
           let e: [string, string][] = []    // one-dimensional array of tuples
           let f: [string, string][][] = []  // two-dimensional array of tuples
-          assertTrue( e.length == 0 )
-          assertTrue( f.length == 0 )
+          arktest.assertTrue( e.length == 0 )
+          arktest.assertTrue( f.length == 0 )
 
           e = [["a", "b"]]
           f = [e, e]
-          assertTrue( e[0][0] == "a" )
-          assertTrue( f[0][0][0] == "a" )
+          arktest.assertTrue( e[0][0] == "a" )
+          arktest.assertTrue( f[0][0][0] == "a" )
 
     - decl: |-
           type TUPLE = [number, string, boolean, Object]
@@ -63,9 +63,9 @@ cases:
           e[1] = "B"
           e[2] = false
           e[3] = e
-          assertTrue( (e[3] as TUPLE)[0] == 33.0 )
-          assertTrue( (e[3] as TUPLE)[1] == "B" )
-          assertTrue( (e[3] as TUPLE)[2] == false )
+          arktest.assertTrue( (e[3] as TUPLE)[0] == 33.0 )
+          arktest.assertTrue( (e[3] as TUPLE)[1] == "B" )
+          arktest.assertTrue( (e[3] as TUPLE)[2] == false )
 
     - decl: |-
           function foo(v: [number, string]): [string, string] {
@@ -73,8 +73,8 @@ cases:
           }
       use: |-
           let res = foo([42.0, "test"])
-          assertTrue( res[0] === "test42" )
-          assertTrue( res[1] === "test" )
+          arktest.assertTrue( res[0] === "test42" )
+          arktest.assertTrue( res[1] === "test" )
 
     - decl: |-
           class A<T> {
@@ -89,8 +89,8 @@ cases:
       use: |-
           let a: A<[string, string]> = new A<[string, string]>(["A", "B"])
           let res = a.getFld()
-          assertTrue( res[0] === "A" )
-          assertTrue( res[1] === "B" )
+          arktest.assertTrue( res[0] === "A" )
+          arktest.assertTrue( res[1] === "B" )
 
     - decl: |-
           class A<T extends [number, boolean]> {
@@ -105,8 +105,8 @@ cases:
       use: |-
           let a: A<[number, boolean]> = new A<[number, boolean]>([1.0, true])
           let res = a.getFld()
-          assertTrue( res[0] == 1.0 )
-          assertTrue( res[1] == true )
+          arktest.assertTrue( res[0] == 1.0 )
+          arktest.assertTrue( res[1] == true )
 
     - decl: |-
           class A<T> {
@@ -125,14 +125,14 @@ cases:
           let a: A<[string|null, string|null] | null> = new A<[string|null, string|null] | null>(null)
           a.setFld(["A", null])
           let res = a.getFld()
-          assertTrue( res![0] === "A" )
-          assertTrue( res![1] === null )
+          arktest.assertTrue( res![0] === "A" )
+          arktest.assertTrue( res![1] === null )
 
     - decl: |-
           const index: int = 1
       use: |-
           let e: [string, boolean] = ["A", true]
-          assertTrue( e[index] == true ) // const indices allowed
+          arktest.assertTrue( e[index] == true ) // const indices allowed
 
     - decl: |-
           function foo(p: string[]) {
@@ -140,7 +140,7 @@ cases:
           }
       use: |-
           let v = foo(["A", "B"])  // array type must be inferred from context
-          assertTrue( v == "A" )
+          arktest.assertTrue( v == "A" )
 
     - decl: |-
           function foo(p: [string, string]) {
@@ -148,7 +148,7 @@ cases:
           }
       use: |-
           let v = foo(["A", "B"])  // tuple type must be inferred from context
-          assertTrue( v == "A" )
+          arktest.assertTrue( v == "A" )
 
     - use: |-
           let v: [number, number] = [1.0, 2.0]
@@ -158,7 +158,7 @@ cases:
     - use: |-
           let v: [string] = ["A"]
           let p = v as [string]  // cast to the same type
-          assertTrue( p[0] == "A" )
+          arktest.assertTrue( p[0] == "A" )
 
     - use: |-
           let res: boolean = false
@@ -169,25 +169,25 @@ cases:
           } catch (e: NullPointerError) {
               res = true // OK
           }
-          assertTrue( res )
+          arktest.assertTrue( res )
 
     - decl: |-
           type TUPLE = [number, string]
       use: |-
           let v: [TUPLE, [number, TUPLE]] = [[1.0, "A"], [2.0, [3.0, "B"]]]
-          assertTrue( v[0][0] == 1.0 )
-          assertTrue( v[0][1] == "A" )
-          assertTrue( v[1][0] == 2.0 )
-          assertTrue( v[1][1][0] == 3.0 )
-          assertTrue( v[1][1][1] == "B" )
+          arktest.assertTrue( v[0][0] == 1.0 )
+          arktest.assertTrue( v[0][1] == "A" )
+          arktest.assertTrue( v[1][0] == 2.0 )
+          arktest.assertTrue( v[1][1][0] == 3.0 )
+          arktest.assertTrue( v[1][1][1] == "B" )
 
     - use: |-
           // test Array.push with tuple literal [boolean, int]
           let arr: Array<[boolean, int]> = new Array<[boolean, int]>()
           arr.push([true, 1])
           arr.push([false, 2])
-          assertTrue( arr.length == 2 )
-          assertTrue( arr[0][0] == true )
-          assertTrue( arr[0][1] == 1 )
-          assertTrue( arr[1][0] == false )
-          assertTrue( arr[1][1] == 2 )
+          arktest.assertTrue( arr.length == 2 )
+          arktest.assertTrue( arr[0][0] == true )
+          arktest.assertTrue( arr[0][1] == 1 )
+          arktest.assertTrue( arr[1][0] == false )
+          arktest.assertTrue( arr[1][1] == 2 )

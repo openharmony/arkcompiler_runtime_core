@@ -22,7 +22,7 @@ class MethodReturnVoidImplicit {
     value: number = 0;
     async methodReturnVoidImplicit(): Promise<void> {
         this.value = 1;
-        assertEQ(this.value, 1);
+        arktest.assertEQ(this.value, 1);
     }
 }
 

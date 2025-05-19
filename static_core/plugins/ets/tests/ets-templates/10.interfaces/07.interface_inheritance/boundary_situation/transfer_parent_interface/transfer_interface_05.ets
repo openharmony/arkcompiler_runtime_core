@@ -28,5 +28,5 @@ function main(): void {
     title: "Sample Title"
   };
   
-  assertEQ(obj.title, "Sample Title");
+  arktest.assertEQ(obj.title, "Sample Title");
 }

@@ -35,7 +35,7 @@ class A {
 function main(): void {
   let instance: A = new A();
 
-  assertEQ( instance.call(), {{member.value}} );
+  arktest.assertEQ( instance.call(), {{member.value}} );
 }
 
 {% endfor %}

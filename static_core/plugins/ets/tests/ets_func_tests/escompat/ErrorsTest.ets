@@ -17,7 +17,7 @@ const success = 0
 const fail = 1
 
 function main(): int {
-    const suite = new ArkTestsuite("Errors API tests")
+    const suite = new arktest.ArkTestsuite("Errors API tests")
 
     suite.addTest("Create an Error object with a message", testCreateError)
     suite.addTest("Throw an Error and catch it", testThrowError)
@@ -58,13 +58,13 @@ function testErrorHelper(
 ) {
     const errorEmptyMessage = factoryUsingConstructor()
     const errorStaticEmptyMessage = factoryUsingStaticInvoke()
-    assertTrue(
+    arktest.assertTrue(
         checkMessageAndName(errorEmptyMessage, errorStaticEmptyMessage, "", name),
         `Error in check "${name}" error class with empty message`
     )
     const errorWithMessage = factoryUsingConstructor(message)
     const errorStaticWithMessage = factoryUsingStaticInvoke(message)
-    assertTrue(
+    arktest.assertTrue(
         checkMessageAndName(
             errorWithMessage,
             errorStaticWithMessage,
@@ -82,7 +82,7 @@ function testCreateError() {
         "Error",
         "Test Error"
     )
-    assertEQ(Error("Test Error", new ErrorOptions("Cause")).cause, "Cause")
+    arktest.assertEQ(Error("Test Error", new ErrorOptions("Cause")).cause, "Cause")
 }
 
 function testThrowError() {
@@ -97,7 +97,7 @@ function testErrorMessage() {
     try {
         throw new Error("Error message test")
     } catch (err: Error) {
-        assertEQ(err.message, "Error message test")
+        arktest.assertEQ(err.message, "Error message test")
         return
     }
 }
@@ -106,15 +106,15 @@ function testErrorWithCause() {
     const options = new ErrorOptions("Test cause")
     const err = new Error("Test error with cause", options)
     const errSc = Error("Test error with cause", options)
-    assertEQ(errSc.cause, err.cause)
-    assertEQ(err.cause, options.cause)
+    arktest.assertEQ(errSc.cause, err.cause)
+    arktest.assertEQ(err.cause, options.cause)
 }
 
 function testCreateAggregateError() {
     const errors = [new Error("Error 1"), new Error("Error 2")]
     let aggErr = new AggregateError(errors, "Aggregate error message")
-    assertEQ(aggErr.errors.length, 2)
-    assertEQ(aggErr.message, "Aggregate error message")
+    arktest.assertEQ(aggErr.errors.length, 2)
+    arktest.assertEQ(aggErr.message, "Aggregate error message")
 
     // Note(ivan-tyulyandin): the code below has to moved into generated tests
     // after internal issue #20142 is resolved
@@ -126,68 +126,68 @@ function testCreateAggregateError() {
 
     // AggregateError(Error)
     aggErr = new AggregateError(errInArr)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
 
     // AggregateError(Error, undefined)
     aggErr = new AggregateError(errInArr, undefined)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, object | undefined>(emptyStr, aggErr.message)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, object | undefined>(emptyStr, aggErr.message)
 
     // AggregateError(Error, undefined, undefined)
     aggErr = new AggregateError(errInArr, undefined)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, object | undefined>(emptyStr, aggErr.message)
-    assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, object | undefined>(emptyStr, aggErr.message)
+    arktest.assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
 
     // AggregateError(Error, "")
     aggErr = new AggregateError(errInArr, emptyStr)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, string>(emptyStr, aggErr.message)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, string>(emptyStr, aggErr.message)
 
     // AggregateError(Error, "text")
     aggErr = new AggregateError(errInArr, nonEmptyStr)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, string>(nonEmptyStr, aggErr.message)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, string>(nonEmptyStr, aggErr.message)
 
     // AggregateError(Error, "", undefined)
     aggErr = new AggregateError(errInArr, emptyStr)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, string>(emptyStr, aggErr.message)
-    assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, string>(emptyStr, aggErr.message)
+    arktest.assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
 
     // AggregateError(Error, "text", undefined)
     aggErr = new AggregateError(errInArr, nonEmptyStr, undefined)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, string>(nonEmptyStr, aggErr.message)
-    assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, string>(nonEmptyStr, aggErr.message)
+    arktest.assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
 
     // AggregateError(Error, undefined, ErrorOptions)
     aggErr = new AggregateError(errInArr, undefined, errOpts)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, object | undefined>(emptyStr, aggErr.message)
-    assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, object | undefined>(emptyStr, aggErr.message)
+    arktest.assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
 
     // AggregateError(Error, "", ErrorOptions)
     aggErr = new AggregateError(errInArr, emptyStr, errOpts)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, string>(emptyStr, aggErr.message)
-    assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, string>(emptyStr, aggErr.message)
+    arktest.assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
 
     // AggregateError(Error, "text", ErrorOptions)
     aggErr = new AggregateError(errInArr, nonEmptyStr, errOpts)
-    assertEQ(aggErr.errors.length,  1, assertMsg)
-    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, string>(nonEmptyStr, aggErr.message)
-    assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
+    arktest.assertEQ(aggErr.errors.length,  1, assertMsg)
+    arktest.assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    arktest.assertEQ<string, string>(nonEmptyStr, aggErr.message)
+    arktest.assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
 }
 
 function testCreateAggregateErrorFromArray() {
@@ -196,8 +196,8 @@ function testCreateAggregateErrorFromArray() {
         new Error("Error 2")
     ])
     const aggErr = new AggregateError(errors, "Aggregate error message")
-    assertEQ(aggErr.errors.length, 2)
-    assertEQ(aggErr.message, "Aggregate error message")
+    arktest.assertEQ(aggErr.errors.length, 2)
+    arktest.assertEQ(aggErr.message, "Aggregate error message")
 }
 
 function testAggregateErrorMessage() {
@@ -205,7 +205,7 @@ function testAggregateErrorMessage() {
         [] as Error[],
         "Test aggregate error message"
     )
-    assertEQ(aggErr.message, "Test aggregate error message")
+    arktest.assertEQ(aggErr.message, "Test aggregate error message")
 }
 
 function testEvalError() {
@@ -215,7 +215,7 @@ function testEvalError() {
         "EvalError",
         "Test EvalError"
     )
-    assertEQ(
+    arktest.assertEQ(
         EvalError("Test EvalError", new ErrorOptions("Test cause")).cause,
         "Test cause"
     )
@@ -228,7 +228,7 @@ function testRangeError() {
         "RangeError",
         "Test RangeError"
     )
-    assertEQ(
+    arktest.assertEQ(
         RangeError("Test RangeError", new ErrorOptions("Test cause")).cause,
         "Test cause"
     )
@@ -241,7 +241,7 @@ function testReferenceError() {
         "ReferenceError",
         "Test ReferenceError"
     )
-    assertEQ(
+    arktest.assertEQ(
         ReferenceError("Test ReferenceError", new ErrorOptions("Test cause")).cause,
         "Test cause"
     )
@@ -254,7 +254,7 @@ function testSyntaxError() {
         "SyntaxError",
         "Test SyntaxError"
     )
-    assertEQ(
+    arktest.assertEQ(
         SyntaxError("Test SyntaxError", new ErrorOptions("Test cause")).cause,
         "Test cause"
     )
@@ -267,7 +267,7 @@ function testTypeError() {
         "TypeError",
         "Test TypeError"
     )
-    assertEQ(
+    arktest.assertEQ(
         TypeError("Test TypeError", new ErrorOptions("Test cause")).cause,
         "Test cause"
     )
@@ -280,7 +280,7 @@ function testURIError() {
         "URIError",
         "Test URIError"
     )
-    assertEQ(
+    arktest.assertEQ(
         URIError("Test URIError", new ErrorOptions("Test cause")).cause,
         "Test cause"
     )

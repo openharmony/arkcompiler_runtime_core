@@ -27,5 +27,5 @@ function main(): void {
   let a : A = new A();
   let b : Int = 2;
   let c = true ? a : b;
-  assertTrue(foo(c) == 1);
+  arktest.assertTrue(foo(c) == 1);
 }

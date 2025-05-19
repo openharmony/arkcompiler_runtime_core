@@ -15,9 +15,9 @@
 
 function main(): int {
     let obj = new Object();
-    assertLT(0, GC.getObjectAddress(obj), "getObjectAddress for regular object must return value > 0");
-    assertLT(0, GC.getObjectAddress("non-movable string"), "getObjectAddress for non-movable must return value > 0");
+    arktest.assertLT(0, GC.getObjectAddress(obj), "getObjectAddress for regular object must return value > 0");
+    arktest.assertLT(0, GC.getObjectAddress("non-movable string"), "getObjectAddress for non-movable must return value > 0");
     let h_obj: long[] = new long[1024 * 64];
-    assertLT(0, GC.getObjectAddress(h_obj), "getObjectAddress for humongous must return value > 0");
+    arktest.assertLT(0, GC.getObjectAddress(h_obj), "getObjectAddress for humongous must return value > 0");
     return 0;
 }

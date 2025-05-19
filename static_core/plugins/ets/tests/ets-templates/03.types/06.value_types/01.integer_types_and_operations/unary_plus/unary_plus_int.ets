@@ -20,7 +20,7 @@ desc: check unary plus operation for integer operand
 
 function main(): void {
   const v: int = {{v.value}}
-  assertEQ( +(v), {{v.result}})
+  arktest.assertEQ( +(v), {{v.result}})
 }
 
 {% endfor %}

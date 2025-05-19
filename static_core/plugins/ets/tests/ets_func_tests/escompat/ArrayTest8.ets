@@ -14,7 +14,7 @@
  */
 
 function main() {
-    let suite = new ArkTestsuite("Array Invoke tests")
+    let suite = new arktest.ArkTestsuite("Array Invoke tests")
     suite.addTest("$_invokeArrayNumber", testInvokeArrayNumber)
     suite.addTest("$_invokeArrayStringOneValue", testInvokeArrayStringOneValue)
     suite.addTest("$_invokeArrayStringManyValues", testInvokeArrayStringManyValues)
@@ -26,26 +26,26 @@ function main() {
 function testInvokeArrayNumber() {
     let arr = Array<number>(1.0, 2.0, 3.0, 4.0)
     for (let i: int = 0; i < arr.length; i++) {
-        assertEQ(arr[i], (i + 1).toDouble())
+        arktest.assertEQ(arr[i], (i + 1).toDouble())
     }
 }
 
 function testInvokeArrayStringOneValue() {
     let arr = Array<string>("abcd")
-    assertEQ(arr[0], "abcd")
+    arktest.assertEQ(arr[0], "abcd")
 }
 
 function testInvokeArrayStringManyValues() {
     let arr = Array<string>("abcd", "ef", "123")
-    assertEQ(arr[0], "abcd")
-    assertEQ(arr[1], "ef")
-    assertEQ(arr[2], "123")
+    arktest.assertEQ(arr[0], "abcd")
+    arktest.assertEQ(arr[1], "ef")
+    arktest.assertEQ(arr[2], "123")
 }
 
 function testInvokeArrayNumberWithInt() {
     let arr = Array<number>(1, 2, 3)
     for (let i: int = 0; i < arr.length; i++) {
-        assertEQ(arr[i], (i + 1).toDouble())
+        arktest.assertEQ(arr[i], (i + 1).toDouble())
     }
 }
 

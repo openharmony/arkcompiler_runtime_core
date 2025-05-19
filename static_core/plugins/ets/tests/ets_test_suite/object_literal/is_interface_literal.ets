@@ -139,7 +139,7 @@ function testIfaceNonLiteralInitGeneric() {
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Interface literal initialization tests")
+    const suite = new arktest.ArkTestsuite("Interface literal initialization tests")
     suite.addTest("Positive test simple", testIfaceLiteralInit)
     suite.addTest("Negative test simple", testIfaceNonLiteralInit)
     suite.addTest("Positive test array", testIfaceLiteralInitArr)

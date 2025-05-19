@@ -30,22 +30,22 @@ function main(): void {
   b.fld = "b"
 
   let a = b as A
-  assertTrue( a instanceof A )
-  assertTrue( a instanceof B )
-  assertTrue( a.fld == "b" )
+  arktest.assertTrue( a instanceof A )
+  arktest.assertTrue( a instanceof B )
+  arktest.assertTrue( a.fld == "b" )
 
   let o = a as Object
-  assertTrue( o instanceof A )
-  assertTrue( o instanceof B )
-  assertTrue( o instanceof Object )
+  arktest.assertTrue( o instanceof A )
+  arktest.assertTrue( o instanceof B )
+  arktest.assertTrue( o instanceof Object )
 
   let a2 = o as A
-  assertTrue( a2 instanceof A )
-  assertTrue( a2 instanceof B )
-  assertTrue( a2.fld == "b" )
+  arktest.assertTrue( a2 instanceof A )
+  arktest.assertTrue( a2 instanceof B )
+  arktest.assertTrue( a2.fld == "b" )
 
   let b2 = o as B
-  assertTrue( b2 instanceof A )
-  assertTrue( b2 instanceof B )
-  assertTrue( b2.fld == "b" )
+  arktest.assertTrue( b2 instanceof A )
+  arktest.assertTrue( b2 instanceof B )
+  arktest.assertTrue( b2.fld == "b" )
 }

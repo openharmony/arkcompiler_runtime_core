@@ -25,6 +25,6 @@ let u1: A|B = new A
 let u2: A|B = new B
 
 function main() {
-  assertEQ(u1.meth(1.0), 43.0);
-  assertEQ(u2.meth(2.0), 35.0);
+  arktest.assertEQ(u1.meth(1.0), 43.0);
+  arktest.assertEQ(u2.meth(2.0), 35.0);
 }

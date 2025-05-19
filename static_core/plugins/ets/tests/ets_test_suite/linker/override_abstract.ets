@@ -22,5 +22,5 @@ class A2 extends A1 {
 }
 
 function main() {
-    assertEQ(((x: A1) => x.foo())(new A2()), 2);
+    arktest.assertEQ(((x: A1) => x.foo())(new A2()), 2);
 }

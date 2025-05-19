@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let suite = new ArkTestsuite("Intl. NumberFormat");
+    let suite = new arktest.ArkTestsuite("Intl. NumberFormat");
     suite.addTest("$_invoke", testInvoke);
     suite.addTest("$_invoke currency style error", testInvokeCurrencyStyleError);
     suite.addTest("$_invoke currency unit error", testInvokeCurrencyStyleError);
@@ -30,7 +30,7 @@ function testInvoke() {
     let result = Intl.NumberFormat.$_invoke("en-EN");
     let value = -123456.789;
     let isEqualed = equaledNumberFormats(result, expected, value);
-    assertTrue(isEqualed, "Error. Got: " + result.format(value) + ". Expected: " + expected.format(value));
+    arktest.assertTrue(isEqualed, "Error. Got: " + result.format(value) + ". Expected: " + expected.format(value));
 }
 
 function testInvokeCurrencyStyleError() {
@@ -45,34 +45,34 @@ function testInvokeUnitStyleError() {
 
 function testInvokeUndefinedLocale() {
     let numberFormat = new Intl.NumberFormat(undefined);
-    assertTrue(numberFormat != undefined && numberFormat != null);
+    arktest.assertTrue(numberFormat != undefined && numberFormat != null);
     let getOptions = numberFormat.resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
-    assertEQ(getOptions.numberingSystem,"latn", "Error. Got: " + s);
-    assertEQ(getOptions.style,"decimal", "Error. Got: " + s);
-    assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
-    assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
-    assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
-    assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
-    assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
-    assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
+    arktest.assertEQ(getOptions.numberingSystem,"latn", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.style,"decimal", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
 
 function testInvokeUndefinedLocaleUndefinedOptions() {
     let numberFormat = new Intl.NumberFormat(undefined, undefined);
-    assertTrue(numberFormat != undefined && numberFormat != null);
+    arktest.assertTrue(numberFormat != undefined && numberFormat != null);
     let getOptions = numberFormat.resolvedOptions();
     let s: string = printResolvedOptions(getOptions);
-    assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
-    assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
-    assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
-    assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
-    assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
-    assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
-    assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
-    assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
-    assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.locale, intlBestFitLocale(""), "Error. Got: " + s);
+    arktest.assertEQ(getOptions.numberingSystem, "latn", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.style, "decimal", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumIntegerDigits, 1.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 0.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 3.0, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.useGrouping, true, "Error. Got: " + s);
+    arktest.assertEQ(getOptions.notation, "standard", "Error. Got: " + s);
+    arktest.assertEQ(getOptions.signDisplay, "auto", "Error. Got: " + s);
 }
 
 function equaledNumberFormats(a: Intl.NumberFormat, b: Intl.NumberFormat, value: number | bigint): boolean {
@@ -112,9 +112,9 @@ function testInvokeMinMaxFracDigits() {
         minimumFractionDigits: 3
     }
     let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
-    assertEQ(getOptions.minimumFractionDigits, 3.0);
-    assertEQ(getOptions.maximumFractionDigits, 5.0);
-    assertTrue(getOptions.maximumFractionDigits > getOptions.minimumFractionDigits);
+    arktest.assertEQ(getOptions.minimumFractionDigits, 3.0);
+    arktest.assertEQ(getOptions.maximumFractionDigits, 5.0);
+    arktest.assertTrue(getOptions.maximumFractionDigits > getOptions.minimumFractionDigits);
 }
 
 function testInvokeMinMaxSignDigits() {
@@ -123,7 +123,7 @@ function testInvokeMinMaxSignDigits() {
         minimumSignificantDigits: 17
     }
     let getOptions = Intl.NumberFormat.$_invoke("zh", options3).resolvedOptions();
-    assertEQ(getOptions.maximumSignificantDigits!, 18.0);
-    assertEQ(getOptions.minimumSignificantDigits!, 17.0);
-    assertTrue(getOptions.maximumSignificantDigits! > getOptions.minimumSignificantDigits!);
+    arktest.assertEQ(getOptions.maximumSignificantDigits!, 18.0);
+    arktest.assertEQ(getOptions.minimumSignificantDigits!, 17.0);
+    arktest.assertTrue(getOptions.maximumSignificantDigits! > getOptions.minimumSignificantDigits!);
 }

@@ -62,10 +62,10 @@ function foo(p: number|string|undefined|Error|boolean): number {
 }
 
 function main() {
-    assertTrue(foo(undefined) == 1 && a === undefined)
-    assertTrue(foo(42.0) == 2 && num == 84 && not_undef as Number == 42.0)
+    arktest.assertTrue(foo(undefined) == 1 && a === undefined)
+    arktest.assertTrue(foo(42.0) == 2 && num == 84 && not_undef as Number == 42.0)
     let e: Error = new Error("xyz")
-    assertTrue(foo(e) == 3 && err == e && not_undef as Error == e && str == "xyz")
-    assertTrue(foo("abc") == 4 && str == "a" && not_undef as string == "abc")
-    assertTrue(foo(true) == 5 && !bool && not_undef as boolean == true)
+    arktest.assertTrue(foo(e) == 3 && err == e && not_undef as Error == e && str == "xyz")
+    arktest.assertTrue(foo("abc") == 4 && str == "a" && not_undef as string == "abc")
+    arktest.assertTrue(foo(true) == 5 && !bool && not_undef as boolean == true)
 }

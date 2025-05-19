@@ -31,7 +31,7 @@ class MethodReturnNestedPromise {
 async function startTest() {
     const example = new MethodReturnNestedPromise();
     const result = await example.methodReturnNestedPromise();
-    assertEQ(result, "Hello, World!")
+    arktest.assertEQ(result, "Hello, World!")
 }
 
 function main(): void {

@@ -26,7 +26,7 @@ function main(): void {
 
   let x: boolean = {{i.avalue}} {{i.operator}} {{i.bvalue}};
 
-  assertEQ( x, {{i.result}} )
+  arktest.assertEQ( x, {{i.result}} )
 }
 
 {% endfor %}

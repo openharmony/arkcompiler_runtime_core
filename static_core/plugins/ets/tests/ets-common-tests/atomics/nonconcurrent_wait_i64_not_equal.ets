@@ -21,7 +21,7 @@ function test(byteToChange: int) {
     (new Console()).println("Testing for byte: " + byteToChange)
     Atomics.store(bytearr, byteToChange, 1);
     let x = Atomics.wait(arr, 0, 0)
-    assertEQ(x, "not-equal")
+    arktest.assertEQ(x, "not-equal")
 }
 
 function main() {

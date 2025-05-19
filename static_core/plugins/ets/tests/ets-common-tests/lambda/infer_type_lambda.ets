@@ -56,17 +56,17 @@ function main() {
     let foo = new Foo()
 
     let x = foo.lambdaInferType()()
-    assertEQ(x, 1)
+    arktest.assertEQ(x, 1)
 
     let x1 = foo.lambdaInferTypeReturnLambda()()()
-    assertEQ(x1, 1)
+    arktest.assertEQ(x1, 1)
 
     let x2 = foo.lambdaInferTypeReturnLambda1()()()
-    assertEQ(x2, 1)
+    arktest.assertEQ(x2, 1)
 
     let x3 = foo.lambdaInferTypeReturnLiteral()()
-    assertEQ(x3, 1)
+    arktest.assertEQ(x3, 1)
     
     let x4 = foo.lambdaNestingReturnStatement()()()
-    assertEQ(x4, 1)
+    arktest.assertEQ(x4, 1)
 }

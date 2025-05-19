@@ -32,79 +32,79 @@ cases:
       constructor(i: number, j: Number) { res = 23;}
     use: |-
       new Base<String, Number>();
-      assertEQ( res, 1);
+      arktest.assertEQ( res, 1);
 
       new Base<String, Number>(1 as short);
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
 
       new Base<String, Number>(new Short());
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
 
       new Base<String, Number>(1 as int);
-      assertEQ( res, 4);
+      arktest.assertEQ( res, 4);
 
       new Base<String, Number>(new Int());
-      assertEQ( res, 4);
+      arktest.assertEQ( res, 4);
 
       new Base<String, Number>(1 as long);
-      assertEQ( res, 6);
+      arktest.assertEQ( res, 6);
 
       new Base<String, Number>(new Long());
-      assertEQ( res, 6);
+      arktest.assertEQ( res, 6);
 
       new Base<String, Number>(1.1 as float);
-      assertEQ( res, 8);
+      arktest.assertEQ( res, 8);
 
       new Base<String, Number>(new Float());
-      assertEQ( res, 8);
+      arktest.assertEQ( res, 8);
 
       new Base<String, Number>(1.2 as double);
-      assertEQ( res, 10);
+      arktest.assertEQ( res, 10);
 
       new Base<String, Number>(new Number());
-      assertEQ( res, 10);
+      arktest.assertEQ( res, 10);
 
       new Base<String, Number>(c'A');
-      assertEQ( res, 12);
+      arktest.assertEQ( res, 12);
 
       new Base<String, Number>(new Char());
-      assertEQ( res, 12);
+      arktest.assertEQ( res, 12);
 
       new Base<String, Number>("some str");
-      assertEQ( res, 14);
+      arktest.assertEQ( res, 14);
 
       new Base<String, Number>(1 as byte);
-      assertEQ( res, 15);
+      arktest.assertEQ( res, 15);
 
       new Base<String, Number>(new Byte());
-      assertEQ( res, 15);
+      arktest.assertEQ( res, 15);
 
       new Base<String, Number>(false);
-      assertEQ( res, 17);
+      arktest.assertEQ( res, 17);
 
       new Base<String, Number>(new Boolean());
-      assertEQ( res, 17);
+      arktest.assertEQ( res, 17);
 
       new Base<String, Number>(1 as int, 1 as int);
-      assertEQ( res, 19);
+      arktest.assertEQ( res, 19);
 
       new Base<Number, String>(new Gen<Number>());
-      assertEQ( res, 20);
+      arktest.assertEQ( res, 20);
 
       new Base<Number, String>(new Gen2<Number, String>());
-      assertEQ( res, 21);
+      arktest.assertEQ( res, 21);
 
       new Base<String, Number>(undefined);
-      assertEQ( res, 22);
+      arktest.assertEQ( res, 22);
 
       new Base<String, Number>(null);
-      assertEQ( res, 22);
+      arktest.assertEQ( res, 22);
 
       new Base<String, Number>(1.1 as number, new Number());
-      assertEQ( res, 23);
+      arktest.assertEQ( res, 23);
 
       new Base<String, Number>(new Number(), 1.1 as number);
-      assertEQ( res, 23);
+      arktest.assertEQ( res, 23);
 
   - tags: negative, compile-only
     decl: |-
@@ -150,73 +150,73 @@ cases:
     use: |-
       let a = new Base<Number, String>();
       a.foo();
-      assertEQ( res, 1);
+      arktest.assertEQ( res, 1);
 
       a.foo(1 as short);
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
 
       a.foo(new Short());
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
 
       a.foo(1 as int);
-      assertEQ( res, 4);
+      arktest.assertEQ( res, 4);
 
       a.foo(new Int());
-      assertEQ( res, 4);
+      arktest.assertEQ( res, 4);
 
       a.foo(1 as long);
-      assertEQ( res, 6);
+      arktest.assertEQ( res, 6);
 
       a.foo(new Long());
-      assertEQ( res, 6);
+      arktest.assertEQ( res, 6);
 
       a.foo(1.1 as float);
-      assertEQ( res, 8);
+      arktest.assertEQ( res, 8);
 
       a.foo(new Float());
-      assertEQ( res, 8);
+      arktest.assertEQ( res, 8);
 
       a.foo(1.2 as double);
-      assertEQ( res, 10);
+      arktest.assertEQ( res, 10);
 
       a.foo(new Number());
-      assertEQ( res, 10);
+      arktest.assertEQ( res, 10);
 
       a.foo(c'A');
-      assertEQ( res, 12);
+      arktest.assertEQ( res, 12);
 
       a.foo(new Char());
-      assertEQ( res, 12);
+      arktest.assertEQ( res, 12);
 
       a.foo("some str");
-      assertEQ( res, 14);
+      arktest.assertEQ( res, 14);
 
       a.foo(1 as byte);
-      assertEQ( res, 15);
+      arktest.assertEQ( res, 15);
 
       a.foo(new Byte());
-      assertEQ( res, 15);
+      arktest.assertEQ( res, 15);
 
       a.foo(false);
-      assertEQ( res, 17);
+      arktest.assertEQ( res, 17);
 
       a.foo(new Boolean());
-      assertEQ( res, 17);
+      arktest.assertEQ( res, 17);
 
       a.foo(1 as int, 1 as int);
-      assertEQ( res, 19);
+      arktest.assertEQ( res, 19);
 
       a.foo(new Gen<Number>());
-      assertEQ( res, 20);
+      arktest.assertEQ( res, 20);
 
       a.foo(new Gen2<Number, String>());
-      assertEQ( res, 21);
+      arktest.assertEQ( res, 21);
 
       a.foo(undefined);
-      assertEQ( res, 22);
+      arktest.assertEQ( res, 22);
 
       a.foo(null);
-      assertEQ( res, 22);
+      arktest.assertEQ( res, 22);
 
   - tags: negative, compile-only
     decl: |-
@@ -267,67 +267,67 @@ cases:
       static foo(i: Number|undefined|null) { res = 20;}
     use: |-
       Base.foo();
-      assertEQ( res, 1);
+      arktest.assertEQ( res, 1);
   
       Base.foo(1 as short);
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
   
       Base.foo(new Short());
-      assertEQ( res, 2);
+      arktest.assertEQ( res, 2);
   
       Base.foo(1 as int);
-      assertEQ( res, 4);
+      arktest.assertEQ( res, 4);
   
       Base.foo(new Int());
-      assertEQ( res, 4);
+      arktest.assertEQ( res, 4);
   
       Base.foo(1 as long);
-      assertEQ( res, 6);
+      arktest.assertEQ( res, 6);
   
       Base.foo(new Long());
-      assertEQ( res, 6);
+      arktest.assertEQ( res, 6);
   
       Base.foo(1.1 as float);
-      assertEQ( res, 8);
+      arktest.assertEQ( res, 8);
   
       Base.foo(new Float());
-      assertEQ( res, 8);
+      arktest.assertEQ( res, 8);
   
       Base.foo(1.2 as double);
-      assertEQ( res, 10);
+      arktest.assertEQ( res, 10);
   
       Base.foo(new Number());
-      assertEQ( res, 10);
+      arktest.assertEQ( res, 10);
   
       Base.foo(c'A');
-      assertEQ( res, 12);
+      arktest.assertEQ( res, 12);
   
       Base.foo(new Char());
-      assertEQ( res, 12);
+      arktest.assertEQ( res, 12);
   
       Base.foo("some str");
-      assertEQ( res, 14);
+      arktest.assertEQ( res, 14);
   
       Base.foo(1 as byte);
-      assertEQ( res, 15);
+      arktest.assertEQ( res, 15);
   
       Base.foo(new Byte());
-      assertEQ( res, 15);
+      arktest.assertEQ( res, 15);
   
       Base.foo(false);
-      assertEQ( res, 17);
+      arktest.assertEQ( res, 17);
   
       Base.foo(new Boolean());
-      assertEQ( res, 17);
+      arktest.assertEQ( res, 17);
   
       Base.foo(1 as int, 1 as int);
-      assertEQ( res, 19);
+      arktest.assertEQ( res, 19);
   
       Base.foo(undefined);
-      assertEQ( res, 20);
+      arktest.assertEQ( res, 20);
   
       Base.foo(null);
-      assertEQ( res, 20);
+      arktest.assertEQ( res, 20);
 
   - tags: negative, compile-only
     decl: |-

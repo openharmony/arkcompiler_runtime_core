@@ -20,5 +20,5 @@ desc: Test the type of the first element in the joint array((number | string)[])
 function main(): void {
   let arr: (number | string)[] = [1, "test"];
 
-  assertEQ(typeof arr[0], "number");
+  arktest.assertEQ(typeof arr[0], "number");
 }

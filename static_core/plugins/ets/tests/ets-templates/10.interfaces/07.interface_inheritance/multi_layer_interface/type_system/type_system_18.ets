@@ -38,8 +38,8 @@ class AmphibiousVehicle implements Car, Boat {
 function main(): void {
     const vehicle: Car | Boat = new AmphibiousVehicle();
     if (typeof vehicle === 'Car') {
-        assertEQ(vehicle.drive(), "Driving!");
+        arktest.assertEQ(vehicle.drive(), "Driving!");
     } else {
-        assertEQ(vehicle.sail(), "Sailing!");
+        arktest.assertEQ(vehicle.sail(), "Sailing!");
     }
 }

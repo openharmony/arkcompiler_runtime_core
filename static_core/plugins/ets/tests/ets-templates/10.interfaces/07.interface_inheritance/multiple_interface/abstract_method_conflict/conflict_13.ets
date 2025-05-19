@@ -47,5 +47,5 @@ class Robot extends Animal implements Machine {
 function main(): void {
   const robot = new Robot();
   robot.makeSound();
-  assertEQ(result, "Beep");
+  arktest.assertEQ(result, "Beep");
 }

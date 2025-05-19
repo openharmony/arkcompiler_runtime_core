@@ -27,5 +27,5 @@ class DateConstantChild implements DateConstantInterface {
 
 function main(): void {
   const instance = new DateConstantChild();
-  assertTrue(instance.CONST instanceof Date);
+  arktest.assertTrue(instance.CONST instanceof Date);
 }

@@ -48,8 +48,8 @@ function main(): void {
   const obj: ChildInterface = new ConcreteClass();
 
   let tmp1: ColorSet = obj.grandparentMethod();
-  assertEQ(tmp1.valueOf(), 0);
+  arktest.assertEQ(tmp1.valueOf(), 0);
 
   let tmp2: ColorSet = obj.parentMethod();
-  assertEQ(tmp2.valueOf(), 1);
+  arktest.assertEQ(tmp2.valueOf(), 1);
 }

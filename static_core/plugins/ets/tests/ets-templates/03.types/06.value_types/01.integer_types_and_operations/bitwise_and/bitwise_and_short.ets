@@ -21,7 +21,7 @@ desc: check bitwise AND operation for short operands
 function main(): void {
     const a: short = {{v.left}}
     const b: short = {{v.right}}
-    assertEQ( (a & b), {{v.result}} )
+    arktest.assertEQ( (a & b), {{v.result}} )
 }
 
 {% endfor %}

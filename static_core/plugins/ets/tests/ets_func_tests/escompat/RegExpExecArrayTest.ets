@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("RegExpExecArray pop() Tests");
+    const suite = new arktest.ArkTestsuite("RegExpExecArray pop() Tests");
 
     suite.addTest("pop() returns the last element", testPopReturnsLast);
     suite.addTest("pop() reduces length", testPopReducesLength);
@@ -32,7 +32,7 @@ function main(): int {
 function testPopReturnsLast(): void {
     let match = new RegExpExecArray(0, "abc", ["a", "b", "c"]);
     let popped = match.pop();
-    assertEQ(popped, "c", "testPopReturnsLast");
+    arktest.assertEQ(popped, "c", "testPopReturnsLast");
 }
 
 /**
@@ -41,7 +41,7 @@ function testPopReturnsLast(): void {
 function testPopReducesLength(): void {
     let match = new RegExpExecArray(0, "abc", ["a", "b", "c"]);
     match.pop();
-    assertEQ(match.result.length, 2, "testPopReducesLength");
+    arktest.assertEQ(match.result.length, 2, "testPopReducesLength");
 }
 
 /**
@@ -49,9 +49,9 @@ function testPopReducesLength(): void {
  */
 function testPopMultipleTimes(): void {
     let match = new RegExpExecArray(0, "abc", ["x", "y", "z"]);
-    assertEQ(match.pop(), "z", "testPopMultipleTimes step 1");
-    assertEQ(match.pop(), "y", "testPopMultipleTimes step 2");
-    assertEQ(match.pop(), "x", "testPopMultipleTimes step 3");
+    arktest.assertEQ(match.pop(), "z", "testPopMultipleTimes step 1");
+    arktest.assertEQ(match.pop(), "y", "testPopMultipleTimes step 2");
+    arktest.assertEQ(match.pop(), "x", "testPopMultipleTimes step 3");
 }
 
 /**
@@ -60,7 +60,7 @@ function testPopMultipleTimes(): void {
 function testPopEmptyReturnsUndefined(): void {
     let match = new RegExpExecArray(0, "abc", []);
     let popped = match.pop();
-    assertEQ(popped, undefined, "testPopEmptyReturnsUndefined");
+    arktest.assertEQ(popped, undefined, "testPopEmptyReturnsUndefined");
 }
 
 /**
@@ -69,14 +69,14 @@ function testPopEmptyReturnsUndefined(): void {
 function testGet(): void {
     let match = new RegExpExecArray(0, "abc", ["x", "y", "z"]);
 
-    assertEQ(match[0], "x", "testGet, int index, step 1");
-    assertEQ(match[0 as number], "x", "testGet, number index, step 1");
+    arktest.assertEQ(match[0], "x", "testGet, int index, step 1");
+    arktest.assertEQ(match[0 as number], "x", "testGet, number index, step 1");
 
-    assertEQ(match[1], "y", "testGet, int index, step 2");
-    assertEQ(match[1 as number], "y", "testGet, number index, step 2");
+    arktest.assertEQ(match[1], "y", "testGet, int index, step 2");
+    arktest.assertEQ(match[1 as number], "y", "testGet, number index, step 2");
 
-    assertEQ(match[2], "z", "testGet, int index, step 3");
-    assertEQ(match[2 as number], "z", "testGet, number index, step 3");
+    arktest.assertEQ(match[2], "z", "testGet, int index, step 3");
+    arktest.assertEQ(match[2 as number], "z", "testGet, number index, step 3");
 
     expectError((): void => { match[-1] }, new ArrayIndexOutOfBoundsError("idx = -1; length = 3"))
     expectError((): void => { match[match.length] }, new ArrayIndexOutOfBoundsError("idx = 3; length = 3"))
@@ -89,16 +89,16 @@ function testSet(): void {
     let match = new RegExpExecArray(0, "abc", ["x", "y", "z"]);
 
     match[0] = "x1"
-    assertEQ(match[0], "x1", "testSet, int index, step 1");
-    assertEQ(match[0 as number], "x1", "testSet, number index, step 1");
+    arktest.assertEQ(match[0], "x1", "testSet, int index, step 1");
+    arktest.assertEQ(match[0 as number], "x1", "testSet, number index, step 1");
 
     match[1] = "y1"
-    assertEQ(match[1], "y1", "testSet, int index, step 2");
-    assertEQ(match[1 as number], "y1", "testSet, number index, step 2");
+    arktest.assertEQ(match[1], "y1", "testSet, int index, step 2");
+    arktest.assertEQ(match[1 as number], "y1", "testSet, number index, step 2");
 
     match[2] = "z1"
-    assertEQ(match[2], "z1", "testSet, int index, step 3");
-    assertEQ(match[2 as number], "z1", "testSet, number index, step 3");
+    arktest.assertEQ(match[2], "z1", "testSet, int index, step 3");
+    arktest.assertEQ(match[2 as number], "z1", "testSet, number index, step 3");
 
     expectError((): void => { match[-1] = "a" }, new ArrayIndexOutOfBoundsError("idx = -1; length = 3"))
     expectError((): void => { match[match.length] = "b" }, new ArrayIndexOutOfBoundsError("idx = 3; length = 3"))

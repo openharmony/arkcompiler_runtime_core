@@ -20,7 +20,7 @@ desc: check bitwise complement of bigint
 
 function main(): void {
   const v: bigint = {{v.value}}
-  assertEQ( ~(v), {{v.result}} )
+  arktest.assertEQ( ~(v), {{v.result}} )
 }
 
 {% endfor %}

@@ -42,7 +42,7 @@ function barretstr(i: int) {
 
 function main() {
     let x: (i: int) => int = {{c.assign}};
-    assertTrue(x({{c.call}}) == {{c.res}});
+    arktest.assertTrue(x({{c.call}}) == {{c.res}});
 }
 
 {% endfor %}

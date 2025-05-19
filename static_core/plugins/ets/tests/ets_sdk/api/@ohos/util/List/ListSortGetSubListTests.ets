@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList API tests");
 
     suite.addTest("List sort with different types in ascending order", testSortDifferentTypesAscending);
     suite.addTest("List sort with object in ascending order", testSortObjectAscending);
@@ -75,7 +75,7 @@ function testSortDifferentTypesAscending() {
     initializeList(list1, TestData.arrayResult1);
     list1.sort((a: number, b: number) => a - b);
     for (let i: number = 0; i < list1.length; i++) {
-        assertEQ(list1.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list1.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
     }
 
     let list2 = new List<string>();
@@ -84,7 +84,7 @@ function testSortDifferentTypesAscending() {
     list2.sort((a: string, b: string) => a.compareTo(b));
     array2.sort((a: string, b: string) => a.compareTo(b));
     for (let i: number = 0; i < list2.length; i++) {
-        assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 
     let list3 = new List<boolean>();
@@ -93,7 +93,7 @@ function testSortDifferentTypesAscending() {
     list3.sort((a: boolean, b: boolean) => (a ? 1 : 0) - (b ? 1 : 0));
     array3.sort((a: boolean, b: boolean) => (a ? 1 : 0) - (b ? 1 : 0));
     for (let i: number = 0; i < list3.length; i++) {
-        assertEQ(list3.get(i), array3[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list3.get(i), array3[i], `Element at index ${i} should match`);
     }
 }
 
@@ -112,7 +112,7 @@ function testSortObjectAscending() {
         return sa.compareTo(sb);
     });
     for (let i: number = 0; i < list1.length; i++) {
-        assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
     }
 
     let list2 = new List<Temp>();
@@ -124,7 +124,7 @@ function testSortObjectAscending() {
     list2.sort((a: Temp, b: Temp) => a.age - b.age);
     array2.sort((a: Temp, b: Temp) => a.age - b.age);
     for (let i: number = 0; i < list2.length; i++) {
-        assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 }
 
@@ -133,7 +133,7 @@ function testSortDifferentTypesDescending() {
     initializeList(list1, TestData.arrayForNumber);
     list1.sort((a: number, b: number) => b - a);
     for (let i: number = 0; i < list1.length; i++) {
-        assertEQ(list1.get(i), TestData.arrayResult1[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list1.get(i), TestData.arrayResult1[i], `Element at index ${i} should match`);
     }
 
     let list2 = new List<string>();
@@ -142,7 +142,7 @@ function testSortDifferentTypesDescending() {
     list2.sort((a: string, b: string) => b.compareTo(a));
     array2.sort((a: string, b: string) => b.compareTo(a));
     for (let i: number = 0; i < list2.length; i++) {
-        assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 
     let list3 = new List<boolean>();
@@ -151,7 +151,7 @@ function testSortDifferentTypesDescending() {
     list3.sort((a: boolean, b: boolean) => (b ? 1 : 0) - (a ? 1 : 0));
     array3.sort((a: boolean, b: boolean) => (b ? 1 : 0) - (a ? 1 : 0));
     for (let i: number = 0; i < list3.length; i++) {
-        assertEQ(list3.get(i), array3[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list3.get(i), array3[i], `Element at index ${i} should match`);
     }
 }
 
@@ -170,7 +170,7 @@ function testSortObjectDescending() {
         return sb.compareTo(sa);
     });
     for (let i: number = 0; i < list1.length; i++) {
-        assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
     }
 
     let list2 = new List<Temp>();
@@ -182,7 +182,7 @@ function testSortObjectDescending() {
     list2.sort((a: Temp, b: Temp) => b.age - a.age);
     array2.sort((a: Temp, b: Temp) => b.age - a.age);
     for (let i: number = 0; i < list2.length; i++) {
-        assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
 }
 
@@ -191,10 +191,10 @@ function testGetSubList() {
     initializeList(list, TestData.arrayForNumber);
     let getSubList = list.getSubList(TestData.testNumber1, TestData.testNumber5 - TestData.testNumber1);
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
     }
     for (let i: number = 0; i < getSubList.length; i++) {
-        assertEQ(getSubList.get(i), TestData.arrayResult6[i], `Element at index ${i} should match`);
+        arktest.assertEQ(getSubList.get(i), TestData.arrayResult6[i], `Element at index ${i} should match`);
     }
 }
 
@@ -204,12 +204,12 @@ function testGetSubListStartIndexOutOfRange() {
     try {
         list.getSubList(-TestData.testNumber1, TestData.testNumber5);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertFalse(false, "The result should be 'RangeError'");
+    arktest.assertFalse(false, "The result should be 'RangeError'");
 }
 
 function testGetSubListEndIndexOutOfRange() {
@@ -218,12 +218,12 @@ function testGetSubListEndIndexOutOfRange() {
     try {
         list.getSubList(TestData.testNumber1, TestData.testNumber8);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertFalse(false, "The result should be 'RangeError'");
+    arktest.assertFalse(false, "The result should be 'RangeError'");
 }
 
 function testGetSubListEndIndexSmallerThanStartIndex() {
@@ -232,12 +232,12 @@ function testGetSubListEndIndexSmallerThanStartIndex() {
     try {
         list.getSubList(TestData.testNumber5, TestData.testNumber1);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertFalse(false, "The result should be 'RangeError'");
+    arktest.assertFalse(false, "The result should be 'RangeError'");
 }
 
 function testGetSubListWithChange() {
@@ -246,10 +246,10 @@ function testGetSubListWithChange() {
     let getSubList = list.getSubList(TestData.testNumber1, TestData.testNumber5 - TestData.testNumber1);
     getSubList.add(TestData.testNumber5);
     for (let i: number = 0; i < list.length; i++) {
-        assertEQ(list.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
+        arktest.assertEQ(list.get(i), TestData.arrayForNumber[i], `Element at index ${i} should match`);
     }
     for (let i: number = 0; i < getSubList.length; i++) {
-        assertEQ(getSubList.get(i), TestData.arrayResult7[i], `Element at index ${i} should match`);
+        arktest.assertEQ(getSubList.get(i), TestData.arrayResult7[i], `Element at index ${i} should match`);
     }
 }
 
@@ -258,12 +258,12 @@ function testGetSubListEmptyContainer() {
     try {
         list.getSubList(TestData.testNumber1, TestData.testNumber3);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertFalse(false, "The result should be 'RangeError'");
+    arktest.assertFalse(false, "The result should be 'RangeError'");
 }
 
 function testGetSubListFullRange() {
@@ -271,7 +271,7 @@ function testGetSubListFullRange() {
     initializeList(list, TestData.arrayForNumber);
     let getSubList = list.getSubList(0, TestData.testNumber5 - TestData.testNumber1);
     for (let i: number = 0; i < getSubList.length; i++) {
-        assertEQ(getSubList.get(i), list.get(i), `Element at index ${i} should match`);
+        arktest.assertEQ(getSubList.get(i), list.get(i), `Element at index ${i} should match`);
     }
-    assertEQ(getSubList.length, TestData.testNumber5 - TestData.testNumber1, "SubList length should be 4");
+    arktest.assertEQ(getSubList.length, TestData.testNumber5 - TestData.testNumber1, "SubList length should be 4");
 }

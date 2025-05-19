@@ -20,5 +20,5 @@ desc: Convert to obj-array type.
 function main(): void {
    let numbers: number[] = [1, 2, 3];
    const obj1: object = numbers;
-   assertTrue(obj1 == numbers);
+   arktest.assertTrue(obj1 == numbers);
 }

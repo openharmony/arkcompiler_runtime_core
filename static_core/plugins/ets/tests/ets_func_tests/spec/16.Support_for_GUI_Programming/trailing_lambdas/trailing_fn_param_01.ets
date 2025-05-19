@@ -27,7 +27,7 @@ function with_param(n: int, fn: () => void) {
 
 function main(): void {
     with_param(5) {
-        assertEQ( a, 5)
+        arktest.assertEQ( a, 5)
     }
 }
 

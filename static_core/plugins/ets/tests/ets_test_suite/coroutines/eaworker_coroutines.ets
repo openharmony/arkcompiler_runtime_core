@@ -128,11 +128,11 @@ function testACoroutineEaworker(): void {
     let job2 = ew.run<number>(testRecursiveLaunch);
     let job3 = ew.run<boolean>(testLaunchThrow);
 
-    assertEQ(EXPECTED_VALUE, job0.Await());
+    arktest.assertEQ(EXPECTED_VALUE, job0.Await());
     job1.Await();
-    assertEQ(counter, INCREMENT);
-    assertEQ(EXPECTED_VALUE, job2.Await());
-    assertTrue(job3.Await());
+    arktest.assertEQ(counter, INCREMENT);
+    arktest.assertEQ(EXPECTED_VALUE, job2.Await());
+    arktest.assertTrue(job3.Await());
 
     ew.join();
 }
@@ -145,11 +145,11 @@ function testAJCoroutineEaworker(): void {
     let job2 = ew.run<number>(testRecursiveAsync);
     let job3 = ew.run<boolean>(testLaunchThrow);
 
-    assertEQ(EXPECTED_VALUE, job0.Await());
+    arktest.assertEQ(EXPECTED_VALUE, job0.Await());
     job1.Await();
-    assertEQ(counter, INCREMENT);
-    assertEQ(EXPECTED_VALUE, job2.Await());
-    assertTrue(job3.Await());
+    arktest.assertEQ(counter, INCREMENT);
+    arktest.assertEQ(EXPECTED_VALUE, job2.Await());
+    arktest.assertTrue(job3.Await());
 
     ew.join();
 }
@@ -164,7 +164,7 @@ function testACAJcoroutine(): void {
 
     ew.join();
 
-    assertEQ(res1, res2);
+    arktest.assertEQ(res1, res2);
 }
 
 function testACoroutineCallAJCoroutine(): void {
@@ -179,7 +179,7 @@ function testACoroutineCallAJCoroutine(): void {
 
     ew.join();
 
-    assertEQ(EXPECTED_VALUE, job1.Await());
+    arktest.assertEQ(EXPECTED_VALUE, job1.Await());
 }
 
 async function AsyncCallLaunch(): Promise<Job<number>> {
@@ -196,7 +196,7 @@ function testAJCoroutineCallACoroutine(): void {
     let result = job2.Await();
     ew.join();
 
-    assertEQ(EXPECTED_VALUE, result);
+    arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
 function testNestedEAWorker(): void {
@@ -216,11 +216,11 @@ function testNestedEAWorker(): void {
 
     e1.join();
 
-    assertEQ(EXPECTED_VALUE, result);
+    arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
 function main(): int {
-    const suite = new ArkTestsuite('EAWorker Test Suite');
+    const suite = new arktest.ArkTestsuite('EAWorker Test Suite');
 
     suite.addTest('testACoroutineEaworker', testACoroutineEaworker);
     suite.addTest('testAJCoroutineEaworker', testAJCoroutineEaworker);

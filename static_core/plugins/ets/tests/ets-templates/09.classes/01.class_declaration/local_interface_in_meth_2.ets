@@ -34,5 +34,5 @@ class A {
 }
 
 function main() {
-    assertEQ(new A().meth(), 42)
+    arktest.assertEQ(new A().meth(), 42)
 }

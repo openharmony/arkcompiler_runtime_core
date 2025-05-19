@@ -25,5 +25,5 @@ namespace abstract {
 }
 
 function main() {
-    assertEQ(abstract.boo(), "Foo1")
+    arktest.assertEQ(abstract.boo(), "Foo1")
 }

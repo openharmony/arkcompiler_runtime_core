@@ -22,7 +22,7 @@ cases:
           let cnt: int = 0
           let a: int[] = [foo(++cnt) + cnt++, ++cnt + foo(--cnt), cnt++ - foo(cnt--), foo(++cnt) + ++cnt, 2 * foo(--cnt) + --cnt,]
           for (let i = 0; i < a.length; i++) {
-              assertTrue( expected[i] == a[i] )
+              arktest.assertTrue( expected[i] == a[i] )
           }
 
     - decl: |-
@@ -37,8 +37,8 @@ cases:
           let cnt: int = 0
           let a: int[][] = [foo(cnt++), foo(cnt++), foo(cnt++), foo(cnt++), foo(cnt++)]
           for (let i = 0; i < a.length; i++) {
-              assertTrue( i == a[i].length )
+              arktest.assertTrue( i == a[i].length )
               for (let j = 0; j < i; j++) {
-                  assertTrue( a[i][j] == j * 10 )
+                  arktest.assertTrue( a[i][j] == j * 10 )
               }
           }

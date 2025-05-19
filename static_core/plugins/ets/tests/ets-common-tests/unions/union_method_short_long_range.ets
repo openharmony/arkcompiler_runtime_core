@@ -40,10 +40,10 @@ function test3(v: A | B): String {
 function main() {
   let a = new A()
   let b = new B()
-  assertEQ(test1(a), "A:abc");
-  assertEQ(test1(b), "B:abc");
-  assertEQ(test2(a), "A:a_b_c");
-  assertEQ(test2(b), "B:a_b_c");
-  assertEQ(test3(a), "A:15");
-  assertEQ(test3(b), "B:15");
+  arktest.assertEQ(test1(a), "A:abc");
+  arktest.assertEQ(test1(b), "B:abc");
+  arktest.assertEQ(test2(a), "A:a_b_c");
+  arktest.assertEQ(test2(b), "B:a_b_c");
+  arktest.assertEQ(test3(a), "A:15");
+  arktest.assertEQ(test3(b), "B:15");
 }

@@ -28,14 +28,14 @@ cases:
           class A implements J {}
       use: |-
           let a: A = new A()
-          assertEQ( a.m(), 0 )
-          assertEQ( a.m(42), 1 )
-          assertEQ( a.m(12, 55), 67 )
-          assertEQ( a.m(12, 55, 42), 3 )
-          assertEQ( a.m(61, 2.0), 63.0 )
-          assertEQ( a.m(11, 12, 15e23), 21 )
-          assertEQ( a.m(2.011e12, 1.98, 88), 31 )
-          assertEQ( a.m("abc", 18.0), "abc18" )
+          arktest.assertEQ( a.m(), 0 )
+          arktest.assertEQ( a.m(42), 1 )
+          arktest.assertEQ( a.m(12, 55), 67 )
+          arktest.assertEQ( a.m(12, 55, 42), 3 )
+          arktest.assertEQ( a.m(61, 2.0), 63.0 )
+          arktest.assertEQ( a.m(11, 12, 15e23), 21 )
+          arktest.assertEQ( a.m(2.011e12, 1.98, 88), 31 )
+          arktest.assertEQ( a.m("abc", 18.0), "abc18" )
 
     - decl: |-
           // method overloaded with optional parameters
@@ -48,11 +48,11 @@ cases:
           class A implements J {}
       use: |-
           let a: A = new A()
-          assertEQ( a.m(a), 1 )
-          assertEQ( a.m(1), 4 )
-          assertEQ( a.m(1, a), 2 )
-          assertEQ( a.m(1, a, a), 3 )
-          assertEQ( a.m(1, a, a, a), 4 )
+          arktest.assertEQ( a.m(a), 1 )
+          arktest.assertEQ( a.m(1), 4 )
+          arktest.assertEQ( a.m(1, a), 2 )
+          arktest.assertEQ( a.m(1, a, a), 3 )
+          arktest.assertEQ( a.m(1, a, a, a), 4 )
 
     - decl: |-
           // method overloaded with boxing/unboxing parameters
@@ -63,11 +63,11 @@ cases:
           class A implements J {}
       use: |-
           let a = new A()
-          assertEQ( a.m(true), 1.0 )
-          assertEQ( a.m(new Boolean()), 1.0 )
-          assertEQ( a.m(true, 1.0), 3.0 )
-          assertEQ( a.m(false, new Double()), 3.0 )
-          assertEQ( a.m(new Boolean(), new Double()), 3.0 )
+          arktest.assertEQ( a.m(true), 1.0 )
+          arktest.assertEQ( a.m(new Boolean()), 1.0 )
+          arktest.assertEQ( a.m(true, 1.0), 3.0 )
+          arktest.assertEQ( a.m(false, new Double()), 3.0 )
+          arktest.assertEQ( a.m(new Boolean(), new Double()), 3.0 )
 
     - decl: |-
           // method overloaded with rest parameters
@@ -80,10 +80,10 @@ cases:
           class A implements J {}
       use: |-
           let a: A = new A()
-          assertEQ( a.m(new Error(), new Object[1]), 1 )
-          assertEQ( a.m(new Error(), new Long(), new Error()), 2 )
-          assertEQ( a.m(new Error(), new Error()), 3 )
-          assertEQ( a.m(new Error(), new Object(), new Object(), new Object()), 4 )
+          arktest.assertEQ( a.m(new Error(), new Object[1]), 1 )
+          arktest.assertEQ( a.m(new Error(), new Long(), new Error()), 2 )
+          arktest.assertEQ( a.m(new Error(), new Error()), 3 )
+          arktest.assertEQ( a.m(new Error(), new Object(), new Object(), new Object()), 4 )
 
     - decl: |-
           // method overloaded with type variables
@@ -97,9 +97,9 @@ cases:
           class A<T, U> implements J<T, U> {}
       use: |-
           let a: A<X, Y> = new A<X, Y>()
-          assertEQ( a.m(new X()), 1 )
-          assertEQ( a.m(new X(), new Y()), 2 )
-          assertEQ( a.m(new Y(), new X(), new Y()), 3 )
+          arktest.assertEQ( a.m(new X()), 1 )
+          arktest.assertEQ( a.m(new X(), new Y()), 2 )
+          arktest.assertEQ( a.m(new Y(), new X(), new Y()), 3 )
 
     - decl: |-
           // method overloaded with multiple parameters with dependent types
@@ -117,10 +117,10 @@ cases:
           let x: X = new X()
           let y: Y = new Y()
           let z: Z = new Z()
-          assertEQ( a.m(x), 3 )
-          assertEQ( a.m(y), 3 )
-          assertEQ( a.m(z), 3 )
-          assertEQ( a.m(x, y), 2 )
-          assertEQ( a.m(z, z), 2 )
-          assertEQ( a.m(x, y, z), 1 )
-          assertEQ( a.m(z, z, z), 1 )
+          arktest.assertEQ( a.m(x), 3 )
+          arktest.assertEQ( a.m(y), 3 )
+          arktest.assertEQ( a.m(z), 3 )
+          arktest.assertEQ( a.m(x, y), 2 )
+          arktest.assertEQ( a.m(z, z), 2 )
+          arktest.assertEQ( a.m(x, y, z), 1 )
+          arktest.assertEQ( a.m(z, z, z), 1 )

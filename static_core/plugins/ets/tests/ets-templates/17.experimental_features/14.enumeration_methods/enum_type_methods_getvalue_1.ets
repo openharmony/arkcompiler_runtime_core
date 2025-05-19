@@ -25,6 +25,6 @@ enum GeneratedEnum {
 
 function main(): void {
   {% for i in range(0, 9) %}
-  assertTrue(GeneratedEnum.{% for _ in range(i + 1)%}A{% endfor %}.valueOf() == "{% for _ in range(i + 1)%}A{% endfor %}");
+  arktest.assertTrue(GeneratedEnum.{% for _ in range(i + 1)%}A{% endfor %}.valueOf() == "{% for _ in range(i + 1)%}A{% endfor %}");
   {%- endfor %}
 }

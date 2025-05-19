@@ -29,6 +29,6 @@ class NullishCoalescingConflictClass implements NullishCoalescingConflictInterfa
 
 function main(): void {
   const instance = new NullishCoalescingConflictClass();
-  assertEQ(instance.CONST, 58);
-  assertEQ(instance.nullishCONST, 59);
+  arktest.assertEQ(instance.CONST, 58);
+  arktest.assertEQ(instance.nullishCONST, 59);
 }

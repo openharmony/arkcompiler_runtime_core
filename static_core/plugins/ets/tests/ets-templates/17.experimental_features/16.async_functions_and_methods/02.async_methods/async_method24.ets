@@ -28,7 +28,7 @@ class MethodWithRecursion {
 async function startTest() {
     const example = new MethodWithRecursion();
     const result = await example.methodWithRecursion(5);
-    assertEQ(result, 15);
+    arktest.assertEQ(result, 15);
 }
 
 function main(): void {

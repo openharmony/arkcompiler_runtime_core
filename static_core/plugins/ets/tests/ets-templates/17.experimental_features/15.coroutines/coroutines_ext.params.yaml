@@ -21,7 +21,7 @@ cases:
     logic: |-
       let cof_result = cof(10);
       cof_result.then((result: int) => {
-        assertEQ(result, 20);
+        arktest.assertEQ(result, 20);
       });
   - desc: Start a coroutine with a complex lambda expression.
     logic: |-
@@ -33,4 +33,4 @@ cases:
         return Promise.resolve(sum);
       };
       const result: int = await complexLambda(3);
-      assertEQ(result, 6);
+      arktest.assertEQ(result, 6);

@@ -22,6 +22,6 @@ function main(): void {
    let array1: number[] = [0, 1, 2];
    array1.length = 5;
    let a: number = array1.length;
-   assertTrue(a === 3);
-   assertNEQ(a, 5);
+   arktest.assertTrue(a === 3);
+   arktest.assertNEQ(a, 5);
 }

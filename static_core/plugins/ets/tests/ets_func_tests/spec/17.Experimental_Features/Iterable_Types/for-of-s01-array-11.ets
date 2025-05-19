@@ -35,7 +35,7 @@ function main() : int {
         index++;
     }
 
-    assertEQ(result, 0)
+    arktest.assertEQ(result, 0)
     return 0;
 }
 

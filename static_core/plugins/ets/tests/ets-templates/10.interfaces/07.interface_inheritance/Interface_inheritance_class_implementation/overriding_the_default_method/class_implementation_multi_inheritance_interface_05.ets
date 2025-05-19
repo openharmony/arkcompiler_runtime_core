@@ -39,6 +39,6 @@ class Animal extends AbstractAnimal {}
 
 function main(): void {
   const animal = new Animal();
-  assertEQ(animal.speak(), "speaking");
-  assertEQ(animal.move(), "move");
+  arktest.assertEQ(animal.speak(), "speaking");
+  arktest.assertEQ(animal.move(), "move");
 }

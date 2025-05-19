@@ -29,24 +29,24 @@ function main(): int {
     for (let i: int = 0; i < 10 ; i++) {
         map.set(arrKeys[i], arrValues[i]);
     }
-    let concurrentHashMapHasTestsuite = new ArkTestsuite("concurrentHashMapHasTest");
+    let concurrentHashMapHasTestsuite = new arktest.ArkTestsuite("concurrentHashMapHasTest");
 
     concurrentHashMapHasTestsuite.addTest("hasTest_001", () =>
     {
         let concurrentHashMap: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
         for (let i: int = 0; i < 10 ; i++) {
-            assertTrue(concurrentHashMap.has(i));
+            arktest.assertTrue(concurrentHashMap.has(i));
         }
     });
     concurrentHashMapHasTestsuite.addTest("hasTest_002", () =>
     {
         let concurrentHashMapNull: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>(map);
-        assertFalse(concurrentHashMapNull.has(10));
+        arktest.assertFalse(concurrentHashMapNull.has(10));
     });
     concurrentHashMapHasTestsuite.addTest("hasTest_003", () =>
     {
         let concurrentHashMapNull: ConcurrentHashMap<number, string> = new ConcurrentHashMap<number, string>();
-        assertFalse(concurrentHashMapNull.has(1));
+        arktest.assertFalse(concurrentHashMapNull.has(1));
     });
     concurrentHashMapHasTestsuite.addTest("hasTest_004", () =>
     {
@@ -54,88 +54,88 @@ function main(): int {
         for (let i: int = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
         }
-        assertEQ(concurrentHashMap.size, 10);
+        arktest.assertEQ(concurrentHashMap.size, 10);
         for (let i: int = 0; i < 10; i++) {
-            assertTrue(concurrentHashMap.has(arrValues[i]));
+            arktest.assertTrue(concurrentHashMap.has(arrValues[i]));
         }
     });
     concurrentHashMapHasTestsuite.addTest("twiceTest_003", () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(hasAll);
         let p2 = launch<void, () => void>(hasAll);
         p1.Await();
         p2.Await();
-        assertTrue(Atomics.load(flag, 0) >= 10);
+        arktest.assertTrue(Atomics.load(flag, 0) >= 10);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_001", () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(hasAll);
         let p2 = launch<void, () => void>(deleteAllBack);
         p1.Await();
         p2.Await();
-        assertTrue(Atomics.load(flag, 0) >= 10);
+        arktest.assertTrue(Atomics.load(flag, 0) >= 10);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_002", () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(hasAll);
         let p2 = launch<void, () => void>(replaceAll);
         p1.Await();
         p2.Await();
-        assertEQ(Atomics.load(flag, 0), 10);
+        arktest.assertEQ(Atomics.load(flag, 0), 10);
         for (let i = 0; i < 10; i++) {
             let newVal = arrValues[i] + "-re";
-            assertEQ(concurrentHashMapOne.get(i), newVal);
+            arktest.assertEQ(concurrentHashMapOne.get(i), newVal);
         }
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_003", () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(hasAll);
         let p2 = launch<void, () => void>(isEmptyFun);
         p1.Await();
         p2.Await();
-        assertEQ(Atomics.load(flag, 0), 10);
+        arktest.assertEQ(Atomics.load(flag, 0), 10);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_004", () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(hasAll);
         let p2 = launch<void, () => void>(clearAll);
         p1.Await();
         p2.Await();
-        assertTrue(Atomics.load(flag, 0) >= 0);
+        arktest.assertTrue(Atomics.load(flag, 0) >= 0);
     });
     concurrentHashMapHasTestsuite.addTest("hasAndTest_005", () =>
     {
         Atomics.store(flag, 0, 0);
         concurrentHashMapOne.clear();
-        assertTrue(concurrentHashMapOne.isEmpty());
+        arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         let p1 = launch<void, () => void>(hasAll);
         let p2 = launch<void, () => void>(removeAllBack);
         p1.Await();
         p2.Await();
-        assertTrue(Atomics.load(flag, 0) >= 0);
+        arktest.assertTrue(Atomics.load(flag, 0) >= 0);
         for (let i = 0; i < 10; i++) {
-            assertEQ(arrValuesTest[i], arrValues[i]);
+            arktest.assertEQ(arrValuesTest[i], arrValues[i]);
         }
     });
 

@@ -28,5 +28,5 @@ class Outer {
 function main(): void {
   let outer: Outer = new Outer();
   outer.inner.value = 60;
-  assertEQ(outer.inner.value , 60);
+  arktest.assertEQ(outer.inner.value , 60);
 }

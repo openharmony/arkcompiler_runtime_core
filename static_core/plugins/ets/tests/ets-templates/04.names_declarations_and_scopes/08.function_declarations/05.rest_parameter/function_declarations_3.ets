@@ -26,5 +26,5 @@ function sumNumbers(...numbers: number[]): number {
 }
 
 function main(): void {
-    assertTrue(sumNumbers() === 0);
+    arktest.assertTrue(sumNumbers() === 0);
 }

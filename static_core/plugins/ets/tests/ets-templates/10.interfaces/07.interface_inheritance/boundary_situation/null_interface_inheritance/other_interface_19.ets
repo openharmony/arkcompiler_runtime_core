@@ -36,6 +36,6 @@ function main(): void {
     value: 123
   };
 
-  assertEQ(typeof obj1.value, "string");
-  assertEQ(typeof obj2.value, "number");
+  arktest.assertEQ(typeof obj1.value, "string");
+  arktest.assertEQ(typeof obj2.value, "number");
 }

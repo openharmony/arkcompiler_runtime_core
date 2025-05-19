@@ -42,5 +42,5 @@ class Sub extends Base {
 function main(): void {
   const instanceB = new Sub();
   instanceB.checkAccess();
-  assertEQ(instanceB.value1, 1);
+  arktest.assertEQ(instanceB.value1, 1);
 }

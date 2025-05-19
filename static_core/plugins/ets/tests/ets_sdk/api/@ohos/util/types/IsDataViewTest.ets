@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isDataView() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isDataView() API tests")
 
     suite.addTest("Verify DataView is identified as DataView", testIsDataView001)
     suite.addTest("Verify Int8Array is not identified as DataView", testIsDataView002)
@@ -39,7 +39,7 @@ function testIsDataView001() {
   let proc = new util.types();
   const ab = new ArrayBuffer(20);
   let result = proc.isDataView(new DataView(ab));
-  assertTrue(result, "The DataView should be of the same type as the DataView");
+  arktest.assertTrue(result, "The DataView should be of the same type as the DataView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0047
@@ -52,7 +52,7 @@ function testIsDataView001() {
 function testIsDataView002() {
   let proc = new util.types();
   let result = proc.isDataView(new Int8Array());
-  assertTrue(result == false, "The Int8Array should not be of the same type as the DataView");
+  arktest.assertTrue(result == false, "The Int8Array should not be of the same type as the DataView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0048
@@ -65,7 +65,7 @@ function testIsDataView002() {
 function testIsDataView003() {
   let proc = new util.types();
   let result = proc.isDataView(new Float64Array());
-  assertTrue(result == false, "The Float64Array should not be of the same type as the DataView");
+  arktest.assertTrue(result == false, "The Float64Array should not be of the same type as the DataView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0049
@@ -78,7 +78,7 @@ function testIsDataView003() {
 function testIsDataView004() {
   let proc = new util.types();
   let result = proc.isDataView(true);
-  assertTrue(result == false, "The primitive Boolean should not be of the same type as the DataView");
+  arktest.assertTrue(result == false, "The primitive Boolean should not be of the same type as the DataView");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0050
@@ -91,5 +91,5 @@ function testIsDataView004() {
 function testIsDataView005() {
   let proc = new util.types();
   let result = proc.isDataView(false);
-  assertTrue(result == false, "The primitive Boolean should not be of the same type as the DataView");
+  arktest.assertTrue(result == false, "The primitive Boolean should not be of the same type as the DataView");
 }

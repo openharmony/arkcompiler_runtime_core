@@ -28,6 +28,6 @@ class X {
 
 function main() : int {
     let x : X = new X();
-    assertEQ( x.data, 0)
+    arktest.assertEQ( x.data, 0)
     return 0;
 }

@@ -460,11 +460,11 @@ function testJSONParse(): int {
     let text:string = `{\"integerValue\":12, \"longValue\": 2, \"appname\": \"test\", \"shortValue\":3, \"floatValue\":1.5, \"byteValue\": 7}`
     let classType = Type.of(new A())
     let parsingResult = JSON.parse<A>(text, classType) as A
-    assertEQ(parsingResult.integerValue, 12)
-    assertEQ(parsingResult.longValue, 2)
-    assertEQ(parsingResult.shortValue, 3)
-    assertEQ(parsingResult.floatValue, 1.5f)
-    assertEQ(parsingResult.byteValue, 7)
+    arktest.assertEQ(parsingResult.integerValue, 12)
+    arktest.assertEQ(parsingResult.longValue, 2)
+    arktest.assertEQ(parsingResult.shortValue, 3)
+    arktest.assertEQ(parsingResult.floatValue, 1.5f)
+    arktest.assertEQ(parsingResult.byteValue, 7)
     return testResult
 }
 

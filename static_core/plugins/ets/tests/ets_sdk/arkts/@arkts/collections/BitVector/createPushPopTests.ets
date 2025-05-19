@@ -19,7 +19,7 @@ import { BusinessError } from "@ohos.base";
 const TypeErrorCodeId: number = 401;
 
 function main() {
-    const suite = new ArkTestsuite("BitVector API tests");
+    const suite = new arktest.ArkTestsuite("BitVector API tests");
 
     suite.addTest("A constructor used to create a BitVector object.", BitVector_constructor_Func_001);
     suite.addTest("Tests BitVector constructor with invalid non-integer length parameter.", BitVector_constructor_Func_002);
@@ -43,7 +43,7 @@ function main() {
  */
 function BitVector_constructor_Func_001() {
     let bitVector = new collections.BitVector(10);
-    assertEQ(bitVector.length, 10, "BitVector length should be 10");
+    arktest.assertEQ(bitVector.length, 10, "BitVector length should be 10");
 }
 
 function BitVector_constructor_Func_002() {
@@ -70,12 +70,12 @@ function BitVector_push_Func_001() {
     let res2 = bitVector.push(0);
     let res3 = bitVector.push(1);
     let res4 = bitVector.push(1);
-    assertTrue(res0, "Push 0 should return true");
-    assertTrue(res1, "Push 1 should return true");
-    assertTrue(res2, "Push 0 should return true");
-    assertTrue(res3, "Push 1 should return true");
-    assertTrue(res4, "Push 1 should return true");
-    assertEQ(bitVector.length, 5, "BitVector length should be 5");
+    arktest.assertTrue(res0, "Push 0 should return true");
+    arktest.assertTrue(res1, "Push 1 should return true");
+    arktest.assertTrue(res2, "Push 0 should return true");
+    arktest.assertTrue(res3, "Push 1 should return true");
+    arktest.assertTrue(res4, "Push 1 should return true");
+    arktest.assertEQ(bitVector.length, 5, "BitVector length should be 5");
 }
 
 /**
@@ -91,9 +91,9 @@ function BitVector_push_Func_002() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(1);
-        assertEQ(res, true, "Push should return true");
+        arktest.assertEQ(res, true, "Push should return true");
     }
-    assertEQ(bitVector.length, bitVectorLength, "BitVector length should be 64");
+    arktest.assertEQ(bitVector.length, bitVectorLength, "BitVector length should be 64");
 }
 
 /**
@@ -109,9 +109,9 @@ function BitVector_push_Func_003() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res = bitVector.push(i % 2);
-        assertEQ(res, true, "Push should return true");
+        arktest.assertEQ(res, true, "Push should return true");
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
 }
 
 /**
@@ -134,12 +134,12 @@ function BitVector_pop_Func_001() {
     let res2 = bitVector.pop();
     let res3 = bitVector.pop();
     let res4 = bitVector.pop();
-    assertEQ(res0, 1, "Pop should return 1");
-    assertEQ(res1, 1, "Pop should return 1");
-    assertEQ(res2, 0, "Pop should return 0");
-    assertEQ(res3, 1, "Pop should return 1");
-    assertEQ(res4, 0, "Pop should return 0");
-    assertEQ(bitVector.length, 0, "BitVector length should be 0");
+    arktest.assertEQ(res0, 1, "Pop should return 1");
+    arktest.assertEQ(res1, 1, "Pop should return 1");
+    arktest.assertEQ(res2, 0, "Pop should return 0");
+    arktest.assertEQ(res3, 1, "Pop should return 1");
+    arktest.assertEQ(res4, 0, "Pop should return 0");
+    arktest.assertEQ(bitVector.length, 0, "BitVector length should be 0");
 }
 
 /**
@@ -156,13 +156,13 @@ function BitVector_pop_Func_002() {
     for (let i = 0; i < bitVectorLength; i++) {
         let res0 = bitVector.push(0);
     }
-    assertEQ(bitVector.length, bitVectorLength, "BitVector length should be 64");
+    arktest.assertEQ(bitVector.length, bitVectorLength, "BitVector length should be 64");
 
     for (let i = 0; i < bitVectorLength; i++) {
         let res1 = bitVector.pop();
-        assertEQ(res1, 0, "Pop should return 0");
+        arktest.assertEQ(res1, 0, "Pop should return 0");
     }
-    assertEQ(bitVector.length, 0, "BitVector length should be 0");
+    arktest.assertEQ(bitVector.length, 0, "BitVector length should be 0");
 }
 
 /**
@@ -179,11 +179,11 @@ function BitVector_pop_Func_003() {
     for (let i = 0; i < bitVectorLength; i++) {
         let res0 = bitVector.push(0);
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
 
     for (let i = 0; i < bitVectorLength; i++) {
         let res1 = bitVector.pop();
-        assertEQ(res1, 0, "Pop should return 0");
+        arktest.assertEQ(res1, 0, "Pop should return 0");
     }
-    assertEQ(bitVector.length, 10, "BitVector length should be 10");
+    arktest.assertEQ(bitVector.length, 10, "BitVector length should be 10");
 }

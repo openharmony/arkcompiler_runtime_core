@@ -24,7 +24,7 @@ let dest:   {{conv.dest}};
 
 function main(): void {
   dest = origin;
-  assertTrue(dest.isNaN());
+  arktest.assertTrue(dest.isNaN());
 }
 
 {% endfor %}

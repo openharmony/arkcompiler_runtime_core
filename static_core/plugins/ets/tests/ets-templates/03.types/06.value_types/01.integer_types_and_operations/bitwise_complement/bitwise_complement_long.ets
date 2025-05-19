@@ -20,7 +20,7 @@ desc: check bitwise complement of long integers
 
 function main(): void {
   const v: long = {{v.value}}
-  assertEQ( ~(v), {{v.result}} )
+  arktest.assertEQ( ~(v), {{v.result}} )
 }
 
 {% endfor %}

@@ -29,14 +29,14 @@ function_decls:
         function foo(): int { return 0; }
       call: |-
         let i = foo();
-        assertEQ( i, 0 )
+        arktest.assertEQ( i, 0 )
 
     # no params, return value type array
     - decl: |-
         function foo(): int[] { return new int[1]; }
       call: |-
         let arr: int[] = foo();
-        assertTrue( arr instanceof int[] && arr.length == 1 )
+        arktest.assertTrue( arr instanceof int[] && arr.length == 1 )
 
     # no params, return function
     - decl: |-
@@ -46,27 +46,27 @@ function_decls:
         }
       call: |-
         let f: () => void = foo();
-        assertTrue( f instanceof (() => void) )
+        arktest.assertTrue( f instanceof (() => void) )
 
     # no params, return reference type
     - decl: |-
         function foo(): Long { return new Long(); }
       call: |-
         let f: Long = foo();
-        assertTrue( f instanceof Long )
+        arktest.assertTrue( f instanceof Long )
 
     - decl: |-
         function foo(): Object|null { return null; }
       call: |-
         let f: Object|null = foo();
-        assertEQ( f, null )
+        arktest.assertEQ( f, null )
 
     # no params, return reference type array
     - decl: |-
         function foo(): Long[] { return new Long[0]; }
       call: |-
         let f: Long[] = foo();
-        assertTrue( f instanceof Long[] && f.length == 0 )
+        arktest.assertTrue( f instanceof Long[] && f.length == 0 )
 
     - decl: |-
         function foo(): (Object|undefined)[] {
@@ -75,7 +75,7 @@ function_decls:
         }
       call: |-
         let f: (Object|undefined)[] = foo();
-        assertTrue( f instanceof (Object|undefined)[] && f.length == 0)
+        arktest.assertTrue( f instanceof (Object|undefined)[] && f.length == 0)
 
     # no params, return enum
     - decl: |-
@@ -83,4 +83,4 @@ function_decls:
         function foo(): Color { return Color.Red; }
       call: |-
         let e: Color  = foo();
-        assertEQ( e, Color.Red )
+        arktest.assertEQ( e, Color.Red )

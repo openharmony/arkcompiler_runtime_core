@@ -23,26 +23,26 @@ function bar() {}
 function testFunction() {
     let bar1 = bar
     let bar2 = bar
-    assertEQ(bar1, bar2)
+    arktest.assertEQ(bar1, bar2)
 }
 
 function testInstanceMethod() {
     let x1 = new X()
     let x2 = new X()
-    assertTrue(x1 !== x2)
+    arktest.assertTrue(x1 !== x2)
     let foo1 = x1.foo
     let foo2 = x1.foo
     let foo3 = x2.foo
     let baz1 = X.baz
-    assertEQ(foo1, foo2)
-    assertNE(foo1, foo3)
-    assertNE(foo1, baz1)
+    arktest.assertEQ(foo1, foo2)
+    arktest.assertNE(foo1, foo3)
+    arktest.assertNE(foo1, baz1)
 }
 
 function testStaticMethod() {
     let baz1 = X.baz
     let baz2 = X.baz
-    assertEQ(baz1, baz2)
+    arktest.assertEQ(baz1, baz2)
 }
 
 function testArrowFunction() {
@@ -50,14 +50,14 @@ function testArrowFunction() {
     for (let i = 0; i < 2; i++) {
         let d = ()=>{}
         if (c != undefined) {
-            assertNE(c, d)
+            arktest.assertNE(c, d)
         }
         c = d
     }
 }
 
 function main() {
-    const suite = new ArkTestsuite('Function Compare tests')
+    const suite = new arktest.ArkTestsuite('Function Compare tests')
     suite.addTest('Function Compare', testFunction)
     suite.addTest('Instance Method Compare', testInstanceMethod)
     suite.addTest('Static Method Compare', testStaticMethod)

@@ -16,7 +16,7 @@
 import {List} from '@ohos.util.List';
 
 function main() {
-    const suite = new ArkTestsuite("List API tests");
+    const suite = new arktest.ArkTestsuite("List API tests");
 
     suite.addTest("List create a single-type container", testCreateSingleTypeContainer);
     suite.addTest("List create a composite-type container", testCreateCompositeTypeContainer);
@@ -54,12 +54,12 @@ function testCreateSingleTypeContainer() {
     try {
         list = new List<number>();
     } catch (e) {
-        assertFalse(false, "Failed to create a single-type instance of List");
+        arktest.assertFalse(false, "Failed to create a single-type instance of List");
         return;
     }
     list.add(TestData.testNumber1);
-    assertTrue(list instanceof List, "The instance should be List");
-    assertEQ(list.length, TestData.testNumber1, "List length should be 1");
+    arktest.assertTrue(list instanceof List, "The instance should be List");
+    arktest.assertEQ(list.length, TestData.testNumber1, "List length should be 1");
 }
 
 function testCreateCompositeTypeContainer() {
@@ -67,7 +67,7 @@ function testCreateCompositeTypeContainer() {
     try {
         list = new List<number | string | boolean | null | object | undefined>();
     } catch (e) {
-        assertFalse(false, "Failed to create a composite-type instance of List");
+        arktest.assertFalse(false, "Failed to create a composite-type instance of List");
         return;
     }
     list.add(TestData.testNumber1);
@@ -76,31 +76,31 @@ function testCreateCompositeTypeContainer() {
     list.add(null);
     list.add(TestData.testObject1);
     list.add(undefined);
-    assertTrue(list instanceof List, "The instance should be List");
-    assertEQ(list.length, TestData.testNumber6, "List length should be 6");
+    arktest.assertTrue(list instanceof List, "The instance should be List");
+    arktest.assertEQ(list.length, TestData.testNumber6, "List length should be 6");
 }
 
 function testLengthSyncSingleType() {
     let list = new List<number>();
-    assertEQ(list.length, 0, "List length should be 0");
+    arktest.assertEQ(list.length, 0, "List length should be 0");
     initializeList(list, TestData.arrayForNumber1);
-    assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be TestData.arrayForNumber1 length");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be TestData.arrayForNumber1 length");
     list.remove(TestData.testNumber1);
-    assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber1, "List length should - 1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber1, "List length should - 1");
 }
 
 function testLengthSyncMultiType() {
     let list = new List<number | string | boolean | null | object | undefined>();
-    assertEQ(list.length, 0, "List length should be 0");
+    arktest.assertEQ(list.length, 0, "List length should be 0");
     list.add(TestData.testNumber1);
     list.add(TestData.testString1);
     list.add(true);
     list.add(null);
     list.add(TestData.testObject1);
     list.add(undefined);
-    assertEQ(list.length, TestData.testNumber6, "List length should be 6");
+    arktest.assertEQ(list.length, TestData.testNumber6, "List length should be 6");
     list.remove(TestData.testNumber1);
-    assertEQ(list.length, TestData.testNumber5, "List length should be 5");
+    arktest.assertEQ(list.length, TestData.testNumber5, "List length should be 5");
 }
 
 function testLengthWithLargeValue() {
@@ -108,5 +108,5 @@ function testLengthWithLargeValue() {
     for (let i: number = 0; i < TestData.testNumberLarge; i++) {
         list.add(TestData.testNumber1);
     }
-    assertEQ(list.length, TestData.testNumberLarge, "List length should be 10000 after adding elements");
+    arktest.assertEQ(list.length, TestData.testNumberLarge, "List length should be 10000 after adding elements");
 }

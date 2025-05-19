@@ -37,7 +37,7 @@ function foo(i: Partial<A>) {
 }
 
 function main() {
-  assertTrue( foo( {{c.argument}} ) == {{c.result}} )
+  arktest.assertTrue( foo( {{c.argument}} ) == {{c.result}} )
 }
 
 {% endfor %}

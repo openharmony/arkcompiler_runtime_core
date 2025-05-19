@@ -41,6 +41,6 @@ class IImpl<X> implements MyIteratorDescendant<X> {
 
 function main() {
     const ix = new IImpl<Number>().$_iterator().next();
-    assertEQ(true, ix.done)
-    assertEQ(undefined, ix.value)
+    arktest.assertEQ(true, ix.done)
+    arktest.assertEQ(undefined, ix.value)
 }

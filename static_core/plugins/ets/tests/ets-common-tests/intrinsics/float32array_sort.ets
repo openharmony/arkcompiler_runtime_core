@@ -23,8 +23,8 @@ const SORTED_WITH_NAN: double[] = [Float.NEGATIVE_INFINITY.toDouble(),-1.125,0.0
 const SINGLE = [88.0];
 
 function fillBuffer(buf: ArrayBuffer): void {
-    assertEQ(Float.BYTE_SIZE, Float32Array.BYTES_PER_ELEMENT);
-    assertEQ(Float.BYTE_SIZE, 4);
+    arktest.assertEQ(Float.BYTE_SIZE, Float32Array.BYTES_PER_ELEMENT);
+    arktest.assertEQ(Float.BYTE_SIZE, 4);
     for (let i = 0; i < AB_SIZE; ++i) {
         if ((i % Float.BYTE_SIZE) == 0) {
             let v: int = Float.bitCastToInt(UNSORTED[i / Float.BYTE_SIZE].toFloat());
@@ -45,7 +45,7 @@ function fillBuffer(buf: ArrayBuffer): void {
 
 function checkSorted(a: Float32Array): void {
     for (let i = 0; i < ARRAY_SIZE; ++i) {
-        assertEQ(a[i], SORTED[i]);
+        arktest.assertEQ(a[i], SORTED[i]);
     }
 }
 
@@ -56,13 +56,13 @@ function checkSortedWithNaN(a: Float32Array): void {
                 continue;
             }
         }
-        assertEQ(a[i], SORTED_WITH_NAN[i].toFloat());
+        arktest.assertEQ(a[i], SORTED_WITH_NAN[i].toFloat());
     }
 }
 
 function checkSortedUnaligned(a: Float32Array): void {
     for (let i = 0; i < ARRAY_SIZE - 1; ++i) {
-        assertEQ(a[i], SORTED_UNALIGNED[i]);
+        arktest.assertEQ(a[i], SORTED_UNALIGNED[i]);
     }
 }
 
@@ -74,7 +74,7 @@ function sortEmpty(): void {
 function sortSingle(): void {
     let single: Float32Array = new Float32Array(SINGLE);
     single.sort();
-    assertEQ(single[0], SINGLE[0]);
+    arktest.assertEQ(single[0], SINGLE[0]);
 }
 
 function sortNormal(): void {
@@ -100,8 +100,8 @@ function sortUnaligned(): void {
 }
 
 function main(): int {
-    assertEQ(UNSORTED.length, SORTED.length);
-    const suite = new ArkTestsuite('Float32Array.sort() tests')
+    arktest.assertEQ(UNSORTED.length, SORTED.length);
+    const suite = new arktest.ArkTestsuite('Float32Array.sort() tests')
     suite.addTest('sort an empty Float32Array', sortEmpty)
     suite.addTest('sort a single-element Float32Array', sortSingle)
     suite.addTest('sort a normal Float32Array', sortNormal)

@@ -34,5 +34,5 @@ let animal: Animal = 5;
 
 function main(): void {
   let obj1: object = animal;
-  assertTrue(obj1 == animal);
+  arktest.assertTrue(obj1 == animal);
 }

@@ -22,6 +22,6 @@ import {foo_2_1param as foo_2_1param} from "./imported_module_2.ets"
 
 
 function main() : void {
-    assertEQ(foo_1(), 0);
-    assertEQ(foo_2_1param(1), 1);
+    arktest.assertEQ(foo_1(), 0);
+    arktest.assertEQ(foo_2_1param(1), 1);
 }

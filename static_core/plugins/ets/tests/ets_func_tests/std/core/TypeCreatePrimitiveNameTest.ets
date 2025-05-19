@@ -18,7 +18,7 @@ interface I {
 }
 
 function foo(self: Object, x: int): int {
-	assertEQ( (Type.of(self) as ClassType).getName(), "i32")
+ arktest.assertEQ( (Type.of(self) as ClassType).getName(), "i32")
 	return x + 11
 }
 
@@ -44,5 +44,5 @@ function main(): void throws {
 		)
 	const ty = creator.create()
 	const i = ty.make() as I
-	assertEQ(i.i(19), 30)
+ arktest.assertEQ(i.i(19), 30)
 }

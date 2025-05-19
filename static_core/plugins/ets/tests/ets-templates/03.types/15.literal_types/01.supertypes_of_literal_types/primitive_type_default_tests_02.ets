@@ -21,5 +21,5 @@ tags: [compile-only, negative]
 let y: string;
 
 function main(): void {
-    assertEQ(y, undefined);
+    arktest.assertEQ(y, undefined);
 }

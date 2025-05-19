@@ -30,7 +30,7 @@ class C implements I {
 
 export function main(): void {
     const c = new C();
-    assertTrue(c.text == "hello");
+    arktest.assertTrue(c.text == "hello");
     const d = new D<string>("hello");
-    assertTrue(d.x == "hello");
+    arktest.assertTrue(d.x == "hello");
 }

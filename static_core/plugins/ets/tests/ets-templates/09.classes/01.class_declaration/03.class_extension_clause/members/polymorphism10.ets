@@ -43,8 +43,8 @@ class Dog extends Animal {
 
 function main(): void {
     const dog = new Dog(5);
-    assertEQ(dog.age, 35);
+    arktest.assertEQ(dog.age, 35);
 
     const animal: Animal = new Dog(5);
-    assertEQ((animal as Dog).age, 35);
+    arktest.assertEQ((animal as Dog).age, 35);
 }

@@ -31,5 +31,5 @@ function getX(): Int|undefined {
 }
 
 function main(): void {
-  assertEQ( getX(), 5 )
+  arktest.assertEQ( getX(), 5 )
 }

@@ -23,5 +23,5 @@ function sayHi(message: "hi") {
 
 function main(): void {
     const result = sayHi("hi");
-    assertEQ(result, "hi");
+    arktest.assertEQ(result, "hi");
 }

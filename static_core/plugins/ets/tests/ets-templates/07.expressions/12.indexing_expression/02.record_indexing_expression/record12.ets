@@ -23,5 +23,5 @@ let optionalRecord: Record<string, string> = {
 };
 
 function main(): void {
-  assertEQ(optionalRecord["gender"], undefined);
+  arktest.assertEQ(optionalRecord["gender"], undefined);
 }

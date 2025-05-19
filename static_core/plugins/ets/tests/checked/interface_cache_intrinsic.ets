@@ -44,5 +44,5 @@ function test(iface: Interface): Boolean {
 }
 
 function main() : void {
-    assertEQ(test(new ActualClass), true)
+    arktest.assertEQ(test(new ActualClass), true)
 }

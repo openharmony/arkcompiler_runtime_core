@@ -41,5 +41,5 @@ class C {
 function main(): void {
     let account: A | B | C = new A();
     let result = account.x;
-    assertTrue(result === 1);
+    arktest.assertTrue(result === 1);
 }

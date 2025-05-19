@@ -19,14 +19,14 @@ cases:
           import { A } from './dir_pub_1/file_A';
       use: |-
           // separate module, positive case with public constructor
-          assertEQ( new A(42).fld, 42 )
+          arktest.assertEQ( new A(42).fld, 42 )
 
     - files: './dir_pub_2/file_B.ets'
       decl: |-
           import { B } from './dir_pub_2/file_B';
       use: |-
           // separate module, positive case with public constructor, from subclass
-          assertEQ( new B(42).fld, 43 )
+          arktest.assertEQ( new B(42).fld, 43 )
 
     # protected access modifier
     - files: './dir_prot_1/file_A.ets'
@@ -35,14 +35,14 @@ cases:
           import { A } from './dir_prot_1/file_A';
       use: |-
           // separate module, negative case with protected constructor
-          assertEQ( new A(42).fld, 42 )
+          arktest.assertEQ( new A(42).fld, 42 )
 
     - files: './dir_prot_2/file_B.ets'
       decl: |-
           import { B } from './dir_prot_2/file_B';
       use: |-
           // separate module, positive case with protected constructor, from subclass
-          assertEQ( new B(42).fld, 43 )
+          arktest.assertEQ( new B(42).fld, 43 )
 
     # private access modifier
     - files: './dir_priv_1/file_A.ets'
@@ -51,7 +51,7 @@ cases:
           import { A } from './dir_priv_1/file_A';
       use: |-
           // separate module, negative case with private constructor
-          assertEQ( new A(42).fld, 42 )
+          arktest.assertEQ( new A(42).fld, 42 )
 
     - files: './dir_priv_2/file_B.ets'
       tags: 'negative, compile-only'
@@ -59,4 +59,4 @@ cases:
           import { B } from './dir_priv_2/file_B';
       use: |-
           // separate module, negative case with private constructor, from subclass
-          assertEQ( new B(42).fld, 43 )
+          arktest.assertEQ( new B(42).fld, 43 )

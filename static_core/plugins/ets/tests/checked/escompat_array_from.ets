@@ -105,7 +105,7 @@ class ArrayValueIteratorTest implements IterableIterator<Number> {
 
 function check_array<T>(arr: Array<T>, start: int, end: int, expected: T) {
     for (let i = start; i < end; i++) {
-        assertEQ(arr[i], expected);
+        arktest.assertEQ(arr[i], expected);
     }
 }
 
@@ -218,21 +218,21 @@ function test_array_from() {
     let array1 = Array.from(smallFromSet);
     let array2 = Array.from(bigFromSet);
     for (let i: int = 0; i < shortSize; i++) {
-        assertEQ(array1[i], i);
+        arktest.assertEQ(array1[i], i);
     }
     for (let i: int = 0; i < longSize; i++) {
-        assertEQ(array2[i], i);
+        arktest.assertEQ(array2[i], i);
     }
 
     let arrayUnion: ArrayLike<number> | Iterable<number> = new Array<number>(1, 2, 3);
     let fromUnion = Array.from(arrayUnion);
     for (let i: int = 0; i < 3; i++) {
-        assertEQ(fromUnion[i], i + 1);
+        arktest.assertEQ(fromUnion[i], i + 1);
     }
     let arrayIter: Iterable<number> = new Array<number>(1, 2, 3)
     let fromIter = Array.from(arrayIter);
     for (let i: int = 0; i < 3; i++) {
-        assertEQ(fromIter[i], i + 1);
+        arktest.assertEQ(fromIter[i], i + 1);
     }
     let arrCustom: Array<ArrayLike<number> | Iterable<number>> = new Array<ArrayLike<number> | Iterable<number>>(2);
     let tmpArrLike: ArrayLikeImplTest<number> = new ArrayLikeImplTest<number>();
@@ -242,7 +242,7 @@ function test_array_from() {
     let fromArr1 = Array.from(arrCustom[0]);
     let fromArr2 = Array.from(arrCustom[1]);
     for (let i: int = 0; i < 1; i++) {
-        assertEQ(fromArr1[i], 1);
-        assertEQ(fromArr2[i], 1);
+        arktest.assertEQ(fromArr1[i], 1);
+        arktest.assertEQ(fromArr2[i], 1);
     }
 }

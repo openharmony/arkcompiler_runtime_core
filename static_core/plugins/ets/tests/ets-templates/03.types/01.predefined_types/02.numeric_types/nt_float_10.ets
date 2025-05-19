@@ -22,5 +22,5 @@ function main(): void {
   let b: float = 3.5f;
   let c = a % b;
 
-  assertTrue(c === 0);
+  arktest.assertTrue(c === 0);
 }

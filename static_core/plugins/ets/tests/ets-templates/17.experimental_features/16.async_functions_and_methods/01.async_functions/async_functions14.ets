@@ -26,7 +26,7 @@ async function startTest() {
     try {
         await tryCatchFinally();
     } catch (error) {
-        assertEQ(error as string, "Something went wrong!");
+        arktest.assertEQ(error as string, "Something went wrong!");
     } finally {
     }
 }

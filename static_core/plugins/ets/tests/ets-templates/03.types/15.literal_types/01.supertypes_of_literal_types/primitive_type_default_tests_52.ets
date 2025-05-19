@@ -23,5 +23,5 @@ function multiplyByThree(num: number) {
 
 function main(): void {
     const result = multiplyByThree(20);
-    assertEQ(result, 60);
+    arktest.assertEQ(result, 60);
 }

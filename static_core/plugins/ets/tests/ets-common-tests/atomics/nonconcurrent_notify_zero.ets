@@ -19,6 +19,6 @@ function main() {
     let arr = new Int32Array(buf, 0, 1);
 
     let x = Atomics.notify(arr, 0)
-    assertEQ(x, 0)
+    arktest.assertEQ(x, 0)
 }
 

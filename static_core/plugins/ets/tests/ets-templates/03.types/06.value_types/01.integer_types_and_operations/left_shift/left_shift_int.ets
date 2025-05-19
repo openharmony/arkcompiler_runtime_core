@@ -21,7 +21,7 @@ desc: check left shift operation for integer
 function main(): void {
     const a: int = {{v.left}}
     const b: int = {{v.right}}
-    assertEQ( (a << b), {{v.result}})
+    arktest.assertEQ( (a << b), {{v.result}})
 }
 
 {% endfor %}

@@ -22,5 +22,5 @@ files:
 import c_var from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const"
 
 function main(): void {
-    assertEQ(c_var, 2);
+    arktest.assertEQ(c_var, 2);
 }

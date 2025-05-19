@@ -34,7 +34,7 @@ async function startTest() {
   const result1 = await step1();
   const result2 = await step2(result1);
   const result3 = await step3(result2);
-  assertEQ(result3, "Step 1 completed, Step 2 completed, Step 3 completed");
+  arktest.assertEQ(result3, "Step 1 completed, Step 2 completed, Step 3 completed");
 }
 
 function main(): void {

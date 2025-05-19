@@ -19,10 +19,10 @@ desc: Switch statement
 
 function f(i: int): void {
   switch (i) {
-    case 0: assertEQ( i, 0); break;
-    case 1: assertEQ( i, 1); break;
-    case 2: assertEQ( i, 2); break;
-    default: assertTrue( false );
+    case 0: arktest.assertEQ( i, 0); break;
+    case 1: arktest.assertEQ( i, 1); break;
+    case 2: arktest.assertEQ( i, 2); break;
+    default: arktest.assertTrue( false );
   }
 }
 

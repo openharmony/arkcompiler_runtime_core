@@ -17,7 +17,7 @@ cases:
       constructor() { res = 21;}
     use: |-
       new Derived<Number>();
-      assertEQ( res, 21 );
+      arktest.assertEQ( res, 21 );
 
   - decl: |-
       constructor() {
@@ -26,7 +26,7 @@ cases:
       }
     use: |-
       new Derived<Number>();
-      assertEQ( res, 21 );
+      arktest.assertEQ( res, 21 );
 
   - decl: |-
       constructor() {
@@ -35,7 +35,7 @@ cases:
       }
     use: |-
       new Derived<Number>();
-      assertEQ( res, 22 );
+      arktest.assertEQ( res, 22 );
 
   - decl: |-
       constructor() {
@@ -44,31 +44,31 @@ cases:
       }
     use: |-
       new Derived<Number>();
-      assertEQ( res, 23 );
+      arktest.assertEQ( res, 23 );
 
   - decl: |-
       constructor(i: number) { res = 21; }
     use: |-
       new Derived<Number>(1.1 as number);
-      assertEQ( res, 21 );
+      arktest.assertEQ( res, 21 );
 
   - decl: |-
       constructor(i: number) { super();}
     use: |-
       new Derived<Number>(1.1 as number);
-      assertEQ( res, 1 );
+      arktest.assertEQ( res, 1 );
 
   - decl: |-
       constructor(i: number) { super(i);}
     use: |-
       new Derived<Number>(1.1 as number);
-      assertEQ( res, 2 );
+      arktest.assertEQ( res, 2 );
 
   - decl: |-
       constructor(i: string) { res = 21;}
     use: |-
       new Derived<Number>("some string");
-      assertEQ( res, 21 );
+      arktest.assertEQ( res, 21 );
 
   - tags: negative, compile-only
     decl: |-
@@ -88,7 +88,7 @@ cases:
       constructor(i: Number) { res = 24;}
     use: |-
       new Derived<Number>(new Number());
-      assertEQ( res, 24 );
+      arktest.assertEQ( res, 24 );
 
   - tags: negative, compile-only
     use: |-
@@ -100,7 +100,7 @@ cases:
     use: |-
       let a: byte[] = [1 as byte, 2 as byte];
       new Derived<Number>(a);
-      assertEQ( res, 25 );
+      arktest.assertEQ( res, 25 );
 
   - tags: negative, compile-only
     use: |-
@@ -112,7 +112,7 @@ cases:
     use: |-
       let a: TPL = [ false, 1.2f];
       new Derived<Number>(a);
-      assertEQ( res, 26 );
+      arktest.assertEQ( res, 26 );
 
   - tags: negative, compile-only
     use: |-
@@ -122,7 +122,7 @@ cases:
       constructor(i: BoolFun) { res = 27;}
     use: |-
       new Derived<Number>( () => { return true; } );
-      assertEQ( res, 27 );
+      arktest.assertEQ( res, 27 );
 
   - tags: negative, compile-only
     use: |-
@@ -132,7 +132,7 @@ cases:
       constructor(i: undefined|Number|null) { res = 28;}
     use: |-
       new Derived<Number>( undefined );
-      assertEQ( res, 28 );
+      arktest.assertEQ( res, 28 );
 
   - tags: negative, compile-only
     use: |-
@@ -142,7 +142,7 @@ cases:
       constructor(i: null|undefined|Number) { res = 28;}
     use: |-
       new Derived<Number>( null );
-      assertEQ( res, 28 );
+      arktest.assertEQ( res, 28 );
 
   - tags: negative, compile-only
     use: |-
@@ -152,4 +152,4 @@ cases:
       constructor(i: Gen<T>) { res = 29;}
     use: |-
       new Derived<Byte>( new Gen<Byte>() );
-      assertEQ( res, 29 );
+      arktest.assertEQ( res, 29 );

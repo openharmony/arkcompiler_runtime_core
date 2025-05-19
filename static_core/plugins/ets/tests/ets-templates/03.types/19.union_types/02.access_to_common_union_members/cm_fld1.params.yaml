@@ -25,8 +25,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertTrue(u1.fld === undefined)
-          assertTrue(u2.fld === null)
+          arktest.assertTrue(u1.fld === undefined)
+          arktest.assertTrue(u2.fld === null)
 
     - decl: |-
           // classes, fields of number type
@@ -39,8 +39,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld, 42.0)
-          assertEQ(u2.fld, 0e0)
+          arktest.assertEQ(u1.fld, 42.0)
+          arktest.assertEQ(u2.fld, 0e0)
 
     - decl: |-
           // classes, fields of bigint type
@@ -53,8 +53,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld, 42n)
-          assertEQ(u2.fld, 33n)
+          arktest.assertEQ(u1.fld, 42n)
+          arktest.assertEQ(u2.fld, 33n)
 
     - decl: |-
           // classes, fields of Integral type
@@ -67,8 +67,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld, 42)
-          assertEQ(u2.fld, 33)
+          arktest.assertEQ(u1.fld, 42)
+          arktest.assertEQ(u2.fld, 33)
 
     - decl: |-
           // classes, fields of Error type
@@ -81,8 +81,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld.message, 'a')
-          assertEQ(u2.fld.message, 'b')
+          arktest.assertEQ(u1.fld.message, 'a')
+          arktest.assertEQ(u2.fld.message, 'b')
 
     - decl: |-
           // classes, fields of union literal type
@@ -95,8 +95,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld, 'a')
-          assertEQ(u2.fld, 'b')
+          arktest.assertEQ(u1.fld, 'a')
+          arktest.assertEQ(u2.fld, 'b')
 
     - decl: |-
           // classes, fields of union type
@@ -109,8 +109,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld, 42.0)
-          assertEQ(u2.fld, undefined)
+          arktest.assertEQ(u1.fld, 42.0)
+          arktest.assertEQ(u2.fld, undefined)
 
     - decl: |-
           // classes, fields of array type
@@ -123,8 +123,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld[0], 'a')
-          assertEQ(u2.fld[2], 'e')
+          arktest.assertEQ(u1.fld[0], 'a')
+          arktest.assertEQ(u2.fld[2], 'e')
 
     - decl: |-
           // classes, fields of tuple type
@@ -137,8 +137,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld[0], 42.0)
-          assertEQ(u2.fld[1], 'b')
+          arktest.assertEQ(u1.fld[0], 42.0)
+          arktest.assertEQ(u2.fld[1], 'b')
 
     - decl: |-
           // classes, fields of Record type
@@ -151,8 +151,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld['a'], 11.0)
-          assertEQ(u2.fld['b'], 22.0)
+          arktest.assertEQ(u1.fld['a'], 11.0)
+          arktest.assertEQ(u2.fld['b'], 22.0)
 
     - decl: |-
           // classes, fields of function type
@@ -165,8 +165,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld('abc'), 4.0)
-          assertEQ(u2.fld('abc'), 13.0)
+          arktest.assertEQ(u1.fld('abc'), 4.0)
+          arktest.assertEQ(u2.fld('abc'), 13.0)
 
     - decl: |-
           // classes, fields of type parameters
@@ -182,8 +182,8 @@ cases:
           let u1: A<string>|B = new A<string>('a')
           let u2: B|A<string> = new B
       use: |-
-          assertEQ(u1.fld, 'a')
-          assertEQ(u2.fld, 'b')
+          arktest.assertEQ(u1.fld, 'a')
+          arktest.assertEQ(u2.fld, 'b')
 
     - decl: |-
           // classes, fields of enum type
@@ -197,8 +197,8 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          assertEQ(u1.fld, Color.Green)
-          assertEQ(u2.fld, Color.Blue)
+          arktest.assertEQ(u1.fld, Color.Green)
+          arktest.assertEQ(u2.fld, Color.Blue)
 
     - decl: |-
           // classes, fields of different types
@@ -209,7 +209,7 @@ cases:
           let u1: A|B = new A
       tags: compile-only, negative
       use: |-
-          assertEQ(u1.fld * 2, 84.0)  // CTE: no fld in class B
+          arktest.assertEQ(u1.fld * 2, 84.0)  // CTE: no fld in class B
 
     - decl: |-
           // classes, fields of different types
@@ -222,7 +222,7 @@ cases:
           let u1: A|B = new A
       tags: compile-only, negative
       use: |-
-          assertEQ(u1.fld * 2, 84.0)  // CTE: different types
+          arktest.assertEQ(u1.fld * 2, 84.0)  // CTE: different types
 
     - decl: |-
           // classes, fields of different types
@@ -235,4 +235,4 @@ cases:
           let u1: A|B = new A
       tags: compile-only, negative
       use: |-
-          assertEQ(u1.fld[0] * 2, 84.0)  // CTE: different types
+          arktest.assertEQ(u1.fld[0] * 2, 84.0)  // CTE: different types

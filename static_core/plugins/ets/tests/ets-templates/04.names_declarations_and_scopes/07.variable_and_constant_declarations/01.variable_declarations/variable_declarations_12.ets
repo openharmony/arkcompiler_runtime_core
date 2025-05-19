@@ -28,6 +28,6 @@ class tmp1 {
 
 function main(): void {
   let obj = new tmp1();
-  assertTrue(obj.tmp == 1);
-  assertTrue(obj.tmp1 == 2);
+  arktest.assertTrue(obj.tmp == 1);
+  arktest.assertTrue(obj.tmp1 == 2);
 }

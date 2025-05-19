@@ -23,7 +23,7 @@ tags: [compile-only, negative]
 import * from "std/math";
 
 function min(v: double, u: double): double {
-    assertTrue( false )
+    arktest.assertTrue( false )
     return v < u ? v : u;
 }
 

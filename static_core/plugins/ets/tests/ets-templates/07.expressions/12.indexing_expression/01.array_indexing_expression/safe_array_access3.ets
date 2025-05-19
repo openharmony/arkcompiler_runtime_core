@@ -25,5 +25,5 @@ function getArrRef(): Int|null {
 }
 
 function main(): void {
-  assertTrue( getArrRef()?.[0] === undefined )
+  arktest.assertTrue( getArrRef()?.[0] === undefined )
 }

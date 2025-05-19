@@ -40,7 +40,7 @@ class MethodWithRace {
 async function startTest() {
   const example = new MethodWithRace();
   const result = await example.methodWithRace();
-  assertEQ(result, "Resolved after 100ms");
+  arktest.assertEQ(result, "Resolved after 100ms");
 }
 
 function main(): void {

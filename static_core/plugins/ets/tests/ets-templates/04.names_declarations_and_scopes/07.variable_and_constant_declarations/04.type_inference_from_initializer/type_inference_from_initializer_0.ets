@@ -19,5 +19,5 @@ desc: Variable declaration with literal type.
 
 function main(): void {
   let tmp = null;
-  assertTrue(tmp == null);
+  arktest.assertTrue(tmp == null);
 }

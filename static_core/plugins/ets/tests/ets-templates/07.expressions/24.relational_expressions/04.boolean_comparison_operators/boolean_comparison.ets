@@ -25,10 +25,10 @@ function main(): void {
     let y: boolean = {{case.yvalue}}
     let by: Boolean = new Boolean({{case.yvalue}})
 
-    assertEQ( ( {{case.xvalue}} {{case.op}} {{case.yvalue}} ), {{case.result}} )
-    assertEQ( ( x {{case.op}} y), {{case.result}} )
-    assertEQ( ( bx {{case.op}} by), {{case.result}} )
-    assertEQ( ( x {{case.op}} by), {{case.result}} )
+    arktest.assertEQ( ( {{case.xvalue}} {{case.op}} {{case.yvalue}} ), {{case.result}} )
+    arktest.assertEQ( ( x {{case.op}} y), {{case.result}} )
+    arktest.assertEQ( ( bx {{case.op}} by), {{case.result}} )
+    arktest.assertEQ( ( x {{case.op}} by), {{case.result}} )
 }
 
 {% endfor %}

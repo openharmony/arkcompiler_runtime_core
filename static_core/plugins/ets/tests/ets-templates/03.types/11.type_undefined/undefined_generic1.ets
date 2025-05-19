@@ -21,5 +21,5 @@ class A<T> {}
 
 function main(): void {
   let i: A<undefined>|undefined = undefined;
-  assertTrue( i === undefined )
+  arktest.assertTrue( i === undefined )
 }

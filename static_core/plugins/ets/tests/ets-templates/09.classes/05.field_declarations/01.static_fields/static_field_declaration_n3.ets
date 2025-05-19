@@ -28,6 +28,6 @@ class A {
 }
 
 function main() {
-    assertEQ( A.x, 42 )
-    assertEQ( A.x(), 41 )
+    arktest.assertEQ( A.x, 42 )
+    arktest.assertEQ( A.x(), 41 )
 }

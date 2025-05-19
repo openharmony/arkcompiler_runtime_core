@@ -26,7 +26,7 @@ async function startTest() {
         await testAsyncError();
     } catch (error) {
         let err: string = error as string;
-        assertEQ(err === "Failed", true);
+        arktest.assertEQ(err === "Failed", true);
     }
 }
 

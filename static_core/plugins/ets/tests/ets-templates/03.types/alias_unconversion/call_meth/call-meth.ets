@@ -27,7 +27,7 @@ function main() {
     let a: A = new A()
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    assertEQ(a.meth(s{{loop.index}}), {{t.val}}, "Assert fails on item {{loop.index}}")
+    arktest.assertEQ(a.meth(s{{loop.index}}), {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
 }
 {%- endfor %}

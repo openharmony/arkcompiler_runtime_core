@@ -27,6 +27,6 @@ desc: >-
 
 function main(): void {
   let v: {{t.type}} = {{t.val|safe}};
-  assertTrue( {{t.assert|safe}} )
+  arktest.assertTrue( {{t.assert|safe}} )
 }
 {% endfor %}

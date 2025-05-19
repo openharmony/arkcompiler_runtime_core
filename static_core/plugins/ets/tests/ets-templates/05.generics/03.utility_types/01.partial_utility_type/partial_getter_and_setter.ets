@@ -44,8 +44,8 @@ function foo(i: Partial<C>) {
 
 function main() {
   z = 0;
-  assertTrue( foo( {{c.argument}} ) == {{c.result}} )
-  assertTrue( z == 0 );
+  arktest.assertTrue( foo( {{c.argument}} ) == {{c.result}} )
+  arktest.assertTrue( z == 0 );
 }
 
 {% endfor %}

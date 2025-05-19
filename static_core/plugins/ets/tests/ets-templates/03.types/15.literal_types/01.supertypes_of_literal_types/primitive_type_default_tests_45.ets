@@ -23,5 +23,5 @@ function addFive(num: number) {
 
 function main(): void {
     const result = addFive(15);
-    assertEQ(result, 20);
+    arktest.assertEQ(result, 20);
 }

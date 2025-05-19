@@ -17,7 +17,7 @@ import buffer from "@ohos.buffer"
 
 
 function main(): int {
-    const suite = new ArkTestsuite("Buffer API tests")
+    const suite = new arktest.ArkTestsuite("Buffer API tests")
 
     suite.addTest("Test basic string encodings", testBasicStringEncodings)
     suite.addTest("Test Unicode string handling", testUnicodeString)

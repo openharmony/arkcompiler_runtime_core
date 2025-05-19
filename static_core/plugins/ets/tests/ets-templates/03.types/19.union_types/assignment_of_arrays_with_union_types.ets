@@ -36,6 +36,6 @@ function main(): void {
   let arrImplementation: GenericInterface<({{c.type}})[]> = new GenericImplementation<({{c.type}})[]>();
   let inputArray: ({{c.type}})[] = [{{c.value}}];
   let result = arrImplementation.process(inputArray);
-  assertEQ(result, inputArray);
+  arktest.assertEQ(result, inputArray);
 }
 {%- endfor %}

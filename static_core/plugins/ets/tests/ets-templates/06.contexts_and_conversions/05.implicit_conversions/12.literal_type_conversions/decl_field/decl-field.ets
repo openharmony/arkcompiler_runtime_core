@@ -30,7 +30,7 @@ class A{{loop.index}} {
 function main() {
 {%- for v in c['values'] %}
     let a{{loop.index}}: A{{loop.index}} = new A{{loop.index}}();
-    assertEQ(a{{loop.index}}.d, {{v.val or v.expr}})
+    arktest.assertEQ(a{{loop.index}}.d, {{v.val or v.expr}})
 {%- endfor %}
 }
 {%- endfor %}

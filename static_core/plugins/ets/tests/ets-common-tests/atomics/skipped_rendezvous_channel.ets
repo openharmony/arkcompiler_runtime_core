@@ -45,13 +45,13 @@ function consumer(): Int {
         c.println("receiving")
         let x = read()
         c.println("received " + x)
-        assertEQ(x, i)
+        arktest.assertEQ(x, i)
     }
     return 1
 }
 
 function send(x: int) {
-    assertNE(x, 0)
+    arktest.assertNE(x, 0)
     try {
         while (true) {
             let oldValue = Atomics.compareExchange(arr, 0, 0, x)
@@ -62,7 +62,7 @@ function send(x: int) {
             Atomics.wait(arr, 0, oldValue)
         }
     } catch (e) {
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -78,7 +78,7 @@ function read(): int {
             Atomics.wait(arr, 0, 0)
         }
     } catch (e) {
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
     return -1
 }

@@ -32,5 +32,5 @@ class B extends A {
 function main(): void {
   let bInstance: A = new B();
   let b = bInstance.method();
-  assertEQ(b, "Method from A and B");
+  arktest.assertEQ(b, "Method from A and B");
 }

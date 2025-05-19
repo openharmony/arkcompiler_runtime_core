@@ -23,7 +23,7 @@ type NullableInt = int | null;
 
 class TestC {
     test(required: String, param: NullableInt = 42): void {
-        assertTrue( param === 42)
+        arktest.assertTrue( param === 42)
     }
 }
 

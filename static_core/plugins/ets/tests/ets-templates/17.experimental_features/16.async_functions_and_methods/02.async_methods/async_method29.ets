@@ -28,7 +28,7 @@ class MethodWithEmptyArray {
 async function startTest() {
     const example = new MethodWithEmptyArray();
     const result = await example.methodWithEmptyArray();
-    assertEQ(result, "Empty array results: 0");
+    arktest.assertEQ(result, "Empty array results: 0");
 }
 
 function main(): void {

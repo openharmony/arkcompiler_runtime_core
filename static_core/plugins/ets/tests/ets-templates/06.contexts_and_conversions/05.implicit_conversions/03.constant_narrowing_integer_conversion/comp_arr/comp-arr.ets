@@ -25,10 +25,10 @@ const c{{loop.index}}: {{c.from_type}} = {{v.expr|safe}}
 function main() {
 {%- for v in c['values'] %}
     let d{{loop.index}}: {{c.to_type}}[] = [({{v.expr|safe}}).to{{c.to_type}}(), ({{v.expr|safe}}).to{{c.to_type}}()]  // expression
-    assertEQ(d{{loop.index}}[1], ({{v.val}}).to{{c.to_type}}())
+    arktest.assertEQ(d{{loop.index}}[1], ({{v.val}}).to{{c.to_type}}())
 
     d{{loop.index}} = [c{{loop.index}}.to{{c.to_type}}()]  // constant
-    assertEQ(d{{loop.index}}[0], ({{v.val}}).to{{c.to_type}}())
+    arktest.assertEQ(d{{loop.index}}[0], ({{v.val}}).to{{c.to_type}}())
 {%- endfor %}
 }
 {%- endfor %}

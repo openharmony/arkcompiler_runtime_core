@@ -26,6 +26,6 @@ enum ConstExpr {
 }
 
 function main(): void {
-    assertEQ( ConstExpr.A.getValue(), 0)
-    assertEQ( ConstExpr.B.getValue(), 1)
+    arktest.assertEQ( ConstExpr.A.getValue(), 0)
+    arktest.assertEQ( ConstExpr.B.getValue(), 1)
 }

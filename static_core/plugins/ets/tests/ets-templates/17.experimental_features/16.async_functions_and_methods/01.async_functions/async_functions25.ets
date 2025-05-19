@@ -37,7 +37,7 @@ async function methodConcurrentExecution(): Promise<Array<Promise<String | numbe
 async function startTest() {
   const result = await methodConcurrentExecution();
   const resTemp = new Array<number | string>("Hello", 42);
-  assertEQ(result === resTemp, true);
+  arktest.assertEQ(result === resTemp, true);
 }
 
 function main(): void {

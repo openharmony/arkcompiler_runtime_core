@@ -36,5 +36,5 @@ class Derived extends Base1 implements Base2 {
 function main(): void {
     let instance: Derived = new Derived();
 
-    assertTrue( instance.field instanceof Derived );
+    arktest.assertTrue( instance.field instanceof Derived );
 }

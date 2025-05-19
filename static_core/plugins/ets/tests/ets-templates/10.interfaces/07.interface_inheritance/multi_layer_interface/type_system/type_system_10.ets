@@ -29,5 +29,5 @@ class C implements B {
 
 function main(): void {
     const c: B = new C();
-    assertEQ(c.value, "Hello");
+    arktest.assertEQ(c.value, "Hello");
 }

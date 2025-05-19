@@ -32,6 +32,6 @@ class PrivatePropConflictClass implements PrivatePropConflictInterface {
 
 function main(): void {
   const instance = new PrivatePropConflictClass();
-  assertEQ(instance.getInternalValue(), 49);
-  assertEQ(instance.CONST, 50);
+  arktest.assertEQ(instance.getInternalValue(), 49);
+  arktest.assertEQ(instance.CONST, 50);
 }

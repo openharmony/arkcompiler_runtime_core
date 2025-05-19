@@ -25,5 +25,5 @@ for (let i = 0; i < byteArray.length; i++) {
 
 function main(): void {
   let expectedString: string = "Hello";
-  assertEQ(charArray, expectedString);
+  arktest.assertEQ(charArray, expectedString);
 }

@@ -32,5 +32,5 @@ class A {
 function main(): void {
   let a: A = new A();
   a.method2();
-  assertEQ( a.res, 1 );
+  arktest.assertEQ( a.res, 1 );
 }

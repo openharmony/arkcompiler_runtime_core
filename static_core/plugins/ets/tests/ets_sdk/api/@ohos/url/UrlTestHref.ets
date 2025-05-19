@@ -25,7 +25,7 @@ import {url} from "@ohos.url"
 function testUrlHref001() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	let result = params.href
-	assertEQ(result, "http://username:password@host:8080/directory/file?query#fragment")
+ arktest.assertEQ(result, "http://username:password@host:8080/directory/file?query#fragment")
 }
 
 /**
@@ -39,7 +39,7 @@ function testUrlHref001() {
 function testUrlHref002() {
 	let params = url.URL.parseURL('http://host:8080/directory/file?query#fragment')
 	let result = params.href
-	assertEQ(result, "http://host:8080/directory/file?query#fragment")
+ arktest.assertEQ(result, "http://host:8080/directory/file?query#fragment")
 }
 
 /**
@@ -53,7 +53,7 @@ function testUrlHref002() {
 function testUrlHref003() {
 	let params = url.URL.parseURL('http://username:password@host:8080')
 	let result = params.href
-	assertEQ(result, "http://username:password@host:8080/")
+ arktest.assertEQ(result, "http://username:password@host:8080/")
 }
 
 /**
@@ -68,7 +68,7 @@ function testUrlHref004() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	params.href = 'http1://myhost/path?sss=1#ff';
 	let result = params.href
-	assertEQ(result, "http1://myhost/path?sss=1#ff")
+ arktest.assertEQ(result, "http1://myhost/path?sss=1#ff")
 }
 
 /**
@@ -83,7 +83,7 @@ function testUrlHref005() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	params.href = 'http://myhost:99/path#ff';
 	let result = params.href
-	assertEQ(result, "http://myhost:99/path#ff")
+ arktest.assertEQ(result, "http://myhost:99/path#ff")
 }
 
 /**
@@ -97,7 +97,7 @@ function testUrlHref005() {
 function testUrlOrigin001() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	let result = params.origin
-	assertEQ(result, 'http://host:8080')
+ arktest.assertEQ(result, 'http://host:8080')
 }
 
 /**
@@ -111,7 +111,7 @@ function testUrlOrigin001() {
 function testUrlOrigin002() {
 	let params = url.URL.parseURL('http://username:password@host:11/directory/file?query#fragment')
 	let result = params.origin
-	assertEQ(result, 'http://host:11')
+ arktest.assertEQ(result, 'http://host:11')
 }
 
 /**
@@ -125,7 +125,7 @@ function testUrlOrigin002() {
 function testUrlOrigin003() {
 	let params = url.URL.parseURL('http://username:password@host/directory/file?query#fragment')
 	let result = params.origin
-	assertEQ(result, 'http://host')
+ arktest.assertEQ(result, 'http://host')
 }
 
 /**
@@ -139,7 +139,7 @@ function testUrlOrigin003() {
 function testUrlOrigin004() {
 	let params = url.URL.parseURL('http://username:password@aaaasshost:212/directory/file?query#fragment')
 	let result = params.origin
-	assertEQ(result, 'http://aaaasshost:212')
+ arktest.assertEQ(result, 'http://aaaasshost:212')
 }
 
 /**
@@ -153,7 +153,7 @@ function testUrlOrigin004() {
 function testUrlOrigin005() {
 	let params = url.URL.parseURL('http://username:password@host22:100#fragment')
 	let result = params.origin
-	assertEQ(result, 'http://host22:100')
+ arktest.assertEQ(result, 'http://host22:100')
 }
 
 /**
@@ -167,7 +167,7 @@ function testUrlOrigin005() {
 function testUrlProtocol001() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	let result = params.protocol
-	assertEQ(result, 'http:')
+ arktest.assertEQ(result, 'http:')
 }
 
 /**
@@ -181,7 +181,7 @@ function testUrlProtocol001() {
 function testUrlProtocol002() {
 	let params = url.URL.parseURL('http1://username:password@host:8080/directory/file?query#fragment')
 	let result = params.protocol
-	assertEQ(result, 'http1:')
+ arktest.assertEQ(result, 'http1:')
 }
 
 /**
@@ -195,7 +195,7 @@ function testUrlProtocol002() {
 function testUrlProtocol003() {
 	let params = url.URL.parseURL('https://username:password@host:8080/directory/file?query#fragment')
 	let result = params.protocol
-	assertEQ(result, 'https:')
+ arktest.assertEQ(result, 'https:')
 }
 
 /**
@@ -210,7 +210,7 @@ function testUrlProtocol004() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	params.protocol = 'https:';
 	let result = params.protocol
-	assertEQ(result, 'https:')
+ arktest.assertEQ(result, 'https:')
 }
 
 /**
@@ -225,7 +225,7 @@ function testUrlProtocol005() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	params.protocol = 'ftp:';
 	let result = params.protocol
-	assertEQ(result, 'ftp:')
+ arktest.assertEQ(result, 'ftp:')
 }
 
 /**
@@ -239,7 +239,7 @@ function testUrlProtocol005() {
 function testUrlUsername001() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	let result = params.username
-	assertEQ(result, 'username')
+ arktest.assertEQ(result, 'username')
 }
 
 /**
@@ -253,7 +253,7 @@ function testUrlUsername001() {
 function testUrlUsername002() {
 	let params = url.URL.parseURL('http://zhao:password@host:8080/directory/file?query#fragment')
 	let result = params.username
-	assertEQ(result, 'zhao')
+ arktest.assertEQ(result, 'zhao')
 }
 
 /**
@@ -268,7 +268,7 @@ function testUrlUsername003() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	params.username = 'skk'
 	let result = params.username
-	assertEQ(result, 'skk')
+ arktest.assertEQ(result, 'skk')
 }
 
 /**
@@ -283,7 +283,7 @@ function testUrlUsername004() {
 	let params = url.URL.parseURL('http://username:password@host:8080/directory/file?query#fragment')
 	params.username = 'skp111'
 	let result = params.username
-	assertEQ(result, 'skp111')
+ arktest.assertEQ(result, 'skp111')
 }
 
 /**
@@ -297,7 +297,7 @@ function testUrlUsername004() {
 function testUrlUsername005() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment')
 	let result = params.username
-	assertEQ(result, 'usme')
+ arktest.assertEQ(result, 'usme')
 }
 
 /**
@@ -311,10 +311,10 @@ function testUrlUsername005() {
 function testUrlHostName001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.hostname;
-	assertEQ(result, 'host');
+ arktest.assertEQ(result, 'host');
     params.hostname = 'www.test.com';
-    assertEQ(params.hostname, 'www.test.com');
-    assertEQ(params.host, 'www.test.com:8080');
+    arktest.assertEQ(params.hostname, 'www.test.com');
+    arktest.assertEQ(params.host, 'www.test.com:8080');
 }
 
 /**
@@ -328,10 +328,10 @@ function testUrlHostName001() {
 function testUrlHostName002() {
 	let params = url.URL.parseURL('http://usme@host1:8080/directory/file?query#fragment');
 	let result = params.hostname;
-	assertEQ(result, 'host1');
+ arktest.assertEQ(result, 'host1');
     params.hostname = 'www.test.com';
-    assertEQ(params.host, 'www.test.com:8080');
-    assertEQ(params.href, 'http://usme@www.test.com:8080/directory/file?query#fragment');
+    arktest.assertEQ(params.host, 'www.test.com:8080');
+    arktest.assertEQ(params.href, 'http://usme@www.test.com:8080/directory/file?query#fragment');
 }
 
 /**
@@ -345,11 +345,11 @@ function testUrlHostName002() {
 function testUrlHost001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.host;
-	assertEQ(result, 'host:8080');
+ arktest.assertEQ(result, 'host:8080');
     params.host = 'www.test:99';
-    assertEQ(params.host, 'www.test:99');
-    assertEQ(params.hostname, 'www.test');
-    assertEQ(params.port, '99');
+    arktest.assertEQ(params.host, 'www.test:99');
+    arktest.assertEQ(params.hostname, 'www.test');
+    arktest.assertEQ(params.port, '99');
 }
 
 /**
@@ -363,9 +363,9 @@ function testUrlHost001() {
 function testUrlPort001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.port;
-	assertEQ(result, '8080');
+ arktest.assertEQ(result, '8080');
     params.port = '77';
-    assertEQ(params.host, 'host:77');
+    arktest.assertEQ(params.host, 'host:77');
 }
 
 /**
@@ -379,15 +379,15 @@ function testUrlPort001() {
 function testUrlGetHost001() {
 	let params = url.URL.parseURL('http://usme@host:8080/directory/file?query#fragment');
 	let result = params.host;
-	assertEQ(result, 'host:8080');
+ arktest.assertEQ(result, 'host:8080');
     params.port = '77';
     params.hostname = 'www.test.com';
-    assertEQ(params.host, 'www.test.com:77');
-    assertEQ(params.toString(), 'http://usme@www.test.com:77/directory/file?query#fragment');
+    arktest.assertEQ(params.host, 'www.test.com:77');
+    arktest.assertEQ(params.toString(), 'http://usme@www.test.com:77/directory/file?query#fragment');
 }
 
 function main(): int {
-	let suite = new ArkTestsuite("URL UT tests");
+	let suite = new arktest.ArkTestsuite("URL UT tests");
 	suite.addTest("testUrlHref001", testUrlHref001);
 	suite.addTest("testUrlHref002", testUrlHref002);
 	suite.addTest("testUrlHref003", testUrlHref003);

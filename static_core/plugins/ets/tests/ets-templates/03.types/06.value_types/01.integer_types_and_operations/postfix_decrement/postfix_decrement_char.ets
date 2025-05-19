@@ -21,8 +21,8 @@ desc: check postfix decrement for char operand
 function main(): void {
   let value: char = {{v.value}}
   let result: char = value--
-  assertEQ( value, {{v.result}} )
-  assertEQ( result, {{v.value}} )
+  arktest.assertEQ( value, {{v.result}} )
+  arktest.assertEQ( result, {{v.value}} )
 }
 
 {% endfor %}

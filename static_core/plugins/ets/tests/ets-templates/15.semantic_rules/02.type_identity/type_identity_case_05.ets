@@ -24,6 +24,6 @@ function main(): void {
   let result1 = typeof value1 === "number";
   let result2 = typeof value2 === "number";
 
-  assertEQ(result1, true, "Expected result1 to be true");
-  assertEQ(result2, false, "Expected result2 to be false");
+  arktest.assertEQ(result1, true, "Expected result1 to be true");
+  arktest.assertEQ(result2, false, "Expected result2 to be false");
 }

@@ -29,5 +29,5 @@ class Child extends Parent {}
 
 function main(): void {
   let childInstance = new Child();
-  assertEQ(childInstance.arr.length, 5);
+  arktest.assertEQ(childInstance.arr.length, 5);
 }

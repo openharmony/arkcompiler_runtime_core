@@ -20,6 +20,6 @@ desc: Cyclic dependency in variable initialization.
 function main(): void {
   const tmp = "1";
   const tmp1 = "1";
-  assertEQ(tmp, '1');
-  assertEQ(tmp1, '1');
+  arktest.assertEQ(tmp, '1');
+  arktest.assertEQ(tmp1, '1');
 }

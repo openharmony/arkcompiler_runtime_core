@@ -27,5 +27,5 @@ class ReturnBooleanConstantChild implements ReturnBooleanConstantInterface {
 
 function main(): void {
   const instance = new ReturnBooleanConstantChild();
-  assertEQ(instance.CONST(), false);
+  arktest.assertEQ(instance.CONST(), false);
 }

@@ -24,11 +24,11 @@ let x = 1
 
 function f1() {
     let x = 9
-    assertEQ( x, 9 )
+    arktest.assertEQ( x, 9 )
 }
 
 function main() {
-    assertEQ( x, 1 )
+    arktest.assertEQ( x, 1 )
     f1()
-    assertEQ( x, 1 )
+    arktest.assertEQ( x, 1 )
 }

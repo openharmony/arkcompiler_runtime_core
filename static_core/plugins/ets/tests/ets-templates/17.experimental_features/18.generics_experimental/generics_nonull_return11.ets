@@ -34,5 +34,5 @@ class B<T extends A | undefined> {
 function main(): void {
     let b = new B<undefined>();
     let result = b.foo(undefined);
-    assertEQ(result === undefined, true);
+    arktest.assertEQ(result === undefined, true);
 }

@@ -25,5 +25,5 @@ async function bar() {
 
 function main() {
     let res: Promise<Promise<string>> = bar();
-    assertEQ((await res), 'AA');
+    arktest.assertEQ((await res), 'AA');
 }

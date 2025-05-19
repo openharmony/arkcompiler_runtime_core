@@ -32,8 +32,8 @@ class ChildClass2 implements ParentInterface2, ParentInterface3 {
 
 function main(): void {
   const instance = new ChildClass2();
-  assertEQ(instance.CONSTANT1, 'test');
-  assertEQ(typeof instance.CONSTANT1, 'string');
-  assertEQ(instance.CONSTANT2, true);
-  assertEQ(typeof instance.CONSTANT2, 'boolean');
+  arktest.assertEQ(instance.CONSTANT1, 'test');
+  arktest.assertEQ(typeof instance.CONSTANT1, 'string');
+  arktest.assertEQ(instance.CONSTANT2, true);
+  arktest.assertEQ(typeof instance.CONSTANT2, 'boolean');
 }

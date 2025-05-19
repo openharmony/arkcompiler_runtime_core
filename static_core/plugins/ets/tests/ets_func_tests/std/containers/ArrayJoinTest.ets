@@ -17,12 +17,12 @@
     let x = new Array<number>(4);
     x[0] = 0;
     x[3] = 3;
-    assertEQ(x.join(), "0,,,3", 'x.join() === "0,,,3". Actual:' + (x.join()));
+    arktest.assertEQ(x.join(), "0,,,3", 'x.join() === "0,,,3". Actual:' + (x.join()));
 
     let z = new Array<undefined>(4)
-    assertEQ(z.join(), ",,,", 'z.join() === ",,,". Actual:' + (z.join()));
+    arktest.assertEQ(z.join(), ",,,", 'z.join() === ",,,". Actual:' + (z.join()));
 
     let y = new Array<null>(null,null,null);
-    assertEQ(y.toString(), ",,", 'let y = new Array<null>(null,null,null); y.toString(null,null,null) === ",,". Actual:' + (y.toString()));
+    arktest.assertEQ(y.toString(), ",,", 'let y = new Array<null>(null,null,null); y.toString(null,null,null) === ",,". Actual:' + (y.toString()));
  }
  

@@ -24,5 +24,5 @@ import VAR_i from "../../07.top-level_declarations/01.exported_declarations/defa
 
 function main() {
     let c: VAR_i = 3;
-    assertEQ(c, 3);
+    arktest.assertEQ(c, 3);
 }

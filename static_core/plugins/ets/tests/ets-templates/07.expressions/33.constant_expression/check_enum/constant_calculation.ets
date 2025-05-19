@@ -24,7 +24,7 @@ const value2: int = 10
 
 function main() {
     enum TestEnum { One = value1 {{c.sign}} value2}
-    assertEQ(TestEnum.One.valueOf(), {{c.expected}})
+    arktest.assertEQ(TestEnum.One.valueOf(), {{c.expected}})
 }
 
 {% endfor %}

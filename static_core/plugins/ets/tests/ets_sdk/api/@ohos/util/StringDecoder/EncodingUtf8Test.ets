@@ -16,7 +16,7 @@
 import { util } from "@ohos.util";
 
 function main() {
-    const suite = new ArkTestsuite("StringDecoder API encoding utf-8 tests");
+    const suite = new arktest.ArkTestsuite("StringDecoder API encoding utf-8 tests");
 
     suite.addTest("Returns a decoded string, ensuring that any incomplete multibyte characters at the end of the Uint8Array are", testwrite001);
     suite.addTest("Returns a decoded string, ensuring that any incomplete multibyte characters at the end of the Uint8Array are", testwrite002);
@@ -39,7 +39,7 @@ function testwrite001() {
     let decoder = new util.StringDecoder('utf-8');
     let input = new Uint8Array([0xE4, 0xBD, 0xA0, 0xE5, 0xA5, 0xBD]);
     const decoded = decoder.write(input);
-    assertEQ(decoded, '你好');
+    arktest.assertEQ(decoded, '你好');
 }
 
 /**
@@ -54,7 +54,7 @@ function testwrite001() {
 function testwrite002() {
     let decoder = new util.StringDecoder('utf-8');
     const decoded = decoder.write("abc");
-    assertEQ(decoded, 'abc');
+    arktest.assertEQ(decoded, 'abc');
 }
 
 /**
@@ -68,7 +68,7 @@ function testwrite002() {
 function testend002() {
     let decoder = new util.StringDecoder('utf-8');
     const decoded = decoder.end("abc");
-    assertEQ(decoded, 'abc');
+    arktest.assertEQ(decoded, 'abc');
 }
 
 /**
@@ -83,7 +83,7 @@ function testend003() {
     let decoder = new util.StringDecoder('utf-8');
     let input = new Uint8Array([0xE4, 0xBD, 0xA0, 0xE5, 0xA5, 0xBD]);
     const decoded = decoder.end(input);
-    assertEQ(decoded, '你好');
+    arktest.assertEQ(decoded, '你好');
 }
 
 /**
@@ -99,6 +99,6 @@ function testend004() {
     let input = new Uint8Array([0xE4, 0xBD, 0xA0, 0xE5, 0xA5, 0xBD]);
     const decoded = decoder.write(input.slice(0, 5));
     const decodeend = decoder.end(input.slice(5));
-    assertEQ(decoded, '你');
-    assertEQ(decodeend, '好');
+    arktest.assertEQ(decoded, '你');
+    arktest.assertEQ(decodeend, '好');
 }

@@ -20,5 +20,5 @@ desc: Compilation error caused by cyclic dependency.
 function main(): void {
   let tmp: number;
   tmp = 10;
-  assertTrue(tmp == 10);
+  arktest.assertTrue(tmp == 10);
 }

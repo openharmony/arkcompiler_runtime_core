@@ -24,7 +24,7 @@ class A {
     }
 
     constructor(){
-        assertTrue(this._x === 1);
+        arktest.assertTrue(this._x === 1);
     }
 }
 
@@ -34,12 +34,12 @@ class B {
         return this._x;
     }
     constructor(){
-        assertTrue(this._x === 2);
+        arktest.assertTrue(this._x === 2);
     }
 }
 
 function main(): void {
     let new_B = new A();
     let num = new_B._x;
-    assertEQ(num, 1);
+    arktest.assertEQ(num, 1);
 }

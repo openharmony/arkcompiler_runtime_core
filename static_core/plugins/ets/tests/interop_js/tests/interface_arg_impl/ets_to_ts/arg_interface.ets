@@ -30,15 +30,15 @@ interface AnotherInterface {
 }
 
 function testFoo(val: Foo): boolean {
-    assertTrue(val instanceof Foo);
-    assertTrue(val instanceof Ageable);
-    assertTrue(val instanceof Callable);
+    arktest.assertTrue(val instanceof Foo);
+    arktest.assertTrue(val instanceof Ageable);
+    arktest.assertTrue(val instanceof Callable);
     return val.call() === '1' && val.age === 1 && val.foo();
 }
 
 function testAgeable(val: Ageable): boolean {
-    assertTrue(val instanceof Ageable);
-    assertTrue(val instanceof Callable);
+    arktest.assertTrue(val instanceof Ageable);
+    arktest.assertTrue(val instanceof Callable);
     return val.call() === '1' && val.age === 1;
 }
 
@@ -47,10 +47,10 @@ function testCallable(val: Callable): boolean {
 }
 
 function testMultiInterface(val: AnotherInterface): boolean {
-    assertTrue(val instanceof Foo);
-    assertTrue(val instanceof Ageable);
-    assertTrue(val instanceof Callable);
-    assertTrue(val instanceof AnotherInterface);
+    arktest.assertTrue(val instanceof Foo);
+    arktest.assertTrue(val instanceof Ageable);
+    arktest.assertTrue(val instanceof Callable);
+    arktest.assertTrue(val instanceof AnotherInterface);
     let obj: Foo = val as Foo;
     return obj.call() === '1' && obj.age === 1 && obj.foo() && !val.run();
 }

@@ -55,8 +55,8 @@ function main(): void {
     let ra2 = a2.foo(new UserType());
     let ra3 = a3.foo("hello")
 
-    assertTrue( ra1 instanceof UserType)
-    assertTrue( ra2 instanceof UserType)
-    assertTrue( ra3 instanceof string)
+    arktest.assertTrue( ra1 instanceof UserType)
+    arktest.assertTrue( ra2 instanceof UserType)
+    arktest.assertTrue( ra3 instanceof string)
 }
 

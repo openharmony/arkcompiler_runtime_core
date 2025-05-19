@@ -27,5 +27,5 @@ function main(): void {
     let a: Object = new A();
     let b: String = "sa";
     let c: String = a + b;
-    assertTrue(c == "asa" )
+    arktest.assertTrue(c == "asa" )
 }

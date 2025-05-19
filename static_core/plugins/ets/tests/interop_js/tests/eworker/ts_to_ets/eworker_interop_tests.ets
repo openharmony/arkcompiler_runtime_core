@@ -27,7 +27,7 @@ function testProcessInput() {
     };
 
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertTrue(res);
+    arktest.assertTrue(res);
 }
 
 function testCreateArray() {
@@ -45,7 +45,7 @@ function testCreateArray() {
                     (res3.getProperty(0).toBoolean() === true);
     };
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertTrue(res);
+    arktest.assertTrue(res);
 }
 
 function testGetUser() {
@@ -60,7 +60,7 @@ function testGetUser() {
                     res2.getProperty('role').toString() === 'admin';
     };
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertTrue(res);
+    arktest.assertTrue(res);
 }
 
 class NewTestClass {
@@ -75,33 +75,33 @@ function testUnion() {
         let dynamicObj = module.getProperty('dynamicObj');
         let TestClass = module.getProperty("TestClass");
         dynamicObj.setProperty('unionProp', ESValue.wrapNumber(123));
-        assertTrue(dynamicObj.getProperty('unionProp').toNumber() === 123);
+        arktest.assertTrue(dynamicObj.getProperty('unionProp').toNumber() === 123);
         dynamicObj.setProperty('unionProp', ESValue.wrapString('123'));
-        assertTrue(dynamicObj.getProperty('unionProp').toString() === '123');
+        arktest.assertTrue(dynamicObj.getProperty('unionProp').toString() === '123');
         dynamicObj.setProperty('unionProp', ESValue.wrapBoolean(true));
-        assertTrue(dynamicObj.getProperty('unionProp').toBoolean() === true);
+        arktest.assertTrue(dynamicObj.getProperty('unionProp').toBoolean() === true);
         let testInstance = TestClass.instantiate();
         dynamicObj.setProperty('unionProp', testInstance);
-        assertTrue(dynamicObj.getProperty('unionProp').getProperty('name').toString() === 'aaa');
+        arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('name').toString() === 'aaa');
         
         dynamicObj.setProperty('unionProp', ESValue.wrap(new NewTestClass()));
-        assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
+        arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
         result = true;
     }
     eaw.run<void>(callback).Await();
   } catch (error) {
     console.error(error.toString());
-    assertFalse(result);
+    arktest.assertFalse(result);
   }
-  assertTrue(result);
+  arktest.assertTrue(result);
 }
 
 function testBaseClass() {
     let callback = () => {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let obj = module.getProperty('Base').instantiate().invokeMethod('getCurrent')
-        assertTrue(obj.typeOf() === 'object')
-        assertTrue(obj.getProperty('baseVal').toNumber() === 1)
+        arktest.assertTrue(obj.typeOf() === 'object')
+        arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
     }
     eaw.run<void>(callback).Await();
 }
@@ -110,9 +110,9 @@ function testChildClass() {
     let callback = () => {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let obj = module.getProperty('Child').instantiate().invokeMethod('getSuper')
-        assertTrue(obj.typeOf() === 'object')
-        assertTrue(obj.getProperty('baseVal').toNumber() === 1)
-        assertTrue(obj.getProperty('childVal').toNumber() === 2)
+        arktest.assertTrue(obj.typeOf() === 'object')
+        arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
+        arktest.assertTrue(obj.getProperty('childVal').toNumber() === 2)
     }
     eaw.run<void>(callback).Await();
 }
@@ -121,7 +121,7 @@ function testBaseFunc() {
     let callback = () => {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let obj = module.getProperty('baseFunc').invoke()
-        assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
+        arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
     eaw.run<void>(callback).Await();
 }
@@ -130,7 +130,7 @@ function testChildFunc() {
     let callback = () => {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let obj = module.getProperty('childFunc').invoke()
-        assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
+        arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
     eaw.run<void>(callback).Await();
 }
@@ -140,7 +140,7 @@ function testFooBaseObjInvoke() {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.getProperty('foo').invoke()
-        assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
+        arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
     eaw.run<void>(callback).Await();
 }
@@ -150,7 +150,7 @@ function testFooBaseObjInvokeMethod() {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.invokeMethod('fooFunc')
-        assertTrue(ESValue.areStrictlyEqual(result, fooBaseObj))
+        arktest.assertTrue(ESValue.areStrictlyEqual(result, fooBaseObj))
     }
     eaw.run<void>(callback).Await();
 }
@@ -160,7 +160,7 @@ function testFooChildObjInvoke() {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.getProperty('foo').invoke()
-        assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
+        arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
     eaw.run<void>(callback).Await();
 }
@@ -170,7 +170,7 @@ function testFooChildObjInvokeMethod() {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers')
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.invokeMethod('fooFunc')
-        assertTrue(ESValue.areStrictlyEqual(result, fooChildObj))
+        arktest.assertTrue(ESValue.areStrictlyEqual(result, fooChildObj))
     }
     eaw.run<void>(callback).Await();
 }
@@ -179,7 +179,7 @@ function testArrowFuncInvoke() {
     let callback = () => {
         let module = ESValue.load('../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers');
         let result = module.getProperty('arrowFunc').invoke()
-        assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
+        arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
     eaw.run<void>(callback).Await();
 }
@@ -187,13 +187,13 @@ function testArrowFuncInvoke() {
 function testOptionalParams() {
     let callback = () => {
         let module = ESValue.load("../../plugins/ets/tests/interop_js/tests/eworker/ts_to_ets/eworker_helpers");
-        assertTrue(module.getProperty("foo1").invoke(ESValue.wrap(1), ESValue.wrap("str")).toBoolean());
-        assertTrue(module.getProperty("foo2").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(true)).toBoolean());
-        assertTrue(module.getProperty("foo3").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(true), ESValue.wrap(2)).toBoolean());
+        arktest.assertTrue(module.getProperty("foo1").invoke(ESValue.wrap(1), ESValue.wrap("str")).toBoolean());
+        arktest.assertTrue(module.getProperty("foo2").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(true)).toBoolean());
+        arktest.assertTrue(module.getProperty("foo3").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(true), ESValue.wrap(2)).toBoolean());
 
-        assertTrue(module.getProperty("fun1").invoke(ESValue.wrap(1), ESValue.wrap("str")).toBoolean());
-        assertTrue(module.getProperty("fun2").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(false)).toBoolean());
-        assertTrue(module.getProperty("fun3").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(false), ESValue.wrap(2)).toBoolean());
+        arktest.assertTrue(module.getProperty("fun1").invoke(ESValue.wrap(1), ESValue.wrap("str")).toBoolean());
+        arktest.assertTrue(module.getProperty("fun2").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(false)).toBoolean());
+        arktest.assertTrue(module.getProperty("fun3").invoke(ESValue.wrap(1), ESValue.wrap("str"), ESValue.wrap(false), ESValue.wrap(2)).toBoolean());
     }
     eaw.run<void>(callback).Await();
 }
@@ -213,7 +213,7 @@ function testError() {
         return res;
     }
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertTrue(res);
+    arktest.assertTrue(res);
 }
 
 function testThrowError() {
@@ -229,7 +229,7 @@ function testThrowError() {
         return res;
     }
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertTrue(res);
+    arktest.assertTrue(res);
 }
 
 function testCustomThrowError() {
@@ -249,7 +249,7 @@ function testCustomThrowError() {
         return res;
     }
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertTrue(res);
+    arktest.assertTrue(res);
 }
 
 function testEAWorkerNestedExecute() {
@@ -272,11 +272,11 @@ function testEAWorkerNestedExecute() {
         }
         let resInner = innerWorker.run<boolean>(callbackInner).Await() as boolean;
         innerWorker.join();
-        assertTrue(resInner);
+        arktest.assertTrue(resInner);
         return res && resInner;
     };
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
 }
 
 function testEAWorkerInteropLoop() {
@@ -287,17 +287,17 @@ function testEAWorkerInteropLoop() {
             let res1 = processInputDy.invoke(ESValue.wrapNumber(5)); //  2 * 5 = 10
             let res2 = processInputDy.invoke(ESValue.wrapString('hello')); // 'HELLO'
             let res3 = processInputDy.invoke(ESValue.wrapBoolean(true)); // false
-            assertEQ(res1.toNumber(), 10);
-            assertEQ(res2.toString(), 'HELLO');
-            assertEQ(res3.toBoolean(), false);
+            arktest.assertEQ(res1.toNumber(), 10);
+            arktest.assertEQ(res2.toString(), 'HELLO');
+            arktest.assertEQ(res3.toBoolean(), false);
         }
     }
     let res = eaw.run<boolean>(callback).Await() as boolean;
-    assertEQ(res, true);
+    arktest.assertEQ(res, true);
 }
 
 function eworkerInteropTest() {
-    let eworkerInteropSuite = new ArkTestsuite("eworker.InteropTest");
+    let eworkerInteropSuite = new arktest.ArkTestsuite("eworker.InteropTest");
     eworkerInteropSuite.addTest("testProcessInput", testProcessInput);
     eworkerInteropSuite.addTest("testCreateArray", testCreateArray);
     eworkerInteropSuite.addTest("testGetUser", testGetUser);

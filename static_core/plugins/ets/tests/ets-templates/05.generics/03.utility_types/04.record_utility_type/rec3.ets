@@ -30,11 +30,11 @@ function main() {
 {%- endfor %}
     }
 {%- for v in c['values'] %}
-    assertTrue(r[{{v.key}}] == {{v.val}})
+    arktest.assertTrue(r[{{v.key}}] == {{v.val}})
 {%- endfor %}
 {%- for v in c['values2'] %}
     r[{{v.key}}] = {{v.val}}
-    assertTrue(r[{{v.key}}] == {{v.val}})
+    arktest.assertTrue(r[{{v.key}}] == {{v.val}})
 {%- endfor %}
 }
 {% endfor %}

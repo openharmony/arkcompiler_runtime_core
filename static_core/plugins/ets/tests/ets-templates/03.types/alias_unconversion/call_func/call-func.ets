@@ -24,7 +24,7 @@ function foo(p: {{c.to_type}}): {{c.to_type}} { return p }
 function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    assertEQ(foo(s{{loop.index}}), {{t.val}}, "Assert fails on item {{loop.index}}")
+    arktest.assertEQ(foo(s{{loop.index}}), {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
 }
 {%- endfor %}

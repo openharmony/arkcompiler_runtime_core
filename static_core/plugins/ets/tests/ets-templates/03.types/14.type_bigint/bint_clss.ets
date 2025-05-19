@@ -31,7 +31,7 @@ let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
 function main() {
     let a: A = { {% for t in c['values'] %}fld{{loop.index}}: new BigInt(prim{{loop.index}}){{ ", " if not loop.last }}{% endfor %} }
 {%- for t in c['values'] %}
-    assertTrue( a.fld{{loop.index}} == {{t.val}})
+    arktest.assertTrue( a.fld{{loop.index}} == {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

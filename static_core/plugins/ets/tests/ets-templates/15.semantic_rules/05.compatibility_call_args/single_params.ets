@@ -40,9 +40,9 @@ function foo(callee: {{ c.arg }}): {{ c.arg }} {
 function main() {
     {%- for v in c['values'] %}
     let a{{loop.index}}: A = new A({{ v.val }});
-    assertEQ(a{{loop.index}}.field, {{ v.result }})
-    assertEQ(a{{loop.index}}.bar({{ v.val }}), {{ v.result }})
-    assertEQ(foo({{ v.val }}), {{ v.result }})
+    arktest.assertEQ(a{{loop.index}}.field, {{ v.result }})
+    arktest.assertEQ(a{{loop.index}}.bar({{ v.val }}), {{ v.result }})
+    arktest.assertEQ(foo({{ v.val }}), {{ v.result }})
     {%- endfor %}
 }
 

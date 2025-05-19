@@ -21,10 +21,10 @@ function main(): void {
   let a: string = "abc";
   let b: string = a;
 
-  assertEQ( a, b)
+  arktest.assertEQ( a, b)
 
   a = a + "d";
 
-  assertEQ( a, "abcd")
-  assertNE( a, b)
+  arktest.assertEQ( a, "abcd")
+  arktest.assertNE( a, b)
 }

@@ -42,8 +42,8 @@ class TestClass {
 
 
         try {
-            assertEQ(JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value1'), 1);
-            assertEQ(JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value2'), 2);
+            arktest.assertEQ(JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value1'), 1);
+            arktest.assertEQ(JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value2'), 2);
         }
         catch(e) {
             console.log("Failed to modify values");
@@ -68,7 +68,7 @@ class TestClass {
         let method = JSRuntime.getPropertyJSValue(module, 'returnTwo');
         let val = JSRuntime.invoke(module, method);
         try {
-            assertEQ(JSRuntime.getValueDouble(val) as int, 2);
+            arktest.assertEQ(JSRuntime.getValueDouble(val) as int, 2);
         }
         catch(e) {
             console.log("callJsFunctionTest failed");
@@ -104,8 +104,8 @@ class TestClass {
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
-            assertEQ(value, 7);
-            assertEQ(modified, true);
+            arktest.assertEQ(value, 7);
+            arktest.assertEQ(modified, true);
         }
         catch(e) {
             console.log("Value modifications failed");

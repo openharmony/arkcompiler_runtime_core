@@ -31,7 +31,7 @@ function foo{{loop.index0}}({{c.sig1}}): int {
 function main(): void {
     let v1 = foo{{loop.index0}}({{c.arg1}})
     let v2 = foo{{loop.index0}}({{c.arg2}})
-    assertEQ(v1, 1)
-    assertEQ(v2, 2)
+    arktest.assertEQ(v1, 1)
+    arktest.assertEQ(v2, 2)
 }
 {%- endfor %}

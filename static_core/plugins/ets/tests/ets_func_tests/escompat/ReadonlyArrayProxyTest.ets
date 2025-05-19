@@ -28,13 +28,13 @@ function testReadonlyArrayProxyOps(): void {
     const handler = new ProxyHandler()
     const arrayProxy = Proxy.create(array, handler)
 
-    assertEQ(arrayProxy.length, 3, "unexpected ReadonlyArray proxy length")
-    assertEQ(arrayProxy[0], "I", "ReadonlyArray proxy first element unexpected value")
-    assertTrue(handler.getTrapped)
+    arktest.assertEQ(arrayProxy.length, 3, "unexpected ReadonlyArray proxy length")
+    arktest.assertEQ(arrayProxy[0], "I", "ReadonlyArray proxy first element unexpected value")
+    arktest.assertTrue(handler.getTrapped)
 }
 
 function main(): int {
-    const suite = new ArkTestsuite("Proxy API")
+    const suite = new arktest.ArkTestsuite("Proxy API")
 
     suite.addTest("ReadonlyArray proxy operations", testReadonlyArrayProxyOps)
 

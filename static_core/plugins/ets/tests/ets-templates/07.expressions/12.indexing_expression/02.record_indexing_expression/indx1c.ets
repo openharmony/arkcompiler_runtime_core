@@ -26,5 +26,5 @@ function refNullish(): Record<string, number>|undefined {
 }
 
 function main() {
-    assertTrue(refNullish()["magic"] == 42) // CTE expected
+    arktest.assertTrue(refNullish()["magic"] == 42) // CTE expected
 }

@@ -37,8 +37,8 @@ function main(): void {
   const instanceA: InterfaceA = new ClassA();
   const instanceB: InterfaceB = new ClassB();
 
-  assertEQ(typeof instanceA.CONFLICT_CONSTANT, 'number');
-  assertEQ(instanceA.CONFLICT_CONSTANT, 123);
-  assertEQ(typeof instanceB.CONFLICT_CONSTANT, 'string');
-  assertEQ(instanceB.CONFLICT_CONSTANT, "abc");
+  arktest.assertEQ(typeof instanceA.CONFLICT_CONSTANT, 'number');
+  arktest.assertEQ(instanceA.CONFLICT_CONSTANT, 123);
+  arktest.assertEQ(typeof instanceB.CONFLICT_CONSTANT, 'string');
+  arktest.assertEQ(instanceB.CONFLICT_CONSTANT, "abc");
 }

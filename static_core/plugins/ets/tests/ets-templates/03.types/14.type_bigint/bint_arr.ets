@@ -26,7 +26,7 @@ let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
 function main() {
     let a: bigint[] = [{% for t in c['values'] %}new BigInt(prim{{loop.index}}){{ ", " if not loop.last }}{% endfor %}]
 {%- for t in c['values'] %}
-    assertTrue( a[{{loop.index0}}] == {{t.val}})
+    arktest.assertTrue( a[{{loop.index0}}] == {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

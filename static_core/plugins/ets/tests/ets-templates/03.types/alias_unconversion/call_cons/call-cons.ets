@@ -27,7 +27,7 @@ class A {
 function main() {
 {%- for t in c['values'] %}
     let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    assertEQ(new A(s{{loop.index}}).f, {{t.val}}, "Assert fails on item {{loop.index}}")
+    arktest.assertEQ(new A(s{{loop.index}}).f, {{t.val}}, "Assert fails on item {{loop.index}}")
 {%- endfor %}
 }
 {%- endfor %}

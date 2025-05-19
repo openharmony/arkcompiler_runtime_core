@@ -23,5 +23,5 @@ import type {T_BOXED} from "../../07.top-level_declarations/01.exported_declarat
 
 function main(): void {
     let i: T_BOXED = new Boolean(true);
-    assertTrue(i instanceof Boolean);
+    arktest.assertTrue(i instanceof Boolean);
 }

@@ -21,6 +21,6 @@ function main(): void {
     let minByte: byte = -128;
     let maxByte: byte = 127;
 
-    assertTrue(minByte === -128);
-    assertTrue(maxByte === 127);
+    arktest.assertTrue(minByte === -128);
+    arktest.assertTrue(maxByte === 127);
 }

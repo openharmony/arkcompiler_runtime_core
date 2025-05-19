@@ -21,7 +21,7 @@ desc: Default values for nullable types
 
 function main(): void {
   let x: {{i.type}};
-  assertEQ( x, {{i.value}} )
+  arktest.assertEQ( x, {{i.value}} )
 }
 
 {% endfor %}

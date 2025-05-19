@@ -19,7 +19,7 @@ assert: This operator is lazy, meaning that if the evaluation of the left-hand-s
 ---*/
 
 function foo(): int {
-  assertTrue( false )
+  arktest.assertTrue( false )
   return 0;
 }
 

@@ -26,7 +26,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(33), 66);
+      arktest.assertEQ(stringValue.getFunctionValue()(33), 66);
 
   - desc: Test that when the generic type is boolean, the method inverts the boolean value and returns it.
     decl: |-
@@ -41,7 +41,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(true), false);
+      arktest.assertEQ(stringValue.getFunctionValue()(true), false);
 
   - desc: When the generic is null, the method returns the original value directly.
     decl: |-
@@ -56,7 +56,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(null), null);
+      arktest.assertEQ(stringValue.getFunctionValue()(null), null);
 
   - desc: When the generic is undefined, the method returns the original value directly.
     decl: |-
@@ -71,7 +71,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(undefined), undefined);
+      arktest.assertEQ(stringValue.getFunctionValue()(undefined), undefined);
 
   - desc: Test that when the generic is of type number, the method internally multiplies the number by 2 and returns(-3).
     decl: |-
@@ -86,7 +86,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(-3), -6);
+      arktest.assertEQ(stringValue.getFunctionValue()(-3), -6);
 
   - desc: Test that when the generic is of type number, the method internally multiplies the number by 2 and returns(0).
     decl: |-
@@ -101,7 +101,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(0), 0);
+      arktest.assertEQ(stringValue.getFunctionValue()(0), 0);
 
   - desc: When the generic type is number, the method internally subtracts 2 from the number and returns the number.
     decl: |-
@@ -116,7 +116,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(12), 10);
+      arktest.assertEQ(stringValue.getFunctionValue()(12), 10);
 
   - desc: When the generic type is number, the method divides the number by 2 and returns the value.
     decl: |-
@@ -131,7 +131,7 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(12), 6);
+      arktest.assertEQ(stringValue.getFunctionValue()(12), 6);
 
   - desc: When the generic type is number, the method returns the number modulo.
     decl: |-
@@ -146,5 +146,5 @@ cases:
       }
     logic: |-
       let stringValue = new FunctionValue();
-      assertEQ(stringValue.getFunctionValue()(12), 2);
+      arktest.assertEQ(stringValue.getFunctionValue()(12), 2);
 

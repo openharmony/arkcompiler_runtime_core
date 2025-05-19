@@ -32,5 +32,5 @@ class Dog extends AbstractMammal {}
 function main(): void {
   let dog = new Dog();
   let result = dog.move();
-  assertEQ(result, "Mammal is walking.");
+  arktest.assertEQ(result, "Mammal is walking.");
 }

@@ -19,7 +19,7 @@ loadLibrary("ani_maythrow");
 
 function check_no_error() {
     let res = maythrow(1)
-    assertEQ(res, 11)
+    arktest.assertEQ(res, 11)
 }
 
 function check_error() {
@@ -29,7 +29,7 @@ function check_error() {
     } catch (e) {
         errorMsg = e.toString();
     }
-    assertEQ(errorMsg, "Error: some error happen");
+    arktest.assertEQ(errorMsg, "Error: some error happen");
 }
 
 function check_error_when_return_complex_object() {
@@ -40,7 +40,7 @@ function check_error_when_return_complex_object() {
     } catch (e) {
         errorMsg = e.toString();
     }
-    assertEQ(errorMsg, "Error: error in getDataMaythrow");
+    arktest.assertEQ(errorMsg, "Error: error in getDataMaythrow");
 }
 
 function check_error_when_no_return() {
@@ -50,7 +50,7 @@ function check_error_when_no_return() {
     } catch (e) {
         errorMsg = e.toString();
     }
-    assertEQ(errorMsg, "Error: error in noReturnMaythrow");
+    arktest.assertEQ(errorMsg, "Error: error in noReturnMaythrow");
 }
 
 function check_business_error() {
@@ -63,13 +63,13 @@ function check_business_error() {
         error_code = e.code
         errorMsg = e.toString();
     }
-    assertEQ(error_code, 5)
-    assertEQ(errorMsg, "Error: error in noReturnBusinessError")
+    arktest.assertEQ(error_code, 5)
+    arktest.assertEQ(errorMsg, "Error: error in noReturnBusinessError")
 }
 
 function main() {
     console.log("##############start#############")
-    const suite = new ArkTestsuite("throw error ut")
+    const suite = new arktest.ArkTestsuite("throw error ut")
 
     suite.addTest("check no error", check_no_error)
     suite.addTest("check error", check_error)

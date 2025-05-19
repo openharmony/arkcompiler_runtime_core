@@ -23,5 +23,5 @@ function testFunc(num: number = 99) {
 
 function main(): void {
     const result = testFunc();
-    assertEQ(result, 99);
+    arktest.assertEQ(result, 99);
 }

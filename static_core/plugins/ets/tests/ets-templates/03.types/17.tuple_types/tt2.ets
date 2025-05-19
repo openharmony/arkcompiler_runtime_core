@@ -25,6 +25,6 @@ desc: >-
 function main() {
     let v: [{{c.type}}] = [{{c.val}}]
     let q = v
-    assertTrue( v === q && v[0] == q[0] )
+    arktest.assertTrue( v === q && v[0] == q[0] )
 }
 {%- endfor %}

@@ -20,5 +20,5 @@ desc: Local declaration in statement (const)
 function main(): void {
   class A {};
   let a: A = new A;
-  assertNE(a, null)
+  arktest.assertNE(a, null)
 }

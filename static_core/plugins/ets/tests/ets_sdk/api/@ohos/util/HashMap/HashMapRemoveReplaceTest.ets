@@ -16,7 +16,7 @@
 import HashMap from "@ohos.util.HashMap";
 
 function main(): int {
-    const suite = new ArkTestsuite("HashMap Remove Replace API tests")
+    const suite = new arktest.ArkTestsuite("HashMap Remove Replace API tests")
 
     suite.addTest("HashMap remove key", testRemoveExistingKey)
     suite.addTest("HashMap remove not set key", testRemoveNonExistingKey)
@@ -36,31 +36,31 @@ function testRemoveExistingKey() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.remove("squirrel");
-    assertEQ(result, 123, "The hashMap should remove the key and return its value");
-    assertEQ(hashMap.length, 0, "The hashMap length should be 0");
+    arktest.assertEQ(result, 123, "The hashMap should remove the key and return its value");
+    arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testRemoveNonExistingKey() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.remove("test");
-    assertEQ(result, undefined, "The hashMap should return undefined when key is not set");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, undefined, "The hashMap should return undefined when key is not set");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testRemoveKeyFromEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result = hashMap.remove("squirrel");
-    assertEQ(result, undefined, "The hashMap should return undefined when the map is empty");
-    assertEQ(hashMap.length, 0, "The hashMap length should be 0");
+    arktest.assertEQ(result, undefined, "The hashMap should return undefined when the map is empty");
+    arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testRemoveEmptyStringKey() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set('', 11);
     let result = hashMap.remove('');
-    assertEQ(result, 11, "The hashMap should remove the key and return its value");
-    assertEQ(hashMap.length, 0, "The hashMap length should be 0");
+    arktest.assertEQ(result, 11, "The hashMap should remove the key and return its value");
+    arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testRemoveKeyAfterClearingHashMap() {
@@ -69,9 +69,9 @@ function testRemoveKeyAfterClearingHashMap() {
     let result1 = hashMap.isEmpty();
     hashMap.clear();
     let result2 = hashMap.remove("ji");
-    assertEQ(result1, false, "The hashMap should not be empty");
-    assertEQ(result2, undefined, "The hashMap should return undefined when the map is empty");
-    assertEQ(hashMap.length, 0, "The hashMap length should be 0");
+    arktest.assertEQ(result1, false, "The hashMap should not be empty");
+    arktest.assertEQ(result2, undefined, "The hashMap should return undefined when the map is empty");
+    arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testReplaceExistingKeyWithNewValue() {
@@ -79,32 +79,32 @@ function testReplaceExistingKeyWithNewValue() {
     hashMap.set("squirrel", 123);
     let result1 = hashMap.replace("squirrel", 789);
     let result2 = hashMap.get("squirrel");
-    assertEQ(result1, true, "The hashMap should replace the value by the key");
-    assertEQ(result2, 789, "The hashMap should return the correct value for the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result1, true, "The hashMap should replace the value by the key");
+    arktest.assertEQ(result2, 789, "The hashMap should return the correct value for the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testReplaceNonExistingKey() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set("squirrel", 123);
     let result = hashMap.replace("test", 789);
-    assertEQ(result, false, "The hashMap should return false by the key that is not set");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, false, "The hashMap should return false by the key that is not set");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testReplaceKeyInEmptyHashMap() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     let result = hashMap.replace("test", 789);
-    assertEQ(result, false, "The hashMap should return false by key when the map is empty");
-    assertEQ(hashMap.length, 0, "The hashMap length should be 0");
+    arktest.assertEQ(result, false, "The hashMap should return false by key when the map is empty");
+    arktest.assertEQ(hashMap.length, 0, "The hashMap length should be 0");
 }
 
 function testReplaceEmptyStringKey() {
     let hashMap: HashMap<string, number> = new HashMap<string, number>();
     hashMap.set('', 123)
     let result = hashMap.replace('', 789);
-    assertEQ(result, true, "The hashMap should replace the value by the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result, true, "The hashMap should replace the value by the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }
 
 function testReplaceKeyWithSameValue() {
@@ -112,7 +112,7 @@ function testReplaceKeyWithSameValue() {
     hashMap.set("squirrel", 123);
     let result1 = hashMap.replace("squirrel", 123);
     let result2 = hashMap.get("squirrel");
-    assertEQ(result1, true, "The hashMap should replace the value by the key");
-    assertEQ(result2, 123, "The hashMap should return the correct value for the key");
-    assertEQ(hashMap.length, 1, "The hashMap length should be 1");
+    arktest.assertEQ(result1, true, "The hashMap should replace the value by the key");
+    arktest.assertEQ(result2, 123, "The hashMap should return the correct value for the key");
+    arktest.assertEQ(hashMap.length, 1, "The hashMap length should be 1");
 }

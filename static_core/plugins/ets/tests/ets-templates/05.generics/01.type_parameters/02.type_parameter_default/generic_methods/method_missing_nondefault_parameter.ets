@@ -25,5 +25,5 @@ class C {
 }
 
 function main() {
-    assertEQ(new C().foo(1, "s"), 1)
+    arktest.assertEQ(new C().foo(1, "s"), 1)
 }

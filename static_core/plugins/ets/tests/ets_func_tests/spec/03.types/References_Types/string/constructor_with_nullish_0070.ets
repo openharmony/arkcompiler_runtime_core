@@ -31,5 +31,5 @@ type ANullish = A | null | undefined
 function main() {
   let obj: ANullish = undefined;
   let testStr = new string(obj);
-  assertEQ( testStr, "undefined")
+  arktest.assertEQ( testStr, "undefined")
 }

@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new ArkTestsuite("LinkedBlockingQueueGetEndTest")
+    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueGetEndTest")
     LinkedBlockingQueueTestsuite.addTest("getEndFill", getEndFillTest)
     LinkedBlockingQueueTestsuite.addTest("getEndMoreType", getEndMoreTypeTest)
     LinkedBlockingQueueTestsuite.addTest("getEndEmpty", getEndEmptyTest)
@@ -29,53 +29,53 @@ function getEndFillTest() {
     for (let i = 0; i < testBQ.capacity; i++) {
         testBQ.add(i)
     }
-    assertEQ(testBQ.size, testBQ.capacity)
-    assertEQ(testBQ.getEnd(), testBQ.capacity - 1)
+    arktest.assertEQ(testBQ.size, testBQ.capacity)
+    arktest.assertEQ(testBQ.getEnd(), testBQ.capacity - 1)
 }
 
 function getEndMoreTypeTest() {
     let testBQ = new LinkedBlockingQueue<int | null | undefined | string>(10)
     testBQ.add(1)
-    assertEQ(testBQ.getEnd(), 1)
+    arktest.assertEQ(testBQ.getEnd(), 1)
     testBQ.add(null)
-    assertEQ(testBQ.getEnd(), null)
+    arktest.assertEQ(testBQ.getEnd(), null)
     testBQ.add(undefined)
-    assertEQ(testBQ.getEnd(), undefined)
+    arktest.assertEQ(testBQ.getEnd(), undefined)
     testBQ.add("\n")
-    assertEQ(testBQ.getEnd(), "\n")
+    arktest.assertEQ(testBQ.getEnd(), "\n")
     testBQ.add("\t")
-    assertEQ(testBQ.getEnd(), "\t")
-    assertEQ(testBQ.size, 5)
+    arktest.assertEQ(testBQ.getEnd(), "\t")
+    arktest.assertEQ(testBQ.size, 5)
 }
 
 function getEndEmptyTest() {
     let testBQ = new LinkedBlockingQueue<int>(10)
-    assertTrue(testBQ.isEmpty())
-    assertEQ(testBQ.getEnd(), null)
+    arktest.assertTrue(testBQ.isEmpty())
+    arktest.assertEQ(testBQ.getEnd(), null)
 }
 
 function getEndOneTest() {
     let testBQ = new LinkedBlockingQueue<int>(1)
     testBQ.add(1)
-    assertEQ(testBQ.size, 1)
-    assertEQ(testBQ.getEnd(), 1)
+    arktest.assertEQ(testBQ.size, 1)
+    arktest.assertEQ(testBQ.getEnd(), 1)
 }
 
 function getEndCapacityTest() {
     let testBQ = new LinkedBlockingQueue<int>(10)
     testBQ.add(0)
-    assertEQ(testBQ.getEnd(), 0)
-    assertEQ(testBQ.size, 1)
+    arktest.assertEQ(testBQ.getEnd(), 0)
+    arktest.assertEQ(testBQ.size, 1)
     for (let i = 1; i < testBQ.capacity - 1; i++) {
-        assertEQ(testBQ.size, i)
+        arktest.assertEQ(testBQ.size, i)
         testBQ.add(i)
-        assertEQ(testBQ.getEnd(), i)
+        arktest.assertEQ(testBQ.getEnd(), i)
     }
-    assertEQ(testBQ.getEnd(), testBQ.capacity - 2)
-    assertEQ(testBQ.size, testBQ.capacity - 1)
+    arktest.assertEQ(testBQ.getEnd(), testBQ.capacity - 2)
+    arktest.assertEQ(testBQ.size, testBQ.capacity - 1)
     testBQ.add(testBQ.capacity - 1)
-    assertEQ(testBQ.getEnd(), testBQ.capacity - 1)
-    assertEQ(testBQ.size, testBQ.capacity)
+    arktest.assertEQ(testBQ.getEnd(), testBQ.capacity - 1)
+    arktest.assertEQ(testBQ.size, testBQ.capacity)
 }
 
 const JOB_COUNT = 3

@@ -47,7 +47,7 @@ function setUpBarrier(nTasks: int) {
     try {
         Atomics.store(arr, 0, nTasks)
     } catch (e) {
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 
@@ -63,7 +63,7 @@ function wait() {
             cur = Atomics.load(arr, 0)
         }
     } catch (e) {
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }
 

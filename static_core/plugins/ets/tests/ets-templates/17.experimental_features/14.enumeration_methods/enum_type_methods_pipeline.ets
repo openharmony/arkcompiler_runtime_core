@@ -22,6 +22,6 @@ desc: |-
 enum Color {Red = 777, Blue = 55, Green = 2}
 
 function main(): void {
-  assertTrue( Color.Red.getName() == "Red" );
-  assertTrue( Color.Red.valueOf() == 777 );
+  arktest.assertTrue( Color.Red.getName() == "Red" );
+  arktest.assertTrue( Color.Red.valueOf() == 777 );
 }

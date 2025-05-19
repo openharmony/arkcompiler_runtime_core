@@ -21,7 +21,7 @@ files: ['./ambient02/file.ets']
 import { foo1, A1, bar1 } from './ambient02/file.d.ets'
 
 function main() {
-    assertEQ(foo1(), 142)
-    assertEQ(bar1, 42)
-    assertEQ(new A1().fld, "abc")
+    arktest.assertEQ(foo1(), 142)
+    arktest.assertEQ(bar1, 42)
+    arktest.assertEQ(new A1().fld, "abc")
 }

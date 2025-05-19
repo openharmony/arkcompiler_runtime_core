@@ -34,10 +34,10 @@ class I implements default_interface {
 }
 
 function main() {
-    assertEQ(default_func(2), 3);
-    assertEQ(default_var, 10);
+    arktest.assertEQ(default_func(2), 3);
+    arktest.assertEQ(default_var, 10);
     let e = new I();
-    assertEQ(e.item, 1);
+    arktest.assertEQ(e.item, 1);
     let b : default_class = new default_class();
-    assertEQ(b.hello("hello"), "hello_world")  
+    arktest.assertEQ(b.hello("hello"), "hello_world")  
 }

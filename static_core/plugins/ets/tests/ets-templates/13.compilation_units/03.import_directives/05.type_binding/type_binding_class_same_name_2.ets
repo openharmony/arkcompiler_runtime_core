@@ -24,5 +24,5 @@ import type {A} from "../../07.top-level_declarations/01.exported_declarations/t
 
 function main(): void {
     let c = new A();
-    assertEQ(c.foo(), 2);
+    arktest.assertEQ(c.foo(), 2);
 }

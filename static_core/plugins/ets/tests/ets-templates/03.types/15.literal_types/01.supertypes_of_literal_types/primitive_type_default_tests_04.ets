@@ -21,5 +21,5 @@ params: null, null
 let a: null = null;
 
 function main(): void {
-    assertEQ(a, null);
+    arktest.assertEQ(a, null);
 }

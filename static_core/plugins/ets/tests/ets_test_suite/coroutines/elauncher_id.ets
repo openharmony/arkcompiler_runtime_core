@@ -22,5 +22,5 @@ function main() {
         resolveFn(CoroutineExtras.getWorkerId());
     });
     let eLauncherId = await p;
-    assertNE(eLauncherId, CoroutineExtras.getWorkerId());
+    arktest.assertNE(eLauncherId, CoroutineExtras.getWorkerId());
 }

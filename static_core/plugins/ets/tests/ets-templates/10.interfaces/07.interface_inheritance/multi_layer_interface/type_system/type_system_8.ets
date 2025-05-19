@@ -27,5 +27,5 @@ class B implements A<string> {
 
 function main(): void {
     const b: A<string> = new B();
-    assertEQ(b.value, "Hello");
+    arktest.assertEQ(b.value, "Hello");
 }

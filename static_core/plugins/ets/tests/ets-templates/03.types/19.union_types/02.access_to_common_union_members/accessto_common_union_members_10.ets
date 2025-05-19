@@ -28,5 +28,5 @@ class B {
 function main(): void {
     let account: A | B = new B();
     let num = account.tmp;
-    assertTrue(num === 2);
+    arktest.assertTrue(num === 2);
 }

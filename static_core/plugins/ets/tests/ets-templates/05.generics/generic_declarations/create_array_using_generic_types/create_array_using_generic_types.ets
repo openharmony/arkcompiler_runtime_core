@@ -29,7 +29,7 @@ function main(): void {
   {{c.expected}}
 
   {% for value in c['expected_values'] %}
-  assertEQ(tmpArray[{{loop.index0}}], {{value}});
+  arktest.assertEQ(tmpArray[{{loop.index0}}], {{value}});
   {% endfor %}
 }
 

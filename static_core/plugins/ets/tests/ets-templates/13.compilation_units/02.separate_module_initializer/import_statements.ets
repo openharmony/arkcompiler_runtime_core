@@ -32,8 +32,8 @@ import {n} from "./modules/statements.ets";
 import {cn} from "./modules/statements.ets";
 
 function main(): void {
-  assertEQ( i, 17 );
-  assertEQ( str, "updated str" );
-  assertEQ( n, 11.1 );
-  assertEQ( cn, 2.5 );
+  arktest.assertEQ( i, 17 );
+  arktest.assertEQ( str, "updated str" );
+  arktest.assertEQ( n, 11.1 );
+  arktest.assertEQ( cn, 2.5 );
 }

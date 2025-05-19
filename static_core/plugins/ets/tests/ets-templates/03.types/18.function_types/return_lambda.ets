@@ -23,5 +23,5 @@ function f(): () => int {
 
 function main(): void {
     let ff: () => int = f();
-    assertTrue( ff() == 5 )
+    arktest.assertTrue( ff() == 5 )
 }

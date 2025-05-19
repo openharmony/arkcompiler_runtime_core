@@ -35,5 +35,5 @@ class B<T> extends A<T> {
 
 function main(): void {
     let b: A<string> = new B<string>()
-    assertEQ( b.returnHello(), "hello B ")
+    arktest.assertEQ( b.returnHello(), "hello B ")
 }

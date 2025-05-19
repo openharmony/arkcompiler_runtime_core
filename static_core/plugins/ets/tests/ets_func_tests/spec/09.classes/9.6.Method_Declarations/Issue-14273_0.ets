@@ -28,7 +28,7 @@ class Base {
 function main(): void {
     let a = new Base();
 
-    assertEQ( a.field, 20)
-    assertEQ( Base.field, 10)
+    arktest.assertEQ( a.field, 20)
+    arktest.assertEQ( Base.field, 10)
 
 }

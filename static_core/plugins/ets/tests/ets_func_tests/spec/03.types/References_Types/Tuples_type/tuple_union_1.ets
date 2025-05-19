@@ -32,10 +32,10 @@ function main(): void {
     y = f;
     y = x;
 
-    assertEQ( x[0], 12.0)
-    assertEQ( x[1], "Hello")
+    arktest.assertEQ( x[0], 12.0)
+    arktest.assertEQ( x[1], "Hello")
 
-    assertEQ( y[0], 12.0)
-    assertEQ( y[1], "Hello")
+    arktest.assertEQ( y[0], 12.0)
+    arktest.assertEQ( y[1], "Hello")
 
 }

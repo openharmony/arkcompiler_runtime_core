@@ -28,6 +28,6 @@ class ChildClass7 implements MultiTypeInterface {
 function main(): void {
   const instance = new ChildClass7();
 
-  assertEQ(instance.NUM_CONST, 123);
-  assertEQ(typeof instance.NUM_CONST, 'number');
+  arktest.assertEQ(instance.NUM_CONST, 123);
+  arktest.assertEQ(typeof instance.NUM_CONST, 'number');
 }

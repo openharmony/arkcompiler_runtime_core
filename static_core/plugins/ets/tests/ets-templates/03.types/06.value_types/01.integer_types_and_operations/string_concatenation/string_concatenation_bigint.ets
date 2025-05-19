@@ -21,7 +21,7 @@ desc: check concatenation of string and bigint
 function main(): void {
     const a: {{v.left}}
     const b: {{v.right}}
-    assertEQ( (a + b), {{v.result}})
+    arktest.assertEQ( (a + b), {{v.result}})
 }
 
 {% endfor %}

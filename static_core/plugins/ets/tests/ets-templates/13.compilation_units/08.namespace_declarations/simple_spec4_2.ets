@@ -33,6 +33,6 @@ namespace A.C {
 }
 
 function main() {
-    assertEQ(A.C.variable11, 11);
-    assertEQ(A.C.variable12, 12);
+    arktest.assertEQ(A.C.variable11, 11);
+    arktest.assertEQ(A.C.variable12, 12);
 }

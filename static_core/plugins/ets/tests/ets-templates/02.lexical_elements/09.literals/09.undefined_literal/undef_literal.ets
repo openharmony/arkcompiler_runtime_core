@@ -19,5 +19,5 @@ desc: Undefined literal
 
 let x = undefined; // x type is expected to be inferred to Object|undefined type
 function main() {
-    assertTrue( x === undefined )
+    arktest.assertTrue( x === undefined )
 }

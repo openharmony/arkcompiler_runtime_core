@@ -23,6 +23,6 @@ desc: The number of initializer expressions enclosed in braces of the array init
 let x: {{item.type}}[] = {{item.array}}
 
 function main() {
-    assertEQ( x.length, {{item.len}} )
+    arktest.assertEQ( x.length, {{item.len}} )
 }
 {% endfor %}

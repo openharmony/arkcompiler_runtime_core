@@ -26,5 +26,5 @@ type Union2 = string | StringEnum;
 function main(): void {
   let numUnion: Union1 = NumberEnum.One;
   let strUnion: Union2 = StringEnum.Two;
-  assertTrue(numUnion == 0);
+  arktest.assertTrue(numUnion == 0);
 }

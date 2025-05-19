@@ -23,7 +23,7 @@ cases:
      function foo(i: C) { return i.p2; }
    use: |-
      let c: C = { p1 = 1, p2 = 2 };
-     assertTrue(foo(c) == 2);
+     arktest.assertTrue(foo(c) == 2);
 
  # use object literal
  - decl: |-
@@ -34,7 +34,7 @@ cases:
      function foo(i: C) { return i.p2; }
    use: |-
      let c: C = { p1: "Xzc", p2: 2 };
-     assertTrue(foo(c) == 2);
+     arktest.assertTrue(foo(c) == 2);
 
  # use tuple
  - tags: negative, compile-only
@@ -46,4 +46,4 @@ cases:
      function foo(i: C) { return i.p2; }
    use: |-
      let c: C = [ "Xzc", 2 ];
-     assertTrue(foo(c) == 2);
+     arktest.assertTrue(foo(c) == 2);

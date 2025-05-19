@@ -27,6 +27,6 @@ class TupleConstantChild implements TupleConstantInterface {
 
 function main(): void {
   const instance = new TupleConstantChild();
-  assertEQ(instance.CONST[0], 'hello');
-  assertEQ(instance.CONST[1], true);
+  arktest.assertEQ(instance.CONST[0], 'hello');
+  arktest.assertEQ(instance.CONST[1], true);
 }

@@ -18,56 +18,56 @@ function main() {
         let sab = new ArrayBuffer(1024);
         let v = new Int8Array(sab, 1);
         v[8] = 52;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
     {
         let sab = new ArrayBuffer(1024);
         let v = new Int16Array(sab, 2);
         v[8] = 52;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
     {
         let sab = new ArrayBuffer(1024);
         let v = new Int32Array(sab, 4);
         v[8] = 52;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
     {
         let sab = new ArrayBuffer(1024);
         let v = new BigInt64Array(sab, 8);
         v[8] = 52n;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
     {
         let sab = new ArrayBuffer(1024);
         let v = new Uint8Array(sab, 1);
         v[8] = 52;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
     {
         let sab = new ArrayBuffer(1024);
         let v = new Uint16Array(sab, 2);
         v[8] = 52;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
     {
         let sab = new ArrayBuffer(1024);
         let v = new Uint32Array(sab, 4);
         v[8] = 52;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
     {
         let sab = new ArrayBuffer(1024);
         let v = new BigUint64Array(sab, 8);
         v[8] = 52n;
-        assertEQ(sab, v.buffer);
-        assertEQ(v[8], Atomics.load(v, 8));
+        arktest.assertEQ(sab, v.buffer);
+        arktest.assertEQ(v[8], Atomics.load(v, 8));
     }
 }

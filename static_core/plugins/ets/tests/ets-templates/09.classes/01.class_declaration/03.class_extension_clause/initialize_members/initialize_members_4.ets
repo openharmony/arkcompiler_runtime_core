@@ -34,5 +34,5 @@ class Child extends Parent {
 function main(): void {
   let child = new Child(undefined);
   let x: undefined = child.constructorPublicVar;
-  assertEQ(x, undefined);
+  arktest.assertEQ(x, undefined);
 }

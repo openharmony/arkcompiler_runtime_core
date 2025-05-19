@@ -41,5 +41,5 @@ class Child extends Parent {
 
 function main(): void {
   const child = new Child("Hello from Child!");
-  assertEQ(child.callParentGreet(), "Modified: Hello from Child!");
+  arktest.assertEQ(child.callParentGreet(), "Modified: Hello from Child!");
 }

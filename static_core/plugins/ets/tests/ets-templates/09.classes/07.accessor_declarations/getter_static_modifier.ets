@@ -26,5 +26,5 @@ class A {
 }
 
 function main(): void {
-  assertEQ( A.age, 5 );
+  arktest.assertEQ( A.age, 5 );
 }

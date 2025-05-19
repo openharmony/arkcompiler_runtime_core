@@ -25,7 +25,7 @@ class Derived extends Base {}
 
 function main(): void {
   let instance = new Derived();
-  assertEQ(instance.value[0], 1, "Subclass should inherit the initial value of the number[] type member variable");
-  assertEQ(instance.value[1], 2, "Subclass should inherit the initial value of the number[] type member variable");
-  assertEQ(instance.value[2], 3, "Subclass should inherit the initial value of the number[] type member variable");
+  arktest.assertEQ(instance.value[0], 1, "Subclass should inherit the initial value of the number[] type member variable");
+  arktest.assertEQ(instance.value[1], 2, "Subclass should inherit the initial value of the number[] type member variable");
+  arktest.assertEQ(instance.value[2], 3, "Subclass should inherit the initial value of the number[] type member variable");
 }

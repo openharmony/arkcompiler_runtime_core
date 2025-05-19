@@ -28,8 +28,8 @@ function main(): void {
   let x: A = new A();
   try {
     x.foo();
-    assertTrue( false )
+    arktest.assertTrue( false )
   } catch (e) {
-    assertTrue( e instanceof NullPointerError )
+    arktest.assertTrue( e instanceof NullPointerError )
   }
 }

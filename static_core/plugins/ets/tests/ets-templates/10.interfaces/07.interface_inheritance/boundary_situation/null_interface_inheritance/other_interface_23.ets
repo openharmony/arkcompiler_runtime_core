@@ -28,5 +28,5 @@ function main(): void {
     bigValue: 9007199254740991n
   };
 
-  assertEQ(obj.bigValue, 9007199254740991n);
+  arktest.assertEQ(obj.bigValue, 9007199254740991n);
 }

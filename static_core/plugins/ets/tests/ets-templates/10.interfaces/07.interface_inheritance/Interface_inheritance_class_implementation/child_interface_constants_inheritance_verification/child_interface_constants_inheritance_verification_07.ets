@@ -27,5 +27,5 @@ class BooleanConstantChild implements BooleanConstantInterface {
 
 function main(): void {
   const instance = new BooleanConstantChild();
-  assertEQ(instance.CONST, true);
+  arktest.assertEQ(instance.CONST, true);
 }

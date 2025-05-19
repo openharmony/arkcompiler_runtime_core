@@ -27,6 +27,6 @@ import {i} from "./pkg"
 import {j} from "./pkg"
 
 function main() {
-  assertEQ(i, 2.0)
-  assertEQ(j, 3.0)
+  arktest.assertEQ(i, 2.0)
+  arktest.assertEQ(j, 3.0)
 }

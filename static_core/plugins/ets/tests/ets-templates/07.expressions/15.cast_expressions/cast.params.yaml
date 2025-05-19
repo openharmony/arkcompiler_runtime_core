@@ -16,43 +16,43 @@ cases:
           let s = 42
       use: |-
           let t = Int.toDouble(s)  // primitive widening
-          assertEQ( t, 42.0 )
+          arktest.assertEQ( t, 42.0 )
 
     - decl: |-
           let s = 42
       use: |-
           let t = Int.toDouble(s)  // primitive widening and boxing
-          assertTrue( t instanceof Number && t.unboxed() == 42.0 )
+          arktest.assertTrue( t instanceof Number && t.unboxed() == 42.0 )
 
     - decl: |-
           let s = Float.MAX_VALUE
       use: |-
           let t = s as Float  // boxing
-          assertTrue( t instanceof Float && t.unboxed() == Float.MAX_VALUE )
+          arktest.assertTrue( t instanceof Float && t.unboxed() == Float.MAX_VALUE )
 
     - decl: |-
           let s = new Float(3.5 as float)
       use: |-
           let t = s as float  // unboxing
-          assertEQ( t, 3.5 )
+          arktest.assertEQ( t, 3.5 )
 
     - decl: |-
           let s = "string"
       use: |-
           let t = s as Object  // reference widening
-          assertTrue( t instanceof Object && (t as string) == "string" )
+          arktest.assertTrue( t instanceof Object && (t as string) == "string" )
 
     - decl: |-
           let s = 42.0
       use: |-
           let t = Double.toInt(s)  // primitive narrowing
-          assertEQ( t, 42 )
+          arktest.assertEQ( t, 42 )
 
     - decl: |-
           let s: byte = 0x40 as byte
       use: |-
           let t = Byte.toChar(s)  // primitive widening and narrowing
-          assertEQ( t, c'@' )
+          arktest.assertEQ( t, c'@' )
 
     - decl: |-
           interface I {}
@@ -60,4 +60,4 @@ cases:
           let s = new B()
       use: |-
           let t = s as I  // reference widening
-          assertTrue( t instanceof I )
+          arktest.assertTrue( t instanceof I )

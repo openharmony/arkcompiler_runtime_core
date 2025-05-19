@@ -26,5 +26,5 @@ function processString(input: string, transformer: StringTransformer): string {
 function main(): void {
   let result = processString("hello", (input) => input.toUpperCase());
 
-  assertEQ(result, "HELLO");
+  arktest.assertEQ(result, "HELLO");
 }

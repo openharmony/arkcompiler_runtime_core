@@ -32,6 +32,6 @@ function main(): void {
     value: 42
   };
 
-  assertEQ(obj1.value, "Hello");
-  assertEQ(obj2.value, 42);
+  arktest.assertEQ(obj1.value, "Hello");
+  arktest.assertEQ(obj2.value, 42);
 }

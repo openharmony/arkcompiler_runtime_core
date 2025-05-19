@@ -27,7 +27,7 @@ bridge_methods_generic:
       }
     check: |-
       let c: Pa<string> = new Cl();
-      assertEQ(typeof c.p('string'), 'string');
+      arktest.assertEQ(typeof c.p('string'), 'string');
 
     # case 1
   - desc: Test generic class inheritance with constructor parameters and method access from both parent and child classes.
@@ -54,8 +54,8 @@ bridge_methods_generic:
       }
     check: |-
       let c = new Ge<string>(1, 'test');
-      assertEQ(c.g(), 1);
-      assertEQ(c.getD(), 'test');
+      arktest.assertEQ(c.g(), 1);
+      arktest.assertEQ(c.getD(), 'test');
 
     # case 2
   - desc: Test multi-level generic inheritance with method overriding at the bottom non-generic class.
@@ -86,7 +86,7 @@ bridge_methods_generic:
       }
     check: |-
       const instance = new Bottom("test");
-      assertEQ(instance.getValue(), "TEST");
+      arktest.assertEQ(instance.getValue(), "TEST");
 
     # case 3
   - desc: Verify method overriding in a multi-level generic inheritance chain with multiple type parameters.
@@ -118,7 +118,7 @@ bridge_methods_generic:
       }
     check: |-
       const instance = new Generic2<number, string>(10, "test");
-      assertEQ(instance.getName(), "ROOT");
+      arktest.assertEQ(instance.getName(), "ROOT");
 
     # case 4
   - desc: Test that a concrete subclass correctly overrides and modifies a method from a generic parent class with a specific type.
@@ -136,7 +136,7 @@ bridge_methods_generic:
       }
     check: |-
       let child = new ConcreteChild();
-      assertEQ(child.process(5), 10);
+      arktest.assertEQ(child.process(5), 10);
 
     # case 5
   - desc: Verify method overriding with multiple generic parameters in a parent-child class relationship.
@@ -155,8 +155,8 @@ bridge_methods_generic:
     check: |-
       const child = new Child();
       const result = child.process("hi", 5);
-      assertEQ(result[0], "HI");
-      assertEQ(result[1], 10);
+      arktest.assertEQ(result[0], "HI");
+      arktest.assertEQ(result[1], 10);
 
     # case 6
   - desc: Verify that a specialized subclass can extend a generic class and add new methods while inheriting existing functionality.
@@ -183,7 +183,7 @@ bridge_methods_generic:
       const list = new StringList();
       list.add("a");
       list.add("b");
-      assertEQ(list.join("-"), "a-b");
+      arktest.assertEQ(list.join("-"), "a-b");
 
     # case 7
   - desc: Verify that a generic subclass correctly overrides a method from a generic parent class while maintaining the same behavior.
@@ -201,7 +201,7 @@ bridge_methods_generic:
      }
     check: |-
       let child = new GenericChild<number>();
-      assertEQ(child.process(5), 5);
+      arktest.assertEQ(child.process(5), 5);
 
     # case 8
   - desc: Generic method override generates a bridged method(string charAt).
@@ -220,7 +220,7 @@ bridge_methods_generic:
     check: |-
       const child: Parent<string> = new Child();
       const result = child.process("hello");
-      assertEQ(result, "e");
+      arktest.assertEQ(result, "e");
 
     # case 9
   - desc: Verify that a concrete subclass can override and modify the behavior of a generic parent class's method.
@@ -245,7 +245,7 @@ bridge_methods_generic:
       }
     check: |-
       const builder = new StringBuilder1("construct");
-      assertEQ(builder.build(), "CONSTRUCT");
+      arktest.assertEQ(builder.build(), "CONSTRUCT");
 
     # case 10
   - desc: Verify that a generic class correctly overrides a method from its non-generic parent class.
@@ -268,7 +268,7 @@ bridge_methods_generic:
       }
     check: |-
       const instance = new Generic<boolean>(true);
-      assertEQ(instance.increment(), 2);
+      arktest.assertEQ(instance.increment(), 2);
 
     # case 11
   - desc: Test that a generic subclass correctly overrides a method from a generic parent class when instantiated with a specific type.
@@ -286,7 +286,7 @@ bridge_methods_generic:
     check: |-
       const child: GenericParent<string> = new StringChild();
       const result = child.process("test");
-      assertEQ(result, "TEST");
+      arktest.assertEQ(result, "TEST");
 
     # case 12
   - desc: Test method overriding in a multi-level generic inheritance chain with type constraints.
@@ -317,7 +317,7 @@ bridge_methods_generic:
 
     check: |-
       const instance = new Bottom("hi");
-      assertEQ(instance.process(), "hihi");
+      arktest.assertEQ(instance.process(), "hihi");
 
     # case 13
   - desc: Verify that a child class correctly overrides a method from a generic parent class when accessed through the parent class type.
@@ -335,4 +335,4 @@ bridge_methods_generic:
     check: |-
       const child: Parent<string> = new Child();
       const result = child.process("hello");
-      assertEQ(result, "HELLO");
+      arktest.assertEQ(result, "HELLO");

@@ -20,7 +20,7 @@ desc: check bitwise complement of short integer
 
 function main(): void {
   const v: short = {{v.value}}
-  assertEQ( ~(v), {{v.result}} )
+  arktest.assertEQ( ~(v), {{v.result}} )
 }
 
 {% endfor %}

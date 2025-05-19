@@ -28,18 +28,18 @@ let arr: Color[] = [Color.Red, Color.Green, Color.Blue, Color.Blue]
 
 function main() {
 {% for d in operands %}
-    assertTrue({{c.op[0]}}({{d[0]}} < {{d[1]}}))
-    assertTrue({{c.op[1]}}({{d[0]}} < {{d[2]}}))
-    assertTrue({{c.op[2]}}({{d[1]}} < {{d[2]}}))
-    assertTrue({{c.op[3]}}({{d[0]}} <= {{d[1]}}))
-    assertTrue({{c.op[4]}}({{d[0]}} <= {{d[2]}}))
-    assertTrue({{c.op[5]}}({{d[1]}} <= {{d[2]}}))
-    assertTrue({{c.op[6]}}({{d[0]}} > {{d[1]}}))
-    assertTrue({{c.op[7]}}({{d[0]}} > {{d[2]}}))
-    assertTrue({{c.op[8]}}({{d[1]}} > {{d[2]}}))
-    assertTrue({{c.op[9]}}({{d[0]}} >= {{d[1]}}))
-    assertTrue({{c.op[10]}}({{d[0]}} >= {{d[2]}}))
-    assertTrue({{c.op[11]}}({{d[1]}} >= {{d[2]}}))
+    arktest.assertTrue({{c.op[0]}}({{d[0]}} < {{d[1]}}))
+    arktest.assertTrue({{c.op[1]}}({{d[0]}} < {{d[2]}}))
+    arktest.assertTrue({{c.op[2]}}({{d[1]}} < {{d[2]}}))
+    arktest.assertTrue({{c.op[3]}}({{d[0]}} <= {{d[1]}}))
+    arktest.assertTrue({{c.op[4]}}({{d[0]}} <= {{d[2]}}))
+    arktest.assertTrue({{c.op[5]}}({{d[1]}} <= {{d[2]}}))
+    arktest.assertTrue({{c.op[6]}}({{d[0]}} > {{d[1]}}))
+    arktest.assertTrue({{c.op[7]}}({{d[0]}} > {{d[2]}}))
+    arktest.assertTrue({{c.op[8]}}({{d[1]}} > {{d[2]}}))
+    arktest.assertTrue({{c.op[9]}}({{d[0]}} >= {{d[1]}}))
+    arktest.assertTrue({{c.op[10]}}({{d[0]}} >= {{d[2]}}))
+    arktest.assertTrue({{c.op[11]}}({{d[1]}} >= {{d[2]}}))
 {% endfor %}
 }
 {%- endfor %}

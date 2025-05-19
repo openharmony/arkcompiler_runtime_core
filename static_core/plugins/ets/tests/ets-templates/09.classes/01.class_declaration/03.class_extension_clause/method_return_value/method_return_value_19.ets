@@ -31,7 +31,7 @@ function main(): void {
         let parentValue: never = parent.getValue();
     } catch (error) {
         if (error instanceof Error) {
-            assertEQ(error.message, 'This method always throws an error');
+            arktest.assertEQ(error.message, 'This method always throws an error');
         } else {
             throw new Error('Unexpected error type');
         }
@@ -42,7 +42,7 @@ function main(): void {
         let childValue: never = child.getValue();
     } catch (error) {
         if (error instanceof Error) {
-            assertEQ(error.message, 'This method always throws an error');
+            arktest.assertEQ(error.message, 'This method always throws an error');
         } else {
             throw new Error('Unexpected error type');
         }

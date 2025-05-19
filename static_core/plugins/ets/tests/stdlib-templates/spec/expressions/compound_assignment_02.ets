@@ -24,7 +24,7 @@ function main(): void {
   let count: {{.item.type2}} = {{.item.value2}}
   let value: {{.item.type1}} = {{.item.value1}}
   value {{.item.operation}}= count
-  assertEQ(value {{.item.casting}}, {{.item.result}}, "value = " + value)
+  arktest.assertEQ(value {{.item.casting}}, {{.item.result}}, "value = " + value)
 }
 
 {%- endfor %}

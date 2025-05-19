@@ -43,5 +43,5 @@ class SubClass extends MyClass {}
 
 function main(): void {
   const sub = new SubClass();
-  assertEQ(sub.CONSTANT_VALUE.value, MyConstants.enum_value);
+  arktest.assertEQ(sub.CONSTANT_VALUE.value, MyConstants.enum_value);
 }

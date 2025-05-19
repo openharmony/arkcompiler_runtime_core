@@ -28,5 +28,5 @@ function f(): A|null {
 }
 
 function main(): void {
-    assertEQ( f()?.check(), 1 )
+    arktest.assertEQ( f()?.check(), 1 )
 }

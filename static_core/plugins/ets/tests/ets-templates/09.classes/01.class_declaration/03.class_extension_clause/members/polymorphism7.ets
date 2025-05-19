@@ -46,5 +46,5 @@ class Dolphin extends Animal implements Motion {
 
 function main(): void {
     const animal: Animal = new Dolphin("Dolly");
-    assertEQ((animal as Dolphin).swim(), "Dolphin is swimming");
+    arktest.assertEQ((animal as Dolphin).swim(), "Dolphin is swimming");
 }

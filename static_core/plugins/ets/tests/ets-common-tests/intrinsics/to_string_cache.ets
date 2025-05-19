@@ -119,7 +119,7 @@ class Worker<T> {
             let value = this.values[index]!;
             let str = (value as object).toString();
             if (check) {
-                // assertTrue(isEqual(str, value), `not equal: string ${str}, number ${value}`)
+                // arktest.assertTrue(isEqual(str, value), `not equal: string ${str}, number ${value}`)
                 strings.push(str);
                 numbers.push(value);
             }
@@ -128,8 +128,8 @@ class Worker<T> {
         if (check) {
             for (let i = 0; i < iters; i++) {
                 let expected = (numbers[i]! as object).toString();
-                assertEQ(strings[i], expected, `results of toString differ: expected ${expected}, got ${strings[i]}`);
-                assertTrue(isEqual(strings[i], numbers[i]), `not equal: string ${strings[i]}, number ${numbers[i]}`)
+                arktest.assertEQ(strings[i], expected, `results of toString differ: expected ${expected}, got ${strings[i]}`);
+                arktest.assertTrue(isEqual(strings[i], numbers[i]), `not equal: string ${strings[i]}, number ${numbers[i]}`)
             }
         }
         return "OK";
@@ -154,7 +154,7 @@ function doTest<T>(values: T[], workers: int) {
     }
     for (let i = 0; i < workers; i++) {
         let res = jobs[i]!.Await();
-        assertEQ(res, "OK");
+        arktest.assertEQ(res, "OK");
     }
 }
 

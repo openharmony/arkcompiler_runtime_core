@@ -25,5 +25,5 @@ let scores: Record<number, string> = {
 
 function main(): void {
   let gradeD = scores[60];
-  assertEQ(gradeD, undefined);
+  arktest.assertEQ(gradeD, undefined);
 }

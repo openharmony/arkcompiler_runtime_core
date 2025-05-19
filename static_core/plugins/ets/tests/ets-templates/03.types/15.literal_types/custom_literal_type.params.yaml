@@ -19,24 +19,24 @@ cases:
           type LITERAL = "some str"
       use: |-
           let a: LITERAL = "some str"
-          assertTrue( a instanceof "some str" )
-          assertTrue( a instanceof LITERAL )
-          assertEQ( a, "some str" )
+          arktest.assertTrue( a instanceof "some str" )
+          arktest.assertTrue( a instanceof LITERAL )
+          arktest.assertEQ( a, "some str" )
 
     - doc: |-
           Union may include literals, boxed and unboxed types
       decl: |-
       use: |-
           let a: "some str" | "another str" | Number | boolean | string = "some str"
-          assertEQ( a, "some str" )
+          arktest.assertEQ( a, "some str" )
           a = "another str"
-          assertEQ( a, "another str" )
+          arktest.assertEQ( a, "another str" )
           a = new Number(3)
-          assertEQ( a.unboxed(), 3 )
+          arktest.assertEQ( a.unboxed(), 3 )
           a = "str"
-          assertEQ( a, "str" )
+          arktest.assertEQ( a, "str" )
           a = true
-          assertTrue( a )
+          arktest.assertTrue( a )
 
     - doc: |-
           Custom union type may include literals, boxed and unboxed types
@@ -44,13 +44,13 @@ cases:
           type LITERAL = "some str" | "another str" | Number | boolean | string
       use: |-
           let a: LITERAL = "some str"
-          assertTrue( a instanceof LITERAL )
-          assertEQ( a, "some str" )
+          arktest.assertTrue( a instanceof LITERAL )
+          arktest.assertEQ( a, "some str" )
           a = "another str"
-          assertEQ( a, "another str" )
+          arktest.assertEQ( a, "another str" )
           a = new Number(3)
-          assertEQ( a.unboxed(), 3 )
+          arktest.assertEQ( a.unboxed(), 3 )
           a = "str"
-          assertEQ( a, "str" )
+          arktest.assertEQ( a, "str" )
           a = true
-          assertTrue( a )
+          arktest.assertTrue( a )

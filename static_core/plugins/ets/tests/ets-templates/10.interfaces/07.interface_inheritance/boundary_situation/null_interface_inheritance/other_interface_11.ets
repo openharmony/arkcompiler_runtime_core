@@ -27,7 +27,7 @@ function main(): void {
   const obj: EmptyInterface = {
     items: ["apple", "banana", "cherry"]
   };
-  assertEQ(obj.items[0], "apple");
-  assertEQ(obj.items[1], "banana");
-  assertEQ(obj.items[2], "cherry");
+  arktest.assertEQ(obj.items[0], "apple");
+  arktest.assertEQ(obj.items[1], "banana");
+  arktest.assertEQ(obj.items[2], "cherry");
 }

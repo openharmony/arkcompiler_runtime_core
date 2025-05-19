@@ -25,7 +25,7 @@ type NS = String
 
 function main() {
    let arr: {{case.typedef}} = ["Hello", "World", "Of", "ArkTS"];
-   assertEQ(4, arr.length);
-   assertEQ("Hello", arr[0]);
+   arktest.assertEQ(4, arr.length);
+   arktest.assertEQ("Hello", arr[0]);
 }
  {% endfor %}

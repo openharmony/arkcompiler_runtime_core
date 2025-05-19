@@ -33,7 +33,7 @@ function main() {
     let a: A = new A()
 {%- for t in c['values'] %}
     a.set({{t.expr|safe}})
-    assertTrue( a.fld == {{t.val}})
+    arktest.assertTrue( a.fld == {{t.val}})
 {%- endfor %}
 }
 {%- endfor %}

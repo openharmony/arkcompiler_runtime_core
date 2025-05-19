@@ -15,20 +15,20 @@
 cases:
   # functions
   - call: |-
-      assertEQ( decodeURIComponent("some%20str"), "some str" )
+      arktest.assertEQ( decodeURIComponent("some%20str"), "some str" )
 
   - call: |-
-      assertEQ( encodeURI("https://d gϴ"), "https://d%20g%CF%B4" )
+      arktest.assertEQ( encodeURI("https://d gϴ"), "https://d%20g%CF%B4" )
 
   - call: |-
-      assertEQ( encodeURIComponent("https://d gϴ"),"https%3A%2F%2Fd%20g%CF%B4" )
+      arktest.assertEQ( encodeURIComponent("https://d gϴ"),"https%3A%2F%2Fd%20g%CF%B4" )
 
   # classes
   - call: |-
-      assertFalse( Atomics.isLockFree(7) )
-      assertTrue( Atomics.isLockFree(8) )
+      arktest.assertFalse( Atomics.isLockFree(7) )
+      arktest.assertTrue( Atomics.isLockFree(8) )
 
   - decl: |-
       function foo(i: (j: (k:Object)=>void)=>void) {}
     call: |-
-      assertTrue( new Promise<Object>(foo) instanceof Promise )
+      arktest.assertTrue( new Promise<Object>(foo) instanceof Promise )

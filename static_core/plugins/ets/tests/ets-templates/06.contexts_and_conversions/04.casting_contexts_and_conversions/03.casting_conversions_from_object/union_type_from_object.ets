@@ -32,6 +32,6 @@ function main() {
     let animal: Animal = new {{c.animal}}()
     let obj: Object = animal as Object
     let target: {{c.type}} = convertObject(obj)
-    assertEQ(target.{{c.call}}(), "{{c.expected}}")
+    arktest.assertEQ(target.{{c.call}}(), "{{c.expected}}")
 }
 {% endfor %}

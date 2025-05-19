@@ -19,5 +19,5 @@ desc: Variable declaration with type annotation.
 
 function main(): void {
     let tmp: number = 1;
-    assertTrue(tmp == 1);
+    arktest.assertTrue(tmp == 1);
 }

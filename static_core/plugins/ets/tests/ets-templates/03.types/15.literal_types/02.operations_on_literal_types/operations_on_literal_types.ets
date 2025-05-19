@@ -23,6 +23,6 @@ desc: >-
 function main() {
     let s0: "string literal" = "string literal"
     let s1 = s0 + s0
-    assertTrue( s1 instanceof string )
-    assertEQ( s1, "string literalstring literal" )
+    arktest.assertTrue( s1 instanceof string )
+    arktest.assertEQ( s1, "string literalstring literal" )
 }

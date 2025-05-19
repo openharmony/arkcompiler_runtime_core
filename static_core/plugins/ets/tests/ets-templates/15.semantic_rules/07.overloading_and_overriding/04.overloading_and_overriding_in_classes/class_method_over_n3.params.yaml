@@ -39,11 +39,11 @@ cases:
           }
       use: |-
           new Derived<A, B>().foo(new A(), new B());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           new Derived<B, I>().foo(new B(), new C());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           Derived.foo(new Number(), new String());
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);
 
     - doc: Override as type parameter of derived class function is contravariant to those used in base class
       decl: |-
@@ -69,13 +69,13 @@ cases:
           }
       use: |-
           new Derived().foo(new A());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           new Derived().foo(new B());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           Derived.foo(new A());
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);
           Derived.foo(new B());
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);
 
     - doc: Override as type parameter of derived class function is invariant to those used in base class
       decl: |-
@@ -101,14 +101,14 @@ cases:
           }
       use: |-
           new Derived().foo(new A());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           let i: I = new A();
           new Derived().foo(i);
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           Derived.foo(new A());
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);
           Derived.foo(i);
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);
 
     - doc: Overload as type parameter of derived class function is covariant to those used in base class
       decl: |-
@@ -135,13 +135,13 @@ cases:
       use: |-
           let i: I = new A();
           new Derived().foo(i);
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           new Derived().foo(new A());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           Derived.foo(i as I);
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);
           Derived.foo(new A());
-          assertEQ( res, 12);
+          arktest.assertEQ( res, 12);
 
     - doc: Overload due to the different number of type parameters
       decl: |-
@@ -168,13 +168,13 @@ cases:
           }
       use: |-
           new Derived<A, B>().foo(new A(), new B());
-          assertEQ( res, 11);
+          arktest.assertEQ( res, 11);
           new Derived<A, B>().foo(new A());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           Derived.foo<A, B>(new A(), new B());
-          assertEQ( res, 12);
+          arktest.assertEQ( res, 12);
           Derived.foo<A>(new A());
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);
 
     - doc: |-
           Override failed due to different return value types.
@@ -216,7 +216,7 @@ cases:
           }
       use: |-
           new Derived<Number, String>().foo(new Number(), new String());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
 
     - doc: |-
           Base method is overridden as A invariant to A.
@@ -237,7 +237,7 @@ cases:
           }
       use: |-
           new Derived<A,B>().foo(new A(), new B());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
 
     - doc: |-
           Override failed as A contravariant to B.
@@ -280,7 +280,7 @@ cases:
           }
       use: |-
           Derived.foo(new A(), new B());
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
 
     # Tuple
     - doc: |-
@@ -301,9 +301,9 @@ cases:
           let tpl1: TPL_BF = [ true, 1.1 as float];
           let tpl2: TPL_FB = [ 1.1 as float, true];
           a.foo(tpl1);
-          assertEQ( res, 11);
+          arktest.assertEQ( res, 11);
           a.foo(tpl2);
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
 
     - doc: |-
           Overloading instance method having arguments of tuple with reference types.
@@ -327,9 +327,9 @@ cases:
           let tpl1: TPL_CE = [ new C(), new E() ];
           let tpl2: TPL_EC = [ new E(), new C() ];
           a.foo(tpl1);
-          assertEQ( res, 11);
+          arktest.assertEQ( res, 11);
           a.foo(tpl2);
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
 
     - doc: |-
           Overriding instance method having arguments of tuple with covariant reference types.
@@ -358,8 +358,8 @@ cases:
           let tpl2: TPL_DE = [ new D(), new E() ];
           let tpl3: TPL_CDE = [ new C(), new D(), new E() ];
           a.foo(tpl1);
-          assertEQ( res, 11);
+          arktest.assertEQ( res, 11);
           a.foo(tpl2);
-          assertEQ( res, 21);
+          arktest.assertEQ( res, 21);
           a.foo(tpl3);
-          assertEQ( res, 22);
+          arktest.assertEQ( res, 22);

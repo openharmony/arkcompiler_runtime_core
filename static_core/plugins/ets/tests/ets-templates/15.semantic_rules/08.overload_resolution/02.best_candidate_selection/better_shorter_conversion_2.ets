@@ -36,6 +36,6 @@ function main(): void {
     candidate = 0;
     let x: byte = 42;
     foo(x);
-    assertEQ(candidate, 1)
+    arktest.assertEQ(candidate, 1)
 }
 

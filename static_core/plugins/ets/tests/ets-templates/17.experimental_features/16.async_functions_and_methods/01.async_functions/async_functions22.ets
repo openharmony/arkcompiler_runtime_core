@@ -24,7 +24,7 @@ async function functionReturnUndefined(): Promise<undefined> {
 
 async function startTest() {
     const result = await functionReturnUndefined();
-    assertEQ(result === undefined, true)
+    arktest.assertEQ(result === undefined, true)
 }
 
 function main(): void {

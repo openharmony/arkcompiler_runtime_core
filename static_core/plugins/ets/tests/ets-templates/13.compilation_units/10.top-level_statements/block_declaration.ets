@@ -26,7 +26,7 @@ function check(): boolean {
 }
 
 function pass(): void {
-  assertTrue( true )
+  arktest.assertTrue( true )
 }
 
 {

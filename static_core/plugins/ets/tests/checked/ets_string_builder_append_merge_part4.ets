@@ -278,109 +278,109 @@ function chain_append4(): string {
 }
 
 function main() : int {
-    assertEQ(append5(), "01234", 'Wrong result at append5()');
-    assertEQ(append6(), "012345", 'Wrong result at append6()');
-    assertEQ(append7(), "0123456", 'Wrong result at append7()');
-    assertEQ(append8(), "01234567", 'Wrong result at append8()');
+    arktest.assertEQ(append5(), "01234", 'Wrong result at append5()');
+    arktest.assertEQ(append6(), "012345", 'Wrong result at append6()');
+    arktest.assertEQ(append7(), "0123456", 'Wrong result at append7()');
+    arktest.assertEQ(append8(), "01234567", 'Wrong result at append8()');
 
-    assertEQ(append18(), "01234567891011121314151617",  'Wrong result at append18');
-    assertEQ(chain_append4(), "0123",  'Wrong result at chain_append4');
+    arktest.assertEQ(append18(), "01234567891011121314151617",  'Wrong result at append18');
+    arktest.assertEQ(chain_append4(), "0123",  'Wrong result at chain_append4');
 
     const asciiString = "_xyz"
 
-    assertEQ(append2(asciiString, asciiString), "_xyz_xyz",  'Wrong result at append2(asciiString, asciiString)');
-    assertEQ(append2("str0"     , asciiString), "str0_xyz",  'Wrong result at append2("str0"     , asciiString)');
-    assertEQ(append2(asciiString, "str1"     ), "_xyzstr1",  'Wrong result at append2(asciiString, "str1"     )');
-    assertEQ(append2("str0"     , "str1"     ), "str0str1",  'Wrong result at append2("str0"     , "str1"     )');
+    arktest.assertEQ(append2(asciiString, asciiString), "_xyz_xyz",  'Wrong result at append2(asciiString, asciiString)');
+    arktest.assertEQ(append2("str0"     , asciiString), "str0_xyz",  'Wrong result at append2("str0"     , asciiString)');
+    arktest.assertEQ(append2(asciiString, "str1"     ), "_xyzstr1",  'Wrong result at append2(asciiString, "str1"     )');
+    arktest.assertEQ(append2("str0"     , "str1"     ), "str0str1",  'Wrong result at append2("str0"     , "str1"     )');
 
-    assertEQ(append3(asciiString, asciiString, asciiString), "_xyz_xyz_xyz", 'Wrong result at append3(asciiString, asciiString, asciiString)');
-    assertEQ(append3("str0"     , asciiString, asciiString), "str0_xyz_xyz", 'Wrong result at append3("str0"     , asciiString, asciiString)');
-    assertEQ(append3(asciiString, "str1"     , asciiString), "_xyzstr1_xyz", 'Wrong result at append3(asciiString, "str1"     , asciiString)');
-    assertEQ(append3(asciiString, asciiString, "str2"     ), "_xyz_xyzstr2", 'Wrong result at append3(asciiString, asciiString, "str2"     )');
-    assertEQ(append3("str0"     , "str1"     , asciiString), "str0str1_xyz", 'Wrong result at append3("str0"     , "str1"     , asciiString)');
-    assertEQ(append3("str0"     , asciiString, "str2"     ), "str0_xyzstr2", 'Wrong result at append3("str0"     , asciiString, "str2"     )');
-    assertEQ(append3(asciiString, "str1"     , "str2"     ), "_xyzstr1str2", 'Wrong result at append3(asciiString, "str1"     , "str2"     )');
-    assertEQ(append3("str0"     , "str1"     , "str2"     ), "str0str1str2", 'Wrong result at append3("str0"     , "str1"     , "str2"     )');
+    arktest.assertEQ(append3(asciiString, asciiString, asciiString), "_xyz_xyz_xyz", 'Wrong result at append3(asciiString, asciiString, asciiString)');
+    arktest.assertEQ(append3("str0"     , asciiString, asciiString), "str0_xyz_xyz", 'Wrong result at append3("str0"     , asciiString, asciiString)');
+    arktest.assertEQ(append3(asciiString, "str1"     , asciiString), "_xyzstr1_xyz", 'Wrong result at append3(asciiString, "str1"     , asciiString)');
+    arktest.assertEQ(append3(asciiString, asciiString, "str2"     ), "_xyz_xyzstr2", 'Wrong result at append3(asciiString, asciiString, "str2"     )');
+    arktest.assertEQ(append3("str0"     , "str1"     , asciiString), "str0str1_xyz", 'Wrong result at append3("str0"     , "str1"     , asciiString)');
+    arktest.assertEQ(append3("str0"     , asciiString, "str2"     ), "str0_xyzstr2", 'Wrong result at append3("str0"     , asciiString, "str2"     )');
+    arktest.assertEQ(append3(asciiString, "str1"     , "str2"     ), "_xyzstr1str2", 'Wrong result at append3(asciiString, "str1"     , "str2"     )');
+    arktest.assertEQ(append3("str0"     , "str1"     , "str2"     ), "str0str1str2", 'Wrong result at append3("str0"     , "str1"     , "str2"     )');
 
-    assertEQ(append4(asciiString, asciiString, asciiString, asciiString), "_xyz_xyz_xyz_xyz", 'Wrong result at append4(asciiString, asciiString, asciiString, asciiString)');
-    assertEQ(append4("str0"     , asciiString, asciiString, asciiString), "str0_xyz_xyz_xyz", 'Wrong result at append4("str0"     , asciiString, asciiString, asciiString)');
-    assertEQ(append4(asciiString, "str1"     , asciiString, asciiString), "_xyzstr1_xyz_xyz", 'Wrong result at append4(asciiString, "str1"     , asciiString, asciiString)');
-    assertEQ(append4(asciiString, asciiString, "str2"     , asciiString), "_xyz_xyzstr2_xyz", 'Wrong result at append4(asciiString, asciiString, "str2"     , asciiString)');
-    assertEQ(append4(asciiString, asciiString, asciiString, "str3"     ), "_xyz_xyz_xyzstr3", 'Wrong result at append4(asciiString, asciiString, asciiString, "str3"     )');
-    assertEQ(append4("str0"     , "str1"     , asciiString, asciiString), "str0str1_xyz_xyz", 'Wrong result at append4("str0"     , "str1"     , asciiString, asciiString)');
-    assertEQ(append4("str0"     , asciiString, "str2"     , asciiString), "str0_xyzstr2_xyz", 'Wrong result at append4("str0"     , asciiString, "str2"     , asciiString)');
-    assertEQ(append4(asciiString, "str1"     , "str2"     , asciiString), "_xyzstr1str2_xyz", 'Wrong result at append4(asciiString, "str1"     , "str2"     , asciiString)');
-    assertEQ(append4(asciiString, "str1"     , asciiString, "str3"     ), "_xyzstr1_xyzstr3", 'Wrong result at append4(asciiString, "str1"     , asciiString, "str3"     )');
-    assertEQ(append4(asciiString, asciiString, "str2"     , "str3"     ), "_xyz_xyzstr2str3", 'Wrong result at append4(asciiString, asciiString, "str2"     , "str3"     )');
-    assertEQ(append4("str0"     , "str1"     , "str2"     , asciiString), "str0str1str2_xyz", 'Wrong result at append4("str0"     , "str1"     , "str2"     , asciiString)');
-    assertEQ(append4("str0"     , "str1"     , asciiString, "str3"     ), "str0str1_xyzstr3", 'Wrong result at append4("str0"     , "str1"     , asciiString, "str3"     )');
-    assertEQ(append4("str0"     , asciiString, "str2"     , "str3"     ), "str0_xyzstr2str3", 'Wrong result at append4("str0"     , asciiString, "str2"     , "str3"     )');
-    assertEQ(append4(asciiString, "str1"     , "str2"     , "str3"     ), "_xyzstr1str2str3", 'Wrong result at append4(asciiString, "str1"     , "str2"     , "str3"     )');
-    assertEQ(append4("str0"     , "str1"     , "str2"     , "str3"     ), "str0str1str2str3", 'Wrong result at append4("str0"     , "str1"     , "str2"     , "str3"     )');
+    arktest.assertEQ(append4(asciiString, asciiString, asciiString, asciiString), "_xyz_xyz_xyz_xyz", 'Wrong result at append4(asciiString, asciiString, asciiString, asciiString)');
+    arktest.assertEQ(append4("str0"     , asciiString, asciiString, asciiString), "str0_xyz_xyz_xyz", 'Wrong result at append4("str0"     , asciiString, asciiString, asciiString)');
+    arktest.assertEQ(append4(asciiString, "str1"     , asciiString, asciiString), "_xyzstr1_xyz_xyz", 'Wrong result at append4(asciiString, "str1"     , asciiString, asciiString)');
+    arktest.assertEQ(append4(asciiString, asciiString, "str2"     , asciiString), "_xyz_xyzstr2_xyz", 'Wrong result at append4(asciiString, asciiString, "str2"     , asciiString)');
+    arktest.assertEQ(append4(asciiString, asciiString, asciiString, "str3"     ), "_xyz_xyz_xyzstr3", 'Wrong result at append4(asciiString, asciiString, asciiString, "str3"     )');
+    arktest.assertEQ(append4("str0"     , "str1"     , asciiString, asciiString), "str0str1_xyz_xyz", 'Wrong result at append4("str0"     , "str1"     , asciiString, asciiString)');
+    arktest.assertEQ(append4("str0"     , asciiString, "str2"     , asciiString), "str0_xyzstr2_xyz", 'Wrong result at append4("str0"     , asciiString, "str2"     , asciiString)');
+    arktest.assertEQ(append4(asciiString, "str1"     , "str2"     , asciiString), "_xyzstr1str2_xyz", 'Wrong result at append4(asciiString, "str1"     , "str2"     , asciiString)');
+    arktest.assertEQ(append4(asciiString, "str1"     , asciiString, "str3"     ), "_xyzstr1_xyzstr3", 'Wrong result at append4(asciiString, "str1"     , asciiString, "str3"     )');
+    arktest.assertEQ(append4(asciiString, asciiString, "str2"     , "str3"     ), "_xyz_xyzstr2str3", 'Wrong result at append4(asciiString, asciiString, "str2"     , "str3"     )');
+    arktest.assertEQ(append4("str0"     , "str1"     , "str2"     , asciiString), "str0str1str2_xyz", 'Wrong result at append4("str0"     , "str1"     , "str2"     , asciiString)');
+    arktest.assertEQ(append4("str0"     , "str1"     , asciiString, "str3"     ), "str0str1_xyzstr3", 'Wrong result at append4("str0"     , "str1"     , asciiString, "str3"     )');
+    arktest.assertEQ(append4("str0"     , asciiString, "str2"     , "str3"     ), "str0_xyzstr2str3", 'Wrong result at append4("str0"     , asciiString, "str2"     , "str3"     )');
+    arktest.assertEQ(append4(asciiString, "str1"     , "str2"     , "str3"     ), "_xyzstr1str2str3", 'Wrong result at append4(asciiString, "str1"     , "str2"     , "str3"     )');
+    arktest.assertEQ(append4("str0"     , "str1"     , "str2"     , "str3"     ), "str0str1str2str3", 'Wrong result at append4("str0"     , "str1"     , "str2"     , "str3"     )');
 
     const utf16String = "红旗";
 
-    assertEQ(append2(utf16String, utf16String), "红旗红旗",  'Wrong result at append2(utf16String, utf16String)');
-    assertEQ(append2("str0"     , utf16String), "str0红旗",  'Wrong result at append2("str0"    , utf16String)');
-    assertEQ(append2(utf16String, "str1"     ), "红旗str1",  'Wrong result at append2(utf16String, "str1"    )');
-    assertEQ(append2("str0"     , "str1"     ), "str0str1",  'Wrong result at append2("str0"    , "str1"    )');
+    arktest.assertEQ(append2(utf16String, utf16String), "红旗红旗",  'Wrong result at append2(utf16String, utf16String)');
+    arktest.assertEQ(append2("str0"     , utf16String), "str0红旗",  'Wrong result at append2("str0"    , utf16String)');
+    arktest.assertEQ(append2(utf16String, "str1"     ), "红旗str1",  'Wrong result at append2(utf16String, "str1"    )');
+    arktest.assertEQ(append2("str0"     , "str1"     ), "str0str1",  'Wrong result at append2("str0"    , "str1"    )');
 
-    assertEQ(append3(utf16String, utf16String, utf16String), "红旗红旗红旗", 'Wrong result at append3(utf16String, utf16String, utf16String)');
-    assertEQ(append3("str0"     , utf16String, utf16String), "str0红旗红旗", 'Wrong result at append3("str0"    , utf16String, utf16String)');
-    assertEQ(append3(utf16String, "str1"     , utf16String), "红旗str1红旗", 'Wrong result at append3(utf16String, "str1"    , utf16String)');
-    assertEQ(append3(utf16String, utf16String, "str2"     ), "红旗红旗str2", 'Wrong result at append3(utf16String, utf16String, "str2"    )');
-    assertEQ(append3("str0"     , "str1"     , utf16String), "str0str1红旗", 'Wrong result at append3("str0"    , "str1"    , utf16String)');
-    assertEQ(append3("str0"     , utf16String, "str2"     ), "str0红旗str2", 'Wrong result at append3("str0"    , utf16String, "str2"    )');
-    assertEQ(append3(utf16String, "str1"     , "str2"     ), "红旗str1str2", 'Wrong result at append3(utf16String, "str1"    , "str2"    )');
-    assertEQ(append3("str0"     , "str1"     , "str2"     ), "str0str1str2", 'Wrong result at append3("str0"    , "str1"    , "str2"    )');
+    arktest.assertEQ(append3(utf16String, utf16String, utf16String), "红旗红旗红旗", 'Wrong result at append3(utf16String, utf16String, utf16String)');
+    arktest.assertEQ(append3("str0"     , utf16String, utf16String), "str0红旗红旗", 'Wrong result at append3("str0"    , utf16String, utf16String)');
+    arktest.assertEQ(append3(utf16String, "str1"     , utf16String), "红旗str1红旗", 'Wrong result at append3(utf16String, "str1"    , utf16String)');
+    arktest.assertEQ(append3(utf16String, utf16String, "str2"     ), "红旗红旗str2", 'Wrong result at append3(utf16String, utf16String, "str2"    )');
+    arktest.assertEQ(append3("str0"     , "str1"     , utf16String), "str0str1红旗", 'Wrong result at append3("str0"    , "str1"    , utf16String)');
+    arktest.assertEQ(append3("str0"     , utf16String, "str2"     ), "str0红旗str2", 'Wrong result at append3("str0"    , utf16String, "str2"    )');
+    arktest.assertEQ(append3(utf16String, "str1"     , "str2"     ), "红旗str1str2", 'Wrong result at append3(utf16String, "str1"    , "str2"    )');
+    arktest.assertEQ(append3("str0"     , "str1"     , "str2"     ), "str0str1str2", 'Wrong result at append3("str0"    , "str1"    , "str2"    )');
 
-    assertEQ(append4(utf16String, utf16String, utf16String, utf16String), "红旗红旗红旗红旗", 'Wrong result at append4(utf16String, utf16String, utf16String, utf16String)');
-    assertEQ(append4("str0"     , utf16String, utf16String, utf16String), "str0红旗红旗红旗", 'Wrong result at append4("str0"    , utf16String, utf16String, utf16String)');
-    assertEQ(append4(utf16String, "str1"     , utf16String, utf16String), "红旗str1红旗红旗", 'Wrong result at append4(utf16String, "str1"    , utf16String, utf16String)');
-    assertEQ(append4(utf16String, utf16String, "str2"     , utf16String), "红旗红旗str2红旗", 'Wrong result at append4(utf16String, utf16String, "str2"    , utf16String)');
-    assertEQ(append4(utf16String, utf16String, utf16String, "str3"     ), "红旗红旗红旗str3", 'Wrong result at append4(utf16String, utf16String, utf16String, "str3"    )');
-    assertEQ(append4("str0"     , "str1"     , utf16String, utf16String), "str0str1红旗红旗", 'Wrong result at append4("str0"    , "str1"    , utf16String, utf16String)');
-    assertEQ(append4("str0"     , utf16String, "str2"     , utf16String), "str0红旗str2红旗", 'Wrong result at append4("str0"    , utf16String, "str2"    , utf16String)');
-    assertEQ(append4(utf16String, "str1"     , "str2"     , utf16String), "红旗str1str2红旗", 'Wrong result at append4(utf16String, "str1"    , "str2"    , utf16String)');
-    assertEQ(append4(utf16String, "str1"     , utf16String, "str3"     ), "红旗str1红旗str3", 'Wrong result at append4(utf16String, "str1"    , utf16String, "str3"    )');
-    assertEQ(append4(utf16String, utf16String, "str2"     , "str3"     ), "红旗红旗str2str3", 'Wrong result at append4(utf16String, utf16String, "str2"    , "str3"    )');
-    assertEQ(append4("str0"     , "str1"     , "str2"     , utf16String), "str0str1str2红旗", 'Wrong result at append4("str0"    , "str1"    , "str2"    , utf16String)');
-    assertEQ(append4("str0"     , "str1"     , utf16String, "str3"     ), "str0str1红旗str3", 'Wrong result at append4("str0"    , "str1"    , utf16String, "str3"    )');
-    assertEQ(append4("str0"     , utf16String, "str2"     , "str3"     ), "str0红旗str2str3", 'Wrong result at append4("str0"    , utf16String, "str2"    , "str3"    )');
-    assertEQ(append4(utf16String, "str1"     , "str2"     , "str3"     ), "红旗str1str2str3", 'Wrong result at append4(utf16String, "str1"    , "str2"    , "str3"    )');
-    assertEQ(append4("str0"     , "str1"     , "str2"     , "str3"     ), "str0str1str2str3", 'Wrong result at append4("str0"    , "str1"    , "str2"    , "str3"    )');
+    arktest.assertEQ(append4(utf16String, utf16String, utf16String, utf16String), "红旗红旗红旗红旗", 'Wrong result at append4(utf16String, utf16String, utf16String, utf16String)');
+    arktest.assertEQ(append4("str0"     , utf16String, utf16String, utf16String), "str0红旗红旗红旗", 'Wrong result at append4("str0"    , utf16String, utf16String, utf16String)');
+    arktest.assertEQ(append4(utf16String, "str1"     , utf16String, utf16String), "红旗str1红旗红旗", 'Wrong result at append4(utf16String, "str1"    , utf16String, utf16String)');
+    arktest.assertEQ(append4(utf16String, utf16String, "str2"     , utf16String), "红旗红旗str2红旗", 'Wrong result at append4(utf16String, utf16String, "str2"    , utf16String)');
+    arktest.assertEQ(append4(utf16String, utf16String, utf16String, "str3"     ), "红旗红旗红旗str3", 'Wrong result at append4(utf16String, utf16String, utf16String, "str3"    )');
+    arktest.assertEQ(append4("str0"     , "str1"     , utf16String, utf16String), "str0str1红旗红旗", 'Wrong result at append4("str0"    , "str1"    , utf16String, utf16String)');
+    arktest.assertEQ(append4("str0"     , utf16String, "str2"     , utf16String), "str0红旗str2红旗", 'Wrong result at append4("str0"    , utf16String, "str2"    , utf16String)');
+    arktest.assertEQ(append4(utf16String, "str1"     , "str2"     , utf16String), "红旗str1str2红旗", 'Wrong result at append4(utf16String, "str1"    , "str2"    , utf16String)');
+    arktest.assertEQ(append4(utf16String, "str1"     , utf16String, "str3"     ), "红旗str1红旗str3", 'Wrong result at append4(utf16String, "str1"    , utf16String, "str3"    )');
+    arktest.assertEQ(append4(utf16String, utf16String, "str2"     , "str3"     ), "红旗红旗str2str3", 'Wrong result at append4(utf16String, utf16String, "str2"    , "str3"    )');
+    arktest.assertEQ(append4("str0"     , "str1"     , "str2"     , utf16String), "str0str1str2红旗", 'Wrong result at append4("str0"    , "str1"    , "str2"    , utf16String)');
+    arktest.assertEQ(append4("str0"     , "str1"     , utf16String, "str3"     ), "str0str1红旗str3", 'Wrong result at append4("str0"    , "str1"    , utf16String, "str3"    )');
+    arktest.assertEQ(append4("str0"     , utf16String, "str2"     , "str3"     ), "str0红旗str2str3", 'Wrong result at append4("str0"    , utf16String, "str2"    , "str3"    )');
+    arktest.assertEQ(append4(utf16String, "str1"     , "str2"     , "str3"     ), "红旗str1str2str3", 'Wrong result at append4(utf16String, "str1"    , "str2"    , "str3"    )');
+    arktest.assertEQ(append4("str0"     , "str1"     , "str2"     , "str3"     ), "str0str1str2str3", 'Wrong result at append4("str0"    , "str1"    , "str2"    , "str3"    )');
 
     const emptyString = "";
 
-    assertEQ(append2(emptyString, emptyString), ""        , 'Wrong result at append2(emptyString, emptyString)');
-    assertEQ(append2("str0"     , emptyString), "str0"    , 'Wrong result at append2("str0"     , emptyString)');
-    assertEQ(append2(emptyString, "str1"     ), "str1"    , 'Wrong result at append2(emptyString, "str1"     )');
-    assertEQ(append2("str0"     , "str1"     ), "str0str1", 'Wrong result at append2("str0"     , "str1"     )');
+    arktest.assertEQ(append2(emptyString, emptyString), ""        , 'Wrong result at append2(emptyString, emptyString)');
+    arktest.assertEQ(append2("str0"     , emptyString), "str0"    , 'Wrong result at append2("str0"     , emptyString)');
+    arktest.assertEQ(append2(emptyString, "str1"     ), "str1"    , 'Wrong result at append2(emptyString, "str1"     )');
+    arktest.assertEQ(append2("str0"     , "str1"     ), "str0str1", 'Wrong result at append2("str0"     , "str1"     )');
 
-    assertEQ(append3(emptyString, emptyString, emptyString), ""            , 'Wrong result at append3(emptyString, emptyString, emptyString)');
-    assertEQ(append3("str0"     , emptyString, emptyString), "str0"        , 'Wrong result at append3("str0"     , emptyString, emptyString)');
-    assertEQ(append3(emptyString, "str1"     , emptyString), "str1"        , 'Wrong result at append3(emptyString, "str1"     , emptyString)');
-    assertEQ(append3(emptyString, emptyString, "str2"     ), "str2"        , 'Wrong result at append3(emptyString, emptyString, "str2"     )');
-    assertEQ(append3("str0"     , "str1"     , emptyString), "str0str1"    , 'Wrong result at append3("str0"     , "str1"     , emptyString)');
-    assertEQ(append3("str0"     , emptyString, "str2"     ), "str0str2"    , 'Wrong result at append3("str0"     , emptyString, "str2"     )');
-    assertEQ(append3(emptyString, "str1"     , "str2"     ), "str1str2"    , 'Wrong result at append3(emptyString, "str1"     , "str2"     )');
-    assertEQ(append3("str0"     , "str1"     , "str2"     ), "str0str1str2", 'Wrong result at append3("str0"     , "str1"     , "str2"     )');
+    arktest.assertEQ(append3(emptyString, emptyString, emptyString), ""            , 'Wrong result at append3(emptyString, emptyString, emptyString)');
+    arktest.assertEQ(append3("str0"     , emptyString, emptyString), "str0"        , 'Wrong result at append3("str0"     , emptyString, emptyString)');
+    arktest.assertEQ(append3(emptyString, "str1"     , emptyString), "str1"        , 'Wrong result at append3(emptyString, "str1"     , emptyString)');
+    arktest.assertEQ(append3(emptyString, emptyString, "str2"     ), "str2"        , 'Wrong result at append3(emptyString, emptyString, "str2"     )');
+    arktest.assertEQ(append3("str0"     , "str1"     , emptyString), "str0str1"    , 'Wrong result at append3("str0"     , "str1"     , emptyString)');
+    arktest.assertEQ(append3("str0"     , emptyString, "str2"     ), "str0str2"    , 'Wrong result at append3("str0"     , emptyString, "str2"     )');
+    arktest.assertEQ(append3(emptyString, "str1"     , "str2"     ), "str1str2"    , 'Wrong result at append3(emptyString, "str1"     , "str2"     )');
+    arktest.assertEQ(append3("str0"     , "str1"     , "str2"     ), "str0str1str2", 'Wrong result at append3("str0"     , "str1"     , "str2"     )');
 
-    assertEQ(append4(emptyString, emptyString, emptyString, emptyString), ""                , 'Wrong result at append4(emptyString, emptyString, emptyString, emptyString)');
-    assertEQ(append4("str0"     , emptyString, emptyString, emptyString), "str0"            , 'Wrong result at append4("str0"     , emptyString, emptyString, emptyString)');
-    assertEQ(append4(emptyString, "str1"     , emptyString, emptyString), "str1"            , 'Wrong result at append4(emptyString, "str1"     , emptyString, emptyString)');
-    assertEQ(append4(emptyString, emptyString, "str2"     , emptyString), "str2"            , 'Wrong result at append4(emptyString, emptyString, "str2"     , emptyString)');
-    assertEQ(append4(emptyString, emptyString, emptyString, "str3"     ), "str3"            , 'Wrong result at append4(emptyString, emptyString, emptyString, "str3"     )');
-    assertEQ(append4("str0"     , "str1"     , emptyString, emptyString), "str0str1"        , 'Wrong result at append4("str0"     , "str1"     , emptyString, emptyString)');
-    assertEQ(append4("str0"     , emptyString, "str2"     , emptyString), "str0str2"        , 'Wrong result at append4("str0"     , emptyString, "str2"     , emptyString)');
-    assertEQ(append4(emptyString, "str1"     , "str2"     , emptyString), "str1str2"        , 'Wrong result at append4(emptyString, "str1"     , "str2"     , emptyString)');
-    assertEQ(append4(emptyString, "str1"     , emptyString, "str3"     ), "str1str3"        , 'Wrong result at append4(emptyString, "str1"     , emptyString, "str3"     )');
-    assertEQ(append4(emptyString, emptyString, "str2"     , "str3"     ), "str2str3"        , 'Wrong result at append4(emptyString, emptyString, "str2"     , "str3"     )');
-    assertEQ(append4("str0"     , "str1"     , "str2"     , emptyString), "str0str1str2"    , 'Wrong result at append4("str0"     , "str1"     , "str2"     , emptyString)');
-    assertEQ(append4("str0"     , "str1"     , emptyString, "str3"     ), "str0str1str3"    , 'Wrong result at append4("str0"     , "str1"     , emptyString, "str3"     )');
-    assertEQ(append4("str0"     , emptyString, "str2"     , "str3"     ), "str0str2str3"    , 'Wrong result at append4("str0"     , emptyString, "str2"     , "str3"     )');
-    assertEQ(append4(emptyString, "str1"     , "str2"     , "str3"     ), "str1str2str3"    , 'Wrong result at append4(emptyString, "str1"     , "str2"     , "str3"     )');
-    assertEQ(append4("str0"     , "str1"     , "str2"     , "str3"     ), "str0str1str2str3", 'Wrong result at append4("str0"     , "str1"     , "str2"     , "str3"     )');
+    arktest.assertEQ(append4(emptyString, emptyString, emptyString, emptyString), ""                , 'Wrong result at append4(emptyString, emptyString, emptyString, emptyString)');
+    arktest.assertEQ(append4("str0"     , emptyString, emptyString, emptyString), "str0"            , 'Wrong result at append4("str0"     , emptyString, emptyString, emptyString)');
+    arktest.assertEQ(append4(emptyString, "str1"     , emptyString, emptyString), "str1"            , 'Wrong result at append4(emptyString, "str1"     , emptyString, emptyString)');
+    arktest.assertEQ(append4(emptyString, emptyString, "str2"     , emptyString), "str2"            , 'Wrong result at append4(emptyString, emptyString, "str2"     , emptyString)');
+    arktest.assertEQ(append4(emptyString, emptyString, emptyString, "str3"     ), "str3"            , 'Wrong result at append4(emptyString, emptyString, emptyString, "str3"     )');
+    arktest.assertEQ(append4("str0"     , "str1"     , emptyString, emptyString), "str0str1"        , 'Wrong result at append4("str0"     , "str1"     , emptyString, emptyString)');
+    arktest.assertEQ(append4("str0"     , emptyString, "str2"     , emptyString), "str0str2"        , 'Wrong result at append4("str0"     , emptyString, "str2"     , emptyString)');
+    arktest.assertEQ(append4(emptyString, "str1"     , "str2"     , emptyString), "str1str2"        , 'Wrong result at append4(emptyString, "str1"     , "str2"     , emptyString)');
+    arktest.assertEQ(append4(emptyString, "str1"     , emptyString, "str3"     ), "str1str3"        , 'Wrong result at append4(emptyString, "str1"     , emptyString, "str3"     )');
+    arktest.assertEQ(append4(emptyString, emptyString, "str2"     , "str3"     ), "str2str3"        , 'Wrong result at append4(emptyString, emptyString, "str2"     , "str3"     )');
+    arktest.assertEQ(append4("str0"     , "str1"     , "str2"     , emptyString), "str0str1str2"    , 'Wrong result at append4("str0"     , "str1"     , "str2"     , emptyString)');
+    arktest.assertEQ(append4("str0"     , "str1"     , emptyString, "str3"     ), "str0str1str3"    , 'Wrong result at append4("str0"     , "str1"     , emptyString, "str3"     )');
+    arktest.assertEQ(append4("str0"     , emptyString, "str2"     , "str3"     ), "str0str2str3"    , 'Wrong result at append4("str0"     , emptyString, "str2"     , "str3"     )');
+    arktest.assertEQ(append4(emptyString, "str1"     , "str2"     , "str3"     ), "str1str2str3"    , 'Wrong result at append4(emptyString, "str1"     , "str2"     , "str3"     )');
+    arktest.assertEQ(append4("str0"     , "str1"     , "str2"     , "str3"     ), "str0str1str2str3", 'Wrong result at append4("str0"     , "str1"     , "str2"     , "str3"     )');
 
     return 0
 }
@@ -505,10 +505,10 @@ function bugfix_19441_append20() : string {
 }
 
 function bugfix_19441() : int {
-    assertEQ(bugfix_19441_append17(), "012345678910111213141516"      , 'Wrong result at bugfix_19441_append17()');
-    assertEQ(bugfix_19441_append18(), "01234567891011121314151617"    , 'Wrong result at bugfix_19441_append18()');
-    assertEQ(bugfix_19441_append19(), "0123456789101112131415161718"  , 'Wrong result at bugfix_19441_append19()');
-    assertEQ(bugfix_19441_append20(), "012345678910111213141516171819", 'Wrong result at bugfix_19441_append20()');
+    arktest.assertEQ(bugfix_19441_append17(), "012345678910111213141516"      , 'Wrong result at bugfix_19441_append17()');
+    arktest.assertEQ(bugfix_19441_append18(), "01234567891011121314151617"    , 'Wrong result at bugfix_19441_append18()');
+    arktest.assertEQ(bugfix_19441_append19(), "0123456789101112131415161718"  , 'Wrong result at bugfix_19441_append19()');
+    arktest.assertEQ(bugfix_19441_append20(), "012345678910111213141516171819", 'Wrong result at bugfix_19441_append20()');
 
     return 0;
 }

@@ -22,5 +22,5 @@ function foo<T>(i: T): boolean {
 }
 
 function main(): void {
-  assertTrue( foo<undefined>(undefined) )
+  arktest.assertTrue( foo<undefined>(undefined) )
 }

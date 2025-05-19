@@ -21,6 +21,6 @@ function main(): void {
   let minShort: short = -32768;
   let maxShort: short = 32767;
 
-  assertTrue(minShort === -32768);
-  assertTrue(maxShort === 32767);
+  arktest.assertTrue(minShort === -32768);
+  arktest.assertTrue(maxShort === 32767);
 }

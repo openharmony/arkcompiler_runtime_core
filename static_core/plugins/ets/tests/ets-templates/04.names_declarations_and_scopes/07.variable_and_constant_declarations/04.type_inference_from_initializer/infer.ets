@@ -23,6 +23,6 @@ desc: Check type inference from the initialization expression
 
 function main(): void {
     {{c.use}}
-    assertTrue( {{c.assert}} )
+    arktest.assertTrue( {{c.assert}} )
 }
 {% endfor %}

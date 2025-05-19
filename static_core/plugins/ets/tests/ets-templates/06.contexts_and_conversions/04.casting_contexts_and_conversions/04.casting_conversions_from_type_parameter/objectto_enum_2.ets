@@ -28,5 +28,5 @@ let myDirection: Direction = Direction.Up;
 
 function main(): void {
     const obj1: object = myDirection;
-    assertTrue(obj1 === Direction.Up);
+    arktest.assertTrue(obj1 === Direction.Up);
 }

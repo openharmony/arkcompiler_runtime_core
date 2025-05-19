@@ -35,7 +35,7 @@ function cor(numObjToCreate: int, humongousSize: int): Object|null {
         return null;
     }
     catch(e) {
-        assertTrue( false, "Some other error: " + e.toString());
+        arktest.assertTrue( false, "Some other error: " + e.toString());
     }
     return localGarbage as Object;
 };
@@ -65,7 +65,7 @@ class TestHumongousStress {
             TestHumongousStress.GARBAGE = new ArrayAsListObject();
         }
         catch(e) {
-            assertTrue( false, "Some other error: " + e.toString());
+            arktest.assertTrue( false, "Some other error: " + e.toString());
         }
         return maxNumberOfObjects;
     }
@@ -74,7 +74,7 @@ class TestHumongousStress {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
         let objPerCoroutine = (maxObjects / this.threadsCount) as int;
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);
-        assertTrue(this.threadsCount > 0 && objPerCoroutine > 0);
+        arktest.assertTrue(this.threadsCount > 0 && objPerCoroutine > 0);
 
         let corArrayTmp = new Array<Job<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
@@ -99,7 +99,7 @@ class TestHumongousStress {
                     continue;
                 }
                 catch(e) {
-                    assertTrue( false : "Some other error: " + e.toString());
+                    arktest.assertTrue( false : "Some other error: " + e.toString());
                 }
             }
         }
@@ -117,7 +117,7 @@ class TestHumongousStress {
                 continue;
             }
             catch(e) {
-                assertTrue( false, "Some other error: " + e.toString());
+                arktest.assertTrue( false, "Some other error: " + e.toString());
             }
         }
     }

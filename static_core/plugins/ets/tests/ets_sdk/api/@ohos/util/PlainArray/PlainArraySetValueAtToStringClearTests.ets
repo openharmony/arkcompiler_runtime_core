@@ -16,7 +16,7 @@
 import { PlainArray } from "@ohos.util.PlainArray";
 
 function main(): int {
-    const suite = new ArkTestsuite("PlainArray API tests");
+    const suite = new arktest.ArkTestsuite("PlainArray API tests");
 
     suite.addTest("PlainArray setValueAt", testSetValueAtValidIndex);
     suite.addTest("PlainArray setValueAt key by boundary index", testSetValueAtBoundaryIndex);
@@ -50,7 +50,7 @@ function testSetValueAtValidIndex() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
     plainArray.setValueAt(TestData.testNumber1, TestData.testNumber1);
-    assertEQ(plainArray.toString(), TestData.testString2, "Set successful and other elements should not change");
+    arktest.assertEQ(plainArray.toString(), TestData.testString2, "Set successful and other elements should not change");
 }
 
 function testSetValueAtBoundaryIndex() {
@@ -58,7 +58,7 @@ function testSetValueAtBoundaryIndex() {
     initializePlainArray(plainArray, TestData.forNumber2);
     plainArray.setValueAt(0, TestData.testNumber6);
     plainArray.setValueAt(TestData.forNumber2.length - TestData.testNumber1, TestData.testNumber6);
-    assertEQ(plainArray.toString(), TestData.testString3, "Set successful and other elements should not change");
+    arktest.assertEQ(plainArray.toString(), TestData.testString3, "Set successful and other elements should not change");
 }
 
 function testSetValueAtExceededIndex() {
@@ -68,20 +68,20 @@ function testSetValueAtExceededIndex() {
     try {
         plainArray.setValueAt(-TestData.testNumber1, TestData.testNumber6);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         count++;
     }
     try {
         plainArray.setValueAt(TestData.testNumber6, TestData.testNumber6);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         count++;
     }
-    assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
+    arktest.assertEQ(count, TestData.testNumber2, "The result should be 'RangeError'");
 }
 
 function testSetValueAtWithEmpty() {
@@ -89,38 +89,38 @@ function testSetValueAtWithEmpty() {
     try {
         plainArray.setValueAt(0, TestData.testNumber2);
     } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
+        arktest.assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
+        arktest.assertEQ((e as RangeError).message, "The value of index is out of range.",
             "The result should be 'Index out of range'");
         return;
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    arktest.assertTrue(false, "The result should be 'RangeError'");
 }
 
 function testToStringWithNonEmpty() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.toString(), TestData.testString1, "The result should be correct string representation");
+    arktest.assertEQ(plainArray.toString(), TestData.testString1, "The result should be correct string representation");
 }
 
 function testToStringWithEmpty() {
     let plainArray = new PlainArray<number>();
-    assertEQ(plainArray.toString(), "", "The result should be correct string representation");
+    arktest.assertEQ(plainArray.toString(), "", "The result should be correct string representation");
 }
 
 function testClearWithNonEmpty() {
     let plainArray = new PlainArray<number>();
     initializePlainArray(plainArray, TestData.forNumber2);
-    assertEQ(plainArray.length, TestData.forNumber2.length,
+    arktest.assertEQ(plainArray.length, TestData.forNumber2.length,
         "The plainArray length should be same as TestData.forNumber2 length");
     plainArray.clear();
-    assertEQ(plainArray.length, 0, "The plainArray length should be 0 after clear");
-    assertTrue(plainArray.isEmpty(), "The plainArray should be empty after clear");
+    arktest.assertEQ(plainArray.length, 0, "The plainArray length should be 0 after clear");
+    arktest.assertTrue(plainArray.isEmpty(), "The plainArray should be empty after clear");
 }
 
 function testClearWithEmpty() {
     let plainArray = new PlainArray<number>();
-    assertEQ(plainArray.length, 0, "The plainArray length should be 0");
+    arktest.assertEQ(plainArray.length, 0, "The plainArray length should be 0");
     plainArray.clear();
-    assertEQ(plainArray.length, 0, "The plainArray length should be 0 after clear");
+    arktest.assertEQ(plainArray.length, 0, "The plainArray length should be 0 after clear");
 }

@@ -34,5 +34,5 @@ function main() {
     const work = new RAImpl<String>()
     work.foo((x: RAImpl<String>) => { test++ })
 
-    assertEQ(1, test)
+    arktest.assertEQ(1, test)
 }

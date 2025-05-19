@@ -34,6 +34,6 @@ function main(): void {
   let childInstance = new ChildClass();
   let tmp1 = childInstance.CHILD_ANT;
   let tmp2 = childInstance.PARENT_ANT;
-  assertEQ(tmp1, "Child ant Value");
-  assertEQ(tmp2, "Parent ant Value");
+  arktest.assertEQ(tmp1, "Child ant Value");
+  arktest.assertEQ(tmp2, "Parent ant Value");
 }

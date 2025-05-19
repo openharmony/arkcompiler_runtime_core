@@ -27,5 +27,5 @@ class StringConstantChild implements StringConstantInterface {
 
 function main(): void {
   const instance = new StringConstantChild();
-  assertEQ(instance.CONST, "test");
+  arktest.assertEQ(instance.CONST, "test");
 }

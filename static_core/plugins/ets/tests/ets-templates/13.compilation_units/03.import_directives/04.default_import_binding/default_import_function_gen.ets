@@ -22,5 +22,5 @@ files:
 import foo from "../../07.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function_gen"
 
 function main(): void {
-    assertEQ(foo(new Number(), new String()), 2);
+    arktest.assertEQ(foo(new Number(), new String()), 2);
 }

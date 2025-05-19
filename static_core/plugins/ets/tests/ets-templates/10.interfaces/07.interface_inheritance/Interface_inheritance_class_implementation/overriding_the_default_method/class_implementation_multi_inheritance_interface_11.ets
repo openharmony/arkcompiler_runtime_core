@@ -44,6 +44,6 @@ class Car extends Vehicle {
 
 function main(): void {
   const car = new Car();
-  assertEQ(car.speak()[1], 5);
-  assertEQ(car.move()[1], 2);
+  arktest.assertEQ(car.speak()[1], 5);
+  arktest.assertEQ(car.move()[1], 2);
 }

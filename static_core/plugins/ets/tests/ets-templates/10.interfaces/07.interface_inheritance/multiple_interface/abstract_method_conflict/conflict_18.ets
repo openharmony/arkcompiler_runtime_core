@@ -44,5 +44,5 @@ class AdvancedRobot extends Robot implements Machine {
 function main(): void {
   const advancedRobot = new AdvancedRobot();
   advancedRobot.makeSound();
-  assertEQ(result, "Advanced Beep");
+  arktest.assertEQ(result, "Advanced Beep");
 }

@@ -22,5 +22,5 @@ function main(): void {
 
   array1[2] = 3;
   let a: number = array1[2];
-  assertEQ(a, 3);
+  arktest.assertEQ(a, 3);
 }

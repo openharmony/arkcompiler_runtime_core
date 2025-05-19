@@ -45,5 +45,5 @@ class Fish extends Animal {
 
 function main(): void {
     const animal: Animal = new Fish("Dory", "Saltwater")
-    assertEQ((animal as Fish).getWaterType(), "Saltwater");
+    arktest.assertEQ((animal as Fish).getWaterType(), "Saltwater");
 }

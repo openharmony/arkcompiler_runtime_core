@@ -16,7 +16,7 @@
 import {util} from "@ohos.util";
 
 function main(): int {
-    const suite = new ArkTestsuite("CommonUtil types.isDate() API tests")
+    const suite = new arktest.ArkTestsuite("CommonUtil types.isDate() API tests")
 
     suite.addTest("Verify Date is identified as Date", testIsDate001)
     suite.addTest("Verify Int8Array is not identified as Date", testIsDate002)
@@ -38,7 +38,7 @@ function main(): int {
 function testIsDate001() {
   let proc = new util.types();
   let result = proc.isDate(new Date());
-  assertTrue(result, "The Date should be of the same type as the Date");
+  arktest.assertTrue(result, "The Date should be of the same type as the Date");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0052
@@ -51,7 +51,7 @@ function testIsDate001() {
 function testIsDate002() {
   let proc = new util.types();
   let result = proc.isDate(new Int8Array());
-  assertTrue(result == false, "The Int8Array should not be of the same type as the Date");
+  arktest.assertTrue(result == false, "The Int8Array should not be of the same type as the Date");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0053
@@ -64,7 +64,7 @@ function testIsDate002() {
 function testIsDate003() {
   let proc = new util.types();
   let result = proc.isDate(true);
-  assertTrue(result == false, "The primitive Boolean should not be of the same type as the Date");
+  arktest.assertTrue(result == false, "The primitive Boolean should not be of the same type as the Date");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0054
@@ -77,7 +77,7 @@ function testIsDate003() {
 function testIsDate004() {
   let proc = new util.types();
   let result = proc.isDate(new Int16Array());
-  assertTrue(result == false, "The Int16Array should not be of the same type as the Date");
+  arktest.assertTrue(result == false, "The Int16Array should not be of the same type as the Date");
 }
 /**
  * @tc.number: SUB_COMMONLIBRARY_ETSUTILS_TYPES_0055
@@ -90,5 +90,5 @@ function testIsDate004() {
 function testIsDate005() {
   let proc = new util.types();
   let result = proc.isDate(new Float64Array());
-  assertTrue(result == false, "The Float64Array should not be of the same type as the Date");
+  arktest.assertTrue(result == false, "The Float64Array should not be of the same type as the Date");
 }

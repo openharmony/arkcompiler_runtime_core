@@ -31,6 +31,6 @@ class Child extends Parent {
 }
 
 function main(): void {
-    assertEQ(Parent.staticMethod(), "Parent's static method");
-    assertEQ(Child.staticMethod(), "Parent's static method and Child's additional logic");
+    arktest.assertEQ(Parent.staticMethod(), "Parent's static method");
+    arktest.assertEQ(Child.staticMethod(), "Parent's static method and Child's additional logic");
 }

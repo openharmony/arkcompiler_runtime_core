@@ -21,7 +21,7 @@ files: ['./ambient03/file.ets']
 import { ns1 as ns } from './ambient03/file.d.ets'
 
 function main() {
-    assertEQ(ns.foo(), 142)
-    assertEQ(ns.bar, 42)
-    assertEQ(new ns.A().fld, "abc")
+    arktest.assertEQ(ns.foo(), 142)
+    arktest.assertEQ(ns.bar, 42)
+    arktest.assertEQ(new ns.A().fld, "abc")
 }

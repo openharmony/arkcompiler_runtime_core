@@ -16,8 +16,8 @@
 function main(): int {
     let str = "abc";
     let null_str: String | null = null;
-    assertNE(str, null_str, "String must not be equal to null");
-    assertNE(null_str, str, "Null string must not be equal to non-null one");
-    assertEQ(null_str, null_str, "Null values of type String must be equal");
+    arktest.assertNE(str, null_str, "String must not be equal to null");
+    arktest.assertNE(null_str, str, "Null string must not be equal to non-null one");
+    arktest.assertEQ(null_str, null_str, "Null values of type String must be equal");
     return 0;
 }

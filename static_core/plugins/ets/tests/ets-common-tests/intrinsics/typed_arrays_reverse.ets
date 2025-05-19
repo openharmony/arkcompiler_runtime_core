@@ -79,17 +79,17 @@ function test_f64_array(): void throws {
 
 function check_array<T extends Number | BigInt>(data: ArrayLike<T>, data_rev: ArrayLike<T>, data_rev2: ArrayLike<T>): void {
     let size = data.length - 1
-    assertEQ(data.length, data_rev.length, "reverse(): bad array len")
-    assertEQ(data.length, data_rev2.length, "toReversed(): bad array len")
+    arktest.assertEQ(data.length, data_rev.length, "reverse(): bad array len")
+    arktest.assertEQ(data.length, data_rev2.length, "toReversed(): bad array len")
 
     for (let i: int = 0; i <= size; i++) {
-        assertEQ(data[i], data_rev[size - i], "reverse(): unexpected element: i: " + i)
-        assertEQ(data[i], data_rev2[size - i], "toReversed(): unexpected element: i: " + i)
+        arktest.assertEQ(data[i], data_rev[size - i], "reverse(): unexpected element: i: " + i)
+        arktest.assertEQ(data[i], data_rev2[size - i], "toReversed(): unexpected element: i: " + i)
     }
 }
 
 function main(): int {
-    let testSuite = new ArkTestsuite("typedArrays.reverse");
+    let testSuite = new arktest.ArkTestsuite("typedArrays.reverse");
     testSuite.addTest("Int8,Uint8 Arrays: reverse test", test_iu8_array);
     testSuite.addTest("Int16,Uint16 Arrays: reverse test", test_iu16_array)
     testSuite.addTest("Int32,Uint32 Arrays: reverse test", test_iu32_array)

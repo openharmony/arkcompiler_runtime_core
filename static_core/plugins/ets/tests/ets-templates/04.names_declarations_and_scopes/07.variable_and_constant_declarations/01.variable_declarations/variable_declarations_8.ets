@@ -22,5 +22,5 @@ function main(): void {
   if (tmp === undefined) {
     tmp = "default";
   }
-  assertTrue(tmp == "default");
+  arktest.assertTrue(tmp == "default");
 }

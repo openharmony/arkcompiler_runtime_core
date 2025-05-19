@@ -28,5 +28,5 @@ const config: Config = {
 
 function main(): void {
   const obj1: object = config;
-  assertTrue(obj1 == config);
+  arktest.assertTrue(obj1 == config);
 }

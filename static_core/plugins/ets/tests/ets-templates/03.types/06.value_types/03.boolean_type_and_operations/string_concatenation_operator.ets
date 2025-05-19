@@ -24,6 +24,6 @@ function main(): void {
   let x = a + "str";
   let y = b + "str";
 
-  assertEQ( x, "truestr" )
-  assertEQ( y, "falsestr" )
+  arktest.assertEQ( x, "truestr" )
+  arktest.assertEQ( y, "falsestr" )
 }

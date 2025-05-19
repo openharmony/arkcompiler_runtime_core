@@ -32,6 +32,6 @@ class A<T extends MyBase | undefined | null> {
 function main() {
     let a = new A<TMyBaseUndefineableNullable>
     let result: MyBase = a.foo(new MyBase)
-    assertNE(result, null);
+    arktest.assertNE(result, null);
 
 }

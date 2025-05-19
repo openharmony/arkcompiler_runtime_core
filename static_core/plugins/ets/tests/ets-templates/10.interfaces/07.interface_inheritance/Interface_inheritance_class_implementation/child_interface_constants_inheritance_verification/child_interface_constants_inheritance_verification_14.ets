@@ -27,5 +27,5 @@ class LocaleConstantChild implements LocaleConstantInterface {
 
 function main(): void {
   const instance = new LocaleConstantChild();
-  assertEQ(instance.CONST.language, 'en');
+  arktest.assertEQ(instance.CONST.language, 'en');
 }

@@ -50,5 +50,5 @@ class ChildImpl implements Child {
 
 function main(): void {
     const child = new ChildImpl();
-    assertEQ(child.greet(), 42);
+    arktest.assertEQ(child.greet(), 42);
 }

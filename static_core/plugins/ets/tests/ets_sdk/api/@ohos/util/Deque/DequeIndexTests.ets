@@ -19,7 +19,7 @@ import { BusinessError } from "@ohos.base";
 const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main(): int {
-    const suite = new ArkTestsuite("Deque API tests");
+    const suite = new arktest.ArkTestsuite("Deque API tests");
 
     suite.addTest("Deque index getter", testIndexGetter);
     suite.addTest("Deque index setter", testIndexSetter);
@@ -35,7 +35,7 @@ function testIndexGetter() {
     let deque = new Deque<number>();
     initializeDeque(deque, testNumbers);
     for (let i: int = 0; i < deque.length; i++) {
-        assertEQ(deque[i], testNumbers[i], `Element at index ${i} should match`);
+        arktest.assertEQ(deque[i], testNumbers[i], `Element at index ${i} should match`);
     }
 }
 
@@ -47,10 +47,10 @@ function testIndexSetter() {
     }
     let forEachCount = 0;
     deque.forEach((value: number) => {
-        assertEQ(value, 3, `Element should match`);
+        arktest.assertEQ(value, 3, `Element should match`);
         forEachCount++;
     });
-    assertEQ(deque.length, forEachCount, "Deque length should match forEach count");
+    arktest.assertEQ(deque.length, forEachCount, "Deque length should match forEach count");
 }
 
 function testIndexOutOfRange() {

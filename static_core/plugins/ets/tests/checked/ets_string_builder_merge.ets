@@ -710,40 +710,40 @@ function chain_concat19(): void {
     sb_abc.append(c)
     let _abc = sb_abc.toString()
 
-    assertEQ(_a, "_a");
-    assertEQ(_ab, "_ab");
-    assertEQ(_abc, "_abc");
+    arktest.assertEQ(_a, "_a");
+    arktest.assertEQ(_ab, "_ab");
+    arktest.assertEQ(_abc, "_abc");
 }
 
 function main() {
-    assertEQ(chain_concat0("a", 4, "b", 3), "_aaaa_bbb_", "Wrong result at chain_concat0");
-    assertEQ(chain_concat1("a", 4, "b", 3, "c", 5), "_aaaa_bbb_ccccc_", "Wrong result at chain_concat1");
-    assertEQ(chain_concat2("a", 4, "b", 3, "c", 5, "d", 2), "_aaaa_bbb_ccccc_dd_", "Wrong result at chain_concat2");
-    assertEQ(chain_concat3("a", 4, "b", 3, "c", 5, "d", 2), "_aaaa_bbb_aaaa_bbb_ccccc_dd_", "Wrong result at chain_concat3");
+    arktest.assertEQ(chain_concat0("a", 4, "b", 3), "_aaaa_bbb_", "Wrong result at chain_concat0");
+    arktest.assertEQ(chain_concat1("a", 4, "b", 3, "c", 5), "_aaaa_bbb_ccccc_", "Wrong result at chain_concat1");
+    arktest.assertEQ(chain_concat2("a", 4, "b", 3, "c", 5, "d", 2), "_aaaa_bbb_ccccc_dd_", "Wrong result at chain_concat2");
+    arktest.assertEQ(chain_concat3("a", 4, "b", 3, "c", 5, "d", 2), "_aaaa_bbb_aaaa_bbb_ccccc_dd_", "Wrong result at chain_concat3");
 
-    assertEQ(supported_chain_concat5(), "012 012", "Wrong result at supported_chain_concat5");
-    assertEQ(supported_chain_concat6(), " abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1  abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1 ", "Wrong result at supported_chain_concat6");
+    arktest.assertEQ(supported_chain_concat5(), "012 012", "Wrong result at supported_chain_concat5");
+    arktest.assertEQ(supported_chain_concat6(), " abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1  abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1 ", "Wrong result at supported_chain_concat6");
 
-    assertEQ(unsupported_append_chain_concat7(), "0 0", "Wrong result at unsupported_append_chain_concat7");
-    assertEQ(unsupported_constructor_chain_concat8(), "00", "Wrong result at unsupported_constructor_chain_concat8");
-    assertEQ(unsupported_usage_chain_concat9(), "0", "Wrong result at unsupported_usage_chain_concat9");
+    arktest.assertEQ(unsupported_append_chain_concat7(), "0 0", "Wrong result at unsupported_append_chain_concat7");
+    arktest.assertEQ(unsupported_constructor_chain_concat8(), "00", "Wrong result at unsupported_constructor_chain_concat8");
+    arktest.assertEQ(unsupported_usage_chain_concat9(), "0", "Wrong result at unsupported_usage_chain_concat9");
 
-    assertEQ(unsupported_chain_concat10(false), "210 012", "Wrong result at unsupported_chain_concat10(false)");
-    assertEQ(unsupported_chain_concat10(true), "012 012", "Wrong result at unsupported_chain_concat10(true)");
+    arktest.assertEQ(unsupported_chain_concat10(false), "210 012", "Wrong result at unsupported_chain_concat10(false)");
+    arktest.assertEQ(unsupported_chain_concat10(true), "012 012", "Wrong result at unsupported_chain_concat10(true)");
 
-    assertEQ(unsupported_chain_concat11(false), "0 2", "Wrong result at unsupported_chain_concat11(false)");
-    assertEQ(unsupported_chain_concat11(true), "1 2", "Wrong result at unsupported_chain_concat11(true)");
+    arktest.assertEQ(unsupported_chain_concat11(false), "0 2", "Wrong result at unsupported_chain_concat11(false)");
+    arktest.assertEQ(unsupported_chain_concat11(true), "1 2", "Wrong result at unsupported_chain_concat11(true)");
 
-    assertEQ(unsupported_chain_concat12(false), "0 1", "Wrong result at unsupported_chain_concat12(false)");
-    assertEQ(unsupported_chain_concat12(true), "0 1", "Wrong result at unsupported_chain_concat12(true)");
+    arktest.assertEQ(unsupported_chain_concat12(false), "0 1", "Wrong result at unsupported_chain_concat12(false)");
+    arktest.assertEQ(unsupported_chain_concat12(true), "0 1", "Wrong result at unsupported_chain_concat12(true)");
 
-    assertEQ(unsupported_chain_concat13(), "0 1", "Wrong result at unsupported_chain_concat13()");
+    arktest.assertEQ(unsupported_chain_concat13(), "0 1", "Wrong result at unsupported_chain_concat13()");
 
-    assertEQ(partially_supported_chain_concat14("ab", "c", "d", "e"), "abcde", "Wrong result at partially_supported_chain_concat14");
-    assertEQ(supported_chain_concat15("ab", "c", "d", "e"), "abcde", "Wrong result at supported_chain_concat15");
-    assertEQ(partially_supported_chain_concat16("ab", "c", "d", "e"), "abcde", "Wrong result at partially_supported_chain_concat16");
-    assertEQ(unsupported_usage_chain_concat17("abc"), "abc", "Wrong result at unsupported_usage_chain_concat17");
-    assertEQ(unsupported_usage_chain_concat18("abc"), "abc", "Wrong result at unsupported_usage_chain_concat18");
+    arktest.assertEQ(partially_supported_chain_concat14("ab", "c", "d", "e"), "abcde", "Wrong result at partially_supported_chain_concat14");
+    arktest.assertEQ(supported_chain_concat15("ab", "c", "d", "e"), "abcde", "Wrong result at supported_chain_concat15");
+    arktest.assertEQ(partially_supported_chain_concat16("ab", "c", "d", "e"), "abcde", "Wrong result at partially_supported_chain_concat16");
+    arktest.assertEQ(unsupported_usage_chain_concat17("abc"), "abc", "Wrong result at unsupported_usage_chain_concat17");
+    arktest.assertEQ(unsupported_usage_chain_concat18("abc"), "abc", "Wrong result at unsupported_usage_chain_concat18");
 
     chain_concat19();
 }
@@ -764,7 +764,7 @@ function bugfix_chain_concat20(): void
     let abcd = abc + "d";
     let abce = abc + "e";
 
-    assertEQ(abc, "abc");
-    assertEQ(abcd, "abcd");
-    assertEQ(abce, "abce");
+    arktest.assertEQ(abc, "abc");
+    arktest.assertEQ(abcd, "abcd");
+    arktest.assertEQ(abce, "abce");
 }

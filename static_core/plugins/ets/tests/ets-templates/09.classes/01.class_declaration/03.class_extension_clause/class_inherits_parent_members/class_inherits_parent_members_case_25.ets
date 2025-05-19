@@ -25,5 +25,5 @@ class Derived extends Base {}
 
 function main(): void {
   let instance = new Derived();
-  assertEQ(instance.value, true, "Subclass should inherit the initial value of the Boolean type member variable");
+  arktest.assertEQ(instance.value, true, "Subclass should inherit the initial value of the Boolean type member variable");
 }

@@ -27,7 +27,7 @@ function main(): void {
   let arr: NumberArray = [1, 2, 3];
   let result = processNumberArray(arr);
 
-  assertEQ(result[0], 1);
-  assertEQ(result[1], 2);
-  assertEQ(result[2], 3);
+  arktest.assertEQ(result[0], 1);
+  arktest.assertEQ(result[1], 2);
+  arktest.assertEQ(result[2], 3);
 }

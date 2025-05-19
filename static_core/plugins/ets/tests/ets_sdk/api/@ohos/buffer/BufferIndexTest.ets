@@ -16,7 +16,7 @@
 import buffer from "@ohos.buffer";
 
 function main(): int {
-    const suite = new ArkTestsuite("Buffer indexer methods")
+    const suite = new arktest.ArkTestsuite("Buffer indexer methods")
 
     suite.addTest("Test get via indexer", testIndexerGet)
     suite.addTest("Test set via indexer", testIndexerSet)
@@ -28,32 +28,32 @@ function main(): int {
 
 function testIndexerGet() {
     const buf = buffer.from([5, 10, 15, 20])
-    assertEQ(buf[0], 5)
-    assertEQ(buf[2], 15)
+    arktest.assertEQ(buf[0], 5)
+    arktest.assertEQ(buf[2], 15)
 }
 
 function testIndexerSet() {
     const buf = buffer.alloc(4)
     buf[1] = 100
     buf[3] = 255
-    assertEQ(buf[1], 100)
-    assertEQ(buf[3], 255)
+    arktest.assertEQ(buf[1], 100)
+    arktest.assertEQ(buf[3], 255)
 }
 
 function testIndexerGetSet() {
     const buf = buffer.from("abcd", "utf8")
     buf[0] = 0x78  // 'x'
     buf[3] = 0x79  // 'y'
-    assertEQ(buf[0], 0x78)
-    assertEQ(buf[3], 0x79)
-    assertEQ(buf.toString(), "xbcy")
+    arktest.assertEQ(buf[0], 0x78)
+    arktest.assertEQ(buf[3], 0x79)
+    arktest.assertEQ(buf.toString(), "xbcy")
 }
 
 function testIndexerOutOfBounds() {
     const buf = buffer.from([1, 2, 3])
-    assertEQ(buf[-1], undefined)
-    assertEQ(buf[5], undefined)
+    arktest.assertEQ(buf[-1], undefined)
+    arktest.assertEQ(buf[5], undefined)
     buf[10] = 99
-    assertEQ(buf.length, 3)
-    assertEQ(buf.toString(), "\u0001\u0002\u0003")
+    arktest.assertEQ(buf.length, 3)
+    arktest.assertEQ(buf.toString(), "\u0001\u0002\u0003")
 }

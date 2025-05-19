@@ -27,5 +27,5 @@ function increment(n: int): void {
 
 function main(): void {
   increment($$globalNum)
-  assertEQ(globalNum,  6)
+  arktest.assertEQ(globalNum,  6)
 }

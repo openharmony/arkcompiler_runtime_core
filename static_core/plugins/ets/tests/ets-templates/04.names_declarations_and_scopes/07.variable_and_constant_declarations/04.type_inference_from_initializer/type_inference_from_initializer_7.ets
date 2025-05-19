@@ -20,5 +20,5 @@ desc: Constant declaration with mixed types.
 function main(): void {
   let cond: boolean = true;
   let tmp = cond ? 1 : 2;
-  assertEQ(tmp, 1);
+  arktest.assertEQ(tmp, 1);
 }

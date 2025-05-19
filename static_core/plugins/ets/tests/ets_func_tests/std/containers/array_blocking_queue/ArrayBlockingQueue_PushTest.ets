@@ -25,7 +25,7 @@ let queueObj: ArrayBlockingQueue<Object> = new ArrayBlockingQueue<Object>(200);
 let queueStr: ArrayBlockingQueue<String> = new ArrayBlockingQueue<String>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new ArkTestsuite("ArrayBlockingQueuePushTest");
+    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePushTest");
 
     ArrayBlockingQueueTestsuite.addTest("SimpleQueuePushPopFrontBackSizeEmptyTest", () =>
     {
@@ -34,46 +34,46 @@ function main(): int {
             let el = (random() * 10000).toInt();
             arr[i] = el;
             queueInt.push(el);
-            assertEQ(el, queueInt.getEnd());
+            arktest.assertEQ(el, queueInt.getEnd());
         }
         let ind: int = 0;
         while (!queueInt.isEmpty()) {
             let el = queueInt.getFirst();
-            assertEQ(el, queueInt.pop());
-            assertEQ(el, arr[ind++]);
+            arktest.assertEQ(el, queueInt.pop());
+            arktest.assertEQ(el, arr[ind++]);
         }
-        assertEQ(ind, arr.length);
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(ind, arr.length);
+        arktest.assertEQ(queueInt.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestInt", () =>
     {
         let p1 = launch<void, () => void>(pusherInt);
         let arrayToCheck = popperInt();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(testArrayInt[i], arrayToCheck[i]);
+            arktest.assertEQ(testArrayInt[i], arrayToCheck[i]);
         }
         p1.Await();
-        assertEQ(queueInt.size, 0);
+        arktest.assertEQ(queueInt.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestObj", () =>
     {
         let p1 = launch<void, () => void>(pusherObj);
         let arrayToCheck = popperObj();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(testArrayObj[i], arrayToCheck[i]);
+            arktest.assertEQ(testArrayObj[i], arrayToCheck[i]);
         }
         p1.Await();
-        assertEQ(queueObj.size, 0);
+        arktest.assertEQ(queueObj.size, 0);
     });
     ArrayBlockingQueueTestsuite.addTest("ConcurrentPushPopTestStr", () =>
     {
         let p1 = launch<void, () => void>(pusherStr);
         let arrayToCheck = popperStr();
         for (let i = 0; i < elementsNum; i++) {
-            assertEQ(testArrayStr[i], arrayToCheck[i]);
+            arktest.assertEQ(testArrayStr[i], arrayToCheck[i]);
         }
         p1.Await();
-        assertEQ(queueStr.size, 0);
+        arktest.assertEQ(queueStr.size, 0);
     });
 
     return ArrayBlockingQueueTestsuite.run();

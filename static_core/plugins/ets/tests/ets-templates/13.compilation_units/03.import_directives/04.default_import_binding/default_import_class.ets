@@ -24,6 +24,6 @@ import DefaultExportedClass from "../../07.top-level_declarations/01.exported_de
 function main(): void {
     let test_class = new DefaultExportedClass();
 
-    assertEQ(test_class.hello("hello"), "hello_world");
-    assertEQ((test_class.test_member + "_member"), "test_member");
+    arktest.assertEQ(test_class.hello("hello"), "hello_world");
+    arktest.assertEQ((test_class.test_member + "_member"), "test_member");
 }

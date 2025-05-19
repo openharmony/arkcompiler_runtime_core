@@ -24,5 +24,5 @@ class StaticNumClass {
 StaticNumClass.staticValue = 100;
 
 function main(): void {
-    assertEQ(StaticNumClass.staticValue, 100);
+    arktest.assertEQ(StaticNumClass.staticValue, 100);
 }

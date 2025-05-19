@@ -41,11 +41,11 @@ class C implements Auto {}
 
 function main(): void {
     let a: A = new A()
-    assertEQ( a.getHorsePower(5, 5), 25 )
+    arktest.assertEQ( a.getHorsePower(5, 5), 25 )
 
     let b: B = new B()
-    assertEQ( b.getHorsePower(5, 5), 25 )
+    arktest.assertEQ( b.getHorsePower(5, 5), 25 )
 
     let c: C = new C()
-    assertEQ( c.getHorsePower(5, 5), 5 )
+    arktest.assertEQ( c.getHorsePower(5, 5), 5 )
 }

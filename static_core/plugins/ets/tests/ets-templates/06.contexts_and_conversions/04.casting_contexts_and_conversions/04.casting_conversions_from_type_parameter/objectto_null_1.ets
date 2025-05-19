@@ -20,5 +20,5 @@ desc: Convert to obj-null type.
 function main(): void {
   let myVar: null = null;
   const obj1: object | null = myVar;
-  assertTrue(obj1 == myVar);
+  arktest.assertTrue(obj1 == myVar);
 }

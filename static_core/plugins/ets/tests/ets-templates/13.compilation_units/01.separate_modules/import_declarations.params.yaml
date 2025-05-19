@@ -18,16 +18,16 @@ cases:
         class B extends A {};
     call: |-
         let z: A = new A();
-        assertTrue(z instanceof A);
+        arktest.assertTrue(z instanceof A);
         let x: B = new B();
-        assertTrue(x instanceof A);
+        arktest.assertTrue(x instanceof A);
 
   - import: |-
         import {A} from "./modules/declarations.ets"  // Base class
         import {B} from "./modules/declarations.ets"  // Derived class
     call: |-
         let z: B = new B();
-        assertTrue(z instanceof A);
+        arktest.assertTrue(z instanceof A);
 
   - import: |-
         import {AC} from "./modules/declarations.ets"  // Abstract class
@@ -36,11 +36,11 @@ cases:
         class B extends AC {};
     call: |-
         let z: AC = new C();
-        assertTrue(z instanceof AC);
-        assertTrue(z instanceof C);
+        arktest.assertTrue(z instanceof AC);
+        arktest.assertTrue(z instanceof C);
         let x: B = new B();
-        assertTrue(x instanceof AC);
-        assertTrue(x instanceof B);
+        arktest.assertTrue(x instanceof AC);
+        arktest.assertTrue(x instanceof B);
 
   - import: |-
         import {I} from "./modules/declarations.ets"  // Base interface
@@ -50,12 +50,12 @@ cases:
         class B implements II {};
     call: |-
         let z: I = new B();
-        assertTrue(z instanceof B);
-        assertTrue(z instanceof I);
-        assertTrue(z instanceof II);
+        arktest.assertTrue(z instanceof B);
+        arktest.assertTrue(z instanceof I);
+        arktest.assertTrue(z instanceof II);
         let x: A = new A();
-        assertTrue(x instanceof A);
-        assertTrue(x instanceof I);
+        arktest.assertTrue(x instanceof A);
+        arktest.assertTrue(x instanceof I);
 
   - import: |-
         import {I} from "./modules/declarations.ets"  // Base interface
@@ -63,35 +63,35 @@ cases:
         import {D} from "./modules/declarations.ets"  // Derived class
     call: |-
         let z: I = new D();
-        assertTrue(z instanceof D);
-        assertTrue(z instanceof I);
-        assertTrue(z instanceof II);
+        arktest.assertTrue(z instanceof D);
+        arktest.assertTrue(z instanceof I);
+        arktest.assertTrue(z instanceof II);
 
   - import: |-
         import {ENUM} from "./modules/declarations.ets"  // Enum
     call: |-
-        assertEQ(ENUM.Red.valueOf(), 0);
-        assertEQ(ENUM.Blue.valueOf(), 1);
+        arktest.assertEQ(ENUM.Red.valueOf(), 0);
+        arktest.assertEQ(ENUM.Blue.valueOf(), 1);
 
   - import: |-
         import {A} from "./modules/declarations.ets"  // Base class
         import {CLASS_A} from "./modules/declarations.ets"  // Type, class
     call: |-
         let z: CLASS_A = new CLASS_A();
-        assertTrue(z instanceof A);
+        arktest.assertTrue(z instanceof A);
 
   - import: |-
         import {VAR_i} from "./modules/declarations.ets"  // variable of primitive type (int)
     call: |-
         let z: VAR_i = 3;
-        assertEQ(z, 3);
+        arktest.assertEQ(z, 3);
 
   - import: |-
         import {TPL} from "./modules/declarations.ets"  // Tuple type
     call: |-
         let z: TPL = [new Number(), new String()];
-        assertTrue(z[0] instanceof Number);
-        assertTrue(z[1] instanceof String);
+        arktest.assertTrue(z[0] instanceof Number);
+        arktest.assertTrue(z[1] instanceof String);
 
   - import: |-
         import {NoArg} from "./modules/declarations.ets"  // Function without arguments
@@ -99,97 +99,97 @@ cases:
 
     call: |-
         NoArg();
-        assertEQ(res, 1);
+        arktest.assertEQ(res, 1);
 
   - import: |-
         import {OneArg} from "./modules/declarations.ets"  // Function, argument of Number type
     call: |-
-        assertEQ(OneArg(new Number()), 2);
+        arktest.assertEQ(OneArg(new Number()), 2);
 
   - import: |-
         import {TwoArgs} from "./modules/declarations.ets"  // Function, arguments of char and byte types
     call: |-
-        assertEQ(TwoArgs(c'A', 1 as byte), 3);
+        arktest.assertEQ(TwoArgs(c'A', 1 as byte), 3);
 
   - import: |-
         import {Gen} from "./modules/declarations.ets"  // Function, generic argument
     call: |-
         let s = "knock-knock";
-        assertEQ(Gen(s), s);
-        assertEQ(Gen(new Number(1.45)), 1.45);
+        arktest.assertEQ(Gen(s), s);
+        arktest.assertEQ(Gen(new Number(1.45)), 1.45);
 
   - import: |-
         import {ArgFun} from "./modules/declarations.ets"  // Function, argument is of function type
     call: |-
-        assertEQ(ArgFun( () => { return 3; } ), 3);
+        arktest.assertEQ(ArgFun( () => { return 3; } ), 3);
 
   - import: |-
         import {ArgFun2} from "./modules/declarations.ets"  // Function, arguments - function type + primitive
     call: |-
-        assertEQ(ArgFun2( (i) => { return i; }, 4), 4);
+        arktest.assertEQ(ArgFun2( (i) => { return i; }, 4), 4);
 
   - import: |-
         import {a} from "./modules/declarations.ets"  // Variable, primitive, implicit type
     call: |-
-        assertEQ(a, 1);
+        arktest.assertEQ(a, 1);
         a = 2;
-        assertEQ(a, 2);
+        arktest.assertEQ(a, 2);
         a = 1;
 
   - import: |-
         import {i} from "./modules/declarations.ets"  // Variable, int
     call: |-
-        assertEQ(i, 2);
+        arktest.assertEQ(i, 2);
         i += 3;
-        assertEQ(i, 5);
+        arktest.assertEQ(i, 5);
         i = 2;
 
   - import: |-
         import {n} from "./modules/declarations.ets"  // Variable, number
     call: |-
-        assertEQ(n, 3);
+        arktest.assertEQ(n, 3);
         n += 0.1;
-        assertEQ(n, 3.1);
+        arktest.assertEQ(n, 3.1);
         n = 3;
 
   - import: |-
         import {s} from "./modules/declarations.ets"  // Variable, String
     call: |-
-        assertEQ(s, "knock-knock");
+        arktest.assertEQ(s, "knock-knock");
         s += " who`s there";
-        assertEQ(s, "knock-knock who`s there");
+        arktest.assertEQ(s, "knock-knock who`s there");
         s = "knock-knock";
 
   - import: |-
         import {c} from "./modules/declarations.ets"  // Variable, char
     call: |-
-        assertEQ(c, c'A');
+        arktest.assertEQ(c, c'A');
         c = c'b';
-        assertEQ(c, c'b');
+        arktest.assertEQ(c, c'b');
         c = c'A';
 
   - import: |-
         import {u} from "./modules/declarations.ets"  // Variable, union
     call: |-
-        assertEQ(u, undefined);
+        arktest.assertEQ(u, undefined);
         u = new Number(1.2);
-        assertEQ(u, 1.2);
+        arktest.assertEQ(u, 1.2);
         u = "hi there";
-        assertEQ(u, "hi there");
+        arktest.assertEQ(u, "hi there");
         u = undefined;
 
   - import: |-
         import {arr} from "./modules/declarations.ets"  // Variable, bytes[3]
     call: |-
-        assertEQ(arr.length, 3);
+        arktest.assertEQ(arr.length, 3);
         arr = new byte[2];
-        assertEQ(arr.length, 2);
+        arktest.assertEQ(arr.length, 2);
         arr = new byte[3];
 
   - import: |-
         import {ca} from "./modules/declarations.ets"  // Const implicit int
     call: |-
-        assertEQ(ca, 11);
+        arktest.assertEQ(ca, 11);
 
   - import: |-
         import {ca} from "./modules/declarations.ets"  // Const implicit int
@@ -201,7 +201,7 @@ cases:
   - import: |-
         import {ci} from "./modules/declarations.ets"  // Const int
     call: |-
-        assertEQ(ci, 12);
+        arktest.assertEQ(ci, 12);
 
   - import: |-
         import {ci} from "./modules/declarations.ets"  // Const int
@@ -213,7 +213,7 @@ cases:
   - import: |-
         import {cs} from "./modules/declarations.ets"  // Const str
     call: |-
-        assertEQ(cs, "who`s there");
+        arktest.assertEQ(cs, "who`s there");
 
   - import: |-
         import {cs} from "./modules/declarations.ets"  // Const str

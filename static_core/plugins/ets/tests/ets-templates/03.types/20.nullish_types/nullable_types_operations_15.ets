@@ -27,5 +27,5 @@ function main(): void {
   let b: A|null = new A();
   let x: int = b.foo();
 
-  assertTrue(x == 5)
+  arktest.assertTrue(x == 5)
 }

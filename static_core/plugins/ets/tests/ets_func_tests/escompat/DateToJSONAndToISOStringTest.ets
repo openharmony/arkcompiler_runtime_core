@@ -15,17 +15,17 @@
 const invalidDate = new Date('invalid date');
 
 function main(): int {
-    const suite = new ArkTestsuite('test invalid date');
+    const suite = new arktest.ArkTestsuite('test invalid date');
     suite.addTest('Date.toJSON', testToJSONWithInvalidDate);
     suite.addTest('Date.toISOString', testToISOStringWithInvalidDate);
     return suite.run();
 }
 
 function testToJSONWithInvalidDate(): void {
-    assertTrue(invalidDate.toJSON() == null);
+    arktest.assertTrue(invalidDate.toJSON() == null);
 }
 
 function testToISOStringWithInvalidDate(): void {
     const errorCheck = (e: Error | Exception) => { return e.message == 'Invalid time value'; };
-    expectThrow((): void throws => { invalidDate.toISOString(); }, errorCheck);
+    arktest.expectThrow((): void throws => { invalidDate.toISOString(); }, errorCheck);
 }

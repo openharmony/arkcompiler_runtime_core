@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function xassert(a: Any, b: Any) { return assertEQ(a, b) }
+function xassert(a: Any, b: Any) { return arktest.assertEQ(a, b) }
 
 function fakeLambdaInvoke(a: string, b: string | undefined): string {
     return a + (b === undefined ? "u" : b);

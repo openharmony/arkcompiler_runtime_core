@@ -28,5 +28,5 @@ namespace NS20 {
 }
 
 function main() {
-    assertEQ(NS20.boo(),"Foo20")
+    arktest.assertEQ(NS20.boo(),"Foo20")
 }

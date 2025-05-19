@@ -21,7 +21,7 @@ desc: Using type undefined‘ as type annotation is not recommended, except in n
 
 function main(): void {
   let a: string|Number|undefined|null = {{val}};
-  assertTrue( a == {{val}})
+  arktest.assertTrue( a == {{val}})
 }
 
 {% endfor %}

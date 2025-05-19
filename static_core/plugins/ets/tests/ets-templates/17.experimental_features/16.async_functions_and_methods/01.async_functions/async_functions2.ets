@@ -24,7 +24,7 @@ async function testAsync(): Promise<double> {
 
 async function startTest() {
     let res: double = await testAsync();
-    assertEQ(res === 10.1, true);
+    arktest.assertEQ(res === 10.1, true);
 }
 
 function main(): void {

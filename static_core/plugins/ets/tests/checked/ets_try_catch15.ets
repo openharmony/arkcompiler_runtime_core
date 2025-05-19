@@ -61,7 +61,7 @@ function __noinline__test() {
             throw Error()
         }
     } catch (e) {
-        assertTrue(false);
+        arktest.assertTrue(false);
     }
 }
 

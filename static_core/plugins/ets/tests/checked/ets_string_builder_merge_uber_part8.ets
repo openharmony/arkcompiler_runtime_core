@@ -27,6 +27,6 @@ const uber_golden_TTTF = "_aaaa_adadad_aaaa_bababa_ddddd_aaaa_bababa_cbcbcb_aaaa
 const uber_golden_TTTT = "_aaaa_adadad_aaaa_bababa_ddddd_aaaa_bababa_cbcbcb_aaaaa_dd_cbcbcb_aaaa_bababa_cbcbcb_aaaaa_aa_";
 
 function main() {
-    assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, true, true, true, false)   , uber_golden_TTTF, "Wrong result at uber_golden_TTTF")
-    assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, true, true, true, true)    , uber_golden_TTTT, "Wrong result at uber_golden_TTTT")
+    arktest.assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, true, true, true, false)   , uber_golden_TTTF, "Wrong result at uber_golden_TTTF")
+    arktest.assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, true, true, true, true)    , uber_golden_TTTT, "Wrong result at uber_golden_TTTT")
 }

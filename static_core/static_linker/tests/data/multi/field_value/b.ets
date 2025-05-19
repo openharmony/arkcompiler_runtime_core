@@ -17,9 +17,9 @@ import { STR } from "./a"
 
 function check(a: string, expected: string): void {
     const a1 = a as Object|null|undefined;
-    assertTrue(a1 !== null);
-    assertTrue(a1 !== undefined);
-    assertEQ(a1, expected);
+    arktest.assertTrue(a1 !== null);
+    arktest.assertTrue(a1 !== undefined);
+    arktest.assertEQ(a1, expected);
 }
 
 function deeper(a: string): void {

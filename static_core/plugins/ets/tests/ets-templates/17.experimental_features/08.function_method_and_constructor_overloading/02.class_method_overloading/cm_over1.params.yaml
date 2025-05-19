@@ -56,22 +56,22 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(new Byte(-1 as byte)), "byte" )
-          assertEQ( a.meth(new Short(-1 as short)), "short" )
-          assertEQ( a.meth(new Int(-1 as int)), "int" )
-          assertEQ( a.meth(new Long(-1 as long)), "long" )
-          assertEQ( a.meth(new Char(c'A')), "char" )
-          assertEQ( a.meth(new Boolean(false)), "boolean" )
-          assertEQ( a.meth(new Float(3.14 as float)), "float" )
-          assertEQ( a.meth(new Double(3.14)), "double" )
-          assertEQ( a.meth(-1 as long), "long" )
-          assertEQ( a.meth(-1 as int), "int" )
-          assertEQ( a.meth(-1 as short), "short" )
-          assertEQ( a.meth(-1 as byte), "byte" )
-          assertEQ( a.meth(c'A'), "char" )
-          assertEQ( a.meth(false), "boolean" )
-          assertEQ( a.meth(3.14), "double" )
-          assertEQ( a.meth(3.14 as float), "float" )
+          arktest.assertEQ( a.meth(new Byte(-1 as byte)), "byte" )
+          arktest.assertEQ( a.meth(new Short(-1 as short)), "short" )
+          arktest.assertEQ( a.meth(new Int(-1 as int)), "int" )
+          arktest.assertEQ( a.meth(new Long(-1 as long)), "long" )
+          arktest.assertEQ( a.meth(new Char(c'A')), "char" )
+          arktest.assertEQ( a.meth(new Boolean(false)), "boolean" )
+          arktest.assertEQ( a.meth(new Float(3.14 as float)), "float" )
+          arktest.assertEQ( a.meth(new Double(3.14)), "double" )
+          arktest.assertEQ( a.meth(-1 as long), "long" )
+          arktest.assertEQ( a.meth(-1 as int), "int" )
+          arktest.assertEQ( a.meth(-1 as short), "short" )
+          arktest.assertEQ( a.meth(-1 as byte), "byte" )
+          arktest.assertEQ( a.meth(c'A'), "char" )
+          arktest.assertEQ( a.meth(false), "boolean" )
+          arktest.assertEQ( a.meth(3.14), "double" )
+          arktest.assertEQ( a.meth(3.14 as float), "float" )
 
     - decl: |-
           // primitives and boxed, with sub/superclass
@@ -99,22 +99,22 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(new Byte(-1 as byte)), "byte" )
-          assertEQ( a.meth(new Short(-1 as short)), "short" )
-          assertEQ( a.meth(new Int(-1 as int)), "int" )
-          assertEQ( a.meth(new Long(-1 as long)), "long" )
-          assertEQ( a.meth(new Char(c'A')), "char" )
-          assertEQ( a.meth(new Boolean(false)), "boolean" )
-          assertEQ( a.meth(new Float(3.14 as float)), "float" )
-          assertEQ( a.meth(new Double(3.14)), "double" )
-          assertEQ( a.meth(-1 as long), "long" )
-          assertEQ( a.meth(-1 as int), "int" )
-          assertEQ( a.meth(-1 as short), "short" )
-          assertEQ( a.meth(-1 as byte), "byte" )
-          assertEQ( a.meth(c'A'), "char" )
-          assertEQ( a.meth(false), "boolean" )
-          assertEQ( a.meth(3.14), "double" )
-          assertEQ( a.meth(3.14 as float), "float" )
+          arktest.assertEQ( a.meth(new Byte(-1 as byte)), "byte" )
+          arktest.assertEQ( a.meth(new Short(-1 as short)), "short" )
+          arktest.assertEQ( a.meth(new Int(-1 as int)), "int" )
+          arktest.assertEQ( a.meth(new Long(-1 as long)), "long" )
+          arktest.assertEQ( a.meth(new Char(c'A')), "char" )
+          arktest.assertEQ( a.meth(new Boolean(false)), "boolean" )
+          arktest.assertEQ( a.meth(new Float(3.14 as float)), "float" )
+          arktest.assertEQ( a.meth(new Double(3.14)), "double" )
+          arktest.assertEQ( a.meth(-1 as long), "long" )
+          arktest.assertEQ( a.meth(-1 as int), "int" )
+          arktest.assertEQ( a.meth(-1 as short), "short" )
+          arktest.assertEQ( a.meth(-1 as byte), "byte" )
+          arktest.assertEQ( a.meth(c'A'), "char" )
+          arktest.assertEQ( a.meth(false), "boolean" )
+          arktest.assertEQ( a.meth(3.14), "double" )
+          arktest.assertEQ( a.meth(3.14 as float), "float" )
 
     - decl: |-
           // enums
@@ -129,12 +129,12 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(-1), "int" )
-          assertEQ( a.meth(Color.Red), "Color" )
-          assertEQ( a.meth(-2 as short), "short" )
-          assertEQ( a.meth("abc"), "string" )
-          assertEQ( a.meth(Size.L), "Size" )
-          assertEQ( a.meth(42 as byte), "int" )
+          arktest.assertEQ( a.meth(-1), "int" )
+          arktest.assertEQ( a.meth(Color.Red), "Color" )
+          arktest.assertEQ( a.meth(-2 as short), "short" )
+          arktest.assertEQ( a.meth("abc"), "string" )
+          arktest.assertEQ( a.meth(Size.L), "Size" )
+          arktest.assertEQ( a.meth(42 as byte), "int" )
 
     - decl: |-
           // enums, with sub/superclass
@@ -154,12 +154,12 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(-1), "int" )
-          assertEQ( a.meth(Color.Red), "Color" )
-          assertEQ( a.meth(-2 as short), "short" )
-          assertEQ( a.meth("abc"), "string" )
-          assertEQ( a.meth(Size.L), "Size" )
-          assertEQ( a.meth(42 as byte), "int" )
+          arktest.assertEQ( a.meth(-1), "int" )
+          arktest.assertEQ( a.meth(Color.Red), "Color" )
+          arktest.assertEQ( a.meth(-2 as short), "short" )
+          arktest.assertEQ( a.meth("abc"), "string" )
+          arktest.assertEQ( a.meth(Size.L), "Size" )
+          arktest.assertEQ( a.meth(42 as byte), "int" )
 
     - decl: |-
           // arrays
@@ -182,18 +182,18 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth([(-1).toByte]), "Byte" )
-          assertEQ( a.meth([(-1).toShort]), "Short" )
-          assertEQ( a.meth([(-1).toInt()]), "Int" )
-          assertEQ( a.meth([(-1).toLong()]), "Long" )
-          assertEQ( a.meth([c'A']), "Char" )
-          assertEQ( a.meth([false]), "Boolean" )
-          assertEQ( a.meth([(3.14).toFloat()]), "Float" )
-          assertEQ( a.meth([3.14]), "Double" )
-          assertEQ( a.meth([new Object()]), "Object" )
-          assertEQ( a.meth([Color.Red]), "Color" )
-          assertEQ( a.meth([Size.M]), "Size" )
-          assertEQ( a.meth(new A[1]), "A" )
+          arktest.assertEQ( a.meth([(-1).toByte]), "Byte" )
+          arktest.assertEQ( a.meth([(-1).toShort]), "Short" )
+          arktest.assertEQ( a.meth([(-1).toInt()]), "Int" )
+          arktest.assertEQ( a.meth([(-1).toLong()]), "Long" )
+          arktest.assertEQ( a.meth([c'A']), "Char" )
+          arktest.assertEQ( a.meth([false]), "Boolean" )
+          arktest.assertEQ( a.meth([(3.14).toFloat()]), "Float" )
+          arktest.assertEQ( a.meth([3.14]), "Double" )
+          arktest.assertEQ( a.meth([new Object()]), "Object" )
+          arktest.assertEQ( a.meth([Color.Red]), "Color" )
+          arktest.assertEQ( a.meth([Size.M]), "Size" )
+          arktest.assertEQ( a.meth(new A[1]), "A" )
 
     - decl: |-
           // arrays, from sub/superclass
@@ -241,26 +241,26 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth([-1 as byte]), "byte" )
-          assertEQ( a.meth([-1 as short]), "short" )
-          assertEQ( a.meth([-1 as int]), "int" )
-          assertEQ( a.meth([-1 as long]), "long" )
-          assertEQ( a.meth([c'A']), "char" )
-          assertEQ( a.meth([false]), "boolean" )
-          assertEQ( a.meth([3.14 as float]), "float" )
-          assertEQ( a.meth([3.14]), "double" )
-          assertEQ( a.meth([new Byte(-1 as byte)]), "byte" )
-          assertEQ( a.meth([new Short(-1 as short)]), "short" )
-          assertEQ( a.meth([new Int(-1)]), "int" )
-          assertEQ( a.meth([new Long(-1 as long)]), "long" )
-          assertEQ( a.meth([new Char(c'A')]), "char" )
-          assertEQ( a.meth([new Boolean(false)]), "boolean" )
-          assertEQ( a.meth([new Float(3.14 as float)]), "float" )
-          assertEQ( a.meth([new Double(3.14)]), "double" )
-          assertEQ( a.meth([new Object()]), "Object" )
-          assertEQ( a.meth([Color.Red]), "Color" )
-          assertEQ( a.meth([Size.M]), "Size" )
-          assertEQ( a.meth(new A[1]), "A" )
+          arktest.assertEQ( a.meth([-1 as byte]), "byte" )
+          arktest.assertEQ( a.meth([-1 as short]), "short" )
+          arktest.assertEQ( a.meth([-1 as int]), "int" )
+          arktest.assertEQ( a.meth([-1 as long]), "long" )
+          arktest.assertEQ( a.meth([c'A']), "char" )
+          arktest.assertEQ( a.meth([false]), "boolean" )
+          arktest.assertEQ( a.meth([3.14 as float]), "float" )
+          arktest.assertEQ( a.meth([3.14]), "double" )
+          arktest.assertEQ( a.meth([new Byte(-1 as byte)]), "byte" )
+          arktest.assertEQ( a.meth([new Short(-1 as short)]), "short" )
+          arktest.assertEQ( a.meth([new Int(-1)]), "int" )
+          arktest.assertEQ( a.meth([new Long(-1 as long)]), "long" )
+          arktest.assertEQ( a.meth([new Char(c'A')]), "char" )
+          arktest.assertEQ( a.meth([new Boolean(false)]), "boolean" )
+          arktest.assertEQ( a.meth([new Float(3.14 as float)]), "float" )
+          arktest.assertEQ( a.meth([new Double(3.14)]), "double" )
+          arktest.assertEQ( a.meth([new Object()]), "Object" )
+          arktest.assertEQ( a.meth([Color.Red]), "Color" )
+          arktest.assertEQ( a.meth([Size.M]), "Size" )
+          arktest.assertEQ( a.meth(new A[1]), "A" )
 
     - decl: |-
           // tuples
@@ -277,12 +277,12 @@ cases:
       use: |-
           let a: A = new A()
           let t: T = [3.14, "abc"]
-          assertEQ( a.meth(t), "T" )
+          arktest.assertEQ( a.meth(t), "T" )
           let r: R = [3.14, false]
-          assertEQ( a.meth(r), "R" )
-          assertEQ( a.meth([3.14]), "number" )
-          assertEQ( a.meth(["abc"]), "string" )
-          assertEQ( a.meth(true), "boolean" )
+          arktest.assertEQ( a.meth(r), "R" )
+          arktest.assertEQ( a.meth([3.14]), "number" )
+          arktest.assertEQ( a.meth(["abc"]), "string" )
+          arktest.assertEQ( a.meth(true), "boolean" )
 
     - decl: |-
           // tuples with sub/superclass
@@ -304,12 +304,12 @@ cases:
       use: |-
           let a: A = new A()
           let t: T = [3.14, "abc"]
-          assertEQ( a.meth(t), "T" )
+          arktest.assertEQ( a.meth(t), "T" )
           let r: R = [3.14, false]
-          assertEQ( a.meth(r), "R" )
-          assertEQ( a.meth([3.14, 3.14]), "number" )
-          assertEQ( a.meth(["abc", "xyz"]), "string" )
-          assertEQ( a.meth(true), "boolean" )
+          arktest.assertEQ( a.meth(r), "R" )
+          arktest.assertEQ( a.meth([3.14, 3.14]), "number" )
+          arktest.assertEQ( a.meth(["abc", "xyz"]), "string" )
+          arktest.assertEQ( a.meth(true), "boolean" )
 
     - decl: |-
           // unions
@@ -326,16 +326,16 @@ cases:
       use: |-
           let a: A = new A()
           let u: U = 3.14
-          assertEQ( a.meth(u), "U" )
+          arktest.assertEQ( a.meth(u), "U" )
           u = "abc"
-          assertEQ( a.meth(u), "U" )
+          arktest.assertEQ( a.meth(u), "U" )
           let v: V = new Boolean(true)
-          assertEQ( a.meth(v), "V" )
+          arktest.assertEQ( a.meth(v), "V" )
           v = new Double(1.5)
-          assertEQ( a.meth(v), "V" )
-          assertEQ( a.meth(3.14), "number" )
-          assertEQ( a.meth(new Boolean(false)), "Boolean" )
-          assertEQ( a.meth("abc"), "string" )
+          arktest.assertEQ( a.meth(v), "V" )
+          arktest.assertEQ( a.meth(3.14), "number" )
+          arktest.assertEQ( a.meth(new Boolean(false)), "Boolean" )
+          arktest.assertEQ( a.meth("abc"), "string" )
 
     - decl: |-
           // unions with sub/superclass
@@ -357,16 +357,16 @@ cases:
       use: |-
           let a: A = new A()
           let u: U = 3.14
-          assertEQ( a.meth(u), "U" )
+          arktest.assertEQ( a.meth(u), "U" )
           u = "abc"
-          assertEQ( a.meth(u), "U" )
+          arktest.assertEQ( a.meth(u), "U" )
           let v: V = new Boolean(true)
-          assertEQ( a.meth(v), "V" )
+          arktest.assertEQ( a.meth(v), "V" )
           v = new Double(1.5)
-          assertEQ( a.meth(v), "V" )
-          assertEQ( a.meth(3.14), "number" )
-          assertEQ( a.meth(new Boolean(false)), "Boolean" )
-          assertEQ( a.meth("abc"), "string" )
+          arktest.assertEQ( a.meth(v), "V" )
+          arktest.assertEQ( a.meth(3.14), "number" )
+          arktest.assertEQ( a.meth(new Boolean(false)), "Boolean" )
+          arktest.assertEQ( a.meth("abc"), "string" )
 
     - decl: |-
           // function types
@@ -386,14 +386,14 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertTrue( false )
+              arktest.assertTrue( false )
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(foo), "void-void" )
-          assertEQ( a.meth((v: number): void => { assertTrue( v, 0.0 ) }), "number-void" )
-          assertEQ( a.meth(fff), "FF" )
-          assertEQ( a.meth(eee), "EE" )
+          arktest.assertEQ( a.meth(foo), "void-void" )
+          arktest.assertEQ( a.meth((v: number): void => { arktest.assertTrue( v, 0.0 ) }), "number-void" )
+          arktest.assertEQ( a.meth(fff), "FF" )
+          arktest.assertEQ( a.meth(eee), "EE" )
 
     - decl: |-
           // function types with sub/superclass
@@ -418,15 +418,15 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assertTrue( false )
+              arktest.assertTrue( false )
           }
       use: |-
           let a: A = new A()
-          assertEQ( a.meth(foo), "void-void" )
-          assertEQ( a.meth((v: number): void => { assertTrue( v, 0.0 )}), "number-void" )
-          assertEQ( a.meth(fff), "FF" )
+          arktest.assertEQ( a.meth(foo), "void-void" )
+          arktest.assertEQ( a.meth((v: number): void => { arktest.assertTrue( v, 0.0 )}), "number-void" )
+          arktest.assertEQ( a.meth(fff), "FF" )
           let v: EE = eee
-          assertEQ( a.meth(v), "EE" )
+          arktest.assertEQ( a.meth(v), "EE" )
 
     - decl: |-
           // nullish types
@@ -444,19 +444,19 @@ cases:
       use: |-
           let a: A = new A()
           let s: S = "ABC"
-          assertEQ( a.meth(s), "S" )
+          arktest.assertEQ( a.meth(s), "S" )
           let sn: SN = "ABC"
-          assertEQ( a.meth(sn), "SN" )
+          arktest.assertEQ( a.meth(sn), "SN" )
           let su: SU = "ABC"
-          assertEQ( a.meth(su), "SU" )
+          arktest.assertEQ( a.meth(su), "SU" )
           let snu: SNU = "ABC"
-          assertEQ( a.meth(snu), "SNU" )
+          arktest.assertEQ( a.meth(snu), "SNU" )
           sn = null
-          assertEQ( a.meth(sn), "SN" )
+          arktest.assertEQ( a.meth(sn), "SN" )
           su = undefined
-          assertEQ( a.meth(su), "SU" )
+          arktest.assertEQ( a.meth(su), "SU" )
           snu = undefined
-          assertEQ( a.meth(snu), "SNU" )
+          arktest.assertEQ( a.meth(snu), "SNU" )
 
     - decl: |-
           // nullish types with sub/superclass
@@ -479,16 +479,16 @@ cases:
       use: |-
           let a: A = new A()
           let s: S = "ABC"
-          assertEQ( a.meth(s), "S" )
+          arktest.assertEQ( a.meth(s), "S" )
           let sn: SN = "ABC"
-          assertEQ( a.meth(sn), "SN" )
+          arktest.assertEQ( a.meth(sn), "SN" )
           let su: SU = "ABC"
-          assertEQ( a.meth(su), "SU" )
+          arktest.assertEQ( a.meth(su), "SU" )
           let snu: SNU = "ABC"
-          assertEQ( a.meth(snu), "SNU" )
+          arktest.assertEQ( a.meth(snu), "SNU" )
           sn = null
-          assertEQ( a.meth(sn), "SN" )
+          arktest.assertEQ( a.meth(sn), "SN" )
           su = undefined
-          assertEQ( a.meth(su), "SU" )
+          arktest.assertEQ( a.meth(su), "SU" )
           snu = undefined
-          assertEQ( a.meth(snu), "SNU" )
+          arktest.assertEQ( a.meth(snu), "SNU" )

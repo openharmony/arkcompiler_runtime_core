@@ -21,7 +21,7 @@ cases:
           let arr = obj as FixedArray<byte>
           let v: byte = arr[0]
           arr[1] = (arr[1] + v) as byte
-          assertEQ(arr[1], -1)
+          arktest.assertEQ(arr[1], -1)
 
     - decl: |-
           let x: FixedArray<short>
@@ -31,7 +31,7 @@ cases:
           let arr = obj as FixedArray<short>
           let v: short = arr[0]
           arr[1] = (arr[1] + v) as short
-          assertEQ(arr[1], -1)
+          arktest.assertEQ(arr[1], -1)
 
     - decl: |-
           let x: FixedArray<int>
@@ -41,7 +41,7 @@ cases:
           let arr = obj as FixedArray<int>
           let v: int = arr[0]
           arr[1] = arr[1] + v
-          assertEQ(arr[1], -1)
+          arktest.assertEQ(arr[1], -1)
 
     - decl: |-
           let x: FixedArray<long>
@@ -51,7 +51,7 @@ cases:
           let arr = obj as FixedArray<long>
           let v: long = arr[0]
           arr[1] = (arr[1] + v) as long
-          assertEQ(arr[1], -1)
+          arktest.assertEQ(arr[1], -1)
 
     - decl: |-
           let x: FixedArray<float>
@@ -61,7 +61,7 @@ cases:
           let arr = obj as FixedArray<float>
           let v: float = arr[0]
           arr[1] = (arr[1] + v) as float
-          assertEQ(arr[1], 3.0f)
+          arktest.assertEQ(arr[1], 3.0f)
 
     - decl: |-
           let x: FixedArray<number>
@@ -71,7 +71,7 @@ cases:
           let arr = obj as FixedArray<number>
           let v: number = arr[0]
           arr[1] = arr[1] + v
-          assertEQ(arr[1], 3.0)
+          arktest.assertEQ(arr[1], 3.0)
 
     - decl: |-
           let x: FixedArray<string>
@@ -81,7 +81,7 @@ cases:
           let arr = obj as FixedArray<string>
           let v: string = arr[0]
           arr[1] = arr[1] + v
-          assertEQ(arr[1], 'ba')
+          arktest.assertEQ(arr[1], 'ba')
 
     - decl: |-
           let x: FixedArray<char>
@@ -91,7 +91,7 @@ cases:
           let arr = obj as FixedArray<char>
           let v: char = arr[0]
           arr[1] = (arr[1] + v).toChar()
-          assertEQ(arr[1], 195)
+          arktest.assertEQ(arr[1], 195)
 
     - decl: |-
           let x: FixedArray<boolean>
@@ -101,7 +101,7 @@ cases:
           let arr = obj as FixedArray<boolean>
           let v: boolean = arr[0]
           arr[1] = arr[1] & v
-          assertEQ(arr[1], false)
+          arktest.assertEQ(arr[1], false)
 
     - decl: |-
           let x: FixedArray<bigint>
@@ -111,7 +111,7 @@ cases:
           let arr = obj as FixedArray<bigint>
           let v: bigint = arr[0]
           arr[1] = arr[1] + v
-          assertEQ(arr[1], 3n)
+          arktest.assertEQ(arr[1], 3n)
 
     - decl: |-
           let x: FixedArray<FixedArray<bigint>>
@@ -121,9 +121,9 @@ cases:
           let arr = obj as FixedArray<Object>
           let arr0: FixedArray<bigint> = arr[0] as FixedArray<bigint>
           let arr1: FixedArray<bigint> = arr[1] as FixedArray<bigint>
-          assertEQ(arr0[0] + arr0[1] + arr1[0] + arr1[1], 10n)
+          arktest.assertEQ(arr0[0] + arr0[1] + arr1[0] + arr1[1], 10n)
           arr0[0] = 11n
-          assertEQ(arr0[0] + arr0[1] + arr1[0] + arr1[1], 20n)
+          arktest.assertEQ(arr0[0] + arr0[1] + arr1[0] + arr1[1], 20n)
 
     - decl: |-
           let x: FixedArray<FixedArray<boolean>>
@@ -131,6 +131,6 @@ cases:
           x = [[true, false], [false, true]]
           let obj: Object = toObj(x)
           let arr = obj as FixedArray<FixedArray<boolean>>
-          assertEQ((arr[0][0] & arr[0][1] | arr[1][0] & arr[1][1]), false)
+          arktest.assertEQ((arr[0][0] & arr[0][1] | arr[1][0] & arr[1][1]), false)
           arr[0][1] = true
-          assertEQ((arr[0][0] & arr[0][1] | arr[1][0] & arr[1][1]), true)
+          arktest.assertEQ((arr[0][0] & arr[0][1] | arr[1][0] & arr[1][1]), true)

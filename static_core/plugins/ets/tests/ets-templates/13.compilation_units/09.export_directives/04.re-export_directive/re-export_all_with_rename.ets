@@ -21,5 +21,5 @@ files: ['./module_all_renamed.ets', './module_a.ets']
 import { NewClassA, NewInterfaceA, newFoo, NEW_BAR } from './module_all_renamed'
 
 function main() {
-    assertEQ(NEW_BAR, 146)
+    arktest.assertEQ(NEW_BAR, 146)
 }

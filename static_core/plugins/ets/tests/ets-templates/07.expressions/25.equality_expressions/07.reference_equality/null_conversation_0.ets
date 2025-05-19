@@ -22,5 +22,5 @@ class A {}
 function main(): void {
   let b: A|null = null;
   let c: A|null = null;
-  assertTrue( b === c && b == c )
+  arktest.assertTrue( b === c && b == c )
 }

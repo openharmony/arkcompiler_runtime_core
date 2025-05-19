@@ -43,6 +43,6 @@ class E extends C implements B, D {
 
 function main(): void {
     const e = new E();
-    assertEQ(e.greet(), "Hello from C");
-    assertEQ(e.CONSTANT, "Constant from E");
+    arktest.assertEQ(e.greet(), "Hello from C");
+    arktest.assertEQ(e.CONSTANT, "Constant from E");
 }

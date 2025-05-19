@@ -28,7 +28,7 @@ function main(): void {
 
     tuple[indexx] = 24;
 
-    assertEQ( tuple[0], 0)
-    assertEQ( tuple[indexx], 24)
+    arktest.assertEQ( tuple[0], 0)
+    arktest.assertEQ( tuple[indexx], 24)
 
 }

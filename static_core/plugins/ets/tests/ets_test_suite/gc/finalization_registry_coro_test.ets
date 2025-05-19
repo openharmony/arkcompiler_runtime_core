@@ -26,7 +26,7 @@ function doFullGC() {
 	try {
 		GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
 	} catch (e) {
-		assertTrue(false, "Unexpected exception during GC");
+	 arktest.assertTrue(false, "Unexpected exception during GC");
 	}
 }
 
@@ -34,7 +34,7 @@ async function doFullGCAsync() {
 	try {
 		GC.waitForFinishGC(GC.startGC(GC.Cause.FULL, GC.IN_PLACE_MODE));
 	} catch (e) {
-		assertTrue(false, "Unexpected exception during GC");
+	 arktest.assertTrue(false, "Unexpected exception during GC");
 	}
 }
 
@@ -64,7 +64,7 @@ function getSizeTests(finreg: FinalizationRegistry<String> | null) {
 		promise_array[i]!.Await();
 	}
 
-	assertEQ(3 * promise_count, finreg!.getSize(), "Size of the finreg is not true");
+ arktest.assertEQ(3 * promise_count, finreg!.getSize(), "Size of the finreg is not true");
 }
 
 // ========================= Unregister tests =========================================== 
@@ -74,7 +74,7 @@ let unreg_array: Array<Job<void>> = new Array<Job<void>>;
 function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 
 	finreg!.unregister(token);
-	assertEQ(0, finreg!.getSize(), "Start size of unregister is invalid");
+ arktest.assertEQ(0, finreg!.getSize(), "Start size of unregister is invalid");
 
 	let token1 = new Object();
 	let token2 = new Object();
@@ -86,7 +86,7 @@ function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 	addToRegistry(finreg, object_count, token3);
 	addToRegistry(finreg, object_count, token4);
 
-	assertEQ(object_count * 4, finreg!.getSize(), " Size after register of Unregister test is invalid");
+ arktest.assertEQ(object_count * 4, finreg!.getSize(), " Size after register of Unregister test is invalid");
 
 	const unregister = (finreg: FinalizationRegistry<String>, s: Object) => {
 		return finreg.unregister(s);
@@ -97,13 +97,13 @@ function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 	launch<void, (finreg: FinalizationRegistry<String>, token: Object) => void>(unregister, finreg!, token3).Await();
 	launch<void, (finreg: FinalizationRegistry<String>, token: Object) => void>(unregister, finreg!, token4).Await();
 
-	assertEQ(0, finreg!.getSize(), "Size of unregister is invalid");
+ arktest.assertEQ(0, finreg!.getSize(), "Size of unregister is invalid");
 
 	for (let i = 0; i < obj_array.length; i++) {
 		addToRegistry(finreg!, object_count, obj_array[i]);
 	}
 
-	assertEQ(obj_array.length * object_count, finreg!.getSize(), "Register function is invalid");
+ arktest.assertEQ(obj_array.length * object_count, finreg!.getSize(), "Register function is invalid");
 
 	for (let i = 0; i < obj_array.length; i++) {
 		unreg_array.push(launch<void, (a: FinalizationRegistry<String> | null, b: Object) => void>(removeFromRegistry, finreg!, obj_array[i]));
@@ -112,7 +112,7 @@ function unregisterTests(finreg: FinalizationRegistry<String> | null) {
 	for (let i = 0; i < unreg_array.length; ++i) {
 		unreg_array[i].Await();
 	}
-	assertEQ(0, finreg!.getSize(), "unregister  test failed");
+ arktest.assertEQ(0, finreg!.getSize(), "unregister  test failed");
 }
 
 // ===============================  CtorTests ==============================
@@ -159,6 +159,6 @@ function main(): void {
 	unregisterTests(registry!);
 
 	ctorTests();
-	assertEQ(cntr, promise_count, "Counter of ctors is not valid");
+ arktest.assertEQ(cntr, promise_count, "Counter of ctors is not valid");
 
 }

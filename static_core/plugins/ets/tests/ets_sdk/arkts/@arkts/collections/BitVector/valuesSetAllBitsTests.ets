@@ -16,7 +16,7 @@
 import { collections } from "@arkts.collections"
 
 function main() {
-    const suite = new ArkTestsuite("BitVector values and setAllBits API tests");
+    const suite = new arktest.ArkTestsuite("BitVector values and setAllBits API tests");
 
     suite.addTest("Verify if values method returns a correct iterator for BitVector with mixed bits.", BitVector_Values_Func_001);
     suite.addTest("Verify if values method returns a correct iterator for BitVector with 64 zeroes.", BitVector_Values_Func_002);
@@ -51,9 +51,9 @@ function BitVector_Values_Func_001() {
         vec.push(tmp.value!);
         tmp = itr.next();
     }
-    assertEQ(vec.length, a.length, "Iterator should return the correct number of elements");
+    arktest.assertEQ(vec.length, a.length, "Iterator should return the correct number of elements");
     for (let i = 0; i < a.length; i++) {
-        assertEQ(vec[i], a[i], `Element at index ${i} should match expected value`);
+        arktest.assertEQ(vec[i], a[i], `Element at index ${i} should match expected value`);
     }
 }
 
@@ -70,9 +70,9 @@ function BitVector_Values_Func_002() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res0 = bitVector.push(0);
-        assertTrue(res0, "Push operation should return true");
+        arktest.assertTrue(res0, "Push operation should return true");
     }
-    assertEQ(bitVector.length, 64, "BitVector length should be 64");
+    arktest.assertEQ(bitVector.length, 64, "BitVector length should be 64");
     let vec: Array<number> = new Array<number>();
     let itr = bitVector.values();
     let tmp: IteratorResult<number> = itr.next();
@@ -80,9 +80,9 @@ function BitVector_Values_Func_002() {
         vec.push(tmp.value!);
         tmp = itr.next();
     }
-    assertEQ(vec.length, bitVectorLength, "Iterator should return correct number of elements");
+    arktest.assertEQ(vec.length, bitVectorLength, "Iterator should return correct number of elements");
     for (let i = 0; i < bitVectorLength; i++) {
-        assertEQ(vec[i], 0, `Element at index ${i} should be 0`);
+        arktest.assertEQ(vec[i], 0, `Element at index ${i} should be 0`);
     }
 }
 
@@ -99,9 +99,9 @@ function BitVector_Values_Func_003() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res0 = bitVector.push(0);
-        assertTrue(res0, "Push operation should return true");
+        arktest.assertTrue(res0, "Push operation should return true");
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
     let vec: Array<number> = new Array<number>();
     let itr = bitVector.values();
     let tmp: IteratorResult<number> = itr.next();
@@ -109,9 +109,9 @@ function BitVector_Values_Func_003() {
         vec.push(tmp.value!);
         tmp = itr.next();
     }
-    assertEQ(vec.length, bitVectorLength + 10, "Iterator should return correct number of elements");
+    arktest.assertEQ(vec.length, bitVectorLength + 10, "Iterator should return correct number of elements");
     for (let i = 10; i < bitVectorLength + 10; i++) {
-        assertEQ(vec[i], 0, `Element at index ${i} should be 0`);
+        arktest.assertEQ(vec[i], 0, `Element at index ${i} should be 0`);
     }
 }
 
@@ -131,17 +131,17 @@ function BitVector_setAllBits_Func_001() {
     bitVector.push(1);
     bitVector.push(1);
     bitVector.setAllBits(0);
-    assertEQ(bitVector[0], 0, "Bit at index 0 should be 0 after setAllBits(0)");
-    assertEQ(bitVector[1], 0, "Bit at index 1 should be 0 after setAllBits(0)");
-    assertEQ(bitVector[2], 0, "Bit at index 2 should be 0 after setAllBits(0)");
-    assertEQ(bitVector[3], 0, "Bit at index 3 should be 0 after setAllBits(0)");
-    assertEQ(bitVector[4], 0, "Bit at index 4 should be 0 after setAllBits(0)");
+    arktest.assertEQ(bitVector[0], 0, "Bit at index 0 should be 0 after setAllBits(0)");
+    arktest.assertEQ(bitVector[1], 0, "Bit at index 1 should be 0 after setAllBits(0)");
+    arktest.assertEQ(bitVector[2], 0, "Bit at index 2 should be 0 after setAllBits(0)");
+    arktest.assertEQ(bitVector[3], 0, "Bit at index 3 should be 0 after setAllBits(0)");
+    arktest.assertEQ(bitVector[4], 0, "Bit at index 4 should be 0 after setAllBits(0)");
     bitVector.setAllBits(1);
-    assertEQ(bitVector[0], 1, "Bit at index 0 should be 1 after setAllBits(1)");
-    assertEQ(bitVector[1], 1, "Bit at index 1 should be 1 after setAllBits(1)");
-    assertEQ(bitVector[2], 1, "Bit at index 2 should be 1 after setAllBits(1)");
-    assertEQ(bitVector[3], 1, "Bit at index 3 should be 1 after setAllBits(1)");
-    assertEQ(bitVector[4], 1, "Bit at index 4 should be 1 after setAllBits(1)");
+    arktest.assertEQ(bitVector[0], 1, "Bit at index 0 should be 1 after setAllBits(1)");
+    arktest.assertEQ(bitVector[1], 1, "Bit at index 1 should be 1 after setAllBits(1)");
+    arktest.assertEQ(bitVector[2], 1, "Bit at index 2 should be 1 after setAllBits(1)");
+    arktest.assertEQ(bitVector[3], 1, "Bit at index 3 should be 1 after setAllBits(1)");
+    arktest.assertEQ(bitVector[4], 1, "Bit at index 4 should be 1 after setAllBits(1)");
 }
 
 /**
@@ -157,16 +157,16 @@ function BitVector_setAllBits_Func_002() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res0 = bitVector.push(0);
-        assertTrue(res0, "Push operation should return true");
+        arktest.assertTrue(res0, "Push operation should return true");
     }
-    assertEQ(bitVector.length, 64, "BitVector length should be 64");
+    arktest.assertEQ(bitVector.length, 64, "BitVector length should be 64");
     bitVector.setAllBits(1);
     for (let i = 0; i < bitVectorLength; i++) {
-        assertEQ(bitVector[i], 1, `Bit at index ${i} should be 1 after setAllBits(1)`);
+        arktest.assertEQ(bitVector[i], 1, `Bit at index ${i} should be 1 after setAllBits(1)`);
     }
     bitVector.setAllBits(0);
     for (let i = 0; i < bitVectorLength; i++) {
-        assertEQ(bitVector[i], 0, `Bit at index ${i} should be 0 after setAllBits(0)`);
+        arktest.assertEQ(bitVector[i], 0, `Bit at index ${i} should be 0 after setAllBits(0)`);
     }
 }
 
@@ -183,15 +183,15 @@ function BitVector_setAllBits_Func_003() {
     let bitVectorLength = 64;
     for (let i = 0; i < bitVectorLength; i++) {
         let res0 = bitVector.push(0);
-        assertTrue(res0, "Push operation should return true");
+        arktest.assertTrue(res0, "Push operation should return true");
     }
-    assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
+    arktest.assertEQ(bitVector.length, bitVectorLength + 10, "BitVector length should be 74");
     bitVector.setAllBits(1);
     for (let i = 10; i < bitVectorLength + 10; i++) {
-        assertEQ(bitVector[i], 1, `Bit at index ${i} should be 1 after setAllBits(1)`);
+        arktest.assertEQ(bitVector[i], 1, `Bit at index ${i} should be 1 after setAllBits(1)`);
     }
     bitVector.setAllBits(0);
     for (let i = 10; i < bitVectorLength + 10; i++) {
-        assertEQ(bitVector[i], 0, `Bit at index ${i} should be 0 after setAllBits(0)`);
+        arktest.assertEQ(bitVector[i], 0, `Bit at index ${i} should be 0 after setAllBits(0)`);
     }
 }

@@ -18,44 +18,44 @@ cases:
       import * as dm from "./declaration_module.ets"
     use: |-
       let myMatrix: dm.Matrix = [[0.0]];
-      assertTrue(typeof myMatrix == 'object' ) ;
+      arktest.assertTrue(typeof myMatrix == 'object' ) ;
 
   #1. Type parameter with arrow function
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myHandler: dm.Handler = (s: string, no: number) => "ret_string";
-      assertTrue(typeof myHandler == 'function' )
+      arktest.assertTrue(typeof myHandler == 'function' )
 
   #2. Type parameter with generic and arrow function
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myPredicate: dm.Predicate<string> = (s: string) => true;
-      assertTrue(typeof myPredicate == 'function' )      
+      arktest.assertTrue(typeof myPredicate == 'function' )      
 
   #3. Type parameter Nullable
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myNumber: dm.NullableNumber;
-      assertTrue( (typeof myNumber as string) == 'undefined' );
+      arktest.assertTrue( (typeof myNumber as string) == 'undefined' );
       myNumber = 1;
-      assertTrue(typeof myNumber == 'number' );
+      arktest.assertTrue(typeof myNumber == 'number' );
       myNumber = null;
-      assertTrue(typeof myNumber == 'object' );
+      arktest.assertTrue(typeof myNumber == 'object' );
 
   #4. Type parameter with generic
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myMapOfString: dm.MapOfString<string> = new Map<string, string>();
-      assertTrue(typeof myMapOfString == 'object' );   
+      arktest.assertTrue(typeof myMapOfString == 'object' );   
 
   #5. Type parameter with generic
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
       let myAAA: dm.AAA<string> = new Array<dm.AAA<string>>;
-      assertTrue(typeof myAAA == 'object' );
+      arktest.assertTrue(typeof myAAA == 'object' );
 

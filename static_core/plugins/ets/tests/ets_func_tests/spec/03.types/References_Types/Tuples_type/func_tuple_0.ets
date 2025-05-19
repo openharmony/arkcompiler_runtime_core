@@ -28,7 +28,7 @@ type FuncTuple2 = [Func1, Func1]
 function main(): void {
     let t: FuncTuple2 = [(value: String) => { return value; }, (value: String) => { return value; }];
 
-    assertEQ( t[0]("One"), "One")
-    assertEQ( t[1]("Two"), "Two")
+    arktest.assertEQ( t[0]("One"), "One")
+    arktest.assertEQ( t[1]("Two"), "Two")
 
 }

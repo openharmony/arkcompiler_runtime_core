@@ -21,5 +21,5 @@ let boolValue: boolean | undefined = true;
 let coalesceResult = boolValue ?? false;
 
 function main(): void {
-    assertEQ(coalesceResult, true);
+    arktest.assertEQ(coalesceResult, true);
 }

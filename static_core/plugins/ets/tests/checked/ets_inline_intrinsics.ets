@@ -47,9 +47,9 @@ function main() {
     let obj = new A();
 
     for (let i:int = 0; i < 10; ++i) {
-        assertTrue(equals_obj_obj(str, str));
-        assertTrue(!equals_obj_obj("abcd", "abce"));
-        assertTrue(!equals_obj_obj(str, obj));
-        assertTrue(!equals_obj_obj(str, null));
+        arktest.assertTrue(equals_obj_obj(str, str));
+        arktest.assertTrue(!equals_obj_obj("abcd", "abce"));
+        arktest.assertTrue(!equals_obj_obj(str, obj));
+        arktest.assertTrue(!equals_obj_obj(str, null));
     }
 }

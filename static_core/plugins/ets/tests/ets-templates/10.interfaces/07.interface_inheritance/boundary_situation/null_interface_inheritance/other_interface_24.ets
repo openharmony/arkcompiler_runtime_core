@@ -28,5 +28,5 @@ function main(): void {
     items: ["apple", "banana"]
   };
 
-  assertEQ(obj.items[0], "apple");
+  arktest.assertEQ(obj.items[0], "apple");
 }

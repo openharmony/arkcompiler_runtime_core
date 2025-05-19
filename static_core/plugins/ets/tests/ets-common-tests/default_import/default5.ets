@@ -21,5 +21,5 @@ files:
 import c from "./export.ets";
 
 function main(){
-    assertEQ(c, 10)
+    arktest.assertEQ(c, 10)
 }

@@ -16,7 +16,7 @@
 import TreeMap from "@ohos.util.TreeMap";
 
 function main(): int {
-    const suite = new ArkTestsuite("TreeMap GetFirstKey GetLastKey API tests")
+    const suite = new arktest.ArkTestsuite("TreeMap GetFirstKey GetLastKey API tests")
 
     suite.addTest("TreeMap getFirstKey getLastKey first and last key",
         testGetFirstKeyAndLastKeySingleElement)
@@ -52,9 +52,9 @@ function testGetFirstKeyAndLastKeySingleElement() {
     treeMap.set("cc", "789");
     let first = treeMap.getFirstKey();
     let last = treeMap.getLastKey();
-    assertEQ(first, "aa", "The treeMap should return the correct first key");
-    assertEQ(last, "cc", "The treeMap should return the correct last key");
-    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+    arktest.assertEQ(first, "aa", "The treeMap should return the correct first key");
+    arktest.assertEQ(last, "cc", "The treeMap should return the correct last key");
+    arktest.assertEQ(treeMap.length, 3, "The treeMap length should be 3");
 }
 
 function testGetFirstKeyAndLastKeyEmptyTreeMap() {
@@ -64,9 +64,9 @@ function testGetFirstKeyAndLastKeyEmptyTreeMap() {
         });
     let first = treeMap.getFirstKey();
     let last = treeMap.getLastKey();
-    assertEQ(first, undefined, "The treeMap should return undefined for the first key in an empty map");
-    assertEQ(last, undefined, "The treeMap should return undefined for the last key in an empty map");
-    assertEQ(treeMap.length, 0, "The treeMap length should be 0");
+    arktest.assertEQ(first, undefined, "The treeMap should return undefined for the first key in an empty map");
+    arktest.assertEQ(last, undefined, "The treeMap should return undefined for the last key in an empty map");
+    arktest.assertEQ(treeMap.length, 0, "The treeMap length should be 0");
 }
 
 function testGetFirstKeyAndLastKeyMultipleElements() {
@@ -77,9 +77,9 @@ function testGetFirstKeyAndLastKeyMultipleElements() {
     treeMap.set("aa", "123");
     let first = treeMap.getFirstKey();
     let last = treeMap.getLastKey();
-    assertEQ(first, "aa", "The treeMap should return the correct first key");
-    assertEQ(last, "aa", "The treeMap should return the correct last key");
-    assertEQ(treeMap.length, 1, "The treeMap length should be 1");
+    arktest.assertEQ(first, "aa", "The treeMap should return the correct first key");
+    arktest.assertEQ(last, "aa", "The treeMap should return the correct last key");
+    arktest.assertEQ(treeMap.length, 1, "The treeMap length should be 1");
 }
 
 function testGetFirstKeyAndLastKeyDescendingOrder() {
@@ -92,9 +92,9 @@ function testGetFirstKeyAndLastKeyDescendingOrder() {
     treeMap.set("cc", "789");
     let first = treeMap.getFirstKey();
     let last = treeMap.getLastKey();
-    assertEQ(first, "cc", "The treeMap should return the correct first key");
-    assertEQ(last, "aa", "The treeMap should return the correct last key");
-    assertEQ(treeMap.length, 3, "The treeMap length should be 3");
+    arktest.assertEQ(first, "cc", "The treeMap should return the correct first key");
+    arktest.assertEQ(last, "aa", "The treeMap should return the correct last key");
+    arktest.assertEQ(treeMap.length, 3, "The treeMap length should be 3");
 }
 
 function testGetFirstKeyAndLastKeyObjectKeys() {
@@ -113,9 +113,9 @@ function testGetFirstKeyAndLastKeyObjectKeys() {
     treeMapo.set(obj_trd, obj_trd_v);
     let first = treeMapo.getFirstKey();
     let last = treeMapo.getLastKey();
-    assertEQ(first, obj, "The treeMap should return the correct first key");
-    assertEQ(last, obj_trd, "The treeMap should return the correct last key");
-    assertEQ(treeMapo.length, 3, "The treeMap length should be 3");
+    arktest.assertEQ(first, obj, "The treeMap should return the correct first key");
+    arktest.assertEQ(last, obj_trd, "The treeMap should return the correct last key");
+    arktest.assertEQ(treeMapo.length, 3, "The treeMap length should be 3");
 }
 
 function testGetFirstKeyAndLastKeyMultipleObjectKeys() {
@@ -128,7 +128,7 @@ function testGetFirstKeyAndLastKeyMultipleObjectKeys() {
     treeMapo.set(obj, obj2);
     let first = treeMapo.getFirstKey();
     let last = treeMapo.getLastKey();
-    assertEQ(first, obj, "The treeMap should return the correct first key");
-    assertEQ(last, obj, "The treeMap should return the correct last key");
-    assertEQ(treeMapo.length, 1, "The treeMap length should be 1");
+    arktest.assertEQ(first, obj, "The treeMap should return the correct first key");
+    arktest.assertEQ(last, obj, "The treeMap should return the correct last key");
+    arktest.assertEQ(treeMapo.length, 1, "The treeMap length should be 1");
 }

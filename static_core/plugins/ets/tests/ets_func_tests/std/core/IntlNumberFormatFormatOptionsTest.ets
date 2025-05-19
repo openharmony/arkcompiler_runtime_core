@@ -14,7 +14,7 @@
  */
 
 function main(): int {
-    const suite = new ArkTestsuite("Intl. NumberFormat format with NumberFormatOptions");
+    const suite = new arktest.ArkTestsuite("Intl. NumberFormat format with NumberFormatOptions");
     // Tests from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
     suite.addTest("testNumberFormat0001", testNumberFormat0001);
     suite.addTest("testNumberFormat0002", testNumberFormat0002);
@@ -27,12 +27,12 @@ function main(): int {
 
 function testNumberFormat0001() {
     let format = Intl.NumberFormat.$_invoke().format(100);
-    assertEQ(format, "100");
+    arktest.assertEQ(format, "100");
 }
 
 function testNumberFormat0002() {
     let format = Intl.NumberFormat.$_invoke("de").format(100);
-    assertEQ(format, "100");
+    arktest.assertEQ(format, "100");
 }
 
 function testNumberFormat0003() {
@@ -40,7 +40,7 @@ function testNumberFormat0003() {
         style: "currency", currency: 'RUB'
     }
     let format = Intl.NumberFormat.$_invoke('ru-RU', options).format(100);
-    assertEQ(format, "100,00\xa0₽");
+    arktest.assertEQ(format, "100,00\xa0₽");
 }
 
 function testNumberFormat0004() {
@@ -48,7 +48,7 @@ function testNumberFormat0004() {
         style: "currency", currency: "CNY"
     }
     let format = Intl.NumberFormat.$_invoke("zh", options).format(100);
-    assertEQ(format, "¥100.00");
+    arktest.assertEQ(format, "¥100.00");
 }
 
 function testNumberFormat0005() {
@@ -56,7 +56,7 @@ function testNumberFormat0005() {
         style: "currency", currency: "CNY", minimumIntegerDigits: 4
     }
     let format = Intl.NumberFormat.$_invoke("zh", options).format(100);
-    assertEQ(format, "¥0,100.00");
+    arktest.assertEQ(format, "¥0,100.00");
 }
 
 function testNumberFormat0006() {
@@ -64,5 +64,5 @@ function testNumberFormat0006() {
         style: "percent"
     }
     let format = Intl.NumberFormat.$_invoke("de", options).format(100);
-    assertEQ(format, "10.000\xa0%");
+    arktest.assertEQ(format, "10.000\xa0%");
 }

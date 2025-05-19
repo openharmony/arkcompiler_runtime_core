@@ -25,14 +25,14 @@ function test_void_input_void_output() {
 
 function test_int_input_void_output() {
     lib.testCbI((a) => {
-        assertEQ(a, 1);
+        arktest.assertEQ(a, 1);
     });
 }
 
 function test_string_boolean_input() {
     lib.testCbS((a, b) => {
         if (b) {
-            assertEQ(a, "hello");
+            arktest.assertEQ(a, "hello");
         }
     });
 }
@@ -41,16 +41,16 @@ function test_string_return_value() {
     let result = lib.testCbRs((a) => {
         return "my return value";
     });
-    assertEQ(result, "my return value");
+    arktest.assertEQ(result, "my return value");
 }
 
 function test_struct_input() {
     lib.testCbStruct((a) => {
         let data:
             lib.Data = {a: (a.a + "main"), b: (a.b + "main"), c: (a.c + 100)};
-        assertEQ(data.a, "amain");
-        assertEQ(data.b, "bmain");
-        assertEQ(data.c, 101);
+        arktest.assertEQ(data.a, "amain");
+        arktest.assertEQ(data.b, "bmain");
+        arktest.assertEQ(data.c, 101);
         return data;
     });
 }
@@ -58,32 +58,32 @@ function test_struct_input() {
 function test_int_string_return_value(){
     let instance: lib.MyInterface = lib.getInterface();
     let result =instance.testCbIntString((a,b)=>{
-        assertEQ(a, 10);
-        assertEQ(b, 100);
+        arktest.assertEQ(a, 10);
+        arktest.assertEQ(b, 100);
     });
-    assertEQ(result, "testCbIntString");
+    arktest.assertEQ(result, "testCbIntString");
 }
 
 function test_int_bool_return_value(){
     let instance: lib.MyInterface = lib.getInterface();
     let result =instance.testCbIntBool((a,b)=>{
-        assertEQ(a, 100);
-        assertEQ(b, 1000000000 as double);
+        arktest.assertEQ(a, 100);
+        arktest.assertEQ(b, 1000000000 as double);
     });
-    assertEQ(result, true);
+    arktest.assertEQ(result, true);
 }
 
 function test_int_enum_return_value(){
     let instance: lib.MyInterface = lib.getInterface();
     let result = instance.testCbEnum((a)=>{
-        assertEQ(a,10);
+        arktest.assertEQ(a,10);
     })
-    assertEQ(result.toString(), "123");
+    arktest.assertEQ(result.toString(), "123");
 }
 
 function main() {
     console.log("##############start#############");
-    const suite = new ArkTestsuite("Callback Tests");
+    const suite = new arktest.ArkTestsuite("Callback Tests");
 
     suite.addTest("test void input void output", test_void_input_void_output);
     suite.addTest("test int input void output", test_int_input_void_output);

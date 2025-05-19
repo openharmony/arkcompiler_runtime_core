@@ -24,6 +24,6 @@ function main(): void {
 
     let a = n >>> s;
     let b = (n >> s) + ((2 as {{rn.type}}) << ~s);
-    assertEQ( a, b );
+    arktest.assertEQ( a, b );
 }
 {% endfor %}

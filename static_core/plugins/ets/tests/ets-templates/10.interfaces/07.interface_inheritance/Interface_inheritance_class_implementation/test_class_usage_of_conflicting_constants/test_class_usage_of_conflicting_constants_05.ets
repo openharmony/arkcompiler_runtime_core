@@ -36,5 +36,5 @@ class OnlyImplementInterface implements MyInterface {
 function main(): void {
   let instanceOfInheritance = new OnlyMultiLevelInheritance();
   let instanceOfImplementation = new OnlyImplementInterface();
-  assertNE((instanceOfInheritance.SAME_NAME_CONSTANT + ""), instanceOfImplementation.SAME_NAME_CONSTANT);
+  arktest.assertNE((instanceOfInheritance.SAME_NAME_CONSTANT + ""), instanceOfImplementation.SAME_NAME_CONSTANT);
 }

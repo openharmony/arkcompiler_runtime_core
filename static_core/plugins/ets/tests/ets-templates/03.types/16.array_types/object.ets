@@ -27,7 +27,7 @@ function foo(p: {{c.type}}): Object {
 function main(): void {
     let arr: {{c.type}} = {{c.vals}}
     let obj: Object = foo(arr)
-    assertTrue( obj === arr)
-    assertTrue( (obj as {{c.type}}){{c.assert}})
+    arktest.assertTrue( obj === arr)
+    arktest.assertTrue( (obj as {{c.type}}){{c.assert}})
 }
 {% endfor %}

@@ -36,7 +36,7 @@ class MethodWithErrorHandling {
 async function startTest() {
     const example = new MethodWithErrorHandling();
     const result = await example.methodWithErrorHandling();
-    assertEQ(result, "Caught error: Something went wrong!")
+    arktest.assertEQ(result, "Caught error: Something went wrong!")
 }
 
 function main(): void {

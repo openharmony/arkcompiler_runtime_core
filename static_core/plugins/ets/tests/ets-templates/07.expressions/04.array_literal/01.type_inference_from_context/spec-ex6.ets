@@ -25,5 +25,5 @@ desc: >-
 function main() {
     let union_of_arrays: number[] | string[] = [1.0, 2.0]  // OK, type of literal is number[]
 
-    assertEQ((union_of_arrays as number[])[0], 1.0)
+    arktest.assertEQ((union_of_arrays as number[])[0], 1.0)
 }

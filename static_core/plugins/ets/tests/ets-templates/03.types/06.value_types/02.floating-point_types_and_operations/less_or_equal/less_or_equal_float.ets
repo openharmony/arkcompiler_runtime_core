@@ -21,7 +21,7 @@ desc: check less or equal operation for two floats
 function main(): void {
   const a: float = {{v.left}} as float
   const b: float = {{v.right}} as float
-  assertEQ( (a <= b), {{v.result}} )
+  arktest.assertEQ( (a <= b), {{v.result}} )
 }
 
 {% endfor %}

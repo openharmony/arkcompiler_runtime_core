@@ -30,5 +30,5 @@ class MyClass {
 function main(): void {
   const myObject = new MyClass();
   myObject.myField = 20;
-  assertEQ(myObject.myField = 20, 20);
+  arktest.assertEQ(myObject.myField = 20, 20);
 }

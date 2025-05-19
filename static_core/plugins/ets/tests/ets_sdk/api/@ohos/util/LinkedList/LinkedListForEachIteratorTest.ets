@@ -16,7 +16,7 @@
 import {LinkedList} from "@ohos.util.LinkedList";
 
 function main() {
-    const suite = new ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite("LinkedList API tests");
 
     suite.addTest("LinkedList forEach without passing any parameters", testForEachNoParams);
     suite.addTest("LinkedList forEach with a single parameter", testForEachSingleParam);
@@ -48,7 +48,7 @@ function testForEachNoParams() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let count: number = 0;
     linkedList.forEach(() => { count++ });
-    assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
+    arktest.assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
 }
 
 function testForEachSingleParam() {
@@ -56,9 +56,9 @@ function testForEachSingleParam() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let count: number = 0;
     linkedList.forEach((value: number) => {
-        assertEQ(linkedList.get(count++), value, `Element should be equal`);
+        arktest.assertEQ(linkedList.get(count++), value, `Element should be equal`);
     });
-    assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
+    arktest.assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
 }
 
 function testForEachTwoParams() {
@@ -66,10 +66,10 @@ function testForEachTwoParams() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let count: number = 0;
     linkedList.forEach((value: number, index: number) => {
-        assertEQ(linkedList.get(count), value, `Element should be equal`);
-        assertEQ(count++, index, `The index should be equal`);
+        arktest.assertEQ(linkedList.get(count), value, `Element should be equal`);
+        arktest.assertEQ(count++, index, `The index should be equal`);
     });
-    assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
+    arktest.assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
 }
 
 function testForEachThreeParams() {
@@ -77,18 +77,18 @@ function testForEachThreeParams() {
     initializeLinkedList(linkedList, TestData.arrayForNumber1);
     let count: number = 0;
     linkedList.forEach((value: number, index: number, tempLinkedList: LinkedList<number>) => {
-        assertEQ(linkedList, tempLinkedList, "TempLinkedList should be this");
-        assertEQ(linkedList.get(count), value, `Element should be equal`);
-        assertEQ(count++, index, `The index should be equal`);
+        arktest.assertEQ(linkedList, tempLinkedList, "TempLinkedList should be this");
+        arktest.assertEQ(linkedList.get(count), value, `Element should be equal`);
+        arktest.assertEQ(count++, index, `The index should be equal`);
     });
-    assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
+    arktest.assertEQ(count, linkedList.length, "ForEach count should match linkedList length");
 }
 
 function testForEachEmptyContainer() {
     let linkedList = new LinkedList<number>();
     let count: number = 0;
     linkedList.forEach(() => { count++ });
-    assertEQ(count, 0, "ForEach count should be 0");
+    arktest.assertEQ(count, 0, "ForEach count should be 0");
 }
 
 function testForEachChangeValue() {
@@ -98,7 +98,7 @@ function testForEachChangeValue() {
         value = TestData.testNumber1;
     });
     for (let i: number = 0; i < linkedList.length; i++) {
-        assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], "ForEach should keep all elements the same");
+        arktest.assertEQ(linkedList.get(i), TestData.arrayForNumber1[i], "ForEach should keep all elements the same");
     }
 }
 
@@ -108,7 +108,7 @@ function testIteratorEmptyContainer() {
     for (let item of linkedList) {
         count++;
     }
-    assertEQ(count, 0, "Iterator count should be 0");
+    arktest.assertEQ(count, 0, "Iterator count should be 0");
 }
 
 function testIteratorNonEmptyContainer() {
@@ -118,10 +118,10 @@ function testIteratorNonEmptyContainer() {
     let iter = linkedList.$_iterator();
     let temp: IteratorResult<number> = iter.next();
     while (!temp.done) {
-        assertEQ(linkedList.get(count++), temp.value, `Element should be equal`);
+        arktest.assertEQ(linkedList.get(count++), temp.value, `Element should be equal`);
         temp = iter.next();
     }
-    assertEQ(count, linkedList.length, "Iterator count should match linkedList length");
+    arktest.assertEQ(count, linkedList.length, "Iterator count should match linkedList length");
 }
 
 function initializeLinkedList<T>(linkedList: LinkedList<T>, sourceArray: Array<T>) {

@@ -37,6 +37,6 @@ class Child1Impl implements Parent1, Parent2 {
 
 function main(): void {
     const child = new Child1Impl();
-    assertEQ(child.greet("Bob"), "Hello Bob from Child1");
-    assertEQ(child.greet(30), "Hello 30 years old from Child2");
+    arktest.assertEQ(child.greet("Bob"), "Hello Bob from Child1");
+    arktest.assertEQ(child.greet(30), "Hello 30 years old from Child2");
 }

@@ -27,6 +27,6 @@ let s: string[] = ["left", "top", "center", "same", "bottom", "middle", "right"]
 function main() {
     let i: (VER|HOR)[] = ["left", "top", "center", "same", "bottom", "middle", "right"]
     for(let j = 0; j < s.length; j++) {
-        assertEQ( i[j], s[j] )
+        arktest.assertEQ( i[j], s[j] )
     }
 }

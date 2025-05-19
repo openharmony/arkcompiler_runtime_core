@@ -24,9 +24,9 @@ function foo{{c}}
 function main() {
     const f1 = foo
     const f2 = foo
-    assertEQ(f1, foo)
-    assertEQ(f2, foo)
-    assertEQ(f1, f2)
+    arktest.assertEQ(f1, foo)
+    arktest.assertEQ(f2, foo)
+    arktest.assertEQ(f1, f2)
 }
 
 {% endfor %}

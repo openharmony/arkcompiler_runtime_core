@@ -16,7 +16,7 @@
 import Deque from "@ohos.util.Deque";
 
 function main(): int {
-    const suite = new ArkTestsuite("Deque API tests");
+    const suite = new arktest.ArkTestsuite("Deque API tests");
 
     suite.addTest("Deque has", testDequeHasElement);
     suite.addTest("Deque has with inexistent element", testDequeHasInexistentElement);
@@ -60,32 +60,32 @@ function testDequeHasElement() {
     let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
     let result: boolean = deque.has(TestData.testNumber3);
-    assertTrue(result, "Deque should contain the element");
+    arktest.assertTrue(result, "Deque should contain the element");
 }
 
 function testDequeHasInexistentElement() {
     let deque = new Deque<number>();
     initializeDeque(deque, TestData.forNumber);
     let result: boolean = deque.has(TestData.testNumber31);
-    assertFalse(result, "Deque should not contain the element");
+    arktest.assertFalse(result, "Deque should not contain the element");
 }
 
 function testDequeHasStringElement() {
     let deque = new Deque<string>();
     deque.insertFront(TestData.testString1);
-    assertTrue(deque.has(TestData.testString1), "Deque should contain the element")
+    arktest.assertTrue(deque.has(TestData.testString1), "Deque should contain the element")
 }
 
 function testDequeHasObjectElement() {
     let deque = new Deque<object>();
     deque.insertFront(TestData.testObject1);
-    assertTrue(deque.has(TestData.testObject1), "Deque should contain the element")
+    arktest.assertTrue(deque.has(TestData.testObject1), "Deque should contain the element")
 }
 
 function testDequePopFirstFromEmpty() {
     let deque = new Deque<number>();
-    assertEQ(deque.length, 0, "Initial deque length should be 0");
-    assertEQ(deque.popFirst(), undefined, "Pop first from empty deque should return undefined");
+    arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
+    arktest.assertEQ(deque.popFirst(), undefined, "Pop first from empty deque should return undefined");
 }
 
 function testDequePopFirstElement() {
@@ -94,21 +94,21 @@ function testDequePopFirstElement() {
     for (let i: number = TestData.testNumber1; i < TestData.testNumber6; i++) {
         deque.insertEnd(TestData.testNumber3);
     }
-    assertEQ(deque.length, TestData.testNumber6, "Deque length should be 6 after inserting six elements");
-    assertEQ(deque.popFirst(), TestData.testNumber1, "Pop first from non-empty deque should return first element");
-    assertEQ(deque.length, TestData.testNumber5, "Pop first from non-empty deque should update length");
+    arktest.assertEQ(deque.length, TestData.testNumber6, "Deque length should be 6 after inserting six elements");
+    arktest.assertEQ(deque.popFirst(), TestData.testNumber1, "Pop first from non-empty deque should return first element");
+    arktest.assertEQ(deque.length, TestData.testNumber5, "Pop first from non-empty deque should update length");
     let countForEach = 0;
     deque.forEach((value: number) => {
-        assertEQ(value, TestData.testNumber3, "Element should match");
+        arktest.assertEQ(value, TestData.testNumber3, "Element should match");
         countForEach++;
     });
-    assertEQ(countForEach, deque.length, "Deque length same as foreach");
+    arktest.assertEQ(countForEach, deque.length, "Deque length same as foreach");
 }
 
 function testDequePopLastFromEmpty() {
     let deque = new Deque<number>();
-    assertEQ(deque.length, 0, "Initial deque length should be 0");
-    assertEQ(deque.popLast(), undefined, "Pop last from empty deque should return undefined");
+    arktest.assertEQ(deque.length, 0, "Initial deque length should be 0");
+    arktest.assertEQ(deque.popLast(), undefined, "Pop last from empty deque should return undefined");
 }
 
 function testDequePopLastElement() {
@@ -117,15 +117,15 @@ function testDequePopLastElement() {
         deque.insertEnd(TestData.testNumber3);
     }
     deque.insertEnd(TestData.testNumber1);
-    assertEQ(deque.length, TestData.testNumber6, "Deque length should be 6 after inserting six elements");
-    assertEQ(deque.popLast(), TestData.testNumber1, "Pop last from non-empty deque should return last element");
-    assertEQ(deque.length, TestData.testNumber5, "Pop last from non-empty deque should update length");
+    arktest.assertEQ(deque.length, TestData.testNumber6, "Deque length should be 6 after inserting six elements");
+    arktest.assertEQ(deque.popLast(), TestData.testNumber1, "Pop last from non-empty deque should return last element");
+    arktest.assertEQ(deque.length, TestData.testNumber5, "Pop last from non-empty deque should update length");
     let countForEach = 0;
     deque.forEach((value: number) => {
-        assertEQ(value, TestData.testNumber3, "Element should match");
+        arktest.assertEQ(value, TestData.testNumber3, "Element should match");
         countForEach++;
     });
-    assertEQ(countForEach, deque.length, "Deque length same as foreach");
+    arktest.assertEQ(countForEach, deque.length, "Deque length same as foreach");
 }
 
 function testDequeForEachNoParam() {
@@ -135,7 +135,7 @@ function testDequeForEachNoParam() {
     deque.forEach(() => {
         forEachCount++;
     });
-    assertEQ(forEachCount, deque.length, "ForEach count should match deque length");
+    arktest.assertEQ(forEachCount, deque.length, "ForEach count should match deque length");
 }
 
 function testDequeForEachWithValue() {
@@ -149,8 +149,8 @@ function testDequeForEachWithValue() {
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match deque length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match deque length");
 }
 
 function testDequeForEachWithValueAndIndex() {
@@ -164,8 +164,8 @@ function testDequeForEachWithValueAndIndex() {
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match deque length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match deque length");
 }
 
 function testDequeForEachWithValueIndexAndTempArrayList() {
@@ -174,7 +174,7 @@ function testDequeForEachWithValueIndexAndTempArrayList() {
     let forEachCount: number = 0;
     let forEachFlag: number = 0;
     deque.forEach((value: number, index: number, tempDeque: Deque<number>) => {
-        assertEQ(deque, tempDeque, "TempDeque should be this");
+        arktest.assertEQ(deque, tempDeque, "TempDeque should be this");
         let elem1 = tempDeque.getFirst();
         let elem2 = deque.popFirst();
         if (value != elem2 || index != forEachCount || elem1 != elem2) {
@@ -182,8 +182,8 @@ function testDequeForEachWithValueIndexAndTempArrayList() {
         }
         forEachCount++;
     });
-    assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
-    assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match deque length");
+    arktest.assertEQ(forEachFlag, 0, "ForEach should iterate and modify elements correctly");
+    arktest.assertEQ(forEachCount, TestData.forNumber.length, "ForEach count should match deque length");
 }
 
 function testDequeForEachChangeElements() {
@@ -194,7 +194,7 @@ function testDequeForEachChangeElements() {
         value = 0;
     });
     for (let i: int = 0; i < TestData.forNumber.length; i++) {
-        assertEQ(deque.popFirst(), TestData.forNumber[i], "ForEach should keep all elements the same");
+        arktest.assertEQ(deque.popFirst(), TestData.forNumber[i], "ForEach should keep all elements the same");
     }
 }
 
@@ -204,7 +204,7 @@ function testDequeJSONStringify() {
     deque.insertEnd(TestData.testString2);
     deque.insertEnd(TestData.testNumber1);
     let jsonResult = JSON.stringify(deque);
-    assertEQ(jsonResult, TestData.result1, `jsonResult should be ${TestData.result1}`);
+    arktest.assertEQ(jsonResult, TestData.result1, `jsonResult should be ${TestData.result1}`);
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {

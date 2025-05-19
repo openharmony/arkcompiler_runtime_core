@@ -22,7 +22,7 @@ tags: [compile-only, negative]
 function {{s}}(): void {}
 
 function main(): void {
-  assertTrue( true )
+  arktest.assertTrue( true )
 }
 
 {%- endfor %}

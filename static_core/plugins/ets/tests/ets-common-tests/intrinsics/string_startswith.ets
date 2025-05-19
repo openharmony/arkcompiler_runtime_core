@@ -20,45 +20,45 @@ const Nature: String = '自然界';
 
 function main(): int {
 
-    assertTrue(Empty.startsWith(''));
-    assertTrue(Empty.startsWith('', -1));
-    assertTrue(Empty.startsWith('', 0));
-    assertTrue(Empty.startsWith('', 1));
-    assertFalse(Empty.startsWith('*'))
-    assertFalse(Empty.startsWith('*', -1))
-    assertFalse(Empty.startsWith('*', 0))
-    assertFalse(Empty.startsWith('*', 1))
+    arktest.assertTrue(Empty.startsWith(''));
+    arktest.assertTrue(Empty.startsWith('', -1));
+    arktest.assertTrue(Empty.startsWith('', 0));
+    arktest.assertTrue(Empty.startsWith('', 1));
+    arktest.assertFalse(Empty.startsWith('*'))
+    arktest.assertFalse(Empty.startsWith('*', -1))
+    arktest.assertFalse(Empty.startsWith('*', 0))
+    arktest.assertFalse(Empty.startsWith('*', 1))
 
-    assertTrue(Esc.startsWith('\t'))
-    assertTrue(Esc.startsWith('\t', -1))
-    assertTrue(Esc.startsWith('\t', 0))
-    assertTrue(Esc.startsWith('\n', 1))
-    assertTrue(Esc.startsWith('\v', 2))
+    arktest.assertTrue(Esc.startsWith('\t'))
+    arktest.assertTrue(Esc.startsWith('\t', -1))
+    arktest.assertTrue(Esc.startsWith('\t', 0))
+    arktest.assertTrue(Esc.startsWith('\n', 1))
+    arktest.assertTrue(Esc.startsWith('\v', 2))
 
-    assertTrue(Hello.startsWith(''))
-    assertTrue(Hello.startsWith('',-1))
-    assertTrue(Hello.startsWith('', 0))
-    assertTrue(Hello.startsWith('', 1))
-    assertTrue(Hello.startsWith('', 2))
-    assertTrue(Hello.startsWith('', 3))
-    assertTrue(Hello.startsWith('', 4))
-    assertTrue(Hello.startsWith('', 5))
+    arktest.assertTrue(Hello.startsWith(''))
+    arktest.assertTrue(Hello.startsWith('',-1))
+    arktest.assertTrue(Hello.startsWith('', 0))
+    arktest.assertTrue(Hello.startsWith('', 1))
+    arktest.assertTrue(Hello.startsWith('', 2))
+    arktest.assertTrue(Hello.startsWith('', 3))
+    arktest.assertTrue(Hello.startsWith('', 4))
+    arktest.assertTrue(Hello.startsWith('', 5))
 
-    assertTrue(Hello.startsWith('H'))
-    assertTrue(Hello.startsWith("Hel"))
-    assertTrue(Hello.startsWith("Hel", 0))
-    assertTrue(Hello.startsWith("Hel", -1))
-    assertTrue(Hello.startsWith("ello", 1))
-    assertTrue(Hello.startsWith("o", 4))
+    arktest.assertTrue(Hello.startsWith('H'))
+    arktest.assertTrue(Hello.startsWith("Hel"))
+    arktest.assertTrue(Hello.startsWith("Hel", 0))
+    arktest.assertTrue(Hello.startsWith("Hel", -1))
+    arktest.assertTrue(Hello.startsWith("ello", 1))
+    arktest.assertTrue(Hello.startsWith("o", 4))
 
-    assertTrue(Nature.startsWith('自然界'))
-    assertTrue(Nature.startsWith('自然'))
-    assertTrue(Nature.startsWith("自"))
-    assertTrue(Nature.startsWith("自", -1))
-    assertFalse(Nature.startsWith("然", 0))
-    assertTrue(Nature.startsWith("然界", 1))
-    assertTrue(Nature.startsWith("界", 2))
-    assertFalse(Nature.startsWith("界", 3))
+    arktest.assertTrue(Nature.startsWith('自然界'))
+    arktest.assertTrue(Nature.startsWith('自然'))
+    arktest.assertTrue(Nature.startsWith("自"))
+    arktest.assertTrue(Nature.startsWith("自", -1))
+    arktest.assertFalse(Nature.startsWith("然", 0))
+    arktest.assertTrue(Nature.startsWith("然界", 1))
+    arktest.assertTrue(Nature.startsWith("界", 2))
+    arktest.assertFalse(Nature.startsWith("界", 3))
 
     return 0;
 }

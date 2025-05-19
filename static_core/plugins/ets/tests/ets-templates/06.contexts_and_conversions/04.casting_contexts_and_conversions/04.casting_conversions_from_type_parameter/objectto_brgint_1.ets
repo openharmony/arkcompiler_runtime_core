@@ -20,5 +20,5 @@ desc: Convert to obj-bigint type.
 function main(): void {
   let bigIntValue: bigint = 123456789012345678901234567890n;
   const obj1: object = bigIntValue;
-  assertTrue(obj1 == bigIntValue);
+  arktest.assertTrue(obj1 == bigIntValue);
 }

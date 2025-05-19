@@ -27,7 +27,7 @@ import { launch } from "std/concurrency"
 function main(): int {
     for (let i = 0; i < 100; i++) {
         let r = launch<number, (p:number) => number>(((p: number): number => p + p), 42.0)
-        assertEQ((r.Await()), 84.0);
+        arktest.assertEQ((r.Await()), 84.0);
     }
     return 0;
 }

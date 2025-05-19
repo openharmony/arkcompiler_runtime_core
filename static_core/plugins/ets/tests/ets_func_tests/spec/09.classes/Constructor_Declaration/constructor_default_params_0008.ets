@@ -37,7 +37,7 @@ class X {
 
 function main() : int {
     let x : X = new X();
-    assertEQ( x.data.data1, 0)
-    assertEQ( x.data.data2, 1)
+    arktest.assertEQ( x.data.data1, 0)
+    arktest.assertEQ( x.data.data2, 1)
     return 0;
 }

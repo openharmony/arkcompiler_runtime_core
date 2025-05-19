@@ -26,7 +26,7 @@ async function startTest() {
     try {
         await neverReturn();
     } catch (error) {
-        assertEQ(error as string, "This function never returns");
+        arktest.assertEQ(error as string, "This function never returns");
     }
 }
 

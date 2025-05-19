@@ -27,5 +27,5 @@ let testObj = new TestObj();
 let methodResult = testObj.testMethod("test");
 
 function main(): void {
-    assertEQ(methodResult, "test");
+    arktest.assertEQ(methodResult, "test");
 }

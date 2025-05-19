@@ -51,8 +51,8 @@ function main(): void {
   const result1 = bird.sleep();
   const result2 = bird.fly();
   const result3 = bird.land();
-  assertEQ(result, 'Bird is eating.');
-  assertEQ(result1, 'Bird is sleeping.');
-  assertEQ(result2, 'Bird is flying.');
-  assertEQ(result3, 'Bird has landed.');
+  arktest.assertEQ(result, 'Bird is eating.');
+  arktest.assertEQ(result1, 'Bird is sleeping.');
+  arktest.assertEQ(result2, 'Bird is flying.');
+  arktest.assertEQ(result3, 'Bird has landed.');
 }

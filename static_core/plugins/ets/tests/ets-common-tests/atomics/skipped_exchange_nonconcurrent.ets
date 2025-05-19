@@ -23,9 +23,9 @@ function main() {
 
         for (let i = 1; i < 100; i++) {
             let old = Atomics.exchange(arr, 0, i)
-            assertEQ(old, i - 1)
+            arktest.assertEQ(old, i - 1)
         }
     } catch (e) {
-        assertTrue(false)
+        arktest.assertTrue(false)
     }
 }

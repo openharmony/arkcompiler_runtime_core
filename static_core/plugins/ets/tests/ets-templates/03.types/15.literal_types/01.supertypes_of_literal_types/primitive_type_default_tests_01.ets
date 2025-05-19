@@ -21,5 +21,5 @@ params: number, 0
 let x: number;
 
 function main(): void {
-    assertEQ(x, 0);
+    arktest.assertEQ(x, 0);
 }

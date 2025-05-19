@@ -32,9 +32,9 @@ function main() {
     {% if t != c.type %}
     try {
         let a: FixedArray<{{t}}> = obj as FixedArray<{{t}}>
-        assertTrue(false, 'ClassCastError was expected')
+        arktest.assertTrue(false, 'ClassCastError was expected')
     } catch (e) {
-        assertTrue(e instanceof ClassCastError, 'ClassCastError was expected')
+        arktest.assertTrue(e instanceof ClassCastError, 'ClassCastError was expected')
     }
     {%- endif %}
 {%- endfor %}
