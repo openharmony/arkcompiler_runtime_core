@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,7 +27,7 @@ from runner.options.config import Config
 from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_suite import EtsTestSuite
 from runner.plugins.ets.test_ets import TestETS
-from runner.plugins.ets.test_sts_ts_subset import TestTSSubset
+from runner.plugins.ets.test_ets_ts_subset import TestTSSubset
 from runner.runner_base import get_test_id
 from runner.runner_file_based import RunnerFileBased
 from runner.enum_types.test_directory import TestDirectory
@@ -45,6 +45,7 @@ class RunnerETS(RunnerFileBased):
         self.__ets_suite_name = self.get_ets_suite_name(config.test_suites)
         RunnerFileBased.__init__(self, config, self.__ets_suite_name)
         self.stdlib_path = path.join(self.build_dir, "plugins/ets/etsstdlib.abc")
+        self.sdk_path = path.join(self.build_dir, "plugins/ets/sdk/etssdk.abc")
         if not path.exists(self.stdlib_path):
             self.stdlib_path = path.join(self.build_dir, "gen", "plugins/ets/etsstdlib.abc")  # for GN build
 
@@ -53,20 +54,32 @@ class RunnerETS(RunnerFileBased):
         self.test_env.es2panda_args.extend([
             f"--arktsconfig={self.arktsconfig}",
             "--gen-stdlib=false",
-            "--extension=sts",
+            "--extension=ets",
             f"--opt-level={self.config.es2panda.opt_level}"
         ])
         if self.config.es2panda.debug_info:
             self.test_env.es2panda_args.append("--debug-info")
         self.test_env.es2panda_args.extend(self.config.es2panda.es2panda_args)
 
-        load_runtime_ets = [f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets"]
+        if self.__ets_suite_name == EtsSuites.SDK.value:
+            boot_files = f"--boot-panda-files={self.stdlib_path}:{self.sdk_path}"
+        else:
+            boot_files = f"--boot-panda-files={self.stdlib_path}"
+        load_runtime_ets = [boot_files, "--load-runtimes=ets"]
         self.test_env.runtime_args.extend(load_runtime_ets)
+        self.test_env.runtime_args.append("--verification-enabled=true")
+        self.test_env.runtime_args.append("--verification-mode=on-the-fly")
+        if self.__ets_suite_name == EtsSuites.SDK.value:
+            self.test_env.runtime_args.append(f"--panda-files={self.sdk_path}")
+            self.test_env.verifier_args.append(f"--panda-files={self.sdk_path}")
         self.test_env.verifier_args.extend(load_runtime_ets)
         if self.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             self.aot_args.extend(load_runtime_ets)
 
         test_suite_class = EtsTestSuite.get_class(self.__ets_suite_name)
+
+        if self.__ets_suite_name == EtsSuites.RUNTIME.value:
+            self.default_list_root = self._get_frontend_test_lists()
 
         test_suite = test_suite_class(self.config, self.work_dir, self.default_list_root)
         test_suite.process(self.config.general.generate_only or self.config.ets.force_generate)
@@ -81,7 +94,7 @@ class RunnerETS(RunnerFileBased):
         self.collect_excluded_test_lists(test_name=suite_name)
         self.collect_ignored_test_lists(test_name=suite_name)
 
-        self.add_directories([TestDirectory(self.test_root, "sts", [])])
+        self.add_directories([TestDirectory(self.test_root, "ets", [])])
 
     @property
     def default_work_dir_root(self) -> Path:
@@ -109,8 +122,10 @@ class RunnerETS(RunnerFileBased):
             name = EtsSuites.ESCHECKED.value
         elif 'ets_custom' in test_suites:
             name = EtsSuites.CUSTOM.value
-        elif 'sts_ts_subset' in test_suites:
+        elif 'ets_ts_subset' in test_suites:
             name = EtsSuites.TS_SUBSET.value
+        elif 'ets_sdk' in test_suites:
+            name = EtsSuites.SDK.value
         else:
             Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name

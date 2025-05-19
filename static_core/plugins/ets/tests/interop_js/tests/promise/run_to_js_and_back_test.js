@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,30 @@
  */
 
 function runTest() {
-	let test = 'toJsAndBack';
-	console.log('Running test ' + test);
-	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-		console.log('Cannot create ETS runtime');
-		process.exit(1);
+	const helper = requireNapiPreview('libinterop_test_helper.so', false);
+	const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
+	const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
+	if (!packageName) {
+		throw Error('PACKAGE_NAME is not set');
 	}
-	let promise = etsVm.call('getPromise');
-	etsVm.call('setAndCheckPromise', promise);
+	const globalName = 'L' + packageName + '/ETSGLOBAL;';
+
+	let test = 'toJsAndBack';
+	print('Running test ' + test);
+	let etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+	const etsOpts = {
+		'panda-files': gtestAbcPath,
+		'boot-panda-files': `${stdlibPath}:${gtestAbcPath}`,
+		'coroutine-enable-external-scheduling': 'true',
+	};
+	if (!etsVm.createRuntime(etsOpts)) {
+		throw Error('Cannot create ETS runtime');
+	}
+	const getPromise = etsVm.getFunction(globalName, 'getPromise');
+	let promise = getPromise();
+	const setAndCheckPromise = etsVm.getFunction(globalName, 'setAndCheckPromise');
+	setAndCheckPromise(promise);
 }
 
 runTest();

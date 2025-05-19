@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,23 @@
  * limitations under the License.
  */
 
-'use strict';
-
-function cons(value, tail) {
+export function cons(value, tail) {
 	return { value: value, tail: tail };
 }
 
-function car(node) {
+export function car(node) {
 	return node.value;
 }
 
-function cdr(node) {
+export function cdr(node) {
 	return node.tail;
 }
 
-function sum(a, b) {
+export function sum(a, b) {
 	return a + b;
 }
 
-class TreeNode {
+export class TreeNode {
 	value;
 	left;
 	right;
@@ -54,13 +52,13 @@ class TreeNode {
 	}
 }
 
-function makeDynObject(x) {
+export function makeDynObject(x) {
 	this.v0 = { value: x };
 }
 
-function doNothing() {}
+export function doNothing() {}
 
-function makeSwappable(obj) {
+export function makeSwappable(obj) {
 	obj.swap = function () {
 		let tmp = this.first;
 		this.first = this.second;
@@ -68,14 +66,14 @@ function makeSwappable(obj) {
 	};
 }
 
-class StaticClass {
+export class StaticClass {
 	static staticProperty = 10;
 	static staticMethod() {
 		return this.staticProperty + 100;
 	}
 }
 
-function extractSquaredInt(obj) {
+export function extractSquaredInt(obj) {
 	let x = obj.intValue;
 	return x * x;
 }
@@ -98,7 +96,7 @@ MakeObjectWithPrototype.prototype.prototypeFunction = function () {
 	return 'prototype function';
 };
 
-let dynStorage = {
+export let dynStorage = {
 	str: 'abcd',
 	dbl: 1.9,
 	integer: 6,
@@ -113,16 +111,5 @@ let dynStorage = {
 	},
 };
 
-exports.cons = cons;
-exports.car = car;
-exports.cdr = cdr;
-exports.sum = sum;
-exports.TreeNode = TreeNode;
-exports.makeDynObject = makeDynObject;
-exports.doNothing = doNothing;
-exports.makeSwappable = makeSwappable;
-exports.StaticClass = StaticClass;
-exports.extractSquaredInt = extractSquaredInt;
-exports.ObjectWithPrototype = MakeObjectWithPrototype;
-exports.dynStorage = dynStorage;
-exports.vundefined = undefined;
+export let ObjectWithPrototype = MakeObjectWithPrototype;
+export let vundefined = undefined;

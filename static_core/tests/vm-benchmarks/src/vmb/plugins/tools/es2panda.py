@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,23 +41,31 @@ def make_arktsconfig(configpath: Union[str, Path],
     template = Template(
         load_file(tpl_path)).substitute(ROOT=str(ark_root))
     parsed_template = json.loads(template)
-    if len(extra_paths) > 0:
-        paths: dict = {}
-        dynamic_paths: dict = {}
-        for path in extra_paths:
-            lib_name = Path(path).stem
-            is_compilable = Path(path).suffix == '.sts' or Path(path).is_dir()
-            paths[lib_name] = [path]
-            if not is_compilable:
-                dynamic_paths[path] = {'language': 'js', 'hasDecl': False}
-                parsed_template['compilerOptions']['paths'] = {
-                    **parsed_template['compilerOptions']['paths'],
-                    **paths
-                    }
-                parsed_template['compilerOptions']['dynamicPaths'] = {
-                    **parsed_template['compilerOptions']['dynamicPaths'],
-                    **dynamic_paths
-                    }
+    if len(extra_paths) < 1:
+        with create_file(configpath) as f:
+            f.write(json.dumps(parsed_template))
+        return
+
+    paths: dict = {}
+    dynamic_paths: dict = {}
+    for path in extra_paths:
+        lib_name = Path(path).stem
+        is_compilable = Path(path).suffix == '.ets' or Path(path).is_dir()
+        paths[lib_name] = [path]
+        if is_compilable:
+            continue
+
+        key: str = path.replace("/", "_").replace(".", "_")
+        dynamic_paths[key] = {'language': 'js', 'declPath': path, 'ohmUrl': path}
+        parsed_template['compilerOptions']['paths'] = {
+            **parsed_template['compilerOptions']['paths'],
+            **paths
+            }
+        parsed_template['compilerOptions']['dynamicPaths'] = {
+            **parsed_template['compilerOptions']['dynamicPaths'],
+            **dynamic_paths
+            }
+
     with create_file(configpath) as f:
         f.write(json.dumps(parsed_template))
 
@@ -72,7 +80,9 @@ class Tool(ToolBase):
         )
         self.default_arktsconfig = str(Path(self.panda_root).joinpath(
             'tools', 'es2panda', 'generated', 'arktsconfig.json'))
-        self.opts = '--gen-stdlib=false --extension=sts --opt-level=2 ' \
+        panda_stdlib_src = os.environ.get('PANDA_STDLIB_SRC', None)
+        stdlib_opt = f'--stdlib={panda_stdlib_src}' if panda_stdlib_src else '--gen-stdlib=false'
+        self.opts = f'{stdlib_opt} --extension=ets --opt-level=2 ' \
             f'{self.custom}'
         self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
 
@@ -95,13 +105,12 @@ class Tool(ToolBase):
         return str(arktsconfig_path)
 
     def exec(self, bu: BenchUnit) -> None:
-        for lib in bu.libs('.ts', '.sts'):
+        for lib in bu.libs('.ts', '.ets'):
             abc = lib.with_suffix('.abc')
             if abc.is_file():
                 continue
-            opts = '--ets-module ' + self.opts
-            self.run_es2panda(lib, abc, opts, bu)
-        src = bu.src('.ts', '.sts')
+            self.run_es2panda(lib, abc, self.opts, bu)
+        src = bu.src('.ts', '.ets')
         abc = src.with_suffix('.abc')
         res = self.run_es2panda(src, abc, self.opts, bu)
         abc_size = self.sh.get_filesize(abc)
@@ -119,7 +128,7 @@ class Tool(ToolBase):
             f'LD_LIBRARY_PATH={self.panda_root}/lib '
             f'{self.es2panda} {opts} '
             f'--arktsconfig={arktsconfig} '
-            f'--output={abc} {src}',
+            f'--output={abc} {src if not bu.src_for_es2panda_override else str(bu.src_for_es2panda_override)}',
             measure_time=True)
         if res.ret != 0 or not abc.is_file():
             bu.status = BUStatus.COMPILATION_FAILED

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,79 +13,80 @@
  * limitations under the License.
  */
 
-const tsTestString = 'ts_test_string';
-exports.UnionSetter = class UnionSetter {
-	set value(arg) {
-		this._value = arg;
-	}
-	get value() {
-		return this._value;
-	}
-};
-exports.InterfaceSetter = class InterfaceSetter {
-	set value(arg) {
-		this._value = arg;
-	}
-	get value() {
-		return this._value;
-	}
-};
-exports.BaseClass = class BaseClass {
-	set value(arg) {
-		this._value = arg;
-	}
-	get value() {
-		return this._value;
-	}
-};
-exports.SubsetRefSet = class SubsetByRef extends exports.BaseClass {};
-exports.tsTestString = tsTestString;
-class ValueSetter {
-	constructor() {
-		this._value = tsTestString;
-	}
+export class UnionSetter {
+    set value(arg) {
+        this._value = arg;
+    }
+    get value() {
+        return this._value;
+    }
 }
-exports.SubsetValueSet = class SubsetValueSet extends ValueSetter {
-	constructor() {
-		super();
-	}
-	set value(arg) {
-		this._value = arg;
-	}
-	get value() {
-		return this._value;
-	}
-};
-exports.SetterAnyType = class SetterAnyType {
-	set value(arg) {
-		this._value = arg;
-	}
-	get value() {
-		return this._value;
-	}
-};
-exports.TupleSet = class TupleSet {
-	set value(arg) {
-		this._value = arg;
-	}
-	get value() {
-		return this._value;
-	}
-};
-class AbstractSetter {}
-exports.AbstractClass = class AbstractClass extends AbstractSetter {
-	set value(arg) {
-		this._value = arg;
-	}
-	get value() {
-		return this._value;
-	}
-};
-exports.AbstractClassObject = new exports.AbstractClass();
-exports.UnionSetterObject = new exports.UnionSetter();
-exports.InterfaceSetterObject = new exports.InterfaceSetter();
-exports.TupleSetObject = new exports.TupleSet();
-exports.SetterAnyTypeObject = new exports.SetterAnyType();
-exports.BaseClassObject = new exports.BaseClass();
-exports.SubsetRefSetObject = new exports.SubsetRefSet();
-exports.SubsetValueSetObject = new exports.SubsetValueSet();
+export class InterfaceSetter {
+    set value(arg) {
+        this._value = arg;
+    }
+    get value() {
+        return this._value;
+    }
+}
+export class BaseClass {
+    set value(arg) {
+        this._value = arg;
+    }
+    get value() {
+        return this._value;
+    }
+}
+export class SubsetRefSet extends BaseClass {
+}
+export const tsTestString = 'ts_test_string';
+class ValueSetter {
+    constructor() {
+        this._value = tsTestString;
+    }
+}
+export class SubsetValueSet extends ValueSetter {
+    constructor() {
+        super();
+    }
+    set value(arg) {
+        this._value = arg;
+    }
+    get value() {
+        return this._value;
+    }
+}
+export class SetterAnyType {
+    set value(arg) {
+        this._value = arg;
+    }
+    get value() {
+        return this._value;
+    }
+}
+export class TupleSet {
+    set value(arg) {
+        this._value = arg;
+    }
+    get value() {
+        return this._value;
+    }
+}
+class AbstractSetter {
+}
+export class AbstractClass extends AbstractSetter {
+    set value(arg) {
+        this._value = arg;
+    }
+    get value() {
+        return this._value;
+    }
+}
+export const AbstractClassObject = new AbstractClass();
+export const UnionSetterObject = new UnionSetter();
+export const InterfaceSetterObject = new InterfaceSetter();
+export const TupleSetObject = new TupleSet();
+export const SetterAnyTypeObject = new SetterAnyType();
+export const BaseClassObject = new BaseClass();
+export const SubsetRefSetObject = new SubsetRefSet();
+export const SubsetValueSetObject = new SubsetValueSet();

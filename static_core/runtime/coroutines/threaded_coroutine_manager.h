@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,10 @@ public:
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                      CoroutineLaunchMode mode) override;
+    bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                CoroutineLaunchMode mode) override;
+    bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                           CoroutineLaunchMode mode) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -78,14 +80,18 @@ protected:
     size_t GetCoroutineCount() override;
     size_t GetCoroutineCountLimit() override;
 
-    /// Sets number of coroutines that can execute simultaniously
-    void SetWorkersCount(uint32_t n);
-    /// Returns number of coroutines that can execute simultaniously
-    uint32_t GetWorkersCount() const;
+    /// @return number of coroutines that can execute simultaniously
+    uint32_t GetActiveWorkersCount() const;
+    /**
+     * Create the required number of worker instances. They are required only for the interface
+     * level compatibility with other parts of the runtime.
+     */
+    void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_) override;
+    CoroutineWorker *ChooseWorkerForCoroutine([[maybe_unused]] Coroutine *co);
 
 private:
-    Coroutine *LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                          bool startSuspended = true);
+    bool LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                    bool startSuspended = true);
     void ScheduleImpl();
     void UnblockWaitersImpl(CoroutineEvent *blocker) REQUIRES(coroSwitchLock_);
 
@@ -98,7 +104,7 @@ private:
     bool RunnableCoroutinesExist();
 
     /* coroutine registry management */
-    void AddToRegistry(Coroutine *co);
+    void AddToRegistry(Coroutine *co) REQUIRES(coroListLock_);
     void RemoveFromRegistry(Coroutine *co) REQUIRES(coroListLock_);
 
     void DeleteCoroutineInstance(Coroutine *co);
@@ -119,7 +125,12 @@ private:
     os::memory::ConditionVariable cvAwaitAll_;
     os::memory::Mutex cvAwaitAllMutex_;
 
-    uint32_t workersCount_ = 1;
+    // worker related members
+    PandaVector<CoroutineWorker *> workers_ GUARDED_BY(workersLock_);
+    size_t activeWorkersCount_ GUARDED_BY(workersLock_) = 0;
+    mutable os::memory::RecursiveMutex workersLock_;
+    mutable os::memory::ConditionVariable workersCv_;
+
     // main is running from the very beginning
     std::atomic_uint32_t runningCorosCount_ = 1;
     std::atomic_uint32_t coroutineCount_ = 0;

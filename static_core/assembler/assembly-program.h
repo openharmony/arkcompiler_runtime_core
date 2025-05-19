@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,9 @@ struct Program {
 
     ark::panda_file::SourceLang lang {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     std::map<std::string, ark::pandasm::Record> recordTable;
-    std::map<std::string, ark::pandasm::Function> functionTable;
+    std::map<std::string, ark::pandasm::Function> functionInstanceTable;
+    std::map<std::string, ark::pandasm::Function> functionStaticTable;
+    std::vector<std::pair<std::string, std::string>> exportStrMap;
     std::unordered_map<std::string, std::vector<std::string>>
         functionSynonyms;  // we might keep unordered, since we don't iterate over it
     std::map<std::string, ark::pandasm::LiteralArray> literalarrayTable;
@@ -46,6 +48,33 @@ struct Program {
      * Returns a JSON string with the program structure and scopes locations
      */
     PANDA_PUBLIC_API std::string JsonDump() const;
+
+    void AddToFunctionTable(ark::pandasm::Function func, const std::string &name = "")
+    {
+        if (func.IsStatic()) {
+            functionStaticTable.emplace(name.empty() ? func.name : name, std::move(func));
+        } else {
+            functionInstanceTable.emplace(name.empty() ? func.name : name, std::move(func));
+        }
+    }
+
+    std::optional<std::map<std::basic_string<char>, ark::pandasm::Function>::const_iterator> FindAmongAllFunctions(
+        const std::string &name, bool isAmbiguous = false, bool isStatic = false) const
+    {
+        const auto &firstSearchTable = isStatic ? functionStaticTable : functionInstanceTable;
+        const auto &secondSearchTable = isStatic ? functionInstanceTable : functionStaticTable;
+        auto it = firstSearchTable.find(name);
+        if (it == firstSearchTable.cend()) {
+            if (isAmbiguous && !isStatic) {
+                return std::nullopt;
+            }
+            it = secondSearchTable.find(name);
+            if (it == secondSearchTable.cend()) {
+                return std::nullopt;
+            }
+        }
+        return it;
+    }
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 

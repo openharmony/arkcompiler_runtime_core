@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,116 +21,116 @@ class EtsPassingReferenceType : public EtsInteropTest {};
 
 TEST_F(EtsPassingReferenceType, referenceAnyParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceAnyParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceAnyParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceAnyWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceAnyWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceAnyWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceLiteralParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceLiteralParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceLiteralParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceLiteralWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceLiteralWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceLiteralWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceExtraSetParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceExtraSetParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceExtraSetParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceExtraSetWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceExtraSetWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceExtraSetWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceSubsetPickParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceSubsetPickParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceSubsetPickParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceSubsetPickWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceSubsetPickWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceSubsetPickWithoutParam");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsPassingReferenceType, referenceSubsetOmitParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceSubsetOmitParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceSubsetOmitParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceSubsetOmitWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceSubsetOmitWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceSubsetOmitWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceSubsetPartialParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceSubsetPartialParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceSubsetPartialParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceSubsetPartialWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceSubsetPartialWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceSubsetPartialWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceUnionArrParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceUnionArrParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceUnionArrParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingReferenceType, referenceUnionObjParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceUnionObjParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceUnionObjParam");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsPassingReferenceType, referenceUnionWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceUnionWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceUnionWithoutParam");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsPassingReferenceType, referenceClassParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceClassParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceClassParam");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsPassingReferenceType, referenceClassWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceClassWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceClassWithoutParam");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsPassingReferenceType, referenceInterfaceParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceInterfaceParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceInterfaceParam");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsPassingReferenceType, referenceInterfaceWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("referenceInterfaceWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceInterfaceWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(pishin) enable after fixibng #17878
 TEST_F(EtsPassingReferenceType, DISABLED_referenceObjectWithArr)
 {
-    auto ret = CallEtsMethod<bool>("referenceObjectWithArr");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "referenceObjectWithArr");
     ASSERT_EQ(ret, true);
 }
 

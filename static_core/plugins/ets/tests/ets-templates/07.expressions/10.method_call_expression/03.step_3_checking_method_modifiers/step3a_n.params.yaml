@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ cases:
               }
           }
       use: |-
-          assert A.met() == "S"
+          assertEQ( A.met(), "S" )
 
     - decl: |-
             interface I {
@@ -29,7 +29,7 @@ cases:
                 }
             }
       use: |-
-          assert I.met() == "I"
+          assertEQ( I.met(), "I" )
 
     - decl: |-
           class A {
@@ -40,7 +40,7 @@ cases:
           type TA = A
       use: |-
           // class name alias
-          assert TA.met() == "S"
+          assertEQ( TA.met(), "S" )
 
     - decl: |-
           interface I {
@@ -51,7 +51,7 @@ cases:
           type TI = I
       use: |-
           // interface name alias
-          assert TI.met() == "I"
+          assertEQ( TI.met(), "I" )
 
     - decl: |-
           class A {
@@ -67,7 +67,7 @@ cases:
           type UT = A | B
       use: |-
           // class name
-          assert UT.met() == "S"
+          assertEQ( UT.met(), "S" )
 
     - decl: |-
           interface I {
@@ -83,4 +83,4 @@ cases:
           type UT = I | J
       use: |-
           // interface name
-          assert UT.met() == "I"
+          assertEQ( UT.met(), "I" )

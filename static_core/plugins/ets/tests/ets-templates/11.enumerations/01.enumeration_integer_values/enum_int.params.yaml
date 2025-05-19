@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,80 +16,98 @@ cases:
     - decl: |-
           enum Enum { first, second, third }
       use: |-
-          assert Enum.first.valueOf() == 0
-          assert Enum.second.valueOf() == 1
-          assert Enum.third.valueOf() == 2
+          assertEQ( Enum.first.valueOf(), 0 )
+          assertEQ( Enum.second.valueOf(), 1 )
+          assertEQ( Enum.third.valueOf(), 2 )
 
     - decl: |-
           enum Enum { first, second = -2147483648, third}
       use: |-
-          assert Enum.first.valueOf() == 0
-          assert Enum.second.valueOf() == -2147483648
-          assert Enum.third.valueOf() == -2147483647
+          assertEQ( Enum.first.valueOf(), 0 )
+          assertEQ( Enum.second.valueOf(), -2147483648 )
+          assertEQ( Enum.third.valueOf(), -2147483647 )
 
     - decl: |-
           enum Enum { first = 0x7fffffff - 2, second, third }
       use: |-
-          assert Enum.first.valueOf() == 2147483645
-          assert Enum.second.valueOf() == 2147483646
-          assert Enum.third.valueOf() == 2147483647  // Int.MAX_VALUE
+          assertEQ( Enum.first.valueOf(), 2147483645 )
+          assertEQ( Enum.second.valueOf(), 2147483646 )
+          assertEQ( Enum.third.valueOf(), 2147483647 ) // Int.MAX_VALUE
 
     - decl: |-
           const a: int = 2147483647
           const b: int = 2147483647 - 1
           enum Enum { first = a, second = b, third = b - 1 }
       use: |-
-          assert Enum.first.valueOf() == a
-          assert Enum.second.valueOf() == b
-          assert Enum.third.valueOf() == b - 1
+          assertEQ( Enum.first.valueOf(), a )
+          assertEQ( Enum.second.valueOf(), b )
+          assertEQ( Enum.third.valueOf(), b - 1 )
 
     - decl: |-
           enum Enum { first, second = -1, third }
       use: |-
-          assert Enum.first.valueOf() == 0
-          assert Enum.second.valueOf() == -1
-          assert Enum.third == Enum.first
+          assertTrue( Enum.first.valueOf() == 0 )
+          assertTrue( Enum.second.valueOf() == -1 )
+          assertTrue( Enum.third == Enum.first )
 
     - decl: |-
           enum Enum { first = 0x7fffffff - 1, second, third }  // int overflow
       use: |-
-          assert Enum.first.valueOf() == 0x7ffffffe
-          assert Enum.second.valueOf() == 0x7fffffff
-          assert Enum.third.valueOf() == 0x80000000
+          assertEQ( Enum.first.valueOf(), 0x7ffffffe )
+          assertEQ( Enum.second.valueOf(), 0x7fffffff )
+          assertEQ( Enum.third.valueOf(), 0x80000000 )
 
     - decl: |-
           enum Enum { first = -1, second, third = -42 }
       use: |-
-          assert Enum.first == -1
-          assert Enum.second == 0
-          assert Enum.third == -42
+          assertEQ( "" + Enum.first, "-1" )
+          assertEQ( "" + Enum.second, "0" )
+          assertEQ( "" + Enum.third, "-42" )
 
     - decl: |-
           enum Enum { first = -1, second, third = -42 }
       use: |-
-          assert "" + Enum.first == "-1"
-          assert "" + Enum.second == "0"
-          assert "" + Enum.third == "-42"
-
-    - decl: |-
-          enum Enum { first = -1, second, third = -42 }
-      use: |-
-          assert Enum.first + Enum.second + Enum.third == -43
+          assertEQ( Enum.first + Enum.second + Enum.third, -43 )
 
     - decl: |-
           enum Enum { first = 0b0011, second = 0o731, third = 0x00FE_CAFE, fourth = 1_123_456 }
       use: |-
-          assert Enum.first.toString() == "3"
-          assert Enum.second.toString() == "473"
-          assert Enum.third.toString() == "16698110"
-          assert Enum.fourth.toString() == "1123456"
+          assertEQ( Enum.first.toString(), "3" )
+          assertEQ( Enum.second.toString(), "473" )
+          assertEQ( Enum.third.toString(), "16698110" )
+          assertEQ( Enum.fourth.toString(), "1123456" )
 
     - decl: |-
           enum Color { Red = 700, Green = 500, Blue = 400 }
       use: |-
           let v: Color = Color.Green
           switch(v) {
-              case Color.Green: assert v.toString() == "500"; break;
-              default: assert false; break;
+              case Color.Green: assertEQ( v.toString(), "500"); break;
+              default: assertTrue( false); break;
           }
 
+    - decl: |-
+          enum Enum { first = -1, second, third = -42 }
+      use: |-
+          assertTrue( Enum.first == -1 )
+          assertTrue( Enum.second == 0 )
+          assertTrue( Enum.third == -42 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          assertEQ( Enum.first + Enum.second - Enum.third, -2 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          assertEQ( Enum.first.valueOf(), -1 )
+          assertEQ( Enum.second.valueOf(), 12345678910 )
+          assertEQ( Enum.third.valueOf(), 12345678911 )
+
+    - decl: |-
+          enum Enum { first = -1, second = 12345678910, third }
+      use: |-
+          assertEQ( Enum.first.toString(), "-1" )
+          assertEQ( Enum.second.toString(), "12345678910" )
+          assertEQ( Enum.third.toString(), "12345678911" )

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,8 @@ public:
     std::map<std::string, TypedValue> GetLocals(const PtFrame &frame);
 
     std::string GetSourceCode(std::string_view sourceFile);
+
+    std::vector<std::string> GetPandaFiles(const std::function<bool(std::string_view)> &sourceFileFilter);
 
 private:
     const panda_file::DebugInfoExtractor &GetDebugInfo(const panda_file::File *file);

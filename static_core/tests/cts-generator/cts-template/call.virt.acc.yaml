@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -125,23 +125,19 @@ tests:
           - values: ['R.sf1, v1, 1']
           - values: ['R.sf1, v2, v1, 2']
           - values: ['R.sf1, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['R.sf2, v1, 1']
           - values: ['R.sf2, v2, v1, 2']
           - values: ['R.sf2, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['R.sf3, v1, 1']
           - values: ['R.sf3, v2, v1, 2']
           - values: ['R.sf3, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['R.sf4, v1, 1']
           - values: ['R.sf4, v2, v1, 2']
           - values: ['R.sf4, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['R.sf5, v1, 1']
           - values: ['R.sf5, v2, v1, 2']
           - values: ['R.sf5, v3, v2, v1, 3']
@@ -150,23 +146,19 @@ tests:
           - values: ['sf1, v1, 1']
           - values: ['sf1, v2, v1, 2']
           - values: ['sf1, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['sf2, v1, 1']
           - values: ['sf2, v2, v1, 2']
           - values: ['sf2, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['sf3, v1, 1']
           - values: ['sf3, v2, v1, 2']
           - values: ['sf3, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['sf4, v1, 1']
           - values: ['sf4, v2, v1, 2']
           - values: ['sf4, v3, v2, v1, 3']
-            runner-options: [verifier-failure, verifier-config]
-            tags: [verifier]
+            runner-options: [compile-failure]
           - values: ['sf5, v1, 1']
           - values: ['sf5, v2, v1, 2']
           - values: ['sf5, v3, v2, v1, 3']
@@ -403,8 +395,7 @@ tests:
           verification:
             - method_id_non_static
         header-template: []
-        runner-options: [verifier-failure, verifier-config]
-        tags: [verifier]
+        runner-options: [compile-failure]
         check-type: exit-positive
         code-template: |
           .record R {}

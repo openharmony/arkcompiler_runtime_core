@@ -766,3 +766,57 @@
     - ark::ObjectHeader*  # resulting array of uint8
     - ark::ObjectHeader*       # src string
     - int32_t                  # count
+
+- name: BeginGeneralNativeMethod
+  entrypoint: BeginGeneralNativeMethod
+  bridge: none
+  properties: []
+  signature:
+    - void
+
+- name: EndGeneralNativeMethodPrim
+  entrypoint: EndGeneralNativeMethodPrim
+  bridge: none
+  properties: []
+  signature:
+    - void
+
+- name: EndGeneralNativeMethodObj
+  entrypoint: EndGeneralNativeMethodObj
+  bridge: none
+  properties: []
+  signature:
+    - ark::ObjectHeader*
+    - ark::mem::Reference*
+
+- name: BeginQuickNativeMethod
+  entrypoint: BeginQuickNativeMethod
+  bridge: none
+  properties: []
+  signature:
+    - void
+
+- name: EndQuickNativeMethodPrim
+  entrypoint: EndQuickNativeMethodPrim
+  bridge: none
+  properties: []
+  signature:
+    - void
+
+- name: EndQuickNativeMethodObj
+  entrypoint: EndQuickNativeMethodObj
+  bridge: none
+  properties: []
+  signature:
+    - ark::ObjectHeader*
+    - ark::mem::Reference*
+
+- name: ResolveCallByName
+  entrypoint: ResolveCallByNameEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - uintptr_t
+  - const ark::Method*
+  - ark::ObjectHeader*
+  - size_t

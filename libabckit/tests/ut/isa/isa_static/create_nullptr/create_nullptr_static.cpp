@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,7 @@ TEST_F(LibAbcKitCreateNullPtrInstTest, CreateNullPtrValid)
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/create_nullptr/create_nullptr_static_modified.abc",
                                   "create_nullptr_static/ETSGLOBAL", "main");
-    EXPECT_TRUE(helpers::Match(output, "null\n"));
+    EXPECT_TRUE(helpers::Match(output, "undefined\n"));
 }
 
 }  // namespace libabckit::test

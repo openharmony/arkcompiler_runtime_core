@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,72 +24,24 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 namespace ark::ets::intrinsics {
 
-constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
-
-template <bool IS_STORE>
-void LookUpException(ark::Class *klass, Field *rawField)
-{
-    {
-        auto type = IS_STORE ? "setter" : "getter";
-        auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and " +
-                        ark::ConvertToString(type) + " with name " + utf::Mutf8AsCString(rawField->GetName().data);
-        ThrowEtsException(
-            EtsCoroutine::GetCurrent(),
-            utf::Mutf8AsCString(
-                Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
-            errorMsg);
-    }
-    HandlePendingException();
-}
-
-template <panda_file::Type::TypeId FIELD_TYPE>
+template <panda_file::Type::TypeId FIELD_TYPE, bool IS_GETTER>
 Field *TryGetField(ark::Method *method, Field *rawField, uint32_t pc, ark::Class *klass)
 {
-    auto cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
     bool useIc = pc != ark::compiler::INVALID_PC;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto address = method->GetInstructions() + (useIc ? pc : 0);
-    if (useIc) {
-        auto *res = cache->template Get<Field>(address, method);
-        auto resUint = reinterpret_cast<uint64_t>(res);
-        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) != 1) && (res->GetClass() == klass)) {
-            return res;
-        }
-    }
-    auto field = klass->LookupFieldByName(rawField->GetName());
-    if (field != nullptr && useIc) {
-        cache->template Set(address, field, method);
-    }
-    return field;
+    InterpreterCache *cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
+    return GetFieldByName<IS_GETTER>(cache->GetEntry(address), method, rawField, address, klass);
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE, bool IS_GETTER>
 ark::Method *TryGetCallee(ark::Method *method, Field *rawField, uint32_t pc, ark::Class *klass)
 {
-    auto cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
     bool useIc = pc != ark::compiler::INVALID_PC;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto address = method->GetInstructions() + (useIc ? pc : 0);
-    if (useIc) {
-        auto *res = cache->template Get<Method>(address, method);
-        auto resUint = reinterpret_cast<uint64_t>(res);
-        auto methodPtr = reinterpret_cast<Method *>(resUint & ~METHOD_FLAG_MASK);
-        if (res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1) && (methodPtr->GetClass() == klass)) {
-            return methodPtr;
-        }
-    }
-    ark::Method *callee;
-    if constexpr (IS_GETTER) {
-        callee = klass->LookupGetterByName<FIELD_TYPE>(rawField->GetName());
-    } else {
-        callee = klass->LookupSetterByName<FIELD_TYPE>(rawField->GetName());
-    }
-    if (callee != nullptr && useIc) {
-        auto mUint = reinterpret_cast<uint64_t>(callee);
-        ASSERT((mUint & METHOD_FLAG_MASK) == 0);
-        cache->template Set(address, reinterpret_cast<Method *>(mUint | METHOD_FLAG_MASK), method);
-    }
-    return callee;
+    InterpreterCache *cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
+    return GetAccessorByName<FIELD_TYPE, IS_GETTER>(cache->GetEntry(address), method, rawField, address, klass);
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE, class T>
@@ -155,9 +107,9 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
         VMHandle<ObjectHeader> handleObj(thread, obj);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(handleObj.GetPtr()->ClassAddr<ark::BaseClass>());
-        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id));
+        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
 
-        auto field = TryGetField<FIELD_TYPE>(method, rawField, pc, klass);
+        Field *field = TryGetField<FIELD_TYPE, true>(method, rawField, pc, klass);
         if (field != nullptr) {
             if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
                 return handleObj.GetPtr()->GetFieldObject(*field);
@@ -173,7 +125,8 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
             return result.GetAs<T>();
         }
     }
-    LookUpException<false>(klass, rawField);
+    LookUpException<true>(klass, rawField);
+    HandlePendingException();
     UNREACHABLE();
 }
 
@@ -251,9 +204,9 @@ void CompilerEtsStObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::O
         VMHandle<ObjectHeader> handleObj(thread, obj);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
-        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id));
+        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
 
-        auto field = TryGetField<FIELD_TYPE>(method, rawField, pc, klass);
+        Field *field = TryGetField<FIELD_TYPE, false>(method, rawField, pc, klass);
         if (field != nullptr) {
             if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
                 UNREACHABLE();
@@ -270,7 +223,8 @@ void CompilerEtsStObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::O
             return;
         }
     }
-    LookUpException<true>(klass, rawField);
+    LookUpException<false>(klass, rawField);
+    HandlePendingException();
     UNREACHABLE();
 }
 
@@ -287,9 +241,9 @@ void CompilerEtsStObjByNameRef(ark::Method *method, int32_t id, uint32_t pc, ark
         VMHandle<ObjectHeader> handleStore(thread, storeValue);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
-        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id));
+        rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
 
-        auto field = TryGetField<panda_file::Type::TypeId::REFERENCE>(method, rawField, pc, klass);
+        Field *field = TryGetField<panda_file::Type::TypeId::REFERENCE, false>(method, rawField, pc, klass);
         if (field != nullptr) {
             return handleObj.GetPtr()->SetFieldObject(*field, handleStore.GetPtr());
         }
@@ -301,7 +255,8 @@ void CompilerEtsStObjByNameRef(ark::Method *method, int32_t id, uint32_t pc, ark
             return;
         }
     }
-    LookUpException<true>(klass, rawField);
+    LookUpException<false>(klass, rawField);
+    HandlePendingException();
     UNREACHABLE();
 }
 
@@ -379,6 +334,25 @@ extern "C" uint8_t CompilerEtsEquals(ObjectHeader *obj1, ObjectHeader *obj2)
 {
     auto coro = EtsCoroutine::GetCurrent();
     return static_cast<uint8_t>(EtsReferenceEquals(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
+}
+
+extern "C" uint8_t CompilerEtsStrictEquals(ObjectHeader *obj1, ObjectHeader *obj2)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    return static_cast<uint8_t>(
+        EtsReferenceEquals<true>(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
+}
+
+extern "C" EtsString *CompilerEtsTypeof(ObjectHeader *obj)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    return EtsReferenceTypeof(coro, EtsObject::FromCoreType(obj));
+}
+
+extern "C" uint8_t CompilerEtsIstrue(ObjectHeader *obj)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    return static_cast<uint8_t>(EtsIstrue(coro, EtsObject::FromCoreType(obj)));
 }
 
 extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,

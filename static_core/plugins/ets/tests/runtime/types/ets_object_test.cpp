@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <cstdint>
 
 #include "types/ets_object.h"
 
@@ -268,12 +269,185 @@ TEST_F(EtsObjectTest, CompareAndSetFieldObject)
     ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj2);
 
     ASSERT_TRUE(
-        barObj->CompareAndSetFieldObject(foo1Field->GetOffset(), fooObj1, fooObj2, std::memory_order_relaxed, false));
+        barObj->CompareAndSetFieldObject(foo1Field->GetOffset(), fooObj1, fooObj2, std::memory_order_relaxed, true));
     ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj2);
 
     ASSERT_TRUE(
-        barObj->CompareAndSetFieldObject(foo2Field->GetOffset(), fooObj2, fooObj1, std::memory_order_relaxed, false));
+        barObj->CompareAndSetFieldObject(foo2Field->GetOffset(), fooObj2, fooObj1, std::memory_order_relaxed, true));
     ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj1);
+}
+
+TEST_F(EtsObjectTest, GetHashCode_SingleThread)
+{
+    // create class for testing
+    EtsClass *barKlass = GetTestClass("Bar");
+    EtsObject *obj = EtsObject::Create(barKlass);
+
+    // after creation EtsObject should have no hash code
+    ASSERT_FALSE(obj->IsHashed());
+
+    // First we will test work with hash only
+    // after getting hash it should be generated
+    auto hash = obj->GetHashCode();
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_EQ(hash, obj->GetHashCode());
+
+    // next we will test usage of ets object state table
+    // for this we should set interop hash
+    static constexpr uint32_t INTEROP_INDEX_VALUE = 42U;
+    obj->SetInteropIndex(INTEROP_INDEX_VALUE);
+    // switched hashed to used info
+    ASSERT_TRUE(obj->IsUsedInfo());
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_TRUE(obj->HasInteropIndex());
+    // after this getting hash should works correct
+    ASSERT_EQ(hash, obj->GetHashCode());
+    ASSERT_EQ(INTEROP_INDEX_VALUE, obj->GetInteropIndex());
+
+    // next we should test droping of interop hash
+    obj->DropInteropIndex();
+    ASSERT_TRUE(obj->IsUsedInfo());
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_FALSE(obj->HasInteropIndex());
+    ASSERT_EQ(hash, obj->GetHashCode());
+
+    // finally we deflect object
+    EtsCoroutine::GetCurrent()->GetVM()->FreeInternalResources();
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_EQ(hash, obj->GetHashCode());
+}
+
+TEST_F(EtsObjectTest, EtsMarkWordTest)
+{
+    // create mark word for testing using object
+    EtsClass *barKlass = GetTestClass("Bar");
+    EtsObject *obj = EtsObject::Create(barKlass);
+    auto markWord = obj->GetMark();
+    ASSERT_EQ(markWord.GetState(), EtsMarkWord::STATE_UNLOCKED);
+
+    // CC-OFFNXT(G.NAM.03) project code style
+    static constexpr uint32_t HASH_TO_DECODE = 12345U;
+    auto hashedMarkWord = markWord.DecodeFromHash(HASH_TO_DECODE);
+    ASSERT_EQ(hashedMarkWord.GetState(), EtsMarkWord::STATE_HASHED);
+    ASSERT_EQ(hashedMarkWord.GetHash(), HASH_TO_DECODE);
+
+    // CC-OFFNXT(G.NAM.03) project code style
+    static constexpr uint32_t INTEROP_INDEX_TO_DECODE = 42U;
+    auto markWordWithInteropIndex = markWord.DecodeFromInteropIndex(INTEROP_INDEX_TO_DECODE);
+    ASSERT_EQ(markWordWithInteropIndex.GetState(), EtsMarkWord::STATE_HAS_INTEROP_INDEX);
+    ASSERT_EQ(markWordWithInteropIndex.GetInteropIndex(), INTEROP_INDEX_TO_DECODE);
+
+    // CC-OFFNXT(G.NAM.03) project code style
+    static constexpr uint32_t USE_INFO_ID_TO_DECODE = 664U;
+    auto markWordWithInfo = markWord.DecodeFromInfo(USE_INFO_ID_TO_DECODE);
+    ASSERT_EQ(markWordWithInfo.GetState(), EtsMarkWord::STATE_USE_INFO);
+    ASSERT_EQ(markWordWithInfo.GetInfoId(), USE_INFO_ID_TO_DECODE);
+}
+
+TEST_F(EtsObjectTest, SetGetAndDropInteropIndex_SingleThread)
+{
+    // create class for testing
+    EtsClass *barKlass = GetTestClass("Bar");
+    EtsObject *obj = EtsObject::Create(barKlass);
+    // after creation EtsObject should have no hash code
+    ASSERT_FALSE(obj->IsHashed());
+    // we should set interop hash by object method
+    // CC-OFFNXT(G.NAM.03) project code style
+    static constexpr uint32_t INTEROP_INDEX_VALUE = 42U;
+    obj->SetInteropIndex(INTEROP_INDEX_VALUE);
+    ASSERT_TRUE(obj->HasInteropIndex());
+    ASSERT_EQ(obj->GetInteropIndex(), INTEROP_INDEX_VALUE);
+
+    // Next test of interop hash droping
+    obj->DropInteropIndex();
+    ASSERT_FALSE(obj->IsHashed());
+    ASSERT_FALSE(obj->HasInteropIndex());
+
+    // Next test of info table usage
+    obj->SetInteropIndex(INTEROP_INDEX_VALUE);
+    auto hash = obj->GetHashCode();
+    // object still should be hashed
+    ASSERT_TRUE(obj->IsUsedInfo());
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_TRUE(obj->HasInteropIndex());
+    // after this getting interop hash should works correct
+    ASSERT_EQ(hash, obj->GetHashCode());
+    ASSERT_EQ(INTEROP_INDEX_VALUE, obj->GetInteropIndex());
+
+    // next we should test droping of interop hash
+    obj->DropInteropIndex();
+    ASSERT_TRUE(obj->IsUsedInfo());
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_FALSE(obj->HasInteropIndex());
+    ASSERT_EQ(hash, obj->GetHashCode());
+
+    // finally we deflect object
+    EtsCoroutine::GetCurrent()->GetVM()->FreeInternalResources();
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_TRUE(obj->IsHashed());
+    ASSERT_EQ(hash, obj->GetHashCode());
+}
+
+TEST_F(EtsObjectTest, InteropIndex_MultiThread)
+{
+    // CC-OFFNXT(G.NAM.03) project code style
+    static constexpr uint32_t ITERATION_COUNT = 1000;
+    for (size_t i = 0; i < ITERATION_COUNT; i++) {
+        // create class for testing
+        EtsClass *barKlass = GetTestClass("Bar");
+        EtsObject *obj = EtsObject::Create(barKlass);
+        std::atomic_bool finish = false;
+        auto interopHashGetter = [obj, &finish, coro = EtsCoroutine::GetCurrent()] {
+            EtsCoroutine::SetCurrent(coro);
+            // CC-OFFNXT(G.NAM.03) project code style
+            static constexpr uint32_t INTEROP_INDEX = 42U;
+            obj->SetInteropIndex(INTEROP_INDEX);
+            while (!finish) {
+                ASSERT_EQ(INTEROP_INDEX, obj->GetInteropIndex());
+            }
+            obj->DropInteropIndex();
+            ASSERT_TRUE(obj->IsHashed());
+            ASSERT_FALSE(obj->HasInteropIndex());
+        };
+
+        auto interopThread = std::thread(interopHashGetter);
+        auto hash = obj->GetHashCode();
+        ASSERT_EQ(hash, obj->GetHashCode());
+        finish = true;
+        interopThread.join();
+    }
+}
+
+TEST_F(EtsObjectTest, EtsHash_MultiThread)
+{
+    // CC-OFFNXT(G.NAM.03) project code style
+    static constexpr uint32_t ITERATION_COUNT = 1000;
+    for (size_t i = 0; i < ITERATION_COUNT; i++) {
+        // create class for testing
+        EtsClass *barKlass = GetTestClass("Bar");
+        EtsObject *obj = EtsObject::Create(barKlass);
+        std::atomic_bool finish = false;
+        auto interopHashGetter = [obj, &finish, coro = EtsCoroutine::GetCurrent()] {
+            EtsCoroutine::SetCurrent(coro);
+            auto hash = obj->GetHashCode();
+            while (!finish) {
+                ASSERT_EQ(hash, obj->GetHashCode());
+            }
+            ASSERT_TRUE(obj->HasInteropIndex());
+        };
+
+        auto interopThread = std::thread(interopHashGetter);
+        // CC-OFFNXT(G.NAM.03) project code style
+        static constexpr uint32_t INTEROP_INDEX = 42U;
+        obj->SetInteropIndex(INTEROP_INDEX);
+        ASSERT_EQ(INTEROP_INDEX, obj->GetInteropIndex());
+        finish = true;
+        interopThread.join();
+        obj->DropInteropIndex();
+        ASSERT_TRUE(obj->IsUsedInfo());
+        EtsCoroutine::GetCurrent()->GetVM()->FreeInternalResources();
+        ASSERT_TRUE(obj->IsHashed());
+    }
 }
 
 }  // namespace ark::ets::test

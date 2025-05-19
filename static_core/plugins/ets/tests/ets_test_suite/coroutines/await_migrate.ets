@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+let isLaunchMigrated: AtomicFlag = new AtomicFlag(false);
+
+function durationFunc(duration: int): void {
+    let t = Date.now();
+    while ((Date.now() - t) < duration) {
+        continue;
+    }
+}
+
+function delayWithYield(duration: int): void {
+    durationFunc(duration);
+    Coroutine.Schedule();
+}
+
+async function awaitee(): Promise<boolean> {
+    Coroutine.Schedule();
+    return true;
+}
+
+
+function testLaunch(): void {
+    let wId = CoroutineExtras.getWorkerId();
+    await awaitee();
+    // migrate to the worker with the least load after await
+    if (wId != CoroutineExtras.getWorkerId()) {
+        isLaunchMigrated.set(true);
+    }
+}
+
+function checkLaunchMigration(): void {
+    await launch testLaunch();
+}
+
+function main() {
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
+    checkLaunchMigration();
+    let res: boolean = isLaunchMigrated.get();
+    assertEQ(res, true);
+    CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
+}

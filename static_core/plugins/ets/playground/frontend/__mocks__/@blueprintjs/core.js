@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,4 +76,17 @@ export const Radio = ({ label, value, checked, onChange, ...props }) => (
         />
         {label}
     </label>
+);
+
+export const Tooltip = ({ content, children, tooltipClassName, isOpen, tooltipRef, ...props }) => (
+    <div className={tooltipClassName} ref={tooltipRef} {...props}>
+        {children}
+        {isOpen && <div data-testid="mocked-tooltip-content">{content}</div>}
+    </div>
+);
+
+export const ButtonGroup = ({ children, groupClassName, ...props }) => (
+    <div className={groupClassName} data-testid="mocked-button-group" {...props}>
+        {children}
+    </div>
 );

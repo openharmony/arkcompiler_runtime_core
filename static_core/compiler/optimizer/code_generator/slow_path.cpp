@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,6 +121,7 @@ bool SlowPathEntrypoint::GenerateByEntry(Codegen *codegen)
         }
         case EntrypointId::NULL_POINTER_EXCEPTION:
         case EntrypointId::ARITHMETIC_EXCEPTION:
+        case EntrypointId::THROW_NATIVE_EXCEPTION:
             codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, {});
             return true;
         case EntrypointId::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION:
@@ -256,7 +257,7 @@ void SlowPathUnresolved::GenerateImpl(Codegen *codegen)
     auto slotImm = Is64BitsArch(arch) ? TypedImm(slotAddr_) : TypedImm(down_cast<uint32_t>(slotAddr_));
 
     ScopedTmpReg valueReg(codegen->GetEncoder());
-    if (GetInst()->GetOpcode() == Opcode::ResolveVirtual) {
+    if (GetInst()->GetOpcode() == Opcode::ResolveVirtual || GetInst()->GetOpcode() == Opcode::ResolveByName) {
         codegen->CallRuntimeWithMethod(GetInst(), method_, GetEntrypoint(), valueReg, argReg_, typeImm, slotImm);
     } else if (GetEntrypoint() == EntrypointId::GET_UNKNOWN_CALLEE_METHOD ||
                GetEntrypoint() == EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS) {

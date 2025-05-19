@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,20 @@ public:
     {
         return war_;
     }
+    inline bool IsUnderscoreOrDollarOrHyphen(char c)
+    {
+        return c == '_' || c == '$' || c == '-';
+    }
+
+    inline bool IsAlphaNumeric(char c)
+    {
+        return std::isalnum(c) != 0 || IsUnderscoreOrDollarOrHyphen(c);
+    }
+
+    inline bool IsNonDigit(char c)
+    {
+        return std::isalpha(c) != 0 || IsUnderscoreOrDollarOrHyphen(c);
+    }
 
 private:
     ark::pandasm::Program program_;
@@ -94,6 +108,7 @@ private:
     bool isConstArray_ = false;
     ark::pandasm::LiteralArray::Literal *currArrayElem_ = nullptr;
     ark::pandasm::Function *currFunc_ = nullptr;
+    std::map<std::pair<std::string, bool>, ark::pandasm::Function> ambiguousFunctionTable_;
     ark::pandasm::Ins *currIns_ = nullptr;
     ark::pandasm::Field *currFld_ = nullptr;
     size_t lineStric_ = 0;
@@ -104,6 +119,22 @@ private:
     bool arrayDef_ = false;
     bool funcDef_ = false;
     static constexpr uint32_t INTRO_CONST_ARRAY_LITERALS_NUMBER = 2;
+
+    enum class BracketOptions : uint8_t {
+        NOT_ALLOW_BRACKETS = 0,
+        ALLOW_BRACKETS = 1,
+        ALLOW_ANGLE_BRACKETS = 2,
+        ALL_BRACKETS = ALLOW_BRACKETS | ALLOW_ANGLE_BRACKETS
+    };
+
+    bool IsAllowAngleBrackets(BracketOptions options)
+    {
+        return (static_cast<uint8_t>(options) & static_cast<uint8_t>(BracketOptions::ALLOW_ANGLE_BRACKETS)) != 0;
+    }
+    bool IsAllowBrackets(BracketOptions options)
+    {
+        return (static_cast<uint8_t>(options) & static_cast<uint8_t>(BracketOptions::ALLOW_BRACKETS)) != 0;
+    }
 
     inline Error GetError(const std::string &mess = "", Error::ErrorType err = Error::ErrorType::ERR_NONE,
                           int8_t shift = 0, int tokenShift = 0, const std::string &addMess = "") const
@@ -144,12 +175,13 @@ private:
     bool ParseFunctionInstruction();
     bool ParseFunctionFullSign();
     bool UpdateFunctionName();
+    bool UpdateFunctionName(bool isHomonym);
     bool ParseFunctionReturn();
     bool ParseFunctionArg();
     bool ParseFunctionArgComma(bool &comma);
     bool ParseFunctionArgs();
     bool ParseType(Type *type);
-    bool PrefixedValidName(bool allowBrackets = false);
+    bool PrefixedValidName(BracketOptions options = BracketOptions::NOT_ALLOW_BRACKETS);
     bool ParseMetaListComma(bool &comma, bool eq);
     bool MeetExpMetaList(bool eq);
     bool BuildMetaListAttr(bool &eq, std::string &attributeName, std::string &attributeValue);
@@ -206,15 +238,17 @@ private:
     void ParseAsRecord(const std::vector<Token> &tokens);
     void ParseAsArray(const std::vector<Token> &tokens);
     void ParseAsFunction(const std::vector<Token> &tokens);
-    void ParseAsUnionField(const std::vector<Token> &tokens);
     void ParseAsBraceRight(const std::vector<Token> &tokens);
     bool ParseAfterLine(bool &isFirstStatement);
     void ParseContextByType(const std::vector<Token> &tokens, bool &isLangParsed, bool &isFirstStatement);
     Expected<Program, Error> ParseAfterMainLoop(const std::string &fileName);
     void ParseResetFunctionLabelsAndParams();
+    void ParseResetFunctionParams(bool isHomonym);
     void ParseResetTables();
     void ParseResetFunctionTable();
     void ParseInsFromFuncTable(ark::pandasm::Function &func);
+    void CheckVirtualCalls(const std::map<std::string, ark::pandasm::Function> &functionTable);
+    bool CheckVirtualCallInsn(const ark::pandasm::Ins &insn);
     void ParseResetRecordTable();
     void ParseResetRecords(const ark::pandasm::Record &record);
     void ParseResetArrayTable();
@@ -229,53 +263,68 @@ private:
     Expected<char, Error> ParseHexEscapeSequence(std::string_view s, size_t *i);
     Expected<char, Error> ParseEscapeSequence(std::string_view s, size_t *i);
 
-    template <class T>
-    auto TryEmplaceInTable(bool flag, T &item, const std::string &cid)
+    bool AnalyzeEmplacement(bool isDefinition, bool isInserted, FileLocation *fileLocation)
     {
-        return item.try_emplace(cid, cid, program_.lang, context_.tokens[context_.number - 1].boundLeft,
-                                context_.tokens[context_.number - 1].boundRight,
-                                context_.tokens[context_.number - 1].wholeLine, flag, lineStric_);
-    }
-
-    template <class T>
-    bool AddObjectInTable(bool flag, T &item, const std::string &cid = "")
-    {
-        std::string elem = !cid.empty() ? cid : std::string(context_.GiveToken().data(), context_.GiveToken().length());
-        auto [iter, is_inserted] = TryEmplaceInTable(flag, item, elem);
-
-        if (is_inserted) {
+        if (isInserted) {
             return true;
         }
 
-        if (iter->second.fileLocation->isDefined && flag) {
+        if (fileLocation->isDefined && isDefinition) {
             return false;
         }
 
-        if (!iter->second.fileLocation->isDefined && flag) {
-            iter->second.fileLocation->isDefined = true;
+        if (!fileLocation->isDefined && isDefinition) {
+            fileLocation->isDefined = true;
             return true;
         }
 
-        if (!iter->second.fileLocation->isDefined) {
-            iter->second.fileLocation->boundLeft = context_.tokens[context_.number - 1].boundLeft;
-            iter->second.fileLocation->boundRight = context_.tokens[context_.number - 1].boundRight;
-            iter->second.fileLocation->wholeLine = context_.tokens[context_.number - 1].wholeLine;
-            iter->second.fileLocation->lineNumber = lineStric_;
+        if (!fileLocation->isDefined) {
+            fileLocation->boundLeft = context_.tokens[context_.number - 1].boundLeft;
+            fileLocation->boundRight = context_.tokens[context_.number - 1].boundRight;
+            fileLocation->wholeLine = context_.tokens[context_.number - 1].wholeLine;
+            fileLocation->lineNumber = lineStric_;
         }
 
         return true;
     }
+
+    template <class T, class E>
+    auto TryEmplaceInTable(bool isDefinition, T &item, const E &elem, const std::string &name)
+    {
+        return item.try_emplace(elem, name, program_.lang, context_.tokens[context_.number - 1].boundLeft,
+                                context_.tokens[context_.number - 1].boundRight,
+                                context_.tokens[context_.number - 1].wholeLine, isDefinition, lineStric_);
+    }
+
+    template <class T>
+    bool AddObjectInTable(bool isDefinition, T &item, const std::string &cid = "")
+    {
+        std::string name = !cid.empty() ? cid : std::string(context_.GiveToken().data(), context_.GiveToken().length());
+        FileLocation *fileLocation {nullptr};
+        bool isInserted = false;
+        if constexpr (std::is_same_v<T, std::map<std::pair<std::string, bool>, ark::pandasm::Function>>) {
+            auto res = TryEmplaceInTable(isDefinition, item, std::make_pair(name, false), name);
+            isInserted = res.second;
+            fileLocation = &(res.first->second.fileLocation.value());
+        } else {
+            auto res = TryEmplaceInTable(isDefinition, item, name, name);
+            isInserted = res.second;
+            fileLocation = &(res.first->second.fileLocation.value());
+        }
+        return AnalyzeEmplacement(isDefinition, isInserted, fileLocation);
+    }
 };
 
 template <>
-inline auto Parser::TryEmplaceInTable(bool flag, std::unordered_map<std::string, ark::pandasm::Label> &item,
-                                      [[maybe_unused]] const std::string &cid)
+inline auto Parser::TryEmplaceInTable(bool isDefinition, std::unordered_map<std::string, ark::pandasm::Label> &item,
+                                      [[maybe_unused]] const std::string &elem,
+                                      [[maybe_unused]] const std::string &name)
 {
     return item.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
                             std::string(context_.GiveToken().data(), context_.GiveToken().length()),
                             context_.tokens[context_.number - 1].boundLeft,
                             context_.tokens[context_.number - 1].boundRight,
-                            context_.tokens[context_.number - 1].wholeLine, flag, lineStric_);
+                            context_.tokens[context_.number - 1].wholeLine, isDefinition, lineStric_);
 }
 
 }  // namespace ark::pandasm

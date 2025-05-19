@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsClassExtendsTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsInt"));
 }
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsString)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsString"));
 }
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsBool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsBool"));
 }
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsArr)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsArr"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsArr"));
 }
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsMethodCallFromTsInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsMethodCallFromTsInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsMethodCallFromTsInt"));
 }
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsMethodCallFromTsString)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsMethodCallFromTsString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsMethodCallFromTsString"));
 }
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsMethodCallFromTsBool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsMethodCallFromTsBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsMethodCallFromTsBool"));
 }
 
 TEST_F(EtsClassExtendsTsToEtsTest, checkClassExtendsMethodCallFromTsArr)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassExtendsMethodCallFromTsArr"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassExtendsMethodCallFromTsArr"));
 }
 
 }  // namespace ark::ets::interop::js::testing

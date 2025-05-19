@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,9 @@ private:
     void LexPreprocess();
     void SkipSpace();
     void AnalyzeLine();
+    void EatSpace();
+    void HandleBrackets();
+    bool IsAngleBracketInFunctionName(char c, Line *currLine);
     Token::Type LexGetType(size_t beg, size_t end) const;
 };
 

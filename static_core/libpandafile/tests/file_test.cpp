@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,8 +237,8 @@ TEST(File, LineNumberProgramDeduplication)
     auto res = p.Parse(source, srcFilename);
     ASSERT(p.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
 
-    ASSERT_EQ(res.Value().functionTable.size(), 2);
-    for (auto &a : res.Value().functionTable) {
+    ASSERT_EQ(res.Value().functionStaticTable.size(), 2);
+    for (auto &a : res.Value().functionStaticTable) {
         ASSERT_TRUE(a.second.HasDebugInfo());
     }
 
@@ -264,6 +264,24 @@ TEST(File, LineNumberProgramDeduplication)
     reader.GetContainerPtr()->DeduplicateCodeAndDebugInfo();
 
     ASSERT_EQ(lnpCnt, 1);
+}
+
+constexpr uint8_t FIZE_SIZE_ERROR_SIZE = 0x09;
+TEST(File, CheckHeader)
+{
+    auto data = GetEmptyPandaFileBytes();
+    auto f = GetPandaFile(&data);
+    auto res = ark::panda_file::CheckHeader(f->GetPtr(), std::string_view(), data.size());
+    EXPECT_EQ(res, true);
+
+    const int fileSizeIndex = offsetof(ark::panda_file::File::Header, fileSize);
+    data[fileSizeIndex] = FIZE_SIZE_ERROR_SIZE;  // Corrupt file size
+    data[fileSizeIndex + 1] = FIZE_SIZE_ERROR_SIZE;
+    data[fileSizeIndex + 2] = FIZE_SIZE_ERROR_SIZE;
+    data[fileSizeIndex + 3] = FIZE_SIZE_ERROR_SIZE;
+
+    res = ark::panda_file::CheckHeader(f->GetPtr(), std::string_view(), data.size());
+    EXPECT_EQ(res, false);
 }
 
 }  // namespace ark::panda_file::test

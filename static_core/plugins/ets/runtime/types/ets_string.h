@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -332,6 +332,11 @@ public:
         return GetCoreType()->CopyDataMUtf8(reinterpret_cast<uint8_t *>(buf), maxLength, isCString);
     }
 
+    size_t CopyDataRegionUtf8(void *buf, size_t start, size_t length, size_t maxLength)
+    {
+        return GetCoreType()->CopyDataRegionUtf8(reinterpret_cast<uint8_t *>(buf), start, length, maxLength);
+    }
+
     size_t CopyDataRegionMUtf8(void *buf, size_t start, size_t length, size_t maxLength)
     {
         return GetCoreType()->CopyDataRegionMUtf8(reinterpret_cast<uint8_t *>(buf), start, length, maxLength);
@@ -368,6 +373,11 @@ public:
         return GetCoreType()->GetUtf16Length();
     }
 
+    uint32_t GetUtf8Length()
+    {
+        return GetCoreType()->GetUtf8Length();
+    }
+
     bool IsEqual(const char *str)
     {
         auto *mutf8Str = utf::CStringAsMutf8(str);
@@ -381,6 +391,20 @@ public:
         out.resize(len);
         CopyDataMUtf8(out.data(), len, false);
         return out;
+    }
+
+    PandaString GetUtf8()
+    {
+        size_t len = GetUtf8Length();
+        PandaString out;
+        out.resize(len);
+        CopyDataRegionUtf8(out.data(), 0, GetCoreType()->GetLength(), len);
+        return out;
+    }
+
+    uint8_t *GetDataUtf8()
+    {
+        return GetCoreType()->GetDataUtf8();
     }
 
     uint8_t *GetDataMUtf8()
@@ -407,6 +431,11 @@ public:
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         return reinterpret_cast<coretypes::String *>(this);
+    }
+
+    ObjectHeader *AsObjectHeader()
+    {
+        return reinterpret_cast<ObjectHeader *>(this);
     }
 
     EtsObject *AsObject()

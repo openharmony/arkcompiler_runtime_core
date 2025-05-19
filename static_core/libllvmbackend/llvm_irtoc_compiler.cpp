@@ -170,7 +170,7 @@ void LLVMIrtocCompiler::InitializeSpecificLLVMOptions(Arch arch)
 
 void LLVMIrtocCompiler::InitializeModule()
 {
-    auto moduleFile = llvmbackend::g_options.GetLlvmInlineModule();
+    const auto &moduleFile = llvmbackend::g_options.GetLlvmInlineModule();
     auto layout = targetMachine_->createDataLayout();
     if (moduleFile.empty()) {
         module_ = std::make_unique<llvm::Module>("irtoc empty module", *GetLLVMContext());

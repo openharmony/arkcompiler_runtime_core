@@ -16,3 +16,4 @@ python3-pip
 python3-setuptools
 python3=3.8*
 texlive-full
+python3-sphinxcontrib.plantuml

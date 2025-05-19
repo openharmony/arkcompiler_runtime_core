@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,8 +91,8 @@ TEST(TestDebugInfo, TestDebugInfo)
         std::sregex_iterator(instructions.begin(), instructions.end(), instRegex), std::sregex_iterator()));
 
     const ark::disasm::ProgInfo &progInfo = d.GetProgInfo();
-    auto gIt = progInfo.methodsInfo.find("g:()");
-    ASSERT_NE(gIt, progInfo.methodsInfo.end());
+    auto gIt = progInfo.methodsStaticInfo.find("g:()");
+    ASSERT_NE(gIt, progInfo.methodsStaticInfo.end());
     // In case of pandasm the table should contain entry on each instruction
     ASSERT_EQ(gIt->second.lineNumberTable.size(), instructionCount);
 

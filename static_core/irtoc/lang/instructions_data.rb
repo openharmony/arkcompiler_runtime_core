@@ -20,7 +20,11 @@ class InstructionsData
   @@types = {}
 
   def self.setup(filename)
-    yaml_data = YAML.load_file(filename)
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+      yaml_data = YAML.load_file(filename)
+    else
+      yaml_data = YAML.load_file(filename, aliases: true)
+    end
 
     yaml_data['instructions'].each do |inst|
       abort "Instruction description doesn't contain opcode field" unless inst.include? "opcode"

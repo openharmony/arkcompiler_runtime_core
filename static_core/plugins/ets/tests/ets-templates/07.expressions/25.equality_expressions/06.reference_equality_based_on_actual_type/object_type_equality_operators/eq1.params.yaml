@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,9 +20,7 @@ cases:
           - new Double(-128.0)
       case2:
           - '-128 as byte'
-          - '-128 as short'
           - '-128'
-          - '-128 as long'
           - '-128f'
           - new Byte(-128 as byte)
           - new Short(-128 as short)
@@ -35,36 +33,24 @@ cases:
           - '127 as long'
           - new Long(127 as long)
       case2:
-          - '127 as byte'
           - '127 as short'
-          - '127'
+          - '127 as long'
           - '127f'
           - '127.0'
-          - "c'\\u007f'"
-          - new Byte(127 as byte)
-          - new Short(127 as short)
-          - new Int(127)
           - new Float(127f)
           - new Double(127.0)
-          - "new Char(c'\\u007f')"
 
     - type: Char
       case1:
-          - "c'\\u0000'"
-          - "new Char(c'\\u0000')"
+          - c'\u0001'
+          - new Char(c'\u0001')
       case2:
-          - '0 as byte'
-          - '0 as short'
-          - '0'
-          - '0 as long'
-          - '0f'
-          - '0.0'
-          - new Byte(0 as byte)
-          - new Short(0 as short)
-          - new Int(0)
-          - new Long(0 as long)
-          - new Float(0f)
-          - new Double(0.0)
+          - '1 as short'
+          - '1'
+          - '1.0'
+          - new Byte(1 as byte)
+          - new Long(1 as long)
+          - new Float(1f)
 
     # string equality
     - type: string
@@ -97,19 +83,25 @@ cases:
     # enumeration  equality
     - type: Color
       decl: |-
-          enum Color { Red, Green, Blue }
+          enum Color { Red, Green, Blue = 0 }
       case1:
           - Color.Red
       case2:
           - Color.values()[0]
+          - Color.Blue
+          - "Color.getValueOf('Red')"
+          - "Color.getValueOf('Blue')"
 
     - type: Size
       decl: |-
-          enum Size { Small = "S", Medium = "M", Large = "L" }
+          enum Size { Small = "S", Medium = "M", Large = "L", medium = "M" }
       case1:
-          - Size.values()[1]
+          - Size.medium
       case2:
+          - Size.values()[1]
           - Size.Medium
+          - "Size.getValueOf('Medium')"
+          - "Size.getValueOf('medium')"
 
     # bigint equality
     - type: BigInt

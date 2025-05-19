@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,10 @@ public:
     {
         return object_;
     }
+    Type StringClass() const
+    {
+        return string_;
+    }
     Type ClassClass() const
     {
         return class_;
@@ -91,7 +95,7 @@ public:
     /* Make TypeSystem remember the class for dumping */
     void MentionClass(Class const *klass);
 
-    Type DescriptorToType(uint8_t const *descr);
+    Type BootDescriptorToType(uint8_t const *descr);
 
     void ResetTypeSpans()
     {
@@ -118,13 +122,11 @@ public:
         return span.begin() - typeSpans_.data();
     }
 
-    Class const *DescriptorToClass(uint8_t const *descr);
-
 private:
     VerifierService *service_;
     plugin::Plugin const *plugin_;
     LanguageContext langCtx_;
-    ClassLinkerContext *linkerCtx_;
+    ClassLinkerContext *bootLinkerCtx_;
 
     PandaUnorderedMap<Type, Type> normalizedTypeOf_;
     PandaUnorderedMap<Method::UniqId, Method const *> methodOfId_;
@@ -137,6 +139,7 @@ private:
 
     Type supertypeOfArray_;
     Type object_;
+    Type string_;
     Type class_;
     Type throwable_;
     Variables variables_;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -273,19 +273,19 @@ public:
                 className = panda_file_items::class_descriptors::ARRAY_STORE_ERROR;
                 break;
             case EtsNapiException::ILLEGAL_MONITOR_STATE:
-                className = panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_EXCEPTION;
+                className = panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_ERROR;
                 break;
             case EtsNapiException::INSTANTIATION:
                 className = panda_file_items::class_descriptors::INSTANTIATION_ERROR;
                 break;
             case EtsNapiException::NO_CLASS_DEF_FOUND:
-                className = panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR;
+                className = panda_file_items::class_descriptors::LINKER_UNRESOLVED_CLASS_ERROR;
                 break;
             case EtsNapiException::NO_SUCH_FIELD:
-                className = panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR;
+                className = panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR;
                 break;
             case EtsNapiException::NO_SUCH_METHOD:
-                className = panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
+                className = panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR;
                 break;
             case EtsNapiException::NULL_POINTER_ERROR:
                 className = panda_file_items::class_descriptors::NULL_POINTER_ERROR;

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,7 +24,7 @@ cases:
           }
       use: |-
           // not array type
-          assert(new A(...a1).fld == -1)
+          assertTrue(new A(...a1).fld == -1)
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -37,7 +37,7 @@ cases:
           }
       use: |-
           // not rest parameters
-          assert(new A(...a1).fld == 3.0)
+          assertTrue(new A(...a1).fld == 3.0)
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -50,7 +50,7 @@ cases:
       use: |-
           // empty arrays
           let a1: Object[] = [], a2: Error[] = []
-          assert(new A(...[...a1, ...a2, new Object(), ...a1]).fld == 1)
+          assertTrue(new A(...[...a1, ...a2, new Object(), ...a1]).fld == 1)
 
     - decl: |-
           class A {
@@ -62,7 +62,7 @@ cases:
       use: |-
           // spread of char array
           let a: char[] = [c'b', c'c']
-          assert(new A(...a).fld == 2)
+          assertTrue(new A(...a).fld == 2)
 
     - decl: |-
           class A {
@@ -74,7 +74,7 @@ cases:
       use: |-
           // spread of byte array
           let a: byte[] = [1 as byte, 2 as byte, 3 as byte]
-          assert(new A(42, ...a).fld == 48)
+          assertTrue(new A(42, ...a).fld == 48)
 
     - decl: |-
           class A {
@@ -86,7 +86,7 @@ cases:
       use: |-
           // spread of short array
           let a: short[] = [1 as short, 2 as short, 3 as short]
-          assert(new A(42, ...a).fld == 48)
+          assertTrue(new A(42, ...a).fld == 48)
 
     - decl: |-
           class A {
@@ -98,7 +98,7 @@ cases:
       use: |-
           // spread of long array
           let a: long[] = [1 as long, 2 as long, 3 as long]
-          assert(new A(42, ...a).fld == 48)
+          assertTrue(new A(42, ...a).fld == 48)
 
     - decl: |-
           class A {
@@ -110,7 +110,7 @@ cases:
       use: |-
           // spread of float array
           let a: float[] = [1f, 2f, 3f]
-          assert(new A(42f, ...a).fld == 48f)
+          assertTrue(new A(42f, ...a).fld == 48f)
 
     - decl: |-
           class A {
@@ -122,7 +122,7 @@ cases:
       use: |-
           // spread of number array
           let a: number[] = [1.0, 2.0, 3.0]
-          assert(new A(42, ...a).fld == 48.0)
+          assertTrue(new A(42, ...a).fld == 48.0)
 
     - decl: |-
           type F = (p: number) => number
@@ -139,7 +139,7 @@ cases:
           let a: F[] = [(p: number) => p * 2, (p: number) => p * 3]
           let b: F[] = [(p: number) => p * 4, (p: number) => p * 5]
           let obj = new A(1.0, ...[...a, ...b])
-          assert(obj.fld == 360.0)
+          assertTrue(obj.fld == 360.0)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -153,7 +153,7 @@ cases:
           // spread of enums
           let a: Color[] = [Color.Red, Color.Blue, Color.Green]
           let obj = new A(...a)
-          assert(obj.fld == Color.Green)
+          assertTrue(obj.fld == Color.Green)
 
     - decl: |-
           class A {
@@ -164,7 +164,7 @@ cases:
           }
       use: |-
           // expression in parentheses
-          assert(new A(...([1.0, 2.0])).fld == 2.0)
+          assertTrue(new A(...([1.0, 2.0])).fld == 2.0)
 
     - decl: |-
           class A {
@@ -182,7 +182,7 @@ cases:
           // ensure-not-nullish expression
           let a1: Object[]|null = [new Object, new Object]
           let obj = new B(5, ...a1!)
-          assert(obj.fld == 7)
+          assertTrue(obj.fld == 7)
 
     - decl: |-
           class A {
@@ -195,7 +195,7 @@ cases:
       use: |-
           // ensure-not-nullish expression
           let obj = new A(5, ...a1!)  // NPE expected
-          assert(obj.fld == 7)
+          assertTrue(obj.fld == 7)
       tags: 'negative'
 
     - decl: |-
@@ -209,7 +209,7 @@ cases:
       use: |-
           // nullish expression
           let obj = new A(5, ...a1)  // CTE expected
-          assert(obj.fld == 7)
+          assertTrue(obj.fld == 7)
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -223,7 +223,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          assert(new A(5, ...(a1 ?? a2)!).fld == 7)
+          assertTrue(new A(5, ...(a1 ?? a2)!).fld == 7)
 
     - decl: |-
           class A {
@@ -241,7 +241,7 @@ cases:
           // method call in expression
           let a = new A()
           let b = new B(...a.foo())
-          assert(b.fld == 3.0)
+          assertTrue(b.fld == 3.0)
 
     - decl: |-
           class A {
@@ -253,7 +253,7 @@ cases:
       use: |-
           // method call in expression
           let s = ["h", "", "el", "", "", "l", "", "o"]
-          assert(new A(...((s: string[]): string[] => {
+          assertTrue(new A(...((s: string[]): string[] => {
                 let res: string[] = []
                 for (let el of s) if (el.length > 0) res = [...res, el]
                 return res
@@ -268,7 +268,7 @@ cases:
           }
       use: |-
           // new expression in expression
-          assert(new A(...(new number[256])).fld == 0)
+          assertTrue(new A(...(new number[256])).fld == 0)
 
     - decl: |-
           class A {
@@ -280,7 +280,7 @@ cases:
       use: |-
           // array index expression
           let a: double[][] = [[2.0, 3.0], []]
-          assert(new A(...a[0]).fld == 5)
+          assertTrue(new A(...a[0]).fld == 5)
 
     - decl: |-
           class A {
@@ -293,7 +293,7 @@ cases:
           // tuple index expression
           let a: [string, double[], string] = ["X", [2.0, 3.0, 4.0], "Z"]
           let obj = new A(...a[1])
-          assert(obj.fld == 9)
+          assertTrue(obj.fld == 9)
 
     - decl: |-
           class A {
@@ -307,7 +307,7 @@ cases:
           let a1 = ["1", "2", "3"]
           let a2 = ["a", "b"]
           let obj = new A(...(a1 = a2))
-          assert((obj).fld == "a-b")
+          assertTrue((obj).fld == "a-b")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
@@ -320,7 +320,7 @@ cases:
           }
       use: |-
           // conditional expression in expression
-          assert(new A(...(a1.length > a2.length ? a1 : a2)).fld == "1-2-3")
+          assertTrue(new A(...(a1.length > a2.length ? a1 : a2)).fld == "1-2-3")
 
     - decl: |-
           class A {
@@ -341,7 +341,7 @@ cases:
       use: |-
           // use this expression
           let a: A = new A([false, false], [true, true])
-          assert(a.meth() == 46)
+          assertTrue(a.meth() == 46)
 
     - decl: |-
           abstract class A {
@@ -370,7 +370,7 @@ cases:
       use: |-
           // use super expression
           let b: B = new B([false, false], [true, true])
-          assert(b.bar() == 46)
+          assertTrue(b.bar() == 46)
 
     - decl: |-
           class A {
@@ -384,7 +384,7 @@ cases:
           let a1: number[][] = [[1.0, 2.0], [], [3.0, 4.0], [5.0]]
       use: |-
           // spread of arrays
-          assert(new A(...a1).fld == 5)
+          assertTrue(new A(...a1).fld == 5)
 
     - decl: |-
           class A {
@@ -407,7 +407,7 @@ cases:
           let a2: number[][] = [[5.0, 6.0], []]
       use: |-
           // spread of arrays, flatten array
-          assert(new B(...[...new A(...a1).fld, ...new A(...a2).fld]).fld == 21.0)
+          assertTrue(new B(...[...new A(...a1).fld, ...new A(...a2).fld]).fld == 21.0)
 
     - decl: |-
           class A {
@@ -421,7 +421,7 @@ cases:
       use: |-
           // union of value types in result array
           let a1: Double[] = [1, 2, 3], a2: Short[] = [4, 5], a3: Byte[] = [6]
-          assert(new A(...[-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]).fld == 42.0)
+          assertTrue(new A(...[-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]).fld == 42.0)
 
     - decl: |-
           class A {
@@ -433,7 +433,7 @@ cases:
       use: |-
           // union of reference types in result array
           let a1: (Int|Number|String|undefined)[] = [new Int(), new Int(), undefined, "Z", 42.0]
-          assert(new A(...a1).fld == 5)
+          assertTrue(new A(...a1).fld == 5)
 
     - decl: |-
           class A<T> {}
@@ -449,7 +449,7 @@ cases:
           // use generics
           let a1: (A<String>|B<Long>|C<Error>|null)[] = [new A<String>, new B<Long>, new C<Error>]
           let obj = new Z<String, Long, Error>(...a1)
-          assert(obj.fld == 3)
+          assertTrue(obj.fld == 3)
 
     - decl: |-
           let a1 = ["1", "2", "3"]
@@ -461,7 +461,7 @@ cases:
           }
       use: |-
           // lambda expression in expression
-          assert(new A(...((): string[] => a1)()).fld == "123")
+          assertTrue(new A(...((): string[] => a1)()).fld == "123")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
@@ -473,7 +473,7 @@ cases:
           }
       use: |-
           // lambda expression in expression
-          assert(new A(...((p: string[], q: string[]): string[] => [...p, ...q])(a1, a1)).fld == "123123")
+          assertTrue(new A(...((p: string[], q: string[]): string[] => [...p, ...q])(a1, a1)).fld == "123123")
 
 # tuples
     - decl: |-
@@ -487,7 +487,7 @@ cases:
           // spread a tuple to same type tuple
           let t1: [number, boolean] = [1.0, true]
           let r: [boolean, number] = new A(...t1).fld
-          assert(r[0] && r[1] == 1.0)
+          assertTrue(r[0] && r[1] == 1.0)
 
     - decl: |-
           class A {
@@ -500,7 +500,7 @@ cases:
           // spread tuples to different types
           let t: [number, boolean] = [1.0, true]
           let r: [number, number, boolean, boolean] = new A(...t).fld
-          assert(r[0] == 1.0 && r[1] == 1.0 && r[2] && r[3])
+          assertTrue(r[0] == 1.0 && r[1] == 1.0 && r[2] && r[3])
 
     - decl: |-
           class A {
@@ -513,7 +513,7 @@ cases:
           // spread tuples of all value types
           let r: [byte, short, int, long, float, double, boolean, char, string] =
               [1 as byte, 2 as short, 3, 4 as long, 5f, 6.0, true, c'Z', "X"]
-          assert(new A(...r).fld[9] == 42)
+          assertTrue(new A(...r).fld[9] == 42)
 
     - decl: |-
           class A {
@@ -525,7 +525,7 @@ cases:
           let a1: [Object, Error]|null = [new Object, new Error]
       use: |-
           // ensure-not-nullish expression
-          assert(new A(...a1!).fld == 3)
+          assertTrue(new A(...a1!).fld == 3)
 
     - decl: |-
           class A {
@@ -537,7 +537,7 @@ cases:
           let a1: [Object, Error]|null = null
       use: |-
           // ensure-not-nullish expression
-          assert(new A(...a1!).fld == 3) // NPE expected
+          assertTrue(new A(...a1!).fld == 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -552,7 +552,7 @@ cases:
       use: |-
           // nullish-coalescing expression
           let obj = new A(...(a1 ?? a2)!)
-          assert(obj.fld == 3)
+          assertTrue(obj.fld == 3)
 
     - decl: |-
           let a1: [Object, Error]|null = null
@@ -565,7 +565,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          assert(new A(...(a1 ?? a2)!).fld == 3) // NPE expected
+          assertTrue(new A(...(a1 ?? a2)!).fld == 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -579,7 +579,7 @@ cases:
           }
       use: |-
           // nullish-coalescing expression
-          assert(new A(...(a1 ?? a2)).fld == 3)  // CTE, nullish expression
+          assertTrue(new A(...(a1 ?? a2)).fld == 3)  // CTE, nullish expression
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -595,7 +595,7 @@ cases:
       use: |-
           // function call in expression
           let r: [string, number] = new A(...A.foo()).fld
-          assert(r[0] == "X" && r[1] == 1)
+          assertTrue(r[0] == "X" && r[1] == 1)
 
     - decl: |-
           class A {
@@ -608,7 +608,7 @@ cases:
           // tuple index expression
           let a: [[double, double], [char, char]] = [[2.0, 3.0], [c'Z', c'X']]
           let obj = new A(...a[0])
-          assert(obj.fld == 5.0)
+          assertTrue(obj.fld == 5.0)
 
     - decl: |-
           class A {
@@ -621,7 +621,7 @@ cases:
           // assignment expression in expression
           let a1: [string, int] = ["1", 10]
           let a2: [string, int] = ["2", 20]
-          assert(new A(...(a1 = a2)).fld == 20)
+          assertTrue(new A(...(a1 = a2)).fld == 20)
 
     - decl: |-
           let a1: [int, int] = [1, 2]
@@ -635,7 +635,7 @@ cases:
       use: |-
           // conditional expression in expression
           let r = new A(...(a1[0] > a2[0] ? a1 : a2)).fld
-          assert(r == 11)
+          assertTrue(r == 11)
 
     - decl: |-
           class A {
@@ -656,7 +656,7 @@ cases:
       use: |-
           // use this expression
           let a: A = new A(1, c'Z')
-          assert(a.meth() == 111)
+          assertTrue(a.meth() == 111)
 
     - decl: |-
           abstract class A {
@@ -685,7 +685,7 @@ cases:
       use: |-
           // use super expression
           let b: B = new B(1, c'Z')
-          assert(b.meth() == 111)
+          assertTrue(b.meth() == 111)
 
     - decl: |-
           class A<T> {}
@@ -699,7 +699,7 @@ cases:
       use: |-
           // use generics
           let a1: [A<Long>, B<Error>] = [new A<Long>, new B<Error>]
-          assert(new A<Long, Error>(...a1).fld == false)
+          assertTrue(new Z<Long, Error>(...a1).fld == false)
 
     - decl: |-
           let a2: [int, int] = [6, 5]
@@ -712,4 +712,4 @@ cases:
       use: |-
           // lambda expression in expression
           let r = new A(...((p: [int, int]): [int, int] => [p[1], p[0]])(a2)).fld
-          assert(r == "56")
+          assertTrue(r == "56")

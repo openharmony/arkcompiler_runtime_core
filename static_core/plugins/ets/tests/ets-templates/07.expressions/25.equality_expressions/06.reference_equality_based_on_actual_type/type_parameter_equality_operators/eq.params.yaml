@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,70 +13,59 @@
 
 cases:
     # numerical equality
-    - case:
+    - case1:
           - '-128 as byte'
+      case2:
           - '-128 as short'
           - '-128'
           - '-128 as long'
           - '-128f'
           - '-128.0'
-          - new Byte(-128 as byte)
-          - new Short(-128 as short)
-          - new Int(-128)
-          - new Long(-128 as long)
-          - new Float(-128f)
-          - new Double(-128.0)
 
-    - case:
-          - '127 as byte'
-          - '127 as short'
-          - '127'
-          - '127 as long'
-          - '127f'
-          - '127.0'
-          - "c'\\u007f'"
-          - new Byte(127 as byte)
+    - case1:
           - new Short(127 as short)
+      case2:
+          - new Byte(127 as byte)
           - new Int(127)
           - new Long(127 as long)
           - new Float(127f)
           - new Double(127.0)
-          - "new Char(c'\\u007f')"
+          - new Char(c'\u007f')
 
-    - case:
-          - '0 as byte'
-          - '0 as short'
-          - '0'
-          - '0 as long'
+    - case1:
           - '0f'
+          - '0 as long'
+      case2:
+          - '0 as short'
           - '0.0'
-          - "c'\\u0000'"
-          - new Byte(0 as byte)
+          - c'\u0000'
           - new Short(0 as short)
           - new Int(0)
           - new Long(0 as long)
-          - new Float(0f)
-          - new Double(0.0)
-          - "new Char(c'\\u0000')"
+          - new Char(c'\u0000')
 
     # string equality
-    - case:
+    - case1:
           - "'abc def'"
+      case2:
           - '`abc def`'
           - new String('abc def')
 
-    - case:
+    - case1:
           - "''"
           - '``'
+      case2:
           - new String('')
 
     # boolean equality
-    - case:
+    - case1:
           - 'true'
+      case2:
           - new Boolean(true)
 
-    - case:
+    - case1:
           - 'false'
+      case2:
           - new Boolean(false)
 
     # enumeration  equality
@@ -84,22 +73,28 @@ cases:
           enum Color { Red, Green, Blue }
       case:
           - Color.Red
+      case2:
           - Color.values()[0]
+          - "Color.getValueOf('Red')"
 
     - decl: |-
           enum Size { Small = "S", Medium = "M", Large = "L" }
-      case:
-          - Size.values()[1]
+      case1:
           - Size.Medium
+      case2:
+          - Size.values()[1]
+          - "Size.getValueOf('Medium')"
 
     # bigint equality
-    - case:
+    - case1:
         - 12345n
         - new BigInt(12345)
+      case2:
         - new BigInt('12345')
 
-    - case:
+    - case1:
         - '0n'
         - '-0n'
+      case2:
         - new BigInt()
         - new BigInt(0.0)

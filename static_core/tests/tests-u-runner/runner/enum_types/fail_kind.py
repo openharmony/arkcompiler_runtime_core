@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -57,3 +57,16 @@ class FailKind(Enum):
 
     SRC_DUMPER_FAIL = 33
     INVALID_JSON = 34
+
+    DECLGEN_ETS2TS_FAIL = 35
+    DECLGEN_ETS2TS_TIMEOUT = 37
+    DECLGEN_ETS2TS_OTHER = 38
+
+    TSC_FAIL = 39
+    TSC_TIMEOUT = 40
+    TSC_OTHER = 41
+
+    DECLGEN_TS2ETS_FAIL = 42
+    DECLGEN_TS2ETS_TIMEOUT = 43
+    DECLGEN_TS2ETS_OTHER = 44
+    

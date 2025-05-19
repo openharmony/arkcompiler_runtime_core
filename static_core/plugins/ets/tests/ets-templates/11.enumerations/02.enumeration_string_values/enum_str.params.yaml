@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,16 +16,16 @@ cases:
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
       use: |-
-          assert Enum.first.valueOf() == "A"
-          assert Enum.second.valueOf() == "B"
-          assert Enum.third.valueOf() == "B"
+          assertEQ(Enum.first.valueOf(), "A")
+          assertEQ(Enum.second.valueOf(), "B")
+          assertEQ(Enum.third.valueOf(), "B")
 
     - decl: |-
           enum Enum { _first = "A", _second = "B", _third = "B" }
       use: |-
-          assert Enum._first.toString() == "A"
-          assert Enum._second.toString() == "B"
-          assert Enum._third.toString() == "B"
+          assertEQ(Enum._first.toString(), "A")
+          assertEQ(Enum._second.toString(),  "B")
+          assertEQ(Enum._third.toString(), "B")
 
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
@@ -33,7 +33,7 @@ cases:
           let e2 = Enum.second
           let e3 = Enum.third
       use: |-
-          assert "" + e1 + e2 + e3 == "ABB"
+          assertEQ("" + e1 + e2 + e3, "ABB")
 
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
@@ -41,46 +41,46 @@ cases:
           const e2 = Enum.second
           const e3 = Enum.third
       use: |-
-          assert "" + e1 + e2 + e3 == "ABB"
+          assertEQ("" + e1 + e2 + e3, "ABB")
 
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
       use: |-
-          assert Enum.first as string == "A"
-          assert Enum.second as string == "B"
-          assert Enum.third as string == "B"
+          assertEQ(Enum.first as string, "A")
+          assertEQ(Enum.second as string, "B")
+          assertEQ(Enum.third as string, "B")
 
     - decl: |-
           const a = "ABC"
           enum Enum { e1 = a, e2 = "DEF" }  // constant expression
       use: |-
-          assert Enum.e1.toString() == "ABC"
-          assert Enum.e2.toString() == "DEF"
+          assertEQ(Enum.e1.toString(), "ABC")
+          assertEQ(Enum.e2.toString(), "DEF")
 
     - decl: |-
           const a = "ABC"
           enum Enum { e1 = a + a, e2 = a + "DEF" }  // constant expressions
       use: |-
-          assert Enum.e1.toString() == "ABCABC"
-          assert Enum.e2.toString() == "ABCDEF"
+          assertEQ(Enum.e1.toString(), "ABCABC")
+          assertEQ(Enum.e2.toString(), "ABCDEF")
 
     - decl: |-
           enum Enum { e1 = "A", e2 = "B", e3 = "C" }
       use: |-
           let v = Enum.e3
           switch (v) {
-              case Enum.e1: assert false; break;
-              case Enum.e2: assert false; break;
-              case Enum.e3: assert v.toString() == Enum.e3.toString(); break;
+              case Enum.e1: assertTrue(false); break;
+              case Enum.e2: assertTrue(false); break;
+              case Enum.e3: assertEQ(v.toString(), Enum.e3.toString()); break;
           }
 
     - decl: |-
           enum Color { Red = "red", Green = "green", Blue = "blue" }
       use: |-
           let r: string = Color.Red
-          assert r == "red"
+          assertEQ(r, "red")
           let g: string = Color.Green
-          assert g == "green"
+          assertEQ(g, "green")
 
     - decl: |-
           enum Color { Red = "red", Green = "green", Blue = "blue" }
@@ -88,14 +88,14 @@ cases:
               return p == "blue"
           }
       use: |-
-          assert foo(Color.Red) == false
-          assert foo(Color.Blue) == true
+          assertEQ(foo(Color.Red), false)
+          assertEQ(foo(Color.Blue), true)
 
     - decl: |-
           enum Template {
-              t1 = `Line 1\nLine 2`,
-              t2 = `Line 3\nLine 4`
+              t1 = "Line 1\nLine 2",
+              t2 = "Line 3\nLine 4"
             }
       use: |-
           let v = Template.t1
-          assert v.toString() == "Line 1\nLine 2"
+          assertEQ(v.toString(), "Line 1\nLine 2")

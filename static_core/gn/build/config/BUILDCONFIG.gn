@@ -28,7 +28,7 @@ declare_args() {
   is_debug = true
   is_asan = false
   is_standard_system = false
-  is_llvmbackend = false
+  is_llvmbackend = true
   is_ccache = false
   is_ohos = false
 }

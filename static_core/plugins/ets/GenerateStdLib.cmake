@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,9 @@ function(regenerate_and_check_stdlib)
     # NOTE(ivan-tyulyandin): add array.sh and related generated files
     # Preparations to check generated against used code equality
     set(ESCOMPAT "stdlib/escompat")
-    set(ESCOMPAT_GEN_FILES "DataView.sts" "TypedUArrays.sts" "TypedArrays.sts" "Array.sts")
+    set(ESCOMPAT_GEN_FILES "DataView.ets" "TypedUArrays.ets" "TypedArrays.ets" "Array.ets")
     set(STD_CORE "stdlib/std/core")
-    set(STD_CORE_GEN_FILES "Function.sts" "BuiltinArray.sts" "BuiltinArraySort.sts" "BuiltinArrayAlgorithms.sts")
+    set(STD_CORE_GEN_FILES "Function.ets" "Tuple.ets" "BuiltinArray.ets" "BuiltinArraySort.ets" "BuiltinArrayAlgorithms.ets")
     set(GEN_FILES )
     foreach(file ${ESCOMPAT_GEN_FILES})
         list(APPEND GEN_FILES "${ESCOMPAT}/${file}")

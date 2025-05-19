@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -19,10 +19,8 @@ Error Handling
     frontend_status: Done
 
 |LANG| is designed to provide first-class support in responding to, and
-recovering from different erroneous conditions in a program.
-
-Two kinds of situations can occur and interrupt normal program
-execution:
+recovering from different error situations in a program. Normal program
+execution can be interrupted by the occurrence of situations of two kinds:
 
 -  Runtime errors (e.g., null pointer dereferencing, array bounds
    checking, or division by zero);
@@ -31,7 +29,6 @@ execution:
    and processing data from a file on disk can fail if the file does
    not exist on a specified path, read permissions are not available,
    or else).
-
 
 .. index::
    execution
@@ -45,43 +42,12 @@ execution:
    path
    read permission
 
-This specification uses the terms as follows:
-
--  *Error* to denote runtime errors, and
-
--  *Exception* to denote failures.
-
-
-The difference between these two terms is that *exceptions* are the
-*normal* and expected way for an operation to complete. A program
-is expected to resolve some exceptions, and inform the user if it
-cannot.
-
-On the contrary, *errors* indicate that there is a failure of the
-program logic, or even of the hardware. The program can recover in
-some but not all cases.
-
-As a result, exceptions can be handled in a much more effective
-manner than errors.
+The term *error* in this specification denotes all kinds of error situations.
 
 .. index::
    runtime error
    failure
-   exception
    runtime
-
-Some modern programming languages support only exceptions; others
-support only errors. |LANG| is based on the presumption that both
-*exceptions* and *errors* must be supported. ``Exception`` and
-``Error`` as predefined types are discussed below.
-
-Exceptions are described in the chapter Experimental Features (see
-:ref:`Exceptions`) of this specification.
-
-.. index::
-   exception
-   error
-   predefined type
 
 |
 
@@ -93,14 +59,14 @@ Errors
 .. meta:
     frontend_status: Done
 
-``Error`` is the base class of all errors. Defining a new error class is
-normally not required because essential error classes for various cases (e.g.,
-``ArrayIndexOutOfBoundsError``) are defined in the standard library (see
-:ref:`Standard Library`).
+*Error* is the base class of all error situations. Defining a new
+error class is normally not required because essential error classes for
+various cases (e.g., ``ArrayIndexOutOfBoundsError``) are defined in the
+standard library (see :ref:`Standard Library`).
 
-However, a developer can define a new error by using ``Error``, or any
-derived class as the base of the new class. An example of error handling is
-provided below:
+However, a developer can handle a new error situation by using ``Error``
+class itself, or by a subclass of ``Error``. An example of error
+handling is provided below:
 
 .. index::
    error
@@ -128,26 +94,19 @@ provided below:
         catch (error) {
           if (error instanceof ArrayIndexOutOfBoundsError) // invalid index detected
              return null
-          throw new UnknownError (error as Error) // Unknown error occurred
+          throw new UnknownError (error) // Unknown error occurred
         }
     }
-
-
-A :index:`compile-time error` occurs if a generic class is directly or
-indirectly a subclass of ``Error``.
 
 In most cases, errors are raised by the |LANG| runtime system, or by the
 standard library (see :ref:`Standard Library`) code.
 
-The ``throw`` statements (see :ref:`Throw Statements`) allow throwing both
-exceptions and errors. Throwing exceptions provide a structured way to
-handle a range of unexpected situations in the application code. Throwing
-errors in such a context is not recommended.
+New error situations can be created and raised by ``throw`` statements (see
+:ref:`Throw Statements`) .
 
-The ``try`` statements (see :ref:`Try Statements`) are used to handle
-errors in a manner similar to the handling of exceptions.
+Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
 
-**Note**: Not every error can be recovered.
+**Note**. Not every error can be recovered.
 
 .. index::
    compile-time error
@@ -156,34 +115,24 @@ errors in a manner similar to the handling of exceptions.
    subclass
    error
    throw statement
-   exception
    error
    try statement
 
 .. code-block:: typescript
    :linenos:
 
-    class Exception extends Error {}
-
     function handleAll(
       actions : () => void,
-      error_handling_actions : () => void,
-      exception_handling_actions : () => void)
+      handling_actions : () => void)
     {
       try {
         actions()
       }
-      catch (x) {
-        if (x instanceof Exception)
-          exception_handling_actions()
-        else if (x instanceof Error)
-          error_handling_actions()
+      catch (x) { // Type of x is Error
+          handling_actions()
       }
     }
-
 
 .. raw:: pdf
 
    PageBreak
-
-

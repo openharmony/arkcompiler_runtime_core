@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,7 @@ AbckitInst *IcreateMulStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst 
 AbckitInst *IcreateDivStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1);
 AbckitInst *IcreateModStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1);
 AbckitInst *IcreateEqualsStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1);
+AbckitInst *IcreateStrictEqualsStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1);
 
 AbckitInst *IcreateAddIStatic(AbckitGraph *graph, AbckitInst *input0, uint64_t imm);
 AbckitInst *IcreateSubIStatic(AbckitGraph *graph, AbckitInst *input0, uint64_t imm);
@@ -145,7 +146,7 @@ AbckitInst *IcreateLoadConstArrayStatic(AbckitGraph *graph, AbckitLiteralArray *
 
 AbckitInst *IcreateCheckCastStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType);
 AbckitInst *IcreateIsInstanceStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType);
-AbckitInst *IcreateLoadUndefinedStatic(AbckitGraph *graph);
+AbckitInst *IcreateLoadNullValueStatic(AbckitGraph *graph);
 AbckitInst *IcreateCastStatic(AbckitGraph *graph, AbckitInst *input0, AbckitTypeId targetTypeId);
 AbckitInst *IcreateIsUndefinedStatic(AbckitGraph *graph, AbckitInst *inputObj);
 

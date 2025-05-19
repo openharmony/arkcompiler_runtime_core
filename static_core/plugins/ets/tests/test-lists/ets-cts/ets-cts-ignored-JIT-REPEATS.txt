@@ -1,5 +1,23 @@
- # panda#17445
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-wd_6.ets
+#25109
+03.types/19.union_types/02.access_to_common_union_members/cm_meth1_3.ets
 
-# 17142 Compilation fails on multiple then/catch in Promise chain
-17.experimental_features/16.coroutines/03.promise_class/p_5.sts
+#25167
+03.types/19.union_types/02.access_to_common_union_members/cm_meth2_10.ets
+
+#20935
+03.types/19.union_types/02.access_to_common_union_members/cm_meth2_4.ets
+03.types/19.union_types/02.access_to_common_union_members/cm_meth3_8.ets
+
+#25236
+03.types/19.union_types/02.access_to_common_union_members/cm_meth3_4.ets
+
+#25189
+03.types/19.union_types/02.access_to_common_union_members/cm_meth3_10.ets
+
+#24004 ASSERTION FAILED: ic != nullptr
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_0.ets
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_18.ets
+17.experimental_features/15.coroutines/create_and_launch_coroutine/c_meth_19.ets
+
+#25252
+17.experimental_features/16.async_functions_and_methods/01.async_functions/afunc_29.ets

@@ -80,6 +80,16 @@ public:
     /// @brief Remove all elements from stack
     void Clear();
 
+    void SetTaskType(GCWorkersTaskTypes taskType)
+    {
+        taskType_ = taskType;
+    }
+
+    GCWorkersTaskTypes GetTaskType() const
+    {
+        return taskType_;
+    }
+
 protected:
     virtual GCAdaptiveStack<Ref> *CreateStack() = 0;
     virtual GCWorkersTask CreateTask(GCAdaptiveStack<Ref> *stack) = 0;
@@ -92,11 +102,6 @@ protected:
     PandaDeque<Ref> *&GetStackDst()
     {
         return stackDst_;
-    }
-
-    GCWorkersTaskTypes GetTaskType() const
-    {
-        return taskType_;
     }
 
     GC *GetGC()

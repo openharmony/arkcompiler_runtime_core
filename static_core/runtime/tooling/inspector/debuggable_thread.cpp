@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "debuggable_thread.h"
 #include "error.h"
+#include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
 DebuggableThread::DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks)
@@ -95,6 +96,18 @@ void DebuggableThread::SetBreakpointsActive(bool active)
     state_.SetBreakpointsActive(active);
 }
 
+void DebuggableThread::SetSkipAllPauses(bool skip)
+{
+    os::memory::LockHolder lock(mutex_);
+    state_.SetSkipAllPauses(skip);
+}
+
+void DebuggableThread::SetMixedDebugEnabled(bool mixedDebugEnabled)
+{
+    os::memory::LockHolder lock(mutex_);
+    state_.SetMixedDebugEnabled(mixedDebugEnabled);
+}
+
 std::optional<BreakpointId> DebuggableThread::SetBreakpoint(const std::vector<PtLocation> &locations,
                                                             const std::string *condition)
 {
@@ -114,6 +127,22 @@ void DebuggableThread::RemoveBreakpoint(BreakpointId id)
 {
     os::memory::LockHolder lock(mutex_);
     state_.RemoveBreakpoint(id);
+}
+
+void DebuggableThread::RemoveBreakpoints(const std::function<bool(const PtLocation &loc)> &filter)
+{
+    os::memory::LockHolder lock(mutex_);
+
+    std::vector<BreakpointId> breakpointsToRemove;
+    state_.EnumerateBreakpoints([&breakpointsToRemove, &filter](const auto &loc, auto id) {
+        if (filter(loc)) {
+            breakpointsToRemove.emplace_back(id);
+        }
+    });
+
+    for (auto id : breakpointsToRemove) {
+        state_.RemoveBreakpoint(id);
+    }
 }
 
 void DebuggableThread::SetPauseOnExceptions(PauseOnExceptionsState state)
@@ -147,27 +176,31 @@ bool DebuggableThread::RequestToObjectRepository(std::function<void(ObjectReposi
     return true;
 }
 
-std::optional<std::pair<RemoteObject, std::optional<RemoteObject>>> DebuggableThread::EvaluateExpression(
+Expected<std::pair<RemoteObject, std::optional<RemoteObject>>, std::string> DebuggableThread::EvaluateExpression(
     uint32_t frameNumber, const ExpressionWrapper &bytecode)
 {
     std::optional<RemoteObject> optResult;
     std::optional<RemoteObject> optException;
-    RequestToObjectRepository([this, frameNumber, &bytecode, &optResult, &optException](ObjectRepository &objectRepo) {
-        Method *method = nullptr;
-        auto res = EvaluateExpression(frameNumber, bytecode, &method);
-        if (!res) {
-            HandleError(res.Error());
-            return;
-        }
+    std::optional<Error> optError;
+    RequestToObjectRepository(
+        [this, frameNumber, &bytecode, &optResult, &optException, &optError](ObjectRepository &objectRepo) {
+            Method *method = nullptr;
+            auto res = EvaluateExpression(frameNumber, bytecode, &method);
+            if (!res) {
+                HandleError(res.Error());
+                optError = res.Error();
+                return;
+            }
 
-        auto [result, exc] = res.Value();
-        optResult.emplace(objectRepo.CreateObject(result));
-        if (exc != nullptr) {
-            optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exc)));
-        }
-    });
-    if (!optResult) {
-        return {};
+            auto [result, exc] = res.Value();
+            optResult.emplace(objectRepo.CreateObject(result));
+            if (exc != nullptr) {
+                optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exc)));
+            }
+        });
+    if (optError) {
+        ASSERT(!optResult);
+        return Unexpected(optError->GetMessage());
     }
     return std::make_pair(*optResult, optException);
 }

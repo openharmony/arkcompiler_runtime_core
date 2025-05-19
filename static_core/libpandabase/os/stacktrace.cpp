@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,11 @@
 
 #include "stacktrace.h"
 #include "os/mutex.h"
+#include "utils/string_helpers.h"
 
 #include <cxxabi.h>
 #include <dlfcn.h>
+#include <link.h>
 #include "debug_info.h"
 
 namespace ark {
@@ -32,8 +34,8 @@ struct VmaEntry {
     enum DebugInfoStatus { NOT_READ, VALID, BAD };
 
     // NOLINTNEXTLINE(modernize-pass-by-value)
-    VmaEntry(uintptr_t paramStartAddr, uintptr_t paramEndAddr, uintptr_t paramOffset, const std::string &fname)
-        : startAddr(paramStartAddr), endAddr(paramEndAddr), offset(paramOffset), filename(fname)
+    VmaEntry(uintptr_t paramStartAddr, uintptr_t paramEndAddr, uintptr_t paramBaseAddr, const std::string &fname)
+        : startAddr(paramStartAddr), endAddr(paramEndAddr), baseAddr(paramBaseAddr), filename(fname)
     {
     }
 
@@ -41,40 +43,13 @@ struct VmaEntry {
 
     uintptr_t startAddr;                // NOLINT(misc-non-private-member-variables-in-classes)
     uintptr_t endAddr;                  // NOLINT(misc-non-private-member-variables-in-classes)
-    uintptr_t offset;                   // NOLINT(misc-non-private-member-variables-in-classes)
+    uintptr_t baseAddr;                 // NOLINT(misc-non-private-member-variables-in-classes)
     std::string filename;               // NOLINT(misc-non-private-member-variables-in-classes)
     DebugInfoStatus status {NOT_READ};  // NOLINT(misc-non-private-member-variables-in-classes)
     DebugInfo debugInfo;                // NOLINT(misc-non-private-member-variables-in-classes)
 
     DEFAULT_MOVE_SEMANTIC(VmaEntry);
     NO_COPY_SEMANTIC(VmaEntry);
-};
-
-class Tokenizer {
-public:
-    // NOLINTNEXTLINE(modernize-pass-by-value)
-    explicit Tokenizer(const std::string &str) : str_(str) {}
-
-    std::string Next(char delim = ' ')
-    {
-        while (pos_ < str_.length() && str_[pos_] == ' ') {
-            ++pos_;
-        }
-        size_t pos = str_.find(delim, pos_);
-        std::string token;
-        if (pos == std::string::npos) {
-            token = str_.substr(pos_);
-            pos_ = str_.length();
-        } else {
-            token = str_.substr(pos_, pos - pos_);
-            pos_ = pos + 1;  // skip delimiter
-        }
-        return token;
-    }
-
-private:
-    std::string str_;
-    size_t pos_ {0};
 };
 
 class StackPrinter {
@@ -117,7 +92,7 @@ private:
             vma = FindVma(pc);
         }
         if (vma != nullptr) {
-            uintptr_t pcOffset = pc - vma->startAddr + vma->offset;
+            uintptr_t pcOffset = pc - vma->baseAddr;
             // pc points to the instruction after the call
             // Decrement pc to get source line number pointing to the function call
             --pcOffset;
@@ -219,37 +194,26 @@ private:
         return false;
     }
 
-    void ScanVma()
+    static int HandleLibrary(dl_phdr_info *info, [[maybe_unused]] size_t size, void *data)
     {
-        static const int HEX_RADIX = 16;
-        static const size_t MODE_FIELD_LEN = 4;
-        static const size_t XMODE_POS = 2;
-
-        if (!vmas_.empty()) {
-            return;
-        }
-
-        std::stringstream fname;
-        fname << "/proc/self/maps";
-        std::string filename = fname.str();
-        std::ifstream maps(filename.c_str());
-
-        while (maps) {
-            std::string line;
-            std::getline(maps, line);
-            Tokenizer tokenizer(line);
-            std::string startAddr = tokenizer.Next('-');
-            std::string endAddr = tokenizer.Next();
-            std::string rights = tokenizer.Next();
-            if (rights.length() == MODE_FIELD_LEN && rights[XMODE_POS] == 'x') {
-                std::string offset = tokenizer.Next();
-                tokenizer.Next();
-                tokenizer.Next();
-                std::string objFilename = tokenizer.Next();
-                vmas_.emplace_back(stoul(startAddr, nullptr, HEX_RADIX), stoul(endAddr, nullptr, HEX_RADIX),
-                                   stoul(offset, nullptr, HEX_RADIX), objFilename);
+        auto *vmas = reinterpret_cast<std::vector<VmaEntry> *>(data);
+        Span<const ElfW(Phdr)> phdrs(info->dlpi_phdr, info->dlpi_phnum);
+        for (const ElfW(Phdr) & phdr : phdrs) {
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
+            if (phdr.p_type == PT_LOAD && (phdr.p_flags & PF_X) != 0) {
+                uintptr_t startAddr = info->dlpi_addr + phdr.p_vaddr;
+                uintptr_t endAddr = startAddr + phdr.p_memsz;
+                vmas->emplace_back(startAddr, endAddr, info->dlpi_addr, info->dlpi_name);
             }
         }
+        return 0;
+    }
+
+    void ScanVma()
+    {
+        dl_iterate_phdr(HandleLibrary, &vmas_);
+        std::sort(vmas_.begin(), vmas_.end(),
+                  [](const VmaEntry &e1, const VmaEntry &e2) { return e1.startAddr < e2.startAddr; });
     }
 
 private:

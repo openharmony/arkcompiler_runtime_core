@@ -1,6 +1,5 @@
-'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,139 +12,83 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.withOptionalMethodInstanceClass =
-	exports.withoutOptionalMethodInstanceClass =
-	exports.tupleInstanceClass =
-	exports.subsetByValueInstanceClass =
-	exports.unionTypeMethodInstanceClass =
-	exports.createInterfaceClassTupleTypeMethodFromTs =
-	exports.TupleTypeMethodClass =
-	exports.optionalArgArray =
-	exports.optionalArg =
-	exports.createClassWithoutOptionalMethod =
-	exports.createClassWithOptionalMethod =
-	exports.WithoutOptionalMethodClass =
-	exports.WithOptionalMethodClass =
-	exports.createSubsetByValueClassFromTs =
-	exports.SubsetByValueClass =
-	exports.subsetByRefInterface =
-	exports.createInterfaceClassUnionTypeMethod =
-	exports.UnionTypeMethodClass =
-	exports.createInterfaceClassAnyTypeMethod =
-	exports.AnyTypeMethodClass =
-	exports.tsString =
-	exports.tsNumber =
-		void 0;
-exports.tsNumber = 1;
-exports.tsString = 'string';
-const AnyTypeMethodClass = /** @class */ (function () {
-	function anyTypeMethodClass() {}
-	anyTypeMethodClass.prototype.get = function (a) {
-		return a;
-	};
-	return anyTypeMethodClass;
-})();
-exports.AnyTypeMethodClass = AnyTypeMethodClass;
-function createInterfaceClassAnyTypeMethod() {
-	return new AnyTypeMethodClass();
+export const tsNumber = 1;
+export const tsString = 'string';
+export class AnyTypeMethodClass {
+    get(a) {
+        return a;
+    }
 }
-exports.createInterfaceClassAnyTypeMethod = createInterfaceClassAnyTypeMethod;
-const UnionTypeMethodClass = /** @class */ (function () {
-	function unionTypeMethodClass() {}
-	unionTypeMethodClass.prototype.get = function (a) {
-		return a;
-	};
-	return unionTypeMethodClass;
-})();
-exports.UnionTypeMethodClass = UnionTypeMethodClass;
-function createInterfaceClassUnionTypeMethod() {
-	return new AnyTypeMethodClass();
+export function createInterfaceClassAnyTypeMethod() {
+    return new AnyTypeMethodClass();
 }
-exports.createInterfaceClassUnionTypeMethod = createInterfaceClassUnionTypeMethod;
-function subsetByRefInterface(obj) {
-	return obj.get();
+export class UnionTypeMethodClass {
+    get(a) {
+        return a;
+    }
 }
-exports.subsetByRefInterface = subsetByRefInterface;
-const UserClass = /** @class */ (function () {
-	function userClass() {
-		this.value = 1;
-	}
-	return userClass;
-})();
-const SubsetByValueClass = /** @class */ (function () {
-	function subsetByValueClass() {}
-	subsetByValueClass.prototype.get = function () {
-		return new UserClass();
-	};
-	return subsetByValueClass;
-})();
-exports.SubsetByValueClass = SubsetByValueClass;
-function createSubsetByValueClassFromTs() {
-	return new SubsetByValueClass();
+export function createInterfaceClassUnionTypeMethod() {
+    return new AnyTypeMethodClass();
 }
-exports.createSubsetByValueClassFromTs = createSubsetByValueClassFromTs;
-const WithOptionalMethodClass = /** @class */ (function () {
-	function withOptionalMethodClass() {}
-	withOptionalMethodClass.prototype.getNum = function () {
-		return exports.tsNumber;
-	};
-	withOptionalMethodClass.prototype.getStr = function () {
-		return exports.tsString;
-	};
-	return withOptionalMethodClass;
-})();
-exports.WithOptionalMethodClass = WithOptionalMethodClass;
-const WithoutOptionalMethodClass = /** @class */ (function () {
-	function withoutOptionalMethodClass() {}
-	withoutOptionalMethodClass.prototype.getStr = function () {
-		return exports.tsString;
-	};
-	return withoutOptionalMethodClass;
-})();
-exports.WithoutOptionalMethodClass = WithoutOptionalMethodClass;
-function createClassWithOptionalMethod() {
-	return new WithOptionalMethodClass();
+export function subsetByRefInterface(obj) {
+    return obj.get();
 }
-exports.createClassWithOptionalMethod = createClassWithOptionalMethod;
-function createClassWithoutOptionalMethod() {
-	return new WithoutOptionalMethodClass();
+class UserClass {
+    constructor() {
+        this.value = 1;
+    }
 }
-exports.createClassWithoutOptionalMethod = createClassWithoutOptionalMethod;
-function optionalArg(arg, optional) {
-	if (optional) {
-		return { with: arg, without: optional };
-	}
-	return { with: arg };
+export class SubsetByValueClass {
+    get() {
+        return new UserClass();
+    }
 }
-exports.optionalArg = optionalArg;
-function optionalArgArray(...args) {
-	const arg = [];
-	for (let I = 0; I < args.length; I++) {
-		arg[I] = args[I];
-	}
-	const withOptional = arg[0];
-	const withoutOptional = arg[1];
-	if (withoutOptional) {
-		return { with: withOptional, without: withoutOptional };
-	}
-	return { with: withOptional };
+export function createSubsetByValueClassFromTs() {
+    return new SubsetByValueClass();
 }
-exports.optionalArgArray = optionalArgArray;
-const TupleTypeMethodClass = /** @class */ (function () {
-	function tupleTypeMethodClass() {}
-	tupleTypeMethodClass.prototype.get = function (arg) {
-		return arg;
-	};
-	return tupleTypeMethodClass;
-})();
-exports.TupleTypeMethodClass = TupleTypeMethodClass;
-function createInterfaceClassTupleTypeMethodFromTs() {
-	return new TupleTypeMethodClass();
+export class WithOptionalMethodClass {
+    getNum() {
+        return tsNumber;
+    }
+    getStr() {
+        return tsString;
+    }
 }
-exports.createInterfaceClassTupleTypeMethodFromTs = createInterfaceClassTupleTypeMethodFromTs;
-exports.unionTypeMethodInstanceClass = new UnionTypeMethodClass();
-exports.subsetByValueInstanceClass = new SubsetByValueClass();
-exports.tupleInstanceClass = new TupleTypeMethodClass();
-exports.withoutOptionalMethodInstanceClass = new WithoutOptionalMethodClass();
-exports.withOptionalMethodInstanceClass = new WithOptionalMethodClass();
+export class WithoutOptionalMethodClass {
+    getStr() {
+        return tsString;
+    }
+}
+export function createClassWithOptionalMethod() {
+    return new WithOptionalMethodClass();
+}
+export function createClassWithoutOptionalMethod() {
+    return new WithoutOptionalMethodClass();
+}
+export function optionalArg(arg, optional) {
+    if (optional) {
+        return { with: arg, without: optional };
+    }
+    return { with: arg };
+}
+export function optionalArgArray(...arg) {
+    const withOptional = arg[0];
+    const withoutOptional = arg[1];
+    if (withoutOptional) {
+        return { with: withOptional, without: withoutOptional };
+    }
+    return { with: withOptional };
+}
+export class TupleTypeMethodClass {
+    get(arg) {
+        return arg;
+    }
+}
+export function createInterfaceClassTupleTypeMethodFromTs() {
+    return new TupleTypeMethodClass();
+}
+export const unionTypeMethodInstanceClass = new UnionTypeMethodClass();
+export const subsetByValueInstanceClass = new SubsetByValueClass();
+export const tupleInstanceClass = new TupleTypeMethodClass();
+export const withoutOptionalMethodInstanceClass = new WithoutOptionalMethodClass();
+export const withOptionalMethodInstanceClass = new WithOptionalMethodClass();

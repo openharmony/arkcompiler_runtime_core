@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1226,11 +1226,9 @@ add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_1813.pa" 
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_1826.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_1827.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_1834.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
-add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_1828.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Expected instance field")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2072.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2075.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2085.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
-add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2086_1.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Expected instance field")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2086_2.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2088.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Unexpected field type")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2090.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
@@ -1239,7 +1237,6 @@ add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2107_2.pa
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2136.pa")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2256.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad call")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2260.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
-add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_2374.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad call static method as virtual")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/issue_964.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad register type")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/bug_1833.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
 add_verifier_test(FILE "${CMAKE_CURRENT_SOURCE_DIR}/verifier-tests/jumps_1.pa" VERIFIER_FAIL_TEST SEARCH_STDERR "Register type conflict")

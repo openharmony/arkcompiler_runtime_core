@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -76,8 +76,12 @@ class EtsTestSuite(ABC):
             EtsSuites.ESCHECKED.value: ESCheckedEtsTestSuite,
             EtsSuites.CUSTOM.value: CustomEtsTestSuite,
             EtsSuites.TS_SUBSET.value: TsSubsetEtsTestSuite,
+            EtsSuites.SDK.value: SdkEtsTestSuite,
         }
-        return name_to_class.get(ets_suite_name)
+        cls = name_to_class.get(ets_suite_name)
+        if cls is None:
+            Log.exception_and_raise(_LOGGER, "Cannot find TestSuite class for " + ets_suite_name)
+        return cls
 
     @cached_property
     def name(self) -> str:
@@ -118,10 +122,6 @@ class RuntimeEtsTestSuite(EtsTestSuite):
         super().__init__(config, work_dir, EtsSuites.RUNTIME.value, default_list_root)
         self.__default_test_dir = RuntimeDefaultEtsTestDir(config.general.static_core_root, config.general.test_root)
         self.set_preparation_steps()
-
-    @property
-    def default_list_root_suite_name(self) -> Path:
-        return Path(self.__default_test_dir.list_root, self.name)
 
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(CopyStep(
@@ -167,7 +167,7 @@ class TsSubsetEtsTestSuite(EtsTestSuite):
 
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(CopyStep(
-            test_source_path=self._ets_test_dir.sts_ts_subset,
+            test_source_path=self._ets_test_dir.ets_ts_subset,
             test_gen_path=self.test_root,
             config=self.config
         ))
@@ -192,7 +192,7 @@ class CustomEtsTestSuite(EtsTestSuite):
                 test_source_path=self.config.custom.test_root,
                 test_gen_path=self.test_root,
                 config=self.config,
-                extension="sts"
+                extension="ets"
             ))
             copy_source_path = self.test_root
         else:
@@ -277,6 +277,27 @@ class ESCheckedEtsTestSuite(EtsTestSuite):
         ))
         self._preparation_steps.append(CopyStep(
             test_source_path=self._ets_test_dir.ets_es_checked,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        if self._is_jit:
+            self._preparation_steps.append(JitStep(
+                test_source_path=self.test_root,
+                test_gen_path=self.test_root,
+                config=self.config,
+                num_repeats=self._jit.num_repeats
+            ))
+
+
+class SdkEtsTestSuite(EtsTestSuite):
+    def __init__(self, config: Config, work_dir: WorkDir, default_list_root: str):
+        super().__init__(config, work_dir, EtsSuites.SDK.value, default_list_root)
+        self._ets_test_dir = EtsTestDir(config.general.static_core_root, config.general.test_root)
+        self.set_preparation_steps()
+
+    def set_preparation_steps(self) -> None:
+        self._preparation_steps.append(CopyStep(
+            test_source_path=self._ets_test_dir.ets_sdk,
             test_gen_path=self.test_root,
             config=self.config
         ))

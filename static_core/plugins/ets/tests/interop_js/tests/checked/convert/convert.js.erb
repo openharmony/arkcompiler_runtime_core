@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-"use strict";
-
-function deepEqual(x, y) {
+export function deepEqual(x, y) {
     // Approximate comparison for objects imported from ets, fails for some corner cases
     if (x === y) {
         return true;
@@ -44,7 +42,6 @@ function deepEqual(x, y) {
         return false;
     }
 }
-exports.deepEqual = deepEqual;
 
 function JsClass(value) {
     this.int_value = value;
@@ -60,7 +57,7 @@ function create_null_obj() {
 
 % @type_infos.each do |type_info|
 % fn_name = "js_get_#{type_info.name}"
-exports.js_get_<%= type_info.name %> = function() {
+export let js_get_<%= type_info.name %> = function() {
     return <%= type_info.value %>;
 }
 
@@ -68,11 +65,11 @@ exports.js_get_<%= type_info.name %> = function() {
 
 var saved_values = [undefined, undefined];
 
-exports.js_set = function(index, value) {
+export let js_set = function(index, value) {
     saved_values[index] = value;
     return index;
 }
 
-exports.js_check_set = function(index, value) {
+export let js_check_set = function(index, value) {
     return deepEqual(saved_values[0], saved_values[1]) ? 0 : 1;
 }

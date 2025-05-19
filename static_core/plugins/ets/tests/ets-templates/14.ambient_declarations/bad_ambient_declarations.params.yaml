@@ -62,3 +62,12 @@ declarations:
     class A {
       declare let y: int
     }
+  - >
+    declare {}
+  - >
+    declare declare
+  - >
+    declare const HelloWithType: String = "Hello"
+  - >
+    declare const ConstWithType: int = 42
+    

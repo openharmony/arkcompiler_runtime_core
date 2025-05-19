@@ -49,9 +49,9 @@ cases:
           - new Short(0 as short)
       case2:
           - '1 as long'
-          - "c'\\u0001'"
+          - c'\u0001'
           - new Long(1 as long)
-          - "new Char(c'\\u0001')"
+          - new Char(c'\u0001')
 
     # numerical equality, not compatible actual types
     - type1: int|boolean
@@ -60,8 +60,8 @@ cases:
           - '-128'
           - new Int(-128)
       case2:
-          - '"-128"'
-          - '"-128 as long"'
+          - "'-128'"
+          - "'-128 as long'"
 
     - type1: number|string
       type2: Object|null
@@ -224,4 +224,4 @@ cases:
         - '0n'
         - new BigInt()
       case2:
-        - '"0"'
+        - "'0'"

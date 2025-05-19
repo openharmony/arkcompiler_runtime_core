@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,17 +22,17 @@ class EtsClassMethodInterfaceClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsClassMethodInterfaceClassTsToEtsTest, checkInterfaceClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInterfaceClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInterfaceClassMethod"));
 }
 
 TEST_F(EtsClassMethodInterfaceClassTsToEtsTest, checkCreateInterfaceClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassFromTs"));
 }
 
 TEST_F(EtsClassMethodInterfaceClassTsToEtsTest, checkInstanceInterfaceClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceInterfaceClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceInterfaceClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

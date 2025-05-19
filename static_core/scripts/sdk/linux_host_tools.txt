@@ -2,7 +2,9 @@ bin/ark
 bin/ark_aot
 bin/ark_disasm
 bin/ark_link
+bin/aspt_converter
 bin/es2panda
+bin/verifier
 lib/libarkaotmanager.so
 lib/libarkassembler.so
 lib/libarkbase.so
@@ -13,6 +15,7 @@ lib/libarkfile.so
 lib/libarklinker.so
 lib/libarkruntime.so
 lib/libarktarget_options.so
+lib/libani_helpers.so
 lib/libetsnative.so
 lib/libarkziparchive.so
 lib/libc_secshared.so
@@ -23,3 +26,5 @@ lib/libhmicui18n.z.so
 lib/libhmicuuc.z.so
 lib/libinit_icu.so
 lib/libirtoc.so
+lib/libllvmbackend.so
+lib/libLLVM-15.so

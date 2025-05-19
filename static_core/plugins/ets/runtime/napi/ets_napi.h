@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,11 @@
 // NOLINTBEGIN(modernize-use-using, readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 
 #ifdef __cplusplus
+#include <cstddef>
 #include <cstdint>
 #include <cstdarg>
 #else
+#include <stddef.h>
 #include <stdint.h>
 #include <stdarg.h>
 #endif
@@ -66,6 +68,7 @@ class __ets_object {};
 class __ets_class : public __ets_object {};
 class __ets_string : public __ets_object {};
 class __ets_array : public __ets_object {};
+class __ets_arraybuffer : public __ets_object {};
 class __ets_objectArray : public __ets_array {};
 class __ets_booleanArray : public __ets_array {};
 class __ets_byteArray : public __ets_array {};
@@ -81,6 +84,7 @@ typedef __ets_object *ets_object;
 typedef __ets_class *ets_class;
 typedef __ets_string *ets_string;
 typedef __ets_array *ets_array;
+typedef __ets_arraybuffer *ets_arraybuffer;
 typedef __ets_objectArray *ets_objectArray;
 typedef __ets_booleanArray *ets_booleanArray;
 typedef __ets_byteArray *ets_byteArray;
@@ -102,6 +106,7 @@ typedef ets_object ets_string;
 typedef ets_object ets_error;
 typedef ets_object ets_weak;
 typedef ets_object ets_array;
+typedef ets_object ets_arraybuffer;
 typedef ets_array ets_objectArray;
 typedef ets_array ets_booleanArray;
 typedef ets_array ets_byteArray;
@@ -161,11 +166,14 @@ typedef const struct ETS_NativeInterface *ets_env;
 // Deprecated types:
 typedef ets_env EtsEnv;
 
+typedef void (*EtsFinalize)(void *finalizeData, void *finalizeHint);
+
 typedef enum {
     ETS_OKAY,
     ETS_INVALID_ARG,
     ETS_GENERIC_FAILURE,
     ETS_PENDING_EXCEPTION,
+    ETS_DETACHABLE_ARRAYBUFFER_EXPECTED,
     ETS_INVALID_VERSION,  // NOTE(v.cherkashin): This status code doesn't match to napi interface.
                           //                     Should we probably delete this status code?
 } ets_status;
@@ -435,6 +443,15 @@ struct ETS_NativeInterface {
     ets_status (*PromiseCreate)(EtsEnv *env, ets_deferred *deferred, ets_object *promise);
     ets_status (*DeferredResolve)(EtsEnv *env, ets_deferred deferred, ets_object resolution);
     ets_status (*DeferredReject)(EtsEnv *env, ets_deferred deferred, ets_object rejection);
+
+    // ArrayBuffer
+    ets_status (*ArrayBufferCreate)(EtsEnv *env, size_t byteLength, void **data, ets_arraybuffer *result);
+    ets_status (*ArrayBufferCreateExternal)(EtsEnv *env, void *externalData, size_t byteLength,
+                                            EtsFinalize finalizeCb, void *finalizeHint, ets_arraybuffer *result);
+    ets_status (*ArrayBufferGetInfo)(EtsEnv *env, ets_arraybuffer buffer, void **resultData,
+                                     size_t *resultByteLength);
+    ets_status (*ArrayBufferDetach)(EtsEnv *env, ets_arraybuffer buffer);
+    ets_status (*ArrayBufferIsDetached)(EtsEnv *env, ets_arraybuffer buffer, bool *result);
 };
 // clang-format on
 
@@ -453,7 +470,8 @@ typedef enum {
     ETS_GC_TYPE,
     ETS_RUN_GC_IN_PLACE,
     ETS_INTERPRETER_TYPE,
-    ETS_NATIVE_LIBRARY_PATH
+    ETS_NATIVE_LIBRARY_PATH,
+    ETS_VERIFICATION_MODE
 } EtsOptionType;
 
 typedef struct EtsVMOption {
@@ -498,6 +516,9 @@ ETS_EXPORT ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArg
 struct ETS_InvokeInterface {
     ets_int (*DestroyEtsVM)(EtsVM *vm);
     ets_int (*GetEnv)(EtsVM *vm, EtsEnv **pEnv, ets_int version);
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    ets_int (*AttachThread)(EtsVM *vm, EtsEnv **resultEnv, void **resultJsEnv);
+    ets_int (*DetachThread)(EtsVM *vm);
 };
 
 struct __EtsVM {
@@ -513,6 +534,16 @@ struct __EtsVM {
     ets_int GetEnv(EtsEnv **pEnv, ets_int version)
     {
         return invoke_interface->GetEnv(this, pEnv, version);
+    }
+
+    ets_int AttachThread(EtsEnv **resultEnv, void **resultJsEnv)
+    {
+        return invoke_interface->AttachThread(this, resultEnv, resultJsEnv);
+    }
+
+    ets_int DetachThread()
+    {
+        return invoke_interface->DetachThread(this);
     }
 #endif
 };
@@ -1531,6 +1562,30 @@ struct __EtsEnv {
     ets_status DeferredReject(ets_deferred deferred, ets_object rejection)
     {
         return native_interface->DeferredReject(this, deferred, rejection);
+    }
+
+    // ArrayBuffer
+    ets_status ArrayBufferCreate(size_t byteLength, void **data, ets_arraybuffer *result)
+    {
+        return native_interface->ArrayBufferCreate(this, byteLength, data, result);
+    }
+    ets_status ArrayBufferCreateExternal(void *externalData, size_t byteLength, EtsFinalize finalizeCb,
+                                         void *finalizeHint, ets_arraybuffer *result)
+    {
+        return native_interface->ArrayBufferCreateExternal(this, externalData, byteLength, finalizeCb, finalizeHint,
+                                                           result);
+    }
+    ets_status ArrayBufferGetInfo(ets_arraybuffer buffer, void **resultData, size_t *resultByteLength)
+    {
+        return native_interface->ArrayBufferGetInfo(this, buffer, resultData, resultByteLength);
+    }
+    ets_status ArrayBufferDetach(ets_arraybuffer buffer)
+    {
+        return native_interface->ArrayBufferDetach(this, buffer);
+    }
+    ets_status ArrayBufferIsDetached(ets_arraybuffer buffer, bool *result)
+    {
+        return native_interface->ArrayBufferIsDetached(this, buffer, result);
     }
 #endif
 };

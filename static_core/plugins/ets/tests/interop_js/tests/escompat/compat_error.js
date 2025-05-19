@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require('escompat.test.js');
+const { etsVm, getTestModule } = require('escompat.test.abc');
 
 const etsMod = getTestModule('escompat_test');
 const CreateEtsSample = etsMod.getFunction('Error_CreateEtsSample');
@@ -33,5 +33,5 @@ const TestJSSample = etsMod.getFunction('Error_TestJSSample');
 
 	ASSERT_EQ(v.cause, undefined);
 
-	ASSERT_TRUE(String(v['<get>stack']()).includes('CreateEtsSample'));
+	ASSERT_TRUE(v.stack.includes('CreateEtsSample'));
 }

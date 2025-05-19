@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -221,15 +221,16 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, compiler::
 template void InstBuilder::BuildStObjByName<true>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 template void InstBuilder::BuildStObjByName<false>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 
-void InstBuilder::BuildIsUndefined(const BytecodeInstruction *bcInst)
+void InstBuilder::BuildIsNullValue(const BytecodeInstruction *bcInst)
 {
-    auto undefInst = graph_->GetOrCreateUndefinedInst();
-    auto cmpInst = graph_->CreateInstCompare(DataType::BOOL, GetPc(bcInst->GetAddress()), GetDefinitionAcc(), undefInst,
-                                             DataType::REFERENCE, ConditionCode::CC_EQ);
+    auto uniqueObjInst = graph_->GetOrCreateUniqueObjectInst();
+    auto cmpInst = graph_->CreateInstCompare(DataType::BOOL, GetPc(bcInst->GetAddress()), GetDefinitionAcc(),
+                                             uniqueObjInst, DataType::REFERENCE, ConditionCode::CC_EQ);
     AddInstruction(cmpInst);
     UpdateDefinitionAcc(cmpInst);
 }
 
+template <bool IS_STRICT>
 void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
 {
     auto pc = GetPc(bcInst->GetAddress());
@@ -237,10 +238,17 @@ void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
     Inst *obj1 = GetDefinition(bcInst->GetVReg(0));
     Inst *obj2 = GetDefinition(bcInst->GetVReg(1));
 
-    RuntimeInterface::IntrinsicId intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_EQUALS;
+    auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_EQUALS;
+    if constexpr (IS_STRICT) {
+        intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRICT_EQUALS;
+    }
 #if defined(ENABLE_LIBABCKIT)
     if (GetGraph()->IsAbcKit()) {
-        intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_EQUALS;
+        if constexpr (IS_STRICT) {
+            intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_STRICT_EQUALS;
+        } else {
+            intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_EQUALS;
+        }
     }
 #endif
     auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc, intrinsicId);
@@ -254,5 +262,109 @@ void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
     AddInstruction(intrinsic);
     UpdateDefinitionAcc(intrinsic);
 }
+
+template void InstBuilder::BuildEquals<true>(const BytecodeInstruction *bcInst);
+template void InstBuilder::BuildEquals<false>(const BytecodeInstruction *bcInst);
+
+void InstBuilder::BuildTypeof(const BytecodeInstruction *bcInst)
+{
+    auto pc = GetPc(bcInst->GetAddress());
+    Inst *obj = GetDefinition(bcInst->GetVReg(0));
+
+    RuntimeInterface::IntrinsicId intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_TYPEOF;
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::REFERENCE, pc, intrinsicId);
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+    intrinsic->AppendInput(obj);
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState);
+    AddInstruction(intrinsic);
+    UpdateDefinitionAcc(intrinsic);
+}
+
+void InstBuilder::BuildIstrue(const BytecodeInstruction *bcInst)
+{
+    auto pc = GetPc(bcInst->GetAddress());
+    Inst *obj = GetDefinition(bcInst->GetVReg(0));
+
+    RuntimeInterface::IntrinsicId intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ISTRUE;
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc, intrinsicId);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 1_I);
+    intrinsic->AppendInput(obj);
+    intrinsic->AddInputType(DataType::REFERENCE);
+
+    AddInstruction(intrinsic);
+    UpdateDefinitionAcc(intrinsic);
+}
+
+template <bool IS_RANGE>
+void InstBuilder::BuildCallByName(const BytecodeInstruction *bcInst)
+{
+    // Suppress BytecodeOptimizer if call.name was encountered
+    if (GetGraph()->IsBytecodeOptimizer()) {
+        failed_ = true;
+        return;
+    }
+
+    auto pc = GetPc(bcInst->GetAddress());
+    auto startReg = bcInst->GetVReg(0);
+    auto objRef = GetDefinition(startReg++);
+    auto methodIndex = bcInst->GetId(0).AsIndex();
+    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
+    auto argsCount = GetMethodArgumentsCount(methodId);
+    auto retType = GetMethodReturnType(methodId);
+
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+    auto nullCheck = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, pc, objRef, saveState);
+
+    ASSERT(saveState != nullptr);
+    ASSERT(nullCheck != nullptr);
+
+    ResolveVirtualInst *resolver = GetGraph()->CreateInstResolveByName(DataType::POINTER, pc, methodId, GetMethod());
+
+    ASSERT(resolver != nullptr);
+
+    resolver->SetInput(0, nullCheck);
+    resolver->SetInput(1, saveState);
+
+    CallInst *call = GetGraph()->CreateInstCallResolvedVirtual(retType, pc, methodId, nullptr);
+
+    // + 1 because the first param is objRef
+    // + 1 because of resolver
+    // + 1 because CallResolvedVirtual has saveState as input (last)
+    call->ReserveInputs(argsCount + 3_I);
+    call->AllocateInputTypes(GetGraph()->GetAllocator(), argsCount + 3_I);
+    call->AppendInput(resolver, DataType::POINTER);
+    call->AppendInput(nullCheck, DataType::REFERENCE);
+
+    if constexpr (IS_RANGE) {
+        for (size_t i = 0; i < argsCount; startReg++, i++) {
+            call->AppendInput(GetDefinition(startReg), GetMethodArgumentType(methodId, i));
+        }
+    } else {
+        for (size_t i = 0; i < argsCount; i++) {
+            call->AppendInput(GetDefinition(bcInst->GetVReg(i + 1)), GetMethodArgumentType(methodId, i));
+        }
+    }
+    call->AppendInput(saveState, DataType::NO_TYPE);
+
+    AddInstruction(saveState);
+    AddInstruction(nullCheck);
+    AddInstruction(resolver);
+    AddInstruction(call);
+
+    if (retType != DataType::VOID) {
+        UpdateDefinitionAcc(call);
+    } else {
+        UpdateDefinitionAcc(nullptr);
+    }
+}
+
+template void InstBuilder::BuildCallByName<true>(const BytecodeInstruction *bcInst);
+template void InstBuilder::BuildCallByName<false>(const BytecodeInstruction *bcInst);
 
 }  // namespace ark::compiler

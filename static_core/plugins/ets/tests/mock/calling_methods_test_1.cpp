@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath1)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath1)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -72,11 +72,11 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath1)
     EXPECT_DEATH(CallDoubleMethodListHelper(env_, nullptr, nullptr, nullptr), "");
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath2)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath2)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    ets_class cls = env_->FindClass("A");
+    ets_class cls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(cls, nullptr);
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);

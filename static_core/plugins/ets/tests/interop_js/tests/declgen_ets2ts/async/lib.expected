@@ -12,31 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-function AsyncIdentity(param: number): Promise<number> { return {} as any; };
-(AsyncIdentity as any) = ETSGLOBAL.AsyncIdentity;
-export {AsyncIdentity};
-exports.AsyncIdentity = AsyncIdentity;
-
-
-function AsyncIdentity$asyncimpl(param: number): any { return {} as any; };
-(AsyncIdentity$asyncimpl as any) = ETSGLOBAL.AsyncIdentity$asyncimpl;
-export {AsyncIdentity$asyncimpl};
-exports.AsyncIdentity$asyncimpl = AsyncIdentity$asyncimpl;
-
-
-class PromiseWrapper {
-    public promise_: Promise<string> = {} as any;
-    constructor() {};
-};
-(PromiseWrapper as any) = (globalThis as any).Panda.getClass('LPromiseWrapper;');
-export {PromiseWrapper};
-exports.PromiseWrapper = PromiseWrapper;
-
+export declare function AsyncIdentity(param: number): Promise<number>;
+export declare const myPromise: Promise<number>;
+export declare let cb: (arg: number) => void;
+export declare let foo: () => Promise<void>;
+export declare class PromiseWrapper {
+    public get promise_(): Promise<string>;
+    public set promise_(value: Promise<string>);
+    constructor();
+}

@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "package": "HarC",
+        "baseUrl": "./src/main/ets/",
+        "paths": {
+            "HarC": [
+                "."
+            ]
+        },
+        "entry": "../../../indexC.ets"
+    }
+}

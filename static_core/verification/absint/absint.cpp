@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -217,7 +217,8 @@ VerificationStatus VerifyExcHandler([[maybe_unused]] TryBlock const *tryBlock, C
     if (exceptionIdx != panda_file::INVALID_INDEX) {
         ScopedChangeThreadStatus st {ManagedThread::GetCurrent(), ThreadStatus::RUNNING};
         exception = verifCtx->GetJob()->GetService()->classLinker->GetExtension(langCtx)->GetClass(
-            *method->GetPandaFile(), method->GetClass()->ResolveClassIndex(exceptionIdx));
+            *method->GetPandaFile(), method->GetClass()->ResolveClassIndex(exceptionIdx),
+            method->GetClass()->GetLoadContext());
     }
 
     LOG(DEBUG, VERIFIER) << "Exception handler at " << std::hex << "0x" << catchBlock->GetHandlerPc()

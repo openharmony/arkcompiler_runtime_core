@@ -1,1 +1,1 @@
-ETS Warning: Replace the lambda function with a regular function. [remove_lambda_1.sts:18:11]
+Warning: Replace the lambda function with a regular function. [remove_lambda_1.ets:18:11]

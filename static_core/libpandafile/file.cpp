@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -187,9 +187,9 @@ std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, 
     return file;
 }
 
-static std::unique_ptr<const panda_file::File> OpenZipPandaFile(FILE *fp, std::string_view location,
-                                                                std::string_view archiveFilename,
-                                                                panda_file::File::OpenMode openMode)
+std::unique_ptr<const panda_file::File> OpenZipPandaFile(FILE *fp, std::string_view location,
+                                                         std::string_view archiveFilename,
+                                                         panda_file::File::OpenMode openMode)
 {
     // Open Zipfile and do the extraction.
     ZipArchiveHandle zipfile = nullptr;
@@ -270,7 +270,9 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     } else {
         file = panda_file::File::Open(location, openMode);
     }
-    fclose(fp);
+    if (file != nullptr) {
+        fclose(fp);
+    }
     return file;
 }
 
@@ -304,6 +306,27 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
     }
     std::hash<void *> hash;
     return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
+}
+
+std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size, std::string filename)
+{
+    if (buffer == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "OpenPandaFileFromSecureMemory buffer is nullptr'";
+        return nullptr;
+    }
+
+    auto *mem = reinterpret_cast<std::byte *>(buffer);
+    os::mem::ConstBytePtr ptr(mem, size, [](std::byte *, size_t) noexcept {});
+    if (ptr.Get() == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "Failed to open panda file from secure memory'";
+        return nullptr;
+    }
+
+    std::hash<std::byte *> hash;
+    if (filename.empty()) {  // filename is sandbox path in application
+        filename = std::to_string(hash(mem));
+    }
+    return panda_file::File::OpenFromMemory(std::move(ptr), filename);
 }
 
 class ClassIdxIterator {
@@ -408,7 +431,7 @@ File::File(std::string filename, os::mem::ConstBytePtr &&base)
     : base_(std::forward<os::mem::ConstBytePtr>(base)),
       filename_(std::move(filename)),
       filenameHash_(CalcFilenameHash(filename_)),
-      fullFilename_(os::GetAbsolutePath(filename_)),
+      fullFilename_(os::GetAbsolutePath(filename_).empty() ? filename_ : os::GetAbsolutePath(filename_)),
       pandaCache_(std::make_unique<PandaCache>()),
       uniqId_(MergeHashes(filenameHash_, GetHash32(reinterpret_cast<const uint8_t *>(GetHeader()), sizeof(Header))))
 {
@@ -489,7 +512,7 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openM
         return nullptr;
     }
 
-    if (!CheckHeader(ptr, filename)) {
+    if (!CheckHeader(ptr, filename, size)) {
         return nullptr;
     }
 
@@ -527,13 +550,18 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
-bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename)
+bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename, const size_t &expectedLength)
 {
     if (ptr.Get() == nullptr || ptr.GetSize() < sizeof(File::Header)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
         return false;
     }
-    auto header = reinterpret_cast<const File::Header *>(reinterpret_cast<uintptr_t>(ptr.Get()));
+    auto header = reinterpret_cast<const File::Header *>(ptr.Get());
+    if (expectedLength != 0 && expectedLength != header->fileSize) {
+        LOG(ERROR, PANDAFILE) << "File [" << filename << "]'s actual size [" << ptr.GetSize()
+                              << "] is not equal to Header's fileSize [" << header->fileSize << "]";
+        return false;
+    }
     if (header->magic != File::MAGIC) {
         LOG(ERROR, PANDAFILE) << "Invalid magic number '";
         return false;

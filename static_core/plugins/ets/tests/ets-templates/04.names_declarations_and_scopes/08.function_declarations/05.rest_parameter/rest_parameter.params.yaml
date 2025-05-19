@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 ---
 cases:
-  # example from the specification
+  # 0. example from the specification
   - sig: |-
       sum(...numbers: int[]): int
     def: |-
@@ -21,9 +21,11 @@ cases:
       for (let n of numbers) res += n
       return res;
     call: |-
-      if (sum() == 0 && sum(1) == 1 && sum(1, 2, 3) == 6) return 0;
+      assertEQ(sum(), 0)
+      assertEQ(sum(1), 1)
+      assertEQ(sum(1, 2, 3), 6)
 
-  # array of arrays
+  # 1. array of arrays
   - sig: |-
       sum(...arrays: int[][]): int
     def: |-
@@ -36,18 +38,23 @@ cases:
       let a1: int[] = [1, 2, 3]
       let a2: int[] = [5, 6, 7]
       let a3: int[] = [9, 9, 9]
-      if (sum(a1) == 6 && sum(a1, a2) == 24 && sum(a3, a2, a1) == 51) return 0;
+      assertEQ(sum(a1), 6)
+      assertEQ(sum(a1, a2), 24)
+      assertEQ(sum(a3, a2, a1), 51)
 
-  # return the array
+  # 2. return the array
   - sig: |-
       foo(...p: int[]): int[]
     def: |-
       return p;
     call: |-
       let v: int[] = foo(10, 20, 30)
-      if (v.length == 3 && v[0] == 10 && v[1] == 20 && v[2] == 30) return 0;
+      assertEQ(v.length, 3)
+      assertEQ(v[0], 10)
+      assertEQ(v[1], 20)
+      assertEQ(v[2], 30)
 
-  # array of nullables
+  # 3. array of nullables
   - sig: |-
       sum(...p: (Int|null)[]): int
     def: |-
@@ -55,45 +62,47 @@ cases:
       for (let n: Int|null of p) res += n??0
       return res;
     call: |-
-      if (sum(1, null, 2) == 3 && sum(null, null, 99, null) == 99) return 0;
+      assertEQ(sum(1, null, 2), 3)
+      assertEQ(sum(null, null, 99, null), 99)
 
-  # array and extra argument
+  # 4. array and extra argument
   - sig: |-
       foo(x: int, ...p: int[]): int[]
     def: |-
       return p;
     call: |-
       let v: int[] = foo(10, 20)
-      if (v.length == 1 && v[0] == 20) return 0;
+      assertEQ(v.length, 1)
+      assertEQ(v[0], 20)
 
-  # array and extra arguments
+  # 5. array and extra arguments
   - sig: |-
       foo(x: int, y: int, ...p: int[]): int
     def: |-
       return x + y + p.length;
     call: |-
       let v = foo(10, 20, 30, 40, 50, 60, 70, 80, 90)
-      if (v == 37) return 0;
+      assertEQ(v, 37)
 
-  # empty array
+  # 6. empty array
   - sig: |-
       foo(...p: int[]): int[]
     def: |-
       return p;
     call: |-
       let v: int[] = foo()
-      if (v.length == 0) return 0;
+      assertEQ(v.length, 0)
 
-  # empty array with extra argument
+  # 7. empty array with extra argument
   - sig: |-
       foo(x: int, ...p: int[]): int[]
     def: |-
       return p;
     call: |-
       let v: int[] = foo(10)
-      if (v.length == 0) return 0;
+      assertEQ(v.length, 0)
 
-  # array in extra argument
+  # 8. array in extra argument
   - sig: |-
       foo(q: int[], ...p: int[]): int
     def: |-
@@ -103,9 +112,9 @@ cases:
       return res;
     call: |-
       let v: int = foo([1, 2], 10, 20)
-      if (v == 33) return 0;
+      assertEQ(v, 33)
 
-  # passing different types
+  # 9. passing different types
   - sig: |-
       foo(x: double, y: boolean, ...p: char[]): string
     def: |-
@@ -114,9 +123,9 @@ cases:
       return res;
     call: |-
       let v = foo(1.5, false, c'A', c'B')
-      if (v == "1.5false2AB") return 0;
+      assertEQ(v, "1.5false2AB")
 
-  # generic function
+  # 10. generic function
   - sig: |-
       foo<T>(x: T, ...p: T[]): T[]
     def: |-
@@ -124,15 +133,71 @@ cases:
     call: |-
       let v: string[] = foo<string>("X", "A", "B", "C")
       let q: Int[] = foo<Int>(1, 2)
-      if (v.length == 3 && "A".equals(v[0]) && "B".equals(v[1]) && "C".equals(v[2]) && q.length == 1 && q[0] == new Int(2)) return 0;
+      assertEQ(v.length, 3)
+      assertTrue("A".equals(v[0]))
+      assertTrue("B".equals(v[1]))
+      assertTrue("C".equals(v[2]))
+      assertEQ(q.length, 1)
+      assertEQ(q[0], new Int(2))
       // TODO: when the error with generic function return type will be fixed, the more usual form can be used:
-      // if (v.length == 3 && v[0] == "A" && v[1] == "B" && v[2] == "C" && q.length == 1 && q[0] == 2) return 0;
+      // assertEQ(v.length, 3)
+      assertEQ(v[0], "A")
+      assertEQ(v[1], "B")
+      assertEQ(v[2], "C")
+      assertEQ(q.length, 1)
+      assertEQ(q[0], 2)
 
-  # generic function with nullable argument
+  # 11. generic function with nullable argument
   - sig: |-
       foo<T>(...p: T[]): T[]
     def: |-
       return p;
     call: |-
       let v: (Object|null)[] = foo<Object|null>(null, new Long(), new Short(), new Object(), null)
-      if (v.length == 5) return 0;
+      assertEQ(v.length, 5)
+
+  # 12. spread tuple
+  - sig: |-
+      sum(...numbers: [number, number, number]): number
+    def: |-
+      return numbers[0] + numbers[1] + numbers[2];
+    call: |-
+      let x: [number, number, number] = [1, 2, 3]
+      assertEQ(sum(...x), 6)
+
+  # 13. spread Array
+  - sig: |-
+      sum(...numbers: Array<number>): number
+    def: |-
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+
+    call: |-
+      let x: Array<number> = [1, 2, 3]
+      assertEQ(sum(...x), 6)
+
+  # 14. spread FixedArray
+  - sig: |-
+      sum(...numbers: FixedArray<number>): number
+    def: |-
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+
+    call: |-
+      let x: FixedArray<number> = [1, 2, 3]
+      assertEQ(sum(...x), 6)
+
+  # 15. spread 2 arrays
+  - sig: |-
+      sum(...numbers: int[]): int
+    def: |-
+      return 1
+    call: |-
+      const arr1 = [1, 2, 3]
+      const arr2 = [4, 5, 6]
+      const combined = [...arr1, ...arr2]
+      const copy = [...arr1]

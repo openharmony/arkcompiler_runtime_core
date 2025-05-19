@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,11 @@
 
 #include "runtime/coroutines/coroutine_context.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/external_iface_table.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
+#include "runtime/coroutines/local_storage.h"
+#include "runtime/include/panda_vm.h"
 
 namespace ark::ets {
 class PandaEtsVM;
@@ -29,6 +32,9 @@ public:
     NO_COPY_SEMANTIC(EtsCoroutine);
     NO_MOVE_SEMANTIC(EtsCoroutine);
 
+    enum class DataIdx { ETS_PLATFORM_TYPES_PTR, INTEROP_CTX_PTR, LAST_ID };
+    using LocalStorage = StaticLocalStorage<DataIdx>;
+
     /**
      * @brief EtsCoroutine factory: the preferrable way to create a coroutine. See CoroutineManager::CoroutineFactory
      * for details.
@@ -38,15 +44,20 @@ public:
      */
     template <class T>
     static T *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&epInfo = std::nullopt)
+                     std::optional<EntrypointInfo> &&epInfo = std::nullopt, Type type = Type::MUTATOR)
     {
         mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
         auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, std::move(name),
-                                               context, std::move(epInfo));
+                                               context, std::move(epInfo), type);
         co->Initialize();
         return co;
     }
-    ~EtsCoroutine() override = default;
+
+    ~EtsCoroutine() override
+    {
+        auto allocator = GetVM()->GetHeapManager()->GetInternalAllocator();
+        allocator->Delete(etsNapiEnv_);
+    }
 
     static EtsCoroutine *CastFromThread(Thread *thread)
     {
@@ -63,9 +74,16 @@ public:
         return nullptr;
     }
 
+    ExternalIfaceTable *GetExternalIfaceTable();
+
     void SetPromiseClass(void *promiseClass)
     {
         promiseClassPtr_ = promiseClass;
+    }
+
+    void SetJobClass(void *jobClass)
+    {
+        jobClassPtr_ = jobClass;
     }
 
     static constexpr uint32_t GetTlsPromiseClassPointerOffset()
@@ -73,20 +91,26 @@ public:
         return MEMBER_OFFSET(EtsCoroutine, promiseClassPtr_);
     }
 
-    ALWAYS_INLINE ObjectHeader *GetUndefinedObject() const
+    // Returns a unique object representing "null" reference
+    ALWAYS_INLINE ObjectHeader *GetNullValue() const
     {
-        return undefinedObj_;
+        return nullValue_;
     }
 
     // For mainthread initializer
-    void SetUndefinedObject(ObjectHeader *obj)
+    void SetupNullValue(ObjectHeader *obj)
     {
-        undefinedObj_ = obj;
+        nullValue_ = obj;
     }
 
-    static constexpr uint32_t GetTlsUndefinedObjectOffset()
+    static constexpr uint32_t GetTlsNullValueOffset()
     {
-        return MEMBER_OFFSET(EtsCoroutine, undefinedObj_);
+        return MEMBER_OFFSET(EtsCoroutine, nullValue_);
+    }
+
+    static constexpr uint32_t GetTlsNapiEnvOffset()
+    {
+        return MEMBER_OFFSET(EtsCoroutine, etsNapiEnv_);
     }
 
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
@@ -94,27 +118,47 @@ public:
 
     PandaEtsNapiEnv *GetEtsNapiEnv() const
     {
-        return etsNapiEnv_.get();
+        return etsNapiEnv_;
     }
 
     void Initialize() override;
+    void CleanUp() override;
     void RequestCompletion(Value returnValue) override;
     void FreeInternalMemory() override;
+
+    LocalStorage &GetLocalStorage()
+    {
+        return localStorage_;
+    }
+
+    // event handlers
+    void OnHostWorkerChanged() override;
 
 protected:
     // we would like everyone to use the factory to create a EtsCoroutine
     explicit EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo);
+                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo, Type type);
 
 private:
     panda_file::Type GetReturnType();
     EtsObject *GetReturnValueAsObject(panda_file::Type returnType, Value returnValue);
     EtsObject *GetValueFromPromiseSync(EtsPromise *promise);
 
-    std::unique_ptr<PandaEtsNapiEnv> etsNapiEnv_;
-    void *promiseClassPtr_ {nullptr};
+    void RequestPromiseCompletion(mem::Reference *promiseRef, Value returnValue);
+    void RequestJobCompletion(mem::Reference *jobRef, Value returnValue);
 
-    ObjectHeader *undefinedObj_ {};
+    PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
+    void *promiseClassPtr_ {nullptr};
+    void *jobClassPtr_ {nullptr};
+
+    ObjectHeader *nullValue_ {};
+
+    static ExternalIfaceTable emptyExternalIfaceTable_;
+
+    LocalStorage localStorage_;
+
+    static_assert(std::is_pointer_v<decltype(etsNapiEnv_)>,
+                  "we load a raw pointer in compiled code, please don't change the type!");
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

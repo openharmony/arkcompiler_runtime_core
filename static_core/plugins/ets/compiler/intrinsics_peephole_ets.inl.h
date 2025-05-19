@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,10 @@ static bool PeepholeStringSubstring(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeStrictEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeTypeof(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeDoubleToString(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeGetTypeInfo(GraphVisitor *v, IntrinsicInst *intrinsic);
 
 #ifdef PANDA_ETS_INTEROP_JS
 bool TryFuseGetPropertyAndCast(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId);
