@@ -241,12 +241,33 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Creates a new `Array` instance from `Object[]` primitive array.
      *
-     * @param arr an iterable object to convert to an array.
+     * @param iterable an iterable object to convert to an array.
      *
      * @returns `Array` intance constructed from `Object[]` primitive array.
      */
     public static from<T>(iterable: ArrayLike<T> | Iterable<T>): Array<T> {
-        return Array.from<T, T>(iterable, (x: T, k: number): T => x)
+        const ret = new Array<T>()
+        iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
+            ret.push(x)
+        })
+        return ret
+    }
+
+    /**
+     * Creates a new `Array` instance from `Object[]` ArrayLike.
+     *
+     * @param arr an iterable object to convert to an array.
+     *
+     * @returns `Array` intance constructed from `Object[]` ArrayLike.
+     */
+    public static from<T>(arr: ArrayLike<T>): Array<T> {
+        const ret = new Array<T>(arr.length as int)
+        let i = 0
+        iteratorForEach<T>(arr.$_iterator(), (x: T): void => {
+            ret[i] = x
+            i += 1
+        })
+        return ret
     }
 
     /**
