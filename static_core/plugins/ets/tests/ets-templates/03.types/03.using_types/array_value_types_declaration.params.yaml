@@ -32,3 +32,5 @@ default_value:
   - Object
   - String
   - never
+  - bigint
+  - BigInt
