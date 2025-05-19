@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_APP_STATE_H
-#define PANDA_RUNTIME_APP_STATE_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_APP_STATE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_APP_STATE_H
 
 #include <atomic>
 #include <cstdint>
+#include <optional>
 
-namespace ark {
+namespace ark::ets {
 
 class AppState {
 public:
@@ -42,6 +43,6 @@ private:
     std::optional<State> state_;
     int64_t timestamp_ {0};
 };
-}  // namespace ark
+}  // namespace ark::ets
 
-#endif  // PANDA_RUNTIME_APP_STATE_H
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_APP_STATE_H
