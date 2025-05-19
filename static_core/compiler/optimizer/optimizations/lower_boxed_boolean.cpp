@@ -209,6 +209,10 @@ bool LowerBoxedBoolean::ProcessSaveState(Inst *saveState, Inst *inst)
         return true;
     }
 
+    if (!saveStateInst->HasUsers()) {
+        return false;
+    }
+
     auto firstUser = saveStateInst->GetFirstUser()->GetInst();
     if (firstUser->GetOpcode() == Opcode::ReturnInlined) {
         return true;
