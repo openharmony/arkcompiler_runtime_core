@@ -19,21 +19,56 @@ import buffer from "@ohos.buffer"
 function main(): int {
     const suite = new ArkTestsuite("Buffer Blob API tests")
 
+    suite.addTest("Test get Blob slice from empty String array", testEmptyStringSlice)
+    suite.addTest("Test get Blob slice from Chinese String array without options", testChineseStringSlice)
+    suite.addTest("Test get Blob slice from Chinese and English String array without options", testEnglishStringSlice)
     suite.addTest("Test create Blob from String array without options", testBlobFromStringArray)
     suite.addTest("Test create Blob from ArrayBuffer without options", testBlobFromArrayBuffer)
     suite.addTest("Test create Blob from TypedArray without options", testBlobFromTypedArray)
     suite.addTest("Test create Blob from DataView without options", testBlobFromDataView)
     suite.addTest("Test create Blob from other Blob without options", testBlobFromBlob)
     suite.addTest("Test create Blob from String array with options", testBlobWithOptions)
-
     suite.addTest("Test get Blob slice from String array without options", testStringArraySlice)
     suite.addTest("Test get Blob slice from ArrayBuffer without options", testArrayBufferSlice)
     suite.addTest("Test get Blob slice from TypedArray without options", testTypedArraySlice)
     suite.addTest("Test get Blob slice from DataView without options", testDataViewSlice)
     suite.addTest("Test get Blob slice from other Blob without options", testBlobSlice)
     suite.addTest("Test get Blob toArrayBuffer", testBlobToArrayBuffer)
+    suite.addTest("Test get Blob constructor ArrayString", testBlobToArrayString)
+    suite.addTest("Test get Blob constructor ArrayBuffer", testBlobToArrayArrayBuffer)
+    suite.addTest("Test get Blob constructor Uint8Array", testBlobToArrayUint8Array)
+    suite.addTest("Test get Blob constructor Uint8ClampedArray", testBlobToArrayUint8ClampedArray)
+    suite.addTest("Test get Blob constructor Int16Array", testBlobToArrayInt16Array)
+    suite.addTest("Test get Blob constructor Uint16Array", testBlobToArrayUint16Array)
 
     return suite.run()
+}
+
+function testEmptyStringSlice() {
+    let src: FixedArray<string> = []
+    let blob = new buffer.Blob(src)
+    assertEQ(blob.type, "")
+    assertEQ(blob.size, 0)
+}
+
+function testChineseStringSlice() {
+    let sources: FixedArray<string> = ["你好", "世界", "测试"];
+    let blob = new buffer.Blob(sources);
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 18)
+    let text = await blob.text()
+    assertEQ(text, "你好世界测试")
+}
+
+function testEnglishStringSlice() {
+    let sources: FixedArray<string> = ["测试", "$#", "c"];
+    let blob = new buffer.Blob(sources)
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 9)
+    let text = await blob.text()
+    assertEQ(text, "测试$#c")
 }
 
 function testBlobFromStringArray() {
@@ -58,12 +93,12 @@ function testBlobFromArrayBuffer() {
 }
 
 function testBlobFromTypedArray() {
-    let src: FixedArray<Int8Array> = [new Int8Array([1, 2, 3, 4, 5])]
+    let src: FixedArray<Int8Array> = [new Int8Array([97, 98, 99, 97, 98])]
     let blob = new buffer.Blob(src)
     assertEQ(blob.size, 5)
     assertEQ(blob.type, "")
     let text = await blob.text()
-    assertEQ(text, "12345")
+    assertEQ(text, "abcab")
 }
 
 function testBlobFromDataView() {
@@ -116,16 +151,16 @@ function testArrayBufferSlice() {
 }
 
 function testTypedArraySlice() {
-    let src: FixedArray<Int8Array> = [new Int8Array([1, 2, 3]), 
-                            new Int8Array([ 4, 5]),
-                            new Int8Array([6, 7]),
-                            new Int8Array([8, 9, 10]),
-                            new Int8Array([11, 12, 13, 14])]
-    let blob = new buffer.Blob(src).slice(2,4)
+    let src: FixedArray<Int8Array> = [new Int8Array([97, 98, 99]),
+                            new Int8Array([100, 101]),
+                            new Int8Array([102, 103]),
+                            new Int8Array([97, 98, 100]),
+                            new Int8Array([110, 120, 130, 140])]
+    let blob = new buffer.Blob(src).slice(0, 1)
     assertEQ(blob.type, "")
-    assertEQ(blob.size, 5)
+    assertEQ(blob.size, 3)
     let text = await blob.text()
-    assertEQ(text, "678910")
+    assertEQ(text, "abc")
 }
 
 function testDataViewSlice() {
@@ -166,3 +201,75 @@ function testBlobToArrayBuffer() {
     assertEQ(ArrayBuffer.stringify(arrayBufferFromBlob, 'utf8', 0, arrayBufferFromBlob.getByteLength()), text)
 }
 
+function testBlobToArrayString() {
+    let sources = ["测试", "$#", "c"];
+    let blob = new buffer.Blob(sources)
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 9)
+    let text = await blob.text()
+    assertEQ(text, "测试$#c")
+}
+
+function testBlobToArrayArrayBuffer() {
+    let arr = new ArrayBuffer(3);
+    let uint8arr = new Uint8Array(arr);
+    uint8arr[0] = 97;
+    uint8arr[1] = 98;
+    uint8arr[2] = 99;
+    let blob = new buffer.Blob([arr]);
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 3)
+    let text = await blob.text()
+    assertEQ(text, "abc")
+}
+
+function testBlobToArrayUint8Array() {
+    let uint8arr1 = new Uint8Array(3);
+    uint8arr1[0] = 97;
+    uint8arr1[1] = 98;
+    uint8arr1[2] = 99;
+    let blob = new buffer.Blob([uint8arr1]);
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 3)
+    let text = await blob.text()
+    assertEQ(text, "abc")
+}
+
+function testBlobToArrayUint8ClampedArray() {
+    let uintc8 = new Uint8ClampedArray(3);
+    uintc8 [0] = 100;
+    uintc8 [1] = 101;
+    uintc8 [2] = 102;
+    let blob = new buffer.Blob([uintc8]);
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 3)
+    let text = await blob.text()
+    assertEQ(text, "def")
+}
+
+function testBlobToArrayInt16Array() {
+    let int16 = new Int16Array(2);
+    int16 [0] = 100;
+    int16 [1] = 101;
+    let blob = new buffer.Blob([int16]);
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 4)
+}
+
+function testBlobToArrayUint16Array() {
+    let uint16 = new Uint16Array(5);
+    uint16[0] = 72;
+    uint16[1] = 101;
+    uint16[2] = 108;
+    uint16[3] = 108;
+    uint16[4] = 111;
+    let blob = new buffer.Blob([uint16]);
+    let size = blob.size;
+    assertEQ(blob.type, "")
+    assertEQ(size, 10)
+}
