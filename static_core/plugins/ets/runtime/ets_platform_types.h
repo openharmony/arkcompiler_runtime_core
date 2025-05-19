@@ -75,6 +75,7 @@ public:
     EtsClass *coreRuntimeLinker;
     EtsClass *coreBootRuntimeLinker;
     EtsClass *coreAbcRuntimeLinker;
+    EtsClass *memoryRuntimeLinker;
     EtsClass *coreAbcFile;
 
     EtsClass *coreField;

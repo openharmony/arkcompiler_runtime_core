@@ -53,6 +53,7 @@ static constexpr std::string_view STRING_BUILDER                       = "Lstd/c
 static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
 static constexpr std::string_view ABC_FILE                             = "Lstd/core/AbcFile;";
 static constexpr std::string_view ABC_RUNTIME_LINKER                   = "Lstd/core/AbcRuntimeLinker;";
+static constexpr std::string_view MEMORY_RUNTIME_LINKER                = "Lstd/core/MemoryRuntimeLinker;";
 static constexpr std::string_view BOOT_RUNTIME_LINKER                  = "Lstd/core/BootRuntimeLinker;";
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
 static constexpr std::string_view RUNTIME_LINKER                       = "Lstd/core/RuntimeLinker;";
