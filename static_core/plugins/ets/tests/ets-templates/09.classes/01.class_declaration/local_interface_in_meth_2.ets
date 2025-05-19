@@ -14,8 +14,7 @@
  */
 
 /*---
-desc: Local classes and interfaces are prohibited in ArkTS
-tags: [compile-only, negative]
+desc: Local interfaces in method.
 ---*/
 
 class A {
@@ -24,7 +23,12 @@ class A {
             fld: int
         }
 
-        let v: LocalInterface = { fld: 42 }
+        class LocalClass implements LocalInterface {
+            fld: int
+        }
+
+        let v: LocalClass = { fld: 0 }
+        v.fld = 42
         return v.fld
     }
 }

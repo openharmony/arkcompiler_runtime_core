@@ -14,8 +14,7 @@
  */
 
 /*---
-desc: Local classes and interfaces are prohibited in ArkTS
-tags: [compile-only, negative]
+desc: Local interfaces in function.
 ---*/
 
 function foo(): int {

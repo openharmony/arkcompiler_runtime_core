@@ -14,21 +14,22 @@
  */
 
 /*---
-desc: Local classes and interfaces are prohibited in ArkTS
-tags: [compile-only, negative]
+desc: Local interfaces in function.
 ---*/
 
 function foo(): int {
 
-    class LocalClass {
+    interface LocalInterface {
         fld: int
-
-        constructor() {
-          this.fld = 42;
-        }
     }
 
-    return new LocalClass().fld
+    class LocalClass implements LocalInterface {
+        fld: int
+    }
+
+    let v: LocalClass = new LocalClass
+    v.fld = 42
+    return v.fld
 }
 
 function main() {

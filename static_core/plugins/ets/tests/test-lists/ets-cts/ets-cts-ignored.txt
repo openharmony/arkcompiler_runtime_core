@@ -3,8 +3,6 @@
 03.types/18.function_types/01.type_function/negative_rt_2.ets
 
 #20936 Access to common union method doesn't work
-03.types/19.union_types/02.access_to_common_union_members/cm_meth1_0.ets
-03.types/19.union_types/02.access_to_common_union_members/cm_meth2_3.ets
 03.types/19.union_types/02.access_to_common_union_members/cm_meth2_6.ets
 
 #24420
@@ -119,10 +117,6 @@
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_multiple_1.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_multiple_2.ets
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_methods/generic_method_with_body_constraint_multiple_3.ets
-
-#24363 missing CTE if unspecified non-default generic type in method (while having default type)
-05.generics/01.type_parameters/02.type_parameter_default/generic_methods/wrong_method_missing_nondefault_parameter.ets
-05.generics/01.type_parameters/02.type_parameter_default/generic_functions/wrong_function_missing_nondefault_parameter.ets
 
 #24441
 05.generics/01.type_parameters/03.type_parameter_variance/generic_classes/type_parameter_variance_out_1.ets
@@ -260,9 +254,6 @@
 #24036
 07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
 
-#24031 not implemented
-07.expressions/01.evaluation_of_expressions/heap_pollution.ets
-
 #25056
 07.expressions/01.evaluation_of_expressions/typ_2.ets
 
@@ -281,7 +272,6 @@
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_cast_27.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_26.ets
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_decl_27.ets
-07.expressions/04.array_literal/01.type_inference_from_context/tup_inf_decl_12.ets
 
 #24879 Cannot determine type of array expression in Union type
 07.expressions/04.array_literal/01.type_inference_from_context/arr3_inf_assn_29.ets
@@ -476,18 +466,12 @@
 #23238 Method returning 'this' returns wrong instance
 09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_8.ets
 
-#24507
-09.classes/06.method_declarations/09.methods_returning_this/met_ret_this_24.ets
-
 #25498
 09.classes/09.constructor_declaration/throws_clause_1.ets
 09.classes/09.constructor_declaration/throws_clause_2.ets
 
 #23764 Constructor body doesn't cause CTE
 09.classes/09.constructor_declaration/02.constructor_body/this_argument_neg.ets
-
-#23818 Compiler doesn't detect circular references
-09.classes/09.constructor_declaration/02.constructor_body/circular_reference.ets
 
 #24685
 10.interfaces/03.interface_body/issue24865.ets
@@ -528,21 +512,13 @@
 15.semantic_rules/07.overloading_and_overriding/01.overload-equivalent_signatures/ex_6_1.ets
 
 #14338 Function, method, constructor overload signatures
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_0.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_1.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_10.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_2.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_3.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_8.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_tuple_9.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_9.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_7.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_15.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_10.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_38.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_39.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_5.ets
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_27.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_1.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_10.ets
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_11.ets
@@ -606,7 +582,6 @@
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/two_class_method_over_n_10.ets
 
 #24129
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatibility_array_1.ets
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over2_3.ets
 
 #24017
