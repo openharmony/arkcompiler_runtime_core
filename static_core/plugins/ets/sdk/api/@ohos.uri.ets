@@ -90,22 +90,28 @@ export namespace uri {
       return createNewUri(uriStr);
     }
 
-    getQueryValue(key: string): string {
+    getQueryValue(key: string): string | null {
       let query = this.uriEntry.getQuery();
-      let queryStrs: string[] = query.split('&');
-      if (key == "" && queryStrs.length > 0 && queryStrs[0] == "") {
-        return "";
+      if (query === '') {
+        return null;
       }
-      for (let item of queryStrs) {
-        let str = item.split('=');
-        let isKeyEqualStr0 = this.decodeSafelyInner(str[0]) == key;
-        if (str.length == 1 && isKeyEqualStr0) {
-          return "";
-        } else if (isKeyEqualStr0) {
-          return this.decodeSafelyInner(item.substring(str[0].length + 1).replaceAll("+", ' '));
+      const queryStrs = query.split('&');
+      for (const item of queryStrs) {
+        const eqPos = item.indexOf('=');
+        let currentKey = item;
+        let currentValue = '';
+        if (eqPos !== -1) {
+          currentKey = item.substring(0, eqPos);
+          currentValue = item.substring(eqPos + 1);
+        }
+
+        const decodedKey = this.decodeSafelyInner(currentKey);
+        if (decodedKey === key) {
+          const decodedValue = this.decodeSafelyInner(currentValue.replaceAll('+', ' '));
+          return decodedValue || '';
         }
       }
-      return "";
+      return null;
     }
 
     private decodeSafelyOut(input: string): string {
@@ -189,7 +195,7 @@ export namespace uri {
 
     getBooleanQueryValue(key: string, defaultValue: boolean): boolean {
       let flag = this.getQueryValue(key);
-      if (flag == "") {
+      if (flag == null) {
         return defaultValue;
       }
       flag = flag.toLocaleLowerCase();
