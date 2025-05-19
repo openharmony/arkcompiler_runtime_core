@@ -682,6 +682,19 @@ ani_string IcuNumberingSystem(ani_env *env, [[maybe_unused]] ani_object self, an
     return nullptr;
 }
 
+ani_double IcuCurrencyDigits(ani_env *env, [[maybe_unused]] ani_object self, ani_string currency)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    const std::string currencyStr = ConvertFromAniString(env, currency);
+    icu::UnicodeString uCurrency = icu::UnicodeString::fromUTF8(currencyStr);
+    int32_t fractionDigits = ucurr_getDefaultFractionDigits(uCurrency.getBuffer(), &status);
+    if (U_SUCCESS(status) != 0) {
+        return static_cast<double>(fractionDigits);
+    }
+    // return default fraction as 2 if ucurr_getDefaultFractionDigits failed
+    return 2;
+}
+
 ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
 {
     ani_class numberFormatClass;
@@ -716,8 +729,8 @@ ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
         ani_native_function {"formatToRangePartsDecStrDecStr",
                              "Lstd/core/String;Lstd/core/String;:[Lstd/core/Intl/NumberRangeFormatPart;",
                              reinterpret_cast<void *>(IcuFormatToRangePartsDecStrDecStr)},
-        ani_native_function {"isUnitCorrect", "Lstd/core/String;:Z", reinterpret_cast<void *>(IsIcuUnitCorrect)}};
-
+        ani_native_function {"isUnitCorrect", "Lstd/core/String;:Z", reinterpret_cast<void *>(IsIcuUnitCorrect)},
+        ani_native_function {"currencyDigits", "Lstd/core/String;:D", reinterpret_cast<void *>(IcuCurrencyDigits)}};
     ani_status status = env->Class_BindNativeMethods(numberFormatClass, methods.data(), methods.size());
     if (!(status == ANI_OK || status == ANI_ALREADY_BINDED)) {
         return status;

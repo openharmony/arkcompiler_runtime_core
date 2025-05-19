@@ -87,10 +87,10 @@ export namespace Intl {
                             this.options.currencyDisplay = "symbol";
                         }
                         if (localOptions.minimumFractionDigits == undefined) {
-                            this.options.minimumFractionDigits = 2;
+                           this.options.minimumFractionDigits = this.currencyDigits(localOptions.currency);
                         }
                         if (localOptions.maximumFractionDigits == undefined) {
-                            this.options.maximumFractionDigits = 2;
+                            this.options.maximumFractionDigits = this.currencyDigits(localOptions.currency);
                         }
                     }
 
@@ -446,6 +446,7 @@ export namespace Intl {
         private native formatToRangePartsDoubleDecStr(start: number, end: string): NumberRangeFormatPart[];
         private native formatToRangePartsDecStrDouble(start: string, end: number): NumberRangeFormatPart[];
         private native formatToRangePartsDecStrDecStr(start: string, end: string): NumberRangeFormatPart[];
+        private native currencyDigits(currency: string | undefined): number;
     }
 
     export class NumberRangeFormatPart {

@@ -39,9 +39,29 @@ function testNaNToLocaleString(): void {
     assertEQ(nan.toLocaleString("fa-IR"), "ناعدد")
 }
 
+function testCurrencyToLocaleString(): void {
+    const num: Number = 123456.789;
+
+    const usdResult = num.toLocaleString("en-US", { style: "currency", currency: "USD" });
+    assertEQ(usdResult, "$123,456.79", "USD format");
+
+    const jpyResult = num.toLocaleString("ja-JP", { style: "currency", currency: "JPY" });
+    assertEQ(jpyResult, "￥123,457", "JPY format");
+
+    const cnyResult = num.toLocaleString("zh-CN", { style: "currency", currency: "CNY" });
+    assertEQ(cnyResult, "¥123,456.79", "CNY format");
+
+    const gbpResult = num.toLocaleString("en-GB", { style: "currency", currency: "GBP" });
+    assertEQ(gbpResult, "£123,456.79", "GBP format");
+
+    const inrResult = num.toLocaleString("en-IN", { style: "currency", currency: "INR" });
+    assertEQ(inrResult, "₹1,23,456.79", "INR format");
+}
+
 function main(): int {
     const suite = new ArkTestsuite("Number")
     suite.addTest("toLocaleString", testNumberToLocaleString)
     suite.addTest("NaN.toLocaleString", testNaNToLocaleString)
+    suite.addTest("num.toLocaleString", testCurrencyToLocaleString)
     return suite.run()
 }
