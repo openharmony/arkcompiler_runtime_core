@@ -713,6 +713,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                         ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value_)));
                     break;
                 case panda_file::LiteralTag::STRING:
+                case panda_file::LiteralTag::ETS_IMPLEMENTS:
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
                         std::string_view(std::get<std::string>(literal.value_))));
                     break;
