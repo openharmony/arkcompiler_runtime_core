@@ -1315,7 +1315,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
      */
     public override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
-        for (let i = 0; i < this.actualLength; i++) {
+        let curArrLength = this.actualLength
+        for (let i = 0; i < curArrLength && i < this.actualLength; i++) {
             if (!predicate(this.$_get_unsafe(i), i as number, this)) {
                 return false
             }
