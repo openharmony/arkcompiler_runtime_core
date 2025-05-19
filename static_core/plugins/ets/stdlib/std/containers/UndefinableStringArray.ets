@@ -127,7 +127,9 @@ export class UndefinableStringArray {
      * @returns popped value
      */
     public popBack(): UndefinableString {
-        assertLT(0, this.curSize, "No data to popBack in UndefinableStringArray!")
+        if (this.curSize === 0) {
+            throw new AssertionError("No data to popBack from UndefinableStringArray!")
+        }
         --this.curSize
         return this.data[this.curSize]
     }

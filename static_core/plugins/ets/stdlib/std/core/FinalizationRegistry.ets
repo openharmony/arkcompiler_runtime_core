@@ -71,7 +71,10 @@ export final class FinalizationRegistry<T> {
     }
 
     private init_arrays(size: int): void {
-        assertLT(1, size);
+        arktest.assertLT(1, size);
+        if (size <= 1) {
+            throw new AssertionError("Size is " + size + " it should be > 1")
+        }
         this.idxarr = new int[size];
         this.idxarr[0] = -1; // first elem reserved for useidx head
         this.enlarge_freeidx(1);

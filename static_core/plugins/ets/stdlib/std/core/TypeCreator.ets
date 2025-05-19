@@ -100,7 +100,9 @@ export abstract class TypeCreator {
         if (this.typ != undefined) {
             return this.typ!.getTypeDesc()
         }
-        assertNE(this.ctxItemPtr, 0, "this.ctxItemPtr is 0")
+        if (this.ctxItemPtr === 0) {
+            throw new AssertionError("this.ctxItemPtr is 0")
+        }
         return TypeCreatorCtx.getTypeDescFromPointer(this.ctxItemPtr)
     }
 }
@@ -232,7 +234,9 @@ final class TypeCreatorCtx {
      * Must be called.
      */
     internal deinit(): void {
-        assertNE(this.ctxPtr, 0, "cannot call deinit when ctxPtr is null")
+        if (this.ctxPtr === 0) {
+            throw new AssertionError("cannot call deinit when ctxPtr is null")
+        }
         TypeCreatorCtx.destroyCtx(this.ctxPtr)
         this.ctxPtr = 0
     }
@@ -445,7 +449,9 @@ export final class ClassTypeCreator extends TypeCreator {
     }
 
     internal override declare(ctx: TypeCreatorCtx): void {
-        assertEQ(this.ctxItemPtr, 0, "this.ctxItemPtr is not 0")
+        if (this.ctxItemPtr !== 0) {
+            throw new AssertionError("this.ctxItemPtr is not 0")
+        }
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.classCreate(ctx.ctxPtr, this.name, this.attrs.get()))
     }
 
@@ -606,7 +612,9 @@ export final class InterfaceTypeCreator extends TypeCreator {
     }
 
     internal override declare(ctx: TypeCreatorCtx): void {
-        assertEQ(this.ctxItemPtr, 0, "this.ctxItemPtr is not 0")
+        if (this.ctxItemPtr !== 0) {
+            throw new AssertionError("this.ctxItemPtr is not 0")
+        }
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.interfaceCreate(ctx.ctxPtr, this.name))
     }
 
@@ -717,7 +725,9 @@ export final class LambdaTypeCreator extends TypeCreator {
     }
 
     internal override declare(ctx: TypeCreatorCtx): void {
-        assertEQ(this.ctxItemPtr, 0, "this.ctxItemPtr is not 0")
+        if (this.ctxItemPtr !== 0) {
+            throw new AssertionError("this.ctxItemPtr is not 0")
+        }
         const ftPtr = TypeCreatorCtx.lambdaTypeCreate(ctx.ctxPtr, this.attrs.get())
         this.ctxItemPtr = ftPtr
         for (let i = 0; i < this.params.length; i++) {

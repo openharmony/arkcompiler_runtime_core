@@ -116,7 +116,9 @@ export class ArrayAsListInt implements ListInt {
      * @returns popped value
      */
     public override popFront(): Int {
-        assertLT(0, this.curSize, "No data to popFront from ArrayAsList!")
+        if (this.curSize === 0) {
+            throw new AssertionError("No data to popFront from ArrayAsList!")
+        }
         let res: Int = this.data[0];
         for (let i = 1; i < this.curSize; ++i) {
             this.data[i-1] = this.data[i];
@@ -148,7 +150,9 @@ export class ArrayAsListInt implements ListInt {
      * @returns popped value
      */
     public override popBack(): Int {
-        assertLT(0, this.curSize, "No data to popBack in ArrayAsList!")
+        if (this.curSize === 0) {
+            throw new AssertionError("No data to popBack from ArrayAsList!")
+        }
         --this.curSize;
         return this.data[this.curSize];
     }

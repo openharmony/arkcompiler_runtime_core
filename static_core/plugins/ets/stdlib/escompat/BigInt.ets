@@ -541,7 +541,6 @@ export final class BigInt {
     }
 
     private static getCnt(from: long, to:long): long {
-        assertLE(from, to)
         return (from + ((to - from)/(2 as long)))
     }
 
