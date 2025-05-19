@@ -197,6 +197,44 @@ TEST_F(StringGetUtf8StringTest, StringGetUtf8_Repeat)
         ASSERT_STREQ(utfBuffer, "example");
     }
 }
+
+TEST_F(StringGetUtf8StringTest, StringGetUtf8_ZeroSymbol)
+{
+    const size_t strSize = 11U;
+    const std::string example("abc\0def\0ghi", strSize);
+    ani_string aniString = nullptr;
+    auto status = env_->String_NewUTF8(example.c_str(), strSize, &aniString);
+    ASSERT_EQ(status, ANI_OK);
+
+    ani_size result = 0U;
+    status = env_->String_GetUTF16Size(aniString, &result);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(result, example.size());
+
+    ani_size result2 = 0U;
+    const ani_size bufferSize = 20U;
+    uint16_t utf16Buffer[bufferSize] = {0U};
+    status = env_->String_GetUTF16(aniString, utf16Buffer, bufferSize, &result2);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(result2, example.size());
+
+    ani_size resultUTF8 = 0U;
+    status = env_->String_GetUTF8Size(aniString, &resultUTF8);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(resultUTF8, example.size());
+
+    ani_size result2UTF8 = 0U;
+    char utf8Buffer[bufferSize] = {0U};
+    status = env_->String_GetUTF8(aniString, utf8Buffer, bufferSize, &result2UTF8);
+    ASSERT_EQ(status, ANI_OK);
+    ASSERT_EQ(result2UTF8, example.size());
+
+    for (size_t i = 0; i < strSize; ++i) {
+        ASSERT_EQ(example[i], utf16Buffer[i]);
+        ASSERT_EQ(example[i], utf8Buffer[i]);
+    }
+}
+
 }  // namespace ark::ets::ani::testing
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
