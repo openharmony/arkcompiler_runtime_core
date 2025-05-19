@@ -161,7 +161,7 @@ EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsV
         return nullptr;
     }
 
-    SharedReference *sharedRef = storage->CreateJSObjectRef(ctx, etsObject, jsValue);
+    SharedReference *sharedRef = storage->CreateJSObjectRefwithWrap(ctx, etsObject, jsValue);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return nullptr;
