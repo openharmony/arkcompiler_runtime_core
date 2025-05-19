@@ -162,7 +162,7 @@ export final class BigInt {
     }
 
     equals(other: NullishType): boolean {
-        if (runtime.isSameReference(this, other)) {
+        if (Runtime.isSameReference(this, other)) {
             return true
         }
 

@@ -18,7 +18,7 @@ undefined
 null
 
 User: John Age: 30
-ConsoleLogTest.A {name: John, age: 30}
+ConsoleWarnTest.A {name: John, age: 30}
 Hello, Alice!
 color: blue; Styled text
 Error: Test error

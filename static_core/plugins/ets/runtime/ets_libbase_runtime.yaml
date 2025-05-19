@@ -630,177 +630,14 @@ intrinsics:
   - name: StdConsolePrintString
     space: ets
     class_name: std.core.Console
-    method_name: print
+    method_name: printString
     static: false
     signature:
       ret: void
       args:
       - std.core.String
+      - i32
     impl: ark::ets::intrinsics::StdConsolePrintString
-
-  - name: StdConsolePrintStringError
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - std.core.String
-    impl: ark::ets::intrinsics::StdConsolePrintStringError
-
-  - name: StdConsolePrintU1
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - u1
-    impl: ark::ets::intrinsics::StdConsolePrintBool
-
-  - name: StdConsolePrintU1Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - u1
-    impl: ark::ets::intrinsics::StdConsolePrintBoolError
-
-  - name: StdConsolePrintI8
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i8
-    impl: ark::ets::intrinsics::StdConsolePrintI8
-
-  - name: StdConsolePrintI8Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i8
-    impl: ark::ets::intrinsics::StdConsolePrintI8Error
-
-  - name: StdConsolePrintI16
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i16
-    impl: ark::ets::intrinsics::StdConsolePrintI16
-
-  - name: StdConsolePrintI16Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i16
-    impl: ark::ets::intrinsics::StdConsolePrintI16Error
-
-  - name: StdConsolePrintU16
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - u16
-    impl: ark::ets::intrinsics::StdConsolePrintChar
-
-  - name: StdConsolePrintU16Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - u16
-    impl: ark::ets::intrinsics::StdConsolePrintCharError
-
-  - name: StdConsolePrintI32
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i32
-    impl: ark::ets::intrinsics::StdConsolePrintI32
-
-  - name: StdConsolePrintI32Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i32
-    impl: ark::ets::intrinsics::StdConsolePrintI32Error
-
-  - name: StdConsolePrintI64
-    space: ets
-    class_name: std.core.Console
-    method_name: print
-    static: false
-    signature:
-      ret: void
-      args:
-      - i64
-    impl: ark::ets::intrinsics::StdConsolePrintI64
-
-  - name: StdConsolePrintI64Error
-    space: ets
-    class_name: std.core.Console
-    method_name: printError
-    static: false
-    signature:
-      ret: void
-      args:
-      - i64
-    impl: ark::ets::intrinsics::StdConsolePrintI64Error
-
-  - name: StdConsolePrintln
-    space: ets
-    class_name: std.core.Console
-    method_name: println
-    static: false
-    signature:
-      ret: void
-      args: []
-    impl: ark::ets::intrinsics::StdConsolePrintln
-
-  - name: StdConsolePrintlnError
-    space: ets
-    class_name: std.core.Console
-    method_name: printlnError
-    static: false
-    signature:
-      ret: void
-      args: []
-    impl: ark::ets::intrinsics::StdConsolePrintlnError
-
 
 ####################
 
@@ -4571,7 +4408,7 @@ intrinsics:
     space: ets
     class_name: std.core.Runtime
     method_name: isSameReference
-    static: false
+    static: true
     signature:
       ret: u1
       args: [ std.core.Object, std.core.Object ]
@@ -4581,7 +4418,7 @@ intrinsics:
     space: ets
     class_name: std.core.Runtime
     method_name: getHashCode
-    static: false
+    static: true
     signature:
       ret: i32
       args: [ std.core.Object ]

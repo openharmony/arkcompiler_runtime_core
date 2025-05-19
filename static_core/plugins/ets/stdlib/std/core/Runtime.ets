@@ -16,7 +16,6 @@
 package std.core;
 
 export final class Runtime {
-    internal constructor() {}
 
     /**
      * Returns a hash code for the Object.
@@ -25,7 +24,7 @@ export final class Runtime {
      *
      * @returns hash code
      */
-    public native getHashCode(o: Object): int;
+    public static native getHashCode(o: Object): int;
 
      /**
       * Checks if two items are equal.
@@ -36,14 +35,14 @@ export final class Runtime {
       *
       * @returns true if items are equal
       */
-    public equals(o1: NullishType, o2: NullishType): boolean {
-        if (this.isSameReference(o1, null)) {
-            return this.isSameReference(o2, null)
+    public static equals(o1: NullishType, o2: NullishType): boolean {
+        if (Runtime.isSameReference(o1, null)) {
+            return Runtime.isSameReference(o2, null)
         }
-        if (this.isSameReference(o1, undefined)) {
-            return this.isSameReference(o2, undefined)
+        if (Runtime.isSameReference(o1, undefined)) {
+            return Runtime.isSameReference(o2, undefined)
         }
-        if (this.isSameReference(o2, null) || this.isSameReference(o2, undefined)) {
+        if (Runtime.isSameReference(o2, null) || Runtime.isSameReference(o2, undefined)) {
             return false;
         }
 
@@ -59,27 +58,27 @@ export final class Runtime {
      *
      * @returns true if items are equal 'by value'
      */
-    public sameValue(o1: NullishType, o2: NullishType): boolean {
-        if (this.isSameReference(o1, null)) {
-            return this.isSameReference(o2, null)
+    public static sameValue(o1: NullishType, o2: NullishType): boolean {
+        if (Runtime.isSameReference(o1, null)) {
+            return Runtime.isSameReference(o2, null)
         }
-        if (this.isSameReference(o1, undefined)) {
-            return this.isSameReference(o2, undefined)
+        if (Runtime.isSameReference(o1, undefined)) {
+            return Runtime.isSameReference(o2, undefined)
         }
-        if (this.isSameReference(o2, null) || this.isSameReference(o2, undefined)) {
+        if (Runtime.isSameReference(o2, null) || Runtime.isSameReference(o2, undefined)) {
             return false;
         }
 
         if (o1 instanceof Number && o2 instanceof Number) {
-            return this.sameNumberValue(o1 as Number, o2 as Number)
+            return Runtime.sameNumberValue(o1 as Number, o2 as Number)
         } else if (o1 instanceof Float && o2 instanceof Float) {
-            return this.sameFloatValue(o1 as Float, o2 as Float)
+            return Runtime.sameFloatValue(o1 as Float, o2 as Float)
         }
 
         return o1 == o2
     }
-    
-    private sameNumberValue(n1: Number, n2: Number): boolean {
+
+    private static sameNumberValue(n1: Number, n2: Number): boolean {
         const n1val = n1.valueOf()
         const n2val = n2.valueOf()
         if (n1val == 0 || n2val == 0) {
@@ -94,7 +93,7 @@ export final class Runtime {
         }
     }
 
-    private sameFloatValue(f1: Float, f2: Float): boolean {
+    private static sameFloatValue(f1: Float, f2: Float): boolean {
         const f1val = f1.unboxed()
         const f2val = f2.unboxed()
 
@@ -111,8 +110,8 @@ export final class Runtime {
         }
     }
 
-    public sameValueZero(o1: NullishType, o2: NullishType): boolean {
-        if (this.sameValue(o1, o2)) {
+    public static sameValueZero(o1: NullishType, o2: NullishType): boolean {
+        if (Runtime.sameValue(o1, o2)) {
             return true;
         }
         if (o1 instanceof Number && o2 instanceof Number) {
@@ -139,15 +138,15 @@ export final class Runtime {
      *
      * @returns true if Objects are equal
      */
-    public native isSameReference(o1: NullishType, o2: NullishType): boolean;
+    public static native isSameReference(o1: NullishType, o2: NullishType): boolean;
 
     /**
      * Internal entrypoint to create exception for failed type cast
-     * 
+     *
      * @param src source value
-     * 
+     *
      * @param dstStr target type string
-     * 
+     *
      * @returns exception object to throw
      */
     static failedTypeCastException(src: NullishType, dstStr: string): ClassCastError {
@@ -194,21 +193,19 @@ export final class Runtime {
         return newRest
     }
 }
-// initialized in _initializerBlock_.ets
-export const runtime:Runtime;
 
 export function __runtimeEquals(o1: NullishType, o2: NullishType): boolean {
-    return runtime.equals(o1, o2)
+    return Runtime.equals(o1, o2)
 }
 
 export function __runtimeSameValueZero(o1: NullishType, o2: NullishType): boolean {
-    return runtime.sameValueZero(o1, o2)
+    return Runtime.sameValueZero(o1, o2)
 }
 
 export function __runtimeSameValue(o1: NullishType, o2: NullishType): boolean {
-    return runtime.sameValue(o1, o2)
+    return Runtime.sameValue(o1, o2)
 }
 
 export function __runtimeIsSameReference(o1: NullishType, o2: NullishType): boolean {
-    return runtime.isSameReference(o1, o2)
+    return Runtime.isSameReference(o1, o2)
 }

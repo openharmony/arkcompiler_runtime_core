@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_IS_SAME_REFERENCE: {
+    Builder()->BuildStdRuntimeEquals(bcInst_, ACC_READ);
+    break;
+}
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_DOUBLE_IS_NAN:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_FLOAT_IS_NAN: {
     Builder()->BuildIsNanIntrinsic(bcInst_, ACC_READ);

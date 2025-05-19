@@ -133,7 +133,9 @@ class ShellBase(metaclass=Singleton):
                    finished_marker: str,
                    measure_time: bool = False,
                    timeout: Optional[float] = None,
-                   cwd: str = '') -> ShellResult:
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
         raise NotImplementedError
 
     def push(self,
@@ -193,7 +195,9 @@ class ShellUnix(ShellBase):
                    finished_marker: str,
                    measure_time: bool = False,
                    timeout: Optional[float] = None,
-                   cwd: str = '') -> ShellResult:
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
         raise NotImplementedError
 
     def run_async(self, cmd: str) -> None:
@@ -292,7 +296,9 @@ class ShellDevice(ShellBase):
                    finished_marker: str,
                    measure_time: bool = False,
                    timeout: Optional[float] = None,
-                   cwd: str = '') -> ShellResult:
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
         raise NotImplementedError
 
     def run_async(self, cmd: str) -> None:
@@ -392,34 +398,48 @@ class ShellHdc(ShellDevice):
             self._sh.run(f'{self._devsh} uninstall {name}', measure_time=False)
         return self._sh.run(f'{self._devsh} aa install {package}', measure_time=False)
 
+    def grab_log(self, tag: str, finished_marker: str) -> Optional[ShellResult]:
+        opts = f' -T {tag}' if tag else ''
+        res = self.run(f'hilog -x{opts}')
+        if res.grep(finished_marker):
+            # success. strip hilog data
+            res.replace_out(self.hilog_re)
+            return res
+        return None
+
     def run_syslog(self, cmd: str,
                    finished_marker: str,
                    measure_time: bool = False,
                    timeout: Optional[float] = None,
-                   cwd: str = '') -> ShellResult:
-        to = 30 if timeout is None else timeout
+                   cwd: str = '',
+                   ping_interval: int = 5,
+                   tag: str = 'VMB') -> ShellResult:
         self.run('rm -f /data/log/faultlog/faultlogger/*')
         self.run('hilog -r')  # clear log buffer
-        ret = self.run(cmd=cmd, measure_time=measure_time, timeout=timeout, cwd=cwd)
-        if ret.ret != 0:
+        res = self.run(cmd=cmd, measure_time=measure_time, cwd=cwd)
+        if res.ret != 0:
             log.error('Command failed. Skippping results.')
-            return ret
-        ping_timeout = 4
-        elapsed = 0
-        res_log = ShellResult()
-        while elapsed < to:
-            log.debug("Waiting  %d sec for [%s]", ping_timeout, finished_marker)
-            time.sleep(ping_timeout)
-            elapsed += ping_timeout
-            res_log = self.run('hilog -x -T VMB')
-            if res_log.grep(finished_marker):
-                # success. strip hilog data
-                res_log.replace_out(self.hilog_re)
-                return res_log
+            return res
+        res_log = None
+        if 0 == ping_interval:  # synchronous cmd
+            res_log = self.grab_log(tag, finished_marker)
+        else:  # async cmd
+            to = 30 if timeout is None else timeout
+            elapsed = 0
+            while elapsed < to:
+                log.debug("Waiting  %d sec for [%s]", ping_interval, finished_marker)
+                time.sleep(ping_interval)
+                elapsed += ping_interval
+                res_log = self.grab_log(tag, finished_marker)
+                if res_log:
+                    break
+        if res_log:
+            res.out = res_log.out
+            return res
         # error. save full log
+        res.ret = 1
         try:
-            res_log.out = self.run('cat /data/log/faultlog/faultlogger/* | head -40').out
+            res.out = self.run('cat /data/log/faultlog/faultlogger/* | head -40').out
         except Exception:  # pylint: disable=broad-exception-caught
             log.warning('Error getting fault logs!')
-        res_log.ret = 1
-        return res_log
+        return res

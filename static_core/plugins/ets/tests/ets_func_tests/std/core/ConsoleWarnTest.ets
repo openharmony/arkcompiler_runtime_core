@@ -25,41 +25,41 @@ class A {
 
 function main() {
     // Basic values
-    console.log("Simple string message");
-    console.log(42);
-    console.log(true);
-    console.log(undefined);
-    console.log(null);
-    console.log()
+    console.warn("Simple string message");
+    console.warn(42);
+    console.warn(true);
+    console.warn(undefined);
+    console.warn(null);
+    console.warn()
 
     // Multiple arguments
-    console.log("User:", "John", "Age:", 30);
+    console.warn("User:", "John", "Age:", 30);
 
-    // Object
-    console.log(new A("John", 30));
+    // Objects
+    console.warn(new A("John", 30));
 
     // Template strings
     const name = "Alice";
-    console.log(`Hello, ${name}!`);
+    console.warn(`Hello, ${name}!`);
 
     // Styled console output
-    console.log(
+    console.warn(
         "%c Styled text",
         "color: blue;"
     );
 
     // Error objects
-    console.log(new Error("Test error"));
+    console.warn(new Error("Test error"));
 
-    console.log(null, undefined, 11, "123", new Object())
+    console.warn(null, undefined, 11, "123", new Object())
     let arr = new Array<string | null | undefined>(3)
-    console.log(arr)
+    console.warn(arr)
 
     // Formatted strings
-    console.log("%d")
-    console.log("%d", 1)
-    console.log("%d", 1, 2)
+    console.warn("%d")
+    console.warn("%d", 1)
+    console.warn("%d", 1, 2)
 
-    console.log("%s %s", "37", 37)
-    console.log("%s %s", "19.5", 19.5)
+    console.warn("%s %s", "37", 37)
+    console.warn("%s %s", "19.5", 19.5)
 }

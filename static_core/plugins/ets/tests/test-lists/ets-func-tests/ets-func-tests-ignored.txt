@@ -338,6 +338,13 @@ std/core/IntlNumberFormatFaultLocaleTest.ets
 #25239
 std/core/IntlNumberFormatSupportedLocalesOfTest3.ets
 
+#25264
+std/core/ConsoleArrayTest.ets
+
+#25014
+std/core/ConsoleErrorTest.ets
+std/core/ConsoleAssertTest.ets
+
 #11468
 std/core/std_core_array_forEach_boolean_array_func_boolean.ets
 std/core/std_core_array_forEach_byte_array_func_byte.ets

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include <iostream>
 #include <limits>
 #include <ostream>
@@ -3462,25 +3463,39 @@ private:
     ani_error error_ {nullptr};
 };
 
-// NOLINTBEGIN(clang-analyzer-deadcode.DeadStores)
-static ani_status GetErrorDescription(ani_env *env, ani_error error, ani_array_ref *errorDescription)
+static ani_status FindClassByName(ani_env *env, const char *name, ani_class *cls)
 {
-    // Create `console.error` arguments array
-    ani_class objectClass = nullptr;
     // NOTE(dslynko, #23447): use cache of well-known classes
-    auto status = env->FindClass("Lstd/core/Object;", &objectClass);
+    auto status = env->FindClass(name, cls);
+    ASSERT(status == ANI_OK);
+    return status;
+}
+
+static ani_status FindMethodByName(ani_env *env, ani_class cls, const char *name, const char *sig, ani_method *res)
+{
+    auto status = env->Class_FindMethod(cls, name, sig, res);
+    ASSERT(status == ANI_OK);
+    return status;
+}
+
+static ani_status CallParameterlessCtor(ani_env *env, ani_class cls, ani_object *obj)
+{
+    ani_method ctor {};
+    // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
+    auto status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor);
     ASSERT(status == ANI_OK);
 
-    ani_ref undefinedRef = nullptr;
-    status = env->GetUndefined(&undefinedRef);
-    ASSERT(status == ANI_OK);
-
-    ani_array_ref descriptionLinesArray = nullptr;
-    status = env->Array_New_Ref(objectClass, static_cast<ani_size>(3U), undefinedRef, &descriptionLinesArray);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    status = env->Object_New(cls, ctor, obj);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+    return status;
+}
 
+// NOLINTBEGIN(clang-analyzer-deadcode.DeadStores)
+static ani_status GetErrorDescriptionLines(ani_env *env, ani_error error, ani_string *errDesc)
+{
     ani_type errorType = nullptr;
-    status = env->Object_GetType(error, &errorType);
+    auto status = env->Object_GetType(error, &errorType);
     ASSERT(status == ANI_OK);
 
     // Get error message
@@ -3488,16 +3503,13 @@ static ani_status GetErrorDescription(ani_env *env, ani_error error, ani_array_r
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     status = env->Object_CallMethodByName_Ref(error, "toString", ":Lstd/core/String;", &errorMessage);
     ASSERT(status == ANI_OK);
-    status = env->Array_Set_Ref(descriptionLinesArray, static_cast<ani_size>(0U), errorMessage);
-    ASSERT(status == ANI_OK);
 
-    // Set newline between error message and stack trace
+    // Add newline between error message and stack trace
     ani_string newlineString = nullptr;
     std::string_view newline = "\n";
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     status = env->String_NewUTF8(newline.data(), newline.size(), &newlineString);
-    ASSERT(status == ANI_OK);
-    status = env->Array_Set_Ref(descriptionLinesArray, static_cast<ani_size>(1U), newlineString);
-    ASSERT(status == ANI_OK);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
     // Get stack trace
     ani_method getterMethod = nullptr;
@@ -3518,11 +3530,34 @@ static ani_status GetErrorDescription(ani_env *env, ani_error error, ani_array_r
         ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
         stackTrace = createdString;
     }
-    status = env->Array_Set_Ref(descriptionLinesArray, static_cast<ani_size>(2U), stackTrace);
+
+    ani_class sbCls = nullptr;
+    FindClassByName(env, "Lstd/core/StringBuilder;", &sbCls);
+
+    // assemble error message, newline and trace into a single string
+    ani_method sbAppend = nullptr;
+    status =
+        FindMethodByName(env, sbCls, "append",
+                         "Lstd/core/String;Lstd/core/String;Lstd/core/String;:Lstd/core/StringBuilder;", &sbAppend);
     ASSERT(status == ANI_OK);
 
-    *errorDescription = descriptionLinesArray;
-    return ANI_OK;
+    ani_object sbObj = nullptr;
+    status = CallParameterlessCtor(env, sbCls, &sbObj);
+    ASSERT(status == ANI_OK);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    status = env->Object_CallMethod_Ref(sbObj, sbAppend, reinterpret_cast<ani_ref *>(&sbObj), errorMessage,
+                                        newlineString, stackTrace);
+    ASSERT(status == ANI_OK);
+
+    ani_method sbToString = nullptr;
+    status = FindMethodByName(env, sbCls, "toString", ":Lstd/core/String;", &sbToString);
+    ASSERT(status == ANI_OK);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    status = env->Object_CallMethod_Ref(sbObj, sbToString, reinterpret_cast<ani_ref *>(errDesc));
+    ASSERT(status == ANI_OK);
+    return status;
 }
 
 NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
@@ -3538,43 +3573,35 @@ NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
     }
     ClearExceptionScope s(env);
 
-    ani_array_ref errorDescription = nullptr;
-    status = GetErrorDescription(env, s.GetError(), &errorDescription);
+    ani_string errorDescription = nullptr;
+    status = GetErrorDescriptionLines(env, s.GetError(), &errorDescription);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
-    // Convert FixedArray to escompat.Array according to signature expected by Console.error
-    ani_class escompatArrayClass {};
-    status = env->FindClass("Lescompat/Array;", &escompatArrayClass);
-    ASSERT(status == ANI_OK);
-    ani_method escompatArrayCtor {};
-    status = env->Class_FindMethod(escompatArrayClass, "<ctor>", ":V", &escompatArrayCtor);
-    ASSERT(status == ANI_OK);
-
-    ani_object descriptionLinesArray {};
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_New(escompatArrayClass, escompatArrayCtor, &descriptionLinesArray);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
-    ani_double ignored = 0;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_CallMethodByName_Double(descriptionLinesArray, "push", "Lescompat/Array;:D", &ignored,
-                                                 errorDescription);
-    ASSERT(status == ANI_OK);
 
     // Get `std.core.console` global variable  [Lstd/core/Object
     ani_module stdCoreModule = nullptr;
     status = env->FindModule("Lstd/core;", &stdCoreModule);
     ASSERT(status == ANI_OK);
+
     ani_variable consoleVar = nullptr;
     status = env->Module_FindVariable(stdCoreModule, "console", &consoleVar);
     ASSERT(status == ANI_OK);
+
     ani_ref console = nullptr;
     status = env->Variable_GetValue_Ref(consoleVar, &console);
     ASSERT(status == ANI_OK);
 
+    ani_type strTyp = nullptr;
+    status = env->Object_GetType(errorDescription, &strTyp);
+    ASSERT(status == ANI_OK);
+
+    ani_array_ref arr = nullptr;
+    status = env->Array_New_Ref(strTyp, 1, errorDescription, &arr);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
+
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    return env->Object_CallMethodByName_Void(static_cast<ani_object>(console), "error", "Lescompat/Array;:V",
-                                             descriptionLinesArray);
+    status = env->Object_CallMethodByName_Void(static_cast<ani_object>(console), "error", "Lescompat/Array;:V", arr);
+    ASSERT(status == ANI_OK);
+    return status;
 }
 // NOLINTEND(clang-analyzer-deadcode.DeadStores)
 

@@ -101,7 +101,15 @@ class Tool(ToolBase):
                         f'--profile-output={abc}.profdata ')
         arkts_cmd = self.cmd.format(
             name=bu.name, abc=abc, options=options, gclog=gclog, an=an)
-        res = self.x_run(arkts_cmd)
+        if Target.OHOS == self.target:  # console writes to hilog on OHOS
+            res = self.hdc.run_syslog(
+                cmd=arkts_cmd,
+                finished_marker=f'Benchmark result: {bu.name}',
+                measure_time=True,
+                ping_interval=0,  # grep log immidiately after cmd
+                tag='ArkTSApp')   # grep only bench-related records
+        else:
+            res = self.x_run(arkts_cmd)
         bu.parse_run_output(res)
         if OptFlags.JIT_STATS in bu_flags:
             csv = Path(f'{abc}.dump.csv')

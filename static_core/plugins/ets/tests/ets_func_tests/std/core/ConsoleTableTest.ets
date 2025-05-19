@@ -127,13 +127,17 @@ class DataDisplay {
 function main() {
     // Display simple array of objects
     DataDisplay.displayUsers();
-    
+
     // Display array of arrays
     DataDisplay.displayMatrix();
-    
+
     // Display array with specific columns
     DataDisplay.displayProducts();
-    
+
     // Display mixed data types
     DataDisplay.displayMixedData();
+
+    console.table(42)
+    console.table("str")
+    console.table("count %d")
 }

@@ -95,7 +95,7 @@ function getIteratorFromIterable(a: NullishType, aTypeUncasted: Type): Iterator<
 }
 
 function __value_is_same(a: NullishType, b: NullishType): boolean {
-  if (runtime.sameValue(a, b)) {
+  if (Runtime.sameValue(a, b)) {
     return true;
   }
   if (a instanceof Number && b instanceof Number) {

@@ -440,37 +440,12 @@ export namespace util {
     * @returns Returns: <string> The formatted string
     */
     export function format(s: string, ...args: Object[]): string {
-        let preI: int = 0
-        let i: int = 0
-        let argCounter = 0
-        const flags: string = "cdfijoOs"
-        let res = new StringBuilder
-        let ss = ""
-        if (args.length == 0) {
-            return s.replaceAll("%%", "%")
+        // arrays are invariant, need to copy Objects to NullishTypes
+        let a = new Array<NullishType>(args.length)
+        for (let i = 0; i < args.length; ++i) {
+            a[i] = args[i]
         }
-
-        while ((i = (ss = s.substring(preI, s.length)).search("%") as int) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
-            res.append(s.substring(preI, preI + i))
-            let flagIndex = preI + i + 1
-            //NOTE(ivan-tyulyandin): has to be string due to internal issue 21459
-            let flag: string = s[flagIndex]
-            if (flags.includes(flag)) {
-                res.append(UtilHelper.processArg(flag, args[argCounter]))
-                ++argCounter
-            } else if (flag == "%") {
-                res.append("%")
-            } else {
-                res.append("%" + flag)
-            }
-            preI += i + 2
-        }
-        if (preI < s.length) {
-            res.append(s.substring(preI, s.length))
-        }
-        let strArgsList = UtilHelper.joinLastArgs(argCounter, ...args)
-        let resStr = res.toString()
-        return resStr.length == 0 ? res + strArgsList.slice(1) : res + strArgsList
+        return (new Formatter).format(s, a)
     }
 
     export function generateRandomUUID(entropyCache?: boolean): string {
@@ -651,7 +626,7 @@ export namespace util {
             }
         }
     }
-    
+
     export interface TextDecoderOptions {
         fatal?: boolean;
         ignoreBOM?: boolean;
@@ -848,7 +823,7 @@ export namespace util {
 
         /**
          * Gets the value of the current RationalNumber object as an integer or float number.
-         * 
+         *
          * @returns { number } returns the value of an integer or float number.
          */
         public valueOf(): number {
@@ -897,7 +872,7 @@ export namespace util {
 
         /**
          * Gets the denominator of the current RationalNumber object.
-         * 
+         *
          * @returns { number } returns the denominator.
          */
         public getDenominator(): number {
@@ -906,7 +881,7 @@ export namespace util {
 
         /**
          * Gets the numerator of the current RationalNumber object.
-         * 
+         *
          * @returns { number } returns the numerator.
          */
         public getNumerator(): number {
@@ -915,7 +890,7 @@ export namespace util {
 
         /**
          * Check if the current RationalNumber object represents a finite value.
-         * 
+         *
          * @returns { boolean } if the denominator is not 0 return true otherwise return false.
          */
         public isFinite(): boolean {
@@ -924,7 +899,7 @@ export namespace util {
 
         /**
          * Check if the current RationalNumber object represents a finite value.
-         * 
+         *
          * @returns { boolean } if both the denominator and the numerator are 0 return true otherwise return false.
          */
         public isNaN(): boolean {
@@ -933,7 +908,7 @@ export namespace util {
 
         /**
          * Check whether the current RationalNumber object is 0.
-         * 
+         *
          * @returns { boolean } if the value represented by the current object is 0 return true Otherwise return false.
          */
         public isZero(): boolean {
@@ -942,7 +917,7 @@ export namespace util {
 
         /**
          * Gets the string representation of the current RationalNumber object.
-         * 
+         *
          * @returns { string } returns a string in Numerator/Denominator format if the denominator is 0 return Infinity.
          * If both the numerator and denominator are 0 return NaN.
          */
@@ -1384,41 +1359,41 @@ export namespace util {
 
         /**
          * Check whether the entered value is of bigint64array array type.
-         * @param { Object } value - A BigInt64Array value 
+         * @param { Object } value - A BigInt64Array value
          * @returns { boolean } Returns true if the value is a BigInt64Array instance.
          */
         isBigInt64Array(value: Object): boolean {
             return value instanceof BigInt64Array;
         }
-        
+
         /**
          * Check whether the entered value is of biguint64array array array type.
-         * @param { Object } value - A BigUint64Array value 
+         * @param { Object } value - A BigUint64Array value
          * @returns { boolean } Returns true if the value is a BigUint64Array instance.
          */
         isBigUint64Array(value: Object): boolean {
             return value instanceof BigUint64Array;
         }
-        
+
         /**
          * Check whether the entered value is of arraybuffer type.
-         * @param { Object } value - A ArrayBuffer value 
+         * @param { Object } value - A ArrayBuffer value
          * @returns { boolean } Returns true if the value is a built-in ArrayBuffer instance.
          */
         isAnyArrayBuffer(value: Object): boolean {
             return this.isArrayBuffer(value);
         }
-        
+
         /**
          * Check whether the type is included in the isAnyArrayBuffer.
-         * @param { Object } value - A included in the isAnyArrayBuffer value 
+         * @param { Object } value - A included in the isAnyArrayBuffer value
          * @returns { boolean } Returns true if the value is an instance of one of the ArrayBuffer views,
          * such as typed array objects or DataView.
          */
         isArrayBufferView(value: Object): boolean {
             return this.isDataView(value) || this.isTypedArray(value);
         }
-        
+
         /**
          * Check whether the entered value is of arraybuffer type.
          * @param { Object } value - A arraybuffer value
@@ -1427,7 +1402,7 @@ export namespace util {
         isArrayBuffer(value: Object): boolean {
             return value instanceof ArrayBuffer;
         }
-        
+
         /**
          * Check whether the entered value is of DataView type.
          * @param { Object } value - A DataView value
@@ -1436,7 +1411,7 @@ export namespace util {
         isDataView(value: Object): boolean {
             return value instanceof DataView;
         }
-        
+
         /**
          * Check whether the entered value is of type date.
          * @param { Object } value - A Date value
@@ -1445,7 +1420,7 @@ export namespace util {
         isDate(value: Object): boolean {
             return value instanceof Date;
         }
-        
+
         /**
          * Check whether the entered value is of float32array array type.
          * @param { Object } value - A Float32Array value
@@ -1454,7 +1429,7 @@ export namespace util {
         isFloat32Array(value: Object): boolean {
             return value instanceof Float32Array;
         }
-        
+
         /**
          * Check whether the entered value is of float64array array type.
          * @param { Object } value - A Float64Array value
@@ -1463,7 +1438,7 @@ export namespace util {
         isFloat64Array(value: Object): boolean {
             return value instanceof Float64Array;
         }
-        
+
         /**
          * Check whether the entered value is of int8array array type.
          * @param { Object } value - A Int8Array value
@@ -1472,7 +1447,7 @@ export namespace util {
         isInt8Array(value: Object): boolean {
             return value instanceof Int8Array;
         }
-        
+
         /**
          * Check whether the entered value is the int16array type.
          * @param { Object } value - A Int16Array value
@@ -1481,7 +1456,7 @@ export namespace util {
         isInt16Array(value: Object): boolean {
             return value instanceof Int16Array;
         }
-        
+
         /**
          * Check whether the entered value is the int32array array type.
          * @param { Object } value - A Int32Array value
@@ -1490,7 +1465,7 @@ export namespace util {
         isInt32Array(value: Object): boolean {
             return value instanceof Int32Array;
         }
-        
+
         /**
          * Check whether the entered value is of map type.
          * @param { Object } value - A Map value
@@ -1508,7 +1483,7 @@ export namespace util {
         isMapIterator(value: Object): boolean {
             return value instanceof IterableIterator;
         }
-        
+
         /**
          * Check whether the value entered is of type error.
          * @param { Object } value - A Error value
@@ -1517,7 +1492,7 @@ export namespace util {
         isNativeError(value: Object): boolean {
             return value instanceof Error;
         }
-        
+
         /**
          * Check whether the entered value is of promise type.
          * @param { Object } value - A Promise value
@@ -1526,7 +1501,7 @@ export namespace util {
         isPromise(value: Object): boolean {
             return value instanceof Promise;
         }
-        
+
         /**
          * Check whether the entered value is of type regexp.
          * @param { Object } value - A regular expression object value
@@ -1535,7 +1510,7 @@ export namespace util {
         isRegExp(value: Object): boolean {
             return value instanceof RegExp;
         }
-        
+
         /**
          * Check whether the entered value is of type set.
          * @param { Object } value - A Set instance value
@@ -1553,7 +1528,7 @@ export namespace util {
         isSetIterator(value: Object): boolean {
             return value instanceof IterableIterator;
         }
-        
+
         /**
          * Check whether the entered value is a type contained in typedarray.
          * @param { Object } value - A TypedArray instance value
@@ -1572,7 +1547,7 @@ export namespace util {
                 this.isBigInt64Array(value) ||
                 this.isBigUint64Array(value);
         }
-  
+
         /**
          * Check whether the entered value is the uint8array array type.
          * @param { Object } value - A Uint8Array value
@@ -1581,7 +1556,7 @@ export namespace util {
         isUint8Array(value: Object): boolean {
             return value instanceof Uint8Array;
         }
-        
+
         /**
          * Check whether the entered value is the uint8clapedarray array type.
          * @param { Object } value - A Uint8ClampedArray value
@@ -1590,7 +1565,7 @@ export namespace util {
         isUint8ClampedArray(value: Object): boolean {
             return value instanceof Uint8ClampedArray;
         }
-        
+
         /**
          * Check whether the entered value is the uint16array array array type.
          * @param { Object } value - A Uint16Array value
@@ -1599,7 +1574,7 @@ export namespace util {
         isUint16Array(value: Object): boolean {
             return value instanceof Uint16Array;
         }
-        
+
         /**
          * Check whether the entered value is the uint32array array type.
          * @param { Object } value - A Uint32Array value
@@ -1608,7 +1583,7 @@ export namespace util {
         isUint32Array(value: Object): boolean {
             return value instanceof Uint32Array;
         }
-        
+
         /**
          * Check whether the entered value is of type weakmap.
          * @param { Object } value - A WeakMap value
@@ -1617,7 +1592,7 @@ export namespace util {
         isWeakMap(value: Object): boolean {
             return value instanceof WeakMap;
         }
-        
+
         /**
          * Check whether the entered value is of type weakset.
          * @param { Object } value - A WeakSet value

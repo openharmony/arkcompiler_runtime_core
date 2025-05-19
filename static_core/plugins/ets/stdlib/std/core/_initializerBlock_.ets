@@ -18,6 +18,5 @@ package std.core;
 static {
     ObjectType = Type.of(new Object()) as ClassType;
     console = new Console();
-    runtime = new Runtime();
     coroutine = new Coroutine();
 }

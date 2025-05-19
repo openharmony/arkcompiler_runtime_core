@@ -47,7 +47,7 @@ let SYS_GC_PAUSE: int = $gc;
 function log(msg: String): void {
     // timestamp is needed by GC parser
     let now: long = Date.now() as long;
-    console.log(now + " " + msg);
+    console.info(now + " " + msg);
 }
 
 function doGC(): void throws {
