@@ -17,7 +17,7 @@ cases:
   - imp: |-
       import * as dm from "./declaration_module.ets"
     use: |-
-      let myMatrix: dm.Matrix ;
+      let myMatrix: dm.Matrix = [[0.0]];
       assertTrue(typeof myMatrix == 'object' ) ;
 
   #1. Type parameter with arrow function
