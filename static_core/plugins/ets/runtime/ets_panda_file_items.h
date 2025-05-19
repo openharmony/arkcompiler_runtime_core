@@ -209,6 +209,9 @@ static constexpr std::string_view ANI_UNSAFE_DIRECT                    = "Lstd/a
 // Module annotation class
 static constexpr std::string_view ANNOTATION_MODULE                    = "Lets/annotation/Module;";
 
+// Interface object literal annotation class
+static constexpr std::string_view INTERFACE_OBJ_LITERAL                = "Lstd/annotations/InterfaceObjectLiteral;";
+
 // escompat
 static constexpr std::string_view DATE                                 = "Lescompat/Date;";
 static constexpr std::string_view ARRAY_ENTRIES_ITERATOR_T             = "Lescompat/ArrayEntriesIterator_T;";
