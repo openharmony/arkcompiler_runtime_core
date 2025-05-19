@@ -41,6 +41,7 @@ static constexpr const uint8_t SETTER_GETTER_PREFIX_LENGTH = 5;
 static constexpr const uint8_t PROPERTY_PREFIX_LENGTH = 10;
 
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
+static constexpr const char *STD_CORE_FUNCTION_UNSAFECALL_METHOD = "unsafeCall";
 static constexpr const char *STD_CORE_FUNCTION_INVOKE_PREFIX = "invoke";
 static constexpr const size_t STD_CORE_FUNCTION_MAX_ARITY = 15;
 

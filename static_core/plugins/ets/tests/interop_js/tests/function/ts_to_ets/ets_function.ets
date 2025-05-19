@@ -13,8 +13,22 @@
  * limitations under the License.
  */
 
-package ets_function;
-
-function callback_js_function_ets(fn: (x: number) => number): number {
+function callbackJsFunctionEts(fn: (x: number) => number): number {
     return fn(0x55aa);
+}
+
+function callbackFunctionEts(fn: Function) {
+    return fn.unsafeCall(0x55aa);
+}
+
+function callbackFunctionEtsTwoParam(fn: Function) {
+    return fn.unsafeCall(0x55aa, 1);
+}
+
+function callbackFunctionEtsTestSum(sumFunc: Function): boolean {
+    assertTrue(sumFunc.unsafeCall() === 0);
+    assertTrue(sumFunc.unsafeCall(1) === 1);
+    assertTrue(sumFunc.unsafeCall(1, 2) === 3);
+    assertTrue(sumFunc.unsafeCall(1, 2, 3) === 6);
+    return true;
 }

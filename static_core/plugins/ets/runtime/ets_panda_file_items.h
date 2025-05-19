@@ -93,6 +93,25 @@ static constexpr std::string_view FUNCTION15                           = "Lstd/c
 static constexpr std::string_view FUNCTION16                           = "Lstd/core/Function16;";
 static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
 
+// varargs Functional interfaces
+static constexpr std::string_view FUNCTIONR0                            = "Lstd/core/FunctionR0;";
+static constexpr std::string_view FUNCTIONR1                            = "Lstd/core/FunctionR1;";
+static constexpr std::string_view FUNCTIONR2                            = "Lstd/core/FunctionR2;";
+static constexpr std::string_view FUNCTIONR3                            = "Lstd/core/FunctionR3;";
+static constexpr std::string_view FUNCTIONR4                            = "Lstd/core/FunctionR4;";
+static constexpr std::string_view FUNCTIONR5                            = "Lstd/core/FunctionR5;";
+static constexpr std::string_view FUNCTIONR6                            = "Lstd/core/FunctionR6;";
+static constexpr std::string_view FUNCTIONR7                            = "Lstd/core/FunctionR7;";
+static constexpr std::string_view FUNCTIONR8                            = "Lstd/core/FunctionR8;";
+static constexpr std::string_view FUNCTIONR9                            = "Lstd/core/FunctionR9;";
+static constexpr std::string_view FUNCTIONR10                           = "Lstd/core/FunctionR10;";
+static constexpr std::string_view FUNCTIONR11                           = "Lstd/core/FunctionR11;";
+static constexpr std::string_view FUNCTIONR12                           = "Lstd/core/FunctionR12;";
+static constexpr std::string_view FUNCTIONR13                           = "Lstd/core/FunctionR13;";
+static constexpr std::string_view FUNCTIONR14                           = "Lstd/core/FunctionR14;";
+static constexpr std::string_view FUNCTIONR15                           = "Lstd/core/FunctionR15;";
+static constexpr std::string_view FUNCTIONR16                           = "Lstd/core/FunctionR16;";
+
 // Tuple classes
 static constexpr std::string_view TUPLE                                = "Lstd/core/Tuple;";
 static constexpr std::string_view TUPLE0                               = "Lstd/core/Tuple0;";

@@ -63,11 +63,15 @@ namespace descriptors = panda_file_items::class_descriptors;
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 static constexpr std::string_view const FUNCTION_INTERFACE_DESCRIPTORS[] = {
-    descriptors::FUNCTION0,  descriptors::FUNCTION1,  descriptors::FUNCTION2,  descriptors::FUNCTION3,
-    descriptors::FUNCTION4,  descriptors::FUNCTION5,  descriptors::FUNCTION6,  descriptors::FUNCTION7,
-    descriptors::FUNCTION8,  descriptors::FUNCTION9,  descriptors::FUNCTION10, descriptors::FUNCTION11,
-    descriptors::FUNCTION12, descriptors::FUNCTION13, descriptors::FUNCTION14, descriptors::FUNCTION15,
-    descriptors::FUNCTION16, descriptors::FUNCTIONN,  descriptors::FUNCTION,
+    descriptors::FUNCTION0,   descriptors::FUNCTION1,   descriptors::FUNCTION2,   descriptors::FUNCTION3,
+    descriptors::FUNCTION4,   descriptors::FUNCTION5,   descriptors::FUNCTION6,   descriptors::FUNCTION7,
+    descriptors::FUNCTION8,   descriptors::FUNCTION9,   descriptors::FUNCTION10,  descriptors::FUNCTION11,
+    descriptors::FUNCTION12,  descriptors::FUNCTION13,  descriptors::FUNCTION14,  descriptors::FUNCTION15,
+    descriptors::FUNCTION16,  descriptors::FUNCTIONN,   descriptors::FUNCTIONR0,  descriptors::FUNCTIONR1,
+    descriptors::FUNCTIONR2,  descriptors::FUNCTIONR3,  descriptors::FUNCTIONR4,  descriptors::FUNCTIONR5,
+    descriptors::FUNCTIONR6,  descriptors::FUNCTIONR7,  descriptors::FUNCTIONR8,  descriptors::FUNCTIONR9,
+    descriptors::FUNCTIONR10, descriptors::FUNCTIONR11, descriptors::FUNCTIONR12, descriptors::FUNCTIONR13,
+    descriptors::FUNCTIONR14, descriptors::FUNCTIONR15, descriptors::FUNCTIONR16,
 };
 
 static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descriptor)

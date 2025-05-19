@@ -25,6 +25,9 @@ namespace ark::ets::interop::js {
 
 static bool IsFunctionClass(InteropCtx *ctx, Class *klass)
 {
+    if (panda_file_items::class_descriptors::FUNCTION.compare(utf::Mutf8AsCString(klass->GetDescriptor())) == 0) {
+        return true;
+    }
     if (ctx->IsFunctionalInterface(klass)) {
         return true;
     }
