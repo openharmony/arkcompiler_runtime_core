@@ -416,14 +416,6 @@
 #18445 No CTE when compared union types have no overlapping values
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/cte_3.ets
 
-#18386 Reference equality based on actual char type fails
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_8.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_9.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq1_1.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq2_2.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_1.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq_2.ets
-07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_2.ets
 #23051 Reference comparison
 07.expressions/25.equality_expressions/07.reference_equality/type_conversion_of_one_operand_to_another_type.ets
 
