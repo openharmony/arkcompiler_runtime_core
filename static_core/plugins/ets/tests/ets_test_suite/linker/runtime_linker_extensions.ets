@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-import { Job } from "std/core"
-
 class A { }
 
 class DummyRuntimeLinker extends RuntimeLinker {
@@ -76,7 +73,7 @@ class Test {
         Test.testEmptyLinker(linker);
     }
 
-    private static native loadFile(path: string): byte[] | undefined;
+    private static native loadFile(path: string): FixedArray<byte> | undefined;
 
     private static getAdditionalFilesList(): string[] {
         let procManager = new StdProcess.ProcessManager();
@@ -85,8 +82,8 @@ class Test {
         return abcFiles.split(":");
     }
 
-    private static loadRawFiles(paths: string[]): byte[][] {
-        const rawFiles = new byte[paths.length as int][0];
+    private static loadRawFiles(paths: string[]): Array<FixedArray<byte>> {
+        const rawFiles = new Array<FixedArray<byte>>(paths.length as int);
         for (let i = 0; i < rawFiles.length; i++) {
             const raw = Test.loadFile(paths[i]);
             arktest.assertNE(raw, undefined, "failed to load file " + paths[i]);
@@ -243,14 +240,14 @@ class Test {
         Test.testAddAbcFiles(linker, [allAbcFiles[0]]);
     }
 
-    private static addSingleAbcFile(linker: AbcRuntimeLinker, path: string): void {
+    public static addSingleAbcFile(linker: AbcRuntimeLinker, path: string): void {
         linker.addAbcFiles([path]);
     }
 
     static testConcurrentAddAbcFiles() {
         const linker = new AbcRuntimeLinker(undefined, []);
         const allAbcFiles = Test.getAdditionalFilesList();
-        const promises = new Array<Promise<void>>();
+        const promises = new Array<Job<void>>();
         // Add all files except "additional1.ets"
         for (let i = 1; i < allAbcFiles.length; i++) {
             promises.push(launch<void, (l: AbcRuntimeLinker, p: string) => void>(Test.addSingleAbcFile, linker, allAbcFiles[i]));
@@ -259,7 +256,7 @@ class Test {
         arktest.expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },
             (e) => e instanceof LinkerClassNotFoundError
         );
-        promises.forEach((p: Promise<void>): void => { await p; });
+        promises.forEach((p: Job<void>): void => { p.Await(); });
         Test.addSingleAbcFile(linker, allAbcFiles[0]);
         // Now class must be found
         arktest.expectNoThrow(() => { linker.loadClass(Test.additionalClass1Name, true); });
@@ -288,6 +285,5 @@ class Test {
 }
 
 function main() {
-    loadLibrary("runtime_linker_extensions-shared-lib");
     Test.test();
 }
