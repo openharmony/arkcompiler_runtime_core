@@ -26,7 +26,7 @@ dev = [
     "antlr4-tools>=0.2.1",
     "black>=25.1.0",
     "coverage>=7.8.0",
-    "pyre-check>=0.9.23",
+    "pyright>=1.1.400",
     "pytest>=8.3.5",
     "removestar>=1.5.2",
     "ruff>=0.11.6",
@@ -39,6 +39,14 @@ default = true
 [tool.black]
 exclude = "taihe/parse/antlr"
 target-version = ['py310']
+
+[tool.pyright]
+include = ["taihe"]
+exclude = ["taihe/parse/antlr"]
+pythonVersion = '3.10'
+
+# strict = ["taihe"]  # Maybe later: codegen
+strict = ["taihe/cli", "taihe/driver", "taihe/parse", "taihe/semantics", "taihe/utils"]
 
 [tool.ruff]
 target-version = 'py310'
@@ -79,9 +87,12 @@ lint.ignore = [
     "D104",
     "D105",
     "D106",
-    "D107", # -> "Missing docstring in public function too restrictive"
-    "UP007", # Allow `Optional[T]`
+    "D107", # "Missing docstring in public function too restrictive"
     "SIM117", # allow multiple `with` statements in code generator
+    "TC001",
+    "TC002",
+    "TC003", # "unnecessary to move to a TYPE_CHECKING block"
+    "TC006",
 ]
 
 [tool.ruff.lint.pydocstyle]

@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from taihe.driver.backend import Backend, BackendConfig
+from taihe.utils.outputs import DEFAULT_INDENT
 
 if TYPE_CHECKING:
     from taihe.driver.contexts import CompilerInstance
@@ -32,6 +33,7 @@ class PrettyPrintBackendConfig(BackendConfig):
 
     def construct(self, instance: "CompilerInstance") -> Backend:
         from taihe.semantics.format import PrettyPrinter
+        from taihe.utils.outputs import BaseWriter
 
         class PrettyPrintBackendImpl(Backend):
             def __init__(self, ci: "CompilerInstance", config: BackendConfig):
@@ -42,7 +44,11 @@ class PrettyPrintBackendConfig(BackendConfig):
 
             def generate(self):
                 PrettyPrinter(
-                    sys.stdout,
+                    BaseWriter(
+                        sys.stdout,
+                        default_indent=DEFAULT_INDENT,
+                        comment_prefix="// ",
+                    ),
                     self._config.show_resolved,
                     self._config.colorize,
                 ).handle_decl(self._ci.package_group)

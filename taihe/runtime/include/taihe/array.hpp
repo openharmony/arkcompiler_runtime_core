@@ -50,6 +50,8 @@ struct array_view {
 
     array_view(pointer data, size_type size) noexcept : m_size(size), m_data(data) {}  // main constructor
 
+    array_view() noexcept : m_size(0), m_data(nullptr) {}
+
     template <typename C, size_type N>
     array_view(C (&value)[N]) noexcept : array_view(value, N)
     {
@@ -203,7 +205,11 @@ protected:
 
 struct copy_data_t {};
 
+constexpr inline copy_data_t copy_data;
+
 struct move_data_t {};
+
+constexpr inline move_data_t move_data;
 
 template <typename cpp_owner_t>
 struct array : public array_view<cpp_owner_t> {
@@ -212,18 +218,18 @@ struct array : public array_view<cpp_owner_t> {
 
     explicit array(pointer data, size_type size) noexcept : array_view<cpp_owner_t>(data, size) {}  // main constructor
 
-    template <typename C>
-    array(copy_data_t, C *data, size_type size) noexcept
-        : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
+    template <typename Iterator>
+    array(copy_data_t, Iterator begin, size_type size) noexcept
+        : array_view<cpp_owner_t>(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
-        std::uninitialized_copy_n(data, size, this->m_data);
+        std::uninitialized_copy_n(begin, size, this->m_data);
     }
 
-    template <typename C>
-    array(move_data_t, C *data, size_type size) noexcept
-        : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
+    template <typename Iterator>
+    array(move_data_t, Iterator begin, size_type size) noexcept
+        : array_view<cpp_owner_t>(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
     {
-        std::uninitialized_move_n(data, size, this->m_data);
+        std::uninitialized_move_n(begin, size, this->m_data);
     }
 
     explicit array(size_type size) : array(reinterpret_cast<cpp_owner_t *>(malloc(size * sizeof(cpp_owner_t))), size)
@@ -247,11 +253,11 @@ struct array : public array_view<cpp_owner_t> {
         return array(size, value);
     }
 
-    array(std::initializer_list<cpp_owner_t> value) noexcept : array(copy_data_t {}, value.begin(), value.size()) {}
+    array(std::initializer_list<cpp_owner_t> value) noexcept : array(copy_data, value.begin(), value.size()) {}
 
-    array(array_view<cpp_owner_t> const &other) : array(copy_data_t {}, other.data(), other.size()) {}
+    array(array_view<cpp_owner_t> const &other) : array(copy_data, other.data(), other.size()) {}
 
-    array(array<cpp_owner_t> const &other) : array(copy_data_t {}, other.data(), other.size()) {}
+    array(array<cpp_owner_t> const &other) : array(copy_data, other.data(), other.size()) {}
 
     array(array<cpp_owner_t> &&other) : array(std::exchange(other.m_data, nullptr), std::exchange(other.m_size, 0)) {}
 

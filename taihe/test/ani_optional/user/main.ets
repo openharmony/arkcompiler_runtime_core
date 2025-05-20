@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as OptTest from "@generated/opt";
-import * as optionalTest from "@generated/optional";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as OptTest from "opt";
+import * as optionalTest from "optional";
 
 loadLibrary("ani_optional");
 
@@ -228,5 +227,5 @@ function main() {
     suite.addTest(
         "func_PrintTestInterfaceArraybuffer test",
         func_PrintTestInterfaceArraybuffer);
-    System.exit(suite.run());
+    exit(suite.run());
 }

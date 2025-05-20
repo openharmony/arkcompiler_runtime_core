@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections.abc import Iterable
-from typing import TYPE_CHECKING, TypeVar
+from collections.abc import Callable, Iterable
+from typing import Any, TypeGuard, TypeVar
 
 from typing_extensions import override
 
@@ -26,6 +26,7 @@ from taihe.semantics.declarations import (
     GlobFuncDecl,
     IfaceDecl,
     IfaceMethodDecl,
+    IfaceParentDecl,
     LongTypeRefDecl,
     NamedDecl,
     PackageDecl,
@@ -34,6 +35,7 @@ from taihe.semantics.declarations import (
     ShortTypeRefDecl,
     StructDecl,
     TypeDecl,
+    TypeRefDecl,
     UnionDecl,
 )
 from taihe.semantics.types import (
@@ -43,6 +45,7 @@ from taihe.semantics.types import (
     ScalarKind,
     ScalarType,
     StringType,
+    Type,
     UserType,
 )
 from taihe.semantics.visitor import RecursiveDeclVisitor
@@ -62,10 +65,6 @@ from taihe.utils.exceptions import (
     TypeUsageError,
 )
 
-if TYPE_CHECKING:
-    from taihe.semantics.declarations import IfaceParentDecl, TypeRefDecl
-    from taihe.semantics.types import Type
-
 
 def analyze_semantics(pg: PackageGroup, diag: AbstractDiagnosticsManager):
     """Runs semantic analysis passes on the given package group."""
@@ -81,7 +80,7 @@ def _check_decl_confilct_with_namespace(
     diag: AbstractDiagnosticsManager,
 ):
     """Checks for declarations conflicts with namespaces."""
-    namespaces = set()
+    namespaces: set[str] = set()
     for pkg_name in pg.package_dict:
         # package "a.b.c" -> namespaces ["a.b.c", "a.b", "a"]
         while True:
@@ -342,7 +341,7 @@ class _CheckFieldNameCollisionErrorPass(RecursiveDeclVisitor):
         return super().visit_package_decl(p)
 
     def check_collision_helper(self, children: Iterable[NamedDecl]):
-        names = {}
+        names: dict[str, NamedDecl] = {}
         for f in children:
             if (prev := names.setdefault(f.name, f)) != f:
                 self.diag.emit(DeclRedefError(prev, f))
@@ -357,8 +356,12 @@ class _CheckEnumTypePass(RecursiveDeclVisitor):
         self.diag = diag
 
     def visit_enum_decl(self, d: EnumDecl) -> None:
-        def is_int(val):
+        def is_int(val: Any) -> TypeGuard[int]:
             return not isinstance(val, bool) and isinstance(val, int)
+
+        valid: Callable[[Any], bool]
+        increment: Callable[[Any, Any], Any]
+        default: Callable[[Any], Any]
 
         match d.ty_ref.maybe_resolved_ty:
             case ScalarType(_, ScalarKind.I8):

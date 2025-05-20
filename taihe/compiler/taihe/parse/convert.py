@@ -18,7 +18,7 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from typing_extensions import override
 
@@ -64,7 +64,7 @@ class IgnoredFileReason(Enum):
 @dataclass
 class IgnoredFileWarn(DiagWarn):
     reason: IgnoredFileReason
-    note: Optional[DiagNote] = None
+    note: DiagNote | None = None
 
     @property
     @override
@@ -99,10 +99,7 @@ def normalize_pkg_name(name: str):
 
 
 def pkg2str(pkg_name: ast.PkgName) -> str:
-    if pkg_name:
-        return ".".join(t.text for t in pkg_name.parts)
-    else:
-        return ""
+    return ".".join(t.text for t in pkg_name.parts)
 
 
 class ExprEvaluator(Visitor):
@@ -302,10 +299,6 @@ class AstConverter(ExprEvaluator):
         self.source = source
         self.diag = diag
 
-    def loc(self, t: ast.any):
-        # Remember, token.column is 0-based.
-        return SourceLocation(self.source, *t._beg, *t._end)
-
     # Attributes
 
     @override
@@ -316,19 +309,19 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_long_type(self, node: ast.LongType) -> LongTypeRefDecl:
-        d = LongTypeRefDecl(self.loc(node), pkg2str(node.pkg_name), str(node.decl_name))
+        d = LongTypeRefDecl(node.loc, pkg2str(node.pkg_name), str(node.decl_name))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     @override
     def visit_short_type(self, node: ast.ShortType) -> ShortTypeRefDecl:
-        d = ShortTypeRefDecl(self.loc(node), str(node.decl_name))
+        d = ShortTypeRefDecl(node.loc, str(node.decl_name))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     @override
     def visit_generic_type(self, node: ast.GenericType) -> GenericTypeRefDecl:
-        d = GenericTypeRefDecl(self.loc(node), str(node.decl_name))
+        d = GenericTypeRefDecl(node.loc, str(node.decl_name))
         self.diag.for_each(node.args, lambda a: d.add_arg_ty_ref(self.visit(a)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
@@ -336,9 +329,9 @@ class AstConverter(ExprEvaluator):
     @override
     def visit_callback_type(self, node: ast.CallbackType) -> CallbackTypeRefDecl:
         if ty := node.return_ty:
-            d = CallbackTypeRefDecl(self.loc(node), self.visit(ty))
+            d = CallbackTypeRefDecl(node.loc, self.visit(ty))
         else:
-            d = CallbackTypeRefDecl(self.loc(node))
+            d = CallbackTypeRefDecl(node.loc)
         self.diag.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
@@ -347,12 +340,12 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_use_package(self, node: ast.UsePackage) -> Iterable[PackageImportDecl]:
-        p_ref = PackageRefDecl(self.loc(node.pkg_name), pkg2str(node.pkg_name))
+        p_ref = PackageRefDecl(node.pkg_name.loc, pkg2str(node.pkg_name))
         if node.pkg_alias:
             d = PackageImportDecl(
                 p_ref,
                 name=str(node.pkg_alias),
-                loc=self.loc(node.pkg_alias),
+                loc=node.pkg_alias.loc,
             )
         else:
             d = PackageImportDecl(
@@ -362,14 +355,14 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_use_symbol(self, node: ast.UseSymbol) -> Iterable[DeclarationImportDecl]:
-        p_ref = PackageRefDecl(self.loc(node.pkg_name), pkg2str(node.pkg_name))
+        p_ref = PackageRefDecl(node.pkg_name.loc, pkg2str(node.pkg_name))
         for p in node.decl_alias_pairs:
-            d_ref = DeclarationRefDecl(self.loc(p.decl_name), str(p.decl_name), p_ref)
+            d_ref = DeclarationRefDecl(p.decl_name.loc, str(p.decl_name), p_ref)
             if p.decl_alias:
                 d = DeclarationImportDecl(
                     d_ref,
                     name=str(p.decl_alias),
-                    loc=self.loc(p.decl_alias),
+                    loc=p.decl_alias.loc,
                 )
             else:
                 d = DeclarationImportDecl(
@@ -381,13 +374,13 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_struct_property(self, node: ast.StructProperty) -> StructFieldDecl:
-        d = StructFieldDecl(self.loc(node.name), str(node.name), self.visit(node.ty))
+        d = StructFieldDecl(node.name.loc, str(node.name), self.visit(node.ty))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     @override
     def visit_struct(self, node: ast.Struct) -> StructDecl:
-        d = StructDecl(self.loc(node.name), str(node.name))
+        d = StructDecl(node.name.loc, str(node.name))
         self.diag.for_each(node.fields, lambda f: d.add_field(self.visit(f)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         self.diag.for_each(node.inner_attrs, lambda a: d.add_attr(self.visit(a)))
@@ -396,15 +389,15 @@ class AstConverter(ExprEvaluator):
     @override
     def visit_enum_property(self, node: ast.EnumProperty) -> EnumItemDecl:
         if node.val:
-            d = EnumItemDecl(self.loc(node.name), str(node.name), self.visit(node.val))
+            d = EnumItemDecl(node.name.loc, str(node.name), self.visit(node.val))
         else:
-            d = EnumItemDecl(self.loc(node.name), str(node.name))
+            d = EnumItemDecl(node.name.loc, str(node.name))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     @override
     def visit_enum(self, node: ast.Enum) -> EnumDecl:
-        d = EnumDecl(self.loc(node.name), str(node.name), self.visit(node.enum_ty))
+        d = EnumDecl(node.name.loc, str(node.name), self.visit(node.enum_ty))
         self.diag.for_each(node.fields, lambda a: d.add_item(self.visit(a)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
@@ -412,15 +405,15 @@ class AstConverter(ExprEvaluator):
     @override
     def visit_union_property(self, node: ast.UnionProperty) -> UnionFieldDecl:
         if ty := node.ty:
-            d = UnionFieldDecl(self.loc(node.name), str(node.name), self.visit(ty))
+            d = UnionFieldDecl(node.name.loc, str(node.name), self.visit(ty))
         else:
-            d = UnionFieldDecl(self.loc(node.name), str(node.name))
+            d = UnionFieldDecl(node.name.loc, str(node.name))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     @override
     def visit_union(self, node: ast.Union) -> UnionDecl:
-        d = UnionDecl(self.loc(node.name), str(node.name))
+        d = UnionDecl(node.name.loc, str(node.name))
         self.diag.for_each(node.fields, lambda f: d.add_field(self.visit(f)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         self.diag.for_each(node.inner_attrs, lambda a: d.add_attr(self.visit(a)))
@@ -428,28 +421,28 @@ class AstConverter(ExprEvaluator):
 
     @override
     def visit_parameter(self, node: ast.Parameter) -> ParamDecl:
-        d = ParamDecl(self.loc(node.name), str(node.name), self.visit(node.ty))
+        d = ParamDecl(node.name.loc, str(node.name), self.visit(node.ty))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     @override
     def visit_interface_function(self, node: ast.InterfaceFunction) -> IfaceMethodDecl:
         if ty := node.return_ty:
-            d = IfaceMethodDecl(self.loc(node.name), str(node.name), self.visit(ty))
+            d = IfaceMethodDecl(node.name.loc, str(node.name), self.visit(ty))
         else:
-            d = IfaceMethodDecl(self.loc(node.name), str(node.name))
+            d = IfaceMethodDecl(node.name.loc, str(node.name))
         self.diag.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
 
     @override
     def visit_interface_parent(self, node: ast.InterfaceParent) -> IfaceParentDecl:
-        p = IfaceParentDecl(self.loc(node.ty), self.visit(node.ty))
+        p = IfaceParentDecl(node.ty.loc, self.visit(node.ty))
         return p
 
     @override
     def visit_interface(self, node: ast.Interface) -> IfaceDecl:
-        d = IfaceDecl(self.loc(node.name), str(node.name))
+        d = IfaceDecl(node.name.loc, str(node.name))
         self.diag.for_each(node.fields, lambda f: d.add_method(self.visit(f)))
         self.diag.for_each(node.extends, lambda i: d.add_parent(self.visit(i)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
@@ -459,9 +452,9 @@ class AstConverter(ExprEvaluator):
     @override
     def visit_global_function(self, node: ast.GlobalFunction) -> GlobFuncDecl:
         if ty := node.return_ty:
-            d = GlobFuncDecl(self.loc(node.name), str(node.name), self.visit(ty))
+            d = GlobFuncDecl(node.name.loc, str(node.name), self.visit(ty))
         else:
-            d = GlobFuncDecl(self.loc(node.name), str(node.name))
+            d = GlobFuncDecl(node.name.loc, str(node.name))
         self.diag.for_each(node.parameters, lambda p: d.add_param(self.visit(p)))
         self.diag.for_each(node.forward_attrs, lambda a: d.add_attr(self.visit(a)))
         return d
@@ -469,13 +462,13 @@ class AstConverter(ExprEvaluator):
     @override
     def visit_decl_attr(self, node: ast.DeclAttr) -> AttrItemDecl:
         value = tuple(self.visit(val) for val in node.vals)
-        d = AttrItemDecl(self.loc(node.name), str(node.name), value)
+        d = AttrItemDecl(node.name.loc, str(node.name), value)
         return d
 
     @override
     def visit_scope_attr(self, node: ast.ScopeAttr) -> AttrItemDecl:
         value = tuple(self.visit(val) for val in node.vals)
-        d = AttrItemDecl(self.loc(node.name), str(node.name), value)
+        d = AttrItemDecl(node.name.loc, str(node.name), value)
         return d
 
     # Package

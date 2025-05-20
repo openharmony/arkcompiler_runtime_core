@@ -15,197 +15,75 @@
 
 """Manage output files."""
 
-from abc import ABC, abstractmethod
+import os
+import os.path
+import sys
 from collections.abc import Generator
 from contextlib import contextmanager
+from dataclasses import dataclass
+from enum import Enum, auto
 from io import StringIO
-from os import makedirs
 from pathlib import Path
-from types import TracebackType
-from typing import Any, Generic, Optional, ParamSpec, TextIO, TypeVar
+from types import FrameType, TracebackType
+from typing import TextIO
 
-from typing_extensions import Self, override
-
-P = ParamSpec("P")
-T = TypeVar("T", bound="OutputBase")
+from typing_extensions import Self
 
 DEFAULT_INDENT = "    "  # Four spaces
 
 
-class OutputBase(ABC, Generic[P]):
-    """Abstract base class for all types of generated output.
+class DebugLevel(Enum):
+    """Controls the code-generator debug info.
 
-    Created, managed and saved to file via an `OutputManager`.
+    When enabled, the generated code would contain comments, representing the
+    location of Python code which generates.
     """
 
-    @abstractmethod  # pyre-ignore
-    def __init__(
-        self,
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ):
-        """Initialize the output instance."""
-
-    @classmethod
-    def create(
-        cls: type[T],  # pyre-ignore
-        tm: "OutputManager",
-        filename: str,
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> T:
-        """Create or retrieve an output instance via the manager."""
-        return tm.get_or_create(cls, filename, *args, **kwargs)
-
-    @abstractmethod
-    def save_as(self, file_path: Path):
-        """Save the output to the specified file path."""
+    NONE = auto()
+    """Don't print any debug info."""
+    CONCISE = auto()
+    """Prints function and line number."""
+    VERBOSE = auto()
+    """Besides CONSICE, also prints code snippet. Could be slow."""
 
 
-class IndentManager:
-    def __init__(self):
-        self.count = 0
-
-    @property
-    def current(self):
-        return self.count * " "
-
-    @contextmanager
-    def offset(self, n=4):
-        try:
-            self.count += n
-            yield
-        finally:
-            self.count -= n
-
-
-class STSOutputBuffer(OutputBase[[]]):
-    """Represents a general target file."""
-
-    @override
-    def __init__(self):
-        super().__init__()
-        self.indent_manager = IndentManager()
-        self.code = StringIO()
-        self.import_dict: dict[str, str] = {}
-
-    @override
-    def save_as(self, file_path: Path):
-        makedirs(file_path.parent, exist_ok=True)
-        with open(file_path, "w", encoding="utf-8") as dst:
-            for import_name, module_name in self.import_dict.items():
-                dst.write(f'import * as {import_name} from "./{module_name}";\n')
-            dst.write(self.code.getvalue())
-
-    @contextmanager
-    def code_block(self, start: str, end: str, n=4):
-        self.writeln(start)
-        with self.indent_manager.offset(n):
-            yield
-        self.writeln(end)
-
-    def write(self, codes: str):
-        for code in codes.splitlines():
-            self.code.write(self.indent_manager.current + code + "\n")
-
-    def writeln(self, *codes: str):
-        for code in codes:
-            self.code.write(self.indent_manager.current + code + "\n")
-
-    def import_module(self, import_name: str, module_name: str):
-        self.import_dict.setdefault(import_name, module_name)
-
-
-class COutputBuffer(OutputBase[[bool]]):
-    """Represents a C or C++ target file."""
-
-    @override
-    def __init__(self, is_header: bool):
-        super().__init__(is_header)
-        self.is_header = is_header
-        self.headers: dict[str, None] = {}
-        self.indent_manager = IndentManager()
-        self.code = StringIO()
-
-    @override
-    def save_as(self, file_path: Path):
-        makedirs(file_path.parent, exist_ok=True)
-        with open(file_path, "w", encoding="utf-8") as dst:
-            if self.is_header:
-                dst.write(f"#pragma once\n")
-            for header in self.headers:
-                dst.write(f'#include "{header}"\n')
-            dst.write(self.code.getvalue())
-
-    @contextmanager
-    def code_block(self, start: str, end: str, n=4):
-        self.writeln(start)
-        with self.indent_manager.offset(n):
-            yield
-        self.writeln(end)
-
-    def write(self, codes: str):
-        for code in codes.splitlines():
-            self.code.write(self.indent_manager.current + code + "\n")
-
-    def writeln(self, *codes: str):
-        for code in codes:
-            self.code.write(self.indent_manager.current + code + "\n")
-
-    def include(self, *headers: str):
-        for header in headers:
-            self.headers.setdefault(header, None)
-
-
-class OutputManager:
+@dataclass
+class OutputConfig:
     """Manages the creation and saving of output files."""
 
-    def __init__(self, dst_dir: Optional[Path]):
-        """Initialize with an empty cache."""
-        self.targets: dict[str, OutputBase] = {}
-        self.dst_dir = dst_dir
-
-    def output_to(self, dst_dir: Path):
-        """Save all managed outputs to a target directory."""
-        for filename, target in self.targets.items():
-            target.save_as(dst_dir / filename)
-
-    def get_or_create(
-        self,
-        cls: type[T],
-        filename: str,
-        *args,
-        **kwargs,
-    ) -> T:
-        """Get or create an output instance by filename."""
-        if target := self.targets.get(filename):
-            pass
-            return target
-
-        target = cls(*args, **kwargs)
-        self.targets[filename] = target
-        return target
+    dst_dir: Path | None = None
+    debug_level: DebugLevel = DebugLevel.NONE
 
 
 class BaseWriter:
-    def __init__(self, out: TextIO, indent_unit: str):
+    def __init__(
+        self,
+        out: TextIO,
+        *,
+        comment_prefix: str,
+        default_indent: str,
+        debug_level: DebugLevel = DebugLevel.NONE,
+    ):
         """Initialize a code writer with a writable output stream.
 
         Args:
             out: A writable stream object
-            indent_unit: The string used for each level of indentation
+            comment_prefix: The prefix for line-comment, for instance, "// " for C++
+            default_indent: The default indentation string for each level of indentation
+            debug_level: see `DebugLevel` for details
         """
         if not hasattr(out, "write"):
             raise ValueError("output_stream must be writable")
 
         self._out = out
-        self._indent_level = 0
-        self._indent_unit = indent_unit
+        self._default_indent = default_indent
+        self._current_indent = ""
+        self._debug_level = debug_level
+        self._comment_prefix = comment_prefix
 
-    @property
-    def current_indent_string(self):
-        """Return the current indentation string."""
-        return self._indent_unit * self._indent_level
+    def newline(self):
+        """Writes a newline character."""
+        self._out.write("\n")
 
     def writeln(self, line: str = ""):
         """Writes a single-line string.
@@ -219,7 +97,7 @@ class BaseWriter:
             self._out.write("\n")
             return
 
-        self._out.write(self.current_indent_string)
+        self._out.write(self._current_indent)
         self._out.write(line)
         self._out.write("\n")
 
@@ -229,6 +107,7 @@ class BaseWriter:
         Args:
             *lines: One or more lines to write
         """
+        self._write_debug(skip=2)
         for line in lines:
             self.writeln(line)
 
@@ -240,51 +119,75 @@ class BaseWriter:
         """
         self.writelns(*text_block.splitlines())
 
-    def indent(self):
-        """Increments the indent level."""
-        self._indent_level += 1
+    def write_comment(self, comment: str):
+        """Writes a comment block, prefixing each line with the comment prefix.
 
-    def dedent(self):
-        """Decrements the indent level."""
-        if self._indent_level <= 0:
-            raise ValueError("Cannot dedent below level 0")
-        self._indent_level -= 1
+        Indents the comment block according to the current indentation level.
+        Handles multi-line comments by splitting the input string.
+
+        Args:
+            comment: The comment text to write. Can be multi-line.
+        """
+        for line in comment.splitlines():
+            self._out.write(self._current_indent)
+            self._out.write(self._comment_prefix)
+            self._out.write(line)
+            self._out.write("\n")
 
     @contextmanager
     def indented(
-        self, prologue: str = "", epilogue: str = ""
+        self,
+        prologue: str | None,
+        epilogue: str | None,
+        /,
+        *,
+        indent: str | None = None,
     ) -> Generator[Self, None, None]:
         """Context manager that indents code within its scope.
 
         Args:
             prologue: Optional text to write before indentation
             epilogue: Optional text to write after indentation
+            indent: Optional string to use for indentation (overrides default)
 
         Returns:
             A context manager that yields this BaseWriter
         """
-        if prologue:
+        self._write_debug(skip=3)
+        if prologue is not None:
             self.writeln(prologue)
-        self.indent()
+        previous_indent = self._current_indent
+        self._current_indent += self._default_indent if indent is None else indent
         try:
             yield self
         finally:
-            self.dedent()
-            if epilogue:
+            self._current_indent = previous_indent
+            if epilogue is not None:
                 self.writeln(epilogue)
 
+    def _write_debug(self, *, skip: int):
+        if self._debug_level == DebugLevel.NONE:
+            return
+        self.write_comment(_format_frame(sys._getframe(skip)))  # type: ignore
 
-class FileWriter(BaseWriter, OutputBase):
+
+class FileWriter(BaseWriter):
     def __init__(
         self,
-        om: OutputManager,
+        oc: OutputConfig,
         path: str,
         *,
-        indent_unit: str = DEFAULT_INDENT,
+        default_indent: str = DEFAULT_INDENT,
+        comment_prefix: str,
     ):
-        super().__init__(out=StringIO(), indent_unit=indent_unit)
+        super().__init__(
+            out=StringIO(),
+            default_indent=default_indent,
+            comment_prefix=comment_prefix,
+            debug_level=oc.debug_level,
+        )
         pass
-        self._path = om.dst_dir / path
+        self._path = oc.dst_dir / path
 
     def __enter__(self):
         return self
@@ -304,10 +207,6 @@ class FileWriter(BaseWriter, OutputBase):
         # Propagate the exception if exists
         return False
 
-    @classmethod
-    def create(cls, tm: OutputManager, path: str, **kwargs: Any) -> Self:
-        return tm.get_or_create(cls, path, **kwargs)
-
     def write_prologue(self, f: TextIO):
         del f
 
@@ -316,4 +215,18 @@ class FileWriter(BaseWriter, OutputBase):
         with open(file_path, "w", encoding="utf-8") as dst:
             pass
             self.write_prologue(dst)
-            dst.write(self._out.getvalue())  # pyre-ignore
+            dst.write(self._out.getvalue())
+
+
+def _format_frame(f: FrameType) -> str:
+    # For /a/b/c/d/e.py, only keep FILENAME_KEEP directories, resulting "c/d/e.py"
+    FILENAME_KEEP = 3
+
+    file_name = f.f_code.co_filename
+    parts = file_name.split(os.sep)
+    if len(parts) > FILENAME_KEEP:
+        file_name = os.path.join(*parts[-FILENAME_KEEP:])
+
+    base_format = f"CODEGEN-DEBUG: {f.f_code.co_name} in {file_name}:{f.f_lineno}"
+
+    return base_format

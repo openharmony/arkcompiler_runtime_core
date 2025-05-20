@@ -16,7 +16,9 @@
 #define RUNTIME_INCLUDE_TAIHE_CALLBACK_HPP_
 // NOLINTBEGIN
 
+#include <taihe/callback.abi.h>
 #include <taihe/common.hpp>
+#include <taihe/object.hpp>
 
 #include <type_traits>
 
@@ -29,107 +31,103 @@ struct callback;
 
 template <typename Return, typename... Params>
 struct callback_view<Return(Params...)> {
-    struct callback_data_t {
-        TRefCount m_count;
-        void (*m_free)(struct callback_data_t *);
-        as_abi_t<Return> (*m_func)(callback_data_t *data_ptr, as_abi_t<Params>... params);
-    };
+    using func_type = as_abi_t<Return>(DataBlockHead *, as_abi_t<Params>...);
 
-    template <typename Impl>
-    struct callback_data_impl : callback_data_t {
-        Impl impl;
+    DataBlockHead *data_ptr;
+    func_type *func_ptr;
 
-        static void c_free(callback_data_t *data_ptr)
-        {
-            delete static_cast<callback_data_impl<Impl> *>(data_ptr);
-        };
-
-        static as_abi_t<Return> c_call(callback_data_t *data_ptr, as_abi_t<Params>... params)
-        {
-            if constexpr (std::is_void_v<Return>) {
-                return static_cast<callback_data_impl<Impl> *>(data_ptr)->impl(from_abi<Params>(params)...);
-            } else {
-                return into_abi<Return>(
-                    static_cast<callback_data_impl<Impl> *>(data_ptr)->impl(from_abi<Params>(params)...));
-            }
-        };
-
-        template <typename... Args>
-        callback_data_impl(Args &&...args) : impl(std::forward<Args>(args)...)
-        {
-            this->m_free = &c_free;
-            this->m_func = &c_call;
-            tref_set(&this->m_count, 1);
-        }
-    };
-
-    callback_data_t *data_ptr;
-
-    explicit callback_view(callback_data_t *data_ptr) : data_ptr(data_ptr) {}
-
-    template <typename Impl, typename... Args>
-    static callback<Return(Params...)> from(Args &&...args)
-    {
-        return callback<Return(Params...)> {
-            new callback_data_impl<Impl>(std::forward<Args>(args)...),
-        };
-    }
-
-    template <typename Impl>
-    static callback<Return(Params...)> from(Impl &&impl)
-    {
-        return callback<Return(Params...)> {
-            new callback_data_impl<Impl>(std::forward<Impl>(impl)),
-        };
-    }
+    explicit callback_view(DataBlockHead *data_ptr, func_type *func_ptr) : data_ptr(data_ptr), func_ptr(func_ptr) {}
 
     Return operator()(Params... params) const
     {
         if constexpr (std::is_void_v<Return>) {
-            return data_ptr->m_func(data_ptr, into_abi<Params>(params)...);
+            return func_ptr(data_ptr, into_abi<Params>(params)...);
         } else {
-            return from_abi<Return>(data_ptr->m_func(data_ptr, into_abi<Params>(params)...));
+            return from_abi<Return>(func_ptr(data_ptr, into_abi<Params>(params)...));
         }
     }
 };
 
 template <typename Return, typename... Params>
 struct callback<Return(Params...)> : callback_view<Return(Params...)> {
-    using typename callback_view<Return(Params...)>::callback_data_t;
+    using typename callback_view<Return(Params...)>::func_type;
+
     using callback_view<Return(Params...)>::data_ptr;
+    using callback_view<Return(Params...)>::func_ptr;
 
-    explicit callback(callback_data_t *data_ptr) : callback_view<Return(Params...)>(data_ptr) {}
-
-    callback(callback<Return(Params...)> &&other) : callback {other.data_ptr}
+    explicit callback(DataBlockHead *data_ptr, func_type *func_ptr)
+        : callback_view<Return(Params...)> {data_ptr, func_ptr}
     {
-        other.data_ptr = nullptr;
-    }
-
-    callback(callback<Return(Params...)> const &other) : callback {other.data_ptr}
-    {
-        if (data_ptr) {
-            tref_inc(&data_ptr->m_count);
-        }
-    }
-
-    callback(callback_view<Return(Params...)> const &other) : callback {other.data_ptr}
-    {
-        if (data_ptr) {
-            tref_inc(&data_ptr->m_count);
-        }
     }
 
     ~callback()
     {
         if (data_ptr && tref_dec(&data_ptr->m_count)) {
-            data_ptr->m_free(data_ptr);
+            data_ptr->rtti_ptr->free(data_ptr);
         }
     }
 
     callback &operator=(callback other)
     {
         std::swap(data_ptr, other.data_ptr);
+        std::swap(func_ptr, other.func_ptr);
         return *this;
+    }
+
+    callback(callback<Return(Params...)> &&other) : callback {other.data_ptr, other.func_ptr}
+    {
+        other.data_ptr = nullptr;
+    }
+
+    callback(callback<Return(Params...)> const &other) : callback {other.data_ptr, other.func_ptr}
+    {
+        if (data_ptr) {
+            tref_inc(&data_ptr->m_count);
+        }
+    }
+
+    callback(callback_view<Return(Params...)> const &other) : callback {other.data_ptr, other.func_ptr}
+    {
+        if (data_ptr) {
+            tref_inc(&data_ptr->m_count);
+        }
+    }
+
+    template <typename Impl>
+    struct invoke_impl {
+        static as_abi_t<Return> invoke(DataBlockHead *data_ptr, as_abi_t<Params>... params)
+        {
+            if constexpr (std::is_void_v<Return>) {
+                return cast_data_ptr<Impl>(data_ptr)->operator()(from_abi<Params>(params)...);
+            } else {
+                return into_abi<Return>(cast_data_ptr<Impl>(data_ptr)->operator()(from_abi<Params>(params)...));
+            }
+        };
+    };
+
+    template <typename Impl>
+    static constexpr TypeInfo rtti_impl = {
+        .version = 0,
+        .free = &::taihe::del_data_ptr<Impl>,
+        .len = 0,
+        .idmap = {},
+    };
+
+    template <typename Impl, typename... Args>
+    static callback<Return(Params...)> from(Args &&...args)
+    {
+        return callback<Return(Params...)>(
+            ::taihe::new_data_ptr<Impl>(reinterpret_cast<TypeInfo const *>(&rtti_impl<Impl>),
+                                        std::forward<Args>(args)...),
+            &invoke_impl<Impl>::invoke);
+    }
+
+    template <typename Impl>
+    static callback<Return(Params...)> from(Impl &&impl)
+    {
+        return callback<Return(Params...)>(
+            ::taihe::new_data_ptr<Impl>(reinterpret_cast<TypeInfo const *>(&rtti_impl<Impl>), std::forward<Impl>(impl)),
+            &invoke_impl<Impl>::invoke);
     }
 };
 
@@ -147,12 +145,12 @@ inline std::size_t hash_impl(adl_helper_t, callback_view<Return(Params...)> val)
 
 template <typename Return, typename... Params>
 struct as_abi<callback_view<Return(Params...)>> {
-    using type = void *;
+    using type = TCallback;
 };
 
 template <typename Return, typename... Params>
 struct as_abi<callback<Return(Params...)>> {
-    using type = void *;
+    using type = TCallback;
 };
 
 template <typename Return, typename... Params>

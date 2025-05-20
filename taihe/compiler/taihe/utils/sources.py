@@ -103,44 +103,43 @@ class SourceManager:
 
 
 @dataclass
+class TextPosition:
+    """Represents a position within a file (1-based)."""
+
+    row: int
+    col: int
+
+    def __str__(self) -> str:
+        return f"{self.row}:{self.col}"
+
+
+@dataclass
+class TextRange:
+    """Represents a range of text within a file."""
+
+    start: TextPosition
+    stop: TextPosition
+
+
+@dataclass
 class SourceLocation:
     """Represents a location (either a position or a region) within a file."""
 
     file: SourceBase
     """Required: The source file associated with the location."""
 
-    has_pos: bool
+    text_range: TextRange | None
+    """Optional: The text range associated with the location."""
 
-    start_row: int
-    """Optional: The start line number (1-based)."""
-
-    start_col: int
-    """Optional: The start column number (1-based)."""
-
-    stop_row: int
-    """Optional: The stop line number (1-based)."""
-
-    stop_col: int
-    """Optional: The stop column number (1-based)."""
-
-    def __init__(self, file: SourceBase, *pos: int):
+    def __init__(self, file: SourceBase, span: TextRange | None = None):
         self.file = file
-
-        if len(pos) == 4:
-            self.start_row, self.start_col, self.stop_row, self.stop_col = pos
-            self.has_pos = True
-        elif len(pos) == 0:
-            self.start_row, self.start_col, self.stop_row, self.stop_col = 0, 0, 0, 0
-            self.has_pos = False
-        else:
-            raise ValueError()
+        self.text_range = span
 
     def __str__(self) -> str:
-        r = self.file.source_identifier
-        if self.has_pos:
-            r = f"{r}:{self.start_row}:{self.start_col}"
-
-        return r
+        res = self.file.source_identifier
+        if self.text_range:
+            res = f"{res}:{self.text_range.start}"
+        return res
 
     @classmethod
     def with_path(cls, path: Path) -> "SourceLocation":

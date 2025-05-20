@@ -268,10 +268,10 @@ class OptionalTypeABIInfo(AbstractAnalysis[OptionalType], AbstractTypeABIInfo):
 class CallbackTypeABIInfo(AbstractAnalysis[CallbackType], AbstractTypeABIInfo):
     def __init__(self, am: AnalysisManager, t: CallbackType) -> None:
         super().__init__(am, t)
-        self.decl_headers = []
-        self.impl_headers = []
-        self.as_owner = "void*"
-        self.as_param = "void*"
+        self.decl_headers = ["taihe/callback.abi.h"]
+        self.impl_headers = ["taihe/callback.abi.h"]
+        self.as_owner = "struct TCallback"
+        self.as_param = "struct TCallback"
 
 
 class VectorTypeABIInfo(AbstractAnalysis[VectorType], AbstractTypeABIInfo):

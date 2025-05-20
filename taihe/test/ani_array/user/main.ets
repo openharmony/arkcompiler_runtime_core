@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as ArrayTest from "@generated/array_test";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as ArrayTest from "array_test";
 
 loadLibrary("ani_array");
 
@@ -169,5 +168,5 @@ function main() {
     suite.addTest("changeStructArray", changeStructArray)
     suite.addTest("fetchBinaryData", fetchBinaryData)
     suite.addTest("makeStructArrayArray", makeStructArrayArray)
-    System.exit(suite.run())
+    exit(suite.run())
 }

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as threadTest from "@generated/thread_test";
 import {BusinessError} from "@ohos.base";
+import * as threadTest from "thread_test";
 
 loadLibrary("ani_thread");
 

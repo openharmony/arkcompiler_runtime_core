@@ -30,7 +30,6 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from taihe.driver.backend import Backend, BackendConfig
 from taihe.parse.convert import (
@@ -44,23 +43,26 @@ from taihe.semantics.declarations import PackageGroup
 from taihe.utils.analyses import AnalysisManager
 from taihe.utils.diagnostics import DiagnosticsManager
 from taihe.utils.exceptions import AdhocNote
-from taihe.utils.outputs import OutputManager
+from taihe.utils.outputs import DebugLevel, OutputConfig
 from taihe.utils.sources import SourceFile, SourceLocation, SourceManager
 
 
 @dataclass
 class CompilerInvocation:
     """Describes the options and intents for a compiler invocation.
+
     CompilerInvocation stores the high-level intent in a structured way, such
     as the input paths, the target for code generation. Generally speaking, it
     can be considered as the parsed and verified version of a compiler's
     command line flags.
+
     CompilerInvocation does not manage the internal state. Use
     `CompilerInstance` instead.
     """
 
     src_dirs: list[Path] = field(default_factory=lambda: [])
-    out_dir: Optional[Path] = None
+    out_dir: Path | None = None
+    out_debug_level: DebugLevel = DebugLevel.NONE
     backends: list[BackendConfig] = field(default_factory=lambda: [])
 
 
@@ -83,7 +85,7 @@ class CompilerInstance:
 
     analysis_manager: AnalysisManager
 
-    target_manager: OutputManager
+    output_config: OutputConfig
 
     def __init__(self, invocation: CompilerInvocation):
         self.invocation = invocation
@@ -91,7 +93,9 @@ class CompilerInstance:
         self.analysis_manager = AnalysisManager(self.diagnostics_manager)
         self.source_manager = SourceManager()
         self.package_group = PackageGroup()
-        self.target_manager = OutputManager(self.invocation.out_dir)
+        self.output_config = OutputConfig(
+            self.invocation.out_dir, self.invocation.out_debug_level
+        )
 
         self.backends = [conf.construct(self) for conf in invocation.backends]
 
@@ -159,13 +163,6 @@ class CompilerInstance:
 
         for b in self.backends:
             b.generate()
-
-        # TODO: generation should not fail
-        if self.diagnostics_manager.has_errors():
-            return
-
-        # TODO: remove this after the completion of refactor
-        self.target_manager.output_to(self.invocation.out_dir)
 
     def run(self):
         self.diagnostics_manager.reset_max_level()

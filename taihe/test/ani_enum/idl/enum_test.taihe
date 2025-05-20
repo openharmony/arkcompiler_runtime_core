@@ -19,20 +19,22 @@ enum Color: String {
 }
 
 function nextEnum(color: Color): Color;
-function showEnum(color: Color): void;
+function getValueOfEnum(color: Color): String;
+function fromValueToEnum(str: String): Color;
 
 enum Weekday: i32 {
+    SUNDAY = 0,
     MONDAY,
     TUESDAY,
     WEDNESDAY,
     THURSDAY,
     FRIDAY,
     SATURDAY,
-    SUNDAY
 }
 
 function nextEnumWeekday(day: Weekday): Weekday;
-function showEnumWeekday(day: Weekday): void;
+function getValueOfEnumWeekday(day: Weekday): i32;
+function fromValueToEnumWeekday(str: i32): Weekday;
 
 @const
 enum Flags: f64 {

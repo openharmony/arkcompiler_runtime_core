@@ -17,6 +17,7 @@ from taihe.codegen.abi.analyses import (
     GlobFuncABIInfo,
     PackageABIInfo,
 )
+from taihe.codegen.abi.writer import CHeaderWriter
 from taihe.codegen.cpp.analyses import (
     GlobFuncCppUserInfo,
     PackageCppInfo,
@@ -26,13 +27,12 @@ from taihe.codegen.cpp.analyses import (
 from taihe.driver.backend import Backend
 from taihe.driver.contexts import CompilerInstance
 from taihe.semantics.declarations import GlobFuncDecl, PackageDecl
-from taihe.utils.outputs import COutputBuffer
 
 
 class CppUserHeadersGenerator(Backend):
     def __init__(self, ci: CompilerInstance):
         super().__init__(ci)
-        self.tm = ci.target_manager
+        self.oc = ci.output_config
         self.am = ci.analysis_manager
         self.pg = ci.package_group
 
@@ -44,21 +44,22 @@ class CppUserHeadersGenerator(Backend):
         pkg_abi_info = PackageABIInfo.get(self.am, pkg)
         pkg_cpp_info = PackageCppInfo.get(self.am, pkg)
         pkg_cpp_user_info = PackageCppUserInfo.get(self.am, pkg)
-        pkg_cpp_user_target = COutputBuffer.create(
-            self.tm, f"include/{pkg_cpp_user_info.header}", True
-        )
-        # types
-        pkg_cpp_user_target.include(pkg_cpp_info.header)
-        # functions
-        pkg_cpp_user_target.include("taihe/common.hpp")
-        pkg_cpp_user_target.include(pkg_abi_info.header)
-        for func in pkg.functions:
-            self.gen_func(func, pkg_cpp_user_target)
+        with CHeaderWriter(
+            self.oc,
+            f"include/{pkg_cpp_user_info.header}",
+        ) as pkg_cpp_user_target:
+            # types
+            pkg_cpp_user_target.add_include(pkg_cpp_info.header)
+            # functions
+            pkg_cpp_user_target.add_include("taihe/common.hpp")
+            pkg_cpp_user_target.add_include(pkg_abi_info.header)
+            for func in pkg.functions:
+                self.gen_func(func, pkg_cpp_user_target)
 
     def gen_func(
         self,
         func: GlobFuncDecl,
-        pkg_cpp_target: COutputBuffer,
+        pkg_cpp_target: CHeaderWriter,
     ):
         func_abi_info = GlobFuncABIInfo.get(self.am, func)
         func_cpp_user_info = GlobFuncCppUserInfo.get(self.am, func)
@@ -66,7 +67,7 @@ class CppUserHeadersGenerator(Backend):
         args_into_abi = []
         for param in func.params:
             type_cpp_info = TypeCppInfo.get(self.am, param.ty_ref.resolved_ty)
-            pkg_cpp_target.include(*type_cpp_info.impl_headers)
+            pkg_cpp_target.add_include(*type_cpp_info.impl_headers)
             params_cpp.append(f"{type_cpp_info.as_param} {param.name}")
             args_into_abi.append(type_cpp_info.pass_into_abi(param.name))
         params_cpp_str = ", ".join(params_cpp)
@@ -74,16 +75,21 @@ class CppUserHeadersGenerator(Backend):
         abi_result = f"{func_abi_info.mangled_name}({args_into_abi_str})"
         if return_ty_ref := func.return_ty_ref:
             type_cpp_info = TypeCppInfo.get(self.am, return_ty_ref.resolved_ty)
-            pkg_cpp_target.include(*type_cpp_info.impl_headers)
+            pkg_cpp_target.add_include(*type_cpp_info.impl_headers)
             cpp_return_ty_name = type_cpp_info.as_owner
             cpp_result = type_cpp_info.return_from_abi(abi_result)
         else:
             cpp_return_ty_name = "void"
             cpp_result = abi_result
-        pkg_cpp_target.writeln(
+        with pkg_cpp_target.indented(
             f"namespace {func_cpp_user_info.namespace} {{",
-            f"inline {cpp_return_ty_name} {func_cpp_user_info.call_name}({params_cpp_str}) {{",
-            f"    return {cpp_result};",
             f"}}",
-            f"}}",
-        )
+            indent="",
+        ):
+            with pkg_cpp_target.indented(
+                f"inline {cpp_return_ty_name} {func_cpp_user_info.call_name}({params_cpp_str}) {{",
+                f"}}",
+            ):
+                pkg_cpp_target.writelns(
+                    f"return {cpp_result};",
+                )

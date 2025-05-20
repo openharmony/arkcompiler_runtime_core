@@ -110,7 +110,7 @@ TH_EXPORT struct TString tstr_dup(struct TString tstr);
 // - A new TString containing the concatenation of `left` and `right`.
 // # Notes
 // - The resulting TString object contains the concatenation of `left` and
-// `right`.
+//   `right`.
 // - The reference counts of both `left` and `right` are incremented.
 //   Remember to call `tstr_drop` after use to manage memory correctly.
 TH_EXPORT struct TString tstr_concat(struct TString left, struct TString right);
@@ -119,7 +119,7 @@ TH_EXPORT struct TString tstr_concat(struct TString left, struct TString right);
 // # Parameters
 // - `s`: The source TString object to extract the substring from.
 // - `pos`: The starting position of the substring within the source TString
-// object.
+//   object.
 // - `len`: The length of the substring to extract.
 // # Returns
 // - A TString reference of the extracted substring.

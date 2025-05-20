@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as IfaceReadonlyTest from "@generated/iface_readonly_test";
-import * as IfaceTest from "@generated/iface_test";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as IfaceReadonlyTest from "iface_readonly_test";
+import * as IfaceTest from "iface_test";
 
 loadLibrary("ani_iface");
 
@@ -88,5 +87,5 @@ function main() {
     suite.addTest("printFooName", printFooName)
     suite.addTest("printNooName", printNooName)
     suite.addTest("setSubFooName", setSubFooName)
-    System.exit(suite.run())
+    exit(suite.run())
 }

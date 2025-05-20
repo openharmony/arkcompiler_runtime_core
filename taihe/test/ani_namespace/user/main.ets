@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as namespace2Test from "@generated/my_ns";
-import * as namespaceTest from "@generated/ns_alltest";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as namespace2Test from "my_ns";
+import * as namespaceTest from "ns_alltest";
 
 loadLibrary("ani_namespace");
 
@@ -1722,5 +1721,5 @@ function main() {
     suite.addTest("check testCaseConstant1", testCaseConstant1);
     suite.addTest("check testCaseConstant2", testCaseConstant2);
     suite.addTest("check testCaseConstant3", testCaseConstant3);
-    System.exit(suite.run());
+    exit(suite.run());
 }

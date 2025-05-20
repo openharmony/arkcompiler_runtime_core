@@ -15,21 +15,16 @@
 #ifndef RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_
 #define RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_
 
-#include <taihe/common.h>
+#include <taihe/object.abi.h>
 
-struct TCallbackData {
-    TRefCount m_count;
-    void (*m_free)(struct TCallbackData *);
-    void *m_func;
-};
-
+// TCallback
+// Represents a callback structure containing a pointer to the data block
+// and a function pointer.
+// # Members
+// - `data_ptr`: A pointer to the data block.
+// - `func_ptr`: A pointer to the function associated with the callback.
 struct TCallback {
-    struct TCallbackData *data_ptr;
+    struct DataBlockHead *data_ptr;
+    void *func_ptr;
 };
-
-TH_EXPORT void tcallback_init(struct TCallbackData *data_ptr, void *func, void (*free)(struct TCallbackData *));
-
-TH_EXPORT struct TCallbackData *tcallback_dup(struct TCallbackData *data_ptr);
-
-TH_EXPORT void tcallback_drop(struct TCallbackData *data_ptr);
 #endif  // RUNTIME_INCLUDE_TAIHE_CALLBACK_ABI_H_

@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as test_primitives from "@generated/primitives_test";
-import * as test_void_ns from "@generated/void_func";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as test_primitives from "primitives_test";
+import * as test_void_ns from "void_func";
 
 loadLibrary("ani_primitives");
 
@@ -1553,5 +1552,5 @@ function main() {
     suite.addTest("check testCaseConstant2", testCaseConstant2);
     suite.addTest("check testCaseConstant3", testCaseConstant3);
     suite.addTest("check testCaseConstant4", testCaseConstant4);
-    System.exit(suite.run())
+    exit(suite.run())
 }
