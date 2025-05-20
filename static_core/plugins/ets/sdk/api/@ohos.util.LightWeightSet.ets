@@ -292,7 +292,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T> {
             return 1;
         }
 
-        const keyHash: int = key!.$_hashCode();
+        const keyHash: int = (key! as object).$_hashCode(); // #26217
         const positiveMask: int = 1 << LightWeightSet.SHIFT_COUNT;
         if (keyHash >= 0) {
             return (keyHash | positiveMask)

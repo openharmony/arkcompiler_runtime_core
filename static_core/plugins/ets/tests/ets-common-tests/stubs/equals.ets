@@ -17,7 +17,7 @@ function isEqual<T>(a: T, b: T): boolean {
     return a == b;
 }
 
-function erase<T>(v: T): Object | null | undefined {
+function erase<T>(v: T): Any {
     return v;
 }
 

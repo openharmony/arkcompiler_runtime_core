@@ -41,7 +41,7 @@ cases:
     - use: |-
           // no constraints, union
           let foo = <T, U> (p: T, q: U): T|U => {
-              return p!.toString() > q!.toString() ? p : q
+              return (p! as object).toString() > (q! as object).toString() ? p : q
           }
 
           let v = foo(1.0, 11.0)

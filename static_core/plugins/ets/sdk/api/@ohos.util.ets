@@ -1116,6 +1116,7 @@ export namespace util {
             }
 
             let strB = new StringBuilder
+            subObj = __narrowAny(subObj)
 
             if (UtilHelper.isArray(subObj!)) {
                 strB.append(subObjName + ':' + delimiter + UtilHelper.arrayToString(delimiter + '  ', subObj! as Array<Object>, depth, full))
@@ -1166,7 +1167,7 @@ export namespace util {
                 return false
             }
 
-            return this.objects.has(obj)
+            return this.objects.has(__narrowAny<object>(obj))
         }
 
         private static nullObjectDescription(objName: string = ''): string {
@@ -1183,7 +1184,7 @@ export namespace util {
             if (UtilHelper.isNullObject(obj)) {
                 return UtilHelper.nullObjectDescription()
             }
-
+            obj = __narrowAny(obj)
             this.objects.add(obj!)
             let strB = new StringBuilder
             if (UtilHelper.isArray(obj!)) {

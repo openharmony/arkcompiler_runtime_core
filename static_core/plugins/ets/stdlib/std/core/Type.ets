@@ -97,7 +97,7 @@ class TypeAPI {
         if (o === null) {
             return TypeAPI.NullTypeDescriptor
         }
-        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(o))
+        return (o === undefined) ? TypeAPI.UndefinedTypeDescriptor : TypeAPI.getClassDescriptor(Class.of(__narrowAny<object>(o)))
     }
 
     static getTypeName(cls: Class): string {
@@ -370,7 +370,7 @@ export abstract class Type extends Object {
 
     public static of(o: NullishType): Type {
         const td = TypeAPI.getTypeDescriptor(o)
-        const contextClass = o == undefined ? Class.ofCaller() : Class.of(o)
+        const contextClass = o == undefined ? Class.ofCaller() : Class.of(__narrowAny<object>(o))
         const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
         return Type.resolve(td, contextLinker)!
     }
@@ -1931,7 +1931,7 @@ export final class ClassType extends Type {
         if (ctors.length != 1) {
             throw new Error("can't select consturctor: " + ctors.length + " left")
         }
-        return ctors.at(0)!.invoke(undefined, args)!
+        return __narrowAny(ctors.at(0)!.invoke(undefined, args))!
     }
 
     // class.subTypeOf(U) means that `class extends U` or `class implements U`

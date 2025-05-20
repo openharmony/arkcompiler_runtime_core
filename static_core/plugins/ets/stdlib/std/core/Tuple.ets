@@ -40,7 +40,7 @@ export class Tuple1<T0> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString()
+            this.$0
     }
 }
 
@@ -56,8 +56,8 @@ export class Tuple2<T0, T1> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString()
+            this.$0 + "," +
+            this.$1
     }
 }
 
@@ -75,9 +75,9 @@ export class Tuple3<T0, T1, T2> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2
     }
 }
 
@@ -97,10 +97,10 @@ export class Tuple4<T0, T1, T2, T3> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3
     }
 }
 
@@ -122,11 +122,11 @@ export class Tuple5<T0, T1, T2, T3, T4> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4
     }
 }
 
@@ -150,12 +150,12 @@ export class Tuple6<T0, T1, T2, T3, T4, T5> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5
     }
 }
 
@@ -181,13 +181,13 @@ export class Tuple7<T0, T1, T2, T3, T4, T5, T6> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6
     }
 }
 
@@ -215,14 +215,14 @@ export class Tuple8<T0, T1, T2, T3, T4, T5, T6, T7> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7
     }
 }
 
@@ -252,15 +252,15 @@ export class Tuple9<T0, T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8
     }
 }
 
@@ -292,16 +292,16 @@ export class Tuple10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString() + "," +
-            this.$9!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8 + "," +
+            this.$9
     }
 }
 
@@ -335,17 +335,17 @@ export class Tuple11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tup
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString() + "," +
-            this.$9!.toString() + "," +
-            this.$10!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8 + "," +
+            this.$9 + "," +
+            this.$10
     }
 }
 
@@ -381,18 +381,18 @@ export class Tuple12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> implement
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString() + "," +
-            this.$9!.toString() + "," +
-            this.$10!.toString() + "," +
-            this.$11!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8 + "," +
+            this.$9 + "," +
+            this.$10 + "," +
+            this.$11
     }
 }
 
@@ -430,19 +430,19 @@ export class Tuple13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> impl
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString() + "," +
-            this.$9!.toString() + "," +
-            this.$10!.toString() + "," +
-            this.$11!.toString() + "," +
-            this.$12!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8 + "," +
+            this.$9 + "," +
+            this.$10 + "," +
+            this.$11 + "," +
+            this.$12
     }
 }
 
@@ -482,20 +482,20 @@ export class Tuple14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString() + "," +
-            this.$9!.toString() + "," +
-            this.$10!.toString() + "," +
-            this.$11!.toString() + "," +
-            this.$12!.toString() + "," +
-            this.$13!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8 + "," +
+            this.$9 + "," +
+            this.$10 + "," +
+            this.$11 + "," +
+            this.$12 + "," +
+            this.$13
     }
 }
 
@@ -537,21 +537,21 @@ export class Tuple15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString() + "," +
-            this.$9!.toString() + "," +
-            this.$10!.toString() + "," +
-            this.$11!.toString() + "," +
-            this.$12!.toString() + "," +
-            this.$13!.toString() + "," +
-            this.$14!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8 + "," +
+            this.$9 + "," +
+            this.$10 + "," +
+            this.$11 + "," +
+            this.$12 + "," +
+            this.$13 + "," +
+            this.$14
     }
 }
 
@@ -595,30 +595,30 @@ export class Tuple16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
 
     public override toString(): string {
         return "" +
-            this.$0!.toString() + "," +
-            this.$1!.toString() + "," +
-            this.$2!.toString() + "," +
-            this.$3!.toString() + "," +
-            this.$4!.toString() + "," +
-            this.$5!.toString() + "," +
-            this.$6!.toString() + "," +
-            this.$7!.toString() + "," +
-            this.$8!.toString() + "," +
-            this.$9!.toString() + "," +
-            this.$10!.toString() + "," +
-            this.$11!.toString() + "," +
-            this.$12!.toString() + "," +
-            this.$13!.toString() + "," +
-            this.$14!.toString() + "," +
-            this.$15!.toString()
+            this.$0 + "," +
+            this.$1 + "," +
+            this.$2 + "," +
+            this.$3 + "," +
+            this.$4 + "," +
+            this.$5 + "," +
+            this.$6 + "," +
+            this.$7 + "," +
+            this.$8 + "," +
+            this.$9 + "," +
+            this.$10 + "," +
+            this.$11 + "," +
+            this.$12 + "," +
+            this.$13 + "," +
+            this.$14 + "," +
+            this.$15
     }
 }
 
 export class TupleN implements Tuple
 {
-    $tupleValues: NullishType[]
+    $tupleValues: Any[]
 
-    constructor(...p: NullishType[]) {
+    constructor(...p: Any[]) {
         this.$tupleValues = p;
     }
 }
