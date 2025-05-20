@@ -419,9 +419,9 @@ public:
     std::string_view ConvertToStringView(PandaVector<uint8_t> *buf)
     {
         if (IsUtf16()) {
-            size_t len = utf::Utf16ToMUtf8Size(GetDataUtf16(), GetUtf16Length()) - 1;
+            size_t len = utf::Utf16ToUtf8Size(GetDataUtf16(), GetUtf16Length(), false) - 1;
             buf->reserve(len);
-            utf::ConvertRegionUtf16ToMUtf8(GetDataUtf16(), buf->data(), GetUtf16Length(), len, 0);
+            utf::ConvertRegionUtf16ToUtf8(GetDataUtf16(), buf->data(), GetUtf16Length(), len, 0, false);
             return {utf::Mutf8AsCString(buf->data()), len};
         }
         return {utf::Mutf8AsCString(GetDataMUtf8()), static_cast<size_t>(GetLength())};
