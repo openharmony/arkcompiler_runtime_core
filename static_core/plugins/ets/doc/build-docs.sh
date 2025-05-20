@@ -34,6 +34,8 @@ BUILD_SYSTEM_ARKTS=no
 BUILD_INTEROP_JS=no
 BUILD_CONCURRENCY=no
 
+CHECK_CODE=no
+
 function print_help()
 {
     local help_message="
@@ -61,6 +63,13 @@ OPTIONS
                                 * debug: Just build specified documents.
                                 * release: Run extra checks and build.
                                 Default is ${BUILD_TYPE}.
+
+    --check-code                If this option is specified, the scipt verifies
+                                correctness of code examples in the specification.
+
+    --panda-path=[PATH]         Path to panda binaries needed to verify correctness
+                                of code examples in the specification.
+
 
 TARGETS
 
@@ -157,6 +166,14 @@ for i in "$@"; do
         fi
         ;;
 
+    --check-code)
+        CHECK_CODE=yes
+        ;;
+    --panda-path=*)
+        PANDA_ROOT="${i//[-a-z]*=/}/bin"
+        export PANDA_ROOT
+        ;;
+
     # Main build targets:
 
     cookbook)
@@ -247,6 +264,18 @@ fi
 check_ubuntu_version
 
 mkdir -p "${BUILD_DIR}"
+
+if [[ "${CHECK_CODE}" == "yes" ]]; then
+    echo "Checking code examples validity"
+    if [[ ! -v PANDA_ROOT ]]; then
+        echo "Error: Panda directory is not set"
+        exit 1
+    fi
+
+    if [[ "${BUILD_CONCURRENCY}" == "yes" ]]; then
+        python3 $(dirname "$SCRIPT_DIR")/tools/specification_checker.py --spec-folder "${SCRIPT_DIR}/concurrency"
+    fi
+fi
 
 if [[ "${BUILD_SPEC}" == "yes" ]]; then
     echo "spec: Validating ${SCRIPT_DIR}/spec"
