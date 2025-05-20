@@ -19,7 +19,12 @@ assert: A field access expression may access a field of an object which is refer
 ---*/
 
 class A {
-  public x: int;
+  private _x: int;
+
+  get x():int {
+    return this._x;
+  }
+
 }
 
 final class B extends A {

@@ -23,7 +23,15 @@ desc: >-
 let x = -10
 
 class C {
-    protected x: int = 100;
+    private _x: int = 100;
+
+    protected get x():int {
+        return this._x;
+    }
+
+    protected set x(p: int) {
+        this._x = p;
+    }
 }
 
 class D extends C {

@@ -18,7 +18,11 @@ desc: The forms using the keyword super are valid in instance methods, construct
 ---*/
 
 class A {
-  public readonly x: int = 5;
+  private readonly _x: int = 5;
+
+  get x(): int{
+    return this._x;
+  }
 }
 
 class B extends A{
