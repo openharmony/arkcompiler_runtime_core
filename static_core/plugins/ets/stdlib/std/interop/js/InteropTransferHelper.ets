@@ -26,7 +26,7 @@ export final class InteropTransferHelper {
         if (dynamicObject == null || dynamicObject == undefined) {
             throw new Error("dynamicObject is null or undefined");
         }
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         return InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicESValue) as Object;
     }
 
@@ -46,7 +46,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -80,7 +80,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -114,7 +114,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -148,7 +148,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -182,7 +182,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -216,7 +216,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -250,7 +250,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -284,7 +284,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -318,7 +318,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -352,7 +352,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -386,7 +386,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let length = dynamicESValue.getProperty("length").toNumber();
@@ -420,7 +420,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
 
-        let dynamicESValue = ESValue.wrap(dynamicObject);
+        let dynamicESValue = ESValue.wrap(__narrowAny<object>(dynamicObject));
         let dynamicBuffer = dynamicESValue.getProperty("buffer");
         let byteOffset = dynamicESValue.getProperty("byteOffset").toNumber();
         let byteLength = dynamicESValue.getProperty("byteLength").toNumber();

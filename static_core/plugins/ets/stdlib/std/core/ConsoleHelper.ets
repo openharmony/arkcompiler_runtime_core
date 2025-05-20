@@ -47,6 +47,7 @@ export class Formatter {
         }
 
         let strB = new StringBuilder
+        subObj = __narrowAny(subObj)
 
         if (Formatter.isArray(subObj!)) {
             strB.append(subObjName + ':' + delimiter + Formatter.arrayToString(delimiter + '  ', subObj! as Array<Object>, depth, full))
@@ -97,7 +98,7 @@ export class Formatter {
             return false
         }
 
-        return this.objects.has(obj)
+        return this.objects.has(__narrowAny<object>(obj))
     }
 
     private static nullObjectDescription(objName: string = ''): string {
@@ -115,6 +116,7 @@ export class Formatter {
             return Formatter.nullObjectDescription()
         }
 
+        obj = __narrowAny(obj)
         this.objects.add(obj!)
         let strB = new StringBuilder
         if (Formatter.isArray(obj!)) {
@@ -276,7 +278,7 @@ export class Formatter {
         for (let i = index; i < args.length; ++i) {
             sb.append(" ")
             // behavior for null and undefined expected to be the same as for empty string
-            sb.append(args[i] != undefined && args[i] != null ? args[i]!.toString() : "")
+            sb.append(args[i] != undefined && args[i] != null ? __narrowAny(args[i])!.toString() : "")
         }
         return sb.toString()
     }
@@ -302,7 +304,7 @@ export class Formatter {
             if (flags.includes(flag)) {
                 let d = args[argCounter]
                 if (d != undefined && d != null) {
-                    res.append(Formatter.processArg(flag, d))
+                    res.append(Formatter.processArg(flag, __narrowAny<object>(d)))
                 } else {
                     // behavior for null and undefined expected to be the same as for empty string
                     res.append(Formatter.processArg(flag, ""))

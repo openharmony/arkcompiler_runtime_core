@@ -15,3 +15,7 @@
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_46.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_47.ets
 17.experimental_features/16.async_functions_and_methods/02.async_methods/ameth_48.ets
+
+#26235
+07.expressions/06.spread_expression/spex_meth_13.ets
+07.expressions/06.spread_expression/spex_meth_15.ets

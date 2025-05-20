@@ -48,7 +48,7 @@ package std.core;
     public override toString(): string {
         return "" {%- if narg != 0 %} + {%- endif -%}
         {% for membIdx in range(narg) %}
-            this.${{membIdx}}!.toString() {%- if membIdx != narg-1 %} + "," + {%- endif %}
+            this.${{membIdx}} {%- if membIdx != narg-1 %} + "," + {%- endif %}
         {%- endfor %}
     }
 {%- endmacro -%}
@@ -70,9 +70,9 @@ export class Tuple{{ narg }}{{ genTupleTypeParamsList(narg) }} implements Tuple
 
 export class TupleN implements Tuple
 {
-    $tupleValues: NullishType[]
+    $tupleValues: Any[]
 
-    constructor(...p: NullishType[]) {
+    constructor(...p: Any[]) {
         this.$tupleValues = p;
     }
 }

@@ -664,6 +664,7 @@ class JSONWriter {
     }
 
     private writeObject(obj: NullishType): void {
+        obj = __narrowAny(obj)
         if (obj === null) {
             this.buffer.append("null")
         } else if (obj === undefined) {
@@ -1006,7 +1007,7 @@ class JSONWriter {
 
         const arrayLength = arrayValue.getLength() as int
         if (arrayLength > 0) {
-            const array: Object = arrayValue.getData()!
+            const array: Object = __narrowAny(arrayValue.getData())!
 
             this.path.add(array)
 
@@ -1129,7 +1130,7 @@ class JSONWriter {
             return
         }
 
-        const cycleDetected = this.path.has(obj)
+        const cycleDetected = this.path.has(__narrowAny<object>(obj))
         if (cycleDetected) {
             throw new TypeError("cyclic object value")
         }

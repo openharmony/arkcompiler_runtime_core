@@ -240,13 +240,13 @@ export abstract class Value extends Object {
         } else if (t instanceof VoidType) {
             return VoidValue.INSTANCE
         } else if (t instanceof ClassType) {
-            return new ClassValue(t as ClassType, o!)
+            return new ClassValue(t as ClassType, __narrowAny(o)!)
         } else if (t instanceof ArrayType) {
-            return new ArrayValue(t as ArrayType, o!)
+            return new ArrayValue(t as ArrayType, __narrowAny(o)!)
         } else if (t instanceof StringType) {
             return new StringValue(t as StringType, o! as string)
         } else if (t instanceof LambdaType) {
-            return new LambdaValue(t as LambdaType, o!)
+            return new LambdaValue(t as LambdaType, __narrowAny(o)!)
         } else if (t instanceof MethodType) {
             throw new Error("The MethodType cannot be instantiated")
         } else if (t instanceof EnumType) {
@@ -436,11 +436,11 @@ export final class ClassValue extends Value {
         } else if (ft.assignableFrom(StringType.REF) && val instanceof StringValue) {
             ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as ArrayValue).getData()!)
+            ValueAPISetFieldByNameObject(this.data, name, __narrowAny((val as ArrayValue).getData())!)
         } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
-            ValueAPISetFieldByNameObject(this.data, name, val.getData()!)
+            ValueAPISetFieldByNameObject(this.data, name, __narrowAny(val.getData())!)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as LambdaValue).getData()!)
+            ValueAPISetFieldByNameObject(this.data, name, __narrowAny((val as LambdaValue).getData())!)
         } else if (ft instanceof DoubleType && val instanceof ByteValue) {
             ValueAPISetFieldByNameDouble(this.data, name, val.getValueData())
         } else if (ft instanceof DoubleType && val instanceof ShortValue) {
@@ -526,11 +526,11 @@ export final class ClassValue extends Value {
         } else if (ft instanceof StringType && val instanceof StringValue) {
             ValueAPISetFieldObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetFieldObject(this.data, i, (val as ArrayValue).getData()!)
+            ValueAPISetFieldObject(this.data, i, __narrowAny((val as ArrayValue).getData())!)
         } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
-            ValueAPISetFieldObject(this.data, i, (val as ClassValue).getData()!)
+            ValueAPISetFieldObject(this.data, i, __narrowAny((val as ClassValue).getData())!)
         } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
-            ValueAPISetFieldObject(this.data, i, val.getData()!)
+            ValueAPISetFieldObject(this.data, i, __narrowAny(val.getData())!)
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
@@ -661,9 +661,9 @@ export final class ArrayValue extends Value {
         } else if (et instanceof StringType && val instanceof StringValue) {
             ValueAPISetElementObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (et instanceof ArrayType && val instanceof ArrayValue) {
-            ValueAPISetElementObject(this.data, i, (val as ArrayValue).getData()!)
+            ValueAPISetElementObject(this.data, i, __narrowAny((val as ArrayValue).getData())!)
         } else if (et instanceof ClassType && val instanceof ClassValue) {
-            ValueAPISetElementObject(this.data, i, (val as ClassValue).getData()!)
+            ValueAPISetElementObject(this.data, i, __narrowAny((val as ClassValue).getData())!)
         } else {
             throw new Error("Cannot assign array of type " + et + " with value of type " + vt)
         }

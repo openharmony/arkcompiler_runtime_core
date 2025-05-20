@@ -35,7 +35,7 @@ export final class Runtime {
       *
       * @returns true if items are equal
       */
-    public static equals(o1: NullishType, o2: NullishType): boolean {
+    public static equals(o1: Any, o2: Any): boolean {
         if (Runtime.isSameReference(o1, null)) {
             return Runtime.isSameReference(o2, null)
         }
@@ -58,7 +58,7 @@ export final class Runtime {
      *
      * @returns true if items are equal 'by value'
      */
-    public static sameValue(o1: NullishType, o2: NullishType): boolean {
+    public static sameValue(o1: Any, o2: Any): boolean {
         if (Runtime.isSameReference(o1, null)) {
             return Runtime.isSameReference(o2, null)
         }
@@ -110,7 +110,7 @@ export final class Runtime {
         }
     }
 
-    public static sameValueZero(o1: NullishType, o2: NullishType): boolean {
+    public static sameValueZero(o1: Any, o2: Any): boolean {
         if (Runtime.sameValue(o1, o2)) {
             return true;
         }
@@ -138,7 +138,7 @@ export final class Runtime {
      *
      * @returns true if Objects are equal
      */
-    public static native isSameReference(o1: NullishType, o2: NullishType): boolean;
+    public static native isSameReference(o1: Any, o2: Any): boolean;
 
     /**
      * Internal entrypoint to create exception for failed type cast
@@ -149,14 +149,14 @@ export final class Runtime {
      *
      * @returns exception object to throw
      */
-    static native failedTypeCastException(src: NullishType, dstStr: string): ClassCastError
+    static native failedTypeCastException(src: Any, dstStr: string): ClassCastError
 
-    native static __getTypeInfo(o: NullishType): Class|undefined;
+    native static __getTypeInfo(o: Any): Class|undefined;
 
-    native static allocSameTypeArray<T extends FixedArray<NullishType>>(type: Class, length: int): T;
+    native static allocSameTypeArray<T extends FixedArray<Any>>(type: Class, length: int): T;
 
-    static addFrontElementsStub(original: FixedArray<__T>, front: FixedArray<__T>): FixedArray<__T> {
-        let res = Runtime.allocSameTypeArray<FixedArray<__T>>(Class.of(original), original.length + front.length)
+    static addFrontElementsStub(original: FixedArray<Any>, front: FixedArray<Any>): FixedArray<Any> {
+        let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length + front.length)
         for (let i: int = 0; i < front.length; ++i) {
             res[i] = front[i]
         }
@@ -166,19 +166,19 @@ export final class Runtime {
         return res
     }
 
-    static removeFrontElementsStub(original: FixedArray<__T>, count: int): FixedArray<__T> {
-        let res = Runtime.allocSameTypeArray<FixedArray<__T>>(Class.of(original), original.length - count)
+    static removeFrontElementsStub(original: FixedArray<Any>, count: int): FixedArray<Any> {
+        let res = Runtime.allocSameTypeArray<FixedArray<Any>>(Class.of(original), original.length - count)
         for (let i: int = count; i < original.length; ++i) {
             res[i - count] = original[i]
         }
         return res
     }
 
-    static restArgumentsUnderapplicationStub(rest: FixedArray<__T>, required: int): FixedArray<__T> {
+    static restArgumentsUnderapplicationStub(rest: FixedArray<Any>, required: int): FixedArray<Any> {
         if (rest.length >= required) {
             return rest
         }
-        let newRest : FixedArray<__T> = new __T[required]
+        let newRest : FixedArray<Any> = new Any[required]
         for (let i: int = 0; i < rest.length; ++i) {
             newRest[i] = rest[i]
         }
@@ -189,18 +189,23 @@ export final class Runtime {
     }
 }
 
-export function __runtimeEquals(o1: NullishType, o2: NullishType): boolean {
+// Deprecated. Narrow the value to type T or to default (object | null | undefined).
+export function __narrowAny<T = (object | null | undefined)>(v: Any): T {
+    return v as T
+}
+
+export function __runtimeEquals(o1: Any, o2: Any): boolean {
     return Runtime.equals(o1, o2)
 }
 
-export function __runtimeSameValueZero(o1: NullishType, o2: NullishType): boolean {
+export function __runtimeSameValueZero(o1: Any, o2: Any): boolean {
     return Runtime.sameValueZero(o1, o2)
 }
 
-export function __runtimeSameValue(o1: NullishType, o2: NullishType): boolean {
+export function __runtimeSameValue(o1: Any, o2: Any): boolean {
     return Runtime.sameValue(o1, o2)
 }
 
-export function __runtimeIsSameReference(o1: NullishType, o2: NullishType): boolean {
+export function __runtimeIsSameReference(o1: Any, o2: Any): boolean {
     return Runtime.isSameReference(o1, o2)
 }
