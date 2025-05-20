@@ -183,14 +183,14 @@ bool ThreadedCoroutineManager::Launch(CompletionEvent *completionEvent, Method *
                                       CoroutinePriority priority)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch started";
-
-    bool result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), priority);
+    auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
+    bool result = LaunchImpl(std::move(epInfo), entrypoint->GetFullName(), priority);
     if (!result) {
         ThrowOutOfMemoryError("Launch failed");
     }
 
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::Launch finished";
-    return true;
+    return result;
 }
 
 bool ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEvent *completionEvent,
@@ -201,6 +201,20 @@ bool ThreadedCoroutineManager::LaunchImmediately([[maybe_unused]] CompletionEven
 {
     LOG(FATAL, COROUTINES) << "ThreadedCoroutineManager::LaunchImmediately not supported";
     return false;
+}
+
+bool ThreadedCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
+                                            [[maybe_unused]] CoroutineLaunchMode mode, CoroutinePriority priority)
+{
+    LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative started";
+    auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
+    bool result = LaunchImpl(epInfo, std::move(coroName), priority);
+    if (!result) {
+        ThrowOutOfMemoryError("Launch failed");
+    }
+
+    LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchNative finished";
+    return result;
 }
 
 bool ThreadedCoroutineManager::RegisterWaiter(Coroutine *waiter, CoroutineEvent *awaitee)
@@ -380,17 +394,14 @@ CoroutineWorker *ThreadedCoroutineManager::ChooseWorkerForCoroutine([[maybe_unus
     return workers_[0];
 }
 
-bool ThreadedCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
-                                          PandaVector<Value> &&arguments, CoroutinePriority priority,
+bool ThreadedCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutinePriority priority,
                                           bool startSuspended)
 {
     os::memory::LockHolder l(coroSwitchLock_);
 #ifndef NDEBUG
     PrintRunnableQueue("LaunchImpl begin");
 #endif
-    auto coroName = entrypoint->GetFullName();
-    Coroutine *co = CreateCoroutineInstance(completionEvent, entrypoint, std::move(arguments), std::move(coroName),
-                                            Coroutine::Type::MUTATOR, priority);
+    Coroutine *co = CreateCoroutineInstance(std::move(epInfo), std::move(coroName), Coroutine::Type::MUTATOR, priority);
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::LaunchImpl: failed to create a coroutine!";

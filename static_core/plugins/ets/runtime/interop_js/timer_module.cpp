@@ -148,24 +148,32 @@ void TimerModule::StopTimer(ani_env *env, ani_int timerId)
 
 void TimerModule::TimerCallback(uv_timer_t *timer)
 {
-    ani_env *env = ark::ets::EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
-    auto timerId = reinterpret_cast<uint64_t>(timer->data);
-    auto [info, exists] = FindTimerInfo(env, timerId);
-    if (!exists) {
-        DisarmTimer(timer);
-        return;
-    }
+    auto timerFunc = [](void *param) {
+        auto *timerHandle = static_cast<uv_timer_t *>(param);
+        auto *env = ark::ets::EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+        auto timerId = reinterpret_cast<uint64_t>(timerHandle->data);
+        auto [info, exists] = FindTimerInfo(env, timerId);
+        if (!exists) {
+            DisarmTimer(timerHandle);
+            return;
+        }
 
-    TimerInfo timerInfo(info);
-    auto oneShotTimer = timerInfo.IsOneShotTimer(env);
-    if (oneShotTimer) {
-        DisarmTimer(timer);
-        ClearTimerInfo(env, timerId);
-    }
-    timerInfo.InvokeCallback(env);
-    if (!oneShotTimer) {
-        uv_timer_again(timer);
-    }
+        TimerInfo timerInfo(info);
+        auto oneShotTimer = timerInfo.IsOneShotTimer(env);
+        if (oneShotTimer) {
+            DisarmTimer(timerHandle);
+            ClearTimerInfo(env, timerId);
+        }
+        timerInfo.InvokeCallback(env);
+        if (!oneShotTimer) {
+            uv_timer_again(timerHandle);
+        }
+    };
+    auto timerId = reinterpret_cast<uint64_t>(timer->data);
+    auto coroName = "Timer callback: " + ark::ToPandaString(timerId);
+    ark::ets::EtsCoroutine::GetCurrent()->GetCoroutineManager()->LaunchNative(timerFunc, timer, std::move(coroName),
+                                                                              ark::CoroutineLaunchMode::SAME_WORKER,
+                                                                              ark::ets::EtsCoroutine::TIMER_CALLBACK);
 }
 
 void TimerModule::DisarmTimer(uv_timer_t *timer)

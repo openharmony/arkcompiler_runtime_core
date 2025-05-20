@@ -48,6 +48,8 @@ public:
                 CoroutineLaunchMode mode, CoroutinePriority priority) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                            CoroutineLaunchMode mode, CoroutinePriority priority) override;
+    bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
+                      CoroutinePriority priority) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -91,8 +93,8 @@ protected:
     CoroutineWorker *ChooseWorkerForCoroutine([[maybe_unused]] Coroutine *co);
 
 private:
-    bool LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                    CoroutinePriority priority, bool startSuspended = true);
+    bool LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutinePriority priority,
+                    bool startSuspended = true);
     void ScheduleImpl();
     void UnblockWaitersImpl(CoroutineEvent *blocker) REQUIRES(coroSwitchLock_);
 
