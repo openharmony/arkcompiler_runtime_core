@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -373,8 +373,38 @@ EtsString *DoubleToExponential(double number, int digit)
 EtsString *DoubleToFixed(double number, int digit)
 {
     PandaStringStream ss;
-    ss << std::setiosflags(std::ios::fixed) << std::setprecision(digit) << number;
-    return EtsString::CreateFromMUtf8(ss.str().c_str());
+    const double scientificNotationThreshold = 1e21;
+    if (std::fabs(number) < scientificNotationThreshold) {
+        ss << std::setiosflags(std::ios::fixed) << std::setprecision(digit) << number;
+        return EtsString::CreateFromMUtf8(ss.str().c_str());
+    }
+
+    ss << std::defaultfloat << std::setprecision(digit) << number;
+    auto str = ss.str();
+    auto ePos = str.find('e');
+    if (ePos == PandaString::npos) {
+        return EtsString::CreateFromMUtf8(str.c_str());
+    }
+
+    auto dotPos = str.find('.');
+    if (dotPos == PandaString::npos || dotPos >= ePos) {
+        return EtsString::CreateFromMUtf8(str.c_str());
+    }
+
+    bool allZero = true;
+    for (size_t i = dotPos + 1; i < ePos; ++i) {
+        if (str[i] != '0') {
+            allZero = false;
+            break;
+        }
+    }
+
+    const size_t digitsAfterDotToKeep = 2;
+    if (allZero) {
+        str.erase(dotPos + digitsAfterDotToKeep, ePos - dotPos - digitsAfterDotToKeep);
+    }
+
+    return EtsString::CreateFromMUtf8(str.c_str());
 }
 
 EtsString *DoubleToPrecision(double number, int digit)
@@ -386,8 +416,8 @@ EtsString *DoubleToPrecision(double number, int digit)
     double positiveNumber = number > 0 ? number : -number;
     int logDigit = std::floor(log10(positiveNumber));
     int radixDigit = digit - logDigit - 1;
-    const int maxExponentDigit = 6;
-    if ((logDigit >= 0 && radixDigit >= 0) || (logDigit < 0 && radixDigit <= maxExponentDigit)) {
+    const int minExponentDigit = -6;
+    if (logDigit >= minExponentDigit && logDigit < digit) {
         return DoubleToFixed(number, std::abs(radixDigit));
     }
     return DoubleToExponential(number, digit - 1);
