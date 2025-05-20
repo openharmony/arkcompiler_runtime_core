@@ -14,25 +14,25 @@
  */
 
 function foo1(a: int, b: string, c?: boolean, d: number = 1): boolean {
-    return a === 1 && b === "str" && c === undefined && d === 1;
+    return a === 1 && b === 'str' && c === undefined && d === 1;
 }
 
 function foo2(a: int, b: string, c?: boolean, d: number = 1): boolean {
-    return a === 1 && b === "str" && c === true && d === 1;
+    return a === 1 && b === 'str' && c === true && d === 1;
 }
 
 function foo3(a: int, b: string, c?: boolean, d: number = 1): boolean {
-    return a === 1 && b === "str" && c === true && d === 2;
+    return a === 1 && b === 'str' && c === true && d === 2;
 }
 
 function fun1(a: int, b: string, c: boolean = true, d?: number): boolean {
-    return a === 1 && b === "str" && c === true && d === undefined;
+    return a === 1 && b === 'str' && c === true && d === undefined;
 }
 
 function fun2(a: int, b: string, c: boolean = true, d?: number): boolean {
-    return a === 1 && b === "str" && c === false && d === undefined;
+    return a === 1 && b === 'str' && c === false && d === undefined;
 }
 
 function fun3(a: int, b: string, c: boolean = true, d?: number): boolean {
-    return a === 1 && b === "str" && c === false && d === 2;
+    return a === 1 && b === 'str' && c === false && d === 2;
 }

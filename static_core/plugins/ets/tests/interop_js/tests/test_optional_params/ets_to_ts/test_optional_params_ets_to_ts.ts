@@ -22,18 +22,18 @@ let fun1 = etsVm.getFunction('Loptional_params/ETSGLOBAL;', 'fun1');
 let fun2 = etsVm.getFunction('Loptional_params/ETSGLOBAL;', 'fun2');
 let fun3 = etsVm.getFunction('Loptional_params/ETSGLOBAL;', 'fun3');
 
-function unreachable() {
+function unreachable(): void {
     ASSERT_TRUE(false);
 }
 
-function main() {
-    ASSERT_TRUE(foo1(1, "str"));
-    ASSERT_TRUE(foo2(1, "str", true));
-    ASSERT_TRUE(foo3(1, "str", true, 2));
+function main(): void {
+    ASSERT_TRUE(foo1(1, 'str'));
+    ASSERT_TRUE(foo2(1, 'str', true));
+    ASSERT_TRUE(foo3(1, 'str', true, 2));
 
-    ASSERT_TRUE(fun1(1, "str"));
-    ASSERT_TRUE(fun2(1, "str", false));
-    ASSERT_TRUE(fun3(1, "str", false, 2));
+    ASSERT_TRUE(fun1(1, 'str'));
+    ASSERT_TRUE(fun2(1, 'str', false));
+    ASSERT_TRUE(fun3(1, 'str', false, 2));
 
     // test if the non-optional non-default parameter is lost
     // for function
@@ -41,7 +41,7 @@ function main() {
         foo1();
         unreachable();
     } catch (e) {
-        ASSERT_TRUE(e.message.includes("wrong argc"));
+        ASSERT_TRUE(e.message.includes('wrong argc'));
     }
 }
 

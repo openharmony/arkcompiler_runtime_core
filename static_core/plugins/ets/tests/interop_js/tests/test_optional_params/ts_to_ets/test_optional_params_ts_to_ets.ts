@@ -14,29 +14,29 @@
  */
 
 export function foo1(a: number, b: string, c?: boolean, d: number = 1): void {
-    ASSERT_TRUE(a === 1 && b === "str" && c === undefined && d === 1);
+    ASSERT_TRUE(a === 1 && b === 'str' && c === undefined && d === 1);
 }
 
 export function foo2(a: number, b: string, c?: boolean, d: number = 1): void {
-    ASSERT_TRUE(a === 1 && b === "str" && c === true && d === 1);
+    ASSERT_TRUE(a === 1 && b === 'str' && c === true && d === 1);
 }
 
 export function foo3(a: number, b: string, c?: boolean, d: number = 1): void {
-    ASSERT_TRUE(a === 1 && b === "str" && c === true && d === 2);
+    ASSERT_TRUE(a === 1 && b === 'str' && c === true && d === 2);
 }
 
 export function fun1(a: number, b: string, c: boolean = true, d?: number): void {
-    ASSERT_TRUE(a === 1 && b === "str" && c === true && d === undefined);
+    ASSERT_TRUE(a === 1 && b === 'str' && c === true && d === undefined);
 }
 
 export function fun2(a: number, b: string, c: boolean = true, d?: number): void {
-    ASSERT_TRUE(a === 1 && b === "str" && c === false && d === undefined);
+    ASSERT_TRUE(a === 1 && b === 'str' && c === false && d === undefined);
 }
 
 export function fun3(a: number, b: string, c: boolean = true, d?: number): void {
-    ASSERT_TRUE(a === 1 && b === "str" && c === false && d === 2);
+    ASSERT_TRUE(a === 1 && b === 'str' && c === false && d === 2);
 }
 
 const etsVm = globalThis.gtest.etsVm;
-let test_optional_params = etsVm.getFunction('Loptional_params/ETSGLOBAL;', 'test_optional_params');
-test_optional_params();
+let testOptionalParams = etsVm.getFunction('Loptional_params/ETSGLOBAL;', 'testOptionalParams');
+testOptionalParams();

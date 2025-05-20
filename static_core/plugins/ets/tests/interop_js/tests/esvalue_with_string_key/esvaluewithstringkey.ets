@@ -17,95 +17,85 @@ import {
     A,
 } from 'esvaluewithstringkey_js';
 
-
-function check_field_access_by_dot(): int {
+function checkFieldAccessByDot(): int {
     let e: JSValue = new A();
     let res = e.Ekko;
-    if (res == 'ekko') {
+    if (res === 'ekko') {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
 
-
-function check_esvalue_with_string_literal(): int {
+function checkEsvalueWithStringLiteral(): int {
     let e: JSValue = new A();
     let res = e['Ekko'];
-    if (res == 'ekko') {
+    if (res === 'ekko') {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
 
-function check_esvalue_with_string_key() : int {
-    let e:  JSValue = new A();
-    let string_key: string = 'Ekko';
-    let res = e[string_key];
-    if (res == 'ekko') {
+function checkEsvalueWithStringKey() : int {
+    let e: JSValue = new A();
+    let stringKey: string = 'Ekko';
+    let res = e[stringKey];
+    if (res === 'ekko') {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
 
-
-function foo (es: JSValue, str: string): string {
+function foo(es: JSValue, str: string): string {
     return es[str];
 }
 
-function check_esvalue_with_string_from_foo() : int {
-    let es:  JSValue = new A();
-    let string_key: string = 'Ekko';
-    let res: string = foo(es, string_key);
+function checkEsvalueWithStringFromFoo() : int {
+    let es: JSValue = new A();
+    let stringKey: string = 'Ekko';
+    let res: string = foo(es, stringKey);
 
-    if (res == 'ekko') {
+    if (res === 'ekko') {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
 
-function check_esvalue_with_expression(): int {
-    let es:  JSValue = new A();
-    let string_key: string = 'Ekk';
-    let res = es[string_key + 'o'];
+function checkEsvalueWithExpression(): int {
+    let es: JSValue = new A();
+    let stringKey: string = 'Ekk';
+    let res = es[stringKey + 'o'];
 
-    if (res == 'ekko') {
+    if (res === 'ekko') {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
 
-function check_esvalue_with_expression_str_literals(): int {
-    let es:  JSValue = new A();
+function checkEsvalueWithExpressionStrLiterals(): int {
+    let es: JSValue = new A();
     let res = es['Ekk' + 'o'];
 
-    if (res == 'ekko') {
+    if (res === 'ekko') {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
 
-function check_esvalue_with_expression_strings(): int {
-    let es:  JSValue = new A();
-    let string_key_1: string = 'Ekk';
-    let string_key_2: string = 'o';
-    let res = es[string_key_1 + string_key_2];
+function checkEsvalueWithExpressionStrings(): int {
+    let es: JSValue = new A();
+    let stringKey1: string = 'Ekk';
+    let stringKey2: string = 'o';
+    let res = es[stringKey1 + stringKey2];
 
-    if (res == 'ekko') {
+    if (res === 'ekko') {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
