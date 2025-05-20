@@ -87,42 +87,42 @@ function checkWrapNumber(): boolean {
 function checkWrapByte(): boolean {
     let val: byte = 111;
     let obj = ESValue.wrapByte(val);
-    return obj.toNumber() as byte == val;
+    return Double.toByte(obj.toNumber()) == val;
 }
 
 // wrapShort(s: short): ESValue
 function checkWrapShort(): boolean {
     let val: short = 111;
     let obj = ESValue.wrapShort(val);
-    return obj.toNumber() as short == val;
+    return Double.toShort(obj.toNumber()) == val;
 }
 
 // wrapInt(i: int): ESValue
 function checkWrapInt(): boolean {
     let val: int = 111;
     let obj = ESValue.wrapInt(val);
-    return obj.toNumber() as int == val;
+    return Double.toInt(obj.toNumber()) == val;
 }
 
 // wrapLong(l: long): ESValue
 function checkWrapLong(): boolean {
     let val: long = 111;
     let obj = ESValue.wrapLong(val);
-    return obj.toNumber() as long == val;
+    return Double.toLong(obj.toNumber()) == val;
 }
 
 // wrapFloat(f: float): ESValue
 function checkWrapFloat(): boolean {
     let val: float = 111;
     let obj = ESValue.wrapFloat(val);
-    return obj.toNumber() as float == val;
+    return Double.toFloat(obj.toNumber()) == val;
 }
 
 // wrapDouble(d: double): ESValue
 function checkWrapDouble(): boolean {
     let val: double = 111;
     let obj = ESValue.wrapDouble(val);
-    return obj.toNumber() as double == val;
+    return obj.toNumber() == val;
 }
 
 // isBoolean(eo: ESValue): boolean
@@ -283,8 +283,8 @@ function checkGetPropertySafe(): boolean {
 // setProperty(name: string, value: ESValue): void
 function checkSetPropertyByName(): boolean {
     let value = ESValue.wrapNumber(5);
-    jsObjectA.setProperty("property2", value);
-    let val = jsObjectA.getProperty("property2");
+    jsObjectA.setProperty("property1", value);
+    let val = jsObjectA.getProperty("property1");
     return val.toNumber() == 5;
 }
 
@@ -299,7 +299,7 @@ function checkSetPropertyByIndex(): boolean {
 // setProperty(property: ESValue, value: ESValue): void
 function checkSetProperty(): boolean {
     let value = ESValue.wrapNumber(5);
-    let property = ESValue.wrapString("property2");
+    let property = ESValue.wrapString("property1");
     jsObjectA.setProperty(property, value);
     let val = jsObjectA.getProperty(property);
     return val.toNumber() == 5;

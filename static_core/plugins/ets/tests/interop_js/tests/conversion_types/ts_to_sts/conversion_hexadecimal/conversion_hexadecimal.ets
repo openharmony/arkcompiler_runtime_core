@@ -16,49 +16,49 @@
 import { tsHexadecimal, systemHexadecimal } from 'main_js';
 
 function checkConversionHexadecimalToInt(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as int;
+    const val = Double.toInt(parseInt(tsHexadecimal, systemHexadecimal as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionHexadecimalToNumber(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as number;
+    const val = parseInt(tsHexadecimal, systemHexadecimal as int);
 
     return typeof val == 'number';
 }
 
 function checkConversionHexadecimalToFloat(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as float;
+    const val = Double.toFloat(parseInt(tsHexadecimal, systemHexadecimal as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionHexadecimalToByte(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as byte;
+    const val = Double.toByte(parseInt(tsHexadecimal, systemHexadecimal as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionHexadecimalToShort(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as short;
+    const val = Double.toShort(parseInt(tsHexadecimal, systemHexadecimal as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionHexadecimalToLong(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as long;
+    const val = Double.toLong(parseInt(tsHexadecimal, systemHexadecimal as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionHexadecimalToDouble(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as double;
+    const val = parseInt(tsHexadecimal, systemHexadecimal as int);
 
     return typeof val == 'number';
 }
 
 function checkConversionHexadecimalToChar(): boolean {
-    const val = parseInt(tsHexadecimal, systemHexadecimal as int) as char;
+    const val = Int.toChar(Double.toInt(parseInt(tsHexadecimal, systemHexadecimal as int)));
 
     return typeof val == 'number';
 }

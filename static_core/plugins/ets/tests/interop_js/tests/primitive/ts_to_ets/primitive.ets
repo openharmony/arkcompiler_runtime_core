@@ -26,7 +26,7 @@ function checkByte(val: byte) {
 }
 
 function checkByteOverflow(val: byte, oriVal: int) {
-    assertTrue(val == oriVal as byte)
+    assertTrue(val == Int.toByte(oriVal))
 }
 
 function checkByteBoxed(val: Byte) {
@@ -42,7 +42,7 @@ function checkShortBoxed(val: Short) {
 }
 
 function checkShortOverflow(val: short, oriVal: int) {
-    assertTrue(val == oriVal as short)
+    assertTrue(val == Int.toShort(oriVal))
 }
 
 function checkInt(val: int) {
@@ -54,7 +54,7 @@ function checkIntBoxed(val: Int) {
 }
 
 function checkIntOverflow(val: int, oriVal: long) {
-    assertTrue(val == oriVal as int)
+    assertTrue(val == Long.toInt(oriVal))
 }
 
 function checkLong(val: long) {
@@ -74,7 +74,7 @@ function checkFloatBoxed(val: Float) {
 }
 
 function checkFloatOverflow(val: float, oriVal: number) {
-    assertTrue(val == oriVal as float)
+    assertTrue(val == Double.toFloat(oriVal))
 }
 
 function checkDouble(val: double) {
