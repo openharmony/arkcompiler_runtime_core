@@ -550,13 +550,13 @@ SaveStateInst *FindPreHeaderSaveState(Loop *loop)
 size_t CountOuterLoopSuccs(BasicBlock *block)
 {
     return std::count_if(block->GetSuccsBlocks().begin(), block->GetSuccsBlocks().end(),
-                         [block](auto succ) { return succ->GetLoop() == block->GetLoop()->GetOuterLoop(); });
+                         [block](auto succ) { return block->GetLoop()->IsInside(succ->GetLoop()); });
 }
 
 BasicBlock *GetOuterLoopSucc(BasicBlock *block)
 {
     auto found = std::find_if(block->GetSuccsBlocks().begin(), block->GetSuccsBlocks().end(),
-                              [block](auto succ) { return succ->GetLoop() == block->GetLoop()->GetOuterLoop(); });
+                              [block](auto succ) { return block->GetLoop()->IsInside(succ->GetLoop()); });
     return found != block->GetSuccsBlocks().end() ? *found : nullptr;
 }
 

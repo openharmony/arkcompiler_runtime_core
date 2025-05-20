@@ -446,3 +446,35 @@ function main(): int {
     assertEQ(toString11("abcde"), "abcde1", "Wrong at toString10")
     return 0;
 }
+
+// Checker below based on plugins/ets/sdk/api/@ohos.url.ets
+// Expected successful compilation
+
+//! CHECKER       AOT IR Builder, Bugfix 25869
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*encodePercentEncoding.*' --compiler-inlining=false --compiler-check-final=false"
+
+const HASH_TABLE: Array<string> = new Array<string>(256);
+const NO_ESCAPE_TABLE = new Int8Array(256);
+
+function encodePercentEncoding(str: string) {
+    let outVal = '';
+
+    const len = str.length;
+    let i = 0;
+    const UNICODE_0x80 = 0x80;
+
+    outer:
+    for (; i < len; i++) {
+        let c = str.charCodeAt(i as number);
+
+        while (c < UNICODE_0x80) {
+            if (NO_ESCAPE_TABLE[c] !== 1) {
+                outVal += HASH_TABLE[c];
+            }
+            if (++i == len)
+                break outer;
+        }
+    }
+    return outVal;
+}
