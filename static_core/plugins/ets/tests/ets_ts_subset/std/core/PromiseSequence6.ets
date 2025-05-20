@@ -15,29 +15,29 @@
 
 function checkSequence(actual: Array<number>, expectedLength: number): void {
     if (actual.length != expectedLength) {
-        console.log("Test failed. Expected sequence length " + expectedLength + ", but got " + actual.length);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
+        throw new Error('Test failed');
     }
     for (let i = 0; i < expectedLength; ++i) {
         if (actual[i] != i + 1) {
-            console.log("Test failed. Expected element at " + i + " to be " + i + ", but got " + actual[i]);
-            throw new Error("Test failed");
+            console.log('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
+            throw new Error('Test failed');
         }
     }
 }
 
 let sequence = new Array<number>();
-let reject: ((err: Error) => void)|null = null;
+let reject: ((err: Error) => void) | null = null;
 let p = new Promise<number>((_: (v: number) => void, _reject: (error: Error) => void) => {
     reject = _reject;
 });
 
 sequence.push(1);
-reject!(new Error("abc"));
+reject!(new Error('abc'));
 
 p.then<void, void>((valule: number): void => {
-    console.log("Test failed. The promise should not be resolved.")
-    throw new Error("Test failed");
+    console.log('Test failed. The promise should not be resolved.')
+    throw new Error('Test failed');
 }, (err: Error): void => {
     sequence.push(3);
     checkSequence(sequence, 3);
@@ -45,12 +45,12 @@ p.then<void, void>((valule: number): void => {
 
 Promise.resolve().then<void>((): void => {
     p.then<void, void>((valule: number): void => {
-        console.log("Test failed. The promise should not be resolved.")
-        throw new Error("Test failed");
+        console.log('Test failed. The promise should not be resolved.')
+        throw new Error('Test failed');
     }, (err: Error): void => {
         sequence.push(5);
         checkSequence(sequence, 5);
-        console.log("Test passed.");
+        console.log('Test passed.');
     });
     sequence.push(4);
     checkSequence(sequence, 4);

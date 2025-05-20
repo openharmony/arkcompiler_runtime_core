@@ -21,10 +21,10 @@ let p = new Promise<Object>((resolve: (v: Object) => void, _: (error: Error) => 
 
 p.then<void, void>((v: Object): void => {
     if (v !== value) {
-        console.log("Test failed. The promise should be resolved by the provided value.");
+        console.log('Test failed. The promise should be resolved by the provided value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 }, (err: Error): void => {
-    console.log("Test failed. The promise should be rejected.");
+    console.log('Test failed. The promise should be rejected.');
 });

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-let resolve: ((value: string) => void)|null = null;
-let reject: ((err: Error) => void)|null = null;
+let resolve: ((value: string) => void) | null = null;
+let reject: ((err: Error) => void) | null = null;
 let p1 = new Promise<string>((_resolve: (v: string)=>void): void => {
     resolve = _resolve;
 });
@@ -22,13 +22,13 @@ let p2 = new Promise<string>((_: (v: string)=>void, _reject: (err: Error)=>void)
     reject = _reject;
 });
 Promise.race<string>([p1, p2]).then<void, void>((value: Object): void => {
-    console.log("Test failed. The promise should not be resolved.");
+    console.log('Test failed. The promise should not be resolved.');
 }, (err: Error): void => {
-    if (!(err instanceof Error) || (err as Error).message != "xyz") {
-        console.log("Test failed. The promise should be rejected by the specified value.");
+    if (!(err instanceof Error) || (err as Error).message != 'xyz') {
+        console.log('Test failed. The promise should be rejected by the specified value.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });
-reject!(new Error("xyz"));
-resolve!("abc");
+reject!(new Error('xyz'));
+resolve!('abc');
