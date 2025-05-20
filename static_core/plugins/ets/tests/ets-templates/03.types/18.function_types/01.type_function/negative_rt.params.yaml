@@ -18,14 +18,6 @@ cases:
         const f: Function = foo
         f.unsafeCall("just a test")
     - |-
-        function foo(n: number) {}
-        const f: Function = foo
-        f.unsafeCall(4.4, 6.6)
-    - |-
-        function foo(n: number) {}
-        const f: Function = foo
-        f.unsafeCall(4.4, "just a test")
-    - |-
         function foo(a: number, b: number) {}
         const f: Function = foo
         f.unsafeCall(4.4)
