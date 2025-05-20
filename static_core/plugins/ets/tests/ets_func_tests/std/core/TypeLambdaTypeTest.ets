@@ -45,6 +45,13 @@ function testGetParameterError(lambdaType: LambdaType): boolean {
     return false
 }
 
+function testLambdaToString(): int {
+    let lambda = () => {}; 
+    let result = lambda.toLocaleString();
+    assertEQ(result,"Cannot get source code of function");
+    return 0
+}
+
 function testLambdaType(): int {
     let foo: () => Base = () : Base => { return new Base() }
     let foo2: (p: Base) => Derived = (p: Base): Derived => { return new Derived() }
@@ -70,6 +77,7 @@ function testLambdaType(): int {
 function main(): int {
     let failures = 0
     failures += testLambdaType()
+    failures += testLambdaToString()
     if (failures == 0) {
         console.println("PASSED: All tests run")
     } else {
