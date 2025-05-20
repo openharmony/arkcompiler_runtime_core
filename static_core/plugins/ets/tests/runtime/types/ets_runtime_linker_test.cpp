@@ -15,11 +15,15 @@
 
 #include <gtest/gtest.h>
 
-#include "ets_coroutine.h"
-#include "ets_vm.h"
-
 #include "types/ets_runtime_linker.h"
 #include "tests/runtime/types/ets_test_mirror_classes.h"
+
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "runtime/include/class_linker.h"
+#include "libpandabase/utils/utf.h"
+
+#include "ets_coroutine.h"
+#include "ets_vm.h"
 
 namespace ark::ets::test {
 
@@ -81,6 +85,25 @@ TEST_F(EtsRuntimeLinkerTest, RuntimeLinkerMemoryLayout)
 {
     EtsClass *runtimeLinkerClass = PlatformTypes(vm_)->coreRuntimeLinker;
     MirrorFieldInfo::CompareMemberOffsets(runtimeLinkerClass, GetClassMembers());
+}
+
+class SuppressErrorHandler : public ark::ClassLinkerErrorHandler {
+    void OnError([[maybe_unused]] ark::ClassLinker::Error error,
+                 [[maybe_unused]] const ark::PandaString &message) override
+    {
+    }
+};
+
+TEST_F(EtsRuntimeLinkerTest, GetClassReturnsNullWhenErrorSuppressed)
+{
+    auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
+        ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
+
+    const auto *fakeDescriptor = reinterpret_cast<const uint8_t *>("Lark/test/Fake;");
+    SuppressErrorHandler handler;
+
+    Class *klass = ext->GetClass(fakeDescriptor, true, nullptr, &handler);
+    ASSERT_EQ(klass, nullptr);
 }
 
 }  // namespace ark::ets::test
