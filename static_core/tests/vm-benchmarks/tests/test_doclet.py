@@ -21,10 +21,12 @@
 import sys
 import pytest  # type: ignore
 from unittest import TestCase
+from dataclasses import asdict
 from unittest.mock import patch
 from vmb.doclet import DocletParser, TemplateVars
 from vmb.helpers import get_plugin
 from vmb.cli import Args
+from vmb.generate import BenchGenerator
 
 ETS_VALID = '''/**
  * @State
@@ -74,6 +76,27 @@ export class ArraySort {
      * @Tags StdLib, StdLib_String, Ohos
      */
     public baseline(): void throws {
+    }
+}
+'''
+
+JS_CLASS = '''/**
+ * @State
+ */
+class ArraySort {
+    size = 1;
+    /**
+     * @Setup
+     */
+    prepareArray() {
+        /* blah */
+    }
+    /**
+     * @Benchmark
+     * @returns {Int}
+     */
+    test() {
+        return this.size;
     }
 }
 '''
@@ -216,7 +239,7 @@ ts_mod = get_plugin('langs', 'ts')
 js_mod = get_plugin('langs', 'js')
 
 
-def test_valid_sts():
+def test_valid_ets():
     ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
@@ -225,6 +248,16 @@ def test_valid_sts():
     test.assertTrue('ArraySort' == parser.state.name)
     test.assertTrue(2 == len(parser.state.params))
     test.assertTrue(2 == len(parser.state.benches))
+
+
+def test_js_class():
+    js = js_mod.Lang()
+    test = TestCase()
+    test.assertIsNotNone(js)
+    parser = DocletParser.create(JS_CLASS, js).parse()
+    test.assertIsNotNone(parser.state)
+    test.assertEqual('ArraySort', parser.state.name)
+    test.assertEqual(1, len(parser.state.benches))
 
 
 def test_duplicate_doclets():
@@ -532,3 +565,19 @@ def test_generator():
     test.assertTrue(parser.state is not None)
     test.assertTrue('X' == parser.state.name)
     test.assertTrue(parser.state.generator == 'gen_classes.py')
+
+
+def test_templates():
+    test = TestCase()
+    ets = ets_mod.Lang()
+    test.assertIsNotNone(ets)
+    parser = DocletParser.create(ETS_VALID, ets).parse()
+    tpl_vars = list(TemplateVars.params_from_parsed('fake src', parser.state))
+    test.assertGreater(len(tpl_vars), 0)
+    with patch.object(sys, 'argv', 'vmb gen -l ets blah'.split()):
+        generator = BenchGenerator(Args())
+        for tpl in ('ets.j2', 'js.j2', 'ts.j2', 'swift.j2'):
+            for v in tpl_vars:
+                template = generator.get_template(tpl)
+                tpl_values = asdict(v)
+                template.render(**tpl_values)

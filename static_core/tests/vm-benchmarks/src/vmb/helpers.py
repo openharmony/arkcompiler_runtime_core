@@ -276,12 +276,17 @@ def create_file(path: Union[str, Path]):
 
 
 def copy_file(src: Union[str, Path], dst: Union[str, Path]) -> None:
-    log.trace('Copy: %s -> %s', str(src), str(dst))
     s = Path(src)
-    d = Path(dst)
     if not s.exists():
         raise RuntimeError(f'File not found: {src}')
-    d.parent.mkdir(parents=True, exist_ok=True)
+    d = Path(dst)
+    if d.is_dir():
+        # copy to existing dir dst
+        d = d.joinpath(s.name)
+    else:
+        # copy to dst as full path
+        d.parent.mkdir(parents=True, exist_ok=True)
+    log.trace('Copy: %s -> %s', str(s), str(d))
     shutil.copy(s, d)
 
 

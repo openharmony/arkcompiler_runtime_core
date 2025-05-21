@@ -31,5 +31,6 @@ class GenSettings:
     src: Set[str]  # extensions for source files
     template: str  # template name
     out: str  # extension for generatad file
-    link_to_src: bool  # softlink from src to bu
+    link_to_src: bool = False  # softlink from src to bu
     link_to_other_src: Set[str] = field(default_factory=set)  # link for src with other extensions
+    print_func: str = ''  # switch b/w console, print, hilog

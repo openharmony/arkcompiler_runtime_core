@@ -326,6 +326,7 @@ class TemplateVars:  # pylint: disable=invalid-name
     bench_name: str = ''
     bench_path: str = ''
     common: str = ''  # common feature is obsoleted
+    print_func: str = ''
     # this should be the only place with defaults
     mi: int = 3
     wi: int = 2
@@ -388,8 +389,9 @@ class TemplateVars:  # pylint: disable=invalid-name
                 tp.bench_name = f'{parsed.name}_{b.name}'
                 if tp.fix_id > 0:
                     tp.bench_name = f'{tp.bench_name}_{tp.fix_id}'
+                # if requested specific tests skip all other
                 if tests_filter and \
-                        not any((x in tp.bench_name) for x in tests_filter):
+                        not any((x == tp.bench_name) for x in tests_filter):
                     fix_id += 1
                     continue
                 tp.state_setup = f'bench.{parsed.setup}();' \

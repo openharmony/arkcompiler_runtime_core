@@ -30,7 +30,7 @@ from vmb.platform import PlatformBase
 
 __all__ = ['main', 'VERSION']
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 log = logging.getLogger("vmb")
 # Inject new log level above info
 logging.addLevelName(PASS_LOG_LEVEL, "PASS")
@@ -98,13 +98,14 @@ def main() -> None:
         bench_units = PlatformBase.search_units(args.paths)
 
     bus, ext_info, timer = runner.run(bench_units)
-
-    if bus:
-        if not args.dry_run:
-            report_main(args, bus=bus, ext_info=ext_info, timer=timer)
-    else:
+    if not bus:
         log.error('No tests run!')
         sys.exit(1)
+    if args.dry_run:
+        sys.exit(0)
+    if args.fail_list:
+        VmbRunner.save_failure_lists(bus, args.fail_list)
+    report_main(args, bus=bus, ext_info=ext_info, timer=timer)
 
 
 if __name__ == '__main__':

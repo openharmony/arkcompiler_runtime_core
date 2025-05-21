@@ -183,9 +183,9 @@ class VMBReport(Jsonable):
     def recalc(self, exclude: OptList = None, tags: Optional[Set[str]] = None,
                skip_tags: Optional[Set[str]] = None) -> None:
         times, sizes, rsss = [], [], []
-        self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, 0, 0
         if not exclude:
             exclude = []
+        self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, len(exclude), 0
         if tags:
             tags = set(t.lower() for t in tags)
             self.report.tests = list(filter(lambda t: tags.intersection(t.tags), self.report.tests))
@@ -194,11 +194,10 @@ class VMBReport(Jsonable):
             log.debug("Skips: %s", skips)
             self.report.tests = list(filter(lambda t: not skips.intersection(t.tags), self.report.tests))
         for t in self.report.tests:
-            self.total_cnt += 1
             name = t.name
             if name in exclude:
-                self.excluded_cnt += 1
                 continue
+            self.total_cnt += 1
             self._name_len = max(self._name_len, len(name))
             if not test_passed(t):
                 self.fail_cnt += 1
@@ -223,6 +222,9 @@ class VMBReport(Jsonable):
                     exclude: OptList = None) -> None:
         self.recalc(exclude=exclude)
         caption(f'{self.title}')
+        s = datetime.strptime(self.report.run.start_time, Timer.tm_format)
+        e = datetime.strptime(self.report.run.end_time, Timer.tm_format)
+        print(f'Run took {e - s}')
         caption(f'{self.summary}')
         print()
         if self.fail_cnt > 0 or full:
@@ -555,6 +557,20 @@ def compare_gc_stats(r1: VMBReport, r2: VMBReport) -> GCComparison:
     return comparison
 
 
+def compare_meta(r1: VMBReport, r2: VMBReport) -> None:
+    rep1 = {t.name: t.full_time for t in r1.report.tests}
+    rep2 = {t.name: t.full_time for t in r2.report.tests}
+    tests1, tests2 = set(rep1.keys()), set(rep2.keys())
+    # pylint: disable-next=protected-access
+    name_len = max(r1._name_len, r2._name_len, len('name'))
+    caption('Full test time comaprison (seconds)')
+    print(f'{"name":<{name_len}}| r1 | r2 |')
+    print('=' * (name_len + 11))
+    for t in tests1.intersection(tests2):
+        t1, t2 = rep1[t], rep2[t]
+        print(f'{t:<{name_len}}|{t1:>4.0f}|{t2:>4.0f}|{diff_str(t1, t2)}')
+
+
 def compare_reports(args):
     if len(args.paths) != 2:
         print('Need 2 reports for comparison')
@@ -565,6 +581,9 @@ def compare_reports(args):
             r1 = VMBReport.parse(f1.read(), tags=args.tags, skip_tags=args.skip_tags)
         with open(args.paths[1], 'r', encoding="utf-8") as f2:
             r2 = VMBReport.parse(f2.read(), tags=args.tags, skip_tags=args.skip_tags)
+        if args.compare_meta:
+            compare_meta(r1, r2)
+            return
         cmp_vmb = VMBReport.compare_vmb(r1, r2, flaky=flaky)
         cmp_vmb.print(full=args.full)
         if args.json:
@@ -623,16 +642,21 @@ def report_main(args: Args,
         Args.print_help(Command.REPORT)
     global TOLERANCE
     TOLERANCE = args.tolerance
-    if args.compare:
+    if args.compare or args.compare_meta:
         compare_reports(args)
     else:
         flaky = read_list_file(args.flaky_list) if args.flaky_list else []
         with open(args.paths[0], 'r', encoding="utf-8") as f:
             r = VMBReport.parse(f.read(), exclude=flaky, tags=args.tags, skip_tags=args.skip_tags)
-        r.text_report(full=args.full, exclude=args.exclude_list)
-        print_flaky(flaky)
-        passed_cnt = r.total_cnt - r.excluded_cnt - r.fail_cnt
-        sys.exit(0 if passed_cnt > 0 and r.fail_cnt == 0 else 1)
+        if not args.status_only:
+            r.text_report(full=args.full, exclude=args.exclude_list)
+            print_flaky(flaky)
+        exit_code = r.get_exit_code()
+        if exit_code == 0:
+            log.passed('Run has no unexpected failures.')
+        else:
+            log.error('Run has %d unexpected failures.', r.fail_cnt)
+        sys.exit(exit_code)
 
 
 if __name__ == '__main__':
