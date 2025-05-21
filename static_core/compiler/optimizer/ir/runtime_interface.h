@@ -1383,6 +1383,11 @@ public:
         return false;
     }
 
+    virtual bool IsIntrinsicStringConcat([[maybe_unused]] IntrinsicId id) const
+    {
+        return false;
+    }
+
     virtual IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId([[maybe_unused]] DataType::Type type) const
     {
         UNREACHABLE();

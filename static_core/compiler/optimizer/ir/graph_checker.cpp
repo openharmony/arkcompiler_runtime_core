@@ -2281,7 +2281,7 @@ void GraphChecker::VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unus
                                                   << *inst << std::endl);
 #ifndef NDEBUG
     auto ss = inst->CastToSaveState();
-    if (ss->GetInputsWereDeleted()) {
+    if (ss->GetInputsWereDeleted() && !ss->GetInputsWereDeletedSafely()) {
         for (auto &user : inst->GetUsers()) {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
                 v, !user.GetInst()->RequireRegMap(),

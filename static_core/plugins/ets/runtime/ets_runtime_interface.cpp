@@ -387,6 +387,20 @@ bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppend(IntrinsicId id) const
     }
 }
 
+bool EtsRuntimeInterface::IsIntrinsicStringConcat(IntrinsicId id) const
+{
+    switch (id) {
+        case IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT2:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT3:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT4:
+            return true;
+        default:
+            return false;
+    }
+}
+
 EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::ConvertTypeToStringBuilderAppendIntrinsicId(
     compiler::DataType::Type type) const
 {

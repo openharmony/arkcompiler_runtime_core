@@ -69,6 +69,7 @@ public:
     bool IsIntrinsicStringBuilderToString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppendString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppend(IntrinsicId id) const override;
+    bool IsIntrinsicStringConcat(IntrinsicId id) const override;
     IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId(compiler::DataType::Type type) const override;
     IntrinsicId GetStringConcatStringsIntrinsicId(size_t numArgs) const override;
     IntrinsicId GetStringIsCompressedIntrinsicId() const override;

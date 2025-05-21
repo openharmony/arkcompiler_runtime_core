@@ -142,10 +142,10 @@
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringConcat2/
+//! INST_COUNT    /StringBuilder::<ctor>/, 1
+//! INST          /Intrinsic.StdCoreSbAppendString2/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/, 1
 //!
 //! METHOD        "ets_string_concat.ETSGLOBAL::concat14"
 //! PASS_BEFORE   "BranchElimination"
@@ -289,10 +289,10 @@
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringConcat2/
+//! INST_COUNT    /StringBuilder::<ctor>/, 1
+//! INST          /Intrinsic.StdCoreSbAppendString2/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
+//! INST_COUNT    /Intrinsic.StdCoreSbToString/, 1
 //!
 //! METHOD        "ets_string_concat.ETSGLOBAL::concat14"
 //! PASS_BEFORE   "BranchElimination"
@@ -360,7 +360,7 @@ function concat11(a: String, b: String): String {
 
 function concat13(): string
 {
-    let str = "" + StringBuilder.toString(1);       // applied
+    let str = "" + StringBuilder.toString(1);       // partially applied, calls StdCoreToStringInt
     return str;
 }
 
