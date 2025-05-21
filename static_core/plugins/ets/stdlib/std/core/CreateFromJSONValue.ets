@@ -30,7 +30,7 @@ export function createFromJSONValue(this: Boolean, json: JSONValue): Boolean {
     } else if (json instanceof JSONTrue) {
         return Boolean.TRUE
     }
-    throw new JSONTypeError('Cannot create Boolean from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Boolean from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -49,7 +49,7 @@ export function createFromJSONValue(this: Byte, json: JSONValue): Byte {
             return num.toByte()
         }
     }
-    throw new JSONTypeError('Cannot create Byte from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Byte from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -68,7 +68,7 @@ export function createFromJSONValue(this: Char, json: JSONValue): Char {
             return Char.valueOf(str.charAt(0))
         }
     }
-    throw new JSONTypeError('Cannot create Char from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Char from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -85,7 +85,7 @@ export function createFromJSONValue(this: Double, json: JSONValue): Double {
     if (json instanceof JSONNumber) {
         return Double.valueOf((json as JSONNumber).value)
     }
-    throw new JSONTypeError('Cannot create Double from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -104,7 +104,7 @@ export function createFromJSONValue(this: Float, json: JSONValue): Float {
             return Float.valueOf(((json as JSONNumber).value).toFloat())
         }
     }
-    throw new JSONTypeError('Cannot create Double from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -123,7 +123,7 @@ export function createFromJSONValue(this: Int, json: JSONValue): Int {
             return Int.valueOf(Double.toInt(num))
         }
     }
-    throw new JSONTypeError('Cannot create Int from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Int from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -142,7 +142,7 @@ export function createFromJSONValue(this: Long, json: JSONValue): Long {
             return Long.valueOf(num.toLong())
         }
     }
-    throw new JSONTypeError('Cannot create Long from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Long from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -161,7 +161,7 @@ export function createFromJSONValue(this: Short, json: JSONValue): Short {
             return Short.valueOf(num.toShort())
         }
     }
-    throw new JSONTypeError('Cannot create Short from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create Short from JSON', {cause: json as Object} as ErrorOptions)
 }
 
 /**
@@ -177,5 +177,5 @@ export function createFromJSONValue(this: String, json: JSONValue): String {
     if (json instanceof JSONString) {
         return (json as JSONString).value
     }
-    throw new JSONTypeError('Cannot create String from JSON', new ErrorOptions(json as Object))
+    throw new JSONTypeError('Cannot create String from JSON', {cause: json as Object} as ErrorOptions)
 }

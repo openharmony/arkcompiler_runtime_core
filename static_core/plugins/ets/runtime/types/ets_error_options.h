@@ -64,7 +64,7 @@ public:
     inline static EtsErrorOptions *Create(EtsCoroutine *etsCoroutine)
     {
         EtsClass *klass = etsCoroutine->GetPandaVM()->GetClassLinker()->GetClass(
-            panda_file_items::class_descriptors::ERROR_OPTIONS.data());
+            panda_file_items::class_descriptors::ERROR_OPTIONS_IMPL.data());
         EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
         return reinterpret_cast<EtsErrorOptions *>(etsObject);
     }
