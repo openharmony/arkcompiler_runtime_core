@@ -61,7 +61,7 @@ class TestSuiteConfigTest1(unittest.TestCase):
             self.workflow_name, self.test_suite_name, "--show-progress", "--verbose", "short",
             "--processes", "12", "--detailed-report", "--detailed-report-file", "my-report",
             "--verbose-filter", "ignored", "--enable-time-report", "--use-llvm-cov", "--qemu", "arm64",
-            "--llvm-cov-profdata-out-path", ".", "--llvm-cov-html-out-path", ".",
+            "--profdata-files-dir", ".", "--coverage-html-report-dir", ".",
             "--time-edges", "1,10,100,500"
         ]
         actual = CliOptions(args).data
