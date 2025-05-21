@@ -227,7 +227,6 @@ test_ts_files = [
 
   "ut/extensions/arkts/inspect_api/api_casts/api_casts",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts_dynamic",
-  "ut/extensions/arkts/modify_api/annotations/annotations_dynamic",
 
   "regression/issue_IB1YEI/issue_IB1YEI",
   "regression/issue_IB2T4M/issue_IB2T4M",
@@ -314,6 +313,107 @@ test_ets_files = [
 test_ets_files += clean_scenario_ets_files
 
 module_output_path = "arkcompiler/runtime_core/libabckit"
+
+template("gen_merge_abc") {
+  merge_datas = invoker.merge_datas
+
+  merge_file_info = merge_datas[0]
+  anno_test_abc =
+      "$target_out_dir/${merge_file_info[0]}/${merge_file_info[1]}.abc"
+  anno_merge_file =
+      "$target_out_dir/${merge_file_info[0]}/${merge_file_info[1]}_merge.txt"
+  anno_path_prefix = rebase_path("$test_js_path")
+  anno_test_merge_path = rebase_path(anno_merge_file)
+  content = ""
+  foreach(data, merge_datas) {
+    if (defined(invoker.is_ohmurl) && invoker.is_ohmurl == true) {
+      item = "$anno_path_prefix/${data[0]}/${data[1]}.ts;&${data[1]}&;esm;${data[1]}.ts;entry;false;ets"
+    } else {
+      item = "$anno_path_prefix/${data[0]}/${data[1]}.ts;${data[1]};esm;${data[1]}.ts;entry;false;ets"
+    }
+    if (content == "") {
+      content = "${content}echo '$item' > $anno_test_merge_path ; "
+    } else {
+      content = "${content}echo '$item' >> $anno_test_merge_path ; "
+    }
+  }
+  action("${target_name}_gen_anno_merge_file") {
+    script = "/usr/bin/sh"
+    args = [
+      "-c",
+      "$content",
+    ]
+    outputs = [ anno_merge_file ]
+  }
+
+  es2abc_gen_abc("${target_name}") {
+    extra_visibility = [ ":*" ]
+    extra_dependencies = [ ":${target_name}_gen_anno_merge_file" ]
+    src_js = "@" + anno_test_merge_path
+    dst_file = rebase_path(anno_test_abc)
+    extra_args = [
+      "--module",
+      "--merge-abc",
+      "--enable-annotations",
+    ]
+    extension = "ts"
+    in_puts = [ anno_merge_file ]
+    out_puts = [ anno_test_abc ]
+  }
+}
+
+gen_merge_abc("gen_anno_abc") {
+  merge_datas = [
+    [
+      "ut/extensions/arkts/modify_api/annotations",
+      "annotations_dynamic",
+    ],
+    [
+      "ut/extensions/arkts/modify_api/annotations",
+      "annotations_imports",
+    ],
+  ]
+}
+
+gen_merge_abc("gen_router_table_abc") {
+  merge_datas = [
+    [
+      "regression/issue_IC78XV/c_api/router_table_ohmurl",
+      "router_table",
+    ],
+    [
+      "regression/issue_IC78XV/c_api/router_table_ohmurl",
+      "modules/IRouterHandler",
+    ],
+    [
+      "regression/issue_IC78XV/c_api/router_table_ohmurl",
+      "modules/routerMap",
+    ],
+    [
+      "regression/issue_IC78XV/c_api/router_table_ohmurl",
+      "modules/xxxHandler",
+    ],
+  ]
+  is_ohmurl = true
+}
+
+gen_merge_abc("gen_replace_call_site_abc") {
+  merge_datas = [
+    [
+      "regression/issue_IC78XV/c_api/replace_call_site_ohmurl",
+      "replace_call_site",
+    ],
+    [
+      "regression/issue_IC78XV/c_api/replace_call_site_ohmurl",
+      "modules/ApiControl",
+    ],
+    [
+      "regression/issue_IC78XV/c_api/replace_call_site_ohmurl",
+      "modules/layout",
+    ],
+  ]
+  is_ohmurl = true
+}
 
 foreach(file, test_js_files) {
   test_js = "${test_js_path}${file}.js"
@@ -565,6 +665,8 @@ libabckit_host_unittest_action("abckit_gtests") {
     "regression/issue_IB1YEI/c_api/issue_IB1YEI.cpp",
     "regression/issue_IB1YEI/cpp_api/issue_IB1YEI.cpp",
     "regression/issue_IB2T4M/c_api/issue_IB2T4M.cpp",
+    "regression/issue_IC78XV/c_api/replace_call_site_ohmurl/replace_call_site_test.cpp",
+    "regression/issue_IC78XV/c_api/router_table_ohmurl/router_table_test.cpp",
     "scenarios/add_log/add_log_dynamic_test.cpp",
     "scenarios/add_log/add_log_static_test.cpp",
     "scenarios/add_try_catch/dynamic/add_try_catch_test.cpp",
@@ -748,6 +850,12 @@ libabckit_host_unittest_action("abckit_gtests") {
   foreach(file, test_ets_files) {
     deps += [ ":gen_${file}_abc" ]
   }
+
+  deps += [
+    ":gen_anno_abc",
+    ":gen_replace_call_site_abc",
+    ":gen_router_table_abc",
+  ]
 
   if (is_ohos && is_standard_system) {
     test_abc_dir = "/data/test"

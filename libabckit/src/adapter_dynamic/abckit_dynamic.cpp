@@ -779,8 +779,66 @@ void SetImpl(std::unique_ptr<AbckitCoreFunction> &function, panda::pandasm::Func
     }
 }
 
+constexpr int REGULAR_IMPORT_SPAN = 3;
+constexpr int NOT_REGULAR_IMPORT_SPAN = 2;
+
+void CollectAnnotationModuleMap(AbckitCoreFunction *function,
+                                std::unordered_map<std::string, std::string> &importModules)
+{
+    for (auto &id : function->owningModule->id) {
+        if (id->importingModule->GetArkTSImpl() == nullptr) {
+            continue;
+        }
+        std::string_view mName = id->importedModule->moduleName->impl;
+        auto mPayload = &id->importingModule->GetArkTSImpl()->impl.GetDynModule();
+        auto idPayload = &id->GetArkTSImpl()->payload.GetDynId();
+        const auto *moduleLitArr = mPayload->moduleLiteralArray;
+        auto sectionOffset =
+            idPayload->isRegularImport ? mPayload->regularImportsOffset : mPayload->namespaceImportsOffset;
+        if (idPayload->isRegularImport) {
+            sectionOffset = sectionOffset + idPayload->moduleRecordIndexOff * REGULAR_IMPORT_SPAN;
+        } else {
+            sectionOffset = sectionOffset + idPayload->moduleRecordIndexOff * NOT_REGULAR_IMPORT_SPAN;
+        }
+        std::string iName = std::get<std::string>(moduleLitArr->GetDynamicImpl()->literals_[sectionOffset].value_);
+        importModules[iName] = mName;
+    }
+}
+
+AbckitCoreAnnotationInterface *CollectAnnotationCorrectInfo(AbckitFile *file,
+                                                            const panda::pandasm::AnnotationData &annoImpl,
+                                                            std::unordered_map<std::string, std::string> &importModules,
+                                                            std::vector<std::string> &removes,
+                                                            std::vector<panda::pandasm::AnnotationData> &inserts)
+{
+    std::string aiModuleName = pandasm::GetOwnerName(annoImpl.GetName());
+    std::string aiName = pandasm::GetItemName(annoImpl.GetName());
+    std::string mName;
+    if (importModules.find(aiName) != importModules.end() && (mName = importModules[aiName]) != aiModuleName) {
+        auto &localModule = file->localModules[mName];
+        if (localModule.get() == nullptr) {
+            return nullptr;
+        }
+        auto &annotationInterface = localModule->at[aiName];
+        if (annotationInterface.get() != nullptr &&
+            libabckit::IsAnnotationInterfaceRecord(*(annotationInterface->GetArkTSImpl()->GetDynamicImpl()))) {
+            inserts.emplace_back(mName + "." + aiName, annoImpl.GetElements());
+            removes.emplace_back(annoImpl.GetName());
+            return annotationInterface.get();
+        }
+    }
+    return nullptr;
+}
+
 void CreateFunctionAnnotations(AbckitFile *file, panda::pandasm::Function &functionImpl, AbckitCoreFunction *function)
 {
+    std::vector<std::string> removes;
+    std::vector<panda::pandasm::AnnotationData> inserts;
+    std::unordered_map<std::string, std::string> importModules;
+    if (function->owningModule->target == ABCKIT_TARGET_ARK_TS_V1) {
+        CollectAnnotationModuleMap(function, importModules);
+    }
+
     for (auto &annoImpl : functionImpl.metadata->GetAnnotations()) {
         if (libabckit::IsServiceRecord(annoImpl.GetName())) {
             continue;
@@ -791,6 +849,9 @@ void CreateFunctionAnnotations(AbckitFile *file, panda::pandasm::Function &funct
         std::string aiName = pandasm::GetItemName(annoImpl.GetName());
         anno->name = CreateNameString(aiName, file);
         anno->ai = file->localModules[aiModuleName]->at[aiName].get();
+        if (anno->ai == nullptr) {
+            anno->ai = CollectAnnotationCorrectInfo(file, annoImpl, importModules, removes, inserts);
+        }
         anno->impl = std::make_unique<AbckitArktsAnnotation>();
         anno->GetArkTSImpl()->core = anno.get();
 
@@ -808,20 +869,29 @@ void CreateFunctionAnnotations(AbckitFile *file, panda::pandasm::Function &funct
         anno->owner = function;
         function->annotations.emplace_back(std::move(anno));
     }
+
+    if (function->owningModule->target == ABCKIT_TARGET_ARK_TS_V1) {
+        for (auto &remove : removes) {
+            functionImpl.metadata->DeleteAnnotationByName(remove);
+        }
+        functionImpl.metadata->AddAnnotations(inserts);
+    }
 }
 
 std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionName,
                                                    panda::pandasm::Function &functionImpl, AbckitFile *file)
 {
     std::string moduleName = pandasm::GetOwnerName(functionName);
-    ASSERT(file->localModules.count(moduleName) != 0);
+    if (file->localModules.count(moduleName) == 0) {
+        return std::unique_ptr<AbckitCoreFunction> {};
+    }
     auto &m = file->localModules[moduleName];
 
     auto function = std::make_unique<AbckitCoreFunction>();
     function->owningModule = m.get();
-    auto [kind, _] = GetFunctionParentKindAndName(functionName, GetScopeNamesArray(function->owningModule));
     if (m->target == ABCKIT_TARGET_ARK_TS_V1) {
-        function->isAnonymous = kind == ParentKind::FUNCTION;
+        auto functionKind = functionImpl.GetFunctionKind();
+        function->isAnonymous = functionKind == panda::panda_file::FunctionKind::NC_FUNCTION;
     } else {
         function->isAnonymous = IsAnonymousName(functionName);
     }
@@ -1118,7 +1188,11 @@ void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
         if (!libabckit::IsFunction(functionName)) {
             continue;
         }
-        functions.emplace_back(CreateFunction(functionName, function, file));
+        auto abckitCoreFunction = CreateFunction(functionName, function, file);
+        if (abckitCoreFunction == nullptr) {
+            continue;
+        }
+        functions.emplace_back(std::move(abckitCoreFunction));
         ASSERT(nameToFunction.count(function.name) == 0);
         nameToFunction[function.name] = functions.back().get();
     }

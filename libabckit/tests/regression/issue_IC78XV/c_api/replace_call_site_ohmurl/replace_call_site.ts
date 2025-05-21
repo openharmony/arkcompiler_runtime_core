@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,32 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class ClassA {
+import { LinearLayout } from "@normalized:N&&&modules/layout&";
+
+class MyClass {
     foo() {
-        print('foo');
-    }
-    bar() {
-        print('bar');
-    }
-}
-
-class ClassB extends ClassA {
-    baz() {
-        print('baz');
-    }
-    func() {
-        print('func');
+        let appColumn = new LinearLayout();
+        appColumn.setOrientation(3);
+        print(appColumn.getOrientation());
     }
 }
 
-(()=> {
-    print('anonymousfunc1');
-})();
-
-(()=> {
-    print('anonymousfunc2');
-})();
-
-let anonymousfunc = (()=> {
-    print('anonymousfunc3');
-});
+let c = new MyClass();
+c.foo();
