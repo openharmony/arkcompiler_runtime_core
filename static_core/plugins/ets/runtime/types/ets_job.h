@@ -165,7 +165,7 @@ public:
         state_ = STATE_FAILED;
 
         if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-            coro->GetPandaVM()->AddUnhandledFailedJob(this);
+            coro->GetPandaVM()->GetUnhandledObjectManager()->AddFailedJob(this);
         }
 
         // Unblock awaitee coros
