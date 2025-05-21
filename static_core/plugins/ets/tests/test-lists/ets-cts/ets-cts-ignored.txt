@@ -186,10 +186,6 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_5.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/lmbd_6.ets
 
-#25154 partial utility type with generic
-05.generics/03.utility_types/01.partial_utility_type/partial_generic.ets
-
-
 #24167 no methods should be inherited using readonly utility type
 05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_10.ets
 05.generics/03.utility_types/01.partial_utility_type/method_excluded_from_partial_11.ets
