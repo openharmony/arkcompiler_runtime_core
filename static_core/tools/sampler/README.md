@@ -14,7 +14,7 @@ git clone https://github.com/brendangregg/FlameGraph.git
 ${BUILD_DIR}/bin/es2panda ${BUILD_SOURCE}/plugins/ets/tests/runtime/tooling/sampler/SamplerTest.ets ${BUILD_DIR}/sampling_app.abc
 
 # get sample dump
-${BUILD_DIR}/bin/ark --load-runtimes=ets --boot-panda-files=${BUILD_DIR}/plugins/ets/etsstdlib.abc --sampling-profiler-enable --sampling-profiler-interval=200 --sampling-profiler-output-file=${BUILD_DIR}/outfile.aspt ${BUILD_DIR}/sampling_app.abc ETSGLOBAL::main
+${BUILD_DIR}/bin/ark --load-runtimes=ets --boot-panda-files=${BUILD_DIR}/plugins/ets/etsstdlib.abc --sampling-profiler-create --sampling-profiler-startup-run --sampling-profiler-interval=200 --sampling-profiler-output-file=${BUILD_DIR}/outfile.aspt ${BUILD_DIR}/sampling_app.abc ETSGLOBAL::main
 
 # convert sample dump to csv
 ${BUILD_DIR}/bin/aspt_converter --input=${BUILD_DIR}/outfile.aspt --output=${BUILD_DIR}/traceout.csv

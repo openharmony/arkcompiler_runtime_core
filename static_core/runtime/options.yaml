@@ -118,10 +118,15 @@ options:
   default: false
   description: Is debugger enabled on runtime create
 
-- name: sampling-profiler-enable
+- name: sampling-profiler-create
   type: bool
   default: false
-  description: Is the sampling profiler enabled during execution time
+  description: Is the sampling profiler created and available during runtime execution
+
+- name: sampling-profiler-startup-run
+  type: bool
+  default: false
+  description: Is the sampling profiler runned on runtime startup
 
 - name: sampling-profiler-interval
   type: uint32_t

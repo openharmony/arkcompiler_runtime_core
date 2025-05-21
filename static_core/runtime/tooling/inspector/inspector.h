@@ -31,9 +31,11 @@
 #include "debuggable_thread.h"
 #include "inspector_server.h"
 #include "object_repository.h"
+#include "runtime/tooling/tools.h"
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
+#include "types/profile_result.h"
 #include "types/property_descriptor.h"
 #include "types/remote_object.h"
 
@@ -111,6 +113,9 @@ private:
 
     Expected<EvaluationResult, std::string> Evaluate(PtThread thread, const std::string &bytecodeBase64,
                                                      size_t frameNumber);
+    void ProfilerSetSamplingInterval(int32_t interval);
+    Expected<bool, std::string> ProfilerStart();
+    Expected<Profile, std::string> ProfilerStop();
 
     ALWAYS_INLINE bool CheckVmDead() REQUIRES_SHARED(vmDeathLock_)
     {
@@ -148,6 +153,9 @@ private:
     bool isVmDead_ GUARDED_BY(vmDeathLock_) {false};
 
     std::thread serverThread_;
+    uint32_t samplingInterval_ {0};
+    std::shared_ptr<sampler::SamplesRecord> profileInfoBuffer_ = nullptr;
+    bool cpuProfilerStarted_ = false;
 };
 }  // namespace inspector
 }  // namespace ark::tooling

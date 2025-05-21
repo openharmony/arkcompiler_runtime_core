@@ -32,6 +32,7 @@
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
+#include "types/profile_result.h"
 #include "types/property_descriptor.h"
 #include "types/remote_object.h"
 #include "types/scope.h"
@@ -112,6 +113,11 @@ public:
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
     void OnCallRuntimeEvaluate(
         std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &)> &&handler);
+    void OnCallProfilerEnable();
+    void OnCallProfilerDisable();
+    void OnCallProfilerSetSamplingInterval(std::function<void(int32_t)> &&handler);
+    void OnCallProfilerStart(std::function<Expected<bool, std::string>()> &&handler);
+    void OnCallProfilerStop(std::function<Expected<Profile, std::string>()> &&handler);
 
 private:
     struct CallFrameInfo {

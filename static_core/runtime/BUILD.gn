@@ -262,6 +262,7 @@ ohos_source_set("libarkruntime_set_static") {
     "tooling/pt_thread.cpp",
     "tooling/sampler/lock_free_queue.cpp",
     "tooling/sampler/sample_writer.cpp",
+    "tooling/sampler/samples_record.cpp",
     "tooling/sampler/sampling_profiler.cpp",
     "tooling/sampler/stack_walker_base.cpp",
     "tooling/sampler/thread_communicator.cpp",
