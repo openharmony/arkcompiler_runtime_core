@@ -16,8 +16,8 @@
 #ifndef COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
 #define COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
 
-#include "thread/thread_holder-inl.h"
-#include "thread/thread_holder_manager.h"
+#include "common_interfaces/thread/thread_holder-inl.h"
+#include "common_interfaces/thread/thread_holder_manager.h"
 
 namespace panda {
 

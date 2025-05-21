@@ -17,7 +17,8 @@
 #define COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
 
 #include <atomic>
-#include "base/common.h"
+#include <mutex>
+#include "common_interfaces/base/common.h"
 
 namespace panda {
 class ThreadHolder;

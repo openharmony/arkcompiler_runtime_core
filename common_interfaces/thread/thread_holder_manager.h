@@ -22,8 +22,8 @@
 #include <list>
 #include <mutex>
 
-#include "base/common.h"
-#include "thread/thread_holder.h"
+#include "common_interfaces/base/common.h"
+#include "common_interfaces/thread/thread_holder.h"
 
 namespace panda {
 

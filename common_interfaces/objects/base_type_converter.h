@@ -16,8 +16,8 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
 #define COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
 
-#include "objects/base_type.h"
-#include "thread/thread_holder.h"
+#include "common_interfaces/objects/base_type.h"
+#include "common_interfaces/thread/thread_holder.h"
 
 namespace panda {
 // Type Converter implemented for dynamic vm.
@@ -27,7 +27,7 @@ public:
     virtual JSTaggedValue WrapTagged(ThreadHolder *thread, PandaType value) = 0;
 
     // convert JSTaggedValue to PandaType
-    virtual PandaType UnWrapTagged(JSTaggedValue value) = 0;
+    virtual PandaType UnwrapTagged(JSTaggedValue value) = 0;
 };
 
 // Type Converter implemented for static vm.
@@ -37,7 +37,7 @@ public:
     virtual BoxedValue WrapBoxed(PandaType value) = 0;
 
     // convert BoxedValue to PandaType
-    virtual PandaType UnWrapBoxed(BoxedValue value) = 0;
+    virtual PandaType UnwrapBoxed(BoxedValue value) = 0;
 };
 }  // namespace panda
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
