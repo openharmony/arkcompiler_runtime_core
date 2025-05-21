@@ -356,17 +356,24 @@ config("ark_config") {
       "PANDA_TARGET_ARM64",
       "PANDA_TARGET_64",
       "PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES",
-      "PANDA_USE_32_BIT_POINTER",
     ]
+    if (!defined(ark_hybrid) || !ark_hybrid) {
+      defines += [ "PANDA_USE_32_BIT_POINTER" ]
+    }
   } else if (current_cpu == "x86") {
-    defines += [ "PANDA_TARGET_X86" ]
+    defines += [
+      "PANDA_TARGET_32",
+      "PANDA_TARGET_X86",
+    ]
   } else if (current_cpu == "amd64" || current_cpu == "x64" ||
              current_cpu == "x86_64") {
     defines += [
       "PANDA_TARGET_64",
       "PANDA_TARGET_AMD64",
-      "PANDA_USE_32_BIT_POINTER",
     ]
+    if (!defined(ark_hybrid) || !ark_hybrid) {
+      defines += [ "PANDA_USE_32_BIT_POINTER" ]
+    }
   }
 }
 
