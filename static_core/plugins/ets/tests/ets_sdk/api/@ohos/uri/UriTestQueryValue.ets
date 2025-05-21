@@ -25,30 +25,30 @@ function testUriGetQueryValue001() {
 
 function testUriGetQueryValue002() {
   let route = new uri.URI('https://www.test.com');
-  assertEQ(route.getQueryValue("param1"), "");
+  assertEQ(route.getQueryValue("param1"), null);
   let include = new uri.URI('https://www.test.com?param1=value1');
-  assertEQ(include.getQueryValue("param"), "");    
+  assertEQ(include.getQueryValue("param"), null);
 }
 
 function testUriGetQueryValue003() {
   let route = new uri.URI('https://www.test.com?param1=value1&param1=value2&param1=value3');
   let param1Value = route.getQueryValue("param1");
   assertEQ(param1Value, "value1");    
-  assertEQ(route.getQueryValues("param1")[0], "value1");    
+  assertEQ(route.getQueryValues("param1")[0], "value1");
 }
 
 function testUriGetQueryValue004() {
   let route = new uri.URI('https://www.test.com?param1=hello%20world');
   assertEQ(route.getQueryValue("param1"), "hello world");
   let specialSymbol = new uri.URI('https://www.test.com?param1=hello+world');
-  assertEQ(specialSymbol.getQueryValue("param1"), "hello world");    
+  assertEQ(specialSymbol.getQueryValue("param1"), "hello world");
 }
 
 function testUriGetQueryValue005() {
   let route = new uri.URI('https://www.test.com?param%201=hello');
   assertEQ(route.getQueryValue("param 1"), "hello");
-  assertEQ(route.getQueryValue("1"), "");
-  assertEQ(route.getQueryValue(" 1"), "");    
+  assertEQ(route.getQueryValue("1"), null);
+  assertEQ(route.getQueryValue(" 1"), null);
 }
 
 function testUriGetQueryValue006() {
@@ -56,7 +56,7 @@ function testUriGetQueryValue006() {
   assertEQ(route.getQueryValue("param1"), "");
   assertEQ(route.getQueryValue("param2"), "");
   let noNameUri = new uri.URI('https://www.test.com?=value');
-  assertEQ(noNameUri.getQueryValue(""), "value");    
+  assertEQ(noNameUri.getQueryValue(""), "value");
 }
 
 function testUriGetQueryValue007() {
@@ -65,7 +65,7 @@ function testUriGetQueryValue007() {
   let emptyParameter12 = new uri.URI('https://www.test.com?param1=value1&');
   assertEQ(emptyParameter12.getQueryValue(""), "");
   let router = new uri.URI('https://www.test.com?');
-  assertEQ(router.getQueryValue(""), "");    
+  assertEQ(router.getQueryValue(""), null);
 }
 
 function testUriAddQueryValue001() {
@@ -73,7 +73,7 @@ function testUriAddQueryValue001() {
   let newRoute = route.addQueryValue("param1", "value1");
   assertEQ(newRoute.getQueryValue("param1"), "value1");
   let clearRoute = newRoute.clearQuery();
-  assertEQ(clearRoute.toString(), "https://www.test.com");    
+  assertEQ(clearRoute.toString(), "https://www.test.com");
 }
 
 function testUriAddQueryValue002() {
@@ -128,6 +128,13 @@ function testUriAddQueryValue007() {
   assertEQ(newRoute.getQueryValue("param 1"), "value 1");
 }
 
+function testUriAddQueryValue008() {
+  let route = new uri.URI('https://www.com?param1=\ud83d\ude0a&param2=value2');
+  assertEQ(route.getQueryValue("abc"), null);
+  let newRoute = new uri.URI('http://www.baidu.com?sa%3D=\ud83d\ude0a')
+  assertEQ(newRoute.getQueryValue('aa'), null);
+}
+
 function main(): int {
   let suite = new ArkTestsuite("URI XTS tests");
   suite.addTest("testUriGetQueryValue001", testUriGetQueryValue001);
@@ -145,6 +152,7 @@ function main(): int {
   suite.addTest("testUriAddQueryValue005", testUriAddQueryValue005);
   suite.addTest("testUriAddQueryValue006", testUriAddQueryValue006);
   suite.addTest("testUriAddQueryValue007", testUriAddQueryValue007);
+  suite.addTest("testUriAddQueryValue008", testUriAddQueryValue008);
   //passed
   return suite.run();
 }
