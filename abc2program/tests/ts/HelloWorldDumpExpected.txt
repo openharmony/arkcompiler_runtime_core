@@ -519,8 +519,8 @@ _GLOBAL_1814 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 2
 .language ECMAScript
 .function any .#~@2=#NestedLiteralArray(any a0, any a1, any a2) {
-	ldai 0x1                                 # line: 34           # column: 0
-	stobjbyname 0x0, num, a2                 # line: 34           # column: 0
+	ldai 0x1                                 # line: 30           # column: 0
+	stobjbyname 0x0, num, a2                 # line: 30           # column: 0
 	lda a2                                   # line: 34           # column: 0
 	return                                   # line: 34           # column: 0
 }

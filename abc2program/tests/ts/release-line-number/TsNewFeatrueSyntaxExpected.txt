@@ -128,9 +128,9 @@ _GLOBAL_2282 { 2 [ tag_value:2, i32:0, ]}
 	lda.str hello                            # line: 69           # column: 0
 	stobjbyname 0x0, hello, a2               # line: 69           # column: 0
 	ldai 0x4d2                               # line: 69           # column: 0
-	stobjbyname 0x2, world, a2               # line: 69           # column: 0
-	lda a2                                   # line: 69           # column: 0
-	return                                   # line: 69           # column: 0
+	stobjbyname 0x2, world, a2               # line: 70           # column: 0
+	lda a2                                   # line: 70           # column: 0
+	return                                   # line: 70           # column: 0
 }
 
 .function_kind FunctionKind::FUNCTION
