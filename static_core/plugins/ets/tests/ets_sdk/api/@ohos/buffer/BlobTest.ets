@@ -40,6 +40,7 @@ function main(): int {
     suite.addTest("Test get Blob constructor Uint8ClampedArray", testBlobToArrayUint8ClampedArray)
     suite.addTest("Test get Blob constructor Int16Array", testBlobToArrayInt16Array)
     suite.addTest("Test get Blob constructor Uint16Array", testBlobToArrayUint16Array)
+    suite.addTest("Test get Blob constructor Uint8Array with options", testBlobToArrayUint8ArrayOptions)
 
     return suite.run()
 }
@@ -272,4 +273,18 @@ function testBlobToArrayUint16Array() {
     let size = blob.size;
     assertEQ(blob.type, "")
     assertEQ(size, 10)
+}
+
+function testBlobToArrayUint8ArrayOptions() {
+    let o1: buffer.BlobOptions = { type: "new type", endings: "transparent" };
+    let uint8arr1 = new Uint8Array(3);
+    uint8arr1[0] = 97;
+    uint8arr1[1] = 98;
+    uint8arr1[2] = 99;
+    let blob = new buffer.Blob([uint8arr1], o1);
+    let size = blob.size;
+    assertEQ(blob.type, "new type")
+    assertEQ(size, 3)
+    let text = await blob.text()
+    assertEQ(text, "abc")
 }
