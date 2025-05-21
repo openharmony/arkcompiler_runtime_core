@@ -1596,6 +1596,16 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitInt8ArrayFillInternal
 
+  - name: Int8ArrayJoin
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayJoin
+
   - name: Int16ArraySetInt
     space: ets
     class_name: escompat.Int16Array
@@ -1656,15 +1666,15 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatInt16ArraySort
 
-  - name: Uint16ArraySort
+  - name: Int16ArrayJoin
     space: ets
-    class_name: escompat.Uint16Array
-    method_name: sort
+    class_name: escompat.Int16Array
+    method_name: joinInternal
     static: false
     signature:
-      ret: escompat.Uint16Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySort
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayJoin
 
   - name: Int16ArrayFillInternal
     space: ets
@@ -1729,15 +1739,15 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatInt32ArraySort
 
-  - name: Uint32ArraySort
+  - name: Int32ArrayJoin
     space: ets
-    class_name: escompat.Uint32Array
-    method_name: sort
+    class_name: escompat.Int32Array
+    method_name: joinInternal
     static: false
     signature:
-      ret: escompat.Uint32Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySort
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayJoin
 
   - name: Int32ArrayFillInternal
     space: ets
@@ -1802,15 +1812,15 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArraySort
 
-  - name: BigUint64ArraySort
+  - name: BigInt64ArrayJoin
     space: ets
-    class_name: escompat.BigUint64Array
-    method_name: sort
+    class_name: escompat.BigInt64Array
+    method_name: joinInternal
     static: false
     signature:
-      ret: escompat.BigUint64Array
-      args: []
-    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySort
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayJoin
 
   - name: BigInt64ArrayFillInternal
     space: ets
@@ -1888,6 +1898,16 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitFloat32ArrayFillInternal
 
+  - name: Float32ArrayJoin
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayJoin
+
   - name: Float64ArraySetDouble
     space: ets
     class_name: escompat.Float64Array
@@ -1950,6 +1970,16 @@ intrinsics:
     codegen_func: CreateFloat64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitFloat64ArrayFillInternal
+
+  - name: Float64ArrayJoin
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayJoin
 
   - name: UInt8ClampedArraySetInt
     space: ets
@@ -2014,6 +2044,16 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt8ClampedArrayFillInternal
 
+  - name: Uint8ClampedArrayJoin
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ClampedArrayJoin
+
   - name: UInt8ArraySetInt
     space: ets
     class_name: escompat.Uint8Array
@@ -2077,6 +2117,16 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt8ArrayFillInternal
 
+  - name: Uint8ArrayJoin
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatUint8ArrayJoin
+
   - name: UInt16ArraySetInt
     space: ets
     class_name: escompat.Uint16Array
@@ -2129,6 +2179,26 @@ intrinsics:
     codegen_func: CreateUInt16ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt16ArrayFillInternal
+
+  - name: Uint16ArraySort
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Uint16Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArraySort
+
+  - name: Uint16ArrayJoin
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatUint16ArrayJoin
 
   - name: UInt32ArraySetInt
     space: ets
@@ -2193,6 +2263,26 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitUInt32ArrayFillInternal
 
+  - name: Uint32ArraySort
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.Uint32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArraySort
+
+  - name: Uint32ArrayJoin
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatUint32ArrayJoin
+
   - name: BigUInt64ArraySetInt
     space: ets
     class_name: escompat.BigUint64Array
@@ -2255,6 +2345,26 @@ intrinsics:
     codegen_func: CreateBigUInt64ArrayFillInternal
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitBigUInt64ArrayFillInternal
+
+  - name: BigUint64ArraySort
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: sort
+    static: false
+    signature:
+      ret: escompat.BigUint64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArraySort
+
+  - name: BigUint64ArrayJoin
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: joinInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::EtsEscompatBigUint64ArrayJoin
 
   - name: Int8ArrayReverse
     space: ets

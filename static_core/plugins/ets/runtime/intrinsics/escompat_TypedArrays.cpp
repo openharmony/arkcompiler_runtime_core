@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+#include <charconv>
+#include "libpandabase/utils/utf.h"
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
 #include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "intrinsics.h"
 #include "cross_values.h"
 
@@ -859,4 +863,240 @@ ETS_ESCOMPAT_LAST_INDEX_OF_LONG(BigUInt64)
 ETS_ESCOMPAT_LAST_INDEX_OF_LONG(UInt8Clamped)
 
 #undef INVALID_INDEX
+
+/* Compute a max size in chars required for not null-terminated string
+ * representation of the specified integral or floating point type.
+ */
+template <typename T>
+constexpr size_t MaxChars()
+{
+    static_assert(std::numeric_limits<T>::radix == 2U);
+    if constexpr (std::is_integral_v<T>) {
+        auto bits = std::numeric_limits<T>::digits;
+        auto digitPerBit = std::log10(std::numeric_limits<T>::radix);
+        auto digits = std::ceil(bits * digitPerBit) + static_cast<int>(std::is_signed_v<T>);
+        return digits;
+    } else {
+        static_assert(std::is_floating_point_v<T>);
+        // Forced to treat T as double
+        auto bits = std::numeric_limits<double>::digits;
+        auto digitPerBit = std::log10(std::numeric_limits<double>::radix);
+        auto digits = std::ceil(bits * digitPerBit) + static_cast<int>(std::is_signed_v<double>);
+        // digits + point + "+e308"
+        return digits + 1U + std::char_traits<char>::length("+e308");
+    }
+}
+
+template <typename T>
+size_t NumberToU8Chars(PandaVector<char> &buf, size_t pos, T number)
+{
+    if constexpr (std::is_integral_v<T>) {
+        auto [strEnd, result] = std::to_chars(&buf[pos], &buf[pos + MaxChars<T>()], number);
+        ASSERT(result == std::errc());
+        return strEnd - &buf[pos];
+    } else {
+        static_assert(std::is_floating_point_v<T>);
+        // Forced to treat T as double
+        auto asDouble = static_cast<double>(number);
+        return intrinsics::helpers::FpToStringDecimalRadix(asDouble, [&buf, &pos](std::string_view str) {
+            ASSERT(str.length() <= MaxChars<T>());
+            auto err = memcpy_s(&buf[pos], MaxChars<T>(), str.data(), str.length());
+            if (err != EOK) {
+                UNREACHABLE();
+            }
+            return str.length();
+        });
+    }
+}
+
+template <typename T>
+size_t NumberToU16Chars(PandaVector<EtsChar> &buf, size_t pos, T number)
+{
+    if constexpr (std::is_integral_v<T>) {
+        auto num = number < 0 ? -static_cast<uint64_t>(number) : static_cast<uint64_t>(number);
+        auto nDigits = (CountDigits(num) + static_cast<uint32_t>(number < 0));
+        ASSERT(pos + nDigits <= buf.size());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        utf::UInt64ToUtf16Array(num, buf.data() + pos, nDigits, number < 0);
+        return nDigits;
+    } else {
+        static_assert(std::is_floating_point_v<T>);
+        static_assert(std::is_unsigned_v<EtsChar>);
+        // Forced to treat T as double
+        auto asDouble = static_cast<double>(number);
+        return intrinsics::helpers::FpToStringDecimalRadix(asDouble, [&buf, &pos](std::string_view str) {
+            ASSERT(str.length() <= MaxChars<T>());
+            for (size_t i = 0; i < str.length(); i++) {
+                buf[pos + i] = static_cast<EtsChar>(str[i]);
+            }
+            return str.length();
+        });
+    }
+}
+
+template <typename T>
+static ark::ets::EtsString *TypedArrayJoinUtf16(Span<T> &data, ark::ets::EtsString *separator)
+{
+    ASSERT(!data.empty());
+    ASSERT(separator->IsUtf16());
+
+    const size_t sepSize = separator->GetUtf16Length();
+    PandaVector<EtsChar> buf(data.Size() * (MaxChars<T>() + sepSize));
+    size_t strSize = 0;
+    auto n = data.Size() - 1;
+    if (sepSize == 1) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto sep = separator->GetDataUtf16()[0];
+        for (auto i = 0U; i < n; i++) {
+            strSize += NumberToU16Chars(buf, strSize, static_cast<T>(data[i]));
+            buf[strSize] = sep;
+            strSize += 1;
+        }
+    } else {
+        for (auto i = 0U; i < n; i++) {
+            strSize += NumberToU16Chars(buf, strSize, static_cast<T>(data[i]));
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            separator->CopyDataUtf16(buf.data() + strSize, sepSize);
+            strSize += sepSize;
+        }
+    }
+    strSize += NumberToU16Chars(buf, strSize, static_cast<T>(data[n]));
+    return EtsString::CreateFromUtf16(reinterpret_cast<EtsChar *>(buf.data()), strSize);
+}
+
+template <typename T>
+static ark::ets::EtsString *TypedArrayJoinUtf8(Span<T> &data)
+{
+    ASSERT(!data.empty());
+    PandaVector<char> buf(data.Size() * MaxChars<T>());
+    size_t strSize = 0;
+    auto n = data.Size();
+    for (auto i = 0U; i < n; i++) {
+        strSize += NumberToU8Chars(buf, strSize, data[i]);
+    }
+    return EtsString::CreateFromUtf8(buf.data(), strSize);
+}
+
+template <typename T>
+static ark::ets::EtsString *TypedArrayJoinUtf8(Span<T> &data, ark::ets::EtsString *separator)
+{
+    ASSERT(!data.empty());
+    ASSERT(!separator->IsUtf16() && !separator->IsEmpty());
+    const size_t sepSize = separator->GetUtf8Length();
+    PandaVector<char> buf(data.Size() * (MaxChars<T>() + sepSize));
+    size_t strSize = 0;
+    auto n = data.Size() - 1;
+    if (sepSize == 1) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto sep = separator->GetDataUtf8()[0];
+        for (auto i = 0U; i < n; i++) {
+            strSize += NumberToU8Chars(buf, strSize, data[i]);
+            buf[strSize] = sep;
+            strSize += 1;
+        }
+    } else {
+        for (auto i = 0U; i < n; i++) {
+            strSize += NumberToU8Chars(buf, strSize, data[i]);
+            separator->CopyDataMUtf8(&buf[strSize], sepSize, false);
+            strSize += sepSize;
+        }
+    }
+    strSize += NumberToU8Chars(buf, strSize, data[n]);
+    return EtsString::CreateFromUtf8(buf.data(), strSize);
+}
+
+template <typename T>
+static ark::ets::EtsString *TypedArrayJoin(T *thisArray, ark::ets::EtsString *separator)
+{
+    using ElementType = typename T::ElementType;
+
+    auto length = thisArray->GetLengthInt();
+    if (UNLIKELY(length <= 0)) {
+        return EtsString::CreateNewEmptyString();
+    }
+
+    void *dataPtr = GetNativeData(thisArray);
+    if (UNLIKELY(dataPtr == nullptr)) {
+        return nullptr;
+    }
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto *tyDataPtr = reinterpret_cast<ElementType *>(static_cast<EtsByte *>(dataPtr) +
+                                                      static_cast<size_t>(thisArray->GetByteOffset()));
+    Span<ElementType> data(tyDataPtr, length);
+    if (separator->IsEmpty()) {
+        return TypedArrayJoinUtf8(data);
+    }
+    if (!separator->IsUtf16()) {
+        return TypedArrayJoinUtf8(data, separator);
+    }
+    return TypedArrayJoinUtf16(data, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatInt8ArrayJoin(ark::ets::EtsEscompatInt8Array *thisArray,
+                                                         ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatUint8ArrayJoin(ark::ets::EtsEscompatUInt8Array *thisArray,
+                                                          ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatUint8ClampedArrayJoin(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
+                                                                 ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatInt16ArrayJoin(ark::ets::EtsEscompatInt16Array *thisArray,
+                                                          ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatUint16ArrayJoin(ark::ets::EtsEscompatUInt16Array *thisArray,
+                                                           ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatInt32ArrayJoin(ark::ets::EtsEscompatInt32Array *thisArray,
+                                                          ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatUint32ArrayJoin(ark::ets::EtsEscompatUInt32Array *thisArray,
+                                                           ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatBigInt64ArrayJoin(ark::ets::EtsEscompatBigInt64Array *thisArray,
+                                                             ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatBigUint64ArrayJoin(ark::ets::EtsEscompatBigUInt64Array *thisArray,
+                                                              ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatFloat32ArrayJoin(ark::ets::EtsEscompatFloat32Array *thisArray,
+                                                            ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
+extern "C" ark::ets::EtsString *EtsEscompatFloat64ArrayJoin(ark::ets::EtsEscompatFloat64Array *thisArray,
+                                                            ark::ets::EtsString *separator)
+{
+    return TypedArrayJoin(thisArray, separator);
+}
+
 }  // namespace ark::ets::intrinsics
