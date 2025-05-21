@@ -150,6 +150,7 @@ function(:IntfInlineCache,
     # Load class from obj
     cache_64 := LoadI(cacheaddr).Imm(0).i64
     # wait issues 6943 solve
+    # NOTE(sukhikh, #26172): load i32 when 32 class pointer will be supported
     klass_0 := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).i64
     # equal to "and x22, x22, #0xffffffff"
     klass_1 := Shl(klass_0, 32).i64

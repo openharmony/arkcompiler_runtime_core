@@ -32,7 +32,7 @@ function(:CheckCastInterfaceEntrypoint,
         next
     end
 
-    klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(obj)
     size := LoadI(klass).Imm(Constants::CLASS_ITABLE_ENTRIES_SIZE_OFFSET).word
     elements0 := LoadI(klass).Imm(Constants::CLASS_ITABLE_ENTRIES_DATA_OFFSET).ptr
     i0 := 0
