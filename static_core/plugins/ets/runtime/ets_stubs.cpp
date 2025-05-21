@@ -101,9 +101,6 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     if (cls1 == ptypes->coreBoolean) {
         return cls2 == ptypes->coreBoolean && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);
     }
-    if (cls1 == ptypes->coreChar) {
-        return cls2 == ptypes->coreChar && CompareBoxedPrimitive<EtsChar>(obj1, obj2);
-    }
     if (UNLIKELY(cls1->IsBigInt())) {
         return cls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
     }
