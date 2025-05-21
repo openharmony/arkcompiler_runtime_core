@@ -145,7 +145,7 @@ AbckitString *GetModuleName(AbckitCoreModule *mod) {
 void AddAnno(AbckitModifyContext *file, AbckitCoreMethod *method) {
     auto mod = implI->functionGetModule(method);
 
-    // Find annoation interface with name "Anno"
+    // Find annotation interface with name "Anno"
     AbckitCoreAnnotationInterface *ai;
     implI->moduleEnumerateAnnotationInterfaces(mod, &ai, [](AbckitCoreAnnotationInterface *annoI, void *data) {
         auto ai1 = (AbckitCoreAnnotationInterface **)data;
