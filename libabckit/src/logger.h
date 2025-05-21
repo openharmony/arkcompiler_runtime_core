@@ -27,8 +27,9 @@
 
 constexpr const char *LIBABCKIT_PREFIX = "[ LIBABCKIT ]";
 #define LIBABCKIT_FUNC_NAME __func__
+#define LIBABCKIT_LINE __LINE__
 
-static constexpr std::array<const char *, 7> const TRUE_VALUES = {"ON", "on", "1", "true", "TRUE", "enable", "ENABLE"};
+constexpr std::array<const char *, 7> const TRUE_VALUES = {"ON", "on", "1", "true", "TRUE", "enable", "ENABLE"};
 
 namespace libabckit {
 
@@ -106,7 +107,8 @@ public:
             return;
         }
         if (const char *env = std::getenv("LIBABCKIT_DEBUG_MODE")) {
-            if ((std::find(TRUE_VALUES.begin(), TRUE_VALUES.end(), (std::string)env)) != TRUE_VALUES.end()) {
+            if ((std::find(TRUE_VALUES.begin(), TRUE_VALUES.end(), static_cast<std::string>(env))) !=
+                TRUE_VALUES.end()) {
                 mode = MODE::DEBUG_MODE;
             }
         }
@@ -184,7 +186,7 @@ public:
 
     static std::string MessageCompPrefix(const std::string &componentName)
     {
-        return "[ LIBABCKIT " + (std::string)componentName + " ] ";
+        return "[ LIBABCKIT " + componentName + " ] ";
     }
 
     static bool CheckPermission(const std::string &levelName)
@@ -215,7 +217,9 @@ public:
     {
         if (levelName == "FATAL") {
             std::cout << "FATAL: " << LIBABCKIT_FUNC_NAME << '\n';
-            std::abort();  // CC-OFF(G.FUU.08) fatal
+            // CC-OFFNXT(G.FUU.08) fatal
+            // CC-OFFNXT(G.STD.16) fatal error
+            std::abort();
         }
         logger_->msgPrefix_ = LIBABCKIT_PREFIX;
         return GetLoggerStream(levelName);
@@ -285,14 +289,14 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_UNIMPLEMENTED                          \
     LIBABCKIT_LOG(DEBUG) << "is not implemented yet!\n"; \
-    abort()
+    abort()  // CC-OFF(G.STD.16) fatal error
 
 // CC-OFFNXT(G.PRE.09) code generation
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_UNREACHABLE                 \
     LIBABCKIT_LOG(DEBUG) << "unreachable!\n"; \
-    abort()
+    abort()  // CC-OFF(G.STD.16) fatal error
 
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -309,6 +313,6 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_UNREACHABLE_TEST(level)          \
     LIBABCKIT_LOG_TEST(level) << "UNREACHABLE!\n"; \
-    abort()
+    abort()  // CC-OFF(G.STD.16) fatal error
 
 #endif

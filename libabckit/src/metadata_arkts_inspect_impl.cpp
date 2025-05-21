@@ -22,6 +22,7 @@
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/helpers_common.h"
+#include "scoped_timer.h"
 
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
@@ -50,6 +51,7 @@ extern "C" AbckitCoreModule *ArktsModuleToCoreModule(AbckitArktsModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     return m->core;
 }
@@ -58,6 +60,7 @@ extern "C" AbckitArktsModule *CoreModuleToArktsModule(AbckitCoreModule *m)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(m);
     return m->GetArkTSImpl();
@@ -71,6 +74,7 @@ extern "C" AbckitCoreNamespace *ArktsNamespaceToCoreNamespace(AbckitArktsNamespa
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(n, nullptr);
     return n->core;
 }
@@ -79,6 +83,7 @@ extern "C" AbckitArktsNamespace *CoreNamespaceToArktsNamespace(AbckitCoreNamespa
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(n, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(n->owningModule);
     return n->GetArkTSImpl();
@@ -88,6 +93,7 @@ extern "C" AbckitArktsFunction *ArktsV1NamespaceGetConstructor(AbckitArktsNamesp
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(n, nullptr);
     if (n->core->owningModule->target != ABCKIT_TARGET_ARK_TS_V1) {
         libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
@@ -104,6 +110,7 @@ extern "C" AbckitCoreImportDescriptor *ArktsImportDescriptorToCoreImportDescript
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     return i->core;
 }
@@ -112,6 +119,7 @@ extern "C" AbckitArktsImportDescriptor *CoreImportDescriptorToArktsImportDescrip
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(i, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(i->importingModule);
     return i->GetArkTSImpl();
@@ -125,6 +133,7 @@ extern "C" AbckitCoreExportDescriptor *ArktsExportDescriptorToCoreExportDescript
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(e, nullptr);
     return e->core;
 }
@@ -133,6 +142,7 @@ extern "C" AbckitArktsExportDescriptor *CoreExportDescriptorToArktsExportDescrip
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(e, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(e->exportingModule);
     return e->GetArkTSImpl();
@@ -146,6 +156,7 @@ extern "C" AbckitCoreClass *ArktsClassToCoreClass(AbckitArktsClass *c)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(c, nullptr);
     return c->core;
 }
@@ -154,6 +165,7 @@ extern "C" AbckitArktsClass *CoreClassToArktsClass(AbckitCoreClass *c)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(c, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(c->owningModule);
     return c->GetArkTSImpl();
@@ -167,6 +179,7 @@ extern "C" AbckitCoreFunction *ArktsFunctionToCoreFunction(AbckitArktsFunction *
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     return m->core;
 }
@@ -175,6 +188,7 @@ extern "C" AbckitArktsFunction *CoreFunctionToArktsFunction(AbckitCoreFunction *
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(m->owningModule);
     return m->GetArkTSImpl();
@@ -184,6 +198,7 @@ extern "C" bool FunctionIsNative(AbckitArktsFunction *function)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(function, false);
 
     switch (function->core->owningModule->target) {
@@ -204,6 +219,7 @@ extern "C" AbckitCoreAnnotation *ArktsAnnotationToCoreAnnotation(AbckitArktsAnno
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     return a->core;
 }
@@ -212,6 +228,7 @@ extern "C" AbckitArktsAnnotation *CoreAnnotationToArktsAnnotation(AbckitCoreAnno
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->owningModule);
     return a->GetArkTSImpl();
@@ -225,6 +242,7 @@ extern "C" AbckitCoreAnnotationElement *ArktsAnnotationElementToCoreAnnotationEl
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     return a->core;
 }
@@ -233,6 +251,7 @@ extern "C" AbckitArktsAnnotationElement *CoreAnnotationElementToArktsAnnotationE
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(a->ann->ai->owningModule);
     return a->GetArkTSImpl();
@@ -247,6 +266,7 @@ extern "C" AbckitCoreAnnotationInterface *ArktsAnnotationInterfaceToCoreAnnotati
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     return a->core;
 }
@@ -256,6 +276,7 @@ extern "C" AbckitArktsAnnotationInterface *CoreAnnotationInterfaceToArktsAnnotat
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(a->owningModule);
     return a->GetArkTSImpl();
@@ -270,6 +291,7 @@ extern "C" AbckitCoreAnnotationInterfaceField *ArktsAnnotationInterfaceFieldToCo
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     return a->core;
 }
@@ -279,6 +301,7 @@ extern "C" AbckitArktsAnnotationInterfaceField *CoreAnnotationInterfaceFieldToAr
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
     LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->owningModule);
     return a->GetArkTSImpl();

@@ -13,6 +13,7 @@
  */
 
 #include "isa_dynamic_impl_instr.h"
+#include "scoped_timer.h"
 
 namespace libabckit {
 
@@ -20,6 +21,7 @@ extern "C" AbckitInst *IcreateDYNAMICThrowConstassignment(AbckitGraph *graph, Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
@@ -33,6 +35,7 @@ extern "C" AbckitInst *IcreateDYNAMICThrowIfnotobject(AbckitGraph *graph, Abckit
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
@@ -46,6 +49,7 @@ extern "C" AbckitInst *IcreateDYNAMICThrowUndefinedifhole(AbckitGraph *graph, Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
@@ -61,6 +65,7 @@ extern "C" AbckitInst *IcreateDYNAMICThrowIfsupernotcorrectcall(AbckitGraph *gra
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -75,6 +80,7 @@ extern "C" AbckitInst *IcreateDYNAMICThrowUndefinedifholewithname(AbckitGraph *g
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -89,6 +95,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallarg0(AbckitGraph *graph, AbckitInst *ac
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -102,6 +109,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallarg1(AbckitGraph *graph, AbckitInst *ac
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -118,6 +126,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallargs2(AbckitGraph *graph, AbckitInst *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -136,6 +145,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallargs3(AbckitGraph *graph, AbckitInst *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -155,6 +165,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallrange(AbckitGraph *graph, AbckitInst *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -172,6 +183,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideCallrange(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -191,6 +203,7 @@ extern "C" AbckitInst *IcreateDYNAMICSupercallspread(AbckitGraph *graph, AbckitI
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -206,6 +219,7 @@ extern "C" AbckitInst *IcreateDYNAMICApply(AbckitGraph *graph, AbckitInst *acc, 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -223,6 +237,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallthis0(AbckitGraph *graph, AbckitInst *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -239,6 +254,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallthis1(AbckitGraph *graph, AbckitInst *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -257,6 +273,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallthis2(AbckitGraph *graph, AbckitInst *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -278,6 +295,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallthis3(AbckitGraph *graph, AbckitInst *a
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -299,6 +317,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallthisrange(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -318,6 +337,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideCallthisrange(AbckitGraph *graph, Abcki
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -337,6 +357,7 @@ extern "C" AbckitInst *IcreateDYNAMICSupercallthisrange(AbckitGraph *graph, size
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -354,6 +375,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideSupercallthisrange(AbckitGraph *graph, 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -371,6 +393,7 @@ extern "C" AbckitInst *IcreateDYNAMICSupercallarrowrange(AbckitGraph *graph, Abc
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -390,6 +413,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideSupercallarrowrange(AbckitGraph *graph,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -411,6 +435,7 @@ extern "C" AbckitInst *IcreateDYNAMICDefinegettersetterbyvalue(AbckitGraph *grap
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -432,6 +457,7 @@ extern "C" AbckitInst *IcreateDYNAMICDefinefunc(AbckitGraph *graph, AbckitCoreFu
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
@@ -446,6 +472,7 @@ extern "C" AbckitInst *IcreateDYNAMICDefinemethod(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -464,6 +491,7 @@ extern "C" AbckitInst *IcreateDYNAMICDefineclasswithbuffer(AbckitGraph *graph, A
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
@@ -481,6 +509,7 @@ extern "C" AbckitInst *IcreateDYNAMICResumegenerator(AbckitGraph *graph, AbckitI
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -494,6 +523,7 @@ extern "C" AbckitInst *IcreateDYNAMICGetresumemode(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -507,6 +537,7 @@ extern "C" AbckitInst *IcreateDYNAMICGettemplateobject(AbckitGraph *graph, Abcki
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -520,6 +551,7 @@ extern "C" AbckitInst *IcreateDYNAMICGetnextpropname(AbckitGraph *graph, AbckitI
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
@@ -533,6 +565,7 @@ extern "C" AbckitInst *IcreateDYNAMICDelobjprop(AbckitGraph *graph, AbckitInst *
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -548,6 +581,7 @@ extern "C" AbckitInst *IcreateDYNAMICSuspendgenerator(AbckitGraph *graph, Abckit
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -563,6 +597,7 @@ extern "C" AbckitInst *IcreateDYNAMICAsyncfunctionawaituncaught(AbckitGraph *gra
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -578,6 +613,7 @@ extern "C" AbckitInst *IcreateDYNAMICCopydataproperties(AbckitGraph *graph, Abck
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -594,6 +630,7 @@ extern "C" AbckitInst *IcreateDYNAMICStarrayspread(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -611,6 +648,7 @@ extern "C" AbckitInst *IcreateDYNAMICSetobjectwithproto(AbckitGraph *graph, Abck
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -626,6 +664,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdobjbyvalue(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -642,6 +681,7 @@ extern "C" AbckitInst *IcreateDYNAMICStobjbyvalue(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -660,6 +700,7 @@ extern "C" AbckitInst *IcreateDYNAMICStownbyvalue(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -677,6 +718,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdsuperbyvalue(AbckitGraph *graph, AbckitIn
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -693,6 +735,7 @@ extern "C" AbckitInst *IcreateDYNAMICStsuperbyvalue(AbckitGraph *graph, AbckitIn
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -710,6 +753,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdobjbyindex(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -723,6 +767,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideLdobjbyindex(AbckitGraph *graph, Abckit
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -737,6 +782,7 @@ extern "C" AbckitInst *IcreateDYNAMICStobjbyindex(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -753,6 +799,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideStobjbyindex(AbckitGraph *graph, Abckit
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -769,6 +816,7 @@ extern "C" AbckitInst *IcreateDYNAMICStownbyindex(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -785,6 +833,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideStownbyindex(AbckitGraph *graph, Abckit
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -799,6 +848,7 @@ extern "C" AbckitInst *IcreateDYNAMICAsyncfunctionresolve(AbckitGraph *graph, Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -814,6 +864,7 @@ extern "C" AbckitInst *IcreateDYNAMICAsyncfunctionreject(AbckitGraph *graph, Abc
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -829,6 +880,7 @@ extern "C" AbckitInst *IcreateDYNAMICCopyrestargs(AbckitGraph *graph, uint64_t i
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -840,6 +892,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideCopyrestargs(AbckitGraph *graph, uint64
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -851,6 +904,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdlexvar(AbckitGraph *graph, uint64_t imm0,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -862,6 +916,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideLdlexvar(AbckitGraph *graph, uint64_t i
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -873,6 +928,7 @@ extern "C" AbckitInst *IcreateDYNAMICStlexvar(AbckitGraph *graph, AbckitInst *ac
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -886,6 +942,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideStlexvar(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -899,6 +956,7 @@ extern "C" AbckitInst *IcreateDYNAMICGetmodulenamespace(AbckitGraph *graph, Abck
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(md, nullptr);
@@ -912,6 +970,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideGetmodulenamespace(AbckitGraph *graph, 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(md, nullptr);
@@ -925,6 +984,7 @@ extern "C" AbckitInst *IcreateDYNAMICStmodulevar(AbckitGraph *graph, AbckitInst 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -940,6 +1000,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideStmodulevar(AbckitGraph *graph, AbckitI
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -954,6 +1015,7 @@ extern "C" AbckitInst *IcreateDYNAMICTryldglobalbyname(AbckitGraph *graph, Abcki
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(string, nullptr);
@@ -966,6 +1028,7 @@ extern "C" AbckitInst *IcreateDYNAMICTrystglobalbyname(AbckitGraph *graph, Abcki
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -980,6 +1043,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdglobalvar(AbckitGraph *graph, AbckitStrin
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(string, nullptr);
@@ -992,6 +1056,7 @@ extern "C" AbckitInst *IcreateDYNAMICStglobalvar(AbckitGraph *graph, AbckitInst 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1006,6 +1071,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdobjbyname(AbckitGraph *graph, AbckitInst 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1021,6 +1087,7 @@ extern "C" AbckitInst *IcreateDYNAMICStobjbyname(AbckitGraph *graph, AbckitInst 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1038,6 +1105,7 @@ extern "C" AbckitInst *IcreateDYNAMICStownbyname(AbckitGraph *graph, AbckitInst 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1054,6 +1122,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdsuperbyname(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1069,6 +1138,7 @@ extern "C" AbckitInst *IcreateDYNAMICStsuperbyname(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1085,6 +1155,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdlocalmodulevar(AbckitGraph *graph, Abckit
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(ed, nullptr);
@@ -1097,6 +1168,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideLdlocalmodulevar(AbckitGraph *graph, Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(ed, nullptr);
@@ -1109,6 +1181,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdexternalmodulevar(AbckitGraph *graph, Abc
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(id, nullptr);
@@ -1121,6 +1194,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideLdexternalmodulevar(AbckitGraph *graph,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(id, nullptr);
@@ -1134,6 +1208,7 @@ extern "C" AbckitInst *IcreateDYNAMICStownbyvaluewithnameset(AbckitGraph *graph,
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1152,6 +1227,7 @@ extern "C" AbckitInst *IcreateDYNAMICStownbynamewithnameset(AbckitGraph *graph, 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1168,6 +1244,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdbigint(AbckitGraph *graph, AbckitString *
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(string, nullptr);
@@ -1180,6 +1257,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdthisbyname(AbckitGraph *graph, AbckitStri
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(string, nullptr);
@@ -1192,6 +1270,7 @@ extern "C" AbckitInst *IcreateDYNAMICStthisbyname(AbckitGraph *graph, AbckitInst
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1206,6 +1285,7 @@ extern "C" AbckitInst *IcreateDYNAMICLdthisbyvalue(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1219,6 +1299,7 @@ extern "C" AbckitInst *IcreateDYNAMICStthisbyvalue(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1234,6 +1315,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideLdpatchvar(AbckitGraph *graph, uint64_t
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -1245,6 +1327,7 @@ extern "C" AbckitInst *IcreateDYNAMICWideStpatchvar(AbckitGraph *graph, AbckitIn
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1258,6 +1341,7 @@ extern "C" AbckitInst *IcreateDYNAMICDynamicimport(AbckitGraph *graph, AbckitIns
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1271,6 +1355,7 @@ extern "C" AbckitInst *IcreateDYNAMICAsyncgeneratorreject(AbckitGraph *graph, Ab
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1286,6 +1371,7 @@ extern "C" AbckitInst *IcreateDYNAMICSetgeneratorstate(AbckitGraph *graph, Abcki
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1299,6 +1385,7 @@ extern "C" AbckitInst *IcreateDYNAMICReturn(AbckitGraph *graph, AbckitInst *acc)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
@@ -1312,6 +1399,7 @@ extern "C" AbckitInst *IcreateDYNAMICReturnundefined(AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
@@ -1323,6 +1411,7 @@ extern "C" AbckitInst *IcreateDYNAMICIf(AbckitGraph *graph, AbckitInst *input, A
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(input, nullptr);
@@ -1340,6 +1429,7 @@ extern "C" AbckitIsaApiDynamicConditionCode IgetDYNAMICConditionCode(AbckitInst 
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_NONE);
 
@@ -1356,6 +1446,7 @@ extern "C" void IsetDYNAMICConditionCode(AbckitInst *inst, AbckitIsaApiDynamicCo
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     if (cc == ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_NONE) {
@@ -1384,6 +1475,7 @@ extern "C" AbckitCoreImportDescriptor *IgetImportDescriptor(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
@@ -1394,6 +1486,7 @@ extern "C" void IsetImportDescriptor(AbckitInst *inst, AbckitCoreImportDescripto
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(id);
@@ -1405,6 +1498,7 @@ extern "C" AbckitCoreExportDescriptor *IgetExportDescriptor(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
@@ -1415,6 +1509,7 @@ extern "C" void IsetExportDescriptor(AbckitInst *inst, AbckitCoreExportDescripto
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(ed);
@@ -1426,6 +1521,7 @@ extern "C" AbckitCoreModule *IgetModule(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT(inst, nullptr);
 
@@ -1436,6 +1532,7 @@ extern "C" void IsetModule(AbckitInst *inst, AbckitCoreModule *md)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(md);
