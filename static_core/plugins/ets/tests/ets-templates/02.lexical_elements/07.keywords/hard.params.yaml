@@ -29,7 +29,7 @@ keywords:
     - enum
     - export
     - extends
-    - false
+    - 'false'
     - final
     - for
     - function
@@ -42,7 +42,7 @@ keywords:
     - let
     - native
     - new
-    - null
+    - 'null'
     - override
     - package
     - private
@@ -54,7 +54,7 @@ keywords:
     - switch
     - this
     - throw
-    - true
+    - 'true'
     - try
     - undefined
     - while

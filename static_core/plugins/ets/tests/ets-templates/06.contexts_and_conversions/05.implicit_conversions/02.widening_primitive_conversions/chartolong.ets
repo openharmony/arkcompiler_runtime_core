@@ -17,8 +17,8 @@
 desc: Casting conversions char to long.
 ---*/
 
-let char: string = 'A';
-let longValue: bigint = BigInt(char.charCodeAt(0));
+let ch: string = 'A';
+let longValue: bigint = BigInt(ch.charCodeAt(0));
 let expectedLongValue: bigint = BigInt(65);
 
 function main(): void {
