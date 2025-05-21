@@ -15,6 +15,8 @@
 
 /*---
     tags: [not-a-test]
+    files: [../../../../../C/src/main/ets/pages/c.ets]
+    arktsconfig: ../../../../arktsconfig.json
 ---*/
 
 import {C} from "HarC/pages/c"

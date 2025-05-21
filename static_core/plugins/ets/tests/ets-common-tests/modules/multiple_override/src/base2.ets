@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+/*---
+  tags: [not-a-test]
+  files: [base1.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
  import { Base1 } from "./base1";
 
 export class Base2 extends Base1 { }

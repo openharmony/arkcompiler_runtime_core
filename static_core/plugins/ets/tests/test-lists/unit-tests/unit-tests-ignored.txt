@@ -2,28 +2,6 @@
 ets-common-tests/imported_modules_TL_exec_2/a.ets
 ets-common-tests/imported_modules_TL_exec_1/a.ets
 
-# URunner: support custom arktsconfig
-ets-common-tests/testing_varying_arktsconfigs/package_names/test_01/dir/foo.ets
-ets-common-tests/testing_arktsconfig/dirA/a.ets
-ets-common-tests/testing_arktsconfig_field_dependencies_and_entry/A/src/main/ets/a1.ets
-ets-common-tests/testing_arktsconfig_paths_single_file/dirA/a.ets
-ets-common-tests/modules/app/module1.ets
-ets-common-tests/modules/app/module2.ets
-ets-common-tests/modules/app/module3.ets
-ets-common-tests/modules/foo/foo.ets
-ets-common-tests/modules/mismatched/app/module4.ets
-ets-common-tests/modules/mismatched/app/module5.ets
-ets-common-tests/modules/multiple_implement/app/module.ets
-ets-common-tests/modules/multiple_implement/app/module1.ets
-ets-common-tests/modules/multiple_override/app/module.ets
-ets-common-tests/modules/multiple_override/app/module1.ets
-ets-common-tests/modules/loop_inheritance/app/module6.ets
-ets-common-tests/modules/verification_mode/app/module.ets
-ets-common-tests/modules/verification_mode/src/bar.ets
-ets-common-tests/modules/spawn/spawn.ets
-ets-common-tests/modules/verification_i32f64misuse/app/module.ets
-ets-common-tests/modules/verification_wrong_this/app/module.ets
-
 # 24932
 # TypeError: Cannot use type 'void' as value.  [cast_type_lambda.ets:41:16]
 ets-common-tests/lambda/cast_type_lambda.ets
@@ -31,12 +9,6 @@ ets-common-tests/lambda/cast_type_lambda.ets
 # 249333
 # E/verifier: Cannot link class: Cannot find field 'int_1' in class 'ambient_const_vars.ETSGLOBAL'
 ets-common-tests/exporting-ambient-decl/main.ets
-
-# 25007
-ets-common-tests/atomics/concurrent_countdownlatch.ets
-
-# 25008
-ets-common-tests/atomics/nonconcurrent_waitasync_store_notify.ets
 
 # 25057
 ets-common-tests/annotation_import_export_test/AmbientImportAl.ets

@@ -15,6 +15,8 @@
 
 /*---
     tags: [not-a-test]
+    files: [../C/indexC.ets]
+    arktsconfig: arktsconfig.json
 ---*/
 
 import {fooIC} from "HarC"

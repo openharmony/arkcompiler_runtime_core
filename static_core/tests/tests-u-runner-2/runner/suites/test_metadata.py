@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -86,6 +87,7 @@ class TestMetadata:
     timeout: int | None = None
     es2panda_options: list[str] = field(default_factory=list)
     spec: str | None = None
+    arktsconfig: Path | None = None
     # Test262 specific metadata keys
     description: str | None = None
     defines: str | None = None
@@ -128,20 +130,24 @@ class TestMetadata:
             del metadata['flags']
         if isinstance(type(metadata.get('ark_options')), str):
             metadata['ark_options'] = [metadata['ark_options']]
-        metadata['package'] = metadata.get("package")
-        if metadata['package'] is None:
-            metadata['package'] = cls.get_package_statement(path)
+        arktsconfig = metadata.get('arktsconfig')
+        package = metadata.get("package")
+        if arktsconfig is not None:
+            arktsconfig_path = (path.parent / arktsconfig).resolve()
+            metadata['arktsconfig'] = arktsconfig_path if arktsconfig_path.exists() else None
+            package = cls.get_package_statement_from_arktsconfig(path, arktsconfig_path)
+        metadata['package'] = cls.get_package_statement_from_source(path) if package is None else package
         return TestMetadata(**metadata)
 
     @classmethod
     def create_empty_metadata(cls, path: Path) -> 'TestMetadata':
         metadata = cls()
         if metadata.package is None:
-            metadata.package = cls.get_package_statement(path)
+            metadata.package = cls.get_package_statement_from_source(path)
         return metadata
 
     @classmethod
-    def get_package_statement(cls, path: Path) -> str | None:
+    def get_package_statement_from_source(cls, path: Path) -> str | None:
         data = Path.read_text(path)
         match = PACKAGE_PATTERN.search(data)
         if match is None:
@@ -149,6 +155,13 @@ class TestMetadata:
         if (stmt := match.group("package_name")) is not None:
             return stmt
         return path.stem
+
+    @classmethod
+    def get_package_statement_from_arktsconfig(cls, path: Path, arktsconfig_path: Path) -> str | None:
+        with open(arktsconfig_path, encoding="utf-8") as json_handler:
+            data = json.load(json_handler)
+        package = data.get("compilerOptions", {}).get('package', None)
+        return f"{package}.{path.stem}" if package is not None else None
 
     def get_package_name(self) -> str:
         return self.package if self.package is not None else ""

@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  files: [../../../indexA.ets, ../../../../B/indexB.ets, ../../../../B/src/main/ets/pages/b.ets]
+  arktsconfig: ../../../arktsconfig.json
+---*/
+
 import {fooIA} from "HarA"
 import {fooIB} from "HarB"
 import {B} from "HarB/pages/b"

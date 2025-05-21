@@ -16,6 +16,7 @@
 /*---
   tags: [not-a-test]
   files: [bar.ets]
+  arktsconfig: arktsconfig.json
 ---*/
 
 import { bar } from "./bar";

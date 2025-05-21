@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  tags: [not-a-test]
+  arktsconfig: arktsconfig.json
+---*/
+
 export class Base1 {
     foo (a: object): void { }
 }

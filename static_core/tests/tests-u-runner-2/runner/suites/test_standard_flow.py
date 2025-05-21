@@ -236,16 +236,30 @@ class TestStandardFlow(Test):
                 result[index] = arg.replace(self.__DEFAULT_ENTRY_POINT, self.main_entry_point).strip()
         return [res for res in result if res]
 
+    def __change_output_arg(self, source_args: list[str], new_args: list[str]) -> list[str]:
+        for index, arg in enumerate(source_args):
+            if arg.startswith("--output="):
+                new_args[index] = f"--output={self.test_abc}"
+                break
+        return new_args
+
+    def __change_arktsconfig_arg(self, source_args: list[str], new_args: list[str]) -> list[str]:
+        for index, arg in enumerate(source_args):
+            if arg.startswith("--arktsconfig=") and self.metadata.arktsconfig is not None:
+                new_args[index] = f"--arktsconfig={self.metadata.arktsconfig}"
+                new_args.insert(0, f"--stdlib={self.test_env.config.general.static_core_root}/plugins/ets/stdlib")
+                break
+        return new_args
+
     def __run_compiler(self, step: Step) -> tuple[bool, TestReport, str | None]:
+        new_step = copy.copy(step)
+        new_step.args = step.args[:]
         if self.__is_dependent:
-            new_step = copy.copy(step)
-            new_step.args = step.args[:]
-            for index, arg in enumerate(new_step.args):
-                if arg.startswith("--output="):
-                    new_step.args[index] = f"--output={self.test_abc}"
-                    break
+            new_step.args = self.__change_output_arg(step.args, new_step.args)
+            new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
             return self.__run_step(new_step)
-        return self.__run_step(step)
+        new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
+        return self.__run_step(new_step)
 
     def __run_verifier(self, step: Step) -> tuple[bool, TestReport, str | None]:
         if self.dependent_tests:

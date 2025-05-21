@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/*---
+  files: [../dirB/foo.ets]
+  arktsconfig: arktsconfig.json
+---*/
+
 import { BObj } from "HarB.foo"
 
 function main() {
