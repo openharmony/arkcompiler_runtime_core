@@ -37,7 +37,7 @@ from taihe.semantics.declarations import (
 class ABIHeadersGenerator(Backend):
     def __init__(self, ci: CompilerInstance):
         super().__init__(ci)
-        self.tm = ci.target_manager
+        self.oc = ci.output_config
         self.am = ci.analysis_manager
         self.pg = ci.package_group
 
@@ -47,7 +47,10 @@ class ABIHeadersGenerator(Backend):
 
     def gen_package_file(self, pkg: PackageDecl):
         pkg_abi_info = PackageABIInfo.get(self.am, pkg)
-        with CHeaderWriter(self.tm, f"include/{pkg_abi_info.header}") as pkg_abi_target:
+        with CHeaderWriter(
+            self.oc,
+            f"include/{pkg_abi_info.header}",
+        ) as pkg_abi_target:
             for struct in pkg.structs:
                 struct_abi_info = StructABIInfo.get(self.am, struct)
                 self.gen_struct_decl_file(struct, struct_abi_info)
@@ -86,8 +89,8 @@ class ABIHeadersGenerator(Backend):
             return_ty_name = type_abi_info.as_owner
         else:
             return_ty_name = "void"
-        pkg_abi_target.writeln(
-            f"TH_EXPORT {return_ty_name} {func_abi_info.mangled_name}({params_str});"
+        pkg_abi_target.writelns(
+            f"TH_EXPORT {return_ty_name} {func_abi_info.mangled_name}({params_str});",
         )
 
     def gen_struct_decl_file(
@@ -96,9 +99,12 @@ class ABIHeadersGenerator(Backend):
         struct_abi_info: StructABIInfo,
     ):
         with CHeaderWriter(
-            self.tm, f"include/{struct_abi_info.decl_header}"
+            self.oc,
+            f"include/{struct_abi_info.decl_header}",
         ) as struct_abi_decl_target:
-            struct_abi_decl_target.writeln(f"struct {struct_abi_info.mangled_name};")
+            struct_abi_decl_target.writelns(
+                f"struct {struct_abi_info.mangled_name};",
+            )
 
     def gen_struct_defn_file(
         self,
@@ -106,7 +112,8 @@ class ABIHeadersGenerator(Backend):
         struct_abi_info: StructABIInfo,
     ):
         with CHeaderWriter(
-            self.tm, f"include/{struct_abi_info.impl_header}"
+            self.oc,
+            f"include/{struct_abi_info.impl_header}",
         ) as struct_abi_defn_target:
             struct_abi_defn_target.add_include("taihe/common.h")
             struct_abi_defn_target.add_include(struct_abi_info.decl_header)
@@ -119,13 +126,14 @@ class ABIHeadersGenerator(Backend):
         struct_abi_defn_target: CHeaderWriter,
     ):
         with struct_abi_defn_target.indented(
-            f"struct {struct_abi_info.mangled_name} {{", "};"
+            f"struct {struct_abi_info.mangled_name} {{",
+            f"}};",
         ):
             for field in struct.fields:
                 type_abi_info = TypeABIInfo.get(self.am, field.ty_ref.resolved_ty)
                 struct_abi_defn_target.add_include(*type_abi_info.impl_headers)
-                struct_abi_defn_target.writeln(
-                    f"{type_abi_info.as_owner} {field.name};"
+                struct_abi_defn_target.writelns(
+                    f"{type_abi_info.as_owner} {field.name};",
                 )
 
     def gen_union_decl_file(
@@ -134,9 +142,12 @@ class ABIHeadersGenerator(Backend):
         union_abi_info: UnionABIInfo,
     ):
         with CHeaderWriter(
-            self.tm, f"include/{union_abi_info.decl_header}"
+            self.oc,
+            f"include/{union_abi_info.decl_header}",
         ) as union_abi_decl_target:
-            union_abi_decl_target.writeln(f"struct {union_abi_info.mangled_name};")
+            union_abi_decl_target.writelns(
+                f"struct {union_abi_info.mangled_name};",
+            )
 
     def gen_union_defn_file(
         self,
@@ -144,7 +155,8 @@ class ABIHeadersGenerator(Backend):
         union_abi_info: UnionABIInfo,
     ):
         with CHeaderWriter(
-            self.tm, f"include/{union_abi_info.impl_header}"
+            self.oc,
+            f"include/{union_abi_info.impl_header}",
         ) as union_abi_defn_target:
             union_abi_defn_target.add_include("taihe/common.h")
             union_abi_defn_target.add_include(union_abi_info.decl_header)
@@ -157,18 +169,23 @@ class ABIHeadersGenerator(Backend):
         union_abi_defn_target: CHeaderWriter,
     ):
         with union_abi_defn_target.indented(
-            f"union {union_abi_info.union_name} {{", "};"
+            f"union {union_abi_info.union_name} {{",
+            f"}};",
         ):
             for field in union.fields:
                 if field.ty_ref is None:
-                    union_abi_defn_target.writeln(f"// {field.name}")
+                    union_abi_defn_target.writelns(
+                        f"// {field.name}",
+                    )
                     continue
                 type_abi_info = TypeABIInfo.get(self.am, field.ty_ref.resolved_ty)
                 union_abi_defn_target.add_include(*type_abi_info.impl_headers)
-                union_abi_defn_target.writeln(f"{type_abi_info.as_owner} {field.name};")
-
+                union_abi_defn_target.writelns(
+                    f"{type_abi_info.as_owner} {field.name};",
+                )
         with union_abi_defn_target.indented(
-            f"struct {union_abi_info.mangled_name} {{", "};"
+            f"struct {union_abi_info.mangled_name} {{",
+            f"}};",
         ):
             union_abi_defn_target.writelns(
                 f"{union_abi_info.tag_type} m_tag;",
@@ -181,9 +198,12 @@ class ABIHeadersGenerator(Backend):
         iface_abi_info: IfaceABIInfo,
     ):
         with CHeaderWriter(
-            self.tm, f"include/{iface_abi_info.decl_header}"
+            self.oc,
+            f"include/{iface_abi_info.decl_header}",
         ) as iface_abi_decl_target:
-            iface_abi_decl_target.writeln(f"struct {iface_abi_info.mangled_name};")
+            iface_abi_decl_target.writelns(
+                f"struct {iface_abi_info.mangled_name};",
+            )
 
     def gen_iface_defn_file(
         self,
@@ -191,22 +211,19 @@ class ABIHeadersGenerator(Backend):
         iface_abi_info: IfaceABIInfo,
     ):
         with CHeaderWriter(
-            self.tm, f"include/{iface_abi_info.defn_header}"
+            self.oc,
+            f"include/{iface_abi_info.defn_header}",
         ) as iface_abi_defn_target:
             iface_abi_defn_target.add_include("taihe/object.abi.h")
             iface_abi_defn_target.add_include(iface_abi_info.decl_header)
-            iface_abi_defn_target.writeln(
-                f"TH_EXPORT void const* const {iface_abi_info.iid};"
+            iface_abi_defn_target.writelns(
+                f"TH_EXPORT void const* const {iface_abi_info.iid};",
             )
             self.gen_iface_ftable(iface, iface_abi_info, iface_abi_defn_target)
             self.gen_iface_vtable(iface, iface_abi_info, iface_abi_defn_target)
             self.gen_iface_defn(iface, iface_abi_info, iface_abi_defn_target)
-            self.gen_iface_static_cast_funcs(
-                iface, iface_abi_info, iface_abi_defn_target
-            )
-            self.gen_iface_dynamic_cast_func(
-                iface, iface_abi_info, iface_abi_defn_target
-            )
+            self.gen_iface_static_casts(iface, iface_abi_info, iface_abi_defn_target)
+            self.gen_iface_dynamic_cast(iface, iface_abi_info, iface_abi_defn_target)
             self.gen_iface_copy_func(iface, iface_abi_info, iface_abi_defn_target)
             self.gen_iface_drop_func(iface, iface_abi_info, iface_abi_defn_target)
 
@@ -216,7 +233,10 @@ class ABIHeadersGenerator(Backend):
         iface_abi_info: IfaceABIInfo,
         iface_abi_defn_target: CHeaderWriter,
     ):
-        with iface_abi_defn_target.indented(f"struct {iface_abi_info.ftable} {{", "};"):
+        with iface_abi_defn_target.indented(
+            f"struct {iface_abi_info.ftable} {{",
+            f"}};",
+        ):
             for method in iface.methods:
                 params = [f"{iface_abi_info.as_param} tobj"]
                 for param in method.params:
@@ -230,8 +250,8 @@ class ABIHeadersGenerator(Backend):
                     return_ty_name = type_abi_info.as_owner
                 else:
                     return_ty_name = "void"
-                iface_abi_defn_target.writeln(
-                    f"{return_ty_name} (*{method.name})({params_str});"
+                iface_abi_defn_target.writelns(
+                    f"{return_ty_name} (*{method.name})({params_str});",
                 )
 
     def gen_iface_vtable(
@@ -240,11 +260,14 @@ class ABIHeadersGenerator(Backend):
         iface_abi_info: IfaceABIInfo,
         iface_abi_defn_target: CHeaderWriter,
     ):
-        with iface_abi_defn_target.indented(f"struct {iface_abi_info.vtable} {{", "};"):
+        with iface_abi_defn_target.indented(
+            f"struct {iface_abi_info.vtable} {{",
+            f"}};",
+        ):
             for ancestor_item_info in iface_abi_info.ancestor_list:
                 ancestor_abi_info = IfaceABIInfo.get(self.am, ancestor_item_info.iface)
-                iface_abi_defn_target.writeln(
-                    f"struct {ancestor_abi_info.ftable} const* {ancestor_item_info.ftbl_ptr};"
+                iface_abi_defn_target.writelns(
+                    f"struct {ancestor_abi_info.ftable} const* {ancestor_item_info.ftbl_ptr};",
                 )
 
     def gen_iface_defn(
@@ -254,14 +277,15 @@ class ABIHeadersGenerator(Backend):
         iface_abi_defn_target: CHeaderWriter,
     ):
         with iface_abi_defn_target.indented(
-            f"struct {iface_abi_info.mangled_name} {{", "};"
+            f"struct {iface_abi_info.mangled_name} {{",
+            f"}};",
         ):
             iface_abi_defn_target.writelns(
                 f"struct {iface_abi_info.vtable} const* vtbl_ptr;",
                 f"struct DataBlockHead* data_ptr;",
             )
 
-    def gen_iface_static_cast_funcs(
+    def gen_iface_static_casts(
         self,
         iface: IfaceDecl,
         iface_abi_info: IfaceABIInfo,
@@ -272,21 +296,18 @@ class ABIHeadersGenerator(Backend):
                 continue
             ancestor_abi_info = IfaceABIInfo.get(self.am, ancestor)
             iface_abi_defn_target.add_include(ancestor_abi_info.defn_header)
-
             with iface_abi_defn_target.indented(
                 f"TH_INLINE struct {ancestor_abi_info.mangled_name} {info.static_cast}(struct {iface_abi_info.mangled_name} tobj) {{",
-                "}",
+                f"}}",
             ):
-                iface_abi_defn_target.writeln(
-                    f"struct {ancestor_abi_info.mangled_name} result;"
+                iface_abi_defn_target.writelns(
+                    f"struct {ancestor_abi_info.mangled_name} result;",
+                    f"result.vtbl_ptr = (struct {ancestor_abi_info.vtable} const*)((void* const*)tobj.vtbl_ptr + {info.offset});",
+                    f"result.data_ptr = tobj.data_ptr;",
+                    f"return result;",
                 )
-                iface_abi_defn_target.writeln(
-                    f"result.vtbl_ptr = (struct {ancestor_abi_info.vtable} const*)((void* const*)tobj.vtbl_ptr + {info.offset});"
-                )
-                iface_abi_defn_target.writeln(f"result.data_ptr = tobj.data_ptr;")
-                iface_abi_defn_target.writeln(f"return result;")
 
-    def gen_iface_dynamic_cast_func(
+    def gen_iface_dynamic_cast(
         self,
         iface: IfaceDecl,
         iface_abi_info: IfaceABIInfo,
@@ -294,7 +315,7 @@ class ABIHeadersGenerator(Backend):
     ):
         with iface_abi_defn_target.indented(
             f"TH_INLINE struct {iface_abi_info.mangled_name} {iface_abi_info.dynamic_cast}(struct DataBlockHead* data_ptr) {{",
-            "}",
+            f"}}",
         ):
             iface_abi_defn_target.writelns(
                 f"struct TypeInfo const* rtti_ptr = data_ptr->rtti_ptr;",
@@ -302,17 +323,21 @@ class ABIHeadersGenerator(Backend):
                 f"result.data_ptr = data_ptr;",
             )
             with iface_abi_defn_target.indented(
-                f"for (size_t i = 0; i < rtti_ptr->len; i++) {{", "}"
+                f"for (size_t i = 0; i < rtti_ptr->len; i++) {{",
+                f"}}",
             ):
                 with iface_abi_defn_target.indented(
-                    f"if (rtti_ptr->idmap[i].id == {iface_abi_info.iid}) {{", "}"
+                    f"if (rtti_ptr->idmap[i].id == {iface_abi_info.iid}) {{",
+                    f"}}",
                 ):
                     iface_abi_defn_target.writelns(
                         f"result.vtbl_ptr = (struct {iface_abi_info.vtable}*)rtti_ptr->idmap[i].vtbl_ptr;",
                         f"return result;",
                     )
-            iface_abi_defn_target.writeln(f"result.vtbl_ptr = NULL;")
-            iface_abi_defn_target.writeln(f"return result;")
+            iface_abi_defn_target.writelns(
+                f"result.vtbl_ptr = NULL;",
+                f"return result;",
+            )
 
     def gen_iface_copy_func(
         self,
@@ -322,14 +347,21 @@ class ABIHeadersGenerator(Backend):
     ):
         with iface_abi_defn_target.indented(
             f"TH_INLINE struct {iface_abi_info.mangled_name} {iface_abi_info.copy_func}(struct {iface_abi_info.mangled_name} tobj) {{",
-            "}",
+            f"}}",
         ):
-            iface_abi_defn_target.writeln(
-                f"struct DataBlockHead* data_ptr = tobj.data_ptr;"
+            iface_abi_defn_target.writelns(
+                f"struct DataBlockHead* data_ptr = tobj.data_ptr;",
             )
-            with iface_abi_defn_target.indented(f"if (data_ptr) {{", "}"):
-                iface_abi_defn_target.writeln(f"tref_inc(&data_ptr->m_count);")
-            iface_abi_defn_target.writeln(f"return tobj;")
+            with iface_abi_defn_target.indented(
+                f"if (data_ptr) {{",
+                f"}}",
+            ):
+                iface_abi_defn_target.writelns(
+                    f"tref_inc(&data_ptr->m_count);",
+                )
+            iface_abi_defn_target.writelns(
+                f"return tobj;",
+            )
 
     def gen_iface_drop_func(
         self,
@@ -339,15 +371,18 @@ class ABIHeadersGenerator(Backend):
     ):
         with iface_abi_defn_target.indented(
             f"TH_INLINE void {iface_abi_info.drop_func}(struct {iface_abi_info.mangled_name} tobj) {{",
-            "}",
+            f"}}",
         ):
-            iface_abi_defn_target.writeln(
-                f"struct DataBlockHead* data_ptr = tobj.data_ptr;"
+            iface_abi_defn_target.writelns(
+                f"struct DataBlockHead* data_ptr = tobj.data_ptr;",
             )
             with iface_abi_defn_target.indented(
-                f"if (data_ptr && tref_dec(&data_ptr->m_count)) {{", "}"
+                f"if (data_ptr && tref_dec(&data_ptr->m_count)) {{",
+                f"}}",
             ):
-                iface_abi_defn_target.writeln(f"data_ptr->rtti_ptr->free(data_ptr);")
+                iface_abi_defn_target.writelns(
+                    f"data_ptr->rtti_ptr->free(data_ptr);",
+                )
 
     def gen_iface_impl_file(
         self,
@@ -355,7 +390,8 @@ class ABIHeadersGenerator(Backend):
         iface_abi_info: IfaceABIInfo,
     ):
         with CHeaderWriter(
-            self.tm, f"include/{iface_abi_info.impl_header}"
+            self.oc,
+            f"include/{iface_abi_info.impl_header}",
         ) as iface_abi_impl_target:
             iface_abi_impl_target.add_include(iface_abi_info.defn_header)
             self.gen_iface_methods(iface, iface_abi_info, iface_abi_impl_target)
@@ -383,20 +419,19 @@ class ABIHeadersGenerator(Backend):
                 return_ty_name = type_abi_info.as_owner
             else:
                 return_ty_name = "void"
-
             with iface_abi_impl_target.indented(
                 f"TH_INLINE {return_ty_name} {method_abi_info.mangled_name}({params_str}) {{",
-                "}",
+                f"}}",
             ):
-                iface_abi_impl_target.writeln(
-                    f"return tobj.vtbl_ptr->{iface_abi_info.ancestor_dict[iface].ftbl_ptr}->{method.name}({args_str});"
+                iface_abi_impl_target.writelns(
+                    f"return tobj.vtbl_ptr->{iface_abi_info.ancestor_dict[iface].ftbl_ptr}->{method.name}({args_str});",
                 )
 
 
 class ABISourcesGenerator(Backend):
     def __init__(self, ci: CompilerInstance):
         super().__init__(ci)
-        self.tm = ci.target_manager
+        self.oc = ci.output_config
         self.am = ci.analysis_manager
         self.pg = ci.package_group
 
@@ -406,7 +441,10 @@ class ABISourcesGenerator(Backend):
 
     def gen_package_file(self, pkg: PackageDecl):
         pkg_abi_info = PackageABIInfo.get(self.am, pkg)
-        with CSourceWriter(self.tm, f"src/{pkg_abi_info.src}") as pkg_abi_src_target:
+        with CSourceWriter(
+            self.oc,
+            f"src/{pkg_abi_info.src}",
+        ) as pkg_abi_src_target:
             for iface in pkg.interfaces:
                 self.gen_iface_file(iface, pkg_abi_src_target)
 
@@ -417,6 +455,6 @@ class ABISourcesGenerator(Backend):
     ):
         iface_abi_info = IfaceABIInfo.get(self.am, iface)
         pkg_abi_src_target.add_include(iface_abi_info.defn_header)
-        pkg_abi_src_target.writeln(
-            f"void const* const {iface_abi_info.iid} = &{iface_abi_info.iid};"
+        pkg_abi_src_target.writelns(
+            f"void const* const {iface_abi_info.iid} = &{iface_abi_info.iid};",
         )

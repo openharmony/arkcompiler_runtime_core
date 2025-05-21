@@ -49,11 +49,11 @@ class CppAuthorBackendConfig(BackendConfig):
                 self._ci = ci
 
             def generate(self):
-                tm = self._ci.target_manager
+                oc = self._ci.output_config
                 am = self._ci.analysis_manager
                 pg = self._ci.package_group
-                CppImplSourcesGenerator(tm, am).generate(pg)
-                CppImplHeadersGenerator(tm, am).generate(pg)
+                CppImplSourcesGenerator(oc, am).generate(pg)
+                CppImplHeadersGenerator(oc, am).generate(pg)
 
         return CppImplBackendImpl(instance)
 

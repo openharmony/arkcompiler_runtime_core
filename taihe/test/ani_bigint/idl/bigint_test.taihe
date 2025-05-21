@@ -15,15 +15,15 @@
 @!sts_inject("""
 function bigIntToArrayInt64(a : BigInt) : long[] {
     let array : Array<long> = new Array<long>(0);
-    let tmp : BigInt = a;
-    if (tmp === 0n) {
+    let ocp : BigInt = a;
+    if (ocp === 0n) {
         array.push(0);
     }
-    while (tmp !== 0n) {
-        let big = BigInt.asIntN(64, tmp);
+    while (ocp !== 0n) {
+        let big = BigInt.asIntN(64, ocp);
         let lg : long = big.getLong();
         array.push(lg);
-        tmp = tmp >> 64n;
+        ocp = ocp >> 64n;
     }
     let out : long[] = new long[array.length];
     for (let i = 0; i < array.length; i++) {
@@ -36,8 +36,8 @@ function bigIntToArrayInt64(a : BigInt) : long[] {
 function arrayInt64ToBigInt(a : long[]) : BigInt {
     let big: BigInt = 0n;
     for (let i = 0; i < a.length; i++) {
-        let tmp: BigInt = new BigInt(a[i]);
-        big = (big << 64n) | tmp;
+        let ocp: BigInt = new BigInt(a[i]);
+        big = (big << 64n) | ocp;
     }
     return big;
 }

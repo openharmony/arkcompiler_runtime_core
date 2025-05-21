@@ -18,7 +18,7 @@
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional, Protocol
+from typing import TYPE_CHECKING, Protocol, TypeVar
 
 from typing_extensions import override
 
@@ -33,13 +33,15 @@ if TYPE_CHECKING:
     )
     from taihe.semantics.visitor import TypeVisitor
 
+T = TypeVar("T")
+
 ############################
 # Infrastructure for Types #
 ############################
 
 
 class TypeProtocol(Protocol):
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         ...
 
 
@@ -61,7 +63,7 @@ class Type(metaclass=ABCMeta):
         """Return the representation of the type."""
 
     @abstractmethod
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         """Accept a visitor."""
 
 
@@ -107,7 +109,7 @@ class ScalarType(BuiltinType):
         return self.kind.symbol
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_scalar_type(self)
 
 
@@ -119,7 +121,7 @@ class OpaqueType(BuiltinType):
         return "Opaque"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_opaque_type(self)
 
 
@@ -131,7 +133,7 @@ class StringType(BuiltinType):
         return "String"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_string_type(self)
 
 
@@ -165,7 +167,7 @@ BUILTIN_TYPES: dict[str, BuiltinBuilder] = {
 
 @dataclass(frozen=True, repr=False)
 class CallbackType(Type):
-    return_ty: Optional[Type]
+    return_ty: Type | None
     params_ty: tuple[Type, ...]
 
     @property
@@ -176,7 +178,7 @@ class CallbackType(Type):
         return f"({params_fmt}) => {return_fmt}"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_callback_type(self)
 
 
@@ -194,7 +196,7 @@ class ArrayType(GenericType):
         return f"Array<{self.item_ty.signature}>"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_array_type(self)
 
 
@@ -208,7 +210,7 @@ class OptionalType(GenericType):
         return f"Optional<{self.item_ty.signature}>"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_optional_type(self)
 
 
@@ -222,7 +224,7 @@ class VectorType(GenericType):
         return f"Vector<{self.val_ty.signature}>"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_vector_type(self)
 
 
@@ -237,7 +239,7 @@ class MapType(GenericType):
         return f"Map<{self.key_ty.signature}, {self.val_ty.signature}>"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_map_type(self)
 
 
@@ -251,7 +253,7 @@ class SetType(GenericType):
         return f"Set<{self.key_ty.signature}>"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_set_type(self)
 
 
@@ -290,7 +292,7 @@ class EnumType(UserType):
     ty_decl: "EnumDecl"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_enum_type(self)
 
 
@@ -299,7 +301,7 @@ class StructType(UserType):
     ty_decl: "StructDecl"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_struct_type(self)
 
 
@@ -308,7 +310,7 @@ class UnionType(UserType):
     ty_decl: "UnionDecl"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_union_type(self)
 
 
@@ -317,5 +319,5 @@ class IfaceType(UserType):
     ty_decl: "IfaceDecl"
 
     @override
-    def _accept(self, v: "TypeVisitor") -> Any:
+    def _accept(self, v: "TypeVisitor[T]") -> T:
         return v.visit_iface_type(self)

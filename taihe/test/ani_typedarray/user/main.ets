@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as bar from "@generated/bar";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as bar from "bar";
 
 loadLibrary("ani_typedarray");
 
@@ -113,5 +112,5 @@ function main() {
     suite.addTest("checkBigInt64Array", checkBigInt64Array);
     suite.addTest("checkFloat32Array", checkFloat32Array);
     suite.addTest("checkFloat64Array", checkFloat64Array);
-    System.exit(suite.run());
+    exit(suite.run());
 }

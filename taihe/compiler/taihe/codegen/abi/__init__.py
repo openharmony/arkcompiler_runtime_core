@@ -59,10 +59,10 @@ class CAuthorBackendConfig(BackendConfig):
                 self._ci = ci
 
             def generate(self):
-                tm = self._ci.target_manager
+                oc = self._ci.output_config
                 am = self._ci.analysis_manager
                 pg = self._ci.package_group
-                CImplSourcesGenerator(tm, am).generate(pg)
-                CImplHeadersGenerator(tm, am).generate(pg)
+                CImplSourcesGenerator(oc, am).generate(pg)
+                CImplHeadersGenerator(oc, am).generate(pg)
 
         return CImplBackendImpl(instance)

@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as FuncTest from "@generated/function_test";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as FuncTest from "function_test";
 
 loadLibrary("ani_function");
 
@@ -156,5 +155,5 @@ function main() {
     suite.addTest("test new class with two args", test_new_class_with_two_args);
 
     suite.addTest("test static property", test_static_property);
-    System.exit(suite.run());
+    exit(suite.run());
 }

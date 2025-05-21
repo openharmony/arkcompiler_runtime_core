@@ -76,11 +76,14 @@ class BackendRegistry:
 
     def register(self, factory: BackendConfigT):
         name = factory.NAME
-        if prev := self._factories.get(name):
-            raise KeyError(
-                f"duplicated backend {name!r}: prev = {prev}, new = {factory}"
+        if (setted := self._factories.setdefault(name, factory)) is not factory:
+            raise ValueError(
+                f"backend {name!r} cannot be registered as {factory.__name__} "
+                f"because it is already registered as {setted.__name__}"
             )
-        self._factories[name] = factory
+
+    def clear(self):
+        self._factories.clear()
 
     def collect_required_backends(self, names: Iterable[str]) -> list[BackendConfigT]:
         result: list[BackendConfigT] = []

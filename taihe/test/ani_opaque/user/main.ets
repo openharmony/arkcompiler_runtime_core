@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as test from "@generated/opaque_test";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as test from "opaque_test";
 
 loadLibrary("ani_opaque");
 
@@ -34,8 +33,8 @@ function test_is_string_with_string() {
 }
 
 function test_get_object() {
-    const object = test.get_object();
-    assertEQ(object, "BBB")
+    const obj = test.get_object();
+    assertEQ(obj, "BBB")
 }
 
 function test_is_object_with_union() {
@@ -45,16 +44,16 @@ function test_is_object_with_union() {
 }
 
 function test_get_objects() {
-    const objects = test.get_objects();
-    assertEQ(objects[0], "AAA");
-    assertEQ(objects[1], undefined);
+    const objs = test.get_objects();
+    assertEQ(objs[0], "AAA");
+    assertEQ(objs[1], undefined);
 }
 
 function main() {
     console.log("##############start#############");
     const suite = new ArkTestsuite("Test Suite");
-    const objects1 = test.get_objects();
-    console.log(objects1);
+    const objs = test.get_objects();
+    console.log(objs);
 
     suite.addTest("test is_string with object", test_is_string_with_object);
     suite.addTest("test is_string with string", test_is_string_with_string);
@@ -62,5 +61,5 @@ function main() {
     suite.addTest("test get_object", test_get_object);
     suite.addTest("test get_objects", test_get_objects);
 
-    System.exit(suite.run());
+    exit(suite.run());
 }

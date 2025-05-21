@@ -35,9 +35,8 @@ class AniBridgeBackendConfig(BackendConfig):
 
         # TODO: unify {ANI,STS}CodeGenerator
         class AniBridgeBackendImpl(Backend):
-            def __init__(self, ci: CompilerInstance, config: BackendConfig):
+            def __init__(self, ci: CompilerInstance, config: AniBridgeBackendConfig):
                 super().__init__(ci)
-                pass
                 self._ci = ci
                 self.keep_name = config.keep_name
 
@@ -50,10 +49,10 @@ class AniBridgeBackendConfig(BackendConfig):
                         pkg.add_attr(d)
 
             def generate(self):
-                tm = self._ci.target_manager
+                oc = self._ci.output_config
                 am = self._ci.analysis_manager
                 pg = self._ci.package_group
-                ANICodeGenerator(tm, am).generate(pg)
-                STSCodeGenerator(tm, am).generate(pg)
+                ANICodeGenerator(oc, am).generate(pg)
+                STSCodeGenerator(oc, am).generate(pg)
 
         return AniBridgeBackendImpl(instance, self)

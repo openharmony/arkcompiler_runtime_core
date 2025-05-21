@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as on_off_test from "@generated/on_off";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as on_off_test from "on_off";
 
 loadLibrary("ani_on_off");
 
@@ -209,5 +208,5 @@ function main() {
     suite.addTest("toplevelFuncBOn", toplevelFuncBOn)
     suite.addTest("toplevelFuncIOff", toplevelFuncIOff)
     suite.addTest("toplevelFuncBOff", toplevelFuncBOff)
-    System.exit(suite.run())
+    exit(suite.run())
 }

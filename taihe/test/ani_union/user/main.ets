@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as UnionTest1 from "@generated/test_union";
-import * as UnionTest from "@generated/union_ani";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as UnionTest1 from "test_union";
+import * as UnionTest from "union_ani";
 
 loadLibrary("ani_union");
 
@@ -679,5 +678,5 @@ function main() {
     suite.addTest(
         "test_interface_Union_array_map9", test_interface_Union_array_map9);
 
-    System.exit(suite.run());
+    exit(suite.run());
 }

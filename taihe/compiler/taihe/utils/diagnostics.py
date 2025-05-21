@@ -22,18 +22,14 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from sys import stderr
 from typing import (
-    TYPE_CHECKING,
     ClassVar,
-    Optional,
     TextIO,
     TypeVar,
 )
 
 from typing_extensions import override
 
-if TYPE_CHECKING:
-    from taihe.utils.sources import SourceLocation
-
+from taihe.utils.sources import SourceLocation
 
 T = TypeVar("T")
 
@@ -51,11 +47,12 @@ class AnsiStyle:
     RESET_ALL = "\033[0m"
 
 
-def _passthrough(x):
+def _passthrough(x: str) -> str:
     return x
 
 
-def _discard(x):
+def _discard(x: str) -> str:
+    del x
     return ""
 
 
@@ -82,11 +79,11 @@ class DiagBase(ABC):
     LEVEL_DESC: ClassVar[str]
     STYLE: ClassVar[str]
 
-    loc: Optional["SourceLocation"] = field(kw_only=True)
+    loc: SourceLocation | None = field(kw_only=True)
     """The source location where the diagnostic refers to."""
 
     def __str__(self) -> str:
-        return self._format(_discard)
+        return self.format(_discard)
 
     @property
     @abstractmethod
@@ -97,7 +94,7 @@ class DiagBase(ABC):
         """Returns the associated notes."""
         return ()
 
-    def _format(self, f: FilterT) -> str:
+    def format(self, f: FilterT) -> str:
         return (
             f"{f(AnsiStyle.BRIGHT)}{self.loc or '???'}: "  # "example.taihe:7:20: "
             f"{f(self.STYLE)}{self.LEVEL_DESC}{f(AnsiStyle.RESET)}: "  # "error: "
@@ -223,18 +220,19 @@ class DiagnosticsManager(AbstractDiagnosticsManager):
         self._out.flush()
 
     # TODO: could be slow.
-    def _render_source_location(self, loc: "SourceLocation"):
+    def _render_source_location(self, loc: SourceLocation):
         MAX_LINE_NO_SPACE = 5
-        if not loc.has_pos:
+        if not loc.text_range:
             return
 
         line_contents = loc.file.read()
+        text_range = loc.text_range
 
-        if loc.start_row < 1 or loc.stop_row > len(line_contents):
+        if text_range.start.row < 1 or text_range.stop.row > len(line_contents):
             return
 
         for line, line_content in enumerate(line_contents, 1):
-            if line < loc.start_row or line > loc.stop_row:
+            if line < text_range.start.row or line > text_range.stop.row:
                 continue
 
             line_content = line_content.rstrip("\n")
@@ -246,8 +244,8 @@ class DiagnosticsManager(AbstractDiagnosticsManager):
             markers = "".join(
                 (
                     " "
-                    if (line == loc.start_row and col < loc.start_col)
-                    or (line == loc.stop_row and col > loc.stop_col)
+                    if (line == text_range.start.row and col < text_range.start.col)
+                    or (line == text_range.stop.row and col > text_range.stop.col)
                     else "^"
                 )
                 for col in range(1, len(line_content) + 1)
@@ -260,6 +258,6 @@ class DiagnosticsManager(AbstractDiagnosticsManager):
             )
 
     def _render(self, d: DiagBase):
-        self._write(f"{d._format(self._color_filter_fn)}\n")
+        self._write(f"{d.format(self._color_filter_fn)}\n")
         if d.loc:
             self._render_source_location(d.loc)

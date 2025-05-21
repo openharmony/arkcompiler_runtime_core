@@ -12,10 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <cstdint>
 #include <iostream>
 
 #include "enum_test.impl.hpp"
 #include "stdexcept"
+#include "taihe/runtime.hpp"
+#include "taihe/string.hpp"
 // Please delete <stdexcept> include when you implement
 using namespace taihe;
 
@@ -33,9 +36,18 @@ static constexpr std::size_t BOOL_COUNT = 3;
     return (::enum_test::Color::key_t)(((int)color.get_key() + 1) % COLOR_COUNT);
 }
 
-void ShowEnum(::enum_test::Color color)
+taihe::string GetValueOfEnum(::enum_test::Color color)
 {
-    std::cout << color << std::endl;
+    return color.get_value();
+}
+
+::enum_test::Color fromValueToEnum(string_view name)
+{
+    auto color = ::enum_test::Color::from_value(name);
+    if (!color.is_valid()) {
+        set_business_error(1, "Invalid enum value");
+    }
+    return color;
 }
 
 ::enum_test::Weekday NextEnumWeekday(::enum_test::Weekday day)
@@ -43,27 +55,18 @@ void ShowEnum(::enum_test::Color color)
     return (::enum_test::Weekday::key_t)(((int)day.get_key() + 1) % WEEKDAY_COUNT);
 }
 
-void ShowEnumWeekday(::enum_test::Weekday day)
+int32_t GetValueOfEnumWeekday(::enum_test::Weekday day)
 {
-    std::string dayStr;
-    if (day.get_key() == ::enum_test::Weekday::key_t::MONDAY) {
-        dayStr = "Monday";
-    } else if (day.get_key() == ::enum_test::Weekday::key_t::TUESDAY) {
-        dayStr = "Tuesday";
-    } else if (day.get_key() == ::enum_test::Weekday::key_t::WEDNESDAY) {
-        dayStr = "Wednesday";
-    } else if (day.get_key() == ::enum_test::Weekday::key_t::THURSDAY) {
-        dayStr = "Thursday";
-    } else if (day.get_key() == ::enum_test::Weekday::key_t::FRIDAY) {
-        dayStr = "Friday";
-    } else if (day.get_key() == ::enum_test::Weekday::key_t::SATURDAY) {
-        dayStr = "Saturday";
-    } else if (day.get_key() == ::enum_test::Weekday::key_t::SUNDAY) {
-        dayStr = "Sunday";
-    } else {
-        dayStr = "Unknown";
+    return day.get_value();
+}
+
+::enum_test::Weekday fromValueToEnumWeekday(int day)
+{
+    auto weekday = ::enum_test::Weekday::from_value(day);
+    if (!weekday.is_valid()) {
+        set_business_error(1, "Invalid enum value");
     }
-    std::cout << dayStr << std::endl;
+    return weekday;
 }
 
 ::enum_test::NumTypeI8 NextEnumI8(::enum_test::NumTypeI8 numTypei8)
@@ -94,9 +97,11 @@ void ShowEnumWeekday(::enum_test::Weekday day)
 }  // namespace
 
 TH_EXPORT_CPP_API_nextEnum(NextEnum);
-TH_EXPORT_CPP_API_showEnum(ShowEnum);
+TH_EXPORT_CPP_API_getValueOfEnum(GetValueOfEnum);
+TH_EXPORT_CPP_API_fromValueToEnum(fromValueToEnum);
 TH_EXPORT_CPP_API_nextEnumWeekday(NextEnumWeekday);
-TH_EXPORT_CPP_API_showEnumWeekday(ShowEnumWeekday);
+TH_EXPORT_CPP_API_getValueOfEnumWeekday(GetValueOfEnumWeekday);
+TH_EXPORT_CPP_API_fromValueToEnumWeekday(fromValueToEnumWeekday);
 TH_EXPORT_CPP_API_nextEnumI8(NextEnumI8);
 TH_EXPORT_CPP_API_nextEnumI16(NextEnumI16);
 TH_EXPORT_CPP_API_nextEnumI32(NextEnumI32);

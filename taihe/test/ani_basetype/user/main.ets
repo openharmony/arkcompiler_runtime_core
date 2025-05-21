@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as base_test from "@generated/base_test";
 import {BusinessError} from "@ohos.base";
-import * as System from "std/core/System";
+import * as base_test from "base_test";
 
 loadLibrary("ani_basetype");
 
@@ -24,7 +23,7 @@ function main() {
     suite.addTest("float_test", float_test);
     suite.addTest("boolean_test", boolean_test);
     suite.addTest("string_test", string_test);
-    System.exit(suite.run());
+    exit(suite.run());
 }
 
 function integer_test() {

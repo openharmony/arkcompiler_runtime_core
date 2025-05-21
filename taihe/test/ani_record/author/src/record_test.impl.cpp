@@ -109,11 +109,11 @@ map<string, int32_t> GetMapfromArray(array_view<::record_test::Data> d)
 
 ::record_test::Data GetDatafromMap(map_view<string, ::record_test::Data> m, string_view k)
 {
-    auto iter = m.find(k);
+    auto iter = m.find_item(k);
     if (iter == nullptr) {
         return {"su", 7};
     }
-    return {iter->a, iter->b};
+    return {iter->second.a, iter->second.b};
 }
 
 void ForeachMap(map_view<string, string> my_map)

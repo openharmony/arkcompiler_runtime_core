@@ -38,12 +38,10 @@ struct IdMapItem {
 // # Members
 // - `version`: A 64-bit unsigned integer representing the version of the type
 // information.
-// - `len`: Size of the type information in bytes.
-// - `pre_idmap_func_count`: Size of inside functions.
-// - `addref`: Function pointer to a addref function for `TObject`.
-// - `release`: Function pointer to a release function for `TObject`.
-// - `idmap`: A flexible array of `IdMapItem` structures for ID-to-vtable
-// mapping.
+// - `free`: A function pointer to a function that frees the data block.
+// - `len`: A 64-bit unsigned integer representing the length of idmap.
+// - `idmap`: An array of IdMapItem structures representing the ID to vtable
+//   mapping.
 struct TypeInfo {
     uint64_t version;
     void (*free)(struct DataBlockHead *);
@@ -52,6 +50,11 @@ struct TypeInfo {
 };
 
 // DataBlockHead
+// Represents the head of a data block, containing a pointer to the runtime
+// type information structure and a reference count.
+// # Members
+// - `rtti_ptr`: A pointer to the runtime type information structure.
+// - `m_count`: A reference count for the data block.
 struct DataBlockHead {
     struct TypeInfo const *rtti_ptr;
     TRefCount m_count;
@@ -74,8 +77,5 @@ TH_EXPORT struct DataBlockHead *tobj_dup(struct DataBlockHead *data_ptr);
 // reaches zero, the object is destroyed.
 // # Arguments
 // - `tobj`: The data pointer.
-// # Returns
-// - This function does not return a value. It may result in the destruction of
-// the TObject if the reference count reaches zero.
 TH_EXPORT void tobj_drop(struct DataBlockHead *data_ptr);
 #endif  // RUNTIME_INCLUDE_TAIHE_OBJECT_ABI_H_

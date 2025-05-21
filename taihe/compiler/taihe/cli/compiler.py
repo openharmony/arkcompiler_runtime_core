@@ -17,13 +17,14 @@ import argparse
 import sys
 from pathlib import Path
 
-from taihe.driver.backend import BackendRegistry
+from taihe.driver.backend import BackendConfig, BackendRegistry
 from taihe.driver.contexts import CompilerInstance, CompilerInvocation
 
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="taihec", description="generates source code from taihe files"
+        prog="taihec",
+        description="generates source code from taihe files",
     )
     parser.add_argument(
         "-I",
@@ -74,13 +75,15 @@ def main():
 
     registry = BackendRegistry()
     registry.register_all()
-    enabled_backend_names = []
+    enabled_backend_names: list[str] = []
     if args.author:
         enabled_backend_names.append("cpp-author")
     if args.ani:
         enabled_backend_names.append("ani-bridge")
+    if args.debug:
+        enabled_backend_names.append("pretty-print")
 
-    resolved_backends = []
+    resolved_backends: list[BackendConfig] = []
     for b in registry.collect_required_backends(enabled_backend_names):
         if b.NAME == "ani-bridge":
             resolved_backends.append(b(keep_name=args.sts_keep_name))  # type: ignore

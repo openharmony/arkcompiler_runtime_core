@@ -68,13 +68,13 @@ if "$run_cpp"; then
     echo "--- Formatting C++ code ---"
     # Cpp, runtime
     find ../runtime/include ../runtime/src -type f |
-        clang-format --verbose -i @/dev/stdin
+        clang-format-19 --verbose -i @/dev/stdin
 
     # Cpp, tests
     find ../test ../cookbook \
          \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) \
          -not -path '*generated*' -type f |
-        clang-format --verbose -i @/dev/stdin
+        clang-format-19 --verbose -i @/dev/stdin
 fi
 
 # ArkTS
@@ -82,6 +82,6 @@ if "$run_arkts"; then
     echo "--- Formatting ArkTS code ---"
     find ../test ../cookbook -name '*.ets' -type f -print0 | while IFS= read -r -d $'\0' file; do
         echo "Formatting $file"
-        clang-format --assume-filename main.js <"$file" >"${file}.formatted" && mv "${file}.formatted" "$file"
+        clang-format-19 --assume-filename main.js <"$file" >"${file}.formatted" && mv "${file}.formatted" "$file"
     done
 fi

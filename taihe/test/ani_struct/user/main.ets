@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as StructTest from "@generated/struct_test";
 import {BusinessError} from "@ohos.base";
+import * as StructTest from "struct_test";
 
 function main() {
     let a: StructTest.A = {

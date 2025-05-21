@@ -37,8 +37,6 @@ public:
     using size_type = std::size_t;
     using reference = T &;
     using pointer = T *;
-    using iterator = T *;
-    using const_iterator = T const *;
 
     void reserve(std::size_t cap) const
     {
@@ -52,6 +50,11 @@ public:
     std::size_t size() const noexcept
     {
         return m_handle->len;
+    }
+
+    bool empty() const noexcept
+    {
+        return m_handle->len == 0;
     }
 
     std::size_t capacity() const noexcept
@@ -103,6 +106,9 @@ public:
         }
         m_handle->len = 0;
     }
+
+    using iterator = T *;
+    using const_iterator = T const *;
 
     iterator begin() const
     {
