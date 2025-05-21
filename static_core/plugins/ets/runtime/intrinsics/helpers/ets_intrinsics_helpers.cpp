@@ -416,8 +416,8 @@ EtsString *DoubleToPrecision(double number, int digit)
     double positiveNumber = number > 0 ? number : -number;
     int logDigit = std::floor(log10(positiveNumber));
     int radixDigit = digit - logDigit - 1;
-    const int maxExponentDigit = 6;
-    if ((logDigit >= 0 && radixDigit >= 0) || (logDigit < 0 && radixDigit <= maxExponentDigit)) {
+    const int minExponentDigit = -6;
+    if (logDigit >= minExponentDigit && logDigit < digit) {
         return DoubleToFixed(number, std::abs(radixDigit));
     }
     return DoubleToExponential(number, digit - 1);
