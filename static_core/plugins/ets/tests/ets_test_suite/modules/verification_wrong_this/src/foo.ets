@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-  tags: [not-a-test]
-  files: [bar.ets]
----*/
-
 import { bar } from "./bar";
 
 export function foo(): void {
