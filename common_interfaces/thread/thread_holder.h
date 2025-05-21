@@ -66,6 +66,7 @@ public:
 
     // This is a temporary impl so we need pass vm from JSThread, or nullptr otherwise
     static ThreadHolder *CreateAndRegisterNewThreadHolder(void *vm);
+    static void DestroyThreadHolder(ThreadHolder *holder);
 
     // Transfer to Running no matter in Running or Native.
     inline void TransferToRunning();
@@ -100,6 +101,11 @@ public:
         return !mutatorBase_->InSaferegion();
     }
 
+    // Thread must be binded mutator before to allocate. Otherwise it cannot allocate heap object in this thread.
+    // One thread only allow to bind one muatator. If try bind sencond mutator, will be fatal.
+    void BindMutator();
+    // One thread only allow to bind one muatator. So it must be unbinded mutator before bind another one.
+    void UnbindMutator();
     // unify JSThread* and Coroutine*
     // When register a thread, it must be initialized, i.e. it's safe to visit GC-Root.
     void RegisterJSThread(JSThread *jsThread);
@@ -118,18 +124,30 @@ public:
         return mutatorBase_->mutator;
     }
 
+    // Return if thread has already binded mutator.
+    class TryBindMutatorScope {
+    public:
+        TryBindMutatorScope(ThreadHolder *holder);
+        ~TryBindMutatorScope();
+
+    private:
+        ThreadHolder *holder_ {nullptr};
+    };
+
 private:
     ~ThreadHolder()
     {
         SetCurrent(nullptr);
     }
 
+    // Return false if thread has already binded mutator. Otherwise bind a mutator.
+    bool TryBindMutator();
+
     MutatorBase *mutatorBase_ {nullptr};
 
-    // Access threads_(iterate/insert/remove) must happen in RunningState from the currentThreadHolder, or
+    // Access jsThreads/coroutines(iterate/insert/remove) must happen in RunningState from the currentThreadHolder, or
     // in SuspendAll from others, because daemon thread may iterate if in NativeState.
     // And if we use locks to make that thread safe, it would cause a AB-BA dead lock.
-    std::unordered_set<BaseThread *> threads_ {};
     JSThread *jsThread_ {nullptr};
     std::unordered_set<Coroutine *> coroutines_ {};
 

@@ -38,6 +38,9 @@ public:
     void RegisterThreadHolder(ThreadHolder *holder);
     void UnregisterThreadHolder(ThreadHolder *holder);
 
+    void BindMutator(ThreadHolder *holder);
+    void UnbindMutator(ThreadHolder *holder);
+
     void SuspendAll(ThreadHolder *current);
     void ResumeAll(ThreadHolder *current);
     void IterateAll(CommonRootVisitor visitor);
