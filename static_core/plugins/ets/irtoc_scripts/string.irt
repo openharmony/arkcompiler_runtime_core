@@ -1,5 +1,5 @@
 # plugin ets_string
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1668,3 +1668,90 @@ Label(:SlowPathEntrypoint)
   Intrinsic(:SLOW_PATH_ENTRY, str, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
+
+function(:WriteStringToMem,
+          params: {mem: 'i64', str: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  buf := Bitcast(mem).ptr
+  len := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  utf16 := AndI(len).Imm(1).u32
+  len_0 := ShrI(len).Imm(1).u32
+  len := len_0
+
+  If(len, 0).EQ.Unlikely.b {
+      Goto(:End)
+  }
+
+  If(utf16, 1).EQ.Unlikely.b {
+    mark := 0xfeff
+    StoreI(buf, mark).Imm(0).u16
+    len_1 := ShlI(len).Imm(1).u32
+    buf_1 := AddI(buf).Imm(2).ptr
+  }
+  buf := Phi(buf, buf_1).ptr
+  len := Phi(len, len_1).u32
+
+  str_data := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
+  copy_u8_chars(str_data, buf, len);
+
+  If(utf16, 1).EQ.Unlikely.b {
+    len_1 := AddI(len).Imm(2).u32
+  }
+
+Label(:End)
+  len := Phi(len_0, len, len_1).u32
+  Return(len).u32
+}
+
+function(:CreateStringFromMem,
+          params: {buf: 'i64', len: 'i32', klass: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  addr := Bitcast(buf).ptr
+  mark := LoadI(addr).Imm(0).u16
+
+  If(mark, Cast(0xFEFF).u16).EQ.Unlikely.b {  # UTF-16 string
+    size_1 := SubI(len).Imm(2).i32
+    addr_1 := AddI(addr).Imm(2).ptr                
+  }
+
+  size := Phi(len, size_1).i32
+  addr := Phi(addr, addr_1).ptr
+
+  str := allocate_string_tlab_no_debug(klass, size)
+  str_data := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
+  copy_u8_chars(addr, str_data, size);
+  size_0 := ShlI(size).Imm(1).u32
+
+  If(mark, Cast(0xFEFF).u16).EQ.Unlikely.b {  # UTF-16 string
+    size_1 := OrI(ShrI(size_0).Imm(1).u32).Imm(1).u32
+  }
+
+  size := Phi(size_0, size_1).u32
+  str_len := AddI(str).Imm(Constants::STRING_LENGTH_OFFSET).ptr
+  StoreI(str_len, size).Imm(0).u32
+
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  Return(str).ptr
+
+  Label(:SlowPathEntrypoint)
+  eid = get_entrypoint_offset("CREATE_STRING_FROM_MEM_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, buf, len).AddImm(eid).MethodAsImm("CreateStringFromMem3ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+

@@ -1415,8 +1415,7 @@ public:
 
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
     {
-        return cross_values::GetManagedThreadEntrypointOffset(
-            arch, ark::EntrypointId(static_cast<std::underlying_type_t<EntrypointId>>(id)));
+        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(id));
     }
 
     virtual EntrypointId GetGlobalVarEntrypointId()

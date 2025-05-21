@@ -668,4 +668,31 @@ void Codegen::CreateBigUInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRC
     CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                  src[FOURTH_OPERAND]);
 }
+
+void Codegen::CreateWriteString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto entrypointId = EntrypointId::WRITE_STRING_TO_MEM;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateReadString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto entrypointId = EntrypointId::CREATE_STRING_FROM_MEM;
+    auto buf = src[FIRST_OPERAND];
+    auto len = src[SECOND_OPERAND];
+    if (GetGraph()->IsAotMode()) {
+        auto *enc = GetEncoder();
+        auto offset = GetRuntime()->GetStringClassPointerTlsOffset(GetArch());
+        ScopedTmpReg klass(enc);
+        enc->EncodeLdr(klass, false, MemRef(ThreadReg(), offset));
+        CallFastPath(inst, entrypointId, dst, {}, buf, len, klass);
+    } else {
+        auto klass = GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr);
+        auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(klass));
+        CallFastPath(inst, entrypointId, dst, {}, buf, len, klassImm);
+    }
+}
+
 }  // namespace ark::compiler

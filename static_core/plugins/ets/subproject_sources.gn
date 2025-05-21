@@ -152,6 +152,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_gc.cpp",
   "runtime/intrinsics/std_core_finalization_registry.cpp",
   "runtime/intrinsics/std_math.cpp",
+  "runtime/intrinsics/unsafe_memory.cpp",
   "runtime/intrinsics/helpers/dtoa_helper.cpp",
   "runtime/intrinsics/helpers/array_buffer_helper.cpp",
   "runtime/intrinsics/helpers/ets_intrinsics_helpers.cpp",

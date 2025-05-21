@@ -228,6 +228,40 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   _allocated_string := _start
 end
 
+# Try to allocate String in TLAB.
+# The result is either a pointer to a new string or null if there is no enough space in TLAB.
+# this is a version that does not do allocation tracking due to the bug #24977
+macro(:allocate_string_tlab_no_debug) do |string_klass, data_size|
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # Add sizeof(String) and do align
+  _data_size := Cast(data_size).word
+  _size := AndI(AddI(_data_size).Imm(Constants::STRING_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word
+  # Load pointer to the TLAB from TLS
+  _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
+  # Load pointer to the start address of free memory in the TLAB
+  _start := LoadI(_tlab).Imm(Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
+  # Load pointer to the end address of free memory in the TLAB
+  _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
+  # Check if there is enough space
+  If(Sub(_end, _start).word, _size).B.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+  end
+  # Store class of the object
+  StoreI(_start, string_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  # Update the TLAB state
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  # Return a pointer to the newly allocated string
+  _allocated_string := _start
+end
+
 # Try to allocate Array of i8 chars in TLAB.
 # The result is either a pointer to a new array or null if there is no enough space in TLAB.
 macro(:allocate_array_of_bytes_tlab) do |array_klass, char_count|

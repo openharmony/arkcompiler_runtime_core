@@ -297,4 +297,72 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
     return std::make_tuple(loadDataInst, dataOffsetInst);
 }
 
+template <bool LOAD>
+void InstBuilder::BuildUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    /* ensure the boot context of the caller */
+    if (!IsInBootContext()) {
+        failed_ = true;
+        return;
+    }
+
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto methodIndex = bcInst->GetId(0).AsIndex();
+    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
+
+    auto type = LOAD ? GetMethodReturnType(methodId) : GetMethodArgumentType(methodId, 1);
+    ASSERT(type == DataType::INT8 || type == DataType::INT16 || type == DataType::INT32 || type == DataType::INT64 ||
+           type == DataType::BOOL || type == DataType::FLOAT32 || type == DataType::FLOAT64);
+
+    auto raw = GetArgDefinition(bcInst, 0, accRead);
+    auto addr = GetGraph()->CreateInstCast(DataType::POINTER, bcAddr, raw, DataType::INT64);
+    auto zero = FindOrCreateConstant(0);
+    AddInstruction(addr);
+
+    if (LOAD) {
+        auto ld = GetGraph()->CreateInstLoadNative(type, bcAddr, addr, zero);
+        AddInstruction(ld);
+        UpdateDefinitionAcc(ld);
+    } else {
+        auto val = GetArgDefinition(bcInst, 1, accRead);
+        auto st = GetGraph()->CreateInstStoreNative(type, bcAddr, addr, zero, val);
+        AddInstruction(st);
+    }
+}
+
+void InstBuilder::BuildUnsafeLoadIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    BuildUnsafeIntrinsic<true>(bcInst, accRead);
+}
+
+void InstBuilder::BuildUnsafeStoreIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    BuildUnsafeIntrinsic<false>(bcInst, accRead);
+}
+
+void InstBuilder::BuildStringSizeInBytes(const BytecodeInstruction *bcInst, bool accRead)
+{
+    /* ensure the boot context of the caller */
+    if (!IsInBootContext()) {
+        failed_ = true;
+        return;
+    }
+
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto str = GetArgDefinition(bcInst, 0, accRead);
+    auto runtime = GetRuntime();
+    auto graph = GetGraph();
+    auto offset = FindOrCreateConstant(runtime->GetStringLengthOffset(graph->GetArch()));
+    auto one = FindOrCreateConstant(1U);
+
+    auto len = graph->CreateInstLoadNative(DataType::INT32, bcAddr, str, offset);
+    auto size = graph->CreateInstShr(DataType::INT32, bcAddr, len, one);
+    auto shift = graph->CreateInstAnd(DataType::INT32, bcAddr, len, one);
+    auto add = graph->CreateInstAdd(DataType::INT32, bcAddr, size, shift);
+    auto result = graph->CreateInstShl(DataType::INT32, bcAddr, add, shift);
+
+    AddInstruction(len, size, shift, add, result);
+    UpdateDefinitionAcc(result);
+}
+
 }  // namespace ark::compiler
