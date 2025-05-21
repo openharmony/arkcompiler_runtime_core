@@ -14,11 +14,14 @@
  */
 
 #include "timers.h"
-#include <nlohmann/json.hpp>
 #include "os/file.h"
 
 #include <algorithm>
 #include <cstring>
+
+#ifndef IS_ARKUI_X_TARGET
+#include <nlohmann/json.hpp>
+#endif
 
 namespace panda {
 TimeStartFunc Timer::timerStart = Timer::TimerStartDoNothing;
@@ -27,7 +30,9 @@ std::unordered_map<std::string_view, TimeRecord> Timer::timers_;
 std::vector<std::string_view> Timer::events_;
 std::mutex Timer::mutex_;
 std::string Timer::perfFile_;
+#ifndef IS_ARKUI_X_TARGET
 static const int INDENT_LEVEL = 4;
+#endif
 
 void Timer::InitializeTimer(std::string &perfFile)
 {
@@ -83,15 +88,18 @@ void ProcessTimePointRecord(
 
 void Timer::PrintTimers()
 {
+#ifndef IS_ARKUI_X_TARGET
     const std::string suffix = ".json";
     if (perfFile_.length() >= suffix.length() &&
         perfFile_.compare(perfFile_.length() - suffix.length(), suffix.length(), suffix) == 0) {
         PrintJson();
-    } else {
-        PrintTxt();
+        return;
     }
+#endif
+    PrintTxt();
 }
 
+#ifndef IS_ARKUI_X_TARGET
 void to_json(nlohmann::json& j, const TimeRecord& t)
 {
     auto early = std::chrono::steady_clock::time_point::max();
@@ -138,6 +146,7 @@ void Timer::PrintJson()
 
     WriteFile(ss, perfFile_);
 }
+#endif
 
 void Timer::PrintTxt()
 {
