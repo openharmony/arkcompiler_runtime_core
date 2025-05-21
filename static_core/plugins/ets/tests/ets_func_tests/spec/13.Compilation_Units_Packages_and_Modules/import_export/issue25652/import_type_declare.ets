@@ -14,8 +14,9 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type_declare.ets
 ---*/
 
-import { id } from './main2'
+import { id } from './export_type_declare'

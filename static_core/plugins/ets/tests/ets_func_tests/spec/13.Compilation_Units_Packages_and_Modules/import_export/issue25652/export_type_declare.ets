@@ -14,12 +14,12 @@
  */
 
 /*---
-tags: [not-a-test]
+tags: [not-a-test, compile-only]
 ---*/
 
 declare let id = 1.0
 
-export id
+export { id }
 
 
 

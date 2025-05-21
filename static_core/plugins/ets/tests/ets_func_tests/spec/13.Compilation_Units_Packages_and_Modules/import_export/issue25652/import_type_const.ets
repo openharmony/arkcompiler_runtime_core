@@ -14,6 +14,7 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type_const.ets
 ---*/
@@ -25,13 +26,3 @@ import { int_3 } from "./export_type_const"
 
 import type { int_4 , int_5, int_6 } from "./export_type_const"
 import { int_6 } from "./export_type_const"
-
-
-function main(): void {
-    let a1 = int_1;
-    let a2 = int_2;
-    let a3 = int_3;
-    let a4 = int_4;
-    let a5 = int_5;
-    let a6 = int_6;
-}

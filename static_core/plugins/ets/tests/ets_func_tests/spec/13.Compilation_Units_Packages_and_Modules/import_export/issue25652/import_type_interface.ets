@@ -14,14 +14,9 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type_interface.ets
 ---*/
 
 import { User } from './export_type_interface'
-
-const user: User = {
-    id: 10,
-    name: "Eray",
-};
-
