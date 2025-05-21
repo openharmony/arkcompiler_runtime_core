@@ -22,6 +22,7 @@ class ConfigurationKind(BaseEnum):
     INT = "INT"
     AOT = "AOT"
     AOT_FULL = "AOT-FULL"
+    AOT_PGO = "AOT-PGO"
     JIT = "JIT"
     QUICK = "QUICK"
 

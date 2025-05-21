@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,20 +12,44 @@
 # limitations under the License.
 
 type: workflow
-workflow-name: ark-aot
+workflow-name: ark-aot-pgo
 parameters:
+    # ark
+    ark-timeout: 210
+    ark-args: [ ]
+    compiler-enable-jit: "true"
+    ark-aot-profdata-file: "${parameters.work-dir}/intermediate/${test-id}.bin"
+    ark-full-args:
+        - ${parameters.ark-args}
+        - "--compiler-profiling-threshold=0"
+        - "--profilesaver-enabled=true"
+        - "--profile-output=${parameters.ark-aot-profdata-file}"
+    # ark_aot
+    aot-args: [ ]
     aot-timeout: 30
+    # common
     build: ${PANDA_BUILD}
     work-dir: ${parameters.work-dir}
-    heap-verifier: fail_on_verification:pre:into:before_g1_concurrent:post
+    load-runtimes: ${parameters.load-runtimes}
     gc-type: g1-gc
     full-gc-bombing-frequency: 0
-    load-runtimes: ${parameters.load-runtimes}
-    aot-args: []
+    heap-verifier: fail_on_verification
     stdlib: "${parameters.build}/plugins/ets/etsstdlib.abc"
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
     paoc-output-file: "${parameters.work-dir}/intermediate/${test-id}.an"
 steps:
+    imports:
+        only-runtime:
+            ark-timeout: ${parameters.ark-timeout}
+            build: ${parameters.build}
+            work-dir: ${parameters.work-dir}
+            heap-verifier: ${parameters.heap-verifier}
+            gc-type: ${parameters.gc-type}
+            full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
+            load-runtimes: ${parameters.load-runtimes}
+            compiler-enable-jit: ${parameters.compiler-enable-jit}
+            ark-args:
+                - ${parameters.ark-full-args}
     ark-aot:
         executable-path: ${parameters.build}/bin/ark_aot
         timeout: ${parameters.aot-timeout}
@@ -37,6 +61,7 @@ steps:
             - "--full-gc-bombing-frequency=${parameters.full-gc-bombing-frequency}"
             - "--compiler-check-final=true"
             - "--compiler-ignore-failures=false"
+            - "--paoc-use-profile:path=${parameters.ark-aot-profdata-file},force"
             - "${parameters.aot-args}"
             - "--boot-panda-files=${parameters.stdlib}"
             - "--paoc-output=${parameters.paoc-output-file}"

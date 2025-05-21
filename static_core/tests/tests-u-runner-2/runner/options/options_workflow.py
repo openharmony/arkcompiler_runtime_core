@@ -77,8 +77,8 @@ class WorkflowOptions(IOptions):
         return "\n".join(result)
 
     @staticmethod
-    def __check_type(step_type: StepKind, actual_count: int, expected_max_count: int) -> None:
-        if actual_count > expected_max_count:
+    def __check_type(step_type: StepKind, actual_count: int, expected_max_count: int | None) -> None:
+        if expected_max_count is not None and actual_count > expected_max_count:
             raise InvalidConfiguration(
                 f"Property 'step-type: {step_type.value}' can be set at only one step, "
                 f"but it is set at {actual_count} steps.")
@@ -116,9 +116,9 @@ class WorkflowOptions(IOptions):
         for step in self.steps:
             types[step.step_kind] = types.get(step.step_kind, 0) + 1
         self.__check_type(StepKind.COMPILER, types.get(StepKind.COMPILER, 0), 1)
-        self.__check_type(StepKind.COMPILER, types.get(StepKind.COMPILER, 0), 1)
         self.__check_type(StepKind.VERIFIER, types.get(StepKind.VERIFIER, 0), 1)
-        self.__check_type(StepKind.RUNTIME, types.get(StepKind.RUNTIME, 0), 1)
+        self.__check_type(StepKind.AOT, types.get(StepKind.AOT, 0), 1)
+        self.__check_type(StepKind.RUNTIME, types.get(StepKind.RUNTIME, 0), None)
 
     def pretty_str(self) -> str:
         result: list[str] = [step.pretty_str() for step in self.steps if str(step.executable_path) and step.enabled]

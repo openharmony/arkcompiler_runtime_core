@@ -12,7 +12,7 @@
 # limitations under the License.
 
 type: workflow
-workflow-name: panda-aot
+workflow-name: panda-aot-pgo
 parameters:
     # common
     build: ${PANDA_BUILD}
@@ -26,17 +26,14 @@ parameters:
     enable-verifier: True
     extension: ${parameters.extension}
     # ark and ark_aot
-    ark-timeout: 180
+    ark-profile-timeout: 180
     aot-timeout: 30
+    ark-timeout: 180
+    aot-args: [ ]
     gc-type: g1-gc
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     ark-args: [ ]
-    compiler-enable-jit: "false"
-    ark-full-args:
-        - ${parameters.ark-args}
-        - "--enable-an:force"
-    aot-args: [ ]
 steps:
     imports:
         only-es2panda:
@@ -49,13 +46,15 @@ steps:
             enable-verifier: ${parameters.enable-verifier}
             es2panda-timeout: ${parameters.es2panda-timeout}
             verifier-timeout: ${parameters.verifier-timeout}
-        only-ark-aot:
+        ark-aot-pgo:
             build: ${parameters.build}
             work-dir: ${parameters.work-dir}
             heap-verifier: ${parameters.heap-verifier}
             gc-type: ${parameters.gc-type}
             full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
             load-runtimes: ${parameters.load-runtimes}
+            compiler-enable-jit: "true"
+            ark-timeout: ${parameters.ark-profile-timeout}
             aot-timeout: ${parameters.aot-timeout}
             aot-args: ${parameters.aot-args}
         only-runtime:
@@ -66,7 +65,8 @@ steps:
             gc-type: ${parameters.gc-type}
             full-gc-bombing-frequency: ${parameters.full-gc-bombing-frequency}
             load-runtimes: ${parameters.load-runtimes}
-            compiler-enable-jit: ${parameters.compiler-enable-jit}
+            compiler-enable-jit: "false"
             ark-args:
                 - ${parameters.ark-full-args}
                 - "--aot-files=${parameters.paoc-output-file}"
+                - "--enable-an:force"
