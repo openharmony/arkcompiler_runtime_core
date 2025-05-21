@@ -19,7 +19,7 @@ cases:
     - sig2: 'p1: Byte, p2: Short, p3: Int, p4: Long, p5: Float, p6: Double, p7: Boolean, p8: Char'
 
     # 2
-    - sig2: 'p1: FixedArray<Int>, p2: Object, p3: FixedArray<int>'
+    - sig2: 'p1: FixedArray<Int>, p2: Object, p3: FixedArray<Int>'
 
     # 3
     - sig2: 'p1: FixedArray<A3>, p2: FixedArray<Object>'

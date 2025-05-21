@@ -23,7 +23,8 @@ tags: [compile-only]
 
 package p3
 
-export let pi: float;
+export let pi: Float;
 static {
-    pi = 3.14159
+    let pid: Double = 3.14159
+    pi = pid.toFloat()
 }
