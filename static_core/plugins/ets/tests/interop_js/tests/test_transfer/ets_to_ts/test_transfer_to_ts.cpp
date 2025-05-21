@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-package unit.test;
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
 
-// NOTE(zhaoziming_hw): #IC8LO3 remove local declaration after Any type is supported
-type Any = object | null | undefined;
+namespace ark::ets::interop::js::testing {
 
-class B {}
+class EtsTransferStaticToDynamicTest : public EtsInteropTest {};
 
-function foo(val: Any): boolean {
-    let a = ESValue.wrap(val);
-    let b = ESValue.wrap(val);
-    let c = a.getProperty('a');
-    let d = ESValue.wrap(new B());
-    return !a.isStaticObject() && !b.isStaticObject() && ESValue.areStrictlyEqual(a, b) && c.isNumber() && d.isStaticObject();
+TEST_F(EtsTransferStaticToDynamicTest, test_transfer_to_ts)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testTransferStaticToDynamic"));
 }
+
+}  // namespace ark::ets::interop::js::testing

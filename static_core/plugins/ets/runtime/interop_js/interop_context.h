@@ -390,11 +390,6 @@ public:
         return sharedEtsVmState_->arrayClass;
     }
 
-    Class *GetArrayBufferClass() const
-    {
-        return sharedEtsVmState_->arraybufClass;
-    }
-
     bool IsFunctionalInterface(Class *klass) const
     {
         return sharedEtsVmState_->functionalInterfaces.count(klass) > 0;
@@ -557,7 +552,6 @@ private:
         Class *exceptionClass {};
         Class *typeClass {};
         Class *arrayClass {};
-        Class *arraybufClass {};
         Class *boxIntClass {};
         Class *boxLongClass {};
         PandaSet<Class *> functionalInterfaces {};

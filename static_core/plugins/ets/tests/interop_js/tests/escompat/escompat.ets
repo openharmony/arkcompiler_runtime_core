@@ -341,28 +341,35 @@ function Error_CreateEtsSampleWithCause(): Error {
     return new Error("message", new ErrorOptions("cause"));
 }
 
-function ArrayBuffer_TestJSLength(arr: ArrayBuffer): void {
+// NOTE(zhaoziming_hw): #IC8LO3 remove local declaration after Any type is supported
+type Any = object | null | undefined;
+
+function ArrayBuffer_TestJSLength(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     assertTrue( (arr as Object) instanceof ArrayBuffer);
     assertEQ( arr.byteLength, 32 );
 }
 
-function ArrayBuffer_TestJSIsView(arr: ArrayBuffer): void {
+function ArrayBuffer_TestJSIsView(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     assertTrue( !ArrayBuffer.isView(arr) );
     assertTrue( ArrayBuffer.isView(new Int8Array(arr)) );
 }
 
-function ArrayBuffer_TestJSSlice(arr: ArrayBuffer): void {
+function ArrayBuffer_TestJSSlice(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     let sliced = arr.slice(8, 24);
     assertEQ( sliced.byteLength, 16 );
 }
 
-function ArrayBuffer_TestJSResize(arr: ArrayBuffer): void {
+function ArrayBuffer_TestJSResize(dynArr: Any): void {
+    let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
     // NOTE(dslynko, #23919): finalize semantics of resizable ArrayBuffers
     assertEQ(arr.resizable, false);
 }
 
-function ArrayBuffer_CreateEtsSample(): ArrayBuffer {
-    return new ArrayBuffer(32, 32);
+function ArrayBuffer_CreateEtsSample(): Any {
+    return InteropTransferHelper.transferArrayBufferToDynamic(new ArrayBuffer(32, 32));
 }
 
 function JSON_stringify_jsv(x: JSValue) {

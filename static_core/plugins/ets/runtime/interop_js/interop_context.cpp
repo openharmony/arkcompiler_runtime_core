@@ -336,7 +336,6 @@ void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
     boxLongClass = CacheClass(etsClassLinker, descriptors::BOX_LONG);
 
     arrayClass = CacheClass(etsClassLinker, descriptors::ARRAY);
-    arraybufClass = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
 
     arrayAsListIntClass = CacheClass(etsClassLinker, descriptors::ARRAY_AS_LIST_INT);
 
