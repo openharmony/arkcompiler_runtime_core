@@ -116,7 +116,7 @@ public:
 
     void *GetMutator() const
     {
-        return mutatorBase_->mutator;
+        return mutatorBase_->mutator_;
     }
 
     // Return if thread has already binded mutator.
