@@ -82,6 +82,7 @@ EtsObject *TransferArrayBufferToDynamic(EtsEscompatArrayBuffer *staticArrayBuffe
 EtsObject *CreateDynamicTypedArray(EtsEscompatArrayBuffer *staticArrayBuffer, int32_t typedArrayType, double length,
                                    double byteOffset);
 EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, double byteLength, double byteOffset);
+void SetInteropRuntimeLinker(EtsRuntimeLinker *linker);
 
 template <typename T>
 typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)

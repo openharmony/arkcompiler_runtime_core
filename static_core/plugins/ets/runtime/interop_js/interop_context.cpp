@@ -541,6 +541,18 @@ void InteropCtx::InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker)
         linker->AsObject()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
 }
 
+void InteropCtx::SetDefaultLinkerContext(EtsRuntimeLinker *linker)
+{
+    os::memory::LockHolder lock(SharedEtsVmState::mutex_);
+    if (!linker->IsInstanceOf(PlatformTypes()->coreRuntimeLinker)) {
+        return;
+    }
+    SharedEtsVmState::linkerCtx_ = linker->GetClassLinkerContext();
+    PandaVM::GetCurrent()->GetGlobalObjectStorage()->Remove(SharedEtsVmState::refToDefaultLinker_);
+    SharedEtsVmState::refToDefaultLinker_ = PandaVM::GetCurrent()->GetGlobalObjectStorage()->Add(
+        linker->AsObject()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+}
+
 void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
 {
     auto env = GetJSEnv();

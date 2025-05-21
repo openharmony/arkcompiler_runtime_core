@@ -36,6 +36,9 @@ coretypes:
 - managed_class: std.interop.js.ESObject
   mirror_class: ark::ets::interop::js::ESValue
 
+- managed_class: std.core.RuntimeLinker
+  mirror_class: ark::ets::EtsRuntimeLinker
+
 intrinsics_namespace: ark::ets::interop::js::intrinsics
 
 
@@ -1081,4 +1084,18 @@ intrinsics:
       ret: std.core.Object
       args: [escompat.ArrayBuffer, f64, f64]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperCreateDynamicDataViewIntrinsic
+    clear_flags: []
+
+####################
+# std.interop.InteropContext #
+####################
+  - name: InteropContextSetInteropRuntimeLinkerImpl
+    space: ets
+    class_name: std.interop.InteropContext
+    method_name: setInteropRuntimeLinker
+    static: true
+    signature:
+      ret: void
+      args: [std.core.RuntimeLinker]
+    impl: ark::ets::interop::js::intrinsics::InteropContextSetInteropRuntimeLinkerImplIntrinsic
     clear_flags: []
