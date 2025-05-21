@@ -15,11 +15,22 @@
 
 package escompat;
 
-export class ErrorOptions {
-    cause: Object | undefined
+export interface ErrorOptions {
+    cause?: Object
+}
+
+export class ErrorOptionsImpl implements ErrorOptions {
+    cause_?: Object
+    override get cause(): Object | undefined {
+        return this.cause_
+    }
+
+    set cause(cause?: Object) {
+        this.cause_ = cause
+    }
 
     constructor(cause?: Object) {
-        this.cause = cause
+        this.cause_ = cause
     }
 }
 
@@ -68,7 +79,7 @@ export class Error {
     *
     * @param options options of the error
     */
-    constructor(name: String, message: String | undefined, options: ErrorOptions | undefined) {
+    constructor(name: String, message: String | undefined, options?: ErrorOptions) {
         this(name, 0 as number, message, options)
     }
 
@@ -83,7 +94,7 @@ export class Error {
      *
      * @param options options of the error
      */
-    constructor(name: String, code: number, message: String | undefined, options: ErrorOptions | undefined) {
+    constructor(name: String, code: number, message?: String, options?: ErrorOptions) {
         this.code_ = code
         this.message_ = (message == undefined) ? "" : message
         this.cause_ = (options == undefined) ? undefined : options.cause

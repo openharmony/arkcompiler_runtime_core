@@ -45,17 +45,17 @@ ani_field g_maximumSignificantDigitsField = nullptr;
 static void CollectSelectOptionsFields(ani_env *env)
 {
     ani_class optionsClass;
-    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.PluralRulesSelectOptions", &optionsClass));
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.PluralRulesSelectOptionsImpl", &optionsClass));
 
-    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "locale", &g_localeField));
-    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "type", &g_typeField));
-    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "minimumIntegerDigits", &g_minimumIntegerDigitsField));
-    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "minimumFractionDigits", &g_minimumFractionDigitsField));
-    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "maximumFractionDigits", &g_maximumFractionDigitsField));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "locale_", &g_localeField));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "type_", &g_typeField));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "minimumIntegerDigits_", &g_minimumIntegerDigitsField));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "minimumFractionDigits_", &g_minimumFractionDigitsField));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(optionsClass, "maximumFractionDigits_", &g_maximumFractionDigitsField));
     ANI_FATAL_IF_ERROR(
-        env->Class_FindField(optionsClass, "minimumSignificantDigits", &g_minimumSignificantDigitsField));
+        env->Class_FindField(optionsClass, "minimumSignificantDigits_", &g_minimumSignificantDigitsField));
     ANI_FATAL_IF_ERROR(
-        env->Class_FindField(optionsClass, "maximumSignificantDigits", &g_maximumSignificantDigitsField));
+        env->Class_FindField(optionsClass, "maximumSignificantDigits_", &g_maximumSignificantDigitsField));
 }
 
 template <typename... Args>
@@ -125,6 +125,8 @@ static SelectOptions ExtractOptions(ani_env *env, ani_object options)
 
 ani_string IcuPluralSelect(ani_env *env, [[maybe_unused]] ani_class klass, ani_double value, ani_object options)
 {
+    CollectSelectOptionsFields(env);
+
     const auto [localeStr, typeStr, minimumIntegerDigits, minimumFractionDigits, maximumFractionDigits,
                 minimumSignificantDigits, maximumSignificantDigits] = ExtractOptions(env, options);
 
@@ -223,8 +225,6 @@ ani_status RegisterIntlPluralRules(ani_env *env)
                           ani_native_function {"getPluralCategories",
                                                "C{std.core.String}C{std.core.String}:C{std.core.Object}",
                                                reinterpret_cast<void *>(IcuGetPluralCategories)}};
-
-    CollectSelectOptionsFields(env);
 
     ani_class pluralRulesClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.PluralRules", &pluralRulesClass));

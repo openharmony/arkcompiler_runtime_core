@@ -43,16 +43,41 @@ export namespace Intl {
         localeMatcher?: "lookup" | "best fit" | undefined
     }
 
-    export class PluralRulesSelectOptions {
-        locale: string = ""
-        type: string = ""
+    export interface PluralRulesSelectOptions {
+        locale: string
+        type: string
         minimumIntegerDigits: number
         minimumFractionDigits: number
         maximumFractionDigits: number
         minimumSignificantDigits: number
         maximumSignificantDigits: number
     }
-    
+
+    class PluralRulesSelectOptionsImpl implements PluralRulesSelectOptions {
+        set locale(val: string) { this.locale_ = val }
+        get locale(): string { return this.locale_ }
+        set type(val: string) { this.type_ = val}
+        get type(): string { return this.type_ }
+        set minimumIntegerDigits(val: number) { this.minimumIntegerDigits_ = val}
+        get minimumIntegerDigits(): number { return this.minimumIntegerDigits_ }
+        get minimumFractionDigits(): number { return this.minimumFractionDigits_ }
+        set minimumFractionDigits(val: number) { this.minimumFractionDigits_ = val}
+        get maximumFractionDigits(): number { return this.maximumFractionDigits_ }
+        set maximumFractionDigits(val: number) { this.maximumFractionDigits_ = val}
+        get minimumSignificantDigits(): number { return this.minimumSignificantDigits_ }
+        set minimumSignificantDigits(val: number) { this.minimumSignificantDigits_ = val}
+        get maximumSignificantDigits(): number { return this.maximumSignificantDigits_ }
+        set maximumSignificantDigits(val: number) { this.maximumSignificantDigits_ = val}
+        
+        private locale_: string = ""
+        private type_: string = ""
+        private minimumIntegerDigits_: number = 0
+        private minimumFractionDigits_: number = 0
+        private maximumFractionDigits_: number = 0
+        private minimumSignificantDigits_: number = 0
+        private maximumSignificantDigits_: number = 0
+    };
+
     export class PluralRules {
         private options : ResolvedPluralRulesOptions
 
@@ -95,7 +120,7 @@ export namespace Intl {
                 maximumFractionDigits: this.options.maximumFractionDigits,
                 minimumSignificantDigits: this.options.minimumSignificantDigits ?? 0,
                 maximumSignificantDigits: this.options.maximumSignificantDigits ?? 0
-            } as PluralRulesSelectOptions
+            } as PluralRulesSelectOptionsImpl
             return PluralRules.selectDouble(value, options) as LDMLPluralRule
         }
 

@@ -36,7 +36,7 @@ namespace ark::ets::stdlib::intl {
 constexpr const char *FORMAT_HOUR_SYMBOLS = "hHkK";
 constexpr const char *FORMAT_AM_PM_SYMBOLS = "a";
 
-constexpr const char *OPTIONS_FIELD_HOUR_CYCLE = "hourCycle";
+constexpr const char *OPTIONS_FIELD_HOUR_CYCLE = "hourCycle_";
 
 constexpr const char *LOCALE_KEYWORD_HOUR_CYCLE = "hours";
 constexpr const char *LOCALE_KEYWORD_CALENDAR = "calendar";
@@ -172,7 +172,7 @@ static std::unique_ptr<icu::UnicodeString> UnicodeStringFromAniString(ani_env *e
 static ani_status DateFormatSetTimeZone(ani_env *env, icu::DateFormat *dateFormat, ani_object options)
 {
     ani_ref timeZoneRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone", &timeZoneRef));
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone_", &timeZoneRef));
 
     auto timeZone = static_cast<ani_string>(timeZoneRef);
     std::unique_ptr<icu::UnicodeString> timeZoneId = UnicodeStringFromAniString(env, timeZone);
@@ -267,7 +267,7 @@ static std::unique_ptr<icu::DateFormat> CreateSkeletonBasedDateFormat(ani_env *e
 static ani_status ConfigureLocaleCalendar(ani_env *env, icu::Locale *locale, ani_object options)
 {
     ani_ref calendarRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "calendar", &calendarRef));
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "calendar_", &calendarRef));
 
     ani_boolean calendarUndefined = ANI_FALSE;
     ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(calendarRef, &calendarUndefined));
@@ -492,10 +492,10 @@ static std::unique_ptr<icu::DateFormat> CreateStyleBasedDateFormat(ani_env *env,
                                                                    ani_object options)
 {
     ani_ref dateStyleRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "dateStyle", &dateStyleRef));
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "dateStyle_", &dateStyleRef));
 
     ani_ref timeStyleRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeStyle", &timeStyleRef));
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeStyle_", &timeStyleRef));
 
     ani_boolean dateStyleUndefined = ANI_FALSE;
     ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(dateStyleRef, &dateStyleUndefined));
@@ -770,7 +770,7 @@ static void FillDateTimeRangeFormatPartArray(ani_env *env, ani_array partsArr,
 static ani_status DateIntervalFormatSetTimeZone(ani_env *env, icu::DateIntervalFormat *format, ani_object options)
 {
     ani_ref timeZoneRef = nullptr;
-    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone", &timeZoneRef));
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(options, "timeZone_", &timeZoneRef));
 
     auto timeZone = static_cast<ani_string>(timeZoneRef);
     std::unique_ptr<icu::UnicodeString> timeZoneId = UnicodeStringFromAniString(env, timeZone);
@@ -786,7 +786,6 @@ static ani_status DateIntervalFormatSetTimeZone(ani_env *env, icu::DateIntervalF
         ThrowRangeError(env, "Invalid time zone specified: " + invalidTimeZoneId);
         return ANI_PENDING_ERROR;
     }
-
     format->adoptTimeZone(formatTimeZone.release());
 
     return ANI_OK;

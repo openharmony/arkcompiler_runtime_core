@@ -252,6 +252,8 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     findType(&EtsPlatformTypes::escompatRegExpExecArray, REG_EXP_EXEC_ARRAY);
     findType(&EtsPlatformTypes::escompatJsonReplacer, JSON_REPLACER);
+    findType(&EtsPlatformTypes::escompatErrorOptions, ERROR_OPTIONS);
+    findType(&EtsPlatformTypes::escompatErrorOptionsImpl, ERROR_OPTIONS_IMPL);
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
         CreateAndInitializeCaches();
     }
