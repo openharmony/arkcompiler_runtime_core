@@ -578,6 +578,7 @@ class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as FixedArray<JSValue>) as ArrayType).getElementType()
     private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
     private static readonly ESCOMPAT_SET_TYPE = Type.of(new Set<Object>())
+    private static readonly ESCOMPAT_MAP_TYPE = Type.of(new Map<Object, Object>())
     private static readonly STD_CORE_PROMISE_TYPE = Type.of(new Promise<Object>((res) => {}))
 
     private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
@@ -635,9 +636,7 @@ class JSONWriter {
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
-            this.writeRecord(obj as Object as Record<string, NullishType>);
-        } else if (obj instanceof Map) {
-            this.buffer.append("{}")
+            this.writeESCompatRecord(obj)
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
@@ -650,8 +649,9 @@ class JSONWriter {
             } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
                 this.writeEscompatArray(obj as Array<Object>)
             } else if (objType.getName() == JSONWriter.ESCOMPAT_SET_TYPE.getName() ||
-                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName()) {
-                this.buffer.append("{}")
+                       objType.getName() == JSONWriter.STD_CORE_PROMISE_TYPE.getName() ||
+                       objType.getName() == JSONWriter.ESCOMPAT_MAP_TYPE.getName()) {
+                this.buffer.append(JSONObject.EMPTY)
             } else if (objType instanceof ClassType) {
                 this.writeClassValue(obj, objType as ClassType)
             } else if (objType instanceof LambdaType) {
@@ -728,29 +728,106 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeRecord(rec: Record<string, NullishType>): void {
-        this.buffer.append("{");
-        this.checkReferencesCycle(rec);
-        this.path.add(rec);
-        let isFirst = true;
-        for (let key of rec.keys()) {
-            if (rec[key] !== undefined) {
-                if (!isFirst) {
-                    this.buffer.append(",");
-                } else {
-                    isFirst = false;
-                }
-                this.buffer.append(JSON.stringify(key as String));
-                this.buffer.append(":");
-                this.writeObject(rec[key]);
-            }
+    private writeESCompatRecord<K extends Numeric | string, V>(record: Record<K, V>): void {
+        const currentBuffer = this.buffer
+        this.buffer = new StringBuilder("{")
+
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
         }
-        this.path.delete(rec);
-        this.buffer.append("}");
+
+        this.path.add(record)
+
+        let entryDumped = false
+        if (this.useFieldsFilter) {
+            const writableEntries = this.getRecordWritableEntries(record)
+
+            const ENTRY_KEY = 0
+            const ENTRY_VAL = 1
+            for (const entry of writableEntries) {
+                const entryKey = entry[ENTRY_KEY]
+                const entryVal = entry[ENTRY_VAL]
+                entryDumped = this.writeRecordEntry(entryKey, entryVal, entryDumped)
+            }
+        } else {
+            record.forEach((entryVal: V, entryKey: K) => {
+                entryDumped = this.writeRecordEntry(entryKey, entryVal, entryDumped)
+            })
+        }
+
+        this.path.delete(record)
+
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
+        this.buffer.append("}")
+
+        currentBuffer.append(entryDumped ? this.buffer.toString() : "{}")
+
+        this.buffer = currentBuffer
+    }
+
+    private getRecordWritableEntries<K extends Numeric | string, V>(record: Record<K, V>): Array<[K, V]> {
+        // 'entry name' -> output position index
+        const entryNamePos = new Map<string, int>()
+        for (let idx = 0; idx < this.fieldsFilter.length; idx++) {
+            const entryName = this.fieldsFilter[idx]
+            entryNamePos.set(entryName, idx)
+        }
+
+        // 'entry key' -> output position index
+        const entryKeyPos = new Array<[K, int]>
+        for (const entryKey of record.keys()) {
+            const entryName = (entryKey as object).toString()
+            const entryPos = entryNamePos.get(entryName)
+            if (entryPos === undefined) {
+                continue
+            }
+
+            const entryKeyPosPair: [K, int] = [entryKey, entryPos]
+            entryKeyPos.push(entryKeyPosPair)
+        }
+
+        // sorting 'filtered in' entries by position
+        const ENTRY_POS = 1
+        entryKeyPos.sort((pos1: [K, int], pos2: [K, int]) => {
+            const entry1Pos = pos1[ENTRY_POS]
+            const entry2Pos = pos2[ENTRY_POS]
+            return (entry1Pos < entry2Pos) ? -1 : ((entry1Pos > entry2Pos) ? 1 : 0)
+        })
+
+        const writableEntries = new Array<[K, V]>()
+
+        const ENTRY_KEY = 0
+        for (const entry of entryKeyPos) {
+            const entryKey = entry[ENTRY_KEY]
+            const entryVal = record.get(entryKey) as V
+
+            const writableEntry: [K, V] = [entryKey, entryVal]
+            writableEntries.push(writableEntry)
+        }
+
+        return writableEntries
+    }
+
+    private writeRecordEntry<K extends Number | string, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
+        const entryValType = Type.of(entryVal)
+        if (entryValType instanceof LambdaType) {
+            return entryDumped
+        }
+
+        const entryName = (entryKey as object).toString()
+        const replacedVal = this.useReplacer ? this.replacer!(entryName, entryVal) : entryVal
+        return this.writeField(entryName, replacedVal, entryDumped)
     }
 
     private writeClassValue(obj: Object, objType: ClassType): void {
         const currentBuffer = this.buffer
+        // we need this local buffer to discard empty object prolog: '{','\n',<space> and replace it with '{}'
         this.buffer = new StringBuilder("{")
 
         if (this.useIndent) {
@@ -775,13 +852,39 @@ class JSONWriter {
         this.writePadding()
         this.buffer.append("}")
 
-        if (fieldDumped) {
-            currentBuffer.append(this.buffer.toString())
-        } else {
-            currentBuffer.append("{}")
-        }
+        currentBuffer.append(fieldDumped ? this.buffer.toString() : "{}")
 
         this.buffer = currentBuffer
+    }
+
+    private writeField(fieldName: string, fieldVal: NullishType, fieldDumped: boolean): boolean {
+        if (fieldVal === undefined) {
+            return fieldDumped
+        }
+
+        if (fieldDumped) {
+            this.buffer.append(",")
+            if (this.useIndent) {
+                this.buffer.append("\n")
+            }
+        } else {
+            fieldDumped = true
+        }
+
+        this.checkReferencesCycle(fieldVal)
+        this.writePadding()
+
+        this.buffer.append('"')
+        this.buffer.append(fieldName)
+        this.buffer.append('":')
+
+        if (this.useIndent) {
+            this.buffer.append(" ")
+        }
+
+        this.writeObject(fieldVal)
+
+        return fieldDumped
     }
 
     private writeClassFields(writableFields: Array<[Field, Value]>): boolean {
@@ -796,29 +899,7 @@ class JSONWriter {
             const objFieldValue = fieldTypeValuePair[FIELD_VALUE]
 
             const objToDump = this.useReplacer ? this.replacer!(objField.getName(), objFieldValue.getData()) : objFieldValue.getData()
-            if (objToDump !== undefined) {
-                if (fieldDumped) {
-                    this.buffer.append(",")
-                    if (this.useIndent) {
-                        this.buffer.append("\n")
-                    }
-                } else {
-                    fieldDumped = true
-                }
-
-                this.checkReferencesCycle(objToDump)
-                this.writePadding()
-
-                this.buffer.append('"')
-                this.buffer.append(objField.getName())
-                this.buffer.append('":')
-
-                if (this.useIndent) {
-                    this.buffer.append(" ")
-                }
-
-                this.writeObject(objToDump)
-            }
+            fieldDumped = this.writeField(objField.getName(), objToDump, fieldDumped)
         }
 
         return fieldDumped
@@ -1395,6 +1476,7 @@ export class JSONObject extends JSONValue {
     readonly static END_CHAR = c'}'
     readonly static SEPARATOR = c':'
     readonly static DELIMETER = c','
+    readonly static EMPTY = "{}"
 
     getFields(): Map<String, JSONValue> {
         const propsCount = this.keys_.length
