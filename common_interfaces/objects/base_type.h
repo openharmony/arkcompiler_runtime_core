@@ -16,6 +16,7 @@
 #ifndef COMMON_INTERFACES_OBJECTS_BASE_TYPE_H
 #define COMMON_INTERFACES_OBJECTS_BASE_TYPE_H
 
+#include <vector>
 #include <variant>
 #include <cstdint>
 #include <memory>
@@ -31,10 +32,15 @@ namespace panda {
 
 struct BaseUndefined {};
 struct BaseNull {};
+struct BaseBigInt {
+    uint32_t length;
+    bool sign;
+    std::vector<uint32_t> data;
+};
 
 // The common consensus type between static and dynamic
 using PandaType = std::variant<std::monostate, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, float,
-                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseObject*>;
+                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseBigInt, BaseObject*>;
 
 // base type for static vm
 using BoxedValue = BaseObject *;
