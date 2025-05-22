@@ -10,7 +10,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//arkcompiler/runtime_core/ark_config.gni")
+
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 config("common_interfaces_public_config") {
   include_dirs = [ "." ]
+}
+
+ohos_static_library("common_interfaces_header") {
+  public_configs = [ ":common_interfaces_public_config" ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

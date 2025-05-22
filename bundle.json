@@ -188,6 +188,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/common_interfaces:common_interfaces_header",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/common_interfaces"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/panda_guard:panda_guard_static"
                 }
             ],
