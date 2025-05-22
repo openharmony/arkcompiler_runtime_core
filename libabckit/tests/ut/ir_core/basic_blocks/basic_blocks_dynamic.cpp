@@ -497,6 +497,19 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetImmediateDominator_1)
     g_impl->closeFile(file);
 }
 
+// Test: test-kind=api, api=GraphApiImpl::bbGetImmediateDominator, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetImmediateDominator_2)
+{
+    AbckitFile *file = g_impl->openAbc(CREATE_EMPTY_INPUT_PATH, strlen(CREATE_EMPTY_INPUT_PATH));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        auto *start = g_implG->gGetStartBasicBlock(graph);
+        auto bb = g_implG->bbGetImmediateDominator(start);
+        ASSERT_EQ(bb, nullptr);
+    });
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=GraphApiImpl::bbGetSuccBlockCount, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetSuccBlockCount_1)
 {
