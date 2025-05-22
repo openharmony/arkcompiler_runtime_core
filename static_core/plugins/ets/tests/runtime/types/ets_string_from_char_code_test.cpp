@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 
 #include "ets_coroutine.h"
-#include "ets_platform_types.h"
 #include "types/ets_box_primitive.h"
 #include "types/ets_box_primitive-inl.h"
 #include "types/ets_array.h"
@@ -71,13 +70,14 @@ public:
         using CharCode = EtsBoxPrimitive<EtsDouble>;
         EtsClass *klass = CharCode::GetEtsBoxClass(coroutine_);
         ASSERT(klass != nullptr);
-        CharCodeArray *charCodeArray = CharCodeArray::Create(klass, std::distance(first, last));
+        auto length = std::distance(first, last);
+        CharCodeArray *charCodeArray = CharCodeArray::Create(klass, length);
         std::for_each(first, last, [&charCodeArray, this, idx = 0U](double d) mutable {
             auto *boxedValue = CharCode::Create(coroutine_, d);
             charCodeArray->Set(idx++, boxedValue);
         });
 
-        return EtsString::CreateNewStringFromCharCode(charCodeArray);
+        return EtsString::CreateNewStringFromCharCode(charCodeArray, length);
     }
 
     EtsString *CreateNewStringFromCharCodes(const std::vector<double> &codes)

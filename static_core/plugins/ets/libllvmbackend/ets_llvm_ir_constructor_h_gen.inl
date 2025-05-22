@@ -90,6 +90,51 @@ bool EmitBigUInt64ArrayFillInternal(Inst *inst)
 bool EmitReadString(Inst *inst);
 bool EmitWriteString(Inst *inst);
 
+bool EmitInt8ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT8_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitInt16ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT16_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitInt32ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::INT32_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitBigInt64ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_INT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitFloat32ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::FLOAT32_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitFloat64ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::FLOAT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint8ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT8_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint8ClampedArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT8_CLAMPED_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint16ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT16_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitUint32ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::UINT32_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+bool EmitBigUint64ArraySetValuesFromArray(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::BIG_UINT64_ARRAY_SET_VALUES_FROM_ARRAY, 2U);
+}
+
 bool EmitMapGet(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::MAP_GET_FAST_PATH, 2U);

@@ -17,16 +17,17 @@
 
 package escompat
 
-{%- for N, T, BT, S in [
-    ('Int8', 'byte', 'Byte', 1),
-    ('Int16', 'short', 'Short', 2),
-    ('Int32', 'int', 'Int', 4),
-    ('BigInt64', 'long', 'Long', 8),
-    ('Float32', 'float', 'Float', 4),
-    ('Float64', 'double', 'Double', 8)]
+{%- for N, U, T, BT, S in [
+    ('Int8', 'Uint8', 'byte', 'Byte', 1),
+    ('Int16', 'Uint16', 'short', 'Short', 2),
+    ('Int32', '', 'int', 'Int', 4),
+    ('BigInt64', '', 'long', 'Long', 8),
+    ('Float32', '', 'float', 'Float', 4),
+    ('Float64', '', 'double', 'Double', 8)]
 %}
 
     {%- set elementCompat = 'number' if T != 'long' else 'BigInt' %}
+    {%- set updatedElementCompat = 'number' if T == 'float' or T == 'double' else 'int' if T != 'long' else 'BigInt' %}
     {%- set asElementCompat = '(%s).toDouble()' if elementCompat == 'number' else 'new BigInt(%s)' %}
     {%- set fromElementCompat = ('.to' + BT + '()') if elementCompat == 'number' else '.getLong()' %}
     {%- set subsetTypeValues = 'Number' if elementCompat == 'number' else 'BigInt' %}
@@ -865,6 +866,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     public native set(array: {{N}}Array): void
 
+    {%- if U|length %}
+    private native final set(array: {{U}}Array): void
+    {%- endif %}
+
     public native set(array: {{N}}Array, offset: number): void
 
     /**
@@ -950,12 +955,76 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static from(arrayLike: ArrayLike<number>): {{N}}Array {
+    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): {{N}}Array {
     {%- if N != 'BigInt64' %}
         return {{N}}Array.from<number>(arrayLike, (x: number, k: number): number => x)
     {%- else %}
         throw new Error("{{N}}Array.from: not implemented")
     {%- endif %}
+    }
+
+    /**
+     * Creates an array from a set of type escompat.Set<{{updatedElementCompat}}>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static fromSet{{updatedElementCompat}}(set: Set<{{updatedElementCompat}}>): {{N}}Array {
+        const length = set.size;
+        const result = new {{N}}Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            result.setUnsafe(i, x.value!{{fromElementCompat}})
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static from{{N}}Array(arr: {{N}}Array): {{N}}Array {
+        let result = new {{N}}Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    {%- if U|length %}
+    /**
+     * Creates an array from an array of the same up to the signess type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static from{{U}}Array(arr: {{U}}Array): {{N}}Array {
+        let result = new {{N}}Array(arr.length)
+        result.set(arr)
+        return result
+    }
+    {%- endif %}
+
+    private native final set(array: Array<{{updatedElementCompat}}>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<{{updatedElementCompat}}>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static fromArray{{updatedElementCompat}}(arr: Array<{{updatedElementCompat}}>): {{N}}Array {
+        let result = new {{N}}Array(arr.length)
+        result.set(arr)
+        return result;
     }
 
     /**
@@ -967,7 +1036,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static from(arrayLike: Iterable<{{elementCompat}}>, mapfn?: (v: {{elementCompat}}, k: number) => {{elementCompat}}): {{N}}Array {
+    public static fromIterable(arrayLike: Iterable<{{elementCompat}}>, mapfn?: (v: {{elementCompat}}, k: number) => {{elementCompat}}): {{N}}Array {
         if (mapfn == undefined) {
             mapfn = (v: {{elementCompat}}, k: number): {{elementCompat}} => { return v }
         }
@@ -1023,7 +1092,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return new {{N}}Array(temp.buffer, 0, index[0])
     }
 
-
     /**
      * Creates an array from an array-like or iterable object.
      *
@@ -1033,7 +1101,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{elementCompat}}): {{N}}Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{elementCompat}}): {{N}}Array {
         let res = new {{N}}Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -1051,6 +1119,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         })
         return res
     }
+
+    public static overload from {
+        fromSet{{updatedElementCompat}}, from{{N}}Array{%- if U|length %} ,from{{U}}Array{%- endif %},
+        fromArray{{updatedElementCompat}}, fromArrayLikeNumber, fromArrayLike, fromIterable
+    };
 
     {%- if (N == 'Float32') or (N == 'Float64') %}
     private final native containsNaN(fromIndex: int): boolean;

@@ -717,6 +717,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     public native set(array: Int8Array): void
+    private native final set(array: Uint8Array): void
 
     public native set(array: Int8Array, offset: number): void
 
@@ -806,8 +807,69 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static from(arrayLike: ArrayLike<number>): Int8Array {
+    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Int8Array {
         return Int8Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    }
+
+    /**
+     * Creates an array from a set of type escompat.Set<int>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new Int8Array
+     */
+    public static fromSetint(set: Set<int>): Int8Array {
+        const length = set.size;
+        const result = new Int8Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            result.setUnsafe(i, x.value!.toByte())
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new Int8Array
+     */
+    public static fromInt8Array(arr: Int8Array): Int8Array {
+        let result = new Int8Array(arr.length)
+        result.set(arr)
+        return result
+    }
+    /**
+     * Creates an array from an array of the same up to the signess type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new Int8Array
+     */
+    public static fromUint8Array(arr: Uint8Array): Int8Array {
+        let result = new Int8Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    private native final set(array: Array<int>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<int>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new Int8Array
+     */
+    public static fromArrayint(arr: Array<int>): Int8Array {
+        let result = new Int8Array(arr.length)
+        result.set(arr)
+        return result;
     }
 
     /**
@@ -819,7 +881,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int8Array {
+    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int8Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -865,7 +927,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         return new Int8Array(temp.buffer, 0, index[0])
     }
 
-
     /**
      * Creates an array from an array-like or iterable object.
      *
@@ -875,7 +936,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
         let res = new Int8Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -888,6 +949,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return res
     }
+
+    public static overload from {
+        fromSetint, fromInt8Array ,fromUint8Array,
+        fromArrayint, fromArrayLikeNumber, fromArrayLike, fromIterable
+    };
 
     /**
      * Determines whether Int8Array includes a certain element, returning true or false as appropriate
@@ -2481,6 +2547,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     public native set(array: Int16Array): void
+    private native final set(array: Uint16Array): void
 
     public native set(array: Int16Array, offset: number): void
 
@@ -2570,8 +2637,69 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static from(arrayLike: ArrayLike<number>): Int16Array {
+    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Int16Array {
         return Int16Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    }
+
+    /**
+     * Creates an array from a set of type escompat.Set<int>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new Int16Array
+     */
+    public static fromSetint(set: Set<int>): Int16Array {
+        const length = set.size;
+        const result = new Int16Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            result.setUnsafe(i, x.value!.toShort())
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new Int16Array
+     */
+    public static fromInt16Array(arr: Int16Array): Int16Array {
+        let result = new Int16Array(arr.length)
+        result.set(arr)
+        return result
+    }
+    /**
+     * Creates an array from an array of the same up to the signess type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new Int16Array
+     */
+    public static fromUint16Array(arr: Uint16Array): Int16Array {
+        let result = new Int16Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    private native final set(array: Array<int>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<int>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new Int16Array
+     */
+    public static fromArrayint(arr: Array<int>): Int16Array {
+        let result = new Int16Array(arr.length)
+        result.set(arr)
+        return result;
     }
 
     /**
@@ -2583,7 +2711,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int16Array {
+    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int16Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -2629,7 +2757,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         return new Int16Array(temp.buffer, 0, index[0])
     }
 
-
     /**
      * Creates an array from an array-like or iterable object.
      *
@@ -2639,7 +2766,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
         let res = new Int16Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -2652,6 +2779,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return res
     }
+
+    public static overload from {
+        fromSetint, fromInt16Array ,fromUint16Array,
+        fromArrayint, fromArrayLikeNumber, fromArrayLike, fromIterable
+    };
 
     /**
      * Determines whether Int16Array includes a certain element, returning true or false as appropriate
@@ -4312,8 +4444,57 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static from(arrayLike: ArrayLike<number>): Int32Array {
+    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Int32Array {
         return Int32Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    }
+
+    /**
+     * Creates an array from a set of type escompat.Set<int>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new Int32Array
+     */
+    public static fromSetint(set: Set<int>): Int32Array {
+        const length = set.size;
+        const result = new Int32Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            result.setUnsafe(i, x.value!.toInt())
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new Int32Array
+     */
+    public static fromInt32Array(arr: Int32Array): Int32Array {
+        let result = new Int32Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    private native final set(array: Array<int>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<int>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new Int32Array
+     */
+    public static fromArrayint(arr: Array<int>): Int32Array {
+        let result = new Int32Array(arr.length)
+        result.set(arr)
+        return result;
     }
 
     /**
@@ -4325,7 +4506,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int32Array {
+    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int32Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -4371,7 +4552,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         return new Int32Array(temp.buffer, 0, index[0])
     }
 
-
     /**
      * Creates an array from an array-like or iterable object.
      *
@@ -4381,7 +4561,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
         let res = new Int32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -4394,6 +4574,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return res
     }
+
+    public static overload from {
+        fromSetint, fromInt32Array,
+        fromArrayint, fromArrayLikeNumber, fromArrayLike, fromIterable
+    };
 
     /**
      * Determines whether Int32Array includes a certain element, returning true or false as appropriate
@@ -6067,8 +6252,57 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static from(arrayLike: ArrayLike<number>): BigInt64Array {
+    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): BigInt64Array {
         throw new Error("BigInt64Array.from: not implemented")
+    }
+
+    /**
+     * Creates an array from a set of type escompat.Set<BigInt>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new BigInt64Array
+     */
+    public static fromSetBigInt(set: Set<BigInt>): BigInt64Array {
+        const length = set.size;
+        const result = new BigInt64Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            result.setUnsafe(i, x.value!.getLong())
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new BigInt64Array
+     */
+    public static fromBigInt64Array(arr: BigInt64Array): BigInt64Array {
+        let result = new BigInt64Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    private native final set(array: Array<BigInt>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<BigInt>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new BigInt64Array
+     */
+    public static fromArrayBigInt(arr: Array<BigInt>): BigInt64Array {
+        let result = new BigInt64Array(arr.length)
+        result.set(arr)
+        return result;
     }
 
     /**
@@ -6080,7 +6314,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static from(arrayLike: Iterable<BigInt>, mapfn?: (v: BigInt, k: number) => BigInt): BigInt64Array {
+    public static fromIterable(arrayLike: Iterable<BigInt>, mapfn?: (v: BigInt, k: number) => BigInt): BigInt64Array {
         if (mapfn == undefined) {
             mapfn = (v: BigInt, k: number): BigInt => { return v }
         }
@@ -6126,7 +6360,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         return new BigInt64Array(temp.buffer, 0, index[0])
     }
 
-
     /**
      * Creates an array from an array-like or iterable object.
      *
@@ -6136,7 +6369,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
         let res = new BigInt64Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -6148,6 +6381,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         })
         return res
     }
+
+    public static overload from {
+        fromSetBigInt, fromBigInt64Array,
+        fromArrayBigInt, fromArrayLikeNumber, fromArrayLike, fromIterable
+    };
 
     /**
      * Determines whether BigInt64Array includes a certain element, returning true or false as appropriate
@@ -7791,8 +8029,57 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static from(arrayLike: ArrayLike<number>): Float32Array {
+    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Float32Array {
         return Float32Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    }
+
+    /**
+     * Creates an array from a set of type escompat.Set<number>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new Float32Array
+     */
+    public static fromSetnumber(set: Set<number>): Float32Array {
+        const length = set.size;
+        const result = new Float32Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            result.setUnsafe(i, x.value!.toFloat())
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new Float32Array
+     */
+    public static fromFloat32Array(arr: Float32Array): Float32Array {
+        let result = new Float32Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    private native final set(array: Array<number>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<number>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new Float32Array
+     */
+    public static fromArraynumber(arr: Array<number>): Float32Array {
+        let result = new Float32Array(arr.length)
+        result.set(arr)
+        return result;
     }
 
     /**
@@ -7804,7 +8091,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float32Array {
+    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float32Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -7850,7 +8137,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         return new Float32Array(temp.buffer, 0, index[0])
     }
 
-
     /**
      * Creates an array from an array-like or iterable object.
      *
@@ -7860,7 +8146,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
         let res = new Float32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -7872,6 +8158,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return res
     }
+
+    public static overload from {
+        fromSetnumber, fromFloat32Array,
+        fromArraynumber, fromArrayLikeNumber, fromArrayLike, fromIterable
+    };
     private final native containsNaN(fromIndex: int): boolean;
 
     /**
@@ -9438,8 +9729,57 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static from(arrayLike: ArrayLike<number>): Float64Array {
+    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Float64Array {
         return Float64Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    }
+
+    /**
+     * Creates an array from a set of type escompat.Set<number>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new Float64Array
+     */
+    public static fromSetnumber(set: Set<number>): Float64Array {
+        const length = set.size;
+        const result = new Float64Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            result.setUnsafe(i, x.value!.toDouble())
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new Float64Array
+     */
+    public static fromFloat64Array(arr: Float64Array): Float64Array {
+        let result = new Float64Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    private native final set(array: Array<number>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<number>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new Float64Array
+     */
+    public static fromArraynumber(arr: Array<number>): Float64Array {
+        let result = new Float64Array(arr.length)
+        result.set(arr)
+        return result;
     }
 
     /**
@@ -9451,7 +9791,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float64Array {
+    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float64Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -9497,7 +9837,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         return new Float64Array(temp.buffer, 0, index[0])
     }
 
-
     /**
      * Creates an array from an array-like or iterable object.
      *
@@ -9507,7 +9846,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
         let res = new Float64Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -9519,6 +9858,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return res
     }
+
+    public static overload from {
+        fromSetnumber, fromFloat64Array,
+        fromArraynumber, fromArrayLikeNumber, fromArrayLike, fromIterable
+    };
     private final native containsNaN(fromIndex: int): boolean;
 
     /**

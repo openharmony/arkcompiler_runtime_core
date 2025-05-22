@@ -23,13 +23,11 @@ module Constants
   LOG2_BITS_PER_U8 = "3"
   LOG2_BITS_PER_U16 = "4"
   LOG2_BYTES_PER_U16 = "1"
-  LOG2_BYTES_PER_OBJ_PTR = "2" # object pointer has a size of 4 bytes on each supported platform
   XOR_SUB_U8_MASK = "0x0101010101010101ULL"
   XOR_AND_U8_MASK = "0x8080808080808080ULL"
   MAX_U8_VALUE = "255"
   U8_SIZE = "1"
   U16_SIZE = "2"
-  OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
 end
 
@@ -887,7 +885,7 @@ function(:StringGetBytesTlab,
 #
 scoped_macro(:load_char_code) do |char_codes, offset|
   _boxed_ptr := get_object_pointer(char_codes, offset)
-  _char_core := LoadI(_boxed_ptr).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
+  _char_code := LoadI(_boxed_ptr).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
 end  # load_char_code
 
 ###
@@ -923,7 +921,7 @@ scoped_macro(:is_array_of_convertible_char_codes) do |codes_data, codes_count|
     _convertible := Cast(1).b
   else
     _offset1 := Cast(0).u64
-    _codes_len := ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _codes_len := ShlI(codes_count).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
     _convertible1 := Cast(1).b
 Label(:Loop)
     _offset := Phi(_offset1, _offset2).u64
@@ -934,7 +932,7 @@ Label(:Loop)
     If(_convertible2, 0).EQ.Unlikely.b {
       Goto(:LoopDone)
     }
-    _offset2 := AddI(_offset).Imm(Constants::OBJ_PTR_SIZE).u64
+    _offset2 := AddI(_offset).Imm(EtsConstants::OBJ_PTR_SIZE).u64
     Goto(:Loop)
 Label(:LoopDone)
     _convertible := Phi(_convertible1, _convertible2).b
@@ -974,7 +972,7 @@ end  # get_char_from_code
 #
 scoped_macro(:is_array_of_compressible_char_codes) do |codes_data, codes_count|
   _offset1 := Cast(0).u64
-  _codes_len := ShlI(codes_count).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+  _codes_len := ShlI(codes_count).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
   _compressible1 := Cast(1).b
 Label(:Loop)
   _offset := Phi(_offset1, _offset2).u64
@@ -986,7 +984,7 @@ Label(:Loop)
     _compressible2 := Cast(0).b
     Goto(:LoopDone)
   }
-  _offset2 := AddI(_offset).Imm(Constants::OBJ_PTR_SIZE).u64
+  _offset2 := AddI(_offset).Imm(EtsConstants::OBJ_PTR_SIZE).u64
   Goto(:Loop)
 
 Label(:LoopDone)
@@ -1006,7 +1004,7 @@ Label(:Loop)
     If(_i, count).AE.Unlikely {
       Goto(:LoopDone)
     }
-    _code_offset := ShlI(_i).Imm(Constants::LOG2_BYTES_PER_OBJ_PTR).u64
+    _code_offset := ShlI(_i).Imm(EtsConstants::LOG2_BYTES_PER_OBJ_PTR).u64
     _char := get_char_from_code(load_char_code(src, _code_offset).f64)
     if compressed_string
       _char_offset := Cast(_i).u64
@@ -1048,7 +1046,7 @@ def GenerateCreateStringFromCharCodeTlab(string_compression_enabled)
 
     char_codes_array := get_object_pointer_imm(char_codes, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
     codes_data := AddI(char_codes_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
-    codes_count := LoadI(char_codes_array).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
+    codes_count := LoadI(char_codes).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
     # Validate if all the char codes are convertible: whenever an overflow or underflow takes place during the
     # conversion of a denormalized number we have to go to the slow path. The validation must take place before
@@ -1812,4 +1810,3 @@ function(:CreateStringFromMem,
   Intrinsic(:SLOW_PATH_ENTRY, buf, len).AddImm(eid).MethodAsImm("CreateStringFromMem3ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
-

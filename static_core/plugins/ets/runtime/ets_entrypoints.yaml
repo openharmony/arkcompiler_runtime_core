@@ -1186,6 +1186,303 @@
       - void*               # serialization buffer
       - int32_t             # buffer length
 
+- name: Int8ArraySetValuesFromArray
+  entrypoint: Int8ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int8ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatInt8ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int8ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatInt8ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int16ArraySetValuesFromArray
+  entrypoint: Int16ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int16ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatInt16ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int16ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatInt16ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int32ArraySetValuesFromArray
+  entrypoint: Int32ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int32ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatInt32ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Int32ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatInt32ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigInt64ArraySetValuesFromArray
+  entrypoint: BigInt64ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigInt64ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatBigInt64ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigInt64ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatBigInt64ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float32ArraySetValuesFromArray
+  entrypoint: Float32ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float32ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatFloat32ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float32ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatFloat32ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float64ArraySetValuesFromArray
+  entrypoint: Float64ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float64ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatFloat64ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Float64ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatFloat64ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ArraySetValuesFromArray
+  entrypoint: Uint8ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint8ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint8ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ClampedArraySetValuesFromArray
+  entrypoint: Uint8ClampedArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ClampedArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint8ClampedArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint8ClampedArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint8ClampedArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint16ArraySetValuesFromArray
+  entrypoint: Uint16ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint16ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint16ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint16ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint16ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint32ArraySetValuesFromArray
+  entrypoint: Uint32ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint32ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatUint32ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: Uint32ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatUint32ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigUint64ArraySetValuesFromArray
+  entrypoint: BigUint64ArraySetValuesFromArray
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigUint64ArraySetValuesFromArrayUsual
+  entrypoint: EtsEscompatBigUint64ArraySetValuesFromArray
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
+- name: BigUint64ArraySetValuesFromArraySlowPath
+  entrypoint: EtsEscompatBigUint64ArraySetValuesFromArray
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - void
+    - ark::ObjectHeader*       # resulting array
+    - ark::ObjectHeader*       # src array
+
 # Map
 - name: MapGetFastPath
   entrypoint: MapGetIrToc

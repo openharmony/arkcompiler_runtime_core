@@ -20,12 +20,13 @@ package escompat
 const IS_LITTLE_ENDIAN: boolean;
 
 {%- for element in [{'name': 'Uint8Clamped', 'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 1, 'primitiveTypeWide': 'short', 'max': 255, 'min': 0, 'clamped': True},
-                    {'name': 'Uint8',        'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 1, 'primitiveTypeWide': 'short'},
-                    {'name': 'Uint16',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 2, 'primitiveTypeWide': 'int'},
-                    {'name': 'Uint32',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'long', 'bytes': 4, 'primitiveTypeWide': 'long'},
+                    {'name': 'Uint8',        'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 1, 'primitiveTypeWide': 'short', 'signed': 'Int8'},
+                    {'name': 'Uint16',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'int', 'bytes': 2, 'primitiveTypeWide': 'int', 'signed': 'Int16'},
+                    {'name': 'Uint32',       'subsetType': 'number', 'subsetTypeValues': 'Number', 'primitiveType': 'long', 'bytes': 4, 'primitiveTypeWide': 'long', 'signed': 'Int32'},
                     {'name': 'BigUint64',    'subsetType': 'BigInt', 'subsetTypeValues': 'BigInt', 'primitiveType': 'long', 'bytes': 8, 'primitiveTypeWide': 'long'}] %}
 
     {%- set _ = element.update({'subsetTypeBoxed':  element['subsetType'][0].upper() + element['subsetType'][1:], 'primitiveTypeBoxed':  element['primitiveType'][0].upper() + element['primitiveType'][1:]}) %}
+    {%- set updatedSubsetType = 'int' if element['subsetType'] != 'BigInt' else 'BigInt' %}
     {%- set asElementCompat = ('%s.toDouble()') if element['subsetType'] != 'BigInt' else 'new BigInt(%s)' %}
     {%- set fromElementCompat = ('%s.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '%s.getULong()' %}
     {%- set numberBigIntToPrimitive = ('.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '.getULong()' %}
@@ -858,6 +859,10 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
 
     public native set(array: {{element['name']}}Array): void
 
+    {%- if element['signed'] is defined and element['signed']|length %}
+    private native final set(array: {{element['signed']}}Array): void
+    {%- endif %}
+
     public native set(array: {{element['name']}}Array, offset: number): void
 
     /**
@@ -933,7 +938,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static from(arr: ArrayLike<{{element['subsetType']}}>): {{element['name']}}Array {
+    public static fromArrayLike{{element['subsetType']}}(arr: ArrayLike<{{element['subsetType']}}>): {{element['name']}}Array {
         {%- if element.name == 'Uint8Clamped' %}
         const len = arr.length;
         const result = new Uint8ClampedArray(len);
@@ -978,6 +983,74 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
+     * Creates an array from a set of type escompat.Set<{{updatedSubsetType}}>.
+     *
+     * @param set A set object to convert to an array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static fromSet{{updatedSubsetType}}(set: Set<{{updatedSubsetType}}>): {{element['name']}}Array {
+        const length = set.size;
+        const result = new {{element['name']}}Array(length)
+        let iter = set.$_iterator()
+        for (let i:int = 0; i < length; ++i) {
+            const x = iter.next()
+            if (x.done) {
+                throw new AssertionError('Wrong Length')
+            }
+            {%- if element.get('name') == 'BigUint64' %}
+            result.setUnsafeClamp(i, x.value!{{numberBigIntToPrimitive}})
+            {%- else %}
+            result.setUnsafeClamp(i, x.value!.to{{element['primitiveType'].capitalize()}}())
+            {%- endif %}
+        }
+        return result
+    }
+
+    /**
+     * Creates an array from an array of the same type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new {{element['name']}}Array
+     */
+    public static from{{element['name']}}Array(arr: {{element['name']}}Array): {{element['name']}}Array {
+        let result = new {{element['name']}}Array(arr.length)
+        result.set(arr)
+        return result
+    }
+
+    {%- if element['signed'] is defined and element['signed']|length %}
+    /**
+     * Creates an array from an array of the same up to the signess type.
+     *
+     * @param arr An array to convert to a new array.
+     *
+     * @returns new {{element['name']}}Array
+     */
+    public static from{{element['signed']}}Array(arr: {{element['signed']}}Array): {{element['name']}}Array {
+        let result = new {{element['name']}}Array(arr.length)
+        result.set(arr)
+        return result
+    }
+    {%- endif %}
+
+    private native final set(array: Array<{{updatedSubsetType}}>): void;
+
+    /**
+     * Creates an array from an object of escompat.Array<{{updatedSubsetType}}>.
+     *
+     * @param arr An instance of the escompat.Array type to convert to an array.
+     *
+     * @returns new {{element['name']}}Array
+     */
+    public static fromArray{{updatedSubsetType}}(arr: Array<{{updatedSubsetType}}>): {{element['name']}}Array {
+        let result = new {{element['name']}}Array(arr.length)
+        result.set(arr)
+        return result;
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
      *
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -986,7 +1059,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static from(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
+    public static fromIterable(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
         if (mapfn == undefined) {
             mapfn = (v: {{element['subsetType']}}, k: number): {{element['subsetType']}} => { return v }
         }
@@ -1052,7 +1125,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
+    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
         let res = new {{element['name']}}Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new int[1]
@@ -1069,6 +1142,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         })
         return res
     }
+
+    public static overload from {
+        fromSet{{updatedSubsetType}}, from{{element['name']}}Array
+        {%- if element['signed'] is defined and element['signed']|length %} ,from{{element['signed']}}Array{%- endif %}
+        ,fromArray{{updatedSubsetType}}, fromArrayLike{{element['subsetType']}}, fromArrayLike, fromIterable
+    };
 
     /**
      * Determines whether {{element['name']}}Array includes a certain element, returning true or false as appropriate
