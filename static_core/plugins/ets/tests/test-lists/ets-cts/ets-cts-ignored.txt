@@ -494,9 +494,6 @@
 10.interfaces/06.interface_method_declarations/throws_clause_1.ets
 10.interfaces/06.interface_method_declarations/throws_clause_2.ets
 
-#25177
-10.interfaces/07.interface_inheritance/multi_layer_interface/type_system/type_system_15.ets
-
 #25187
 10.interfaces/07.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
 
