@@ -44,6 +44,6 @@ class ConcreteClass implements ChildInterface {
 
 function main(): void {
   const obj: ChildInterface = new ConcreteClass();
-  assertEQ(obj.GRANDPARENT_CONST as number, 0);
-  assertEQ(obj.PARENT_CONST as number, 0);
+  assertEQ(obj.GRANDPARENT_CONST.valueOf(), 0);
+  assertEQ(obj.PARENT_CONST.valueOf(), 0);
 }

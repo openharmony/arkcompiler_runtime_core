@@ -15,7 +15,7 @@
 primitives:
   - { type: 'boolean', value: "true" }
   - { type: 'byte', value: "12"  }
-  - { type: 'char', value: "'c'"  }
+  - { type: 'Char', value: "c'c'"  }
   - { type: 'double', value: "234.0"  }
   - { type: 'float', value: "123.0f"  }
   - { type: 'int' , value: "456" }
