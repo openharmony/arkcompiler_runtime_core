@@ -437,7 +437,7 @@ Grammar Summary
 
     lambdaSignature:
         '(' lambdaParameterList? ')' returnType?
-        | identifier    
+        | identifier
         ;
 
     lambdaParameterList:
@@ -446,7 +446,7 @@ Grammar Summary
         ;
 
     lambdaParameter:
-        annotationUsage? (lambdaRequiredParameter | lambdaOptionalParameter)    
+        annotationUsage? (lambdaRequiredParameter | lambdaOptionalParameter)
         ;
 
     lambdaRequiredParameter:
@@ -598,7 +598,8 @@ Grammar Summary
 
     classDeclaration:
         classModifier? ('class' | 'struct') identifier typeParameters?
-          classExtendsClause? implementsClause? classBody
+          classExtendsClause? implementsClause?
+          classMembers
         ;
 
     classModifier:
@@ -617,13 +618,13 @@ Grammar Summary
         typeReference (',' typeReference)*
         ;
 
-    classBody:
+    classMembers:
         '{'
-           classBodyDeclaration* globalInitializer? classBodyDeclaration*
+           classMember* staticBlock? classMember*
         '}'
         ;
 
-    classBodyDeclaration:
+    classMember:
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
@@ -633,6 +634,10 @@ Grammar Summary
         )
         ;
 
+    staticBlock:
+        'static' block
+          ;
+
     accessModifier:
         'private'
         | 'internal'
@@ -641,7 +646,7 @@ Grammar Summary
         ;
 
     classFieldDeclaration:
-        fieldModifier* 
+        fieldModifier*
         identifier
         ( '?'? ':' type initializer?
         | '?'? initializer
@@ -817,7 +822,7 @@ Grammar Summary
 
     singleExportDirective:
         'export'
-        ( identifier 
+        ( identifier
         | 'default' (expression | identifier)
         | '{' identifier 'as' 'default' '}'
         )
@@ -828,9 +833,9 @@ Grammar Summary
         ;
 
     reExportDirective:
-        'export' 
-        ('*' bindingAlias? 
-        | selectiveBindings 
+        'export'
+        ('*' bindingAlias?
+        | selectiveBindings
         | '{' 'default' bindingAlias? '}'
         )
         'from' importPath
@@ -872,10 +877,10 @@ Grammar Summary
     ambientClassDeclaration:
         'class'|'struct' identifier typeParameters?
         classExtendsClause? implementsClause?
-        '{' ambientClassBodyDeclaration* '}'
+        '{' ambientClassMember* '}'
         ;
 
-    ambientClassBodyDeclaration:
+    ambientClassMember:
         ambientAccessModifier?
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
@@ -900,7 +905,7 @@ Grammar Summary
         ;
 
     ambientConstructorDeclaration:
-        'constructor' parameters 
+        'constructor' parameters
         ;
 
     ambientMethodDeclaration:
@@ -990,7 +995,7 @@ Grammar Summary
         ;
 
     signatureWithReceiver:
-        '(' receiverParameter (', ' parameterList)? ')' returnType? 
+        '(' receiverParameter (', ' parameterList)? ')' returnType?
         ;
 
     receiverParameter:
@@ -1039,7 +1044,7 @@ Grammar Summary
         ;
 
     packageModuleDeclaration:
-        packageTopDeclaration | initializerBlock
+        packageTopDeclaration | staticBlock
         ;
 
     packageTopDeclaration:
@@ -1060,11 +1065,6 @@ Grammar Summary
         identifier ':' type initializer?
         | identifier initializer
         ;
-
-
-      initializerBlock:
-          'static' block
-          ;
 
     annotationDeclaration:
         '@interface' identifier '{' annotationField* '}'
@@ -1299,23 +1299,23 @@ Grammar Summary
         ~["'\\\r\n] ('*'|'+'|'?'|('{' DecimalIntegerLiteral (',' DecimalIntegerLiteral? )? '}'))?
         ;
 
-    RegexSpecialForms:   
-        CharacterClass ('(' '?='|'?!' CharacterClasse ')')? 
+    RegexSpecialForms:
+        CharacterClass ('(' '?='|'?!' CharacterClasse ')')?
         ('(' '?<='|'?<!' CharacterClasse ')') CharacterClass
         ;
 
-    CharacterClass: 
+    CharacterClass:
         '[' '^'? '\b'? (RegexCharacter | (RegexCharacter '-' RegexCharacter) '\B'?)+ '\b'? ']'
         | '.'
         | '\' ('d' | 'D' | 'w' | 'W' | 's' | 'S' | 't' | 'r' | 'n' | 'v' | 'f' | '0' | 'c' ['A'-'Z'] | 'x' DecimalDigit DecimalDigit | DecimalIntegerLiteral | 'k<' Identifier '>')
-        | 'u' HexDigit HexDigit HexDigit HexDigit 
+        | 'u' HexDigit HexDigit HexDigit HexDigit
         | 'u{' HexDigit HexDigit HexDigit HexDigit HexDigit? '}'
-        | '[\b]' 
+        | '[\b]'
         | (RegexCharacter '|' RegexCharacter)
         ;
 
     RegExFlags:
-        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
+        'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'?
         ;
 
 

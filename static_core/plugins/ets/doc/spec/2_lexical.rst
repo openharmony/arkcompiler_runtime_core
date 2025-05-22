@@ -308,30 +308,32 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``else``        |   ``internal``   |   ``switch``     |
+|   ``abstract``     |   ``else``        |   ``internal``   |   ``static``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``enum``        |   ``let``        |   ``super``      |
+|   ``as``           |   ``enum``        |   ``let``        |   ``switch``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``export``      |   ``native``     |   ``this``       |
+|   ``async``        |   ``export``      |   ``native``     |   ``super``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``extends``     |   ``new``        |   ``throw``      |
+|   ``await``        |   ``extends``     |   ``new``        |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``false``       |   ``null``       |   ``true``       |
+|   ``break``        |   ``false``       |   ``null``       |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``final``       |   ``override``   |   ``try``        |
+|   ``case``         |   ``final``       |   ``overload``   |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``for``         |   ``package``    |   ``undefined``  |
+|   ``class``        |   ``for``         |   ``override``   |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``const``        |   ``function``    |   ``private``    |   ``while``      |
+|   ``const``        |   ``function``    |   ``package``    |   ``undefined``  |
 +--------------------+-------------------+------------------+------------------+
-|   ``constructor``  |   ``if``          |   ``protected``  |                  |
+|   ``constructor``  |   ``if``          |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``continue``     |   ``implements``  |   ``public``     |                  |
+|   ``continue``     |   ``implements``  |   ``protected``  |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``default``      |   ``import``      |   ``return``     |                  |
+|   ``default``      |   ``import``      |   ``public``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``do``           |   ``interface``   |   ``static``     |                  |
+|   ``do``           |   ``interface``   |   ``return``     |                  |
 +--------------------+-------------------+------------------+------------------+
+
+|
 
 2. Names and aliases of predefined types are *hard keywords*, and cannot be
 used as identifiers:
@@ -1008,10 +1010,11 @@ Regex Literal
 .. meta:
     frontend_status: None
 
-*Regex literals* can contain mandatory regex part and optional flags:
+*Regex literals* can contain the mandatory regex part and optional flags:
 
 .. index::
    regex literal
+   optional flag
 
 .. code-block:: abnf
 
@@ -1057,7 +1060,7 @@ Regex Literal
         'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
         ;
 
-Regex flags may be put in any order, but duplication leads to a
+Regex flags can be put in any order. However, regex flag duplication causes a
 :index:`compile-time error`.
 
 An example of regex literals is provided below:
@@ -1068,9 +1071,8 @@ An example of regex literals is provided below:
     let regex1 = /abc/ 
     let regex2 = /ab+c/gi
 
-
-Semantically *regex literal* is equivalant to creation of an object of *RegExp*
-type which is a part of the standard library (see :ref:`Standard Library`)
+*Regex literal* is semantically equivalent to the creation of an object of
+*RegExp* type that is a part of the :ref:`Standard Library`.
 
 .. code-block:: typescript
    :linenos:
@@ -1078,8 +1080,8 @@ type which is a part of the standard library (see :ref:`Standard Library`)
     let regex1 = /abc/ 
     let regex2 = new RegExp ("abc")
 
-The |LANG| supports the same semantics of *regex literals* as 
-semantics of |JS| regular expresions.
+The semantics of *regex literals* supported by |LANG| is the same as that of
+regular expressions in |JS|.
 
 |
 

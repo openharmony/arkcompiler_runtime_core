@@ -32,6 +32,9 @@ are omitted to simplify the understanding.
 Semantic Essentials
 *******************
 
+.. meta:
+    frontend_status: Partly
+
 The section gives a brief introduction to the major semantic terms
 and their usage in several contexts.
 
@@ -41,6 +44,9 @@ and their usage in several contexts.
 
 Type of Standalone Expression
 =============================
+
+.. meta:
+    frontend_status: Done
 
 *Standalone expression* (see :ref:`Type of Expression`) is an expression for
 which no target type is expected in its context.
@@ -157,6 +163,9 @@ as follows:
 Specifics of Numeric Operator Contexts
 ======================================
 
+.. meta:
+    frontend_status: Done
+
 Operands of unary and binary numeric expressions are widened to a larger numeric
 type. The minimum type is ``int``. Specifically, no arithmetic operator
 evaluates values of types ``byte`` and ``short`` without widening. Details of
@@ -169,6 +178,9 @@ specific operators are discussed in corresponding sections of the Specification.
 Specifics of String Operator Contexts
 =====================================
 
+.. meta:
+    frontend_status: Done
+
 If one operand of the binary operator ‘`+`’ is of type ``string``, then the
 string conversion applies to another non-string operand to convert it to string
 (see :ref:`String Concatenation` and :ref:`String Operator Contexts`).
@@ -180,8 +192,11 @@ string conversion applies to another non-string operand to convert it to string
 Other Contexts
 ==============
 
+.. meta:
+    frontend_status: Done
+
 The only semantic rule for all other contexts, and specifically for
-:ref:`Overloading and Overriding`, is to use :ref:`Subtyping`.
+:ref:`Overriding`, is to use :ref:`Subtyping`.
 
 |
 
@@ -189,6 +204,9 @@ The only semantic rule for all other contexts, and specifically for
 
 Specifics of Type Parameters
 ============================
+
+.. meta:
+    frontend_status: Done
 
 If the type of a left-hand-side expression in *assignment-like context* is a
 type parameter, then it provides no additional information for type inference
@@ -231,7 +249,8 @@ Major semantic terms are listed below:
 - :ref:`String Operator Contexts`;
 - :ref:`Subtyping`;
 - :ref:`Assignability`;
-- :ref:`Overloading and Overriding`;
+- :ref:`Overriding`;
+- :ref:`Overloading`;
 - :ref:`Type Inference`.
 
 |
@@ -355,7 +374,6 @@ constraint of that type parameter.
    Object
 
 |
-
 
 .. _Subtyping for Literal Types:
 
@@ -768,7 +786,7 @@ the right when checking the validity of any function, method, constructor, or
 lambda call:
 
 **Step 1**: All arguments in the form of spread expression (see
-:ref:`spread Expression`) are to be linearized recursively to enusre that
+:ref:`spread Expression`) are to be linearized recursively to ensure that
 no spread expression is left at the call site.
 
 **Step 2**: The following checks are performed on all arguments from left to
@@ -832,7 +850,7 @@ The examples below represent the checks:
 
     call (...[1, "str", true], ...[ ...123])  // Initial call form
 
-    call (1, "str", true, 123) // To be unfoled into the form with no spread expressions
+    call (1, "str", true, 123) // To be unfolded into the form with no spread expressions
 
 
 
@@ -928,28 +946,32 @@ Type inference is applied by the compiler in the following contexts:
 Type Inference for Integer Constant Expressions
 ===============================================
 
-For :ref:`Constant Expressions` of integer types
-the type of expression is first evaluated from the expression
-in the following way:
+.. meta:
+    frontend_status: Partly
 
-- For an integer literal the type is the default type of the literal:
+The type of expression of integer types for :ref:`Constant Expressions` is
+first evaluated from the expression as follows:
+
+- Type of an integer literal is the default type of the literal:
   ``int`` or ``long`` (see :ref:`Integer Literals`);
 
-- For a named constant the type is specified in the constant declaration;
+- Type of a named constant is specified in the constant declaration;
 
-- For an operator the result type is evaluated accoriding rules of
-  this operator;
+- Result type of an operator is evaluated according to the rules of
+  the operator;
 
-- For :ref:`Cast expression` type is specified in the expression
-  target type.
+- Type of a :ref:`Cast expression` is specified in the expression target type.
 
-If the evaluated result type is of an integer type,
-it can be inferred to smaller integer *target type* from the context,
-if the following conditions are met:
+The evaluated result type can be inferred to a smaller integer *target type*
+from the context if it is of an integer type and the following conditions are met:
 
-#. The top-level expression is not a cast expression;
+#. Top-level expression is not a cast expression;
 
-#. The value of the expression fits into the range of the *target type*.
+#. Value of the expression fits into the range of the *target type*.
+
+A :index:`compile-time error` occurs if the context is a union type,
+and the evaluated value can be treated
+as value of several of union component types.
 
 The examples below illustrate valid and invalid narrowing.
 
@@ -963,9 +985,11 @@ The examples below illustrate valid and invalid narrowing.
     b = 64 + 63 // ok, int -> byte narrowing
     b = 128 // compile-time-error, value is out of range
     b = 1.0 // compile-time-error, floating-point value cannot be narrowed
-    b = 1 as short // // compile-time-error, cast expresion
+    b = 1 as short // // compile-time-error, cast expression
 
     let s: short = 32768 // compile-time-error, value is out of range
+
+    let u: byte | int = 1 // compile-time error, ambiguity
 
 .. index::
    narrowing
@@ -1086,273 +1110,296 @@ Other examples are explicit calls to ``instanceof``
    reference equality
 
 In like cases, a smart compiler can deduce the smart type of an entity without
-requiring unnecessary casting conversions (see :ref:`Cast Expression`).
+requiring additional checks or casts (see :ref:`Cast Expression`).
 
-Overloading (see :ref:`Function, Method and Constructor Overloading`) can cause
-tricky situations when a smart type leads to the call of a function or a method
-(see :ref:`Overload Resolution`) that suits smart rather than static type of an
-argument:
+Overloading (see :ref:`Overload Declarations`) can cause tricky situations
+when a smart type leads to the call of an entity
+(see :ref:`Overload Resolution`) that suits smart type rather than static type
+of an argument:
 
 .. code-block:: typescript
    :linenos:
 
-    function foo (p: Base) {}
-    function foo (p: Derived) {}
+    class Base {b = 1}
+    class Derived extends Base{d = 2}
+
+    function fooBase (p: Base) {}
+    function fooDerived (p: Derived) {}
+
+    overload foo { fooDerived, fooBase }
 
     function too() {
-       let b: Base = new Derived
-       foo (b) // potential ambiguity in case of smart type, foo(p:Base) is to be called
-       foo (b as Derived) // no ambiguity,  foo(p:Derived) is to be called
+        let a: Base = new Base
+        foo (a) // fooBase will be called
+        let b: Base = new Derived
+        foo (b) // as smart type of 'b' is Derived, fooDerived will be called
     }
 
 Particular cases supported by the compiler are determined by the compiler
 implementation.
 
 .. index::
-   compiler
    smart type
-   smart compiler
    entity
    casting conversion
    overloading
-   conversion
    function
    method
-   conversion overloading
-   function overloading
-   method overloading
    static type
-   argument
    implementation
    compiler
 
 |
 
-.. _Overloading and Overriding:
+.. _Overriding:
 
-Overloading and Overriding
-**************************
+Overriding
+**********
 
-Two important concepts apply to different contexts and entities throughout
-this specification as follows:
+*Method overriding* is the language feature closely connected with inheritance.
+It allows a subclass or a subinterface to offer a specific
+implementation of a method already defined in its supertype optionally
+with modified signature.
 
-#. *Overloading* allows defining and using functions (in general sense,
-   including methods and constructors) with the same name but different
-   signatures. The actual function to be called is determined at compile
-   time. Thus, *overloading* is related to compile-time polymorphism.
+The actual method to be called is determined at runtime based on object type.
+Thus, overriding is related to runtime polymorphism.
 
-#. *Overriding* is closely connected with inheritance. It is used on methods
-   but not on functions. Overriding allows a subclass to offer a specific
-   implementation of a method already defined in its parent class.
-   The actual method to be called is determined at runtime based on object type.
-   Thus, overriding is related to runtime polymorphism.
-
-|LANG| uses two semantic rules related to these concepts:
-
--  *Overload-equivalence* rule: the *overloading* of two entities is
-   correct if their signatures are **not** *overload-equivalent* (see
-   :ref:`Overload-Equivalent Signatures`).
-
--  *Override-compatibility* rule: the *overriding* of two entities is
-   correct if their signatures are *override-compatible* (see
-   :ref:`Override-Compatible Signatures`).
-
-See :ref:`Overloading for Functions`,
-:ref:`Overloading and Overriding in Classes`, and
-:ref:`Overloading and Overriding in Interfaces` for details.
+|LANG| uses the *override-compatibility* rule to check the correctness of
+overriding. The *overriding* is correct if method signature in a subtype
+(subclass or subinterface) is *override-compatible* with the method defined
+in a supertype    (see :ref:`Override-Compatible Signatures`).
 
 .. index::
-   overloading
    overriding
-   context
-   entity
-   function
-   constructor
-   method
-   signature
-   compile-time polymorphism
    subclass
    runtime polymorphism
    inheritance
    parent class
    object type
    runtime
-   overload-equivalence
    override-compatibility
-   overload-equivalent signature
-   overriding
-   overloading
 
 |
 
-.. _Overload-Equivalent Signatures:
+.. _Overriding in Classes:
 
-Overload-Equivalent Signatures
-==============================
+Overriding in Classes
+=====================
 
 .. meta:
     frontend_status: Partly
 
-Signatures *S1* with parameters *S1P*:sub:`1`, ... , *S1P*:sub:`n`, and *S2* with
-the same number of parameters *S2P*:sub:`1`, ... , *S2P*:sub:`n`
-are *overload-equivalent* if the *effective types* of parameters (see
-:ref:`Type Erasure`) *S1P*:sub:`i` and *S2P*:sub:`i` for each *i* are
-*overload-equavalent*.
+**Note**. Only accessible (see :ref:`Accessible`) methods are subjected to
+overriding. The same rule applies to accessors in case of overriding.
 
-**Notes:**
+An overriding member can keep or extend an access modifier (see
+:ref:`Access Modifiers`) of a member that is inherited or implemented.
+Otherwise, a :index:`compile-time error` occurs.
 
--  For an optional parameter (see :ref:`Optional Parameters`) in the form
-   ``ident?: T``, the actual parameter type is considered, i.e., union type
-   ``T | undefined``.
+A :index:`compile-time error` occurs if an attempt is made to do the following:
 
--  Type parameter constraint ``Object|null|undefined`` (see
-   :ref:`Type Parameter Constraint`) is condidered for a type parameter if
-   no constraint is set explicitly.
+- Override a private method of a superclass; or
+- Declare a method with the same name as that of a private method with default
+  implementation from any superinterface.
 
-Parameters *S1P*:sub:`i` and *S2P*:sub:`i` are *overload-equavalent*, if
-the are simultaneously ``rest`` or not ``rest`` parameters and if:
-
-#. Type of *S1P*:sub:`i` is a *type parameter* and type of *S2P*:sub:`i`
-   is a subtype of *type parameter constraint* or a *type parameter*;
-
-#. Type of *S1P*:sub:`i` is *generic type*
-   ``G`` <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, where at least one
-   ``T``:sub:`i` is a type parameter, and a
-   type of *S2P*:sub:`i` is also ``G`` with any
-   list of :ref:`Type Arguments` or a *union type* that contains ``G``;
-
-#. Types of *S1P*:sub:`i` and *S2P*:sub:`i` are
-   *union types* containing types that fall into either provision above;
-
-#. Types of *S1P*:sub:`i` and *S2P*:sub:`i` are identical (see
-   :ref:`Type Identity`).
-
-Parameter names and return types do not influence *overload equivalence*.
-Signatures are *overload-equivalent*  in the following examples:
 
 .. index::
-   overload-equivalent signature
-   signature
-   parameter
-   type parameter
-   parameter type
-   non-generic reference type
-   union type
-   reference type
-   generic type
-   type argument
+   overloading
+   inheritance
    overriding
-   parameter name
-   return type
-   overload equivalence
-   type identity
-   overload equivalence
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   (x: number): void
-   (y: number): void
-
-.. code-block-meta:
+   class
+   constructor
+   accessibility
+   access
+   private method
+   method
+   subclass
+   accessor
+   superclass
+   access modifier
+   implementation
+   superinterface
 
 .. code-block:: typescript
    :linenos:
 
-   (x: number): void
-   (y: number): number
+   class Base {
+      public public_member() {}
+      protected protected_member() {}
+      internal internal_member() {}
+      private private_member() {}
+   }
 
-.. code-block-meta:
+   interface Interface {
+      public_member()             // All members are public in interfaces
+      private private_member() {} // Except private methods with default implementation
+   }
+
+   class Derived extends Base implements Interface {
+      public override public_member() {}
+         // Public member can be overridden and/or implemented by the public one
+      public override protected_member() {}
+         // Protected member can be overridden by the protected or public one
+      internal internal_member() {}
+         // Internal member can be overridden by the internal one only
+      override private_member() {}
+         // A compile-time error occurs if an attempt is made to override private member
+         // or implement the private methods with default implementation
+   }
+
+The table below represents semantic rules that apply in various contexts:
+
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Context
+     - Semantic Check
+   * - An *instance method* is defined in a subclass with the same name as the
+       *instance method* in a superclass.
+     - If signatures are *override-compatible* (see
+       :ref:`Override-Compatible Signatures`), then *overriding* is used.
+       Otherwise, a :index:`compile-time error` occurs.
+
 
 .. code-block:: typescript
    :linenos:
 
-   class G<T>
-   (y: number): void
-   (x: T): void
+   class Base {
+      method_1() {}
+      method_2(p: number) {}
+   }
+   class Derived extends Base {
+      override method_1() {} // overriding
+      method_2(p: string) {} // compile-time error
+   }
 
-.. code-block-meta:
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 0
 
-.. code-block:: typescript
-   :linenos:
-
-   class G<T>
-   (y: G<number>): void
-   (x: G<T>): void
-
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   class G<T, S>
-   (y: T): void
-   (x: S): void
-
-
-Signatures are not *overload-equivalent* in the following examples:
+   * - A *static method* is defined in a subclass with the same name as the
+       *static method* in a superclass.
+     - If signatures are *override-compatible* (see
+       :ref:`Override-Compatible Signatures`), then the static method in the
+       subclass *hides* the previous static method.
+       Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
-   overload-equivalent signature
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   (x: number): void
-   (y: string): void
-
-.. code-block-meta:
+   instance method
+   static method
+   subclass
+   superclass
+   override-compatible signature
+   override-compatibility
+   overloading
+   hiding
+   overriding
 
 .. code-block:: typescript
    :linenos:
 
-   class A { /*body*/}
-   class B extends A { /*body*/}
-   (x: A): void
-   (y: B): void
+   class Base {
+      static method_1() {}
+      static method_2(p: number) {}
+   }
+   class Derived extends Base {
+      static method_1() {} // hiding
+      static method_2(p: string) {} // compile-time error
+   }
 
-.. code-block-meta:
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 0
 
-.. code-block:: typescript
-   :linenos:
+   * - A *constructor* is defined in a subclass.
+     - All base class constructors are available for call in all derived class
+       constructors.
 
-   class A<T> {
-   (p: T)
-   (p: T[])
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {}
-   class Derived1 extends Base {}
-   class Derived2 extends Base {}
-   (p: Derived1 | Derived2 ): void
-   (p: Base): void
-
-.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
 
-   class G<T>
-   (x: G<number>): void
-   (y: G<string>): void
+   class Base {
+      constructor() {}
+      constructor(p: number) {}
+   }
+   class Derived extends Base {
+      constructor(p: string) {
+           super()
+           super(5)
+      }
+   }
 
-.. code-block-meta:
+.. index::
+   constructor
+   subclass
+   class constructor
+   derived class constructor
+
+|
+
+.. _Overriding and Overload Signatures in Interfaces:
+
+Overriding and Overload Signatures in Interfaces
+================================================
+
+.. meta:
+    frontend_status: Done
+
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Context
+     - Semantic Check
+   * - A method is defined in a subinterface with the same name as the method
+       in the superinterface.
+     - If signatures are *override-compatible* (see
+       :ref:`Override-Compatible Signatures`), then *overriding* is used.
+       Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
 
-   class G<T extends number>
-   (x: T): void
-   (y: string): void
+   interface Base {
+      method_1()
+      method_2(p: number)
+   }
+   interface Derived extends Base {
+      method_1() // overriding
+      method_2(p: string) // compile-time error
+   }
+
+
+.. list-table::
+   :width: 100%
+   :widths: 50 50
+   :header-rows: 0
+
+   * - Two or more methods with the same name are defined in the same interface.
+     - :ref:`Interface Method Overload Signatures` is used.
+
+
+.. index::
+   method
+   subinterface
+   superinterface
+   semantic check
+   override-compatible
+   interface
+
+.. code-block:: typescript
+   :linenos:
+
+   interface anInterface {
+      instance_method()          // 1st signature
+      instance_method(p: number) // 2nd signature
+   }
 
 |
 
@@ -1533,7 +1580,7 @@ The semantics is illustrated by the examples below:
     }
 
 
-The example below illustrates override compatibility with ``Object``:
+Override compatibility with ``Object`` is represented by the example below:
 
 .. index::
    contravariance
@@ -1603,631 +1650,157 @@ The example below illustrates override compatibility with ``Object``:
 
 |
 
-.. _Overloading for Functions:
+.. _Overriding and Implementing Methods with Overload Signatures:
 
-Overloading for Functions
-=========================
+Overriding and Implementing Methods with Overload Signatures
+============================================================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: None
 
-*Overloading* must only be considered for functions because inheritance for
-functions is not defined.
+If an interface (*derived interface*) extends another interface (*base
+interface*), and the base interface has a set of overload signatures, then the
+derived interface must provide a valid overriding overload signature (or
+signatures) for all overload signatures of the base interface. The derived
+interface can introduce additional overload signatures. The situation is
+represented by the example below:
 
-The correctness check for functions overloading is performed if two or more
-functions with the same name are accessible (see :ref:`Accessible`) in a scope
-(see :ref:`Scopes`).
 
-A function can be declared in, or imported to a scope.
+.. code-block:: typescript
+   :linenos:
 
-The semantic check for overloading functions is as follows:
+    interface Interface {
+      foo (p: number): void // 1st overload signature
+      foo (p: string): void // 2nd overload signature
+    }
 
--  If function signatures are *overload-equivalent*, then
-   a :index:`compile-time error` occurs.
+    interface Interface1 extends Interface {
+      foo (p: number|string): void // 1st overload signature overrides both foo from Interface
+      foo (p: boolean): void       // 2nd overload signature
+    }
 
--  Otherwise, *overloading* is valid.
+    function demo (p1: Interface1) {
+        p1.foo (5)         // fits 1st signature of Interface1
+        p1.foo ("5 true")  // fits 1st signature of Interface1
+        p1.foo (true)      // fits 2nd signature of Interface1
+    }
 
-It is discussed in detail in :ref:`Function Overloading` and
-:ref:`Import and Overloading of Function Names`.
+
+If a class (*derived class*) implements an interface (*base interface*), and
+the base interface has a set of overload signatures, then the derived class
+can provide a valid overriding overload signature (or signatures) for all
+overload signatures of the base interface. The derived class can introduce
+additional overload signatures. The implementation interface must have
+the signature ``(...p: Any[]): Any``. This signature is a valid overriding for
+any overloaded signature. The same works if one class extends another class.
+The situation is represented by the example below:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class Class1 implements Interface {
+      foo (p: number): void // 1st overload signature
+      foo (p: string): void // 2nd overload signature
+      foo (...p: Any[]): Any {} // implementation signature + body
+    }
+
+    class Class2 implements Interface {
+      foo (...p: Any[]): Any {} // implementation signature only + body
+    }
+
+    class Class3 extends Class1 {
+      override foo (p: number): void // 1st overload signature
+      override foo (p: string): void // 2nd overload signature
+      override foo (...p: Any[]): Any {} // implementation signature + body
+    }
+
+    class Class4 extends Class3 {
+      override foo (...p: Any[]): Any {} // implementation signature only + body
+    }
+
+    new Class1().foo(5)     // OK
+    new Class1().foo("555") // OK
+    new Class1().foo(true)  // compile-time error - no boolean parameter
+
+    new Class2().foo(5)     // OK
+    new Class2().foo("555") // OK
+
+    function test (p: Interface) {
+        p.foo (5)
+        p.foo ("5555")
+    }
+
+    test(new Class1)
+    test(new Class2)
+    test(new Class3)
+    test(new Class4)
+
+
+|
+
+.. _Overloading:
+
+Overloading
+***********
+
+*Overloading* is the language feature that allows to use one name to
+call several functions (in general sense, including methods and constructors)
+with different signatures and different bodies.
+
+The actual function to be called is determined at compile
+time. Thus, *overloading* is related to compile-time polymorphism.
+
+|LANG| support two mechanisms for *overloading*:
+
+- |TS| compatible feature: :ref:`Declarations with Overload Signatures`
+  that is mainly used to improve type checking;
+
+- and innovative form of *managed overloading*: :ref:`Overload Declarations`.
+
 
 .. index::
    overloading
+   context
+   entity
    function
-   inheritance
-   correctness check
-   semantic check
-   accessibility
-   access
-   scope
-   import
-   compilation unit
-   overload-equivalent signature
-
-|
-
-.. _Overloading and Overriding in Classes:
-
-Overloading and Overriding in Classes
-=====================================
-
-.. meta:
-    frontend_status: Partly
-
-Both *overloading* and *overriding* must be considered in case of classes for
-methods and partly for constructors.
-
-**Note**. Only accessible (see :ref:`Accessible`) methods are subjected to
-overloading and overriding. The same rules also apply to accessors in case of
-overriding.
-
-An overriding member can keep or extend an access modifier (see
-:ref:`Access Modifiers`) of a member that is inherited or implemented.
-Otherwise, a :index:`compile-time error` occurs.
-
-An attempt to override a private method of a superclass, or to declare a method
-with the same name as the private method with default implementation from any
-superinterface causes a :index:`compile-time error`.
-
-.. index::
-   overloading
-   inheritance
-   overriding
-   class
    constructor
-   accessibility
-   access
-   private method
    method
-   subclass
-   accessor
-   superclass
-   access modifier
-   implementation
-   superinterface
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      public public_member() {}
-      protected protected_member() {}
-      internal internal_member() {}
-      private private_member() {}
-   }
-
-   interface Interface {
-      public_member()             // All members are public in interfaces
-      private private_member() {} // Except private methods with default implementation
-   }
-
-   class Derived extends Base implements Interface {
-      public override public_member() {}
-         // Public member can be overridden and/or implemented by the public one
-      public override protected_member() {}
-         // Protected member can be overridden by the protected or public one
-      internal internal_member() {}
-         // Internal member can be overridden by the internal one only
-      override private_member() {}
-         // A compile-time error occurs if an attempt is made to override private member
-         // or implement the private methods with default implementation
-   }
-
-The table below represents semantic rules that apply in various contexts:
-
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 1
-
-   * - Context
-     - Semantic Check
-   * - Two *instance methods*, two *static methods* with the same name, or two
-       *constructors* are defined in the same class.
-     - If signatures are *overload-equivalent*, (see :ref:`Overload-Equivalent
-       Signatures`), then a :index:`compile-time error` occurs. Otherwise,
-       *overloading* is used.
-
-
-.. index::
-   semantic check
-   instance method
-   method
-   static method
-   constructor
-   overload equivalence
-   overloading
-   overload-equivalent signature
-   overriding
-   implementation
-   public
-   internal
-   private
-
-.. code-block:: typescript
-   :linenos:
-
-   class aClass {
-
-      instance_method_1() {}
-      instance_method_1() {} // compile-time error: instance method duplication
-
-      static static_method_1() {}
-      static static_method_1() {} // compile-time error: static method duplication
-
-      instance_method_2() {}
-      instance_method_2(p: number) {} // valid overloading
-
-      static static_method_2() {}
-      static static_method_2(p: string) {} // valid overloading
-
-      constructor() {}
-      constructor() {} // compile-time error: constructor duplication
-
-      constructor(p: number) {}
-      constructor(p: string) {} // valid overloading
-
-   }
-
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 0
-
-   * - An *instance method* is defined in a subclass with the same name as the
-       *instance method* in a superclass.
-     - If signatures are *override-compatible* (see
-       :ref:`Override-Compatible Signatures`), then *overriding* is used.
-       Otherwise, *overloading* is used.
-
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      method_1() {}
-      method_2(p: number) {}
-   }
-   class Derived extends Base {
-      override method_1() {} // overriding
-      method_2(p: string) {} // overloading
-   }
-
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 0
-
-   * - A *static method* is defined in a subclass with the same name as the
-       *static method* in a superclass.
-     - If signatures are *overload-equivalent* (see
-       :ref:`Overload-Equivalent Signatures`), then the static method in the
-       subclass *hides* the previous static method.Otherwise, *overloading* is
-       used.
-
-.. index::
-   instance method
-   static method
-   subclass
-   superclass
-   override-compatible signature
-   override-compatibility
-   overloading
-   hiding
-   overriding
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      static method_1() {}
-      static method_2(p: number) {}
-   }
-   class Derived extends Base {
-      static method_1() {} // hiding
-      static method_2(p: string) {} // overloading
-   }
-
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 0
-
-   * - A *constructor* is defined in a subclass.
-     - All base class constructors are available for call in all derived class
-       constructors.
-
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      constructor() {}
-      constructor(p: number) {}
-   }
-   class Derived extends Base {
-      constructor(p: string) {
-           super()
-           super(5)
-      }
-   }
-
-.. index::
-   constructor
-   subclass
-   class constructor
-   derived class constructor
-
-|
-
-.. _Overloading and Overriding in Interfaces:
-
-Overloading and Overriding in Interfaces
-========================================
-
-.. meta:
-    frontend_status: Done
-
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 1
-
-   * - Context
-     - Semantic Check
-   * - A method is defined in a subinterface with the same name as the method
-       in the superinterface.
-     - If signatures are *override-compatible* (see
-       :ref:`Override-Compatible Signatures`), then *overriding* is used.
-       Otherwise, *overloading* is used.
-
-.. code-block:: typescript
-   :linenos:
-
-   interface Base {
-      method_1()
-      method_2(p: number)
-   }
-   interface Derived extends Base {
-      method_1() // overriding
-      method_2(p: string) // overloading
-   }
-
-
-.. list-table::
-   :width: 100%
-   :widths: 50 50
-   :header-rows: 0
-
-   * - Two methods with the same name are defined in the same interface.
-     - *Overloading* is used. A :index:`compile-time error` occurs if signatures
-       are *overload-equivalent*.
-
-
-.. index::
-   method
-   subinterface
-   superinterface
-   semantic check
-   override-compatible
-   overload-equivalent
-   interface
+   signature
+   compile-time polymorphism
    overloading
 
-.. code-block:: typescript
-   :linenos:
-
-   interface anInterface {
-      instance_method_1()
-      instance_method_1()  // Compile-time error: instance method duplication
-
-      instance_method_2()
-      instance_method_2(p: number)  // Valid overloading
-   }
+TBD: A :index:`compile-time warning` is issued if the the order of
+*overload signatures* or order of entity in *overload declarations*
+is wrong in a sense that some signature or entity can never
+be selected for call.
 
 |
 
 .. _Overload Resolution:
 
 Overload Resolution
-*******************
+===================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: None
 
 *Overload resolution* is used to select one entity to call from a set of
-*potentially applicable candidates* in a function, method, or constructor call.
-Overload resolution is performed in two steps as follows:
-
-#. Select *applicable candidates* from *potentially applicable candidates*;
-
-#. If there is more than one *applicable candidate*, then select the *best
-   candidate*.
-
-**Note**. The first step is performed in all cases, even if there is
-only one *applicable candidate* to check *call signature compatibility*.
-
-.. index::
-   overload resolution
-   entity
-   applicable candidate
-   call signature compatibility
-   constructor call
-   constructor
-   potentially applicable candidate
-   best candidate
-
-|
-
-.. _Selection of Applicable Candidates:
-
-Selection of Applicable Candidates
-==================================
-
-.. meta:
-    frontend_status: Partly
-    todo: adapt the implementation to the latest specification (handle rest, union, functional types properly)
-    todo: make the ISA/assembler/runtime handle union types without collision - eg foo(arg: A|B) and foo(arg: C|D)
-
-The selection of *applicable candidates* is the process of checking
-:ref:`Compatibility of Call Arguments` for all entities from the set of
-*potentially applicable candidates*. If any argument is not compatible with
-the corresponding parameter type, then the entity is deleted from the set.
-
-**Note**. Compile-time errors are not reported at this stage.
-
-After processing all entities, one of the following results is achieved:
-
-- Set is empty (all entities are deleted). A compile-time error occurs,
-  and the *overload resolution* is completed.
-
-- Only one entity is left in the set. This is the entity to call, and
-  the *overload resolution* is completed.
-
-- More than one entity is left in the set. The next step of the
-  *overload resolution* is to be performed.
-
-.. index::
-   applicable candidate
-   potentially applicable candidate
-   semantic check
-   compatibility
-   call argument
-   entity
-   parameter type
-   overload resolution
-   overloaded function
-   call
-
-Two overloaded functions are considered in the following example:
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base { }
-   class Derived extends Base { }
-
-   function foo(p: Base) { ... }     // #1
-   function foo(p: Derived) { ... }  // #2
-
-   foo(new Derived) // two applicable candidates for this call
-                    // next step of overload resolution is required
-
-   foo(new Base)    // one applicable candidate
-                    // overload resolution is completed
-                    // #1 will be called
-
-   foo(new Base, 5) // no candidates, compile-time error
-
-|
-
-.. _Selection of Best Candidate:
-
-Selection of Best Candidate
-===========================
-
-.. meta:
-    frontend_status: Partly
-
-If the set of *applicable candidates* has two or more candidates, then the
-best candidate for the given list of arguments is to be identified, if possible.
-
-The selection of the best candidate is based on the following:
-
-- There are no candidates with the same list of parameters, as this situation
-  is already forbidden by the compiler (at the place of declaration or import)
-  (see :ref:`Overload-Equivalent Signatures`);
-
-- If several candidates can be called correctly by using the same argument list,
-  then at least one implicit argument transformation   must be applied to make
-  the call.
-
-Possible argument transformations are listed below:
-
-- Passing default values to fill any missing arguments
-  (:ref:`Optional Parameters`);
-
-- Passing the empty array to replace a ``rest`` parameter that has no argument;
-
-- Folding several arguments to the array for a ``rest`` parameter.
-
-.. index::
-   applicable candidate
-   best candidate
-   parameter
-   compiler
-   import site
-   argument transformation
-   value
-   overload-equivalent signature
-   rest parameter
-   conversion
-   array
-   rest parameter
-
-The examples of transformations are presented below:
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo1(x?: string) {}
-   foo1() // passing default value -> foo(undefined)
-
-   function foo2(...x: int[]) {}
-   foo2() // passing empty array -> foo([])
-   foo2(1, 2) // folding to array -> foo(...[1, 2])
-
-The *best candidate* is the candidate that requires no transformation for all
-arguments. If there is such a single candidate, then other candidates are not
-considered. Such *best candidate* is represented
-in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   function max(a: number, b: number)  // #1
-   function max(...args: number[]) // #2
-
-   max(1, 2) // #1 - is the best candidate, no transformation
-
-.. index::
-   best candidate
-   transformation
-   argument
-
-If there is no *best candidate* at this step, then each candidate
-is compared to other candidates.
-The following sequence of checks is used to calculate a partially *better*
-relation based on the comparison of candidates *C1* and *C2*:
-
-
-**Check 1**. If *C1* has fewer parameters, i.e., default values or an empty
-``rest`` argument are used instead of the absent arguments in the *C2* call,
-then *C1* is *better*.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(n: number, s?: string)  // #1
-   function foo(n: number)              // #2
-
-   foo(1) // #2 is better, less parameters
-
-   function bar(...args: number[])  // #1
-   function bar()                   // #2
-
-   bar() // #2 is better, less parameters
-
-   function goo(...args: number[])  // #1
-   function goo(n?: number)         // #2
-
-   goo() // none is better
-
-.. index::
-   best candidate
-   better candidate
-   partially better candidate
-   rest argument
-
-**Check 2**. If *C1* has a non-``rest`` parameter(s) for a non-empty list of
-arguments, and *C2* has a ``rest`` parameter, then *C1* is *better*.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(sum: number, a: number, b: number)  // #1
-   function foo(sum: number, ...x: number[])        // #2
-
-   foo(1, 2, 3) // #1 is better, non-rest parameters
-
-.. index::
-   argument
-   better candidate
-   rest argument
-
-**Check 3**. If an argument type is a subtype of parameter type for *C1* and
-not for *C2*, then *C1* is *better* for this argument.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(n: int)  // #1
-   function foo(n: long) // #2
-
-   foo(1) // #1 is better, argument type is subtype of parameter type
-   foo(1 as long) // #2 is better
-
-.. index::
-   argument
-   better candidate
-   argument transformation
-
-**Check 4**. If an argument type is a subtype of parameter type for both *C1*
-and *C2*, but type of *C1* is identical for the argument type and type of *C2*
-is not, then *C1* is *better* for this argument.
-
-.. code-block:: typescript
-   :linenos:
-
-    class C {}
-    class D extends C {}
-
-    function foo(x: C) {} // #1
-    function foo(x: D) {} // #2
-
-    foo(new C) // #1 is better
-
-**Check 5**. Otherwise, none is better for this argument, including cases:
-
--  An argument type is a subtype of parameter type for both *C1*
-   and *C2*, but neither is identical;
-
--  An argument type is not a subtype for both *C1* and *C2*.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(x: number | boolean) // #1
-   function foo(x: number | string)  // #2
-
-   foo(1.) // both subtype, none identical: none is better
-
-   function negate(x: long) // #1
-   function negate(x: double) // #2
-
-   negate(1) // none subtype: none is better
-
-.. index::
-   best candidate
-   better candidate
-   argument transformation
-   numeric type
-   conversion
-   parameter
-
-A :index:`compile-time error` occurs if
-*C1* is *better* for one argument, and *C2* is *better* for another argument
-as represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   function goo(a: int; b: int | string)  // #1
-   function goo(a: int | string, b: int)  // #2
-
-   goo(1, 1) // compile-time error, as
-             // #1 is better for 1st argument,
-             // #2 is better for 2nd argument.
-
-.. index::
-   best candidate
-   argument
-   better candidate
-
-
-If exactly one candidate is *better* than others,
-then it is the *best candidate*.
-Otherwise, if no single candidate is *better*,
-:index:`compile-time error` occurs.
+candidates if a name to call refers to a *declaration with overload signatures*
+(see :ref:`Declarations with Overload Signatures`)
+or a *overload declaration* (see :ref:`Overload Declarations`).
+
+*Overload signatures* allows allows specifying an entity
+(function, method or constructor) that can have several signatures and
+one *implementation body*. An *implementation body* cannot be called directly.
+At the call site, signatures to use is checked in the declaration order: the first
+signature that is appropriate for the call arguments is used.
+
+*Overload declarations* defines an ordered set of entities, at the call site
+the first entity from this set with appropriate signature is used to call.
+The *first match* algorithm gives a developer with
+full control over selecting specific entity to call.
+That's why this approach is called *managed overloading*.
 
 |
 
@@ -2236,13 +1809,15 @@ Otherwise, if no single candidate is *better*,
 Type Erasure
 *************
 
+.. meta:
+    frontend_status: Done
+
 *Type erasure* is the concept that denotes a special handling of some language
 *types*, primarily :ref:`Generics`, in the semantics of the following language
 operations that require the type to be preserved for execution:
 
 -  :ref:`InstanceOf Expression`;
--  :ref:`Cast Expression`;
--  :ref:`Overload-Equivalent Signatures`.
+-  :ref:`Cast Expression`.
 
 In these operations some *types* are handled as their corresponding *effective
 types*, while the *effective type* is defined as type mapping. The *effective
@@ -2260,7 +1835,6 @@ two kinds of relationship are possible between an original type and an
    type erasure
    instanceof expression
    cast expression
-   overload-equivalent signature
    operation
    type
    effective type
@@ -2270,7 +1844,7 @@ two kinds of relationship are possible between an original type and an
 In addition, accessing a value of type ``T``, including by
 :ref:`Field Access Expression`, :ref:`Method Call Expression`, or
 :ref:`Function Call Expression` can cause ``ClassCastError`` thrown if
-type ``T``and the ``target`` type are both affected by *type erasure*, and the
+type ``T`` and the ``target`` type are both affected by *type erasure*, and the
 value is produced by :ref:`Cast Expression`.
 
 .. code-block:: typescript
@@ -2313,7 +1887,7 @@ Type mapping determines the *effective types* as follows:
    - *Covariant* type parameters are instantiated with the constraint type;
 
    - *Contravariant* type parameters are instantiated with the type ``never``;
-   
+
    - *Invariant* type parameters have no corresponding type argument, **TBD**
 
 -  Union type constructed from the effective types of types ``T1 | T2 ... Tn``
@@ -2364,46 +1938,48 @@ Type mapping determines the *effective types* as follows:
 Static Initialization
 *********************
 
-*Static initialization* is a routine performed once for each class
-(see :ref:`Classes`), namespace (see :ref:`Namespace Declarations`),
-separate module (see :ref:`Separate Modules`) or package module (see :ref:`Packages`).
+.. meta:
+    frontend_status: Done
 
-*Static initialization* execution involves execution of:
+*Static initialization* is a routine performed once for each class (see
+:ref:`Classes`), namespace (see :ref:`Namespace Declarations`), separate module
+(see :ref:`Separate Modules`), or package module (see :ref:`Packages`).
 
-- *Initializers* of *variables* or *static fields*
+*Static initialization* execution involves the execution of the following:
 
-- *Top-level statements*
+- *Initializers* of *variables* or *static fields*;
 
-- Code inside *Static block*
+- *Top-level statements*;
+
+- Code inside a *static block*.
 
 
-*Static initialization* is performed before one of the following operations is first excecuted:
+*Static initialization* is performed before the first execution of one of the
+following operations:
 
-- a static method or function of entity's scope is invoked
+- Invocation of a static method or function of an entity scope;
 
-- a static field or variable of entity's scope is accessed
+- Access to a static field or variable of an entity scope;
 
-- entity, which is an interface or class, is instantiated
+- Instantiation of an entity that is an interface or class;
 
-- entity is a class, and its direct subclass is *statically initialized*
+- *Static initialization* of a direct subclass of an entity that is a class.
 
-Note: Any of the enlisted operations does not invoke *static initialization*
-recursively if the *static initializaton* of the same entity is not complete.
+**Note**. None of the operations above invokes a *static initialization*
+recursively if the *static initialization* of the same entity is not complete.
 
-If *static initialization* routine execution is terminated due to the
-exception thrown, then the initialization is not complete,
-and any attempt to execute its *static initialization* once again will
-produce an exception.
+If *static initialization* routine execution is terminated due to an
+exception thrown, then the initialization is not complete. A repetitive attempt
+to execute the *static initialization* produces an exception again.
 
-For the concurrent execution (see :ref:`Coroutines (Experimental)`)
-*static initialization* routine invokation involves synchronization
-between all *coroutines* that try to invoke it to ensure that
-initialization is performed only once and the operations
-that require *static initialization* to be performed are executed after
-the initialization completes.
+*Static initialization* routine invocation of a concurrent execution (see
+:ref:`Coroutines (Experimental)`) involves synchronization of all *coroutines*
+that try to invoke it. The synchronization is to ensure that the initialization
+is performed only once, and the operations that require the *static
+initialization* to be performed are executed after the initialization completes.
 
-If *static initialization* routines of two concurrently initialized classes
-has a circular dependence, it may lead to deadlock.
+If *static initialization* routines of two concurrently initialized classes are
+circularly dependent, then a deadlock can occur.
 
 |
 
@@ -2412,22 +1988,25 @@ has a circular dependence, it may lead to deadlock.
 Static Initialization Safety
 ============================
 
-If a *named reference* refers to a not yet initialized *entity*, including
+.. meta:
+    frontend_status: Done
 
-- variable (see :ref:`Variable and Constant Declarations`) of a separate module
-  package (see :ref:`Packages`), or namespace (see :ref:`Namespace Declarations`)
+A compile-time error occurs if a *named reference* refers to a not yet
+initialized *entity*, including one of the following:
 
-- a static field of the class (see :ref:`Static Fields`)
+- Variable (see :ref:`Variable and Constant Declarations`) of a separate module
+  package (see :ref:`Packages`), or namespace (see :ref:`Namespace Declarations`);
 
-then a compile-time error is produced.
+- Static field of a class (see :ref:`Static and Instance Fields`).
 
-If it is not possible to detect an access to a not yet initalized *entity*,
-then the runtime evaluation is performed as follows:
+If detecting an access to a not yet initialized *entity* is not possible, then
+runtime evaluation is performed as follows:
 
-- If type of the entity has a default value, then a default value is produced
+- Default value is produced if the type of an entity has a default value;
 
-- Otherwise, ``NullPointerError`` is thrown
+- Otherwise, ``NullPointerError`` is thrown.
 
+|
 
 .. _Dispatch:
 
@@ -2479,6 +2058,9 @@ program code execution. Compilation tools can optimize dynamic to static dispatc
 
 Compatibility Features
 **********************
+
+.. meta:
+    frontend_status: Done
 
 Some features are added to |LANG| in order to support smooth |TS| compatibility.
 Using these features while doing the |LANG| programming is not recommended in
@@ -2579,7 +2161,7 @@ below:
      - When value is ``false`` according to this column
      - When value is ``true`` according to this column
      - ``x != null`` or
-     
+
        ``x != undefined`` for union types with nullish types
    * - Any other nonNullish type
      - ``never``

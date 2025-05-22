@@ -110,12 +110,16 @@ The syntax of *class declaration* is presented below:
 
     classDeclaration:
         classModifier? 'class' identifier typeParameters?
-          classExtendsClause? implementsClause? classBody
+        classExtendsClause? implementsClause? 
+        classMembers
         ;
 
     classModifier:
         'abstract' | 'final'
         ;
+
+Classes with the ``final`` modifier is an experimental feature,
+discussed in :ref:`Final Classes`.
 
 The scope of a class declaration is specified in :ref:`Scopes`.
 
@@ -231,22 +235,6 @@ contains the modifiers ``final`` or ``override``.
    non-abstract class
    class
    method declaration
-
-|
-
-.. _Final Classes:
-
-Final Classes
-=============
-
-.. meta:
-    frontend_status: Done
-
-Final classes are discussed in the chapter Experimental Features (see
-:ref:`Final Classes Experimental`).
-
-.. index::
-   final class
 
 |
 
@@ -665,33 +653,36 @@ form as follows:
 
 |
 
-.. _Class Body:
+.. _Class Members:
 
-Class Body
-**********
+Class Members
+*************
 
 .. meta:
     frontend_status: Done
 
-A *class body* can contain declarations of the following members:
+A class can contain declarations of the following members:
 
 -  Fields,
 -  Methods,
 -  Accessors,
--  Constructors, and
--  Initializer blocks.
+-  Constructors, 
 
-The syntax of *class body* is presented below:
+and
+
+-  single static block for initialization (see :ref:`Static Initialization`).
+
+The syntax is presented below:
 
 .. code-block:: abnf
 
-    classBody:
+    classMembers:
         '{'
-           classBodyDeclaration* classInitializer? classBodyDeclaration*
+           classMember* staticBlock? classMember*
         '}'
         ;
 
-    classBodyDeclaration:
+    classMember:
         annotationUsage?
         accessModifier?
         ( constructorDeclaration
@@ -700,6 +691,8 @@ The syntax of *class body* is presented below:
         | classAccessorDeclaration
         )
         ;
+        
+    staticBlock: 'static' Block;    
 
 Declarations can be inherited or immediately declared in a class. Any
 declaration within a class has a class scope. The class scope is fully
@@ -725,13 +718,7 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
 
 |
 
-.. _Class Members:
 
-Class Members
-*************
-
-.. meta:
-    frontend_status: Done
 
 Class members are as follows:
 
@@ -739,7 +726,7 @@ Class members are as follows:
    except class ``Object`` that cannot have a direct superclass.
 -  Members declared in a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
--  Members declared in the class body (see :ref:`Class Body`).
+-  Members declared in the class body (see :ref:`Class Members`).
 
 Class members declared ``private`` are not accessible (see :ref:`Accessible`)
 to all subclasses of the current class.
@@ -766,7 +753,7 @@ Class members declared ``internal`` are accessible within the package the
 current class resides in. They are inherited by all subclasses of the current
 class.
 
-Constructors and initializer blocks are not members, and are not inherited.
+Constructors and static block are not members, and are not inherited.
 
 Members can be as follows:
 
@@ -856,6 +843,9 @@ The syntax of *class members or constructors modifiers* is presented below:
 If no explicit modifier is provided, then a class member or a constructor
 is implicitly considered ``public`` by default.
 
+The modifier ``internal`` is an experimental feature
+(see :ref:`Internal Access Modifier Experimental`).
+
 .. index::
    access modifier
    member
@@ -904,24 +894,6 @@ within the class body of ``C``:
    accessibility
    declaring class
    class body
-
-|
-
-.. _Internal Access Modifier:
-
-Internal Access Modifier
-========================
-
-.. meta:
-    frontend_status: Partly
-    todo: Implement in libpandafile, implement semantic, now it is parsed and ignored - #16088
-
-The modifier ``internal`` is discussed in the chapter Experimental Features
-(see :ref:`Internal Access Modifier Experimental`).
-
-.. index::
-   access modifier
-   internal
 
 |
 
@@ -1007,7 +979,7 @@ Field Declarations
     todo: syntax for definite assignment
 
 *Field declarations* represent data members in class instances or static data
-members (see :ref:`Static Fields`).
+members (see :ref:`Static and Instance Fields`).
 Syntactically, a field declaration is similar to a variable declaration.
 
 .. code-block:: abnf
@@ -1077,10 +1049,10 @@ to be inherited only once.
 
 |
 
-.. _Static Fields:
+.. _Static and Instance Fields:
 
-Static Fields
-=============
+Static and Instance Fields
+==========================
 
 .. meta:
     frontend_status: Done
@@ -1189,11 +1161,12 @@ Field Initialization
     frontend_status: Done
 
 All fields except :ref:`Fields with Late Initialization` are initialized by
-using the default value (see :ref:`Default Values for Types`), or field initializer
-(see below) otherwise, the field can be initalized in
+using the default value (see :ref:`Default Values for Types`) or a field
+initializer (see below). Otherwise, the field can be initialized in one of
+the following:
 
-- An initializer block of for static field (see :ref:`Static Initialization`), or
-- A class constructor of a non-static field (see :ref:`Constructor Declaration`).
+- Initializer block of a static field (see :ref:`Static Initialization`), or
+- Class constructor of a non-static field (see :ref:`Constructor Declaration`).
 
 .. index::
    field initialization
@@ -1211,8 +1184,8 @@ using the default value (see :ref:`Default Values for Types`), or field initiali
 *Field initializer* is an expression that is evaluated at compile time or
 runtime. The result of successful evaluation is assigned into the field. The
 semantics of field initializers is therefore similar to that of assignments
-(see :ref:`Assignment`). The initializer expression evaluation and subseqent
-assignment is performed only once.
+(see :ref:`Assignment`). Each initializer expression evaluation and the
+subsequent assignment are only performed once.
 
 ``Readonly`` fields initialization never uses default values (see
 :ref:`Default Values for Types`).
@@ -1296,13 +1269,13 @@ Fields with Late Initialization
 ===============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 *Field with late initialization* must be an *instance field*. If it is defined
 as ``static``, then a :index:`compile-time error` occurs.
 
-A type of a *field with late initialization* can not be *nullish type*
-(see :ref:`Nullish Types`), otherwise a :index:`compile-time error` occurs. 
+*Field with late initialization* cannot be of a *nullish type* (see
+:ref:`Nullish Types`). Otherwise, a :index:`compile-time error` occurs.
 
 As all other fields, a *field with late initialization* must be initialized
 before it is used for the first time. However, this field can be initialized
@@ -1310,14 +1283,14 @@ before it is used for the first time. However, this field can be initialized
 Initialization of this field can be performed in a constructor
 (see :ref:`Constructor Declaration`), although it is not mandatory.
 
-A *field with late initialization* cannot have *field initializers* 
-and cannot be an *optional field* (see :ref:`Optional Fields`).
-It must be initialized explicitly, even though its type has
-a *default value*.
+*Field with late initialization* cannot have *field initializers* or be an
+*optional field* (see :ref:`Optional Fields`). *Field with late initialization*
+must be initialized explicitly, even though its type has a *default value*.
 
 The fact of initialization of *field with late initialization* is checked when
-the field value is read. The check normally is performed at runtime. If the
-compiler identifies an error situation, then the error is reported at compile time.
+the field value is read. The check is normally performed at runtime. If the
+compiler identifies an error situation, then the error is reported at compile
+time:
 
 .. code-block:: typescript
    :linenos:
@@ -1349,15 +1322,17 @@ Overriding Fields
 .. meta:
     frontend_status: None
 
-While extending a class or implementing interfaces, a field declared in a
-superclass or a superinterface can be overridden by field with the same name,
-the same type and the same ``static`` or non ``static`` modifier status.
+
+When extending a class or implementing interfaces, a field declared in a
+superclass or a superinterface can be overridden by a field with the same name,
+the same type, and the same ``static`` or non-``static`` modifier status.
 Using the keyword ``override`` is not required. The new declaration acts as
-redeclaration. The type of the overriding field is to be the same as the type of
-the overridden field. Otherwise, a :index:`compile-time error` occurs. Initializers of
-overridden fields are preserved for execution, initialization is performed in context of
-*super* class constructors as normal. A :index:`compile-time error` occurs if a field
-is not declared as ``readonly`` in a superclass but an overriding field is marked as ``readonly``.
+redeclaration. The type of the overriding field is to be the same as that of
+the overridden field. Otherwise, a :index:`compile-time error` occurs.
+Initializers of overridden fields are preserved for execution, and the
+initialization is normally performed in the context of *superclass* constructors.
+A :index:`compile-time error` occurs if a field is not declared as ``readonly``
+in a superclass, while an overriding field is marked as ``readonly``.
 
 .. code-block:: typescript
    :linenos:
@@ -1435,17 +1410,17 @@ The syntax of *class method declarations* is presented below:
         | 'async'
         ;
 
-The identifier of ``classMethodDeclaration`` is the method name that can be
+The identifier in a *class method declaration* defines the method name that can be
 used to refer to a method (see :ref:`Method Call Expression`).
+
+Methods with the ``final`` modifier is an experimental feature,
+discussed in :ref:`Final Methods`.
 
 A :index:`compile-time error` occurs if:
 
 -  The method modifier appears more than once in a method declaration.
 -  The body of a class declaration declares a method but the name of that
    method is already used for a field in the same declaration.
--  The body of a class declaration declares two same-name methods with
-   overload-equivalent signatures (see :ref:`Overload-Equivalent Signatures`)
-   as members of that body of a class declaration.
 
 .. index::
    method declaration
@@ -1457,7 +1432,6 @@ A :index:`compile-time error` occurs if:
    method modifier
    method declaration
    class declaration
-   overload-equivalent signature
    class declaration body
 
 |
@@ -1574,21 +1548,6 @@ method overrides a non-abstract instance method.
 
 |
 
-.. _Final Methods:
-
-Final Methods
-=============
-
-.. meta:
-    frontend_status: Done
-
-Final methods are discussed in :ref:`Final Methods Experimental`.
-
-.. index::
-   final method
-
-|
-
 .. _Async Methods:
 
 Async Methods
@@ -1614,7 +1573,7 @@ Overriding Methods
 
 The ``override`` modifier indicates that an instance method in a superclass is
 overridden by the corresponding instance method from a subclass (see
-:ref:`Overloading and Overriding`).
+:ref:`Overriding`).
 
 The usage of the modifier ``override`` is optional but strongly recommended as
 it makes the overriding explicit.
@@ -1634,8 +1593,8 @@ A :index:`compile-time error` occurs if a parameter in the overriding method
 has a default value.
 
 More details on overriding are provided
-in :ref:`Overloading and Overriding in Classes` and
-:ref:`Overloading and Overriding in Interfaces`.
+in :ref:`Overriding in Classes` and
+:ref:`Overriding and Overload Signatures in Interfaces`.
 
 
 .. index::
@@ -1923,8 +1882,7 @@ data (as in the example above).
 
 A name of an accessor cannot be the same as that of a non-static field, or of a
 method of class or interface. Otherwise, a :index:`compile-time error`
-occurs. Moreover, a name of an accessor cannot be the same as that of another
-accessor for overloading is not allowed:
+occurs:
 
 .. index::
    accessor
@@ -1934,12 +1892,11 @@ accessor for overloading is not allowed:
    interface
    class method
    interface method
-   overloading
 
 .. code-block:: typescript
    :linenos:
 
-    class Person1 {
+    class Person {
       name: string = ""
       get name(): string { // Compile-time error: getter name clashes with the field name
           return this.name
@@ -1949,14 +1906,7 @@ accessor for overloading is not allowed:
       }
     }
 
-    class Person2 {
-      set name(name: string) {}
-      set name(name: number) {} // Compile-time error: setters overloading is not permitted
-      get name(): string {  return "A name" }
-      get name(): number {  return 100 }  // Compile-time error: getters overloading is not permitted
-    }
-
-In the process of inheriting and overriding (see :ref:`Overloading and Overriding`),
+In the process of inheriting and overriding (see :ref:`Overriding`),
 accessors behave as methods. The getter parameter type follows the covariance
 pattern, and the setter parameter type follows the contravariance pattern (see
 :ref:`Override-Compatible Signatures`):
@@ -1996,6 +1946,7 @@ Constructor Declaration
 .. meta:
     frontend_status: Partly
     todo: native constructors
+    todo: optional constructor names
     todo: Explicit Constructor Call - "Qualified superclass constructor calls" - not implemented, need more investigation (inner class)
 
 *Constructors* are used to initialize objects that are instances of class. A
@@ -2006,8 +1957,11 @@ a method declaration with no return type:
 .. code-block:: abnf
 
     constructorDeclaration:
-        'native'? 'constructor' parameters constructorBody?
+        'native'? 'constructor' identifier? parameters constructorBody?
         ;
+
+An optional identifier in *constructor declaration* is an experimental feature,
+discusses in :ref:`Constructor Names`.
 
 Constructors are called by the following:
 
@@ -2029,10 +1983,6 @@ Access to constructors is governed by access modifiers (see
 inaccessible prevents class instantiation from using this constructor.
 If the only constructor is declared inaccessible, then no class instance
 can be created.
-
-A :index:`compile-time error` occurs if two constructors in a class are
-declared, and have identical signatures (see
-:ref:`Distinguishable Declarations`).
 
 A ``native`` constructor (an experimental feature described in
 :ref:`Native Constructors`) must have no *constructorBody*. Otherwise, a
@@ -2120,7 +2070,7 @@ The high-level sequence of a *primary constructor* body includes the following:
    if a class has an extension clause (see :ref:`Class Extension Clause`) on all
    execution paths of the constructor body.
 
-3. Implicitly executed field initializers in the order they appear in class body
+3. Implicitly executed field initializers in the order they appear in a class body.
 
 4. Optional arbitrary code.
 
@@ -2470,7 +2420,7 @@ The method of each inherited abstract method must be defined with
 *override-compatible* signatures (see :ref:`Override-Compatible Signatures`).
 
 Semantic checks for inherited method and accessors are described in
-:ref:`Overloading and Overriding in Classes`.
+:ref:`Overriding in Classes`.
 
 Constructors from the direct superclass of ``C``  are not subject of overloading
 and overriding because such constructors are not accessible (see

@@ -63,12 +63,12 @@ Compilation Units in Host System
 .. meta:
     frontend_status: Done
 
-Modules and packages are created and stored in a manner determined by the
-host system. The exact manner modules and packages are stored in a file
-system is determined by a particular implementation of the compiler and other
-tools.
+Modules, packages, and libraries are created and stored in a manner that is
+determined by the host system. The exact manner modules and packages are stored
+in a file system is determined by a particular implementation of the compiler
+and other tools.
 
-A simple implementation is summarized in the following example:
+A simple implementation is summarized as follows:
 
 -  Module (package module) is stored in a single file.
 
@@ -79,6 +79,9 @@ A simple implementation is summarized in the following example:
 
 -  Folder that stores a single package must not contain separate module
    files or package modules from other packages.
+
+-  Library description files are named "lib.ets". Source files are stored in
+   folders with a predefined structure.
 
 .. index::
    compilation unit
@@ -97,10 +100,10 @@ A simple implementation is summarized in the following example:
 
 |
 
-.. _How to get type via reflection:
+.. _Getting Type Via Reflection:
 
-How to Get Type Via Reflection
-******************************
+Getting Type Via Reflection
+***************************
 
 .. meta:
     frontend_status: None
@@ -135,8 +138,33 @@ value of type ``Type`` that represents type ``T`` at runtime.
    variable
    runtime
 
-There are some restrictions on type ``T``, see :ref:`Standard Library` for 
-details.
+Restrictions apply to type ``T`` (see :ref:`Standard Library` for details).
+
+
+|
+
+.. _Ensuring Module Initialization:
+
+Ensuring Module Initialization
+******************************
+
+.. meta:
+    frontend_status: None
+
+The |LANG| standard library (see :ref:`Standard Library`) provides a top-level
+function ``initModule()`` with one parameter of ``string`` type. A call to this
+function ensures that the module referred by the argument is available and its 
+initialization (see :ref:`Static Initialization`) is performed. An argument
+should be a string literal otherwise a :index:`compile-time error` occurs. The
+current module has no access to the exported declarations of the module
+referred by the argument. If such module is not available or any other runtime
+issue occurs then a proper exception is thrown. All these details are part of
+the standard library documentation.
+
+.. code-block:: typescript
+   :linenos:
+
+    initModule ("@ohos/library/src/main/ets/pages/Index")
 
 |
 

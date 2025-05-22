@@ -51,27 +51,29 @@ presented as source code in |LANG|.
    type definition
    source code
 
-All |LANG| types are summarized in the table below:
+|LANG| types are summarized in the table below:
 
 
    ========================= =========================
    Predefined Types          User-Defined Types
    ========================= =========================
-   ``number``, ``byte``,     class types,
-   ``short``, ``int``,       interface types,
-   ``long``, ``float``,      array types,
-   ``double``, ``char``,     fixed array types,
-   ``boolean``,              tuple types,
+   ``byte``, ``short``,      class types,
+   ``int``,  ``long``,       interface types,
+   ``float``, ``double``,    array types,
+   ``number``,               fixed array types,
+   ``boolean``, ``char``,    tuple types,
 
    ``string``,               union types,
 
    ``bigint``,               literal types,
 
-   ``Object``,               function types,
+   ``Any``, ``Object``,       function types,
 
    ``never``, ``void``,      type parameters
 
-   ``undefined``, ``null``   enumeration types
+   ``undefined``, ``null``,  enumeration types
+   ``Array<T>`` or ``T[]``,
+   ``FixedArray<T>``
    ========================= =========================
 
 **Note**. Type ``number`` is an alias to ``double``.
@@ -484,14 +486,17 @@ Larger type values include all values of smaller types:
 A value of a smaller type can be assigned to a variable of a larger type as
 a consequence (see :ref:`Widening Numeric Conversions`).
 
-Type ``bigint`` does not belong to this hierarchy. No implicit conversion
-occurs from a numeric type (see :ref:`Numeric Types`) to ``bigint``.
-Standard library (see :ref:`Standard Library`) class ``BigInt`` methods must be
-used to create ``bigint`` values from numeric types.
+Type ``bigint`` does not belong to this hierarchy. No implicit conversion from
+numeric types (see :ref:`Numeric Types`) to ``bigint`` occurs in an assignment
+contexts (see :ref:`Assignment-like Contexts`). Thus, the methods of class
+``BigInt`` (which is a part of the :ref:`Standard Library`) must be used to
+create ``bigint`` values from numeric type values.
 
 .. index::
    integer type
    floating-point type
+   assignability
+   variable
    numeric type
    double
    float
@@ -969,13 +974,15 @@ Reference Types
 Type ``Any``
 ************
 
-Type ``Any`` is the predefined type which is the supertype
-(see :ref:`Subtyping`) of all types except
-:ref:`Type void`.
+.. meta:
+    frontend_status: Partly
 
-Specificaly, as type ``Any`` is supertype of :ref:`Type undefined`
-and :ref:`Type null` it is a predefined *nullish-type*
-(see :ref:`Nullish Types`).
+Type ``Any`` is a predefined type which is the supertype of all types except
+:ref:`Type void` (see :ref:`Subtyping`). Type ``Any`` is a predefined
+*nullish-type* (see :ref:`Nullish Types`), i.e., a supertype of
+:ref:`Type undefined` and :ref:`Type null` in particular.
+
+Type ``Any`` has no methods or fields.
 
 |
 
@@ -988,15 +995,14 @@ Type ``Object``
     frontend_status: Done
 
 Type ``Object`` is the predefined class type which is the supertype
-(see :ref:`Subtyping`) of all types except
-:ref:`Type void`, :ref:`Type undefined`, :ref:`Type null`,
-:ref:`Nullish Types`, :ref:`Type Parameters`, and :ref:`Union types`
-that contain type parameters.
-All subtypes of ``Object`` inherit the methods of class ``Object``
-(see :ref:`Inheritance`).
-All methods of class ``Object`` are described in full in :ref:`Standard Library`.
+(see :ref:`Subtyping`) of all types except :ref:`Type void`,
+:ref:`Type undefined`, :ref:`Type null`, :ref:`Nullish Types`,
+:ref:`Type Parameters`, and :ref:`Union types` that contain type parameters.
+All subtypes of ``Object`` inherit the methods of class ``Object`` (see
+:ref:`Inheritance`). All methods of class ``Object`` are described in full in
+:ref:`Standard Library`.
 
-The method ``toString`` as used in the examples in this document returns a
+The method ``toString`` used in the examples in this document returns a
 string representation of the object.
 
 .. index::
@@ -1013,19 +1019,20 @@ string representation of the object.
    array
    inheritance
 
-The term *object* is used in the Specification to refer to
-an instance of any type.
+The term *object* is used in the Specification to refer to an instance of any
+type.
 
 Pointers to objects are called *references*.
 Multiple references to an object are possible.
 
-Objects can have states. A state is stored in a fields if an object is
-a class instance, or in elements of an array or a tuple object.
+Objects can have states. A state of an object that is a class instance is
+stored in its fields. A state of an array or tuple object is stored in its
+elements.
 
 If two variables of any type except :ref:`Value Types` contain references
-to the same object, and the state of that
-object is modified in the reference of either variable, then the state so
-modified can be seen in the reference of the other variable.
+to the same object, and the state of that object is modified in the reference
+of either variable, then the state so modified can be seen in the reference of
+the other variable.
 
 .. index::
    object
@@ -1249,7 +1256,7 @@ A ``string`` object is immutable, the value of a ``string`` object cannot be
 changed after the object is created. The value of a ``string`` object can be
 shared.
 
-Type ``string`` has dual semantics:
+Type ``string`` has dual semantics as follows:
 
 -  Type ``string`` behaves like a reference type (see :ref:`Reference Types`)
    if it is created, assigned, or passed as an argument.
@@ -1258,20 +1265,20 @@ Type ``string`` has dual semantics:
    :ref:`String Equality Operators`, and :ref:`String Relational Operators`).
 
 
-There are number of operators to act on ``string`` values as discussed below:
+A number of operators can act on ``string`` values as follows:
 
--  Accessing the ``length`` property to get string length
-   as ``int`` type value;
+-  Accessing the ``length`` property returns the string length as ``int``
+   type value;
 
 -  Concatenation operator '``+``' (see :ref:`String Concatenation`) produces
    a value of type ``string``. If the result is not a constant expression
    (see :ref:`Constant Expressions`), then the string concatenation operator
    can implicitly create a new ``string`` object;
 
--  Indexing of a string value (see :ref:`String Indexing Expression`) returns
-   a value of type ``string``. New ``string`` object can be implicitly created.
+-  Indexing a string value (see :ref:`String Indexing Expression`) returns a
+   value of type ``string``. A new ``string`` object can be created implicitly.
 
-Using ``string`` is recommended in all cases, although the name ``String``
+Using ``string`` in all cases is recommended, although the name ``String``
 also refers to type ``string``.
 
 .. index::
@@ -1584,10 +1591,25 @@ An array as an object is assignable to a variable of type ``Object``:
 Readonly Array Types
 ====================
 
-If an *array* type has the prefix ``readonly``, then
-its length cannot be changed and its elements
-cannot be modified after the initial assignment directly or through a function
-or method call. Otherwise, a :index:`compile-time error` occurs.
+.. meta:
+    frontend_status: Partly
+
+*Readonly array type* with elements of type ``T`` can have the following two
+syntax forms:
+
+- ``readonly T[]``, and
+- ``ReadonlyArray<T>``.
+
+Both forms specify identical (indistinguishable) types (see :ref:`Type Identity`).
+
+Any varaible of *readonly array type* has the following characteristics: 
+
+- its length cannot be changed
+- its elements cannot be modified after the initial assignment directly or
+  through a function or method call. 
+
+Otherwise, a :index:`compile-time error` occurs.
+
 
 .. code-block-meta:
    expect-cte:
@@ -1676,9 +1698,12 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
 Readonly Tuple Types
 ====================
 
-If an *tuple* type has the prefix ``readonly``, then its elements
-cannot be modified after the initial assignment directly or through a function
-or method call. Otherwise, a :index:`compile-time error` occurs.
+.. meta:
+    frontend_status: Done
+
+If an *tuple* type has the prefix ``readonly``, then its elements cannot be
+modified after the initial assignment directly or through a function or method
+call. Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block-meta:
    expect-cte:
@@ -2082,8 +2107,8 @@ after another:
    for non-alias types.
 #. Identical types within a union type are replaced for a single type with
    account to the ``readonly`` type flag priority.
-#. If at least one type in a union is ``Object``, then all other non-nullish
-   types are removed.
+#. If at least one type in a union is ``Any``, then all other types are
+   removed.
 #. If present among union types, type ``never`` is removed.
 #. If one type in a union is ``string``, then all string literal types (if
    any) and all enumerations with constants of type ``string``
@@ -2091,9 +2116,6 @@ after another:
 #. If one type in a union is an integer type, then all enumerations with
    constants of the same integer type or of a shorter type
    (if any) are removed.
-#. If a union type includes two types ``T``:sub:`i` and ``T``:sub:`j` (i != j),
-   and ``T``:sub:`i` is subtype of ``T``:sub:`j` (see :ref:`Subtyping`), then
-   only ``T``:sub:`j` remains in the union type, and ``T``:sub:`i` is removed.
 
    This procedure is performed recursively until no assignable type remains, or
    the until the union type is reduced to a single type.
@@ -2141,14 +2163,9 @@ is presented in the examples below:
     enum EI {A, B}
     int | EI // normalized as "int", as all enumeration constants values are of type "int"
 
-    "1" | Object // normalized as Object. Object always wins
-    AnyNonNullishType | Object // normalized as Object
-
     class Base {}
-    class Derived1 extends Base {}
-    class Derived2 extends Base {}
-    Base | Derived1 // normalized as Base. Base wins over Derived.
-    Derived1 | Derived2 // normalized as Derived1 | Derived2.
+    class Derived extends Base {}
+    Base | Derived // normalized as Base | Derived (no change)
 
 The |LANG| compiler applies normalization while processing union types and
 handling the type inference for array literals (see
@@ -2303,9 +2320,9 @@ Nullish Types
 can be used as the type to specify a
 nullish version of type ``T``.
 
-All predefined types, except :ref:`Type Any`, and all
-user-defined types are non-nullish types.
-Non-nullish types cannot have a ``null`` or ``undefined`` value at runtime.
+All predefined types except :ref:`Type Any`, and all user-defined types are
+non-nullish types. Non-nullish types cannot have a ``null`` or ``undefined``
+value at runtime.
 
 A variable declared to have type ``T | null`` can hold the values of type ``T``
 and its derived types, or the value ``null``. Such a type is called a *nullable
@@ -2419,7 +2436,7 @@ The following types use so-called *default values* for variables that require
 no explicit initialization (see :ref:`Variable Declarations`):
 
 - :ref:`Value Types`;
-- ``undefined`` and all its supertypes
+- Type ``undefined`` and all its supertypes
 
 .. -  Nullable reference types with the default value *null* (see :ref:`Literals`).
 
@@ -2463,7 +2480,8 @@ Default values of value types are as follows:
 | ``boolean``  | ``false``          |
 +--------------+--------------------+
 
-``undefined`` value is a default value of each type it can be assigned to.
+Value ``undefined`` is the default value of each type this value can be
+assigned to.
 
 .. code-block-meta:
 

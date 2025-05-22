@@ -201,10 +201,10 @@ The syntax of *ambient class declaration* is presented below:
     ambientClassDeclaration:
         'class'|'struct' identifier typeParameters?
         classExtendsClause? implementsClause?
-        '{' ambientClassBodyDeclaration* '}'
+        '{' ambientClassMember* '}'
         ;
 
-    ambientClassBodyDeclaration:
+    ambientClassMember:
         ambientAccessModifier?
         ( ambientFieldDeclaration
         | ambientConstructorDeclaration
