@@ -26,6 +26,9 @@ config("arkbase_public_config") {
   }
 
   include_dirs += platform_include_dirs
+  if (is_arkui_x) {
+    defines = [ "IS_ARKUI_X_TARGET" ]
+  }
 }
 
 config("arkbase_fuzz_config") {
@@ -209,10 +212,7 @@ ohos_static_library("libarkbase_static") {
   deps = libarkbase_deps
 
   if (is_arkui_x) {
-    deps += [
-      "$ark_third_party_root/bounds_checking_function:libsec_static",
-      "$ark_third_party_root/json:nlohmann_json_static",
-    ]
+    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
   } else if (ark_standalone_build) {
     external_deps = [
       "json:nlohmann_json_static",
@@ -254,10 +254,7 @@ ohos_source_set("libarkbase_frontend_set_static") {
   deps = libarkbase_deps
 
   if (is_arkui_x) {
-    deps += [
-      "$ark_third_party_root/bounds_checking_function:libsec_static",
-      "$ark_third_party_root/json:nlohmann_json_static",
-    ]
+    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
   } else {
     external_deps = [
       "json:nlohmann_json_static",
