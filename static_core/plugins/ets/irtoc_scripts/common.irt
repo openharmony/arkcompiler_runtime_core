@@ -22,6 +22,32 @@ module EtsConstants
     TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedUnsignedArrayByteOffsetOffset(graph->GetArch())"
     ARRAY_BUFFER_DATA_OFFSET = "cross_values::GetArrayBufferDataOffset(graph->GetArch())"
     CORO_LOCAL_STORAGE_OFFSET = "cross_values::GetEtsCoroutineLocalStorageOffset(graph->GetArch())"
+
+    ETS_CLASS_RUNTIME_CLASS_OFFSET = "cross_values::GetEtsClassRuntimeClassOffset(graph->GetArch())"
+    ETS_CLASS_FLAGS_OFFSET = "cross_values::GetEtsClassFlagsOffset(graph->GetArch())"
+    ETS_CLASS_FLAGS_FROM_RUNTIME_CLASS_OFFSET = "(-" + ETS_CLASS_RUNTIME_CLASS_OFFSET + "+" + ETS_CLASS_FLAGS_OFFSET + ")"
+    ETS_CLASS_IS_BIG_INT_FLAG = "cross_values::GetEtsClassIsBigIntFlag(graph->GetArch())"
+    ETS_CLASS_BOXED_TYPE_FIELD_START = "cross_values::GetEtsClassBoxedTypeFieldStart(graph->GetArch())"
+    ETS_CLASS_BOXED_TYPE_FIELD_SIZE = "cross_values::GetEtsClassBoxedTypeFieldSize(graph->GetArch())"
+    ETS_CLASS_BOXED_TYPE_FIELD_MASK = "(((1LLU << " + ETS_CLASS_BOXED_TYPE_FIELD_SIZE + ") - 1) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+    ETS_CLASS_BOXED_TYPE_INT_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeIntMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+    ETS_CLASS_BOXED_TYPE_DOUBLE_MASK_VALUE = "(cross_values::GetEtsClassBoxedTypeDoubleMaskValue(graph->GetArch()) << " + ETS_CLASS_BOXED_TYPE_FIELD_START + ")"
+
+    OBJ_PTR_SIZE = "ark::OBJECT_POINTER_SIZE"
+    LOG2_BYTES_PER_OBJ_PTR = "2" # object pointer has a size of 4 bytes on each supported platform
+
+    FLOAT32_NAN = "0x7fc00000"
+    FLOAT64_NAN = "0x7ff8000000000000"
+    FLOAT64_INF = "0x7ff0000000000000"
+    FLOAT64_MINUS_INF = "0xfff0000000000000"
+end
+
+scoped_macro(:getBoxedType) do |flags|
+  AndI(flags).Imm(EtsConstants::ETS_CLASS_BOXED_TYPE_FIELD_MASK).u32
+end
+
+scoped_macro(:isBigIntType) do |flags|
+  AndI(flags).Imm(EtsConstants::ETS_CLASS_IS_BIG_INT_FLAG).u32
 end
 
 macro(:ets_nullvalue) do

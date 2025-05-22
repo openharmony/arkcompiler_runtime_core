@@ -675,6 +675,31 @@ void Codegen::CreateBigUInt64ArrayFillInternal(IntrinsicInst *inst, Reg dst, SRC
                  src[FOURTH_OPERAND]);
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(defName, defType)                                   \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                               \
+    void Codegen::Create##defName##ArraySetValuesFromArray(IntrinsicInst *inst, Reg dst, SRCREGS src) \
+    {                                                                                                 \
+        ASSERT(inst->GetInputsCount() == 3U);                                                         \
+        auto eid = EntrypointId::defType##_ARRAY_SET_VALUES_FROM_ARRAY;                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                        \
+        CallFastPath(inst, eid, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);                    \
+    }
+
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Int8, INT8)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Int16, INT16)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Int32, INT32)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(BigInt64, BIG_INT64)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Float32, FLOAT32)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Float64, FLOAT64)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint8, UINT8)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint8Clamped, UINT8_CLAMPED)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint16, UINT16)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(Uint32, UINT32)
+CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY(BigUint64, BIG_UINT64)
+
+#undef CODEGEN_TYPED_ARRAY_SET_VALUES_FROM_ARRAY
+
 void Codegen::CreateWriteString(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
