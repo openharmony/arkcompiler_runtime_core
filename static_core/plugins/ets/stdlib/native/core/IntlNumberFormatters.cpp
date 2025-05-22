@@ -381,22 +381,22 @@ void ParseOptions(ani_env *env, ani_object self, ParsedOptions &options)
     auto optionsObj = static_cast<ani_object>(optionsRef);
     ASSERT(optionsObj != nullptr);
 
-    options.locale = GetFieldStr(env, optionsObj, "locale");
-    options.compactDisplay = GetFieldStrUndefined(env, optionsObj, "compactDisplay");
-    options.currencySign = GetFieldStrUndefined(env, optionsObj, "currencySign");
-    options.currency = GetFieldStrUndefined(env, optionsObj, "currency");
-    options.currencyDisplay = GetFieldStrUndefined(env, optionsObj, "currencyDisplay");
+    options.locale = GetFieldStr(env, optionsObj, "_locale");
+    options.compactDisplay = GetFieldStrUndefined(env, optionsObj, "_compactDisplay");
+    options.currencySign = GetFieldStrUndefined(env, optionsObj, "_currencySign");
+    options.currency = GetFieldStrUndefined(env, optionsObj, "_currency");
+    options.currencyDisplay = GetFieldStrUndefined(env, optionsObj, "_currencyDisplay");
     options.minFractionDigits = GetFieldStr(env, optionsObj, "minFracStr");
     options.maxFractionDigits = GetFieldStr(env, optionsObj, "maxFracStr");
     options.minSignificantDigits = GetFieldStrUndefined(env, optionsObj, "minSignStr");
     options.maxSignificantDigits = GetFieldStrUndefined(env, optionsObj, "maxSignStr");
     options.minIntegerDigits = GetFieldStr(env, optionsObj, "minIntStr");
-    options.notation = GetFieldStrUndefined(env, optionsObj, "notation");
-    options.numberingSystem = GetFieldStr(env, optionsObj, "numberingSystem");
-    options.signDisplay = GetFieldStrUndefined(env, optionsObj, "signDisplay");
-    options.style = GetFieldStr(env, optionsObj, "style");
-    options.unit = GetFieldStrUndefined(env, optionsObj, "unit");
-    options.unitDisplay = GetFieldStrUndefined(env, optionsObj, "unitDisplay");
+    options.notation = GetFieldStrUndefined(env, optionsObj, "_notation");
+    options.numberingSystem = GetFieldStr(env, optionsObj, "_numberingSystem");
+    options.signDisplay = GetFieldStrUndefined(env, optionsObj, "_signDisplay");
+    options.style = GetFieldStr(env, optionsObj, "_style");
+    options.unit = GetFieldStrUndefined(env, optionsObj, "_unit");
+    options.unitDisplay = GetFieldStrUndefined(env, optionsObj, "_unitDisplay");
     options.useGrouping = GetFieldStrUndefined(env, optionsObj, "useGroupingStr");
 }
 

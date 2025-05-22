@@ -224,42 +224,42 @@ export namespace Intl {
         private static assignOptionsDefault(options?: NumberFormatOptions): ResolvedNumberFormatOptionsImpl {
             let newOptions = new ResolvedNumberFormatOptionsImpl
             // Set new options or default decimal style and values
-            newOptions.currencySign = options?.currencySign ?? undefined
-            newOptions.currency = options?.currency ?? undefined
-            newOptions.currencyDisplay = options?.currencyDisplay ?? undefined
+            newOptions._currencySign = options?.currencySign ?? undefined
+            newOptions._currency = options?.currency ?? undefined
+            newOptions._currencyDisplay = options?.currencyDisplay ?? undefined
             let locMatcher = options?.localeMatcher ?? "best fit"
-            newOptions.locale = locMatcher == "lookup" ? intlLookUpLocale("") : intlBestFitLocale("")
-            newOptions.maximumFractionDigits = options?.maximumFractionDigits ?? 3
-            newOptions.minimumFractionDigits = options?.minimumFractionDigits ?? 0
-            if (newOptions.maximumFractionDigits < newOptions.minimumFractionDigits) {
-                newOptions.maximumFractionDigits = newOptions.minimumFractionDigits
+            newOptions._locale = locMatcher == "lookup" ? intlLookUpLocale("") : intlBestFitLocale("")
+            newOptions._maximumFractionDigits = options?.maximumFractionDigits ?? 3
+            newOptions._minimumFractionDigits = options?.minimumFractionDigits ?? 0
+            if (newOptions._maximumFractionDigits < newOptions._minimumFractionDigits) {
+                newOptions._maximumFractionDigits = newOptions._minimumFractionDigits
             }
-            newOptions.minimumIntegerDigits = options?.minimumIntegerDigits ?? 1
-            newOptions.maximumSignificantDigits = options?.maximumSignificantDigits ?? undefined
-            newOptions.minimumSignificantDigits = options?.minimumSignificantDigits ?? undefined
-            if (newOptions.minimumSignificantDigits != undefined) {
-                if (newOptions.maximumSignificantDigits == undefined) {
-                    newOptions.maximumSignificantDigits = 21
+            newOptions._minimumIntegerDigits = options?.minimumIntegerDigits ?? 1
+            newOptions._maximumSignificantDigits = options?.maximumSignificantDigits ?? undefined
+            newOptions._minimumSignificantDigits = options?.minimumSignificantDigits ?? undefined
+            if (newOptions._minimumSignificantDigits != undefined) {
+                if (newOptions._maximumSignificantDigits == undefined) {
+                    newOptions._maximumSignificantDigits = 21
                 }
             }
-            if (newOptions.maximumSignificantDigits != undefined) {
-                if (newOptions.minimumSignificantDigits == undefined) {
-                    newOptions.minimumSignificantDigits = 1
+            if (newOptions._maximumSignificantDigits != undefined) {
+                if (newOptions._minimumSignificantDigits == undefined) {
+                    newOptions._minimumSignificantDigits = 1
                 }
             }
-            newOptions.notation = options?.notation ?? "standard"
-            if (newOptions.notation == "compact") {
-                newOptions.compactDisplay = options?.compactDisplay ?? "short"
+            newOptions._notation = options?.notation ?? "standard"
+            if (newOptions._notation == "compact") {
+                newOptions._compactDisplay = options?.compactDisplay ?? "short"
                 newOptions.isCompact = true
             } else {
                 newOptions.isCompact = false
             }
-            newOptions.numberingSystem = "latn"
-            newOptions.signDisplay = options?.signDisplay ?? "auto"
-            newOptions.style = options?.style ?? "decimal"
-            newOptions.unit = options?.unit ?? undefined
-            newOptions.unitDisplay = options?.unitDisplay ?? undefined
-            newOptions.useGrouping = (options == undefined) ? true : (options!.useGrouping ?? true)
+            newOptions._numberingSystem = "latn"
+            newOptions._signDisplay = options?.signDisplay ?? "auto"
+            newOptions._style = options?.style ?? "decimal"
+            newOptions._unit = options?.unit ?? undefined
+            newOptions._unitDisplay = options?.unitDisplay ?? undefined
+            newOptions._useGrouping = (options == undefined) ? true : (options!.useGrouping ?? true)
             return newOptions
         }
 
@@ -479,8 +479,7 @@ export namespace Intl {
         }
     }
 
-    // NOTE(ilyakorobkov) replace class with interface after fix issue #22050, #24106
-    export class NumberFormatOptions {
+    export interface NumberFormatOptions {
         compactDisplay?: "short" | "long";
         currency?: string;
         currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name"
@@ -499,8 +498,7 @@ export namespace Intl {
         useGrouping?: boolean;
     }
 
-    // NOTE(ilyakorobkov) replace class with interface after fix issue #22050, #24106
-    export class ResolvedNumberFormatOptions {
+    export interface ResolvedNumberFormatOptions {
         compactDisplay?: "short" | "long"
         currencySign?: "standard" | "accounting"
         currency?: string
@@ -520,7 +518,7 @@ export namespace Intl {
         useGrouping: boolean
     }
 
-    class ResolvedNumberFormatOptionsImpl extends ResolvedNumberFormatOptions {
+    class ResolvedNumberFormatOptionsImpl implements ResolvedNumberFormatOptions {
         public minFracStr: string;
         public maxFracStr: string;
         public minSignStr: string;
@@ -529,29 +527,183 @@ export namespace Intl {
         public useGroupingStr: string;
         public isCompact: boolean;
 
+        private _compactDisplay?: "short" | "long";
+        private _currencySign?: "standard" | "accounting";
+        private _currency?: string;
+        private _currencyDisplay?: "code" | "symbol" | "narrowSymbol" | "name";
+        private _locale: Intl.BCP47LanguageTag;
+        private _maximumFractionDigits: number;
+        private _maximumSignificantDigits?: number;
+        private _minimumFractionDigits: number;
+        private _minimumIntegerDigits: number;
+        private _minimumSignificantDigits?: number;
+        private _notation?: "standard" | "scientific" | "engineering" | "compact";
+        private _numberingSystem: string;
+        private _signDisplay?: "auto" | "never" | "always" | "exceptZero";
+        private _style: "decimal" | "percent" | "currency" | "unit";
+        private _unit?: string;
+        private _unitDisplay?: "short" | "long" | "narrow";
+        private _useGrouping: boolean;
+
+        set compactDisplay(value: "short" | "long" | undefined) {
+            this._compactDisplay = value;
+        }
+
+        get compactDisplay(): "short" | "long" | undefined {
+            return this._compactDisplay;
+        }
+
+        set currencySign(value: "standard" | "accounting" | undefined) {
+            this._currencySign = value;
+        }
+
+        get currencySign(): "standard" | "accounting" | undefined {
+            return this._currencySign;
+        }
+
+        set currency(value: string | undefined) {
+            this._currency = value;
+        }
+
+        get currency(): string | undefined {
+            return this._currency;
+        }
+
+        set currencyDisplay(value: "code" | "symbol" | "narrowSymbol" | "name" | undefined) {
+            this._currencyDisplay = value;
+        }
+
+        get currencyDisplay(): "code" | "symbol" | "narrowSymbol" | "name" | undefined {
+            return this._currencyDisplay;
+        }
+
+        set locale(value: Intl.BCP47LanguageTag) {
+            this._locale = value;
+        }
+
+        get locale(): Intl.BCP47LanguageTag {
+            return this._locale;
+        }
+
+        set maximumFractionDigits(value: number) {
+            this._maximumFractionDigits = value;
+        }
+
+        get maximumFractionDigits(): number {
+            return this._maximumFractionDigits;
+        }
+
+        set maximumSignificantDigits(value: number | undefined) {
+            this._maximumSignificantDigits = value;
+        }
+
+        get maximumSignificantDigits(): number | undefined {
+            return this._maximumSignificantDigits;
+        }
+
+        set minimumFractionDigits(value: number) {
+            this._minimumFractionDigits = value;
+        }
+
+        get minimumFractionDigits(): number {
+            return this._minimumFractionDigits;
+        }
+
+        set minimumIntegerDigits(value: number) {
+            this._minimumIntegerDigits = value;
+        }
+
+        get minimumIntegerDigits(): number {
+            return this._minimumIntegerDigits;
+        }
+
+        set minimumSignificantDigits(value: number | undefined) {
+            this._minimumSignificantDigits = value;
+        }
+
+        get minimumSignificantDigits(): number | undefined {
+            return this._minimumSignificantDigits;
+        }
+
+        set notation(value: "standard" | "scientific" | "engineering" | "compact" | undefined) {
+            this._notation = value;
+        }
+
+        get notation(): "standard" | "scientific" | "engineering" | "compact" | undefined {
+            return this._notation;
+        }
+
+        set numberingSystem(value: string) {
+            this._numberingSystem = value;
+        }
+
+        get numberingSystem(): string {
+            return this._numberingSystem;
+        }
+
+        set signDisplay(value: "auto" | "never" | "always" | "exceptZero" | undefined) {
+            this._signDisplay = value;
+        }
+
+        get signDisplay(): "auto" | "never" | "always" | "exceptZero" | undefined {
+            return this._signDisplay;
+        }
+
+        set style(value: "decimal" | "percent" | "currency" | "unit") {
+            this._style = value;
+        }
+
+        get style(): "decimal" | "percent" | "currency" | "unit" {
+            return this._style;
+        }
+
+        set unit(value: string | undefined) {
+            this._unit = value;
+        }
+
+        get unit(): string | undefined {
+            return this._unit;
+        }
+
+        set unitDisplay(value: "short" | "long" | "narrow" | undefined) {
+            this._unitDisplay = value;
+        }
+
+        get unitDisplay(): "short" | "long" | "narrow" | undefined {
+            return this._unitDisplay;
+        }
+
+        set useGrouping(value: boolean) {
+            this._useGrouping = value;
+        }
+
+        get useGrouping(): boolean {
+            return this._useGrouping;
+        }
+
         public toString(): string {
             return JSON.stringify(this)
         }
 
         public resolvedNumberFormatOptions(): ResolvedNumberFormatOptions {
-            let newOptions = new ResolvedNumberFormatOptions
-            newOptions.compactDisplay = this.compactDisplay
-            newOptions.currencySign = this.currencySign
-            newOptions.currency = this.currency
-            newOptions.currencyDisplay = this.currencyDisplay
-            newOptions.locale = this.locale
-            newOptions.maximumFractionDigits = this.maximumFractionDigits
-            newOptions.maximumSignificantDigits = this.maximumSignificantDigits
-            newOptions.minimumFractionDigits = this.minimumFractionDigits
-            newOptions.minimumIntegerDigits = this.minimumIntegerDigits
-            newOptions.minimumSignificantDigits = this.minimumSignificantDigits
-            newOptions.notation = this.notation
-            newOptions.numberingSystem = this.numberingSystem
-            newOptions.signDisplay = this.signDisplay
-            newOptions.style = this.style
-            newOptions.unit = this.unit
-            newOptions.unitDisplay = this.unitDisplay
-            newOptions.useGrouping = this.useGrouping
+            let newOptions: ResolvedNumberFormatOptions = {}
+            newOptions.compactDisplay = this._compactDisplay
+            newOptions.currencySign = this._currencySign
+            newOptions.currency = this._currency
+            newOptions.currencyDisplay = this._currencyDisplay
+            newOptions.locale = this._locale
+            newOptions.maximumFractionDigits = this._maximumFractionDigits
+            newOptions.maximumSignificantDigits = this._maximumSignificantDigits
+            newOptions.minimumFractionDigits = this._minimumFractionDigits
+            newOptions.minimumIntegerDigits = this._minimumIntegerDigits
+            newOptions.minimumSignificantDigits = this._minimumSignificantDigits
+            newOptions.notation = this._notation
+            newOptions.numberingSystem = this._numberingSystem
+            newOptions.signDisplay = this._signDisplay
+            newOptions.style = this._style
+            newOptions.unit = this._unit
+            newOptions.unitDisplay = this._unitDisplay
+            newOptions.useGrouping = this._useGrouping
             return newOptions;
         }
     }
