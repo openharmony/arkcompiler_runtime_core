@@ -32,6 +32,7 @@
 #include "inspector_server.h"
 #include "object_repository.h"
 #include "runtime/tooling/tools.h"
+#include "os/mutex.h"
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
@@ -66,6 +67,10 @@ public:
     void ThreadStart(PtThread thread) override;
     void ThreadEnd(PtThread thread) override;
     void VmDeath() override;
+
+    void Run();
+    void Stop();
+    void WaitForDebugger();
 
 private:
     void RuntimeEnable(PtThread thread);
@@ -107,7 +112,8 @@ private:
     std::string GetSourceCode(std::string_view sourceFile);
 
     void DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &objectRepository,
-                                     const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception);
+                                     const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception,
+                                     PauseReason pauseReason);
 
     void NotifyExecutionEnded();
 
@@ -156,6 +162,8 @@ private:
     uint32_t samplingInterval_ {0};
     std::shared_ptr<sampler::SamplesRecord> profileInfoBuffer_ = nullptr;
     bool cpuProfilerStarted_ = false;
+    os::memory::Mutex waitDebuggerMutex_;
+    os::memory::ConditionVariable waitDebuggerCond_ GUARDED_BY(waitDebuggerMutex_);
 };
 }  // namespace inspector
 }  // namespace ark::tooling

@@ -22,10 +22,12 @@
 #include "runtime/tooling/debugger.h"
 
 #include "evaluation/conditions_storage.h"
+#include "include/tooling/debug_interface.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
 
 namespace ark::tooling::inspector {
+
 class DebuggableThread;
 
 class ThreadState final {
@@ -76,7 +78,12 @@ public:
     void OnException(bool uncaught);
     void OnFramePop();
     bool OnMethodEntry();
-    void OnSingleStep(const PtLocation &location);
+    void OnSingleStep(const PtLocation &location, const char *sourceFile);
+
+    PauseReason GetPauseReason() const
+    {
+        return pauseReason_;
+    }
 
 private:
     enum class StepKind {
@@ -128,6 +135,9 @@ private:
     bool paused_ {false};
     bool skipAllPauses_ {false};
     bool mixedDebugEnabled_ {false};
+    bool breakOnStart_ {false};
+    std::set<std::string_view> sourceFiles_;
+    PauseReason pauseReason_ {PauseReason::OTHER};
 };
 }  // namespace ark::tooling::inspector
 

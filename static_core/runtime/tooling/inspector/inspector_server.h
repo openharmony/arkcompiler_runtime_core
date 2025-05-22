@@ -29,6 +29,7 @@
 
 #include "session_manager.h"
 #include "source_manager.h"
+#include "thread_state.h"
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
@@ -65,7 +66,7 @@ public:
     void OnFail(std::function<void()> &&handler);
 
     void CallDebuggerPaused(PtThread thread, const std::vector<BreakpointId> &hitBreakpoints,
-                            const std::optional<RemoteObject> &exception,
+                            const std::optional<RemoteObject> &exception, PauseReason pauseReason,
                             const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
     void CallDebuggerResumed(PtThread thread);
     void CallDebuggerScriptParsed(PtThread thread, ScriptId scriptId, std::string_view sourceFile);

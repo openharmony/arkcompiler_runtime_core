@@ -34,7 +34,8 @@ class DebuggableThread final : private PtThreadEvaluationEngine {
 public:
     struct SuspensionCallbacks final {
         std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> preSuspend;
-        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> postSuspend;
+        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *, PauseReason)>
+            postSuspend;
         std::function<void()> preWaitSuspension;
         std::function<void()> postWaitSuspension;
         std::function<void()> preResume;
@@ -125,7 +126,7 @@ public:
     bool OnMethodEntry();
 
     // Notification that a next step will be performed. Pauses the thread if necessary
-    void OnSingleStep(const PtLocation &location);
+    void OnSingleStep(const PtLocation &location, const char *sourceFile);
 
     // Notification that a call to console was performed. Returns its arguments presented as remote objects
     std::vector<RemoteObject> OnConsoleCall(const PandaVector<TypedValue> &arguments);
@@ -144,7 +145,7 @@ private:
 
     // Suspends a paused thread. Should be called on an application thread
     void Suspend(ObjectRepository &objectRepository, const std::vector<BreakpointId> &hitBreakpoints,
-                 ObjectHeader *exception) REQUIRES(mutex_);
+                 ObjectHeader *exception, PauseReason pauseReason) REQUIRES(mutex_);
 
     // Marks a paused thread as not suspended. Should be called on the server thread
     void Resume() REQUIRES(mutex_);

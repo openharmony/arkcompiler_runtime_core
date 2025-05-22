@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ namespace ark::tooling::inspector {
 
 bool OhosWsServer::RunOne()
 {
-    if (!endpoint_.IsConnected() && !endpoint_.AcceptNewConnection()) {
+    if (!endpoint_.IsConnected() && !AcceptNewWsConnection()) {
         LOG(WARNING, DEBUGGER) << "Inspector server is unable to establish a new connection, exiting";
         return false;
     }
@@ -66,6 +66,29 @@ bool OhosWsServer::Stop()
     // Stop event loop before closing endpoint server.
     Kill();
     endpoint_.Close();
+    socketpairMode_ = false;
     return true;
 }
+
+bool OhosWsServer::StartForSocketpair(int socketfd)
+{
+    bool succeeded = endpoint_.InitUnixWebSocket(socketfd);
+    if (succeeded) {
+        LOG(INFO, DEBUGGER) << "Inspector server listening on " << socketfd;
+        socketpairMode_ = true;
+        return true;
+    }
+
+    LOG(ERROR, DEBUGGER) << "Failed to bind Inspector server on " << socketfd;
+    return false;
+}
+
+bool OhosWsServer::AcceptNewWsConnection()
+{
+    if (socketpairMode_) {
+        return endpoint_.ConnectUnixWebSocketBySocketpair();
+    }
+    return endpoint_.AcceptNewConnection();
+}
+
 }  // namespace ark::tooling::inspector

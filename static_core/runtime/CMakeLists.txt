@@ -30,6 +30,7 @@ set(SOURCES
     class_initializer.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
+    tooling/inspector/debugger_arkapi.cpp
     tooling/pt_default_lang_extension.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp

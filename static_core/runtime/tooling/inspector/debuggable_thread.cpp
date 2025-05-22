@@ -214,7 +214,7 @@ void DebuggableThread::OnException(bool uncaught)
     state_.OnException(uncaught);
     while (state_.IsPaused()) {
         ObjectRepository objectRepository;
-        Suspend(objectRepository, {}, GetManagedThread()->GetException());
+        Suspend(objectRepository, {}, GetManagedThread()->GetException(), state_.GetPauseReason());
     }
 }
 
@@ -236,17 +236,17 @@ bool DebuggableThread::OnMethodEntry()
     return state_.OnMethodEntry();
 }
 
-void DebuggableThread::OnSingleStep(const PtLocation &location)
+void DebuggableThread::OnSingleStep(const PtLocation &location, const char *sourceFile)
 {
     if (IsEvaluating()) {
         return;
     }
     os::memory::LockHolder lock(mutex_);
-    state_.OnSingleStep(location);
+    state_.OnSingleStep(location, sourceFile);
     while (state_.IsPaused()) {
         ObjectRepository objectRepository;
         auto hitBreakpoints = state_.GetBreakpointsByLocation(location);
-        Suspend(objectRepository, hitBreakpoints, {});
+        Suspend(objectRepository, hitBreakpoints, {}, state_.GetPauseReason());
     }
 }
 
@@ -262,7 +262,7 @@ std::vector<RemoteObject> DebuggableThread::OnConsoleCall(const PandaVector<Type
 }
 
 void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::vector<BreakpointId> &hitBreakpoints,
-                               ObjectHeader *exception)
+                               ObjectHeader *exception, PauseReason pauseReason)
 {
     ASSERT(ManagedThread::GetCurrent() == GetManagedThread());
 
@@ -274,7 +274,7 @@ void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::ve
     suspended_ = true;
     GetManagedThread()->Suspend();
 
-    callbacks_.postSuspend(objectRepository, hitBreakpoints, exception);
+    callbacks_.postSuspend(objectRepository, hitBreakpoints, exception, pauseReason);
 
     while (suspended_) {
         mutex_.Unlock();
