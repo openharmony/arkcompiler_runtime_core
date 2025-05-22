@@ -1,9 +1,6 @@
 #25889
 spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda2.ets
 
-#24380
-std/core/IntlDateFormatTest.ets
-
 #15592 Timeouts. Will be fixed when generics accept primitives as type arguments
 std/core/SortInternalTestByte.ets
 std/core/SortInternalTestInt.ets
