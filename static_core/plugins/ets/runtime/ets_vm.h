@@ -244,7 +244,7 @@ public:
 
     PANDA_PUBLIC_API ObjectHeader *GetOOMErrorObject() override;
 
-    PANDA_PUBLIC_API ObjectHeader *GetNullValue();
+    PANDA_PUBLIC_API ObjectHeader *GetNullValue() const;
 
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {

@@ -13,4 +13,5 @@
 
 add_subdirectory(proxy_reference_storage_1)
 add_subdirectory(proxy_reference_storage_2)
+add_subdirectory(proxy_reference_storage_3)
 add_subdirectory(items_pool)

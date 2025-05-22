@@ -61,6 +61,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_method_set.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference_storage.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference_storage_verifier.cpp
         ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_proxy.cpp
         ${ETS_EXT_SOURCES}/interop_js/event_loop_module.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_value.cpp

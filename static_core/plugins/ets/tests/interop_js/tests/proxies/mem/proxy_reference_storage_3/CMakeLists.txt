@@ -11,29 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-options:
-- name: xgc-min-trigger-threshold
-  type: uint32_t
-  default: 20480
-  description: Initial count of live shared references count for XGC triggering
-
-- name: xgc-trigger-percent-threshold
-  type: uint32_t
-  default: 20
-  description: Percent for XGC threshold increasing
-
-- name: xgc-trigger-type
-  lang:
-    - ets
-  type: std::string
-  default: default
-  possible_values:
-    - default
-    - force
-    - never
-  description: Set XGC trigger policy
-
-- name: enable-xgc-verifier
-  type: bool
-  default: false
-  description: Enable switch for shared reference storage verification
+panda_ets_interop_js_gtest(ets_interop_js__test_proxy_reference_storage_3
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_proxy_reference_storage_3.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_proxy_reference_storage_3.sts
+    LIBRARIES ets_interop_js_napi
+)

@@ -517,7 +517,7 @@ ObjectHeader *PandaEtsVM::GetOOMErrorObject()
     return obj;
 }
 
-ObjectHeader *PandaEtsVM::GetNullValue()
+ObjectHeader *PandaEtsVM::GetNullValue() const
 {
     auto obj = GetGlobalObjectStorage()->Get(nullValueRef_);
     ASSERT(obj != nullptr);
