@@ -21,11 +21,13 @@ function main() {
     suite.addTest("ArrayList replaceAllElements with constant value", testReplaceAllElementsWithConstantValue);
     suite.addTest("ArrayList replaceAllElements with lambda", testReplaceAllElementsWithLambda);
     suite.addTest("ArrayList replaceAllElements with lambda and index", testReplaceAllElementsWithLambdaAndIndex);
-    suite.addTest("ArrayList replaceAllElements with lambda, index and tempArrayList", testReplaceAllElementsWithLambdaIndexAndTempArrayList);
+    suite.addTest("ArrayList replaceAllElements with lambda, index and tempArrayList",
+        testReplaceAllElementsWithLambdaIndexAndTempArrayList);
     suite.addTest("ArrayList forEach with no parameter function", testForEachNoParameterFunction);
     suite.addTest("ArrayList forEach with function with value", testForEachFunctionWithValue);
     suite.addTest("ArrayList forEach with function with value and index", testForEachFunctionWithValueAndIndex);
-    suite.addTest("ArrayList forEach with function with value, index and tempArrayList", testForEachFunctionWithValueIndexAndTempArrayList);
+    suite.addTest("ArrayList forEach with function with value, index and tempArrayList",
+        testForEachFunctionWithValueIndexAndTempArrayList);
     suite.addTest("ArrayList forEach with change the elements", testForEachChangeElements);
 
     return suite.run();
