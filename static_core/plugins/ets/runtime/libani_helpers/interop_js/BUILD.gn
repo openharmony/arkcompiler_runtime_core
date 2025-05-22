@@ -18,33 +18,26 @@ if (ark_standalone_build) {
   import("//build/ohos.gni")
 }
 
-config("ani_helpers_config") {
-  include_dirs = [ "./" ]
-}
-
-ohos_source_set("ani_helpers_static") {
+ohos_source_set("hybridgref_static") {
   configs = [
     "$ark_root:ark_config",
     "$ark_root/runtime:arkruntime_public_config",
+    "$ark_root/plugins/ets/runtime/interop_js:interop_js_public_config",
+    "$ark_root/libpandabase:arkbase_public_config",
   ]
 
   include_dirs = [ "$ark_root/plugins/ets/runtime/ani" ]
 
   sources = [
-    "ani_signature_builder.cpp",
-    "concurrency_helpers.cpp",
+    "hybridgref_ani.cpp",
+    "hybridgref_napi.cpp",
   ]
-  if (ark_ets_interop_js) {
-    deps = [ "interop_js:hybridgref_static" ]
+  deps = [ "$ark_root/libpandabase:libarktsbase" ]
+  if (is_ohos && is_standard_system) {
+    external_deps = [ "napi:ace_napi" ]
+  } else if (ark_standalone_build && ark_ets_hybrid) {
+    deps += [ "$arkui_root/napi:ace_napi" ]
   }
-
-  part_name = ark_part_name
-  subsystem_name = "$ark_subsystem_name"
-}
-
-ohos_shared_library("ani_helpers") {
-  public_configs = [ ":ani_helpers_config" ]
-  deps = [ ":ani_helpers_static" ]
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }
