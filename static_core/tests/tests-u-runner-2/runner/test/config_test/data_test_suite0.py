@@ -99,6 +99,6 @@ args = {
     'runner.enable_time_report': True,
     'runner.time_edges': [1, 10, 100, 500],
     'runner.use_llvm_cov': True,
-    'runner.llvm_cov_profdata_out_path': str(Path(".").resolve()),
-    'runner.coverage_html_report_dir': str(Path(".").resolve())
+    'runner.llvm_cov_profdata_out_path': Path.cwd().resolve().resolve(),
+    'runner.coverage_html_report_dir': Path.cwd().resolve().resolve()
 }

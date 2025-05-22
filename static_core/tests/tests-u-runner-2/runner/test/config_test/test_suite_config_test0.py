@@ -62,8 +62,8 @@ class TestSuiteConfigTest0(unittest.TestCase):
 
     def test_test_suite(self) -> None:
         self.assertEqual(self.test_suite.suite_name, "test_suite")
-        self.assertEqual(self.test_suite.test_root, Path(".").resolve())
-        self.assertEqual(self.test_suite.list_root, Path(".").resolve())
+        self.assertEqual(self.test_suite.test_root, Path.cwd().resolve())
+        self.assertEqual(self.test_suite.list_root, Path.cwd().resolve())
         self.assertEqual(self.test_suite.extension(), "sts")
         self.assertEqual(self.test_suite.load_runtimes(), "ets")
         self.assertEqual(self.test_suite.work_dir, ".")

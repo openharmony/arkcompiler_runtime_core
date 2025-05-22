@@ -63,6 +63,7 @@ class TestSuiteConfigTest1(unittest.TestCase):
             "--processes", "12", "--detailed-report", "--detailed-report-file", "my-report",
             "--report-dir", "my-report-dir",
             "--verbose-filter", "ignored", "--enable-time-report", "--use-llvm-cov", "--qemu", "arm64",
+            "--report-dir", "my-report-dir",
             "--profdata-files-dir", ".", "--coverage-html-report-dir", ".",
             "--time-edges", "1,10,100,500"
         ]
