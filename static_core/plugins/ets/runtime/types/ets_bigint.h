@@ -33,14 +33,29 @@ public:
         return reinterpret_cast<EtsBigInt *>(etsObj);
     }
 
-    EtsBoxedIntArray *GetBytes()
+    /* The sign field can have the following values: -1, 0, 1
+     * -1 - for negative
+     *  0 - for zero value
+     *  1 - for positive
+     */
+    EtsInt GetSign()
     {
-        return reinterpret_cast<EtsBoxedIntArray *>(GetFieldObject(GetBytesOffset()));
+        return GetFieldPrimitive<EtsInt>(GetSignOffset());
+    }
+
+    EtsIntArray *GetBytes()
+    {
+        return reinterpret_cast<EtsIntArray *>(GetFieldObject(GetBytesOffset()));
     }
 
     static constexpr size_t GetBytesOffset()
     {
         return MEMBER_OFFSET(EtsBigInt, bytes_);
+    }
+
+    static constexpr size_t GetSignOffset()
+    {
+        return MEMBER_OFFSET(EtsBigInt, sign_);
     }
 
     EtsBigInt() = delete;
@@ -50,7 +65,8 @@ private:
     NO_COPY_SEMANTIC(EtsBigInt);
     NO_MOVE_SEMANTIC(EtsBigInt);
 
-    ObjectPointer<EtsBoxedIntArray> bytes_;
+    ObjectPointer<EtsIntArray> bytes_;
+    EtsInt sign_;
 
     friend class test::EtsBigIntMembers;
 };

@@ -12,24 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-class Methods {
-    public IsTrue(a: boolean): boolean { return {} as any; };
-    public SumString(a: string, b: string): string { return {} as any; };
-    public static StaticSumDouble(a: number, b: number): number { return {} as any; };
-    public SumIntArray(a: number[]): number { return {} as any; };
-    public OptionalString(a: string | undefined): string | undefined { return {} as any; };
-    public SumIntVariadic(a: number, ...b: number[]): number { return {} as any; };
-    constructor() {};
-};
-(Methods as any) = (globalThis as any).Panda.getClass('LMethods;');
-export {Methods};
-exports.Methods = Methods;
-
+export declare class Methods {
+    public IsTrue(a: boolean): boolean;
+    public SumString(a: string, b: string): string;
+    public static StaticSumDouble(a: number, b: number): number;
+    public SumIntArray(a: number[]): number;
+    public OptionalString(a: string | undefined): string | undefined;
+    public SumIntVariadic(a: number, ...b: number[]): number;
+    constructor();
+}

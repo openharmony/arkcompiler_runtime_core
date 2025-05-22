@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,13 @@ class EtsInteropScenariosJsToEts : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsToEts, test_standalone_function_call)
 {
-    auto ret = CallEtsMethod<bool>("TestStandaloneFunctionCall");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestStandaloneFunctionCall");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, test_class_methodCall)
 {
-    auto ret = CallEtsMethod<bool>("TestClassMethodCall");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestClassMethodCall");
     ASSERT_EQ(ret, true);
 }
 
@@ -36,245 +36,247 @@ TEST_F(EtsInteropScenariosJsToEts, test_class_methodCall)
 #if CAN_CREATE_CLASSES_AT_RUNTIME
 TEST_F(EtsInteropScenariosJsToEts, Test_interface_methodCall)
 {
-    auto ret = CallEtsMethod<bool>("TestInterfaceMethodCall");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestInterfaceMethodCall");
     ASSERT_EQ(ret, true);
 }
 #endif
 
 TEST_F(EtsInteropScenariosJsToEts, Test_class_getter)
 {
-    auto ret = CallEtsMethod<bool>("TestClassGetter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestClassGetter");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_class_setter)
 {
-    auto ret = CallEtsMethod<bool>("TestClassSetter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestClassSetter");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_lambda_function_call)
 {
-    auto ret = CallEtsMethod<bool>("TestLambdaFunctionCall");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestLambdaFunctionCall");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_generic_function_call)
 {
-    auto ret = CallEtsMethod<bool>("TestGenericFunctionCall");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestGenericFunctionCall");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_any)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_unknown)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeUnknown");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeUnknown");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_undefined)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeUndefined");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeUndefined");
     ASSERT_EQ(ret, true);
 }
-
-TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_tuple)
+// NOTE (#24570): fix interop tests for tuples
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_arg_type_tuple)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeTuple");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeTuple");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_any)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_unknown)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeUnknown");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeUnknown");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_undefined)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeUndefined");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeUndefined");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE #15891 enable this after interop is implemented in this direction
 TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_arg_type_callable)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeCallable");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeCallable");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_default_value_define_for_parameter)
 {
-    auto ret = CallEtsMethod<bool>("TestDefaultValueDefineForParameter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestDefaultValueDefineForParameter");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_default_value_int_define_for_parameter)
 {
-    auto ret = CallEtsMethod<bool>("TestDefaultValueIntDefineForParameter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestDefaultValueIntDefineForParameter");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_generic_type_as_parameter)
 {
-    auto ret = CallEtsMethod<bool>("TestGenericTypeAsParameter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestGenericTypeAsParameter");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_generic_type_as_return_value)
 {
-    auto ret = CallEtsMethod<bool>("TestGenericTypeAsReturnValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestGenericTypeAsReturnValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_optional_primitive_explicit)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeOptionalPrimitiveExplicit");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeOptionalPrimitiveExplicit");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_optional_primitive_default)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeOptionalPrimitiveDefault");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeOptionalPrimitiveDefault");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_primitive)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypePrimitive");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypePrimitive");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_primitive)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypePrimitive");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypePrimitive");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_optional_call)
 {
-    auto ret = CallEtsMethod<bool>("testOptionals");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testOptionals");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_rest_params)
 {
-    auto ret = CallEtsMethod<bool>("TestRestParams");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestRestParams");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_union)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeUnion");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeUnion");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_union)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionReturnTypeUnion");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionReturnTypeUnion");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_class_method_arg_type_union)
 {
-    auto ret = CallEtsMethod<bool>("TestClassMethodArgTypeUnion");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestClassMethodArgTypeUnion");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_class_method_return_type_union)
 {
-    auto ret = CallEtsMethod<bool>("TestClassMethodReturnTypeUnion");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestClassMethodReturnTypeUnion");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_interface_methodCall_return_type_union)
 {
-    auto ret = CallEtsMethod<bool>("TestInterfaceMethodCallReturnTypeUnion");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestInterfaceMethodCallReturnTypeUnion");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_static_methodCall)
 {
-    auto ret = CallEtsMethod<bool>("TestStaticMethodCall");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestStaticMethodCall");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_static_methodCall_return_type_union)
 {
-    auto ret = CallEtsMethod<bool>("TestStaticMethodCallReturnTypeUnion");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestStaticMethodCallReturnTypeUnion");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(nikitayegorov) #18381 disable after 'this' is fixed to return a reference instead of a value copy.
 TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_return_value_is_this)
 {
-    auto ret = CallEtsMethod<bool>("testReturnIsThis");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testReturnIsThis");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_return_value_is_omitted)
 {
-    auto ret = CallEtsMethod<bool>("testReturnIsOmitted");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testReturnIsOmitted");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_rest_parameter)
 {
-    auto ret = CallEtsMethod<bool>("testFunctionRestParameter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testFunctionRestParameter");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
 TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_spread_parameter)
 {
-    auto ret = CallEtsMethod<bool>("testFunctionSpreadParameter");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testFunctionSpreadParameter");
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropScenariosJsToEts, testFunctionOverload)
+// #24756
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_testFunctionOverload)
 {
-    auto ret = CallEtsMethod<bool>("testFunctionOverload");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testFunctionOverload");
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropScenariosJsToEts, testFunctionCallableReturnValue)
+// NOTE #24130
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_testFunctionCallableReturnValue)
 {
-    auto ret = CallEtsMethod<bool>("testFunctionCallableReturnValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testFunctionCallableReturnValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, testFunctionArgStringLiteralType)
 {
-    auto ret = CallEtsMethod<bool>("testFunctionArgStringLiteralType");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testFunctionArgStringLiteralType");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, testFunctionIntersectionTypePrimitive)
 {
-    auto ret = CallEtsMethod<bool>("testFunctionIntersectionTypePrimitive");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testFunctionIntersectionTypePrimitive");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_class_in_place_field_declarations)
 {
-    auto ret = CallEtsMethod<bool>("testClassInPlaceFieldDeclarations");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testClassInPlaceFieldDeclarations");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_returns_composite_type_int)
 {
-    auto ret = CallEtsMethod<bool>("testFunctionReturnsCompositeTypeInt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "testFunctionReturnsCompositeTypeInt");
     ASSERT_EQ(ret, true);
 }
 

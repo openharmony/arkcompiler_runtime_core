@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@
 #include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/types/ets_method_signature.h"
+#include "utils/utf.h"
 
 namespace ark::ets {
 
@@ -38,6 +40,7 @@ class EtsObject;
 class EtsString;
 class EtsArray;
 class EtsPromise;
+class EtsJob;
 class EtsErrorOptions;
 class EtsTypeAPIField;
 class EtsTypeAPIMethod;
@@ -98,8 +101,22 @@ public:
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const uint8_t *name, const char *signature);
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const char *signature);
 
-    PANDA_PUBLIC_API EtsMethod *GetMethod(const char *name);
-    PANDA_PUBLIC_API EtsMethod *GetMethod(const char *name, const char *signature);
+    PANDA_PUBLIC_API EtsMethod *GetStaticMethod(const char *name, const char *signature, bool isANIFormat = false) const
+    {
+        if (signature == nullptr) {
+            return GetMethodInternal<FindFilter::STATIC>(name);
+        }
+        return GetMethodInternal<FindFilter::STATIC>(name, signature, isANIFormat);
+    }
+
+    PANDA_PUBLIC_API EtsMethod *GetInstanceMethod(const char *name, const char *signature,
+                                                  bool isANIFormat = false) const
+    {
+        if (signature == nullptr) {
+            return GetMethodInternal<FindFilter::INSTANCE>(name);
+        }
+        return GetMethodInternal<FindFilter::INSTANCE>(name, signature, isANIFormat);
+    }
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const PandaString &name, const PandaString &signature)
     {
@@ -107,11 +124,6 @@ public:
     }
 
     PANDA_PUBLIC_API EtsMethod *GetDirectMethod(const char *name, const Method::Proto &proto) const;
-
-    EtsMethod *GetMethod(const PandaString &name, const PandaString &signature)
-    {
-        return GetMethod(name.c_str(), signature.c_str());
-    }
 
     EtsMethod *GetMethodByIndex(uint32_t i);
 
@@ -156,6 +168,8 @@ public:
 
     void SetStaticFieldObject(EtsField *field, EtsObject *value);
     void SetStaticFieldObject(int32_t fieldOffset, bool isVolatile, EtsObject *value);
+
+    EtsObject *CreateInstance();
 
     bool IsEtsObject()
     {
@@ -411,9 +425,10 @@ public:
     void SetWeakReference();
     void SetFinalizeReference();
     void SetValueTyped();
-    void SetUndefined();
+    void SetNullValue();
     void SetBoxed();
     void SetFunction();
+    void SetEtsEnum();
     void SetBigInt();
 
     [[nodiscard]] bool IsWeakReference() const
@@ -437,9 +452,9 @@ public:
         return (GetFlags() & IS_VALUE_TYPED) != 0;
     }
 
-    [[nodiscard]] bool IsUndefined() const
+    [[nodiscard]] bool IsNullValue() const
     {
-        return (GetFlags() & IS_UNDEFINED) != 0;
+        return (GetFlags() & IS_NULLVALUE) != 0;
     }
 
     [[nodiscard]] bool IsBoxed() const
@@ -452,9 +467,19 @@ public:
         return (GetFlags() & IS_FUNCTION) != 0;
     }
 
+    [[nodiscard]] bool IsEtsEnum() const
+    {
+        return (GetFlags() & IS_ETS_ENUM) != 0;
+    }
+
     [[nodiscard]] bool IsBigInt() const
     {
         return (GetFlags() & IS_BIGINT) != 0;
+    }
+
+    [[nodiscard]] bool IsModule() const
+    {
+        return (GetFlags() & IS_MODULE) != 0;
     }
 
     EtsClass() = delete;
@@ -488,6 +513,64 @@ public:
     }
 
 private:
+    enum class FindFilter { STATIC, INSTANCE };
+
+    template <FindFilter FILTER>
+    EtsMethod *GetMethodInternal(const char *name) const
+    {
+        const auto *coreName = utf::CStringAsMutf8(name);
+
+        Method *coreMethod = nullptr;
+        auto *runtimeClass = GetRuntimeClass();
+        if (IsInterface()) {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticInterfaceMethod(coreName);
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualInterfaceMethod(coreName);
+            }
+        } else {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticClassMethod(coreName);
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualClassMethod(coreName);
+            }
+        }
+        return reinterpret_cast<EtsMethod *>(coreMethod);
+    }
+
+    template <FindFilter FILTER>
+    EtsMethod *GetMethodInternal(const char *name, const char *signature, bool isANIFormat) const
+    {
+        EtsMethodSignature methodSignature(signature, isANIFormat);
+        if (!methodSignature.IsValid()) {
+            LOG(ERROR, ETS_NAPI) << "Wrong method signature:" << signature;
+            return nullptr;
+        }
+
+        const auto *coreName = utf::CStringAsMutf8(name);
+
+        Method *coreMethod = nullptr;
+        auto *runtimeClass = GetRuntimeClass();
+        if (IsInterface()) {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticInterfaceMethod(coreName, methodSignature.GetProto());
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualInterfaceMethod(coreName, methodSignature.GetProto());
+            }
+        } else {
+            if constexpr (FILTER == FindFilter::STATIC) {
+                coreMethod = runtimeClass->GetStaticClassMethod(coreName, methodSignature.GetProto());
+            } else {
+                static_assert(FILTER == FindFilter::INSTANCE);
+                coreMethod = runtimeClass->GetVirtualClassMethod(coreName, methodSignature.GetProto());
+            }
+        }
+        return reinterpret_cast<EtsMethod *>(coreMethod);
+    }
+
     ObjectHeader *GetObjectHeader()
     {
         return &header_;
@@ -507,14 +590,18 @@ private:
 
     // Class is a value-semantic type
     constexpr static uint32_t IS_VALUE_TYPED = 1U << 19U;
-    // Class is an internal "undefined" class
-    constexpr static uint32_t IS_UNDEFINED = 1U << 20U;
+    // Class is an internal "nullvalue" class
+    constexpr static uint32_t IS_NULLVALUE = 1U << 20U;
     // Class is a boxed type
     constexpr static uint32_t IS_BOXED = 1U << 21U;
     // Class is Function
     constexpr static uint32_t IS_FUNCTION = 1U << 22U;
     // Class is BigInt
     constexpr static uint32_t IS_BIGINT = 1U << 23U;
+    // Class is Module
+    constexpr static uint32_t IS_MODULE = 1U << 24U;
+    // Class is enum
+    constexpr static uint32_t IS_ETS_ENUM = 1U << 25U;
 
     ark::ObjectHeader header_;  // EtsObject
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,16 +55,23 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     ASSERT(etsClass_ == etsObject->GetClass());
 
     SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    if (LIKELY(storage->HasReference(etsObject))) {
-        SharedReference *sharedRef = storage->GetReference(etsObject);
-        ASSERT(sharedRef != nullptr);
-        return sharedRef->GetJsObject(env);
+    if (LIKELY(storage->HasReference(etsObject, env))) {
+        return storage->GetJsObject(etsObject, env);
     }
 
     napi_value jsValue;
     // etsObject will be wrapped in jsValue in responce to jsCtor call
-    ctx->SetPendingNewInstance(etsObject);
-    NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
+    auto *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsObject> handle(coro, etsObject);
+    ctx->SetPendingNewInstance(handle);
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
+    }
+    if (this->needProxy_) {
+        jsValue = CreateProxy(env, jsValue, this);
+    }
     return jsValue;
 }
 
@@ -75,12 +82,12 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
 
     napi_env env = ctx->GetJSEnv();
 
-    ASSERT(!IsNull(env, jsValue));
+    ASSERT(!IsUndefined(env, jsValue));
 
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     if (LIKELY(sharedRef != nullptr)) {
-        EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
+        EtsObject *etsObject = sharedRef->GetEtsObject();
         if (UNLIKELY(!etsClass_->IsAssignableFrom(etsObject->GetClass()))) {
             ThrowJSErrorNotAssignable(env, etsObject->GetClass(), etsClass_);
             return nullptr;
@@ -112,12 +119,12 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     if (LIKELY(sharedRef != nullptr)) {
-        EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
+        EtsObject *etsObject = sharedRef->GetEtsObject();
         if (UNLIKELY(!etsClass_->IsAssignableFrom(etsObject->GetClass()))) {
             ThrowJSErrorNotAssignable(env, etsObject->GetClass(), etsClass_);
             return nullptr;
         }
-        if (UNLIKELY(!sharedRef->GetField<SharedReference::HasETSObject>())) {
+        if (UNLIKELY(!sharedRef->HasETSFlag())) {
             InteropCtx::ThrowJSTypeError(env, std::string("JS object in context of EtsProxy of class ") +
                                                   etsClass_->GetDescriptor());
             return nullptr;
@@ -137,7 +144,8 @@ void EtsClassWrapper::ThrowJSErrorNotAssignable(napi_env env, EtsClass *fromKlas
 EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsValue)
 {
     ASSERT(jsproxyWrapper_ != nullptr);
-    ASSERT(SharedReference::ExtractMaybeReference(ctx->GetJSEnv(), jsValue) == nullptr);
+    auto *storage = ctx->GetSharedRefStorage();
+    ASSERT(storage->GetReference(ctx->GetJSEnv(), jsValue) == nullptr);
 
     EtsObject *etsObject = EtsObject::Create(jsproxyWrapper_->GetProxyClass());
     if (UNLIKELY(etsObject == nullptr)) {
@@ -145,12 +153,12 @@ EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsV
         return nullptr;
     }
 
-    SharedReference *sharedRef = ctx->GetSharedRefStorage()->CreateJSObjectRef(ctx, etsObject, jsValue);
+    SharedReference *sharedRef = storage->CreateJSObjectRef(ctx, etsObject, jsValue);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return nullptr;
     }
-    return sharedRef->GetEtsObject(ctx);  // fetch again after gc
+    return sharedRef->GetEtsObject();  // fetch again after gc
 }
 
 /*static*/
@@ -173,10 +181,8 @@ public:
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
     {
         SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-        INTEROP_FATAL_IF(!storage->HasReference(etsObject));
-        SharedReference *sharedRef = storage->GetReference(etsObject);
-        ASSERT(sharedRef != nullptr);
-        return sharedRef->GetJsObject(ctx->GetJSEnv());
+        INTEROP_FATAL_IF(!storage->HasReference(etsObject, ctx->GetJSEnv()));
+        return storage->GetJsObject(etsObject, ctx->GetJSEnv());
     }
 
     EtsObject *UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
@@ -192,6 +198,87 @@ std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertJSProxy([[maybe
 {
     ASSERT(js_proxy::JSProxy::IsProxyClass(klass));
     return std::make_unique<JSRefConvertJSProxy>();
+}
+
+class JSRefConvertInterface : public JSRefConvert {
+public:
+    explicit JSRefConvertInterface(Class *klass) : JSRefConvert(this), klass_(klass)
+    {
+        ASSERT(klass->IsInterface());
+    }
+
+    napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
+    {
+        auto realConverter = JSRefConvertResolve(ctx, etsObject->GetClass()->GetRuntimeClass());
+        if (realConverter == nullptr) {
+            InteropFatal("Cannot get ref converter for object");
+        }
+        return realConverter->Wrap(ctx, etsObject);
+    }
+
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
+    {
+        auto objectConverter =
+            ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+        auto ret = objectConverter->Unwrap(ctx, jsValue);
+        if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
+                                                       " is not assignable to " + klass_->GetName());
+            return nullptr;
+        }
+        return ret;
+    }
+
+protected:
+    template <typename D>
+    explicit JSRefConvertInterface(Class *klass, D *instance) : JSRefConvert(instance), klass_(klass)
+    {
+        ASSERT(klass->IsInterface());
+    }
+    Class *GetKlass()
+    {
+        return klass_;
+    }
+
+private:
+    Class *klass_;
+};
+
+class JSRefConvertInterfaceIterator : public JSRefConvertInterface {
+public:
+    explicit JSRefConvertInterfaceIterator(Class *klass) : JSRefConvertInterface(klass, this)
+    {
+        ASSERT(klass->IsInterface());
+    }
+
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
+    {
+        auto objectConverter =
+            ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+        auto ret = objectConverter->Unwrap(ctx, jsValue);
+
+        std::array args = {Value {ret->GetCoreType()}};
+        auto *method = EtsClass::FromRuntimeClass(ctx->GetJSRuntimeClass())->GetStaticMethod("CreateIterator", nullptr);
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto resObject = method->GetPandaMethod()->Invoke(coro, args.data());
+        ret = EtsObject::FromCoreType(resObject.GetAs<ObjectHeader *>());
+        if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(GetKlass()))) {
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
+                                                       " is not a assignable to " + GetKlass()->GetName());
+            return nullptr;
+        }
+        return ret;
+    }
+};
+
+/*static*/
+std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertEtsInterface([[maybe_unused]] InteropCtx *ctx,
+                                                                              Class *klass)
+{
+    if (klass->GetName() == INTERFACE_ITERABLE_NAME) {
+        return std::make_unique<JSRefConvertInterfaceIterator>(klass);
+    }
+    return std::make_unique<JSRefConvertInterface>(klass);
 }
 
 EtsMethodSet *EtsClassWrapper::GetMethod(const std::string &name) const
@@ -218,8 +305,8 @@ EtsClassWrapper *EtsClassWrapper::Get(InteropCtx *ctx, EtsClass *etsClass)
     ASSERT(!etsClass->IsPrimitive() && etsClass->GetComponentType() == nullptr);
     ASSERT(ctx->GetRefConvertCache()->Lookup(etsClass->GetRuntimeClass()) == nullptr);
 
-    if (IsStdClass(etsClass) &&
-        !etsClass->IsInterface()) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
+    if (IsStdClass(etsClass) && !etsClass->IsInterface() &&
+        !etsClass->IsEtsEnum()) {  // NOTE(gogabr): temporary ugly workaround for Function... interfaces
         ctx->Fatal(std::string("ets_proxy requested for ") + etsClass->GetDescriptor() + " must add or forbid");
     }
     ASSERT(!js_proxy::JSProxy::IsProxyClass((etsClass->GetRuntimeClass())));
@@ -269,15 +356,20 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     }
     // Select preferred overloads
     if (overloads != nullptr) {
-        for (auto &[name, signature] : *overloads) {
-            Method *method = etsClass_->GetDirectMethod(name, signature)->GetPandaMethod();
+        for (auto &[name, signaturePair] : *overloads) {
+            Method *method = etsClass_->GetDirectMethod(name, signaturePair.first)->GetPandaMethod();
             if (UNLIKELY(method == nullptr)) {
-                fatalNoMethod(klass, name, signature);
+                fatalNoMethod(klass, name, signaturePair.first);
             }
             auto etsMethodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(method));
             auto it = props.insert({method->GetName().data, etsMethodSet.get()});
-            etsMethods_.push_back(std::move(etsMethodSet));
-            INTEROP_FATAL_IF(!it.second);
+            if (!it.second && std::holds_alternative<EtsMethodSet *>(it.first->second)) {
+                // Possible correct method overloading: merge to existing entry
+                auto addedMethods = std::get<EtsMethodSet *>(it.first->second);
+                addedMethods->MergeWith(*etsMethodSet.get());
+            } else {
+                etsMethods_.push_back(std::move(etsMethodSet));
+            }
         }
     }
 
@@ -327,9 +419,10 @@ void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, cons
         if (m.IsPrivate()) {
             continue;
         }
-        auto name = m.GetName().data;
-        if (overloads != nullptr && overloads->find(name) != overloads->end()) {
-            continue;
+        if (overloads != nullptr) {
+            if (HasOverloadsMethod(overloads, &m)) {
+                continue;
+            }
         }
         auto methodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(&m));
         auto it = props->insert({m.GetName().data, methodSet.get()});
@@ -347,6 +440,20 @@ void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, cons
     }
 }
 
+bool EtsClassWrapper::HasOverloadsMethod(const OverloadsMap *overloads, Method *m)
+{
+    auto name = m->GetName().data;
+    auto range = overloads->equal_range(name);
+    EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(m);
+    for (auto iter = range.first; iter != range.second; ++iter) {
+        if (iter->second.second ==
+            etsMethod->GetNumArgs() - static_cast<unsigned int>(etsMethod->GetPandaMethod()->HasVarArgs())) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *props)
 {
     auto hasSquashedProtoOhosImpl = [](EtsClassWrapper *wclass) {
@@ -361,7 +468,7 @@ void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *prop
         return true;
     };
 
-#if PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     auto hasSquashedProto = hasSquashedProtoOhosImpl;
     (void)hasSquashedProtoOtherImpl;
 #else
@@ -413,11 +520,11 @@ std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapp
     return {fields, methods};
 }
 
-std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Field *> fields,
+std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(napi_env &env, Span<Field *> fields,
                                                                          Span<EtsMethodSet *> methods)
 {
     std::vector<napi_property_descriptor> jsProps;
-    jsProps.reserve(fields.size() + methods.size());
+    jsProps.reserve(fields.size() + methods.size() + 1);
 
     // Process fields
     numFields_ = fields.size();
@@ -443,12 +550,23 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Fi
     etsMethodWrappers_ = std::make_unique<LazyEtsMethodWrapperLink[]>(numMethods_);
     Span<LazyEtsMethodWrapperLink> etsMethodWrappers(etsMethodWrappers_.get(), numMethods_);
     size_t methodIdx = 0;
-
+    GetterSetterPropsMap propMap;
     for (auto &method : methods) {
         ASSERT(!method->IsConstructor());
         auto lazyLink = &etsMethodWrappers[methodIdx++];
         lazyLink->Set(method);
         jsProps.emplace_back(EtsMethodWrapper::MakeNapiProperty(method, lazyLink));
+        if (strcmp(method->GetName(), ITERATOR_METHOD) == 0) {
+            auto iterator = EtsClassWrapper::GetGlobalSymbolIterator(env);
+            jsProps.emplace_back(EtsMethodWrapper::MakeNapiIteratorProperty(iterator, method, lazyLink));
+        }
+        if (method->IsGetter() || method->IsSetter()) {
+            BuildGetterSetterFieldProperties(propMap, method);
+        }
+    }
+    jsProps.reserve(jsProps.size() + propMap.size());
+    for (auto &item : propMap) {
+        jsProps.emplace_back(item.second);
     }
 
     if (UNLIKELY(!IsEtsGlobalClass() && etsCtorLink_.GetUnresolved() == nullptr)) {
@@ -456,6 +574,39 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Fi
     }
 
     return jsProps;
+}
+
+void EtsClassWrapper::BuildGetterSetterFieldProperties(GetterSetterPropsMap &propMap, EtsMethodSet *method)
+{
+    auto ptr = reinterpret_cast<uintptr_t>(method->GetName());
+    const char *fieldName = reinterpret_cast<char *>(ptr + strlen(SETTER_BEGIN));
+    const std::string key(fieldName);
+    auto result = propMap.find(key);
+    if (result != propMap.end()) {
+        EtsMethodWrapper::AttachGetterSetterToProperty(method, result->second);
+    } else {
+        napi_property_descriptor prop {};
+        auto fieldWrapper = std::make_unique<EtsFieldWrapper>(this);
+        prop.utf8name = fieldName;
+        prop.attributes = method->IsStatic() ? EtsClassWrapper::STATIC_FIELD_ATTR : EtsClassWrapper::FIELD_ATTR;
+        prop.data = fieldWrapper.get();
+        EtsMethodWrapper::AttachGetterSetterToProperty(method, prop);
+        propMap.insert({key, prop});
+        getterSetterFieldWrappers_.push_back(std::move(fieldWrapper));
+    }
+}
+
+/* static */
+napi_value EtsClassWrapper::GetGlobalSymbolIterator(napi_env &env)
+{
+    napi_value global;
+    napi_value symbol;
+    napi_value iterator;
+    NAPI_CHECK_FATAL(napi_get_global(env, &global));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Symbol", &symbol));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, symbol, "iterator", &iterator));
+
+    return iterator;
 }
 
 EtsClassWrapper *EtsClassWrapper::LookupBaseWrapper(EtsClass *klass)
@@ -505,6 +656,9 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     auto [fields, methods] = _this->CalculateProperties(overloads);
     for (auto method : methods) {
         const std::string methodName(method->GetName());
+        if (methodName == GET_INDEX_METHOD || methodName == SET_INDEX_METHOD) {
+            _this->SetUpMimicHandler(env);
+        }
         auto baseClassWrapper = _this->baseWrapper_;
         while (nullptr != baseClassWrapper) {
             EtsMethodSet *baseMethodSet = baseClassWrapper->GetMethod(methodName);
@@ -516,7 +670,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
         }
     }
 
-    auto jsProps = _this->BuildJSProperties({fields.data(), fields.size()}, {methods.data(), methods.size()});
+    auto jsProps = _this->BuildJSProperties(env, {fields.data(), fields.size()}, {methods.data(), methods.size()});
 
     // NOTE(vpukhov): fatal no-public-fields check when escompat adopt accessors
     if (_this->HasBuiltin() && !fields.empty()) {
@@ -528,8 +682,13 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
     if (!etsClass->IsFinal()) {
         auto ungroupedMethods = CollectAllPandaMethods(methods.begin(), methods.end());
-        _this->jsproxyWrapper_ =
-            js_proxy::JSProxy::Create(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+        _this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
+        if (_this->jsproxyWrapper_ == nullptr) {
+            // NOTE(konstanting): we assume that the method list stays the same for every proxied class
+            _this->jsproxyWrapper_ =
+                js_proxy::JSProxy::CreateBuiltinProxy(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+            ctx->SetJsProxyInstance(etsClass, _this->jsproxyWrapper_);
+        }
     }
 
     napi_value jsCtor {};
@@ -542,10 +701,129 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
                                                : (base->HasBuiltin() ? base->GetBuiltin(env) : base->GetJsCtor(env));
 
     SimulateJSInheritance(env, jsCtor, fakeSuper);
-    NAPI_CHECK_FATAL(NapiObjectSeal(env, jsCtor));
+    NAPI_CHECK_FATAL(napi_object_seal(env, jsCtor));
     NAPI_CHECK_FATAL(napi_create_reference(env, jsCtor, 1, &_this->jsCtorRef_));
 
     return _this;
+}
+
+void EtsClassWrapper::SetUpMimicHandler(napi_env env)
+{
+    this->needProxy_ = true;
+
+    napi_value global;
+    NAPI_CHECK_FATAL(napi_get_global(env, &global));
+
+    napi_value jsProxyCtorRef;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "Proxy", &jsProxyCtorRef));
+    NAPI_CHECK_FATAL(napi_create_reference(env, jsProxyCtorRef, 1, &this->jsProxyCtorRef_));
+
+    napi_value jsProxyHandlerRef;
+    NAPI_CHECK_FATAL(napi_create_object(env, &jsProxyHandlerRef));
+    NAPI_CHECK_FATAL(napi_create_reference(env, jsProxyHandlerRef, 1, &this->jsProxyHandlerRef_));
+
+    napi_value getHandlerFunc;
+    NAPI_CHECK_FATAL(napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, EtsClassWrapper::MimicGetHandler, nullptr,
+                                          &getHandlerFunc));
+    napi_value setHandlerFunc;
+    NAPI_CHECK_FATAL(napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, EtsClassWrapper::MimicSetHandler, nullptr,
+                                          &setHandlerFunc));
+
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandlerRef, "get", getHandlerFunc));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsProxyHandlerRef, "set", setHandlerFunc));
+}
+
+/*static*/
+napi_value EtsClassWrapper::CreateProxy(napi_env env, napi_value jsCtor, EtsClassWrapper *thisWrapper)
+{
+    napi_value jsProxyHandlerRef;
+    NAPI_CHECK_FATAL(napi_get_reference_value(env, thisWrapper->jsProxyHandlerRef_, &jsProxyHandlerRef));
+    napi_value jsProxyCtorRef;
+    NAPI_CHECK_FATAL(napi_get_reference_value(env, thisWrapper->jsProxyCtorRef_, &jsProxyCtorRef));
+
+    napi_value proxyObj;
+    std::vector<napi_value> args = {jsCtor, jsProxyHandlerRef};
+
+    NAPI_CHECK_FATAL(napi_new_instance(env, jsProxyCtorRef, args.size(), args.data(), &proxyObj));
+    return proxyObj;
+}
+
+/*static*/
+napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_JS(coro);
+
+    size_t argc;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, jsArgs->data(), nullptr, nullptr));
+
+    napi_value target = jsArgs[0];
+    napi_value property = jsArgs[1];
+
+    if (GetValueType(env, property) == napi_number) {
+        ScopedManagedCodeThread managedCode(coro);
+        ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+        ASSERT(storage != nullptr);
+        ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
+        if (sharedRef == nullptr) {
+            InteropFatal("MimicGetHandler sharedRef is empty");
+        }
+
+        auto *etsThis = sharedRef->GetEtsObject();
+        ASSERT(etsThis != nullptr);
+        EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(GET_INDEX_METHOD, nullptr);
+        ASSERT(method != nullptr);
+
+        Span sp(jsArgs->begin(), jsArgs->end());
+        const size_t startIndex = 1;
+        const size_t argSize = 1;
+        return CallETSInstance(coro, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
+    }
+
+    napi_value result;
+    NAPI_CHECK_FATAL(napi_get_property(env, target, property, &result));
+    return result;
+}
+
+/*static*/
+napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_JS(coro);
+
+    size_t argc;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, jsArgs->data(), nullptr, nullptr));
+
+    ScopedManagedCodeThread managedCode(coro);
+    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    ASSERT(storage != nullptr);
+    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
+    if (sharedRef == nullptr) {
+        InteropFatal("MimicSetHandler sharedRef is empty");
+    }
+
+    auto *etsThis = sharedRef->GetEtsObject();
+    ASSERT(etsThis != nullptr);
+    EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(SET_INDEX_METHOD, nullptr);
+    ASSERT(method != nullptr);
+
+    Span sp(jsArgs->begin(), jsArgs->end());
+
+    const size_t startIndex = 1;
+    const size_t argSize = 2;
+    CallETSInstance(coro, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
+
+    napi_value trueValue;
+    NAPI_CHECK_FATAL(napi_get_boolean(env, true, &trueValue));
+    return trueValue;
 }
 
 /*static*/
@@ -553,7 +831,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro, env);
+    INTEROP_CODE_SCOPE_JS(coro);
 
     napi_value jsThis;
     size_t argc;
@@ -561,6 +839,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, &jsThis, &data));
     auto etsClassWrapper = reinterpret_cast<EtsClassWrapper *>(data);
 
+    ScopedManagedCodeThread managedScope(coro);
     EtsObject *etsObject = ctx->AcquirePendingNewInstance();
 
     if (LIKELY(etsObject != nullptr)) {
@@ -606,7 +885,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     EtsClass *instanceClass {};
 
     if (LIKELY(notExtensible)) {
-#ifndef PANDA_TARGET_OHOS
+#if !defined(PANDA_TARGET_OHOS) && !defined(PANDA_JS_ETS_HYBRID_MODE)
         // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
         NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
 #endif  // PANDA_TARGET_OHOS
@@ -627,7 +906,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     SharedReference *sharedRef;
     if (LIKELY(notExtensible)) {
         sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject.GetPtr(), jsThis);
-#ifdef PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
         // In case of OHOS sealed object can't be wrapped, therefore seal it after wrapping
         NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
 #endif  // PANDA_TARGET_OHOS

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ from __future__ import annotations
 from unittest import TestCase
 from os import path, makedirs
 from pathlib import Path
-from typing import Tuple, Optional, Sequence, List
+from typing import Tuple, Optional, Sequence, List, Dict
 from runner.utils import compare_files
 
 from runner.plugins.ets.ets_templates.test_metadata import get_metadata, TestMetadata
@@ -31,17 +31,24 @@ from runner.test_file_based import TestFileBased
 
 
 class TestETS(TestFileBased):
-    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
+    def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str,
+                 parent_test_id: str = "") -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
 
-        self.main_entry_point = "ETSGLOBAL::main"
         self.metadata: TestMetadata = get_metadata(Path(test_path))
-        if self.metadata.package is not None:
-            self.main_entry_point = f"{self.metadata.package}.{self.main_entry_point}"
+        self.main_entry_point = f"{self.metadata.module}.ETSGLOBAL::main"
+        package = self.metadata.get_package_name()
+        # Defines if in dependent packages there is at least one file compile-only and negative
+        self.dependent_packages: Dict[str, bool] = {
+            package: self.is_negative_compile
+        }
 
         # If test fails it contains reason (of FailKind enum) of first failed step
         # It's supposed if the first step is failed then no step is executed further
         self.fail_kind = None
+
+        # parent test id
+        self.parent_test_id = parent_test_id
 
         self.bytecode_path = test_env.work_dir.intermediate
         makedirs(self.bytecode_path, exist_ok=True)
@@ -93,13 +100,26 @@ class TestETS(TestFileBased):
         for file in self.metadata.files:
             test_path = Path(self.path).parent / Path(file)
             current_test_id = Path(self.test_id)
-            test = self.__class__(self.test_env, str(test_path), self.flags, str(current_test_id.parent / Path(file)))
+            test = self.__class__(
+                test_env=self.test_env,
+                test_path=str(test_path),
+                flags=self.flags,
+                test_id=str(current_test_id.parent / Path(file)),
+                parent_test_id=self.test_id)
 
-            test_abc_name = f'{current_test_id.stem}_{Path(test.test_abc).name}'
-            test_an_name = f'{current_test_id.stem}_{Path(test.test_an).name}'
+            prefix = Path(self.parent_test_id).stem if self.parent_test_id else current_test_id.stem
+
+            test_abc_name = f'{prefix}_{Path(test.test_abc).name}'
+            test_an_name = f'{prefix}_{Path(test.test_an).name}'
 
             test.test_abc = str(Path(test.test_abc).parent / Path(test_abc_name))
             test.test_an = str(Path(test.test_abc).parent / Path(test_an_name))
+
+            package = test.metadata.get_package_name()
+            self.dependent_packages[package] = self.dependent_packages.get(package, False) or test.is_negative_compile
+            if test.dependent_packages:
+                for dep_key, dep_item in test.dependent_packages.items():
+                    self.dependent_packages[dep_key] = self.dependent_packages.get(dep_key, False) or dep_item
 
             tests.append(test)
         return tests
@@ -108,35 +128,69 @@ class TestETS(TestFileBased):
     def runtime_args(self) -> List[str]:
         if not self.dependent_files:
             return super().runtime_args
-        return self.add_boot_panda_files(super().runtime_args)
+        return self.add_panda_files(super().runtime_args)
 
     @property
     def verifier_args(self) -> List[str]:
         if not self.dependent_files:
             return super().verifier_args
-        return self.add_boot_panda_files(super().verifier_args)
+        return self.add_panda_files(super().verifier_args)
 
-    def add_boot_panda_files(self, args: List[str]) -> List[str]:
+    def get_all_abc_dependent_files(self) -> List[str]:
+        result: List[str] = []
+        for dep_file in self.dependent_files:
+            result.extend(dep_file.get_all_abc_dependent_files())
+            result.append(dep_file.test_abc)
+
+        return result
+
+    def add_panda_files(self, args: List[str]) -> List[str]:
+        opt_name = '--panda-files'
+        met_panda_files_opt = False
         dep_files_args = []
         for arg in args:
-            name = '--boot-panda-files'
-            if name in arg:
+            if opt_name in arg:
+                met_panda_files_opt = True
                 _, value = arg.split('=')
-                dep_files_args.append(f'{name}={":".join([value] + [dt.test_abc for dt in self.dependent_files])}')
-            else:
-                dep_files_args.append(arg)
+                opt_value = ":".join([value] + self.get_all_abc_dependent_files())
+                arg = f'{opt_name}={opt_value}'
+            dep_files_args.append(arg)
+        # Add the option only in case of non-empty dependency files list
+        if not met_panda_files_opt and len(self.dependent_files) > 0:
+            opt_value = ":".join(self.get_all_abc_dependent_files())
+            dep_files_args.append(f'{opt_name}={opt_value}')
         return dep_files_args
+
+    def continue_after_process_dependent_files(self) -> bool:
+        """
+        Processes dependent files
+        Returns True if to continue test run
+        False - break test run
+        """
+        for test in self.dependent_files:
+            dependent_result = test.do_run()
+            self.reproduce += dependent_result.reproduce
+            simple_failed = not dependent_result.passed
+            negative_compile = dependent_result.passed and dependent_result.is_negative_compile
+            dep_package = dependent_result.metadata.get_package_name()
+            package_neg_compile = self.dependent_packages.get(dep_package, False)
+            if simple_failed or negative_compile or package_neg_compile:
+                self.passed = dependent_result.passed if not package_neg_compile else True
+                self.report = dependent_result.report
+                self.fail_kind = dependent_result.fail_kind
+                return False
+        return True
 
     # pylint: disable=too-many-return-statements
     def do_run(self) -> TestETS:
-        for test in self.dependent_files:
-            test.do_run()
+        if not self.continue_after_process_dependent_files():
+            return self
 
         if not self.is_valid_test and not self.is_compile_only:
             return self
 
         if not self.is_valid_test and self.is_compile_only:
-            self._run_compiler(self.test_abc)
+            self.passed, self.report, self.fail_kind = self._run_compiler(self.test_abc)
             return self
 
         if self.test_env.config.ets.compare_files:
@@ -156,7 +210,7 @@ class TestETS(TestFileBased):
         if self.test_env.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             self.passed, self.report, self.fail_kind = self.run_aot(
                 self.test_an,
-                [test.test_abc for test in list(self.dependent_files) + [self]],
+                self.get_all_abc_dependent_files() + [self.test_abc],
                 lambda o, e, rc: rc == 0 and path.exists(self.test_an) and path.getsize(self.test_an) > 0
             )
 
@@ -235,8 +289,6 @@ class TestETS(TestFileBased):
 
     def _run_compiler(self, test_abc: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = []
-        if not self.is_valid_test:
-            es2panda_flags.append('--ets-module')
         es2panda_flags.extend(self.test_env.es2panda_args)
         es2panda_flags.append(f"--output={test_abc}")
         es2panda_flags.append(self.path)
@@ -262,7 +314,9 @@ class TestETS(TestFileBased):
         return passed, report, fail_kind
 
     def _validate_compiler(self, return_code: int, output_path: str) -> bool:
-        if self.is_negative_compile:
+        dep_package = self.metadata.get_package_name()
+        package_compile = self.dependent_packages.get(dep_package, False)
+        if self.is_negative_compile or package_compile:
             return return_code == self.CTE_RETURN_CODE
         return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 

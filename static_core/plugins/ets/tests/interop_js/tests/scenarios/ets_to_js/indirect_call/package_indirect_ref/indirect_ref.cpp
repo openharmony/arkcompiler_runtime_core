@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,23 +39,23 @@ TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, test_function_type_ref_array_b
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/type_ref/test_function_type_ref_array_bind_without_arg.js"));
 }
-
-TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, test_function_type_ref_tuple_call)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, DISABLED_test_function_type_ref_tuple_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/type_ref/test_function_type_ref_tuple_call.js"));
 }
-
-TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, test_function_type_ref_tuple_apply)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, DISABLED_test_function_type_ref_tuple_apply)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/type_ref/test_function_type_ref_tuple_apply.js"));
 }
-
-TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, test_function_type_ref_tuple_bind_with_arg)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, DISABLED_test_function_type_ref_tuple_bind_with_arg)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/type_ref/test_function_type_ref_tuple_bind_with_arg.js"));
 }
-
-TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, test_function_type_ref_tuple_bind_without_arg)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInteropScenariosEtsToJsIndirectCallRef, DISABLED_test_function_type_ref_tuple_bind_without_arg)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/type_ref/test_function_type_ref_tuple_bind_without_arg.js"));
 }

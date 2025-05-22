@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+#
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import logging
 import multiprocessing
 import re
 import argparse
+import sys
 from unittest import TestCase
 from abc import abstractmethod, ABC
 from collections import Counter
@@ -266,7 +267,12 @@ class Runner(ABC):
         for test_dir in test_dirs:
             self.add_directory(test_dir)
         if not self.tests:
-            Log.exception_and_raise(_LOGGER, "No tests have been loaded")
+            Log.default(
+                _LOGGER,
+                "No tests have been loaded. "
+                "Check values of filtering options: --filter, --groups and --group-number, "
+                "--test-list, --chapter")
+            sys.exit(-1)
 
     # Browse the directory, search for files with the specified extension
     # and add them as tests
@@ -287,12 +293,13 @@ class Runner(ABC):
                 self.load_ignored_tests()
             if not path.exists(directory):
                 directory = str(path.normpath(path.join(self.test_root, directory)))
-            test_files.extend(self.__load_test_files(directory, extension))
+            test_files.extend(self.__load_test_files(directory, extension))  # type: ignore
 
         self._search_both_excluded_and_ignored_tests()
         self._search_not_used_ignored(test_files)
 
-        all_tests = {self.create_test(path.normpath(test), flags, test in self.ignored_tests) for test in test_files}
+        all_tests = {self.create_test(path.normpath(test), flags, test in self.ignored_tests)  # type: ignore
+                     for test in test_files}
         not_tests = {t for t in all_tests if isinstance(t, TestETS) and not t.is_valid_test}
         valid_tests = all_tests - not_tests
 
@@ -300,10 +307,11 @@ class Runner(ABC):
             groups = self.config.test_lists.groups.quantity
             n_group = self.config.test_lists.groups.number
             n_group = n_group if n_group <= groups else groups
-            valid_tests = {test for test in valid_tests if get_group_number(test.path, groups) == n_group}
+            valid_tests = {test for test in valid_tests if get_group_number(test.test_id, groups) == n_group}
 
         self.tests.update(valid_tests)
-        Log.default(_LOGGER, f"Loaded {len(valid_tests)} tests from directory '{directory}'")
+        Log.default(_LOGGER, f"Loaded {len(valid_tests)} tests from directory '{directory}'. "
+                             f"Excluded {len(self.excluded_tests)} tests are not loaded.")
 
     def _search_both_excluded_and_ignored_tests(self) -> None:
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]

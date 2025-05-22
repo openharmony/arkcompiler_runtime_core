@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,53 +14,32 @@
  */
 
 #include <cstdlib>
-#include <iostream>
-#include <ostream>
-
 #include <gtest/gtest.h>
 
-#include "libpandabase/utils/logger.h"
+#include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
+
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_error.h"
+
 #include "runtime/include/class.h"
-#include "runtime/include/managed_thread.h"
 #include "runtime/include/object_header.h"
-#include "runtime/include/panda_vm.h"
-#include "runtime/include/runtime_options.h"
-#include "runtime/include/runtime.h"
 
 namespace ark::ets::test {
 
-class EtsVMInitPreallocTest : public testing::Test {
-public:
-    EtsVMInitPreallocTest()
+class EtsVMInitPreallocTest : public ani::testing::AniTest {
+private:
+    std::vector<ani_option> GetExtraAniOptions() override
     {
-        RuntimeOptions options;
-        options.SetShouldLoadBootPandaFiles(true);
-        options.SetShouldInitializeIntrinsics(false);
-        options.SetCompilerEnableJit(false);
-        options.SetGcType("epsilon");
-        options.SetLoadRuntimes({"ets"});
-
-        auto stdlib = std::getenv("PANDA_STD_LIB");
-        if (stdlib == nullptr) {
-            std::cerr << "PANDA_STD_LIB env variable should be set and point to mock_stdlib.abc" << std::endl;
-            std::abort();
-        }
-        options.SetBootPandaFiles({stdlib});
-
-        Logger::InitializeStdLogging(Logger::Level::ERROR, 0);
-
-        Runtime::Create(options);
+        // Can't use epsilon GC, because epsilon gc use slots for allocate.
+        // It is hard to fill all possible slots, more easier is to fill regions in g1-gc allocator.
+        ani_option gcType = {"--ext:gc-type=g1-gc", nullptr};
+        ani_option gcTriggerType = {"--ext:gc-trigger-type=debug-never", nullptr};
+        ani_option jit = {"--ext:compiler-enable-jit=false", nullptr};
+        return std::vector<ani_option> {ani_option {heapSz_.c_str(), nullptr}, gcType, gcTriggerType, jit};
     }
-
-    ~EtsVMInitPreallocTest() override
-    {
-        Runtime::Destroy();
-    }
-
-    NO_COPY_SEMANTIC(EtsVMInitPreallocTest);
-    NO_MOVE_SEMANTIC(EtsVMInitPreallocTest);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    std::string heapSz_ = std::string("--ext:heap-size-limit=") + std::to_string(32_MB);
 };
 
 TEST_F(EtsVMInitPreallocTest, PreallocatedOOMObjectTest)
@@ -78,6 +57,47 @@ TEST_F(EtsVMInitPreallocTest, PreallocatedOOMObjectTest)
     auto descriptorGot = utf::Mutf8AsCString(oomClass->GetDescriptor());
     auto descriptorExp = utf::Mutf8AsCString(ctx.GetOutOfMemoryErrorClassDescriptor());
     ASSERT_STREQ(descriptorGot, descriptorExp);
+}
+
+TEST_F(EtsVMInitPreallocTest, ThrowPreallocatedOOMObjectTest)
+{
+    ani_string oomName;
+    ani_string oomMsg;
+    ani_string oomStack;
+
+    ASSERT_EQ(env_->String_NewUTF8(EtsOutOfMemoryError::OOM_ERROR_NAME.data(),
+                                   EtsOutOfMemoryError::OOM_ERROR_NAME.size(), &oomName),
+              ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8(EtsOutOfMemoryError::DEFAULT_OOM_MSG.data(),
+                                   EtsOutOfMemoryError::DEFAULT_OOM_MSG.size(), &oomMsg),
+              ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8(EtsOutOfMemoryError::DEFAULT_OOM_STACK.data(),
+                                   EtsOutOfMemoryError::DEFAULT_OOM_STACK.size(), &oomStack),
+              ANI_OK);
+
+    auto res = CallEtsFunction<ani_boolean>("PreallocTest", "testThrowingPreallocOOMObject", oomName, oomMsg, oomStack);
+    ASSERT_EQ(res, true);
+}
+
+TEST_F(EtsVMInitPreallocTest, ThrowPreallocatedOOMObjectTwiceTest)
+{
+    ani_string oomName;
+    ani_string oomMsg;
+    ani_string oomStack;
+
+    ASSERT_EQ(env_->String_NewUTF8(EtsOutOfMemoryError::OOM_ERROR_NAME.data(),
+                                   EtsOutOfMemoryError::OOM_ERROR_NAME.size(), &oomName),
+              ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8(EtsOutOfMemoryError::DEFAULT_OOM_MSG.data(),
+                                   EtsOutOfMemoryError::DEFAULT_OOM_MSG.size(), &oomMsg),
+              ANI_OK);
+    ASSERT_EQ(env_->String_NewUTF8(EtsOutOfMemoryError::DEFAULT_OOM_STACK.data(),
+                                   EtsOutOfMemoryError::DEFAULT_OOM_STACK.size(), &oomStack),
+              ANI_OK);
+
+    auto res =
+        CallEtsFunction<ani_boolean>("PreallocTest", "testThrowingPreallocOOMObjectTwice", oomName, oomMsg, oomStack);
+    ASSERT_EQ(res, true);
 }
 
 }  // namespace ark::ets::test

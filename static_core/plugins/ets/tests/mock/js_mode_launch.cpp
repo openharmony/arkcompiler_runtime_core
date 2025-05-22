@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,19 +44,18 @@ protected:
         }
         options.SetBootPandaFiles({stdlib, "js_mode_launch.abc"});
         options.SetCoroutineImpl("stackful");
-        options.SetCoroutineJsMode(true);
 
         Runtime::Create(options);
 
         EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scope(coroutine);
         EtsClassLinker *etsClassLinker = coroutine->GetPandaVM()->GetClassLinker();
-        EtsClass *global = etsClassLinker->GetClass("LJSCoroutine;");
+        EtsClass *global = etsClassLinker->GetClass("Ljs_mode_launch/JSCoroutine;");
         ASSERT_NE(nullptr, global);
-        EtsMethod *getCoroIdMethod = global->GetMethod("getCoroutineId");
+        EtsMethod *getCoroIdMethod = global->GetStaticMethod("getCoroutineId", nullptr);
         ASSERT_NE(nullptr, getCoroIdMethod);
         ASSERT_TRUE(getCoroIdMethod->IsNative());
-        getCoroIdMethod->RegisterNativeImpl(reinterpret_cast<void *>(GetCoroId));
+        getCoroIdMethod->RegisterNativeDeprecated(reinterpret_cast<void *>(GetCoroId));
     }
 
     void TearDown() override
@@ -70,7 +69,7 @@ protected:
 
 TEST_F(JsModeLaunchTest, Call)
 {
-    const std::string mainFunc = "ETSGLOBAL::main";
+    const std::string mainFunc = "js_mode_launch.ETSGLOBAL::main";
     auto res = Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {});
     ASSERT_EQ(0, res.Value());
 }

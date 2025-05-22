@@ -15,9 +15,6 @@
 class_members:
   - "f: int;"
   - "m(): void {}"
-  - "class B{}"
-  - "protected interface I{}"
-  - "enum Color {Red, Green}"
   - "constructor() {}"
   - "constructor() {}; private constructor(i: string) {}"
   - "get age(): int {return 2}; set age(i: int) {}"

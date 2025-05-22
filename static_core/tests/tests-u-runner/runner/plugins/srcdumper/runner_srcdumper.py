@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -55,29 +55,36 @@ class RunnerSRCDumper(RunnerJS):
         self.collect_ignored_test_lists()
 
         test_dirs: List[TestDirectory] = [
-            TestDirectory('compiler/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('compiler/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 '--exit-after-phase', 'plugins-after-parse',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
 
-            TestDirectory('parser/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('parser/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 '--exit-after-phase', 'plugins-after-parse',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
 
-            TestDirectory('runtime/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('runtime/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 '--exit-after-phase', 'plugins-after-parse',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
 
-            TestDirectory('ast', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('ast', 'ets', flags=[
+                '--extension=ets',
+                '--output=/dev/null',
+                '--exit-after-phase', 'plugins-after-parse',
+                f'--arktsconfig={self.arktsconfig}'
+            ]),
+
+            TestDirectory('srcdump', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 '--exit-after-phase', 'plugins-after-parse',
                 f'--arktsconfig={self.arktsconfig}'

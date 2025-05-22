@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,15 @@
  */
 
 #include "runtime/include/managed_thread.h"
+#include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_native_interface.h"
 
 namespace ark::ets {
-Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
-                                                                                 mem::InternalAllocatorPtr allocator)
+Expected<PandaEtsNapiEnv *, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
+                                                                  mem::InternalAllocatorPtr allocator)
 {
     auto etsVm = coroutine->GetVM();
     auto referenceStorage = MakePandaUnique<EtsReferenceStorage>(etsVm->GetGlobalObjectStorage(), allocator, false);
@@ -29,13 +30,12 @@ Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> PandaEtsNapiEnv::Create
         return Unexpected("Cannot allocate EtsReferenceStorage");
     }
 
-    // Do not use PandaUniquePtr here as the environment could be accessed from daemon threads after destroy of runtime
-    auto etsNapiEnv = std::make_unique<PandaEtsNapiEnv>(coroutine, std::move(referenceStorage));
-    if (etsNapiEnv.get() == nullptr) {
+    auto *etsNapiEnv = allocator->New<PandaEtsNapiEnv>(coroutine, std::move(referenceStorage));
+    if (etsNapiEnv == nullptr) {
         return Unexpected("Cannot allocate PandaEtsNapiEnv");
     }
 
-    return Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *>(std::move(etsNapiEnv));
+    return Expected<PandaEtsNapiEnv *, const char *>(etsNapiEnv);
 }
 
 PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
@@ -44,7 +44,10 @@ PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
 }
 
 PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
-    : EtsEnv {napi::GetNativeInterface()}, coroutine_(coroutine), referenceStorage_(std::move(referenceStorage))
+    : ani_env {ani::GetInteractionAPI()},
+      EtsEnv {napi::GetNativeInterface()},
+      coroutine_(coroutine),
+      referenceStorage_(std::move(referenceStorage))
 {
 }
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,15 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/ImportAll.sts ${CMAKE_CURRENT_BINARY_DIR}/ImportAll ImportAll EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/expAnnotationsSrcort.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/MixedImport.sts ${CMAKE_CURRENT_BINARY_DIR}/MixedImport MixedImport EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/SeveralImport.sts ${CMAKE_CURRENT_BINARY_DIR}/SeveralImport SeveralImport EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.sts)
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/SingleNameImport.sts ${CMAKE_CURRENT_BINARY_DIR}/SingleNameImport SingleNameImport EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.sts)
-
-
+run_int_ets_code(annotation_import_export_test_1 ${CMAKE_CURRENT_BINARY_DIR}/test1 SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/ImportAll.ets;
+	${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.ets)
+run_int_ets_code(annotation_import_export_test_2 ${CMAKE_CURRENT_BINARY_DIR}/test2 SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/MixedImport.ets;
+	${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.ets)
+run_int_ets_code(annotation_import_export_test_3 ${CMAKE_CURRENT_BINARY_DIR}/test3 SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/SeveralImport.ets;
+	${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.ets)
+run_int_ets_code(annotation_import_export_test_4 ${CMAKE_CURRENT_BINARY_DIR}/test4 SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/SingleNameImport.ets;
+	${CMAKE_CURRENT_SOURCE_DIR}/AnnotationsSrc.ets)

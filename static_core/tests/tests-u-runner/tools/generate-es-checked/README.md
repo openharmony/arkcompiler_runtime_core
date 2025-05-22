@@ -5,8 +5,8 @@ This generator works as follows:
 - recursively traverses configuration tree and looks for [properties](#configuration-properties)
 - generates `.ts` file based upon configuration
 - executes `.ts` file to get json of golden answers
-- generates `.sts` file with in-place assertions
-- (optionally) launches this `.sts` file, note that test-u-runner should be used outside of initial testing
+- generates `.ets` file with in-place assertions
+- (optionally) launches this `.ets` file, note that test-u-runner should be used outside of initial testing
 
 Example of how to run:
 ```bash

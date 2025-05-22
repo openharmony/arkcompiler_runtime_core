@@ -103,11 +103,9 @@ cases:
 
     - defs: |-
           class Outer {
-              class Inner {
-                  public ok = true;
-              }
+              public ok = true;
           }
-          type Shortcut = Outer.Inner;
+          type Shortcut = Outer
       use: |-
           let v: Shortcut = new Shortcut();
           let ok: boolean = v.ok;
@@ -252,7 +250,7 @@ cases:
 
     - defs: |-
           class C<out T> {
-            fld: T
+            readonly fld: T
             constructor(p: T) {
                 this.fld = p
             }

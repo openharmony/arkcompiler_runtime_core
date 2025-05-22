@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,17 +19,21 @@ import {ICodeReq} from '../../models/code';
 interface IState {
     isRunLoading: boolean
     isCompileLoading: boolean
+    isShareLoading: boolean
     code: string
     compileRes: ICodeReq | null
     runRes: ICodeReq | null
+    verifierRes: ICodeReq | null
 }
 
 const initialState: IState = {
     isRunLoading: false,
     isCompileLoading: false,
-    code: '',
+    isShareLoading: false,
+    code: 'console.log("Hello, ArkTS!");',
     compileRes: null,
-    runRes: null
+    runRes: null,
+    verifierRes: null
 };
 
 const codeSlice = createSlice({
@@ -41,6 +45,9 @@ const codeSlice = createSlice({
         },
         setCompileLoading(state, action: PayloadAction<boolean>) {
             state.isCompileLoading = action.payload;
+        },
+        setShareLoading(state, action: PayloadAction<boolean>) {
+            state.isShareLoading = action.payload;
         },
         setCode(state, action: PayloadAction<string>) {
             state.code = action.payload;
@@ -57,6 +64,7 @@ const codeSlice = createSlice({
 export const {
     setRunLoading,
     setCompileLoading,
+    setShareLoading,
     setCode,
     setCompileRes,
     setRunRes

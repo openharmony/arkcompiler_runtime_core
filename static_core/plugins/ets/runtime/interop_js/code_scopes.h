@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,7 @@ public:
         auto ctx = InteropCtx::Current(coro_);
 
         if constexpr (IN_ETS_MANAGED) {
-            ASSERT(coro_->IsManagedCode());
-        } else if (UNLIKELY(!coro_->IsManagedCode())) {
-            coro_->ManagedCodeBegin();
-            switched_ = true;
+            ctx->UpdateInteropStackInfoIfNeeded();
         }
         ctx->CallStack().AllocRecord(coro_->GetCurrentFrame(), descr);
     }
@@ -42,16 +39,10 @@ public:
         auto ctx = InteropCtx::Current(EtsCoroutine::CastFromThread(coro_));
 
         ctx->CallStack().PopRecord();
-        if constexpr (IN_ETS_MANAGED) {
-            ASSERT(coro_->IsManagedCode());
-        } else if (UNLIKELY(switched_)) {
-            coro_->ManagedCodeEnd();
-        }
     }
 
 private:
     EtsCoroutine *coro_;
-    bool switched_ = false;
 
     NO_COPY_SEMANTIC(InteropCodeScope);
     NO_MOVE_SEMANTIC(InteropCodeScope);
@@ -59,46 +50,27 @@ private:
 
 using InteropCodeScopeETS = InteropCodeScope<true>;
 
-class JSNapiEnvScope {
-public:
-    explicit JSNapiEnvScope(InteropCtx *ctx, napi_env newEnv) : ctx_(ctx)
-    {
-        saved_ = ctx_->jsEnv_;
-        ctx_->SetJSEnv(newEnv);
-    }
-
-    ~JSNapiEnvScope()
-    {
-        ctx_->SetJSEnv(saved_);
-    }
-
-private:
-    NO_COPY_SEMANTIC(JSNapiEnvScope);
-    NO_MOVE_SEMANTIC(JSNapiEnvScope);
-
-    InteropCtx *ctx_ {};
-    napi_env saved_ {};
-};
-
 class InteropCodeScopeJS {
 public:
-    InteropCodeScopeJS(EtsCoroutine *coro, napi_env env, char const *descr = nullptr)
-        : codeScope_(coro, descr), jsEnvScope_(InteropCtx::Current(coro), env)
-    {
-    }
+    explicit InteropCodeScopeJS(EtsCoroutine *coro, char const *descr = nullptr) : codeScope_(coro, descr) {}
 
-    ~InteropCodeScopeJS() = default;
+    ~InteropCodeScopeJS()
+    {
+        auto ctx = InteropCtx::Current();
+        ctx->UpdateInteropStackInfoIfNeeded();
+    }
 
 private:
     NO_COPY_SEMANTIC(InteropCodeScopeJS);
     NO_MOVE_SEMANTIC(InteropCodeScopeJS);
 
     InteropCodeScope<false> codeScope_;
-    JSNapiEnvScope jsEnvScope_;
 };
 
+// CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INTEROP_CODE_SCOPE_JS(coro, env) InteropCodeScopeJS codeScope(coro, env, __PRETTY_FUNCTION__)
+#define INTEROP_CODE_SCOPE_JS(coro) InteropCodeScopeJS codeScope(coro, __PRETTY_FUNCTION__)
+// CC-OFFNXT(G.PRE.02-CPP) for readability and ease of use
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INTEROP_CODE_SCOPE_ETS(coro) InteropCodeScopeETS codeScope(coro, __PRETTY_FUNCTION__)
 

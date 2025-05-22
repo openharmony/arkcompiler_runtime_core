@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-const { getTestClass } = require('ets_proxy.test.js');
+const {
+    getTestClass,
+} = require('ets_proxy.test.abc');
+
 const PrimitivesAccess = getTestClass('PrimitivesAccess');
 const PrimitivesAccessStatic = getTestClass('PrimitivesAccessStatic');
+
 
 let pa = new PrimitivesAccess();
 let pas = PrimitivesAccessStatic;
@@ -57,7 +61,7 @@ const cap = (str = '') => str[0].toUpperCase() + str.substring(1);
 	testSInt('long', 53);
 	testAccessors('float', 0, 1, 1.25, 0x1234 / 256, Infinity, NaN);
 	testAccessors('double', 0, 1, 1.33333, 0x123456789a / 256, Infinity, NaN);
-	testUInt('char', 16);
+	testAccessors('char', '1');
 	testAccessors('boolean', false, true);
 }
 

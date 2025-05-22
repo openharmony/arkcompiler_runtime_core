@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include <array>
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
-#include "libpandabase/os/failure_retry.h"
 #include "libpandabase/os/thread.h"
-#include "libpandabase/os/mem.h"
 #include "libpandabase/utils/logger.h"
-#include "libpandabase/utils/span.h"
+#ifdef PANDA_TARGET_OHOS
+#include "libpandabase/os/mem.h"
+#endif
 #ifdef PANDA_TARGET_UNIX
 #include <fcntl.h>
 #include <pthread.h>

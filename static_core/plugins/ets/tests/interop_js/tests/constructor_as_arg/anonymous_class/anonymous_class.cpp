@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,32 +22,32 @@ class EtsAnonymousClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_anonymous_class_create_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassCreateClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnonymousClassCreateClass"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_create_anonymous_class_create_class_with_arg_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassCreateClassWithArgFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnonymousClassCreateClassWithArgFromTs"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_create_anonymous_class_create_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassCreateClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnonymousClassCreateClassFromTs"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_anonymous_class_create_main_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassCreateMainInstance"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnonymousClassCreateMainInstance"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_create_anonymous_class_create_IIFE_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassCreateIIFEClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnonymousClassCreateIIFEClassFromTs"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_anonymous_class_create_IIFE_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassCreateIIFEInstance"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnonymousClassCreateIIFEInstance"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -20,7 +20,9 @@ import {
     setErrLogs,
     setOutLogs,
     setRunErrLogs,
-    setRunOutLogs
+    setRunOutLogs,
+    setVerifierErrLogs,
+    setVerifierOutLogs
 } from '../store/slices/logs';
 import { RootState } from '../store';
 
@@ -31,6 +33,8 @@ export enum ELogType {
     RUN_ERR = 'runErr',
     DISASM_OUT = 'disasmOut',
     DISASM_ERR = 'disasmErr',
+    VERIFIER_OUT = 'verifierOut',
+    VERIFIER_ERR = 'verifierErr',
 }
 
 export interface ILog {
@@ -40,19 +44,25 @@ export interface ILog {
 }
 
 export interface ICompileData {
-    exit_code: number;
+    exit_code?: number;
     output?: string;
     error?: string;
 }
 
 export interface IRunData {
-    exit_code: number;
+    exit_code?: number;
     output?: string;
     error?: string;
 }
 
 export interface IDisassemblyData {
-    exit_code: number;
+    exit_code?: number;
+    output?: string;
+    error?: string;
+}
+
+export interface IVerifierData {
+    exit_code?: number;
     output?: string;
     error?: string;
 }
@@ -62,14 +72,13 @@ export interface IApiResponse {
         compile?: ICompileData;
         run?: IRunData;
         disassembly?: IDisassemblyData;
+        verifier?: IVerifierData;
     };
 }
 
 export const handleResponseLogs = createAsyncThunk(
     'logs/compileLogs',
     async (response: IApiResponse, thunkAPI) => {
-        const state: RootState = thunkAPI.getState() as RootState;
-        const logsState = state.logs;
 
         const handleLog = (
             data: ICompileData | IRunData | IDisassemblyData | undefined,
@@ -79,10 +88,57 @@ export const handleResponseLogs = createAsyncThunk(
             setOutAction: (logs: ILog[]) => { payload: ILog[]; type: string },
             setErrAction: (logs: ILog[]) => { payload: ILog[]; type: string }
         ): void => {
+            const state: RootState = thunkAPI.getState() as RootState;
+            const logsState = state.logs;
+
             if (!data) {
                 return;
             }
-            if (data.exit_code === 0 && data.output) {
+            if (data.output && data.error) {
+                thunkAPI.dispatch(setOutAction(
+                    logsState.out.concat([{
+                        message: data.output,
+                        isRead: false,
+                        from: logTypeOut
+                    }])
+                ));
+                thunkAPI.dispatch(setOutLogs(
+                    logsState.out.concat({
+                        message: data.output,
+                        isRead: false,
+                        from: logTypeOut
+                    })
+                ));
+                thunkAPI.dispatch(setErrAction(
+                    logsState.err.concat([{
+                        message: data.error,
+                        isRead: false,
+                        from: logTypeErr
+                    }])
+                ));
+                thunkAPI.dispatch(setErrLogs(
+                    logsState.err.concat({
+                        message: data.error,
+                        isRead: false,
+                        from: logTypeErr
+                    })
+                ));
+            } else if (data.error) {
+                thunkAPI.dispatch(setErrAction(
+                    logsState.err.concat([{
+                        message: data.error,
+                        isRead: false,
+                        from: logTypeErr
+                    }])
+                ));
+                thunkAPI.dispatch(setErrLogs(
+                    logsState.err.concat({
+                        message: data.error,
+                        isRead: false,
+                        from: logTypeErr
+                    })
+                ));
+            } else if (data.exit_code === 0 && data.output && !data.error) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
                         message: data.output,
@@ -97,7 +153,7 @@ export const handleResponseLogs = createAsyncThunk(
                         from: logTypeOut
                     })
                 ));
-            } else if (data.exit_code === 0) {
+            } else if (data.exit_code === 0 && !data.error && !data.output) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
                         message: successMessage,
@@ -112,32 +168,17 @@ export const handleResponseLogs = createAsyncThunk(
                         from: logTypeOut
                     })
                 ));
-            } else if (data.exit_code !== 0 && data.error) {
+            } else if (data.exit_code && data.exit_code !== 0) {
                 thunkAPI.dispatch(setErrAction(
                     logsState.err.concat({
-                        message: data.error,
+                        message: data.output || `Exit code: ${data.exit_code}`,
                         isRead: false,
                         from: logTypeErr
                     })
                 ));
                 thunkAPI.dispatch(setErrLogs(
                     logsState.err.concat({
-                        message: data.error,
-                        isRead: false,
-                        from: logTypeErr
-                    })
-                ));
-            } else if (data.exit_code !== 0 && data.output) {
-                thunkAPI.dispatch(setErrAction(
-                    logsState.err.concat({
-                        message: data.output,
-                        isRead: false,
-                        from: logTypeErr
-                    })
-                ));
-                thunkAPI.dispatch(setErrLogs(
-                    logsState.err.concat({
-                        message: data.output,
+                        message: data.output || `Exit code: ${data.exit_code}`,
                         isRead: false,
                         from: logTypeErr
                     })
@@ -171,5 +212,16 @@ export const handleResponseLogs = createAsyncThunk(
             setDisasmOutLogs,
             setDisasmErrLogs
         );
+
+        if (response.data.verifier?.error || response.data.verifier?.output) {
+            handleLog(
+                response.data.verifier,
+                ELogType.VERIFIER_OUT,
+                ELogType.VERIFIER_ERR,
+                '',
+                setVerifierOutLogs,
+                setVerifierErrLogs
+            );
+        }
     }
 );

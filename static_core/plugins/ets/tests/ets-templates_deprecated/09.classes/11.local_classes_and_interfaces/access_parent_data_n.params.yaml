@@ -1,0 +1,272 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |-
+      // Local class has access to class scope it is stored at. Field check.
+      class A {
+        public x: int = 1;
+        class B {
+          bar(): int {
+            return x + 1;
+          }
+        }
+        foo(): int {
+          b: B = new B();
+          return b.bar();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.foo() == 2);
+      }
+
+  - decl: |-
+      // Local class has access to class scope it is stored at. Const field check.
+      class A {
+        const x: int = 1;
+        class B {
+          bar(): int {
+            return x + 1;
+          }
+        }
+        foo(): int {
+          b: B = new B();
+          return b.bar();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.foo() == 2);
+      }
+
+  - decl: |-
+      // Local class has access to class scope it is stored at. Readonly field check.
+      class A {
+        readonly x: int = 1;
+        class B {
+          bar(): int {
+            return x + 1;
+          }
+        }
+        foo(): int {
+          b: B = new B();
+          return b.bar();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.foo() == 2);
+      }
+
+  - decl: |-
+      // Local class has access to class scope it is stored at. Static field check.
+      class A {
+        static x: int = 1;
+        class B {
+          bar(): int {
+            return A.x + 1;
+          }
+        }
+        foo(): int {
+          b: B = new B();
+          return b.bar();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.foo() == 2);
+      }
+
+  - decl: |-
+      // Local class has access to class scope it is stored at. Protected method check.
+      class A {
+        protected x(): int {
+          return 1;
+        }
+
+        class B {
+          bar(): int {
+            return x() + 1;
+          }
+        }
+
+        foo(): int {
+          b: B = new B();
+          return b.bar();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.foo() == 2);
+      }
+
+  - decl: |-
+      // Local class has access to class scope it is stored at. Private method check.
+      class A {
+        private x(): int {
+          return 1;
+        }
+
+        class B {
+          bar(): int {
+            return x() + 1;
+          }
+        }
+
+        foo(): int {
+          b: B = new B();
+          return b.bar();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assertTrue(a.foo() == 2);
+      }
+
+  - decl: |-
+      // Access to function variable by local class from if clause
+      function foo(): int {
+        if(1) {
+          let i: int = 1;
+          class A {
+            a: int;
+            constructor() {
+              let this.a = i;
+            }
+          let a: A = new A();
+          return a.a;
+        }
+        return 0;
+      }
+    check: |-
+      function main() {
+        assertTrue(foo() == 1);
+      }
+
+  - decl: |-
+      // Access to function variable by local class from switch
+      function foo(): int {
+        let i: int = 1;
+        switch(1) {
+          case 1:
+            let ii: int = 2;
+            class A {
+              a: int;
+              constructor() {
+                let this.a = i + ii;
+              }
+            }
+            i = new A().a;
+            break;
+          default:
+            assertTrue(false);
+        }
+        return i;
+      }
+    check: |-
+      function main() {
+        assertTrue(foo() == 3);
+      }
+
+  - decl: |-
+      // Access to function variable by local class from for loop
+      function foo(): int {
+        let i: int = 1;
+        for( let j = 0; j < 1; j++) {
+          let ii: int = 2;
+          class A {
+            a: int;
+            constructor() {
+              let this.a = i * ii;
+            }
+          return new A().a;
+        }
+        return 0;
+      }
+    check: |-
+      function main() {
+        assertTrue(foo() == 2);
+      }
+
+  - decl: |-
+      // Access to function variable by local class from try-catch clause
+      function foo(): int {
+        let i: int = 1;
+        try {
+          let ii: int = 2;
+          class A {
+            a: int;
+            constructor() {
+              let this.a = i + ii;
+            }
+          return new A().a;
+        } catch(e) {
+          assertTrue(false);
+        };
+        return 0;
+      }
+    check: |-
+      function main() {
+        assertTrue(foo() == 3);
+      }
+
+  - decl: |-
+      // Access to function variable by local class from try-catch clause
+      function foo(): int {
+        let i: int = 1;
+        try {
+          assertTrue(false);
+        } catch(e) {
+          let ii: int = 2;
+          class A {
+            a: int;
+            constructor() {
+              let this.a = i + ii;
+            }
+          return new A().a;
+        };
+        return 0;
+      }
+    check: |-
+      function main() {
+        assertTrue(foo() == 3);
+      }
+
+  - decl: |-
+      // Access to function variable for local class and interface
+      foo(i: int, j: int): int {
+
+        interface I {
+          bar(): int {
+            return i;
+          }
+        }
+        class A implements I {
+          k: int = j;
+        }
+
+        c: A = new A();
+        return c.bar() + c.k;
+      }
+    check: |-
+      function main() {
+        assertTrue(a.foo(1,2) == 3);
+      }

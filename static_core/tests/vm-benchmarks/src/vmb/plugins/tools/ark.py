@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -50,6 +50,12 @@ class Tool(ToolBase):
             an_files.append(stdlib)
         if OptFlags.INT in self.flags:
             opts += '--compiler-enable-jit=false '
+        if OptFlags.INT_CPP in self.flags:
+            opts += '--interpreter-type=cpp '
+        if OptFlags.INT_IRTOC in self.flags:
+            opts += '--interpreter-type=irtoc '
+        if OptFlags.INT_LLVM in self.flags:
+            opts += '--interpreter-type=llvm '
         if OptFlags.GC_STATS in self.flags:
             opts += '--print-gc-statistics --log-components=gc ' \
                     '--log-level=info --log-stream=file ' \
@@ -59,12 +65,13 @@ class Tool(ToolBase):
         if OptFlags.AOT in self.flags:
             an_files.append('{an}')
         if an_files:
-            opts += '--enable-an:force --aot-files=' + \
+            enable_an = '' if Target.HOST == self.target else '--enable-an:force'
+            opts += f'{enable_an} --aot-files=' + \
                     ":".join(an_files) + ' '
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.ark} ' \
                    f'--boot-panda-files={self.etsstdlib} ' \
                    f'--load-runtimes=ets {opts} {self.custom} ' \
-                   '{options} {abc} ETSGLOBAL::main'
+                   '{options} {abc} {name}.ETSGLOBAL::main'
 
     @property
     def name(self) -> str:
@@ -89,7 +96,7 @@ class Tool(ToolBase):
         if OptFlags.GC_STATS in bu_flags:
             gclog = str(abc.with_suffix('.gclog.txt'))
         arkts_cmd = self.cmd.format(
-            abc=abc, options=options, gclog=gclog, an=an)
+            name=bu.name, abc=abc, options=options, gclog=gclog, an=an)
         res = self.x_run(arkts_cmd)
         bu.parse_run_output(res)
         if OptFlags.JIT_STATS in bu_flags:

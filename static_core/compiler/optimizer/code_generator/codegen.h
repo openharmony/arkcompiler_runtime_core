@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -323,6 +323,7 @@ public:
     void StoreFreeSlot(Reg src);
 
     ssize_t GetStackOffset(Location location);
+    ssize_t GetBaseOffset(Location location);
     MemRef GetMemRefForSlot(Location location);
     Reg SpReg() const;
     Reg FpReg() const;
@@ -387,6 +388,7 @@ protected:
     void EmitResolveStatic(ResolveStaticInst *resolver);
     void EmitCallResolvedStatic(CallInst *call);
     void EmitCallDynamic(CallInst *call);
+    void EmitCallNative(CallInst *call);
     void FinalizeCall(CallInst *call);
 
     uint32_t GetVtableShift();

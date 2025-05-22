@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -163,14 +163,8 @@ class StsStressTest(StressTest):
     def collect(self) -> List[str]:
         logger = stress_common.create_logger()
         tests: List[str] = []
-        tests.extend(
-            collect_from(
-                self.ets_dir, lambda name: name.endswith('.sts') and not name.
-                startswith('.')))
-        tests.extend(
-            collect_from(
-                self.stdlib_dir, lambda name: name.endswith('.sts') and
-                not name.startswith('.')))
+        tests.extend(collect_from(self.ets_dir, lambda name: name.endswith('.ets') and not name.startswith('.')))
+        tests.extend(collect_from(self.stdlib_dir, lambda name: name.endswith('.ets') and not name.startswith('.')))
 
         random.shuffle(tests)
         logger.debug('Total tests: %s', len(tests))

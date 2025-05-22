@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,10 +27,16 @@ namespace ark {
 struct CoroutineManagerConfig {
     static constexpr uint32_t WORKERS_COUNT_AUTO = 0;
 
-    /// JS-compatible mode, affects async functions, await() and other things
-    bool emulateJs = false;
+    /// enable the experimental task execution interface
+    bool enableDrainQueueIface = false;
+    /// enable migration
+    bool enableMigration = false;
+    /// migrate coroutines that resumed from wait
+    bool migrateAwakenedCoros = false;
     /// Number of coroutine workers for the N:M mode
     uint32_t workersCount = WORKERS_COUNT_AUTO;
+    /// Limit on the number of exclusive coroutines workers
+    uint32_t exclusiveWorkersLimit = 0;
     /// Collection of performance statistics
     bool enablePerfStats = false;
 };
@@ -50,12 +56,20 @@ enum class CoroutineLaunchMode {
 /// @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types.
 enum class CoroutineSchedulingPolicy {
     /// choose the least busy worker
-    DEFAULT,
+    ANY_WORKER,
     /**
-     * same as default but exclude the main worker from available hosts on launch and
+     * same as any_worker but exclude the main worker from available hosts on launch and
      * disallow non_main -> main transitions on migration
      */
     NON_MAIN_WORKER
+};
+
+/// @brief defines the selection policy for a worker.
+enum class WorkerSelectionPolicy {
+    /// choose the least busy worker
+    LEAST_LOADED,
+    /// choose the busiest worker
+    MOST_LOADED
 };
 
 /**
@@ -88,9 +102,11 @@ public:
      * If ep_info is provided then the newly created coroutine will execute the specified method and do all the
      * initialization/finalization steps, including completion_event management and notification of waiters.
      *
+     * @param type type of work, which the coroutine performs: whether it is a mutator, a schedule loop or some other
+     * thing
      */
     using CoroutineFactory = Coroutine *(*)(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *ctx,
-                                            std::optional<Coroutine::EntrypointInfo> &&epInfo);
+                                            std::optional<Coroutine::EntrypointInfo> &&epInfo, Coroutine::Type type);
 
     NO_COPY_SEMANTIC(CoroutineManager);
     NO_MOVE_SEMANTIC(CoroutineManager);
@@ -124,8 +140,19 @@ public:
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      */
-    virtual Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                              CoroutineLaunchMode mode) = 0;
+    virtual bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                        CoroutineLaunchMode mode) = 0;
+    /**
+     * @brief The public coroutine creation and execution interface. Switching to the newly created coroutine occurs
+     * immediately. Coroutine launch mode should correspond to the use of parent's worker.
+     *
+     * @param completionEvent the event used for notification when coroutine completes (also used to pass the return
+     * value to the language-level entities)
+     * @param entrypoint the coroutine entrypoint method
+     * @param arguments array of coroutine's entrypoint arguments
+     */
+    virtual bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                                   CoroutineLaunchMode mode) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
@@ -158,7 +185,8 @@ public:
      *
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
-    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name);
+    Coroutine *CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent, PandaString name,
+                                             Coroutine::Type type);
     void DestroyEntrypointlessCoroutine(Coroutine *co);
 
     /// Destroy a coroutine with an entrypoint
@@ -172,11 +200,54 @@ public:
     void SetSchedulingPolicy(CoroutineSchedulingPolicy policy);
     CoroutineSchedulingPolicy GetSchedulingPolicy() const;
 
-    /// @return true if js compatibility mode is selected for the coroutine manager
-    virtual bool IsJsMode()
+    virtual bool IsMainWorker(Coroutine *coro) const = 0;
+
+    virtual Coroutine *CreateExclusiveWorkerForThread([[maybe_unused]] Runtime *runtime, [[maybe_unused]] PandaVM *vm)
+    {
+        return nullptr;
+    }
+
+    virtual bool DestroyExclusiveWorker()
     {
         return false;
     }
+
+    /**
+     * @brief This method creates the required number of worker threads
+     * @param howMany - number of common workers to be created
+     */
+    virtual void CreateWorkers([[maybe_unused]] size_t howMany, [[maybe_unused]] Runtime *runtime,
+                               [[maybe_unused]] PandaVM *vm)
+    {
+    }
+
+    /**
+     * @brief This method finalizes the required number of common worker threads
+     * @param howMany - number of common workers to be finalized
+     * NOTE: Make sure that howMany is less than the number of active workers
+     */
+    virtual void FinalizeWorkers([[maybe_unused]] size_t howMany, [[maybe_unused]] Runtime *runtime,
+                                 [[maybe_unused]] PandaVM *vm)
+    {
+    }
+
+    virtual bool IsExclusiveWorkersLimitReached() const
+    {
+        return false;
+    }
+
+    /* events */
+    /// Should be called when a coro makes the non_active->active transition (see the state diagram in coroutine.h)
+    virtual void OnCoroBecameActive([[maybe_unused]] Coroutine *co) {};
+    /**
+     * Should be called when a running coro is being blocked or terminated, i.e. makes
+     * the active->non_active transition (see the state diagram in coroutine.h)
+     */
+    virtual void OnCoroBecameNonActive([[maybe_unused]] Coroutine *co) {};
+    /// Should be called at the beginning of the VM native interface call
+    virtual void OnNativeCallEnter([[maybe_unused]] Coroutine *co) {};
+    /// Should be called at the end of the VM native interface call
+    virtual void OnNativeCallExit([[maybe_unused]] Coroutine *co) {};
 
     /* debugging tools */
     /**
@@ -191,8 +262,6 @@ public:
     /// @return true if coroutine switch for the current worker is disabled
     virtual bool IsCoroutineSwitchDisabled() = 0;
 
-    virtual bool IsMainWorker(Coroutine *coro) const = 0;
-
 protected:
     /// Create native coroutine context instance (implementation dependent)
     virtual CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) = 0;
@@ -206,7 +275,7 @@ protected:
      * @return nullptr if resource limit reached or something went wrong; ptr to the coroutine otherwise
      */
     Coroutine *CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                       PandaVector<Value> &&arguments, PandaString name);
+                                       PandaVector<Value> &&arguments, PandaString name, Coroutine::Type type);
     /// Returns number of existing coroutines
     virtual size_t GetCoroutineCount() = 0;
     /**
@@ -225,7 +294,8 @@ protected:
 private:
     CoroutineFactory coFactory_ = nullptr;
 
-    CoroutineSchedulingPolicy schedulingPolicy_ = CoroutineSchedulingPolicy::DEFAULT;
+    mutable os::memory::Mutex policyLock_;
+    CoroutineSchedulingPolicy schedulingPolicy_ GUARDED_BY(policyLock_) = CoroutineSchedulingPolicy::NON_MAIN_WORKER;
 
     // coroutine id management
     os::memory::Mutex idsLock_;

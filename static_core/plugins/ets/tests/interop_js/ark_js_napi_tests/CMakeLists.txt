@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -53,6 +53,7 @@ add_ark_js_napi_interop_test(create_etsvm_test MODULE ets_interop_js_napi)
 
 panda_ets_interop_js_plugin(sample_function
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/sample_function.cpp
+    OUTPUT_SUFFIX ".node"
 )
 panda_target_include_directories(sample_function
     PUBLIC ${PANDA_ROOT}/

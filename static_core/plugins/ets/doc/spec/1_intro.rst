@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -51,7 +51,6 @@ The following major aspects characterize the |LANG| language as a whole:
    -  Methods (class instance or interface methods) with a dynamically dispatched
       overriding mechanism.
 
-
    Common in many (if not all) modern programming languages, object orientation
    enables powerful, flexible, safe, clear, and adequate software design.
 
@@ -59,10 +58,12 @@ The following major aspects characterize the |LANG| language as a whole:
    object
    object orientation
    object-oriented
-   OOP (object-oriented programming)
+   object-oriented programming
+   OOP
    inheritance
    overriding
    abstraction
+   dynamically dispatched overriding
 
 -  Modularity
 
@@ -83,6 +84,8 @@ The following major aspects characterize the |LANG| language as a whole:
 .. index::
    modularity
    compilation unit
+   component programming
+   maintainability
    module
    package
 
@@ -107,9 +110,10 @@ The following major aspects characterize the |LANG| language as a whole:
    abstract notion
    abstract data structure
    genericity
-   type parameterization
+   type parameterized entity
    compile-time feature
-   generics
+   program entity
+   generic
    template
 
 -  Multitargeting
@@ -123,19 +127,25 @@ The following major aspects characterize the |LANG| language as a whole:
 
 .. index::
    multitargeting
+   cross-platform development
 
 |LANG| is designed as a part of the modern language manifold. To provide an
 efficient and safely executable code, the language takes flexibility and
-power from |TS| and its predecessor JavaScript, and the static
-typing principle from Java and Kotlin. The overall design keeps the |LANG|’
+power from |TS| and its predecessor |JS|, and the static
+typing principle from Java and Kotlin. The overall design keeps the |LANG|
 syntax style similar to that of those languages, and some of its important
 constructs are almost identical to theirs on purpose.
 
 In other words, there is a significant *common subset* of features of |LANG|
-on the one hand, and of |TS|, JavaScript, Java, and Kotlin on the other.
-Consequently, the |LANG|’ style and constructs are no puzzle for the |TS| and
+on the one hand, and of |TS|, |JS|, Java, and Kotlin on the other.
+Consequently, the |LANG| style and constructs are no puzzle for the |TS| and
 Java users who can sense the meaning of most constructs of the new language
 even if not understand them completely.
+
+.. index::
+   construct
+   syntax
+   common subset
 
 This stylistic and semantic similarity permits smoothly migrating the
 applications originally written in |TS|, Java, or Kotlin to |LANG|.
@@ -158,9 +168,14 @@ automatic or semi-automatic transition from other languages (currently,
 |TS| and Java) to |LANG|.
 
 .. index::
-   object
+   high-level language
+   low-level representation
+   storage management
+   dynamically created object
+   deallocation
    migration
    automatic transition
+   semi-automatic transition
 
 |
 
@@ -175,6 +190,8 @@ a program.
 
 .. index::
    context-free grammar
+   lexical structure
+   syntactic structure
 
 The |LANG| lexical notation defines a set of productions (rules) that specify
 the structure of the elementary language parts called *tokens*. All tokens are
@@ -184,6 +201,7 @@ numbers/numeric literals, operator signs, delimiters), special characters
 *alphabet*.
 
 .. index::
+   lexical notation
    production
    token
    lexical element
@@ -200,9 +218,9 @@ numbers/numeric literals, operator signs, delimiters), special characters
 
 The tokens defined by the lexical grammar are terminal symbols of syntactic
 notation. Syntactic notation defines a set of productions starting from the
-goal symbol *compilationUnit* (see :ref:`Modules and Compilation Units`). It is
-a sentence that consists of a single distinguished nonterminal, and describes
-how sequences of tokens can form syntactically correct programs.
+goal symbol *compilationUnit* (see :ref:`Compilation Units`). It is a sentence
+that consists of a single distinguished nonterminal, and describes how
+sequences of tokens can form syntactically correct programs.
 
 .. index::
    production
@@ -220,7 +238,7 @@ production:
 - Is comprised of an abstract symbol (*nonterminal*) as its left-hand side,
   and a sequence of one or more *nonterminal* and *terminal* symbols as its
   *right-hand side*.
-- Includes the '``:``' character as a separator between the left- and 
+- Includes the '``:``' character as a separator between the left- and
   right-hand sides, and the '``;``' character as the end marker.
 
 .. index::
@@ -233,7 +251,7 @@ production:
    separator
    end marker
 
-Grammars draw terminal symbols from a fixed width form. Starting from the
+Grammars draw terminal symbols from a fixed-width form. Starting from the
 goal symbol, grammars specify the language itself, i.e., the set of possible
 sequences of terminal symbols that can result from repeatedly replacing
 any nonterminal in the left-hand-side sequence for a right-hand side of the
@@ -243,6 +261,8 @@ production.
    goal symbol
    nonterminal
    terminal symbol
+   sequence
+   production
 
 Grammars can use the following additional symbols---sometimes called
 *metasymbols*---in the right-hand side of a grammar production along
@@ -289,10 +309,13 @@ All grammar rules are presented in the Grammar section (see
 :ref:`Grammar Summary`) of this specification.
 
 .. index::
-   terminal
+   structuring rule
+   sequence
+   terminal symbol
    expression
    grammar rule
 
+|
 
 Terms and Definitions
 *********************
@@ -490,10 +513,6 @@ as used in other languages, application areas, or industries.
      -- one of lexical input elements that separate tokens from one another
      in order to improve the source code readability and avoid ambiguities.
 
-   overload signature
-      -- signatures that have several function (or method) headers with the same
-      name and different signatures, and are followed by one implementation.
-
    widening conversion
      -- a conversion that causes no loss of information about the overall
      magnitude of a numeric value.
@@ -511,25 +530,22 @@ as used in other languages, application areas, or industries.
      specified type.
 
    method
-     -- ordered 4-tuple consisting of type parameters, argument types,
-     return type, and a ``throws``/``rethrows`` clause.
+     -- ordered 3-tuple consisting of type parameters, argument types,
+     return type.
 
    abstract declaration
      -- ordinary interface method declaration that specifies the method’s name
      and signature.
 
    truthiness
-     -- concept that extends the Boolean logic to operands and results
-     of non-Boolean types, and allows handling the value of a valid
+     -- concept that extends the boolean logic to operands and results
+     of non-boolean types, and allows handling the value of a valid
      expression of a non-void type as ``Truthy`` or ``Falsy``, depending on
      the kind of the value type.
 
-   default ``catch`` clause
-     -- ``catch`` clause that has its exception parameter type omitted, and can
-     handle any exception or error that is not handled by a preceding clause.
-
    overloading
-     -- situation where different methods inherited by or declared in the same
+     -- situation where different functions 
+     or methods inherited by or declared in the same
      class or interface have the same name but different signatures.
 
    shadowing
@@ -541,7 +557,7 @@ as used in other languages, application areas, or industries.
       the entire package, and in other packages if exported.
 
    module level scope
-     -- a name that is applicable for separate modules only. It is accessible
+     -- a name that is applicable to separate modules only. It is accessible
      throughout the entire module and in other packages if exported.
 
    class level scope
@@ -579,7 +595,7 @@ as used in other languages, application areas, or industries.
      -- de-nesting of all nested types in a union type to present them in
      the form of a flat line that has no more union types included.
 
-   fit (into)
+   fit into (v.)
      -- belong, or be implicitly convertible (see :ref:`Widening Primitive Conversions`)
      to an entity.
 
@@ -598,9 +614,6 @@ as used in other languages, application areas, or industries.
      -- a component produced by, inherited from, and dependent from another
      component.
 
-
 .. raw:: pdf
 
    PageBreak
-
-

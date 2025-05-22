@@ -12,17 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-function NumberOrStringEquality(a: number | string, b: number | string): boolean { return {} as any; };
-(NumberOrStringEquality as any) = ETSGLOBAL.NumberOrStringEquality;
-export {NumberOrStringEquality};
-exports.NumberOrStringEquality = NumberOrStringEquality;
-
-
+export declare function NumberOrStringEquality(a: number | string, b: number | string): boolean;
+export declare let u: union;
+export type union = number | string;

@@ -16,14 +16,12 @@
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 3
 
-   /2_esobject
-   /3_primitive_conversions
-   /4_reference_conversions
-   /5_js_features
-   /6_arkts_features
-   /7_js_std_library
-   /8_arkts_std_library
-   /9_async_and_concurrency_js_features
-   /10_async_and_concurrency_arkts_features
+   /1_introduction
+   /3_conversions_type_check
+   /4_conversions_runtime
+   /5_js
+   /6_ts
+   /7_arkts
+   /99_backlog_features_recheck

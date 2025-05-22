@@ -1,1 +1,1 @@
-ETS Warning: Suggest 'final' modifier for class. [suggest_final_for_classes_1.sts:15:7]
+Warning: Suggest 'final' modifier for class. [suggest_final_for_classes_1.ets:15:7]

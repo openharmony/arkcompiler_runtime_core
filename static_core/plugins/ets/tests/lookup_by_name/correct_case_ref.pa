@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,22 +25,24 @@
     std.core.String foo
 }
 
-.function std.core.String A.baz(A a0) <access.function=public> {
+.function std.core.String A.<get>baz(A a0) <access.function=public> {
     lda.str "42"
     return.obj
 }
 
-.function void C.bar(C a0, std.core.String a1) <access.function=public> {
+.function void C.<set>bar(C a0, std.core.String a1) <access.function=public> {
     lda.obj a1
     stobj.obj a0, C.foo
     return.void
 }
 
-.union_field std.core.String bar
-.union_field std.core.String baz
+.record $NamedAccessMeta-std.core.String {
+    std.core.String bar
+    std.core.String baz
+}
 
 .function void test(std.core.Object a0, std.core.Object a1) {
-    ets.ldobj.name.obj a0, baz
+    ets.ldobj.name.obj a0, $NamedAccessMeta-std.core.String.baz
     sta.obj v0
     lda.str "42"
     sta.obj v1
@@ -48,11 +50,11 @@
     movi v0, 1
     jne v0, fail_test
     lda.str "44"
-    ets.stobj.name.obj a1, bar
+    ets.stobj.name.obj a1, $NamedAccessMeta-std.core.String.bar
     return.void
 fail_test:
     lda.str "88"
-    ets.stobj.name.obj a1, bar
+    ets.stobj.name.obj a1, $NamedAccessMeta-std.core.String.bar
     return.void
 }
 

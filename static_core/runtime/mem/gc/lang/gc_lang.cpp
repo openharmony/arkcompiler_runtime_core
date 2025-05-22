@@ -116,8 +116,7 @@ void GCLang<LanguageConfig>::PreRunPhasesImpl()
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (LanguageConfig::MT_MODE != MT_MODE_SINGLE) {
-        // Run monitor deflation first
-        GetPandaVm()->GetMonitorPool()->DeflateMonitors();
+        GetPandaVm()->FreeInternalResources();
     }
 }
 

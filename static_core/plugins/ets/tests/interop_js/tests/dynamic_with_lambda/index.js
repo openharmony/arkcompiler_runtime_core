@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 const MAX_ARGUMENTS = 2;
-class A {
+export class A {
 	bar(func, ...args) {
 		if (args.length > MAX_ARGUMENTS) {
 			throw new Error('Too many method arguments');
@@ -22,5 +22,3 @@ class A {
 		return func(...args.slice(0, MAX_ARGUMENTS));
 	}
 }
-
-exports.A = A;

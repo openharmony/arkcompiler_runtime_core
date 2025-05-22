@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -286,9 +286,17 @@ bool GC::NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) 
     // should become visible
     auto newCounter = gcCounter_.load(std::memory_order_acquire);
     ASSERT(newCounter >= counterBeforeWaiting);
+    bool isSensitiveState = false;
+    // NOTE(malinin, 24305): refactor appstate to be moved to another method
+#if defined(PANDA_TARGET_OHOS)
+    auto currentState = this->GetPandaVm()->GetAppState();
+    isSensitiveState = currentState.GetState() == AppState::State::SENSITIVE_START;
+#endif
+    bool shouldRunAccordingToAppState = !(isSensitiveState && task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
     // Atomic with acquire order reason: data race with last_cause_ with dependecies on reads after the load which
     // should become visible
-    return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason);
+    return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason) &&
+           shouldRunAccordingToAppState;
 }
 
 bool GC::GCPhasesPreparation(const GCTask &task)
@@ -421,10 +429,6 @@ GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettin
 
 bool GC::CheckGCCause(GCTaskCause cause) const
 {
-    // Cross reference cause is only suitable for XGC
-    if (cause == GCTaskCause::CROSSREF_CAUSE) {
-        return false;
-    }
     return cause != GCTaskCause::INVALID_CAUSE;
 }
 
@@ -529,8 +533,10 @@ void GC::PostponeGCStart()
 void GC::PostponeGCEnd()
 {
     ASSERT(IsPostponeGCSupported());
-    ASSERT(IsPostponeEnabled());
+    // Don't check IsPostponeEnabled because runtime can be created
+    // during app launch. In this case PostponeGCStart is not called.
     isPostponeEnabled_ = false;
+    gcWorker_->OnPostponeGCEnd();
 }
 
 bool GC::IsPostponeEnabled() const
@@ -978,23 +984,24 @@ bool GC::IsGenerational() const
 void GC::GCListenerManager::AddListener(GCListener *listener)
 {
     os::memory::LockHolder lh(listenerLock_);
-    newListeners_.insert(listener);
+    newListeners_.push_back(listener);
 }
 
 void GC::GCListenerManager::RemoveListener(GCListener *listener)
 {
     os::memory::LockHolder lh(listenerLock_);
-    listenersForRemove_.insert(listener);
+    listenersForRemove_.push_back(listener);
 }
 
 void GC::GCListenerManager::NormalizeListenersOnStartGC()
 {
     os::memory::LockHolder lh(listenerLock_);
     for (auto *listenerForRemove : listenersForRemove_) {
-        if (newListeners_.find(listenerForRemove) != newListeners_.end()) {
-            newListeners_.erase(listenerForRemove);
+        auto it = std::find(newListeners_.begin(), newListeners_.end(), listenerForRemove);
+        if (it != newListeners_.end()) {
+            newListeners_.erase(it);
         }
-        auto it = currentListeners_.find(listenerForRemove);
+        it = std::find(currentListeners_.begin(), currentListeners_.end(), listenerForRemove);
         if (it != currentListeners_.end()) {
             LOG(DEBUG, GC) << "Remove listener for GC: " << listenerForRemove;
             currentListeners_.erase(it);
@@ -1003,7 +1010,7 @@ void GC::GCListenerManager::NormalizeListenersOnStartGC()
     listenersForRemove_.clear();
     for (auto *newListener : newListeners_) {
         LOG(DEBUG, GC) << "Add new listener for GC: " << newListener;
-        currentListeners_.insert(newListener);
+        currentListeners_.push_back(newListener);
     }
     newListeners_.clear();
 }

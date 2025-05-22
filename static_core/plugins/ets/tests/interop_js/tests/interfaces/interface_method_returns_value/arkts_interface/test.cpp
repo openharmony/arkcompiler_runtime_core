@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,31 +23,31 @@ class EtsInteropInterfaceReturnsValuesJsToArkts : public EtsInteropTest {};
 /* test set employing interface imported from JS as is */
 TEST_F(EtsInteropInterfaceReturnsValuesJsToArkts, test_interface_returns_literal_type_imported)
 {
-    [[maybe_unused]] auto ret = CallJsMethod<bool>("getLiteralTypeReturn", "./index.js");
+    [[maybe_unused]] auto ret = CallJsMethod<bool>("getLiteralTypeReturn", "index");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesJsToArkts, test_interface_returns_native_array_type_imported)
 {
-    [[maybe_unused]] auto ret = CallJsMethod<bool>("getNativeArrayReturn", "./index.js");
+    [[maybe_unused]] auto ret = CallJsMethod<bool>("getNativeArrayReturn", "index");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesJsToArkts, DISABLED_test_interface_returns_record_type_imported)
 {
-    [[maybe_unused]] auto ret = CallJsMethod<bool>("getRecordTypeReturn", "./index.js");
+    [[maybe_unused]] auto ret = CallJsMethod<bool>("getRecordTypeReturn", "index");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesJsToArkts, test_interface_returns_ref_type_imported)
 {
-    [[maybe_unused]] auto ret = CallJsMethod<bool>("getRefTypeReturn", "./index.js");
+    [[maybe_unused]] auto ret = CallJsMethod<bool>("getRefTypeReturn", "index");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesJsToArkts, test_interface_returns_union_type_imported)
 {
-    [[maybe_unused]] auto ret = CallJsMethod<bool>("getUnion", "./index.js");
+    [[maybe_unused]] auto ret = CallJsMethod<bool>("getUnion", "index");
     ASSERT_EQ(ret, true);
 }
 

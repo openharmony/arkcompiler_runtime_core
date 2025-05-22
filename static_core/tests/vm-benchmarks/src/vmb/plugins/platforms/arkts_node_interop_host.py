@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 # pylint: disable=duplicate-code
 import logging
+from pathlib import Path
 from typing import List, Optional
 from vmb.helpers import ensure_env_var
 from vmb.platform import PlatformBase
@@ -35,6 +36,7 @@ class Platform(PlatformBase):
         super().__init__(args)
         self.es2panda = self.tools_get('es2panda')
         self.node = self.tools_get('node_interop')
+        self.ark = self.tools_get('ark')
 
     @property
     def name(self) -> str:
@@ -51,17 +53,50 @@ class Platform(PlatformBase):
     @property
     def langs(self) -> List[str]:
         """Use this lang plugins."""
-        return ['sts']
+        return ['interop']
 
     @property
     def template(self) -> Optional[GenSettings]:
         """Special template."""
-        return GenSettings(src={'.sts'},
-                           template='Template-ArkTS-NodeJS-Interop.js',
-                           out='.js',
-                           link_to_src=True)
+        # NOTE these are only to trace mis-use of the API, real settings
+        #  are dependent on interop mode and established later when it gets known.
+        return GenSettings(src={'interop_src'},
+                           template='interop_template',
+                           out='interop_out',
+                           link_to_src=False)
 
     def run_unit(self, bu: BenchUnit) -> None:
+        log.trace('Run bench unit tags %s path: %s', bu.tags if hasattr(bu, 'tags') else None, bu.path)
+        if not hasattr(bu, 'tags'):
+            log.debug('Bench unit does not have tags, looking for freestyle benchmarks to run')
+            self.run_generated(bu)
+            return
+        if not bu.doclet_src:
+            raise ValueError(f'Sources for unit {bu.name} are not set')
+        if 'bu_a2a' in bu.tags:
+            self.es2panda(bu)
+            self.ark(bu)
+            return
+        if 'bu_a2j' in bu.tags:
+            self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.js {bu.path}')
+            self.es2panda(bu)
+            self.run_generated(bu)
+            return
+        if 'bu_j2j' in bu.tags:
+            self.sh.run(f'cp -f -n {str(bu.doclet_src.parent)}/*.js {bu.path}')
+            self.node(bu)
+            return
+        if 'bu_j2a' in bu.tags:
+            self.sh.run(f'cp -f {str(bu.doclet_src.parent)}/*.ets {bu.path}')
+            bu.src_for_es2panda_override = Path(f'{bu.path}/*.ets')  # wildcard here assumes single ets file
+            self.run_generated(bu)
+            return
+
+        log.warning('Valid generated interop mode not found in tags: %s',
+                    ','.join(bu.tags))
+        return
+
+    def run_generated(self, bu: BenchUnit) -> None:
         abc = bu.src('.abc')
         if not abc.is_file():
             self.es2panda(bu)

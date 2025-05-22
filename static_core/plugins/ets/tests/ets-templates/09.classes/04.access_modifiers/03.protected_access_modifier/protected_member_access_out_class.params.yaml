@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
- # List of valid class members
+ # List of class members
 members:
   - { body: "x: int;", call: "x" }
   - { body: "getValue(): int { return 1; }", call: "getValue()" }
-  - { body: "inner class C { static x: int = 1; }", call: "C.x" }
+  - { body: "class C { static x: int = 1; }", call: "C.x" }
   - { body: "enum Color {Red, Green}", call: "Color.Red.ordinal()" }

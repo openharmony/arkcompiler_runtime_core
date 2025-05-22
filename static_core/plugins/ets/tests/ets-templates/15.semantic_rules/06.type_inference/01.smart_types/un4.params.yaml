@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,13 +14,13 @@
 cases:
     # var init
     - code: |-
-          let v: Object[]|undefined = new X[1]
+          let v: X[]|undefined = new X[1]
           res = v[0].int2str(123) + 4 == '1234'
 
     # var assignment
     - code: |-
-          let v: Object[]|undefined = undefined
-          v = [new X()] as X[]
+          let v: X[]|undefined = undefined
+          v = [new X]
           res = v[0].int2str(987) + 6 == '9876'
 
     # function argument
@@ -29,8 +29,8 @@ cases:
               return p[0].int2str(123)
           }
       code: |-
-          let v: Object[]|undefined = undefined
-          v = [new X()] as X[]
+          let v: X[]|undefined = undefined
+          v = [new X]
           res = foo(v) == '123'
 
     # constructor argument
@@ -42,7 +42,7 @@ cases:
               }
           }
       code: |-
-          let v: Object[]|undefined = undefined
+          let v: X[]|undefined = undefined
           v = new X[1]
           let a: A = new A(v)
           res = a.fld[0].int2str(123) == '123'
@@ -55,14 +55,14 @@ cases:
               }
           }
       code: |-
-          let v: Object[]|null = null
+          let v: X[]|null = null
           let a: A = new A()
           v = new X[1]
           res = a.meth(v) == '123'
 
     # array literal element
     - code: |-
-          let v: Object[]|null = new Error[1]
+          let v: X[]|null = new X[1]
           let arr: X[][]
           v = new X[1]
           arr = [v, v]
@@ -81,6 +81,6 @@ cases:
 
     # lambda argument
     - code: |-
-          let v: Object[]|undefined|null = undefined
+          let v: X[]|undefined|null = undefined
           v = new X[1]
           res = ((p: X[]): string => { return p[0].int2str(777) })(v) == '777'

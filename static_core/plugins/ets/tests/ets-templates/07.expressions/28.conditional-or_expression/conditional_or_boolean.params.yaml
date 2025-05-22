@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,18 +17,18 @@ cases:
     decl: |-
       let a: Boolean = false;
       let b: Boolean = false;
-      assert((a || b) == false);
+      assertTrue((a || b) == false);
 
   - doc: Conditional OR for 2x Boolean - false true
     decl: |-
       let a: Boolean = false;
       let b: Boolean = true;
-      assert((a || b) == true);
+      assertTrue((a || b) == true);
 
   - doc: Conditional OR for 2x Boolean - true unknown
     decl: |-
       let a: Boolean = true;
-      assert((a || fail()) == true);
+      assertTrue((a || fail()) == true);
 
   - doc: Conditional OR for 4x Boolean - false false false false
     decl: |-
@@ -36,7 +36,7 @@ cases:
       let b: Boolean = false;
       let c: Boolean = false;
       let d: Boolean = false;
-      assert((a || b || c || d) == false)
+      assertTrue((a || b || c || d) == false)
 
   - doc: Conditional OR for 4x Boolean - false false false true
     decl: |-
@@ -44,23 +44,23 @@ cases:
       let b: Boolean = false;
       let c: Boolean = false;
       let d: Boolean = true;
-      assert((a || b || c || d) == true)
+      assertTrue((a || b || c || d) == true)
 
   - doc: Conditional OR for 4x Boolean - false false true unknown
     decl: |-
       let a: Boolean = false;
       let b: Boolean = false;
       let c: Boolean = true;
-      assert((a || b || c || fail()) == true)
+      assertTrue((a || b || c || fail()) == true)
 
   - doc: Conditional OR for 4x Boolean - false true unknown...
     decl: |-
       let a: Boolean = false;
       let b: Boolean = true;
-      assert((a || b || fail() || fail()) == true)
+      assertTrue((a || b || fail() || fail()) == true)
 
   - doc: Conditional OR for 4x Boolean - true unknown...
     decl: |-
       let a: Boolean = true;
-      assert((a || fail() || fail() || fail()) == true)
+      assertTrue((a || fail() || fail() || fail()) == true)
 

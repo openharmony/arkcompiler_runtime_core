@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,18 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(union_tests
-    union_class_01
-)
+set(unions_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
+set(unions_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
-set(union_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
-set(union_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
+add_custom_target(ets_test_suite_unions)
 
-foreach(test ${union_tests})
-    set(test_out_dir "${union_tests_out_dir}/${test}")
-
-    set(test_src "${union_tests_in_dir}/${test}.sts")
-    set(target ets_test_suite_union_${test})
-
-    run_ets_code_verifier(${test_src} ${test_out_dir} ${target}-ets-verifier)
+file(GLOB test_files "${unions_tests_in_dir}/*.ets")
+foreach(filename ${test_files})
+    get_filename_component(test_file "${filename}" NAME)
+    get_filename_component(test_name "${test_file}" NAME_WE)
+    add_ets_test(ets_test_suite_unions
+                 SKIP_ARM32_COMPILER
+                 FILE ${test_file}
+                 TEST_NAME "unions_${test_name}"
+                 MODE "INT" "JIT" "AOT"
+    )
 endforeach()

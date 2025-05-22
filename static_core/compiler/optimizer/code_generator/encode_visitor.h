@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,7 +152,7 @@ protected:
 
     static void VisitNullPtr(GraphVisitor *visitor, Inst *inst);
 
-    static void VisitLoadUndefined(GraphVisitor *visitor, Inst *inst);
+    static void VisitLoadUniqueObject(GraphVisitor *visitor, Inst *inst);
 
     static void VisitIf(GraphVisitor *visitor, Inst *inst);
 
@@ -299,6 +299,9 @@ protected:
 
     static void VisitCallDynamic(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitCallNative(GraphVisitor *visitor, Inst *inst);
+    static void VisitWrapObjectNative(GraphVisitor *visitor, Inst *inst);
+
     static void VisitLoadConstantPool(GraphVisitor *visitor, Inst *inst);
     static void VisitLoadLexicalEnv(GraphVisitor *visitor, Inst *inst);
 
@@ -360,6 +363,8 @@ protected:
     static void VisitLiveOut(GraphVisitor *visitor, Inst *inst);
     static void VisitCallIndirect(GraphVisitor *visitor, Inst *inst);
     static void VisitCall(GraphVisitor *visitor, Inst *inst);
+
+    static void VisitResolveByName(GraphVisitor *visitor, Inst *inst);
 
     // Dyn inst.
     static void VisitCompareAnyType(GraphVisitor *visitor, Inst *inst);

@@ -12,28 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-enum Letter {
+export declare enum Letter {
     A = 0,
     B = 1,
     C = 2,
 }
-export {Letter};
-exports.Letter = Letter;
-
-enum Color {
+export declare enum Color {
     Red = 0,
     Green = -100,
     Blue = -99,
     White = 0,
 }
-export {Color};
-exports.Color = Color;
-
+export declare enum Color1 {
+    Red = 0,
+    Green = 1,
+    Blue = 2,
+}
+export declare enum UserRole {
+    Admin = "admin",
+    Editor = "editor",
+    Viewer = "viewer",
+    Guest = "guest",
+}
+export type MyTuple = [number , string , boolean];

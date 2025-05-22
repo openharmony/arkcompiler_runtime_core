@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,17 +14,17 @@
 ---
 cases:
     - use: |-
-          assert(cls.foo("a", "b") == "a")
+          assertTrue(cls.foo("a", "b") == "a")
     - use: |-
-          assert(cls.foo(null, 1) === 1)
+          assertTrue(cls.foo(null, 1) === 1)
     - use: |-
           let a = 42
-          assert(cls.foo(a, new Object()) == 42)
+          assertTrue(cls.foo(a, new Object()) == 42)
     - use: |-
           let a = new Object()
           let b = "abc"
-          assert(cls.foo(a, b) instanceof String)
+          assertTrue(cls.foo(a, b) instanceof String)
     - use: |-
           let a = new Object()
           let b = "abc"
-          assert(cls.foo(b, a) instanceof String)
+          assertTrue(cls.foo(b, a) instanceof String)

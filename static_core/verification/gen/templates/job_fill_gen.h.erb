@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,10 +76,10 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %   combination_flags = ""
 %   mnemonic = i.mnemonic.split('.').map { |p| p == '64' ? 'Wide' : p.capitalize }.join
 %   value_dispatch = "HANDLE_" + i.handler_name
-%   if i.properties.any? {  |prop| ['method_id', 'field_id', 'type_id', 'literalarray_id'].include?(prop)}
+%   if i.properties.any? {  |prop| ['method_id', 'static_method_id', 'field_id', 'static_field_id', 'type_id', 'literalarray_id'].include?(prop)}
 %                           combination_flags += "Prop_"
 %   end
-%   if (['method_id', 'field_id', 'type_id', 'string_id', 'literalarray_id'] & i.properties).size > 1
+%   if (['method_id', 'static_method_id', 'field_id', 'static_field_id', 'type_id', 'string_id', 'literalarray_id'] & i.properties).size > 1
 %       cache_api = "cache_api"
 %       combination_flags += "CacheApi_"
 %   else
@@ -89,11 +89,14 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %   if i.properties.include?('literalarray_id')
 %       combination_flags += "LiteralliId_"
 %   end
-%   if i.properties.include?('method_id')
+%   if i.properties.include?('method_id') || i.properties.include?('static_method_id')
 %       combination_flags += "MethodId_"
 %   end
 %   if i.properties.include?('field_id')
 %       combination_flags += "FieldId_"
+%   end
+%   if i.properties.include?('static_field_id')
+%       combination_flags += "StaticFieldId_"
 %   end
 %   if i.properties.include?('type_id')
 %       if i.verification.include?('type_id_class')
@@ -193,7 +196,7 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %        bool isArrayConstructorCall = false;
 %        if (calledMethod == nullptr) {
 %            panda_file::MethodDataAccessor const mda(*pf, methodId);
-%            Class * cls = classLinker_->GetClass(*method_, mda.GetClassId());
+%            Class *cls = classLinker_->GetClass(*method_, mda.GetClassId(), &errorHandler);
 %
 %            auto opcode = inst.GetOpcode();
 %            if (UNLIKELY((opcode == BytecodeInstructionSafe::Opcode::INITOBJ_SHORT_V4_V4_ID16 ||
@@ -216,10 +219,23 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %                                 << method_->GetFullName();
 %        }
 %    }),
+%    "StaticFieldId_" => %({
+%        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
+%        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
+%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, true, &errorHandler);
+%        if (cachedField != nullptr) {
+%            AddField(inst.GetOffset(), cachedField);
+%            auto classType = Type {cachedField->GetClass()};
+%            AddType(inst.GetOffset(), &classType);
+%        } else {
+%            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve field with id " << id << " in method "
+%                                 << method_->GetFullName();
+%        }
+%    }),
 %    "FieldId_" => %({
 %        ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
 %        auto fieldIdx = method_->GetClass()->ResolveFieldIndex(id.AsIndex());
-%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, &errorHandler);
+%        auto *cachedField = classLinker_->GetField(*method_, fieldIdx, false, &errorHandler);
 %        if (cachedField != nullptr) {
 %            AddField(inst.GetOffset(), cachedField);
 %            auto classType = Type {cachedField->GetClass()};

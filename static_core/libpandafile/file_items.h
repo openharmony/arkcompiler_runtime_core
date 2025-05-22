@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -489,13 +489,23 @@ public:
         return class_;
     }
 
+    uint32_t GetAccessFlags() const
+    {
+        return accessFlags_;
+    }
+
+    bool IsStatic() const
+    {
+        return (accessFlags_ & ACC_STATIC) != 0;
+    }
+
     ~BaseFieldItem() override = default;
 
     DEFAULT_MOVE_SEMANTIC(BaseFieldItem);
     DEFAULT_COPY_SEMANTIC(BaseFieldItem);
 
 protected:
-    PANDA_PUBLIC_API BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type);
+    PANDA_PUBLIC_API BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags);
 
     PANDA_PUBLIC_API size_t CalculateSize() const override;
 
@@ -505,6 +515,7 @@ private:
     BaseClassItem *class_;
     StringItem *name_;
     TypeItem *type_;
+    uint32_t accessFlags_;
 };
 
 class FieldItem : public BaseFieldItem {
@@ -569,11 +580,6 @@ public:
         return &runtimeTypeAnnotations_;
     }
 
-    uint32_t GetAccessFlags() const
-    {
-        return accessFlags_;
-    }
-
     DEFAULT_MOVE_SEMANTIC(FieldItem);
     DEFAULT_COPY_SEMANTIC(FieldItem);
 
@@ -584,7 +590,6 @@ private:
 
     bool WriteTaggedData(Writer *writer);
 
-    uint32_t accessFlags_;
     ValueItem *value_ {nullptr};
     std::vector<AnnotationItem *> runtimeAnnotations_;
     std::vector<AnnotationItem *> annotations_;
@@ -1301,7 +1306,10 @@ public:
 
 class ForeignFieldItem : public BaseFieldItem {
 public:
-    ForeignFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type) : BaseFieldItem(cls, name, type) {}
+    ForeignFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags)
+        : BaseFieldItem(cls, name, type, accessFlags)
+    {
+    }
 
     ~ForeignFieldItem() override = default;
 
@@ -1797,6 +1805,13 @@ public:
         return std::get<T>(value_);
     }
 
+    // NOTE: fix in follow-up patch (#24481)
+    template <class T>
+    void SetValueUnsafe(T value)
+    {
+        std::get<T>(value_) = value;
+    }
+
     size_t CalculateSize() const override;
 
     size_t Alignment() override;
@@ -1832,6 +1847,12 @@ public:
     PANDA_PUBLIC_API void AddItems(const std::vector<LiteralItem> &item);
 
     const std::vector<LiteralItem> &GetItems() const
+    {
+        return items_;
+    }
+
+    // NOTE: fix in follow-up patch (#24481)
+    std::vector<LiteralItem> &GetItemsUnsafe()
     {
         return items_;
     }

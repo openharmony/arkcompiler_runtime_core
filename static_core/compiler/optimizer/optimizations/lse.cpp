@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -456,14 +456,39 @@ public:
         }
     }
 
+    bool CheckRefMustAlias(Inst *first, Inst *second)
+    {
+        ASSERT(first != second);
+        auto firstIt = eliminations_.find(first);
+        if (firstIt != eliminations_.end() && firstIt->second.origin == second) {
+            return true;
+        }
+        auto secondIt = eliminations_.find(second);
+        if (secondIt != eliminations_.end() && secondIt->second.origin == first) {
+            return true;
+        }
+        return firstIt != eliminations_.end() && secondIt != eliminations_.end() &&
+               firstIt->second.val == secondIt->second.val;
+    }
+
+    bool CheckInstMustAlias(Inst *first, Inst *second)
+    {
+        aliasCalls_++;
+        auto aliasType = aa_.CheckInstAlias<true>(first, second);
+        COMPILER_LOG(DEBUG, LSE_OPT) << "Alias type: " << aliasType;
+        if (aliasType != ALIAS_IF_BASE_EQUALS) {
+            return aliasType == MUST_ALIAS;
+        }
+        return CheckRefMustAlias(first->GetDataFlowInput(0), second->GetDataFlowInput(0));
+    }
+
 private:
     /// Return a MUST_ALIASed heap entry, nullptr if not present.
     const Lse::HeapValue *GetHeapValue(Inst *inst)
     {
         auto &blockHeap = heaps_[GetEquivClass(inst)].first.at(inst->GetBasicBlock());
         for (auto &entry : blockHeap) {
-            aliasCalls_++;
-            if (aa_.CheckInstAlias(inst, entry.first) == MUST_ALIAS) {
+            if (CheckInstMustAlias(inst, entry.first)) {
                 return &entry.second;
             }
         }
@@ -607,7 +632,7 @@ private:
 };
 
 /// Returns true if the instruction invalidates the whole heap
-static bool IsHeapInvalidatingInst(Inst *inst)
+bool Lse::IsHeapInvalidatingInst(Inst *inst)
 {
     switch (inst->GetOpcode()) {
         case Opcode::LoadStatic:
@@ -731,9 +756,8 @@ void Lse::MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps)
 }
 
 /// Merge heap values for passed block from its direct predecessors.
-size_t Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk)
+void Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk)
 {
-    size_t aliasCalls = 0;
     for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
         auto &heap = (*heaps)[eqClass].first;
         auto &blockHeap = heap.at(block);
@@ -745,14 +769,12 @@ size_t Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Mar
             predIt++;
         }
 
-        aliasCalls += ProcessHeapValuesForBlock(&heap, block, phiFixupMrk);
+        ProcessHeapValuesForBlock(&heap, block, phiFixupMrk);
     }
-    return aliasCalls;
 }
 
-size_t Lse::ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiFixupMrk)
+void Lse::ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiFixupMrk)
 {
-    size_t aliasCalls = 0;
     auto &blockHeap = heap->at(block);
     auto preds = block->GetPredsBlocks();
     auto predIt = preds.begin();
@@ -766,7 +788,7 @@ size_t Lse::ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiF
         auto heapIt = blockHeap.begin();
         while (heapIt != blockHeap.end()) {
             auto &heapValue = heapIt->second;
-            auto predInstIt = ProcessPredecessorHeap(predHeap, heapValue, block, heapIt->first, &aliasCalls);
+            auto predInstIt = ProcessPredecessorHeap(predHeap, heapValue, block, heapIt->first);
             if (predInstIt == predHeap.end() ||
                 !ProcessHeapValues(heapValue, block, predInstIt, {preds.begin(), predIt}, phiFixupMrk)) {
                 heapIt = blockHeap.erase(heapIt);
@@ -780,19 +802,17 @@ size_t Lse::ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiF
         }
         predIt++;
     }
-    return aliasCalls;
 }
 
 Lse::BasicBlockHeapIter Lse::ProcessPredecessorHeap(BasicBlockHeap &predHeap, HeapValue &heapValue, BasicBlock *block,
-                                                    Inst *curInst, size_t *aliasCalls)
+                                                    Inst *curInst)
 {
     auto predInstIt = predHeap.begin();
     while (predInstIt != predHeap.end()) {
         if (predInstIt->first == curInst) {
             break;
         }
-        (*aliasCalls)++;
-        if (GetGraph()->CheckInstAlias(curInst, predInstIt->first) == MUST_ALIAS) {
+        if (visitor_->CheckInstMustAlias(curInst, predInstIt->first)) {
             break;
         }
         predInstIt++;
@@ -1111,10 +1131,9 @@ void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps, const BasicBl
     }
 }
 
-void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phiFixupMrk)
+void Lse::ProcessAllBBs(HeapEqClasses *heaps, Marker phiFixupMrk)
 {
     InstVector invs(GetGraph()->GetLocalAllocator()->Adapter());
-    size_t aliasCalls = 0;
     for (auto block : GetGraph()->GetBlocksRPO()) {
         COMPILER_LOG(DEBUG, LSE_OPT) << "Processing BB " << block->GetId();
         InitializeHeap(block, heaps);
@@ -1122,34 +1141,34 @@ void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phiFix
         if (block->IsLoopHeader()) {
             MergeHeapValuesForLoop(block, heaps);
         } else {
-            aliasCalls += MergeHeapValuesForBlock(block, heaps, phiFixupMrk);
+            MergeHeapValuesForBlock(block, heaps, phiFixupMrk);
         }
 
         for (auto inst : block->Insts()) {
             if (IsHeapReadingInst(inst)) {
-                visitor.SetHeapAsRead(block);
+                visitor_->SetHeapAsRead(block);
             }
             if (IsHeapInvalidatingInst(inst)) {
                 COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " invalidates heap";
-                visitor.InvalidateHeap(block);
+                visitor_->InvalidateHeap(block);
             } else if (inst->IsLoad()) {
-                visitor.VisitLoad(inst);
+                visitor_->VisitLoad(inst);
             } else if (inst->IsStore()) {
-                visitor.VisitStore(inst, InstStoredValue(inst));
+                visitor_->VisitStore(inst, InstStoredValue(inst));
             }
             if (inst->IsIntrinsic()) {
-                visitor.VisitIntrinsic(inst, &invs);
+                visitor_->VisitIntrinsic(inst, &invs);
             }
             // If we call Alias Analysis too much, we assume that this block has too many
             // instructions and we should bail in favor of performance.
-            if (visitor.GetAliasAnalysisCallCount() + aliasCalls > Lse::AA_CALLS_LIMIT) {
+            if (visitor_->GetAliasAnalysisCallCount() > Lse::AA_CALLS_LIMIT) {
                 COMPILER_LOG(DEBUG, LSE_OPT) << "Exiting BB " << block->GetId() << ": too many Alias Analysis calls";
-                visitor.InvalidateHeap(block);
+                visitor_->InvalidateHeap(block);
                 break;
             }
         }
-        visitor.ClearLocalValuesFromHeap(block);
-        visitor.ResetLimits();
+        visitor_->ClearLocalValuesFromHeap(block);
+        visitor_->ResetLimits();
     }
 }
 
@@ -1170,16 +1189,17 @@ bool Lse::RunImpl()
     GetGraph()->RunPass<LoopAnalyzer>();
     GetGraph()->RunPass<AliasAnalysis>();
 
-    LseVisitor visitor(GetGraph(), &heaps);
+    LseVisitor visitorInstance(GetGraph(), &heaps);
+    visitor_ = &visitorInstance;
     auto markerHolder = MarkerHolder(GetGraph());
     auto phiFixupMrk = markerHolder.GetMarker();
 
-    ProcessAllBBs(visitor, &heaps, phiFixupMrk);
+    ProcessAllBBs(&heaps, phiFixupMrk);
 
-    visitor.FinalizeShadowedStores();
-    visitor.FinalizeLoops(GetGraph(), rpoLoops_);
+    visitor_->FinalizeShadowedStores();
+    visitor_->FinalizeLoops(GetGraph(), rpoLoops_);
 
-    auto &eliminated = visitor.GetEliminations();
+    auto &eliminated = visitor_->GetEliminations();
     GetGraph()->RunPass<DominatorsTree>();
     if (hoistLoads_) {
         for (auto loop : GetGraph()->GetRootLoop()->GetInnerLoops()) {
@@ -1187,7 +1207,7 @@ bool Lse::RunImpl()
         }
     }
 
-    DeleteInstructions(visitor.GetEliminations());
+    DeleteInstructions(visitor_->GetEliminations());
 
     for (auto block : GetGraph()->GetBlocksRPO()) {
         FixupPhisInBlock(block, phiFixupMrk);

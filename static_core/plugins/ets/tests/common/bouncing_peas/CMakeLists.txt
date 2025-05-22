@@ -15,12 +15,12 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_jit_aot_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/bouncing_peas.sts ${CMAKE_CURRENT_BINARY_DIR} bouncing_peas_ets)
-run_deterministic_test(${CMAKE_CURRENT_SOURCE_DIR}/bouncing_peas.sts ${CMAKE_CURRENT_BINARY_DIR} bouncing_peas_ets)
+run_int_jit_aot_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/bouncing_peas.ets ${CMAKE_CURRENT_BINARY_DIR} bouncing_peas_ets)
+run_deterministic_test(${CMAKE_CURRENT_SOURCE_DIR}/bouncing_peas.ets ${CMAKE_CURRENT_BINARY_DIR} bouncing_peas_ets)
 
 set(OUTPUT_ABC ${CMAKE_CURRENT_BINARY_DIR}/bouncing_peas_unit_native.abc)
 compile_ets_code(
-    ${CMAKE_CURRENT_SOURCE_DIR}/bouncing_peas_unit_native.sts
+    ${CMAKE_CURRENT_SOURCE_DIR}/bouncing_peas_unit_native.ets
     ${OUTPUT_ABC}
     bouncing_peas_unit_ets_abc
 )

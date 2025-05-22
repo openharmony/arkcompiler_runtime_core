@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -56,7 +56,7 @@ cases:
           const n3: Number = Number.MAX_VALUE
 
           const v = `A ${b1} B ${b2} C ${b3} D ${s1} E ${s2} F ${s3} G ${i1} H ${i2} I ${i3} J ${l1} K ${l2} L ${l3} M ${f1} N ${f2} P ${f3} Q ${n1} R ${n2} S ${n3}`
-          const expected = 'A -128 B 0 C 127 D -32768 E 0 F 32767 G -2147483648 H 0 I 2147483647 J -9223372036854775808 K 0 L 9223372036854775807 M 1.4013e-45 N 0 P 3.40282e+38 Q 4.94066e-324 R 0 S 1.79769e+308'
+          const expected = 'A -128 B 0 C 127 D -32768 E 0 F 32767 G -2147483648 H 0 I 2147483647 J -9223372036854775808 K 0 L 9223372036854775807 M 1e-45 N 0 P 3.4028235e+38 Q 5e-324 R 0 S 1.7976931348623157e+308'
 
     - use: |-
           const f1: float = Float.NEGATIVE_INFINITY

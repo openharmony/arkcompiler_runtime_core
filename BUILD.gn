@@ -229,12 +229,14 @@ config("ark_config") {
     cflags_cc += [
       "-O3",
       "-ggdb3",
+      "-gdwarf-4",
       "-fno-omit-frame-pointer",
       "-D_GLIBCXX_ASSERTIONS",
     ]
     cflags_c += [
       "-O3",
       "-ggdb3",
+      "-gdwarf-4",
       "-fno-omit-frame-pointer",
       "-D_GLIBCXX_ASSERTIONS",
     ]
@@ -242,6 +244,7 @@ config("ark_config") {
     cflags_cc += [
       "-Og",
       "-ggdb3",
+      "-gdwarf-4",
     ]
   }
 

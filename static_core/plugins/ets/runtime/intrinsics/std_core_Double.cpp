@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "unicode/numberformatter.h"
 #include "unicode/unistr.h"
 #include "utils/utf.h"
-
+#include "plugins/ets/runtime/intrinsics/helpers/dtoa_helper.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 
 namespace ark::ets::intrinsics {
@@ -59,6 +59,11 @@ EtsString *StdCoreDoubleToString(double number, int radix)
     return cache->GetOrCache(EtsCoroutine::GetCurrent(), number);
 }
 
+bool IsNegativeNan(double x)
+{
+    return std::isnan(x) && std::signbit(x);
+}
+
 EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
 {
     ASSERT(obj != nullptr && locale != nullptr);
@@ -76,8 +81,8 @@ EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
     }
 
     double objValue = helpers::GetStdDoubleArgument(obj);
-    if (std::isnan(objValue)) {
-        return EtsString::CreateFromMUtf8("NaN");
+    if (IsNegativeNan(objValue)) {
+        objValue = std::numeric_limits<double>::quiet_NaN();
     }
 
     icu::number::LocalizedNumberFormatter locNumFmt = icu::number::NumberFormatter::withLocale(loc);
@@ -164,17 +169,61 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
     }
 
     // truncate the arg val
-    double digitAbs = std::isnan(d) ? 0 : d;
-    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
+    double digit = std::isnan(d) ? 0 : d;
+    digit = (digit >= 0) ? std::floor(digit) : std::ceil(digit);
     // Check range
-    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
+    if (UNLIKELY(digit > helpers::MAX_FRACTION || digit < helpers::MIN_FRACTION)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
                           panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
                           "toExponential argument must be between 0 and 100");
         return nullptr;
     }
 
-    return helpers::DoubleToExponential(objValue, static_cast<int>(digitAbs));
+    return helpers::DoubleToExponential(objValue, static_cast<int>(digit));
+}
+
+EtsString *StdCoreDoubleToExponentialWithNoDigit(ObjectHeader *obj)
+{
+    double objValue = helpers::GetStdDoubleArgument(obj);
+    // If x is NaN, return the String "NaN".
+    if (std::isnan(objValue)) {
+        return EtsString::CreateFromMUtf8("NaN");
+    }
+    // If x < 0, then
+    //    a. Let s be "-".
+    //    b. Let x = –x.
+    // If x = +infinity, then
+    //    a. Return the concatenation of the Strings s and "Infinity".
+    if (!std::isfinite(objValue)) {
+        if (objValue < 0) {
+            return EtsString::CreateFromMUtf8("-Infinity");
+        }
+        return EtsString::CreateFromMUtf8("Infinity");
+    }
+
+    if (objValue == 0.0) {
+        return EtsString::CreateFromMUtf8("0e+0");
+    }
+    std::string res;
+    if (objValue < 0) {
+        res += "-";
+        objValue = -objValue;
+    }
+
+    char tmpbuf[helpers::BUF_SIZE] = {0};
+    helpers::DtoaHelper dtoa {tmpbuf};
+    dtoa.Dtoa(objValue);
+    int n = dtoa.GetPoint();
+    int k = dtoa.GetDigits();
+
+    std::string base = tmpbuf;
+    base.erase(1, k - 1);
+    if (k != 1) {
+        base += std::string(".") + std::string(&tmpbuf[1]);
+    }
+    base += "e" + (n >= 1 ? std::string("+") : "") + std::to_string(n - 1);
+    res += base;
+    return EtsString::CreateFromMUtf8(res.c_str());
 }
 
 EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
@@ -212,6 +261,16 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 
 EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
 {
+    // truncate the arg val
+    double digitAbs = std::isnan(d) ? 0 : d;
+    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
+    // Check range
+    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR,
+                          "toFixed argument must be between 0 and 100");
+        return nullptr;
+    }
+
     double objValue = helpers::GetStdDoubleArgument(obj);
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
@@ -227,17 +286,6 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
             return EtsString::CreateFromMUtf8("-Infinity");
         }
         return EtsString::CreateFromMUtf8("Infinity");
-    }
-
-    // truncate the arg val
-    double digitAbs = std::isnan(d) ? 0 : d;
-    digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-    // Check range
-    if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(),
-                          panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_EXCEPTION,
-                          "toFixed argument must be between 0 and 100");
-        return nullptr;
     }
 
     return helpers::DoubleToFixed(objValue, static_cast<int>(digitAbs));

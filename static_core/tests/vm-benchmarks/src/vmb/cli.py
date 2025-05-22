@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -61,7 +61,11 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
                         help='If <val> >= 0 invoke GC twice '
                         'and wait <val> ms before iteration')
     parser.add_argument("-aot-co", "--aot-compiler-options", default=[],
-                        type=str, action="append", help="aot-compiler options")
+                        type=str, action="append",
+                        help="Sets ahead-of-time compiler options")
+    parser.add_argument("-aot-lib-co", "--aot-lib-compiler-options", default=[],
+                        type=str, action="append",
+                        help="Sets ahead-of-time compiler options for libraries")
     parser.add_argument("-c", "--concurrency-level",
                         default=None, type=str,
                         help="Concurrency level (DEPRECATED)")
@@ -78,14 +82,6 @@ def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
                         help='Comma-separated list of lang plugins')
     parser.add_argument('-o', '--outdir', default='generated', type=str,
                         help='Dir for generated benches')
-    parser.add_argument('-T', '--tags',
-                        default=set(),
-                        type=comma_separated_list,
-                        help='Filter by tag (comma-separated list)')
-    parser.add_argument('-ST', '--skip-tags',
-                        default=set(),
-                        type=comma_separated_list,
-                        help='Skip if tagged (comma-separated list)')
     parser.add_argument('-t', '--tests',
                         default=set(),
                         type=comma_separated_list,
@@ -98,8 +94,7 @@ def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
 
 
 def add_run_opts(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument('-p', '--platform', type=str,
-                        required=True,
+    parser.add_argument('-p', '--platform', type=str, required=True,
                         help='Platform plugin name')
     parser.add_argument('-m', '--mode', type=str,
                         default='default',
@@ -111,6 +106,9 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         help='Timeout (seconds)')
     parser.add_argument('--device', type=str,
                         default='', help='Device ID (serial)')
+    parser.add_argument('--device-host', type=str, default='',
+                        help='device server in form server:port '
+                             'in case you use remote device')
     parser.add_argument('--device-dir', type=str,
                         default='/data/local/tmp/vmb',
                         help='Base dir on device (%(default)s)')
@@ -137,7 +135,8 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
                         metavar='FAIL_LOGS_DIR',
                         help='Save failure messages to folder')
     parser.add_argument('--cpumask', default='', type=str,
-                        help='Use cores mask. F.e. 11110000 = low cores')
+                        help='Use cores mask in hex or bin format. '
+                             'E.g., 0x38 or 0b111000 = high cores')
     parser.add_argument('--aot-stats', action='store_true',
                         help='Collect aot compilation data')
     parser.add_argument('--jit-stats', action='store_true',
@@ -167,6 +166,17 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
                         help='Percentage of tolerance in comparison')
 
 
+def add_filter_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('-T', '--tags',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Filter by tag (comma-separated list)')
+    parser.add_argument('-ST', '--skip-tags',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Skip if tagged (comma-separated list)')
+
+
 class _ArgumentParser(argparse.ArgumentParser):
 
     def __init__(self, command: Command) -> None:
@@ -190,11 +200,13 @@ class _ArgumentParser(argparse.ArgumentParser):
         if command in (Command.GEN, Command.ALL):
             add_gen_opts(self, command)
             add_measurement_opts(self)
+            add_filter_opts(self)
         # Runner-specific options
         if command in (Command.RUN, Command.ALL):
             add_run_opts(self)
         if command in (Command.REPORT,):
             add_report_opts(self)
+            add_filter_opts(self)
 
     @staticmethod
     def __epilog() -> str:
@@ -272,8 +284,16 @@ class Args(argparse.Namespace):
         mode = ToolMode(self.get('mode'))
         if ToolMode.AOT == mode:
             flags |= OptFlags.AOT
+        elif ToolMode.LLVMAOT == mode:
+            flags |= OptFlags.AOT | OptFlags.LLVMAOT
         elif ToolMode.INT == mode:
             flags |= OptFlags.INT
+        elif ToolMode.INT_CPP == mode:
+            flags |= OptFlags.INT | OptFlags.INT_CPP
+        elif ToolMode.INT_IRTOC == mode:
+            flags |= OptFlags.INT | OptFlags.INT_IRTOC
+        elif ToolMode.INT_LLVM == mode:
+            flags |= OptFlags.INT | OptFlags.INT_LLVM
         elif ToolMode.JIT == mode:
             flags |= OptFlags.JIT
         if self.get('dry_run', False):

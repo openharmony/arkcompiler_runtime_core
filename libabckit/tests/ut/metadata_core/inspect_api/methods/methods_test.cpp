@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticMethodGetName)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     std::set<std::string> names = {
+        "main:void;",
         "m0F0:void;",
         "m0F1:void;",
         "m0F2$asyncimpl:std.core.Object;",
@@ -289,6 +290,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionIsStatic)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     std::set<std::string> staticMethods = {
+        "main:void;",
         "M0N0C0F1:void;",
         "M0C0F1:void;",
         "m0F0:void;",
@@ -481,6 +483,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionGetParentClass)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_static.abc", &file);
 
     std::unordered_map<std::string, std::string> methodClasses = {
+        {"main:void;", ""},
         {"m0F0:void;", ""},
         {"m0F1:void;", ""},
         {"m0F2$asyncimpl:std.core.Object;", ""},

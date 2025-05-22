@@ -11,5 +11,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_custom_target(ets_tests_runtime_gtests)
+
+panda_ets_add_gtest(
+    NO_CORES
+    NAME ets_vm_test
+    SOURCES ets_vm_test.cpp
+    LIBRARIES arkbase arkfile arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB $<TARGET_PROPERTY:mock_stdlib,FILE>
+    DEPS_TARGETS mock_stdlib
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
+panda_add_gtest_with_ani(ets_vm_init_prealloc_test
+    CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.cpp
+    ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_init_prealloc_test.ets
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    LIBRARIES arkbase arkfile arkruntime
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
 add_subdirectory(types)
 add_subdirectory(tooling)

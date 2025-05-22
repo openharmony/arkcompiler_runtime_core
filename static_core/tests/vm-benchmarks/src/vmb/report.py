@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ import json
 import re
 import logging
 from datetime import datetime, timezone
-from typing import Union, Iterable, Optional, List, Dict, Tuple, Any
+from typing import Union, Iterable, Optional, List, Set, Dict, Tuple, Any
 from dataclasses import dataclass
 from statistics import geometric_mean, mean
 from pathlib import Path
@@ -122,7 +122,10 @@ class VMBReport(Jsonable):
         times1, times2, sizes1, sizes2, rss1, rss2 = [], [], [], [], [], []
         missed, new, fixed, new_fail = 0, 0, 0, 0
         # compare tests present in both reports
-        for t in tests1.intersection(tests2):
+        common_tests = tests1.intersection(tests2)
+        log.info('Comparison: %d common tests selected',
+                 len(common_tests))
+        for t in common_tests:
             t1, t2 = results1[t], results2[t]
             status1, status2 = test_passed(t1), test_passed(t2)
             is_flaky = t in flaky
@@ -164,22 +167,32 @@ class VMBReport(Jsonable):
 
     @classmethod
     def parse(cls, text: str,
-              exclude: OptList = None) -> VMBReport:
+              exclude: OptList = None,
+              tags: Optional[Set[str]] = None,
+              skip_tags: Optional[Set[str]] = None) -> VMBReport:
         obj = json.loads(text)
         rr = RunReport.from_obj(**obj)
         vmb_rep = VMBReport(report=rr)
-        vmb_rep.recalc(exclude=exclude)
+        vmb_rep.recalc(exclude=exclude, tags=tags, skip_tags=skip_tags)
         return vmb_rep
 
     def get_exit_code(self) -> int:
         passed_cnt = self.total_cnt - self.excluded_cnt - self.fail_cnt
         return 0 if passed_cnt > 0 and self.fail_cnt == 0 else 1
 
-    def recalc(self, exclude: OptList = None) -> None:
+    def recalc(self, exclude: OptList = None, tags: Optional[Set[str]] = None,
+               skip_tags: Optional[Set[str]] = None) -> None:
         times, sizes, rsss = [], [], []
         self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, 0, 0
         if not exclude:
             exclude = []
+        if tags:
+            tags = set(t.lower() for t in tags)
+            self.report.tests = list(filter(lambda t: tags.intersection(t.tags), self.report.tests))
+        if skip_tags:
+            skips = set(t.lower() for t in skip_tags)
+            log.debug("Skips: %s", skips)
+            self.report.tests = list(filter(lambda t: not skips.intersection(t.tags), self.report.tests))
         for t in self.report.tests:
             self.total_cnt += 1
             name = t.name
@@ -549,9 +562,9 @@ def compare_reports(args):
     else:
         flaky = read_list_file(args.flaky_list) if args.flaky_list else []
         with open(args.paths[0], 'r', encoding="utf-8") as f1:
-            r1 = VMBReport.parse(f1.read())
+            r1 = VMBReport.parse(f1.read(), tags=args.tags, skip_tags=args.skip_tags)
         with open(args.paths[1], 'r', encoding="utf-8") as f2:
-            r2 = VMBReport.parse(f2.read())
+            r2 = VMBReport.parse(f2.read(), tags=args.tags, skip_tags=args.skip_tags)
         cmp_vmb = VMBReport.compare_vmb(r1, r2, flaky=flaky)
         cmp_vmb.print(full=args.full)
         if args.json:
@@ -615,7 +628,7 @@ def report_main(args: Args,
     else:
         flaky = read_list_file(args.flaky_list) if args.flaky_list else []
         with open(args.paths[0], 'r', encoding="utf-8") as f:
-            r = VMBReport.parse(f.read(), exclude=flaky)
+            r = VMBReport.parse(f.read(), exclude=flaky, tags=args.tags, skip_tags=args.skip_tags)
         r.text_report(full=args.full, exclude=args.exclude_list)
         print_flaky(flaky)
         passed_cnt = r.total_cnt - r.excluded_cnt - r.fail_cnt

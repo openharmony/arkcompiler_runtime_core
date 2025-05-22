@@ -1,0 +1,260 @@
+#!/bin/bash
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+set -eu
+set -o pipefail
+
+# Global variables
+SOURCES_LIST="/etc/apt/sources.list"
+BACKUP_FILE="/etc/apt/sources.list.backup"
+
+# Constants for pip configuration
+PIP_CONFIG_DIR="$HOME/.pip"
+PIP_CONFIG_FILE="$PIP_CONFIG_DIR/pip.conf"
+PIP_CONFIG_BACKUP="$PIP_CONFIG_DIR/pip.conf.backup"
+
+# Logging function
+log() {
+    local level=$1
+    shift
+    local message="$@"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+}
+
+# Check if root
+check_root() {
+    if [ "$EUID" -ne 0 ]; then
+        log "ERROR" "This script must be run as root (using sudo)"
+        exit 1
+    fi
+    log "INFO" "Root privileges verified"
+}
+
+# Create backup of sources.list
+backup_sources() {
+    if [ -f "$SOURCES_LIST" ]; then
+        cp "$SOURCES_LIST" "$BACKUP_FILE"
+        if [ $? -eq 0 ]; then
+            log "INFO" "Successfully backed up $SOURCES_LIST to $BACKUP_FILE"
+        else
+            log "ERROR" "Failed to create backup of $SOURCES_LIST"
+            exit 1
+        fi
+    else
+        log "ERROR" "Sources list file not found at $SOURCES_LIST"
+        exit 1
+    fi
+}
+
+# Detect distribution and codename
+detect_distribution() {
+    if [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        DISTRO_CODENAME=$DISTRIB_CODENAME
+        DISTRO_TYPE="ubuntu"
+    elif [ -f /etc/os-release ]; then
+        . /etc/os-release
+        DISTRO_CODENAME=$VERSION_CODENAME
+        if [[ "$ID" == "debian" ]]; then
+            DISTRO_TYPE="debian"
+        else
+            DISTRO_TYPE="ubuntu"
+        fi
+    else
+        log "ERROR" "Could not determine distribution version"
+        exit 1
+    fi
+    log "INFO" "Detected distribution: $DISTRO_TYPE ($DISTRO_CODENAME)"
+}
+
+# Generate sources.list content based on distribution
+generate_sources_content() {
+    if [[ "$DISTRO_TYPE" == "ubuntu" ]]; then
+        cat > "$SOURCES_LIST" << EOF
+# Tsinghua University Mirror for Ubuntu
+# Generated on $(date)
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME} main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME}-updates main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME}-backports main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME}-security main restricted universe multiverse
+
+# Source repositories
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME} main restricted universe multiverse
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME}-updates main restricted universe multiverse
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME}-backports main restricted universe multiverse
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${DISTRO_CODENAME}-security main restricted universe multiverse
+EOF
+    elif [[ "$DISTRO_TYPE" == "debian" ]]; then
+        cat > "$SOURCES_LIST" << EOF
+# Tsinghua University Mirror for Debian
+# Generated on $(date)
+deb http://mirrors.tuna.tsinghua.edu.cn/debian/ ${DISTRO_CODENAME} main contrib non-free
+deb http://mirrors.tuna.tsinghua.edu.cn/debian/ ${DISTRO_CODENAME}-updates main contrib non-free
+deb http://mirrors.tuna.tsinghua.edu.cn/debian-security ${DISTRO_CODENAME}-security main contrib non-free
+
+# Source repositories
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/debian/ ${DISTRO_CODENAME} main contrib non-free
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/debian/ ${DISTRO_CODENAME}-updates main contrib non-free
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/debian-security ${DISTRO_CODENAME}-security main contrib non-free
+EOF
+    fi
+
+    if [ $? -eq 0 ]; then
+        log "INFO" "Successfully generated new sources.list"
+    else
+        log "ERROR" "Failed to generate new sources.list"
+        exit 1
+    fi
+}
+
+# Cleanup function
+cleanup() {
+    if [ $? -ne 0 ]; then
+        log "ERROR" "Script failed with exit code $?"
+    fi
+}
+
+# Create pip config directory if it doesn't exist
+setup_pip_directory() {
+    if [ ! -d "$PIP_CONFIG_DIR" ]; then
+        mkdir -p "$PIP_CONFIG_DIR"
+        if [ $? -eq 0 ]; then
+            log "INFO" "Created pip config directory at $PIP_CONFIG_DIR"
+        else
+            log "ERROR" "Failed to create pip config directory"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Backup existing pip configuration
+backup_pip_config() {
+    if [ -f "$PIP_CONFIG_FILE" ]; then
+        cp "$PIP_CONFIG_FILE" "$PIP_CONFIG_BACKUP"
+        if [ $? -eq 0 ]; then
+            log "INFO" "Backed up existing pip configuration to $PIP_CONFIG_BACKUP"
+        else
+            log "ERROR" "Failed to backup pip configuration"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Update pip configuration to use Tsinghua mirror
+update_pip_mirror() {
+    setup_pip_directory || return 1
+    backup_pip_config || return 1
+
+    cat > "$PIP_CONFIG_FILE" << EOF
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+trusted-host = pypi.tuna.tsinghua.edu.cn
+EOF
+
+    if [ $? -eq 0 ]; then
+        log "INFO" "Successfully updated pip configuration to use Tsinghua mirror"
+        # Test pip configuration
+        if command -v pip3 >/dev/null 2>&1; then
+            if pip3 config list 2>&1 | grep -q "index-url='https://pypi.tuna.tsinghua.edu.cn/simple'"; then
+                log "INFO" "Pip configuration verified successfully"
+            else
+                log "WARNING" "Pip configuration might not be properly set"
+            fi
+        else
+            log "WARNING" "pip3 not found, skipping configuration verification"
+        fi
+    else
+        log "ERROR" "Failed to update pip configuration"
+        # Restore backup if it exists
+        if [ -f "$PIP_CONFIG_BACKUP" ]; then
+            cp "$PIP_CONFIG_BACKUP" "$PIP_CONFIG_FILE"
+            log "INFO" "Restored pip configuration backup"
+        fi
+        return 1
+    fi
+    return 0
+}
+
+main_update_apt_mirror() {
+    log "INFO" "Starting mirror update script"
+    check_root
+    backup_sources
+    detect_distribution
+    generate_sources_content
+    log "INFO" "Mirror update completed"
+}
+
+main_install_packages() {
+    apt update
+    apt install --yes python3 pip virtualenv clang antlr4
+}
+
+setup_compiler_env() {
+    local script_dir=$1
+
+    log "INFO" "Setting up venv"
+    virtualenv "${script_dir}/../compiler/.venv"
+    source "${script_dir}/../compiler/.venv/bin/activate"
+
+    log "INFO" "Setting up poetry"
+    pip install poetry
+    poetry config virtualenvs.in-project true
+    (cd "${script_dir}/../compiler" && poetry install)
+
+    log "INFO" "Generating antlr4 grammar"
+    (cd "${script_dir}/../compiler" && ./generate-grammar)
+
+    log "INFO" "Completed!"
+    echo "Hint: run the following command to begin:"
+    
+    echo "  source ${script_dir}/../compiler/.venv/bin/activate"
+    echo "  ${script_dir}/../compiler/run-test ${script_dir}/../test/ani_array -ani"
+}
+
+main() {
+    script_dir=$(realpath "$(dirname "$0")")
+
+    case "${1:-}" in
+        update_apt_mirror)
+            main_update_apt_mirror
+            ;;
+        install_pkg)
+            main_install_packages
+            ;;
+        update_pip_mirror)
+            update_pip_mirror
+            ;;
+        setup_compiler_env)
+            setup_compiler_env "$script_dir"
+            ;;
+        *)
+            sudo "$0" update_apt_mirror
+            sudo "$0" install_pkg
+            "$0" update_pip_mirror
+            "$0" setup_compiler_env "$script_dir"
+            exit 1
+            ;;
+    esac
+}
+
+# Set up trap for cleanup
+trap cleanup EXIT
+
+# Run main function
+main "$@"
+
+exit 0

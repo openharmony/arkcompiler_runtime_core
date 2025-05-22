@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +25,11 @@ if (ark_standalone_build) {
 ohos_static_library("libarktscompiler_package") {
   deps = []
   if (enable_static_vm) {
-    deps += [ ":libarktscompiler" ]
+    if (is_mac) {
+      deps += [ ":libarktscompiler_frontend_static" ]
+    } else {
+      deps += [ ":libarktscompiler" ]
+    }
   }
 
   part_name = ark_part_name
@@ -83,11 +87,13 @@ libarkcompiler_sources = [
   "compiler_logger.cpp",
   "compiler_options.cpp",
   "optimizer/analysis/alias_analysis.cpp",
+  "optimizer/analysis/alias_visitor.cpp",
   "optimizer/analysis/bounds_analysis.cpp",
   "optimizer/analysis/catch_inputs.cpp",
   "optimizer/analysis/countable_loop_parser.cpp",
   "optimizer/analysis/dominators_tree.cpp",
   "optimizer/analysis/linear_order.cpp",
+  "optimizer/analysis/live_in_analysis.cpp",
   "optimizer/analysis/live_registers.cpp",
   "optimizer/analysis/liveness_analyzer.cpp",
   "optimizer/analysis/liveness_use_table.cpp",
@@ -139,6 +145,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/memory_barriers.cpp",
   "optimizer/optimizations/memory_coalescing.cpp",
   "optimizer/optimizations/move_constants.cpp",
+  "optimizer/optimizations/native_call_optimization.cpp",
   "optimizer/optimizations/object_type_check_elimination.cpp",
   "optimizer/optimizations/optimize_string_concat.cpp",
   "optimizer/optimizations/peepholes.cpp",
@@ -168,21 +175,19 @@ libarkcompiler_sources = [
 ]
 libarkcompiler_sources += plugin_libarkcompiler_sources
 
-if (!is_mac) {
-  libarkcompiler_sources += [
-    "code_info/code_info.cpp",
-    "code_info/code_info_builder.cpp",
-    "compile_method.cpp",
-    "optimizer/code_generator/codegen.cpp",
-    "optimizer/code_generator/codegen_native.cpp",
-    "optimizer/code_generator/disassembly.cpp",
-    "optimizer/code_generator/encode_visitor.cpp",
-    "optimizer/code_generator/method_properties.cpp",
-    "optimizer/code_generator/slow_path.cpp",
-    "optimizer/code_generator/spill_fill_encoder.cpp",
-    "optimizer/pipeline.cpp",
-  ]
-}
+libarkcompiler_sources += [
+  "code_info/code_info.cpp",
+  "code_info/code_info_builder.cpp",
+  "compile_method.cpp",
+  "optimizer/code_generator/codegen.cpp",
+  "optimizer/code_generator/codegen_native.cpp",
+  "optimizer/code_generator/disassembly.cpp",
+  "optimizer/code_generator/encode_visitor.cpp",
+  "optimizer/code_generator/method_properties.cpp",
+  "optimizer/code_generator/slow_path.cpp",
+  "optimizer/code_generator/spill_fill_encoder.cpp",
+  "optimizer/pipeline.cpp",
+]
 
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
@@ -289,16 +294,16 @@ ohos_shared_library("libarktscompiler") {
       ":plugin_create_pipeline_inl",
     ]
   }
-  if (enable_codegen) {
+  if (enable_codegen && !is_mac) {
     deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
   }
 
   deps += plugin_compiler_deps
 
-  include_dirs = [
-    "$ark_root/compiler/optimizer",
-    "$ark_root/compiler/optimizer/code_generator",
-  ]
+  include_dirs = [ "$ark_root/compiler/optimizer" ]
+  if (!is_mac) {
+    include_dirs += [ "$ark_root/compiler/optimizer/code_generator" ]
+  }
 
   if (abckit_enable) {
     include_dirs += libabckit_includes
@@ -335,15 +340,15 @@ ohos_source_set("libarktscompiler_frontend_static") {
       ":irtoc_interface_extensions_inl_h",
     ]
   }
-  if (enable_codegen) {
-    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_static" ]
+  if (enable_codegen && !is_mac) {
+    deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder_frontend_dependency_static" ]
   }
   deps += plugin_compiler_deps
 
-  include_dirs = [
-    "$ark_root/compiler/optimizer",
-    "$ark_root/compiler/optimizer/code_generator",
-  ]
+  include_dirs = [ "$ark_root/compiler/optimizer" ]
+  if (!is_mac) {
+    include_dirs += [ "$ark_root/compiler/optimizer/code_generator" ]
+  }
 
   if (abckit_enable) {
     include_dirs += libabckit_includes

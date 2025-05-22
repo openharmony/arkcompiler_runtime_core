@@ -3,11 +3,10 @@
 		"baseUrl": "${CMAKE_CURRENT_SOURCE_DIR}",
 		"paths": {
 			"escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"],
-			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"],
-			"./code.js": ["${CMAKE_CURRENT_SOURCE_DIR}/code.js"]
+			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"]
 		},
 		"dynamicPaths": {
-			"${CMAKE_CURRENT_SOURCE_DIR}/code.js": { "language": "js", "hasDecl": false }
+			"js_code": { "language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/code" }
 		}
 	}
 }

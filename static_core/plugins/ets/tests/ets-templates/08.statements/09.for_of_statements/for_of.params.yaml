@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,21 +16,21 @@ cases:
     - use: |-
           let arr: int[] = new int[0]
           for (let v of arr) res += v
-          assert res == "";
+          assertEQ( res, "" )
 
     - use: |-
           let arr: int[]|null = new int[0]
           for (let v of arr) res += v
-          assert res == "";
+          assertEQ( res, "" )
 
     - use: |-
           let arr: int[]|null = (): int[]|null => { return new int[0]; }()
           for (let v of arr!) res += v
-          assert res == "";
+          assertEQ( res, "" )
 
     - use: |-
           for (let v of "") res += v
-          assert res == "";
+          assertEQ( res, "" )
 
     - use: |-
           let arr: int[][] = [[1,2,3], [4,5,6], [7,8,9]]
@@ -39,42 +39,42 @@ cases:
               for (const q of v)
                   res += q
           }
-          assert res == " 123 456 789";
+          assertEQ( res, " 123 456 789" )
 
     - use: |-
           const v: int = 0;
           for (let v of [1,2,3,4]) res += v
-          assert res == "1234";
-          assert v == 0;
+          assertEQ( res, "1234" )
+          assertEQ( v, 0 )
 
     - use: |-
           let v: int;
           for (v of [1,2,3,4]) res += v
-          assert res == "1234";
+          assertEQ( res, "1234" )
 
     - use: |-
           let v: float;
           for (v of [1.1,2.2,3.3,4.4] as float[]) res += v
-          assert res == "1.12.23.34.4";
+          assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
           let v: double
           for (v of [1.1,2.2,3.3,4.4]) res += v
-          assert res == "1.12.23.34.4";
+          assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
           let v: long;
           for (v of [1,2,3,4]) res += v
-          assert res == "1234";
+          assertEQ( res, "1234" )
 
     - use: |-
           let v: number;
           for (v of [1.1,2.2,3.3,4.4]) res += v
-          assert res == "1.12.23.34.4";
+          assertEQ( res, "1.12.23.34.4" )
 
     - use: |-
           for (const ch of [c'1', c'2', c'3', c'4']) res += ch
-          assert res == "1234";
+          assertEQ( res, "1234" )
 
     - use: |-
           const ch: char = c'X'
@@ -83,12 +83,12 @@ cases:
               ch = c' '
               res += ch
           }
-          assert res == "A B C D ";
+          assertEQ( res, "A B C D " )
 
     - use: |-
           let ch: char
           for (ch of "ABCD") res += ch
-          assert res == "ABCD";
+          assertEQ( res, "ABCD" )
 
     - use: |-
           let ch: char
@@ -97,29 +97,29 @@ cases:
               ch = c' '
               res += ch
           }
-          assert res == "A B C D ";
+          assertEQ( res, "A B C D " )
 
     - use: |-
         let foo: () => String = ():String => { return "ABCD" }
         for (let ch of foo()) res += ++ch
-        assert res == "BCDE";
+        assertEQ( res, "BCDE" )
 
     - use: |-
           let arr: Long[] = new Long[3]
           for (let i: int = 0; i < 3; i++) arr[i] = new Long(i as long)
           for (let i of arr) res += i
-          assert res == "012";
+          assertEQ( res, "012" )
 
     - use: |-
           let arr: int[] = [1,2,3]
           for (let v of arr) {v *= 2; res += v }
-          assert res == "246";
+          assertEQ( res, "246" )
 
     - use: |-
           let arr: int[] = [1,2,3]
           let v = 4
           for (v of arr); res += v
-          assert res == "3";
+          assertEQ( res, "3" )
 
     - decl: |-
           function foo<T extends String>(s: T): T[] {
@@ -127,38 +127,38 @@ cases:
           }
       use: |-
           for (let v of foo<String>("A")) res += v
-          assert res == "AAA";
+          assertEQ( res, "AAA" )
 
     - use: |-
           let s: String|null = ""
           for (let v of s) res += v
-          assert res == "";
+          assertEQ( res, "" )
 
     - use: |-
           let s: String|null = (): string|null => { return ""; }();
           for (let v of s!) res += v
-          assert res == "";
+          assertEQ( res, "" )
 
     - use: |-
           let s: string|null = (): string|null => { return null; }();
           try {
               for (let v of s!) res += v
-              assert false;
+              assertTrue( false )
           } catch (e: NullPointerError) {
-              assert true;
+              assertTrue( true )
           } catch (e) {
-              assert false;
+              assertTrue( false )
           }
 
     - use: |-
           let s: string|undefined = (): string|undefined => { return undefined; }();
           try {
               for (let v of s!) res += v
-              assert false;
+              assertTrue( false )
           } catch (e: NullPointerError) {
-              assert true;
+              assertTrue( true )
           } catch (e) {
-              assert false;
+              assertTrue( false )
           }
 
     - decl: |-
@@ -174,28 +174,28 @@ cases:
           let array: A[] = new A[10];
           let c = 0;
           for (let x of array) c += x.i;
-          assert c == 45;
+          assertEQ( c, 45)
 
     - use: |-
           let s: number[]|null = (): number[]|null => { return null; }();
           try {
               for (let v of s!) res += v
-              assert false;
+              assertTrue(false)
           } catch (e: NullPointerError) {
-              assert true;
+              assertTrue(true)
           } catch (e) {
-              assert false;
+              assertTrue(false)
           }
 
     - use: |-
           let s: number[]|undefined = (): number[]|undefined => { return undefined; }();
           try {
               for (let v of s!) res += v
-              assert false;
+              assertTrue( false )
           } catch (e: NullPointerError) {
-              assert true;
+              assertTrue(true)
           } catch (e) {
-              assert false;
+              assertTrue(false)
           }
 
     - decl: |-
@@ -221,7 +221,7 @@ cases:
       use: |-
           let a = new A();
           for (let x of a) res += x;
-          assert res == "abc";
+          assertEQ( res, "abc")
 
     - decl: |-
           type UT = string[] | string
@@ -232,4 +232,4 @@ cases:
                   res += y
               }
           }
-          assert(res == 'abcdefghi')
+          assertEQ(res, 'abcdefghi')

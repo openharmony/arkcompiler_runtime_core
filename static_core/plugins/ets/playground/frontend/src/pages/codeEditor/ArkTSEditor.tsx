@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,26 +50,30 @@ const ArkTSEditor: React.FC = () => {
             // @ts-ignore
             monaco.languages.setMonarchTokensProvider('arkts', cloneSyntax);
             monaco.languages.setLanguageConfiguration('arkts', {
-            brackets: [
-                ['{', '}'],
-                ['[', ']'],
-                ['(', ')'],
-            ],
-            autoClosingPairs: [
-                { open: '{', close: '}' },
-                { open: '[', close: ']' },
-                { open: '(', close: ')' },
-                { open: '"', close: '"' },
-                { open: "'", close: "'" },
-            ],
-            surroundingPairs: [
-                { open: '{', close: '}' },
-                { open: '[', close: ']' },
-                { open: '(', close: ')' },
-                { open: '"', close: '"' },
-                { open: "'", close: "'" },
-            ],
-        });
+                comments: {
+                    lineComment: '//',
+                    blockComment: ['/*', '*/'],
+                },
+                brackets: [
+                    ['{', '}'],
+                    ['[', ']'],
+                    ['(', ')'],
+                ],
+                autoClosingPairs: [
+                    { open: '{', close: '}' },
+                    { open: '[', close: ']' },
+                    { open: '(', close: ')' },
+                    { open: '"', close: '"' },
+                    { open: "'", close: "'" },
+                ],
+                surroundingPairs: [
+                    { open: '{', close: '}' },
+                    { open: '[', close: ']' },
+                    { open: '(', close: ')' },
+                    { open: '"', close: '"' },
+                    { open: "'", close: "'" },
+                ],
+            });
         }
     }, [monaco, syn]);
 
@@ -79,9 +83,8 @@ const ArkTSEditor: React.FC = () => {
 
     return (
         <Editor
-            height="90vh"
             defaultLanguage="arkts"
-            defaultValue="function main(): void {}"
+            defaultValue={'console.log("Hello, ArkTS!");'}
             theme={theme === 'dark' ? 'vs-dark' : 'light'}
             onChange={handleEditorChange}
             className={styles.editor}

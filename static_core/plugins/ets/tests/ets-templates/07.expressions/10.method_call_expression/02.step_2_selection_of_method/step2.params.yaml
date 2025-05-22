@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,8 +25,8 @@ cases:
       use: |-
           // select method with no boxing/unboxing
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -38,8 +38,8 @@ cases:
       use: |-
           // select method with with unboxing
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "n"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -51,8 +51,8 @@ cases:
       use: |-
           // select method with boxing
           let c: C = new C()
-          assert c.met(0.0) == "N"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "N" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -67,8 +67,8 @@ cases:
       use: |-
           // select method with rest parameter
           let c: C = new C()
-          assert c.met(0.0) == "nR"
-          assert c.met(new Number()) == "NR"
+          assertEQ( c.met(0.0),  "nR" )
+          assertEQ( c.met(new Number()),  "NR" )
 
 
     - decl: |-
@@ -80,8 +80,8 @@ cases:
       use: |-
           // select method with rest parameter and unboxing
           let c: C = new C()
-          assert c.met(0.0) == "nR"
-          assert c.met(new Number()) == "nR"
+          assertEQ( c.met(0.0),  "nR" )
+          assertEQ( c.met(new Number()),  "nR" )
 
 
     - decl: |-
@@ -93,8 +93,8 @@ cases:
       use: |-
           // select method with rest parameter and boxing
           let c: C = new C()
-          assert c.met(0.0) == "NR"
-          assert c.met(new Number()) == "NR"
+          assertEQ( c.met(0.0),  "NR" )
+          assertEQ( c.met(new Number()),  "NR" )
 
 
     - decl: |-
@@ -109,8 +109,8 @@ cases:
       use: |-
           // select method with default parameter
           let c: C = new C()
-          assert c.met(0.0) == "nD1"
-          assert c.met(new Number()) == "ND1"
+          assertEQ( c.met(0.0),  "nD1" )
+          assertEQ( c.met(new Number()),  "ND1" )
 
 
     - decl: |-
@@ -122,8 +122,8 @@ cases:
       use: |-
           // select method with default parameter and unboxing
           let c: C = new C()
-          assert c.met(0.0) == "nD1"
-          assert c.met(new Number()) == "nD1"
+          assertEQ( c.met(0.0),  "nD1" )
+          assertEQ( c.met(new Number()),  "nD1" )
 
 
     - decl: |-
@@ -135,8 +135,8 @@ cases:
       use: |-
           // select method with default parameter and boxing
           let c: C = new C()
-          assert c.met(0.0) == "ND1"
-          assert c.met(new Number()) == "ND1"
+          assertEQ( c.met(0.0),  "ND1" )
+          assertEQ( c.met(new Number()),  "ND1" )
 
 
     - decl: |-
@@ -151,8 +151,8 @@ cases:
       use: |-
           // select method with undefined parameter
           let c: C = new C()
-          assert c.met(0.0) == "nD2"
-          assert c.met(new Number()) == "ND2"
+          assertEQ( c.met(0.0),  "nD2" )
+          assertEQ( c.met(new Number()),  "ND2" )
 
 
     - decl: |-
@@ -164,8 +164,8 @@ cases:
       use: |-
           // select method with undefined parameter and unboxing
           let c: C = new C()
-          assert c.met(0.0) == "nD2"
-          assert c.met(new Number()) == "nD2"
+          assertEQ( c.met(0.0),  "nD2" )
+          assertEQ( c.met(new Number()),  "nD2" )
 
 
     - decl: |-
@@ -177,8 +177,8 @@ cases:
       use: |-
           // select method with undefined parameter and boxing
           let c: C = new C()
-          assert c.met(0.0) == "ND2"
-          assert c.met(new Number()) == "ND2"
+          assertEQ( c.met(0.0),  "ND2" )
+          assertEQ( c.met(new Number()),  "ND2" )
 
 
     - decl: |-
@@ -193,8 +193,8 @@ cases:
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          assert c.met(0.0) == "nR"
-          assert c.met(new Number()) == "ND1"
+          assertEQ( c.met(0.0),  "nR" )
+          assertEQ( c.met(new Number()),  "ND1" )
 
 
     - decl: |-
@@ -209,8 +209,8 @@ cases:
       use: |-
           // select method with rest parameter and undefined parameter
           let c: C = new C()
-          assert c.met(0.0) == "nR"
-          assert c.met(new Number()) == "ND2"
+          assertEQ( c.met(0.0),  "nR" )
+          assertEQ( c.met(new Number()),  "ND2" )
 
 
     - decl: |-
@@ -225,8 +225,8 @@ cases:
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          assert c.met(0.0) == "nD1"
-          assert c.met(new Number()) == "NR"
+          assertEQ( c.met(0.0),  "nD1" )
+          assertEQ( c.met(new Number()),  "NR" )
 
 
     - decl: |-
@@ -241,8 +241,8 @@ cases:
       use: |-
           // select method with rest parameter and default parameter
           let c: C = new C()
-          assert c.met(0.0) == "nD2"
-          assert c.met(new Number()) == "NR"
+          assertEQ( c.met(0.0),  "nD2" )
+          assertEQ( c.met(new Number()),  "NR" )
 
 
     - decl: |-
@@ -263,8 +263,8 @@ cases:
       use: |-
           // select method without boxing/unboxing and without rest
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -282,8 +282,8 @@ cases:
       use: |-
           // select method with unboxing and without rest
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "n"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -301,8 +301,8 @@ cases:
       use: |-
           // select method with boxing and without rest
           let c: C = new C()
-          assert c.met(0.0) == "N"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "N" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -323,8 +323,8 @@ cases:
       use: |-
           // select method without boxing/unboxing and without default parameter
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -342,8 +342,8 @@ cases:
       use: |-
           // select method with unboxing and without default parameter
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "n"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -361,8 +361,8 @@ cases:
       use: |-
           // select method with boxing and without default parameter
           let c: C = new C()
-          assert c.met(0.0) == "N"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "N" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -383,8 +383,8 @@ cases:
       use: |-
           // select method without boxing/unboxing and without undefined parameter
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -402,8 +402,8 @@ cases:
       use: |-
           // select method with unboxing and without undefined parameter
           let c: C = new C()
-          assert c.met(0.0) == "n"
-          assert c.met(new Number()) == "n"
+          assertEQ( c.met(0.0),  "n" )
+          assertEQ( c.met(new Number()),  "n" )
 
 
     - decl: |-
@@ -421,8 +421,8 @@ cases:
       use: |-
           // select method with boxing and without undefined parameter
           let c: C = new C()
-          assert c.met(0.0) == "N"
-          assert c.met(new Number()) == "N"
+          assertEQ( c.met(0.0),  "N" )
+          assertEQ( c.met(new Number()),  "N" )
 
 
     - decl: |-
@@ -443,9 +443,44 @@ cases:
           }
       use: |-
           let a: A = new C()
-          assert a.met(true) == "C-true"
-          assert a.met(new Boolean()) == "B-false"
+          assertEQ( a.met(true),  "C-true" )
+          assertEQ( a.met(new Boolean()),  "B-false" )
 
           let b: B = new B()
-          assert b.met(true) == "A-true"
-          assert b.met(new Boolean()) == "B-false"
+          assertEQ( b.met(true),  "A-true" )
+          assertEQ( b.met(new Boolean()),  "B-false" )
+
+
+    - decl: |-
+          class C {
+              met(p: number): string {
+                  return "n"
+              }
+              met(...p: number[]): string {
+                  return "nR"
+              }
+              met(p: number, q: number = 0.0): string {
+                  return "nD1"
+              }
+          }
+      use: |-
+          // more than one applicable method
+          let c: C = new C()
+          assertEQ( c.met(0.0),  "n" )
+
+    - decl: |-
+          class C {
+              met(p: number): string {
+                  return "n"
+              }
+              met(...p: number[]): string {
+                  return "nR"
+              }
+              met(p: number, q?: Number): string {
+                  return "nD2"
+              }
+          }
+      use: |-
+          // more than one applicable method
+          let c: C = new C()
+          assertEQ( c.met(0.0),  "n" )

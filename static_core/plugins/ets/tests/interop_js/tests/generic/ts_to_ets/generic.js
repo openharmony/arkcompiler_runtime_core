@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,82 +12,78 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const tsString = 'string';
-const tsNumber = 1;
-
-exports.tsString = tsString;
-exports.tsNumber = tsNumber;
-exports.LiteralClass = class LiteralClass {
-	constructor(value) {
-		this._value = value;
-	}
-	set(arg) {
-		this._value = arg;
-	}
-	get() {
-		return this._value;
-	}
+export const tsString = 'string';
+export const tsNumber = 1;
+export class LiteralClass {
+    constructor(value) {
+        this._value = value;
+    }
+    set(arg) {
+        this._value = arg;
+    }
+    get() {
+        return this._value;
+    }
+}
+export class UnionClass {
+    constructor(value) {
+        this._value = value;
+    }
+    set(arg) {
+        this._value = arg;
+    }
+    get() {
+        return this._value;
+    }
+}
+export class InterfaceClass {
+    constructor(value) {
+        this.value = value;
+    }
+    set(arg) {
+        this.value = arg;
+    }
+    get() {
+        return this.value;
+    }
+}
+export class GAbstract {
+    constructor(value) {
+        this._value = value;
+    }
+    set(arg) {
+        this._value = arg;
+    }
+    get() {
+        return this._value;
+    }
+}
+export class AbstractClass extends GAbstract {
+    constructor(value) {
+        super(value);
+    }
+}
+export class GClass {
+    constructor(content) {
+        this.content = content;
+    }
+    get() {
+        return this.content;
+    }
+}
+export function genericFunction(arg) {
+    return arg;
+}
+export function tupleDeclaredType(items) {
+    return items;
+}
+export function genericSubsetRef(items) {
+    return items;
+}
+export const explicitlyDeclaredType = () => {
+    return tsString;
 };
-exports.UnionClass = class UnionClass {
-	constructor(value) {
-		this._value = value;
-	}
-	set(arg) {
-		this._value = arg;
-	}
-	get() {
-		return this._value;
-	}
-};
-exports.InterfaceClass = class InterfaceClass {
-	constructor(value) {
-		this.value = value;
-	}
-	set(arg) {
-		this.value = arg;
-	}
-	get() {
-		return this.value;
-	}
-};
-exports.GAbstract = class GAbstract {
-	constructor(value) {
-		this._value = value;
-	}
-	set(arg) {
-		this._value = arg;
-	}
-	get() {
-		return this._value;
-	}
-};
-exports.AbstractClass = class AbstractClass extends exports.GAbstract {
-	constructor(value) {
-		super(value);
-	}
-};
-exports.GClass = class GClass {
-	constructor(content) {
-		this.content = content;
-	}
-	get() {
-		return this.content;
-	}
-};
-exports.genericFunction = function genericFunction(arg) {
-	return arg;
-};
-exports.tupleDeclaredType = function tupleDeclaredType(items) {
-	return items;
-};
-exports.genericSubsetRef = function genericSubsetRef(items) {
-	return items;
-};
-exports.explicitlyDeclaredType = () => {
-	return tsString;
-};
-exports.literalClass = new exports.LiteralClass(exports.tsString);
-exports.unionClass = new exports.UnionClass(exports.tsString);
-exports.interfaceClass = new exports.InterfaceClass(exports.tsString);
-exports.abstractClass = new exports.AbstractClass(exports.tsString);
+export const literalClass = new LiteralClass(tsString);
+export const unionClass = new UnionClass(tsString);
+export const interfaceClass = new InterfaceClass(tsString);
+export const abstractClass = new AbstractClass(tsString);

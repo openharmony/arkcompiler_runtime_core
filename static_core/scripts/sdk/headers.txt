@@ -5,7 +5,6 @@ libpandabase
 libpandafile
 platforms/unix
 plugins/ets
-plugins/ecmascript/libpandabase
 runtime
 third_party/utils_native/base/include
 verification/public.h

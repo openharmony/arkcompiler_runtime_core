@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,17 @@
 # limitations under the License.
 
 
-panda_ets_interop_js_gtest(ets_interop_js__generic_call_params_sts_to_ts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__generic_call_params_sts_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_call_params.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_call_params.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/generic_call_params.ets
+    JS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_apply_function_generic_array.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_apply_function_generic.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_apply_function_generics.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_apply_function_generic_union.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_apply_function_with_constraints.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_extends_class.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/check_generic_subset_class.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/generic_call_params.test.js
+    COMPILATION_JS_WITH_CJS_ON
 )

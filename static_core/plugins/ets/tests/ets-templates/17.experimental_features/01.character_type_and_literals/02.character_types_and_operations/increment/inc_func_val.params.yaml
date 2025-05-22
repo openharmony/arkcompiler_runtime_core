@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,52 +12,62 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0020'
       exp: 'incPre(v1)'
       res: c'!'
 
+    # 1.
     - v1: c'\u0020'
       exp: 'incPost(v1)'
       res: c'!'
 
+    # 2.
     - v1: c'\u0020'
-      exp: "c' ' + incPre(v1)"
+      exp: "(c' ' + incPre(v1)) as char"
       res: c'A'
 
+    # 3.
     - v1: c'\u0020'
-      exp: "c' ' + incPost(v1)"
+      exp: "(c' ' + incPost(v1)) as char"
       res: c'A'
 
+    # 4.
     - v1: c'\uFFFF'
       exp: "incPre(v1)"
       res: c'\x00'
 
+    # 5.
     - v1: c'\uFFFF'
       exp: "incPost(v1)"
       res: c'\x00'
 
+    # 6. Widening to int happens
     - v1: c'\uFFFF'
-      exp: "incPre(c'!' + v1 + v1)"
+      exp: "incPre((c'!' + v1 + v1) as char)"
       res: c'\u0020'
 
+    # 7. Widening to int happens
     - v1: c'\uFFFF'
-      exp: "incPost(c'!' + v1 + v1)"
+      exp: "incPost((c'!' + v1 + v1) as char)"
       res: c'\u0020'
 
+    # 8. Widening to int happens
     - v1: c'\u0F0F'
-      exp: "incPre(v1 + c'1') + incPre(c'\\uACD9')"
+      exp: "(incPre((v1 + c'1') as char) + incPre(c'\\uACD9')) as char"
       res: c'\uBC1B'
 
+    # 9. Widening to int happens
     - v1: c'\u0F0F'
-      exp: "incPost(v1 + c'1') + incPost(c'\\uACD9')"
+      exp: "(incPost((v1 + c'1') as char) + incPost(c'\\uACD9')) as char"
       res: c'\uBC1B'
 
     - v1: c'\u007F'
-      exp: "incPre(c'\\u0000') + incPre(v1)"
+      exp: "(incPre(c'\\u0000') + incPre(v1)) as char"
       res: c'\u0081'
 
     - v1: c'\u007F'
-      exp: "incPost(c'\\u0000') + incPost(v1)"
+      exp: "(incPost(c'\\u0000') + incPost(v1)) as char"
       res: c'\u0081'
 
     - v1: c'∫'

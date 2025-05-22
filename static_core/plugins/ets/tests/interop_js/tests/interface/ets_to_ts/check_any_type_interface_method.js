@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const { num, string, bool, arr, obj, isObject, AnyTypeMethodClass, createInterfaceClassAnyTypeMethod } = require('interface_method.test.js');
+const { num, string, bool, arr, obj, isObject, AnyTypeMethodClass, createInterfaceClassAnyTypeMethod } = require('interface_method.test.abc');
 
 function checkAnyTypeMethodClassInterfaceInt() {
 	const IClass = new AnyTypeMethodClass();
@@ -46,31 +46,31 @@ function checkAnyTypeMethodClassInterfaceObject() {
 }
 
 function checkInterfaceObjectFromEtsInt() {
-	const IClass = new createInterfaceClassAnyTypeMethod();
+	const IClass = createInterfaceClassAnyTypeMethod();
 
 	ASSERT_TRUE(IClass.get(num) === num);
 }
 
 function checkInterfaceObjectFromEtsString() {
-	const IClass = new createInterfaceClassAnyTypeMethod();
+	const IClass = createInterfaceClassAnyTypeMethod();
 
 	ASSERT_TRUE(IClass.get(string) === string);
 }
 
 function checkInterfaceObjectFromEtsBool() {
-	const IClass = new createInterfaceClassAnyTypeMethod();
+	const IClass = createInterfaceClassAnyTypeMethod();
 
 	ASSERT_TRUE(IClass.get(bool) === bool);
 }
 
 function checkInterfaceObjectFromEtsArr() {
-	const IClass = new createInterfaceClassAnyTypeMethod();
+	const IClass = createInterfaceClassAnyTypeMethod();
 
 	ASSERT_TRUE(Array.isArray(IClass.get(arr)));
 }
 
 function checkInterfaceObjectFromEtsObject() {
-	const IClass = new createInterfaceClassAnyTypeMethod();
+	const IClass = createInterfaceClassAnyTypeMethod();
 
 	ASSERT_TRUE(isObject(IClass.get(obj)));
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 
 #include <atomic>
@@ -22,7 +23,8 @@ namespace ark::ets {
 /*static*/
 EtsMutex *EtsMutex::Create(EtsCoroutine *coro)
 {
-    auto *klass = coro->GetPandaVM()->GetClassLinker()->GetMutexClass();
+    EtsHandleScope scope(coro);
+    auto *klass = PlatformTypes(coro)->coreMutex;
     auto hMutex = EtsHandle<EtsMutex>(coro, EtsMutex::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
     hMutex->SetWaitersList(coro, waitersList);
@@ -59,7 +61,8 @@ bool EtsMutex::IsHeld()
 /*static*/
 EtsEvent *EtsEvent::Create(EtsCoroutine *coro)
 {
-    auto *klass = coro->GetPandaVM()->GetClassLinker()->GetEventClass();
+    EtsHandleScope scope(coro);
+    auto *klass = PlatformTypes(coro)->coreEvent;
     auto hEvent = EtsHandle<EtsEvent>(coro, EtsEvent::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
     hEvent->SetWaitersList(coro, waitersList);
@@ -93,8 +96,8 @@ void EtsEvent::Fire()
 /* static */
 EtsCondVar *EtsCondVar::Create(EtsCoroutine *coro)
 {
-    auto *classLinker = coro->GetPandaVM()->GetClassLinker();
-    auto *klass = classLinker->GetCondVarClass();
+    EtsHandleScope scope(coro);
+    auto *klass = PlatformTypes(coro)->coreCondVar;
     auto hCondVar = EtsHandle<EtsCondVar>(coro, EtsCondVar::FromEtsObject(EtsObject::Create(klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
     hCondVar->SetWaitersList(coro, waitersList);

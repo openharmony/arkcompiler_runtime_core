@@ -20,6 +20,12 @@
 
 namespace ark::mem {
 
+GCAdaptiveMarkingStack::~GCAdaptiveMarkingStack()
+{
+    auto allocator = GetGC()->GetInternalAllocator();
+    allocator->Delete(additionalMarkingInfo_);
+}
+
 void GCAdaptiveMarkingStack::PushToStack(const ObjectHeader *fromObject, ObjectHeader *object)
 {
     LOG(DEBUG, GC) << "Add object to stack: " << GetDebugInfoAboutObject(object)

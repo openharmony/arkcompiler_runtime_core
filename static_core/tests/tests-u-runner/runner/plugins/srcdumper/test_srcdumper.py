@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 import json
 import logging
 import os
+import re
 from typing import List, Any
 import traceback
 
@@ -55,18 +56,10 @@ class TestSRCDumper(TestFileBased):
 
 
     def check_for_parser_error(self) -> bool:
-        found = False
-
         with os.fdopen(os.open(self.path, os.O_RDONLY, mode=511), "r", encoding="utf-8") as file:
             data = file.read()
-
-            open_comment_pos = data.find("/*")
-            while not found and open_comment_pos != -1:
-                close_comment_pos = closing if (closing := data.find("*/", open_comment_pos)) != -1 else len(data)
-                found = data.find("Error SyntaxError:", open_comment_pos, close_comment_pos) != -1
-                open_comment_pos = data.find("/*", close_comment_pos)
-
-        return found
+            regex = r"\/\*\s+@@(@|\?)\s+.*?\s+Error\s+(SyntaxError|TypeError|Error):\s+.*?\s+\*\/"
+            return re.search(regex, data) is not None
 
 
     def compare_ast(self) -> None:

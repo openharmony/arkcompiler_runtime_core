@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,19 +21,19 @@ class EtsImplementInterfacesEts : public EtsInteropTest {};
 // NOTE(andreypetukhov) enable after fixibng #12808
 TEST_F(EtsImplementInterfacesEts, DISABLED_arktsClassGetProperty)
 {
-    auto ret = CallEtsMethod<bool>("arktsClassGetProperty");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "arktsClassGetProperty");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #12808
 TEST_F(EtsImplementInterfacesEts, DISABLED_arktsClassUseStringFn)
 {
-    auto ret = CallEtsMethod<bool>("arktsClassUseStringFn");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "arktsClassUseStringFn");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #12808
 TEST_F(EtsImplementInterfacesEts, DISABLED_arktsClassUseNumberFn)
 {
-    auto ret = CallEtsMethod<bool>("arktsClassUseNumberFn");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "arktsClassUseNumberFn");
     ASSERT_EQ(ret, true);
 }
 

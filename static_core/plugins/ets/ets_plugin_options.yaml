@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,6 +48,7 @@
 
       logger:
         components:
+          - name: ani
           - name: ets
           - name: ets_napi
           - name: ets_interop_js
@@ -81,6 +82,16 @@
         header_path_implementation_codegen: plugins/ets/compiler/optimizer/ets_codegen_extensions.h
         launch_call_codegen: LaunchCallCodegen
         load_immediate_codegen: LoadImmediateCodegen
+        get_native_method_codegen: EtsGetNativeMethod
+        get_native_method_managed_class_codegen: EtsGetNativeMethodManagedClass
+        get_method_native_pointer_codegen: EtsGetMethodNativePointer
+        get_native_api_env_codegen: EtsGetNativeApiEnv
+        begin_native_method_codegen: EtsBeginNativeMethod
+        end_native_method_prim_codegen: EtsEndNativeMethodPrim
+        end_native_method_obj_codegen: EtsEndNativeMethodObj
+        check_native_exception_codegen: EtsCheckNativeException
+        wrap_object_native_codegen: EtsWrapObjectNative
+        resolve_call_by_name: ResolveCallByNameCodegen
         pipeline_includes: plugins/ets/compiler/optimizer/ets_pipeline_includes.inl.h
         optimizations_after_unroll: plugins/ets/compiler/optimizer/ets_optimizations_after_unroll.inl
       runtime_defines:

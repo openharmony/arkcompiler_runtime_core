@@ -15,7 +15,7 @@
 cases:
     - decl: |-
           function eq(p: Object, q: String): boolean {
-              return p == q
+              return p == q && q == p
           }
 
           class A<T extends Object, U extends String> {
@@ -35,7 +35,7 @@ cases:
               meth(t: T, u: U): boolean {
                   p = t
                   q = u
-                  return p == q
+                  return p == q && q == p
               }
           }
       code: |-
@@ -44,7 +44,7 @@ cases:
 
     - decl: |-
           function eq(p: Object|null|undefined, q: Object|null|undefined): boolean {
-              return p == q
+              return p == q && q == p
           }
 
           class A<T extends Object|null, U extends Number|undefined> {
@@ -59,7 +59,7 @@ cases:
     - tags: 'compile-only, negative'
       decl: |-
           function eq(p: Object, q: String): boolean {
-              return p == q
+              return p == q && q == p
           }
 
           class A<T, U> {
@@ -80,7 +80,7 @@ cases:
               meth(t: T, u: U): boolean {
                   p = t
                   q = u
-                  return p == q
+                  return p == q && q == p
               }
           }
       code: |-
@@ -90,7 +90,7 @@ cases:
     - tags: 'compile-only, negative'
       decl: |-
           function eq(p: Object, q: Number): boolean {
-              return p == q
+              return p == q && q == p
           }
 
           class A<T extends Object|null, U> {

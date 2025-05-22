@@ -394,7 +394,7 @@
     object_type: Double,
     init_object_data_type: "double[]",
     init_object_type: double,
-    init_object_data: "[0.25, -0.25, 12345.01, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, 123456, 77, -77]",
+    init_object_data: "[0.25, -0.25, 12345.01, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, 123456, 77, -77, 1234567890123456, -1234567890123456, 0.1234567890123456, 0.0, -0.0, Double.MAX_VALUE, Double.MIN_VALUE, Int.MAX_VALUE, Int.MIN_VALUE]",
 
     param_init_data_types: {},
     param_types: {},
@@ -405,7 +405,7 @@
     
     expected_data_item_type: String,
     expected_data_type: "String[]",
-    expected_test_data: '["2e-1", "-2e-1", "1e+4", "Infinity", "-Infinity", "NaN", "1e+5", "8e+1", "-8e+1"]',
+    expected_test_data: '["2.5e-1", "-2.5e-1", "1.234501e+4", "Infinity", "-Infinity", "NaN", "1.23456e+5", "7.7e+1", "-7.7e+1", "1.234567890123456e+15", "-1.234567890123456e+15", "1.234567890123456e-1", "0e+0", "0e+0", "1.7976931348623157e+308", "5e-324", "2.147483647e+9", "-2.147483648e+9"]',
     verify_test_result_function: compareStringTrivial
   }
 

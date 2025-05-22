@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/typed_pointer.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/wrappers_cache.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/ets_field_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_set.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -35,6 +36,8 @@ class EtsClassWrapper;
 
 using LazyEtsMethodWrapperLink = TypedPointer<EtsMethodSet, EtsMethodWrapper>;
 using EtsMethodWrappersCache = WrappersCache<EtsMethodSet *, EtsMethodWrapper>;
+using EtsMethodAndClassWrapper = std::tuple<EtsMethod *, const char *, EtsClassWrapper *>;
+using FindMethodFunc = std::function<std::tuple<EtsMethod *, const char *, EtsClassWrapper *>(void *, size_t)>;
 
 class EtsMethodWrapper {
 public:
@@ -84,14 +87,27 @@ public:
     }
 
     static napi_property_descriptor MakeNapiProperty(EtsMethodSet *method, LazyEtsMethodWrapperLink *lazyLinkSpace);
+    static void AttachGetterSetterToProperty(EtsMethodSet *method, napi_property_descriptor &property);
+
+    static napi_property_descriptor MakeNapiIteratorProperty(napi_value &iterator, EtsMethodSet *method,
+                                                             LazyEtsMethodWrapperLink *lazyLinkSpace);
 
     template <bool IS_STATIC>
     static napi_value EtsMethodCallHandler(napi_env env, napi_callback_info cinfo);
 
+    template <bool IS_STATIC>
+    static napi_value GetterSetterCallHandler(napi_env env, napi_callback_info cinfo);
+
 private:
     static std::unique_ptr<EtsMethodWrapper> CreateMethod(EtsMethodSet *etsMethodSet, EtsClassWrapper *owner);
 
-    EtsMethodWrapper(EtsMethodSet *etsMethodSet, EtsClassWrapper *owner) : etsMethodSet_(etsMethodSet), owner_(owner) {}
+    explicit EtsMethodWrapper(EtsMethodSet *etsMethodSet, EtsClassWrapper *owner)
+        : etsMethodSet_(etsMethodSet), owner_(owner)
+    {
+    }
+
+    template <bool IS_STATIC>
+    static napi_value DoEtsMethodCall(napi_env env, napi_callback_info cinfo, FindMethodFunc &findMethodFunc);
 
     EtsMethodSet *const etsMethodSet_;
     EtsClassWrapper *const owner_ {};  // only for instance methods

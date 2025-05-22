@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-const { getTestClass } = require('ets_proxy.test.js');
+const {
+    getTestClass,
+} = require('ets_proxy.test.abc');
+
 const ReferencesAccess = getTestClass('ReferencesAccess');
 const ReferencesAccessStatic = getTestClass('ReferencesAccessStatic');
 const UClass1 = getTestClass('UClass1');
@@ -41,13 +44,13 @@ const PROMISE_IMPLEMENTED = false;
 		testAccessorsOf(ras, tname, ...values);
 	}
 
-	testAccessors('UClass1', null, new UClass1());
-	testAccessors('String', null, 'fooo', '0123456789abcdef');
-	testAccessors('JSValue', null, 1234, 'fooo', {}, new UClass1());
+	testAccessors('UClass1', undefined, new UClass1());
+	testAccessors('String', undefined, 'fooo', '0123456789abcdef');
+	testAccessors('JSValue', undefined, 1234, 'fooo', {}, new UClass1());
 	PROMISE_IMPLEMENTED &&
 		testAccessors(
 			'Promise',
-			null,
+			undefined,
 			new Promise(
 				function () {},
 				function () {}

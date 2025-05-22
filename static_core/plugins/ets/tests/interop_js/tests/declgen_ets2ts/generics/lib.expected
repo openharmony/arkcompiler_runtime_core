@@ -12,52 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-function Identity<T>(x: T): T { return {} as any; };
-(Identity as any) = ETSGLOBAL.Identity;
-export {Identity};
-exports.Identity = Identity;
-
-
-function ForEach<T extends Object>(a: T[], cb: (p1: T, p2: number) => void): void { return {} as any; };
-(ForEach as any) = ETSGLOBAL.ForEach;
-export {ForEach};
-exports.ForEach = ForEach;
-
-
-class GenericClass<T extends Object> {
-    public identity(x: T): T { return {} as any; };
-    constructor() {};
-};
-(GenericClass as any) = (globalThis as any).Panda.getClass('LGenericClass;');
-export {GenericClass};
-exports.GenericClass = GenericClass;
-
-interface IGeneric0<T> {
+export declare function Identity<T>(x: T): T;
+export declare function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void;
+export declare function foo1<T>(x: Partial<C1<T>>): void;
+export declare class GenericClass<T extends Object> {
+    public identity(x: T): T;
+    constructor();
+}
+export declare interface IGeneric0<T> {
     I0Method(a: T): T;
 }
-export {IGeneric0};
-
-
-interface IGeneric1<T> {
+export declare interface IGeneric1<T> {
     I1Method(a: T): T;
 }
-export {IGeneric1};
-
-
-class BaseGeneric<T, U> {
-    public c: T = {} as any;
-    public d: U = {} as any;
-    public constructor(c: T, d: U) {};
-};
-(BaseGeneric as any) = (globalThis as any).Panda.getClass('LBaseGeneric;');
-export {BaseGeneric};
-exports.BaseGeneric = BaseGeneric;
-
+export declare class BaseGeneric<T, U> {
+    public get c(): T;
+    public set c(value: T);
+    public get d(): U;
+    public set d(value: U);
+    public constructor(c: T, d: U);
+}
+export declare class C1<T> {
+    constructor();
+}
+export type Callback<T, C = void, V = void> = (data: T, data2: C) => V;
+export declare class C2 {
+    public get a(): Callback<string, number>;
+    public set a(value: Callback<string, number>);
+    public constructor();
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -888,7 +888,8 @@ ForeignFieldItem *FileReader::CreateForeignFieldItem(BaseClassItem *fcls, File::
 
     ASSERT(fieldTypeItem != nullptr);
 
-    auto *fieldItem = container_.CreateItem<ForeignFieldItem>(fcls, fieldName, fieldTypeItem);
+    auto *fieldItem =
+        container_.CreateItem<ForeignFieldItem>(fcls, fieldName, fieldTypeItem, fieldAcc.GetAccessFlags());
     itemsDone_.insert({fieldId, static_cast<BaseItem *>(fieldItem)});
 
     return fieldItem;
@@ -1101,7 +1102,7 @@ void FileReader::InstCheckByFlags(BytecodeInstruction &inst, MethodItem *methodI
         ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
         auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
         methodItem->AddIndexDependency(idxItem);
-    } else if (inst.HasFlag(Flags::METHOD_ID)) {
+    } else if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
         BytecodeId bId = inst.GetId();
         File::Index idx = bId.AsIndex();
         File::EntityId methodId = reverseDone.find(methodItem)->second;
@@ -1109,7 +1110,7 @@ void FileReader::InstCheckByFlags(BytecodeInstruction &inst, MethodItem *methodI
         ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
         auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
         methodItem->AddIndexDependency(idxItem);
-    } else if (inst.HasFlag(Flags::FIELD_ID)) {
+    } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
         BytecodeId bId = inst.GetId();
         File::Index idx = bId.AsIndex();
         File::EntityId methodId = reverseDone.find(methodItem)->second;
@@ -1181,7 +1182,7 @@ void FileReader::InstUpdateId(CodeItem *codeItem, MethodItem *methodItem,
             auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
             uint32_t index = idxItem->GetIndex(methodItem);
             inst.UpdateId(BytecodeId(index));
-        } else if (inst.HasFlag(Flags::METHOD_ID)) {
+        } else if (inst.HasFlag(Flags::METHOD_ID) || inst.HasFlag(Flags::STATIC_METHOD_ID)) {
             BytecodeId bId = inst.GetId();
             File::Index idx = bId.AsIndex();
 
@@ -1192,7 +1193,7 @@ void FileReader::InstUpdateId(CodeItem *codeItem, MethodItem *methodItem,
             auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
             uint32_t index = idxItem->GetIndex(methodItem);
             inst.UpdateId(BytecodeId(index));
-        } else if (inst.HasFlag(Flags::FIELD_ID)) {
+        } else if (inst.HasFlag(Flags::FIELD_ID) || inst.HasFlag(Flags::STATIC_FIELD_ID)) {
             BytecodeId bId = inst.GetId();
             File::Index idx = bId.AsIndex();
 

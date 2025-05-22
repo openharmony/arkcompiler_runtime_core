@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -576,8 +576,9 @@ cases:
       new Derived().foo(i);
     result: 1
 
-  # override-compatible argument (covariance)
-  - base: |-
+  # override-incompatible argument (covariance)
+  - tags: negative, compile-only
+    base: |-
       foo(i: [Object, Object]): void {
           res = 1;
       }
@@ -590,8 +591,9 @@ cases:
       new Derived().foo(i);
     result: 2
 
-  # override-compatible argument (covariance)
-  - base: |-
+  # override-incompatible argument (covariance)
+  - tags: negative, compile-only
+    base: |-
       foo(i: [Object, Object]): void {
           res = 1;
       }
@@ -607,12 +609,12 @@ cases:
   # override-compatible return value (invariance)
   - base: |-
       foo(): [Object, Object] {
-          res = 1;  
+          res = 1;
           return [ new Object(), new Object()];
       }
     derived: |-
       override foo(): [Object, Object] {
-          res = 2;  
+          res = 2;
           return [ new Object(), new Object()];
       }
     call: new Derived().foo();
@@ -621,68 +623,72 @@ cases:
   # override-compatible return value (invariance)
   - base: |-
       foo(): [Object, Base] {
-          res = 1;  
+          res = 1;
           return [ new Object(), new Base()];
       }
     derived: |-
       override foo(): [Object, Base] {
-          res = 2;  
+          res = 2;
           return [ new Object(), new Base()];
       }
     call: new Derived().foo();
     result: 2
 
   # override-incompatible return value (contravariance)
+  - tags: negative, compile-only
     base: |-
       foo(): [Object, Base] {
-          res = 1;  
+          res = 1;
           return [ new Object(), new Base()];
       }
     derived: |-
       override foo(): [Object, Object] {
-          res = 2;  
+          res = 2;
           return [ new Object(), new Object()];
       }
     call: new Derived().foo();
     result: 2
 
-  # override-compatible return value (covariance)
-  - base: |-
+  # override-incompatible return value (covariance)
+  - tags: negative, compile-only
+    base: |-
       foo(): [Object, Object] {
-          res = 1;  
+          res = 1;
           return [ new Object(), new Object()];
       }
     derived: |-
       override foo(): [Base, Base] {
-          res = 2;  
+          res = 2;
           return [ new Base(), new Base()];
       }
     call: new Derived().foo();
     result: 2
 
-  # override-compatible return value (covariance)
-  - base: |-
+  # override-incompatible return value (covariance)
+  - tags: negative, compile-only
+    base: |-
       foo(): [Object, Object] {
-          res = 1;  
+          res = 1;
           return [ new Object(), new Object()];
       }
     derived: |-
       override foo(): [Base, Object] {
-          res = 2;  
+          res = 2;
           return [ new Base(), new Object()];
       }
     call: new Derived().foo();
     result: 2
 
-  # override-compatible return value (covariance)
-  - base: |-
+  # override-incompatible return value (covariance)
+  - tags: negative, compile-only
+    base: |-
       foo(): [Object, Object] {
-          res = 1;  
+          res = 1;
           return [ new Object(), new Object()];
       }
     derived: |-
       override foo(): [Object, Base] {
-          res = 2;  
+          res = 2;
           return [ new Object(), new Base()];
       }
     call: new Derived().foo();

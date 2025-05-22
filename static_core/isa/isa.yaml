@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,96 +14,94 @@
 ---
 
 chapters:
-  - name: General design
+  - name: General Design
     text: >
-      VM is register based with dedicated accumulator register, which serves as an implicit operand to instructions.
+      VM is register-based with a dedicated accumulator register that serves as an implicit operand to instructions.
 
   - name: Registers
     text: >
       Registers are wide enough to hold a single reference when working with objects.
-      When used for primitive types, registers width should be considered as 64 bits.
-      When used for object types, registers should be considered wide enough to hold a reference to an object.
-      The scope of a register is function frame (also known as activation record). If instruction defines not all 64
-      bits of a register, undefined bits shall not be accessed in verified code.
-      Register field width in instruction encoding could be 4 (16 addressable registers), 8 (256 registers) or
+      When used for primitive types, register width is considered to be 64 bits.
+      When used for object types, registers must be considered wide enough to hold a reference to an object.
+      The scope of a register is a *function frame* (also known as *activation record*). If an instruction defines not all 64
+      bits of a register, then the undefined bits are not accessed in a verified code.
+      Register field width in instruction encoding can be 4 (16 addressable registers), 8 (256 registers) or
       16 (65536 registers) bits.
 
   - name: Accumulator
     text: >
-      Accumulator is a special register which is implicitly used by instructions as a source and/or destination operand.
+      *Accumulator* is a special register which is used implicitly by instructions as a source and/or destination operand.
       The main goal of using accumulator is to improve encoding density without losing much in performance. Therefore,
-      the general intuition regarding accumulator usage is to utilize the accumulator as much as possible taking it as
-      a source from previous instruction result and passing it to the next instruction in its destination operand.
-      Moreover, when instruction has more than one source operands, the value which lives shorter should be passed
-      through the accumulator. If it is profitable however, variations of instructions that don't write into the
-      accumulator are also introduced. For example, moving arguments for `call.range` instruction may be done by
-      register-to-register moves.
+      the general intuition regarding accumulator usage is to utilize accumulator as much as possible by taking it as
+      a source from a previous instruction result and passing it to the next instruction in its destination operand.
+      Moreover, when an instruction has more than one source operand, the shorter-living value must be passed
+      through accumulator. However, instruction variations that do not write into accumulator are also introduced
+      if it gives advantage. For example, arguments for the`call.range` instruction can be moved register-to-register.
 
-  - name: Calling sequence
+  - name: Calling Sequence
     text: >
-      On execution of a call bytecode a new function frame is created. All necessary arguments are copied from the
-      caller frame onto the top of the callee frame such as the last argument is placed in the register with the largest
-      index and the first argument is placed into the register with the index equal to the size of frame subtracted by
-      the number of arguments. Accumulator value is considered as undefined and shall not be read in verified bytecode.
-      On return, callee frame is destroyed. If function return value is non-void, it is passed to caller via
-      accumulator. Otherwise accumulator content in caller frame is considered as undefined and shall not
-      be read in verified bytecode.
+      A new function frame is created upon the execution of call bytecode. All necessary arguments are copied from the
+      caller frame to the top of the callee frame. E.g., the last argument is placed in the register with the largest
+      index, and the first argument is placed in the register with the index that equals the size of the frame subtracted
+      by the number of arguments. The accumulator value is considered *undefined*; it is not read in the verified bytecode.
+      Upon return, the callee frame is destroyed. If a function return value is non-void, then it is passed to the caller
+      via accumulator. Otherwise, the accumulator content in the caller frame is considered *undefined*; it is not
+      read in the verified bytecode.
 
-  - name: Supported primitive types
+  - name: Supported Primitive Types
     text: |
-      VM support operations on registers with i32 and i64 integral values. However, 8-bit and 16-bit integral values
-      can be loaded/stored into records and arrays with corresponding bytecodes. In that case, VM will extend/truncate
+      VM supports operations on registers with i32 and i64 integral values. However, 8-bit and 16-bit integral values
+      can be loaded/stored into records and arrays with corresponding bytecodes. In that case, VM extends/truncates the
       value to match storage size with i32. Similarly, passing an 8-bit or 16-bit value to a function can be emulated by
       passing a value, which is zero or sign-extended to i32.
-      VM support operations on registers with f32 and f64 values, which corresponds to IEEE-754 single and double precision
-      floating-point represenation.
+      VM supports operations on registers with f32 and f64 values, which correspond to the IEEE-754 single and double precision
+      floating-point representations.
       Primitive data type of a register is not tracked by VM and is interpreted by separate bytecodes.
-      Integral values are not inherently signed or unsigned, signedness is interpreted by bytecodes as well.
-      If bytecode treats register value as signed integer, it uses two's complement representation.
-      To denote that bytecode treats register values as unsigned integer, u32/u64 notation is used.
-      For moves, loads and stores it is not always possible to denote a type of result, because it depends on type
-      of source object. In that case, bNN notation is used, where NN is bit size of result. Therefore, for example,
-      b64 is a union of f64 and i64.
+      Integral values are not inherently signed or unsigned. Their signedness is interpreted by bytecodes as well.
+      If bytecode treats a register value as a signed integer, then it uses two's complement representation.
+      If bytecode treats a register value as an unsigned integer, then the bytecode is denoted by using the u32/u64 notation.
+      It is not always possible to denote the type of result for moves, loads and stores, because it depends on the type of the
+      source object. If it is not possible to denote the type of result, then bNN notation is used, where NN is the bit size of
+      the result. Therefore, for example, b64 is a union of f64 and i64.
 
       ### Floating-point literals
 
       Decimal floating-point literals can have the following parts:
 
-      - Sign ("`+`" or "`-`")
-      - Whole number part
-      - Decimal point
-      - Fractional part
-      - Exponent indicator ("`e`")
-      - Exponent sign
-      - Exponent
+      - Sign ('``+``' or '``-`'`),
+      - Whole number part,
+      - Decimal point,
+      - Fractional part,
+      - Exponent indicator ('``e``'),
+      - Exponent sign,
+      - Exponent.
 
-      Decimal floating-point literals must have at least one digit and either decimal point or exponent part.
+      Decimal floating-point literals must have at least one digit, plus either a decimal point or an exponent part.
 
       Special values:
 
-      - Positive zero (+0.0, hexadecimal representation is `0x0000000000000000`)
-      - Negative zero (-0.0, hexadecimal representation is `0x8000000000000000`)
-      - Minimal positive value (4.9E-324, hexadecimal representation is `0x0000000000000001`)
-      - Maximal negative value (-4.9E-324, hexadecimal representation is `0x8000000000000001`)
-      - Maximal positive value (1.7976931348623157e308, hexadecimal representation is `0x7fefffffffffffff`)
-      - Minimal negative value (-1.7976931348623157e308, hexadecimal representation is `0xffefffffffffffff`)
-      - Positive infinity (hexadecimal representation is `0x7ff0000000000000`)
-      - Negative infinity (hexadecimal representation is `0xfff0000000000000`)
-      - Not a number - set of all NaN values (one of hexadecimal representations is `0x7ff8000000000000`)
+      - Positive zero (+0.0, hexadecimal representation is `0x0000000000000000`),
+      - Negative zero (-0.0, hexadecimal representation is `0x8000000000000000`),
+      - Minimal positive value (4.9E-324, hexadecimal representation is `0x0000000000000001`),
+      - Maximal negative value (-4.9E-324, hexadecimal representation is `0x8000000000000001`),
+      - Maximal positive value (1.7976931348623157e308, hexadecimal representation is `0x7fefffffffffffff`),
+      - Minimal negative value (-1.7976931348623157e308, hexadecimal representation is `0xffefffffffffffff`),
+      - Positive infinity (hexadecimal representation is `0x7ff0000000000000`),
+      - Negative infinity (hexadecimal representation is `0xfff0000000000000`),
+      - Not a number - set of all NaN values (one of hexadecimal representations is `0x7ff8000000000000`).
 
-  - name: Language-dependent types
+  - name: Language-Dependent Types
     text: >
-      Panda VM supports type hierarchies according to the language it executes. That way, creation (or loading
-      from constant pool) of strings, arrays, exception objects results into an object of type native to language,
-      including inheritance relations.
+      Panda VM supports type hierarchies according to the language it executes. Therefore, creation (or loading
+      from a constant pool) of strings, arrays, and exception objects produces objects of types native to the
+      language, including inheritance relations.
 
-  - name: Dynamically-typed languages support
+  - name: Dynamically-Typed Languages Support
     text: >
-      Panda VM supports languages with dynamic types. It represents dynamic values through special 'any' values,
-      which wraps a value itself (both primitive and objects) and corresponding type info. VM tracks type of registers,
-      that hold 'any' value, whether they are primitive or not. Virtual registers and accumulator are wide enough
-      to hold 'any' value. When VM executes code inside dynamically-typed language context, regular static instructions
-      also may be used.
+      Panda VM supports dynamically-typed languages. It represents a dynamic value through a special 'any' value. 'Any' values
+      wrap each value itself (both primitive value and object) with its corresponding type info. VM tracks types of registers
+      that hold 'any' values, whether primitive or not. Virtual registers and accumulator are wide enough to hold an 'any'
+      value. Regular static instructions can also be used when the VM executes a code inside a dynamically-typed language context.
 
 # File format and ISA versioning
 min_version: 0.0.0.5
@@ -114,12 +112,16 @@ properties:
     description: Use an id which resolves into a type constant.
   - tag: method_id
     description: Use an id which resolves into a method constant.
+  - tag: static_method_id
+    description: Use an id which resolves into a static method constant.
   - tag: string_id
     description: Use an id which resolves into a string constant.
   - tag: literalarray_id
     description: Use an id which resolves into a constant literalarray.
   - tag: field_id
-    description: Use an id which resolves into a field reference.
+    description: Use an id which resolves into an instance field reference.
+  - tag: static_field_id
+    description: Use an id which resolves into a static field reference.
   - tag: short_long_range
     description: Instruction is used to pass arguments, exists in short, long and range forms.
   - tag: call
@@ -170,7 +172,7 @@ exceptions:
   - tag: x_init
     description: Bytecode throws ExceptionInInitializerError if unexpected exception occurred in a static initializer.
   - tag: x_call
-    description: Bytecode may throw an error if an exception occures in the called bytecode.
+    description: Bytecode may throw an error if an exception occurs in the called bytecode.
   - tag: x_throw
     description: Bytecode's primary role is to throw provided exception object.
   - tag: x_link
@@ -257,7 +259,7 @@ prefixes:
     description: IEEE-754 single precision floating-point operations.
     opcode_idx: 0xec
 
-# Define elements, that allowed to be used in a profile description.
+# Define elements allowed to be used in a profile description.
 profiles_schema: {}
 
 # Profiles should be specified in an ISA description for a specific language.
@@ -306,7 +308,7 @@ groups:
 
   - title: Move immediate-to-register
     description: >
-      Move integer immediate into a register. For short formats immediate is sign extended to operand size.
+      Move integer immediate into a register. For short formats immediate is sign-extended to operand size.
     exceptions:
       - x_none
     verification:
@@ -334,8 +336,8 @@ groups:
         opcode_idx: [0xe]
         properties: [float]
 
-  - title: Move null reference into register
-    description: Move null reference into a register.
+  - title: Move null reference into the register
+    description: Move null reference into the register.
     exceptions:
       - x_none
     verification:
@@ -348,8 +350,8 @@ groups:
         format: [op_v_8]
         opcode_idx: [0xf]
 
-  - title: Load accumulator from register
-    description: Moves register content into an accumulator.
+  - title: Load accumulator from the register
+    description: Moves register content into accumulator.
     exceptions:
       - x_none
     verification:
@@ -372,7 +374,7 @@ groups:
 
   - title: Load accumulator from immediate
     description: >
-      Load immediate into accumulator. For short formats immediate is sign extended to operand size.
+      Load immediate into accumulator. For short formats immediate is sign-extended to operand size.
     exceptions:
       - x_none
     verification:
@@ -530,7 +532,7 @@ groups:
         opcode_idx: [0x1]
 
   - title: Floating-point comparison
-    description: Perform specified floating point comparison between register and accumulator.
+    description: Perform specified floating-point comparison between register and accumulator.
     properties:
       - float
     exceptions:
@@ -579,7 +581,7 @@ groups:
   - title: Unconditional jump
     description: >
       Unconditionally transfer execution to an instruction at offset bytes from the beginning of the current
-      instruction. Offset is sign extended to the size of instruction address.
+      instruction. Offset is sign-extended to the size of instruction address.
     properties:
       - jump
     exceptions:
@@ -597,7 +599,7 @@ groups:
   - title: Conditional object comparison jump
     description: >
       Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
-      object references in accumulator and source register compare as specified. Offset is sign extended to the size of
+      object references in accumulator and source register compare as specified. Offset is sign-extended to the size of
       instruction address.
     properties:
       - jump
@@ -631,7 +633,7 @@ groups:
   - title: Conditional compared to null jump
     description: >
       Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
-      object reference in accumulator compares with null as specified. Offset is sign extended to the size of
+      object reference in accumulator compares with null as specified. Offset is sign-extended to the size of
       instruction address.
     properties:
       - jump
@@ -664,7 +666,7 @@ groups:
   - title: Conditional compared to zero jump
     description: >
       Transfer execution to an instruction at offset bytes from the beginning of the current instruction if
-      signed 32-bit integer in accumulator compares with 0 as specified. Offset is sign extended to the size
+      signed 32-bit integer in accumulator compares with 0 as specified. Offset is sign-extended to the size
       of instruction address.
     properties:
       - jump
@@ -729,7 +731,7 @@ groups:
   - title: Conditional compared to register jump
     description: >
       Transfer execution to an instruction at offset bytes from the beginning of the current instruction if signed
-      32-bit integers in accumulator and register compare as specified. Offset is sign extended to the size of
+      32-bit integers in accumulator and register compare as specified. Offset is sign-extended to the size of
       instruction address.
     properties:
       - jump
@@ -794,7 +796,7 @@ groups:
         opcode_idx: [0x43, 0x44]
 
   - title: Floating-point unary
-    description: Perform specified floating-point operation on accumulator
+    description: Perform specified floating-point operation on accumulator.
     properties:
       - float
     exceptions:
@@ -818,7 +820,7 @@ groups:
         opcode_idx: [0x45]
 
   - title: Unary
-    description: Perform specified operation on accumulator
+    description: Perform specified operation on accumulator.
     exceptions:
       - x_none
     verification:
@@ -852,7 +854,7 @@ groups:
         opcode_idx: [0x1]
 
   - title: Two address binary operation on accumulator
-    description: Perform specified binary operation on accumulator and register and store result into accumulator
+    description: Perform specified binary operation on accumulator and register, and store the result into accumulator.
     exceptions:
       - x_none
     verification:
@@ -982,8 +984,8 @@ groups:
         format: [pref_op_v_8]
         opcode_idx: [0xd]
 
-  - title: Two address binary operation on accumulator with result in register
-    description: Perform specified binary operation on accumulator and register and store result into register
+  - title: Two address binary operations on accumulator with results in the register
+    description: Perform specified binary operation on accumulator and register, and store the result into the register.
     exceptions:
       - x_none
     verification:
@@ -1097,20 +1099,21 @@ groups:
 
   - title: Two address floating-point binary operation on accumulator
     description: |
-      Perform specified floating-point binary operation on accumulator and register and store result into accumulator.
-      The results of instructions correspond IEEE-754 arithmetic rules.
+      Perform specified floating-point binary operation on accumulator and register, and store the result into accumulator.
+      The results of instructions correspond to the IEEE-754 arithmetic rules.
 
-      - Any operation with NaN results to NaN value.
-      - The sum of opposite infinities or the difference of the same sign infinities is NaN.
+      - Any operation with NaN results in the NaN value.
+      - The sum of opposite infinities or the difference of the same-sign infinities is NaN.
       - Division is NaN if Infinity is divided by Infinity.
       - Division is NaN if zero is divided by zero.
       - Multiplication is NaN if zero is multiplied by infinity.
-      - The sign of division or multiplication result is positive if both values have the same sign, negative if the values have different sign.
-      - Division is infinity if any non zero value is divided by zero.
-      - Multiplication is infinity if any non zero value is multiplied by infinity.
-      - The sum of two infinities of the same sign or the difference of two infinities of opposite sign is infinity. The sign of result matches the sign of accumulator value.
-      - The sum or the difference of infinity and any finite value is infinity. The sign of result matches the sign of infinity.
-      - The sum or the difference of zeros is zero. Exceptions are the sum of two negative zeros and the difference of negative and positive zero - the result is negative zero.
+      - The sign of division or multiplication result is positive if both values have the same sign, or negative if the values have different signs.
+      - Division is infinity if any nonzero value is divided by zero.
+      - Multiplication is infinity if any nonzero value is multiplied by infinity.
+      - The sum of two infinities of the same sign or the difference of two infinities of opposite signs is infinity. The sign of the result matches
+        the sign of the accumulator value.
+      - The sum or the difference of infinity and any finite value is infinity. The sign of the result matches the sign of infinity.
+      - The sum or the difference of zeros is zero. Exceptions are the sum of two negative zeros and the difference of negative and positive zeros - the result is negative zero.
 
     properties:
       - float
@@ -1183,22 +1186,23 @@ groups:
         format: [op_v_8]
         opcode_idx: [0x52]
 
-  - title: Two address floating-point binary operation on accumulator with result in register
+  - title: Two address floating-point binary operations on accumulator with the results in the register.
     description: |
-      Perform specified floating-point binary operation on accumulator and register and store result into register.
-      The results of instructions correspond IEEE-754 arithmetic rules.
+      Perform specified floating-point binary operation on accumulator and register, and store the result into the register.
+      The results of instructions correspond to the IEEE-754 arithmetic rules.
 
-      - Any operation with NaN results to NaN value.
-      - The sum of opposite infinities or the difference of the same sign infinities is NaN.
+      - Any operation with NaN results in NaN value.
+      - The sum of opposite infinities or the difference of the same-sign infinities is NaN.
       - Division is NaN if Infinity is divided by Infinity.
       - Division is NaN if zero is divided by zero.
       - Multiplication is NaN if zero is multiplied by infinity.
       - The sign of division or multiplication result is positive if both values have the same sign, negative if the values have different sign.
-      - Division is infinity if any non zero value is divided by zero.
-      - Multiplication is infinity if any non zero value is multiplied by infinity.
-      - The sum of two infinities of the same sign or the difference of two infinities of opposite sign is infinity. The sign of result matches the sign of accumulator value.
+      - Division is infinity if any nonzero value is divided by zero.
+      - Multiplication is infinity if any nonzero value is multiplied by infinity.
+      - The sum of two infinities of the same sign or the difference of two infinities of opposite sign is infinity.
+        The sign of result matches the sign of the accumulator value.
       - The sum or the difference of infinity and any finite value is infinity. The sign of result matches the sign of infinity.
-      - The sum or the difference of zeros is zero. Exceptions are the sum of two negative zeros and the difference of negative and positive zero - the result is negative zero.
+      - The sum or the difference of zeros is zero. Exceptions are the sum of two negative zeros and the difference of negative and positive zeros - the result is negative zero.
 
     properties:
       - float
@@ -1262,7 +1266,7 @@ groups:
         format: [op_v1_8_v2_8]
 
   - title: Two address integer division and modulo on accumulator
-    description: Perform integer division or modulo on accumulator and register and store result into accumulator
+    description: Perform integer division or modulo on accumulator and register, and store the result into accumulator.
     exceptions:
       - x_arith
     verification:
@@ -1341,8 +1345,8 @@ groups:
         format: [pref_op_v_8]
         opcode_idx: [0x5]
 
-  - title: Two address integer division and modulo on accumulator with result in register
-    description: Perform integer division or modulo on accumulator and register and store result into register
+  - title: Two address integer division and modulo on accumulator with the result in the register
+    description: Perform integer division or modulo on accumulator and register, and store the result into the register.
     exceptions:
       - x_arith
     verification:
@@ -1415,8 +1419,8 @@ groups:
 
   - title: Two address binary operation with immediate on accumulator
     description: >
-      Perform specified binary operation on accumulator and immediate and store result into accumulator.
-      Immediate is sign extended to operand size.
+      Perform specified binary operation on accumulator and immediate, and store the result into accumulator.
+      Immediate is sign-extended to operand size.
     exceptions:
       - x_none
     verification:
@@ -1482,8 +1486,8 @@ groups:
 
   - title: Two address binary operation with immediate
     description: >
-      Perform specified binary operation and immediate and store result into register.
-      Immediate is sign extended to operand size.
+      Perform specified binary operation and immediate, and store the result into the register.
+      Immediate is sign-extended to operand size.
     exceptions:
       - x_none
     verification:
@@ -1541,8 +1545,8 @@ groups:
 
   - title: Two address integer division or modulo with immediate on accumulator
     description: >
-      Perform two address integer division or modulo on accumulator and immediate and store result into accumulator.
-      Immediate is sign extended to operand size.
+      Perform two address integer division or modulo on accumulator and immediate, and store the result into accumulator.
+      Immediate is sign-extended to operand size.
     exceptions:
       - x_arith
     verification:
@@ -1576,8 +1580,8 @@ groups:
 
   - title: Two address integer division or modulo with immediate
     description: >
-      Perform two address integer division or modulo and immediate and store result into register.
-      Immediate is sign extended to operand size.
+      Perform two address integer division or modulo and immediate, and store the result into the register.
+      Immediate is sign-extended to operand size.
     exceptions:
       - x_arith
     verification:
@@ -1609,7 +1613,7 @@ groups:
         format: [op_v1_4_v2_4_imm_8]
 
   - title: Three address binary operation
-    description: Perform specified binary operation on two registers and store result into accumulator
+    description: Perform specified binary operation on two registers, and store the result into accumulator.
     exceptions:
       - x_none
     verification:
@@ -1679,8 +1683,8 @@ groups:
         format: [pref_op_v1_4_v2_4]
         opcode_idx: [0x14]
 
-  - title: Three address binary operation with result in register
-    description: Perform specified binary operation on two registers and store result into register
+  - title: Three address binary operation with the result in the register
+    description: Perform specified binary operation on two registers, and store the result into the register.
     exceptions:
       - x_none
     verification:
@@ -1742,7 +1746,7 @@ groups:
         format: [pref_op_v1_4_v2_4]
 
   - title: Three address integer division or modulo
-    description: Perform integer division or modulo on two registers and store result into accumulator
+    description: Perform integer division or modulo on two registers, and store the result into accumulator.
     exceptions:
       - x_arith
     verification:
@@ -1775,8 +1779,8 @@ groups:
         format: [op_v1_4_v2_4]
         opcode_idx: [0x65]
 
-  - title: Three address integer division or modulo with result in register
-    description: Perform integer division or modulo on two registers and store result into accumulator
+  - title: Three address integer division or modulo with the result in the register
+    description: Perform integer division or modulo on two registers, and store the result into accumulator.
     exceptions:
       - x_arith
     verification:
@@ -1809,7 +1813,7 @@ groups:
 
   - title: Increment register with immediate
     description: >
-      Increment virtual register by specified immediate. Immediate is sign extended to operand size.
+      Increment virtual register by specified immediate. Immediate is sign-extended to operand size.
     exceptions:
       - x_none
     verification:
@@ -1822,17 +1826,17 @@ groups:
         format: [op_v_4_imm_4]
         opcode_idx: [0x66]
 
-  - title: Conversions between integer and floating point types
+  - title: Conversions between integer and floating-point types
     description: |
       Perform specified primitive type conversion of accumulator.
-      Conversion from floating-point types to integer one obeys the following rules.
+      Conversion from floating-point types to integer type is performed by the following rules:
 
       - It is rounding toward zero.
-      - If converted value is less than minimal value for destination type, the result is minimal value for that type.
-      - If source is negative infinity, the result is minimal value for destination type.
-      - If converted value is greater than maximum value for destination type, the result is maximum value for that type.
-      - If source is positive infinity, the result is maximum value for destination type.
-      - If source is NaN, the result is equal to 0.
+      - If converted value is less than minimal value for destination type, then the result is the minimum value for that type.
+      - If source is negative infinity, then the result is the minimum value for the destination type.
+      - If converted value is greater than the maximum value for the destination type, then the result is the maximum value for that type.
+      - If source is positive infinity, then the result is the maximum value for the destination type.
+      - If source is NaN, then the result is equal to 0.
 
     properties:
       - float
@@ -1936,10 +1940,10 @@ groups:
 
   - title: Conversions from integer types to u1
     description: |
-      Conversion from integer types to u1 obeys the following rules.
+      Conversion from integer types to u1 is performed by the following rules:
 
-      - If converted integer is not equal to zero, the result is 1.
-      - Otherwise the result is 0.
+      - If converted integer is not equal to zero, then the result is 1.
+      - Otherwise, the result is 0.
 
     exceptions:
       - x_none
@@ -1969,12 +1973,12 @@ groups:
         format: [pref_op_none]
         opcode_idx: [0xb]
 
-  - title: Integer truncations and extensions.
+  - title: Integer truncations and extensions
     description: >
       Perform specified integer extension or truncations of accumulator.
-      Truncations discard all but N lowest-order bits, where N is the bit size of destination type.
-      If extension bytecode treats its source as signed integer, the value is sign-extended to destination type.
-      If extension bytecode treats its source as unsigned integer, the value is zero-extended to destination type.
+      Truncations discard all but N lowest-order bits, where N is the bit size of the destination type.
+      If extension bytecode treats its source as signed integer, then the value is sign-extended to destination type.
+      If extension bytecode treats its source as unsigned integer, then the value is zero-extended to destination type.
     exceptions:
       - x_none
     verification:
@@ -2050,9 +2054,9 @@ groups:
 
   - title: Load from array
     description: >
-      Load an element from array using accumulator as an index and puts it into accumulator.
-      If element size is smaller then 32 bits, it will be zero or sign extended (depending on bytecode)
-      to i32.
+      Load an element from array using accumulator as an index and put it into accumulator.
+      If the size of an element is smaller then 32 bits, then it is zero or
+      sign-extended (depending on bytecode) to i32.
     verification:
       - v1_array_type
       - acc_i32
@@ -2119,9 +2123,9 @@ groups:
 
   - title: Store to array
     description: >
-      Store accumulator content into array slot pointed by index.
-      If size of element to store is less than 32, accumulator content will be truncated
-      to storage size before storing.
+      Store the accumulator content into the array slot pointed by index.
+      If the size of an element to store is less than 32, then the accumulator
+      content is truncated to storage size before storing.
     verification:
       - v1_array_type
       - v2_i32
@@ -2199,7 +2203,7 @@ groups:
   - title: Create new array
     description: >
       Create a new single-dimensional array of given type and size and put a reference to it into register.
-      Elements of array are initialized to a default value, i.e. 0 for primitive types and null for objects.
+      Elements of array are initialized to a default value, i.e., 0 for primitive types and null for objects.
     verification:
       - type_id_array
       - v2_i32
@@ -2230,10 +2234,11 @@ groups:
 
   - title: Create new object
     description: |
-      Resolve class type from type_id, allocate memory for an object, initialize its fields with their
-      default values (i.e. 0 for primitives and null for objects) and put a reference to the newly created
-      object into register. The object should be initialized by calling initialization method before
-      further usage.
+      Resolve class type from type_id, allocate memory for an object,
+      initialize its fields with their default values (i.e., 0 for primitives
+      and null for objects), and put a reference to the newly created object
+      into the register. The object must be initialized by calling the
+      initialization method before further usage.
     verification:
       - type_id_object
     exceptions:
@@ -2258,13 +2263,16 @@ groups:
 
   - title: Create new object and call initializer
     description: >
-      Resolve class type from initializer method_id, allocate memory for an object, initialize its fields with their
-      default values (i.e. 0 for primitives and null for objects), call specified initializer and put a reference to
-      the newly created object into accumulator. method_id should resolve to an initializer.
-      Non-range instructions can be used to pass up to 4 arguments.
-      Unused register slot values will be discarded and corresponding registers will not be passed to initializer).
-      For methods with more arguments range kinds of instruction are to be used, which takes the needed number of
-      arguments starting from 'vs' register.
+      Resolve class type from initializer method_id, allocate memory for an
+      object, initialize its fields with their default values (i.e., 0 for
+      primitives and null for objects), call specified initializer, and put
+      a reference to the newly created object into accumulator.
+      method_id must resolve to an initializer. Non-range instructions can be
+      used to pass up to 4 arguments. Unused register slot values are to be
+      discarded, and corresponding registers are not to be passed to initializer).
+      Range kinds of instruction is to be used for methods with more arguments.
+      Such instructions take the required number of arguments starting from
+      'vs' register.
     verification:
       - method_id_non_static
       - method_id_accessible
@@ -2307,9 +2315,11 @@ groups:
   - title: Get field from object to accumulator
     description: >
       Get field value from an object by field id and put it into accumulator.
-      For non-object variant, the size of the field is determined by the field_id,
-      most significant bits are sign or unsigned extended based on the field type to fit accumulator size.
-      If field type size is less than 32, then loaded value is sign or zero extended to i32 depending on field type.
+      For a non-object variant, the size of the field is determined by the
+      field_id. The most significant bits are sign- or unsigned-extended
+      based on the field type to fit accumulator size. If field type size is
+      less than 32, then the loaded value is sign- or zero-extended to i32
+      depending on field type.
     verification:
       - v1_object
       - field_id_non_static
@@ -2344,9 +2354,11 @@ groups:
 
   - title: Store accumulator content into object field
     description: >
-      Store accumulator content into object field by field_id. For non-object variant the size of actually stored
-      value is determined by field_id, other accumulator bits are discarded.
-      If field type size is less than 32, accumulator content will be truncated to storage size before storing.
+      Store the accumulator content into object field by field_id. For
+      a non-object variant, the size of the actually stored value is determined
+      by field_id, while other accumulator bits are discarded.
+      If field type size is less than 32, then the accumulator content is
+      truncated to storage size before storing.
     verification:
       - v1_object
       - field_id_non_static
@@ -2383,9 +2395,11 @@ groups:
   - title: Get field from object to register
     description: >
       Get field value from an object by field id and put it into register.
-      For non-object variant, the size of the field is determined by the field_id,
-      most significant bits are sign or unsigned extended based on the field type to fit register size.
-      If field type size is less than 32, then loaded value is sign or zero extended to i32 depending on field type.
+      For a non-object variant, the size of the field is determined by the
+      field_id, and the most significant bits are sign- or unsigned-extended
+      based on the field type to fit register size. If field type size is less
+      than 32, then the loaded value is sign- or zero-extended to i32
+      depending on field type.
     verification:
       - v2_object
       - field_id_non_static
@@ -2420,9 +2434,11 @@ groups:
 
   - title: Store register content into object field
     description: >
-      Store register content into object field by field_id. For non-object variant the size of actually stored
-      value is determined by field_id, other register bits are discarded.
-      If field type size is less than 32, register content will be truncated to storage size before storing.
+      Store register content into object field by field_id. For a non-object
+      variant the size of the actually stored value is determined by field_id,
+      while other register bits are discarded.
+      If field type size is less than 32, then the register content is truncated
+      to storage size before storing.
     verification:
       - v1_type
       - v2_object
@@ -2458,15 +2474,17 @@ groups:
 
   - title: Get static field
     description: >
-      Get static field value by field_id and put it into accumulator.
-      For non-object variant, the size of the field is determined by the field_id,
-      most significant bits are sign or unsigned extended based on the field type to fit accumulator size.
-      If field size is less then 32, result will be sign or unsigned extended to i32 depedning on field type.
+      Get static field value by field_id and put it into accumulator. For a
+      non-object variant, the size of the field is determined by field_id, the
+      most significant bits are sign- or unsigned-extended based on field type
+      to fit accumulator size.
+      If field size is less then 32, then the result is sign- or
+      unsigned-extended to i32 depending on field type.
     verification:
       - field_id_static
       - field_id_size
     properties:
-      - field_id
+      - static_field_id
       - initialize_type
     exceptions:
       - x_init
@@ -2496,15 +2514,16 @@ groups:
 
   - title: Store to static field
     description: >
-      Store accumulator content into static field by field_id. For non-object variant the size of actually stored
-      value is determined by field_id, other accumulator bits are discarded.
-      If field type size is less than 32, then accumulator content will be trunctated to field size before storing.
+      Store accumulator content into static field by field_id. For a non-object
+      variant the size of the actually stored value is determined by field_id, other
+      accumulator bits are discarded. If field type size is less than 32, then
+      accumulator content is truncated to field size before storing.
     verification:
       - field_id_static
       - field_id_size
       - acc_type
     properties:
-      - field_id
+      - static_field_id
       - initialize_type
     exceptions:
       - x_init
@@ -2534,8 +2553,8 @@ groups:
 
   - title: Return value from method
     description: >
-      Return from the current method, i.e. restore the frame of method invoker and return control to the
-      invoker. Return value should be in accumulator.
+      Return from the current method, i.e., restore the frame of method invoker
+      and return control to the invoker. Return value must be in accumulator.
     verification:
       - acc_return_type
     exceptions:
@@ -2560,9 +2579,10 @@ groups:
 
   - title: Return from a void method
     description: >
-      Return from the current method, i.e. restore the frame of method invoker and return control to the invoker.
-      Caller should treat accumulator value as undefined and cannot use it until accumulator definition in the caller
-      frame.
+      Return from the current method, i.e., restore the frame of method invoker
+      and return control to the invoker. Caller must treat accumulator value as
+      undefined, and cannot use it until accumulator in the caller frame is
+      defined.
     verification:
       - none
     exceptions:
@@ -2579,10 +2599,12 @@ groups:
 
   - title: Throw exception
     description: >
-      Throw an exception located in register. The current method is searched for the first exception handler that
-      matches the class of exception. If exception handler is found, control is passed to the exception handler. If no
-      exception handler is found, the frame of invoker is restored. If such frame exists, the exception is re-thrown.
-      If no such frame exists, the current VM thread exits.
+      Throw an exception located in register. The current method is searched
+      for the first exception handler that matches the class of exception. If
+      exception handler is found, then control is passed to the exception
+      handler. If no exception handler is found, then the frame of invoker is
+      restored. If such frame exists, then the exception is re-thrown.
+      If no such frame exists, then the current VM thread exits.
     verification:
       - v1_throw_type
     exceptions:
@@ -2601,11 +2623,13 @@ groups:
 
   - title: Check cast
     description: >
-      Resolve object type by specified id and if an object in accumulator can be cast to the resolved type,
-      accumulator content remains unchanged. Otherwise ClassCastException is thrown.
-      Object of type O can be cast to type T if O is the same as T or is subtype of T. For arrays O can be cast
-      to T if T is a root type in type hierarchy or T is such array that O array elements are the same or subtype of
-      T array elements.
+      Resolve object type by specified id; if an object in accumulator can be
+      cast to the resolved type, then the accumulator content remains unchanged.
+      Otherwise, ClassCastException is thrown.
+      Object of type O can be cast to type T if O is the same as T or is a
+      subtype of T. For arrays, O can be cast to T if T is a root type in type
+      hierarchy, or array elements of T and O are the same, or O is a subtype
+      of a T array element.
       'null' object reference can be cast to every type.
     verification:
       - type_id_any_object
@@ -2627,10 +2651,13 @@ groups:
 
   - title: Is instance
     description: >
-      Resolve object type by specified id and if an object in accumulator is an instance of the resolved type,
-      put 1 into accumulator, otherwise put 0.
-      Object of type O is instance of type T if O is the same as T or is subtype of T. For arrays T should be a root
-      type in type hierarchy or T is such array that O array elements are the same or subtype of T array elements.
+      Resolve object type by specified id, and if an object in accumulator is
+      an instance of the resolved type, then put 1 into accumulator. Otherwise,
+      put 0.
+      Object of type O is instance of type T if O is the same as T, or is a
+      subtype of T. For arrays, T must be a root type in type hierarchy, or
+      array elements of T and O are the same, or O is a subtype of a T
+      array element.
       'null' object is not an instance of any class.
     verification:
       - type_id_any_object
@@ -2654,24 +2681,29 @@ groups:
 
   - title: Static call
     description: >
-      Call indicated static method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in
-      runtime constant-pool.
-      Arguments are passed in source registers in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (unused register slot values will
-      be discarded and corresponding registers will not be passed to the callee).
-      For methods with more arguments range kind of instruction is to be used, which takes the needed number
-      of arguments starting from 'vs' register.
+      Call the indicated static method, i.e., create new frame, pass values of
+      arguments, and continue the execution from the first instruction of a
+      method.
+      Callee must treat the accumulator value as undefined, and cannot use it
+      until accumulator in the new frame is defined.
+      Result (if any) is returned in accumulator (see 'Calling sequence'
+      for more details).
+      Method, its class, and the number of arguments is resolved by a given
+      method_id in runtime constant-pool.
+      Arguments are passed in source registers in the same order as in the
+      method signature.
+      Non-range instructions can be used to pass up to 4 arguments (unused
+      register slot values are discarded, and corresponding registers are not
+      passed to the callee).
+      Range kind of instructions are to be used for methods with more arguments
+      Such instructions take the required number of arguments starting from
+      'vs' register.
     verification:
       - method_id_static
       - method_id_non_abstract
       - compatible_arguments
     properties:
-      - method_id
+      - static_method_id
       - call
       - initialize_type
       - short_long_range
@@ -2698,23 +2730,28 @@ groups:
 
   - title: Static call with accumulator as input
     description: >
-      Call indicated static method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in
-      runtime constant-pool.
-      Arguments are passed in source registers in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (unused register slot values will
-      be discarded and corresponding registers will not be passed to the callee).
-      Immediate operand encodes a position starting from 0 on which accumulator is passed.
+      Call the indicated static method, i.e., create a new frame, pass values
+      of arguments, and continue the execution from the first instruction of a
+      method.
+      Callee must treat the accumulator value as undefined, and cannot use it
+      until accumulator in the new frame is defined.
+      Result (if any) is returned in accumulator (see 'Calling sequence' for
+      more details).
+      Method, its class, and the number of arguments is resolved by a given
+      method_id in runtime constant-pool.
+      Arguments are passed in source registers in the same order as in the
+      method signature.
+      Non-range instructions can be used to pass up to 4 arguments (unused
+      register slot values are discarded, and corresponding registers are not
+      passed to the callee).
+      Immediate operand encodes a position starting from 0 on which accumulator
+      is passed.
     verification:
       - method_id_static
       - method_id_non_abstract
       - compatible_arguments
     properties:
-      - method_id
+      - static_method_id
       - call
       - short_long_range
     exceptions:
@@ -2744,21 +2781,27 @@ groups:
 
   - title: Virtual calls
     description: >
-      Call indicated virtual method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in runtime
-      constant-pool based on object reference using language-specific semantics (currently only Java
-      virtual methods are supported, further extensions are TBD).
-      Object reference is passed in the first source register, arguments are passed starting from
-      the second source register in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (including object reference).
-      Unused register slot values will be discarded and corresponding registers will not be
-      passed to the callee).
-      For methods with more arguments range kinds of instruction are to be used, which takes
-      the needed number of arguments starting from 'vs' register (including object reference).
+      Call the indicated virtual method, i.e., create a new frame, pass values
+      of arguments, and continue the execution from the first instruction of a
+      method.
+      Callee must treat the accumulator value as undefined, and cannot use it
+      until accumulator in the new frame is defined.
+      Result (if any) is returned in accumulator (see 'Calling sequence' for
+      more details).
+      Method, its class, and the number of arguments is resolved by a given
+      method_id in runtime constant-pool based on object reference using
+      language-specific semantics (currently only Java virtual methods are
+      supported, further extensions are TBD).
+      Object reference is passed in the first source register, arguments are
+      passed starting from the second source register in the same order as in
+      the method signature.
+      Non-range instructions can be used to pass up to 4 arguments (including
+      object reference).
+      Unused register slot values are discarded, and corresponding registers
+      are not passed to the callee).
+      For methods with more arguments, range kinds of instruction are to be used.
+      The instructions take the required number of arguments starting from
+      'vs' register (including object reference).
     verification:
       - compatible_arguments
       - method_id_accessible
@@ -2796,20 +2839,25 @@ groups:
 
   - title: Virtual calls with accumulator as input
     description: >
-      Call indicated virtual method, i.e. create new frame, pass values of arguments and
-      continue execution from the first instruction of a method.
-      Callee should treat accumulator value as undefined and cannot use it until accumulator
-      definition in the new frame.
-      Result (if any) is returned in accumulator (see 'Calling sequence' chapter for more details).
-      Method, its class and the number of argument is resolved by given method_id in runtime
-      constant-pool based on object reference using language-specific semantics (currently only Java
-      virtual methods are supported, further extensions are TBD).
-      Object reference is passed in the first source register, arguments are passed starting from
-      the second source register in the same order as in method signature.
-      Non-range instructions can be used to pass up to 4 arguments (including object reference).
-      Unused register slot values will be discarded and corresponding registers will not be
-      passed to the callee).
-      Immediate operand encodes a position starting from 0 on which accumulator is passed.
+      Call the indicated virtual method, i.e., create a new frame, pass values
+      of arguments, and continue the execution from the first instruction of a
+      method.
+      Callee must treat the accumulator value as undefined, and cannot use it
+      until accumulator in the new frame is defined.
+      Result (if any) is returned in accumulator (see 'Calling sequence' for
+      more details).
+      Method, its class, and the number of arguments is resolved by a given
+      method_id in runtime constant-pool based on object reference using
+      language-specific semantics (currently only Java virtual methods are
+      supported, further extensions are TBD).
+      Object reference is passed in the first source register, arguments are
+      passed starting from the second source register in the same order as
+      in the method signature.
+      Non-range instructions can be used to pass up to 4 arguments (including
+      object reference). Unused register slot values are discarded, and
+      corresponding registers are not passed to the callee).
+      Immediate operand encodes a position starting from 0 on which accumulator
+      is passed.
     verification:
       - compatible_arguments
       - method_id_accessible
