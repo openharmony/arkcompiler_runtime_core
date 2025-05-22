@@ -19,11 +19,14 @@ assert: A hidden field can be accessed by using a qualified name if it is static
 ---*/
 
 class A {
-  public x: int;
+  private _x: int;
+
+  public get x(): int{
+    return this._x;
+  }
 }
 
 class B extends A{
-  public x: boolean;
 
   public getX(): int {
     return super.x;

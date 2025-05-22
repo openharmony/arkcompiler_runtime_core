@@ -19,9 +19,13 @@ tags: [not-a-test, compile-only]
 package pkg_pub;
 
 export class A {
-    fld: number
+    private _fld: number
+
+    get fld(): number{
+        return this._fld;
+    }
 
     constructor(p: number) {
-        this.fld = p + 1
+        this._fld = p + 1
     }
 }
