@@ -323,6 +323,8 @@ public:
     }
 #endif
 
+    void LinkToExternalHolder(bool useSharedHolder);
+
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,

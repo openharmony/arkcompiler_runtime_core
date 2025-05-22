@@ -75,8 +75,7 @@ void Thread::FreeAllocatedMemory()
 #endif
 }
 
-Thread::Thread(PandaVM *vm, ThreadType threadType)
-    : vm_(vm), threadType_(threadType), mutatorLock_(vm->GetMutatorLock())
+Thread::Thread(PandaVM *vm, ThreadType threadType) : ThreadProxy(vm->GetMutatorLock()), vm_(vm), threadType_(threadType)
 {
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
     mem::GC *gc = vm->GetGC();
@@ -84,8 +83,7 @@ Thread::Thread(PandaVM *vm, ThreadType threadType)
         barrierSet_ = vm->GetGC()->GetBarrierSet();
         InitCardTableData(barrierSet_);
     }
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.asInt = initialThreadFlag_;
+    InitializeThreadFlag();
 
 #ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
@@ -136,18 +134,6 @@ void Thread::InitPreBuff()
     }
 }
 
-CONSTEXPR_IN_RELEASE ThreadFlag GetInitialThreadFlag()
-{
-#ifndef NDEBUG
-    ThreadFlag initialFlag = Runtime::GetOptions().IsRunGcEverySafepoint() ? SAFEPOINT_REQUEST : NO_FLAGS;
-    return initialFlag;
-#else
-    return NO_FLAGS;
-#endif
-}
-
-ThreadFlag Thread::initialThreadFlag_ = NO_FLAGS;
-
 /* static */
 void ManagedThread::Initialize()
 {
@@ -155,7 +141,7 @@ void ManagedThread::Initialize()
     ASSERT(!zeroTlab_);
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
     zeroTlab_ = allocator->New<mem::TLAB>(nullptr, 0U);
-    initialThreadFlag_ = GetInitialThreadFlag();
+    InitializeInitThreadFlag();
 }
 
 /* static */
@@ -417,64 +403,6 @@ void ManagedThread::EnableStackOverflowCheck()
     iframeStackSize_ = nativeStackSize_ * 4U;
     if (nativeStackProtectedSize_ > 0) {
         ark::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
-    }
-}
-
-// NO_THREAD_SAFETY_ANALYSIS due to TSAN not being able to determine lock status
-void ManagedThread::SuspendCheck() NO_THREAD_SAFETY_ANALYSIS
-{
-    // We should use internal suspension to avoid missing call of IncSuspend
-    SuspendImpl(true);
-    GetMutatorLock()->Unlock();
-    GetMutatorLock()->ReadLock();
-    ResumeImpl(true);
-}
-
-void ManagedThread::SuspendImpl(bool internalSuspend)
-{
-    os::memory::LockHolder lock(suspendLock_);
-    LOG(DEBUG, RUNTIME) << "Suspending thread " << GetId();
-    if (!internalSuspend) {
-        if (IsUserSuspended()) {
-            LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already suspended";
-            return;
-        }
-        userCodeSuspendCount_++;
-    }
-    auto oldCount = suspendCount_++;
-    if (oldCount == 0) {
-        SetFlag(SUSPEND_REQUEST);
-    }
-}
-
-void ManagedThread::ResumeImpl(bool internalResume)
-{
-    os::memory::LockHolder lock(suspendLock_);
-    LOG(DEBUG, RUNTIME) << "Resuming thread " << GetId();
-    if (!internalResume) {
-        if (!IsUserSuspended()) {
-            LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already resumed";
-            return;
-        }
-        ASSERT(userCodeSuspendCount_ != 0);
-        userCodeSuspendCount_--;
-    }
-    if (suspendCount_ > 0) {
-        suspendCount_--;
-        if (suspendCount_ == 0) {
-            ClearFlag(SUSPEND_REQUEST);
-        }
-    }
-    // Help for UnregisterExitedThread
-    TSAN_ANNOTATE_HAPPENS_BEFORE(&fts_);
-    suspendVar_.Signal();
-}
-
-void ManagedThread::SafepointPoll()
-{
-    if (this->TestAllFlags()) {
-        trace::ScopedTrace scopedTrace("RunSafepoint");
-        ark::interpreter::RuntimeInterface::Safepoint();
     }
 }
 
@@ -988,9 +916,7 @@ void ManagedThread::CleanUp()
     objectHeaderHandleStorage_->FreeHandles(0);
     objectHeaderHandleScopes_.clear();
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.asInt = initialThreadFlag_;
-    StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(ThreadStatus::CREATED);
+    CleanUpThreadStatus();
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 

@@ -116,6 +116,13 @@ public:
         affinityMask_ = mask;
     }
 
+    /// @return true if migration from worker is allowed
+    bool IsMigrationAllowed() const
+    {
+        std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> mask(affinityMask_);
+        return mask.count() > 1;
+    }
+
 protected:
     void SetStatus(Coroutine::Status newStatus) override;
     StackfulCoroutineManager *GetManager() const;

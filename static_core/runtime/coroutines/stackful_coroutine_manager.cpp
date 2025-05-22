@@ -322,10 +322,12 @@ void StackfulCoroutineManager::RegisterCoroutine(Coroutine *co)
     // We need to propagate SUSPEND_REQUEST under the coroListLock_.
     // It guarantees that the flag is already set for the current coro and we need to propagate it
     // or GC will see the new coro in EnumerateAllThreads.
+#ifndef ARK_HYBRID
     if (Thread::GetCurrent() != nullptr && Coroutine::GetCurrent() != nullptr &&
         Coroutine::GetCurrent()->IsSuspended() && !co->IsSuspended()) {
         co->SuspendImpl(true);
     }
+#endif
 }
 
 bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
@@ -346,6 +348,9 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
     {
         os::memory::LockHolder lList(coroListLock_);
         RemoveFromRegistry(co);
+#ifdef ARK_HYBRID
+        co->GetThreadHolder()->UnregisterCoroutine(co);
+#endif
         // We need collect TLAB metrics and clear TLAB before calling the manage thread destructor
         // because of the possibility heap use after free. This happening when GC starts execute ResetYoungAllocator
         // method which start iterate set of threads, collect TLAB metrics and clear TLAB. If thread was deleted from
