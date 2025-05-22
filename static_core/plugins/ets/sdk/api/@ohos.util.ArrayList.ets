@@ -13,6 +13,14 @@
  * limitations under the License.
  */
 
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
+const OutOfBoundsErrorCodeId: number = 10200001;
+const IncorrectBufferSizeId: number = 10200009;
+const CapacityErrorCodeId: number = 10200062;
+const INT_MAX_VALUE_OFFSET: number = 4294967296;
+
 export class ArrayList<T> implements Iterable<T> {
     private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
@@ -48,7 +56,7 @@ export class ArrayList<T> implements Iterable<T> {
      */
     public add(element: T): boolean {
         if (this.length >= Int.MAX_VALUE) {
-            throw new RangeError("The current capacity has reached the maximum limit.");
+            throw new BusinessError(CapacityErrorCodeId, new Error(`The current capacity has reached the maximum limit.`));
         }
 
         if (this.length == this.capacity) {
@@ -66,9 +74,8 @@ export class ArrayList<T> implements Iterable<T> {
      * @param index - the index.
      */
     public insert(element: T, index: number): void {
-        if (index < 0 || index > this.length || index > Int.MAX_VALUE) {
-            throw new RangeError("The value of index is out of range.");
-        }
+        this.checkIndexType(index);
+        this.checkIndex(index, this.length);
 
         if (this.length + 1 <= this.capacity) {
             this.buffer.push(element); // length++
@@ -80,6 +87,7 @@ export class ArrayList<T> implements Iterable<T> {
             this.increaseCap((this.capacity * 1.5) as int);
 
             let newBuffer: Array<T> = new Array<T>(this.capacity);
+            newBuffer.length = 0;
             for (let i: int = 0; i < index; i++) {
                 newBuffer.push(this.buffer[i]);
             }
@@ -137,9 +145,10 @@ export class ArrayList<T> implements Iterable<T> {
      * @returns the deleted element.
      */
     public removeByIndex(index: number): T {
-        if (index < 0 || this.length <= 0 || index >= this.length) {
-            throw new RangeError("The value of index is out of range.");
-        }
+        this.checkIndexType(index);
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length - 1);
+
         let delItem: T = this.buffer[index];
 
         for (let i: int = index as int + 1; i < this.length; i++) {
@@ -174,9 +183,8 @@ export class ArrayList<T> implements Iterable<T> {
      * @param toIndex - the end index.
      */
     public removeByRange(fromIndex: number, toIndex: number): void {
-        if (fromIndex < 0 || fromIndex >= toIndex || toIndex >= this.length) {
-            throw new RangeError("The value of fromIndex or toIndex is out of range.");
-        }
+        this.checkEmptyContainer();
+        this.checkRange(fromIndex, toIndex);
 
         for (let i: int = fromIndex as int, j: int = toIndex as int; j < this.length; i++, j++) {
             this.buffer[i] = this.buffer[j];
@@ -229,9 +237,8 @@ export class ArrayList<T> implements Iterable<T> {
      * @returns A new ArrayList containing the specified portion of the original ArrayList.
      */
     public subArrayList(fromIndex: number, toIndex: number): ArrayList<T> {
-        if (fromIndex < 0 || fromIndex >= toIndex || toIndex >= this.length) {
-            throw new RangeError("The value of fromIndex or toIndex is out of range.");
-        }
+        this.checkEmptyContainer();
+        this.checkRange(fromIndex, toIndex);
 
         let subArrLength = toIndex - fromIndex;
         let newBuffer: ArrayList<T> = new ArrayList<T>(subArrLength as int);
@@ -300,9 +307,11 @@ export class ArrayList<T> implements Iterable<T> {
      * @returns The element at the specified index.
      */
     public $_get(index: number): T {
-        if (index >= this.length || index < 0) {
-            throw new RangeError("The value of index is out of range.");
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId, new Error(`The type of \"index\" must be small integer.`));
         }
+        this.checkEmptyContainer();
+        this.checkIndex(index, this.length - 1);
 
         return this.buffer[index];
     }
@@ -315,9 +324,11 @@ export class ArrayList<T> implements Iterable<T> {
      * @param val - The value to set at the specified index.
      */
     public $_set(index: number, val: T): void {
-        if (index >= this.length || index < 0) {
-            throw new RangeError("The value of index is out of range.");
+        this.checkEmptyContainer();
+        if (index < 0 || index > Int.MAX_VALUE) {
+            return;
         }
+        this.checkIndex(index, this.length - 1);
 
         this.buffer[index] = val;
     }
@@ -329,7 +340,7 @@ export class ArrayList<T> implements Iterable<T> {
      */
     public increaseCapacityTo(newCapacity: number): void {
         if (newCapacity > Int.MAX_VALUE) {
-            throw new RangeError("The value of capacity is out of range.");
+            throw new BusinessError(CapacityErrorCodeId, new Error(`The current capacity has reached the maximum limit.`));
         }
 
         if (newCapacity > this.capacity) {
@@ -369,5 +380,42 @@ export class ArrayList<T> implements Iterable<T> {
 
         this.capacity = cap;
         this.buffer = newBuffer;
+    }
+
+    private checkEmptyContainer(): void {
+        if (this.isEmpty()) {
+            throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`Container is empty`));
+        }
+    }
+
+    private checkIndexType(index: number): void {
+        if (index > Int.MAX_VALUE) {
+            throw new BusinessError(TypeErrorCodeId, new Error(`The type of "index" must be small integer. Received value is: ${index}`));
+        }
+    }
+
+    private checkIndex(index: number, length: number): void {
+        if (index > length || index < 0) {
+            this.createBusinessError('index', length, index);
+        }
+    }
+
+    private checkRange(fromIndex: number, toIndex: number): void {
+        if (fromIndex > Int.MAX_VALUE) {
+            this.createBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex - INT_MAX_VALUE_OFFSET);
+        }
+        if (fromIndex < 0 || fromIndex >= toIndex || fromIndex >= this.length) {
+            this.createBusinessError('fromIndex', min(this.length - 1, toIndex - 1), fromIndex);
+        }
+        if (toIndex > Int.MAX_VALUE) {
+            this.createBusinessError('toIndex', this.length, toIndex - INT_MAX_VALUE_OFFSET);
+        }
+        if (toIndex > this.length) {
+            this.createBusinessError('toIndex', this.length, toIndex);
+        }
+    }
+
+    private createBusinessError(index: string, upperLimit: number, currentValue: number): void {
+        throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"${index}\" is out of range. It must be >= 0 && <= ${upperLimit}. Received value is: ${currentValue}`));
     }
 }

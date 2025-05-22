@@ -14,6 +14,9 @@
  */
 
 import {ArrayList} from "@ohos.util.ArrayList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new ArkTestsuite("ArrayList API tests");
@@ -103,79 +106,61 @@ function testRemoveByRange() {
 function testRemoveByRangeStartIndexOutOfRange() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    try {
-        arrayList.removeByRange(-TestData.testNumber1, TestData.testNumber3);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 2. Received value is: -1") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    expectThrow(() => {arrayList.removeByRange(-TestData.testNumber1, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testRemoveByRangeEndIndexOutOfRange() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    try {
-        arrayList.removeByRange(TestData.testNumber1, TestData.testNumber8);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"toIndex\" is out of range. It must be >= 0 && <= 5. Received value is: 8") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    expectThrow(() => {arrayList.removeByRange(TestData.testNumber1, TestData.testNumber8)}, exceptionCheck);
 }
 
 function testRemoveByRangeEndIndexSmallerThanStartIndex() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    try {
-        arrayList.removeByRange(TestData.testNumber3, TestData.testNumber1);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 3") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testRemoveByRangeEmptyContainer() {
     let arrayList = new ArrayList<number>();
-    try {
-        arrayList.removeByRange(0, TestData.testNumber1);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == "Container is empty") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    expectThrow(() => {arrayList.removeByRange(0, TestData.testNumber1)}, exceptionCheck);
 }
 
 function testRemoveByRangeStartIndexEqualsEndIndex() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    try {
-        arrayList.removeByRange(TestData.testNumber3, TestData.testNumber3);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of fromIndex or toIndex is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 2. Received value is: 3") &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    expectThrow(() => {arrayList.removeByRange(TestData.testNumber3, TestData.testNumber3)}, exceptionCheck);
 }
 
 function testRemoveByRangeFullRange() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    arrayList.removeByRange(0, TestData.testNumber5 - TestData.testNumber1);
-    assertEQ(arrayList.length, 1, "ArrayList length should be 1 after removeByRange operation");
-    assertEQ(arrayList[0], TestData.forNumber[TestData.testInt4],
-        "ArrayList[0] should be TestData.forNumber[4] after removeByRange operation");
+    arrayList.removeByRange(0, TestData.testNumber5);
+    assertEQ(arrayList.length, 0, "ArrayList length should be 0 after removeByRange operation");
 }
 
 function initializeArrayList<T>(arrayList: ArrayList<T>, sourceArray: T[]) {

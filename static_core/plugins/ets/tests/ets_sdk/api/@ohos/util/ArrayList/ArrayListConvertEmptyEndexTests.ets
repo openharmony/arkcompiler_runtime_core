@@ -14,6 +14,9 @@
  */
 
 import {ArrayList} from "@ohos.util.ArrayList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new ArkTestsuite("ArrayList API tests");
@@ -167,15 +170,12 @@ function testIndexSetter() {
 function testIndexOutOfRange() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    try {
-        arrayList[TestData.testNumber8];
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: 8`) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    expectThrow(() => {arrayList[TestData.testNumber8]}, exceptionCheck);
 }
 
 function testIndexWithDoubleIndex() {

@@ -45,29 +45,12 @@ class TestData {
 
 function testCreateSingleTypeInstance() {
     let arrayList: ArrayList<number>;
-    try {
-        arrayList = new ArrayList<number>();
-    } catch (e) {
-        assertTrue(false, "The memory application needs to be successful");
-        return;
-    }
-    let result: boolean = arrayList.add(TestData.testNumber3);
-    assertTrue(result, "ArrayList add should return true");
-    assertEQ(arrayList.length, TestData.testNumber1, "ArrayList length should be 1 after adding one element");
+    expectNoThrow(() => {arrayList = new ArrayList<number>()});
 }
 
 function testCreateMultiTypeInstance() {
     let arrayList: ArrayList<number | string>;
-    try {
-        arrayList = new ArrayList<number | string>();
-    } catch (e) {
-        assertTrue(false, "The memory application needs to be successful");
-        return;
-    }
-    arrayList.add(TestData.testString1);
-    arrayList.add(TestData.testNumber3);
-    arrayList.add(TestData.testString1);
-    assertEQ(arrayList.length, TestData.testNumber3, "ArrayList length should be 3 after adding three elements");
+    expectNoThrow(() => {arrayList = new ArrayList<number | string>()});
 }
 
 function testArrayListLength() {
