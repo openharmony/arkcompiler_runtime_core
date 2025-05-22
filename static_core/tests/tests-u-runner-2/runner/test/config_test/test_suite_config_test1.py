@@ -19,7 +19,9 @@ import shutil
 import unittest
 from pathlib import Path
 
-from runner.options.cli_options import CliOptions
+from runner.common_exceptions import InvalidConfiguration
+from runner.options import cli_options_utils as cli_utils
+from runner.options.cli_options import CliOptionsParser, CliParserBuilder, ConfigsLoader
 from runner.test.config_test import data_1, data_2
 from runner.test.test_utils import compare_dicts
 
@@ -52,21 +54,61 @@ class TestSuiteConfigTest1(unittest.TestCase):
         cls.test_suite_path.unlink(missing_ok=True)
 
     def test_min_args(self) -> None:
-        args = [self.workflow_name, self.test_suite_name]
-        actual = CliOptions(args).data
+
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
+
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+        workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               parser_builder.create_parser_for_default_test_suite(),
+                               workflow_parser, *[])
+        cli.parse_args()
+
+        actual = cli.full_options
+        actual = cli_utils.restore_duplicated_options(configs, actual)
+        actual = cli_utils.add_config_info(configs, actual)
+        actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
         expected = data_1.args
         compare_dicts(self, actual, expected)
 
     def test_args_urunner(self) -> None:
         args = [
-            self.workflow_name, self.test_suite_name, "--show-progress", "--verbose", "short",
+            "--show-progress", "--verbose", "short",
             "--processes", "12", "--detailed-report", "--detailed-report-file", "my-report",
             "--report-dir", "my-report-dir",
             "--verbose-filter", "ignored", "--enable-time-report", "--use-llvm-cov", "--qemu", "arm64",
             "--report-dir", "my-report-dir",
             "--profdata-files-dir", ".", "--coverage-html-report-dir", ".",
-            "--time-edges", "1,10,100,500"
-        ]
-        actual = CliOptions(args).data
+            "--time-edges", "1,10,100,500"]
+
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
+
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+        workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               parser_builder.create_parser_for_default_test_suite(),
+                               workflow_parser, *args)
+        cli.parse_args()
+
+        actual = cli.full_options
+        actual = cli_utils.restore_duplicated_options(configs, actual)
+        actual = cli_utils.add_config_info(configs, actual)
+        actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
         expected = data_2.args
         compare_dicts(self, actual, expected)
+
+
+    def test_wrong_config_names(self) -> None:
+        args = [("panda-int1", "ets-runtime"), ("panda-int", "ets-runtime1"),
+                ("panda-int1", "ets-runtime1")]
+        for arg in args:
+            workflow_name, test_suite_name = arg
+            with self.assertRaises(InvalidConfiguration):
+                cli_utils.check_valid_workflow_name(cli_utils.WorkflowName(workflow_name))
+                cli_utils.check_valid_test_suite_name(cli_utils.TestSuiteName(test_suite_name))

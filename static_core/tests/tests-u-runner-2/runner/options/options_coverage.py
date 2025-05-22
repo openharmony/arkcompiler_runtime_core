@@ -36,16 +36,19 @@ class CoverageOptions(IOptions):
         return self._to_str(indent=2)
 
     @staticmethod
-    def add_cli_args(parser: argparse.ArgumentParser) -> None:
+    def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         parser.add_argument(
-            f'--{CoverageOptions.__USE_LLVM_COV}', action='store_true', default=False)
+            f'--{CoverageOptions.__USE_LLVM_COV}', action='store_true', default=False,
+        dest=f"{dest}{CoverageOptions.__USE_LLVM_COV}")
         parser.add_argument(
             f'--{CoverageOptions.__LLVM_PROFDATA_OUT_PATH}', default=None,
             type=make_dir_if_not_exist,
+            dest=f"{dest}{CoverageOptions.__LLVM_PROFDATA_OUT_PATH}",
             help='Directory where coverage intermediate files (*.profdata) are created.')
         parser.add_argument(
             f'--{CoverageOptions.__LLVM_COV_HTML_OUT_PATH}', default=None,
             type=make_dir_if_not_exist,
+            dest=f"{dest}{CoverageOptions.__LLVM_COV_HTML_OUT_PATH}",
             help='Stacks files in the specified directory')
 
     @cached_property

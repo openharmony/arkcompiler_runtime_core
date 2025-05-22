@@ -35,14 +35,16 @@ class TimeReportOptions(IOptions):
         return self._to_str(indent=2)
 
     @staticmethod
-    def add_cli_args(parser: argparse.ArgumentParser) -> None:
+    def add_cli_args(parser: argparse.ArgumentParser, dest: str | None = None) -> None:
         parser.add_argument(
             f'--{TimeReportOptions.__TIME_REPORT}', action='store_true', default=False,
+            dest=f"{dest}{TimeReportOptions.__TIME_REPORT}",
             help='Log execution test time')
         parser.add_argument(
             f'--{TimeReportOptions.__TIME_EDGES}', action='store',
             default=TimeReportOptions.__DEFAULT_EDGES,
             type=TimeReportOptions.__process_time_edges,
+            dest=f"{dest}{TimeReportOptions.__TIME_EDGES}",
             help='Time edges in the format `1,5,10` where numbers are seconds')
 
     @staticmethod

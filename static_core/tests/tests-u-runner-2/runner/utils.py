@@ -358,7 +358,7 @@ def get_config_test_suite_folder() -> Path:
     return get_config_folder().joinpath("test-suites")
 
 
-def load_config(config_path: str | None) -> dict[str, str | dict]:
+def load_config(config_path: str | Path | None) -> dict[str, str | dict]:
     __cfg_type = "type"
     config_from_file = {}
     if config_path is not None:

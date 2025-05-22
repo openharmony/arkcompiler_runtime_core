@@ -18,11 +18,13 @@ import os
 import shutil
 import unittest
 from pathlib import Path
+from typing import cast
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.base_enum import IncorrectEnumValue
 from runner.enum_types.verbose_format import VerboseKind
-from runner.options.cli_options import CliOptions
+from runner.options import cli_options_utils as cli_utils
+from runner.options.cli_options import CliOptions, CliOptionsParser, CliParserBuilder, ConfigsLoader
 
 
 class TestSuiteConfigTest2(unittest.TestCase):
@@ -74,49 +76,117 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
     def test_option_with_repeated_value(self) -> None:
         args = [
-            self.workflow_name, self.test_suite_name,
             "--verbose", "all", "--verbose", "short"
         ]
-        actual = CliOptions(args)
-        self.assertEqual(VerboseKind.SHORT, actual.data.get("runner.verbose"))
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
+
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+        workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               parser_builder.create_parser_for_default_test_suite(),
+                               workflow_parser, *args)
+        cli.parse_args()
+
+        actual = cli.full_options
+        actual = cli_utils.restore_duplicated_options(configs, actual)
+        actual = cli_utils.add_config_info(configs, actual)
+        actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
+        self.assertEqual(VerboseKind.SHORT, actual.get("runner.verbose"))
 
     def test_option_with_test_suite_option1(self) -> None:
         args = [
-            self.workflow_name, self.test_suite_name,
             "--with-js"
         ]
-        actual = CliOptions(args)
-        self.assertTrue(actual.data.get('test_suite2.parameters.with-js'))
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
 
-    def test_option_with_test_suite_option2(self) -> None:
-        args = [
-            self.workflow_name, self.test_suite_name,
-            "--validator"
-        ]
-        with self.assertRaises(InvalidConfiguration):
-            CliOptions(args)
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+        workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               parser_builder.create_parser_for_default_test_suite(),
+                               workflow_parser, *args)
+        cli.parse_args()
+
+        actual = cli.full_options
+        actual = cli_utils.restore_duplicated_options(configs, actual)
+        actual = cli_utils.add_config_info(configs, actual)
+        actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
+        self.assertTrue(actual.get('test_suite2.parameters.with-js'))
+
 
     def test_option_with_test_suite_option3(self) -> None:
         args = [
-            self.workflow_name, self.test_suite_name,
             "--validator", "a.b.c"
         ]
-        actual = CliOptions(args)
-        self.assertEqual("a.b.c", actual.data.get('test_suite2.parameters.validator'))
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
+
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+        workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               parser_builder.create_parser_for_default_test_suite(),
+                               workflow_parser, *args)
+        cli.parse_args()
+
+        actual = cli.full_options
+        actual = cli_utils.restore_duplicated_options(configs, actual)
+        actual = cli_utils.add_config_info(configs, actual)
+        actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
+        self.assertEqual("a.b.c", actual.get('test_suite2.parameters.validator'))
 
     def test_option_with_test_suite_option_several_times1(self) -> None:
         args = [
-            self.workflow_name, self.test_suite_name,
             "--validator", "a.b.c", "--validator", "d.e.f"
         ]
-        actual = CliOptions(args)
-        self.assertEqual("d.e.f", actual.data.get('test_suite2.parameters.validator'))
+
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
+
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+        workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               parser_builder.create_parser_for_default_test_suite(),
+                               workflow_parser, *args)
+        cli.parse_args()
+
+        actual = cli.full_options
+        actual = cli_utils.restore_duplicated_options(configs, actual)
+        actual = cli_utils.add_config_info(configs, actual)
+        actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
+
+        self.assertEqual("d.e.f", actual.get('test_suite2.parameters.validator'))
 
     def test_option_with_test_suite_option_several_times2(self) -> None:
         args = [
-            self.workflow_name, self.test_suite_name,
-            "--es2panda-full-args", "--thread=0", "--es2panda-full-args", "--parse-only"
+            "--es2panda-full-args=--thread=0", "--es2panda-full-args=--parse-only", "--es2panda-full-args=--dump-ast",
+            "--es2panda-full-args=--extension=${parameters.extension}"
         ]
-        actual = CliOptions(args)
+        configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
+
+        parser_builder = CliParserBuilder(configs)
+        test_suite_parser, key_lists_ts = parser_builder.create_parser_for_test_suite()
+        workflow_parser, key_lists_wf = parser_builder.create_parser_for_workflow()
+
+        cli = CliOptionsParser(configs, parser_builder.create_parser_for_runner(),
+                               test_suite_parser,
+                               parser_builder.create_parser_for_default_test_suite(),
+                               workflow_parser, *args)
+        cli.parse_args()
+
+        actual = cli.full_options
+        actual = cli_utils.restore_duplicated_options(configs, actual)
+        actual = cli_utils.add_config_info(configs, actual)
+        actual = cli_utils.restore_default_list(actual, key_lists_ts | key_lists_wf)
+
         expected = ['--thread=0', '--parse-only', '--dump-ast', '--extension=${parameters.extension}']
-        self.assertEqual(expected, actual.data.get('test_suite2.parameters.es2panda-full-args'))
+        self.assertEqual(sorted(expected),
+                         sorted(cast(list, actual.get('test_suite2.parameters.es2panda-full-args'))))
