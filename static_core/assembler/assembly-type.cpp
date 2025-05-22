@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,10 @@ Type Type::FromDescriptor(std::string_view descriptor)
         return Type(descriptor, rank);
     }
 
+    auto it = reversePrimitiveTypes.find(descriptor);
+    if (it == reversePrimitiveTypes.end()) {
+        LOG(FATAL, ASSEMBLER) << "The map 'reversePrimitiveTypes' don't contain the descriptor [" << descriptor << "].";
+    }
     return Type(reversePrimitiveTypes[descriptor], rank);
 }
 
@@ -131,6 +135,7 @@ Type Type::FromName(std::string_view name, bool ignorePrimitive)
 }
 
 /* static */
+// NOLINTNEXTLINE(misc-unused-parameters)
 bool Type::IsStringType(const std::string &name, ark::panda_file::SourceLang lang)
 {
     auto stringType = Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(lang));
