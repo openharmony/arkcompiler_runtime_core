@@ -47,7 +47,8 @@ class EnvironmentTest(TestCase):
     @patch.dict(os.environ, {}, clear=True)
     def test_get_mandatory_props_empty(self) -> None:
         expected = {
-            'PANDA_SOURCE_PATH': (None, True),
+            'ARKCOMPILER_RUNTIME_CORE_PATH': (None, True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': (None, True),
             'PANDA_BUILD': (None, True),
             'WORK_DIR': (None, False)
         }
@@ -56,15 +57,17 @@ class EnvironmentTest(TestCase):
         self.assertDictEqual(props, expected)
 
     @patch.dict(os.environ, {
-        'PANDA_SOURCE_PATH': "aaa",
-        'PANDA_BUILD': "bbb",
-        'WORK_DIR': "ccc"
+        'ARKCOMPILER_RUNTIME_CORE_PATH': "aaa",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': "bbb",
+        'PANDA_BUILD': "ccc",
+        'WORK_DIR': "ddd"
     }, clear=True)
     def test_get_mandatory_props_full(self) -> None:
         expected = {
-            'PANDA_SOURCE_PATH': ("aaa", True),
-            'PANDA_BUILD': ("bbb", True),
-            'WORK_DIR': ("ccc", False)
+            'ARKCOMPILER_RUNTIME_CORE_PATH': ("aaa", True),
+            'ARKCOMPILER_ETS_FRONTEND_PATH': ("bbb", True),
+            'PANDA_BUILD': ("ccc", True),
+            'WORK_DIR': ("ddd", False)
         }
         props = RunnerEnv.get_mandatory_props()
         self.assertIsInstance(props, dict)
@@ -75,18 +78,18 @@ class EnvironmentTest(TestCase):
         # test
         self.assertRaises(
             OSError,
-            RunnerEnv.check_mandatory_prop,
-            'PANDA_SOURCE_PATH', must_exist=True)
+            RunnerEnv.check_expand_mandatory_prop,
+            'ARKCOMPILER_RUNTIME_CORE_PATH', must_exist=True)
 
     @patch.dict(os.environ, {
-        'PANDA_SOURCE_PATH': non_existing_path_01,
+        'ARKCOMPILER_RUNTIME_CORE_PATH': non_existing_path_01,
     }, clear=True)
     def test_check_mandatory_prop_not_exist_but_must(self) -> None:
         # test
         self.assertRaises(
             OSError,
-            RunnerEnv.check_mandatory_prop,
-            'PANDA_SOURCE_PATH', must_exist=True)
+            RunnerEnv.check_expand_mandatory_prop,
+            'ARKCOMPILER_RUNTIME_CORE_PATH', must_exist=True)
 
     @patch.dict(os.environ, {
         'WORK_DIR': non_existing_path_01,
@@ -96,11 +99,11 @@ class EnvironmentTest(TestCase):
         assert_not_raise(
             test_case=self,
             cls=OSError,
-            function=RunnerEnv.check_mandatory_prop,
+            function=RunnerEnv.check_expand_mandatory_prop,
             params=['WORK_DIR', False])
 
     @patch.dict(os.environ, {
-        'PANDA_SOURCE_PATH': existing_path_01,
+        'ARKCOMPILER_RUNTIME_CORE_PATH': existing_path_01,
     }, clear=True)
     def test_check_mandatory_prop_exist_and_must(self) -> None:
         # preparation
@@ -109,8 +112,8 @@ class EnvironmentTest(TestCase):
         assert_not_raise(
             test_case=self,
             cls=OSError,
-            function=RunnerEnv.check_mandatory_prop,
-            params=['PANDA_SOURCE_PATH', True])
+            function=RunnerEnv.check_expand_mandatory_prop,
+            params=['ARKCOMPILER_RUNTIME_CORE_PATH', True])
         # clear up
         self.clear_dir(Path(existing_path_01))
 
@@ -124,7 +127,7 @@ class EnvironmentTest(TestCase):
         assert_not_raise(
             test_case=self,
             cls=OSError,
-            function=RunnerEnv.check_mandatory_prop,
+            function=RunnerEnv.check_expand_mandatory_prop,
             params=['WORK_DIR', False])
         # clear up
         self.clear_dir(Path(existing_path_02))
@@ -194,30 +197,37 @@ class EnvironmentTest(TestCase):
         # preparation
         self.urunner_path.unlink(missing_ok=True)
         current_path = Path(__file__).parent
-        panda_path = current_path / f"aaa-{random_suffix()}"
-        build_path = current_path / f"bbb-{random_suffix()}"
-        work_path = current_path / f"ccc-{random_suffix()}"
+        runtime_path = current_path / f"aaa-{random_suffix()}"
+        frontend_path = current_path / f"bbb-{random_suffix()}"
+        build_path = current_path / f"ccc-{random_suffix()}"
+        work_path = current_path / f"ddd-{random_suffix()}"
 
-        panda_path.mkdir(parents=True, exist_ok=True)
+        runtime_path.mkdir(parents=True, exist_ok=True)
+        frontend_path.mkdir(parents=True, exist_ok=True)
         build_path.mkdir(parents=True, exist_ok=True)
 
-        os.environ[RunnerEnv.mandatory_props[0][0]] = str(panda_path)
-        os.environ[RunnerEnv.mandatory_props[1][0]] = str(build_path)
-        os.environ[RunnerEnv.mandatory_props[2][0]] = str(work_path)
+        os.environ[RunnerEnv.mandatory_props[0][0]] = str(runtime_path)
+        os.environ[RunnerEnv.mandatory_props[1][0]] = str(frontend_path)
+        os.environ[RunnerEnv.mandatory_props[2][0]] = str(build_path)
+        os.environ[RunnerEnv.mandatory_props[3][0]] = str(work_path)
         # test
         runner_env = RunnerEnv(global_env=self.urunner_path)
         runner_env.load_environment()
-        panda_name = RunnerEnv.mandatory_props[0][0]
-        panda_env = os.getenv(panda_name)
-        build_name = RunnerEnv.mandatory_props[1][0]
+        runtime_name = RunnerEnv.mandatory_props[0][0]
+        runtime_env = os.getenv(runtime_name)
+        frontend_name = RunnerEnv.mandatory_props[1][0]
+        frontend_env = os.getenv(frontend_name)
+        build_name = RunnerEnv.mandatory_props[2][0]
         build_env = os.getenv(build_name)
-        work_name = RunnerEnv.mandatory_props[2][0]
+        work_name = RunnerEnv.mandatory_props[3][0]
         work_env = os.getenv(work_name)
         self.assertFalse(self.urunner_path.exists())
-        self.assertEqual(str(panda_path), panda_env, f"for {RunnerEnv.mandatory_props[0][0]}")
-        self.assertEqual(str(build_path), build_env, f"for {RunnerEnv.mandatory_props[1][0]}")
-        self.assertEqual(str(work_path), work_env, f"for {RunnerEnv.mandatory_props[2][0]}")
+        self.assertEqual(str(runtime_path), runtime_env, f"for {RunnerEnv.mandatory_props[0][0]}")
+        self.assertEqual(str(frontend_path), frontend_env, f"for {RunnerEnv.mandatory_props[1][0]}")
+        self.assertEqual(str(build_path), build_env, f"for {RunnerEnv.mandatory_props[2][0]}")
+        self.assertEqual(str(work_path), work_env, f"for {RunnerEnv.mandatory_props[3][0]}")
         # clear up
-        panda_path.rmdir()
+        runtime_path.rmdir()
+        frontend_path.rmdir()
         build_path.rmdir()
         self.urunner_path.unlink(missing_ok=True)

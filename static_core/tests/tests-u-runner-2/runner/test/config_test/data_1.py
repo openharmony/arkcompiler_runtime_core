@@ -92,6 +92,7 @@ args = {
     'runner.processes': 1,
     'runner.detailed_report': False,
     'runner.detailed_report_file': 'detailed-report-file',
+    'runner.report_dir': 'report',
     'runner.show_progress': False,
     'runner.verbose': VerboseKind.SILENT,
     'runner.verbose_filter': VerboseFilter.NEW_FAILURES,
@@ -99,6 +100,6 @@ args = {
     'runner.enable_time_report': False,
     'runner.time_edges': [1, 5, 10],
     'runner.use_llvm_cov': False,
-    'runner.llvm_cov_profdata_out_path': None,
+    'runner.profdata_files_dir': None,
     'runner.coverage_html_report_dir': None
 }

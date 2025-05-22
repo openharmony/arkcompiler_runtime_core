@@ -246,8 +246,9 @@ class TestStandardFlow(Test):
     def __change_arktsconfig_arg(self, source_args: list[str], new_args: list[str]) -> list[str]:
         for index, arg in enumerate(source_args):
             if arg.startswith("--arktsconfig=") and self.metadata.arktsconfig is not None:
+                stdlib_path = self.test_env.config.general.static_core_root / 'plugins' / 'ets' / 'stdlib'
                 new_args[index] = f"--arktsconfig={self.metadata.arktsconfig}"
-                new_args.insert(0, f"--stdlib={self.test_env.config.general.static_core_root}/plugins/ets/stdlib")
+                new_args.insert(0, f"--stdlib={stdlib_path.as_posix()}")
                 break
         return new_args
 

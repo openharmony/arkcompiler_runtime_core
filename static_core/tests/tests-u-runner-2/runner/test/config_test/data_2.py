@@ -92,6 +92,7 @@ args = {
     'runner.processes': 12,
     'runner.detailed_report': True,
     'runner.detailed_report_file': 'my-report',
+    'runner.report_dir': 'my-report-dir',
     'runner.show_progress': True,
     'runner.verbose': VerboseKind.SHORT,
     'runner.verbose_filter': VerboseFilter.IGNORED,
@@ -99,6 +100,6 @@ args = {
     'runner.enable_time_report': True,
     'runner.time_edges': [1, 10, 100, 500],
     'runner.use_llvm_cov': True,
-    'runner.llvm_cov_profdata_out_path': str(Path(".").resolve()),
+    'runner.profdata_files_dir': str(Path(".").resolve()),
     'runner.coverage_html_report_dir': str(Path(".").resolve())
 }

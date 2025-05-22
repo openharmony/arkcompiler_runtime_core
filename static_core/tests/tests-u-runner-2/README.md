@@ -18,7 +18,8 @@ It is possible to run tests either using script `runner.sh` or `main.py` directl
 - Create at your home the file `.urunner.env`
 - Specify there following environment variables:
 ```bash
-PANDA_SOURCE_PATH=<your path to panda source folder arkcompiler>
+ARKCOMPILER_RUNTIME_CORE_PATH=<your path to the folder with cloned repository arkcompiler_runtime_core>
+ARKCOMPILER_ETS_FRONTEND_PATH=<your path to the folder with cloned repository arkcompiler_ets_frontend>
 PANDA_BUILD=<your path to build folder>
 WORK_DIR=<your path to temporary folder where all intermediate files and reports will be kept>
 ```

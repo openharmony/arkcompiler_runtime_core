@@ -14,11 +14,11 @@
 version: 0.0.0.1
 type: test-suite
 suite-name: parser
-list-root: ${PANDA_SOURCE_PATH}/ets_frontend/ets2panda/test/test-lists/parser
+list-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test/test-lists/parser
 test-root: ${parameters.parser-root}
 
 parameters:
-  parser-root: ${PANDA_SOURCE_PATH}/ets_frontend/ets2panda/test
+  parser-root: ${ARKCOMPILER_ETS_FRONTEND_PATH}/ets2panda/test
   work-dir: ${WORK_DIR}/${suite-name}
   enable-verifier: False
   build: ${PANDA_BUILD}
