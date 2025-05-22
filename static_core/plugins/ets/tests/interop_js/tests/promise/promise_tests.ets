@@ -366,9 +366,9 @@ let asyncLambdaAwait: () => Promise<Object | null> = async (): Promise<Object | 
 
 async function RejPromise1(): Promise<string> {
     let s: string = await new Promise<string>(
-        (resolve: (obj: string) => void,
-         reject: (obj: string) => void): void => {
-        reject("rejected");
+        (resolve: (obj: string|PromiseLike<string>) => void,
+         reject: (obj: Error) => void): void => {
+             reject(new Error("rejected"));
     });
     return s;
 }
@@ -381,7 +381,7 @@ async function asyncFuncAwaitRejected(): Promise<Object | null> {
     let promise: Promise<string> = RejPromise2();
 
     let promise2: Promise<string> =
-    promise.then((x: Promise<string>): string => {
+    promise.then((x: string|Promise<string>): string => {
         return "smth";
     })
 
@@ -497,7 +497,7 @@ async function testAsyncVoidNothing() {}
 function testPromiseAllEmpty(): void {
     globalTest = new Test();
     let promises: FixedArray<Promise<Object>> = [];
-    Promise.all(promises).then<void>((values: Array<Object>): void => {
+    Promise.all<Object>(promises).then<void>((values: Array<Object>): void => {
         if (values == null || values.length != 0) {
             globalTest!.fail();
         } else {
@@ -606,7 +606,7 @@ function testPromiseAllSettledEmpty(): void {
             globalTest!.fail();
         }
         globalTest!.success();
-    }, (err: NullishType): void => {
+    }, (err: Error): void => {
         globalTest!.fail();
     });
 }
@@ -616,7 +616,7 @@ function testPromiseAllSettled(): void {
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>(new Error("def"));
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
-    Promise.allSettled([
+    Promise.allSettled<Object>([
         p1, p2, p3
     ]).then<void, void>((result: PromiseSettledResult<Object>[]): void => {
         if (result.length != 3) {
@@ -644,7 +644,7 @@ function testPromiseAllSettled(): void {
             globalTest!.fail();
         }
         globalTest!.success();
-    }, (err: NullishType): void => {
+    }, (err: Error): void => {
         globalTest!.fail();
     });
 }
@@ -760,8 +760,9 @@ function testPromiseThenOnRejection(): void {
         globalTest!.fail();
     }, (error: Error): string => {
         return "correct flow";
-    }).then<string, void>((value: Object): void => {
+    }).then<string, void>((value): string => {
         globalTest!.success();
+        return value as string
     }, (error: Error): void => {
         globalTest!.fail();
     });

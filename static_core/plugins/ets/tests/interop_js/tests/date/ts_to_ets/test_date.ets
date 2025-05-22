@@ -124,7 +124,7 @@ function testSetDateOfSetTime(val: Date): boolean {
 }
 
 function testSetDateOfSetDate(val: Date): boolean {
-    val.setDate(15);
+    val.setDate(15 as number); // workaround for #26000
     return val.getDate() === 15;
 }
 
@@ -139,7 +139,7 @@ function testSetDateOfSetMonth(val: Date): boolean {
 }
 
 function testSetDateOfSetUTCDate(val: Date): boolean {
-    val.setUTCDate(20);
+    val.setUTCDate(20 as number); // workaround for #26000
     return val.getUTCDate() === 20;
 }
 
@@ -154,41 +154,41 @@ function testSetDateOfSetUTCMonth(val: Date): boolean {
 }
 
 function testSetDateOfMilliSeconds(val: Date): boolean {
-    val.setMilliseconds(55);
+    val.setMilliseconds(55 as number); // workaround for #26000
     return val.getMilliseconds() === 55;
 }
 
 function testDateOfSetUTCMilliSeconds(val: Date): boolean {
-    val.setUTCMilliseconds(11);
+    val.setUTCMilliseconds(11 as number); // workaround for #26000
     return val.getUTCMilliseconds() === 11;
 }
 
 function testSetDateOfSetHours(val: Date): boolean {
-    val.setHours(20);
+    val.setHours(20 as number); // workaround for #26000
     return val.getHours() === 20;
 }
 
 function testSetDateOfSetMinutes(val: Date): boolean {
-    val.setMinutes(45 as byte);
+    val.setMinutes(45 as byte); // workaround for #26000
     return val.getMinutes() === 45;
 }
 
 function testSetDateOfSetSeconds(val: Date): boolean {
-    val.setSeconds(30 as byte);
+    val.setSeconds(30 as byte); // workaround for #26000
     return val.getSeconds() === 30;
 }
 
 function testSetDateOfSetUTCHours(val: Date): boolean {
-    val.setUTCHours(10 as byte);
+    val.setUTCHours(10 as byte); // workaround for #26000
     return val.getUTCHours() === 10;
 }
 
 function testSetDateOfSetUTCMinutes(val: Date): boolean {
-    val.setUTCMinutes(55 as byte);
+    val.setUTCMinutes(55 as byte); // workaround for #26000
     return val.getUTCMinutes() === 55;
 }
 
 function testSetDateOfSetUTCSeconds(val: Date): boolean {
-    val.setUTCSeconds(55 as byte);
+    val.setUTCSeconds(55 as byte); // workaround for #26000
     return val.getUTCSeconds() === 55;
 }

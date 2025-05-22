@@ -64,7 +64,7 @@ function type_imported__returnBoolean(){
 
 function type_imported__returnInteger(){
     const getterFn: TFunctionReturnsNumber = genericInterfaceImplementation.getInt as TFunctionReturnsNumber;
-    return typeof getterFn() == "object" && (getterFn() as int) > 0 && (getterFn() as int) / 2 == (getterFn() as int) * 0.5;
+    return typeof getterFn() == "object" && (getterFn() as int) > 0 && (getterFn() as int) / 2 == Double.toInt((getterFn() as int) * 0.5);
 }
 
 function type_imported__returnNegativeInteger(){
@@ -139,4 +139,3 @@ function type_imported__returnFunction(){
             && (returnNumericValue() as float)> 3
             && (returnNumericValue() as float) < 4;
 }
-

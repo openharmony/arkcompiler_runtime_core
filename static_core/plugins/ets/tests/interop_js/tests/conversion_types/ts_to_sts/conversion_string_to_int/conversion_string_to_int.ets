@@ -16,49 +16,49 @@
 import { tsIntString } from 'main_js';
 
 function checkConversionStringToInt(): boolean {
-    const val = parseInt(tsIntString) as int;    
+    const val = Double.toInt(parseInt(tsIntString));
 
     return typeof val == 'number';
 }
 
 function checkConversionStringToNumber(): boolean {
-    const val = parseInt(tsIntString) as number;
+    const val = parseInt(tsIntString);
 
     return typeof val == 'number';
 }
 
 function checkConversionStringToFloat(): boolean {
-    const val = parseInt(tsIntString) as float;
+    const val = Double.toFloat(parseInt(tsIntString));
 
     return typeof val == 'number';
 }
 
 function checkConversionStringToByte(): boolean {
-    const val = parseInt(tsIntString) as byte;
+    const val = Double.toByte(parseInt(tsIntString));
 
     return typeof val == 'number';
 }
 
 function checkConversionStringToShort(): boolean {
-    const val = parseInt(tsIntString) as short;
+    const val = Double.toShort(parseInt(tsIntString));
 
     return typeof val == 'number';
 }
 
 function checkConversionStringToLong(): boolean {
-    const val = parseInt(tsIntString) as long;
+    const val = Double.toLong(parseInt(tsIntString));
 
     return typeof val == 'number';
 }
 
 function checkConversionStringToDouble(): boolean {
-    const val = parseInt(tsIntString) as double;
+    const val = parseInt(tsIntString);
 
     return typeof val == 'number';
 }
 
 function checkConversionStringToChar(): boolean {
-    const val = parseInt(tsIntString) as char;
+    const val = Int.toChar(Double.toInt(parseInt(tsIntString)));
 
     return typeof val == 'number';
 }

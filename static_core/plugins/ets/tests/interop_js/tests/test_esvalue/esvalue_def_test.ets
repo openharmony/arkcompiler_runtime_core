@@ -71,37 +71,37 @@ function checkWrapNumber(): boolean {
 function checkWrapByte(): boolean {
     let val: byte = 111;
     let obj = ESValue.wrapByte(val);
-    return obj.toNumber() as byte === val;
+    return Double.toByte(obj.toNumber()) === val;
 }
 
 function checkWrapShort(): boolean {
     let val: short = 111;
     let obj = ESValue.wrapShort(val);
-    return obj.toNumber() as short === val;
+    return Double.toShort(obj.toNumber()) === val;
 }
 
 function checkWrapInt(): boolean {
     let val: int = 111;
     let obj = ESValue.wrapInt(val);
-    return obj.toNumber() as int === val;
+    return Double.toInt(obj.toNumber()) === val;
 }
 
 function checkWrapLong(): boolean {
     let val: long = 111;
     let obj = ESValue.wrapLong(val);
-    return obj.toNumber() as long === val;
+    return Double.toLong(obj.toNumber()) === val;
 }
 
 function checkWrapFloat(): boolean {
     let val: float = 111;
     let obj = ESValue.wrapFloat(val);
-    return obj.toNumber() as float === val;
+    return Double.toFloat(obj.toNumber()) === val;
 }
 
 function checkWrapDouble(): boolean {
     let val: double = 111;
     let obj = ESValue.wrapDouble(val);
-    return obj.toNumber() as double === val;
+    return obj.toNumber() === val;
 }
 
 function checkIsBoolean(): boolean {
@@ -206,8 +206,8 @@ function checkGetPropertyByIndexSafe(): boolean {
 }
 
 function checkGetProperty(): boolean {
-    let peroperty = ESValue.wrapString('property2');
-    let val = jsObjectA.getProperty(peroperty);
+    let property = ESValue.wrapString('property2');
+    let val = jsObjectA.getProperty(property);
     return val.toNumber() === 2;
 }
 
@@ -219,8 +219,8 @@ function checkGetPropertySafe(): boolean {
 
 function checkSetPropertyByName(): boolean {
     let value = ESValue.wrapNumber(5);
-    jsObjectA.setProperty('property2', value);
-    let val = jsObjectA.getProperty('property2');
+    jsObjectA.setProperty('property1', value);
+    let val = jsObjectA.getProperty('property1');
     return val.toNumber() === 5;
 }
 
@@ -233,7 +233,7 @@ function checkSetPropertyByIndex(): boolean {
 
 function checkSetProperty(): boolean {
     let value = ESValue.wrapNumber(5);
-    let property = ESValue.wrapString('property2');
+    let property = ESValue.wrapString('property1');
     jsObjectA.setProperty(property, value);
     let val = jsObjectA.getProperty(property);
     return val.toNumber() === 5;

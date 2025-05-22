@@ -16,49 +16,49 @@
 import { tsExponential } from 'main_js';
 
 function checkConversionExponentialToInt(): boolean {
-    const val = parseInt(tsExponential) as int;
+    const val = Double.toInt(parseInt(tsExponential));
 
     return typeof val == 'number';
 }
 
 function checkConversionExponentialToNumber(): boolean {
-    const val = parseInt(tsExponential) as number;
+    const val = parseInt(tsExponential);
 
     return typeof val == 'number';
 }
 
 function checkConversionExponentialToFloat(): boolean {
-    const val = parseInt(tsExponential) as float;
+    const val = Double.toFloat(parseInt(tsExponential));
 
     return typeof val == 'number';
 }
 
 function checkConversionExponentialToByte(): boolean {
-    const val = parseInt(tsExponential) as byte;
+    const val = Double.toByte(parseInt(tsExponential));
 
     return typeof val == 'number';
 }
 
 function checkConversionExponentialToShort(): boolean {
-    const val = parseInt(tsExponential) as short;
+    const val = Double.toShort(parseInt(tsExponential));
 
     return typeof val == 'number';
 }
 
 function checkConversionExponentialToLong(): boolean {
-    const val = parseInt(tsExponential) as long;
+    const val = Double.toLong(parseInt(tsExponential));
 
     return typeof val == 'number';
 }
 
 function checkConversionExponentialToDouble(): boolean {
-    const val = parseInt(tsExponential) as double;
+    const val = parseInt(tsExponential);
 
     return typeof val == 'number';
 }
 
 function checkConversionExponentialToChar(): boolean {
-    const val = parseInt(tsExponential) as char;
+    const val = Int.toChar(Double.toInt(parseInt(tsExponential)));
 
     return typeof val == 'number';
 }

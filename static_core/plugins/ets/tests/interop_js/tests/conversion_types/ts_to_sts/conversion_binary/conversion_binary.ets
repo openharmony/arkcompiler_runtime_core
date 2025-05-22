@@ -16,49 +16,49 @@
 import { tsBinary, systemBinary } from 'main_js';
 
 function checkConversionBinaryToInt(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as int;
+    const val = Double.toInt(parseInt(tsBinary, systemBinary as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionBinaryToNumber(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as number;
+    const val = parseInt(tsBinary, systemBinary as int);
 
     return typeof val == 'number';
 }
 
 function checkConversionBinaryToFloat(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as float;
+    const val = Double.toFloat(parseInt(tsBinary, systemBinary as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionBinaryToByte(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as byte;
+    const val = Double.toByte(parseInt(tsBinary, systemBinary as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionBinaryToShort(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as short;
+    const val = Double.toShort(parseInt(tsBinary, systemBinary as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionBinaryToLong(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as long;
+    const val = Double.toLong(parseInt(tsBinary, systemBinary as int));
 
     return typeof val == 'number';
 }
 
 function checkConversionBinaryToDouble(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as double;
+    const val = parseInt(tsBinary, systemBinary as int);
 
     return typeof val == 'number';
 }
 
 function checkConversionBinaryToChar(): boolean {
-    const val = parseInt(tsBinary, systemBinary as int) as char;
+    const val = Int.toChar(Double.toInt(parseInt(tsBinary, systemBinary as int)));
 
     return typeof val == 'number';
 }

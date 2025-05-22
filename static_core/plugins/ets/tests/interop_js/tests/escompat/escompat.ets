@@ -68,7 +68,7 @@ function Array_TestJSPop(arr: Array<FooClass>): void {
 
 function Array_TestJSSort(arr: Array<FooClass>): void {
     let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
-        return a.toString().compareTo(b.toString()) as number;
+        return Int.toDouble(a.toString().compareTo(b.toString()));
     }
     arr.sort(comparator);
     assertEQ( arr.at(1)!.toString(), "{Foo named zero}");
@@ -76,7 +76,7 @@ function Array_TestJSSort(arr: Array<FooClass>): void {
 
 function Array_TestJSToSorted(arr: Array<FooClass>): void {
     let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
-        return a.toString().compareTo(b.toString()) as number;
+        return Int.toDouble(a.toString().compareTo(b.toString()));
     }
     let toSorted = arr.toSorted(comparator);
     assertEQ( toSorted.at(1)!.toString(), "{Foo named zero}");
@@ -261,10 +261,10 @@ function Array_TestJSFindIndex(arr: Array<FooClass>): void {
     let fnTrue: (v: FooClass) => boolean = (v: FooClass): boolean => { return true; }
     let fnFalse: (v: FooClass) => boolean = (v: FooClass): boolean => { return false; }
 
-    let found: int = arr.findIndex(fnTrue) as int;
+    let found: int = Double.toInt(arr.findIndex(fnTrue));
     assertEQ( found, 0) ;
 
-    let not_found: int = arr.findIndex(fnFalse) as int;
+    let not_found: int = Double.toInt(arr.findIndex(fnFalse));
     assertEQ( not_found, -1 );
 }
 
@@ -358,7 +358,7 @@ function ArrayBuffer_TestJSIsView(dynArr: Any): void {
 
 function ArrayBuffer_TestJSSlice(dynArr: Any): void {
     let arr = InteropTransferHelper.transferArrayBufferToStatic(dynArr) as ArrayBuffer;
-    let sliced = arr.slice(8, 24);
+    let sliced = arr.slice(8 as int, 24 as int); // workaround for #26000
     assertEQ( sliced.byteLength, 16 );
 }
 
