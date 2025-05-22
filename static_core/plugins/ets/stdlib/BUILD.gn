@@ -17,6 +17,7 @@ import("//arkcompiler/runtime_core/static_vm_config.gni")
 if (ark_standalone_build) {
   import("$build_root/ark.gni")
 } else {
+  import("//build/config/components/ets_frontend/ets2abc_config.gni")
   import("//build/ohos.gni")
 }
 
@@ -61,6 +62,16 @@ if (is_mac) {
     outputs = [ "${root_out_dir}/arkcompiler/$target_name" ]
     module_source_dir = "${root_out_dir}/arkcompiler/$target_name"
     module_install_name = ""
+    part_name = "runtime_core"
+    subsystem_name = "arkcompiler"
+  }
+}
+
+if (!ark_standalone_build) {
+  ohos_copy("ohos_ets_stdlib") {
+    deps = [ ":copy_stdlib" ]
+    sources = [ "${root_out_dir}/arkcompiler/stdlib" ]
+    outputs = [ ohos_ets_stdlib_path ]
     part_name = "runtime_core"
     subsystem_name = "arkcompiler"
   }
