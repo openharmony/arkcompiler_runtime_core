@@ -22,18 +22,18 @@ interface A<T, U> {
     b: U;
 }
 
-class B implements A<string, boolean> {
+class B implements A<string, Boolean> {
     a: string = "B";
-    b: boolean = true;
+    b: Boolean = true;
 }
 
 class C extends B {
     a: string = "C";
-    b: boolean = false;
+    b: Boolean = false;
 }
 
 function main(): void {
-    const b: A<string, boolean> = new B();
+    const b: A<string, Boolean> = new B();
     assertEQ(b.a, "B");
     assertEQ(b.b, true);
 
