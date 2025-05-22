@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "base/common.h"
+#include "heap/heap_visitor.h"
 #include "thread/mutator_base.h"
 #include "thread/thread_state.h"
 
@@ -36,9 +37,6 @@ class Coroutine;
 namespace panda {
 class BaseThread;
 class ThreadHolderManager;
-
-// to determine
-using CommonRootVisitor = void (*)(void *root);
 
 /**
  * ThreadHolder does two things:
