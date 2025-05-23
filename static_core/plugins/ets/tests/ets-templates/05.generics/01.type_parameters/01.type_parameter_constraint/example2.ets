@@ -22,6 +22,7 @@ tags: [compile-only, negative]
 
 class G<T extends String> {
   foo() {
-    let t: T // compile-time error, variable is not initialized
+    let t: T
+    let foo = t + "bar" // TypeError: variable 't' is used before being assigned
   }
 }
