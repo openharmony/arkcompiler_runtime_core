@@ -746,7 +746,7 @@ export final class LambdaValue extends Value {
     }
 
     public override toString(): string {
-        return this.typ.toString()
+        return "Cannot get source code of function";
     }
 
     public override toLocaleString(): string {
