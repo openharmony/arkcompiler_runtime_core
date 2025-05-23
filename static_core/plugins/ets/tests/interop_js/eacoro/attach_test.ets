@@ -93,7 +93,7 @@ class TestClass {
 
         let method = JSRuntime.getPropertyJSValue(module, funcName);
         let callRes = JSRuntime.invoke(module, method);
-        let linker = Class.ofCaller().getLinker();
+        let linker = Class.ofCaller()!.getLinker();
         let clsName = 'std.core.Promise';
         let p = JSRuntime.getValueObject(callRes, linker.loadClass(clsName, false)) as Promise<Object>;
         let p1 = p.then((x:Object): void => {

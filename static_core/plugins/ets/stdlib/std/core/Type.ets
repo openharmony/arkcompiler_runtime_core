@@ -206,7 +206,8 @@ export abstract class Type extends Object {
      * @returns instance of appropriate type or undefined if resolving is failed
      */
     public static resolve(td: TypeDescriptor): Type | undefined {
-        const contextLinker = Class.ofCaller().getLinker()
+        const callerClass = Class.ofCaller()
+        const contextLinker = callerClass == undefined ? getBootRuntimeLinker() : callerClass.getLinker()
         const internalTd: RuntimeTypeDescriptor = TypeAPI.convertTypeDescriptor(td)
         return Type.resolve(internalTd, contextLinker)
     }
@@ -369,7 +370,8 @@ export abstract class Type extends Object {
 
     public static of(o: NullishType): Type {
         const td = TypeAPI.getTypeDescriptor(o)
-        const contextLinker = (o == null) ? Class.ofCaller().getLinker() : Class.of(__narrowAny<object>(o)).getLinker()
+        const contextClass = o == undefined ? Class.ofCaller() : Class.of(__narrowAny<object>(o))
+        const contextLinker = contextClass == undefined ? getBootRuntimeLinker() : contextClass.getLinker()
         return Type.resolve(td, contextLinker)!
     }
 
