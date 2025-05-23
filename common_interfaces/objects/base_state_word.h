@@ -92,6 +92,23 @@ public:
         return state_.forwardState_;
     }
 
+    StateWordType GetClassAddress() const
+    {
+#ifdef USE_CMC_GC
+        return state_.padding_;
+#else
+        return header_;
+#endif
+    }
+
+    void SetClassAddress(StateWordType address)
+    {
+#ifdef USE_CMC_GC
+        state_.padding_ = address;
+#else
+        header_ = address;
+#endif
+    }
 private:
     // Little endian
     struct State {

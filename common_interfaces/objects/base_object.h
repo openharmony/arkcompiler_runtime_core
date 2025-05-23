@@ -19,22 +19,16 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "objects/base_class.h"
 #include "base/common.h"
 #include "objects/base_object_operator.h"
 #include "objects/base_state_word.h"
 
 namespace panda {
-#ifndef USE_CMC_GC
-class BaseObject {
-};
-#else
 class BaseObject {
 public:
     BaseObject() : state_(0) {}
-    static BaseObject *Cast(MAddress address)
-    {
-        return reinterpret_cast<BaseObject *>(address);
-    }
+#ifdef USE_CMC_GC
 
     static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
     static void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
@@ -179,7 +173,31 @@ public:
     }
     // The interfaces above only use for common code compiler. It will be deleted later.
 
+#endif
+
+    void SetBaseClassWithoutBarrier(BaseClass* cls)
+    {
+        state_.SetClassAddress(reinterpret_cast<StateWordType>(cls));
+    }
+
+    BaseClass *GetBaseClass() const
+    {
+        return reinterpret_cast<BaseClass *>(state_.GetClassAddress());
+    }
+
+    // Size of object header
+    static constexpr size_t BaseObjectSize()
+    {
+        return sizeof(BaseObject);
+    }
 protected:
+#ifdef USE_CMC_GC
+    static BaseObject *SetClassInfo(MAddress address, TypeInfo *klass)
+    {
+        auto ref = reinterpret_cast<BaseObject *>(address);
+        return ref;
+    }
+
     inline BaseObjectOperatorInterfaces *GetOperator() const
     {
         if (state_.IsStatic()) {
@@ -188,9 +206,10 @@ protected:
         return operator_.dynamicObjOp_;
     }
 
-    static PUBLIC_API BaseObjectOperator operator_;
+    static BaseObjectOperator operator_;
+#endif
+private:
     BaseStateWord state_;
 };
-#endif
 }  // namespace panda
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
