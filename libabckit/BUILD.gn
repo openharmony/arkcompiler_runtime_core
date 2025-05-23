@@ -61,6 +61,7 @@ config("abckit_config") {
   }
 
   configs = [ sdk_libc_secshared_config ]
+  configs += [ "$ark_root:ark_config" ]
 }
 
 config("abckit_mock_config") {
