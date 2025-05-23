@@ -64,11 +64,11 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_INT32_ARRAY_GET: {
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_BIG_INT64_ARRAY_SET_LONG: {
-    Builder()->BuildTypedArraySetIntrinsic(bcInst_, DataType::INT64, ACC_READ);
+    Builder()->BuildBigInt64ArraySetIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_BIG_INT64_ARRAY_GET: {
-    Builder()->BuildTypedArrayGetIntrinsic(bcInst_, DataType::INT64, ACC_READ);
+    Builder()->BuildBigInt64ArrayGetIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_FLOAT32_ARRAY_SET_FLOAT: {
@@ -92,37 +92,37 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_CLAMPED_ARRAY_SET_INT: {
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_ARRAY_SET_INT: {
-    Builder()->BuildTypedArraySetIntrinsic(bcInst_, DataType::UINT8, ACC_READ);
+    Builder()->BuildTypedUnsignedArraySetIntrinsic(bcInst_, DataType::UINT8, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_ARRAY_GET:
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_CLAMPED_ARRAY_GET: {
-    Builder()->BuildTypedArrayGetIntrinsic(bcInst_, DataType::UINT8, ACC_READ);
+    Builder()->BuildTypedUnsignedArrayGetIntrinsic(bcInst_, DataType::UINT8, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT16_ARRAY_SET_INT: {
-    Builder()->BuildTypedArraySetIntrinsic(bcInst_, DataType::UINT16, ACC_READ);
+    Builder()->BuildTypedUnsignedArraySetIntrinsic(bcInst_, DataType::UINT16, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT16_ARRAY_GET: {
-    Builder()->BuildTypedArrayGetIntrinsic(bcInst_, DataType::UINT16, ACC_READ);
+    Builder()->BuildTypedUnsignedArrayGetIntrinsic(bcInst_, DataType::UINT16, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT32_ARRAY_SET_INT:
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT32_ARRAY_SET_LONG: {
-    Builder()->BuildTypedArraySetIntrinsic(bcInst_, DataType::UINT32, ACC_READ);
+    Builder()->BuildTypedUnsignedArraySetIntrinsic(bcInst_, DataType::UINT32, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT32_ARRAY_GET: {
-    Builder()->BuildTypedArrayGetIntrinsic(bcInst_, DataType::UINT32, ACC_READ);
+    Builder()->BuildTypedUnsignedArrayGetIntrinsic(bcInst_, DataType::UINT32, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_BIG_U_INT64_ARRAY_SET_INT:
 case RuntimeInterface::IntrinsicId::INTRINSIC_BIG_U_INT64_ARRAY_SET_LONG: {
-    Builder()->BuildTypedArraySetIntrinsic(bcInst_, DataType::UINT64, ACC_READ);
+    Builder()->BuildBigUint64ArraySetIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_BIG_U_INT64_ARRAY_GET: {
-    Builder()->BuildTypedArrayGetIntrinsic(bcInst_, DataType::UINT64, ACC_READ);
+    Builder()->BuildBigUint64ArrayGetIntrinsic(bcInst_, ACC_READ);
     break;
 }

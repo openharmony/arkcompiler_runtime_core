@@ -73,12 +73,6 @@ void InstBuilder::BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool 
     UpdateDefinitionAcc(res);
 }
 
-void InstBuilder::BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type, bool accRead)
-{
-    auto *value = GetArgDefinition(bcInst, 2, accRead);
-    BuildTypedArraySetIntrinsic(bcInst, value, type, accRead);
-}
-
 void InstBuilder::BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *bcInst,
                                                      ark::compiler::DataType::Type type, bool accRead)
 {
@@ -94,51 +88,117 @@ void InstBuilder::BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *
     clamped->SetInput(0, clamped0);
     clamped->SetInput(1, graph->FindOrCreateConstant(MAX_VALUE));
     AddInstruction(clamped);
-    BuildTypedArraySetIntrinsic(bcInst, clamped, type, accRead);
+    BuildTypedUnsignedArraySetIntrinsic(bcInst, clamped, type, accRead);
 }
 
-void InstBuilder::BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, Inst *value, DataType::Type type,
-                                              bool accRead)
+void InstBuilder::BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type, bool accRead)
+{
+    ASSERT(type != DataType::INT64);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto *value = GetArgDefinition(bcInst, 2, accRead);
+    BuildTypedArraySet(bcInst, value, type, loadDataInst, dataOffsetInst);
+}
+
+void InstBuilder::BuildTypedUnsignedArraySetIntrinsic(const BytecodeInstruction *bcInst, Inst *value,
+                                                      DataType::Type type, bool accRead)
+{
+    ASSERT(type != DataType::INT64);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
+    BuildTypedArraySet(bcInst, value, type, loadDataInst, dataOffsetInst);
+}
+
+void InstBuilder::BuildTypedUnsignedArraySetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type,
+                                                      bool accRead)
+{
+    ASSERT(type != DataType::INT64);
+    auto *value = GetArgDefinition(bcInst, 2, accRead);
+    BuildTypedUnsignedArraySetIntrinsic(bcInst, value, type, accRead);
+}
+
+void InstBuilder::BuildTypedArraySet(const BytecodeInstruction *bcInst, Inst *value, ark::compiler::DataType::Type type,
+                                     Inst *loadDataInst, Inst *dataOffsetInst)
 {
     const size_t valueIndex = 2;
     auto bcAddr = GetPc(bcInst->GetAddress());
-    auto [loadDataInst, dataOffsetInst] = DataType::IsTypeSigned(type)
-                                              ? BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead)
-                                              : BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
-
     auto *storeInst = GetGraph()->CreateInstStoreNative(type, bcAddr);
     storeInst->SetInput(0, loadDataInst);
     storeInst->SetInput(1, dataOffsetInst);
-    if (!DataType::IsInt32Bit(type) && DataType::IsInt32Bit(value->GetType())) {
-        auto *cast = GetGraph()->CreateInstCast(type, bcAddr, value, value->GetType());
-        storeInst->SetInput(valueIndex, cast);
-        AddInstruction(cast);
-    } else {
-        storeInst->SetInput(valueIndex, value);
-    }
+    storeInst->SetInput(valueIndex, value);
     AddInstruction(storeInst);
+}
+
+void InstBuilder::BuildBigInt64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto *value = GetArgDefinition(bcInst, 2, accRead);
+    if (value->GetType() != DataType::INT64) {
+        auto bcAddr = GetPc(bcInst->GetAddress());
+        auto *cast = GetGraph()->CreateInstCast(DataType::INT64, bcAddr, value, value->GetType());
+        AddInstruction(cast);
+        value = cast;
+    }
+    BuildTypedArraySet(bcInst, value, DataType::INT64, loadDataInst, dataOffsetInst);
+}
+
+void InstBuilder::BuildBigUint64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto *value = GetArgDefinition(bcInst, 2, accRead);
+    if (value->GetType() != DataType::INT64) {
+        auto bcAddr = GetPc(bcInst->GetAddress());
+        auto *cast = GetGraph()->CreateInstCast(DataType::INT64, bcAddr, value, value->GetType());
+        AddInstruction(cast);
+        value = cast;
+    }
+    BuildTypedArraySet(bcInst, value, DataType::INT64, loadDataInst, dataOffsetInst);
 }
 
 void InstBuilder::BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type, bool accRead)
 {
+    ASSERT(type != DataType::INT64);
     auto bcAddr = GetPc(bcInst->GetAddress());
-    auto [loadDataInst, dataOffsetInst] = DataType::IsTypeSigned(type)
-                                              ? BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead)
-                                              : BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
+    auto result = GetGraph()->CreateInstCast(DataType::FLOAT64, bcAddr, loadInst, loadInst->GetType());
+    AddInstruction(result);
+    UpdateDefinitionAcc(result);
+}
 
+void InstBuilder::BuildTypedUnsignedArrayGetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type,
+                                                      bool accRead)
+{
+    ASSERT(type != DataType::INT64);
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
+    auto result = GetGraph()->CreateInstCast(DataType::FLOAT64, bcAddr, loadInst, loadInst->GetType());
+    AddInstruction(result);
+    UpdateDefinitionAcc(result);
+}
+
+Inst *InstBuilder::BuildTypedArrayGet(const BytecodeInstruction *bcInst, DataType::Type type, Inst *loadDataInst,
+                                      Inst *dataOffsetInst)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
     auto *loadInst = GetGraph()->CreateInstLoadNative(type, bcAddr);
     loadInst->SetInput(0, loadDataInst);
     loadInst->SetInput(1, dataOffsetInst);
     AddInstruction(loadInst);
+    return loadInst;
+}
 
-    if (type == DataType::INT64 || type == DataType::UINT64) {
-        UpdateDefinitionAcc(loadInst);
-        return;
-    }
+void InstBuilder::BuildBigInt64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto *loadInst = BuildTypedArrayGet(bcInst, DataType::INT64, loadDataInst, dataOffsetInst);
+    UpdateDefinitionAcc(loadInst);
+}
 
-    auto result = GetGraph()->CreateInstCast(DataType::FLOAT64, bcAddr, loadInst, loadInst->GetType());
-    AddInstruction(result);
-    UpdateDefinitionAcc(result);
+void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto *loadInst = BuildTypedArrayGet(bcInst, DataType::INT64, loadDataInst, dataOffsetInst);
+    UpdateDefinitionAcc(loadInst);
 }
 
 /*
@@ -250,7 +310,6 @@ void InstBuilder::BuildTypedArrayDeoptimizeIfOutOfRange(Inst *posInst, Inst *len
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
                                                                                  DataType::Type type, bool accRead)
 {
-    ASSERT(!DataType::IsTypeSigned(type));
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto *obj = GetArgDefinition(bcInst, 0, accRead);
     auto *pos = GetArgDefinition(bcInst, 1, accRead);
