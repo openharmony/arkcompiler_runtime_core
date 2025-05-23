@@ -17,7 +17,7 @@
 desc: OutOfMemoryError is thrown by an assignment to an array component of
     reference type, a method call expression, or a prefix / postfix
     increment / decrement operator as a result of boxing conversion.
-ark_options: ['--heap-size-limit=33554432', '--init-heap-size-limit=33554432']
+ark_options: ['--heap-size-limit=8388608', '--init-heap-size-limit=8388608', '--gc-type=stw']
 timeout: 60
 ---*/
 
