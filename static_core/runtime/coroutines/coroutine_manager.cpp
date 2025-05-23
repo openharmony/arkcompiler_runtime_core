@@ -86,9 +86,8 @@ void CoroutineManager::DestroyEntrypointlessCoroutine(Coroutine *co)
     DeleteCoroutineContext(context);
 }
 
-Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                                     PandaVector<Value> &&arguments, PandaString name,
-                                                     Coroutine::Type type, CoroutinePriority priority)
+Coroutine *CoroutineManager::CreateCoroutineInstance(EntrypointInfo &&epInfo, PandaString name, Coroutine::Type type,
+                                                     CoroutinePriority priority)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -102,8 +101,7 @@ Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completion
     // assuming that the main coro is already created and Coroutine::GetCurrent is not nullptr
     ASSERT(Coroutine::GetCurrent() != nullptr);
     auto *coro = coFactory_(Runtime::GetCurrent(), Coroutine::GetCurrent()->GetVM(), std::move(name), ctx,
-                            Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)}, type,
-                            priority);
+                            std::move(epInfo), type, priority);
     return coro;
 }
 
