@@ -10,34 +10,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-====================
-|LANG| Specification
-====================
+Introduction
+############
 
-.. toctree::
-   :numbered:
-   :maxdepth: 3
+-  Why Interop with |TS|?
+-  Overview of Interop Mechanisms
+-  Brief explanation how interop works (VMs, proxy object, etc.)
 
-   /1_intro
-   /2_lexical
-   /3_types
-   /4_names
-   /5_generics
-   /6_conversions
-   /7_expressions
-   /8_statements
-   /9_classes
-   /10_interfaces
-   /11_enums
-   /12_errors
-   /13_modules
-   /14_ambients
-   /15_semantics
-   /16_concurrency
-   /17_experimental
-   /18_annotations
-   /19_stdlib
-   /20_implementation
-   /21_grammar
-   /0_authors
+Code Conventions
+****************
 
+**TBD**: ``app.ets``, ``lib.ts``, etc.
+
+-  Example of calling TypeScript functions from |LANG|
+-  Example of calling |LANG| functions from |TS|

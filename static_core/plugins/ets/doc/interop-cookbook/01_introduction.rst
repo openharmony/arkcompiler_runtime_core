@@ -9,19 +9,3 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-.. _Support for GUI Programming:
-
-Support for GUI Programming
-###########################
-
-This Chapter is deprecated. See ArkUI documentation.
-
-.. index::
-   GUI programming
-
-|
-
-.. raw:: pdf
-
-   PageBreak

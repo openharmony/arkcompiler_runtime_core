@@ -26,7 +26,7 @@ Common Description
 ******************
 
 The |LANG| language combines and supports features that are in use in many
-well-known programming languages, where these tools have already proven
+well-known programming languages, where such features have already proven
 helpful and powerful.
 
 |LANG| supports imperative, object-oriented, functional, and generic
@@ -42,14 +42,14 @@ The following major aspects characterize the |LANG| language as a whole:
 
 -  Object orientation
 
-   The |LANG| language supports conventional class-based, *object-oriented
-   approach* to programming (OOP). The major notions of this approach are
-   as follows:
+   The |LANG| language supports *object-oriented programming* (OOP) approach
+   based on classes and interfaces. The major notions of this approach are as
+   follows:
 
    -  Classes with single inheritance,
    -  Interfaces as abstractions to be implemented by classes, and
-   -  Methods (class instance or interface methods) with a dynamically dispatched
-      overriding mechanism.
+   -  Methods (class instance or interface methods) with overriding and dynamic
+      dispatch mechanisms.
 
    Common in many (if not all) modern programming languages, object orientation
    enables powerful, flexible, safe, clear, and adequate software design.
@@ -58,8 +58,7 @@ The following major aspects characterize the |LANG| language as a whole:
    object
    object orientation
    object-oriented
-   object-oriented programming
-   OOP
+   OOP (object-oriented programming)
    inheritance
    overriding
    abstraction
@@ -537,16 +536,11 @@ as used in other languages, application areas, or industries.
      -- ordinary interface method declaration that specifies the method’s name
      and signature.
 
-   truthiness
-     -- concept that extends the boolean logic to operands and results
-     of non-boolean types, and allows handling the value of a valid
-     expression of a non-void type as ``Truthy`` or ``Falsy``, depending on
-     the kind of the value type.
 
    overloading
-     -- situation where different functions 
-     or methods inherited by or declared in the same
-     class or interface have the same name but different signatures.
+     -- situation where different methods inherited or declared in the same
+     class, interface, function, or constructors have the same name, and their
+     signatures are not overload-equivalent.
 
    shadowing
      -- situation where a derived class introduces a field with the same name as
@@ -596,7 +590,7 @@ as used in other languages, application areas, or industries.
      the form of a flat line that has no more union types included.
 
    fit into (v.)
-     -- belong, or be implicitly convertible (see :ref:`Widening Primitive Conversions`)
+     -- belong, or be implicitly convertible (see :ref:`Widening Numeric Conversions`)
      to an entity.
 
    match (v.)
