@@ -34,6 +34,7 @@ enum class GcType : uint8_t {
     ASYNC,
     SYNC,
     FULL,  // Waiting finish
+    APPSPAWN,
 };
 using HeapVisitor = const std::function<void(BaseObject*)>;
 
@@ -79,6 +80,10 @@ public:
         return *threadHolderManager_;
     }
 
+    HeapManager &GetHeapManager()
+    {
+        return *heapManager_;
+    }
 private:
     RuntimeParam param_ {};
 
