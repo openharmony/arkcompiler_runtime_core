@@ -19,7 +19,7 @@
 #include <atomic>
 #include <cstdint>
 
-#include "base/common.h"
+#include "common_interfaces/base/common.h"
 
 namespace panda {
 

@@ -18,9 +18,8 @@
 
 #include <unordered_set>
 
-#include "thread/thread_holder.h"
-
-#include "thread/mutator_base-inl.h"
+#include "common_interfaces/thread/mutator_base-inl.h"
+#include "common_interfaces/thread/thread_holder.h"
 
 namespace panda {
 void ThreadHolder::TransferToRunning()

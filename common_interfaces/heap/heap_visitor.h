@@ -19,8 +19,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include "base/common.h"
-#include "objects/ref_field.h"
+#include "common_interfaces/base/common.h"
+#include "common_interfaces/objects/ref_field.h"
 
 namespace panda {
 class BaseObject;

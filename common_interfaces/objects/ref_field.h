@@ -18,7 +18,7 @@
 
 #include <atomic>
 #include <functional>
-#include "objects/base_state_word.h"
+#include "common_interfaces/objects/base_state_word.h"
 
 namespace panda {
 class BaseObject;
