@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ cases:
       for (;;) {
         if( m++ > 1) break;
       }
-      assert m == 2;
+      assertEQ( m, 3 );
 
   - doc: For loop without any statement configured, spase as delimiter
     decl: |-
@@ -27,7 +27,7 @@ cases:
       for ( ; ; ) {
         if( m++ > 1) break;
       }
-      assert m == 2;
+      assertEQ( m, 3 );
 
   - doc: For loop with init as the only configured statement. Creating variable with already existing name during the for loop initialization.
     decl: |-
@@ -35,7 +35,7 @@ cases:
       for (let m = 1;;) {
         if(m == 1) break;
       }
-      assert m == "string";
+      assertEQ( m, "string" );
 
   - doc: For loop with expression as the only configured statement. Creating variable with already existing name at the for loop body.
     decl: |-
@@ -44,15 +44,15 @@ cases:
         let m = 1;
         if(m == 1) break;
       }
-      assert m == "string";
+      assertEQ( m, "string" );
 
   - doc: For loop with forUpdate as the only configured statement. Variable was created outside of the loop body and gets changed as forUpdate.
     decl: |-
-      let m;
+      let m : int;
       for (;; m++) {
         if(m > 1) break;
       }
-      assert m == 2;
+      assertEQ( m, 2 );
 
   - doc: For loop with init and conditional statements configured.
     decl: |-
@@ -60,7 +60,7 @@ cases:
       for (let i = 0; i < 10;) {
         m += ++i;
       }
-      assert m == 55;
+      assertEQ( m, 55);
 
   - doc: For loop with init and forUpdate statements configured.
     decl: |-
@@ -69,16 +69,16 @@ cases:
         m = i;
         if(i > 10) break;
       }
-      assert m == 10;
+      assertEQ( m, 11 );
 
   - doc: For loop with condition and forUpdate statements configured. Verify 'continue' statement.
     decl: |-
       let m: int = 10;
       for (; m > 0; m--) { 
         if(1) continue;
-        assert false;
+        assertTrue( false );
       }
-      assert m == 0;
+      assertEQ( m, 0 );
 
   - doc: For loop with all parameters configured.
     decl: |-
@@ -86,7 +86,7 @@ cases:
       for (let i: int = 1; i < 4; i++) {
         sum += i;
       }
-      assert sum == 6;
+      assertEQ( sum, 6 );
 
   - doc: For loop with multiple init options configured.
     decl: |-
@@ -95,7 +95,7 @@ cases:
         sum += i + j;
         j--;
       }
-      assert sum == 1;
+      assertEQ( sum, 1 );
 
   - doc: For loop with multiple forUpdate options configured.
     decl: |-
@@ -103,7 +103,7 @@ cases:
       for(let i = 0, j = 0; j<5; i++, i--, j++) {
         sum += i + j;
       }
-      assert sum == 10;
+      assertEQ( sum, 10 );
 
   - doc: For loop with complicated expression option configured.
     decl: |-
@@ -111,7 +111,7 @@ cases:
       let o1: Object|null = null;
       let i = 0;
       for(; ( (o1 ?? o) && i<5); i++ ) { }
-      assert i == 5;
+      assertEQ( i, 5 );
 
   - doc: For loop with complicated forUpdate option configured.
     decl: |-
@@ -119,7 +119,7 @@ cases:
       for(let a = 0, b: string='string' ; a<10 ; a++, b += String.fromCharCode( (a+40) as number) ) {
         c = b;
       }
-      assert c == "string)*+,-./01";
+      assertEQ( c, "string)*+,-./01" );
 
   - doc: For loop with complicated forUpdate option configured.
     add: |-
@@ -130,9 +130,9 @@ cases:
       let a:int;
       for(a  =0 ; a<10 ; a=foo(a) ) {
         if(a >= 0) continue;
-        assert false;
+        assertTrue( false );
       }
-      assert a == 10;
+      assertEQ( a, 10 );
 
   - doc: For loop with complicated forUpdate option configured.
     add: |-
@@ -146,7 +146,7 @@ cases:
       for(a = 0 ; a<10 ; a = new A().foo(a) ) {
         continue;
       }
-      assert a == 10;
+      assertEQ( a, 10 );
 
   - doc: For loop with number type in init.
     decl: |-
@@ -154,7 +154,7 @@ cases:
       for(let i: number = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
-      assert a == 9.09;
+      assertEQ( a, 9.09 );
 
   - doc: For loop with float type in init.
     decl: |-
@@ -162,7 +162,7 @@ cases:
       for(let i: float = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
-      assert a > 9;
+      assertLT( 9, a )
 
   - doc: For loop with double type in init.
     decl: |-
@@ -170,7 +170,7 @@ cases:
       for(let i: double = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
-      assert a == 9.09;
+      assertEQ( a, 9.09 )
 
   - doc: For loop with Int type in init.
     decl: |-
@@ -178,7 +178,7 @@ cases:
       for(let i: Int = 0 ; i<10 ; i += 1 ) {
         a = i;
       }
-      assert a == 9;
+      assertEQ( a, 9 );
 
   - doc: For loop with Number type in init.
     decl: |-
@@ -186,7 +186,7 @@ cases:
       for(let i: Number = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
-      assert a == 9.09;
+      assertEQ( a, 9.09 );
 
   - doc: For loop with Double type in init.
     decl: |-
@@ -194,7 +194,7 @@ cases:
       for(let i: Double = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
-      assert a == 9.09;
+      assertEQ( a, 9.09 );
 
   - doc: For loop with Float type in init.
     decl: |-
@@ -202,4 +202,4 @@ cases:
       for(let i: Float = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
-      assert a > 9;
+      assertTrue( a > 9 );

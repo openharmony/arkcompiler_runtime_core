@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,43 +16,43 @@ cases:
           let s = 42
       use: |-
           let t = s as number  // primitive widening
-          assert t == 42.0
+          assertEQ( t, 42.0 )
 
     - decl: |-
           let s = 42
       use: |-
           let t = s as Number  // primitive widening and boxing
-          assert t instanceof Number && t.unboxed() == 42.0
+          assertTrue( t instanceof Number && t.unboxed() == 42.0 )
 
     - decl: |-
           let s = Float.MAX_VALUE
       use: |-
           let t = s as Float  // boxing
-          assert t instanceof Float && t.unboxed() == Float.MAX_VALUE
+          assertTrue( t instanceof Float && t.unboxed() == Float.MAX_VALUE )
 
     - decl: |-
           let s = new Float(3.5 as float)
       use: |-
           let t = s as float  // unboxing
-          assert t == 3.5
+          assertEQ( t, 3.5 )
 
     - decl: |-
           let s = "string"
       use: |-
           let t = s as Object  // reference widening
-          assert t instanceof Object && (t as string) == "string"
+          assertTrue( t instanceof Object && (t as string) == "string" )
 
     - decl: |-
           let s = 42.0
       use: |-
           let t = s as int  // primitive narrowing
-          assert t == 42
+          assertEQ( t, 42 )
 
     - decl: |-
           let s: byte = 0x40 as byte
       use: |-
           let t = s as char  // primitive widening and narrowing
-          assert t == c'@'
+          assertEQ( t, c'@' )
 
     - decl: |-
           interface I {}
@@ -60,4 +60,4 @@ cases:
           let s = new B()
       use: |-
           let t = s as I  // reference widening
-          assert t instanceof I
+          assertTrue( t instanceof I )

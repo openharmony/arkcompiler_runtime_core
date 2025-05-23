@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,17 +160,17 @@ static void CheckTestCalls(std::stringstream &g, std::string &line)
     std::getline(g, line);
     EXPECT_EQ("\tcall.virt.range B.Bhandler_range:(B,i8,i16,i32,i8,i16,i32), v4", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.short handler_unspec:()", line);
+    EXPECT_EQ("\tcall.short <static> handler_unspec:()", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.short handler_short:(u1), v1", line);
+    EXPECT_EQ("\tcall.short <static> handler_short:(u1), v1", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.short handler_short2:(u1,i64), v1, v2", line);
+    EXPECT_EQ("\tcall.short <static> handler_short2:(u1,i64), v1, v2", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall handler_long:(i8,i16,i32), v0, v1, v2", line);
+    EXPECT_EQ("\tcall <static> handler_long:(i8,i16,i32), v0, v1, v2", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall handler_long2:(i8,i16,i32,f64), v0, v1, v2, v3", line);
+    EXPECT_EQ("\tcall <static> handler_long2:(i8,i16,i32,f64), v0, v1, v2, v3", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.range handler_range:(i8,i16,i32,i8,i16,i32), v0", line);
+    EXPECT_EQ("\tcall.range <static> handler_range:(i8,i16,i32,i8,i16,i32), v0", line);
     std::getline(g, line);
     EXPECT_EQ("\tinitobj.short B.Bhandler_unspec:(B)", line);
     std::getline(g, line);
@@ -184,21 +184,21 @@ static void CheckTestCalls(std::stringstream &g, std::string &line)
     std::getline(g, line);
     EXPECT_EQ("\tinitobj.range B.Bhandler_range:(B,i8,i16,i32,i8,i16,i32), v0", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.short handler_unspec_ext:()", line);
+    EXPECT_EQ("\tcall.short <static> handler_unspec_ext:()", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.short handler_short_ext:(u1), v1", line);
+    EXPECT_EQ("\tcall.short <static> handler_short_ext:(u1), v1", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.short handler_short2_ext:(u1,i64), v1, v2", line);
+    EXPECT_EQ("\tcall.short <static> handler_short2_ext:(u1,i64), v1, v2", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall handler_long_ext:(i8,i16,i32), v0, v1, v2", line);
+    EXPECT_EQ("\tcall <static> handler_long_ext:(i8,i16,i32), v0, v1, v2", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall handler_long2_ext:(i8,i16,i32,f64), v0, v1, v2, v3", line);
+    EXPECT_EQ("\tcall <static> handler_long2_ext:(i8,i16,i32,f64), v0, v1, v2, v3", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.range handler_range_ext:(i8,i16,i32,i8,i16,i32), v0", line);
+    EXPECT_EQ("\tcall.range <static> handler_range_ext:(i8,i16,i32,i8,i16,i32), v0", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.acc.short handler_short:(u1), v0, 0x0", line);
+    EXPECT_EQ("\tcall.acc.short <static> handler_short:(u1), v0, 0x0", line);
     std::getline(g, line);
-    EXPECT_EQ("\tcall.acc.short handler_short2:(u1,i64), a0, 0x1", line);
+    EXPECT_EQ("\tcall.acc.short <static> handler_short2:(u1,i64), a0, 0x1", line);
 }
 
 TEST(InstructionsTest, TestCalls)
@@ -293,7 +293,7 @@ TEST(InstructionsTest, TestCorrectReg)
 
     ASSERT(program);
     ark::pandasm::Program *prog = &(program.Value());
-    auto mainFunc = prog->functionTable.find("main:()");
+    auto mainFunc = prog->functionStaticTable.find("main:()");
     mainFunc->second.regsNum = 0;
 
     auto pf = ark::pandasm::AsmEmitter::Emit(*prog);
@@ -312,7 +312,7 @@ TEST(InstructionsTest, TestCorrectReg)
     std::getline(main, line);
     EXPECT_EQ("\tlda.str \"string\"", line);
     std::getline(main, line);
-    EXPECT_EQ("\tcall.acc.short handler:(panda.String), v0, 0x0", line);
+    EXPECT_EQ("\tcall.acc.short <static> handler:(panda.String), v0, 0x0", line);
     std::getline(main, line);
     EXPECT_EQ("\treturn.obj", line);
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ public:
             intrinsics::helpers::FpToStringDecimalRadix(value,
                                                         [&res](std::string_view expected) { ASSERT(expected == res); });
 
-            auto resValue = std::stod(std::string(res));
+            auto resValue = PandaStringToD(res);
             auto eps = std::numeric_limits<double>::epsilon() * 2 * std::abs(value);
             ASSERT(std::abs(resValue - value) < eps);
         }
@@ -107,8 +107,8 @@ public:
     void TestConcurrentInsertion(const std::array<double, TEST_ARRAY_SIZE> &values)
     {
         auto runtime = Runtime::GetCurrent();
-        auto coro = mainCoro_->GetCoroutineManager()->CreateEntrypointlessCoroutine(runtime, runtime->GetPandaVM(),
-                                                                                    true, "worker");
+        auto coro = mainCoro_->GetCoroutineManager()->CreateEntrypointlessCoroutine(
+            runtime, runtime->GetPandaVM(), true, "worker", Coroutine::Type::MUTATOR);
         std::mt19937 engine(std::random_device {}());
         std::uniform_real_distribution<> dis(-VALUE_RANGE, VALUE_RANGE);
         std::bernoulli_distribution bern(1.0 / TEST_THREADS);

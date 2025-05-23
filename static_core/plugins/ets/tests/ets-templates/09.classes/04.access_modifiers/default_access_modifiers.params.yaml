@@ -11,11 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
- # List of valid class members
+ # List of class members
 members:
   - { body: "x: int;", call: "instance.x" }
   - { body: "foo(): void {}", call: "instance.foo()" }
-  - { body: "class B{}", call: "let x: A.B = new A.B()" }
-  - { body: "interface I{}", call: "let x: A.I" }
-  - { body: "enum Color {Red, Green}", call: "instance.Color.Red" }
-  - { body: "constructor(int y) { this.y = y; }", call: "let x: A = new A(5)" }
+  - { body: "class B{}", call: "let x: A.B = new A.B()", unsupported: "true" }
+  - { body: "interface I{}", call: "let x: A.I", unsupported: "true" }
+  - { body: "enum Color {Red, Green}", call: "instance.Color.Red", unsupported: "true" }
+  - { body: "constructor(y: int) { this.y = y; }", call: "let x: A = new A(5)" }

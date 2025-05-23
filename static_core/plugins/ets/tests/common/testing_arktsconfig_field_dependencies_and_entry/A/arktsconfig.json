@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "package": "HarA",
+        "baseUrl": "./src/main/ets",
+        "paths": {
+            "HarA": ["."]
+        },
+        "dependencies": [
+            "../../../../B/arktsconfig.json"
+        ],
+        "entry": "../../../indexA.ets"
+    }
+}

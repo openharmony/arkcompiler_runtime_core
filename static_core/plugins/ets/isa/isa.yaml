@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,7 +30,7 @@ groups:
     verification:
       - none
     properties:
-      - method_id
+      - static_method_id
       - short_long_range
     exceptions:
       - x_oom
@@ -51,6 +51,18 @@ groups:
         acc: out:top
         format: [pref_op_v_8_id_16]
 
+  - title: ETS launch instructions
+    description: >
+      ETS launch instructions for virtual methods. #TODO(audovichenko, kgrebenschikov): add description.
+    verification:
+      - none
+    properties:
+      - method_id
+      - short_long_range
+    exceptions:
+      - x_oom
+    namespace: ets
+    instructions:
       - sig: ets.launch.virt.short method_id, v1:in:top, v2:in:top
         prefix: ets
         acc: out:top
@@ -171,68 +183,138 @@ groups:
         prefix: ets
         intrinsic_name: INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ
 
-  - title: Load 'undefined' reference into accumulator
+  - title: Call method from object by name
     description: >
-      Load 'undefined' reference into accumulator.
+      Call method from an object by method name method_id, i.e., resolve method and
+      create new frame, pass values of arguments, and continue the execution from the
+      first instruction of a method.
+      Callee must treat the accumulator value as undefined, and cannot use it
+      until accumulator in the new frame is defined.
+      Result (if any) is returned in accumulator.
+      Method, its class, and the number of arguments is resolved by a given
+      method_id in runtime constant-pool based on object reference.
+      Object reference is passed in the first source register, arguments are
+      passed starting from the second source register in the same order as in
+      the method signature.
+      Non-range instructions can be used to pass up to 4 arguments (including
+      object reference).
+      Unused register slot values are discarded, and corresponding registers
+      are not passed to the callee).
+      For methods with more arguments, range kinds of instruction are to be used.
+      The instructions take the required number of arguments starting from
+      'vs' register (including object reference).
+    verification:
+      - v1_object
+    properties:
+      - method_id
+      - call
+      - short_long_range
+    exceptions:
+      - x_null
+      - x_abstract
+      - x_call
+    pseudo: |
+      if args[0] == null then
+        throw NullPointerException
+      end
+      method = resolve_method_by_name(method_id)
+      if method != null then
+          if is_abstract(method) then
+            throw AbstractMethodError
+          end
+          acc = call(method, args)
+      else
+          throw_ets_exception(no_such_method_error)
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.call.name.short method_id, v1:in:top, v2:in:top
+        acc: out:top
+        format: [pref_op_v1_4_v2_4_id_16]
+        prefix: ets
+      - sig: ets.call.name method_id, v1:in:top, v2:in:top, v3:in:top, v4:in:top
+        acc: out:top
+        format: [pref_op_v1_4_v2_4_v3_4_v4_4_id_16]
+        prefix: ets
+      - sig: ets.call.name.range method_id, v:in:top
+        acc: out:top
+        format: [pref_op_v_8_id_16]
+        prefix: ets
+
+  - title: Load 'nullvalue' reference into accumulator
+    description: >
+      Load 'nullvalue' reference into accumulator.
     verification:
       - acc_type
     exceptions:
       - x_none
     pseudo: |
-      acc = undefined_object
+      acc = nullvalue
     namespace: ets
     instructions:
-      - sig: ets.ldundefined
+      - sig: ets.ldnullvalue
         prefix: ets
         acc: out:ref
         format: [pref_op_none]
 
-  - title: Move 'undefined' reference into a register
+  - title: Move 'nullvalue' reference into a register
     description: >
-      Move 'undefined' reference into a register.
+      Move 'nullvalue' reference into a register.
     verification:
       - none
     exceptions:
       - x_none
     pseudo: |
-      vd = undefined_object
+      vd = nullvalue_object
     namespace: ets
     instructions:
-      - sig: ets.movundefined v:out:ref
+      - sig: ets.movnullvalue v:out:ref
         prefix: ets
         acc: none
         format: [pref_op_v_8]
 
-  - title: Check if accumulator value is 'undefined'
+  - title: Check if accumulator value is 'nullvalue'
     description: >
-      Check if accumulator value is 'undefined'.
+      Check if accumulator value is 'nullvalue'.
     verification:
       - v1_object
       - acc_type
     exceptions:
       - x_none
     pseudo: |
-      if acc == undefined_object then
+      if acc == nullvalue_object then
         acc = 1
       else
         acc = 0
       end
     namespace: ets
     instructions:
-      - sig: ets.isundefined
+      - sig: ets.isnullvalue
         prefix: ets
         acc: inout:ref->i32
         format: [pref_op_none]
 
   - title: Check if two references are loosely equal
     description: >
-      Check if two references are loosely equal
+      Check if two references are loosely equal.
     verification:
       - v1_obj_or_null
       - v2_obj_or_null
       - acc_type
     exceptions:
       - x_none
+    pseudo:
+      if v1 == v2 then
+        acc = 1
+      else if is_nullish(v1) or is_nullish(v2) then
+        acc = is_nullish(v1) and is_nullish(v2)
+      else
+        if is_value_typed(v1) and is_value_typed(v2) then
+          acc = value_equals(v1, v2) then
+        else
+          acc = 0
+        end
+      end
     namespace: ets
     instructions:
       - sig: ets.equals v1:in:ref, v2:in:ref
@@ -240,3 +322,64 @@ groups:
         acc: out:i32
         format: [pref_op_v1_4_v2_4]
         intrinsic_name: INTRINSIC_COMPILER_ETS_EQUALS
+
+  - title: Strict check if two references are strictly equal
+    description: >
+      Check if two references are strictly equal.
+    verification:
+      - v1_obj_or_null
+      - v2_obj_or_null
+      - acc_type
+    exceptions:
+      - x_none
+    pseudo:
+      if v1 == v2 then
+        acc = 1
+      else if is_nullish(v1) or is_nullish(v2) then
+        acc = 0
+      else
+        if is_value_typed(v1) and is_value_typed(v2) then
+          acc = value_equals(v1, v2) then
+        else
+          acc = 0
+        end
+      end
+    namespace: ets
+    instructions:
+      - sig: ets.strictequals v1:in:ref, v2:in:ref
+        prefix: ets
+        acc: out:i32
+        format: [pref_op_v1_4_v2_4]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_STRICT_EQUALS
+
+  - title: Evaluate typeof string
+    description: >
+      Evaluate typeof string
+    verification:
+      - v1_obj_or_null
+      - acc_type
+    exceptions:
+      - x_oom
+    namespace: ets
+    instructions:
+      - sig: ets.typeof v1:in:ref
+        prefix: ets
+        acc: out:ref
+        format: [pref_op_v1_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_TYPEOF
+
+  - title: Check if value is 'true' in extended conditional semantics
+    description: >
+      Check if the value in the accumulator is considered true in ETS semantics.
+    verification:
+      - v1_obj_or_null
+      - acc_type
+    exceptions:
+      - x_none
+    namespace: ets
+    instructions:
+      - sig: ets.istrue v:in:ref
+        prefix: ets
+        acc: out:i32
+        format: [pref_op_v_8]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_ISTRUE

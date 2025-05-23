@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,7 @@ TEST_F(BytecodeOptPeepholes, TryBlock)
     // Check if there is initobj instruction in the bytecode
     bool containsInitobj = false;
     const auto sigTryCatch = pandasm::GetFunctionSignatureFromName("try_catch", {});
-    for (const auto &inst : program.functionTable.at(sigTryCatch).ins) {
+    for (const auto &inst : program.functionStaticTable.at(sigTryCatch).ins) {
         if (inst.opcode == pandasm::Opcode::INITOBJ) {
             containsInitobj = true;
         }

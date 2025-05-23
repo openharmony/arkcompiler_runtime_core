@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,141 +21,141 @@ class EtsPassingOptionalType : public EtsInteropTest {};
 
 TEST_F(EtsPassingOptionalType, optionalAnyParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalAnyParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalAnyParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalAnyWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalAnyWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalAnyWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalAnyObjectParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalAnyObjectParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalAnyObjectParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalAnyObjectWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalAnyObjectWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalAnyObjectWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalLiteralParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalLiteralParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalLiteralParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalLiteralWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalLiteralWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalLiteralWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalLiteralObjectParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalLiteralObjectParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalLiteralObjectParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalLiteralObjectWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalLiteralObjectWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalLiteralObjectWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalExtraSetParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalExtraSetParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalExtraSetParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalExtraSetWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalExtraSetWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalExtraSetWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalSubSetObjectReduseParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalSubSetObjectReduseParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalSubSetObjectReduseParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalSubSetObjectPartialParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalSubSetObjectPartialParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalSubSetObjectPartialParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalExtraSetObjectParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalExtraSetObjectParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalExtraSetObjectParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalExtraSetObjectWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalExtraSetObjectWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalExtraSetObjectWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalSubSetObjectParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalSubSetObjectParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalSubSetObjectParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalSubSetObjectWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalSubSetObjectWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalSubSetObjectWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalUnionStringParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalUnionStringParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalUnionStringParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalUnionStringWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalUnionStringWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalUnionStringWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalUnionNumberParam)
 {
-    auto ret = CallEtsMethod<int64_t>("optionalUnionNumberParam");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "optionalUnionNumberParam");
     constexpr int EXPECTED_VALUE = 999;
     ASSERT_EQ(ret, EXPECTED_VALUE);
 }
 
 TEST_F(EtsPassingOptionalType, optionalUnionWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalUnionWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalUnionWithoutParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalUnionStringObjectParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalUnionStringObjectParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalUnionStringObjectParam");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsPassingOptionalType, optionalUnionNumberObjectParam)
 {
-    auto ret = CallEtsMethod<int64_t>("optionalUnionNumberObjectParam");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "optionalUnionNumberObjectParam");
     constexpr int EXPECTED_VALUE = 777;
     ASSERT_EQ(ret, EXPECTED_VALUE);
 }
 
 TEST_F(EtsPassingOptionalType, optionalUnionObjectWithoutParam)
 {
-    auto ret = CallEtsMethod<bool>("optionalUnionObjectWithoutParam");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "optionalUnionObjectWithoutParam");
     ASSERT_EQ(ret, true);
 }
 

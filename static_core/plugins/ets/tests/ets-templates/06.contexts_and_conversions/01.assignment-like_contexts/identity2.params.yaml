@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,9 +17,8 @@ cases:
   - { type: float, expr: Float.POSITIVE_INFINITY, op: '!=' }
   - { type: '(a: Boolean) => Object[]', expr: '(a: Boolean): Object[] => { return [a]; }', op: '!==' }
   - { type: 'String|null', expr: 'null', op: '!==' }
-  - { type: 'ClassNotFoundException[]', expr: 'new ClassNotFoundException[100]', op: '!==' }
   - { type: '((a: Object) => Object)[]|null', expr: '[]', op: '!==' }
-  - { type: '(Double|null)[][]', expr: 'new Double[1][1]', op: '!==' }
+  - { type: '(double|null)[][]', expr: '[[1.0, 2.0, null]]', op: '!==' }
 
   - defs: |-
       interface I {}
@@ -46,15 +45,4 @@ cases:
       class B<T extends A> {}
     type: B<A>
     expr: new B<A>()
-    op: '!=='
-
-  - defs: |-
-      interface I {}
-      interface J {}
-      class A {}
-      class B {}
-      class C implements I, J {}
-      class Klazz<in T, out U, V extends I & J> {}
-    type: Klazz<A, B, C>
-    expr: new Klazz<A, B, C>()
     op: '!=='

@@ -197,7 +197,8 @@ NO_ADDRESS_SANITIZE void DestroyMethodWithInvalidatingEP(Method *destroyMethod)
     LOG(INFO, INTEROP) << "Deoptimize frame: " << method->GetFullName() << ", pc=" << std::hex
                        << pc - method->GetInstructions() << std::dec;
 
-    thread->GetVM()->ClearInteropHandleScopes(thread->GetCurrentFrame());
+    // NOTE(konstanting): a potential candidate for moving out of the core part
+    thread->GetVM()->CleanupCompiledFrameResources(thread->GetCurrentFrame());
 
     auto context = thread->GetVM()->GetLanguageContext();
     // We must run InvalidateCompiledEntryPoint before we convert the frame, because GC is already may be in the

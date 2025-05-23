@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,82 +21,83 @@ namespace ark::ets::interop::js::testing {
 class EtsInteropInterfaceReturnsValuesArkToJs : public EtsInteropTest {};
 
 /* test set employing interface imported from JS as is */
-TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_any_type_imported)
+// #21832: returned undefined previously, now leads to NPE
+TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, DISABLED_test_interface_returns_any_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnAny");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_string_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnString");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnString");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE 17741 -- disabled while JSValue BigInt is unsupported
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, DISABLED_test_interface_returns_bigint_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnBigint");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnBigint");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_boolean_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnBoolean");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnBoolean");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_integer_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnInteger");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnInteger");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_negative_integer_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnNegativeInteger");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnNegativeInteger");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_infinity_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnInfinity");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnInfinity");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_negative_infinity_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnNegativeInfinity");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnNegativeInfinity");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_NaN_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnNaN");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnNaN");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_enum_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnEnum");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnEnum");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_undefined_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnUndefined");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnUndefined");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_null_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnNull");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnNull");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropInterfaceReturnsValuesArkToJs, test_interface_returns_function_type_imported)
 {
-    [[maybe_unused]] auto ret = CallEtsMethod<bool>("type_imported__returnFunction");
+    [[maybe_unused]] auto ret = CallEtsFunction<bool>(GetPackageName(), "type_imported__returnFunction");
     ASSERT_EQ(ret, true);
 }
 

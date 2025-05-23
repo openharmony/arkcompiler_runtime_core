@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,25 +39,23 @@
 #include "runtime/include/stack_walker-inl.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/gc/g1/g1-evacuate-regions-worker-state-inl.h"
+#include "runtime/mem/gc/g1/xgc-extension-data.h"
 
 namespace ark::mem {
 
-/* static */
-template <class LanguageConfig>
-void G1GC<LanguageConfig>::CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
+void Unreachable([[maybe_unused]] ObjectHeader *obj)
 {
-    Region *region = ObjectToRegion(object);
-    size_t objectSize = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(baseKlass));
-    region->AddLiveBytes<true>(objectSize);
+    UNREACHABLE();
 }
 
 /* static */
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
+template <bool ATOMICALLY>
+void G1GC<LanguageConfig>::CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
 {
     Region *region = ObjectToRegion(object);
     size_t objectSize = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(baseKlass));
-    region->AddLiveBytes<false>(objectSize);
+    region->AddLiveBytes<ATOMICALLY>(objectSize);
 }
 
 template <class LanguageConfig>
@@ -66,6 +64,8 @@ G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *objectAllocator, const GCSetting
       marker_(this),
       concMarker_(this),
       mixedMarker_(this),
+      onPauseXMarker_(this, Unreachable),
+      concXMarker_(this, Unreachable),
       concurrentMarkingStack_(this),
       numberOfMixedTenuredRegions_(settings.GetG1NumberOfTenuredRegionsAtMixedCollection()),
       regionGarbageRateThreshold_(settings.G1RegionGarbageRateThreshold()),
@@ -404,12 +404,13 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
     auto deathVisitor = [](ObjectHeader *objectHeader) {
         LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << objectHeader;
     };
-    for (auto i : *emptyTenuredRegions) {
-        deleteCount += i->GetAllocatedObjects();
-        deleteSize += i->GetAllocatedBytes();
-        ASSERT(i->GetLiveBitmap()->FindFirstMarkedChunks() == nullptr);
+    for (auto *region : *emptyTenuredRegions) {
+        deleteCount += region->GetAllocatedObjects();
+        deleteSize += region->GetAllocatedBytes();
+        ASSERT_PRINT(region->GetLiveBitmap()->FindFirstMarkedChunks() == nullptr,
+                     *region << " contains marked object: " << region->GetLiveBitmap()->FindFirstMarkedChunks());
         if (g1TrackFreedObjects_) {
-            i->IterateOverObjects(deathVisitor);
+            region->IterateOverObjects(deathVisitor);
         }
     }
     {
@@ -545,7 +546,16 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             break;
         }
         case GCWorkersTaskTypes::TASK_REMARK: {
-            ExecuteRemarkTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack());
+            ExecuteRemarkTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack(), marker_);
+            break;
+        }
+        case GCWorkersTaskTypes::TASK_HUGE_ARRAY_MARKING_REMARK: {
+            auto *hugeArrayTask = task->Cast<GCMarkWorkersTask>();
+            ExecuteHugeArrayMarkTask(hugeArrayTask->GetMarkingStack(), marker_);
+            break;
+        }
+        case GCWorkersTaskTypes::TASK_XREMARK: {
+            ExecuteRemarkTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack(), onPauseXMarker_);
             break;
         }
         case GCWorkersTaskTypes::TASK_FULL_MARK: {
@@ -588,11 +598,41 @@ void G1GC<LanguageConfig>::ExecuteMarkingTask(GCMarkWorkersTask::StackType *obje
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack)
+template <typename Marker>
+void G1GC<LanguageConfig>::ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker)
 {
-    this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess);
+    this->MarkStack(&marker, objectsStack, CalcLiveBytesMarkPreprocess<true>);
     ASSERT(objectsStack->Empty());
     this->GetInternalAllocator()->Delete(objectsStack);
+}
+
+template <class LanguageConfig>
+template <typename Marker>
+void G1GC<LanguageConfig>::ExecuteHugeArrayMarkTask(GCMarkWorkersTask::StackType *objectsStack, Marker &marker)
+{
+    ASSERT(objectsStack->Size() == 1);
+    auto *markingRanges = reinterpret_cast<std::pair<size_t, size_t> *>(objectsStack->GetAdditionalMarkingInfo());
+    ASSERT(markingRanges != nullptr);
+    auto [traversingStartIndex, traversingEndIndex] = *markingRanges;
+    auto *arrayObject = coretypes::Array::Cast(objectsStack->PopFromStack());
+    ASSERT(traversingEndIndex <= arrayObject->GetLength());
+    objectsStack->SetTaskType(GCWorkersTaskTypes::TASK_REMARK);
+    for (size_t i = traversingStartIndex; i < traversingEndIndex; ++i) {
+        auto *arrayElement = arrayObject->Get<ObjectHeader *>(i);
+        if (arrayElement == nullptr) {
+            continue;
+        }
+#ifndef NDEBUG
+        auto arrayElementCls = arrayElement->ClassAddr<Class>();
+        LOG_IF(arrayElementCls == nullptr, ERROR, GC)
+            << " object's class is nullptr: " << arrayElement << " from array: " << arrayObject;
+        ASSERT(arrayElementCls != nullptr);
+#endif
+        if (marker_.MarkIfNotMarked(arrayElement)) {
+            objectsStack->PushToStack(arrayObject, arrayElement);
+        }
+    }
+    ExecuteRemarkTask(objectsStack, marker);
 }
 
 template <class LanguageConfig>
@@ -602,7 +642,7 @@ void G1GC<LanguageConfig>::ExecuteFullMarkingTask(GCMarkWorkersTask::StackType *
         // process all refs
         return true;
     };
-    this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess, refEnablePred);
+    this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess<true>, refEnablePred);
     ASSERT(objectsStack->Empty());
     this->GetInternalAllocator()->Delete(objectsStack);
 }
@@ -686,6 +726,15 @@ bool G1GC<LanguageConfig>::NeedFullGC(const ark::GCTask &task)
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::SetExtensionData(GCExtensionData *data)
+{
+    GenerationalGC<LanguageConfig>::SetExtensionData(data);
+    auto *xdata = reinterpret_cast<XGCExtensionData *>(data);
+    onPauseXMarker_ = XGCMarker<LanguageConfig, true>(this, xdata->GetXObjectHandler());
+    concXMarker_ = XGCMarker<LanguageConfig, true>(this, xdata->GetXObjectHandler());
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
 {
     SuspendUpdateRemsetWorkerScope stopUpdateRemsetWorkerScope(updateRemsetWorker_);
@@ -709,7 +758,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
                 EnsurePreWrbDisabledInThreads();
 
                 if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
-                    PrintFragmentationMetrics("Before GC fragmentation metrics");
+                    PrintFragmentationMetrics("Fragmentation before GC: ");
                 }
 
                 if (NeedFullGC(task)) {
@@ -720,7 +769,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
                 }
 
                 if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
-                    PrintFragmentationMetrics("After GC fragmentation metrics");
+                    PrintFragmentationMetrics("Fragmentation after GC: ");
                 }
             }
         }
@@ -734,8 +783,10 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
         collectionSet_.clear();
         singlePassCompactionEnabled_ = false;
 
-        if (ScheduleMixedGCAndConcurrentMark(task)) {
-            RunConcurrentMark(task);
+        if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
+            RunConcurrentGC(task, onPauseXMarker_, concXMarker_);
+        } else if (ScheduleMixedGCAndConcurrentMark(task)) {
+            RunConcurrentGC(task, marker_, concMarker_);
         }
     }
     // Update global and GC memstats based on generational memstats information
@@ -930,20 +981,86 @@ void G1GC<LanguageConfig>::EnsurePreWrbDisabledInThreads()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunConcurrentMark(ark::GCTask &task)
+template <typename OnPauseMarker, typename ConcurrentMarker>
+void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pmarker, ConcurrentMarker &cmarker)
 {
     ASSERT(collectionSet_.empty());
     // Init concurrent marking
     EnablePreWrbInThreads();
 
     if (this->GetSettings()->BeforeG1ConcurrentHeapVerification()) {
-        trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier before concurrent");
-        size_t failCount = this->VerifyHeap();
-        if (this->GetSettings()->FailOnHeapVerification() && failCount > 0) {
-            LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << failCount << " corruptions";
+        VerifyHeapBeforeConcurrent();
+    }
+
+    bool refProcess = task.reason == GCTaskCause::NATIVE_ALLOC_CAUSE || task.reason == GCTaskCause::CROSSREF_CAUSE;
+    {
+        PauseTimeGoalDelay();
+        auto scopedTracker = g1PauseTracker_.CreateScope();
+        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
+        if (UNLIKELY(refProcess)) {
+            InitialMark<true>(concurrentMarkingStack_, pmarker);
+        } else {
+            InitialMark<false>(concurrentMarkingStack_, pmarker);
         }
     }
-    ConcurrentMarking(task);
+
+    if (UNLIKELY(refProcess)) {
+        ConcurrentMark<true>(task, &concurrentMarkingStack_, cmarker);
+    } else {
+        ConcurrentMark<false>(task, &concurrentMarkingStack_, cmarker);
+    }
+    PauseTimeGoalDelay();
+
+    DisablePreWrbInThreads();
+
+    concurrentMarkingFlag_ = false;
+    if (!interruptConcurrentFlag_) {
+        if (UNLIKELY(refProcess)) {
+            Remark<true>(task, pmarker);
+        } else {
+            Remark<false>(task, pmarker);
+        }
+        // Enable mixed GC
+        topGarbageRegions_ = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>(regionGarbageRateThreshold_);
+        if (HaveGarbageRegions()) {
+            // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking
+            // and than set isMixedGcRequired_) in mutator thread which waits for the end of concurrent
+            // marking.
+            isMixedGcRequired_.store(true, std::memory_order_release);
+        }
+
+        if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
+            LOG_INFO_GC << "Old dead obj ratio " << this->GetG1ObjectAllocator()->CalculateOldDeadObjectsRatio();
+#ifdef PANDA_MEASURE_FRAGMENTATION
+            LOG_INFO_GC << "Nonmovable dead obj ratio "
+                        << this->GetG1ObjectAllocator()->CalculateNonMovableDeadObjectsRatio();
+#endif
+        }
+
+        ConcurrentSweep(task);
+    } else {
+        concurrentMarkingStack_.Clear();
+        ClearSatb();
+    }
+    ASSERT(concurrentMarkingStack_.Empty());
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ConcurrentSweep(ark::GCTask &task)
+{
+    // NOTE(ipetrov, 20146): Cross reference can be allocated during concurrent sweep, so XGC should handle this
+    // situation. There is hot fix: XGC does not concurrent sweep
+    if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
+        return;
+    }
+    ScopedTiming t("Concurrent Sweep", *this->GetTiming());
+    ConcurrentScope concurrentScope(this);
+    auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(topGarbageRegions_);
+    if (this->IsConcurrencyAllowed()) {
+        CollectEmptyRegions<true, true>(task, &emptyTenuredRegions);
+    } else {
+        CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
+    }
 }
 
 template <class LanguageConfig>
@@ -1012,7 +1129,7 @@ void G1GC<LanguageConfig>::InitializeImpl()
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::MarkObject(ObjectHeader *object)
 {
-    G1GCPauseMarker<LanguageConfig>::Mark(object);
+    G1GCMarker<LanguageConfig, true>::Mark(object);
 }
 
 template <class LanguageConfig>
@@ -1026,6 +1143,24 @@ bool G1GC<LanguageConfig>::MarkObjectIfNotMarked(ObjectHeader *object)
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::MarkObjectRecursively(ObjectHeader *object)
+{
+    ASSERT(object != nullptr);
+    ASSERT(this->GetLastGCCause() == GCTaskCause::CROSSREF_CAUSE);
+    [[maybe_unused]] auto phase = this->GetGCPhase();  // Load phase once to avoid false-positive assertion failure
+    ASSERT_PRINT(phase == GCPhase::GC_PHASE_RUNNING || phase == GCPhase::GC_PHASE_INITIAL_MARK ||
+                     phase == GCPhase::GC_PHASE_MARK || phase == GCPhase::GC_PHASE_REMARK,
+                 GCScopedPhase::GetPhaseAbbr(phase));
+    if (concXMarker_.MarkIfNotMarked(object)) {
+        GCMarkingStackType stack(this);
+        stack.PushToStack(RootType::ROOT_VM, object);
+        this->MarkStack(&concXMarker_, &stack, CalcLiveBytesMarkPreprocess<true>);
+    } else {
+        LOG_DEBUG_GC << "Skip object: " << object << " since it is already marked";
+    }
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] ark::ObjectHeader *object)
 {
     LOG(FATAL, GC) << "Not implemented";
@@ -1034,7 +1169,7 @@ void G1GC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] ark::O
 template <class LanguageConfig>
 bool G1GC<LanguageConfig>::IsMarked(ark::ObjectHeader const *object) const
 {
-    return G1GCPauseMarker<LanguageConfig>::IsMarked(object);
+    return G1GCMarker<LanguageConfig, true>::IsMarked(object);
 }
 
 template <class LanguageConfig>
@@ -1079,7 +1214,7 @@ void G1GC<LanguageConfig>::MarkStackMixed(GCMarkingStackType *stack)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::MarkStackFull(GCMarkingStackType *stack)
 {
-    this->MarkStack(&marker_, stack, CalcLiveBytesMarkPreprocess, GC::EmptyReferenceProcessPredicate);
+    this->MarkStack(&marker_, stack, CalcLiveBytesMarkPreprocess<true>, GC::EmptyReferenceProcessPredicate);
 }
 
 template <class LanguageConfig>
@@ -1346,7 +1481,8 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
     analytics_.ReportMarkingStart(ark::time::GetCurrentTimeInNanos());
     CacheRefsFromRemsets(refsChecker);
 
-    GCRootVisitor gcMarkCollectionSet = CreateGCRootVisitorForMixedMark(objectsStack);
+    GCRootVisitor gcMarkCollectionSet = CreateGCRootVisitor(
+        objectsStack, mixedMarker_, [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); });
 
     {
         GCScope<TRACE_TIMING> markingCollectionSetRootsTrace("Marking roots collection-set", this);
@@ -1373,29 +1509,29 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
 }
 
 template <class LanguageConfig>
-GCRootVisitor G1GC<LanguageConfig>::CreateGCRootVisitorForMixedMark(GCMarkingStackType &objectsStack)
+template <typename Marker, typename Predicate>
+GCRootVisitor G1GC<LanguageConfig>::CreateGCRootVisitor(GCMarkingStackType &objectsStack, Marker &marker,
+                                                        const Predicate &refPred)
 {
-    GCRootVisitor gcMarkCollectionSet = [&objectsStack, this](const GCRoot &gcRoot) {
-        auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    GCRootVisitor gcMarkCollectionSet = [&objectsStack, &marker, &refPred, this](const GCRoot &gcRoot) {
         ObjectHeader *rootObject = gcRoot.GetObjectHeader();
         ObjectHeader *fromObject = gcRoot.GetFromObjectHeader();
         LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(rootObject) << " from: " << gcRoot.GetType();
         if (UNLIKELY(fromObject != nullptr) &&
             this->IsReference(fromObject->NotAtomicClassAddr<BaseClass>(), fromObject, refPred)) {
             LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(fromObject) << " to stack";
-            mixedMarker_.Mark(fromObject);
+            marker.Mark(fromObject);
             this->ProcessReference(&objectsStack, fromObject->NotAtomicClassAddr<BaseClass>(), fromObject,
                                    GC::EmptyReferenceProcessPredicate);
         } else {
             // Skip non-collection-set roots
             auto rootObjectPtr = gcRoot.GetObjectHeader();
             ASSERT(rootObjectPtr != nullptr);
-            if (mixedMarker_.MarkIfNotMarked(rootObjectPtr)) {
-                ASSERT(this->InGCSweepRange(rootObjectPtr));
+            if (marker.MarkIfNotMarked(rootObjectPtr)) {
                 LOG_DEBUG_GC << "root " << GetDebugInfoAboutObject(rootObjectPtr);
                 objectsStack.PushToStack(gcRoot.GetType(), rootObjectPtr);
             } else {
-                LOG_DEBUG_GC << "Skip root for young mark: " << std::hex << rootObjectPtr;
+                LOG_DEBUG_GC << "Skip root: " << std::hex << rootObjectPtr;
             }
         }
     };
@@ -1661,7 +1797,7 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::OnPauseMark(GCTask &task, G
         // non-young mem-range checker
         [objectAllocator](MemRange &memRange) { return !objectAllocator->IsIntersectedWithYoung(memRange); },
         // mark predicate
-        CalcLiveBytesMarkPreprocess);
+        CalcLiveBytesMarkPreprocess<true>);
     if (useGcWorkers) {
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
@@ -1687,7 +1823,7 @@ void G1GC<LanguageConfig>::FullMarking(ark::GCTask &task)
                                            GCWorkersTaskTypes::TASK_FULL_MARK,
                                            this->GetSettings()->GCMarkingStackNewTasksFrequency());
 
-    InitialMark(fullCollectionStack);
+    InitialMark<true>(fullCollectionStack, marker_);
 
     this->OnPauseMark(task, &fullCollectionStack, useGcWorkers);
     // We will sweep VM refs in tenured space during mixed collection, but only for non empty regions.
@@ -1707,66 +1843,6 @@ void G1GC<LanguageConfig>::FullMarking(ark::GCTask &task)
     auto garbageRegions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
     auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(garbageRegions);
     CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
-}
-
-template <class LanguageConfig>
-void G1GC<LanguageConfig>::ConcurrentMarking(ark::GCTask &task)
-{
-    {
-        PauseTimeGoalDelay();
-        auto scopedTracker = g1PauseTracker_.CreateScope();
-        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
-        InitialMark(concurrentMarkingStack_);
-    }
-
-    if (UNLIKELY(task.reason == GCTaskCause::NATIVE_ALLOC_CAUSE)) {
-        LOG_DEBUG_GC << "Concurrent marking with weak refs processing started";
-        ConcurrentMark<true>(&concurrentMarkingStack_);
-    } else {
-        LOG_DEBUG_GC << "Concurrent marking without weak refs processing started";
-        ConcurrentMark<false>(&concurrentMarkingStack_);
-    }
-    PauseTimeGoalDelay();
-    // weak refs shouldn't be added to the queue on concurrent-mark
-    ASSERT(this->GetReferenceProcessor()->GetReferenceQueueSize() == 0);
-
-    DisablePreWrbInThreads();
-
-    concurrentMarkingFlag_ = false;
-    if (!interruptConcurrentFlag_) {
-        Remark(task);
-        // Enable mixed GC
-        topGarbageRegions_ = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>(regionGarbageRateThreshold_);
-        if (HaveGarbageRegions()) {
-            // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking
-            // and than set isMixedGcRequired_) in mutator thread which waits for the end of concurrent
-            // marking.
-            isMixedGcRequired_.store(true, std::memory_order_release);
-        }
-
-        if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
-            LOG_INFO_GC << "Old dead obj ratio " << this->GetG1ObjectAllocator()->CalculateOldDeadObjectsRatio();
-#ifdef PANDA_MEASURE_FRAGMENTATION
-            LOG_INFO_GC << "Nonmovable dead obj ratio "
-                        << this->GetG1ObjectAllocator()->CalculateNonMovableDeadObjectsRatio();
-#endif
-        }
-
-        {
-            ScopedTiming t("Concurrent Sweep", *this->GetTiming());
-            ConcurrentScope concurrentScope(this);
-            auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(topGarbageRegions_);
-            if (this->IsConcurrencyAllowed()) {
-                CollectEmptyRegions<true, true>(task, &emptyTenuredRegions);
-            } else {
-                CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
-            }
-        }
-    } else {
-        concurrentMarkingStack_.Clear();
-        ClearSatb();
-    }
-    ASSERT(concurrentMarkingStack_.Empty());
 }
 
 template <class LanguageConfig>
@@ -1792,25 +1868,10 @@ void G1GC<LanguageConfig>::PauseTimeGoalDelay()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &markingStack)
+template <bool PROCESS_WEAK_REFS, typename Marker>
+void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &markingStack, Marker &marker)
 {
-    {
-        // First we need to unmark all heap
-        GCScope<TRACE_TIMING> unMarkScope("UnMark", this);
-        LOG_DEBUG_GC << "Start unmark all heap before mark";
-        auto allRegion = GetG1ObjectAllocator()->GetAllRegions();
-        for (Region *r : allRegion) {
-            auto *bitmap = r->GetMarkBitmap();
-            // Calculate live bytes during mark-phase
-            r->SetLiveBytes(0U);
-            // unmark full-heap except Humongous-space
-            bitmap->ClearAllBits();
-        }
-#ifndef NDEBUG
-        this->GetObjectAllocator()->IterateOverObjects(
-            [this](ObjectHeader *obj) { ASSERT(!this->marker_.IsMarked(obj)); });
-#endif
-    }
+    UnmarkAll(marker);
     ASSERT(this->GetReferenceProcessor()->GetReferenceQueueSize() ==
            0);  // all references should be processed on mixed-gc
     {
@@ -1820,27 +1881,59 @@ void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &markingStack)
         // The interregion roots will be processed at pause
 
         // InitialMark. STW
-        GCRootVisitor gcMarkRoots = [this, &markingStack](const GCRoot &gcRoot) {
-            ValidateObject(gcRoot.GetType(), gcRoot.GetObjectHeader());
-            if (marker_.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
-                markingStack.PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
-            }
-        };
-        this->VisitRoots(gcMarkRoots, VisitGCRootFlags::ACCESS_ROOT_ALL);
+        if constexpr (!PROCESS_WEAK_REFS) {
+            GCRootVisitor gcMarkRoots = [&markingStack, &marker](const GCRoot &gcRoot) {
+                ValidateObject(gcRoot.GetType(), gcRoot.GetObjectHeader());
+                if (marker.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
+                    markingStack.PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
+                }
+            };
+            this->VisitRoots(gcMarkRoots, VisitGCRootFlags::ACCESS_ROOT_ALL);
+        } else {
+            GCRootVisitor gcMarkRoots = CreateGCRootVisitor(markingStack, marker, GC::EmptyReferenceProcessPredicate);
+            this->VisitRoots(gcMarkRoots, VisitGCRootFlags::ACCESS_ROOT_ALL);
+        }
     }
 }
 
 template <class LanguageConfig>
-template <bool PROCESS_WEAK_REFS>
-void G1GC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objectsStack)
+template <typename Marker>
+void G1GC<LanguageConfig>::UnmarkAll([[maybe_unused]] Marker &marker)
 {
-    ConcurrentScope concurrentScope(this);
-    GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
-    this->ConcurrentMarkImpl<PROCESS_WEAK_REFS>(objectsStack);
+    // First we need to unmark all heap
+    GCScope<TRACE_TIMING> unMarkScope("UnMark", this);
+    LOG_DEBUG_GC << "Start unmark all heap before mark";
+    auto allRegion = GetG1ObjectAllocator()->GetAllRegions();
+    for (Region *r : allRegion) {
+        auto *bitmap = r->GetMarkBitmap();
+        // Calculate live bytes during mark-phase
+        r->SetLiveBytes(0U);
+        // unmark full-heap except Humongous-space
+        bitmap->ClearAllBits();
+    }
+#ifndef NDEBUG
+    this->GetObjectAllocator()->IterateOverObjects([&marker](ObjectHeader *obj) { ASSERT(!marker.IsMarked(obj)); });
+#endif
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::Remark(ark::GCTask const &task)
+template <bool PROCESS_WEAK_REFS, typename Marker>
+void G1GC<LanguageConfig>::ConcurrentMark(const GCTask &task, GCMarkingStackType *objectsStack, Marker &marker)
+{
+    ConcurrentScope concurrentScope(this);
+    GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
+    if (task.reason == GCTaskCause::CROSSREF_CAUSE) {
+        // Live region bytes calculation does from GC several thread, so atomic calculation is required
+        this->ConcurrentMarkImpl<PROCESS_WEAK_REFS, true>(objectsStack, marker);
+    } else {
+        // Only GC thread can modify live bytes in region, so no need atomically calculation
+        this->ConcurrentMarkImpl<PROCESS_WEAK_REFS, false>(objectsStack, marker);
+    }
+}
+
+template <class LanguageConfig>
+template <bool PROCESS_WEAK_REFS, typename Marker>
+void G1GC<LanguageConfig>::Remark(const GCTask &task, Marker &marker)
 {
     /**
      * Make remark on pause to have all marked objects in tenured space, it gives possibility to check objects in
@@ -1854,13 +1947,18 @@ void G1GC<LanguageConfig>::Remark(ark::GCTask const &task)
         bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
         GCMarkingStackType stack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
                                  useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
-                                 GCWorkersTaskTypes::TASK_REMARK,
+                                 task.reason == GCTaskCause::CROSSREF_CAUSE ? GCWorkersTaskTypes::TASK_XREMARK
+                                                                            : GCWorkersTaskTypes::TASK_REMARK,
                                  this->GetSettings()->GCMarkingStackNewTasksFrequency());
 
         // The mutator may create new regions.
         // If so we should bind bitmaps of new regions.
-        DrainSatb(&stack);
-        this->MarkStack(&marker_, &stack, CalcLiveBytesMarkPreprocess);
+        DrainSatb(&stack, marker);
+        if constexpr (PROCESS_WEAK_REFS) {
+            this->MarkStack(&marker, &stack, CalcLiveBytesMarkPreprocess<true>, GC::EmptyReferenceProcessPredicate);
+        } else {
+            this->MarkStack(&marker, &stack, CalcLiveBytesMarkPreprocess<true>);
+        }
 
         if (useGcWorkers) {
             this->GetWorkersTaskPool()->WaitUntilTasksEnd();
@@ -1922,6 +2020,16 @@ void G1GC<LanguageConfig>::SweepRegularVmRefs()
         }
         return ObjectStatus::ALIVE_OBJECT;
     });
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::VerifyHeapBeforeConcurrent()
+{
+    trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier before concurrent");
+    size_t failCount = this->VerifyHeap();
+    if (this->GetSettings()->FailOnHeapVerification() && failCount > 0) {
+        LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << failCount << " corruptions";
+    }
 }
 
 template <class LanguageConfig>
@@ -2175,11 +2283,12 @@ void G1GC<LanguageConfig>::PostZygoteFork()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack)
+template <typename Marker>
+void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack, Marker &marker)
 {
     ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     // Process satb buffers of the active threads
-    auto callback = [this, objectStack](ManagedThread *thread) {
+    auto callback = [this, objectStack, &marker](ManagedThread *thread) {
         // Acquire lock here to avoid data races with the threads
         // which are terminating now.
         // Data race is happens in thread.pre_buf_. The terminating thread may
@@ -2194,7 +2303,7 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack)
             return true;
         }
         for (auto obj : *preBuff) {
-            if (marker_.MarkIfNotMarked(obj)) {
+            if (marker.MarkIfNotMarked(obj)) {
                 objectStack->PushToStack(RootType::SATB_BUFFER, obj);
             }
         }
@@ -2208,7 +2317,7 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack)
     for (auto objVector : satbBuffList_) {
         ASSERT(objVector != nullptr);
         for (auto obj : *objVector) {
-            if (marker_.MarkIfNotMarked(obj)) {
+            if (marker.MarkIfNotMarked(obj)) {
                 objectStack->PushToStack(RootType::SATB_BUFFER, obj);
             }
         }
@@ -2216,7 +2325,7 @@ void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack)
     }
     satbBuffList_.clear();
     for (auto obj : newobjBuffer_) {
-        if (marker_.MarkIfNotMarked(obj)) {
+        if (marker.MarkIfNotMarked(obj)) {
             objectStack->PushToStack(RootType::SATB_BUFFER, obj);
         }
     }
@@ -2446,13 +2555,14 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::ShouldRunTenuredGC(const GCTask &task)
 {
     return this->IsOnPygoteFork() || task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE ||
-           task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE;
+           task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE || task.reason == GCTaskCause::NATIVE_ALLOC_CAUSE;
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::OnWaitForIdleFail()
 {
-    if (this->GetGCPhase() == GCPhase::GC_PHASE_MARK) {
+    // NOTE(ipetrov, #22715): Don't interrupt XGC while it is not support in another
+    if (this->GetGCPhase() == GCPhase::GC_PHASE_MARK && this->GetLastGCCause() != GCTaskCause::CROSSREF_CAUSE) {
         // Atomic with release order reason: write to this variable should become visible in concurrent marker check
         interruptConcurrentFlag_.store(true, std::memory_order_release);
         if (this->GetSettings()->G1EnablePauseTimeGoal()) {
@@ -2611,13 +2721,14 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
 }
 
 template <class LanguageConfig>
-template <bool PROCESS_WEAK_REFS>
-NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkingStackType *objectsStack)
+template <bool PROCESS_WEAK_REFS, bool ATOMICALLY, typename Marker>
+NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkingStackType *objectsStack,
+                                                                        Marker &marker)
 {
     {
         ScopedTiming t("VisitClassRoots", *this->GetTiming());
-        this->VisitClassRoots([this, objectsStack](const GCRoot &gcRoot) {
-            if (concMarker_.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
+        this->VisitClassRoots([this, objectsStack, marker](const GCRoot &gcRoot) {
+            if (marker.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
                 ASSERT(gcRoot.GetObjectHeader() != nullptr);
                 objectsStack->PushToStack(RootType::ROOT_CLASS, gcRoot.GetObjectHeader());
             } else {
@@ -2628,8 +2739,8 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkin
     {
         ScopedTiming t("VisitInternalStringTable", *this->GetTiming());
         this->GetPandaVm()->VisitStringTable(
-            [this, objectsStack](ObjectHeader *str) {
-                if (concMarker_.MarkIfNotMarked(str)) {
+            [objectsStack, &marker](ObjectHeader *str) {
+                if (marker.MarkIfNotMarked(str)) {
                     ASSERT(str != nullptr);
                     objectsStack->PushToStack(RootType::STRING_TABLE, str);
                 }
@@ -2639,7 +2750,7 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkin
     // Atomic with acquire order reason: load to this variable should become visible
     while (!objectsStack->Empty() && !interruptConcurrentFlag_.load(std::memory_order_acquire)) {
         auto *object = this->PopObjectFromStack(objectsStack);
-        ASSERT(concMarker_.IsMarked(object));
+        ASSERT(marker.IsMarked(object));
         ValidateObject(nullptr, object);
         auto *objectClass = object->template ClassAddr<BaseClass>();
         // We need annotation here for the FullMemoryBarrier used in InitializeClassByIdEntrypoint
@@ -2647,12 +2758,11 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkin
         LOG_DEBUG_GC << "Current object: " << GetDebugInfoAboutObject(object);
 
         ASSERT(!object->IsForwarded());
-        CalcLiveBytesNotAtomicallyMarkPreprocess(object, objectClass);
+        CalcLiveBytesMarkPreprocess<ATOMICALLY>(object, objectClass);
         if constexpr (PROCESS_WEAK_REFS) {
-            auto refPred = [this](const ObjectHeader *obj) { return InGCSweepRange(obj); };
-            concMarker_.MarkInstance(objectsStack, object, objectClass, refPred);
+            marker.MarkInstance(objectsStack, object, objectClass, GC::EmptyReferenceProcessPredicate);
         } else {
-            concMarker_.MarkInstance(objectsStack, object, objectClass);
+            marker.MarkInstance(objectsStack, object, objectClass);
         }
     }
 }
@@ -2680,17 +2790,15 @@ size_t G1GC<LanguageConfig>::GetUniqueRemsetRefsCount() const
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PrintFragmentationMetrics(const char *title)
 {
-    LOG_INFO_GC << title;
-    LOG_INFO_GC << "Internal Old fragmentation " << this->GetG1ObjectAllocator()->CalculateInternalOldFragmentation();
-    LOG_INFO_GC << "Internal humongous fragmentation "
+    LOG_INFO_GC << title << "internal Old fragmentation "
+                << this->GetG1ObjectAllocator()->CalculateInternalOldFragmentation();
+    LOG_INFO_GC << title << "internal humongous fragmentation "
                 << this->GetG1ObjectAllocator()->CalculateInternalHumongousFragmentation();
-    LOG_INFO_GC << "Nonmovable external fragmentation "
+    LOG_INFO_GC << title << "nonmovable external fragmentation "
                 << this->GetG1ObjectAllocator()->CalculateNonMovableExternalFragmentation();
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GC);
-TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GCConcurrentMarker);
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GCMixedMarker);
-TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GCPauseMarker);
 
 }  // namespace ark::mem

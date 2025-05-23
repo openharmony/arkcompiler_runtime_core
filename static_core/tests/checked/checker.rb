@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,6 +54,11 @@ OptionParser.new do |opts|
   opts.on("--with-llvm", "Tells checker that ARK was built with LLVM support") do |v|
     options.with_llvm = true
   end
+  opts.on('--checker-filter=STRING', 'Run only checkers with filter-matched name') do |v|
+    options.checker_filter = v
+  end
+  opts.on('--interop', 'Do interop-specific actions')
+    options.interop = true
 end.parse!(into: options)
 
 $LOG_LEVEL = options.verbose ? Logger::DEBUG : Logger::ERROR
@@ -127,7 +132,6 @@ class SearchScope
 
   def find(match)
     return if match.nil?
-
     @current_index = @lines.index { |line| contains?(line, match) }
     raise_error "#{@name} not found: #{match_str(match)}" if @current_index.nil?
     @current_index += 1
@@ -137,6 +141,7 @@ class SearchScope
     return if match.nil?
 
     index = @lines.drop(@current_index).index { |line| contains?(line, match) }
+
     raise_error "#{@name} not found: #{match_str(match)}" if index.nil?
     @current_index += index + 1
   end
@@ -163,19 +168,32 @@ class SearchScope
 end
 
 class Checker
+  protected
+  attr_writer :name
+  attr_accessor :aot_mode
+
+  public
   attr_reader :name
 
-  def initialize(options, name)
+  module AotMode
+    PAOC = 1
+    LLVM = 2
+    ALL  = 3
+  end
+
+  Code = Struct.new('Code', :source, :filename, :line_no)
+
+  def initialize(options, name, line_no: 0)
     @name = name
-    @lines = []
-    @code = ""
-    @cwd = "#{Dir.getwd}/#{name.gsub(/[ -:()]/, '_')}"
+    @code = Code.new('', options.source, line_no)
+    @cwd = "#{Dir.getwd}/#{name.gsub(/[ -:()<>]/, '_')}"
     @options = options
     @args = ''
     @ir_files = []
     @architecture = options.arch
+    @profdata_file = nil
     @aot_file = ''
-    @llvm_paoc = false
+    @aot_mode = nil
 
     # Events scope for 'events.csv'
     @events_scope = nil
@@ -188,17 +206,43 @@ class Checker
     @disasm_method_scope = nil
     # Current search scope
     @disasm_scope = nil
+  end
 
+  def init_run
     Dir.mkdir(@cwd) unless File.exists?(@cwd)
+    if @options.interop
+      # module directory need only for interop with ArkJSVM
+      module_dir_path = File.join(@cwd, "module")
+      Dir.mkdir(module_dir_path) unless Dir.exist?(module_dir_path)
+    end
     clear_data
   end
 
-  def set_llvm_paoc()
-    @llvm_paoc = true
+  def clone_with(name:, aot_mode:)
+    that = clone
+    that.aot_mode = aot_mode
+    that.name = name
+    that
+  end
+
+  def populate
+    checks = []
+    if @aot_mode == AotMode::ALL
+      checks << clone_with(aot_mode: AotMode::PAOC, name: "#{@name} [PAOC]")
+      checks << clone_with(aot_mode: AotMode::LLVM, name: "#{@name} [LLVM]")
+    else
+      checks << self
+    end
+    checks
+  end
+
+  def match_filter?
+    @options.checker_filter.nil? or @name.match? @options.checker_filter
   end
 
   def append_line(line)
-    @code << line + "\n"
+    @aot_mode = AotMode::LLVM if line.include? "RUN_AOT"
+    @code.source << line + "\n"
   end
 
   def RUN(**args)
@@ -206,29 +250,41 @@ class Checker
     aborted_sig = 0
     entry = '_GLOBAL::main'
     env = ''
-    @args = ''
+    @args = []
     args.each do |name, value|
-      if name == :force_jit and value
-        @args << '--compiler-hotness-threshold=0 --no-async-jit=true --compiler-enable-jit=true '
-      elsif name == :options
+      case name
+      when :force_jit
+        next unless value
+        @args << '--compiler-hotness-threshold=0 --no-async-jit=true --compiler-enable-jit=true'
+      when :force_profiling
+        next unless value
+        @args << '--compiler-profiling-threshold=0 --no-async-jit=true --compiler-enable-jit=true'
+      when :pgo_emit_profdata
+        next unless value
+        @profdata_file = "#{@cwd}/#{File.basename(@options.test_file, File.extname(@options.test_file))}.profdata"
+        @args << "--profilesaver-enabled=true --profile-output=#{@profdata_file}"
+      when :options
         @args << value
-      elsif name == :entry
+      when :entry
         entry = value
-      elsif name == :result
+      when :result
         expected_result = value
-      elsif name == :abort
+      when :abort
         aborted_sig = value
-      elsif name == :env
+      when :env
         env = value
       end
     end
     raise ":abort and :result cannot be set at the same time, :abort = #{aborted_sig}, :result = #{expected_result}" if aborted_sig != 0 && expected_result != 0
 
     clear_data
+    @args = @args.join(' ')
     aot_arg = @aot_file.empty? ? '' : "--aot-file #{@aot_file}"
 
+    compiler_dump = @options.interop ? "--compiler-dump:folder=./ir_dump" : "--compiler-dump"
+
     cmd = "#{@options.run_prefix} #{@options.panda} --compiler-queue-type=simple --compiler-ignore-failures=false #{@options.panda_options} \
-                #{aot_arg} #{@args} --events-output=csv --compiler-dump --compiler-disasm-dump:single-file #{@options.test_file} #{entry}"
+                #{aot_arg} #{@args} --events-output=csv #{compiler_dump} --compiler-disasm-dump:single-file #{@options.test_file} #{entry}"
     $curr_cmd = "#{env} #{cmd}"
     log.debug "Panda command: #{$curr_cmd}"
 
@@ -257,12 +313,12 @@ class Checker
   end
 
   def RUN_PAOC(**args)
-    @aot_file = "#{Dir.getwd}/#{File.basename(@options.test_file, File.extname(@options.test_file))}.an"
+    @aot_file = "#{@cwd}/#{File.basename(@options.test_file, File.extname(@options.test_file))}.an"
 
     inputs = @options.test_file
     aot_output_option = '--paoc-output'
     output = @aot_file
-    options = ''
+    options = []
     env = ''
     aborted_sig = 0
     result = 0
@@ -270,9 +326,15 @@ class Checker
     args.each do |name, value|
       case name
       when :options
-        options = value
+        options << value
       when :boot
+        next unless value
         aot_output_option = '--paoc-boot-output'
+      when :pgo_use_profdata
+        next unless value
+        raise "call RUN with `pgo_emit_profdata: true` (or RUN_PGO_PROF) before :pgo_use_profdata" unless @profdata_file
+        options << "--paoc-use-profile:path=#{@profdata_file},force"
+        options << "--panda-files=#{@options.test_file}"  # NOTE (urandon): this is required for compiler's runtime now
       when :env
         env = value
       when :inputs
@@ -287,7 +349,7 @@ class Checker
     end
     raise ":abort and :result cannot be set at the same time, :abort = #{aborted_sig}, :result = #{result}" if aborted_sig != 0 && result != 0
 
-    paoc_args = "--paoc-panda-files #{inputs} --events-output=csv --compiler-dump #{options} #{aot_output_option} #{output}"
+    paoc_args = "--paoc-panda-files #{inputs} --events-output=csv --compiler-dump #{options.join(' ')} #{aot_output_option} #{output}"
 
     clear_data
 
@@ -324,11 +386,23 @@ class Checker
   end
 
   def RUN_AOT(**args)
-    if @llvm_paoc
-      RUN_LLVM(**args)
-    else
+    raise 'aot_mode cannot be nil' if @aot_mode.nil?
+    case @aot_mode
+    when AotMode::PAOC
       RUN_PAOC(**args)
+    when AotMode::LLVM
+      RUN_LLVM(**args)
+    when AotMode::ALL
+      raise 'Checker not populated, run populate()'
     end
+  end
+
+  def RUN_PGO_PROF(**args)
+    RUN(force_profiling: true, pgo_emit_profdata: true, **args)
+  end
+
+  def RUN_PGO_PAOC(**args)
+    RUN_PAOC(pgo_use_profdata: true, **args)
   end
 
   def RUN_BCO(**args)
@@ -379,6 +453,7 @@ class Checker
   def RUN_LLVM(**args)
     raise SkipException unless @options.with_llvm
 
+    args[:options] = '' unless args.has_key? :options
     args[:options] << " --paoc-mode=llvm "
     RUN_PAOC(**args)
   end
@@ -435,7 +510,6 @@ class Checker
 
   def IR_COUNT(match)
     return 0 if @options.release
-
     @ir_scope.lines.count { |inst| contains?(inst, match) && !contains?(inst, /^Method:/) }
   end
 
@@ -587,9 +661,9 @@ class Checker
 
   def METHOD(method)
     return if @options.release
-    @ir_files = Dir["#{@cwd}/ir_dump/*#{method.gsub(/::|[<>]/, '_')}*.ir"]
+    @ir_files = Dir["#{@cwd}/ir_dump/*#{method.gsub(/::|[<>]|\.|-/, '_')}*.ir"]
     @ir_files.sort!
-    raise_error "IR dumps not found for method: #{method.gsub(/::|[<>]/, '_')}" if @ir_files.empty?
+    raise_error "IR dumps not found for method: #{method.gsub(/::|[<>]|\.|-/, '_')}" if @ir_files.empty?
     $current_method = method
     @current_file_index = 0
   end
@@ -629,10 +703,16 @@ class Checker
   end
 
   def run
+    unless match_filter?
+      log.info "Filtered-out: \"#{@name}\""
+      return
+    end
+
     log.info "Running \"#{@name}\""
+    init_run
     $checker_name = @name
     begin
-      self.instance_eval @code
+      self.instance_eval(@code.source, @code.filename, @code.line_no)
     rescue SkipException
       log.info "Skipped: \"#{@name}\""
     else
@@ -645,7 +725,6 @@ class Checker
    $current_method = nil
    $current_pass = nil
    if !@options.keep_data
-      FileUtils.rm_rf("#{@cwd}/ir_dump")
       FileUtils.rm_rf("#{@cwd}/events.csv")
       FileUtils.rm_rf("#{@cwd}/disasm.txt")
       FileUtils.rm_rf("#{@cwd}/console.out")
@@ -656,32 +735,24 @@ end
 def read_checks(options)
   checks = []
   check = nil
-  check_llvm = nil
   command_token = /[ ]*#{options.command_token}(.*)/
   checker_start = /[ ]*#{options.command_token} CHECKER[ ]*(.*)/
   disabled_checker_start = /[ ]*#{options.command_token} DISABLED_CHECKER[ ]*(.*)/
-  File.readlines(options.source).each do |line|
+  File.readlines(options.source).each_with_index do |line, line_no|
     if check
       unless line.start_with? command_token
         check = nil
-        check_llvm = nil
         next
       end
       raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start
-      if line.include? "RUN_AOT"
-        checks << check_llvm
-      end
       check.append_line(command_token.match(line)[1]) unless check == :disabled_check
-      check_llvm.append_line(command_token.match(line)[1]) unless check == :disabled_check
     else
       next unless line.start_with? command_token
       if line.start_with? checker_start
         name = command_token.match(line)[1]
         raise "Checker with name '#{name}'' already exists" if checks.any? { |x| x.name == name }
 
-        check = Checker.new(options, name)
-        check_llvm = Checker.new(options, "#{name} LLVMAOT")
-        check_llvm.set_llvm_paoc()
+        check = Checker.new(options, name, line_no: line_no)
         checks << check
       else
         raise "Line '#{line.strip}' does not belong to any checker" unless line.start_with? disabled_checker_start
@@ -694,7 +765,7 @@ def read_checks(options)
 end
 
 def main(options)
-  read_checks(options).each(&:run)
+  read_checks(options).flat_map(&:populate).each(&:run)
   0
 end
 

@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "package": "HarB",
+        "baseUrl": "./src/main/ets/",
+        "paths": {
+            "HarB": [
+                "."
+            ]
+        },
+        "dependencies": [
+            "../../../../C/arktsconfig.json"
+        ],
+        "entry": "../../../indexB.ets"
+        
+    }
+}

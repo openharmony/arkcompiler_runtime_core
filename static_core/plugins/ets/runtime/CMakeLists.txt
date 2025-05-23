@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,35 +14,47 @@
 set(ETS_EXT_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/runtime)
 
 set(ETS_RUNTIME_SOURCES
+    ${ETS_EXT_SOURCES}/ani/ani_interaction_api.cpp
+    ${ETS_EXT_SOURCES}/ani/ani_mangle.cpp
+    ${ETS_EXT_SOURCES}/ani/ani_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_annotation.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
+    ${ETS_EXT_SOURCES}/ets_class_linker_context.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_extension.cpp
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
     ${ETS_EXT_SOURCES}/ets_napi_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp
     ${ETS_EXT_SOURCES}/ets_native_library_provider.cpp
+    ${ETS_EXT_SOURCES}/ets_platform_types.cpp
     ${ETS_EXT_SOURCES}/ets_runtime_interface.cpp
     ${ETS_EXT_SOURCES}/ets_vm.cpp
     ${ETS_EXT_SOURCES}/ets_stubs.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
     ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
     ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_TypedArrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/debugger_api.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_AniHelpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Runtime.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Class.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcFile.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_AbcRuntimeLinker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Double.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Float.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_SyncPrimitives.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_ExclusiveLauncher.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_String.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StringBuilder.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/gc_task_tracker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
@@ -52,9 +64,12 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Value.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_Job.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_concurrency_Launch.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/array_buffer_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
@@ -63,6 +78,9 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/napi/ets_napi_native_interface.cpp
     ${ETS_EXT_SOURCES}/napi/ets_mangle.cpp
     ${ETS_EXT_SOURCES}/regexp/regexp_executor.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp_16.cpp
+    ${ETS_EXT_SOURCES}/regexp/regexp_8.cpp
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
@@ -81,15 +99,26 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
+    ${ETS_EXT_SOURCES}/types/ets_job.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
+    ${ETS_EXT_SOURCES}/ets_object_state_info.cpp
+    ${ETS_EXT_SOURCES}/ets_object_state_table.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Intl.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCommon.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlState.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormat.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlFormattersCache.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleMatch.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollator.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocale.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlPluralRules.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlSegmenter.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/stdlib_ani_helpers.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDateTimeFormat.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
@@ -112,11 +141,18 @@ elseif (PANDA_TARGET_AMD64)
         ${ETS_EXT_SOURCES}/napi/arch/amd64/ets_napi_entry_point_amd64.S)
 endif()
 
+if (PANDA_TARGET_OHOS)
+    list (APPEND ETS_RUNTIME_SOURCES
+        ${ETS_EXT_SOURCES}/platform/ohos/logger.cpp)
+endif()
+
 panda_target_sources(arkruntime_obj PRIVATE ${ETS_RUNTIME_SOURCES})
 panda_target_include_directories(arkruntime_obj PUBLIC
     ${PANDA_BINARY_ROOT}/cross_values
     ${PANDA_ETS_PLUGIN_SOURCE}/runtime/
     ${PANDA_BINARY_ROOT}/
+    # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
+    ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani/
 )
 add_dependencies(arkruntime_obj es2panda-public)
 panda_target_link_libraries(arkruntime_obj es2panda-public arkassembler)
@@ -129,10 +165,15 @@ if(PANDA_TARGET_OHOS)
 endif()
 
 if (PANDA_ETS_INTEROP_JS)
+    add_subdirectory(${PANDA_ROOT}/../arkplatform ${PANDA_BINARY_ROOT}/arkplatform)
+    if (PANDA_JS_ETS_HYBRID_MODE)
+        panda_target_compile_definitions(arkruntime_obj PRIVATE PANDA_JS_ETS_HYBRID_MODE)
+    endif(PANDA_JS_ETS_HYBRID_MODE)
     add_subdirectory(interop_js)
 endif()
 
 add_subdirectory(napi)
+add_subdirectory(libani_helpers)
 
 set(IRTOC_ETS_SCRIPTS ${PANDA_ROOT}/plugins/ets/irtoc_scripts)
 set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)

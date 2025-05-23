@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <deque>
 #include <functional>
 #include <optional>
 #include <set>
@@ -30,8 +29,7 @@
 
 #include "session_manager.h"
 #include "source_manager.h"
-#include "types/exception_details.h"
-#include "types/location.h"
+#include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
 #include "types/property_descriptor.h"
@@ -39,15 +37,17 @@
 #include "types/scope.h"
 
 namespace ark::tooling::inspector {
+class UrlBreakpointResponse;
 class Server;  // NOLINT(fuchsia-virtual-inheritance)
+class UrlBreakpointRequest;
 
 class InspectorServer final {
 public:
-    using SetBreakpointHandler = std::optional<BreakpointId>(PtThread, const std::function<bool(std::string_view)> &,
-                                                             size_t, std::set<std::string_view> &, const std::string *);
+    using SourceFileFilter = std::function<bool(std::string_view)>;
+    using SetBreakpointHandler = std::optional<BreakpointId>(PtThread, const SourceFileFilter &, size_t,
+                                                             std::set<std::string_view> &, const std::string *);
     using FrameInfoHandler = std::function<void(FrameId, std::string_view, std::string_view, size_t,
                                                 const std::vector<Scope> &, const std::optional<RemoteObject> &)>;
-    using EvaluationResult = std::optional<std::pair<RemoteObject, std::optional<ExceptionDetails>>>;
 
 public:
     explicit InspectorServer(Server &server);
@@ -81,21 +81,37 @@ public:
     void OnCallDebuggerGetScriptSource(std::function<std::string(std::string_view)> &&handler);
     void OnCallDebuggerPause(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerRemoveBreakpoint(std::function<void(PtThread, BreakpointId)> &&handler);
+    void OnCallDebuggerRemoveBreakpointsByUrl(std::function<void(PtThread, SourceFileFilter)> &&handler);
     void OnCallDebuggerRestartFrame(std::function<void(PtThread, FrameId)> &&handler);
     void OnCallDebuggerResume(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSetAsyncCallStackDepth(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSetBlackboxPatterns(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSmartStepInto(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHandler> &&handler);
     void OnCallDebuggerSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler);
+    void OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler);
     void OnCallDebuggerSetBreakpointsActive(std::function<void(PtThread, bool)> &&handler);
+    void OnCallDebuggerSetSkipAllPauses(std::function<void(PtThread, bool)> &&handler);
     void OnCallDebuggerSetPauseOnExceptions(std::function<void(PtThread, PauseOnExceptionsState)> &&handler);
     void OnCallDebuggerStepInto(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerStepOut(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerStepOver(std::function<void(PtThread)> &&handler);
-
+    void OnCallDebuggerEvaluateOnCallFrame(
+        std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler);
+    void OnCallDebuggerClientDisconnect(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerDisable(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerDropFrame(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSetNativeRange(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerReplyNativeCalling(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerCallFunctionOn(
+        std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &, size_t)> &&handler);
+    void OnCallDebuggerSetMixedDebugEnabled(std::function<void(PtThread, bool)> &&handler);
     void OnCallRuntimeEnable(std::function<void(PtThread)> &&handler);
     void OnCallRuntimeGetProperties(
         std::function<std::vector<PropertyDescriptor>(PtThread, RemoteObjectId, bool)> &&handler);
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
-    void OnCallRuntimeEvaluate(std::function<EvaluationResult(PtThread, const std::string &)> &&handler);
+    void OnCallRuntimeEvaluate(
+        std::function<Expected<EvaluationResult, std::string>(PtThread, const std::string &)> &&handler);
 
 private:
     struct CallFrameInfo {
@@ -112,8 +128,11 @@ private:
     void AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
                           const std::vector<Scope> &scopeChain, PtThread thread,
                           const std::optional<RemoteObject> &objThis);
-    void AddBreakpointByUrlLocations(JsonArrayBuilder &locations, const std::set<std::string_view> &sourceFiles,
-                                     size_t lineNumber, PtThread thread);
+    Expected<std::unique_ptr<UrlBreakpointResponse>, std::string> SetBreakpointByUrl(
+        const std::string &sessionId, const UrlBreakpointRequest &breakpointRequest,
+        const std::function<SetBreakpointHandler> &handler);
+    void AddLocations(UrlBreakpointResponse &response, const std::set<std::string_view> &sourceFiles, size_t lineNumber,
+                      PtThread thread);
     static void AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
                                   const std::vector<BreakpointId> &hitBreakpoints);
     static std::string GetExecutionContextUniqueId(const PtThread &thread);

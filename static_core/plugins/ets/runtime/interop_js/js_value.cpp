@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,10 @@ namespace ark::ets::interop::js {
     ASSERT(JSValue::IsFinalizableType(jsValue->GetType()));
 
     auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return nullptr;
+    }
 
     LocalObjectHandle<JSValue> handle(coro, jsValue);
 
@@ -58,7 +62,7 @@ void JSValue::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
         case napi_object:
             [[fallthrough]];
         case napi_function:
-            NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), jsValue->GetNapiRef()));
+            NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), jsValue->GetNapiRef(ctx->GetJSEnv())));
             return;
         case napi_bigint:
             delete jsValue->GetBigInt();
@@ -109,8 +113,8 @@ JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue,
         case napi_function:
             [[fallthrough]];
         case napi_external: {
-            jsvalue->SetRefValue(env, nvalue, jsType);
-            return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
+            jsvalue->SetRefValue(ctx, nvalue, jsType);
+            return jsvalue;
         }
         default: {
             InteropCtx::Fatal("Unsupported JSValue.Type: " + std::to_string(jsType));

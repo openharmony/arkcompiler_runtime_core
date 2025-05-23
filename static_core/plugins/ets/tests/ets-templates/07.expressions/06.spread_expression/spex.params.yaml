@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,69 +18,69 @@ cases:
           let a1: Object|null|undefined = new Object
       use: |-
           // not array type
-          assert([...a1, new Object].length == 2)
+          assertTrue([...a1, new Object].length == 2)
       tags: 'negative, compile-only'
 
     - decl: |-
           let a1: Object[]|null = [new Object]
       use: |-
           // possibly nullish
-          assert([...a1, new Object].length == 2)
+          assertTrue([...a1, new Object].length == 2)
       tags: 'negative, compile-only'
 
     - decl: |-
           let a1: Object[]|undefined = [new Object]
       use: |-
           // possibly nullish
-          assert([...a1, new Object].length == 2)
+          assertTrue([...a1, new Object].length == 2)
       tags: 'negative, compile-only'
 
     - use: |-
           // empty arrays
           let a1: Object[] = [], a2: Error[] = []
-          assert([...a1, ...a2, new Object(), ...a1].length == 1)
+          assertTrue([...a1, ...a2, new Object(), ...a1].length == 1)
 
     - use: |-
           // spread of char array
           let a: char[] = [c'b', c'c']
           let r = [c'a', ...a, c'd']
-          assert(r.length == 4 && (new String(r) == "abcd"))
+          assertTrue(r.length == 4 && (new String(r) == "abcd"))
 
     - use: |-
           // spread of byte array
           let a = [2 as byte, 3 as byte]
           let r = [1 as byte, ...a, 4 as byte]
-          assert(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
+          assertTrue(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
 
     - use: |-
           // spread of short array
           let a = [2 as short, 3 as short]
           let r = [1 as short, ...a, 4 as short]
-          assert(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
+          assertTrue(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
 
     - use: |-
           // spread of int array
           let a = [2, 3]
           let r = [1, ...a, 4]
-          assert(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
+          assertTrue(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
 
     - use: |-
           // spread of long array
           let a: long[] = [2 as long, 3 as long]
           let r = [1 as long, ...a, 4 as long]
-          assert(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
+          assertTrue(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
 
     - use: |-
           // spread of float array
           let a: float[] = [2f, 3f]
           let r = [1f, ...a, 4f]
-          assert(r.length == 4 && r[0] == 1f && r[1] == 2f && r[2] == 3f && r[3] == 4f)
+          assertTrue(r.length == 4 && r[0] == 1f && r[1] == 2f && r[2] == 3f && r[3] == 4f)
 
     - use: |-
           // spread of double array
           let a = [2.0, 3.0]
           let r = [1.0, ...a, 4.0]
-          assert(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
+          assertTrue(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
 
     - decl: |-
           type F = (p: number) => number
@@ -90,7 +90,7 @@ cases:
           let b: F[] = [(p: number) => p * 4, (p: number) => p * 5]
           let res = 1.0
           for (let el of [...a, ...b]) res += el(res)
-          assert(res == 360.0)
+          assertTrue(res == 360.0)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -99,24 +99,24 @@ cases:
           let a: Color[] = [Color.Red, Color.Green]
           let b: Color[] = [Color.Blue]
           let r = [...a, ...b]
-          assert(r.length == 3 && r[0] == Color.Red && r[1] == Color.Green && r[2] == Color.Blue )
+          assertTrue(r.length == 3 && r[0] == Color.Red && r[1] == Color.Green && r[2] == Color.Blue )
 
     - use: |-
           // expression in parentheses
           let a1: Number[] = [1.0, 2.0]
           let r = [...(a1)]
-          assert(r[0] == 1 && r[1] == 2)
+          assertTrue(r[0] == 1 && r[1] == 2)
 
     - use: |-
           // ensure-not-nullish expression
           let a1: Object[]|null = [new Object]
-          assert([...a1!, new Object].length == 2)
+          assertTrue([...a1!, new Object].length == 2)
 
     - decl: |-
           let a1: Object[]|null = null
       use: |-
           // ensure-not-nullish expression
-          assert([...a1!, new Object].length == 2) // NPE expected
+          assertTrue([...a1!, new Object].length == 2) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -124,7 +124,7 @@ cases:
           let a2: Object[]|null = [new Object, new Object]
       use: |-
           // nullish-coalescing expression
-          assert([...(a1 ?? a2)!, new Object].length == 3)
+          assertTrue([...(a1 ?? a2)!, new Object].length == 3)
 
     - decl: |-
           function foo(): Number[] {
@@ -133,7 +133,7 @@ cases:
       use: |-
           // function call in expression
           let r = [...foo()]
-          assert(r[0] == 1 && r[1] == 2)
+          assertTrue(r[0] == 1 && r[1] == 2)
 
     - decl: |-
           function str_filter(s: string[], f: (p: string) => boolean): string[] {
@@ -145,31 +145,31 @@ cases:
           // function call in expression
           let s = ["h", "", "el", "", "", "l", "", "o"]
           let r = [...str_filter(s, (item: string) => item.length > 0), "!"]
-          assert(r.length == 5 && String.join(r, "") == "hello!")
+          assertTrue(r.length == 5 && String.join(r, "") == "hello!")
 
     - use: |-
           // new expression in expression
           let r = [...(new number[256])]
-          assert(r.length == 256 && r[0] == 0 && r[255] == 0)
+          assertTrue(r.length == 256 && r[0] == 0 && r[255] == 0)
 
     - use: |-
           // array index expression
           let a: double[][] = [[2.0, 3.0], []]
           let r = [1.0, ...a[0], ...a[1], 4.0]
-          assert(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
+          assertTrue(r.length == 4 && r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4)
 
     - use: |-
           // tuple index expression
           let a: [double[], string] = [[2.0, 3.0, 4.0], "X"]
           let r = [0.0, 1.0, ...a[0]]
-          assert(reduce(r, (sum: double, item: double) => sum + item, 0.0) == 10.0)
+          assertTrue(reduce(r, (sum: double, item: double) => sum + item, 0.0) == 10.0)
 
     - use: |-
           // assignment expression in expression
           let a1 = ["1", "2", "3"]
           let a2 = ["a", "b"]
           let r = [...a1, ...(a1 = a2), ...a1]
-          assert("".concat(...r) == "123abab")
+          assertTrue("".concat(...r) == "123abab")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
@@ -177,7 +177,7 @@ cases:
       use: |-
           // conditional expression in expression
           let r = [...(a1.length > a2.length ? a1 : a2), "!"]
-          assert(String.join(r, "") == "123!")
+          assertTrue(String.join(r, "") == "123!")
 
     - decl: |-
           class A {
@@ -192,7 +192,7 @@ cases:
       use: |-
           // use this expression
           let a: A = new A([false, false], [true, true])
-          assert(a.meth().length == 7)
+          assertTrue(a.meth().length == 7)
 
     - decl: |-
           abstract class A {
@@ -215,14 +215,14 @@ cases:
       use: |-
           // use super expression
           let b: B = new B([false, false], [true, true])
-          assert(b.meth().length == 8)
+          assertTrue(b.meth().length == 8)
 
     - use: |-
           // spread of arrays
           let a1: number[][] = [[1.0, 2.0], [3.0, 4.0]]
           let a2: number[][] = [[5.0, 6.0], []]
           let r: number[][] = [...a1, [], ...a2]
-          assert(r.length == 5)
+          assertTrue(r.length == 5)
 
     - use: |-
           // spread of arrays, flatten array
@@ -230,7 +230,7 @@ cases:
           let a2: number[][] = [[5.0, 6.0], []]
           let res: number[] = []
           for (let el of [...a1, ...a2, [7.0]]) res = [...res, ...el]
-          assert(res.length == 7)
+          assertTrue(res.length == 7)
 
     - use: |-
           // union of types in result array
@@ -238,14 +238,14 @@ cases:
           let ar = [-10.0, ...a1, ...a1, ...a2, ...a2, ...a3, 10.0, ...a3]
           let res = 0.0
           for (let el of ar) res += (el as Numeric).doubleValue()
-          assert(res == 42.0)
+          assertTrue(res == 42.0)
 
     - use: |-
           // union of reference types in result array
           let a1: (Object|undefined)[] = [new Int(), new Int(), undefined]
           let a2: (Number|undefined)[] = [42.0, 42.0, undefined]
           let r = [...a1, ...a2, 42.0]
-          assert(r[0] == 0 && r[1] == 0 && r[2] == undefined && r[3] == 42 && r[4] == 42 && r[5] == undefined && r[6] == 42)
+          assertTrue(r[0] == 0 && r[1] == 0 && r[2] == undefined && r[3] == 42 && r[4] == 42 && r[5] == undefined && r[6] == 42)
 
     - decl: |-
           class A<T> {}
@@ -256,35 +256,35 @@ cases:
           let a1: (null|undefined|never|byte|int|long|double)[] = [1, 2, 3, 4.0]
           let a2: (A<String>|B<Long>|C<Error>|int)[] = [5, new A<String>, new B<Long>, new C<Error>]
           let r = [...a1, null, ...a2]
-          assert(r.length == 9 && r[0] == 1 && r[8] instanceof C)
+          assertTrue(r.length == 9 && r[0] == 1 && r[8] instanceof C)
 
     - decl: |-
           let a1 = ["1", "2", "3"]
       use: |-
           // lambda expression in expression
           let r = [...((): string[] => a1)(), "!"]
-          assert(String.join(r, "") == "123!")
+          assertTrue(String.join(r, "") == "123!")
 
     - decl: |-
           let a1 = ["1", "2", "3"]
       use: |-
           // lambda expression in expression
           let r = [...((p: string[], q: string[]): string[] => [...p, ...q])(a1, a1), "!"]
-          assert(String.join(r, "") == "123123!")
+          assertTrue(String.join(r, "") == "123123!")
 
 # tuples
     - use: |-
           // spread a tuple to same type tuple
           let t1: [number, boolean] = [1.0, true]
           let r: [number, boolean] = [...t1]
-          assert(r[0] == 1.0 && r[1])
+          assertTrue(r[0] == 1.0 && r[1])
 
     - use: |-
           // spread tuples to different types
           let t1: [number] = [1.0]
           let t2: [boolean] = [true]
           let r: [number, number, boolean, boolean] = [...t1, ...t1, ...t2, ...t2]
-          assert(r[0] == 1.0 && r[1] == 1.0 && r[2] && r[3])
+          assertTrue(r[0] == 1.0 && r[1] == 1.0 && r[2] && r[3])
 
     - use: |-
           // spread tuples of all value types
@@ -293,19 +293,19 @@ cases:
           let t3: [float, double, boolean] = [5f, 6.0, true]
           let t4: [char, string] = [c'Z', "X"]
           let r: [byte, short, int, long, float, double, boolean, char, string] = [...t1, ...t2, ...t3, ...t4]
-          assert(r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4 && r[4] == 5f && r[5] == 6.0 && r[6] && r[7] == c'Z' && r[8] == "X")
+          assertTrue(r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4 && r[4] == 5f && r[5] == 6.0 && r[6] && r[7] == c'Z' && r[8] == "X")
 
     - decl: |-
           let a1: [Object, Error]|null = [new Object, new Error]
       use: |-
           // ensure-not-nullish expression
-          assert([...a1!, new Object].length == 3)
+          assertTrue([...a1!, new Object].length == 3)
 
     - decl: |-
           let a1: [Object, Error]|null = null
       use: |-
           // ensure-not-nullish expression
-          assert([...a1!, new Object].length == 3) // NPE expected
+          assertTrue([...a1!, new Object].length == 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -313,14 +313,14 @@ cases:
           let a2: [Object, Error]|null = [new Object, new Error]
       use: |-
           // nullish-coalescing expression
-          assert([...(a1 ?? a2)!, new Object].length == 3)
+          assertTrue([...(a1 ?? a2)!, new Object].length == 3)
 
     - decl: |-
           let a1: [Object, Error]|null = null
           let a2: [Object, Error]|null = null
       use: |-
           // nullish-coalescing expression
-          assert([...(a1 ?? a2)!, new Object].length == 3) // NPE expected
+          assertTrue([...(a1 ?? a2)!, new Object].length == 3) // NPE expected
       tags: 'negative'
 
     - decl: |-
@@ -328,7 +328,7 @@ cases:
           let a2: [Object, Error]|null = null
       use: |-
           // nullish-coalescing expression
-          assert([...(a1 ?? a2), new Object].length == 3)  // nullish expression
+          assertTrue([...(a1 ?? a2), new Object].length == 3)  // nullish expression
       tags: 'negative, compile-only'
 
     - decl: |-
@@ -338,20 +338,20 @@ cases:
       use: |-
           // function call in expression
           let r: [number, string] = [...foo()]
-          assert(r[0] == 1 && r[1] == "X")
+          assertTrue(r[0] == 1 && r[1] == "X")
 
     - use: |-
           // tuple index expression
           let a: [double[], char[]] = [[2.0, 3.0], [c'Z', c'X']]
           let r: [double, double, char, char] = [...a[0], ...a[1]]
-          assert(r[0] == 2 && r[1] == 3 && r[2] == c'Z' && r[3] == c'X')
+          assertTrue(r[0] == 2 && r[1] == 3 && r[2] == c'Z' && r[3] == c'X')
 
     - use: |-
           // assignment expression in expression
           let a1: [string, int] = ["1", 10]
           let a2: [string, int] = ["2", 20]
           let r: [string, int, string, int, string, int] = [...a1, ...(a1 = a2), ...a1]
-          assert(r[0] == "1" && r[1] == 10 && r[2] == "2" && r[3] == 20 && r[4] == "2" && r[5] == 20)
+          assertTrue(r[0] == "1" && r[1] == 10 && r[2] == "2" && r[3] == 20 && r[4] == "2" && r[5] == 20)
 
     - decl: |-
           let a1: [int, int] = [1, 2]
@@ -359,7 +359,7 @@ cases:
       use: |-
           // conditional expression in expression
           let r: [int, int] = [...(a1[0] > a2[0] ? a1 : a2)]
-          assert(r[0] == 5 && r[1] == 6)
+          assertTrue(r[0] == 5 && r[1] == 6)
 
     - decl: |-
           class A {
@@ -375,7 +375,7 @@ cases:
           // use this expression
           let a: A = new A(1, c'Z')
           let r = a.meth()
-          assert(r[0] == 0 && r[1] == 1 && r[2] == c'Z')
+          assertTrue(r[0] == 0 && r[1] == 1 && r[2] == c'Z')
 
     - decl: |-
           abstract class A {
@@ -399,7 +399,8 @@ cases:
           // use super expression
           let b: B = new B(1, c'Z')
           let r = b.meth()
-          assert(r[0] == 0 && r[1] == 1 && r[2] == c'Z' && r[3] == 5)
+          assertTrue(r[0] == 0 && r[1] == 1 && r[2] == c'Z' && r[3] == 5)
+      tags: 'negative, compile-only'
 
     - decl: |-
           class A<T> {}
@@ -409,11 +410,11 @@ cases:
           let a1: [int|A<String>, double|B<Long>] = [1, new B<Long>]
           let a2: [int|A<Long>, double|B<String>] = [new A<Long>, new B<String>]
           let r: [A<String>|int, B<Long>|double, A<Long>|int, B<String>|double] = [...a1, ...a2]
-          assert(r[0] == 1 && r[1] instanceof B && r[2] instanceof A && r[3] instanceof B)
+          assertTrue(r[0] == 1 && r[1] instanceof B && r[2] instanceof A && r[3] instanceof B)
 
     - decl: |-
           let a2: [int, int] = [6, 5]
       use: |-
           // lambda expression in expression
           let r: [int, int] = [...((p: [int, int]): [int, int] => [p[1], p[0]])(a2)]
-          assert(r[0] == 5 && r[1] == 6)
+          assertTrue(r[0] == 5 && r[1] == 6)

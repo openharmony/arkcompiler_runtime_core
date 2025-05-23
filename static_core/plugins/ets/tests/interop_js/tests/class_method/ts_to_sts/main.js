@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,24 +28,10 @@ let __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (ConstrFoo.prototype = b.prototype, new ConstrFoo());
     };
 })();
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.instanceChildAbstractClass = exports.ChildAbstractClass = exports.instanceChildProtectedClass = 
-exports.ChildProtectedClass = exports.instanceProtectedClass = exports.ProtectedClass = 
-exports.instancePrivateClass = exports.PrivateClass = exports.StaticClass = 
-exports.instanceInterfaceClass = exports.InterfaceClass = exports.instanceChildClass = 
-exports.ChildClass = exports.instanceUserClass = exports.UserClass = exports.tsInt = void 0;
-exports.createUserClassFromTs = createUserClassFromTs;
-exports.createChildClassFromTs = createChildClassFromTs;
-exports.createInterfaceClassFromTs = createInterfaceClassFromTs;
-exports.createStaticClassFromTs = createStaticClassFromTs;
-exports.createPrivateClassFromTs = createPrivateClassFromTs;
-exports.createProtectedClassFromTs = createProtectedClassFromTs;
-exports.createChildProtectedClassFromTs = createChildProtectedClassFromTs;
-exports.createChildAbstractClassFromTs = createChildAbstractClassFromTs;
-exports.tsInt = 1;
-let UserClass = /** @class */ (function () {
+export let tsInt = 1;
+export let UserClass = /** @class */ (function () {
     function UserClass() {
-        this.value = exports.tsInt;
+        this.value = tsInt;
     }
     UserClass.prototype.get = function () {
         return this.value;
@@ -58,12 +44,12 @@ let UserClass = /** @class */ (function () {
     };
     return UserClass;
 }());
-exports.UserClass = UserClass;
-function createUserClassFromTs() {
+export function createUserClassFromTs() {
     return new UserClass();
 }
-exports.instanceUserClass = new UserClass();
-let ChildClass = /** @class */ (function (_super) {
+export let instanceUserClass = new UserClass();
+
+export let ChildClass = /** @class */ (function (_super) {
     __extends(ChildClass, _super);
     function ChildClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
@@ -76,15 +62,14 @@ let ChildClass = /** @class */ (function (_super) {
     };
     return ChildClass;
 }(UserClass));
-exports.ChildClass = ChildClass;
-;
-function createChildClassFromTs() {
+export function createChildClassFromTs() {
     return new ChildClass();
 }
-exports.instanceChildClass = new ChildClass();
-let InterfaceClass = /** @class */ (function () {
+export let instanceChildClass = new ChildClass();
+
+export let InterfaceClass = /** @class */ (function () {
     function InterfaceClass() {
-        this.value = exports.tsInt;
+        this.value = tsInt;
     }
     InterfaceClass.prototype.get = function () {
         return this.value;
@@ -97,12 +82,12 @@ let InterfaceClass = /** @class */ (function () {
     };
     return InterfaceClass;
 }());
-exports.InterfaceClass = InterfaceClass;
-function createInterfaceClassFromTs() {
+export function createInterfaceClassFromTs() {
     return new InterfaceClass();
 }
-exports.instanceInterfaceClass = new InterfaceClass();
-let StaticClass = /** @class */ (function () {
+export let instanceInterfaceClass = new InterfaceClass();
+
+export let StaticClass = /** @class */ (function () {
     function staticClass() {
     }
     staticClass.get = function () {
@@ -114,16 +99,16 @@ let StaticClass = /** @class */ (function () {
         }
         return false;
     };
-    staticClass.value = exports.tsInt;
+    staticClass.value = tsInt;
     return staticClass;
 }());
-exports.StaticClass = StaticClass;
-function createStaticClassFromTs() {
+export function createStaticClassFromTs() {
     return StaticClass;
 }
-let PrivateClass = /** @class */ (function () {
+
+export let PrivateClass = /** @class */ (function () {
     function PrivateClass() {
-        this.value = exports.tsInt;
+        this.value = tsInt;
     }
     PrivateClass.prototype.get = function () {
         return this.value;
@@ -136,14 +121,14 @@ let PrivateClass = /** @class */ (function () {
     };
     return PrivateClass;
 }());
-exports.PrivateClass = PrivateClass;
-function createPrivateClassFromTs() {
+export function createPrivateClassFromTs() {
     return new PrivateClass();
 }
-exports.instancePrivateClass = new PrivateClass();
-let ProtectedClass = /** @class */ (function () {
+export let instancePrivateClass = new PrivateClass();
+
+export let ProtectedClass = /** @class */ (function () {
     function ProtectedClass() {
-        this.value = exports.tsInt;
+        this.value = tsInt;
     }
     ProtectedClass.prototype.get = function () {
         return this.value;
@@ -156,26 +141,26 @@ let ProtectedClass = /** @class */ (function () {
     };
     return ProtectedClass;
 }());
-exports.ProtectedClass = ProtectedClass;
-function createProtectedClassFromTs() {
+export function createProtectedClassFromTs() {
     return new ProtectedClass();
 }
-exports.instanceProtectedClass = new ProtectedClass();
-let ChildProtectedClass = /** @class */ (function (_super) {
+export let instanceProtectedClass = new ProtectedClass();
+
+export let ChildProtectedClass = /** @class */ (function (_super) {
     __extends(ChildProtectedClass, _super);
     function ChildProtectedClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return ChildProtectedClass;
 }(ProtectedClass));
-exports.ChildProtectedClass = ChildProtectedClass;
-function createChildProtectedClassFromTs() {
+export function createChildProtectedClassFromTs() {
     return new ChildProtectedClass();
 }
-exports.instanceChildProtectedClass = new ProtectedClass();
+export let instanceChildProtectedClass = new ProtectedClass();
+
 let AbstractClass = /** @class */ (function () {
     function abstractClass() {
-        this.value = exports.tsInt;
+        this.value = tsInt;
     }
     abstractClass.prototype.get = function () {
         return this.value;
@@ -188,16 +173,15 @@ let AbstractClass = /** @class */ (function () {
     };
     return abstractClass;
 }());
-let ChildAbstractClass = /** @class */ (function (_super) {
+export let ChildAbstractClass = /** @class */ (function (_super) {
     __extends(ChildAbstractClass, _super);
     function ChildAbstractClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return ChildAbstractClass;
 }(AbstractClass));
-exports.ChildAbstractClass = ChildAbstractClass;
-;
-function createChildAbstractClassFromTs() {
+
+export function createChildAbstractClassFromTs() {
     return new ChildAbstractClass();
 }
-exports.instanceChildAbstractClass = new ChildAbstractClass();
+export let instanceChildAbstractClass = new ChildAbstractClass();

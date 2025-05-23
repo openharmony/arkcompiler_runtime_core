@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,18 +19,25 @@
 #include <cstddef>
 #include <utility>
 
+#include "runtime/class_linker_context.h"
 #include "runtime/include/vtable_builder_variance-inl.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets {
 
-bool ETSProtoIsOverriddenBy(Method::ProtoId const &base, Method::ProtoId const &derv);
+bool ETSProtoIsOverriddenBy(const ClassLinkerContext *ctx, Method::ProtoId const &base, Method::ProtoId const &derv);
 
-struct EtsVTableCompatibleSignatures {
+class EtsVTableCompatibleSignatures {
+public:
+    explicit EtsVTableCompatibleSignatures(const ClassLinkerContext *ctx) : ctx_(ctx) {}
+
     bool operator()(const Method::ProtoId &base, const Method::ProtoId &derv) const
     {
-        return ETSProtoIsOverriddenBy(base, derv);
+        return ETSProtoIsOverriddenBy(ctx_, base, derv);
     }
+
+private:
+    const ClassLinkerContext *ctx_;
 };
 
 struct EtsVTableOverridePred {

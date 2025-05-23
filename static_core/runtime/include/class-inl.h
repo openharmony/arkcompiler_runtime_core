@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -460,12 +460,6 @@ inline Method *Class::GetDirectMethod(const uint8_t *mutf8Name, const Method::Pr
         sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
 }
 
-inline Method *Class::GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
-{
-    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
-    return GetClassMethod(sd, proto);
-}
-
 inline Method *Class::GetClassMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const
 {
     return FindClassMethod<FindFilter::ALL, MethodNameComp>(
@@ -484,12 +478,6 @@ inline Method *Class::GetVirtualClassMethodByName(const panda_file::File::String
 {
     return FindClassMethod<FindFilter::INSTANCE, MethodNameComp>(
         sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
-}
-
-inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
-{
-    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
-    return GetInterfaceMethod(sd, proto);
 }
 
 inline Method *Class::GetInterfaceMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const
@@ -524,10 +512,76 @@ inline Method *Class::GetClassMethod(const uint8_t *mutf8Name) const
     return FindClassMethod<FindFilter::ALL, MethodNameComp>(sd);
 }
 
+inline Method *Class::GetStaticClassMethod(const uint8_t *mutf8Name) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindClassMethod<FindFilter::STATIC, MethodNameComp>(sd);
+}
+
+inline Method *Class::GetVirtualClassMethod(const uint8_t *mutf8Name) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindClassMethod<FindFilter::INSTANCE, MethodNameComp>(sd);
+}
+
+inline Method *Class::GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindClassMethod<FindFilter::ALL, MethodNameComp>(
+        sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
+}
+
+inline Method *Class::GetStaticClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindClassMethod<FindFilter::STATIC, MethodNameComp>(
+        sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
+}
+
+inline Method *Class::GetVirtualClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindClassMethod<FindFilter::INSTANCE, MethodNameComp>(
+        sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
+}
+
 inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8Name) const
 {
     panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
     return FindInterfaceMethod<FindFilter::ALL, MethodNameComp>(sd);
+}
+
+inline Method *Class::GetStaticInterfaceMethod(const uint8_t *mutf8Name) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindInterfaceMethod<FindFilter::STATIC, MethodNameComp>(sd);
+}
+
+inline Method *Class::GetVirtualInterfaceMethod(const uint8_t *mutf8Name) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindInterfaceMethod<FindFilter::INSTANCE, MethodNameComp>(sd);
+}
+
+inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindInterfaceMethod<FindFilter::ALL, MethodNameComp>(
+        sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
+}
+
+inline Method *Class::GetStaticInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindInterfaceMethod<FindFilter::STATIC, MethodNameComp>(
+        sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
+}
+
+inline Method *Class::GetVirtualInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const
+{
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+    return FindInterfaceMethod<FindFilter::INSTANCE, MethodNameComp>(
+        sd, [&proto](const Method &method) { return method.GetProtoId() == proto; });
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical

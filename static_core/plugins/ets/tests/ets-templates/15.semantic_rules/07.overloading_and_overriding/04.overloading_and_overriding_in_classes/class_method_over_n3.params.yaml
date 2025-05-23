@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,29 +21,29 @@ cases:
           class C implements I {}
           class Base<T,S> {
               foo(i: T, j: S) {
-                res == 11;
+                res = 11;
               }
 
-              static foo(i: T, j: S) {
-                res == 12;
+              static foo<X,Y>(i: X, j: Y) {
+                res = 12;
               }
           }
           class Derived<T,S> extends Base<T,S> {
               foo(i: T, j: S) {
-                res == 21;
+                res = 21;
               }
 
-              static foo(i: T, j: S) {
-                res == 22;
+              static foo<X,Y>(i: X, j: Y) {
+                res = 22;
               }
           }
       use: |-
           new Derived<A, B>().foo(new A(), new B());
-          assert(res == 21);
+          assertEQ( res, 21);
           new Derived<B, I>().foo(new B(), new C());
-          assert(res == 21);
+          assertEQ( res, 21);
           Derived.foo(new Number(), new String());
-          assert(res == 22);
+          assertEQ( res, 22);
 
     - doc: Override as type parameter of derived class function is contravariant to those used in base class
       decl: |-
@@ -51,31 +51,31 @@ cases:
           class B extends A {}
           class Base {
               foo(i: B) {
-                res == 11;
+                res = 11;
               }
 
               static foo(i: B) {
-                res == 12;
+                res = 12;
               }
           }
           class Derived extends Base {
-              foo(i: B) {
-                res == 21;
+              foo(i: A) {
+                res = 21;
               }
 
-              static foo(i: B) {
-                res == 22;
+              static foo(i: A) {
+                res = 22;
               }
           }
       use: |-
           new Derived().foo(new A());
-          assert(res == 21);
+          assertEQ( res, 21);
           new Derived().foo(new B());
-          assert(res == 21);
+          assertEQ( res, 21);
           Derived.foo(new A());
-          assert(res == 22);
+          assertEQ( res, 22);
           Derived.foo(new B());
-          assert(res == 22);
+          assertEQ( res, 22);
 
     - doc: Override as type parameter of derived class function is invariant to those used in base class
       decl: |-
@@ -83,32 +83,32 @@ cases:
           class A implements I {}
           class Base {
               foo(i: I) {
-                res == 11;
+                res = 11;
               }
 
               static foo(i: I) {
-                res == 12;
+                res = 12;
               }
           }
           class Derived extends Base {
               foo(i: I) {
-                res == 21;
+                res = 21;
               }
 
               static foo(i: I) {
-                res == 22;
+                res = 22;
               }
           }
       use: |-
           new Derived().foo(new A());
-          assert(res == 21);
+          assertEQ( res, 21);
           let i: I = new A();
           new Derived().foo(i);
-          assert(res == 21);
+          assertEQ( res, 21);
           Derived.foo(new A());
-          assert(res == 22);
+          assertEQ( res, 22);
           Derived.foo(i);
-          assert(res == 22);
+          assertEQ( res, 22);
 
     - doc: Overload as type parameter of derived class function is covariant to those used in base class
       decl: |-
@@ -116,32 +116,32 @@ cases:
           class A implements I {}
           class Base {
               foo(i: A) {
-                res == 11;
+                res = 11;
               }
 
               static foo(i: A) {
-                res == 12;
+                res = 12;
               }
           }
           class Derived extends Base {
               foo(i: I) {
-                res == 21;
+                res = 21;
               }
 
               static foo(i: I) {
-                res == 22;
+                res = 22;
               }
           }
       use: |-
           let i: I = new A();
           new Derived().foo(i);
-          assert(res == 21);
+          assertEQ( res, 21);
           new Derived().foo(new A());
-          assert(res == 11);
-          Derived.foo(i);
-          assert(res == 22);
+          assertEQ( res, 21);
+          Derived.foo(i as I);
+          assertEQ( res, 22);
           Derived.foo(new A());
-          assert(res == 12);
+          assertEQ( res, 12);
 
     - doc: Overload due to the different number of type parameters
       decl: |-
@@ -150,31 +150,31 @@ cases:
           interface I {}
           class Base<T,S> {
               foo(i: T, j: S) {
-                res == 11;
+                res = 11;
               }
 
-              static foo(i: T, j: S) {
-                res == 12;
+              static foo<X,Y>(i: X, j: Y) {
+                res = 12;
               }
           }
           class Derived<T,S> extends Base<T,S> {
               foo(i: T) {
-                res == 21;
+                res = 21;
               }
 
-              static foo(i: T) {
-                res == 22;
+              static foo<X>(i: X) {
+                res = 22;
               }
           }
       use: |-
           new Derived<A, B>().foo(new A(), new B());
-          assert(res == 11);
+          assertEQ( res, 11);
           new Derived<A, B>().foo(new A());
-          assert(res == 21);
-          Derived<A, B>.foo(new A(), new B());
-          assert(res == 11);
-          Derived<A, B>.foo(new A());
-          assert(res == 22);
+          assertEQ( res, 21);
+          Derived.foo<A, B>(new A(), new B());
+          assertEQ( res, 12);
+          Derived.foo<A>(new A());
+          assertEQ( res, 22);
 
     - doc: |-
           Override failed due to different return value types.
@@ -185,12 +185,12 @@ cases:
           class B extends A {}
           class Base<T,S> {
               foo(i: T, j: S) {
-                res == 11;
+                res = 11;
               }
           }
           class Derived<T,S> extends Base<T,S> {
               foo(i: T, j: S): int {
-                res == 21;
+                res = 21;
                 return 1;
               }
           }
@@ -204,19 +204,19 @@ cases:
           class B extends A {}
           class Base<T, S> {
               foo(i: T, j: S): A {
-                res == 11;
+                res = 11;
                 return new A();
               }
           }
           class Derived<T, S> extends Base<T, S> {
               foo(i: T, j: S): B {
-                res == 21;
+                res = 21;
                 return new B();
               }
           }
       use: |-
           new Derived<Number, String>().foo(new Number(), new String());
-          assert(res == 21);
+          assertEQ( res, 21);
 
     - doc: |-
           Base method is overridden as A invariant to A.
@@ -225,19 +225,19 @@ cases:
           class B extends A {}
           class Base<T,S> {
               foo(i: T, j: S): A {
-                res == 11;
+                res = 11;
                 return new A();
               }
           }
           class Derived<T,S> extends Base<T,S> {
               foo(i: T, j: S): A {
-                res == 21;
+                res = 21;
                 return new A();
               }
           }
       use: |-
           new Derived<A,B>().foo(new A(), new B());
-          assert(res == 21);
+          assertEQ( res, 21);
 
     - doc: |-
           Override failed as A contravariant to B.
@@ -248,13 +248,13 @@ cases:
           class B extends A {}
           class Base<T, S> {
               foo(i: T, j: S): B {
-                res == 11;
+                res = 11;
                 return new B();
               }
           }
           class Derived<T, S> extends Base<T, S> {
               foo(i: T, j: S): A {
-                res == 21;
+                res = 21;
                 return new A();
               }
           }
@@ -267,20 +267,20 @@ cases:
           class A {}
           class B extends A {}
           class Base<T,S> {
-              static foo(i: T, j: S): int {
-                res == 11;
+              static foo<X,Y>(i: X, j: Y): int {
+                res = 11;
                 return 1;
               }
           }
           class Derived<T,S> extends Base<T,S> {
-              static foo(i: S, j: T): float {
-                res == 21;
+              static foo<X,Y>(i: X, j: Y): float {
+                res = 21;
                 return 1.1 as float;
               }
           }
       use: |-
-          Derived<A,B>.foo(new A(), new B());
-          assert(res == 21);
+          Derived.foo(new A(), new B());
+          assertEQ( res, 21);
 
     # Tuple
     - doc: |-
@@ -301,9 +301,9 @@ cases:
           let tpl1: TPL_BF = [ true, 1.1 as float];
           let tpl2: TPL_FB = [ 1.1 as float, true];
           a.foo(tpl1);
-          assert(res == 11);
+          assertEQ( res, 11);
           a.foo(tpl2);
-          assert(res == 21);
+          assertEQ( res, 21);
 
     - doc: |-
           Overloading instance method having arguments of tuple with reference types.
@@ -327,9 +327,9 @@ cases:
           let tpl1: TPL_CE = [ new C(), new E() ];
           let tpl2: TPL_EC = [ new E(), new C() ];
           a.foo(tpl1);
-          assert(res == 11);
+          assertEQ( res, 11);
           a.foo(tpl2);
-          assert(res == 21);
+          assertEQ( res, 21);
 
     - doc: |-
           Overriding instance method having arguments of tuple with covariant reference types.
@@ -358,8 +358,8 @@ cases:
           let tpl2: TPL_DE = [ new D(), new E() ];
           let tpl3: TPL_CDE = [ new C(), new D(), new E() ];
           a.foo(tpl1);
-          assert(res == 22);
+          assertEQ( res, 11);
           a.foo(tpl2);
-          assert(res == 22);
+          assertEQ( res, 21);
           a.foo(tpl3);
-          assert(res == 23);
+          assertEQ( res, 22);

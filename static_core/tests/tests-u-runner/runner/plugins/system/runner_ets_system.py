@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,15 +32,15 @@ _LOGGER = logging.getLogger("runner.plugins.system.runner_ets_system")
 
 
 class SystemArkTSFlags(Enum):
-    ALL_WARNINGS = ["--ets-warnings-all"]
-    BOOST_EQUALITY_STATEMENTS = ["--ets-boost-equality-statement"]
-    IMPLICIT_BOXING_UNBOXING = ["--ets-implicit-boxing-unboxing"]
-    PROHIBIT_TOP_LEVEL_STATEMENTS = ["--ets-prohibit-top-level-statements"]
-    REMOVE_ASYNC = ["--ets-remove-async"]
-    REMOVE_LAMBDA = ["--ets-remove-lambda"]
-    SUGGEST_FINAL = ["--ets-suggest-final"]
-    SUPPRESSION_TESTS = ["--ets-warnings-all"]
-    WERROR_TESTS = ["--ets-warnings-all", "--ets-werror"]
+    ALL_WARNINGS = ["--ets-warnings"]
+    BOOST_EQUALITY_STATEMENTS = ["--ets-warnings:enable=ets-boost-equality-statement"]
+    IMPLICIT_BOXING_UNBOXING = ["--ets-warnings:enable=ets-implicit-boxing-unboxing"]
+    PROHIBIT_TOP_LEVEL_STATEMENTS = ["--ets-warnings:enable=ets-prohibit-top-level-statements"]
+    REMOVE_ASYNC = ["--ets-warnings:enable=ets-remove-async"]
+    REMOVE_LAMBDA = ["--ets-warnings:enable=ets-remove-lambda"]
+    SUGGEST_FINAL = ["--ets-warnings:enable=ets-suggest-final"]
+    SUPPRESSION_TESTS = ["--ets-warnings"]
+    WERROR_TESTS = ["--ets-warnings:werror"]
 
 
 class RunnerETSSystem(RunnerJS):
@@ -72,7 +72,7 @@ class RunnerETSSystem(RunnerJS):
         self.collect_ignored_test_lists()
 
         ets_flags = [
-            "--extension=sts",
+            "--extension=ets",
             "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
         ]
@@ -88,15 +88,15 @@ class RunnerETSSystem(RunnerJS):
 
         if config.es2panda.system:
             test_dirs = [
-                TestDirectory("all_warnings_tests", "sts", flags=all_warnings),
-                TestDirectory("boost_equal_statements_tests", "sts", flags=boost_equality_statements),
-                TestDirectory("implicit_boxing_unboxing_tests", "sts", flags=implicit_boxing_unboxing),
-                TestDirectory("prohibit_top_level_statements_tests", "sts", flags=prohibit_top_level),
-                TestDirectory("remove_async_tests", "sts", flags=remove_async),
-                TestDirectory("remove_lambda_tests", "sts", flags=remove_lambda),
-                TestDirectory("suggest_final_tests", "sts", flags=suggest_final),
-                TestDirectory("warnings_suppresion_tests", "sts", flags=suppression_tests),
-                TestDirectory("werror_tests", "sts", flags=werror_tests),
+                TestDirectory("all_warnings_tests", "ets", flags=all_warnings),
+                TestDirectory("boost_equal_statements_tests", "ets", flags=boost_equality_statements),
+                TestDirectory("implicit_boxing_unboxing_tests", "ets", flags=implicit_boxing_unboxing),
+                TestDirectory("prohibit_top_level_statements_tests", "ets", flags=prohibit_top_level),
+                TestDirectory("remove_async_tests", "ets", flags=remove_async),
+                TestDirectory("remove_lambda_tests", "ets", flags=remove_lambda),
+                TestDirectory("suggest_final_tests", "ets", flags=suggest_final),
+                TestDirectory("warnings_suppresion_tests", "ets", flags=suppression_tests),
+                TestDirectory("werror_tests", "ets", flags=werror_tests),
             ]
             self.add_directories(test_dirs)
 

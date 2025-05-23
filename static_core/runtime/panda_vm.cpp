@@ -126,6 +126,12 @@ void PandaVM::ClearMarkQueue()
     markQueue_.clear();
 }
 
+void PandaVM::FreeInternalResources()
+{
+    // Run monitor deflation first
+    GetMonitorPool()->DeflateMonitors();
+}
+
 LoadableAgentHandle PandaVM::CreateDebuggerAgent()
 {
     if (!Runtime::GetOptions().GetDebuggerLibraryPath().empty()) {

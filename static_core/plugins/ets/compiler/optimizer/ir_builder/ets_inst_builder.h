@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,12 @@ template <bool IS_ABC_KIT = false>
 IntrinsicInst *CreateStObjByNameIntrinsic(size_t pc, compiler::DataType::Type type);
 template <bool IS_ABC_KIT = false>
 void BuildStObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
-virtual void BuildIsUndefined(const BytecodeInstruction *bcInst);
-
+template <bool IS_RANGE>
+void BuildCallByName(const BytecodeInstruction *bcInst);
+virtual void BuildIsNullValue(const BytecodeInstruction *bcInst);
+template <bool IS_STRICT = false>
 void BuildEquals(const BytecodeInstruction *bcInst);
+void BuildTypeof(const BytecodeInstruction *bcInst);
+void BuildIstrue(const BytecodeInstruction *bcInst);
 
 #endif  // PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H

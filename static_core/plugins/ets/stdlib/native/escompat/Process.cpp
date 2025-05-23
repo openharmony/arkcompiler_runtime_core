@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "libpandabase/os/system_environment.h"
 #include "libpandabase/os/time.h"
 #include "plugins/ets/stdlib/native/escompat/Process.h"
+#include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 
 namespace ark::ets::stdlib {
 
@@ -53,49 +54,50 @@ static auto GetPipeHandler(int stdOutFdIn, int stdOutFdOut, int stdErrFdIn, int 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 os::memory::Mutex g_terminatedChildSetLock {};
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::set<ets_double> g_terminatedChildSet GUARDED_BY(g_terminatedChildSetLock) {};
+static std::set<ani_double> g_terminatedChildSet GUARDED_BY(g_terminatedChildSetLock) {};
 
-static void SpawnChildProcess(EtsEnv *env, ets_object child, ets_string cmd, ets_int timeout, ets_int signal)
+static void SpawnChildProcess(ani_env *env, ani_object child, ani_string cmd, ani_int timeout, ani_int signal)
 {
     auto stdOutFd = os::CreatePipe();
     if (!stdOutFd.first.IsValid()) {
-        env->ThrowErrorNew(env->FindClass("std/core/RuntimeException"), "Failed to create a child process");
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to create a child process", "Lstd/core/String;:V");
         return;
     }
     auto stdErrFd = os::CreatePipe();
     if (!stdErrFd.first.IsValid()) {
-        env->ThrowErrorNew(env->FindClass("std/core/RuntimeException"), "Failed to create a child process");
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to create a child process", "Lstd/core/String;:V");
         return;
     }
 
     auto pipeHandler =
         GetPipeHandler(stdOutFd.first.Get(), stdOutFd.second.Get(), stdErrFd.first.Get(), stdErrFd.second.Get());
 
-    const char *cmdString = env->GetStringUTFChars(cmd, nullptr);
-    auto result = ark::os::exec::ExecWithCallbackNoWait(pipeHandler, "/bin/sh", "-c", cmdString);
-    env->ReleaseStringUTFChars(cmd, cmdString);
+    auto cmdString = ConvertFromAniString(env, cmd);
+    auto result = ark::os::exec::ExecWithCallbackNoWait(pipeHandler, "/bin/sh", "-c", cmdString.c_str());
+
     stdOutFd.second.Reset();
     stdErrFd.second.Reset();
 
-    auto childKlass = env->GetObjectClass(child);
     if (result.HasValue()) {
-        env->SetDoubleField(child, env->Getp_field(childKlass, "pid", "D"), result.Value());
+        ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Double(child, "pid", result.Value()));
     } else {
         stdOutFd.first.Reset();
         stdErrFd.first.Reset();
-        env->ThrowErrorNew(env->FindClass("std/core/RuntimeException"), "Failed to create a child process");
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to create a child process", "Lstd/core/String;:V");
         return;
     }
 
-    env->SetDoubleField(child, env->Getp_field(childKlass, "ppid", "D"), ark::os::thread::GetPid());
-    env->SetIntField(child, env->Getp_field(childKlass, "outFd", "I"), stdOutFd.first.Release());
-    env->SetIntField(child, env->Getp_field(childKlass, "errorFd", "I"), stdErrFd.first.Release());
+    ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Double(child, "ppid", ark::os::thread::GetPid()));
+    ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "outFd", stdOutFd.first.Release()));
+    ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "errorFd", stdErrFd.first.Release()));
 
     if (timeout == 0) {
         return;
     }
 
-    auto pidToTerminate = env->GetDoubleField(child, env->Getp_field(childKlass, "pid", "D"));
+    ani_double pidToTerminate;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Double(child, "pid", &pidToTerminate));
+
     auto terminator = [timeout, signal, pidToTerminate] {
         ark::os::thread::NativeSleep(timeout);
         os::memory::LockHolder lock {g_terminatedChildSetLock};
@@ -111,44 +113,54 @@ static void SpawnChildProcess(EtsEnv *env, ets_object child, ets_string cmd, ets
     timeoutListener.detach();
 }
 
-static void ReadFinalizer(EtsEnv *env, ets_object child, bool isStdErr)
+static void ReadFinalizer(ani_env *env, ani_object child, bool isStdErr)
 {
     bool terminated = false;
-    auto childKlass = env->GetObjectClass(child);
-    if (env->GetDoubleField(child, env->Getp_field(childKlass, "exitCode", "D")) > -1) {
+
+    ani_double exitCode;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Double(child, "exitCode", &exitCode));
+
+    if (exitCode > -1) {
         terminated = true;
     } else {
         os::memory::LockHolder lock {g_terminatedChildSetLock};
-        auto pidId = env->Getp_field(childKlass, "pid", "D");
-        terminated = g_terminatedChildSet.count(env->GetDoubleField(child, pidId)) != 0U;
+        ani_double pid;
+        ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Double(child, "pid", &pid));
+        terminated = g_terminatedChildSet.count(pid) != 0U;
     }
 
     if (terminated) {
         std::string fdName = isStdErr ? "errorFd" : "outFd";
-        ets_field fdId = env->Getp_field(childKlass, fdName.c_str(), "I");
-        auto fd = env->GetIntField(child, fdId);
+        ani_int fd;
+        ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Int(child, fdName.data(), &fd));
         ark::os::unique_fd::UniqueFd out {fd};
         out.Reset();
-        env->SetIntField(child, fdId, -1);
+        ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, fdName.data(), -1));
     }
 }
 
-static void ReadChildProcessStdOut(EtsEnv *env, ets_object child)
+static void ReadChildProcessStdOut(ani_env *env, ani_object child)
 {
-    auto childKlass = env->GetObjectClass(child);
-    ets_field outFdId = env->Getp_field(childKlass, "outFd", "I");
-    auto fd = env->GetIntField(child, outFdId);
+    ani_int fd;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Int(child, "outFd", &fd));
     if (fd == -1) {
         return;
     }
 
-    auto bufferObject = env->GetObjectField(child, env->Getp_field(childKlass, "outBuffer", "Lescompat/ArrayBuffer;"));
-    auto arrayBufferClass = env->GetObjectClass(bufferObject);
-    auto arrayBufferDataId = env->Getp_field(arrayBufferClass, "data", "[B");
-    ASSERT(arrayBufferDataId);
+    ani_ref bufferObject;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(child, "outBuffer", &bufferObject));
+
+    ani_ref outBuffer;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(bufferObject), "data", &outBuffer));
+
     while (true) {
-        auto outBytesRead = env->GetIntField(child, env->Getp_field(childKlass, "outBytesRead", "I"));
-        auto outBufferLength = env->GetIntField(bufferObject, env->Getp_field(arrayBufferClass, "_byteLength", "I"));
+        ani_int outBytesRead;
+        ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Int(child, "outBytesRead", &outBytesRead));
+
+        ani_int outBufferLength;
+        ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Int(reinterpret_cast<ani_object>(bufferObject), "_byteLength",
+                                                          &outBufferLength));
+
         if (outBytesRead >= outBufferLength) {
             break;
         }
@@ -165,30 +177,43 @@ static void ReadChildProcessStdOut(EtsEnv *env, ets_object child)
             bytesRead = outBufferLength - outBytesRead;
             ark::os::unique_fd::UniqueFd out {fd};
             out.Reset();
-            env->SetIntField(child, outFdId, -1);
+            ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "outFd", -1));
         }
-        auto outBuffer = reinterpret_cast<ets_byteArray>(env->GetObjectField(bufferObject, arrayBufferDataId));
-        env->SetByteArrayRegion(outBuffer, outBytesRead, bytesRead, buffer.data());
-        env->SetIntField(child, env->Getp_field(childKlass, "outBytesRead", "I"), outBytesRead + bytesRead);
+
+        ANI_FATAL_IF_ERROR(env->Array_SetRegion_Byte(reinterpret_cast<ani_array_byte>(outBuffer), outBytesRead,
+                                                     bytesRead, buffer.data()));
+        ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "outBytesRead", outBytesRead + bytesRead));
     }
 }
 
-static void ReadChildProcessStdErr(EtsEnv *env, ets_object child)
+static void ReadChildProcessStdErr(ani_env *env, ani_object child)
 {
-    auto childKlass = env->GetObjectClass(child);
-    ets_field errFdId = env->Getp_field(childKlass, "errorFd", "I");
-    auto fd = env->GetIntField(child, errFdId);
+    ani_int fd;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Int(child, "errorFd", &fd));
     if (fd == -1) {
         return;
     }
 
-    auto bufferObject = env->GetObjectField(child, env->Getp_field(childKlass, "errBuffer", "Lescompat/ArrayBuffer;"));
-    auto arrayBufferClass = env->GetObjectClass(bufferObject);
-    auto arrayBufferDataId = env->Getp_field(arrayBufferClass, "data", "[B");
-    ASSERT(arrayBufferDataId);
+    ani_ref bufferObject;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(child, "errBuffer", &bufferObject));
+
+    ani_ref errBuffer;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(bufferObject), "data", &errBuffer));
+
+    ani_type childClassType;
+    ANI_FATAL_IF_ERROR(env->Object_GetType(child, &childClassType));
+
+    ani_field errBytesReadId;
+    ANI_FATAL_IF_ERROR(env->Class_FindField(static_cast<ani_class>(childClassType), "errBytesRead", &errBytesReadId));
+
     while (true) {
-        auto errBytesRead = env->GetIntField(child, env->Getp_field(childKlass, "errBytesRead", "I"));
-        auto errBufferLength = env->GetIntField(bufferObject, env->Getp_field(arrayBufferClass, "_byteLength", "I"));
+        ani_int errBytesRead;
+        ANI_FATAL_IF_ERROR(env->Object_GetField_Int(child, errBytesReadId, &errBytesRead));
+
+        ani_int errBufferLength;
+        ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Int(reinterpret_cast<ani_object>(bufferObject), "_byteLength",
+                                                          &errBufferLength));
+
         if (errBytesRead >= errBufferLength) {
             break;
         }
@@ -206,29 +231,35 @@ static void ReadChildProcessStdErr(EtsEnv *env, ets_object child)
 
             ark::os::unique_fd::UniqueFd out {fd};
             out.Reset();
-            env->SetIntField(child, errFdId, -1);
+            ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "errorFd", -1));
         }
-        auto errBuffer = reinterpret_cast<ets_byteArray>(env->GetObjectField(bufferObject, arrayBufferDataId));
 
-        env->SetByteArrayRegion(errBuffer, errBytesRead, bytesRead, buffer.data());
-        env->SetIntField(child, env->Getp_field(childKlass, "errBytesRead", "I"), errBytesRead + bytesRead);
+        ANI_FATAL_IF_ERROR(env->Array_SetRegion_Byte(reinterpret_cast<ani_array_byte>(errBuffer), errBytesRead,
+                                                     bytesRead, buffer.data()));
+        ANI_FATAL_IF_ERROR(env->Object_SetField_Int(child, errBytesReadId, errBytesRead + bytesRead));
     }
 }
 
-static void WaitChildProcess(EtsEnv *env, ets_object child)
+static void WaitChildProcess(ani_env *env, ani_object child)
 {
-    auto childKlass = env->GetObjectClass(child);
-    auto exitCodeId = env->Getp_field(childKlass, "exitCode", "D");
-    auto pidId = env->Getp_field(childKlass, "pid", "D");
-    auto pid = env->GetDoubleField(child, pidId);
+    ani_double pid;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Double(child, "pid", &pid));
 
-    if (env->GetDoubleField(child, exitCodeId) < 0) {
+    ani_type childClassType;
+    ANI_FATAL_IF_ERROR(env->Object_GetType(child, &childClassType));
+
+    ani_field exitCodeId;
+    ANI_FATAL_IF_ERROR(env->Class_FindField(static_cast<ani_class>(childClassType), "exitCode", &exitCodeId));
+
+    ani_double exitCode;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Double(child, exitCodeId, &exitCode));
+
+    if (exitCode < 0) {
         auto result = ark::os::exec::Wait(pid, false);
         if (result.HasValue()) {
-            env->SetDoubleField(child, exitCodeId, result.Value());
+            ANI_FATAL_IF_ERROR(env->Object_SetField_Double(child, exitCodeId, result.Value()));
         } else {
-            auto exceptionClass = env->FindClass("std/core/RuntimeException");
-            env->ThrowErrorNew(exceptionClass, "Wait failed");
+            ThrowNewError(env, "Lstd/core/RuntimeException;", "Wait failed", "Lstd/core/String;:V");
             return;
         }
     }
@@ -242,36 +273,42 @@ static void WaitChildProcess(EtsEnv *env, ets_object child)
     }
 }
 
-static void KillChildProcess(EtsEnv *env, ets_object child, ets_int signal)
+static void KillChildProcess(ani_env *env, ani_object child, ani_int signal)
 {
     auto signalType = std::array {SIG_INT, SIG_QUIT, SIG_KILL, SIG_TERM};
 
     auto intSignal = static_cast<int>(signal);
-    auto childKlass = env->GetObjectClass(child);
-    auto pidId = env->Getp_field(childKlass, "pid", "D");
-    auto pid = env->GetDoubleField(child, pidId);
+
+    ani_double pid;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Double(child, "pid", &pid));
+
     if (ark::os::kill_process::Kill(pid, intSignal) == 0) {
         if (std::find(signalType.begin(), signalType.end(), intSignal) != signalType.end()) {
             os::memory::LockHolder lock {g_terminatedChildSetLock};
             g_terminatedChildSet.insert(pid);
         }
-        auto killedId = env->Getp_field(childKlass, "killed", "Z");
-        env->SetBooleanField(child, killedId, 1U);
+        ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Boolean(child, "killed", 1U));
         return;
     }
 
-    auto exceptionClass = env->FindClass("std/core/RuntimeException");
-    env->ThrowErrorNew(exceptionClass, "Kill failed");
+    ThrowNewError(env, "Lstd/core/RuntimeException;", "Kill failed", "Lstd/core/String;:V");
 }
 
-static void CloseChildProcess(EtsEnv *env, ets_object child)
+static void CloseChildProcess(ani_env *env, ani_object child)
 {
-    auto childKlass = env->GetObjectClass(child);
-    auto exitCodeId = env->Getp_field(childKlass, "exitCode", "D");
-    auto pidId = env->Getp_field(childKlass, "pid", "D");
-    auto pid = env->GetDoubleField(child, pidId);
+    ani_type childClassType;
+    ANI_FATAL_IF_ERROR(env->Object_GetType(child, &childClassType));
 
-    if (env->GetDoubleField(child, exitCodeId) > -1) {
+    ani_field exitCodeId;
+    ANI_FATAL_IF_ERROR(env->Class_FindField(static_cast<ani_class>(childClassType), "exitCode", &exitCodeId));
+
+    ani_double pid;
+    ANI_FATAL_IF_ERROR(env->Object_GetFieldByName_Double(child, "pid", &pid));
+
+    ani_double exitCode;
+    ANI_FATAL_IF_ERROR(env->Object_GetField_Double(child, exitCodeId, &exitCode));
+
+    if (exitCode > -1) {
         return;
     }
 
@@ -285,57 +322,50 @@ static void CloseChildProcess(EtsEnv *env, ets_object child)
 
     auto status = ark::os::kill_process::Close(pid);
     if (LIKELY(status != -1)) {
-        env->SetDoubleField(child, exitCodeId, status);
+        ANI_FATAL_IF_ERROR(env->Object_SetField_Double(child, exitCodeId, status));
         return;
     }
 
-    auto exceptionClass = env->FindClass("std/core/RuntimeException");
-    env->ThrowErrorNew(exceptionClass, "Close failed");
+    ThrowNewError(env, "Lstd/core/RuntimeException;", "Close failed", "Lstd/core/String;:V");
 }
 
-static ets_double PManagerGetUidForName(EtsEnv *env, [[maybe_unused]] ets_object process, ets_string name)
+static ani_double PManagerGetUidForName(ani_env *env, [[maybe_unused]] ani_object process, ani_string name)
 {
-    const char *str = env->GetStringUTFChars(name, nullptr);
+    auto str = ConvertFromAniString(env, name);
     auto result = ark::os::system_environment::GetUidForName(str);
-    env->ReleaseStringUTFChars(name, str);
-
     return result;
 }
 
-static ets_double PManagerGetThreadPriority([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process,
-                                            ets_double tid)
+static ani_double PManagerGetThreadPriority([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process,
+                                            ani_double tid)
 {
     return ark::os::thread::GetPriority(tid);
 }
 
-static ets_double PManagerGetSystemConfig([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process,
-                                          ets_double name)
+static ani_double PManagerGetSystemConfig([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process,
+                                          ani_double name)
 {
     return ark::os::system_environment::GetSystemConfig(name);
 }
 
-static ets_string PManagerGetEnvironmentVar(EtsEnv *env, [[maybe_unused]] ets_object process, ets_string name)
+static ani_string PManagerGetEnvironmentVar(ani_env *env, [[maybe_unused]] ani_object process, ani_string name)
 {
-    const char *str = env->GetStringUTFChars(name, nullptr);
-    auto result = env->NewStringUTF(ark::os::system_environment::GetEnvironmentVar(std::string(str).c_str()).c_str());
-    env->ReleaseStringUTFChars(name, str);
-
-    return result;
+    auto str = ConvertFromAniString(env, name);
+    auto envVar = ark::os::system_environment::GetEnvironmentVar(str.c_str());
+    return CreateUtf8String(env, envVar.data(), envVar.size());
 }
 
-static void PManagerExit([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process, ets_double code)
+static void PManagerExit([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process, ani_double code)
 {
     std::exit(code);
 }
 
-static ets_boolean PManagerKill(EtsEnv *env, [[maybe_unused]] ets_object process, ets_double signal, ets_double pid)
+static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object process, ani_double signal, ani_double pid)
 {
     int integerPid = static_cast<int>(pid);
     auto ownPid = ark::os::thread::GetPid();
     if (integerPid == 0 || integerPid == -1 || integerPid == ownPid || integerPid == -ownPid) {
-        auto exceptionClass = env->FindClass("std/core/IllegalArgumentException");
-        env->ThrowErrorNew(exceptionClass, "Invalid pid argument");
-
+        ThrowNewError(env, "Lstd/core/IllegalArgumentException;", "Invalid pid argument", "Lstd/core/String;:V");
         return 0U;
     }
 
@@ -343,152 +373,156 @@ static ets_boolean PManagerKill(EtsEnv *env, [[maybe_unused]] ets_object process
     constexpr int MAX_SINAL_VALUE = 64;
 
     if (std::trunc(signal) != signal || signal < MIN_SIGNAL_VALUE || signal > MAX_SINAL_VALUE) {
-        auto exceptionClass = env->FindClass("std/core/IllegalArgumentException");
-        env->ThrowErrorNew(exceptionClass, "Invalid signal argument");
-
+        ThrowNewError(env, "Lstd/core/IllegalArgumentException;", "Invalid signal argument", "Lstd/core/String;:V");
         return 0U;
     }
 
-    return static_cast<ets_boolean>(ark::os::kill_process::Kill(integerPid, signal) == 0);
+    return static_cast<ani_boolean>(ark::os::kill_process::Kill(integerPid, signal) == 0);
 }
 
-static ets_double GetTid([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetTid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::thread::GetCurrentThreadId();
 }
 
-static ets_double GetPid([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetPid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::thread::GetPid();
 }
 
-static ets_double GetPPid([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetPPid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::thread::GetPPid();
 }
 
-static ets_double GetUid([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetUid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::thread::GetUid();
 }
 
-static ets_double GetEuid([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetEuid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::thread::GetEuid();
 }
 
-static ets_double GetGid([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetGid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::thread::GetGid();
 }
 
-static ets_double GetEgid([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetEgid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::thread::GetEgid();
 }
 
-static ets_doubleArray GetGroupIDs(EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_array_double GetGroupIDs(ani_env *env, [[maybe_unused]] ani_object process)
 {
     auto groups = ark::os::thread::GetGroups();
-    auto groupIds = std::vector<ets_double>(groups.begin(), groups.end());
+    auto groupIds = std::vector<ani_double>(groups.begin(), groups.end());
 
-    auto result = env->NewDoubleArray(groups.size());
+    ani_array_double result;
+    ANI_FATAL_IF_ERROR(env->Array_New_Double(groups.size(), &result));
 
     if (groups.empty()) {
-        auto exceptionClass = env->FindClass("std/core/RuntimeException");
-        env->ThrowErrorNew(exceptionClass, "Failed to get process groups");
+        ThrowNewError(env, "Lstd/core/RuntimeException;", "Failed to get process groups", "Lstd/core/String;:V");
         return result;
     }
 
-    env->SetDoubleArrayRegion(result, 0, groups.size(), groupIds.data());
+    ANI_FATAL_IF_ERROR(env->Array_SetRegion_Double(result, 0, groups.size(), groupIds.data()));
 
     return result;
 }
 
-static ets_boolean Is64BitProcess([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_boolean Is64BitProcess([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     constexpr int SIZE_OF_64_BIT_PTR = 8;
-    return static_cast<ets_boolean>(sizeof(char *) == SIZE_OF_64_BIT_PTR);
+    return static_cast<ani_boolean>(sizeof(char *) == SIZE_OF_64_BIT_PTR);
 }
 
-static ets_double GetProcessStartRealTime([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetProcessStartRealTime([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     return ark::os::time::GetStartRealTime<std::chrono::milliseconds>();
 }
 
-static ets_double GetProcessPastCpuTime([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetProcessPastCpuTime([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     constexpr int PROCESS_CLOCK = 2;
     return ark::os::time::GetClockTime<std::chrono::milliseconds>(PROCESS_CLOCK);
 }
 
-static void AbortProcess([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static void AbortProcess([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     std::abort();
 }
 
-static ets_string GetCurrentWorkingDirectory(EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_string GetCurrentWorkingDirectory(ani_env *env, [[maybe_unused]] ani_object process)
 {
-    return env->NewStringUTF(ark::os::GetCurrentWorkingDirectory().c_str());
+    auto workDir = ark::os::GetCurrentWorkingDirectory();
+    return CreateUtf8String(env, workDir.data(), workDir.size());
 }
 
-static void ChangeCurrentWorkingDirectory(EtsEnv *env, [[maybe_unused]] ets_object process, ets_string path)
+static void ChangeCurrentWorkingDirectory(ani_env *env, [[maybe_unused]] ani_object process, ani_string path)
 {
-    const char *str = env->GetStringUTFChars(path, nullptr);
+    auto str = ConvertFromAniString(env, path);
     os::ChangeCurrentWorkingDirectory(str);
-    env->ReleaseStringUTFChars(path, str);
 }
 
-static ets_double GetSystemUptime([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_object process)
+static ani_double GetSystemUptime([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process)
 {
     constexpr int BOOTTIME_CLOCK = 7;
     return ark::os::time::GetClockTime<std::chrono::milliseconds>(BOOTTIME_CLOCK);
 }
 
-void RegisterProcessNativeMethods(EtsEnv *env)
+void RegisterProcessNativeMethods(ani_env *env)
 {
     const auto childProcessImpls =
-        std::array {EtsNativeMethod {"readOutput", nullptr, reinterpret_cast<void *>(ReadChildProcessStdOut)},
-                    EtsNativeMethod {"readErrorOutput", nullptr, reinterpret_cast<void *>(ReadChildProcessStdErr)},
-                    EtsNativeMethod {"close", nullptr, reinterpret_cast<void *>(CloseChildProcess)},
-                    EtsNativeMethod {"killImpl", nullptr, reinterpret_cast<void *>(KillChildProcess)},
-                    EtsNativeMethod {"spawn", nullptr, reinterpret_cast<void *>(SpawnChildProcess)},
-                    EtsNativeMethod {"waitImpl", nullptr, reinterpret_cast<void *>(WaitChildProcess)}};
+        std::array {ani_native_function {"readOutput", ":V", reinterpret_cast<void *>(ReadChildProcessStdOut)},
+                    ani_native_function {"readErrorOutput", ":V", reinterpret_cast<void *>(ReadChildProcessStdErr)},
+                    ani_native_function {"close", ":V", reinterpret_cast<void *>(CloseChildProcess)},
+                    ani_native_function {"killImpl", "I:V", reinterpret_cast<void *>(KillChildProcess)},
+                    ani_native_function {"spawn", "Lstd/core/String;II:V", reinterpret_cast<void *>(SpawnChildProcess)},
+                    ani_native_function {"waitImpl", ":D", reinterpret_cast<void *>(WaitChildProcess)}};
 
     const auto processManagerImpls = std::array {
-        EtsNativeMethod {"getUidForName", nullptr, reinterpret_cast<void *>(PManagerGetUidForName)},
-        EtsNativeMethod {"getThreadPriority", nullptr, reinterpret_cast<void *>(PManagerGetThreadPriority)},
-        EtsNativeMethod {"getSystemConfig", nullptr, reinterpret_cast<void *>(PManagerGetSystemConfig)},
-        EtsNativeMethod {"getEnvironmentVar", nullptr, reinterpret_cast<void *>(PManagerGetEnvironmentVar)},
-        EtsNativeMethod {"exit", nullptr, reinterpret_cast<void *>(PManagerExit)},
-        EtsNativeMethod {"kill", nullptr, reinterpret_cast<void *>(PManagerKill)},
+        ani_native_function {"getUidForName", "Lstd/core/String;:D", reinterpret_cast<void *>(PManagerGetUidForName)},
+        ani_native_function {"getThreadPriority", "D:D", reinterpret_cast<void *>(PManagerGetThreadPriority)},
+        ani_native_function {"getSystemConfig", "D:D", reinterpret_cast<void *>(PManagerGetSystemConfig)},
+        ani_native_function {"getEnvironmentVar", "Lstd/core/String;:Lstd/core/String;",
+                             reinterpret_cast<void *>(PManagerGetEnvironmentVar)},
+        ani_native_function {"exit", "D:V", reinterpret_cast<void *>(PManagerExit)},
+        ani_native_function {"kill", "DD:Z", reinterpret_cast<void *>(PManagerKill)},
     };
 
-    const auto processImpls =
-        std::array {EtsNativeMethod {"getTidImpl", nullptr, reinterpret_cast<void *>(GetTid)},
-                    EtsNativeMethod {"getPidImpl", nullptr, reinterpret_cast<void *>(GetPid)},
-                    EtsNativeMethod {"getPpidImpl", nullptr, reinterpret_cast<void *>(GetPPid)},
-                    EtsNativeMethod {"getUidImpl", nullptr, reinterpret_cast<void *>(GetUid)},
-                    EtsNativeMethod {"getEuidImpl", nullptr, reinterpret_cast<void *>(GetEuid)},
-                    EtsNativeMethod {"getGidImpl", nullptr, reinterpret_cast<void *>(GetGid)},
-                    EtsNativeMethod {"getEgidImpl", nullptr, reinterpret_cast<void *>(GetEgid)},
-                    EtsNativeMethod {"getGroupsImpl", nullptr, reinterpret_cast<void *>(GetGroupIDs)},
-                    EtsNativeMethod {"is64Bit", nullptr, reinterpret_cast<void *>(Is64BitProcess)},
-                    EtsNativeMethod {"getStartRealtime", nullptr, reinterpret_cast<void *>(GetProcessStartRealTime)},
-                    EtsNativeMethod {"getPastCpuTime", nullptr, reinterpret_cast<void *>(GetProcessPastCpuTime)},
-                    EtsNativeMethod {"abort", nullptr, reinterpret_cast<void *>(AbortProcess)},
-                    EtsNativeMethod {"cwd", nullptr, reinterpret_cast<void *>(GetCurrentWorkingDirectory)},
-                    EtsNativeMethod {"chdir", nullptr, reinterpret_cast<void *>(ChangeCurrentWorkingDirectory)},
-                    EtsNativeMethod {"uptime", nullptr, reinterpret_cast<void *>(GetSystemUptime)}};
+    const auto processImpls = std::array {
+        ani_native_function {"getTidImpl", ":D", reinterpret_cast<void *>(GetTid)},
+        ani_native_function {"getPidImpl", ":D", reinterpret_cast<void *>(GetPid)},
+        ani_native_function {"getPpidImpl", ":D", reinterpret_cast<void *>(GetPPid)},
+        ani_native_function {"getUidImpl", ":D", reinterpret_cast<void *>(GetUid)},
+        ani_native_function {"getEuidImpl", ":D", reinterpret_cast<void *>(GetEuid)},
+        ani_native_function {"getGidImpl", ":D", reinterpret_cast<void *>(GetGid)},
+        ani_native_function {"getEgidImpl", ":D", reinterpret_cast<void *>(GetEgid)},
+        ani_native_function {"getGroupsImpl", ":[D", reinterpret_cast<void *>(GetGroupIDs)},
+        ani_native_function {"is64Bit", ":Z", reinterpret_cast<void *>(Is64BitProcess)},
+        ani_native_function {"getStartRealtime", ":D", reinterpret_cast<void *>(GetProcessStartRealTime)},
+        ani_native_function {"getPastCpuTime", ":D", reinterpret_cast<void *>(GetProcessPastCpuTime)},
+        ani_native_function {"abort", ":V", reinterpret_cast<void *>(AbortProcess)},
+        ani_native_function {"cwd", ":Lstd/core/String;", reinterpret_cast<void *>(GetCurrentWorkingDirectory)},
+        ani_native_function {"chdir", "Lstd/core/String;:V", reinterpret_cast<void *>(ChangeCurrentWorkingDirectory)},
+        ani_native_function {"uptime", ":D", reinterpret_cast<void *>(GetSystemUptime)}};
 
-    auto childProcessKlass = env->FindClass("escompat/ChildProcess");
-    env->RegisterNatives(childProcessKlass, childProcessImpls.data(), childProcessImpls.size());
+    ani_class childProcessKlass;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lescompat/StdProcess/ChildProcess;", &childProcessKlass));
+    ANI_FATAL_IF_ERROR(
+        env->Class_BindNativeMethods(childProcessKlass, childProcessImpls.data(), childProcessImpls.size()));
 
-    auto processManagerKlass = env->FindClass("escompat/ProcessManager");
-    env->RegisterNatives(processManagerKlass, processManagerImpls.data(), processManagerImpls.size());
+    ani_class processManagerKlass;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lescompat/StdProcess/ProcessManager;", &processManagerKlass));
+    ANI_FATAL_IF_ERROR(
+        env->Class_BindNativeMethods(processManagerKlass, processManagerImpls.data(), processManagerImpls.size()));
 
-    auto processKlass = env->FindClass("escompat/process");
-    env->RegisterNatives(processKlass, processImpls.data(), processImpls.size());
+    ani_class processKlass;
+    ANI_FATAL_IF_ERROR(env->FindClass("Lescompat/StdProcess/process;", &processKlass));
+    ANI_FATAL_IF_ERROR(env->Class_BindNativeMethods(processKlass, processImpls.data(), processImpls.size()));
 }
 
 }  // namespace ark::ets::stdlib

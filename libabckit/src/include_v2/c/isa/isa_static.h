@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,9 +79,10 @@ enum AbckitIsaApiStaticOpcode {
     ABCKIT_ISA_API_STATIC_OPCODE_LOADCONSTARRAY,
     ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST,
     ABCKIT_ISA_API_STATIC_OPCODE_ISINSTANCE,
-    ABCKIT_ISA_API_STATIC_OPCODE_ISUNDEFINED,
-    ABCKIT_ISA_API_STATIC_OPCODE_LOADUNDEFINED,
+    ABCKIT_ISA_API_STATIC_OPCODE_ISNULLVALUE,
+    ABCKIT_ISA_API_STATIC_OPCODE_LOADNULLVALUE,
     ABCKIT_ISA_API_STATIC_OPCODE_EQUALS,
+    ABCKIT_ISA_API_STATIC_OPCODE_STRICTEQUALS,
 
     /* Return: */
     ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID,
@@ -593,12 +594,12 @@ struct AbckitIsaApiStatic {
                                      AbckitType *targetType /* in */);
 
     /**
-     * @brief Creates `LoadUndefined` inst.
+     * @brief iCreateLoadNullValue.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
      */
-    AbckitInst *(*iCreateLoadUndefined)(AbckitGraph *graph /* in */);
+    AbckitInst *(*iCreateLoadNullValue)(AbckitGraph *graph /* in */);
 
     /**
      * @brief Creates `ReturnVoid` inst.
@@ -621,6 +622,19 @@ struct AbckitIsaApiStatic {
      * @note and `input1->graph` are not the same.
      */
     AbckitInst *(*iCreateEquals)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */);
+
+    /**
+     * @brief iCreateStrictEquals.
+     * @return AbckitInst *.
+     * @param [ in ] AbckitGraph *graph .
+     * @param [ in ]  AbckitInst *input0 .
+     * @param [ in ]  AbckitInst *input1 .
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input0  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     */
+    AbckitInst *(*iCreateStrictEquals)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */,
+                                       AbckitInst *input1 /* in */);
 
     /**
      * @brief Creates `CallStatic` inst.

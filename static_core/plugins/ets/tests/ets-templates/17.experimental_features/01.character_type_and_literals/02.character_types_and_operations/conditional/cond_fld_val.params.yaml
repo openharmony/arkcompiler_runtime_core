@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,17 +12,20 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0020'
       v2: c'\u0021'
       b: 'true'
       r: c' '
 
+    # 1.
     - v1: c'\u0020'
       v2: c'\uF041'
       b: 'false'
       r: c'A' + c'\uF000'
 
-    - v1: c'\uFFFE' + c'\u0023'
-      v2: c'\u0021' + c'\u0001'
+    # 2.
+    - v1: (c'\uFFFE' + c'\u0023') as char
+      v2: (c'\u0021' + c'\u0001') as char
       b: 'true'
       r: c'!'

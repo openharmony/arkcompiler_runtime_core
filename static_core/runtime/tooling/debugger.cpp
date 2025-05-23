@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -452,6 +452,7 @@ std::optional<Error> Debugger::EvaluateExpression(PtThread thread, uint32_t fram
         return ret.Error();
     }
 
+    // NOTE(dslynko, #22497): must select first non-boot context as target
     auto *ctx = ret.Value()->GetMethod()->GetClass()->GetLoadContext();
     auto optMethod = LoadExpressionBytecode(ctx, expr);
     if (!optMethod) {
@@ -701,14 +702,14 @@ void Debugger::HandleNotifyFramePop(ManagedThread *managedThread, Method *method
     }
 }
 
-static Field *ResolveField(ManagedThread *thread, const Method *caller, const BytecodeInstruction &inst)
+static Field *ResolveField(ManagedThread *thread, const Method *caller, const BytecodeInstruction &inst, bool isStatic)
 {
     auto propertyIndex = inst.GetId().AsIndex();
     auto propertyId = caller->GetClass()->ResolveFieldIndex(propertyIndex);
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     ASSERT(classLinker);
     ASSERT(!thread->HasPendingException());
-    auto *field = classLinker->GetField(*caller, propertyId);
+    auto *field = classLinker->GetField(*caller, propertyId, isStatic);
     if (UNLIKELY(field == nullptr)) {
         // Field might be nullptr if a class was not found
         thread->ClearException();
@@ -737,7 +738,7 @@ bool Debugger::HandlePropertyAccess(ManagedThread *thread, Method *method, const
             return false;
     }
 
-    Field *field = ResolveField(thread, method, inst);
+    Field *field = ResolveField(thread, method, inst, isStatic);
     if (field == nullptr) {
         return false;
     }
@@ -784,7 +785,7 @@ bool Debugger::HandlePropertyModify(ManagedThread *thread, Method *method, const
             return false;
     }
 
-    Field *field = ResolveField(thread, method, inst);
+    Field *field = ResolveField(thread, method, inst, isStatic);
     if (field == nullptr) {
         return false;
     }

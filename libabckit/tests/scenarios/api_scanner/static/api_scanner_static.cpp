@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,7 @@ void VisitAllBBs(AbckitGraph *graph, std::unordered_map<std::string, int> &metho
 bool CheckRessult(std::unordered_map<std::string, int> &methodsMap)
 {
     std::unordered_map<std::string, int> expected = {
+        {"api_scanner_static main:void;", 0},
         {"api_scanner_static bar:void;", 1},
         {"api_scanner_static bar2:void;", 0},
         {"api_scanner_static _cctor_:void;", 0},

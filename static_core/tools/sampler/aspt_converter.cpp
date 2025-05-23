@@ -177,7 +177,7 @@ bool AsptConverter::DumpModulesToFile(const std::string &outname) const
 /* static */
 DumpType AsptConverter::GetDumpTypeFromOptions(const Options &cliOptions)
 {
-    const std::string dumpTypeStr = cliOptions.GetCsvTidSeparation();
+    const auto &dumpTypeStr = cliOptions.GetCsvTidSeparation();
 
     DumpType dumpType;
     if (dumpTypeStr == "single-csv-single-tid") {
@@ -239,7 +239,7 @@ bool AsptConverter::RunDumpTracesInCsvMode(const std::string &outname)
 
 bool AsptConverter::RunWithOptions(const Options &cliOptions)
 {
-    std::string outname = cliOptions.GetOutput();
+    const auto &outname = cliOptions.GetOutput();
 
     dumpType_ = GetDumpTypeFromOptions(cliOptions);
     buildColdGraph_ = cliOptions.IsColdGraphEnable();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,12 @@ public:
     static constexpr uint32_t GetDataOffset()
     {
         return coretypes::Array::GetDataOffset();
+    }
+
+    static EtsArray *FromEtsObject(EtsObject *object)
+    {
+        ASSERT(object->IsArrayClass());
+        return reinterpret_cast<EtsArray *>(object);
     }
 
     EtsObject *AsObject()
@@ -158,6 +164,12 @@ public:
     {
         auto offset = index * sizeof(ObjectPointerType);
         return Component::FromCoreType(GetCoreType()->GetObject(offset, memoryOrder));
+    }
+
+    static EtsTypedObjectArray *FromEtsObject(EtsObject *object)
+    {
+        ASSERT(object->IsArrayClass());
+        return reinterpret_cast<EtsTypedObjectArray *>(object);
     }
 
     static EtsTypedObjectArray *FromCoreType(ObjectHeader *objectHeader)
@@ -264,61 +276,6 @@ using EtsLongArray = EtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>;
 using EtsFloatArray = EtsPrimitiveArray<EtsFloat, EtsClassRoot::FLOAT_ARRAY>;
 using EtsDoubleArray = EtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>;
 
-namespace test {
-template <class ElementType>
-class EtsArrayObjectMembers;
-}  // namespace test
-
-// Mirror class for Array<T> from ETS stdlib
-template <class ElementType>
-class EtsArrayObject : public EtsObject {
-public:
-    EtsArrayObject() = delete;
-    ~EtsArrayObject() = delete;
-
-    NO_COPY_SEMANTIC(EtsArrayObject);
-    NO_MOVE_SEMANTIC(EtsArrayObject);
-
-    static EtsArrayObject *FromEtsObject(EtsObject *etsObj)
-    {
-        return reinterpret_cast<EtsArrayObject *>(etsObj);
-    }
-
-    EtsTypedObjectArray<ElementType> *GetData()
-    {
-        return reinterpret_cast<EtsTypedObjectArray<ElementType> *>(GetFieldObject(GetBufferOffset()));
-    }
-
-    uint32_t GetActualLength()
-    {
-        return helpers::ToUnsigned(GetFieldPrimitive<EtsInt>(GetActualLengthOffset()));
-    }
-
-    static constexpr size_t GetBufferOffset()
-    {
-        return MEMBER_OFFSET(EtsArrayObject, buffer_);
-    }
-
-    static constexpr size_t GetActualLengthOffset()
-    {
-        return MEMBER_OFFSET(EtsArrayObject, actualLength_);
-    }
-
-private:
-    ObjectPointer<EtsTypedObjectArray<ElementType>> buffer_;
-    EtsInt actualLength_;
-
-    friend class test::EtsArrayObjectMembers<ElementType>;
-};
-
-using EtsBoxedBooleanArray = EtsArrayObject<EtsBoxPrimitive<EtsBoolean>>;
-using EtsBoxedByteArray = EtsArrayObject<EtsBoxPrimitive<EtsByte>>;
-using EtsBoxedCharArray = EtsArrayObject<EtsBoxPrimitive<EtsChar>>;
-using EtsBoxedShortArray = EtsArrayObject<EtsBoxPrimitive<EtsShort>>;
-using EtsBoxedIntArray = EtsArrayObject<EtsBoxPrimitive<EtsInt>>;
-using EtsBoxedLongArray = EtsArrayObject<EtsBoxPrimitive<EtsLong>>;
-using EtsBoxedFloatArray = EtsArrayObject<EtsBoxPrimitive<EtsFloat>>;
-using EtsBoxedDoubleArray = EtsArrayObject<EtsBoxPrimitive<EtsDouble>>;
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_

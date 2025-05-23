@@ -16,13 +16,15 @@
 class ArrayValuesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx.this_generic %> implements IterableIterator<<%= ctx.el_type %>> {
     private parent: <%= ctx.this_type %>
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: <%= ctx.this_type %>) {
         this.parent = parent
     }
 
     override next(): IteratorResult<<%= ctx.el_type %>> {
-        if (this.idx >= <%= ctx.array_len_int.('this.parent') %>) {
+        if (this.isDone || this.idx >= <%= ctx.array_len_int.('this.parent') %>) {
+            this.isDone = true
             return new IteratorResult<<%= ctx.el_type %>>()
         }
         return new IteratorResult<<%= ctx.el_type %>>(<%= ctx.get_unsafe.('this.parent', 'this.idx++') %>)
@@ -40,13 +42,15 @@ class ArrayValuesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx
 class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx.this_generic %> implements IterableIterator<[number, <%= ctx.el_type %>]> {
     private parent: <%= ctx.this_type %>
     private idx: int = 0
+    private isDone: boolean = false
 
     constructor(parent: <%= ctx.this_type %>) {
         this.parent = parent
     }
 
     override next(): IteratorResult<[number, <%= ctx.el_type %>]> {
-        if (this.idx >= <%= ctx.array_len_int.('this.parent') %>) {
+        if (this.isDone || this.idx >= <%= ctx.array_len_int.('this.parent') %>) {
+            this.isDone = true
             return new IteratorResult<[number, <%= ctx.el_type %>]>()
         }
         const i = this.idx++;

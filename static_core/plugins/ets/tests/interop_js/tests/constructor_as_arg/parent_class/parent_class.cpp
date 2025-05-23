@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,57 +22,57 @@ class EtsParentClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsParentClassTsToEtsTest, check_main_class_as_arg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkMainClassAsArg"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkMainClassAsArg"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_anonymous_class_as_arg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassAsArg"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnonymousClassAsArg"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_IIFE_class_as_arg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFEClassAsArg"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIIFEClassAsArg"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_main_class_with_arg_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateMainClassWithArgFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateMainClassWithArgFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_main_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateMainClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateMainClassFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_main_class_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkMainClassInstance"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkMainClassInstance"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_anonymous_class_with_arg_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassWithArgFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnonymousClassWithArgFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, checkCreateAnonymousClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAnonymousClassFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_anonymous_class_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassInstance"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnonymousClassInstance"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_iife_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateIifeClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateIifeClassFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_iife_class_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkIifeClassInstance"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIifeClassInstance"));
 }
 
 }  // namespace ark::ets::interop::js::testing

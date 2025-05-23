@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,14 +19,15 @@ readonly GENPATH="${SCRIPT_DIR}/../../stdlib"
 readonly GEN_ESCOMPAT_PATH="${1:-${GENPATH}}/escompat"
 readonly GEN_STDCORE_PATH="${1:-${GENPATH}}/std/core"
 readonly VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
-readonly ARR="${GEN_ESCOMPAT_PATH}/Array.sts"
-readonly BLT_ARR="${GEN_STDCORE_PATH}/BuiltinArray.sts"
-readonly BLT_ARR_SORT="${GEN_STDCORE_PATH}/BuiltinArraySort.sts"
-readonly BLT_ARR_ARG="${GEN_STDCORE_PATH}/BuiltinArrayAlgorithms.sts"
-readonly DATAVIEW="${GEN_ESCOMPAT_PATH}/DataView.sts"
-readonly TYPED_ARR="${GEN_ESCOMPAT_PATH}/TypedArrays.sts"
-readonly TYPED_UARR="${GEN_ESCOMPAT_PATH}/TypedUArrays.sts"
-readonly FUNC="${GEN_STDCORE_PATH}/Function.sts"
+readonly ARR="${GEN_ESCOMPAT_PATH}/Array.ets"
+readonly BLT_ARR="${GEN_STDCORE_PATH}/BuiltinArray.ets"
+readonly BLT_ARR_SORT="${GEN_STDCORE_PATH}/BuiltinArraySort.ets"
+readonly BLT_ARR_ARG="${GEN_STDCORE_PATH}/BuiltinArrayAlgorithms.ets"
+readonly DATAVIEW="${GEN_ESCOMPAT_PATH}/DataView.ets"
+readonly TYPED_ARR="${GEN_ESCOMPAT_PATH}/TypedArrays.ets"
+readonly TYPED_UARR="${GEN_ESCOMPAT_PATH}/TypedUArrays.ets"
+readonly FUNC="${GEN_STDCORE_PATH}/Function.ets"
+readonly TUP="${GEN_STDCORE_PATH}/Tuple.ets"
 
 cd "$SCRIPT_DIR"
 
@@ -50,23 +51,27 @@ echo "Generating ${BLT_ARR}"
 erb Array_builtin.erb | format_file > "${BLT_ARR}"
 
 echo "Generating ${BLT_ARR_SORT}"
-"${JINJA_PATH}" Array_builtin_sort.sts.j2 | format_file > "${BLT_ARR_SORT}"
+"${JINJA_PATH}" Array_builtin_sort.ets.j2 | format_file > "${BLT_ARR_SORT}"
 
 echo "Generating ${BLT_ARR_ARG}"
-"${JINJA_PATH}" Array_builtin_algorithms.sts.j2 | format_file > "${BLT_ARR_ARG}"
+"${JINJA_PATH}" Array_builtin_algorithms.ets.j2 | format_file > "${BLT_ARR_ARG}"
 
 # Generate TypedArrays
 echo "Generating ${DATAVIEW}"
-"${JINJA_PATH}" "${SCRIPT_DIR}/DataView.sts.j2" -o "${DATAVIEW}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/DataView.ets.j2" -o "${DATAVIEW}"
 
 echo "Generating ${TYPED_ARR}"
-"${JINJA_PATH}" "${SCRIPT_DIR}/typedArray.sts.j2" -o "${TYPED_ARR}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedArray.ets.j2" -o "${TYPED_ARR}"
 
 echo "Generating ${TYPED_UARR}"
-"${JINJA_PATH}" "${SCRIPT_DIR}/typedUArray.sts.j2" -o "${TYPED_UARR}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedUArray.ets.j2" -o "${TYPED_UARR}"
 
 # Generate Functions
 echo "Generating ${FUNC}"
-"${JINJA_PATH}" "${SCRIPT_DIR}/Function.sts.j2" -o "${FUNC}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"
+
+# Generate Tuples
+echo "Generating ${TUP}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/Tuple.ets.j2" -o "${TUP}"
 
 exit 0

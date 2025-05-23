@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -56,7 +56,7 @@ Lexical Input Elements
 .. meta:
     frontend_status: Done
 
-The language has the following types of lexical input elements:
+The language has the following types of *lexical input elements*:
 
 -  :ref:`White Spaces`,
 -  :ref:`Line Separators`,
@@ -80,7 +80,7 @@ White Spaces
 .. meta:
     frontend_status: Done
 
-White spaces are lexical input elements that separate tokens from one another.
+*White spaces* are lexical input elements that separate tokens from one another.
 White spaces include the following:
 
 - Space (U+0020),
@@ -94,7 +94,6 @@ White spaces include the following:
 - No-break space (U+00A0), and
 
 - Zero-width no-break space (U+FEFF).
-
 
 White spaces improve source code readability and help avoiding ambiguities.
 White spaces are ignored by the syntactic grammar (see :ref:`Grammar Summary`).
@@ -123,7 +122,7 @@ Line Separators
 .. meta:
     frontend_status: Done
 
-Line separators are lexical input elements that separate tokens from one
+*Line separators* are lexical input elements that separate tokens from one
 another and divide sequences of Unicode input characters into lines.
 Line separators include the following:
 
@@ -145,7 +144,6 @@ separators is considered a single separator.
    line separator character
    paragraph separator character
 
-
 |
 
 .. _Tokens:
@@ -163,8 +161,7 @@ Tokens form the vocabulary of the language. There are four classes of tokens:
 -  :ref:`Operators and Punctuators`, and
 -  :ref:`Literals`.
 
-
-Token is the only lexical input element that can act as a terminal symbol
+*Token* is the only lexical input element that can act as a terminal symbol
 of the syntactic grammar (see :ref:`Grammar Summary`). In the process of
 tokenization, the next token is always the longest sequence of characters that
 form a valid token. Tokens are separated by white spaces (see
@@ -201,7 +198,7 @@ Identifiers
 .. meta:
     frontend_status: Done
 
-An identifier is a sequence of one or more valid Unicode characters. The
+*Identifier* is a sequence of one or more valid Unicode characters. The
 Unicode grammar of identifiers is based on character properties
 specified by the Unicode Standard.
 
@@ -292,9 +289,10 @@ Keywords
 .. meta:
     frontend_status: Done
 
-*Keywords* are the reserved words that have permanently predefined meanings
-in |LANG|. Keywords are always lowercase. Keywords can be of four kinds as
-discussed below.
+*Keywords* are reserved words with permanently predefined meanings
+in |LANG|. Keywords are case-sensitive, 
+see the exact spelling in the tables below.
+Kinds of keywords are discussed below.
 
 1. The following keywords are reserved in any context (*hard keywords*), and
 cannot be used as identifiers:
@@ -306,62 +304,37 @@ cannot be used as identifiers:
    soft keyword
    identifier
    context
-   
+
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``else``        |   ``internal``   |   ``static``     |
+|   ``abstract``     |   ``else``        |   ``internal``   |   ``switch``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``enum``        |   ``launch``     |   ``switch``     |
+|   ``as``           |   ``enum``        |   ``let``        |   ``super``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``export``      |   ``let``        |   ``super``      |
+|   ``async``        |   ``export``      |   ``native``     |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``extends``     |   ``native``     |   ``this``       |
+|   ``await``        |   ``extends``     |   ``new``        |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``false``       |   ``new``        |   ``throw``      |
+|   ``break``        |   ``false``       |   ``null``       |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``final``       |   ``null``       |   ``true``       |
+|   ``case``         |   ``final``       |   ``override``   |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``for``         |   ``override``   |   ``try``        |
+|   ``class``        |   ``for``         |   ``package``    |   ``undefined``  |
 +--------------------+-------------------+------------------+------------------+
-|   ``const``        |   ``function``    |   ``package``    |   ``undefined``  |
+|   ``const``        |   ``function``    |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``constructor``  |   ``if``          |   ``private``    |   ``while``      |
+|   ``constructor``  |   ``if``          |   ``protected``  |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``continue``     |   ``implements``  |   ``protected``  |                  |
+|   ``continue``     |   ``implements``  |   ``public``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``default``      |   ``import``      |   ``public``     |                  |
+|   ``default``      |   ``import``      |   ``return``     |                  |
 +--------------------+-------------------+------------------+------------------+
-|   ``do``           |   ``interface``   |   ``return``     |                  |
+|   ``do``           |   ``interface``   |   ``static``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
-2. The following words have special meaning in certain contexts (*soft
-keywords*) but are valid identifiers elsewhere:
-
-.. index::
-   keyword
-   soft keyword
-   identifier
-
-+-----------------+--------------------+-------------------+-------------------+
-|                 |                    |                   |                   |
-+=================+====================+===================+===================+
-|   ``catch``     |     ``in``         |     ``out``       |    ``throws``     |
-+-----------------+--------------------+-------------------+-------------------+
-|   ``declare``   |     ``instanceof`` |     ``readonly``  |     ``type``      |
-+-----------------+--------------------+-------------------+-------------------+
-|   ``finally``   |     ``keyof``      |     ``rethrows``  |     ``typeof``    |   
-+-----------------+--------------------+-------------------+-------------------+
-|   ``from``      |     ``namespace``  |     ``set``       |                   |
-+-----------------+--------------------+-------------------+-------------------+
-|   ``get``       |     ``of``         |     ``struct``    |                   |
-+-----------------+--------------------+-------------------+-------------------+
-
-3. The following words cannot be used as user-defined type names but are not
-otherwise restricted:
-
-.. index::
-   user-defined type name
+2. Names of primitive built-in types as well as their aliases
+also are *hard keywords*, and cannot be used as identifiers:
 
 +---------------+---------------+---------------+---------------+---------------+---------------+
 |               |               |               |               |               |               |
@@ -377,8 +350,27 @@ otherwise restricted:
 | ``void``      |               |               |               |               |               |
 +---------------+---------------+---------------+---------------+---------------+---------------+
 
+3. The following words have special meaning in certain contexts (*soft
+keywords*) but are valid identifiers elsewhere:
 
-See also :ref:`Reserved Names of TS Types`.
+.. index::
+   keyword
+   soft keyword
+   identifier
+
++-----------------+--------------------+-------------------+
+|                 |                    |                   |
++=================+====================+===================+
+|   ``catch``     |     ``in``         |     ``readonly``  |
++-----------------+--------------------+-------------------+
+|   ``declare``   |     ``instanceof`` |     ``set``       |
++-----------------+--------------------+-------------------+
+|   ``finally``   |     ``namespace``  |     ``type``      |
++-----------------+--------------------+-------------------+
+|   ``from``      |     ``of``         |     ``typeof``    |
++-----------------+--------------------+-------------------+
+|   ``get``       |     ``out``        |                   |
++-----------------+--------------------+-------------------+
 
 4. The following identifiers are also treated as *soft keywords* reserved for
 the future use (or used in |TS|):
@@ -387,12 +379,11 @@ the future use (or used in |TS|):
    identifier
    soft keyword
 
-+-------------------------+-------------------------+-------------------------+
-|                         |                         |                         |
-+=========================+=========================+=========================+
-|        ``is``           |        ``var``          |        ``yield``        |
-+-------------------------+-------------------------+-------------------------+
-
++---------------+---------------+---------------+---------------+----------------+
+|               |               |               |               |                |
++===============+===============+===============+===============+================+
+|   ``keyof``   |    ``is``     |   ``struct``  |    ``var``    |  ``yield``     |
++---------------+---------------+---------------+---------------+----------------+
 
 |
 
@@ -454,8 +445,8 @@ Literals
 .. meta:
     frontend_status: Done
 
-*Literals* are values of certain types (see
-:ref:`Predefined Types` and :ref:`Literal Types`).
+*Literals* are values of certain types (see :ref:`Predefined Types` and
+:ref:`Literal Types`).
 
 .. code-block:: abnf
 
@@ -473,14 +464,26 @@ Literals
 
 See :ref:`Character Literals` for the experimental ``char literal``.
 
-Every literal is described in details below.
+Each literal is described in detail below.
 
 .. index::
    literal
    char
 
 |
-   
+
+.. _Numeric Literals:
+
+Numeric Literals
+================
+
+.. meta:
+    frontend_status: Done
+
+Integer and floating-point literals are numeric literals.
+
+|
+
 .. _Integer Literals:
 
 Integer Literals
@@ -489,7 +492,7 @@ Integer Literals
 .. meta:
     frontend_status: Done
 
-Integer literals represent numbers that do not have a decimal point or
+Integer literals represent numbers that have neither a decimal point nor
 an exponential part. Integer literals can be written with radices 16
 (hexadecimal), 10 (decimal), 8 (octal), and 2 (binary) as follows:
 
@@ -501,7 +504,6 @@ an exponential part. Integer literals can be written with radices 16
    octal
    binary
    radix
-
 
 .. code-block:: abnf
 
@@ -580,17 +582,46 @@ last symbol of an integer literal.
 
 Integer literals are of integer types that match literals as follows:
 
-- ``int`` if the literal value can be represented by a 32-bit number; or
-- ``long`` otherwise.
+- For *decimal* integer literals
 
+  + ``int`` if the literal value can be represented
+    by a non-negative 32-bit number, i.e., the value is in the
+    range 0..max(int); or
 
-An integer literal in variable and constant declarations can be implicitly
-converted to another numeric type or type ``char`` (see
-:ref:`Type Compatibility with Initializer`). An explicit cast must be used
-elsewhere (see :ref:`Cast Expressions`).
+  + ``long`` otherwise.
+
+- For *hex*, *octal*, and *binary* integer literals
+
+  + ``int`` if bit representation of the value fits in 32-bits, i.e., the value 
+    is in the range 0..max(unsigned 32-bit integer); or
+
+  + ``long`` otherwise.
 
 A :index:`compile-time error` occurs if an integer literal value is too
-large for the values of type ``long``.
+large for the values of type ``long``. The concept is represented by the
+examples below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // literals of type int:
+    1
+    0x7F
+    0x7FFFFFFF // max(int)
+    0x80000000 // min(int)
+
+    // literals of type long:
+    0x7FFF_FFFF_1
+    9223372036854775807 // max(long)
+
+    // compile-time error as value is too large:
+    9223372036854775808 // max(long) + 1
+    0xFFFF_FFFF_FFFF_FFFF_0
+
+An integer literal in variable and constant declarations can be implicitly
+converted to another numeric type  (see :ref:`Numeric Types`) or type ``char``
+(see :ref:`Primitive Types Conversions`). An casting conversion must be
+used elsewhere (see :ref:`Cast Expressions`).
 
 .. index::
    integer literal
@@ -599,7 +630,6 @@ large for the values of type ``long``.
    constant declaration
    variable declaration
    char
-   explicit cast
    implicit conversion
    cast expression
 
@@ -615,7 +645,7 @@ Floating-Point Literals
 
 *Floating-point literals* represent decimal numbers and consist of a
 whole-number part, a decimal point, a fraction part, an exponent, and
-a float type suffix as follows:
+a ``float`` type suffix as follows:
 
 .. code-block:: abnf
 
@@ -661,9 +691,8 @@ follows:
 - ``float`` if *float type suffix* is present; or
 - ``double`` otherwise (type ``number`` is an alias to ``double``).
 
-
 A floating-point literal in variable and constant declarations can be implicitly
-converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
+converted to type ``float`` (see :ref:`Assignability with Initializer`).
 
 A :index:`compile-time error` occurs if a non-zero floating-point literal is
 too large for its type.
@@ -681,20 +710,20 @@ too large for its type.
 
 |
 
-.. _BigInt Literals:
+.. _Bigint Literals:
 
-``BigInt`` Literals
-===================
+Bigint Literals
+===============
 
 .. meta:
     frontend_status: Done
 
-``BigInt`` literals represent integer numbers with unlimited number of digits.
-``BigInt`` literals use decimal radix only.
+*Bigint literals* represent integer numbers with unlimited number of digits.
+*Bigint literals* use decimal radix only.
 
-``BigInt`` literals are always of the ``bigint`` type (see :ref:`BigInt Type`).
+*Bigint literals* are always of the ``bigint`` type (see :ref:`Type bigint`).
 
-A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
+A ``bigint`` literal is a sequence of digits followed by the symbol '``n``':
 
 .. code-block:: abnf
 
@@ -707,62 +736,58 @@ The concept is presented by the examples below:
 
 .. code-block:: typescript
 
-    153n // BigInt literal
-    1_153n // BigInt literal
-    -153n // negative BigInt literal
-
+    153n // bigint literal
+    1_153n // bigint literal
+    -153n // negative bigint literal
 
 The underscore character '``_``' used between successive digits can be used to
-denote a ``BigInt`` literal and improve readability. Underscore characters in
+denote a ``bigint`` literal and improve readability. Underscore characters in
 such positions do not change the values of literals. However, the underscore
-character must not be the very first or the very last symbol of a ``BigInt``
+character must be neither the very first nor the very last symbol of a ``bigint``
 literal.
 
-Strings that represent numbers or any integer values can be converted to
+Strings that represent numbers or any integer value can be converted to
 ``bigint`` by using built-in functions:
-
 
 .. code-block-meta:
     skip
 
 .. code-block:: typescript
 
-    BigInt (other: string): bigint
-    BigInt (other: long): bigint
+    BigInt(other: string): bigint
+    BigInt(other: long): bigint
 
 .. index::
    integer
-   BigInt literal
+   bigint literal
    underscore character
    readability
    string
    number
    integer value
 
-Two other static methods allow taking *bitsCount* lower bits of a
-``BigInt`` number and return them as a result. Signed and unsigned versions
+Two methods allow taking *bitsCount* lower bits of a
+``bigint`` number and return them as a result. Signed and unsigned versions
 are both possible as seen below:
 
 .. code-block:: typescript
 
-    BigInt.asIntN(bitsCount: long, bigIntToCut: bigint): bigint
-    BigInt.asUintN(bitsCount: long, bigIntToCut: bigint): bigint
+    asIntN(bitsCount: long, bigIntToCut: bigint): bigint
+    asUintN(bitsCount: long, bigIntToCut: bigint): bigint
 
 .. index::
-   static method
    decimal
    radix
 
-
 .. _Boolean Literals:
 
-``Boolean`` Literals
-====================
+Boolean Literals
+================
 
 .. meta:
     frontend_status: Done
 
-The two ``Boolean`` literal values are represented by the keywords ``true`` and
+The two *boolean literal* values are represented by the keywords ``true`` and
 ``false``.
 
 .. code-block:: abnf
@@ -771,40 +796,37 @@ The two ``Boolean`` literal values are represented by the keywords ``true`` and
         'true' | 'false'
         ;
 
-``Boolean`` literals are of the ``boolean`` type.
+*Boolean literals* are of the ``boolean`` type.
 
 .. index::
    keyword
    Boolean literal
    literal value
    literal
-   literal type
 
 |
 
 .. _String Literals:
 
-``String`` Literals
-===================
+String Literals
+===============
 
 .. meta:
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-``String`` literals consist of zero or more characters enclosed between
+*String literals* consist of zero or more characters enclosed between
 single or double quotes. A special form of string literals is
 *multiline string* literal (see :ref:`Multiline String Literal`).
 
-``String`` literals are of the literal type that corresponds to the literal.
+*String literals* are of the literal type that corresponds to the literal.
 If an operator is applied to the literal, then the literal type is replaced
-for ``string`` (see :ref:`Type String`).
-
+for ``string`` (see :ref:`Type string`).
 
 .. index::
    string literal
    multiline string
    predefined reference type
-
 
 .. code-block:: abnf
 
@@ -831,13 +853,14 @@ for ``string`` (see :ref:`Type String`).
         | ~[1-9xu\r\n]
         ;
 
-Normally, characters in ``string`` literals represent themselves. However,
+Characters in *string literals* normally represent themselves. However,
 certain non-graphic characters can be represented by explicit specifications
 or Unicode codes. Such constructs are called *escape sequences*.
 
-Escape sequences can represent graphic characters within a ``string`` literal,
-e.g., single quotes '``’``', double quotes '``”``', backslashes '``\``', and
-some others.
+Escape sequences can represent graphic characters within a *string literal*,
+e.g., single quotes '\'', double quotes '``"``', backslashes '``\``', and
+some others. An escape sequence always starts with the backslash character
+'``\``', followed by one of the following characters:
 
 .. index::
    string literal
@@ -846,12 +869,9 @@ some others.
    single quote
    double quotes
 
-An escape sequence always starts with the backslash character '``\``', followed
-by one of the following characters:
+-  ``"`` (double quote, U+0022),
 
--  ``”`` (double quote, U+0022),
-
-.. "
+.. ” "
 
 -  ``'`` (neutral single quote, U+0027),
 
@@ -892,7 +912,6 @@ by one of the following characters:
    vertical tab
    hexadecimal
    Unicode escape sequence
-
 
 The examples are provided below:
 
@@ -946,7 +965,6 @@ Multiline String Literal
         '\\' [\r\n\u2028\u2029]+
         ;
 
-
 The grammar of *embeddedExpression* is described in
 :ref:`String Interpolation Expressions`.
 
@@ -956,8 +974,8 @@ An example of a multiline string is provided below:
    :linenos:
 
     let sentence = `This is an example of
-                    a multiline string, 
-                    which should be enclosed in 
+                    a multiline string,
+                    which should be enclosed in
                     backticks`
 
 *MultilineString* literals are of the literal type that corresponds to the literal.
@@ -987,11 +1005,11 @@ represented by the keyword ``null``:
 .. code-block:: abnf
 
     NullLiteral:
-        'null' 
+        'null'
         ;
 
-
-Typically value is used for types like ``T | null`` (see :ref:`Nullish Types`).
+The value is typically used for types like ``T | null``
+(see :ref:`Nullish Types`).
 
 .. index::
    null literal
@@ -1046,7 +1064,6 @@ or sequence of characters between them is allowed but ignored.
    :linenos:
 
     // This is a line comment
-
 
 *Multiline comments* begin with the sequence of characters '``\*``' (as seen
 in the example below) and end with the first subsequent sequence of characters
@@ -1110,9 +1127,6 @@ syntax productions written in one line, or to avoid ambiguity.
 .. [2]
    https://unicode.org/reports/tr31/
 
-
 .. raw:: pdf
 
    PageBreak
-
-

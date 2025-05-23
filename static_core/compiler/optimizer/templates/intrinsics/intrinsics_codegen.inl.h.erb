@@ -26,7 +26,7 @@
 % codegen_plugin_funcs += ['CreateStringSubstringTlab', 'CreateStringGetCharsTlab']
 % codegen_plugin_funcs += ['CreateStringEquals', 'CreateStringHashCode', 'CreateStringCompareTo']
 % # generate corresponding virtual method decl.
-% codegen_vfuncs = Compiler::intrinsics.select {|i| (i.respond_to? 'codegen_func') && i.is_codegen_virtual?}.collect {|i| i.codegen_func}
+% codegen_vfuncs = Compiler::intrinsics.select {|i| (i.respond_to? 'codegen_func') && i.is_codegen_virtual? && (!i.skip_codegen_decl?)}.collect {|i| i.codegen_func}
 % if !codegen_plugin_vfuncs.nil?
 %   codegen_vfuncs += codegen_plugin_vfuncs
 % end
@@ -34,7 +34,7 @@
 virtual void <%= codegen_vfunc %>(IntrinsicInst *inst, Reg dst, SRCREGS src);
 % end
 % # generate corresponding non-virtual method decl.
-% codegen_funcs = Compiler::intrinsics.select {|i| (i.respond_to? 'codegen_func') && (!i.is_codegen_virtual?)}.collect {|i| i.codegen_func}
+% codegen_funcs = Compiler::intrinsics.select {|i| (i.respond_to? 'codegen_func') && (!i.is_codegen_virtual?) && (!i.skip_codegen_decl?)}.collect {|i| i.codegen_func}
 % if !codegen_plugin_funcs.nil?
 %   codegen_funcs += codegen_plugin_funcs
 % end

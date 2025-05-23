@@ -1,0 +1,55 @@
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - { type: byte, val: (-1) as byte, res: 1 }
+  - { type: short, val: (-1) as short, res: 2 }
+  - { type: char, val: "c' '", res: 3 }
+  - { type: int, val: -1, res: 4 }
+  - { type: long, val: -1 as long, res: 5 }
+  - { type: float, val: (-1.0) as float, res: 6 }
+  - { type: double, val: -1.0, res: 7 }
+  - { type: boolean, val: 'false', res: 8 }
+  - { type: Byte, val: new Byte(), res: 21 }
+  - { type: Short, val: new Short(), res: 22 }
+  - { type: Char, val: new Char(), res: 23 }
+  - { type: Int, val: new Int(), res: 24 }
+  - { type: Long, val: new Long(), res: 25 }
+  - { type: Float, val: new Float(), res: 26 }
+  - { type: Double, val: new Double(), res: 27 }
+  - { type: Boolean, val: new Boolean(), res: 28 }
+  - { type: Integral, val: new Short(), res: 22 }
+  - { type: Floating, val: new Float(), res: 26 }
+  - { type: String, val: '""', res: 31 }
+  - { type: Object, val: '""', res: 31 }
+  - { type: 'byte[]', val: '[0 as byte]', res: 101 }
+  - { type: 'short[]', val: '[0 as short]', res: 102 }
+  - { type: 'char[]', val: '[]', res: 103 }
+  - { type: 'int[]', val: '[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]', res: 104 }
+  - { type: 'long[]', val: '[1 as long, 2 as long, 3 as long]', res: 105}
+  - { type: 'float[]', val: '[1.0 as float, 2.0 as float, 3.0 as float]', res: 106 }
+  - { type: 'boolean[]', val: '[true, true, false]', res: 108 }
+  - { type: 'Byte[]', val: '[new Byte()]', res: 121 }
+  - { type: 'Char[]', val: 'new Char[1]', res: 123 }
+  - { type: 'Int[]', val: 'new Int[200]', res: 124 }
+  - { type: 'Object[][][]', val: 'new String[1][1][1]', res: 132 }
+  - {
+      type: 'Boolean[]',
+      val: '[new Boolean(), new Boolean(), new Boolean()]',
+      res: 128,
+    }
+  - { type: 'Floating[]', val: '[]', res: 130 }
+  - { type: 'Object[]', val: '[new Int(1), new Boolean()]', res: 132 }
+  - { type: StringBuilder, val: new StringBuilder(), res: 32 }
+  - { type: 'Comparable<Int>[]', val: '[new Int(0)]', res: 132, tags: 'compile-only, negative' }

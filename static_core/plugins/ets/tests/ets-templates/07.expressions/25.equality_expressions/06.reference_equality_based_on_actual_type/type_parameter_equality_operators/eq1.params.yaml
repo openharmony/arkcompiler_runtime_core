@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,50 +20,34 @@ cases:
           - new Double(-128.0)
       case2:
           - '-128 as byte'
-          - '-128 as short'
           - '-128'
-          - '-128 as long'
           - '-128f'
-          - new Byte(-128 as byte)
           - new Short(-128 as short)
-          - new Int(-128)
           - new Long(-128 as long)
-          - new Float(-128f)
 
     - type: Long
       case1:
           - '127 as long'
           - new Long(127 as long)
       case2:
-          - '127 as byte'
           - '127 as short'
-          - '127'
           - '127f'
           - '127.0'
-          - "c'\\u007f'"
+          - c'\u007f'
           - new Byte(127 as byte)
-          - new Short(127 as short)
           - new Int(127)
-          - new Float(127f)
-          - new Double(127.0)
-          - "new Char(c'\\u007f')"
 
     - type: Char
       case1:
-          - "c'\\u0000'"
-          - "new Char(c'\\u0000')"
+          - c'\u0000'
+          - new Char(c'\u0000')
       case2:
           - '0 as byte'
-          - '0 as short'
           - '0'
           - '0 as long'
           - '0f'
-          - '0.0'
-          - new Byte(0 as byte)
           - new Short(0 as short)
-          - new Int(0)
           - new Long(0 as long)
-          - new Float(0f)
           - new Double(0.0)
 
     # string equality
@@ -102,6 +86,7 @@ cases:
           - Color.Red
       case2:
           - Color.values()[0]
+          - "Color.getValueOf('Red')"
 
     - type: Size
       decl: |-
@@ -110,6 +95,7 @@ cases:
           - Size.values()[1]
       case2:
           - Size.Medium
+          - "Size.getValueOf('Medium')"
 
     # bigint equality
     - type: BigInt

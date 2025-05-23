@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,7 +30,14 @@ def ark_build_fixture(tmp_path_factory):
     plugin_path = build_path / "plugins" / "ets"
     plugin_path.mkdir(parents=True)
     bin_path.mkdir()
-    paths = [bin_path / "es2panda", bin_path / "ark_disasm", bin_path / "ark", plugin_path / "etsstdlib.abc"]
+    paths = [
+        bin_path / "es2panda",
+        bin_path / "ark_disasm",
+        bin_path / "ark",
+        plugin_path / "etsstdlib.abc",
+        bin_path / "verifier",
+        build_path / "icudt72l.dat"
+    ]
     for p in paths:
         p.write_text("")
     return build_path, *paths

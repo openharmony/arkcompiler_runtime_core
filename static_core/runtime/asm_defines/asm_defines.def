@@ -15,7 +15,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming)
 DEFINE_VALUE(SLOT_SIZE, PointerSize(RUNTIME_ARCH))
-DEFINE_VALUE(POINTER_LOG_SIZE, helpers::math::GetIntLog2(sizeof(void *)))
+DEFINE_VALUE(POINTER_LOG_SIZE, helpers::math::GetIntLog2(static_cast<uint64_t>(sizeof(void *))))
 
 // File offsets
 DEFINE_VALUE(FILE_BASE_OFFSET, ark::panda_file::File::GetFileBaseOffset())

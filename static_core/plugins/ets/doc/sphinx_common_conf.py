@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,15 +24,18 @@
 
 project = u'ArkTS'
 
-author = u'Huawei Consumer BG'
+# CC-OFFNXT(G.NAM.01): project code style
+author = u''
 
 copyright = u'2021-2024 Huawei Device Co., Ltd.'
 
 # The short X.Y version
-version = u'1.1.0'
+# CC-OFFNXT(G.NAM.01): project code style
+version = u'1.2.0'
 
 # The full version, including alpha/beta/rc tags
-release = u'1.1.0'
+# CC-OFFNXT(G.NAM.01): project code style
+release = u'1.2.0-alpha'
 
 # Common glossary for the entire documentation bundle:
 rst_epilog = '''

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1351,7 +1351,7 @@ void Codegen::CreateAlignmentValue(Reg alignmentReg, Reg tmpReg, size_t alignmen
 
 Reg GetObjectReg(Codegen *codegen, Inst *inst)
 {
-    ASSERT(inst->IsCall() || inst->GetOpcode() == Opcode::ResolveVirtual);
+    ASSERT(inst->IsCall() || inst->GetOpcode() == Opcode::ResolveVirtual || inst->GetOpcode() == Opcode::ResolveByName);
     auto location = inst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
     auto objReg = codegen->ConvertRegister(location.GetValue(), inst->GetInputType(0));
@@ -1760,6 +1760,32 @@ void Codegen::EmitCallStatic(CallInst *call)
         GetEncoder()->MakeCall(MemRef(param0, GetRuntime()->GetCompiledEntryPointOffset(GetArch())));
     }
     FinalizeCall(call);
+}
+
+void Codegen::EmitCallNative(CallInst *callNative)
+{
+    SCOPED_DISASM_STR(this, "CallNative");
+    ASSERT(GetGraph()->SupportManagedCode());
+    ASSERT(!HasLiveCallerSavedRegs(callNative));
+
+    auto nativePointerReg = ConvertRegister(callNative->GetSrcReg(0), DataType::POINTER);
+    GetEncoder()->MakeCall(nativePointerReg);
+
+    if (callNative->GetType() != DataType::VOID) {
+        auto arch = GetArch();
+        auto returnType = callNative->GetType();
+        auto dstReg = ConvertRegister(callNative->GetDstReg(), callNative->GetType());
+        auto returnReg = GetTarget().GetReturnReg(dstReg.GetType());
+        // We must:
+        //  sign extend INT8 and INT16 to INT32
+        //  zero extend UINT8 and UINT16 to UINT32
+        if (DataType::ShiftByType(returnType, arch) < DataType::ShiftByType(DataType::INT32, arch)) {
+            bool isSigned = DataType::IsTypeSigned(returnType);
+            GetEncoder()->EncodeCast(Reg(dstReg.GetId(), INT32_TYPE), isSigned, returnReg, isSigned);
+        } else {
+            GetEncoder()->EncodeMov(dstReg, returnReg);
+        }
+    }
 }
 
 void Codegen::EmitCallDynamic(CallInst *call)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,47 +22,47 @@ class EtsInteropJsDynamicWithLambda : public EtsInteropTest {};
 
 TEST_F(EtsInteropJsDynamicWithLambda, TestArgs0)
 {
-    auto ret = CallEtsMethod<uint32_t>("TestArgs0");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestArgs0");
     ASSERT_EQ(ret, 25U);
 }
 
 TEST_F(EtsInteropJsDynamicWithLambda, TestArgs1)
 {
-    auto ret = CallEtsMethod<uint32_t>("TestArgs1");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestArgs1");
     ASSERT_EQ(ret, 25U);
 }
 
 TEST_F(EtsInteropJsDynamicWithLambda, TestArgs2)
 {
-    auto ret = CallEtsMethod<uint32_t>("TestArgs2");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestArgs2");
     ASSERT_EQ(ret, 25U);
 }
 
 // NOTE: vpukhov. Function cast #14626
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValue)
 {
-    auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValue");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestLambdaJSValue");
     ASSERT_EQ(ret, 25U);
 }
 
 // NOTE: vpukhov. Function cast #14626
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCast)
 {
-    auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCast");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestLambdaJSValueCast");
     ASSERT_EQ(ret, 25U);
 }
 
 // NOTE: vpukhov. Function cast #14626
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCache)
 {
-    auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCache");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestLambdaJSValueCache");
     ASSERT_EQ(ret, 25U);
 }
 
 // NOTE(itrubachev) this test can be enabled after fixing NOTE in checker::Type *TSAsExpression::Check in es2panda
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCastCallAsArgument)
 {
-    auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCastCallAsArgument");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestLambdaJSValueCastCallAsArgument");
     ASSERT_EQ(ret, 25U);
 }
 

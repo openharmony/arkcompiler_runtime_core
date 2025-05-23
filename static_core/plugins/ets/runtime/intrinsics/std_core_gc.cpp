@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
-#include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -24,110 +24,8 @@
 #include "runtime/include/thread_scopes.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
-#include "runtime/mem/refstorage/reference.h"
 
 namespace ark::ets::intrinsics {
-
-/**
- * Class tracks GC tasks already processed by GC.
- * Also the class tracks concurrent mark GC phase and calls
- * the callback if it specified.
- */
-class GCTaskTracker : public mem::GCListener {
-public:
-    void InitIfNeeded(mem::GC *gc);
-    bool IsInitialized();
-    void AddTaskId(uint64_t id);
-    bool HasId(uint64_t id);
-    void SetCallbackForTask(uint32_t taskId, mem::Reference *callbackRef);
-    void GCStarted(const GCTask &task, size_t heapSize) override;
-    void GCPhaseStarted(mem::GCPhase phase) override;
-    void GCFinished(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize) override;
-    void RemoveId(uint64_t id);
-
-private:
-    bool initialized_ = false;
-    std::vector<uint64_t> taskIds_ GUARDED_BY(lock_);
-    uint32_t currentTaskId_ = 0;
-    uint32_t callbackTaskId_ = 0;
-    mem::Reference *callbackRef_ = nullptr;
-    os::memory::Mutex lock_;
-};
-
-void GCTaskTracker::InitIfNeeded(mem::GC *gc)
-{
-    if (initialized_) {
-        return;
-    }
-    gc->AddListener(this);
-    initialized_ = true;
-}
-
-bool GCTaskTracker::IsInitialized()
-{
-    return initialized_;
-}
-
-void GCTaskTracker::AddTaskId(uint64_t id)
-{
-    os::memory::LockHolder lock(lock_);
-    taskIds_.push_back(id);
-}
-
-bool GCTaskTracker::HasId(uint64_t id)
-{
-    os::memory::LockHolder lock(lock_);
-    return std::find(taskIds_.begin(), taskIds_.end(), id) != taskIds_.end();
-}
-
-void GCTaskTracker::SetCallbackForTask(uint32_t taskId, mem::Reference *callbackRef)
-{
-    callbackTaskId_ = taskId;
-    callbackRef_ = callbackRef;
-}
-
-void GCTaskTracker::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
-{
-    currentTaskId_ = task.GetId();
-}
-
-void GCTaskTracker::GCPhaseStarted(mem::GCPhase phase)
-{
-    if (phase != mem::GCPhase::GC_PHASE_MARK || callbackRef_ == nullptr || currentTaskId_ != callbackTaskId_) {
-        return;
-    }
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    auto *obj = reinterpret_cast<EtsObject *>(coroutine->GetPandaVM()->GetGlobalObjectStorage()->Get(callbackRef_));
-    Value arg(obj->GetCoreType());
-    os::memory::ReadLockHolder lock(*coroutine->GetPandaVM()->GetRendezvous()->GetMutatorLock());
-    LambdaUtils::InvokeVoid(coroutine, obj);
-}
-
-void GCTaskTracker::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
-                               [[maybe_unused]] size_t heapSize)
-{
-    RemoveId(task.GetId());
-}
-
-void GCTaskTracker::RemoveId(uint64_t id)
-{
-    currentTaskId_ = 0;
-    if (id == callbackTaskId_ && callbackRef_ != nullptr) {
-        EtsCoroutine::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef_);
-        callbackRef_ = nullptr;
-    }
-    if (id != 0) {
-        os::memory::LockHolder lock(lock_);
-        auto it = std::find(taskIds_.begin(), taskIds_.end(), id);
-        // There may be no such id if the corresponding GC has been triggered not by startGC
-        if (it != taskIds_.end()) {
-            taskIds_.erase(it);
-        }
-    }
-}
-
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-GCTaskTracker g_gGctaskTracker;
 
 static inline size_t ClampToSizeT(EtsLong n)
 {
@@ -152,9 +50,6 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
     }
     if (cause == 3_I) {
         return GCTaskCause::OOM_CAUSE;
-    }
-    if (cause == 4_I) {
-        return GCTaskCause::CROSSREF_CAUSE;
     }
     return GCTaskCause::INVALID_CAUSE;
 }
@@ -187,13 +82,13 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, eMsg.str());
         return -1;
     }
-    g_gGctaskTracker.InitIfNeeded(gc);
+    auto &gcTaskTracker = GCTaskTracker::InitIfNeededAndGet(gc);
     auto task = MakePandaUnique<GCTask>(reason);
     uint32_t id = task->GetId();
     if (callback != nullptr) {
         auto *callbackRef = coroutine->GetPandaVM()->GetGlobalObjectStorage()->Add(callback->GetCoreType(),
                                                                                    mem::Reference::ObjectType::GLOBAL);
-        g_gGctaskTracker.SetCallbackForTask(id, callbackRef);
+        gcTaskTracker.SetCallbackForTask(id, callbackRef);
         // Run GC in place, because need to run callback in managed part
         runGcInPlace = true;
     }
@@ -211,9 +106,9 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
                           "Calling GC threshold not in place after calling postponeGCStart");
         return -1;
     }
-    g_gGctaskTracker.AddTaskId(id);
+    gcTaskTracker.AddTaskId(id);
     if (!gc->Trigger(std::move(task))) {
-        g_gGctaskTracker.RemoveId(id);
+        gcTaskTracker.RemoveId(id);
         return -1;
     }
     return static_cast<EtsLong>(id);
@@ -232,10 +127,10 @@ extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
         return;
     }
     auto id = static_cast<uint64_t>(gcId);
-    ASSERT(g_gGctaskTracker.IsInitialized());
+    ASSERT(GCTaskTracker::IsInitialized());
     ScopedNativeCodeThread s(thread);
-    while (g_gGctaskTracker.HasId(id)) {
-        constexpr uint64_t WAIT_TIME_MS = 10;
+    while (GCTaskTracker::InitIfNeededAndGet(thread->GetVM()->GetGC()).HasId(id)) {
+        constexpr uint64_t WAIT_TIME_MS = 2U;
         os::thread::NativeSleep(WAIT_TIME_MS);
     }
 }

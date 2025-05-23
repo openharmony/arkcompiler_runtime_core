@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,50 +20,59 @@ namespace ark::ets::interop::js::testing {
 
 class EtsConversionBigIntTsToEtsTest : public EtsInteropTest {};
 
-// NOTE issue (17741) - enable this after fix import bigInt
-TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkTypeBigInt)
+TEST_F(EtsConversionBigIntTsToEtsTest, checkTypeBigInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkTypeBigInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTypeBigInt"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToInt"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToNumber"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToFloat)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToFloat"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToFloat"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToByte)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToByte"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToByte"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToShort)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToShort"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToShort"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToLong)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToLong"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToDouble)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToDouble"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToDouble"));
 }
 // NOTE issue (17741) - enable this after fix import bigInt
 TEST_F(EtsConversionBigIntTsToEtsTest, DISABLED_checkConversionBigIntToChar)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkConversionBigIntToChar"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkConversionBigIntToChar"));
+}
+
+TEST_F(EtsConversionBigIntTsToEtsTest, checkReturnBigInt)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkReturnBigInt"));
+}
+
+TEST_F(EtsConversionBigIntTsToEtsTest, checkReturnBigIntObj)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkReturnBigIntObj"));
 }
 
 }  // namespace ark::ets::interop::js::testing

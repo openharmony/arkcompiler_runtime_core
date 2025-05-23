@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,8 @@ std::string AbcCodeConverter::IDToString(BytecodeInstruction bcIns, panda_file::
             stringTable_->GetStringById(file_->ResolveClassIndex(methodId, bcIns.GetId().AsIndex())));
         name.str("");
         name << type.GetPandasmName();
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
         auto id = file_->ResolveMethodIndex(methodId, bcIns.GetId().AsIndex());
         AbcMethodProcessor methodProcessor(id, keyData_);
         name << methodProcessor.GetMethodSignature();
@@ -44,16 +45,13 @@ std::string AbcCodeConverter::IDToString(BytecodeInstruction bcIns, panda_file::
         stringTable_->AddStringId(offset);
         std::string strData = stringTable_->GetStringById(offset);
         name << stringTable_->GetStringById(bcIns.GetId().AsFileId());
-    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
+    } else if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID) ||
+               bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_FIELD_ID)) {
         auto id = file_->ResolveFieldIndex(methodId, bcIns.GetId().AsIndex());
         panda_file::FieldDataAccessor fieldAccessor(*file_, id);
 
         auto recordName = keyData_.GetFullRecordNameById(fieldAccessor.GetClassId());
-        if (!panda_file::IsDummyClassName(recordName)) {
-            name << recordName;
-            name << '.';
-        }
-        name << stringTable_->GetStringById(fieldAccessor.GetNameId());
+        name << recordName << "." << stringTable_->GetStringById(fieldAccessor.GetNameId());
     } else if (bcIns.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
         auto index = bcIns.GetId().AsIndex();
         name << "array_" << index;

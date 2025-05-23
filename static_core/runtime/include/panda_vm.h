@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_PANDA_VM_H_
-#define PANDA_RUNTIME_PANDA_VM_H_
+#ifndef PANDA_RUNTIME_PANDA_VM_H
+#define PANDA_RUNTIME_PANDA_VM_H
 
 #include "include/coretypes/string.h"
 #include "include/runtime_options.h"
+#include "runtime/include/app_state.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -228,12 +229,28 @@ public:
     void IterateOverMarkQueue(const std::function<void(ObjectHeader *)> &visitor);
     void ClearMarkQueue();
 
-    virtual void ClearInteropHandleScopes([[maybe_unused]] Frame *frame) {}
+    void UpdateAppState(AppState appState)
+    {
+        os::memory::LockHolder lh(appStateLock_);
+        appState_ = appState;
+    }
+
+    AppState GetAppState() const
+    {
+        os::memory::LockHolder lh(appStateLock_);
+        return appState_;
+    }
+
+    // NOTE(konstanting): a potential candidate for moving out of the core part
+    // Cleans up language-specific CFrame resources
+    virtual void CleanupCompiledFrameResources([[maybe_unused]] Frame *frame) {}
 
     virtual bool SupportGCSinglePassCompaction() const
     {
         return false;
     }
+
+    virtual void FreeInternalResources();
 
     NO_MOVE_SEMANTIC(PandaVM);
     NO_COPY_SEMANTIC(PandaVM);
@@ -260,8 +277,10 @@ private:
     // Intrusive GC test API
     PandaList<ObjectHeader *> markQueue_ GUARDED_BY(markQueueLock_);
     os::memory::Mutex markQueueLock_;
+    mutable os::memory::Mutex appStateLock_;
+    AppState appState_;
 };
 
 }  // namespace ark
 
-#endif  // PANDA_RUNTIME_PANDA_VM_H_
+#endif  // PANDA_RUNTIME_PANDA_VM_H

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,12 @@
 % if instructions.first
 %   instructions = instructions.group_by(&:intrinsic_name)
 % end
-% lowerings = [["ets.ldobj.name", "VisitEtsLdObjByName"],
-%              ["ets.stobj.name", "VisitEtsStObjByName"],
-%              ["ets.equals",     "VisitEtsEquals"]
+% lowerings = [["ets.ldobj.name",   "VisitEtsLdObjByName"],
+%              ["ets.stobj.name",   "VisitEtsStObjByName"],
+%              ["ets.equals",       "VisitEtsEquals<false>"],
+%              ["ets.strictequals", "VisitEtsEquals<true>"],
+%              ["ets.typeof",       "VisitEtsTypeof"],
+%              ["ets.istrue",       "VisitEtsIstrue"]
 %             ]
 % instructions.each do |intrinsic_name, group|
 %     inst = group.first

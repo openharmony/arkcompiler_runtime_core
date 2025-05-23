@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,12 @@
  */
 'use strict';
 
+globalThis.gtest.etsVm = requireNapiPreview('lib/ets_interop_js_napi_arkjsvm.so', false);
+
 Object.defineProperty(exports, '__esModule', { value: true });
 
-exports.getUnion = exports.getRefTypeReturn = exports.getRecordTypeReturn = exports.getNativeArrayReturn =
-        exports.getLiteralTypeReturn = exports.test = void 0;
 
-const etsVm = require('lib/module/ets_interop_js_napi');
+const etsVm = globalThis.gtest.etsVm;
 
 const TestModule = /** @class */ (function () {
     function TestModule(name) {
@@ -42,17 +42,15 @@ function test() {
     let dir = new directClass();
     return true;
 }
-exports.test = test;
 
-function getLiteralTypeReturn() {
+export function getLiteralTypeReturn() {
     let getterFn = testModule.getFunction('getBoolValue');
     let classInstance = getterFn();
     let expectedFalse = classInstance.getBoolean();
     return typeof expectedFalse === 'boolean' && !expectedFalse;
 }
-exports.getLiteralTypeReturn = getLiteralTypeReturn;
 
-function getNativeArrayReturn() {
+export function getNativeArrayReturn() {
     let getterFn = testModule.getFunction('getArrayValue');
     let classInstance = getterFn();
     let result = classInstance.getArray();
@@ -60,9 +58,8 @@ function getNativeArrayReturn() {
     let canDestructureCorrectly = destructuredFirst === result[0];
     return Array.isArray(result) && canDestructureCorrectly;
 }
-exports.getNativeArrayReturn = getNativeArrayReturn;
 
-function getRecordTypeReturn() {
+export function getRecordTypeReturn() {
     let getterFn = testModule.getFunction('getRefValue');
     let classInstance = getterFn();
     let returnedRecord = classInstance.getRecord();
@@ -70,9 +67,8 @@ function getRecordTypeReturn() {
     let isMissingOptionUndefined = returnedRecord[1];
     return shouldBeValidFirst && isMissingOptionUndefined;
 }
-exports.getRecordTypeReturn = getRecordTypeReturn;
 
-function getRefTypeReturn() {
+export function getRefTypeReturn() {
     let getterFn = testModule.getFunction('getRefValue');
     let classInstance = getterFn();
     let canGetInterfaceMethod = Boolean(classInstance.getLiteral) && typeof classInstance.getLiteral === 'function';
@@ -86,9 +82,8 @@ function getRefTypeReturn() {
     }
     return canGetInterfaceMethod && canGetNotDescribedMethod && failsOnInexistentMethod;
 }
-exports.getRefTypeReturn = getRefTypeReturn;
 
-function getUnion() {
+export function getUnion() {
     let getterFn = testModule.getFunction('getUnion');
     // @ts-ignore
     let instance = getterFn();
@@ -102,4 +97,3 @@ function getUnion() {
     }
     return true;
 }
-exports.getUnion = getUnion;

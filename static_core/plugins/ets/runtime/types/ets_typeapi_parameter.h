@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,17 @@
 #define PANDA_PLUGINS_ETS_TYPEAPI_PARAMETER_H_
 
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "types/ets_primitives.h"
-#include "types/ets_typeapi.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_typeapi.h"
+#include "plugins/ets/runtime/types/ets_typeapi_type.h"
 
 namespace ark::ets {
+
+namespace test {
+class EtsTypeAPITest;
+}  // namespace test
 
 class EtsCoroutine;
 
@@ -50,9 +56,11 @@ public:
         return reinterpret_cast<EtsTypeAPIParameter *>(field);
     }
 
-    void SetTypeDesc(EtsString *td)
+    void SetParameterType(EtsTypeAPIType *paramType)
     {
-        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIParameter, td_), td->AsObject()->GetCoreType());
+        ASSERT(paramType != nullptr);
+        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsTypeAPIParameter, paramType_),
+                                  paramType->AsObject()->GetCoreType());
     }
 
     void SetName(EtsString *name)
@@ -66,9 +74,11 @@ public:
     }
 
 private:
-    ObjectPointer<EtsString> td_;
+    ObjectPointer<EtsTypeAPIType> paramType_;
     ObjectPointer<EtsString> name_;
     FIELD_UNUSED EtsInt attr_;
+
+    friend class test::EtsTypeAPITest;
 };
 
 }  // namespace ark::ets

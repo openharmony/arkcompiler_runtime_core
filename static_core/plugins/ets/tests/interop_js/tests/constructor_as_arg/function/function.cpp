@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,52 +22,52 @@ class EtsFunctionTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_main)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionMain"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassFunctionMain"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_parent)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionParent"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassFunctionParent"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_child)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionChild"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassFunctionChild"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_anonymous)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionAnonymous"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassFunctionAnonymous"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_IIFE)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionIIFE"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassFunctionIIFE"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_main)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionMain"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassArrowFunctionMain"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_parent)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionParent"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassArrowFunctionParent"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_child)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionChild"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassArrowFunctionChild"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_anonymous)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionAnonymous"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassArrowFunctionAnonymous"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_IIFE)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionIIFE"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassArrowFunctionIIFE"));
 }
 
 }  // namespace ark::ets::interop::js::testing

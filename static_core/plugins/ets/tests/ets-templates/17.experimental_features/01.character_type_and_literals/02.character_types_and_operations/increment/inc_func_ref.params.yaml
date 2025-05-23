@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,11 +21,11 @@ vals:
       res: c'!'
 
     - v1: c'\u0020'
-      exp: "c' ' + incPre(v1)"
+      exp: "(c' ' + incPre(v1)) as Char"
       res: c'A'
 
     - v1: c'\u0020'
-      exp: "c' ' + incPost(v1)"
+      exp: "(c' ' + incPost(v1)) as Char"
       res: c'A'
 
     - v1: c'\uFFFF'
@@ -37,27 +37,27 @@ vals:
       res: c'\x00'
 
     - v1: c'\uFFFF'
-      exp: "incPre(c'!' + v1 + v1)"
+      exp: "incPre((c'!' + v1 + v1) as Char)"
       res: c'\u0020'
 
     - v1: c'\uFFFF'
-      exp: "incPost(c'!' + v1 + v1)"
+      exp: "incPost((c'!' + v1 + v1) as Char)"
       res: c'\u0020'
 
     - v1: c'\u0F0F'
-      exp: "incPre(v1 + c'1') + incPre(c'\\uACD9')"
+      exp: "(incPre((v1 + c'1') as Char) + incPre(c'\\uACD9')) as Char"
       res: c'\uBC1B'
 
     - v1: c'\u0F0F'
-      exp: "incPost(v1 + c'1') + incPost(c'\\uACD9')"
+      exp: "(incPost((v1 + c'1') as Char) + incPost(c'\\uACD9')) as Char"
       res: c'\uBC1B'
 
     - v1: c'\u007F'
-      exp: "incPre(c'\\u0000') + incPre(v1)"
+      exp: "(incPre(c'\\u0000') + incPre(v1)) as Char"
       res: c'\u0081'
 
     - v1: c'\u007F'
-      exp: "incPost(c'\\u0000') + incPost(v1)"
+      exp: "(incPost(c'\\u0000') + incPost(v1)) as Char"
       res: c'\u0081'
 
     - v1: c'∫'

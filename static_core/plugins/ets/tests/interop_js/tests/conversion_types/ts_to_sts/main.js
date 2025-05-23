@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.tsExponential = exports.tsFloat = exports.tsByte = exports.tsIntString = 
-exports.tsHexadecimal = exports.tsBinary = exports.tsBigInt = exports.tsInt = 
-exports.systemBinary = exports.systemHexadecimal = void 0;
 let buffer = new ArrayBuffer(1);
 let dataView = new DataView(buffer);
 dataView.setUint8(0, 255);
-exports.systemHexadecimal = 16;
-exports.systemBinary = 2;
-exports.tsInt = 1;
-exports.tsBigInt = 1n;
-exports.tsBinary = (256 >> 1).toString(exports.systemBinary);
-exports.tsHexadecimal = (300).toString(exports.systemHexadecimal);
-exports.tsIntString = '1';
-exports.tsByte = dataView;
-exports.tsFloat = 3.14;
-exports.tsExponential = exports.tsInt.toExponential();
+export let systemHexadecimal = 16;
+export let systemBinary = 2;
+export let tsInt = 1;
+export let tsBigInt = 1n;
+export let tsBinary = (256 >> 1).toString(systemBinary);
+export let tsHexadecimal = (300).toString(systemHexadecimal);
+export let tsIntString = '1';
+export let tsByte = dataView;
+export let tsFloat = 3.14;
+export let tsExponential = tsInt.toExponential();
+
+export let returnBigInt = () => 1000000n;
+export let returnBigIntObj = () => BigInt(1);

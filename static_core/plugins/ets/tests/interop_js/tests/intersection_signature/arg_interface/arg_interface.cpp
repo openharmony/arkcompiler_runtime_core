@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,57 +22,57 @@ class EtsIntersectionArgInterfaceTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkArgFuFromSts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkArgFuFromSts"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkArgFuFromSts"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkAgeNameClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAgeNameClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAgeNameClass"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkAgeNameClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAgeNameClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAgeNameClassMethod"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkCreateAgeNameClassInterfaceFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAgeNameClassInterfaceFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateAgeNameClassInterfaceFromTs"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkCallMethodAgeNameClassInterfaceFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodAgeNameClassInterfaceFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodAgeNameClassInterfaceFromTs"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkInstanceAgeNameInterfaceClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceAgeNameInterfaceClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceAgeNameInterfaceClass"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkChildAgeNameInterfaceClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildAgeNameInterfaceClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildAgeNameInterfaceClass"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkChildAgeNameInterfaceClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildAgeNameInterfaceClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildAgeNameInterfaceClassMethod"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkCreateChildAgeNameClassInterfaceFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateChildAgeNameClassInterfaceFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateChildAgeNameClassInterfaceFromTs"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkCallMethodChildAgeNameClassInterfaceFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodChildAgeNameClassInterfaceFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodChildAgeNameClassInterfaceFromTs"));
 }
 
 TEST_F(EtsIntersectionArgInterfaceTsToEtsTest, checkInstanceChildAgeNameInterfaceClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceChildAgeNameInterfaceClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceChildAgeNameInterfaceClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

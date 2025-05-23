@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,11 +146,11 @@ export class MethodClass {
 	}
 }
 
-export function createClassFunction(Arg: ClassConstructor<number>, val: number): Object {
+export function CreateClassFunction(Arg: ClassConstructor<number>, val: number): Object {
 	return new Arg(val);
 }
 
-export function createClassArrowFunction(Arg: ClassConstructor<number>, val: number): Object {
+export function CreateClassArrowFunction(Arg: ClassConstructor<number>, val: number): Object {
 	return new Arg(val);
 }
 

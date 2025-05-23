@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -20,7 +20,7 @@ Experimental Features
 
 This Chapter introduces the |LANG| features that are considered parts of
 the language, but have no counterpart in |TS|, and are therefore not
-recommended to those in need of a single source code for |TS| and |LANG|.
+recommended to those who seek a single source code for |TS| and |LANG|.
 
 Some features introduced in this Chapter are still under discussion. They can
 be removed from the final version of the |LANG| specification. Once a feature
@@ -29,7 +29,7 @@ section is moved to the body of the specification as appropriate.
 
 The *array creation* feature introduced in :ref:`Array Creation Expressions`
 enables users to dynamically create objects of array type by using runtime
-expressions that provide the array size. This is a useful addition to other
+expressions that provide the array size. This addition is useful to other
 array-related features of the language, such as array literals.
 
 The construct can also be used to create multidimensional arrays.
@@ -37,7 +37,8 @@ The construct can also be used to create multidimensional arrays.
 The feature *function and method overloading* is supported in many
 (if not all) modern programming languages. Overloading functions/methods
 is a practical and convenient way to write program actions that are similar
-in logic but different in implementation.
+in logic but different in implementation. It is discussed in detail in section
+:ref:`Function, Method and Constructor Overloading`.
 
 .. index::
    implementation
@@ -46,13 +47,6 @@ in logic but different in implementation.
    array
    array literal
    construct
-   function overloading
-   method overloading
-
-The |LANG| language supports (as an experimental feature at the moment) two
-semantically and syntactically different implementations of overloading: the
-|TS|-like implementation, and that of other languages. See
-:ref:`Function and Method Overloading` for more details.
 
 Section :ref:`Native Functions and Methods` introduces practically important
 and useful mechanisms for the inclusion of components written in other languages
@@ -63,9 +57,9 @@ in many OOP languages provides a way to restrict class inheritance and method
 overriding. Making a class *final* prohibits defining classes derived from it,
 whereas making a method *final* prevents it from overriding in derived classes.
 
-Section :ref:`Adding Functionality to Existing Types` defines the ability
-to add new functionality to already defined type. This
-feature can be used for GUI programming (:ref:`Support for GUI Programming`).
+Section :ref:`Adding Functionality to Existing Types` discusses the way to
+add new functionality to an already defined type. This feature can be used
+for GUI programming (:ref:`Support for GUI Programming`).
 
 Section :ref:`Enumeration Methods` adds methods to declarations of the
 enumeration types. Such methods can help in some kinds of manipulations
@@ -85,47 +79,30 @@ with ``enums``.
    inheritance
    derived class
 
-Section :ref:`Exceptions` discusses the powerful, commonly used mechanism for
-the processing of various kinds of unexpected events and situations that break
-the *ordinary* program logic. There are constructs to raise (*throw*)
-exceptions, *catch* them along the dynamic sequence of function calls, and
-handle them. Some support for exceptions is also provided by the classes from
-the standard library (see :ref:`Standard Library`).
-
-**Note**: The exceptions mechanism is sometimes deprecated for being too
-time-consuming and unsafe. Some modern languages do not support the
-exceptions mechanism as discussed in this section. That is why the expediency
-of adding this feature to the language is still under discussion.
-
 The |LANG| language supports writing concurrent applications in the form of
 *coroutines* (see :ref:`Coroutines`) that allow executing functions
-concurrently, while the *channels* through which the coroutines can produce
-results are asynchronous.
+concurrently.
 
 There is a basic set of language constructs that support concurrency. A function
 to be launched asynchronously is marked by adding the modifier ``async``
 to its declaration. In addition, any function---or lambda expression---can be
-launched as a separate thread explicitly by using the launch expression.
+launched as a separate thread explicitly by using the launch function from
+the standard library.
 
 .. index::
-   exception
    construct
    coroutine
    channel
    function
    async modifier
-   launch expression
-   launch
    lambda expression
    concurrency
    async modifier
 
-The ``await`` statement is introduced to synchronize functions launched as
-threads. The generic class ``Promise<T>`` from the standard library (see
-:ref:`Standard Library`) is used to exchange information between threads.
-The class can be handled as an implementation of the channel mechanism.
-The class provides a number of methods to manipulate the values produced
-by threads.
+The ``await`` statement is introduced to await Promise resolving.
+The generic class ``Promise<T>`` from the standard library (see
+:ref:`Standard Library`) is used to access result of Promise resolving or
+``async`` function execution.
 
 Section :ref:`Packages` discusses a well-known and proven language feature
 intended to organize large pieces of software that typically consist of many
@@ -136,7 +113,6 @@ that is appropriate for independent teams to work in parallel.
 .. index::
    await statement
    function
-   launch
    generic class
    standard library
    implementation
@@ -148,15 +124,14 @@ that is appropriate for independent teams to work in parallel.
 and makes them parts of an independent compilation unit.
 
 The *export* and *import* features are used to organize communication between
-*packages*. An entity exported from one package becomes known to---and
-accessible (see :ref:`Accessible`) in---another package which imports that
+*packages*. An entity exported from one package becomes known to and
+accessible (see :ref:`Accessible`) in another package which imports that
 feature. Various options are provided to simplify export/import, e.g., by
 defining non-exported, i.e., ``internal`` declarations that are not accessible
 (see :ref:`Accessible`) from the outside of the package.
 
 In addition, |LANG| supports the *package* initialization semantics that
-makes a *package* even more independent from the environment.
-
+makes a *package* even more independent from its environment.
 
 .. index::
    package
@@ -188,12 +163,11 @@ Character Literals
 .. meta:
     frontend_status: Done
 
-A ``char literal`` represents the following:
+*Character literal* represents the following:
 
--  A value with a single character; or
--  A single escape sequence preceded by the characters *single quote* (U+0027)
+-  Value consisting of a single character; or
+-  Single escape sequence preceded by the characters *single quote* (U+0027)
    and '*c*' (U+0063), and followed by a *single quote* U+0027).
-
 
 .. code-block:: abnf
 
@@ -216,7 +190,7 @@ The examples are presented below:
       c'\x7F'
       c'\u0000'
 
-``Character Literals`` are of type ``char``.
+*Character literals* are of type ``char``.
 
 .. index::
    char literal
@@ -240,8 +214,8 @@ Character Type and Operations
 | **Type**  | **Type's Set of Values**         | **Corresponding Class Type** |
 +===========+==================================+==============================+
 | ``char``  | Symbols with codes from \U+0000  | *Char*                       |
-|           | to \U+FFFF inclusive, that is,   |                              |
-|           | from *0* to *65,535*             |                              |
+| (32-bits) | to \U+10FFFF (maximum valid      |                              |
+|           | unicode code point) inclusive    |                              |
 +-----------+----------------------------------+------------------------------+
 
 |LANG| provides a number of operators to act on character values as discussed
@@ -265,6 +239,61 @@ parts of the |LANG| standard library (see :ref:`Standard Library`).
 
 |
 
+.. _Fixed Array Types:
+
+Fixed Array Types
+*****************
+
+.. meta:
+    frontend_status: Partly
+
+*Fixed array type* is the built-in type characterized by the following:
+
+-  Any object of array type contains elements, and the number of such elements
+   is known as *array length*.
+-  Array length is a non-negative integer number.
+-  Array length is set once at runtime and can not be changed after that.
+-  Array element is accessed by its index. *Index* is an integer number
+   starting from *0* to *array length minus 1*.
+-  Accessing an element by its index is a constant-time operation.
+-  If passed to non-|LANG| environment, an array is represented as a contiguous
+   memory location.
+-  Type of each array element is assignable to the element's type specified
+   in the array declaration (see :ref:`Assignability`).
+
+*Fixed arrays* differ from *resizable arrays* as follows:
+
+- *Fixed array* length is set once to achieve better performance;
+- *Fixed arrays* have no methods defined;
+- *Fixed arrays* are not compatible with *resizable arrays*.
+
+*Fixed array* can be created by using :ref:`Array Literal`.
+
+The examples are presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a : FixedArray<number> = [1, 2, 3]
+      /* allocate array with 3 elements of type number */
+    a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
+    let y = a[2] /* get the last element of array 'a' */
+    let count = a.length // get the number of array elements
+    y = a[3] // Will lead to runtime error - attempt to access non-existing array element
+
+.. index::
+   fixed array type
+   fixed array
+   integer
+   array element
+   element type
+   access
+
+
+TBD: example for incompatibility between array and fixed array.
+
+|
+
 .. _Array Creation Expressions:
 
 Array Creation Expressions
@@ -273,9 +302,9 @@ Array Creation Expressions
 .. meta:
     frontend_status: Done
 
-An *array creation expression* creates new objects that are instances of arrays.
+*Array creation expression* creates new objects that are instances of arrays.
 The *array literal* expression is used to create an array instance, and to
-provide some initial values (see :ref:`Array Literal`).
+provide initial values (see :ref:`Array Literal`).
 
 .. code-block:: abnf
 
@@ -301,7 +330,7 @@ provide some initial values (see :ref:`Array Literal`).
 
       let x = new number[2][2] // create 2x2 matrix
 
-An *array creation expression* creates an object that is a new array with the
+*Array creation expression* creates an object that is a new array with the
 elements of the type specified by ``arrayElelementType``.
 
 The type of each *dimensionExpression* must be convertible (see
@@ -313,8 +342,8 @@ on each *dimensionExpression* to ensure that the resultant type is ``int``.
 Otherwise, a :index:`compile-time error` occurs.
 
 A :index:`compile-time error` occurs if any *dimensionExpression* is a
-constant expression that is evaluated at compile time to a negative integer
-value.
+constant expression that is evaluated to a negative integer value at compile
+time.
 
 .. index::
    array creation expression
@@ -330,9 +359,8 @@ If the type of any *dimensionExpression* is ``number`` or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
 
-- A runtime error, if the situation is identified during program execution; and
-- A :index:`compile-time error`, if the situation is detected during
-  compilation.
+- Compile-time error, if the situation is identified during compilation; and
+- Runtime error, if the situation is identified during program execution.
 
 If ``arrayElement`` is provided, then the type of the ``expression`` can be
 as follows:
@@ -366,7 +394,6 @@ Otherwise, a :index:`compile-time error` occurs.
       function foo (size: number) {
          let y = new number[size]  // runtime error
       }
-
 
 A :index:`compile-time error` occurs if ``arrayElelementType`` refers to a
 class that does not contain an accessible (see :ref:`Accessible`) parameterless
@@ -405,7 +432,7 @@ parameter:
    constructor
    array
 
-Creating an array with a known number of elements is presented below:
+The creation of an array with a known number of elements is presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -429,7 +456,8 @@ Creating an array with a known number of elements is presented below:
             have initial value equal to the result of lambda function execution with
             different indices */
 
-Creating exotic arrays with different kinds of element types is presented below:
+The creation of exotic arrays with different kinds of element types is presented
+below:
 
 .. code-block:: typescript
    :linenos:
@@ -438,6 +466,13 @@ Creating exotic arrays with different kinds of element types is presented below:
       let array_of_functor = new (() => void) [5] ( (): void => {})
       type aliasTypeName = number []
       let array_of_array = new aliasTypeName [5] ( [3.141592653589] )
+
+The creation of fixed arrays is presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+      let fixed_array : FixedArray<number> = new number[5]
 
 |
 
@@ -454,7 +489,7 @@ The evaluation of an array creation expression at runtime is performed
 as follows:
 
 #. The dimension expressions are evaluated. The evaluation is performed
-   left-to-right; if any expression evaluation completes abruptly, then
+   left-to-right. If any expression evaluation completes abruptly, then
    the expressions to the right of it are not evaluated.
 
 #. The values of dimension expressions are checked. If the value of any
@@ -517,8 +552,8 @@ value: Type2)* respectively, then an indexing expression (see
     x = x[1] // This notation implies a call: x = x.$_get (1)
     x[1] = x // This notation implies a call: x.$_set (1, x)
 
-If only one function is present, then only the appropriate form of the index
-expressions (see :ref:`Indexing Expressions`) is available:
+If only one function is present, then only the appropriate form of index
+expression (see :ref:`Indexing Expressions`) is available:
 
 .. code-block-meta:
    expect-cte:
@@ -539,7 +574,6 @@ expressions (see :ref:`Indexing Expressions`) is available:
     let setClass = new ClassWithSet
     setClass = setClass[0] // Error - no $_get function available
     setClass[0] = setClass
-
 
 .. index::
    function
@@ -619,7 +653,7 @@ used in generic classes and interfaces for better flexibility. A
     }
 
     let x: IndexableByNumber<boolean> = new BadClass
-    x[666] = true // This will be dispatched at runtime to the overridden
+    x[42] = true // This will be dispatched at runtime to the overridden
        // version of the $_set method
     x.$_get (15)  // $_get and $_set can be called as ordinary
        // methods
@@ -634,15 +668,16 @@ Iterable Types
 .. meta:
     frontend_status: Done
 
-A class or an interface can be made *iterable*, meaning that their instances
-can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
+A class or an interface can be made *iterable*. It means that instances of the
+class or the interface can be used in ``for-of`` statements (see
+:ref:`For-Of Statements`).
 
 Some type ``C`` is *iterable* if it declares a parameterless function with name
-``$_iterator`` with the return type which is compatible (see
-:ref:`Type Compatibility`) with type ``Iterator``, defined in the standard
-library (see :ref:`Standard Library`). It guarantees the object returned
-is of the class type which implements ``Iterator``, and thus allows traversing
-an object of class type ``C``. The example below defines *iterable* class ``C``:
+``$_iterator`` and return type that is assignable (see :ref:`Assignability`)
+to type ``Iterator`` as defined in the standard library (see
+:ref:`Standard Library`). It guarantees that the object returned is of the
+class type which implements ``Iterator`` and allows traversing an object of
+class type ``C``. The example below defines *iterable* class ``C``:
 
 .. index::
    iterable type
@@ -693,7 +728,6 @@ this code prints out the following:
     "b"
     "c"
 
-
 The function ``$_iterator`` is an ordinary function with a compiler-known
 signature. The function can be used like any other function. It can be
 abstract or defined in an interface to be implemented later. A
@@ -708,7 +742,7 @@ abstract or defined in an interface to be implemented later. A
    signature
    async function
 
-**Note**: To support the code compatible with |TS|, the name of the function
+**Note**. To support the code compatible with |TS|, the name of the function
 ``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the class
 ``iterable`` looks as follows:
 
@@ -741,13 +775,14 @@ Callable Types
 **************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: add $_ to names
 
 A type is *callable* if the name of the type can be used in a call expression.
 A call expression that uses the name of a type is called a *type call
 expression*. Only class type can be callable. To make a type
-callable, a static method with the name ``invoke`` or ``instantiate`` must be
-defined or inherited:
+callable, a static method with the name ``$_invoke`` or ``$_instantiate`` must
+be defined or inherited:
 
 .. code-block-meta:
 
@@ -755,14 +790,14 @@ defined or inherited:
    :linenos:
 
     class C {
-        static invoke() { console.log("invoked") }
+        static $_invoke() { console.log("invoked") }
     }
     C() // prints: invoked
-    C.invoke() // also prints: invoked
+    C.$_invoke() // also prints: invoked
 
 In the above example, ``C()`` is a *type call expression*. It is the short
-form of the normal method call ``C.invoke()``. Using an explicit call is always
-valid for the methods ``invoke`` and ``instantiate``.
+form of the normal method call ``C.$_invoke()``. Using an explicit call is
+always valid for the methods ``$_invoke`` and ``$_instantiate``.
 
 .. index::
    callable type
@@ -773,8 +808,8 @@ valid for the methods ``invoke`` and ``instantiate``.
    method call
    instantiation
 
-**Note**: Only a constructor---not the methods ``invoke`` or ``instantiate``---is
-called in a *new expression*:
+**Note**. Only a constructor---not the methods ``$_invoke`` or
+``$_instantiate``---is called in a *new expression*:
 
 .. code-block-meta:
 
@@ -782,16 +817,16 @@ called in a *new expression*:
    :linenos:
 
     class C {
-        static invoke() { console.log("invoked") }
+        static $_invoke() { console.log("invoked") }
         constructor() { console.log("constructed") }
     }
     let x = new C() // constructor is called
 
-The methods ``invoke`` and ``instantiate`` are similar but have differences as
+The methods ``$_invoke`` and ``$_instantiate`` are similar but have differences as
 discussed below.
 
 A :index:`compile-time error` occurs if a callable type contains both methods
-``invoke`` and ``instantiate``.
+``invoke`` and ``$_instantiate``.
 
 .. index::
    method
@@ -799,15 +834,15 @@ A :index:`compile-time error` occurs if a callable type contains both methods
 
 |
 
-.. _Callable Types with Invoke Method:
+.. _Callable Types with $_invoke Method:
 
-Callable Types with Invoke Method
-=================================
+Callable Types with ``$_invoke`` Method
+=======================================
 
 .. meta:
     frontend_status: Done
 
-The method ``invoke`` can have an arbitrary signature. The method can be used
+The method ``$_invoke`` can have an arbitrary signature. The method can be used
 in a *type call expression* in either case above. If the signature has
 parameters, then the call must contain corresponding arguments.
 
@@ -817,7 +852,7 @@ parameters, then the call must contain corresponding arguments.
    :linenos:
 
     class Add {
-        static invoke(a: number, b: number): number {
+        static $_invoke(a: number, b: number): number {
             return a + b
         }
     }
@@ -832,19 +867,18 @@ parameters, then the call must contain corresponding arguments.
 
 |
 
-.. _Callable Types with Instantiate Method:
+.. _Callable Types with $_instantiate Method:
 
-Callable Types with Instantiate Method
-======================================
+Callable Types with ``$_instantiate`` Method
+============================================
 
 .. meta:
-    frontend_status: Partly
-    todo: es2panda segfaults on the first example
+    frontend_status: Done
 
-The method ``instantiate`` can have an arbitrary signature by itself.
+The method ``$_instantiate`` can have an arbitrary signature by itself.
 If it is to be used in a *type call expression*, then its first parameter
 must be a ``factory`` (i.e., it must be a *parameterless function type
-returning some class or struct type*).
+returning some class type*).
 The method can have or not have other parameters, and those parameters can
 be arbitrary.
 
@@ -855,14 +889,14 @@ parameter is passed implicitly:
    :linenos:
 
     class C {
-        static instantiate(factory: () => C): C {
+        static $_instantiate(factory: () => C): C {
             return factory()
         }
     }
     let x = C() // factory is passed implicitly
 
-    // Explicit call of 'instantiate' requires explicit 'factory':
-    let y = C.instantiate(() => { return new C()})
+    // Explicit call of '$_instantiate' requires explicit 'factory':
+    let y = C.$_instantiate(() => { return new C()})
 
 .. index::
    method
@@ -872,7 +906,7 @@ parameter is passed implicitly:
    parameterless function type
    struct type
 
-If the method ``instantiate`` has additional parameters, then the call must
+If the method ``$_instantiate`` has additional parameters, then the call must
 contain corresponding arguments:
 
 .. code-block:: typescript
@@ -880,7 +914,7 @@ contain corresponding arguments:
 
     class C {
         name = ""
-        static instantiate(factory: () => C, name: string): C {
+        static $_instantiate(factory: () => C, name: string): C {
             let x = factory()
             x.name = name
             return x
@@ -891,8 +925,8 @@ contain corresponding arguments:
 A :index:`compile-time error` occurs in a *type call expression* with type ``T``,
 if:
 
-- ``T`` has neither method ``invoke`` nor  method ``instantiate``; or
-- ``T`` has the method ``instantiate`` but its first parameter is not
+- ``T`` has neither method ``$_invoke`` nor  method ``$_instantiate``; or
+- ``T`` has the method ``$_instantiate`` but its first parameter is not
   a ``factory``.
 
 .. index::
@@ -908,11 +942,11 @@ if:
    :linenos:
 
     class C {
-        static instantiate(factory: string): C {
+        static $_instantiate(factory: string): C {
             return factory()
         }
     }
-    let x = C() // compile-time error, wrong 'instantiate' 1st parameter
+    let x = C() // compile-time error, wrong '$_instantiate' 1st parameter
 
 |
 
@@ -925,7 +959,6 @@ Statements
     frontend_status: Done
 
 |
-
 
 .. _For-of Type Annotation:
 
@@ -953,183 +986,27 @@ An explicit type annotation is allowed for a *for-variable*:
 
 |
 
-.. _Multiple Catch Clauses in Try Statements:
+.. _Function, Method and Constructor Overloading:
 
-Multiple Catch Clauses in Try Statements
-========================================
-
-.. meta:
-    frontend_status: Done
-
-When an exception or an error is thrown in the ``try`` block
-(see :ref:`try Statements`), or in a
-*throwing* or *rethrowing* function (see :ref:`Throwing Functions` and
-:ref:`Rethrowing Functions`) called from the ``try`` block, the control is
-transferred to the first ``catch`` clause if the statement has at least one
-``catch`` clause that can catch that exception or error. If no ``catch``
-clause is found, then exception or error is propagated to the surrounding
-scope.
-
-**Note**: An exception handled within a *non-throwing* function (see
-:ref:`Non-Throwing Functions`) is never propagated outside that function.
-
-A ``catch`` clause has two parts:
-
--  Exception parameter that provides access to the object associated
-   with the exception or the error occurred; and
-
--  Block of code that is to handle the situation.
-
-.. index::
-   exception
-   error
-   throwing function
-   rethrowing function
-   non-throwing function
-   try block
-   try statement
-   propagation
-   scope
-   catch clause
-   propagation
-   exception parameter
-   access
-
-*Default catch clause* is a ``catch`` clause with the exception parameter type
-omitted. Such a ``catch`` clause handles any exception or error that is not
-handled by any previous clause. The type of that parameter is union
-``Exception`` | ``Error``.
-
-A :index:`compile-time error` occurs if:
-
--  Default ``catch`` clause is not the last ``catch`` clause in a
-   ``try`` statement.
-
--  Type reference of an exception parameter (if any) is neither the
-   class ``Exception`` or ``Error``, nor a class derived from ``Exception`` or
-   ``Error``.
-
-.. index::
-   catch clause
-   default catch clause
-   exception
-   parameter type
-   union
-   try statement
-   type reference
-   error
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-      class ZeroDivisorException extends Exception {}
-
-      function divide(a: int, b: int): int throws {
-        if (b == 0) throw new ZeroDivisorException()
-        return a / b
-      }
-
-      function process(a: int; b: int) {
-        try {
-          let res = divide(a, b)
-
-          // Division successful, further processing ...
-        }
-        catch (d: ZeroDivisorException) {
-          // Handle zero division situation
-        }
-        catch (e) { // type of 'e' is Error|Exception
-          // Handle all other errors or exceptions
-        }
-      }
-
-
-All exceptions that the ``try`` block can throw are caught by the function
-*process*. Special handling is provided for the ``ZeroDivisor`` exception,
-and the handling of other exceptions and errors is different.
-
-``Catch`` clauses do not handle every possible exception or error that can
-be thrown by the code in the ``try`` block. If no ``catch`` clause can handle
-the situation, then exception or error is propagated to the surrounding scope.
-
-**Note**: If a ``try`` statement (*default catch clause*) is placed inside a
-*non-throwing* function (see :ref:`Non-Throwing Functions`), then exception
-is never propagated.
-
-.. index::
-   exception
-   try block
-   exception
-   propagation
-   try statement
-   default catch clause
-   non-throwing function
-
-If a ``catch`` clause contains a block that corresponds to a parameter of the
-error, then it can only handle that error.
-
-The type of the ``catch`` clause parameter in a *default catch clause* is
-omitted. The ``catch`` clause can handle any exceptions or errors unhandled
-by the previous clauses.
-
-The type of a ``catch`` clause parameter (if any) must be of the class
-``Error`` or ``Exception``, or of another class derived from ``Exception``
-or ``Error``.
-
-.. index::
-   exception
-   error
-   catch clause
-   default catch clause
-   derived class
-   Error
-   Exception
-
-.. code-block:: typescript
-   :linenos:
-
-        function process(a: int; b: int): int {
-        try {
-          return a / b
-        }
-        catch (x: DivideByZeroError) { return MaxInt }
-      }
-
-A ``catch`` clause handles the ``DivideByZeroError`` at runtime. Other errors
-are propagated to the surrounding scope if no ``catch`` clause is found.
-
-.. index::
-   catch clause
-   runtime
-   error
-   propagation
-   scope
-
-|
-
-.. _Function and Method Overloading:
-
-Function and Method Overloading
-*******************************
+Function, Method and Constructor Overloading
+********************************************
 
 .. meta:
     frontend_status: Done
 
-Similarly to |TS|, the |LANG| language supports overload signatures that allow
-specifying several headers for a function or method with different signatures.
-Most other languages support a different form of overloading that specifies
-a separate body for each overloaded header.
+As many other languages do, |LANG| supports overloading. Overloading allows
+declaring several functions or methods with the same name but different
+signatures.
+|LANG| does not support |TS| overload signatures that allow
+specifying several headers for a function or method with a single body but
+different signatures (see :ref:`TS Overload Signatures`).
 
-Both approaches have their advantages and disadvantages. The latter approach
-supported by |LANG| can deliver better performance because no extra checks
+The |LANG| approach delivers better performance because no extra checks
 are performed during the execution of a specific body at runtime.
 
 .. index::
    function overloading
    method overloading
-   overload signature
    header
    function
    method
@@ -1150,13 +1027,12 @@ Function Overloading
 If a declaration scope declares and/or imports two or more functions with the
 same name but different signatures that are not *overload-equivalent* (see
 :ref:`Overload-Equivalent Signatures`), then such functions are *overloaded*.
-Function overloading declarations cause no :index:`compile-time error` on their
+Function overload declarations cause no :index:`compile-time error` on their
 own.
 
-No specific relationship is required between the return types, or between the
-``throws`` clauses of the two functions with the same name but different
-signatures that are not *overload-equivalent* (see
-:ref:`Overload-Equivalent Signatures`).
+No specific relationship is required between the return types of the two
+functions with the same name but different signatures that are not
+*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`).
 
 When calling an overloaded function, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
@@ -1172,7 +1048,6 @@ time to determine exactly which one is to be called (see
    overload-equivalent signature
    overloaded function name
    return type
-   throws clause
    argument
    type argument
    function call
@@ -1193,7 +1068,7 @@ are not *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then
 such methods are considered *overloaded*.
 
 Method overloading declarations cause no :index:`compile-time error` on their
-own, except where a possible instantiation causes an *overload-equivalent* (see
+own, except where possible instantiation causes an *overload-equivalent* (see
 :ref:`Overload-Equivalent Signatures`) method in the instantiated class or
 interface:
 
@@ -1225,24 +1100,19 @@ interface:
      function foo (instantiation: ITemplate<number>) { ... }
        // Leads to two *overload-equivalent* methods
 
-
-
-If the signatures of two or more methods with the same name are not
-*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then the
-return types of those methods, or the ``throws`` or ``rethrows`` clauses of
-those methods can have any kind of relationship.
+If signatures of two or more methods with the same name are not
+*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then return
+types of those methods can have any kind of relationship.
 
 When calling an overloaded method, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
 time to determine exactly which one is to be called (see
-:ref:`Method Call Expression`, and :ref:`Step 2 Selection of Method`).
+:ref:`Method Call Expression` and :ref:`Step 2 Selection of Method`).
 
 .. index::
    signature
    overload-equivalent signature
    overload equivalence
-   throws clause
-   rethrows clause
    type argument
    argument type
    method call
@@ -1314,7 +1184,7 @@ The example below represents the functions distinguishable by signatures:
       function foo(x: number[]) {}
       function foo(x: string) {}
 
-The following example represents the functions undistinguishable by signatures
+The following example represents the functions indistinguishable by signatures
 that cause a :index:`compile-time error`:
 
 .. code-block:: typescript
@@ -1336,7 +1206,50 @@ that cause a :index:`compile-time error`:
 
 |
 
+.. _TS Overload Signatures:
+
+|TS| Overload Signatures
+========================
+
+.. meta:
+    frontend_status: None
+
+|LANG| does not support overload signatures in |TS|-style where several function
+headers are followed by a single body. Each overloaded function, method, or
+constructor is required to have a separate body.
+
+The following code is valid in |TS| but causes a compile-time error in |LANG|:
+
+.. code-block-meta:
+   expect-cte
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(): void 
+    function foo(x: string): void
+    function foo(x?: string): void {
+        /*body*/
+    }
+
+The following code is valid in |LANG|
+(see :ref:`Function, Method and Constructor Overloading`):
+
+.. code-block-meta:
+   not-subset
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(): void {
+      /*body1*/
+    }
+    function foo(x: string): void {
+      /*body2*/
+    }
+
 |
+
 
 .. _Native Functions and Methods:
 
@@ -1356,11 +1269,12 @@ Native Functions
 .. meta:
     frontend_status: Done
 
-A native function is a function that marked with ``native`` keyword (see :ref:`Function Declarations`).
+*Native function* is a function marked with the keyword ``native`` (see
+:ref:`Function Declarations`).
 
-A ``native`` function implemented in a platform-dependent code is typically
-written in another programming language (e.g., *C*). A :index:`compile-time error`
-occurs if a ``native`` function has a body.
+*Native function* implemented in a platform-dependent code is typically written
+in another programming language (e.g., *C*). A :index:`compile-time error`
+occurs if a native function has a body.
 
 .. index::
    keyword native
@@ -1381,18 +1295,22 @@ Native Methods
 .. meta:
     frontend_status: Done
 
-A native method is a method that marked with ``native`` keyword (see :ref:`Method Declarations`).
+*Native method* is a method marked with the keyword ``native`` (see
+:ref:`Method Declarations`).
 
-``Native`` methods are the methods implemented in a platform-dependent code
+*Native methods* are the methods implemented in a platform-dependent code
 written in another programming language (e.g., *C*).
 
 A :index:`compile-time error` occurs if:
 
--  The method declaration contains the keyword ``abstract`` along with the
+-  Method declaration contains the keyword ``abstract`` along with the
    keyword ``native``.
 
--  The ``native`` method has a body (see :ref:`Method Body`) that is a block
+-  *Native method* has a body (see :ref:`Method Body`) that is a block
    instead of a simple semicolon or empty body.
+
+-  *Native method* is defined in a local class (see
+   :ref:`Local Classes and Interfaces`).
 
 .. index::
    native method
@@ -1414,16 +1332,19 @@ Native Constructors
 ===================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-A native constructor is a constructor that marked with ``native`` keyword (see :ref:`Constructor Declaration`).
+*Native constructor* is a constructor marked with the keyword ``native`` (see
+:ref:`Constructor Declaration`).
 
-``Native`` constructors are the constructors implemented in a platform-dependent code
-written in another programming language (e.g., *C*).
+*Native constructors* are the constructors implemented in a platform-dependent
+code written in another programming language (e.g., *C*).
 
-A :index:`compile-time error` occurs if:
+A :index:`compile-time error` occurs if a *native constructor*:
 
--  The ``native`` constructor has a non-empty body (see :ref:`Constructor Body`).
+-  Has a non-empty body (see :ref:`Constructor Body`).
+
+-  Is defined in a local class (see :ref:`Local Classes and Interfaces`).
 
 .. index::
    native constructor
@@ -1440,8 +1361,6 @@ Final Classes and Methods
 
 .. meta:
     frontend_status: Done
-
-|
 
 .. _Final Classes Experimental:
 
@@ -1540,16 +1459,22 @@ the method that implements the interface.
 Adding Functionality to Existing Types
 **************************************
 
-|LANG| supports adding functions and accessors to already defined types,
-so its usage looks the same, as if they are methods and accessors of these types.
-The mechanism used is called: :ref:`Functions with Receiver` and
-:ref:`Accessors with Receiver`. This feature is often used to add new
-functionality to a class without having to inherit from this class.
-However, it can be used not only for classes but for other types as well.
+.. meta:
+    frontend_status: Done
 
-Additionally, :ref:`Function Types with Receiver` and
-:ref:`Lambda Expressions with Receiver` can be defined and use,
-making the code more flexible.
+|LANG| supports adding functions and accessors to already defined types. The
+usage of functions so added looks the same as if they are methods and accessors
+of these types. The mechanism is called :ref:`Functions with Receiver`
+and :ref:`Accessors with Receiver`. This feature is often used to add new
+functionality to a class or interface without having to inherit from this class
+or implement this interface. However, it can be used not only for classes and
+interfaces but also for other types.
+
+Moreover, :ref:`Function Types with Receiver` and
+:ref:`Lambda Expressions with Receiver` can be defined and used to make the
+code more flexible.
+
+|
 
 .. _Functions with Receiver:
 
@@ -1557,13 +1482,12 @@ Functions with Receiver
 =======================
 
 .. meta:
-    frontend_status: None
-    todo: import/export of them, function with receiver of primitive types or array
+    frontend_status: Done
 
-A *function with receiver* declaration is a top-level declaration
-(see :ref:`Top-Level Declarations`) that looks almost the same as 
+*Function with receiver* declaration is a top-level declaration
+(see :ref:`Top-Level Declarations`) that looks almost the same as
 :ref:`Function Declarations`, except that the first parameter is mandatory,
-and keyword ``this`` is used as its name:
+and the keyword ``this`` is used as its name:
 
 .. code-block:: abnf
 
@@ -1576,18 +1500,17 @@ and keyword ``this`` is used as its name:
         ;
 
     receiverParameter:
-        'this' ':' 'readonly'? type
+        annotationUsage? 'this' ':' type
         ;
 
-There are two ways to call a *function with receiver*:
+A *function with receiver* can be called in the following two ways:
 
--  as a function call (see :ref:`Function Call Expression`),
-   passing the first parameter in the usual way
+-  Making a function call (see :ref:`Function Call Expression`), and
+   passing the first parameter in the usual way;
 
--  as a method call (see :ref:`Method Call Expression`), where
-   no argument is provided for the first parameter
-   and the ``objectReference`` before
-   the function name is used as the first argument
+-  Making a method call (see :ref:`Method Call Expression`) with
+   no argument provided for the first parameter, and using the
+   ``objectReference`` before the function name as the first argument.
 
 .. code-block:: typescript
    :linenos:
@@ -1607,21 +1530,40 @@ There are two ways to call a *function with receiver*:
       c.foo()
       c.bar(1)
 
-The keyword ``this`` can be used inside a *function with receiver*
-and it corresponds the first parameter.
+      interface D {}
+      function foo1(this: D) {}
+      function bar1(this: D, n: number): void {}
 
-The type of ``this`` parameter is called the *receiver type*
-(see :ref:`Receiver Type`). 
+      function demo (d: D) {
+         // as a function call:
+         foo(d)
+         bar(d, 1)
+
+         // as a method call:
+         d.foo()
+         d.bar(1)
+      }
 
 
-If the *receiver type* is a class type, ``private`` or ``protected``
-members are not accessible (see :ref:`Accessible`) within the bodies of thee
-*function with receiver*. Only ``public`` members can be accessed:
+
+The keyword ``this`` can be used inside a *function with receiver*. It
+corresponds to the first parameter. The type of ``this`` parameter is
+called the *receiver type* (see :ref:`Receiver Type`).
+
+If the *receiver type* is a class or interface type, then ``private`` or
+``protected`` members are not accessible (see :ref:`Accessible`) within the
+body of a *function with receiver*. Only ``public`` and  ``internal`` members
+can be accessed. The ``internal`` members can be accessed only when *function
+with receiver* and class or interface type are declared in the same compilation
+unit:
 
 .. index::
    keyword this
-   private
-   protected
+   function with receiver
+   receiver type
+   public member
+   private member
+   protected member
    access
 
 .. code-block:: typescript
@@ -1643,12 +1585,40 @@ members are not accessible (see :ref:`Accessible`) within the bodies of thee
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
 
-The name of a *function with receiver* cannot be the same as the name of some
-public receiver method or field, otherwise a :index:`compile-time error` occurs.
-It also means, that a *function with receiver* cannot overload a method,
-defined for receiver type.
+A :index:`compile-time error` occurs is the name of a *function with receiver*
+is the same as the name of an accessible instance method or field
+of the receiver type.
+It means that a *function with receiver* cannot overload a method
+defined for the receiver type.
+
+.. code-block:: typescript
+   :linenos:
+
+      class A {
+          foo () { ...  }
+      }
+
+      function foo(this: A) { ... } // Compile-time error
+
+A function with reciever can overload a global function with
+the same name. A compile-time error occurs if signatures of
+a function with receiver is overload-equivalent
+(see Overload-Equivalent Signatures) to such overloaded function.
+
+.. code-block:: typescript
+   :linenos:
+
+      function foo(this: A) { ... }
+      function foo(param: A) { ... } /* Compile-time error as it is a
+                                        non-distinguishable declaration */
 
 *Function with receiver* can be generic as in the following example:
+
+.. index::
+   function with receiver
+   public method
+   overload
+   receiver type
 
 .. code-block:: typescript
    :linenos:
@@ -1663,12 +1633,10 @@ defined for receiver type.
           // Explicit instantiation
      }
 
-*Functions with receiver* are dispatched statically; 
-what function is being called is known at compile time based
-on the receiver type specified in its declaration.
-
-They can be applied to receiver of any 
-derived class until it is redefined in the derived class:
+*Functions with receiver* are dispatched statically. What function is being
+called is known at compile time based on the receiver type specified in the
+declaration. A *function with receiver* can be applied to the receiver of any
+derived class until it is redefined within the derived class:
 
 .. code-block:: typescript
    :linenos:
@@ -1687,18 +1655,18 @@ derived class until it is redefined in the derived class:
       d.foo() // `Derived.foo is called` to be printed
 
 As illustrated by the following examples, a *function with receiver* can be
-defined in a compilation unit other than one that defines a receiver type:
+defined in a compilation unit other than the one that defines the receiver type:
 
 .. code-block:: typescript
    :linenos:
 
-      // file a.sts
+      // file a.ets
       class A {
           foo() { ... }
       }
 
-      // file ext.sts
-      import {A} from "a.sts" // name 'A' is imported
+      // file ext.ets
+      import {A} from "a.ets" // name 'A' is imported
       function bar(this: A) () {
          this.foo() // Method foo() is called
       }
@@ -1710,23 +1678,25 @@ defined in a compilation unit other than one that defines a receiver type:
 Receiver Type
 =============
 
-A *receiver type* is a type of *receiver parameter* in functions, function types
-and lamdbas with receiver.
+.. meta:
+    frontend_status: Done
 
-A *receiver type* may be an interface type, a class type, an array type
-or a type parameter, otherwise a :index:`compile-time error` occurs.
+*Receiver type* is the type of the *receiver parameter* in a function,
+function type, and lambda with receiver. A *receiver type* may be an interface
+type, a class type, an array type, or a type parameter. Otherwise, a
+:index:`compile-time error` occurs.
 
-Using an array type as receiever type is illustrated by the example below:
+Using an array type as *receiver type* is illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
 
-      function addElements(this: number[], ...s: number[]) { 
+      function addElements(this: number[], ...s: number[]) {
        ...
       }
 
       let x: number[] = [1, 2]
-      x.addElements(3, 4) 
+      x.addElements(3, 4)
 
 |
 
@@ -1736,12 +1706,11 @@ Accessors with Receiver
 =======================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-An *accessor with receiver* declaration is a top-level declaration 
-(see :ref:`Top-Level Declarations`) that can be used as class or interface 
-accessors (see :ref:`Accessor Declarations`)
-for specified receiver type:
+*Accessor with receiver* declaration is a top-level declaration (see
+:ref:`Top-Level Declarations`) that can be used as class or interface accessor
+(see :ref:`Accessor Declarations`) for a specified receiver type:
 
 .. code-block:: abnf
 
@@ -1750,8 +1719,11 @@ for specified receiver type:
         | 'set' identifier '(' receiverParameter ',' parameter ')' block
         ;
 
-A get-accessor (getter) must have a single *received parameter* and an explicit return type. 
-A set-accessor (setter) must have a *received parameter*, and a second parameter and no return type.
+A get-accessor (getter) must have a single *receiver parameter* and an explicit
+return type.
+
+A set-accessor (setter) must have a *receiver parameter*, one other parameter,
+and no return type.
 
 The use of getters and setters looks the same as the use of fields:
 
@@ -1775,7 +1747,7 @@ The use of getters and setters looks the same as the use of fields:
       console.log(c.fullName) // output: 'Doe John'
       c.fullName = "new name" // compile-time error, as setter is not defined
 
-A :index:`compile-time error` occurs if an accessor is used in form of 
+A :index:`compile-time error` occurs if an accessor is used in the form of
 a function or a method call.
 
 |
@@ -1786,21 +1758,21 @@ Function Types with Receiver
 ============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-A *function type with receiver* specifies signature of functions or lambdas with receiver. 
-It is almost the same as a *function type* (see :ref:`Function Types`), 
-except that the first parameter is mandatory,
-and keyword ``this`` is used as its name:
+*Function type with receiver* specifies the signature of a function or lambda
+with receiver. It is almost the same as *function type* (see :ref:`Function Types`),
+except that the first parameter is mandatory, and the keyword ``this`` is used
+as its name:
 
 .. code-block:: abnf
 
     functionTypeWithReceiver:
-        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 'throws'?
+        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType
         ;
 
-The type of the *receiver parameter* is called a *receiver type*
-(see :ref:`Receiver Type`).
+The type of a *receiver parameter* is called the *receiver type* (see
+:ref:`Receiver Type`).
 
 .. code-block:: typescript
    :linenos:
@@ -1820,9 +1792,8 @@ The type of the *receiver parameter* is called a *receiver type*
       type FB<T> = (this: B<T>, x: T): void
       type FBS = (this: B<string>, x: string): void
 
-
 The usual rule of function type compatibility (see :ref:`Function Types Conversions`)
-are applied to *function type with receiver*, ignoring parameters names. 
+is applied to *function type with receiver*, and parameter names are ignored.
 
 .. code-block:: typescript
    :linenos:
@@ -1832,9 +1803,9 @@ are applied to *function type with receiver*, ignoring parameters names.
       type F1 = (this: A) => boolean
       type F2 = (a: A) => boolean
 
-      function foo(this: A) => boolean {}
-      function goo(a: A) => boolean {}
-      
+      function foo(this: A): boolean {}
+      function goo(a: A): boolean {}
+
       let f1: F1 = foo // ok
       f1 = goo // ok
 
@@ -1842,8 +1813,9 @@ are applied to *function type with receiver*, ignoring parameters names.
       f2 = foo // ok
       f1 = f2 // ok
 
-The only difference is that only entity of function type with receiver can be 
-used in :ref:`Method Call Expression`. Using definitions from previous example:
+The sole difference is that only an entity of *function type with receiver* can
+be used in :ref:`Method Call Expression`. The definitions from the previous
+example are reused in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1851,7 +1823,7 @@ used in :ref:`Method Call Expression`. Using definitions from previous example:
       let a = new A()
       a.f1() // ok, function type with receiver
       f1(a)  // ok
-      
+
       a.f2() // compile-time error
       f2(a) // ok
 
@@ -1863,54 +1835,146 @@ Lambda Expressions with Receiver
 ================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-*Lambda expression with receiver* defines an instance of
-a *function type with receiver* (see :ref:`Function Types with Receiver`).
-
-It looks almost the same as ordinary lambda expression
-(see :ref:`Lambda Expressions`), except that the first parameter is mandatory,
-and keyword ``this`` is used as its name:
+*Lambda expression with receiver* defines an instance of a *function type with
+receiver* (see :ref:`Function Types with Receiver`). It looks almost the same
+as an ordinary lambda expression (see :ref:`Lambda Expressions`), except that
+the first parameter is mandatory, and the keyword ``this`` is used as its name:
 
 .. code-block:: abnf
 
     lambdaExpressionWithReceiver:
-        typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
+        annotationUsage? typeParameters?
+        '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? throwMark? '=>' lambdaBody
         ;
 
-The keyword ``this`` can be used inside a *lamdba expression with receiver*
-and it corresponds the first parameter:
+The usage of annotations is discussed in :ref:`Using Annotations`.
+
+The keyword ``this`` can be used inside a *lambda expression with receiver*,
+It corresponds to the first parameter:
 
 .. code-block:: typescript
    :linenos:
 
       class A { name = "Bob" }
 
-      let show = (this: a): void {
+      let show = (this: A): void {
           console.log(this.name)
       }
 
-The use of lambada  is illustrated by the example below:
+The use of lambda is illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
 
-      class A { 
+      class A {
         name: string
         constructor (n: string) {
             this.name = n
         }
       }
-      
+
       function apply(aa: A[], f: (this: A) => void) {
         for (let a of aa) {
             a.f()
         }
       }
 
-      let aa: A[] = [new A("aa"), new A("bb")]  
+      let aa: A[] = [new A("aa"), new A("bb")]
       foo(aa, (this: A) => { console.log(this.name)} ) // output: "aa" "bb"
+
+
+**Note**. If *lambda expression with receiver* is declared in a class or
+interface, then the use of ``this`` in a lambda body always refers to the first
+lambda parameter, but not to ``this`` of the surrounding class or interface.
+
+.. code-block:: typescript
+   :linenos:
+
+      class B {
+        foo() { console.log ("foo() from B is called") }
+      }
+      class A {
+        foo() { console.log ("foo() from A is called") }
+        bar() {
+            let lambda = (this: B): void => { this.foo() }
+            new B().lambda()
+        }
+      }
+      new A().bar() // Output is 'foo() from B is called'
+
+|
+
+.. _Implicit this in Lambda with Receiver Body:
+
+Implicit ``this`` in Lambda with Receiver Body
+==============================================
+
+.. meta:
+    frontend_status: Done
+
+Implicit ``this`` can be used in the body of *lambda expression with receiver*
+when accessing the following:
+
+- Instance methods, fields, and accessories of lambda receiver type (see
+  :ref:`Receiver Type`); or
+- Functions with receiver (see :ref:`Functions with Receiver`) of the same
+  receiver type.
+
+In other words, prefix ``this.`` in such cases can be omitted. This feature
+is added to |LANG| to improve DSL support. It is illustrated by the following
+examples:
+
+.. code-block:: typescript
+   :linenos:
+
+     class C {
+       name: string = ""
+       foo(): void {}
+     }
+
+     function process(context: (this: C) => void) {}
+
+     process(
+        (this: C): void => {
+            this.foo()   // ok - normal call
+            foo()        // ok - implicit 'this'
+            name = "Bob" // ok - implicit 'this'
+        }
+     )
+
+The same applies if *lambda expression with receiver* is defined as
+*trailing lambda* (see :ref:`Trailing Lambdas`). In this case, lambda signature
+is inferred from the context:
+
+.. code-block:: typescript
+   :linenos:
+
+     process() {
+        this.foo() // ok - normal call
+        foo()      // ok - implicit 'this'
+     }
+
+The example above represents the use of implicit ``this`` when calling a function
+with receiver:
+
+.. code-block:: typescript
+   :linenos:
+
+     function bar(this: C) {}
+     function otherBar(this: OtherClass) {}
+
+     process() {
+        bar()      // ok -  implicit 'this'
+        otherBar() // compile-time error, wrong type of implicit 'this'
+     }
+
+If a simple name used in a lambda body can be resolved as instance method,
+field or accessor of the receiver type, and as another entity in the current
+scope at the same time, then a :index:`compile-time error` occurs to prevent
+ambiguity and improve readability.
 
 |
 
@@ -1925,9 +1989,7 @@ Trailing Lambdas
 The *trailing lambda* mechanism allows using a special form of function
 or method call when the last parameter of a function or a method is of
 function type, and the argument is passed as a lambda using the ``{}``
-notation.
-
-Syntactically, the *trailing lambda* looks as follows:
+notation. The *trailing lambda* syntactically looks as follows:
 
 .. index::
    trailing lambda
@@ -1962,11 +2024,11 @@ The formal syntax of the *trailing lambda* is presented below:
         arguments block
         ;
 
+Currently, no parameter can be specified for the trailing lambda,
+except a receiver parameter (see :ref:`Lambda Expressions with Receiver`).
+Otherwise, a :index:`compile-time error` occurs.
 
-Currently, no parameter can be specified for the trailing lambda. Otherwise,
-a :index:`compile-time error` occurs.
-
-**Note**: If a call is followed by a block, and the function or method
+**Note**. If a call is followed by a block, and the function or method
 being called has no last function type parameter, then such block is
 handled as an ordinary block of statements but not as a lambda function.
 
@@ -1997,21 +2059,21 @@ argument (see :ref:`Optional Parameters`).
           foo (p?: ()=>void) { ... }
       }
 
-      let a = new A()
+      const a = new A()
+
       a.foo() { console.log ("method lambda argument is activated") }
-      // method foo receives last argument as an inline lambda
+      // method 'foo' receives last argument as an inline lambda
 
       a.foo(); { console.log ("that is the block code") }
       // method 'foo' is called with 'p' parameter set to 'undefined'
       // ';' allows to specify explicitly that '{' starts the block
 
-      function bar(f: ()=>void) { ... }
+      function bar(f?: ()=>void) { ... }
 
       bar() { console.log ("function lambda argument is activated") }
       // function 'bar' receives last argument as an inline lambda,
       bar(); { console.log ("that is the block code") }
-      // function 'bar' is called with 'p' parameter set to 'undefined'
-
+      // function 'bar' is called with 'f' parameter set to 'undefined'
 
 .. code-block:: typescript
    :linenos:
@@ -2028,43 +2090,6 @@ argument (see :ref:`Optional Parameters`).
      { console.log ("after call of 'foo' this block is executed") }
      /* here, function foo receives lambda as an argument and a block after
       the call is just a block, not a trailing lambda. */
-
-|
-
-.. _Enumeration Types Conversions:
-
-Enumeration Types Conversions
-*****************************
-
-.. meta:
-    frontend_status: Partly
-
-Every *enum* type is compatible with type ``Object`` (see
-:ref:`Type Compatibility`). Every variable of type ``enum`` can thus be
-assigned into a variable of type ``Object``. The ``instanceof`` check can
-be used to get an enumeration variable back by applying the ``as`` conversion:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-    enum Commands { Open = "fopen", Close = "fclose" }
-    let c: Commands = Commands.Open
-    let o: Object = c // Autoboxing of enum type to its reference version
-    // Such reference version type has no name, but can be detected by instanceof
-    if (o instanceof Commands) {
-       c = o as Commands // And explicitly converted back by 'as' conversion
-    }
-
-.. index::
-   enum type
-   enumeration type
-   conversion
-   assignment
-   Object
-   variable
-   compatibility
 
 |
 
@@ -2116,347 +2141,63 @@ There are additional methods for instances of any enumeration type:
       console.log(c.valueOf()) // prints 10
       console.log(c.getName()) // prints Green
 
-**Note**: ``c.toString()`` returns the same value as ``c.valueOf().toString()``.
+**Note**. Methods ``c.toString()`` and ``c.valueOf().toString()`` return the
+same value.
 
 .. index::
    instance
    enumeration type
    value
-   numeric type
    enumeration constant
    type int
    type string
 
 |
 
-.. _Exceptions:
+.. _Errors and Initialization Expression:
 
-Exceptions
-**********
-
-.. meta:
-    frontend_status: Done
-
-``Exception`` is the base class of all exceptions. ``Exception`` is used to
-define a new exception, or any class derived from the ``Exception`` as the
-base of a class:
-
-.. code-block:: typescript
-   :linenos:
-
-      class MyException extends Exception { ... }
-
-.. index::
-   exception
-   base class
-   Exception
-
-A :index:`compile-time error` occurs if a generic class is a direct or
-indirect subclass of ``Exception``.
-
-An exception is thrown explicitly with the ``throw`` statement.
-
-When an exception is thrown, the surrounding piece of code is to handle it by
-correcting the problem, trying an alternative approach, or informing the user.
-
-An exception can  be  processed in two ways:
-
--  Propagating the exception from a function to the code that calls that
-   function (see :ref:`Throwing Functions`);
-
--  Using a ``try`` statement to handle the exception (see :ref:`Try Statements`).
-
-.. index::
-   exception
-   base class
-   Exception
-   try statement
-   throw statement
-   propagation
-   function
-   throwing function
-   function call
-
-|
-
-.. _Throwing Functions:
-
-Throwing Functions
-==================
+Errors and Initialization Expression
+====================================
 
 .. meta:
     frontend_status: Done
 
-The keyword ``throws`` is used at the end of a signature to indicate that a
-function (this notion here includes methods, constructors, or lambdas) can
-throw an exception. A function ending with ``throws`` is called a
-*throwing function*. The function type can also be marked as ``throws``:
+If code of an *initialization expression* of *variable declaration* (see
+:ref:`Variable Declarations`), *constant declaration* (see
+:ref:`Constant Declarations`), or *class field initializer* (see
+:ref:`Field Initialization`) contains unhandled ``throw`` statement (see
+:ref:`Throw Statements`), then the program terminates (see :ref:`Program Exit`).
 
-.. index::
-   keyword throws
-   throwing function
-   signature
-   method
-   constructor
-   lambda
-   function
-   exception
-   function type
-   throws mark
+These situations are represented by the examples below:
 
 .. code-block:: typescript
    :linenos:
 
-      function canThrow(x: int): int throws { ... }
-
-A *throwing function* can propagate exceptions to the scope from which
-it is called. The propagation of an *exception* occurs if:
-
--  The call of a *throwing function* is not enclosed in a ``try`` statement; or
--  The enclosed ``try`` statement does not contain a clause that can catch the
-   exception.
+    const const_decl = foo(true)
+    class A {
+        field_decl = foo(false)
+    }
 
 
-In the example below, the function call is not enclosed in a ``try``
-statement; any exception raised by ``canThrow`` function is propagated:
-
-.. index::
-   throwing function
-   propagation
-   exception
-   scope
-   function call
-   try statement
-
-.. code-block:: typescript
-   :linenos:
-
-      function propagate1(x: int): int throws {
-        return y = canThrow(x) // exception is propagated
-      }
+    function foo(toggle: boolean) {
+        if (toggle)
+            throw new Error // No surrounding 'try'
+        return true
+    }
 
 
-In the example below, the ``try`` statement can catch only ``this`` exceptions.
-Any exception raised by ``canThrow`` function---except for ``MyException``
-itself, and any exception derived from ``MyException``---is propagated:
-
-.. index::
-   try statement
-   this
-   exception
-   propagation
-
-.. code-block:: typescript
-   :linenos:
-
-      function propagate2(x: int): int throws {
-        try {
-          return y = canThrow(x) //
-        }
-        catch (e: MyException) /*process*/ }
-          return 0
-      }
-
-|
-
-.. _Non-Throwing Functions:
-
-Non-Throwing Functions
-======================
-
-.. meta:
-    frontend_status: Done
-
-A *non-throwing function* is a function (this notion here includes methods,
-constructors, or lambdas) not marked as ``throws``. Any exceptions inside a
-*non-throwing function* must be handled inside the function.
-
-A :index:`compile-time error` occurs if not **all** of the following
-requirements are met:
-
--  The call of a *throwing function* is enclosed in a ``try`` statement;
--  The enclosing ``try`` statement has a default ``catch`` clause.
-
-.. index::
-   non-throwing function
-   throwing function
-   function
-   method
-   constructor
-   lambda
-   throws mark
-   try statement
-   catch clause
-
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-      // non-throwing function
-      function cannotThrow(x: int): int {
-        return y = canThrow(x) // compile-time error
-      }
-
-      function cannotThrow(x: int): int {
-        try {
-          return y = canThrow(x) //
-        }
-        catch (e: MyException) { /* process */ }
-        // compile-time error – default catch clause is required
-      }
-
-|
-
-.. _Rethrowing Functions:
-
-Rethrowing Functions
-====================
-
-.. meta:
-    frontend_status: Done
-
-A *rethrowing function* is a function that accepts a *throwing function* as a
-parameter, and is marked with the keyword ``rethrows``.
-
-The body of such function must not contain any ``throw`` statement that is
-not handled by a ``try`` statement within that body. A function with unhandled
-``throw`` statements must be marked with the keyword ``throws`` but not
-``rethrows``.
-
-.. index::
-   rethrowing function
-   throwing function
-   non-throwing function
-   function parameter
-   keyword throws
-   keyword rethrows
-   try statement
-   throw statement
-
-Both a *throwing* and a *non-throwing* function can be an argument of a
-*rethrowing function* ``foo`` that is being called.
-
-If a *throwing function* is an argument, then the calling of ``foo`` can
-throw an exception.
-
-This rule is exception-free, i.e., a *non-throwing* function used as a call
-argument cannot throw an exception:
-
-.. code-block:: typescript
-   :linenos:
-
-        function foo (action: () throws) rethrows {
-        action()
-      }
-
-      function canThrow() {
-        /* body */
-      }
-
-      function cannotThrow() {
-        /* body */
-      }
-
-      // calling rethrowing function:
-        foo(canThrow) // exception can be thrown
-        foo(cannotThrow) // exception-free
-
-A call is exception-free if:
-
--  Function ``foo`` has several parameters of a function type marked
-   with ``throws``; and
--  All actual arguments of the call to ``foo`` are non-throwing.
-
-However, the call can raise an exception, and is handled as any other
-*throwing function* call if at least one of the actual function arguments
-is *throwing*. It implies that a call to ``foo`` within the body of a
-*non-throwing* function must be guaranteed with a ``try-catch`` statement:
-
-.. index::
-   function
-   exception-free call
-   function type parameter
-   throws mark
-   throwing function
-   non-throwing function
-   try-catch statement
-
-.. code-block:: typescript
-   :linenos:
-
-      function mayThrowContext() throws {
-        // calling rethrowing function:
-        foo(canThrow) // exception can be thrown
-        foo(cannotThrow) // exception-free
-      }
-
-      function neverThrowsContext() {
-        try {
-          // calling rethrowing function:
-          foo(canThrow) // exception can be thrown
-          foo(cannotThrow) // exception-free
-        }
-        catch (e) {
-          // To handle the situation
-        }
-      }
-
-|
-
-.. _Exceptions and Initialization Expression:
-
-Exceptions and Initialization Expression
-========================================
-
-.. meta:
-    frontend_status: Done
-
-A *variable declaration* (see :ref:`Variable Declarations`) or a *constant
-declaration* (see :ref:`Constant Declarations`) expression used to initialize
-a variable or constant must not have calls to functions that can *throw* or
-*rethrow* exceptions if the declaration is not within a statement that handles
-all exceptions.
-
-See :ref:`Throwing Functions` and :ref:`Rethrowing Functions` for details.
 
 .. index::
    variable declaration
-   exception
    initialization expression
    constant declaration
+   field initializer
    expression
    initialization
    variable
    constant
    function call
-   throw exception
-   rethrow exception
    statement
-   throwing function
-   rethrowing function
-
-|
-
-.. _Exceptions and Errors Inside Field Initializers:
-
-Exceptions and Errors Inside Field Initializers
-===============================================
-
-.. meta:
-    frontend_status: Done
-
-Class field initializers cannot call *throwing* or *rethrowing* functions.
-
-See :ref:`Throwing Functions` and :ref:`Rethrowing Functions` for details.
-
-.. index::
-   exception
-   error
-   field initializer
-   throwing function
-   rethrowing function
 
 |
 
@@ -2467,268 +2208,22 @@ Coroutines
 
 .. meta:
     frontend_status: Partly
-    todo: rename valueOf(string) to getValueOf(string), implement valueOf()
 
 A function or lambda can be a *coroutine*. |LANG| supports *basic coroutines*,
-*structured coroutines*, and *communication channels*.
+*structured coroutines*.
 Basic coroutines are used to create and launch a coroutine; the result is then
 to be awaited.
+
+See :ref:`Standard Library`.
 
 .. index::
    structured coroutine
    basic coroutine
-   function
-   lambda
    coroutine
-   communication channel
-   launch
 
 |
 
-.. _Create and Launch a Coroutine:
-
-Create and Launch a Coroutine
-=============================
-
-.. meta:
-    frontend_status: Done
-
-The following expression is used to create and launch a coroutine based on
-a function call, a lambda call (see :ref:`Function Call Expression`), or a
-method call (see :ref:`Method Call Expression`):
-
-.. code-block:: abnf
-
-      launchExpression:
-        'launch' functionCallExpression | methodCallExpression;
-
-
-.. code-block:: typescript
-   :linenos:
-
-      let res = launch cof(10)
-
-      // where 'cof' can be defined as:
-      function cof(a: int): int {
-        let res: int
-        // Do something
-        return res
-      }
-
-Lambda can be used in a launch expression as a part of a function call:
-
-.. code-block:: typescript
-   :linenos:
-
-      let res = launch ((n: int) => { /* lambda body */ })(7)
-
-.. index::
-   expression
-   coroutine
-   launch
-   function call expression
-   lambda
-   launch expression
-
-The result of the launch expression is of type ``Promise<T>``, where ``T`` is
-the return type of the function being called:
-
-.. code-block:: typescript
-   :linenos:
-
-      function foo(): int {}
-      function bar() {}
-      let resfoo = launch foo()
-      let resbar = launch bar()
-
-In the example above the type of ``resfoo`` is ``Promise<int>``, and the
-type of ``resbar`` is ``Promise<void>``.
-
-Similarly to |TS|, |LANG| supports the launching of a coroutine by calling
-the function ``async`` (see :ref:`Async Functions`). No restrictions apply as
-to from what scope to call the function ``async``:
-
-.. index::
-   launch expression
-   return type
-   function call
-   coroutine
-   async function
-   restriction
-
-.. code-block:: typescript
-   :linenos:
-
-      async function foo(): Promise<int> {}
-
-      // This will create and launch coroutine
-      let resfoo = foo()
-
-|
-
-.. _Awaiting a Coroutine:
-
-Awaiting a Coroutine
-====================
-
-.. meta:
-    frontend_status: Done
-
-The ``await`` expressions are used while a previously launched coroutine
-finishes and returns a value:
-
-.. code-block:: abnf
-
-      awaitExpression:
-        'await' expression
-        ;
-
-A :index:`compile-time error` occurs if the expression type is not ``Promise<T>``.
-
-.. index::
-   expression await
-   launch
-   coroutine
-   expression type
-
-.. code-block:: typescript
-   :linenos:
-
-      let promise = launch (): int { return 1 } ()
-      console.log(await promise) // output: 1
-
-If the coroutine result must be ignored, then the expression statement
-``await`` is used:
-
-.. code-block:: typescript
-   :linenos:
-
-      function foo() { /* do something */ }
-      let promise = launch foo()
-      await promise
-
-The ``await`` cannot return ``Promise<T>`` or union type that contains
-``Promise<T>``. If the actual type argument of ``T`` in ``Promise<T>`` contains
-``Promise``, then the compiler eliminates any such usage.
-
-Return types of ``await`` expressions are represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-       // if p has type Promise<Promise<string>>,
-       // await p returns string
-       let x : string = await p;
-
-       // if p2 has type Promise<Promise<string> | number>,
-       // await p2 returns string | number
-       let y : string | number = await p2;
-
-       // if p3 has type Promise<string>|Promise<number>,
-       // await p2 returns string | number
-       let z : string | number = await p3;
-
-.. index::
-   coroutine
-   expression statement
-   union type
-   type argument
-   await expression
-
-|
-
-.. _Promise<T> Class:
-
-``Promise<T>`` Class
-====================
-
-.. meta:
-    frontend_status: Done
-
-The class ``Promise<T>`` represents the values returned by launch expressions
-(see :ref:`Create and Launch a Coroutine`) and dynamic import expressions (see
-:ref:`Dynamic Import Expression`). It belongs to the core packages of the
-standard library (see :ref:`Standard Library`), and can be used without
-any qualification.
-
-The methods are used as follows:
-
--  ``then`` takes two arguments (the first argument is the callback used if the
-   promise is fulfilled, and the second if it is rejected), and returns
-   ``Promise<U>``.
-
-.. index::
-   class
-   value
-   launch expression
-   import expression
-   argument
-   callback
-   package
-   standard library
-   method
-
-.. code-block:: typescript
-
-        Promise<U> Promise<T>::then<U>(fulfilCallback :
-            function
-        <T>(val: T) : Promise<U>, rejectCallback : (err: Object)
-        : Promise<U>)
-
--  ``catch`` is the alias for ``Promise<T>.then<U>((value: T) : U => {}``, ``onRejected)``.
-
-.. code-block-meta:
-
-.. code-block:: typescript
-
-        Promise<U> Promise<T>::catch<U>(rejectCallback : (err:
-            Object) : Promise<U>)
-
--  ``finally`` takes one argument (the callback called after ``promise`` is
-   either fulfilled or rejected) and returns ``Promise<T>``.
-
-.. index::
-   alias
-   callback
-   call
-
-.. code-block:: typescript
-
-        Promise<U> Promise<T>::finally<U>(finallyCallback : (
-            Object:
-        T) : Promise<U>)
-
-|
-
-.. _Structured Coroutines:
-
-Structured Coroutines
-=====================
-
-.. meta:
-    frontend_status: None
-
-|
-
-.. _Channels Classes:
-
-Channels Classes
-================
-
-.. meta:
-    frontend_status: None
-
-*Channels* are used to send data between coroutines.
-
-*Channels classes* are a part of the coroutine-related package of the
-standard library (see :ref:`Standard Library`).
-
-.. index::
-   channel class
-   coroutine
-   package
-
-|
+.. _Async Functions and Methods:
 
 Async Functions and Methods
 ***************************
@@ -2736,7 +2231,6 @@ Async Functions and Methods
 .. meta:
     frontend_status: Done
 
-|
 
 .. _Async Functions:
 
@@ -2749,8 +2243,8 @@ Async Functions and Methods
 ``Async`` functions are implicit coroutines that can be called as regular
 functions. ``Async`` functions can be neither ``abstract`` nor ``native``.
 
-The return type of an ``async`` function must be ``Promise<T>`` (see
-:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and ``T``
+The return type of an ``async`` function must be ``Promise<T>``. 
+Returning values of types ``Promise<T>`` and ``T``
 from ``async`` functions is allowed.
 
 Using return statement without an expression is allowed if the return type
@@ -2759,7 +2253,7 @@ is ``Promise<void>``.
 of the function body if there is no explicit return statement in a function
 with the return ``Promise<void>``.
 
-**Note**: Using type ``Promise<void>`` is not recommended as this type is
+**Note**. Using type ``Promise<void>`` is not recommended as this type is
 supported for the sake of backward |TS| compatibility only.
 
 .. index::
@@ -2787,9 +2281,9 @@ Experimental ``Async`` Methods
 The method ``async`` is an implicit coroutine that can be called as a regular
 method. ``Async`` methods can be neither ``abstract`` nor ``native``.
 
-The return type of an ``async`` method must be ``Promise<T>`` (see
-:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and *T* from
-``async`` methods is allowed.
+The return type of an ``async`` method must be ``Promise<T>``. 
+Returning values of types ``Promise<T>`` and ``T``
+from ``async`` methods is allowed.
 
 Using return statement without an expression is allowed if the return type
 is ``Promise<void>``.
@@ -2797,7 +2291,7 @@ is ``Promise<void>``.
 of the methods body if there is no explicit return statement in a method
 with return type ``Promise<void>``.
 
-**Note**: Using this annotation is not recommended as this type of methods
+**Note**. Using this annotation is not recommended as this type of methods
 is supported for the sake of backward |TS| compatibility only.
 
 .. index::
@@ -2810,270 +2304,6 @@ is supported for the sake of backward |TS| compatibility only.
    annotation
    abstract method
    native method
-
-|
-
-.. _DynamicObject Type:
-
-DynamicObject Type
-******************
-
-.. meta:
-    frontend_status: Partly
-
-The interface ``DynamicObject`` is used to provide seamless interoperability
-with dynamic languages (e.g., |JS| and |TS|), and to support advanced
-language features such as *dynamic import* (see :ref:`Dynamic Import Expression`).
-
-This interface (defined in :ref:`Standard Library`) is common for a set of
-wrappers (also defined in :ref:`Standard Library`) that provide access to
-underlying objects.
-
-An instance of ``DynamicObject`` cannot be created directly. Only an
-instance of a specific wrapper object can be instantiated. For example, a
-*dynamic import* expression (see :ref:`Dynamic Import Expression`) can produce
-an instance of the dynamic object implementation class that wraps an object
-containing exported entities of an imported module.
-
-``DynamicObject`` is a predefined type. The following operations applied to an
-object of type ``DynamicObject`` are handled by the compiler in a special manner:
-
-- Field access;
-- Method call;
-- Indexing access;
-- New; and
-- Cast.
-
-.. index::
-   interface
-   interoperability
-   dynamic import
-   interface
-   wrapper
-   access
-   underlying object
-   instantiation
-   export
-   entity
-   import
-   predefined type
-   field access
-   indexing access
-   method call
-   cast
-
-|
-
-.. _DynamicObject Field Access:
-
-``DynamicObject`` Field Access
-==============================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The field access expression *D.F*, where *D* is of type ``DynamicObject``,
-is handled as an access to a property of an underlying object.
-
-If the value of a field access is used, then it is wrapped in the instance of
-``DynamicObject``, since the actual type of the field is not known at compile
-time.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      console.log(d.f1) // access of the property named "f1" of underlying object
-      d.f1 = 5 // set a value of the property named "f1"
-      let y = d.f1 // 'y' is of type DynamicObject
-   }
-
-The wrapper can raise an error if:
-
-- No property with the specified name exists in the underlying object; or
-- The field access is in the right-hand side of the assignment, and the
-  type of the assigned value is not compatible with the type of the property
-  (see :ref:`Type Compatibility`).
-
-.. index::
-   wrapper
-   dynamic import
-   underlying object
-   field access
-   field access expression
-   compile time
-   property
-   instance
-   assignment
-   assigned value
-
-
-|
-
-.. _DynamicObject Method Call:
-
-``DynamicObject`` Method Call
-=============================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The method call expression *D.F(arguments)*, where *D* is of type
-``DynamicObject``, is handled as a call of the instance method of an
-underlying object.
-
-If the result of a method call is used, then it is wrapped in the instance
-of ``DynamicObject``, since the actual type of the returned value is not known
-at compile time.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      d.foo() // call of a method "foo" of underlying object
-      let y = d.goo() // 'y' is of type DynamicObject
-   }
-
-The wrapper must raise an error if:
-
-- No method with the specified name exists in the underlying object; or
-- The signature of the method is not compatible with the types of the
-  call arguments.
-
-.. index::
-   DynamicObject
-   wrapper
-   method
-   dynamic import
-   field access
-   property
-   instance
-   method
-
-|
-
-.. _DynamicObject Indexing Access:
-
-``DynamicObject`` Indexing Access
-=================================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The indexing access expression *D[index]*, where *D* is of type
-``DynamicObject``, is handled as an indexing access to an underlying object.
-
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      let x = d[0]
-   }
-
-The wrapper must raise an error if:
-
-- The indexing access is not supported by the underlying object;
-- The type of the *index* expression is not supported by the underlying object.
-
-.. index::
-   indexing access expression
-   index expression
-   wrapper
-   access
-   underlying object
-
-|
-
-.. _DynamicObject New Expression:
-
-``DynamicObject`` New Expression
-================================
-
-.. meta:
-    frontend_status: Partly
-    todo: now it supports only JSValue, need to add full abstract support
-
-The new expression *new D(arguments)* (see :ref:`New Expressions`), where
-*D* is of type ``DynamicObject``, is handled as a new expression (constructor
-call) applied to the underlying object.
-
-The result of the expression is wrapped in an instance of ``DynamicObject``,
-as the actual type of the returned value is not known at compile time.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(d: DynamicObject) {
-      let x = new d()
-   }
-
-The wrapper must raise an error if:
-
-- A new expression is not supported by the underlying object; or
-- The signature of the constructor of the underlying object is not compatible
-  with the types of call arguments.
-
-.. index::
-   expression
-   constructor call
-   constructor
-   wrapper
-   returned value
-   compatibility
-   call argument
-   property
-   instance
-
-|
-
-.. _DynamicObject Cast Expression:
-
-``DynamicObject`` Cast Expression
-=================================
-
-.. meta:
-    frontend_status: None
-
-The cast expression *D as T* (see :ref:`Cast Expressions`), where *D* is of
-type ``DynamicObject``, is handled as an attempt to cast the underlying object
-to a static type ``T``.
-
-A :index:`compile-time error` occurs if ``T`` is not a class or interface type.
-
-The result of a cast expression is an instance of type ``T``.
-
-.. code-block:: typescript
-   :linenos:
-
-   interface I {
-      bar()
-   }
-
-   function foo(d: DynamicObject) {
-      let x = d as I
-      x.bar() // a call of interface method (not dynamic)
-   }
-
-The wrapper must raise an error if an underlying object cannot be converted
-to the target type specified by the cast operator.
-
-.. index::
-   wrapper
-   underlying object
-   cast expression
-   interface type
-   cast expression
-   instance
-   type
-   conversion
-   target type
-   cast operator
 
 |
 
@@ -3123,12 +2353,12 @@ have the same *package header*:
           ;
 
       packageTopDeclaration:
-          topDeclaration | packageInitializer
+          topDeclaration | initializerBlock
           ;
 
 A :index:`compile-time error` occurs if:
 
--  A *package module* contains no package header; or
+-  *Package module* contains no package header; or
 -  Package headers of two package modules in the same package have
    different identifiers.
 
@@ -3137,6 +2367,29 @@ packages of the standard library (see :ref:`Standard Library Usage`).
 
 A *package module* can directly access all top-level entities declared in all
 modules that constitute the package.
+
+If a top declaration in any package module contains an initializer for a
+variable or a constant, then the form of the initializer must be
+*constantExpression*. Otherwise, a :index:`compile-time error` occurs.
+Initializer block is to be used for initialization to ensure an explicit order
+of initialization.
+
+.. code-block:: typescript
+   :linenos:
+
+   package P
+     let v1 = foo() // Compile-time error as call to foo() is not a constant expression
+     function foo() { return 1 }
+
+     let v2 = 2 + 3 * 4 // OK
+
+     let v2: number
+     static {
+        v2 = foo() // OK
+     }
+
+
+
 
 .. index::
    package module
@@ -3210,12 +2463,33 @@ Package Initializer
 ===================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
 
 Among all *package modules* there can be one to contain a code that performs
 initialization actions (e.g., setting initial values for variables across all
-package modules) as described in detail in :ref:`Compilation Unit Initialization`.
-The appropriate syntax is presented below:
+package modules) as described in detail in
+:ref:`Compilation Unit Initialization` and in :ref:`Initializer Block`.
+
+A :index:`compile-time error` occurs if a package contains *package initializer*
+in more than one source file.
+
+.. code-block:: typescript
+   :linenos:
+
+      // Source file 1
+      package P
+         static { // P initializer part one
+         }
+         function foo() {}
+         static { // P initializer part two
+         }
+
+
+      // Source file 2
+      package P
+         static {} // compile-time error as initializer in a different source file
+
+
 
 .. index::
    package initializer
@@ -3223,16 +2497,6 @@ The appropriate syntax is presented below:
    initialization
    compilation unit
    variable
-   package initializer
-
-.. code-block:: abnf
-
-      packageInitializer:
-          'static' block
-          ;
-
-A :index:`compile-time error` occurs if a package contains more than one
-*package initializer*.
 
 |
 
@@ -3249,11 +2513,11 @@ While importing functions, the following situations can occur:
 -  Different imported functions have the same name but different signatures, or
    a function (functions) of the current module and an imported function
    (functions) have the same name but different signatures. This situation is
-   *overloading*. All such functions are accessible (see :ref:`Accessible`).
+   called *overloading*. All such functions are accessible (see :ref:`Accessible`).
 
 -  A function (functions) of the current module and an imported function
-   (functions) have the same name and overload-equivalent signature (see
-   :ref:`Overload-Equivalent Signatures`). This situation is a
+   (functions) have the same name and an overload-equivalent signature (see
+   :ref:`Overload-Equivalent Signatures`). This situation causes a
    :index:`compile-time error` as declarations are duplicated. Qualified import
    or alias in import can be used to access the imported entity.
 
@@ -3296,7 +2560,6 @@ The two situations are illustrated by the examples below:
         foo(3.141592653589) // Call to local foo(double)
       }
 
-
       // Declaration duplication case
       package P1
          function foo() {}
@@ -3321,6 +2584,9 @@ The two situations are illustrated by the examples below:
 Generics Experimental
 *********************
 
+.. meta:
+    frontend_status: Done
+
 |
 
 .. _NonNullish Type Parameter:
@@ -3329,10 +2595,10 @@ NonNullish Type Parameter
 =========================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
 
-If some generic class has a type parameter with nullish union type constraint,
-then special syntax for type annotation can be used to get a non-nullish
+If some generic class has a type parameter with a nullish union type constraint,
+then special syntax can be used for type annotation to get a non-nullish
 version of the type parameter variable. The example below illustrates this
 possibility:
 
@@ -3380,7 +2646,6 @@ possibility:
       result = a.foo(void)      // void! => never
       result = b.foo(null)      // null! => never
       result = c.foo(undefined) // undefined! => never
-
 
 .. raw:: pdf
 

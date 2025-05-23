@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,17 +62,19 @@ class RunnerJSParser(RunnerJS):
 
         test_dirs: List[TestDirectory] = [
             TestDirectory('compiler/ts', 'ts', flags=['--extension=ts']),
-            TestDirectory('compiler/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('compiler/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
-                f'--arktsconfig={self.arktsconfig}'
+                f'--arktsconfig={self.arktsconfig}',
+                f'--ets-path={es2panda_test}'
             ]),
             TestDirectory('parser/ts', 'ts', flags=['--parse-only', '--extension=ts']),
             TestDirectory('parser/as', 'ts', flags=['--parse-only', '--extension=as']),
-            TestDirectory('parser/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('parser/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
-                f'--arktsconfig={self.arktsconfig}'
+                f'--arktsconfig={self.arktsconfig}',
+                f'--ets-path={es2panda_test}'
             ]),
         ]
 

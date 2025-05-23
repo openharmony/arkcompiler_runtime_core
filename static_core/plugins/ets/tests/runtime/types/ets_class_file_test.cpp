@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -507,16 +507,16 @@ TEST_F(EtsClassTest, GetMethod)
     ASSERT_NE(klassA, nullptr);
     ASSERT_NE(klassB, nullptr);
 
-    EtsMethod *methodFoo1 = klassA->GetMethod("foo1", ":V");
+    EtsMethod *methodFoo1 = klassA->GetStaticMethod("foo1", ":V");
     ASSERT_NE(methodFoo1, nullptr);
     ASSERT_TRUE(!strcmp(methodFoo1->GetName(), "foo1"));
 
-    EtsMethod *methodFoo2 = klassB->GetMethod("foo2", "IIFDF:LTestObject;");
+    EtsMethod *methodFoo2 = klassB->GetStaticMethod("foo2", "IIFDF:LTestObject;");
     ASSERT_NE(methodFoo2, nullptr);
     ASSERT_TRUE(!strcmp(methodFoo2->GetName(), "foo2"));
 
     // GetMethod can find method from base class
-    EtsMethod *methodFoo1FromKlassB = klassB->GetMethod("foo1");
+    EtsMethod *methodFoo1FromKlassB = klassB->GetStaticMethod("foo1", nullptr);
     ASSERT_NE(methodFoo1FromKlassB, nullptr);
     ASSERT_TRUE(!strcmp(methodFoo1FromKlassB->GetName(), "foo1"));
 }
@@ -767,7 +767,7 @@ TEST_F(EtsClassTest, SetAndGetSuperClass)
     ASSERT_NE(klass, nullptr);
     ASSERT_NE(superKlass, nullptr);
 
-    ASSERT_EQ(klass->GetSuperClass(), PandaEtsVM::GetCurrent()->GetClassLinker()->GetObjectClass());
+    ASSERT_EQ(klass->GetSuperClass(), PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT));
     klass->SetSuperClass(superKlass);
     ASSERT_EQ(klass->GetSuperClass(), superKlass);
 }
@@ -861,11 +861,11 @@ TEST_F(EtsClassTest, EnumerateMethods)
     std::vector<EtsMethod *> methods(methodsVectorSize);
     std::vector<EtsMethod *> enumerateMethods(methodsVectorSize);
 
-    methods.push_back(klass->GetMethod("foo1"));
-    methods.push_back(klass->GetMethod("foo2"));
-    methods.push_back(klass->GetMethod("foo3"));
-    methods.push_back(klass->GetMethod("foo4"));
-    methods.push_back(klass->GetMethod("foo5"));
+    methods.push_back(klass->GetInstanceMethod("foo1", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo2", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo3", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo4", nullptr));
+    methods.push_back(klass->GetInstanceMethod("foo5", nullptr));
 
     klass->EnumerateMethods([&enumerateMethods, &methodsVectorSize](EtsMethod *method) {
         enumerateMethods.push_back(method);

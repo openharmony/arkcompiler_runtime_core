@@ -45,7 +45,9 @@ add_compile_options(
 
 # NB! For Windows we link everything statically (incl. standard library, pthread, etc.):
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/gcc/${PANDA_TRIPLET}/${MINGW_VERSION} -static-libstdc++ -static-libgcc -Wl,-Bstatic")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/gcc/${PANDA_TRIPLET}/${MINGW_VERSION} -Wl,--allow-multiple-definition -static-libstdc++ -static-libgcc -Bstatic -Wl,--image-base=0x10000000 -Wl,--disable-stdcall-fixup")
 
 include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 set_c_compiler(clang-14)
 set_cxx_compiler(clang++-14)
+set(PANDA_TARGET_WINDOWS ON)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 
 #include <sstream>
 
+#include "include/tooling/pt_location.h"
 #include "macros.h"
 
-#include "debuggable_thread.h"
 #include "error.h"
 #include "types/numeric_id.h"
 
@@ -42,8 +42,11 @@ void ThreadState::Reset()
     stepLocations_.clear();
     methodEntered_ = false;
     breakpointsActive_ = true;
+    skipAllPauses_ = false;
+    mixedDebugEnabled_ = false;
     nextBreakpointId_ = 0;
     breakpointLocations_.clear();
+    breakpointConditions_.Clear();
     pauseOnExceptionsState_ = PauseOnExceptionsState::NONE;
 }
 
@@ -92,7 +95,7 @@ void ThreadState::StepOut()
 
 void ThreadState::Pause()
 {
-    if (!paused_) {
+    if (!paused_ && !skipAllPauses_) {
         stepKind_ = StepKind::PAUSE;
     }
 }
@@ -100,6 +103,17 @@ void ThreadState::Pause()
 void ThreadState::SetBreakpointsActive(bool active)
 {
     breakpointsActive_ = active;
+}
+
+void ThreadState::SetSkipAllPauses(bool skip)
+{
+    skipAllPauses_ = skip;
+}
+
+// NOTE(fangting, #25108): implement "NativeOut" events when in mixed debug mode
+void ThreadState::SetMixedDebugEnabled(bool mixedDebugEnabled)
+{
+    mixedDebugEnabled_ = mixedDebugEnabled;
 }
 
 BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition)
@@ -141,6 +155,9 @@ void ThreadState::SetPauseOnExceptions(PauseOnExceptionsState state)
 void ThreadState::OnException(bool uncaught)
 {
     ASSERT(!paused_);
+    if (skipAllPauses_) {
+        return;
+    }
     switch (pauseOnExceptionsState_) {
         case PauseOnExceptionsState::NONE:
             break;
@@ -254,7 +271,7 @@ static std::string DumpBreakpoint(BreakpointId bpId, const PtLocation &loc)
 
 bool ThreadState::ShouldStopAtBreakpoint(const PtLocation &location)
 {
-    if (!breakpointsActive_) {
+    if (!breakpointsActive_ || skipAllPauses_) {
         return false;
     }
 

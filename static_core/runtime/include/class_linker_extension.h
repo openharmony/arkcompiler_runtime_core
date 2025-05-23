@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,21 @@ public:
     virtual const void *GetNativeEntryPointFor(Method *method) const = 0;
 
     virtual bool CanThrowException(const Method *method) const = 0;
+
+    virtual bool IsMethodNativeApi([[maybe_unused]] const Method *method) const
+    {
+        return false;
+    }
+
+    virtual bool IsNecessarySwitchThreadState([[maybe_unused]] const Method *method) const
+    {
+        return false;
+    }
+
+    virtual bool CanNativeMethodUseObjects([[maybe_unused]] const Method *method) const
+    {
+        return false;
+    }
 
     virtual ClassLinkerErrorHandler *GetErrorHandler() = 0;
 
@@ -327,6 +342,7 @@ private:
     {
         return static_cast<size_t>(root);
     }
+
     ClassLinkerErrorHandler *ResolveErrorHandler(ClassLinkerErrorHandler *errorHandler)
     {
         if (errorHandler == nullptr) {

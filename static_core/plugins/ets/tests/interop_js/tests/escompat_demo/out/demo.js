@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,17 @@
 
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
-const foo1 = require('./foo');
+const foo1 = require('./foo.abc');
 function test() {
 	const arr = new Array();
 	arr.push(new foo1.FooClass('zero'));
 	arr.push(new foo1.FooClass('one'));
 	arr.push(new foo1.FooClass('two'));
-	console.log('test: ' + (0, foo1.FooFunction)(arr));
+	print('test: ' + (0, foo1.FooFunction)(arr));
 	const arr2 = (0, foo1.BarFunction)();
-	console.log('test: check instanceof Array: ' + (arr2 instanceof Array));
-	console.log('test: ' + arr2.at(0).name);
-	console.log('test: ' + arr2.at(1).name);
-	console.log('test: ' + arr2.at(2).name);
+	print('test: check instanceof Array: ' + (arr2 instanceof Array));
+	print('test: ' + arr2.at(0).name);
+	print('test: ' + arr2.at(1).name);
+	print('test: ' + arr2.at(2).name);
 }
 test();

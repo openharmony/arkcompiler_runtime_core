@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -137,6 +137,9 @@ config("ark_config") {
       "$ark_es2panda_root:libes2panda_public",
       "$ark_es2panda_root:libes2panda_public_frontend_static",
       "$ark_es2panda_root/aot:ets2panda",
+      "$ark_es2panda_root/bindings:ts_bindings",
+      "$ark_es2panda_root/lsp:libes2panda_lsp",
+      "$ark_es2panda_root/lsp:libes2panda_lsp_static",
       "$ark_third_party_root/asmjit:*",
       "$ark_third_party_root/vixl:*",
       "./*",
@@ -194,7 +197,6 @@ config("ark_config") {
       "PANDA_TARGET_WINDOWS",
       "PANDA_WITH_BYTECODE_OPTIMIZER",
       "PANDA_WITH_COMPILER",
-      "_CRTBLD",
       "__LIBMSVCRT__",
     ]
     if (enable_irtoc) {
@@ -305,10 +307,6 @@ config("ark_config") {
     cflags_cc += [ "-g" ]
     defines += [ "__SANITIZE_ADDRESS__" ]
     print("ASAN is enabled")
-  }
-
-  if (enable_relayout_profile) {
-    defines += [ "PANDA_ENABLE_RELAYOUT_PROFILE" ]
   }
 
   configs = plugin_ark_configs

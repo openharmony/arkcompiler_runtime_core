@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,7 @@ public:
     }
 
     static bool CanEliminateInstruction(Inst *inst);
+    static bool IsHeapInvalidatingInst(Inst *inst);
 
     static constexpr size_t AA_CALLS_LIMIT = 20000;
     static constexpr size_t LS_ACCESS_LIMIT = 32;
@@ -138,17 +139,17 @@ public:
 private:
     void InitializeHeap(BasicBlock *block, HeapEqClasses *heaps);
     void MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps);
-    size_t MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk);
-    size_t ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiFixupMrk);
+    void MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk);
+    void ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiFixupMrk);
     BasicBlockHeapIter ProcessPredecessorHeap(BasicBlockHeap &predHeap, HeapValue &heapValue, BasicBlock *block,
-                                              Inst *curInst, size_t *aliasCalls);
+                                              Inst *curInst);
     bool ProcessHeapValues(HeapValue &heapValue, BasicBlock *block, BasicBlockHeapIter predInstIt,
                            PredBlocksItersPair iters, Marker phiFixupMrk);
     void FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk);
     const char *GetEliminationCode(Inst *inst, Inst *origin);
     void ApplyHoistToCandidate(Loop *loop, Inst *alive);
     void TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps, const BasicBlockHeap *eliminated);
-    void ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phiFixupMrk);
+    void ProcessAllBBs(HeapEqClasses *heaps, Marker phiFixupMrk);
     void DeleteInstruction(Inst *inst, Inst *value);
     void DeleteInstructions(const BasicBlockHeap &eliminated);
 
@@ -158,6 +159,7 @@ private:
     SaveStateBridgesBuilder ssb_;
     ArenaUnorderedSet<Inst *> beAlive_;
     ArenaVector<Loop *> rpoLoops_;
+    LseVisitor *visitor_ {nullptr};
 };
 
 }  // namespace ark::compiler

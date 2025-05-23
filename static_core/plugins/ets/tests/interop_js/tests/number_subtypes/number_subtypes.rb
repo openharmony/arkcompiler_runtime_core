@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,7 +41,8 @@ end
     # double-long precision loss
     # NumberTypeDescription.new("long", -9223372036854775808, 9223372036854775, 0),
     NumberTypeDescription.new("long", -9223372036854775, 9223372036854775, -9223372036854775 + 9223372036854775),
-    NumberTypeDescription.new("char", 0, 65535, 0 + 65535),
+    # char will map to string when pass to dynamic world
+    # NumberTypeDescription.new("char", 0, 65535, 0 + 65535),
 ]
 
 @float_primitives = [

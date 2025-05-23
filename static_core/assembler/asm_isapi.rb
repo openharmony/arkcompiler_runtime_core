@@ -74,7 +74,7 @@ module Panda
     insns << IR.new('STAX',       ['InstFlags::PSEUDO', 'InstFlags::ACC_READ'], 0, [])
     insns << IR.new('NEWX',       ['InstFlags::PSEUDO'], 0, [])
     insns << IR.new('INITOBJX',   ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
-    insns << IR.new('CALLX',      ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
+    insns << IR.new('CALLX',      ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE', 'InstFlags::STATIC_METHOD_ID'], 'INVALID_REG_IDX', [])
     insns << IR.new('CALLX_VIRT', ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
     insns << IR.new('B_P_CALLIX', ['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])
     insns << IR.new('B_P_CALLIEX',['InstFlags::PSEUDO', 'InstFlags::CALL', 'InstFlags::ACC_WRITE'], 'INVALID_REG_IDX', [])

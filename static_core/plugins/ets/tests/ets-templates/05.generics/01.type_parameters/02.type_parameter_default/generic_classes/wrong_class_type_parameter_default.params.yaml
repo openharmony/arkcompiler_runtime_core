@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,12 +13,11 @@
 
 ---
 cases:
-  - class Base<T = SomeType, T = OtherType> {}
-  - class Base<T, T = SomeType> {}
-  - class Base<T = SomeType, V>
-  - class Base<T = 5>
-  - class Base<T = true>
-  - class Base<T = "param">
-  - class Base<T = Base<T>>
-
-
+  - T = SomeType, T = OtherType
+  - T, T = SomeType
+  - T = SomeType, V
+  - T = 5
+  - T = true
+  - T = Base<T>
+  - T1, T2 = SomeType, T3
+  - T1 = T2, T2 = T1

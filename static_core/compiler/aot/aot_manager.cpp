@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,8 +37,8 @@ Expected<bool, std::string> AotManager::AddFile(const std::string &fileName, Run
         aotFile.Value()->InitializeGot(runtime);
     }
 
-    LOG(DEBUG, AOT) << "AOT file '" << fileName << "' has been loaded, code=" << aotFile.Value()->GetCode()
-                    << ", code_size=" << aotFile.Value()->GetCodeSize();
+    LOG(INFO, AOT) << "AOT file '" << fileName << "' has been loaded, code=" << aotFile.Value()->GetCode()
+                   << ", code_size=" << aotFile.Value()->GetCodeSize();
     LOG(DEBUG, AOT) << "  It contains the following panda files:";
     for (auto header : aotFile.Value()->FileHeaders()) {
         LOG(DEBUG, AOT) << "  " << aotFile.Value()->GetString(header.fileNameStr);
@@ -80,22 +80,20 @@ const AotFile *AotManager::GetFile(const std::string &fileName) const
 /* We need such kind of complex print because line length of some tool is limited by 4000 characters */
 static void FancyClassContextPrint(std::string_view context)
 {
-    constexpr char DELIMITER = ':';
     size_t start = 0;
-    size_t end = context.find(DELIMITER, start);
+    size_t end = context.find(AotClassContextCollector::DELIMETER, start);
     while (end != std::string::npos) {
         LOG(ERROR, AOT) << "\t\t" << context.substr(start, end - start);
         start = end + 1;
-        end = context.find(DELIMITER, start);
+        end = context.find(AotClassContextCollector::DELIMETER, start);
     }
     LOG(ERROR, AOT) << "\t\t" << context.substr(start);
 }
 
 static bool CheckFilesInClassContext(std::string_view context, std::string_view aotContext)
 {
-    constexpr char DELIMITER = ':';
     size_t start = 0;
-    size_t end = aotContext.find(DELIMITER, start);
+    size_t end = aotContext.find(AotClassContextCollector::DELIMETER, start);
     while (end != std::string::npos) {
         auto fileContext = aotContext.substr(start, end - start);
         if (context.find(fileContext) == std::string::npos) {
@@ -103,7 +101,7 @@ static bool CheckFilesInClassContext(std::string_view context, std::string_view 
             return false;
         }
         start = end + 1;
-        end = aotContext.find(DELIMITER, start);
+        end = aotContext.find(AotClassContextCollector::DELIMETER, start);
     }
     return true;
 }
@@ -113,7 +111,7 @@ void AotManager::VerifyClassHierarchy()
     auto completeContext = bootClassContext_;
     if (!appClassContext_.empty()) {
         if (!completeContext.empty()) {
-            completeContext.append(":");
+            completeContext.push_back(AotClassContextCollector::DELIMETER);
         }
         completeContext.append(appClassContext_);
     }
@@ -172,17 +170,37 @@ void AotManager::RegisterAotStringRoot(ObjectHeader **slot, bool isYoung)
     aotStringGcRootsCount_.fetch_add(1, std::memory_order_acq_rel);
 }
 
+void AotManager::ParseClassContextToFile(std::string_view context)
+{
+    size_t start = 0;
+    size_t end;
+    size_t pathEnd;
+    if (context.empty()) {
+        profiledPandaFiles_.insert("");
+        return;
+    }
+    while ((end = context.find(AotClassContextCollector::DELIMETER, start)) != std::string_view::npos) {
+        pathEnd = context.find(AotClassContextCollector::HASH_DELIMETER, start);
+        ASSERT(pathEnd != std::string_view::npos);
+        profiledPandaFiles_.insert(context.substr(start, pathEnd - start));
+        start = end + 1;
+    }
+    pathEnd = context.find(AotClassContextCollector::HASH_DELIMETER, start);
+    ASSERT(pathEnd != std::string_view::npos);
+    profiledPandaFiles_.insert(context.substr(start, pathEnd - start));
+}
+
 bool AotClassContextCollector::operator()(const panda_file::File &pf)
 {
     if (!acc_->empty()) {
-        acc_->append(":");
+        acc_->push_back(DELIMETER);
     }
     if (useAbsPath_) {
         acc_->append(os::GetAbsolutePath(pf.GetFilename()));
     } else {
         acc_->append(pf.GetFilename());
     }
-    acc_->append("*");
+    acc_->push_back(HASH_DELIMETER);
     acc_->append(pf.GetPaddedChecksum());
     return true;
 }

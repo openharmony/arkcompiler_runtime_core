@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ enum class GCTriggerType {
     ON_NTH_ALLOC,             // Triggers GC on n-th allocation
     PAUSE_TIME_GOAL_TRIGGER,  // Triggers concurrent marking by heap size threshold and ask GC to change eden size to
                               // satisfy pause time goal
-    GCTRIGGER_LAST = ON_NTH_ALLOC
+    XGC,                      // Trigger for cross VM references GC
 };
 
 class GCTriggerConfig {

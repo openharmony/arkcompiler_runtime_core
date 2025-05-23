@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -259,7 +259,19 @@ public:
         return mda.GetClassId().GetOffset();
     }
 
+    uint64_t GetUniqClassId(ClassPtr klass) const override
+    {
+        return ClassCast(klass)->GetUniqId();
+    }
+
     bool HasNativeException(MethodPtr method) const override;
+
+    bool IsNecessarySwitchThreadState(MethodPtr method) const override;
+
+    uint8_t GetStackReferenceMask() const override;
+
+    bool CanNativeMethodUseObjects(MethodPtr method) const override;
+
     bool IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const override;
 
     bool IsMethodIntrinsic(MethodPtr method) const override
@@ -290,6 +302,14 @@ public:
             return false;
         }
         return !(methodPtr->IsIntrinsic() || methodPtr->IsNative() || methodPtr->IsAbstract());
+    }
+
+    bool IsMethodNativeApi(MethodPtr method) const override;
+
+    void *GetMethodNativePointer(MethodPtr method) const override
+    {
+        auto *methodPtr = MethodCast(method);
+        return methodPtr->GetNativePointer();
     }
 
     bool IsMethodStaticConstructor([[maybe_unused]] MethodPtr method) const override;
@@ -500,7 +520,7 @@ public:
     /**********************************************************************************/
     /// Field information
 
-    FieldPtr ResolveField(MethodPtr method, size_t id, bool allowExternal, uint32_t *classId) override;
+    FieldPtr ResolveField(MethodPtr method, size_t id, bool isStatic, bool allowExternal, uint32_t *classId) override;
     compiler::DataType::Type GetFieldType(FieldPtr field) const override;
     compiler::DataType::Type GetArrayComponentType(ClassPtr klass) const override;
     compiler::DataType::Type GetFieldTypeById(MethodPtr parentMethod, IdType id) const override;
@@ -526,7 +546,7 @@ public:
     }
 
     FieldId GetFieldId(FieldPtr field) const override;
-    Field *GetField(MethodPtr method, RuntimeInterface::IdType id) const;
+    Field *GetField(MethodPtr method, RuntimeInterface::IdType id, bool isStatic) const;
 
     /**********************************************************************************/
     /// Type information

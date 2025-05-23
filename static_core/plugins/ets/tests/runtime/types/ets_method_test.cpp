@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,11 +105,11 @@ TEST_F(EtsMethodTest, Invoke)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *fooMethod = klass->GetMethod("foo");
+    EtsMethod *fooMethod = klass->GetStaticMethod("foo", nullptr);
     ASSERT(fooMethod);
-    EtsMethod *gooMethod = klass->GetMethod("goo");
+    EtsMethod *gooMethod = klass->GetStaticMethod("goo", nullptr);
     ASSERT(gooMethod);
-    EtsMethod *sumMethod = klass->GetMethod("sum");
+    EtsMethod *sumMethod = klass->GetStaticMethod("sum", nullptr);
     ASSERT(sumMethod);
 
     EtsValue res = fooMethod->Invoke(GetScopedManagedCodeFix(), nullptr);
@@ -143,11 +143,11 @@ TEST_F(EtsMethodTest, GetNumArgSlots)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    EtsMethod *foo1Method = klass->GetStaticMethod("foo1", nullptr);
     ASSERT(foo1Method);
-    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    EtsMethod *foo2Method = klass->GetStaticMethod("foo2", nullptr);
     ASSERT(foo2Method);
-    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    EtsMethod *foo3Method = klass->GetStaticMethod("foo3", nullptr);
     ASSERT(foo3Method);
 
     ASSERT_TRUE(foo1Method->IsStatic());
@@ -177,7 +177,7 @@ TEST_F(EtsMethodTest, GetArgType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *fooMethod = klass->GetMethod("foo");
+    EtsMethod *fooMethod = klass->GetStaticMethod("foo", nullptr);
     ASSERT(fooMethod);
 
     std::vector<EtsType> expectedArgTypes = {EtsType::BOOLEAN, EtsType::BYTE, EtsType::CHAR,  EtsType::SHORT,
@@ -220,7 +220,7 @@ TEST_F(EtsMethodTest, GetReturnValueType)
 
     for (std::size_t i = 0; i < returnValTypes.size(); i++) {
         std::string fooName("foo");
-        currentMethod = klass->GetMethod((fooName + std::to_string(i)).data());
+        currentMethod = klass->GetStaticMethod((fooName + std::to_string(i)).data(), nullptr);
         ASSERT(currentMethod);
         methods.push_back(currentMethod);
     }
@@ -252,11 +252,11 @@ TEST_F(EtsMethodTest, GetMethodSignature)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    EtsMethod *foo1Method = klass->GetStaticMethod("foo1", nullptr);
     ASSERT(foo1Method);
-    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    EtsMethod *foo2Method = klass->GetStaticMethod("foo2", nullptr);
     ASSERT(foo2Method);
-    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    EtsMethod *foo3Method = klass->GetStaticMethod("foo3", nullptr);
     ASSERT(foo3Method);
 
     ASSERT_EQ(foo1Method->GetMethodSignature(), "I:LTestObject;");
@@ -280,7 +280,7 @@ TEST_F(EtsMethodTest, GetLineNumFromBytecodeOffset)
 
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
-    EtsMethod *fooMethod = klass->GetMethod("foo");
+    EtsMethod *fooMethod = klass->GetStaticMethod("foo", nullptr);
     ASSERT(fooMethod);
 
     ASSERT_EQ(fooMethod->GetLineNumFromBytecodeOffset(0U), 5_I);
@@ -322,9 +322,9 @@ TEST_F(EtsMethodTest, GetName)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    EtsMethod *foo1Method = klass->GetStaticMethod("foo1", nullptr);
     ASSERT(foo1Method);
-    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    EtsMethod *foo2Method = klass->GetStaticMethod("foo2", nullptr);
     ASSERT(foo2Method);
 
     ASSERT_TRUE(!strcmp(foo1Method->GetName(), "foo1"));
@@ -359,11 +359,11 @@ TEST_F(EtsMethodTest, ResolveArgType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    EtsMethod *foo1Method = klass->GetStaticMethod("foo1", nullptr);
     ASSERT(foo1Method);
-    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    EtsMethod *foo2Method = klass->GetStaticMethod("foo2", nullptr);
     ASSERT(foo2Method);
-    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    EtsMethod *foo3Method = klass->GetStaticMethod("foo3", nullptr);
     ASSERT(foo3Method);
 
     ASSERT_EQ(foo1Method->ResolveArgType(0), foo2Method->ResolveArgType(0));
@@ -397,13 +397,13 @@ TEST_F(EtsMethodTest, ResolveReturnType)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT(klass);
 
-    EtsMethod *foo1Method = klass->GetMethod("foo1");
+    EtsMethod *foo1Method = klass->GetStaticMethod("foo1", nullptr);
     ASSERT(foo1Method);
-    EtsMethod *foo2Method = klass->GetMethod("foo2");
+    EtsMethod *foo2Method = klass->GetStaticMethod("foo2", nullptr);
     ASSERT(foo2Method);
-    EtsMethod *foo3Method = klass->GetMethod("foo3");
+    EtsMethod *foo3Method = klass->GetStaticMethod("foo3", nullptr);
     ASSERT(foo3Method);
-    EtsMethod *foo4Method = klass->GetMethod("foo4");
+    EtsMethod *foo4Method = klass->GetStaticMethod("foo4", nullptr);
     ASSERT(foo4Method);
 
     ASSERT_EQ(foo1Method->ResolveReturnType(), foo2Method->ResolveReturnType());
@@ -425,7 +425,7 @@ TEST_F(EtsMethodTest, GetClassSourceFile)
 
     EtsClass *klass = GetTestClass(source, "LTest;", sourceFilename);
     ASSERT(klass);
-    EtsMethod *fooMethod = klass->GetMethod("foo");
+    EtsMethod *fooMethod = klass->GetStaticMethod("foo", nullptr);
     ASSERT(fooMethod);
 
     auto result = fooMethod->GetClassSourceFile();

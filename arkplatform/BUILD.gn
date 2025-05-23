@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,38 +11,87 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/runtime_core/ark_config.gni")
 import("//arkcompiler/runtime_core/arkplatform/arkplatform_config.gni")
 
 group("arkplatform_packages") {
-  if (enable_arkplatform) {
-    deps = [ ":libarkplatform" ]
-  }
+  deps = [ ":libarkplatform" ]
 }
 
 config("arkplatform_public_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [ "$arkplatform_root" ]
 }
 
-ohos_source_set("arkplatform_static") {
-  sources = [ "src/arkplatform.cpp" ]
-  include_dirs = [
-    "$ark_root/arkplatform",
-    "$ark_root/include",
+config("arkplatform_private_config") {
+  cflags_c = []
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+    "-Wextra",
+    "-pedantic",
+    "-Wno-invalid-offsetof",
+    "-Wno-gnu-statement-expression",
+    "-fno-rtti",
+    "-std=c++17",
   ]
+  defines = []
+
+  if (is_fastverify) {
+    cflags_cc += [
+      "-O3",
+      "-ggdb3",
+      "-gdwarf-4",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+    cflags_c += [
+      "-O3",
+      "-ggdb3",
+      "-gdwarf-4",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+  } else if (is_debug) {
+    cflags_cc += [
+      "-Og",
+      "-ggdb3",
+      "-gdwarf-4",
+    ]
+  } else {
+    defines += [ "NDEBUG" ]
+  }
+
+  if (is_asan) {
+    cflags_cc += [ "-g" ]
+    defines += [ "__SANITIZE_ADDRESS__" ]
+  }
+
+  if (current_cpu == "arm") {
+    cflags_cc += [
+      "-march=armv7-a",
+      "-marm",
+      "-mfpu=vfp",
+    ]
+  }
+}
+
+ohos_static_library("arkplatform_static") {
+  configs = [
+    ":arkplatform_private_config",
+    ":arkplatform_public_config",
+  ]
+  include_dirs = [ "$arkplatform_root" ]
+  sources = [ "hybrid/xgc/xgc.cpp" ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
-
-  external_deps = [ "ets_runtime:libark_jsruntime" ]
-  if (!ark_standalone_build) {
-    external_deps += [ "hilog:libhilog" ]
-  }
 }
 
 ohos_shared_library("libarkplatform") {
   deps = [ ":arkplatform_static" ]
-  output_extension = "so"
+  if (!is_mingw && !is_mac) {
+    output_extension = "so"
+  }
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }

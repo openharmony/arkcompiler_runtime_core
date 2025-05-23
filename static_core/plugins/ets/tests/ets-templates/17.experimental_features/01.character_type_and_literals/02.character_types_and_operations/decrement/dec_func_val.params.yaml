@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,58 +12,71 @@
 # limitations under the License.
 ---
 vals:
+    # 0.
     - v1: c'\u0021'
       exp: 'decPre(v1)'
       res: c' '
-
+    # 1.
     - v1: c'\u0022'
       exp: 'decPost(v1)'
       res: c'!'
 
+    # 2.
     - v1: c'"'
-      exp: "c' ' + decPre(v1)"
+      exp: "(c' ' + decPre(v1)) as char"
       res: c'A'
 
+    # 3.
     - v1: c'\u0020'
-      exp: "c' ' + decPost(v1)"
+      exp: "(c' ' + decPost(v1)) as char"
       res: c'?'
 
+    # 4.
     - v1: c'\u0000'
       exp: "decPre(v1)"
       res: c'\uFFFF'
 
+    # 5.
     - v1: c'\u0000'
       exp: "decPost(v1)"
       res: c'\uFFFF'
 
+    # 6. Widening to int happens
     - v1: c'\u00FF'
-      exp: "decPre(c'!' + v1 + v1)"
+      exp: "decPre((c'!' + v1 + v1) as char)"
       res: c'\u021E'
 
+    # 7. Widening to int happens
     - v1: c'\u0001'
-      exp: "decPost(v1 - c'!' - v1)"
+      exp: "decPost((v1 - c'!' - v1) as char)"
       res: c'\uFFDE'
 
+    # 8. Widening to int happens
     - v1: c'\u0F0F'
-      exp: "decPre(v1 - c'1') - decPre(c'\\uACD9')"
+      exp: "(decPre((v1 - c'1') as char) - decPre(c'\\uACD9')) as char"
       res: c'\u6205'
 
+    # 9. Widening to int happens
     - v1: c'\u0F0F'
-      exp: "decPost(v1 + c'1') + decPost(c'\\uACD9')"
+      exp: "(decPost((v1 + c'1') as char) + decPost(c'\\uACD9')) as char"
       res: c'\uBC17'
 
+    # 10.
     - v1: c'\u1110'
-      exp: "decPre(c'\\u0000') - decPre(v1)"
+      exp: "(decPre(c'\\u0000') - decPre(v1)) as char"
       res: c'\uEEF0'
 
+    # 11.
     - v1: c'\u1000'
-      exp: "decPost(c'\\u0000') - decPost(v1)"
+      exp: "(decPost(c'\\u0000') - decPost(v1)) as char"
       res: c'\uF000'
 
+    # 12.
     - v1: c'∬'
       exp: "decPre(v1)"
       res: c'∫'
 
+    # 13.
     - v1: c'∬'
       exp: "decPost(v1)"
       res: c'∫'

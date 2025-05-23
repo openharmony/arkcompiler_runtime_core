@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,27 +22,27 @@ class EtsMethodConstructorTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_constructor_main_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodConstructorMainClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkMethodConstructorMainClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_parent_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassParentClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkMethodClassParentClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_child_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassChildClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkMethodClassChildClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_anonymous_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassAnonymousClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkMethodClassAnonymousClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_IIFE_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassIIFEClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkMethodClassIIFEClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

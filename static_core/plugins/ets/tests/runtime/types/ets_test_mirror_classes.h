@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include <string_view>
 #include <libpandabase/macros.h>
 #include "types/ets_class.h"
+#include "ets_platform_types.h"
 
 namespace ark::ets::test {
 
@@ -44,10 +45,12 @@ public:
         return offset_;
     }
 
-    static void CompareMemberOffsets(EtsClass *klass, const std::vector<MirrorFieldInfo> &members)
+    static void CompareMemberOffsets(EtsClass *klass, const std::vector<MirrorFieldInfo> &members, bool checkAll = true)
     {
         ASSERT_NE(nullptr, klass);
-        ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
+        if (checkAll) {
+            ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
+        }
 
         for (const MirrorFieldInfo &memb : members) {
             EtsField *field = klass->GetFieldIDByName(memb.Name());

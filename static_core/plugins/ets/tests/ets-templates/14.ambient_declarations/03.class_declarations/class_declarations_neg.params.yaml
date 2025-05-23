@@ -1,0 +1,57 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+declarations:
+  # classes
+  - >
+    declare class A
+  - >
+    declare final class B
+  - >
+    declare abstract class C
+  - >
+    class A {}
+
+    declare class B extends A
+  - >
+    interface A {}
+
+    declare class B implements A
+  - >
+    declare class A<T1, T2>
+  - >
+    declare class MyIndexable {
+      [index: string]: MyIndexable
+    }
+  - >
+    declare class WithPrivateField {
+      private x: int
+    }
+  - >
+    declare class WithPrivateMethod {
+      private foo(): int
+    }
+  - >
+    declare class WithPrivateConstructor {
+      private constructor()
+    }  
+  - >
+    class MyIterable implements Iterator<String> {
+      next(): IteratorResult<String> {
+        return {done: true, value: 'Hello World'}
+      }
+    }
+    
+    declare class IterableClass  {
+      $_iterator()
+    }

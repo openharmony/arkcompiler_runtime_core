@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,12 @@ class EtsGenericStaticExtraSetTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsGenericStaticExtraSetTsToEtsTest, checkGenericExtraSet)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericExtraSet"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericExtraSet"));
 }
 
 TEST_F(EtsGenericStaticExtraSetTsToEtsTest, checkGenericExtraSetCallFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericExtraSetCallFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericExtraSetCallFromTs"));
 }
 
 }  // namespace ark::ets::interop::js::testing

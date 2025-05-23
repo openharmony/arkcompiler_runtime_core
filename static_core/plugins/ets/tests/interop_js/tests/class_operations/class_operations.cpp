@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,116 +22,118 @@ class EtsInteropClassOperationsTest : public EtsInteropTest {
 public:
     void SetUp() override
     {
-        interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
-        // This object is used to save global js names
-        if (!SetGtestEnv()) {
+        EtsInteropTest::SetUp();
+        LoadModuleAs("module", "module");
+        if (std::getenv("PACKAGE_NAME") != nullptr) {
+            packageName_ = std::string(std::getenv("PACKAGE_NAME"));
+        } else {
+            std::cerr << "PACKAGE_NAME is not set" << std::endl;
             std::abort();
         }
-        LoadModuleAs("module", "module.js");
     }
 };
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallEmpty)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallEmpty");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallEmpty");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewEmpty)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnewEmpty");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewEmpty");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticEmpty)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallStaticMethodEmpty");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallStaticMethodEmpty");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallObject)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallObject");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallObject");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewObject)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnewObject");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewObject");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewObjectSetProperty)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnewSetPropertyObject");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewSetPropertyObject");
     ASSERT_EQ(ret, 0);
 }
 
 // returns nan
 TEST_F(EtsInteropClassOperationsTest, TestJSCallMethodObject)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallMethodObject");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallMethodObject");
     ASSERT_EQ(ret, 0);
 }
 
 // simplification of previous failure
 TEST_F(EtsInteropClassOperationsTest, TestJSCallMethodObjectSimple)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallMethodSimple");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallMethodSimple");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallString)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallString");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallString");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewString)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnewString");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewString");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestjsnewSetPropertyString)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnewSetPropertyString");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewSetPropertyString");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticString)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallStaticMethodString");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallStaticMethodString");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallArray");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallArray");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnewArray");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewArray");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestjsnewSetPropertyArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnewSetPropertyArray");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jsnewSetPropertyArray");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jscallStaticMethodArray");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "jscallStaticMethodArray");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestNamespace)
 {
-    auto ret = CallEtsMethod<int64_t>("testNamespace");
+    auto ret = CallEtsFunction<int64_t>(GetPackageName(), "testNamespace");
     ASSERT_EQ(ret, 0);
 }
 

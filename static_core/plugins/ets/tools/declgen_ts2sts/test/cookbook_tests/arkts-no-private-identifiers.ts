@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,5 +56,26 @@ class C {
 
     #s() {
         return
+    }
+}
+
+class Singleton {
+    private static instance: Singleton | null = null;
+
+    private constructor() {}
+
+    public static getInstance(): Singleton {
+        if (Singleton.instance === null) {
+            Singleton.instance = new Singleton();
+        }
+        return Singleton.instance;
+    }
+
+    public someMethod(): void {
+        console.log("This is a method of the Singleton class.");
+    }
+
+    private test(){
+        console.log("test");
     }
 }

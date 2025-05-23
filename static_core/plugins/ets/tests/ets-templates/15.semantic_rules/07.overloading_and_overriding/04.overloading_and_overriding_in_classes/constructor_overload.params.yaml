@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@ cases:
       constructor() { res = 21;}
     use: |-
       new Derived<Number>();
-      assert res == 21;
+      assertEQ( res, 21 );
 
   - decl: |-
       constructor() {
@@ -26,7 +26,7 @@ cases:
       }
     use: |-
       new Derived<Number>();
-      assert res == 21;
+      assertEQ( res, 21 );
 
   - decl: |-
       constructor() { 
@@ -35,7 +35,7 @@ cases:
       }
     use: |-
       new Derived<Number>();
-      assert res == 22;
+      assertEQ( res, 22 );
 
   - decl: |-
       constructor() { 
@@ -44,31 +44,31 @@ cases:
       }
     use: |-
       new Derived<Number>();
-      assert res == 23;
+      assertEQ( res, 23 );
 
   - decl: |-
       constructor(i: number) { res = 21; }
     use: |-
       new Derived<Number>(1.1 as number);
-      assert res == 21;
+      assertEQ( res, 21 );
 
   - decl: |-
       constructor(i: number) { super();}
     use: |-
       new Derived<Number>(1.1 as number);
-      assert res == 1;
+      assertEQ( res, 1 );
 
   - decl: |-
       constructor(i: number) { super(i);}
     use: |-
       new Derived<Number>(1.1 as number);
-      assert res == 2;
+      assertEQ( res, 2 );
 
   - decl: |-
       constructor(i: string) { res = 21;}
     use: |-
       new Derived<Number>("some string");
-      assert res == 21;
+      assertEQ( res, 21 );
 
   - tags: negative, compile-only
     decl: |-
@@ -85,10 +85,10 @@ cases:
       new Derived<Number>(new Number());
 
   - decl: |-
-      constructor(i: Number) { res == 24;}
+      constructor(i: Number) { res = 24;}
     use: |-
       new Derived<Number>(new Number());
-      assert res == 24;
+      assertEQ( res, 24 );
 
   - tags: negative, compile-only
     use: |-
@@ -96,11 +96,11 @@ cases:
       new Derived<Number>(a);
 
   - decl: |-
-      constructor(i: byte[]) { res == 25;}
+      constructor(i: byte[]) { res = 25;}
     use: |-
       let a: byte[] = [1 as byte, 2 as byte];
       new Derived<Number>(a);
-      assert res == 25;
+      assertEQ( res, 25 );
 
   - tags: negative, compile-only
     use: |-
@@ -108,48 +108,48 @@ cases:
       new Derived<Number>(a);
 
   - decl: |-
-      constructor(i: TPL) { res == 26;}
+      constructor(i: TPL) { res = 26;}
     use: |-
       let a: TPL = [ false, 1.2];
       new Derived<Number>(a);
-      assert res == 26;
+      assertEQ( res, 26 );
 
   - tags: negative, compile-only
     use: |-
       new Derived<Number>( () => { return true; } );
 
   - decl: |-
-      constructor(i: BoolFun) { res == 27;}
+      constructor(i: BoolFun) { res = 27;}
     use: |-
       new Derived<Number>( () => { return true; } );
-      assert res == 27;
+      assertEQ( res, 27 );
 
   - tags: negative, compile-only
     use: |-
       new Derived<Number>( undefined );
 
   - decl: |-
-      constructor(i: undefined|Number|null) { res == 28;}
+      constructor(i: undefined|Number|null) { res = 28;}
     use: |-
       new Derived<Number>( undefined );
-      assert res == 28;
+      assertEQ( res, 28 );
 
   - tags: negative, compile-only
     use: |-
       new Derived<Number>( null );
 
   - decl: |-
-      constructor(i: null|undefined|Number) { res == 28;}
+      constructor(i: null|undefined|Number) { res = 28;}
     use: |-
       new Derived<Number>( null );
-      assert res == 28;
+      assertEQ( res, 28 );
 
   - tags: negative, compile-only
     use: |-
       new Derived<Number>( new Gen<Byte>() );
 
   - decl: |-
-      constructor(i: Gen<T>) { res == 29;}
+      constructor(i: Gen<T>) { res = 29;}
     use: |-
       new Derived<Byte>( new Gen<Byte>() );
-      assert res == 29;
+      assertEQ( res, 29 );

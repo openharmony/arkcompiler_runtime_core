@@ -50,8 +50,12 @@ class Tool(ToolBase):
             aot_stats = '--compiler-dump-stats-csv={an}.dump.csv '
         else:
             aot_stats = ''
+        if OptFlags.LLVMAOT in self.flags:
+            aot_mode = '--paoc-mode=llvm '
+        else:
+            aot_mode = '--paoc-mode=aot '
         self.cmd = f'LD_LIBRARY_PATH={self.ark_lib} {self.paoc} ' \
-                   f'--boot-panda-files={self.etsstdlib} ' \
+                   f'--boot-panda-files={self.etsstdlib} {aot_mode} ' \
                    '--load-runtimes=ets {opts} ' \
                    f'{self.custom} {aot_stats}' \
                    '--paoc-panda-files={abc} ' \

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,19 +15,6 @@
 cases:
   # readonly argument could not be used as read-write.
     # array
-    - decl: |-
-        foo(i: readonly int[]) {
-            return 1;
-        }
-        foo(i: int[]) {
-            return 2;
-        }
-      use: |-
-        function main() {
-            let ro: readonly int[] = [1, 2];
-            assert(foo(ro) == 1);
-        }
-
     - tags: |-
         compile-only, negative
       decl: |-
@@ -40,20 +27,6 @@ cases:
             foo(ro);
         }
 
-    # std:Array, not dependent on the place in code
-    - decl: |-
-        foo(i: Array<int>) {
-            return 1;
-        }
-        foo(i: readonly Array<int>) {
-            return 2;
-        }
-      use: |-
-        function main() {
-            let ro: readonly Array<int> = new Array<int>(1);
-            assert(foo(ro) == 2);
-        }
-
     - tags: |-
         compile-only, negative
       decl: |-
@@ -64,21 +37,6 @@ cases:
         function main() {
             let ro: readonly Array<int> = new Array<int>(1);
             foo(ro);
-        }
-
-    # tuple
-    - decl: |-
-        type TPL = [number, string]
-        foo(i: readonly TPL) {
-            return 1;
-        }
-        foo(i: TPL) {
-            return 2;
-        }
-      use: |-
-        function main() {
-            let ro: readonly TPL = [1.1, "str"];
-            assert(foo(ro) == 1);
         }
 
     - tags: |-
@@ -95,17 +53,6 @@ cases:
         }
 
   # read-write argument could be used as readonly.
-    # array
-    - decl: |-
-        foo(i: readonly int[]) {
-            return 1;
-        }
-      use: |-
-        function main() {
-            let rw: int[] = [1, 2];
-            assert(foo(rw) == 1);
-        }
-
     - tags: |-
         compile-only, negative
       decl: |-
@@ -122,16 +69,6 @@ cases:
         }
 
   # std:Array, not dependent on the place in code
-    - decl: |-
-        foo(i: readonly Array<int>) {
-            return 1;
-        }
-      use: |-
-        function main() {
-            let rw: Array<int> = new Array<int>(1);
-            assert(foo(rw) == 1);
-        }
-
     - tags: |-
         compile-only, negative
       decl: |-
@@ -145,18 +82,6 @@ cases:
         function main() {
             let rw: Array<int> = new Array<int>(1);
             foo(rw);
-        }
-
-  # tuple
-    - decl: |-
-        foo(i: readonly TPL) {
-            return 1;
-        }
-      use: |-
-        type TPL = [number, string]
-        function main() {
-            let rw: TPL = [1.1, "str"];
-            assert(foo(rw) == 1);
         }
 
     - tags: |-

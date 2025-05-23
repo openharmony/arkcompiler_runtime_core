@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,9 +29,7 @@ srcs_compiler = [
 
 srcs_abc2program = [ "abc2program/abc2program_ets_plugin.cpp" ]
 
-if (!is_mac) {
-  srcs_compiler += [ "compiler/codegen_intrinsics_ets.cpp" ]
-}
+srcs_compiler += [ "compiler/codegen_intrinsics_ets.cpp" ]
 
 srcs_disassembler = [ "disassembler/disasm_ets_plugin.cpp" ]
 
@@ -59,7 +57,7 @@ if (ark_ets_interop_js) {
 
 option_yaml_path = "ets_plugin_options.yaml"
 
-runtime_option_yaml_path = "runtime_options.yaml"
+runtime_option_yaml_path = [ "runtime_options.yaml" ]
 
 inst_templates_yaml_path =
     "compiler/optimizer/ir_builder/ets_inst_templates.yaml"
@@ -86,8 +84,12 @@ arkruntime_deps = [
 arkcompiler_deps += [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h(${default_toolchain})" ]
 
 srcs_runtime = [
+  "runtime/ani/ani_interaction_api.cpp",
+  "runtime/ani/ani_mangle.cpp",
+  "runtime/ani/ani_vm_api.cpp",
   "runtime/ets_annotation.cpp",
   "runtime/ets_class_linker.cpp",
+  "runtime/ets_class_linker_context.cpp",
   "runtime/ets_class_linker_extension.cpp",
   "runtime/ets_coroutine.cpp",
   "runtime/ets_entrypoints.cpp",
@@ -97,12 +99,17 @@ srcs_runtime = [
   "runtime/ets_napi_env.cpp",
   "runtime/ets_native_library.cpp",
   "runtime/ets_native_library_provider.cpp",
+  "runtime/ets_object_state_info.cpp",
+  "runtime/ets_object_state_table.cpp",
+  "runtime/ets_platform_types.cpp",
   "runtime/ets_runtime_interface.cpp",
   "runtime/ets_stubs.cpp",
   "runtime/ets_vm.cpp",
   "runtime/ets_vm_api.cpp",  # TODO(nsizov): Take into account PR640, if needed
   "runtime/ets_vtable_builder.cpp",
+  "runtime/intrinsics/escompat_Array.cpp",
   "runtime/intrinsics/escompat_ArrayBuffer.cpp",
+  "runtime/intrinsics/escompat_TypedArrays.cpp",
   "runtime/intrinsics/compiler_intrinsics.cpp",
   "runtime/intrinsics/debugger_api.cpp",
   "runtime/intrinsics/escompat_Date.cpp",
@@ -111,13 +118,20 @@ srcs_runtime = [
   "runtime/intrinsics/std_core.cpp",
   "runtime/intrinsics/std_core_Char.cpp",
   "runtime/intrinsics/std_core_Arrays.cpp",
+  "runtime/intrinsics/std_core_Job.cpp",
+  "runtime/intrinsics/std_concurrency_Launch.cpp",
   "runtime/intrinsics/std_core_Class.cpp",
+  "runtime/intrinsics/std_core_AbcFile.cpp",
+  "runtime/intrinsics/std_core_AbcRuntimeLinker.cpp",
   "runtime/intrinsics/std_core_Console.cpp",
   "runtime/intrinsics/std_core_Double.cpp",
+  "runtime/intrinsics/std_core_ExclusiveLauncher.cpp",
   "runtime/intrinsics/std_core_Float.cpp",
   "runtime/intrinsics/std_core_Promise.cpp",
   "runtime/intrinsics/std_core_StackTrace.cpp",
   "runtime/intrinsics/escompat_Atomics.cpp",
+  "runtime/intrinsics/gc_task_tracker.cpp",
+  "runtime/intrinsics/std_core_AniHelpers.cpp",
   "runtime/intrinsics/std_core_Runtime.cpp",
   "runtime/intrinsics/std_core_SyncPrimitives.cpp",
   "runtime/intrinsics/std_core_String.cpp",
@@ -130,6 +144,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_finalization_registry.cpp",
   "runtime/intrinsics/std_math.cpp",
   "runtime/intrinsics/helpers/dtoa_helper.cpp",
+  "runtime/intrinsics/helpers/array_buffer_helper.cpp",
   "runtime/intrinsics/helpers/ets_intrinsics_helpers.cpp",
   "runtime/intrinsics/helpers/ets_to_string_cache.cpp",
   "runtime/mem/ets_reference_processor.cpp",
@@ -137,10 +152,14 @@ srcs_runtime = [
   "runtime/napi/ets_napi_invoke_interface.cpp",
   "runtime/napi/ets_napi_native_interface.cpp",
   "runtime/napi/ets_mangle.cpp",
+  "runtime/regexp/regexp.cpp",
+  "runtime/regexp/regexp_16.cpp",
+  "runtime/regexp/regexp_8.cpp",
   "runtime/regexp/regexp_executor.cpp",
   "runtime/types/ets_class.cpp",
   "runtime/types/ets_field.cpp",
   "runtime/types/ets_method.cpp",
+  "runtime/types/ets_job.cpp",
   "runtime/types/ets_promise.cpp",
   "runtime/types/ets_promise_ref.cpp",
   "runtime/types/ets_shared_memory.cpp",
@@ -158,15 +177,28 @@ srcs_runtime = [
   "stdlib/native/init_native_methods.cpp",
   "stdlib/native/escompat/Process.cpp",
   "stdlib/native/core/Intl.cpp",
+  "stdlib/native/core/IntlCommon.cpp",
   "stdlib/native/core/IntlState.cpp",
   "stdlib/native/core/IntlNumberFormat.cpp",
   "stdlib/native/core/IntlFormattersCache.cpp",
-  "stdlib/native/etsstdlib.cpp"
+  "stdlib/native/core/IntlLocale.cpp",
+  "stdlib/native/core/IntlLocaleMatch.cpp",
+  "stdlib/native/core/IntlCollator.cpp",
+  "stdlib/native/core/IntlPluralRules.cpp",
+  "stdlib/native/core/IntlSegmenter.cpp",
+  "stdlib/native/core/stdlib_ani_helpers.cpp",
+  "stdlib/native/etsstdlib.cpp",
+  "stdlib/native/core/IntlDateTimeFormat.cpp",
 ]
+
+if (is_ohos) {
+  srcs_runtime += [ "runtime/platform/ohos/logger.cpp" ]
+}
 
 configs_runtime = []
 
 if (ark_ets_interop_js) {
+  runtime_option_yaml_path += [ "runtime/interop_js/runtime_options.yaml" ]
   srcs_runtime += [
     "runtime/interop_js/call/call_ets.cpp",
     "runtime/interop_js/call/call_js.cpp",
@@ -177,20 +209,29 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/ets_proxy/ets_proxy.cpp",
     "runtime/interop_js/ets_proxy/shared_reference.cpp",
     "runtime/interop_js/ets_proxy/shared_reference_storage.cpp",
+    "runtime/interop_js/event_loop_module.cpp",
     "runtime/interop_js/interop_common.cpp",
     "runtime/interop_js/interop_context.cpp",
     "runtime/interop_js/intrinsics/std_js_jsruntime.cpp",
     "runtime/interop_js/intrinsics_api_impl.cpp",
+    "runtime/interop_js/jsbacktrace/backtrace.cpp",
     "runtime/interop_js/js_job_queue.cpp",
-    "runtime/interop_js/js_remote_promise_resolver.cpp",
     "runtime/interop_js/js_proxy/js_proxy.cpp",
     "runtime/interop_js/js_refconvert.cpp",
     "runtime/interop_js/js_refconvert_builtin.cpp",
     "runtime/interop_js/js_refconvert_function.cpp",
     "runtime/interop_js/js_value.cpp",
     "runtime/interop_js/napi_impl/napi_impl.cpp",
-    "runtime/interop_js/ts2ets_copy.cpp",
+    "runtime/interop_js/stack_info.cpp",
+    "runtime/interop_js/sts_vm_interface_impl.cpp",
+    "runtime/interop_js/timer_module.cpp",
+    "runtime/interop_js/xgc/xgc.cpp",
+    "runtime/interop_js/xgc/xgc_vm_adaptor.cpp",
   ]
+
+  if (ark_ets_hybrid) {
+    srcs_runtime += [ "runtime/interop_js/handshake.cpp" ]
+  }
 
   if (current_cpu == "amd64" || current_cpu == "x64" ||
       current_cpu == "x86_64") {
@@ -203,7 +244,14 @@ if (ark_ets_interop_js) {
 
   configs_runtime += [ "runtime/interop_js:interop_js_public_config" ]
 
-  if (ark_standalone_build) {
+  arkruntime_deps += [ "$arkplatform_root:libarkplatform" ]
+
+  if (ark_standalone_build && ark_ets_hybrid) {
+    arkruntime_deps += [
+      "$ark_third_party_root/libuv:uv",
+      "$arkui_root/napi:ace_napi",
+    ]
+  } else if (ark_standalone_build && !ark_ets_hybrid) {
     arkruntime_deps +=
         [ "$ark_root/plugins/ets/runtime/interop_js:install_nodejs" ]
   }

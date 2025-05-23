@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -60,15 +60,15 @@ class RunnerASTChecker(RunnerJS):
 
         test_dirs: List[TestDirectory] = [
             TestDirectory('ast/compiler/ts', 'ts', flags=['--extension=ts']),
-            TestDirectory('ast/compiler/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('ast/compiler/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
             TestDirectory('ast/parser/ts', 'ts', flags=['--parse-only', '--extension=ts']),
             TestDirectory('ast/parser/as', 'ts', flags=['--parse-only', '--extension=as']),
-            TestDirectory('ast/parser/ets', 'sts', flags=[
-                '--extension=sts',
+            TestDirectory('ast/parser/ets', 'ets', flags=[
+                '--extension=ets',
                 '--output=/dev/null',
                 f'--arktsconfig={self.arktsconfig}'
             ]),

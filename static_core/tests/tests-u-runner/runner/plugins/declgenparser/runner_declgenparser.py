@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -63,8 +63,8 @@ class RunnerDeclgenParser(RunnerJS):
         return Path("/tmp") / "declgenparser"
 
     def get_test_directories(self) -> List[TestDirectory]:
-        flags = ["--extension=sts"]
-        return [TestDirectory(path.join(self.test_root, test_dir), "sts", flags)
+        flags = ["--extension=ets"]
+        return [TestDirectory(path.join(self.test_root, test_dir), "ets", flags)
                 for test_dir in self.TEST_DIRS]
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenParser:

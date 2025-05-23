@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,7 +29,7 @@ from .logs import logger
 
 LOG = logger(__name__)
 
-CompilerExtensions = Literal["js", "ts", "as", "sts"]
+CompilerExtensions = Literal["js", "ts", "as", "ets"]
 
 CompileLogLevel = Literal["debug", "info", "warning", "error", "fatal"]
 
@@ -54,12 +54,11 @@ class Options:
 
 @dataclass
 class CompilerArguments:
-    extension: CompilerExtensions = "sts"
+    extension: CompilerExtensions = "ets"
     ets_module: bool = False
     opt_level: int = 0
     debug_info: bool = True
     dump_dynamic_ast: bool | None = None
-    debugger_eval_mode: bool | None = None
     debugger_eval_panda_files: list[Path] | None = None
     debugger_eval_source: Path | None = None
     debugger_eval_line: int | None = None
@@ -70,14 +69,20 @@ class CompilerArguments:
         if isinstance(arg, bool):
             return str(arg).lower()
         if isinstance(arg, list):
-            return ",".join(str(f) for f in arg)
+            return ":".join(str(f) for f in arg)
         return str(arg)
+
+    @staticmethod
+    def to_cli_key(key: str) -> str:
+        if key.startswith("debugger_eval_"):
+            return f"--debugger-eval:{key[len('debugger_eval_'):].replace('_', '-')}"
+        return f"--{key.replace('_', '-')}"
 
     def to_arguments_list(self) -> list[str]:
         result = []
         for key, value in vars(self).items():
             if value is not None:
-                result.append(f"--{key.replace('_', '-')}={CompilerArguments.arg_to_str(value)}")
+                result.append(f"{CompilerArguments.to_cli_key(key)}={CompilerArguments.arg_to_str(value)}")
         return result
 
 
@@ -217,7 +222,7 @@ class StringCodeCompiler:
         ast_parser: AstParser | None = None,
     ) -> ScriptFile:
         """
-        Compiles the ``sts``-file and returns the :class:`ScriptFile` instance.
+        Compiles the ``ets``-file and returns the :class:`ScriptFile` instance.
         """
         args = arguments if arguments else CompilerArguments()
         source_file = self._write_into_file(source_code, name, args.extension)
@@ -237,7 +242,6 @@ class StringCodeCompiler:
             ets_module=True,
             opt_level=0,
             dump_dynamic_ast=ast_parser is not None,
-            debugger_eval_mode=True,
             debugger_eval_panda_files=eval_args.eval_panda_files,
             debugger_eval_source=eval_args.eval_source,
             debugger_eval_line=eval_args.eval_line,
@@ -274,7 +278,7 @@ def code_compiler(
     ark_compiler: Compiler,
 ) -> StringCodeCompiler:
     """
-    Return :class:`StringCodeCompiler` instance that can compile ``sts``-file.
+    Return :class:`StringCodeCompiler` instance that can compile ``ets``-file.
     """
     return StringCodeCompiler(
         tmp_path=tmp_path,

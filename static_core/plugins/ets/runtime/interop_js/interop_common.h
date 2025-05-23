@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,27 @@
 
 #include <node_api.h>
 
+#include <functional>
+
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+#include "interfaces/inner_api/napi/native_node_api.h"
+#else
+// NOLINTBEGIN(readability-identifier-naming)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_wrap_with_xref(napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb,
+                    napi_ref *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_xref_unwrap(napi_env env, napi_value js_object, void **result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_create_xref(napi_env env, napi_value value, uint32_t initial_refcount, napi_ref *result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_register_appstate_callback(napi_env env, void (*f)(int a1, int64_t a2));
+// NOLINTEND(readability-identifier-naming)
+#endif
+
 namespace ark::ets::interop::js {
 
-constexpr uint32_t BIGINT_BITMASK_30 = 0x3FFFFFFF;
-constexpr size_t BIGINT_BITS_NUM = 30;
+constexpr size_t BIGINT_BITS_NUM = 32;
 constexpr size_t BIT_64 = 64;
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -38,7 +55,12 @@ constexpr size_t BIT_64 = 64;
 
 std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsVal);
 SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32_t> &etsArray);
-std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray, int signBit);
+std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray);
+
+PANDA_PUBLIC_API void ThrowNoInteropContextException();
+
+bool NapiGetProperty(napi_env env, napi_value object, napi_value key, napi_value *result);
+bool NapiGetNamedProperty(napi_env env, napi_value object, const char *utf8name, napi_value *result);
 
 // Alternative for ASSERT(!expr) with interop stacktraces, enabled in NDEBUG
 #define INTEROP_FATAL_IF(expr)                     \
@@ -48,6 +70,14 @@ std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsA
             InteropFatal("INTEROP_FATAL: " #expr); \
             UNREACHABLE();                         \
         }                                          \
+    } while (0)
+
+#define INTEROP_RETURN_IF(expr) \
+    do {                        \
+        bool _expr = (expr);    \
+        if (UNLIKELY(_expr)) {  \
+            return false;       \
+        }                       \
     } while (0)
 
 #ifndef NDEBUG
@@ -77,6 +107,14 @@ void InteropTrace(const char *func, const char *file, int line);
             InteropFatal("NAPI_CHECK_FATAL: " #status, _status); \
             UNREACHABLE();                                       \
         }                                                        \
+    } while (0)
+
+#define NAPI_CHECK_RETURN(status)           \
+    do {                                    \
+        napi_status _status = (status);     \
+        if (UNLIKELY(_status != napi_ok)) { \
+            return false;                   \
+        }                                   \
     } while (0)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
@@ -193,38 +231,6 @@ inline std::string GetString(napi_env env, napi_value jsVal)
     return value;
 }
 
-inline int GeBigIntSign(std::vector<uint32_t> &array)
-{
-    int sign = 1;
-    if (array.back() == 0) {
-        sign = 0;
-    }
-    array.pop_back();
-
-    return sign;
-}
-
-inline void DecrementBigInt(std::vector<uint32_t> &array)
-{
-    for (auto &elem : array) {
-        if (elem != 0) {
-            --elem;
-            break;
-        }
-
-        elem = ~elem & BIGINT_BITMASK_30;
-    }
-}
-
-inline void ConvertFromTwosComplement(std::vector<uint32_t> &array)
-{
-    DecrementBigInt(array);
-
-    for (auto &elem : array) {
-        elem = ~elem & BIGINT_BITMASK_30;
-    }
-}
-
 inline bool NapiIsExceptionPending(napi_env env)
 {
     bool pending;
@@ -238,40 +244,14 @@ inline bool NapiThrownGeneric(napi_status rc)
     return rc == napi_generic_failure;
 }
 
-inline napi_status NapiObjectSeal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value jsVal)
-{
-// Ark js vm crashes in napi_object_seal.
-// Disable the call temporary
-#ifndef PANDA_TARGET_OHOS
-    return napi_object_seal(env, jsVal);
-#else
-    return napi_ok;
-#endif  // PANDA_TARGET_OHOS
-}
-
 inline napi_status NapiCallFunction(napi_env env, napi_value recv, napi_value func, size_t argc, const napi_value *argv,
                                     napi_value *result)
 {
-#ifdef PANDA_TARGET_OHOS
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
     napi_value dummy;
     result = result != nullptr ? result : &dummy;
 #endif  // PANDA_TARGET_OHOS
     return napi_call_function(env, recv, func, argc, argv, result);
-}
-
-inline napi_status NapiWrap(napi_env env, napi_value jsObject, void *nativeObject, napi_finalize finalizeCb,
-                            void *finalizeHint, napi_ref *result)
-{
-#ifdef PANDA_TARGET_OHOS
-    napi_status status = napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, nullptr);
-    if (result == nullptr || UNLIKELY(status != napi_ok)) {
-        return status;
-    }
-    return napi_create_reference(env, jsObject, 0, result);
-#else
-    ASSERT(result == nullptr || finalizeCb != nullptr);
-    return napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, result);
-#endif
 }
 
 }  // namespace ark::ets::interop::js

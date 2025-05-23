@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -202,7 +202,7 @@ private:
     static PANDA_PUBLIC_API void VisitLoadObject([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitConstant([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitNullPtr([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
-    static PANDA_PUBLIC_API void VisitLoadUndefined([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static PANDA_PUBLIC_API void VisitLoadUniqueObject([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitPhi([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitParameter([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitCompare([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -268,6 +268,7 @@ private:
     static PANDA_PUBLIC_API void VisitLoadUnresolvedType(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitCallNative(GraphVisitor *v, Inst *inst);
 
 #include "visitor.inc"
 
@@ -519,9 +520,9 @@ private:
         return ++nullPtrInstCounter_;
     }
 
-    int IncrementLoadUndefinedInstCounterAndGet()
+    int IncrementLoadUniqueObjectInstCounterAndGet()
     {
-        return ++loadUndefinedInstCounter_;
+        return ++loadUniqueObjectInstCounter_;
     }
 
     void PrintFailedMethodAndPass() const;
@@ -532,7 +533,7 @@ private:
     ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
     ArenaAllocator localAllocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
     int nullPtrInstCounter_ = 0;
-    int loadUndefinedInstCounter_ = 0;
+    int loadUniqueObjectInstCounter_ = 0;
     std::string passName_;
     bool success_ {true};
 };
