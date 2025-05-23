@@ -29,7 +29,10 @@ class BaseObject {
 public:
     BaseObject() : state_(0) {}
 #ifdef USE_CMC_GC
-
+    static BaseObject *Cast(MAddress address)
+    {
+        return reinterpret_cast<BaseObject *>(address);
+    }
     static void RegisterDynamic(BaseObjectOperatorInterfaces *dynamicObjOp);
     static void RegisterStatic(BaseObjectOperatorInterfaces *staticObjOp);
 
@@ -175,14 +178,14 @@ public:
 
 #endif
 
-    void SetBaseClassWithoutBarrier(BaseClass* cls)
+    void SetFullBaseClassWithoutBarrier(BaseClass* cls)
     {
-        state_.SetClassAddress(reinterpret_cast<StateWordType>(cls));
+        state_.SetFullBaseClassAddress(reinterpret_cast<StateWordType>(cls));
     }
 
     BaseClass *GetBaseClass() const
     {
-        return reinterpret_cast<BaseClass *>(state_.GetClassAddress());
+        return reinterpret_cast<BaseClass *>(state_.GetBaseClassAddress());
     }
 
     // Size of object header
@@ -208,7 +211,6 @@ protected:
 
     static BaseObjectOperator operator_;
 #endif
-private:
     BaseStateWord state_;
 };
 }  // namespace panda
