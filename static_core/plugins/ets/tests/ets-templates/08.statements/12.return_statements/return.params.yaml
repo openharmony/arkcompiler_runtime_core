@@ -51,4 +51,11 @@ block_statements:
       }
     use: |
       new A()
+  - decl: |
+      function test(): void {
+        return;
+        assertTrue(true);
+      }
+    use: |
+      test()
 

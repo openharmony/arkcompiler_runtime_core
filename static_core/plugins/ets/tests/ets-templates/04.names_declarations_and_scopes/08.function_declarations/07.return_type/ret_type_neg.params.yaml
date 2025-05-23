@@ -49,13 +49,3 @@ function_decls:
         }
       call: |-
         let x = foo();  // CTE, Cannot use type 'void' as value
-
-    - decl: |-
-        let i = 1
-        function foo() throws {  // infer void
-            i += 1
-            throw new Exception()
-            return i;   // CTE - unreachable stmt
-        }
-      call: |-
-        foo();

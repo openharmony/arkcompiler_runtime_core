@@ -14,11 +14,6 @@
 --- # List of valid expression statements
 block_statements:
   - decl: |
-      function test(): void {
-        return;
-        assertTrue( false );  // CTE: unreachable statement
-      }
-  - decl: |
       class A {
         public static x: int
         static {
