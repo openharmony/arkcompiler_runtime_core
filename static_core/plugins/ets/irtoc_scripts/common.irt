@@ -15,11 +15,6 @@ module EtsConstants
     CORO_NULL_VALUE_OFFSET = "cross_values::GetEtsCoroutineNullValueOffset(graph->GetArch())"
     ESCOMPAT_ARRAY_DATA_OFFSET = "cross_values::GetEscompatArrayBufferOffset(graph->GetArch())"
     BOX_PRIMITIVE_VALUE_OFFSET = "cross_values::GetEtsBoxPrimitiveValueOffset(graph->GetArch())"
-    TYPED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedArrayBufferOffset(graph->GetArch())"
-    TYPED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedArrayByteOffsetOffset(graph->GetArch())"
-    TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET = "cross_values::GetTypedUnsignedArrayBufferOffset(graph->GetArch())"
-    TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET = "cross_values::GetTypedUnsignedArrayByteOffsetOffset(graph->GetArch())"
-    ARRAY_BUFFER_DATA_OFFSET = "cross_values::GetArrayBufferDataOffset(graph->GetArch())"
 end
 
 macro(:ets_nullvalue) do

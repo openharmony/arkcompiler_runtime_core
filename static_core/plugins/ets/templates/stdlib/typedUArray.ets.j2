@@ -1651,9 +1651,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns a reversed copy
      */
-    public toReversed(): {{element['name']}}Array {
-        return new {{element['name']}}Array(this).reverse()
-    }
+    public final native toReversed(): {{element['name']}}Array
 
     /**
      * Creates a sorted copy

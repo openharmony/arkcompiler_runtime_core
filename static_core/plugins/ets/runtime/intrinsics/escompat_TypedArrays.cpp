@@ -14,6 +14,7 @@
  */
 
 #include <charconv>
+#include "ets_handle.h"
 #include "libpandabase/utils/utf.h"
 #include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
@@ -21,6 +22,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "intrinsics.h"
 #include "cross_values.h"
+#include "types/ets_object.h"
 
 namespace ark::ets::intrinsics {
 
@@ -484,7 +486,7 @@ static T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define TYPED_ARRAY_REVERSE_CALL_DECL(Type)                                         \
+#define REVERSE_CALL_DECL(Type)                                                     \
     /* CC-OFFNXT(G.PRE.02) name part */                                             \
     extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArrayReverse( \
         ark::ets::EtsEscompat##Type##Array *thisArray)                              \
@@ -493,18 +495,88 @@ static T *EtsEscompatTypedArrayReverseImpl(T *thisArray)
         return EtsEscompatTypedArrayReverseImpl(thisArray);                         \
     }  // namespace ark::ets::intrinsics
 
-TYPED_ARRAY_REVERSE_CALL_DECL(Int8)
-TYPED_ARRAY_REVERSE_CALL_DECL(Int16)
-TYPED_ARRAY_REVERSE_CALL_DECL(Int32)
-TYPED_ARRAY_REVERSE_CALL_DECL(BigInt64)
-TYPED_ARRAY_REVERSE_CALL_DECL(Float32)
-TYPED_ARRAY_REVERSE_CALL_DECL(Float64)
+REVERSE_CALL_DECL(Int8)
+REVERSE_CALL_DECL(Int16)
+REVERSE_CALL_DECL(Int32)
+REVERSE_CALL_DECL(BigInt64)
+REVERSE_CALL_DECL(Float32)
+REVERSE_CALL_DECL(Float64)
 
-TYPED_ARRAY_REVERSE_CALL_DECL(UInt8)
-TYPED_ARRAY_REVERSE_CALL_DECL(UInt8Clamped)
-TYPED_ARRAY_REVERSE_CALL_DECL(UInt16)
-TYPED_ARRAY_REVERSE_CALL_DECL(UInt32)
-TYPED_ARRAY_REVERSE_CALL_DECL(BigUInt64)
+REVERSE_CALL_DECL(UInt8)
+REVERSE_CALL_DECL(UInt8Clamped)
+REVERSE_CALL_DECL(UInt16)
+REVERSE_CALL_DECL(UInt32)
+REVERSE_CALL_DECL(BigUInt64)
+
+#undef REVERSE_CALL_DECL
+
+/*
+ * Typed Arrays: ToReversed Implementation
+ */
+template <typename T>
+static T *EtsEscompatTypedArrayToReversedImpl(T *thisArray)
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+
+    size_t elementSize = static_cast<size_t>(thisArray->GetBytesPerElement()) * sizeof(EtsByte);
+    EtsInt arrayLength = thisArray->GetLengthInt();
+    size_t byteLength = static_cast<size_t>(arrayLength) * elementSize;
+
+    // Clone src array to dest array. Alloc new buffer. Assign new buffer to dest array.
+    EtsHandle<EtsObject> srcArray(coro, thisArray);
+    ASSERT(srcArray.GetPtr() != nullptr);
+
+    auto *srcData = GetNativeData(static_cast<T *>(srcArray.GetPtr()));
+    void *dstData = nullptr;
+    EtsHandle<EtsEscompatArrayBuffer> newBuffer(coro, EtsEscompatArrayBuffer::Create(coro, byteLength, &dstData));
+    auto dstArray = static_cast<T *>(srcArray->Clone());
+
+    ASSERT(newBuffer.GetPtr() != nullptr);
+    ASSERT(dstArray != nullptr);
+    dstArray->SetBuffer(newBuffer.GetPtr());
+
+    // Copy data from src array to dst array in reversed order.
+    ASSERT(srcData != nullptr);
+    ASSERT(dstData != nullptr);
+
+    using ElementType = typename T::ElementType;
+    auto *src = static_cast<ElementType *>(srcData);
+    auto *dst = static_cast<ElementType *>(dstData);
+    ASSERT(src != nullptr);
+    ASSERT(dst != nullptr);
+
+    for (int i = 0; i < arrayLength; i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, clang-analyzer-core.NullDereference)
+        dst[i] = src[(arrayLength - 1) - i];
+    }
+    return dstArray;
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define TO_REVERSED_CALL_DECL(Type)                                                    \
+    /* CC-OFFNXT(G.PRE.02) name part */                                                \
+    extern "C" ark::ets::EtsEscompat##Type##Array *EtsEscompat##Type##ArrayToReversed( \
+        ark::ets::EtsEscompat##Type##Array *thisArray)                                 \
+    {                                                                                  \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                         \
+        return EtsEscompatTypedArrayToReversedImpl(thisArray);                         \
+    }
+
+TO_REVERSED_CALL_DECL(Int8)
+TO_REVERSED_CALL_DECL(Int16)
+TO_REVERSED_CALL_DECL(Int32)
+TO_REVERSED_CALL_DECL(BigInt64)
+TO_REVERSED_CALL_DECL(Float32)
+TO_REVERSED_CALL_DECL(Float64)
+
+TO_REVERSED_CALL_DECL(UInt8)
+TO_REVERSED_CALL_DECL(UInt8Clamped)
+TO_REVERSED_CALL_DECL(UInt16)
+TO_REVERSED_CALL_DECL(UInt32)
+TO_REVERSED_CALL_DECL(BigUInt64)
+
+#undef TO_REVERSED_CALL_DECL
 
 int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
 {

@@ -48,6 +48,11 @@ public:
         return reinterpret_cast<EtsEscompatArrayBuffer *>(arrayBuffer);
     }
 
+    static constexpr size_t GetClassSize()
+    {
+        return sizeof(EtsEscompatArrayBuffer);
+    }
+
     /**
      * Creates a byte array in non-movable space.
      * @param length of created array.
@@ -179,9 +184,24 @@ public:
         ASSERT(res == 0);
     }
 
+    static constexpr size_t GetByteLengthOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatArrayBuffer, byteLength_);
+    }
+
+    static constexpr size_t GetNativeDataOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatArrayBuffer, nativeData_);
+    }
+
     static constexpr size_t GetManagedDataOffset()
     {
         return MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_);
+    }
+
+    static constexpr size_t GetIsResizableOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatArrayBuffer, isResizable_);
     }
 
     template <typename T>
