@@ -98,6 +98,7 @@ panda_add_gtest(
         tests/parser_test.cpp
         tests/emitter_test.cpp
         tests/mangling_tests.cpp
+        tests/type_test.cpp
     LIBRARIES
         arkbase arkassembler_static
     SANITIZERS
