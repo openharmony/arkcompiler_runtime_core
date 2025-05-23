@@ -1,4 +1,0 @@
-# 23757 need to adjust to tools update
-BenchS2d_otherTest_1
-BenchS2d_someTest
-BenchS2d_someTest_1

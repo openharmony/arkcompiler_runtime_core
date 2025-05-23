@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,7 +30,7 @@ class LangBase(ABC):
     name = ''
     short_name = ''
     _re_import = re.compile(
-        r'^\s*(import\s+)?(?P<what>[\w{}\s]+)\s+from\s+'
+        r'^\s*(import\s+)?(?P<what>[*\w{},\s]+)\s+from\s+'
         r'([\'"])?(?P<lib>[./\w]+)([\'"])?\s*(;\s*)?$')
 
     def __init__(self):
@@ -60,7 +60,7 @@ class LangBase(ABC):
     def get_import_line(self, lib: str, what: str) -> str:
         libfile = os.path.split(lib)[1]
         libname = os.path.splitext(libfile)[0]
-        return f'import {what} from "./{libname}";\n'
+        return f'import {what} from "{libname}";\n'
 
     def get_method_call(self, name: str, typ: str) -> str:
         if typ and typ != 'void':

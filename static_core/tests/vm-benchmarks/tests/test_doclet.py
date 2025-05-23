@@ -176,6 +176,23 @@ class X {
   size: int = 1024;
 '''
 
+JS_PARAM_INIT = '''
+/**
+ * @State
+ */
+function X() {
+    /**
+     * With initialization.
+     * @Param 1024
+     */
+        this.size = 16;
+    /**
+     * Without initialization.
+     * @Param "one","two"
+     */
+        this.name;
+'''
+
 ETS_MEASURE_OVERRIDES = '''
     /**
     * @State
@@ -194,11 +211,13 @@ ETS_MEASURE_OVERRIDES = '''
     }
     '''
 
-sts_mod = get_plugin('langs', 'ets')
+ets_mod = get_plugin('langs', 'ets')
+ts_mod = get_plugin('langs', 'ts')
+js_mod = get_plugin('langs', 'js')
 
 
 def test_valid_sts():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(ETS_VALID, ets).parse()
@@ -209,14 +228,14 @@ def test_valid_sts():
 
 
 def test_duplicate_doclets():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     TestCase().assertTrue(ets is not None)
     with pytest.raises(ValueError):
         DocletParser.create(ETS_DUP, ets).parse()
 
 
 def test_no_state():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     TestCase().assertTrue(ets is not None)
     for src in (ETS_NOSTATE_BENCH, ETS_NOSTATE_SETUP, ETS_NOSTATE_PARAM):
         with pytest.raises(ValueError):
@@ -224,7 +243,7 @@ def test_no_state():
 
 
 def test_bench_list():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(ETS_BENCH_LIST, ets).parse()
@@ -244,7 +263,7 @@ def test_bench_list():
 
 
 def test_bugs():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(ETS_VALID, ets).parse()
@@ -259,7 +278,7 @@ def test_bugs():
 
 
 def test_state_tags():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(ETS_STATE_TAGS, ets).parse()
@@ -282,7 +301,7 @@ def test_tags_before_state():
      */
     class MathFunctions {
     '''
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(src, ets).parse()
@@ -294,7 +313,7 @@ def test_tags_before_state():
 
 
 def test_state_comment():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(ETS_STATE_COMMENT, ets).parse()
@@ -303,15 +322,21 @@ def test_state_comment():
 
 
 def test_param_init():
-    ets = sts_mod.Lang()
-    test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_PARAM_INIT, ets).parse()
-    test.assertTrue(parser.state is not None)
+    fixture = {
+        'ts':  {'module': ts_mod,  'src': ETS_PARAM_INIT},
+        'ets': {'module': ets_mod, 'src': ETS_PARAM_INIT},
+        'js':  {'module': js_mod,  'src': JS_PARAM_INIT}
+    }
+    for _, v in fixture.items():
+        lang = v['module'].Lang()
+        test = TestCase()
+        test.assertTrue(lang is not None)
+        parser = DocletParser.create(v['src'], lang).parse()
+        test.assertTrue(parser.state is not None)
 
 
 def test_measure_overrides():
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(ETS_MEASURE_OVERRIDES, ets).parse()
@@ -391,7 +416,7 @@ def test_tags():
     public two(): bool {
     }
     '''
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(src, ets).parse()
@@ -450,7 +475,7 @@ def test_import():
      public x(): int {
      }
     '''
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test = TestCase()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(src, ets).parse()
@@ -475,7 +500,7 @@ def test_generic_type():
     }
     '''
     test = TestCase()
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(src, ets).parse()
     test.assertTrue(parser.state is not None)
@@ -501,7 +526,7 @@ def test_generator():
          }
     }'''
     test = TestCase()
-    ets = sts_mod.Lang()
+    ets = ets_mod.Lang()
     test.assertTrue(ets is not None)
     parser = DocletParser.create(src, ets).parse()
     test.assertTrue(parser.state is not None)

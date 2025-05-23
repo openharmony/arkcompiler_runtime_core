@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-import os
 from vmb.tool import ToolBase
 from vmb.unit import BenchUnit
 
@@ -24,24 +23,19 @@ class Tool(ToolBase):
 
     def __init__(self, *args):
         super().__init__(*args)
-        panda_build = self.ensure_dir_env('PANDA_BUILD')
-        # assuming PANDA_BUILD is PANDA_ROOT/build
-        modules = self.ensure_dir(panda_build, 'lib', 'module')
-        self.ark_js_napi_cli = self.ensure_file(
-            panda_build, 'bin', 'interop_js', 'ark_js_napi_cli')
-        etsstdlib = self.ensure_file(
-            panda_build, 'plugins', 'ets', 'etsstdlib.abc')
-        self.ld_library_path = f'LD_LIBRARY_PATH={panda_build}/lib/interop_js/:{panda_build}/lib/ '
-        vmb_bench_unit_iterations = os.environ.get('VMB_BENCH_UNIT_ITERATIONS', '')
-        if not vmb_bench_unit_iterations:
-            vmb_bench_unit_iterations = 10000
-        self.cmd = f'MODULE_PATH={modules} ' \
+        self.panda_root = self.ensure_dir_env('PANDA_BUILD')
+        self.ets_vm_opts = '{}'  # no extra options by default, but still valid json
+        ark_js = ToolBase.ensure_file(
+            self.panda_root, 'bin', 'interop_js', 'ark_js_napi_cli')
+        etsstdlib = ToolBase.ensure_file(
+            self.panda_root, 'plugins', 'ets', 'etsstdlib.abc')
+        self.cmd = f'LD_LIBRARY_PATH={self.panda_root}/lib/interop_js/:{self.panda_root}/lib/ ' \
                    f'ARK_ETS_STDLIB_PATH={etsstdlib} ' \
+                   "ETS_VM_OPTS='{ets_vm_opts}' " \
                    'ARK_ETS_INTEROP_JS_GTEST_ABC_PATH={test_zip} ' \
-                   f'VMB_BENCH_UNIT_ITERATIONS={vmb_bench_unit_iterations} ' \
-                   f'{self.ark_js_napi_cli} ' \
+                   'VMB_BENCH_NAME={bench_name} ' \
+                   f'{ark_js} ' \
                    '--entry-point={entry_point} ' \
-                   f' {self.custom} ' \
                    '{test_abc}'
 
     @property
@@ -53,26 +47,18 @@ class Tool(ToolBase):
         return 'version n/a'
 
     def exec(self, bu: BenchUnit) -> None:
-        def ets_vm_opts() -> str:
-            # convert to string for JSON parse: '{"name1": "value1", "name2": "value2"}'
-            # and names of the options should be without minus signs "name1" not "--name1"
-            if not self.custom_opts or not self.custom_opts.get('ark'):
-                return '{}'
-            ets_vm_opts_str: str = str(self.custom_opts.get('ark'))
-            return ((ets_vm_opts_str.replace('[\'', '{\"').replace('\']', '\"}')
-                    .replace('=', '\": \"').replace('\', \'', '\", \"'))
-                    .replace('\"--', '\"'))
+        raise NotImplementedError
 
-        js = bu.src('.js')
-        if not js.is_file():
-            # for bu_s2d
-            js = bu.path.joinpath('InteropRunner.js')
-        test_zip = bu.src('.zip')
-        formatted_cmd = self.cmd.format(test_zip=test_zip,
-                                        entry_point=js.stem,
-                                        test_abc=str(js)[:-3] + '.abc'
-                                        )
-        with_ets_vm_opts: str = f'ETS_VM_OPTS=\'{ets_vm_opts()}\' '
-        res = self.x_run(f'{self.ld_library_path} {with_ets_vm_opts} {formatted_cmd}',
-                         measure_time=True)
+    def run(self, bu: BenchUnit, abc: str, entry_point: str,
+            bench_name: str = 'none', zip_path: str = 'none'):
+        res = self.sh.run(self.cmd.format(
+            test_zip=zip_path,
+            test_abc=abc,
+            entry_point=entry_point,
+            bench_name=bench_name,
+            ets_vm_opts=self.ets_vm_opts
+        ))
         bu.parse_run_output(res)
+
+    def kill(self) -> None:
+        self.sh.run('pkill ark_js_napi_cli')
