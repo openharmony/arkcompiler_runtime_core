@@ -171,9 +171,6 @@ build-sdk/sdk/tslinter/dist/lib.es2022.string.d.ts
 build-sdk/sdk/tslinter/dist/lib.esnext.d.ts
 build-sdk/sdk/tslinter/dist/lib.esnext.full.d.ts
 build-sdk/sdk/tslinter/dist/lib.esnext.intl.d.ts
-build-sdk/sdk/tslinter/dist/lib.esnext.promise.d.ts
-build-sdk/sdk/tslinter/dist/lib.esnext.string.d.ts
-build-sdk/sdk/tslinter/dist/lib.esnext.weakref.d.ts
 build-sdk/sdk/tslinter/dist/lib.scripthost.d.ts
 build-sdk/sdk/tslinter/dist/lib.webworker.d.ts
 build-sdk/sdk/tslinter/dist/lib.webworker.importscripts.d.ts
