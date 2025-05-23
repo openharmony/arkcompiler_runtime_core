@@ -241,13 +241,6 @@ options:
   description: Pathes to find native libraries
   delimiter: ":"
 
-- name: coroutine-enable-external-scheduling
-  lang:
-    - ets
-  type: bool
-  default: false
-  description: Enable external coroutine scheduling (e.g. in event loop)
-
 - name: load-in-boot
   type: bool
   default: false

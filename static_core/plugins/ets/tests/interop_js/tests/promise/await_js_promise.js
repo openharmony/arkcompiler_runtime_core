@@ -45,7 +45,6 @@ function init() {
 		'compiler-enable-jit': 'false',
 		'run-gc-in-place': 'true',
 		'coroutine-impl': 'stackful',
-		'coroutine-enable-external-scheduling': 'true',
 		'xgc-trigger-type': 'never'
 		// 'log-debug': 'coroutines'
 	};

@@ -32,7 +32,6 @@ async function main() {
         'load-runtimes': 'ets',
         'compiler-enable-jit': 'false',
         'coroutine-workers-count': '8',
-        'coroutine-enable-external-scheduling': 'true',
         'xgc-trigger-type': 'never'
     });
 
