@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 const { init, validationXGCResult, triggerXGC, JsTestClass } = require('./mark_test_xgc_utils.js');
-let g_etsVm = init('mark_test_xgc_module', 'mark_test_xgc.abc');
-let StsTestClass = g_etsVm.getClass('Lxgc_test_ets/TestStsClass;');
+let etsVm = init('mark_test_xgc_module', 'mark_test_xgc.abc');
+let stsEtsClass = etsVm.getClass('Lxgc_test_ets/TestStsClass;');
 
 function myObjectTest() {
     let obj1 = new JsTestClass();
-    let obj2 = new StsTestClass();
+    let obj2 = new stsEtsClass();
     let obj3 = new JsTestClass();
-    let obj4 = new StsTestClass();
+    let obj4 = new stsEtsClass();
     let obj5 = new JsTestClass();
-    let obj6 = new StsTestClass();
+    let obj6 = new stsEtsClass();
     obj1.obj = obj2;
     obj2.obj = obj3;
     obj3.obj = obj4;
