@@ -373,6 +373,7 @@ inline float FpDelta(FpType number)
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
 EtsString *FpToString(FpType number, int radix)
 {
+    EVENT_ETS_CACHE("Slowpath: create string from number without cache");
     // check radix range
     if (UNLIKELY(radix > helpers::MAX_RADIX || radix < helpers::MIN_RADIX)) {
         constexpr size_t MAX_BUF_SIZE = 128;

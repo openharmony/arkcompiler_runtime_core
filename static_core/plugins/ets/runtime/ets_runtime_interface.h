@@ -76,6 +76,7 @@ public:
     IntrinsicId GetStringBuilderToStringIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
     void *GetDoubleToStringCache() const override;
+    bool IsStringCachesUsed() const override;
     bool IsNativeMethodOptimizationEnabled() const override;
     uint64_t GetDeprecatedNativeApiMask() const override;
     uint32_t GetRuntimeClassOffset(Arch arch) const override;
