@@ -167,27 +167,27 @@ export namespace collections {
         public has(element: number, fromIndex: number, toIndex: number): boolean {
             this.checkRange(fromIndex, toIndex);
 
-            let from = this.computeElementIdAndBitId(fromIndex);
-            let to =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex);
+            let toElem =  this.computeElementIdAndBitId(toIndex);
 
-            if (from.elementId === to.elementId) {
-                return this.checkBit(this.buffer[from.elementId], from.index, to.index - 1, element);
+            if (fromElem.elementId === toElem.elementId) {
+                return this.checkBit(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1, element);
             }
 
-            if (this.checkBit(this.buffer[from.elementId], from.index, BitVector.BIT_SET_LENGTH - 1, element)) {
+            if (this.checkBit(this.buffer[fromElem.elementId], fromElem.index, BitVector.BIT_SET_LENGTH - 1, element)) {
                 return true;
             }
 
-            from.elementId++;
-            while (from.elementId < to.elementId) {
-                if (this.checkBit(this.buffer[from.elementId], 0, BitVector.BIT_SET_LENGTH - 1, element)) {
+            fromElem.elementId++;
+            while (fromElem.elementId < toElem.elementId) {
+                if (this.checkBit(this.buffer[fromElem.elementId], 0, BitVector.BIT_SET_LENGTH - 1, element)) {
                     return true;
                 }
-                from.elementId++;
+                fromElem.elementId++;
             }
 
-            if (to.index > 0) {
-                return this.checkBit(this.buffer[to.elementId], 0, to.index - 1, element);
+            if (toElem.index > 0) {
+                return this.checkBit(this.buffer[toElem.elementId], 0, toElem.index - 1, element);
             }
 
             return false;
@@ -248,24 +248,24 @@ export namespace collections {
         public flipBitsByRange(fromIndex: number, toIndex: number): void {
             this.checkRange(fromIndex, toIndex);
 
-            let from = this.computeElementIdAndBitId(fromIndex);
-            let to =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex);
+            let toElem =  this.computeElementIdAndBitId(toIndex);
 
-            if (from.elementId === to.elementId) {
-                this.buffer[from.elementId] = this.flipBits(this.buffer[from.elementId], from.index, to.index - 1);
+            if (fromElem.elementId === toElem.elementId) {
+                this.buffer[fromElem.elementId] = this.flipBits(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1);
                 return;
             }
 
-            this.buffer[from.elementId] = this.flipBits(this.buffer[from.elementId], from.index, BitVector.BIT_SET_LENGTH - 1);
+            this.buffer[fromElem.elementId] = this.flipBits(this.buffer[fromElem.elementId], fromElem.index, BitVector.BIT_SET_LENGTH - 1);
 
-            ++from.elementId;
-            while (from.elementId < to.elementId) {
-                this.buffer[from.elementId] = this.flipBits(this.buffer[from.elementId], 0, BitVector.BIT_SET_LENGTH - 1);
-                ++from.elementId;
+            ++fromElem.elementId;
+            while (fromElem.elementId < toElem.elementId) {
+                this.buffer[fromElem.elementId] = this.flipBits(this.buffer[fromElem.elementId], 0, BitVector.BIT_SET_LENGTH - 1);
+                ++fromElem.elementId;
             }
 
-            if (to.index > 0) {
-                this.buffer[to.elementId] = this.flipBits(this.buffer[to.elementId], 0, to.index - 1);
+            if (toElem.index > 0) {
+                this.buffer[toElem.elementId] = this.flipBits(this.buffer[toElem.elementId], 0, toElem.index - 1);
             }
         }
 
@@ -283,13 +283,13 @@ export namespace collections {
         public getBitsByRange(fromIndex: number, toIndex: number): BitVector {
             this.checkRange(fromIndex, toIndex);
 
-            let from = this.computeElementIdAndBitId(fromIndex);
-            let to =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex);
+            let toElem =  this.computeElementIdAndBitId(toIndex);
 
             let newBitVector = new BitVector(toIndex - fromIndex);
 
-            if (from.elementId === to.elementId) {
-                newBitVector.buffer[0] = this.getBits(this.buffer[from.elementId], from.index, to.index - 1);
+            if (fromElem.elementId === toElem.elementId) {
+                newBitVector.buffer[0] = this.getBits(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1);
                 return newBitVector;
             }
 
@@ -314,24 +314,24 @@ export namespace collections {
         public setBitsByRange(element: number, fromIndex: number, toIndex: number): void {
             this.checkRange(fromIndex, toIndex);
 
-            let from = this.computeElementIdAndBitId(fromIndex);
-            let to =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex);
+            let toElem =  this.computeElementIdAndBitId(toIndex);
 
-            if (from.elementId === to.elementId) {
-                this.buffer[from.elementId] = this.setBits(this.buffer[from.elementId], from.index, to.index - 1, element);
+            if (fromElem.elementId === toElem.elementId) {
+                this.buffer[fromElem.elementId] = this.setBits(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1, element);
                 return;
             }
 
-            this.buffer[from.elementId] = this.setBits(this.buffer[from.elementId], from.index, BitVector.BIT_SET_LENGTH - 1, element);
+            this.buffer[fromElem.elementId] = this.setBits(this.buffer[fromElem.elementId], fromElem.index, BitVector.BIT_SET_LENGTH - 1, element);
 
-            ++from.elementId;
-            while (from.elementId < to.elementId) {
-                this.buffer[from.elementId] = this.setBits(this.buffer[from.elementId], 0, BitVector.BIT_SET_LENGTH - 1, element);
-                ++from.elementId;
+            ++fromElem.elementId;
+            while (fromElem.elementId < toElem.elementId) {
+                this.buffer[fromElem.elementId] = this.setBits(this.buffer[fromElem.elementId], 0, BitVector.BIT_SET_LENGTH - 1, element);
+                ++fromElem.elementId;
             }
 
-            if (to.index != 0) {
-                this.buffer[from.elementId] = this.setBits(this.buffer[to.elementId], 0, to.index - 1, element);
+            if (toElem.index != 0) {
+                this.buffer[fromElem.elementId] = this.setBits(this.buffer[toElem.elementId], 0, toElem.index - 1, element);
             }
         }
 
@@ -406,27 +406,125 @@ export namespace collections {
         public getBitCountByRange(element: number, fromIndex: number, toIndex: number): number {
             this.checkRange(fromIndex, toIndex);
 
-            let from = this.computeElementIdAndBitId(fromIndex);
-            let to =  this.computeElementIdAndBitId(toIndex);
+            let fromElem = this.computeElementIdAndBitId(fromIndex);
+            let toElem =  this.computeElementIdAndBitId(toIndex);
 
-            if (from.elementId === to.elementId) {
-                let count = this.countBit1InRange(this.buffer[from.elementId], from.index, to.index - 1);
+            if (fromElem.elementId === toElem.elementId) {
+                let count = this.countBit1InRange(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1);
                 return element === 0 ? (toIndex - fromIndex - count) : count;
             }
 
-            let count = this.countBit1InRange(this.buffer[from.elementId], from.index, BitVector.BIT_SET_LENGTH - 1);
+            let count = this.countBit1InRange(this.buffer[fromElem.elementId], fromElem.index, BitVector.BIT_SET_LENGTH - 1);
 
-            ++from.elementId;
-            while (from.elementId < to.elementId) {
-                count += this.countBit1InRange(this.buffer[from.elementId], 0, BitVector.BIT_SET_LENGTH - 1);
-                ++from.elementId;
+            ++fromElem.elementId;
+            while (fromElem.elementId < toElem.elementId) {
+                count += this.countBit1InRange(this.buffer[fromElem.elementId], 0, BitVector.BIT_SET_LENGTH - 1);
+                ++fromElem.elementId;
             }
 
-            if (to.index != 0) {
-                count += this.countBit1InRange(this.buffer[to.elementId], 0, to.index - 1);
+            if (toElem.index != 0) {
+                count += this.countBit1InRange(this.buffer[toElem.elementId], 0, toElem.index - 1);
             }
 
             return element === 0 ? (toIndex - fromIndex - count) : count;
+        }
+
+        /**
+         * Locates the first occurrence of a certain bit value within a range of bits in a bit vector.
+         *
+         * @param { number } element - Element to be Located (0 means 0, else means 1).
+         * @param { number } fromIndex - The starting position of the index, containing the value at that index position.
+         * @param { number } toIndex - The end of the index, excluding the value at that index.
+         * @returns { number } The number type, return the first index of specified bit within a range,
+         * or -1 if this range of the bitVector does not contain the element.
+         * @throws { BusinessError } 401 - Parameter error. Possible causes:
+         *                                    1.Mandatory parameters are left unspecified.
+         *                                    2.Incorrect parameter types.
+         * @throws { BusinessError } 10200001 - The value of fromIndex or toIndex is out of range.
+         */
+        public getIndexOf(element: number, fromIndex: number, toIndex: number): number {
+            this.checkRange(fromIndex, toIndex);
+
+            let fromElem = this.computeElementIdAndBitId(fromIndex);
+            let toElem =  this.computeElementIdAndBitId(toIndex);
+
+            if (fromElem.elementId === toElem.elementId) {
+                let bitIndex = this.findSignificantBit(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1, element);
+                return bitIndex != -1 ? this.computeIndex(fromElem.elementId, bitIndex) : -1;
+            }
+
+            let bitIndex = this.findSignificantBit(this.buffer[fromElem.elementId], fromElem.index, BitVector.BIT_SET_LENGTH - 1, element);
+            if (bitIndex != -1) {
+                return this.computeIndex(fromElem.elementId, bitIndex)
+            }
+
+            ++fromElem.elementId;
+            while (fromElem.elementId < toElem.elementId) {
+                bitIndex = this.findSignificantBit(this.buffer[fromElem.elementId], 0, BitVector.BIT_SET_LENGTH - 1, element);
+                if (bitIndex != -1) {
+                    return this.computeIndex(fromElem.elementId, bitIndex);
+                }
+
+                ++fromElem.elementId;
+            }
+
+            if (toElem.index > 0) {
+                bitIndex = this.findSignificantBit(this.buffer[toElem.elementId], 0, toElem.index - 1, element);
+                if (bitIndex != -1) {
+                    return this.computeIndex(toElem.elementId, bitIndex);
+                }
+            }
+
+            return -1;
+        }
+
+        /**
+         * Locates the last occurrence of a certain bit value within a range of bits in a bit vector.
+         *
+         * @param { number } element - Element to be Located (0 means 0, else means 1).
+         * @param { number } fromIndex - The starting position of the index, containing the value at that index position.
+         * @param { number } toIndex - The end of the index, excluding the value at that index.
+         * @returns { number } The number type, return the last index of specified bit within a range,
+         * or -1 if this range of the bitVector does not contain the element.
+         * @throws { BusinessError } 401 - Parameter error. Possible causes:
+         *                                    1.Mandatory parameters are left unspecified.
+         *                                    2.Incorrect parameter types.
+         * @throws { BusinessError } 10200001 - The value of fromIndex or toIndex is out of range.
+         */
+        public getLastIndexOf(element: number, fromIndex: number, toIndex: number): number {
+            this.checkRange(fromIndex, toIndex);
+
+            let fromElem = this.computeElementIdAndBitId(fromIndex);
+            let toElem =  this.computeElementIdAndBitId(toIndex);
+
+            if (fromElem.elementId === toElem.elementId) {
+                let bitIndex = this.findSignificantBit(this.buffer[fromElem.elementId], fromElem.index, toElem.index - 1, element, false);
+                return bitIndex != -1 ? this.computeIndex(fromElem.elementId, bitIndex) : -1;
+            }
+
+            if (toElem.index > 0) {
+                let bitIndex = this.findSignificantBit(this.buffer[toElem.elementId], 0, toElem.index - 1, element, false);
+                if (bitIndex != -1) {
+                    return this.computeIndex(toElem.elementId, bitIndex);
+                }
+            }
+
+            --toElem.elementId;
+            while (fromElem.elementId < toElem.elementId) {
+                let bitIndex = this.findSignificantBit(this.buffer[toElem.elementId], 0, BitVector.BIT_SET_LENGTH - 1, element, false);
+                if (bitIndex != -1) {
+                    return this.computeIndex(toElem.elementId, bitIndex);
+                }
+
+                --toElem.elementId;
+            }
+
+            let bitIndex = this.findSignificantBit(this.buffer[fromElem.elementId], fromElem.index, BitVector.BIT_SET_LENGTH - 1, element, false);
+            if (bitIndex != -1) {
+                return this.computeIndex(fromElem.elementId, bitIndex);
+            }
+
+            return -1;
         }
 
         private checkAndIncrement(index: number): void {
@@ -550,6 +648,63 @@ export namespace collections {
             }
 
             return count;
+        }
+
+        private findLSB(num: int): number {
+            if (num === 0) {
+                return -1;
+            }
+
+            // Get the lowest 1 bit
+            let isolatedBit: int = num & -num;
+
+            let pos = 0;
+            // Check upper 16 bits; if set, add 16 and shift right
+            if (isolatedBit & 0xFFFF0000) { pos += 16; isolatedBit >>= 16; }
+            // Check next 8 bits; if set, add 8 and shift right
+            if (isolatedBit & 0x0000FF00) { pos += 8; isolatedBit >>= 8; }
+            // Check next 4 bits; if set, add 4 and shift right
+            if (isolatedBit & 0x000000F0) { pos += 4; isolatedBit >>= 4; }
+            // Check next 2 bits; if set, add 2 and shift right
+            if (isolatedBit & 0x0000000C) { pos += 2; isolatedBit >>= 2; }
+            // Check bit 1; if set, add 1
+            if (isolatedBit & 0x00000002) { pos += 1; }
+
+            return pos;
+        }
+
+        private findMSB(num: int): number {
+            if (num === 0) {
+                return -1;
+            }
+
+            let pos = 0;
+            // Check upper 16 bits; if set, add 16 and shift right
+            if (num & 0xFFFF0000) { pos += 16; num >>= 16; }
+            // Check next 8 bits; if set, add 8 and shift right
+            if (num & 0xFF00) { pos += 8; num >>= 8; }
+            // Check next 4 bits; if set, add 4 and shift right
+            if (num & 0xF0) { pos += 4; num >>= 4; }
+            // Check next 2 bits; if set, add 2 and shift right
+            if (num & 0xC) { pos += 2; num >>= 2; }
+            // Check bit 1; if set, add 1
+            if (num & 0x2) { pos += 1; }
+
+            return pos;
+        }
+
+        private findSignificantBit(element: int, fromIndex: number, toIndex: number, target: number, isLSB: boolean = true): number {
+            let length = toIndex - fromIndex + 1;
+            let mask: int = this.getRangeMask(fromIndex, length);
+
+            let masked_value: int = 0;
+            if (target != 0) {
+                masked_value = element & mask;
+            } else {
+                masked_value = (~element) & mask;
+            }
+
+            return isLSB ? this.findLSB(masked_value) : fromIndex + this.findMSB(masked_value >> fromIndex);
         }
     }
 }
