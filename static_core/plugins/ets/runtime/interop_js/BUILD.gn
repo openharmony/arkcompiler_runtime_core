@@ -100,11 +100,6 @@ config("interop_js_public_config") {
   include_dirs = [ "$arkplatform_include" ]
   defines = []
   if (ark_ets_hybrid) {
-    node_api_includes = "//third_party/node/src"
-    include_dirs += [
-      "$node_api_includes",
-      "$arkui_root/napi",
-    ]
     defines += [ "PANDA_JS_ETS_HYBRID_MODE" ]
   } else if (ark_standalone_build || ark_static_standalone_build) {
     node_version = "v18.13.0"
