@@ -14,6 +14,9 @@
  */
 
 import {ArrayList} from "@ohos.util.ArrayList";
+import {BusinessError} from "@ohos.base";
+
+const OutOfBoundsErrorCodeId: number = 10200001;
 
 function main() {
     const suite = new ArkTestsuite("ArrayList API tests");
@@ -115,23 +118,18 @@ function testRemoveByIndexWithBoundaryIndices() {
 function testRemoveByIndexOutOfRange() {
     let arrayList = new ArrayList<number>();
     initializeArrayList(arrayList, TestData.forNumber);
-    let errorCount = 0;
-    try {
-        arrayList.removeByIndex(TestData.testNumber12);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        errorCount++;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: 12`) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    try {
-        arrayList.removeByIndex(-TestData.testNumber12);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.", "The result should be 'Index out of range'");
-        errorCount++;
+    let exceptionCheck1 = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message ==
+            `The value of \"index\" is out of range. It must be >= 0 && <= 4. Received value is: -12`) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertEQ(errorCount, TestData.testNumber2, "Throw error when ArrayList index out of range");
+    expectThrow(() => {arrayList.removeByIndex(TestData.testNumber12)}, exceptionCheck);
+    expectThrow(() => {arrayList.removeByIndex(-TestData.testNumber12)}, exceptionCheck1);
 }
 
 function testRemoveByIndexWithDoubleIndex() {
@@ -158,15 +156,11 @@ function testRemoveByIndexWithDoubleIndex2() {
 
 function testRemoveByIndexEmptyContainer() {
     let arrayList = new ArrayList<number>();
-    try {
-        arrayList.removeByIndex(0);
-    } catch (e) {
-        assertTrue(e instanceof RangeError, "The result should be 'RangeError'");
-        assertEQ((e as RangeError).message, "The value of index is out of range.",
-            "The result should be 'Index out of range'");
-        return;
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).message == `Container is empty`) &&
+            ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    assertTrue(false, "The result should be 'RangeError'");
+    expectThrow(() => {arrayList.removeByIndex(0)}, exceptionCheck);
 }
 
 function testRemoveByIndexSameIndex() {
