@@ -1593,6 +1593,9 @@ export class Date {
      * ```
      */
     public toISOString(): string {
+        if (!this.isDateValid()) {
+            throw new RangeError('Invalid time value');
+        }
         let sb = new StringBuilder();
         let y = this.getUTCFullYear();
         if (y < 0) {
@@ -1659,7 +1662,10 @@ export class Date {
      *
      * @returns JSON representation of the current instance
      */
-    public toJSON(): string {
+    public toJSON(): string | null {
+        if (!this.isDateValid()) {
+            return null;
+        }
         return this.toISOString();
     }
 
