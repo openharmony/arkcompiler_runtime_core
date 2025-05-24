@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H
-#define PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H
-
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/types/ets_arraybuffer.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
-#include "plugins/ets/runtime/types/ets_typed_arrays.h"
-#include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
 #include "plugins/ets/runtime/types/ets_map.h"
-#include "plugins/ets/runtime/types/ets_set.h"
 
-#endif  // PLUGINS_ETS_RUNTIME_ASM_DEFINES_DEFINES_H
+#include "types/ets_object.h"
+
+namespace ark::ets::intrinsics {
+
+extern "C" EtsBoolean EtsEscompatMapHas(EtsEscompatMap *map, EtsObject *key)
+{
+    return EtsEscompatMap::Has(map, key);
+}
+
+extern "C" EtsObject *EtsEscompatMapGet(EtsEscompatMap *map, EtsObject *key)
+{
+    return EtsEscompatMap::Get(map, key);
+}
+
+extern "C" EtsBoolean EtsEscompatMapDelete(EtsEscompatMap *map, EtsObject *key)
+{
+    return EtsEscompatMap::Delete(map, key);
+}
+
+}  // namespace ark::ets::intrinsics

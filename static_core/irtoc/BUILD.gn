@@ -48,6 +48,8 @@ if (enable_irtoc) {
     "scripts/string_builder.irt",
     "scripts/memcopy.irt",
     "scripts/arrays.irt",
+    "scripts/map.irt",
+    "scripts/set.irt",
   ]
   irtoc_scripts += plugin_irtoc_scripts
 

@@ -607,6 +607,16 @@ public:
         return (GetFlagsOffset() - GCRefFieldsOffset()) / sizeof(ObjectPointerType);
     }
 
+    static constexpr uint32_t GetIsNullvalueFlag()
+    {
+        return IS_NULLVALUE;
+    }
+
+    static constexpr uint32_t GetIsBoxedFlag()
+    {
+        return IS_BOXED;
+    }
+
 private:
     enum class FindFilter { STATIC, INSTANCE, ALL };
 

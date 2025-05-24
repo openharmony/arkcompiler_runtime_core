@@ -328,20 +328,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns true if the value is in the Map
      */
-    override has(key: K): boolean {
-        const buck = this.getBucket(key)
-        if (buck !== undefined) {
-            const buckSize = buck.actualLength
-            for (let i = 0; i < buckSize; i++) {
-                const entry = buck.$_get_unsafe(i)
-                if (__runtimeSameValueZero(entry.key, key)) {
-                    return true
-                }
-            }
-        }
-
-        return false;
-    }
+    override native has(key: K): boolean;
 
     /**
      * Returns number of Entries with unique keys in the Map
@@ -357,43 +344,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @param key the key to remove
      */
-    delete(key: K): boolean {
-        if (!this.deleteImpl(key)) {
-            return false
-        }
-
-        this.sizeVal--
-        if (this.sizeVal == 0) {
-            this.headEntry = undefined
-        }
-        return true
-    }
-
-    private deleteImpl(key: K): boolean {
-        const buck = this.getBucket(key)
-        if (buck === undefined) {
-            return false
-        }
-
-        const buckSize = buck.actualLength
-        for (let i = 0; i < buckSize; i++) {
-            const entry = buck.$_get_unsafe(i)
-            if (!__runtimeSameValueZero(entry.key, key)) {
-                continue
-            }
-
-            entry.prev.next = entry.next
-            entry.next.prev = entry.prev
-
-            const popped = buck.pop()!
-            if (i != buckSize - 1) {
-                buck[i] = popped
-            }
-            return true
-        }
-
-        return false
-    }
+    native delete(key: K): boolean;
 
     /**
      * Deletes all elements from the Map
@@ -414,20 +365,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns value if assosiated with key presents.
      */
-    override get(key: K): V | undefined {
-        const buck = this.getBucket(key)
-        if (buck !== undefined) {
-            const buckSize = buck.actualLength
-            for (let i = 0; i < buckSize; i++) {
-                const entry = buck.$_get_unsafe(i)
-                if (__runtimeSameValueZero(entry.key, key)) {
-                    return entry.val
-                }
-            }
-        }
-
-        return undefined;
-    }
+    override native get(key: K): V | undefined;
 
     /**
      * Returns a value assosiated with key if present, or a default value otherwise
