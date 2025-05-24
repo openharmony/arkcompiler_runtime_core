@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -80,37 +80,32 @@ add_custom_target(${PROJECT_NAME}_check
         ${PROJECT_NAME}_black
 )
 
-# add_custom_target(${PROJECT_NAME}
-#     COMMAND
-#         ${CMAKE_CURRENT_BINARY_DIR}/.venv/bin/python3
-#         -X pycache_prefix=${CMAKE_CURRENT_BINARY_DIR}/.pycache
-#         -m pytest
-#         -o cache_dir=${CMAKE_CURRENT_BINARY_DIR}/.pytest_cache
-#         -o testpaths=${CMAKE_CURRENT_SOURCE_DIR}/src
-#         --ark-build-path=${CMAKE_BINARY_DIR}
-#         --rootdir=${CMAKE_CURRENT_SOURCE_DIR}/src
-#         -vv
-#         ${CMAKE_CURRENT_SOURCE_DIR}/src
-#     DEPENDS
-#         ${PROJECT_NAME}_deps
-#         ${PROJECT_NAME}_check
-#         panda_bins
-#         arkinspector
-#     BYPRODUCTS
-#         ${CMAKE_CURRENT_BINARY_DIR}/.pycache
-#         ${CMAKE_CURRENT_BINARY_DIR}/.pytest_cache
-#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#     COMMENT "${PROJECT_NAME}: Running tests"
-#     USES_TERMINAL
-# )
+# NOTE(dslynko, #25138): fix and reenable expression evaluation tests
+set(IGNORED_TESTS --ignore-glob=**/evaluate/*)
 
-# NOTE(dslynko, #20818): now checks only codestyle. Switch on the test after fixing the deadlock
 add_custom_target(${PROJECT_NAME}
+    COMMAND
+        ${CMAKE_CURRENT_BINARY_DIR}/.venv/bin/python3
+        -X pycache_prefix=${CMAKE_CURRENT_BINARY_DIR}/.pycache
+        -m pytest
+        -o cache_dir=${CMAKE_CURRENT_BINARY_DIR}/.pytest_cache
+        -o testpaths=${CMAKE_CURRENT_SOURCE_DIR}/src
+        --ark-build-path=${CMAKE_BINARY_DIR}
+        --rootdir=${CMAKE_CURRENT_SOURCE_DIR}/src
+        -vv
+        ${IGNORED_TESTS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
     DEPENDS
         ${PROJECT_NAME}_deps
         ${PROJECT_NAME}_check
+        panda_bins
+        arkinspector
+    BYPRODUCTS
+        ${CMAKE_CURRENT_BINARY_DIR}/.pycache
+        ${CMAKE_CURRENT_BINARY_DIR}/.pytest_cache
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "${PROJECT_NAME}: Running tests"
+    USES_TERMINAL
 )
 
 set_property(TARGET ${PROJECT_NAME}

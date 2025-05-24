@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,7 @@ async def test_assert_in_capture(
     code = """\
 function main(): int {
     console.log("START")
-    assert false
+    assertTrue(false)
     console.log("TEST_END")
     return 0
 }\
@@ -44,9 +44,10 @@ function main(): int {
     log.info("STDOUT %s", runtime_capture.stdout)
     log.info("STDERR %s", runtime_capture.stderr)
     with expect.error():
-        assert arkts_str_list(["START", "Assertion failed."]) == runtime_capture.stdout
+        assertion_message = "expected true but was false"
+        assert arkts_str_list(["START", assertion_message]) == runtime_capture.stdout
         stdout_text = "\n".join(runtime_capture.stdout)
-        assert search("Assertion failed", stdout_text)
+        assert search(assertion_message, stdout_text)
         error_log = "\n".join(runtime_capture.stderr)
         assert search(r"Unhandled exception: std.core.AssertionError", error_log)
 

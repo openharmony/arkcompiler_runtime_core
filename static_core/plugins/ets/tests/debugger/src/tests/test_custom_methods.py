@@ -20,9 +20,8 @@ from typing import Final
 
 import trio
 
-from arkdb.compiler import StringCodeCompiler, EvaluateCompileExpressionArgs
+from arkdb.compiler import StringCodeCompiler
 from arkdb.debug_client import DebugLocator
-from arkdb.debug_types import compile_expression
 from arkdb.extensions import debugger as ext_debugger
 from arkdb.runtime import Runtime
 from arkdb.source_meta import parse_source_meta
@@ -89,7 +88,7 @@ async def test_get_possible_and_set_breakpoint_by_url(
             meta_breakpoints_lines = set(bp.line_number for bp in meta.breakpoints)
             set_breakpoints = await client.get_possible_and_set_breakpoint_by_url(
                 [
-                    ext_debugger.UrlBreakpointRequest(line_number, url=str(script_file.source_file))
+                    ext_debugger.UrlBreakpointRequest(line_number, url=script_file.source_file.name)
                     for line_number in meta_breakpoints_lines
                 ]
             )
@@ -157,50 +156,6 @@ async def test_get_script_source(
 
         process.terminate()
     assert process.returncode == -SIGTERM
-
-
-async def test_evaluate_on_call_frame(
-    breakpoint_walker: BreakpointWalkerType,
-) -> None:
-    code = """\
-function foo() {
-    let x: int = 10;
-    let y: int = 20;
-    x += 1;
-    y += 1; // #BP{1}
-    return;
-}
-function main(): int {
-    let x: int = 1;
-    let y: int = 2;
-    x += 1;
-    y += 1;
-    foo();
-    return 0;
-}
-"""
-    async with breakpoint_walker(code) as walker:
-        paused_step = await anext(walker)
-        bps = paused_step.hit_breakpoints()
-
-        compiled_expression_bytecode = compile_expression(
-            paused_step.client.code_compiler,
-            EvaluateCompileExpressionArgs(
-                ets_expression="x+y",
-                eval_panda_files=[walker.script_file.panda_file],
-                eval_source=walker.script_file.source_file,
-                eval_line=bps[0].line_number + 1,
-            ),
-        )
-        result, _ = await paused_step.client.evaluate_on_call_frame(
-            debugger.CallFrameId("0"),
-            compiled_expression_bytecode,
-            return_by_value=True,
-            silent=True,
-            object_group="console",
-            include_command_line_api=True,
-        )
-        assert result.value == 31
 
 
 CODE_DEAD_LOOP: Final[

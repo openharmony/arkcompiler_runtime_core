@@ -542,7 +542,7 @@ void InspectorServer::OnCallDebuggerGetPossibleAndSetBreakpointByUrl(std::functi
             auto response = std::make_unique<CustomUrlBreakpointLocations>();
             for (const auto &req : *optRequests) {
                 auto optResponse = SetBreakpointByUrl(sessionId, req, handler);
-                response->Add((optResponse.Value() != nullptr)
+                response->Add(optResponse.HasValue()
                     ? optResponse.Value()->ToCustomUrlBreakpointResponse()
                     : CustomUrlBreakpointResponse(req.GetLineNumber()));
             }
