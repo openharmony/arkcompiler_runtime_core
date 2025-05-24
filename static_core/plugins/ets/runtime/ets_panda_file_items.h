@@ -226,6 +226,11 @@ static constexpr std::string_view SET                                  = "Lescom
 static constexpr std::string_view RECORD                               = "Lescompat/Record;";
 static constexpr std::string_view PROCESS                              = "Lescompat/StdProcess/process;";
 
+// Json Annotations
+static constexpr std::string_view JSON_STRINGIFY_IGNORE                = "Lescompat/JSONStringifyIgnore;";
+static constexpr std::string_view JSON_PARSE_IGNORE                    = "Lescompat/JSONParseIgnore;";
+static constexpr std::string_view JSON_RENAME                          = "Lescompat/JSONRename;";
+
 // Annotation for optional parameters
 static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
     "Lstd/annotations/functions/OptionalParametersAnnotation;";
