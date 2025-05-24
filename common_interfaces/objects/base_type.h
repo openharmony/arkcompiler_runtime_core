@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "objects/base_object.h"
+#include "objects/string/base_string_declare.h"
 
 namespace panda::ecmascript {
 class JSTaggedValue;
@@ -40,7 +41,8 @@ struct BaseBigInt {
 
 // The common consensus type between static and dynamic
 using PandaType = std::variant<std::monostate, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, float,
-                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseBigInt, BaseObject*>;
+                               double, int64_t, uint64_t, BaseUndefined, BaseNull, BaseBigInt, BaseObject*,
+                               BaseString*>;
 
 // base type for static vm
 using BoxedValue = BaseObject *;
