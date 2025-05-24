@@ -23,7 +23,7 @@ namespace ark::ets::intrinsics::taskpool {
 static std::atomic<EtsLong> g_taskId = 1;
 static std::atomic<EtsLong> g_taskGroupId = 1;
 static std::atomic<EtsLong> g_seqRunnerId = 1;
-static constexpr const char *EA_WORKER = "eaworker";
+static constexpr const char *LAUNCH = "launch";
 
 extern "C" EtsLong GenerateTaskId()
 {
@@ -45,7 +45,16 @@ extern "C" EtsBoolean IsUsingLaunchMode()
     const auto &taskpoolMode =
         Runtime::GetOptions().GetTaskpoolMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
 
-    bool res = (taskpoolMode == EA_WORKER);
+    bool res = (taskpoolMode == LAUNCH);
+    return ark::ets::ToEtsBoolean(res);
+}
+
+extern "C" EtsBoolean IsSupportingInterop()
+{
+    bool res = false;
+#ifdef PANDA_ETS_INTEROP_JS
+    res = Runtime::GetOptions().IsTaskpoolSupportInterop(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
+#endif /* PANDA_ETS_INTEROP_JS */
     return ark::ets::ToEtsBoolean(res);
 }
 }  // namespace ark::ets::intrinsics::taskpool

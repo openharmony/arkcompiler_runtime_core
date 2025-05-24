@@ -43,4 +43,6 @@ export final class CoroutineExtras {
     public static native workerHasExternalScheduler(): boolean;
     // is taskpool using launch mode
     public static native isTaskpoolUsingLaunchMode(): boolean;
+    // is taskpool supporting interop
+    public static native isTaskpoolSupportingInterop(): boolean;
 }

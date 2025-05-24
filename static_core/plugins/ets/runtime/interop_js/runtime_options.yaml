@@ -37,3 +37,11 @@ options:
   type: bool
   default: false
   description: Enable switch for shared reference storage verification
+
+- name: taskpool-support-interop
+  lang:
+    - ets
+  type: bool
+  default: false
+  description: taskpool support interop or not, only valid when taskpool-mode is eaworker
+

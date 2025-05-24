@@ -19,8 +19,8 @@ import {launch} from "std/concurrency"
 
 export namespace taskpool {
     class TaskPoolWorker extends EAWorker {
-        constructor() {
-            super(false);
+        constructor(supportInterop: boolean = false) {
+            super(supportInterop);
             this.run<void>((): void => {
                 this.workerId = CoroutineExtras.getWorkerId();
             }).Await();
@@ -1321,7 +1321,7 @@ export namespace taskpool {
             }
             isWorkersInitialized = true;
             for (let i = 0; i < initialWorkersNumber; ++i) {
-                let w = new TaskPoolWorker();
+                let w = new TaskPoolWorker(isTaskpoolSupportInterop);
                 workers.add(w);
             }
         })
@@ -1453,6 +1453,7 @@ export namespace taskpool {
     }
 
     native function isUsingLaunch(): boolean;
+    native function isSupportingInterop(): boolean;
 
     // managed mutex for taskpool containers below
     const mutex = ConcurrencyHelpers.mutexCreate();
@@ -1484,6 +1485,7 @@ export namespace taskpool {
     let mediumTaskExecuteCount: int = 0;
 
     const isTaskPoolUseLaunch: boolean = isUsingLaunch();
+    const isTaskpoolSupportInterop: boolean = isSupportingInterop();
 
     const initialWorkersNumber: int = 2;
     const continuousExecutionCount: int = 5;
