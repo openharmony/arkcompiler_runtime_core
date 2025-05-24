@@ -31,7 +31,7 @@ final class ListNode<T> {
 /**
  * BlockingQueue implementation
  */
-export final class LinkedBlockingQueue<T> implements BlockingQueue<T> {
+export class LinkedBlockingQueue<T> implements BlockingQueue<T> {
     /**
      * Constructs a default LinkedBlockingQueue.
      */
@@ -226,6 +226,24 @@ export final class LinkedBlockingQueue<T> implements BlockingQueue<T> {
             }
         } finally {
             ConcurrencyHelpers.mutexUnlock(this.popMutex);
+        }
+    }
+
+    /**
+     * Returns the end element in a LinkedBlockingQueue.
+     *
+     * @returns return the end element or null.
+     */
+    public getEnd(): T | null {
+        ConcurrencyHelpers.mutexLock(this.pushMutex);
+        try {
+            if (this.atomicsGetSize() == 0) {
+                return null;
+            } else {
+                return this.tail!.element;
+            }
+        } finally {
+            ConcurrencyHelpers.mutexUnlock(this.pushMutex);
         }
     }
 
