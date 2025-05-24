@@ -482,9 +482,6 @@
 10.interfaces/06.interface_method_declarations/throws_clause_1.ets
 10.interfaces/06.interface_method_declarations/throws_clause_2.ets
 
-#25187
-10.interfaces/07.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_15.ets
-
 #23856
 13.compilation_units/09.export_directives/01.selective_export_directive/t01/c.ets
 13.compilation_units/09.export_directives/01.selective_export_directive/t02/d.ets
