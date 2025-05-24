@@ -296,8 +296,9 @@ export class Formatter {
         while((i = (ss = s.substring(preI, s.length)).search("%") as int) != -1 && (preI + i < s.length - 1) && (argCounter < args.length)) {
             res.append(s.substring(preI, preI + i))
             let flagIndex = preI + i + 1
-            //NOTE(ivan-tyulyandin): has to be string due to internal issue 21459
-            let flag: string = s[flagIndex]
+            //NOTE(DZ): temporary solution until primitives remove patch will be merged
+            let ch = new Char(s[flagIndex]);
+            let flag: string = ch.toString();
             if (flags.includes(flag)) {
                 let d = args[argCounter]
                 if (d != undefined && d != null) {

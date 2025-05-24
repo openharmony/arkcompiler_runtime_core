@@ -23,5 +23,5 @@ class Woman {
 }
 
 function newSarahObject() {
-    return new Woman("Sarah", 'a');
+    return new Woman("Sarah", c'a');
 }

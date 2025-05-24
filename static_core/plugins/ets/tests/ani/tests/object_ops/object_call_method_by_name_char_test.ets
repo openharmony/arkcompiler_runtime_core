@@ -68,10 +68,10 @@ class B implements ji {
 
     public recursiveMethod(value: int): char {
         if (value <= 0) {
-            return 'A';
+            return c'A';
         }
         if (value === 1) {
-            return 'Z';
+            return c'Z';
         }
         return this.recursiveMethod(value - 1);
     }

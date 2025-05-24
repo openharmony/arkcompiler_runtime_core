@@ -34,7 +34,7 @@ function foo2(): boolean {
 }
 
 function foo3(): char {
-    return 'c';
+    return c'c';
 }
 
 function foo4(): string {

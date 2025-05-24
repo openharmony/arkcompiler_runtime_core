@@ -158,7 +158,7 @@ async def test_arkts_primitive(
         ("Float", 1),
         ("double", 1),
         ("Double", 1),
-        ("char", ("'A'", "A")),
+        ("char", ("c'A'", "A")),
         ("string", ("'AA'", "AA")),
         ("Char", ("c'A'", '"A"')),  # Char object will be output as String
         ("Char", ("new Char(c'A')", '"A"')),  # Char object will be output as String

@@ -14,7 +14,7 @@
  */
 
 function getCharTuple(): [char, char, char, char, char] {
-    return ['H', 'e', 'l', 'l', 'o'];
+    return [c'H', c'e', c'l', c'l', c'o'];
 }
 
 function getReferenceTuple(): [String, double[], String] {
@@ -22,5 +22,5 @@ function getReferenceTuple(): [String, double[], String] {
 }
 
 function getTestPrimitiveTuple(): [boolean, char, byte, short, int, long, float, double] {
-    return [true, 'x', 127, 300, 500, 600, 100.0, 400.0];
+    return [true, c'x', 127, 300, 500, 600, 100.0, 400.0];
 }

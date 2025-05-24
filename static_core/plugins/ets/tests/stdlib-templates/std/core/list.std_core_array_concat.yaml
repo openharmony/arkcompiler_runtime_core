@@ -198,18 +198,18 @@
     method_throws: "false",
     method_test_index_data:
       {
-        test1: { first: "['a']", second: "['z']" },
-        test2: { first: "['a', 'b']", second: "['y', 'z']" },
+        test1: { first: "[c'a']", second: "[c'z']" },
+        test2: { first: "[c'a', c'b']", second: "[c'y', c'z']" },
         test3: { first: "[]", second: "[]" },
-        test4: { first: "['x', 'y']", second: "[]" },
-        test5: { first: "[]", second: "['x', 'y', 'z']" },
+        test4: { first: "[c'x', c'y']", second: "[]" },
+        test5: { first: "[]", second: "[c'x', c'y', c'z']" },
       },
     method_expected_data:
       {
-        test1: "['a', 'z']",
-        test2: "['a', 'b', 'y', 'z']",
+        test1: "[c'a', c'z']",
+        test2: "[c'a', c'b', c'y', c'z']",
         test3: "[]",
-        test4: "['x', 'y']",
-        test5: "['x', 'y', 'z']",
+        test4: "[c'x', c'y']",
+        test5: "[c'x', c'y', c'z']",
       },
   }

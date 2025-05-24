@@ -252,7 +252,7 @@ export final class Console {
         this.addToBuffer(this.indent + i + c'\n', LogLevel.LOG)
     }
     public log(): void {
-        this.addToBuffer(c'\n', LogLevel.LOG)
+        this.addToBuffer("\n", LogLevel.LOG)
     }
 
     /**

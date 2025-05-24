@@ -295,8 +295,8 @@ export namespace util {
             let bytes: Array<number> = new Array<number>();
 
             for (let i = 0; i < cleaned.length; i++) {
-                let ch: string = cleaned[i];
-                if (ch == "=") {
+                let ch = cleaned[i];
+                if (ch == c'=') {
                     break;
                 }
                 let index: int = table.indexOf(ch) as int;
@@ -1620,4 +1620,3 @@ export namespace util {
         return result;
     }
 }
-

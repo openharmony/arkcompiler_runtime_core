@@ -16,7 +16,7 @@
 class Pack {
     boolean_value: boolean = true;
     string_value: string = "";
-    char_value: char = 'a';
+    char_value: char = c'a';
 }
 
 function newPackObject(): Pack {

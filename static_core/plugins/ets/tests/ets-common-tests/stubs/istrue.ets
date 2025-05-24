@@ -67,7 +67,7 @@ function testNormal() {
     assertTrue(!istrue(new Double(0.0)));
     assertTrue(istrue(new Double(0.5)));
     assertTrue(!istrue(new Char(0 as char)));
-    assertTrue(istrue(new Char('0')));
+    assertTrue(istrue(new Char(c'0')));
     assertTrue(!istrue(""));
     assertTrue(istrue("Hello"));
     assertTrue(!istrue(false));
@@ -107,7 +107,7 @@ function testErase() {
     assertTrue(!istrue(erase(new Double(0.0))));
     assertTrue(istrue(erase(new Double(0.5))));
     assertTrue(!istrue(erase(new Char(0 as char))));
-    assertTrue(istrue(erase(new Char('0'))));
+    assertTrue(istrue(erase(new Char(c'0'))));
     assertTrue(!istrue(erase("")));
     assertTrue(istrue(erase("Hello")));
     assertTrue(!istrue(erase(false)));

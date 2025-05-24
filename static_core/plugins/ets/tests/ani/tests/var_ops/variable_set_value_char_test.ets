@@ -14,11 +14,11 @@
  */
 
 namespace anyns {
-    export let aChar: char = 'A';
+    export let aChar: char = c'A';
     export let aDouble: double = 3.0;
     export let sum: char;
     class A {
-        static val1: char = 'C';
+        static val1: char = c'C';
         static val2: char = 2;
         public static add(): char {
             sum = A.val1 + A.val2 as char;
@@ -27,10 +27,10 @@ namespace anyns {
     }
 
     namespace second {
-        export let aValue: char = 'W';
+        export let aValue: char = c'W';
     }
 }
 
 namespace anyns {
-    export let testValue: char = 'M';
+    export let testValue: char = c'M';
 }

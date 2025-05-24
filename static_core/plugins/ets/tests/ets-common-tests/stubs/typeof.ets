@@ -32,7 +32,7 @@ function testNumerics() {
     assertEQ(typeof (() => { let v: long = 123456789123; return v })(), "number");
     assertEQ(typeof (() => { let v: float = 1.1f; return v })(), "number");
     assertEQ(typeof (() => { let v: double = 1.1; return v })(), "number");
-    assertEQ(typeof (() => { let v: char = 'a'; return v })(), "number");
+    assertEQ(typeof (() => { let v: char = c'a'; return v })(), "number");
 }
 
 function testNumerics2() {
@@ -42,7 +42,7 @@ function testNumerics2() {
     let a4: long = 123456789123;
     let a5: float = 1.1f;
     let a6: double = 1.1;
-    let a7: char = 'a';
+    let a7: char = c'a';
     assertEQ(typeof erase(a1), "number");
     assertEQ(typeof erase(a2), "number");
     assertEQ(typeof erase(a3), "number");

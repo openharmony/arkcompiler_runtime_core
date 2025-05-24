@@ -14,27 +14,27 @@
  */
 
 class GetCharStatic {
-    static name: char = 'b';
+    static name: char = c'b';
     static age: int = 20;
     static specia2: string = "";
     static specia3: null = null;
     static specia4: undefined  = undefined ;
-    static specia5: char = "\n";
-    static specia6: char = "\r";
-    static specia7: char = "\t";
-    static specia8: char = "\b";
-    static specia9: char = "\a";
-    static specia10: char = "\f";
-    static specia11: char = "\v";
-    static specia12: char = "\0";
+    static specia5: char = c'\n';
+    static specia6: char = c'\r';
+    static specia7: char = c'\t';
+    static specia8: char = c'\b';
+    static specia9: char = c'\a';
+    static specia10: char = c'\f';
+    static specia11: char = c'\v';
+    static specia12: char = c'\0';
     static charMin: char = 0;
     static charMax: char = 65535;
 }
 
 class CharStaticA extends GetCharStatic {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
 }
 
 final class CharStaticFinal extends GetCharStatic {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
 }

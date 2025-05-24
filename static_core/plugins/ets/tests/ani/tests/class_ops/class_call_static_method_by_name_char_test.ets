@@ -15,7 +15,7 @@
 
 class Operations {
     static sub(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         if (c0 > c1) {
             c = c0 - c1 as Char;
         } else {
@@ -28,7 +28,7 @@ class Operations {
 namespace na {
 class A {
     static funcA(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         if (c0 > c1) {
             c = c0 - c1 as Char;
         } else {
@@ -46,7 +46,7 @@ namespace nb {
 namespace nc {
 class A {
     static funcA(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         if (c0 > c1) {
             c = c0 - c1 as Char;
         } else {
@@ -61,7 +61,7 @@ class A {
 namespace nd {
 class A {
     static funcA(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         if (c0 > c1) {
             c = c0 - c1 as Char;
         } else {
@@ -73,7 +73,7 @@ class A {
 
 class B extends A {
     static funcA(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         c = c0 + c1 as Char;
         return c as char;
     }
@@ -82,7 +82,7 @@ class B extends A {
 
 class A {
     static funcA(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         if (c0 > c1) {
             c = c0 - c1 as char;
         } else {
@@ -102,7 +102,7 @@ class A {
 
 class B extends A {
     static funcB(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         c = c0 + c1 as char;
         return c as char;
     }
@@ -113,7 +113,7 @@ class C extends A {
 
 class D extends A {
     static funcA(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         c = c0 + c1 as char;
         return c as char;
     }
@@ -135,18 +135,18 @@ class F {
         return F.count;
     }
 
-    static count: char = '\0';
+    static count: char = c'\0';
 }
 
 class G {
     public static publicMethod(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         c = c0 + c1 as char;
         return c as char;
     }
 
     private static privateMethod(c0: char, c1: char): char {
-        let c: Char = new Char('0');
+        let c: Char = new Char(c'0');
         if (c0 > c1) {
             c = c0 - c1 as char;
         } else {

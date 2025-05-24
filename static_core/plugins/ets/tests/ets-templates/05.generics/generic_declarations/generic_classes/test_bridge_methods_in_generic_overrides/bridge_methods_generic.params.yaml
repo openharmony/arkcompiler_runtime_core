@@ -12,7 +12,7 @@
 # limitations under the License.
 
 bridge_methods_generic:
-    # case 0  
+    # case 0
   - desc: Test that a generic subclass correctly overrides a method from a generic parent class when instantiated with a string type.
     dec1: |-
       class Pa<T> {
@@ -29,7 +29,7 @@ bridge_methods_generic:
       let c: Pa<string> = new Cl();
       assertEQ(typeof c.p('string'), 'string');
 
-    # case 1  
+    # case 1
   - desc: Test generic class inheritance with constructor parameters and method access from both parent and child classes.
     dec1: |-
       class Ng {
@@ -57,8 +57,8 @@ bridge_methods_generic:
       assertEQ(c.g(), 1);
       assertEQ(c.getD(), 'test');
 
-    # case 2 
-  - desc: Test multi-level generic inheritance with method overriding at the bottom non-generic class. 
+    # case 2
+  - desc: Test multi-level generic inheritance with method overriding at the bottom non-generic class.
     dec1: |-
       class Base<T> {
         value: T;
@@ -88,7 +88,7 @@ bridge_methods_generic:
       const instance = new Bottom("test");
       assertEQ(instance.getValue(), "TEST");
 
-    # case 3  
+    # case 3
   - desc: Verify method overriding in a multi-level generic inheritance chain with multiple type parameters.
     dec1: |-
       class Root {
@@ -120,7 +120,7 @@ bridge_methods_generic:
       const instance = new Generic2<number, string>(10, "test");
       assertEQ(instance.getName(), "ROOT");
 
-    # case 4  
+    # case 4
   - desc: Test that a concrete subclass correctly overrides and modifies a method from a generic parent class with a specific type.
     dec1: |-
       class GenericParent<T> {
@@ -138,7 +138,7 @@ bridge_methods_generic:
       let child = new ConcreteChild();
       assertEQ(child.process(5), 10);
 
-    # case 5  
+    # case 5
   - desc: Verify method overriding with multiple generic parameters in a parent-child class relationship.
     dec1: |-
       class Parent<T, U> {
@@ -158,7 +158,7 @@ bridge_methods_generic:
       assertEQ(result[0], "HI");
       assertEQ(result[1], 10);
 
-    # case 6  
+    # case 6
   - desc: Verify that a specialized subclass can extend a generic class and add new methods while inheriting existing functionality.
     dec1: |-
       class Generic<T> {
@@ -185,7 +185,7 @@ bridge_methods_generic:
       list.add("b");
       assertEQ(list.join("-"), "a-b");
 
-    # case 7  
+    # case 7
   - desc: Verify that a generic subclass correctly overrides a method from a generic parent class while maintaining the same behavior.
     dec1: |-
      class GenericParent<T> {
@@ -203,7 +203,7 @@ bridge_methods_generic:
       let child = new GenericChild<number>();
       assertEQ(child.process(5), 5);
 
-    # case 8  
+    # case 8
   - desc: Generic method override generates a bridged method(string charAt).
     dec1: |-
       class Parent<T> {
@@ -214,7 +214,8 @@ bridge_methods_generic:
 
       class Child extends Parent<string> {
         process(value: string): string {
-          return value.charAt(1);
+          let ch = new Char(value.charAt(1));
+          return ch.toString();
         }
       }
     check: |-
@@ -222,7 +223,7 @@ bridge_methods_generic:
       const result = child.process("hello");
       assertEQ(result, "e");
 
-    # case 9  
+    # case 9
   - desc: Verify that a concrete subclass can override and modify the behavior of a generic parent class's method.
     dec1: |-
       class Builder<T> {
@@ -247,7 +248,7 @@ bridge_methods_generic:
       const builder = new StringBuilder1("construct");
       assertEQ(builder.build(), "CONSTRUCT");
 
-    # case 10  
+    # case 10
   - desc: Verify that a generic class correctly overrides a method from its non-generic parent class.
     dec1: |-
       class NonGeneric {
@@ -270,7 +271,7 @@ bridge_methods_generic:
       const instance = new Generic<boolean>(true);
       assertEQ(instance.increment(), 2);
 
-    # case 11  
+    # case 11
   - desc: Test that a generic subclass correctly overrides a method from a generic parent class when instantiated with a specific type.
     dec1: |-
       class GenericParent<T> {
@@ -288,7 +289,7 @@ bridge_methods_generic:
       const result = child.process("test");
       assertEQ(result, "TEST");
 
-    # case 12 
+    # case 12
   - desc: Test method overriding in a multi-level generic inheritance chain with type constraints.
     dec1: |-
       class Base<T> {
@@ -319,7 +320,7 @@ bridge_methods_generic:
       const instance = new Bottom("hi");
       assertEQ(instance.process(), "hihi");
 
-    # case 13 
+    # case 13
   - desc: Verify that a child class correctly overrides a method from a generic parent class when accessed through the parent class type.
     dec1: |-
       class Parent<T> {

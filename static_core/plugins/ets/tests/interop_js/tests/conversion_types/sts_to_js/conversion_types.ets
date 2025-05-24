@@ -40,7 +40,7 @@ static {
     globStsLong = new Long(42 as long);
     globStsFloat = new Float(42.42 as float);
     globStsDouble = new Double(42.42 as double);
-    globStsChar = new Char('a');
+    globStsChar = new Char(c'a');
     globStsBoolean = new Boolean(true);
     globStsBigInt = new BigInt(42);
 }
@@ -60,7 +60,7 @@ class DeferentIntTypes {
 }
 
 class DeferentStringTypes {
-    ch: char = 'a';
+    ch: char = c'a';
     str: string = "hello";
     lit: "one" | "two" = "one";
 }

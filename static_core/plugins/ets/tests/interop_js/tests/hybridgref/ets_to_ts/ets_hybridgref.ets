@@ -19,7 +19,7 @@ type refType = Object | ESValue;
 native function saveHybridGref(ref: refType):void;
 
 export function etsSaveNativeGrefChar(): void {
-    let value : char = 'A'
+    let value : char = c'A'
     let ref = new Char(value);
     saveHybridGref(ref);
 }
