@@ -92,7 +92,7 @@ public:
         return state_.forwardState_;
     }
 
-    StateWordType GetClassAddress() const
+    StateWordType GetBaseClassAddress() const
     {
 #ifdef USE_CMC_GC
         return state_.padding_;
@@ -101,7 +101,7 @@ public:
 #endif
     }
 
-    void SetClassAddress(StateWordType address)
+    void SetFullBaseClassAddress(StateWordType address)
     {
 #ifdef USE_CMC_GC
         state_.padding_ = address;
