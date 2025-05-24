@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//! CHECKER       Check LowerBoxedBoolean pass
+//! CHECKER       (JIT) Check LowerBoxedBoolean pass
 //! RUN           force_jit: true, options: "--compiler-regex='.*lower_boxed_boolean.*test.*' ", entry: "lower_boxed_boolean.ETSGLOBAL::main"
 //!
 //! METHOD        "lower_boxed_boolean.ETSGLOBAL::test1"
@@ -117,7 +117,21 @@
 //! INST_NOT      /Compare NE.*-> (.*).*/
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      /LoadStatic.*std.core.Boolean.TRUE/
+
+//! CHECKER       (AOT) Check LowerBoxedBoolean pass
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_AOT       options: "--compiler-regex='.*lower_boxed_boolean.*test.*' --compiler-simplify-string-builder=false", entry: "lower_boxed_boolean.ETSGLOBAL::main"
 //!
+//! METHOD        "lower_boxed_boolean.ETSGLOBAL::test8"
+//! PASS_BEFORE   "CheckElimination"
+//! INST          /CallStatic.*std.core.Boolean::valueOf/
+//! INST_NEXT     /.*ref.*Phi.*/
+//! INST_NEXT     /SaveState (?!.*->).*/
+//! PASS_AFTER    "CheckElimination"
+//! INST          /CallStatic.*std.core.Boolean::valueOf/
+//! INST_NEXT     /.*ref.*Phi.*/
+//! INST_NOT      /.*b.*Phi.*/
+//! INST_NEXT     /SaveState (?!.*->).*/
 
 // Check LowerBoxedBoolean optimization on Phi with two inputs.
 function test1(input: boolean): boolean {
@@ -206,6 +220,20 @@ function test7(): boolean {
     return true;
 }
 
+function get_a_string(flag: Boolean = Boolean.FALSE): string {
+    return "A";
+}
+
+// Check that LowerBoxedBoolean safely skips optimization for SaveState with no users (preventing segfault).
+// CallStatic std.core.Boolean <- Phi <- SaveState <- None.
+function test8(obj: Object, flag: boolean = false): string {
+    let s = new StringBuilder("A");
+    for (const i of Object.entries(obj)) {
+        s.append(get_a_string(flag));
+    }
+    return s.toString();
+}
+
 function main(): int {
     let result1: boolean = test1(true);
     let array: Array<Number> = new Array<Number>(1, 2, 3, -2, 6, 7)
@@ -215,5 +243,6 @@ function main(): int {
     let result5: Boolean = test5(array, 5);
     let result6: Boolean = test6(array, 3);
     let result7: boolean = test7();
+    let result8: string = test8("A");
     return 0;
 }
