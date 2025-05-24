@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -227,4 +227,36 @@ TEST(JsonParser, InvalidJson)
     ASSERT_FALSE(obj.IsValid());
 }
 
+/**
+ * @tc.name: UnescapeString
+ * @tc.desc: Verify the json parser with unescape string.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+TEST(JsonParser, UnescapeString)
+{
+    std::stringstream ss(R"(
+    {
+        "key_0" : "\ttest_string1\r\n",
+        "key_1" : "\ftest_string2\b"
+    }
+    )");
+
+    JsonObject obj(ss.rdbuf());
+    ASSERT_TRUE(obj.IsValid());
+
+    ASSERT_NE(obj.GetValue<JsonObject::StringT>("key_0"), nullptr);
+    ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_0"), "\ttest_string1\r\n");
+
+    ASSERT_NE(obj.GetValue<JsonObject::StringT>("key_1"), nullptr);
+    ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_1"), "\ftest_string2\b");
+
+    auto invalidUnescapeStr(R"(
+    {
+        "key_0" : "\a"
+    }
+    )");
+    JsonObject invalidObj(invalidUnescapeStr);
+    ASSERT_FALSE(invalidObj.IsValid());
+}
 }  // namespace ark::json_parser::test
