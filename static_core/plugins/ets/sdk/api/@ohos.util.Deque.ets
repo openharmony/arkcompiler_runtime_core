@@ -62,7 +62,7 @@ export default class Deque<T> implements Iterable<T> {
             return undefined;
         }
 
-        return this.buffer[this.rear - 1];
+        return this.buffer[(this.rear - 1 + this.capacity) % this.capacity];
     }
 
     /**
