@@ -308,9 +308,7 @@
 #15577 union type inference
 07.expressions/05.object_literal/01.object_literal_of_class_type/cl_2.ets
 
-#20328 Unexpected CTE in Record indexing expression: Value is possibly nullish
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_6.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_13.ets
+#25990
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
 
 #24003
