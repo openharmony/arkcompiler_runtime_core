@@ -267,9 +267,6 @@ if (ark_ets_interop_js) {
       "$ark_third_party_root/libuv:uv",
       "$arkui_root/napi:ace_napi",
     ]
-  } else if (ark_standalone_build && !ark_ets_hybrid) {
-    arkruntime_deps +=
-        [ "$ark_root/plugins/ets/runtime/interop_js:install_nodejs" ]
   }
 }
 
