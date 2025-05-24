@@ -19,13 +19,25 @@ void BuildIsFiniteIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead);
 void BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
+void BuildTypedUnsignedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::Inst *value,
+                                         ark::compiler::DataType::Type type, bool accRead);
+void BuildTypedUnsignedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type,
+                                         bool accRead);
 void BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type,
                                         bool accRead);
-void BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::Inst *value,
-                                 ark::compiler::DataType::Type type, bool accRead);
+void BuildTypedArraySet(const BytecodeInstruction *bcInst, ark::compiler::Inst *value,
+                        ark::compiler::DataType::Type type, ark::compiler::Inst *loadDataInst,
+                        ark::compiler::Inst *dataOffsetInst);
+void BuildBigInt64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildBigUint64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type, bool accRead);
-void BuildInt8ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
-void BuildInt8ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildTypedUnsignedArrayGetIntrinsic(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type,
+                                         bool accRead);
+// CC-OFFNXT(G.NAM.01,G.NAM.03) false positive
+ark::compiler::Inst *BuildTypedArrayGet(const BytecodeInstruction *bcInst, ark::compiler::DataType::Type type,
+                                        ark::compiler::Inst *loadDataInst, ark::compiler::Inst *dataOffsetInst);
+void BuildBigInt64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+void BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 template <bool LOAD>
 void BuildUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildUnsafeLoadIntrinsic(const BytecodeInstruction *bcInst, bool accRead);

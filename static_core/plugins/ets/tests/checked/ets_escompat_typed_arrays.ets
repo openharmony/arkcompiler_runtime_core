@@ -983,6 +983,7 @@ function test_int8array_set_byte_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int8array_set_byte_ir(): void {
     let ar = new Int8Array(10)
     ar[2] = -128 as byte
@@ -1025,6 +1026,7 @@ function test_int8array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int8array_set_int_ir(): void {
     let ar = new Int8Array(10)
     ar[2] = -128
@@ -1099,6 +1101,7 @@ function test_int16array_set_short_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int16array_set_short_ir(): void {
     let ar = new Int16Array(10)
     ar[2] = -32768 as short
@@ -1141,6 +1144,7 @@ function test_int16array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int16array_set_int_ir(): void {
     let ar = new Int16Array(10)
     ar[2] = -32768
@@ -1209,6 +1213,7 @@ function test_int32array_set_int_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Int32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_int32array_set_int_ir(): void {
     let ar = new Int32Array(10)
     ar[2] = -2147483648
@@ -1299,6 +1304,7 @@ function test_bigint64array_set_long_cpp(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_bigint64array_set_long_ir(): void {
     let ar = new BigInt64Array(10)
     ar[2] = 9223372036854775807n
@@ -1350,6 +1356,7 @@ function test_float32array_set_float_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_float32array_set_float_ir(): void {
     let ar = new Float32Array(10)
     ar[2] = -3.4028235e+38f
@@ -1397,6 +1404,7 @@ function test_float64array_set_double_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.Float64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_float64array_set_double_ir(): void {
     let ar = new Float64Array(10)
     ar[2] = -3.4028235e+38
@@ -1481,6 +1489,7 @@ function test_uint8array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint8array_set_int_ir(): void {
     let ar = new Uint8Array(10)
     ar[2] = -1
@@ -1533,6 +1542,7 @@ function test_uint8clampedarray_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt8ClampedArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint8clampedarray_set_int_ir(): void {
     let ar = new Uint8ClampedArray(10)
     ar.fill(77)
@@ -1585,6 +1595,7 @@ function test_uint16array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt16ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint16array_set_int_ir(): void {
     let ar = new Uint16Array(10)
     ar[2] = -1
@@ -1637,6 +1648,7 @@ function test_uint32array_set_rangeerror_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint32array_set_int_ir(): void {
     let ar = new Uint32Array(10)
     ar[2] = -1
@@ -1673,6 +1685,7 @@ function test_uint32array_set_long_cpp(): void {
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.UInt32ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_uint32array_set_long_ir(): void {
     let ar = new Uint32Array(10)
     ar[2] = -1 as long
@@ -1707,6 +1720,7 @@ function test_biguint64array_set_int_cpp(): void {
 //! INST_NOT      "Intrinsic.BigUInt64ArraySetLong "
 //! INST_NOT      /Call.*Array::\$_set/
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
+//! EVENT_NOT     /Deoptimization/
 function test_biguint64array_set_int_ir(): void {
     let ar = new BigUint64Array(10)
     ar[2] = -1
@@ -1765,6 +1779,7 @@ function test_biguint64array_set_rangeerror_cpp(): void {
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic.BigUInt64ArrayGet "
 //! INST_NOT      /Call.*Array::\$_get/
+//! EVENT_NOT     /Deoptimization/
 function test_biguint64array_set_long_ir(): void {
     let ar = new BigUint64Array(10)
     ar[2] = 18446744073709551618n
