@@ -842,6 +842,9 @@ AbckitBasicBlock *BBgetImmediateDominatorStatic(AbckitBasicBlock *basicBlock)
     }
 
     auto *bb = basicBlock->impl->GetDominator();
+    if (bb == nullptr) {
+        return nullptr;
+    }
     return basicBlock->graph->implToBB.at(bb);
 }
 
