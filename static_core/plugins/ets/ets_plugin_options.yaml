@@ -69,6 +69,9 @@
         - plugins_string: plugins/ets/irtoc_scripts/string.irt
         - plugins_to_string_cache: plugins/ets/irtoc_scripts/to_string_cache.irt
         - plugins_typed_arrays: plugins/ets/irtoc_scripts/typed_arrays.irt
+        - plugins_map: plugins/ets/irtoc_scripts/map.irt
+        - plugins_set: plugins/ets/irtoc_scripts/set.irt
+
       Metadatas:
         - RecordMetadata:
             new_class_name: ark::pandasm::extensions::ets::RecordMetadata

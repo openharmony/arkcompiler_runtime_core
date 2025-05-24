@@ -126,6 +126,15 @@ coretypes:
 - managed_class: escompat.BigUint64Array
   mirror_class: ark::ets::EtsEscompatBigUInt64Array
 
+- managed_class: escompat.Map
+  mirror_class: ark::ets::EtsEscompatMap
+
+- managed_class: escompat.MapEntry
+  mirror_class: ark::ets::EtsEscompatMapEntry
+
+- managed_class: escompat.Set
+  mirror_class: ark::ets::EtsEscompatSet
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -8639,3 +8648,74 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdCoreLongToChar
     safe_intrinsic: true
+
+########################
+# escompat.Map #
+########################
+  - name: MapGet
+    space: ets
+    class_name: escompat.Map
+    method_name: get
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatMapGet
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateMapGet
+    llvm_codegen_func: EmitMapGet
+
+  - name: MapHas
+    space: ets
+    class_name: escompat.Map
+    method_name: has
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatMapHas
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateMapHas
+    llvm_codegen_func: EmitMapHas
+
+  - name: MapDelete
+    space: ets
+    class_name: escompat.Map
+    method_name: delete
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatMapDelete
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateMapDelete
+    llvm_codegen_func: EmitMapDelete
+
+########################
+# escompat.Set #
+########################
+  - name: SetHas
+    space: ets
+    class_name: escompat.Set
+    method_name: has
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatSetHas
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSetHas
+    llvm_codegen_func: EmitSetHas
+
+  - name: SetDelete
+    space: ets
+    class_name: escompat.Set
+    method_name: delete
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatSetDelete
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSetDelete
+    llvm_codegen_func: EmitSetDelete

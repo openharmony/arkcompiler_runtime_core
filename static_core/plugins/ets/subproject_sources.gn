@@ -75,7 +75,9 @@ irtoc_plugins = [
   "irtoc_scripts/interpreter_main_loop.irt",
   "irtoc_scripts/string_builder.irt",
   "irtoc_scripts/string.irt",
-  "irtoc_scripts/typed_arrays.irt"
+  "irtoc_scripts/typed_arrays.irt",
+  "irtoc_scripts/map.irt",
+  "irtoc_scripts/set.irt",
 ]
 
 arkbytecodeopt_deps =
@@ -121,6 +123,8 @@ srcs_runtime = [
   "runtime/integrate/ets_ani_expo.cpp",
   "runtime/intrinsics/escompat_ArrayBuffer.cpp",
   "runtime/intrinsics/escompat_TypedArrays.cpp",
+  "runtime/intrinsics/escompat_Map.cpp",
+  "runtime/intrinsics/escompat_Set.cpp",
   "runtime/intrinsics/compiler_intrinsics.cpp",
   "runtime/intrinsics/debugger_api.cpp",
   "runtime/intrinsics/escompat_Date.cpp",
@@ -191,7 +195,8 @@ srcs_runtime = [
   "runtime/types/ets_typeapi_create.cpp",
   "runtime/types/ets_waiters_list.cpp",
   "runtime/types/ets_weak_reference.cpp",
-  "runtime//types/ets_finalizable_weak_ref.cpp",
+  "runtime/types/ets_finalizable_weak_ref.cpp",
+  "runtime/types/ets_map.cpp",
   "runtime/ets_utils.cpp",
   "runtime/static_object_accessor.cpp",
   "runtime/static_type_converter.cpp",

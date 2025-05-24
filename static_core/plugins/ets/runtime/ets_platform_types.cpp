@@ -230,6 +230,9 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
         InitializeCaches();
     }
+
+    findType(&EtsPlatformTypes::escompatMap, MAP);
+    findType(&EtsPlatformTypes::escompatMapEntry, MAPENTRY);
 }
 
 }  // namespace ark::ets

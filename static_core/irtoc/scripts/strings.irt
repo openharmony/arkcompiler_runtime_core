@@ -302,19 +302,10 @@ Label(:SlowPathEntrypoint)
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
-function(:StringCompareTo,
-         params: {str1: 'ref', str2: 'ref'},
-         regmap: $full_regmap,
-         regalloc_set: $panda_mask,
-         mode: [:FastPath]) {
-  # Arm32 is not supported
-  if Options.arch == :arm32
-    Intrinsic(:UNREACHABLE).void.Terminator
-    next
-  end
-
+scoped_macro(:macroStringCompareTo) do |str1, str2|
   If(str1, str2).EQ.Unlikely.b {
-    Return(0).i32
+    result_1 := 0
+    Goto(:Done)
   }
 
   length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -322,11 +313,13 @@ function(:StringCompareTo,
 
   # cover the cases of length2 being zero and both lengths being zero
   If(length2, 0).EQ.Unlikely.b {
-    Return(length1).i32
+    result_2 := length1
+    Goto(:Done)
   }
 
   If(length1, 0).EQ.Unlikely.b {
-    Return(-1).i32
+    result_3 := -1
+    Goto(:Done)
   }
 
   buf1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
@@ -338,11 +331,12 @@ function(:StringCompareTo,
   utf_1 := AndI(length1).Imm(1).u32
   utf_2 := AndI(length2).Imm(1).u32
 
-  # in the unlikely case the strings are in different 
+  # in the unlikely case the strings are in different
   # encodings the comparison gets more comlicated as
   # we have to expand the latin string to u16 first
   If(utf_1, utf_2).NE.Unlikely.b {
-    Return(compare_mixed_strings(buf1, buf2, length, utf_1).i32).i32
+    result_4 := compare_mixed_strings(buf1, buf2, length, utf_1).i32
+    Goto(:Done)
   }
   utf := Cast(utf_1).u64
 
@@ -363,7 +357,8 @@ Label(:Loop)
     If(last_data1, last_data2).NE.b {
       Goto(:NotEqual)
     }
-    Return(Sub(length1, length2).i32).i32
+    result_5 := Sub(length1, length2).i32
+    Goto(:Done)
   }
 
   data1 := Load(buf1, i).u64
@@ -377,7 +372,24 @@ Label(:Loop)
 Label(:NotEqual)
   d1 := Phi(last_data1, data1).u64
   d2 := Phi(last_data2, data2).u64
-  Return(calculate_chars_difference(d1, d2, utf).i32).i32
+  result_6 := calculate_chars_difference(d1, d2, utf).i32
+
+Label(:Done)
+  result := Phi(result_1, result_2, result_3, result_4, result_5, result_6).i32
+end
+
+function(:StringCompareTo,
+         params: {str1: 'ref', str2: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:FastPath]) {
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  Return(macroStringCompareTo(str1, str2)).i32
 }
 
 include_plugin 'ets_string'

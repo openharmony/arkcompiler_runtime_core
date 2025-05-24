@@ -133,6 +133,23 @@ public:
     }
     Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
+    EtsClass *escompatMap {};
+    EtsClass *escompatMapEntry {};
+
+public:
+    static constexpr size_t GetCoreLongTypeOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreLong);
+    }
+    static constexpr size_t GetCoreFloatTypeOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreFloat);
+    }
+    static constexpr size_t GetCoreDoubleTypeOffset()
+    {
+        return MEMBER_OFFSET(EtsPlatformTypes, coreDouble);
+    }
+
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
