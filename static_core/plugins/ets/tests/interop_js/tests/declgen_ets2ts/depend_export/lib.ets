@@ -105,3 +105,28 @@ namespace NN1 {
 
 interface IN {}
 class CN implements IN {}
+
+
+namespace image {
+    export interface PixelMap {}
+}
+class Want {}
+export type ValueType = number | string | boolean | image.PixelMap | Want | ArrayBuffer | object | null | undefined;
+
+export let p3: E5;
+export function foo3(a: E6): E7 {
+  return E7.A;
+}
+export let p12: Promise<E8>;
+enum E5 {
+  A
+}
+enum E6 {
+  A
+}
+enum E7 {
+  A
+}
+enum E8 {
+  A
+}
