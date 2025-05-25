@@ -118,7 +118,7 @@ public:
 
     void *GetMutator() const
     {
-        return mutatorBase_->mutator;
+        return mutatorBase_->mutator_;
     }
 
     GCPhase GetMutatorPhase() const
