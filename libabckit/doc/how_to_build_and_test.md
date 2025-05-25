@@ -1,3 +1,14 @@
+# Install dependencies:
+
+Ensure the following components are installed:
+- repo
+- clang++-14
+- clang-format-14
+- clang-tidy-14
+- doxygen
+- graphviz
+- Git LFS
+
 # How to download
 
 ```sh

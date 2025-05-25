@@ -1,7 +1,7 @@
 # Implementation description
 
-Important note: Currently AbcKit supports JS, ArkTS1 and ArkTS2, but **ArkTS2 support is experimental**.
-Compiled JS and ArkTS1 are stored in "dynamic" `abc` file format and ArkTS2 in "static" `abc` file format.
+Important note: Currently AbcKit supports JS, ArkTS and static ArkTS, but **static ArkTS support is experimental**.
+Compiled JS and ArkTS are stored in "dynamic" `abc` file format and static ArkTS in "static" `abc` file format.
 AbcKit works with these file formats using "dynamic" and "static" runtimes.
 
 Please take a look at [cookbook](mini_cookbook.md) beforehand to find out how API looks like from user' point of view.
@@ -41,13 +41,13 @@ include/c/
 ├── metadata_core.h           // API for language-independent metadata inspection/transformation
 ├── extensions
 │   ├── arkts
-│   │   └── metadata_arkts.h  // API for language-specific (ArkTS1 and ArkTS2) metadata inspection/transformation
+│   │   └── metadata_arkts.h  // API for language-specific (ArkTS and static ArkTS) metadata inspection/transformation
 │   └── js
 │       └── metadata_js.h     // API for language-specific (JS) metadata inspection/transformation
 ├── ir_core.h                 // API for language-independent graph inspection/transformation
 ├── isa
-│   ├── isa_dynamic.h         // API for language-specific (JS and ArkTS1) graph inspection/transformation
-│   └── isa_static.h          // API for language-specific (ArkTS2) graph inspection/transformation (This header is now hidden)
+│   ├── isa_dynamic.h         // API for language-specific (JS and ArkTS) graph inspection/transformation
+│   └── isa_static.h          // API for language-specific (static ArkTS) graph inspection/transformation (This header is now hidden)
 ├── statuses.h                // List of error codes
 ```
 
@@ -181,9 +181,9 @@ Top level data structure is `AbckitFile`, user receives `AbckitFile*` pointer af
 `AbckitXXX` metadata structures has "tree structure" which matches source program structure, for example:
 
 1. `AbckitFile` owns verctor of `unique_ptr<AbckitCoreModule>` (each module usually corresponds to one source file)
-2. `AbckitCoreModule` owns vectors of `unique_ptr<AbckitCoreNamesapce>` (top level namespaces),
+2. `AbckitCoreModule` owns vectors of `unique_ptr<AbckitCoreNamespace>` (top level namespaces),
    `unique_ptr<AbckitCoreClass>` (top level classes), `unique_ptr<AbckitCoreFunction>` (top level functions)
-3. `AbckitNamespace` owns vectors of `unique_ptr<AbckitCoreNamesapce>` (namespaces nested in namespace),
+3. `AbckitNamespace` owns vectors of `unique_ptr<AbckitCoreNamespace>` (namespaces nested in namespace),
    `unique_ptr<AbckitCoreClass>` (classes nested in namespace), `unique_ptr<AbckitCoreFunction>` (top level namespace functions)
 4. `AbckitCoreClass` owns vector of `unique_ptr<AbckitCoreFunction>` (class methods)
 5. `AbckitCoreFunction` owns vector of `unique_ptr<AbckitCoreFunction>` (for function nested in other functions)
