@@ -70,6 +70,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_function.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_refconvert_record.cpp
         ${ETS_EXT_SOURCES}/interop_js/napi_impl/napi_impl.cpp
+        ${ETS_EXT_SOURCES}/interop_js/native_api/arkts_esvalue.cpp
         ${ETS_EXT_SOURCES}/interop_js/interop_common.cpp
         ${ETS_EXT_SOURCES}/interop_js/timer_module.cpp
         ${ETS_EXT_SOURCES}/interop_js/js_job_queue.cpp

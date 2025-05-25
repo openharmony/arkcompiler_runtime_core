@@ -29,6 +29,8 @@ class MyObject {
     }
 }
 
+(globalThis as any).wrapobjTS = new MyObject(55);
+
 function main(): void {
     let etsVm = globalThis.gtest.etsVm;
 
@@ -90,4 +92,8 @@ function main(): void {
 }
 
 (globalThis as any).nativeSaveRef("temp");
+
+const obj = {};
+
+(globalThis as any).nativeWrapRef(obj);
 main();
