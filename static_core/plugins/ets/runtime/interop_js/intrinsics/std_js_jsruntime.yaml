@@ -33,7 +33,7 @@ coretypes:
 - managed_class: escompat.ArrayBuffer
   mirror_class: ark::ets::EtsEscompatArrayBuffer
 
-- managed_class: std.interop.js.ESObject
+- managed_class: std.interop.ESValue
   mirror_class: ark::ets::interop::js::ESValue
 
 intrinsics_namespace: ark::ets::interop::js::intrinsics
@@ -1046,7 +1046,7 @@ intrinsics:
     static: true
     signature:
       ret: escompat.ArrayBuffer
-      args: [std.interop.js.ESObject]
+      args: [std.interop.ESValue]
     impl: ark::ets::interop::js::intrinsics::InteropTransferHelperTransferArrayBufferToStaticImplIntrinsic
     clear_flags: []
 

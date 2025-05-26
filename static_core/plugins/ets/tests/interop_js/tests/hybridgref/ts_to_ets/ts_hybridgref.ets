@@ -14,7 +14,7 @@
  */
 package ets_functions;
 
-native function nativeGetRef(): ESObject;
+native function nativeGetRef(): ESValue;
 
 export function etsCheckNativeGrefString(): boolean {
     let value = nativeGetRef();

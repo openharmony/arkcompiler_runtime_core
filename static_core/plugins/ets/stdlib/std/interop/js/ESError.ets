@@ -16,17 +16,17 @@
 package std.interop.js;
 
 export final class ESError extends Error {
-    private err_: ESObject;
+    private err_: ESValue;
     private jserr_: JSValue;
 
     private constructor(err: JSValue) {
         super("ESError", "", new ErrorOptions(err as Object));
-        this.err_ = new ESObject(err);
+        this.err_ = new ESValue(err);
         this.jserr_ = err;
     }
 
     /**
-     * Retrieves the name of the error from the ESObject.
+     * Retrieves the name of the error from the ESValue.
      * If the property does not exist, returns "UnknownError".
      */
     override get name(): string {
@@ -36,14 +36,14 @@ export final class ESError extends Error {
     }
 
     /**
-     * Sets the name of the error in the ESObject.
+     * Sets the name of the error in the ESValue.
      */
     override set name(val: string) {
-        this.err_.setProperty("name", ESObject.wrapString(val));
+        this.err_.setProperty("name", ESValue.wrapString(val));
     }
 
     /**
-     * Retrieves the message of the error from the ESObject.
+     * Retrieves the message of the error from the ESValue.
      * If the property does not exist, returns an empty string.
      */
     override get message(): string {
@@ -53,24 +53,24 @@ export final class ESError extends Error {
     }
 
     /**
-     * Sets the message of the error in the ESObject.
+     * Sets the message of the error in the ESValue.
      */
     override set message(val: string) {
-        this.err_.setProperty("message", ESObject.wrapString(val));
+        this.err_.setProperty("message", ESValue.wrapString(val));
     }
 
     /**
-     * Retrieves the cause of the error from the ESObject.
+     * Retrieves the cause of the error from the ESValue.
      * If the property does not exist, returns undefined.
      */
-    override get cause(): ESObject | undefined {
+    override get cause(): ESValue | undefined {
         return this.err_.hasProperty("cause") 
             ? this.err_.getProperty("cause") 
             : undefined;
     }
 
     /**
-     * Sets the cause of the error in the ESObject.
+     * Sets the cause of the error in the ESValue.
      */
     override set cause(val: Object | undefined) {
         if (val !== undefined) {
@@ -79,9 +79,9 @@ export final class ESError extends Error {
     }
 
     /**
-     * Retrieves the ESObject associated with this error.
+     * Retrieves the ESValue associated with this error.
      */
-    getValue(): ESObject {
+    getValue(): ESValue {
         return this.err_;
     }
 

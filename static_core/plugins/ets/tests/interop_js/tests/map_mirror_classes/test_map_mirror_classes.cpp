@@ -66,7 +66,7 @@ public:
     static std::vector<MemberInfo> GetMembersInfo()
     {
         return std::vector<MemberInfo> {
-            MemberInfo {MEMBER_OFFSET(ESValue, eo_), "eo"},
+            MemberInfo {MEMBER_OFFSET(ESValue, eo_), "ev"},
             MemberInfo {MEMBER_OFFSET(ESValue, isStatic_), "isStatic"},
         };
     }
@@ -75,7 +75,7 @@ public:
 TEST_F(EtsInteropJsClassLinkerTest, Filed_std_interop_ESValue)
 {
     // #IC8LH8: change class name after ESObject is finally removed
-    CheckOffsetOfFields("Lstd/interop/js/ESObject;", ESValueOffsets::GetMembersInfo());
+    CheckOffsetOfFields("Lstd/interop/ESValue;", ESValueOffsets::GetMembersInfo());
 }
 
 }  // namespace ark::ets::interop::js::testing

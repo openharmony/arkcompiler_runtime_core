@@ -41,16 +41,16 @@ function areArraysEqual2(arr1: Array<number>, arr2: Array<number>){
     return res;
 }
 
-let jsArray1: ESObject;
-let jsArray2: ESObject;
+let jsArray1: ESValue;
+let jsArray2: ESValue;
 function areArraysEqual3(arr1: Array<number>){
     jsArray1 = module.getProperty('jsArray');
     jsArray2 = module.getProperty('jsArray');
     let o1 =  module.getProperty('o');
     let o2 =  module.getProperty('o');
-    let res: boolean = ESObject.areEqual(jsArray1, jsArray2) && ESObject.areStrictlyEqual(jsArray1, jsArray2) 
-                       && ESObject.areEqual(o1, o2) && ESObject.areStrictlyEqual(o1, o2)
-                       && ESObject.areEqual(jsArray1, new ESObject(arr1)) && !(jsArray1 === new ESObject(arr1));
+    let res: boolean = ESValue.areEqual(jsArray1, jsArray2) && ESValue.areStrictlyEqual(jsArray1, jsArray2) 
+                       && ESValue.areEqual(o1, o2) && ESValue.areStrictlyEqual(o1, o2)
+                       && ESValue.areEqual(jsArray1, new ESValue(arr1)) && !(jsArray1 === new ESValue(arr1));
     return res;
 }
 
