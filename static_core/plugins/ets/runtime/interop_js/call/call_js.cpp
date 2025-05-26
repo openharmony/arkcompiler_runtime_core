@@ -223,6 +223,7 @@ napi_value CallJSHandler::HandleSpecialMethod(Span<napi_value> jsargs)
 {
     napi_value handlerResult {};
     napi_env env = ctx_->GetJSEnv();
+    ScopedNativeCodeThread nativeScope(coro_);
     const char *methodName = EtsMethod::FromRuntimeMethod(protoReader_.GetMethod())->GetName();
     if (methodName != nullptr && std::strlen(methodName) >= SETTER_GETTER_PREFIX_LENGTH) {
         std::string content = std::string(methodName).substr(SETTER_GETTER_PREFIX_LENGTH);
