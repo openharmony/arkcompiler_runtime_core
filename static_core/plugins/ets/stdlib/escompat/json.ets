@@ -18,6 +18,18 @@ package escompat
 // initialized in _initializerBlock_.ets
 const BigIntType: Type;
 
+export interface JsonReplacer {
+    jsonReplacer(): Record<String, NullishType>
+}
+
+// NOTE (chengzhihao): $Partial is not generated for exported interfaces.issue #26111
+// now use this class to throw the error.
+export class JsonReplacerTemp implements JsonReplacer {
+    jsonReplacer(): Record<String, NullishType> {
+        throw new Error("frontend bug");
+    }
+}
+
 export class JSON {
     /**
      * Converts byte to JSON format
@@ -207,6 +219,11 @@ export class JSON {
      */
     public static stringify(obj: NullishType): String {
         return new JSONWriter().write(obj)
+    }
+
+    public static stringify(obj: JsonReplacer): String {
+        const record = obj.jsonReplacer();
+        return JSON.stringify(record);
     }
 
     /**
@@ -637,6 +654,9 @@ class JSONWriter {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
             this.writeESCompatRecord(obj)
+        } else if (obj instanceof JsonReplacer) {
+            let temp: Record<String, NullishType> = obj.jsonReplacer()
+            this.writeESCompatRecord(temp)
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else {
