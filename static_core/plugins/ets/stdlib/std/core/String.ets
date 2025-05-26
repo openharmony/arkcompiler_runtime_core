@@ -231,7 +231,6 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns the codepoint at the specified index
      */
     private codePointAtInt(index: int): int {
-        assertTrue(index >= 0 && index < this.getLength(), "Index " + index + " has to be in range 0.." + (this.getLength()-1))
         let highValue: char = this.charAt(index);
         if (!Char.isHighSurrogate(highValue) || ++index == this.getLength()) {
             return highValue as int;
@@ -276,7 +275,9 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @returns the amount of completed codepoints
      */
     public codePointCount(begin: int, end: int): int {
-        assertLE(begin, end, "Begin idx must be less than end idx")
+        if (begin > end) {
+            throw new AssertionError("Begin idx must be less than end idx")
+        }
         let counter: int = 0;
         for (let i: int = begin; i < end; i++) {
             ++counter;
@@ -770,7 +771,6 @@ export final class String extends Object implements Comparable<String>, JSONable
         let lastStart = 0
         for (let lastEnd = 0; lastEnd < s;) {
             let separatorRight = String.splitMatch(this, lastEnd, separator)
-            assertLE(separatorRight, s)
             if (separatorRight != -1 && separatorRight != lastStart) {
                 let substr = this.substring(lastStart, lastEnd)
                 splittedStrings.pushBack(substr)
@@ -1455,7 +1455,9 @@ export final class String extends Object implements Comparable<String>, JSONable
     static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Object | undefined, replacement: String) {
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
-        assertTrue(position >= 0 && position <= stringLength, "Position " + position + " has to be in range 0.." + stringLength)
+        if (position < 0 || position > stringLength) {
+            throw new AssertionError("Position " + position + " has to be in range 0.." + stringLength)
+        }
         let tailPos = position + matchLength
         let m = captures.length
         let result = ""

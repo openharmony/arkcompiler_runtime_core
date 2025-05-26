@@ -132,7 +132,6 @@ function encodeCharAsHex(ret: StringBuilder, c: int): void {
 }
 
 function encodeURIImpl(uri: string, ok: boolean[]): string {
-    assertEQ(ok.length, 128)
     let ret = new StringBuilder()
     let i = 0
     while (i < uri.getLength()) {
@@ -235,8 +234,6 @@ export function escape(str: string): string {
     for (let i = 0; i < str.getLength(); i++) {
         const d = str.charAt(i)
         const c = (d as int) & 0xffff
-        assertLE(0, c)
-        assertEQ(hexChars.length, 16)
         if (c >= c'a' && c <= c'z' || c >= c'A' && c <= c'Z' || c >= c'0' && c <= c'9' || c >= 42 && c <= 47 && c != 44 || c == c'_' || c == c'@') {
             ret.append(c as char)
         } else {
@@ -261,7 +258,9 @@ function unhex(c: char): int {
 
 function encodedURIHexAt(str: string, i: int): int {
     try {
-        assertEQ(str.charAt(i), c'%');
+        if (str.charAt(i) !== c'%') {
+            throw new AssertionError("Char at " + i + "equals c'%'")
+        }
         return unhex(str.charAt(i + 1)) << 4 | unhex(str.charAt(i + 2))
     } catch (e) {
         throw new URIError("malformed URI sequence")
