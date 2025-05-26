@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,11 +31,14 @@ public:
     enum ErrorCode { SUCCESS, NO_DEBUG_INFO, ERROR };
 
     explicit DebugInfo() = default;
+    DebugInfo(DebugInfo &&info);
 
     ~DebugInfo()
     {
         Destroy();
     }
+
+    DebugInfo &operator=(DebugInfo &&info);
 
     ErrorCode ReadFromFile(const char *filename);
 
@@ -46,7 +49,6 @@ public:
 
     void Destroy();
 
-    DEFAULT_MOVE_SEMANTIC(DebugInfo);
     NO_COPY_SEMANTIC(DebugInfo);
 
 private:
@@ -164,7 +166,6 @@ private:
                                  Span<Dwarf_Line>::ConstIterator end);
     void GetSrcFileAndLine(Dwarf_Line line, std::string *outSrcFile, uint32_t *outLine);
     bool PcMatches(uintptr_t pc, Dwarf_Die die);
-    bool GetDieRange(Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc);
     bool GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc);
     bool FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr baseAddr, Dwarf_Addr *outLowPc,
                         Dwarf_Addr *outHighPc);

@@ -70,6 +70,7 @@ set(CRYPTO_CONFIG_COMMON_DEFINITIONS
     "-DENGINESDIR=\"\""
     "-DMODULESDIR=\"\""
     "-DOPENSSLDIR=\"\""
+    "-DSTATIC_LEGACY"
 )
 
 # platform-specific compiler options and definitions
@@ -126,6 +127,7 @@ set(CRYPTO_CONFIG_DARWIN64_X86_64_CC_DEFINITIONS
     "-DOPENSSL_BN_ASM_GF2m"
     "-DOPENSSL_BN_ASM_MONT"
     "-DOPENSSL_BN_ASM_MONT5"
+    "-DPADLOCK_ASM"
     "-DPOLY1305_ASM"
     "-DSHA1_ASM"
     "-DSHA256_ASM"
@@ -170,6 +172,7 @@ set(CRYPTO_CONFIG_LINUX_X86_64_DEFINITIONS
     "-DOPENSSL_BN_ASM_GF2m"
     "-DOPENSSL_BN_ASM_MONT"
     "-DOPENSSL_BN_ASM_MONT5"
+    "-DPADLOCK_ASM"
     "-DPOLY1305_ASM"
     "-DSHA1_ASM"
     "-DSHA256_ASM"
@@ -206,6 +209,7 @@ set(CRYPTO_CONFIG_MINGW64_DEFINITIONS
   "-DOPENSSL_BN_ASM_GF2m"
   "-DOPENSSL_BN_ASM_MONT"
   "-DOPENSSL_BN_ASM_MONT5"
+  "-DPADLOCK_ASM"
   "-DPOLY1305_ASM"
   "-DSHA1_ASM"
   "-DSHA256_ASM"
@@ -282,7 +286,7 @@ else()
 endif()
 
 set(TARGET_GENERATED_DIR ${TARGET_OUT_DIR}/generated)
-if (NOT IS_DIRECTORY ${TARGET_GENERATED_DIR})
+if (NOT IS_DIRECTORY ${TARGET_GENERATED_DIR} AND NOT CROSS_VALUES_CONFIG)
     # Openssl generate some assembly codes before it is building.
     # The sources list in include the assembly codes.
     execute_process(COMMAND python3
@@ -404,6 +408,7 @@ set(LIBCRYPTO_BUILD_ALL_GENERATED_DARWIN64_X86_64_CC_SOURCES
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/sha/sha512-x86_64.s
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/whrlpool/wp-x86_64.s
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/x86_64cpuid.s
+    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/engines/e_padlock-x86_64.s
 )
 set(LIBCRYPTO_BUILD_ALL_GENERATED_DARWIN64_ARM64_CC_SOURCES
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/aes/aesv8-armx.S
@@ -452,6 +457,7 @@ set(LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_X86_64_SOURCES
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/sha/sha512-x86_64.s
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/whrlpool/wp-x86_64.s
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/x86_64cpuid.s
+    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/engines/e_padlock-x86_64.s
 )
 set(LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_X86_SOURCES
     ""
@@ -488,53 +494,56 @@ set(LIBCRYPTO_BUILD_ALL_GENERATED_MINGW64_SOURCES
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/sha/sha512-x86_64.s
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/whrlpool/wp-x86_64.s
     ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/crypto/x86_64cpuid.s
+    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/engines/e_padlock-x86_64.s
 )
 
-set(LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-    ""
-)
-if ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-armv4")
-    list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-        ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_ARMV4_SOURCES}
+if (NOT CROSS_VALUES_CONFIG)
+    set(LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+        ""
     )
-elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-aarch64")
-    list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-        ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_AARCH64_SOURCES}
+    if ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-armv4")
+        list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+            ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_ARMV4_SOURCES}
+        )
+    elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-aarch64")
+        list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+            ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_AARCH64_SOURCES}
+        )
+    elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "darwin64-x86_64-cc")
+        list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+            ${LIBCRYPTO_BUILD_ALL_GENERATED_DARWIN64_X86_64_CC_SOURCES}
+        )
+    elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "darwin64-arm64-cc")
+        list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+            ${LIBCRYPTO_BUILD_ALL_GENERATED_DARWIN64_ARM64_CC_SOURCES}
+        )
+    elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-x86_64")
+        list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+            ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_X86_64_SOURCES}
+        )
+    elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-x86")
+        list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+            ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_X86_SOURCES}
+        )
+    elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "mingw64")
+        list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+            ${LIBCRYPTO_BUILD_ALL_GENERATED_MINGW64_SOURCES}
+        )
+    endif()
+
+    set(LIBCOMMON_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+        ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_digests_gen.c
+        ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_dsa_gen.c
+        ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_ec_gen.c
+        ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_ecx_gen.c
+        ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_rsa_gen.c
+        ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_wrap_gen.c
     )
-elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "darwin64-x86_64-cc")
-    list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-        ${LIBCRYPTO_BUILD_ALL_GENERATED_DARWIN64_X86_64_CC_SOURCES}
-    )
-elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "darwin64-arm64-cc")
-    list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-        ${LIBCRYPTO_BUILD_ALL_GENERATED_DARWIN64_ARM64_CC_SOURCES}
-    )
-elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-x86_64")
-    list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-        ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_X86_64_SOURCES}
-    )
-elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "linux-x86")
-    list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-        ${LIBCRYPTO_BUILD_ALL_GENERATED_LINUX_X86_SOURCES}
-    )
-elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "mingw64")
-    list(APPEND LIBCRYPTO_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-        ${LIBCRYPTO_BUILD_ALL_GENERATED_MINGW64_SOURCES}
+
+    set(LIBDEFAULT_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
+    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_sm2_gen.c
     )
 endif()
-
-set(LIBCOMMON_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_digests_gen.c
-    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_dsa_gen.c
-    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_ec_gen.c
-    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_ecx_gen.c
-    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_rsa_gen.c
-    ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_wrap_gen.c
-)
-
-set(LIBDEFAULT_BUILD_ALL_GENERATED_SELECTED_PLATFORM_SOURCES
-  ${OPENSSL_SELECTED_PLATFORM_FULL_PATH}/providers/common/der/der_sm2_gen.c
-)
 
 set(LIBCOMMON_COMMON_SOURCES
     ${OPENSSL_ROOT}/providers/common/der/der_dsa_key.c
@@ -601,6 +610,10 @@ set(LIBDEFAULT_COMMON_SOURCES
     ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_cts.c
     ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_null.c
     ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_sm4.c
+    ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_sm4_ccm.c
+    ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_sm4_ccm_hw.c
+    ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_sm4_gcm.c
+    ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_sm4_gcm_hw.c
     ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_sm4_hw.c
     ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_tdes.c
     ${OPENSSL_ROOT}/providers/implementations/ciphers/cipher_tdes_common.c
@@ -851,7 +864,6 @@ set(CRYPTO_SOURCES
     ${OPENSSL_ROOT}/crypto/bn/bn_srp.c
     ${OPENSSL_ROOT}/crypto/bn/bn_word.c
     ${OPENSSL_ROOT}/crypto/bn/bn_x931p.c
-    ${OPENSSL_ROOT}/crypto/bn/rsa_sup_mul.c
     ${OPENSSL_ROOT}/crypto/bsearch.c
     ${OPENSSL_ROOT}/crypto/buffer/buf_err.c
     ${OPENSSL_ROOT}/crypto/buffer/buffer.c
@@ -1505,7 +1517,6 @@ elseif ("${OPENSSL_SELECTED_PLATFORM}" STREQUAL "mingw64")
         ${OPENSSL_ROOT}/crypto/bn/asm/x86_64-gcc.c
         ${OPENSSL_ROOT}/crypto/bn/rsaz_exp.c
         ${OPENSSL_ROOT}/crypto/bn/rsaz_exp_x2.c
-        ${OPENSSL_ROOT}/crypto/dllmain.c
     )
 endif()
 

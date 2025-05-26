@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +19,15 @@
 #include <string>
 
 extern "C" {
-ETS_EXPORT void ETS_CALL ETS_InterfaceNativeTest_callMethod(EtsEnv *env, [[maybe_unused]] ets_class cls)
+ETS_EXPORT void ETS_CALL ETS_InterfaceNativeTest_InterfaceNativeTest_callMethod(EtsEnv *env,
+                                                                                [[maybe_unused]] ets_class cls)
 {
     ets_method method = env->GetStaticp_method(cls, "staticLongMethod", "I:J");
     env->native_interface->CallStaticLongMethod(env, cls, method, static_cast<ets_int>(10));
     return;
 }
 
-ETS_EXPORT void ETS_CALL ETS_InterfaceNativeTest_testChar(EtsEnv *env, ets_class cls, ets_char c)
+ETS_EXPORT void ETS_CALL ETS_InterfaceNativeTest_InterfaceNativeTest_testChar(EtsEnv *env, ets_class cls, ets_char c)
 {
     ets_value arr[1];
     arr[0].c = c;
@@ -36,8 +37,9 @@ ETS_EXPORT void ETS_CALL ETS_InterfaceNativeTest_testChar(EtsEnv *env, ets_class
     return;
 }
 
-ETS_EXPORT ets_int ETS_CALL ETS_InterfaceNativeTest_testFloat(EtsEnv *env, ets_class cls, ets_float f1, ets_float f2,
-                                                              ets_float f3)
+ETS_EXPORT ets_int ETS_CALL ETS_InterfaceNativeTest_InterfaceNativeTest_testFloat(EtsEnv *env, ets_class cls,
+                                                                                  ets_float f1, ets_float f2,
+                                                                                  ets_float f3)
 {
     ets_method method = env->Getp_method(cls, "<ctor>", ":V");
     if (method == nullptr) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,6 @@ void ChecksElimination::VisitRefTypeCheck(GraphVisitor *v, Inst *inst)
     visitor->TryRemoveDominatedChecks<Opcode::RefTypeCheck>(inst, [arrayInst, ref](Inst *userInst) {
         return userInst->GetDataFlowInput(0) == arrayInst && userInst->GetInput(1) == ref;
     });
-    visitor->GetGraph()->RunPass<ObjectTypePropagation>();
     auto arrayTypeInfo = arrayInst->GetObjectTypeInfo();
     if (arrayTypeInfo && arrayTypeInfo.IsExact()) {
         auto storeTypeInfo = storeInst->GetObjectTypeInfo();
@@ -445,7 +444,6 @@ void ChecksElimination::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
 void ChecksElimination::VisitCheckCast(GraphVisitor *v, Inst *inst)
 {
     auto visitor = static_cast<ChecksElimination *>(v);
-    visitor->GetGraph()->RunPass<ObjectTypePropagation>();
     auto result = ObjectTypeCheckElimination::TryEliminateCheckCast(inst);
     if (result != ObjectTypeCheckElimination::CheckCastEliminateType::INVALID) {
         visitor->SetApplied();

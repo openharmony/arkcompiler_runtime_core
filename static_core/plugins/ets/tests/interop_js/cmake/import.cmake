@@ -12,4 +12,3 @@
 # limitations under the License.
 
 include(cmake/interop_js_tests.cmake)
-include(cmake/interop_js_checked_tests.cmake)

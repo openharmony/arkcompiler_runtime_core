@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
 
@@ -26,15 +27,20 @@ namespace ark::ets {
 static constexpr char ARRAY_TYPE_PREFIX = '[';
 static constexpr char CLASS_TYPE_PREFIX = 'L';
 static constexpr char METHOD_PREFIX = 'M';
-static constexpr const char *NULL_TYPE_DESC = "Null";
-static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
-static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
-static constexpr const char *LAMBDA_METHOD_NAME = "invoke";
-static constexpr const char *FN_INVOKE_METHOD_NAME = "invoke0";
+static constexpr const char *TYPE_API_UNDEFINED_TYPE_DESC = "__TYPE_API_UNDEFINED";
+static constexpr const char *INVOKE_METHOD_NAME = "$_invoke";
 static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
 static constexpr const char *GETTER_BEGIN = "<get>";
 static constexpr const char *SETTER_BEGIN = "<set>";
+static constexpr const char *ITERATOR_METHOD = "$_iterator";
+static constexpr const char *GET_INDEX_METHOD = "$_get";
+static constexpr const char *SET_INDEX_METHOD = "$_set";
+static constexpr const uint8_t SETTER_GETTER_PREFIX_LENGTH = 5;
+
+static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
+static constexpr const char *STD_CORE_FUNCTION_INVOKE_PREFIX = "invoke";
+static constexpr const size_t STD_CORE_FUNCTION_MAX_ARITY = 15;
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 
@@ -125,6 +131,30 @@ inline std::string ConvertEtsPrimitiveTypeToString(const EtsType type)
             return "ets_double";
         default:
             UNREACHABLE();
+    }
+}
+
+template <typename T>
+constexpr EtsType GetEtsTypeByPrimitive()
+{
+    if constexpr (std::is_same_v<T, EtsBoolean>) {
+        return EtsType::BOOLEAN;
+    } else if constexpr (std::is_same_v<T, EtsChar>) {
+        return EtsType::CHAR;
+    } else if constexpr (std::is_same_v<T, EtsByte>) {
+        return EtsType::BYTE;
+    } else if constexpr (std::is_same_v<T, EtsShort>) {
+        return EtsType::SHORT;
+    } else if constexpr (std::is_same_v<T, EtsInt>) {
+        return EtsType::INT;
+    } else if constexpr (std::is_same_v<T, EtsLong>) {
+        return EtsType::LONG;
+    } else if constexpr (std::is_same_v<T, EtsFloat>) {
+        return EtsType::FLOAT;
+    } else if constexpr (std::is_same_v<T, EtsDouble>) {
+        return EtsType::DOUBLE;
+    } else {
+        static_assert(true, "Unsupported Ets primitive");
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,7 +247,7 @@ public:
     // NOLINTNEXTLINE(*-explicit-constructor)
     operator bool() const
     {
-        return class_ != 0;
+        return IsValid();
     }
 
     ClassType GetClass() const
@@ -880,9 +880,27 @@ public:
     {
         return GetOpcode() == Opcode::CallStatic || GetOpcode() == Opcode::CallResolvedStatic || IsStaticLaunchCall();
     }
+    bool IsNativeApiCall() const
+    {
+        return GetOpcode() == Opcode::CallNative;
+    }
+    bool IsReferenceForNativeApiCall() const
+    {
+        if (GetType() != DataType::REFERENCE) {
+            return false;
+        }
+
+        for (const auto &user : GetUsers()) {
+            if (user.GetInst()->GetOpcode() == Opcode::WrapObjectNative) {
+                return true;
+            }
+        }
+        return false;
+    }
     bool IsMethodResolver() const
     {
-        return opcode_ == Opcode::ResolveVirtual || opcode_ == Opcode::ResolveStatic;
+        return opcode_ == Opcode::ResolveVirtual || opcode_ == Opcode::ResolveStatic ||
+               opcode_ == Opcode::ResolveByName;
     }
     bool IsFieldResolver() const
     {
@@ -955,9 +973,9 @@ public:
         return GetOpcode() == Opcode::NullPtr;
     }
 
-    bool IsLoadUndefined() const
+    bool IsLoadUniqueObject() const
     {
-        return GetOpcode() == Opcode::LoadUndefined;
+        return GetOpcode() == Opcode::LoadUniqueObject;
     }
 
     bool IsReturn() const
@@ -2974,6 +2992,16 @@ public:
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
+    void SetIsNative(bool isNative)
+    {
+        SetField<IsNativeFlag>(isNative);
+    }
+
+    bool GetIsNative() const
+    {
+        return GetField<IsNativeFlag>();
+    }
+
     void SetCanNativeException(bool isNative)
     {
         SetField<IsNativeExceptionFlag>(isNative);
@@ -2988,11 +3016,16 @@ public:
 
     bool IsRuntimeCall() const override
     {
+        if (IsNativeApiCall()) {
+            // checking runtime_call flag is enough
+            return Base::IsRuntimeCall();
+        }
         return !IsInlined();
     }
 
 protected:
-    using IsNativeExceptionFlag = LastField::NextFlag;
+    using IsNativeFlag = LastField::NextFlag;
+    using IsNativeExceptionFlag = IsNativeFlag::NextFlag;
     using LastField = IsNativeExceptionFlag;
 };
 
@@ -4526,7 +4559,9 @@ protected:
 #include "intrinsics_flags.inl"
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public TypeIdMixin {
+class PANDA_PUBLIC_API IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>,
+                                       public TypeIdMixin,
+                                       public MethodDataMixin {
 public:
     using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
@@ -4867,8 +4902,10 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToLoad()->GetVolatile() == GetVolatile());
-        ASSERT(clone->CastToLoad()->GetScale() == GetScale());
+        ASSERT((clone->GetOpcode() == Opcode::Load && clone->CastToLoad()->GetVolatile() == GetVolatile()) ||
+               (clone->GetOpcode() == Opcode::LoadNative && clone->CastToLoadNative()->GetVolatile() == GetVolatile()));
+        ASSERT((clone->GetOpcode() == Opcode::Load && clone->CastToLoad()->GetScale() == GetScale()) ||
+               (clone->GetOpcode() == Opcode::LoadNative && clone->CastToLoadNative()->GetVolatile() == GetVolatile()));
         return clone;
     }
 
@@ -5129,8 +5166,12 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
-        ASSERT(clone->CastToStore()->GetVolatile() == GetVolatile());
-        ASSERT(clone->CastToStore()->GetScale() == GetScale());
+        ASSERT(
+            (clone->GetOpcode() == Opcode::Store && clone->CastToStore()->GetVolatile() == GetVolatile()) ||
+            (clone->GetOpcode() == Opcode::StoreNative && clone->CastToStoreNative()->GetVolatile() == GetVolatile()));
+        ASSERT(
+            (clone->GetOpcode() == Opcode::Store && clone->CastToStore()->GetScale() == GetScale()) ||
+            (clone->GetOpcode() == Opcode::StoreNative && clone->CastToStoreNative()->GetVolatile() == GetVolatile()));
         return clone;
     }
 };
@@ -5320,6 +5361,7 @@ class PANDA_PUBLIC_API UnresolvedStoreStaticInst : public NeedBarrierMixin<Fixed
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
+    static constexpr size_t STORED_INPUT_INDEX = 0U;
 
     UnresolvedStoreStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
@@ -5361,6 +5403,7 @@ class PANDA_PUBLIC_API StoreResolvedObjectFieldStaticInst : public NeedBarrierMi
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
+    static constexpr size_t STORED_INPUT_INDEX = 1U;
 
     StoreResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
@@ -5807,6 +5850,25 @@ public:
 
 private:
     RuntimeInterface::ClassPtr klass_ {nullptr};
+};
+
+class PANDA_PUBLIC_API WrapObjectNativeInst : public FixedInputsInst1 {
+public:
+    using Base = FixedInputsInst1;
+    using Base::Base;
+
+    explicit WrapObjectNativeInst(Inst::Initializer t) : Base(std::move(t)) {}
+
+    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    {
+        ASSERT(index < GetInputsCount());
+        return DataType::REFERENCE;
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        return FixedInputsInst::Clone(targetGraph);
+    }
 };
 
 /// Get global var address inst
@@ -6762,7 +6824,7 @@ public:
             case Opcode::AddOverflowCheck:
             case Opcode::SubOverflowCheck:
             case Opcode::NegOverflowAndZeroCheck:
-                SetDeoptimizeType(DeoptimizeType::OVERFLOW);
+                SetDeoptimizeType(DeoptimizeType::OVERFLOW_TYPE);
                 break;
             case Opcode::DeoptimizeIf:
                 SetDeoptimizeType(static_cast<DeoptimizeTypeMixin *>(inst)->GetDeoptimizeType());

@@ -1,0 +1,48 @@
+# 19194 Panda issue
+EqualityExtraA2j_test
+equalityExtraJ2j_test
+EqualityObjectsA2j_test
+EqualityPrimitivesA2j_test
+
+# 1942 mistakes in benchmarks code
+PromiseA2a_test
+PromiseA2j_test
+promiseJ2a_test
+promiseJ2j_test
+
+# 1943 issues with VMB or Panda build cause benchmarks failures
+GetSpecificA2a_test
+getSpecificJ2a_test
+GetStringA2a_test
+getStringJ2a_test
+getNumericJ2a_test
+
+# 19307 Panda issue
+CallImportFunctionA2a_test
+CallImportFunctionA2j_test
+
+# 17965 Panda issue
+classInitByRestJ2a_test
+
+# 19331 Panda issue
+ClassInitByRestA2a_test
+
+# 23757 need to adjust to tools update
+ClassInitByRestA2j_test
+ConversionBinaryA2j_test
+ConversionCharA2j_test
+ConversionDecimalA2j_test
+ConversionHexA2j_test
+ConversionOctalA2j_test
+EqualityNumericA2j_test
+EqualityStringA2j_test
+GetNumericA2j_test
+GetSpecificA2j_test
+GetStringA2j_test
+MapCallbackA2j_test
+ReduceCallbackA2j_test
+StringifyArrayA2j_test
+StringifyObjectA2j_test
+callImportFunctionJ2a_test
+equalityExtraJ2a_test
+stringifyArrayJ2a_test

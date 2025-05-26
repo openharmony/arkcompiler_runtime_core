@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,31 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/etsstdlib.h"
+#include <ani.h>
+#include <iostream>
+
 #include "plugins/ets/stdlib/native/core/Intl.h"
 
 namespace ark::ets::stdlib {
 
 // EtsNapiOnLoad needs to implement issue #18135
-ets_int EtsNapiOnLoad(EtsEnv *env)
+/* And provide symbol after fix #18135: extern "C"*/
+// NOLINTNEXTLINE(readability-identifier-naming)
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
+    ani_env *env;
+    if (vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        return ANI_ERROR;
+    }
+
     // Initializing components
-    ets_int hasError = ETS_OK;
-    hasError += InitCoreIntl(env);
-    return hasError == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
+    if (intl::InitCoreIntl(env) != ANI_OK) {
+        return ANI_ERROR;
+    }
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
 }
 
 }  // namespace ark::ets::stdlib

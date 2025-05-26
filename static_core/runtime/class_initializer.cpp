@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -391,7 +391,7 @@ bool ClassInitializer<MODE>::VerifyClass(Class *klass)
     auto &opts = Runtime::GetCurrent()->GetOptions();
 
     if (!IsVerifySuccInAppInstall(klass->GetPandaFile())) {
-        LOG(ERROR, CLASS_LINKER) << "verify fail";
+        LOG(ERROR, VERIFIER) << "Class verification failed: '" << klass->GetName() << "'";
         return false;
     }
 
@@ -404,10 +404,12 @@ bool ClassInitializer<MODE>::VerifyClass(Class *klass)
         return true;
     }
 
-    LOG(INFO, VERIFIER) << "Verification of class '" << klass->GetName() << "'";
+    LOG(INFO, VERIFIER) << "Start verification of class '" << klass->GetName() << "'";
 
     for (auto &method : klass->GetMethods()) {
         if (!method.Verify()) {
+            LOG(ERROR, VERIFIER) << "Class verification failed: '" << klass->GetName()
+                                 << "' method: " << method.GetFullName(true);
             return false;
         }
     }

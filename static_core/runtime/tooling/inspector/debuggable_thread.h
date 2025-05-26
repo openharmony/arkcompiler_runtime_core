@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 #define PANDA_TOOLING_INSPECTOR_DEBUGGABLE_THREAD_H
 
 #include "include/managed_thread.h"
+#include "include/tooling/pt_location.h"
 
 #include "evaluation/evaluation_engine.h"
 #include "object_repository.h"
 #include "thread_state.h"
-#include "types/exception_details.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
 
@@ -85,6 +85,12 @@ public:
     // Enables or disables stops on breakpoints
     void SetBreakpointsActive(bool active);
 
+    // Enables or disables skipping all pauses
+    void SetSkipAllPauses(bool skip);
+
+    // Enables or disables mixdebug && mixstack
+    void SetMixedDebugEnabled(bool mixedDebugEnabled);
+
     /**
      * @brief Set a breakpoint with optional condition.
      * @param locations to set breakpoint at, all will have the same BreakpointId.
@@ -96,6 +102,9 @@ public:
 
     // Removes the breakpoint by ID
     void RemoveBreakpoint(BreakpointId id);
+
+    // Removes all breakpoints with matching location
+    void RemoveBreakpoints(const std::function<bool(const PtLocation &loc)> &filter);
 
     // Tells when stops should be made on exceptions
     void SetPauseOnExceptions(PauseOnExceptionsState state);
@@ -125,9 +134,9 @@ public:
      * @brief Evaluates the given bytecode expression.
      * @param frameNumber frame depth to evaluate expression in.
      * @param bytecode fragment with expression.
-     * @returns optional pair of result (might be void) and optional exception objects.
+     * @returns pair of result (might be void) and optional exception objects OR error message
      */
-    std::optional<std::pair<RemoteObject, std::optional<RemoteObject>>> EvaluateExpression(
+    Expected<std::pair<RemoteObject, std::optional<RemoteObject>>, std::string> EvaluateExpression(
         uint32_t frameNumber, const ExpressionWrapper &bytecode);
 
 private:

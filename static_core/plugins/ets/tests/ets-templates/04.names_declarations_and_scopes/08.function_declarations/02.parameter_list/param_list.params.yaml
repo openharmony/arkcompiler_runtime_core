@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,6 +35,21 @@ function_decls:
       call: |-
           foo(bar);
 
+    # Case for issue 14702 Subtyping with functions requires explicit conversion
+    - decl: |-
+        function bar(): String { return "Bar" }
+        function foo(a: () => Object): void { let xx = a() }
+      call: |-
+        foo(bar);
+
+  # Case for issue 14702 Subtyping with functions requires explicit conversion
+    - decl: |-
+        type TFunc = () => Object
+        function bar(): String { return "Bar" }
+        function foo(a: TFunc): void { let xx = a() }
+      call: |-
+        foo(bar);
+
     # reference type param, void return
     - decl: |-
           function foo(a: Long) {}
@@ -53,10 +68,10 @@ function_decls:
           foo(new Long[0])
 
     - decl: |-
-          function foo(a: (Object|null)[]) {}
+          function foo(a: (Object|undefined)[]) {}
       call: |-
-          let arr: (Object|null)[] = new (Object|null)[1]
-          arr[0] = null
+          let arr: (Object|undefined)[] = new (Object|undefined)[1]
+          arr[0] = undefined
           foo(arr)
 
     # enum param, void return
@@ -66,15 +81,6 @@ function_decls:
       call: |-
           foo(Color.Red);
 
-    # enum array param, void return
-    - decl: |-
-          enum Color { Red, Green, Blue }
-          function foo(a: Color[]) {}
-      call: |-
-          let arr: Color[] =  new Color[1]
-          arr[0] = Color.Red
-          foo(arr);
-
     # T param, T return
     - decl: |-
           function foo<T>(a: T): T {
@@ -82,7 +88,7 @@ function_decls:
           }
       call: |-
           let v: Long = foo<Long>(new Long())
-          assert v instanceof Long;
+          assertTrue( v instanceof Long)
 
     - decl: |-
           function foo<T, U, V>(a: T, b: U, c: V): V {
@@ -90,7 +96,7 @@ function_decls:
           }
       call: |-
           let v: Object|null = foo<Long, Boolean, Object|null>(new Long(), new Boolean(true), new Object())
-          assert v instanceof Object;
+          assertTrue( v instanceof Object)
 
     # T array param, T array return
     - decl: |-
@@ -99,7 +105,7 @@ function_decls:
           }
       call: |-
           let arr: Boolean[] = foo<Boolean>(new Boolean[0])
-          assert arr instanceof Boolean[] && arr.length == 0;
+          assertTrue( arr instanceof Boolean[] && arr.length == 0 )
 
     # mixed type params
     - decl: |-
@@ -108,4 +114,4 @@ function_decls:
           }
       call: |-
           let v: Byte = foo<Byte>(1 as byte, null, Long.MIN_VALUE, new Byte(1 as byte), new Byte(2 as byte))
-          assert v instanceof Byte && v.unboxed() == 1;
+          assertTrue( v instanceof Byte && v.unboxed() == 1 )

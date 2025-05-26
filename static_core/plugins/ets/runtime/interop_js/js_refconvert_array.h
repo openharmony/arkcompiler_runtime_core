@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public:
 private:
     using ElemCpptype = typename Conv::cpptype;
 
-    static ElemCpptype GetElem(coretypes::Array *arr, size_t idx)
+    static ElemCpptype GetElem(VMHandle<coretypes::Array> arr, size_t idx)
     {
         if constexpr (Conv::IS_REFTYPE) {
             auto elem = EtsObject::FromCoreType(arr->Get<ObjectHeader *>(idx));
@@ -58,14 +58,19 @@ private:
 public:
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *obj)
     {
+        auto *coro = EtsCoroutine::GetCurrent();
         auto env = ctx->GetJSEnv();
+        [[maybe_unused]] HandleScope<ObjectHeader *> hscope(coro);
 
-        auto etsArr = static_cast<coretypes::Array *>(obj->GetCoreType());
+        VMHandle<coretypes::Array> etsArr(coro, coretypes::Array::Cast(obj->GetCoreType()));
         auto len = etsArr->GetLength();
 
         NapiEscapableScope jsHandleScope(env);
         napi_value jsArr;
-        NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
+        {
+            ScopedNativeCodeThread nativeScope(coro);
+            NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
+        }
 
         for (size_t idx = 0; idx < len; ++idx) {
             ElemCpptype etsElem = GetElem(etsArr, idx);
@@ -73,9 +78,13 @@ public:
             if (UNLIKELY(jsElem == nullptr)) {
                 return nullptr;
             }
-            napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
-            if (UNLIKELY(NapiThrownGeneric(rc))) {
-                return nullptr;
+            {
+                // NOTE(audovichenko): try to do not change thread state in each iteration.
+                ScopedNativeCodeThread s(coro);
+                napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
+                if (UNLIKELY(NapiThrownGeneric(rc))) {
+                    return nullptr;
+                }
             }
         }
         jsHandleScope.Escape(jsArr);
@@ -141,13 +150,17 @@ public:
     {
         auto coro = EtsCoroutine::GetCurrent();
         auto env = ctx->GetJSEnv();
+        [[maybe_unused]] HandleScope<ObjectHeader *> hscope(coro);
 
-        LocalObjectHandle<coretypes::Array> etsArr(coro, obj->GetCoreType());
+        VMHandle<coretypes::Array> etsArr(coro, obj->GetCoreType());
         auto len = etsArr->GetLength();
 
         NapiEscapableScope jsHandleScope(env);
         napi_value jsArr;
-        NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
+        {
+            ScopedNativeCodeThread nativeScope(coro);
+            NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
+        }
 
         for (size_t idx = 0; idx < len; ++idx) {
             EtsObject *etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(idx));
@@ -165,11 +178,14 @@ public:
                     return nullptr;
                 }
             } else {
-                jsElem = GetNull(env);
+                jsElem = GetUndefined(env);
             }
-            napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
-            if (UNLIKELY(NapiThrownGeneric(rc))) {
-                return nullptr;
+            {
+                ScopedNativeCodeThread s(coro);
+                napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
+                if (UNLIKELY(NapiThrownGeneric(rc))) {
+                    return nullptr;
+                }
             }
         }
         jsHandleScope.Escape(jsArr);

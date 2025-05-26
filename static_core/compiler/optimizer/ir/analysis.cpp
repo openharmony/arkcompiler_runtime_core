@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -180,6 +180,7 @@ Inst *InstStoredValue(Inst *inst, Inst **secondValue)
         case Opcode::StoreStatic:
         case Opcode::StoreArrayI:
         case Opcode::Store:
+        case Opcode::StoreNative:
         case Opcode::StoreI:
         case Opcode::StoreObjectDynamic:
             // Last input is a stored value

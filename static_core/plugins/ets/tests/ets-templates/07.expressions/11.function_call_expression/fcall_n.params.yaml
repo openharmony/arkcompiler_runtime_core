@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,21 +18,21 @@ cases:
               return p.toString().length
           }
       use: |-
-          assert foo<out>(0.0) == 1  // CTE: wildcard in type arguments
+          assertEQ( foo<out>(0.0), 1 ) // CTE: wildcard in type arguments
 
     - decl: |-
           function foo<T extends Object>(p: T): number {
               return p.toString().length
           }
       use: |-
-          assert foo<out Number>(0.0) == 1  // CTE: wildcard in type arguments
+          assertEQ( foo<out Number>(0.0), 1 ) // CTE: wildcard in type arguments
 
     - decl: |-
           function foo<T extends Object>(p: T): number {
               return p.toString().length
           }
       use: |-
-          assert foo<in Number>(0.0) == 1  // CTE: wildcard in type arguments
+          assertEQ( foo<in Number>(0.0), 1 ) // CTE: wildcard in type arguments
 
     - decl: |-
           function bar(p: string): string {
@@ -40,7 +40,7 @@ cases:
           }
           let ft = "bar"
       use: |-
-          assert ft("A") == "AA"  // CTE: not a function type called
+          assertEQ( ft("A"), "AA" ) // CTE: not a function type called
 
     - decl: |-
           function bar(p: string): string {
@@ -48,5 +48,36 @@ cases:
           }
           let ft: ((p: string) => string)|null = bar
       use: |-
-          assert ft("A") == "AA"  // CTE: no ?. for nullish expression
+          assertEQ( ft("A"), "AA" ) // CTE: no ?. for nullish expression
+
+    - decl: |-
+          function foo() {}
+      use: |-
+          let e = foo() // CTE: void cannot be used as type annotation
+
+    - decl: |-
+          function bar(callee: () => void): void {}
+      use: |-
+          bar("A") // CTE: not a function type called
+
+    - decl: |-
+          function bar(callee: () => void): void {
+            callee()
+          }
+      use: |-
+          bar((): int => { return 1 }) // CTE: No matching call signature
+
+    - decl: |-
+          function bar(callee: () => void): void {
+            callee()
+          }
+      use: |-
+          bar((a: int): void => {}) // CTE: No matching call signature
+
+    - decl: |-
+          function bar(callee: (a: int) => void): void {
+            callee(1)
+          }
+      use: |-
+          bar((): void => {}) // CTE: No matching call signature
 

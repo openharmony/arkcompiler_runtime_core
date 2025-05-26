@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,42 +22,42 @@ class EtsImportPrimitiveTypesTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeNumber)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeNumber"));
 }
 
 TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeString)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeString"));
 }
 
 TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeTrue)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeTrue"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeTrue"));
 }
 
 TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeFalse)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeFalse"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeFalse"));
 }
 
 TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeUndefined)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeUndefined"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeUndefined"));
 }
 
 TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeNull)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeNull"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeNull"));
 }
 
 TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeSymbol)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeSymbol"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeSymbol"));
 }
-// NOTE issue (17741) - enable this after fix import bigInt
-TEST_F(EtsImportPrimitiveTypesTsToEtsTest, DISABLED_checkChangeBigInt)
+
+TEST_F(EtsImportPrimitiveTypesTsToEtsTest, checkChangeBigInt)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChangeBigInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChangeBigInt"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,45 +13,45 @@
  * limitations under the License.
  */
 
-exports.Identity = function (x) {
+export let Identity = function (x) {
 	return x;
 };
-exports.Curry = function (x) {
+export let Curry = function (x) {
 	return {
 		toString() {
 			return x;
 		},
 	};
 };
-exports.Throwing = function () {
+export let Throwing = function () {
 	return {
 		toString() {
 			throw 123;
 		},
 	};
 };
-exports.CurryToString = function (x) {
+export let CurryToString = function (x) {
 	return {
 		toString() {
 			return x.toString();
 		},
 	};
 };
-exports.IntValue = function () {
+export let IntValue = function () {
 	return 42;
 };
-exports.NullVal = function () {
+export let NullVal = function () {
 	return null;
 };
-exports.NanVal = function () {
+export let NanVal = function () {
 	return NaN;
 };
-exports.UndefinedVal = function () {
+export let UndefinedVal = function () {
 	return undefined;
 };
-exports.Optional = function (x) {
+export let Optional = function (x) {
 	return x ? null : 'optionalVal';
 };
-exports.StringifyValue = function (v) {
+export let StringifyValue = function (v) {
 	return typeof v + ':' + v;
 };

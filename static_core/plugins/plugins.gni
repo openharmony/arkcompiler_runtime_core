@@ -180,8 +180,9 @@ foreach(plugin, ark_enabled_plugins) {
     plugin_option_yamls += [ "$_plugin_dir/${_plugin_vars.option_yaml_path}" ]
   }
   if (defined(_plugin_vars.runtime_option_yaml_path)) {
-    plugin_runtime_options_yamls +=
-        [ "$_plugin_dir/${_plugin_vars.runtime_option_yaml_path}" ]
+    foreach(src, _plugin_vars.runtime_option_yaml_path) {
+      plugin_runtime_options_yamls += [ "$_plugin_dir/$src" ]
+    }
   }
   if (defined(_plugin_vars.compiler_options_yaml_path)) {
     plugin_compiler_options_yamls +=

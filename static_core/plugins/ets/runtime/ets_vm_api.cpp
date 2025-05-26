@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 static void LogPrint([[maybe_unused]] int id, int level, const char *component, [[maybe_unused]] const char *fmt,
                      const char *msg)
 {
-#ifdef PANDA_USE_OHOS_LOG
+#ifdef PANDA_OHOS_USE_INNER_HILOG
     constexpr static unsigned int ARK_DOMAIN = 0xD003F00;
     constexpr static auto TAG = "ArkEtsVm";
     constexpr static OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
@@ -67,7 +67,7 @@ static void LogPrint([[maybe_unused]] int id, int level, const char *component, 
         default:
             UNREACHABLE();
     }
-#endif  // PANDA_USE_OHOS_LOG
+#endif  // PANDA_OHOS_USE_INNER_HILOG
 }
 #else
 static void LogPrint([[maybe_unused]] int id, [[maybe_unused]] int level, [[maybe_unused]] const char *component,
@@ -97,6 +97,15 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
 
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    if ((runtimeOptions.GetXgcTriggerType() != "never") &&
+        (runtimeOptions.GetGcType("ets") != "g1-gc" || runtimeOptions.IsNoAsyncJit())) {
+        // XGC is not implemented for other GC types
+        LOG(ERROR, RUNTIME) << "GC type must be g1-gc and no-async-jit option must be false";
+        return false;
+    }
+#endif
+
     if (!ark::Runtime::Create(runtimeOptions)) {
         LOG(ERROR, RUNTIME) << "CreateRuntime: cannot create ets runtime";
         return false;
@@ -114,7 +123,6 @@ bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, con
         runtimeOptions->SetGcTriggerType("heap-trigger");
         runtimeOptions->SetCompilerEnableJit(useJit);
         runtimeOptions->SetEnableAn(useAot);
-        runtimeOptions->SetCoroutineJsMode(true);
         runtimeOptions->SetCoroutineImpl("stackful");
         return true;
     };
@@ -129,13 +137,14 @@ bool DestroyRuntime()
     return res;
 }
 
-std::pair<bool, int> ExecuteMain()
+std::pair<bool, int> ExecuteModule(std::string_view name)
 {
     auto runtime = ark::Runtime::GetCurrent();
     auto pfPath = runtime->GetPandaFiles()[0];
-    LOG(INFO, RUNTIME) << "ExecuteEtsMain: '" << pfPath << "'";
-    auto res = ark::Runtime::GetCurrent()->ExecutePandaFile(pfPath, "ETSGLOBAL::main", {});
-    LOG(INFO, RUNTIME) << "ExecuteEtsMain: result = " << (res ? std::to_string(res.Value()) : "failed");
+    LOG(INFO, RUNTIME) << "ExecuteEtsModule: '" << pfPath << "'";
+    std::string moduleEp = (name.empty() ? "ETSGLOBAL::main" : std::string(name) + ".ETSGLOBAL::main");
+    auto res = ark::Runtime::GetCurrent()->ExecutePandaFile(pfPath, moduleEp, {});
+    LOG(INFO, RUNTIME) << "ExecuteEtsModule: result = " << (res ? std::to_string(res.Value()) : "failed");
     return res ? std::make_pair(true, res.Value()) : std::make_pair(false, 1);
 }
 

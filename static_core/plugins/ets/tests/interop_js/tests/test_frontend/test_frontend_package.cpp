@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,29 +18,22 @@
 
 namespace ark::ets::interop::js::testing {
 
-class EtsInteropJsTestFrontend : public EtsInteropTest {
-public:
-    void SetUp() override
-    {
-        EtsInteropTest::SetUp();
-        LoadModuleAs("test_frontend", "index.js");
-    }
-};
+class EtsInteropJsTestFrontend : public EtsInteropTest {};
 
 TEST_F(EtsInteropJsTestFrontend, test_newcall)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test.test_newcall"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "test_newcall"));
 }
 
 TEST_F(EtsInteropJsTestFrontend, test_dyncall)
 {
-    auto ret = CallEtsMethod<uint32_t>("Test.test_dyncall");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "test_dyncall");
     ASSERT_EQ(ret, 10U);
 }
 
 TEST_F(EtsInteropJsTestFrontend, test_dyncall_by_value)
 {
-    auto ret = CallEtsMethod<uint32_t>("Test.test_dyncall_by_value");
+    auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "test_dyncall_by_value");
     ASSERT_EQ(ret, 43U);
 }
 

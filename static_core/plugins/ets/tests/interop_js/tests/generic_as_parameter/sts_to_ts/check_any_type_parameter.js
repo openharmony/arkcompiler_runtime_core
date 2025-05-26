@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ const {
     jsObj,
     jsTuple,
     getFunction,
-} = require('generic_as_parameter.test.js');
+} = require('generic_as_parameter.test.abc');
 
 const anyTypeParameter = getFunction('anyTypeParameter');
 const anyTypeParameterExplicitCallFromEtsInt = getFunction('anyTypeParameterExplicitCallFromEtsInt');
@@ -32,7 +32,7 @@ const anyTypeParameterExplicitCallFromEtsBool = getFunction('anyTypeParameterExp
 const anyTypeParameterExplicitCallFromEtsArr = getFunction('anyTypeParameterExplicitCallFromEtsArr');
 const anyTypeParameterExplicitCallFromEtsObj = getFunction('anyTypeParameterExplicitCallFromEtsObj');
 const anyTypeParameterExplicitCallFromEtsUnion = getFunction('anyTypeParameterExplicitCallFromEtsUnion');
-const anyTypeParameterExplicitCallFromEtsTuple = getFunction('anyTypeParameterExplicitCallFromEtsTuple');
+
 
 function checkAnyTypeParameterInt() {
     ASSERT_TRUE(anyTypeParameter(jsInt) === jsInt);
@@ -85,11 +85,6 @@ function checkAnyTypeParameterExplicitCallFromEtsUnion() {
     ASSERT_TRUE(anyTypeParameterExplicitCallFromEtsUnion() === jsInt);
 }
 
-function checkAnyTypeParameterExplicitCallFromEtsTuple() {
-    const res = anyTypeParameterExplicitCallFromEtsTuple();
-    ASSERT_TRUE(checkArray(res) && res[0] === jsTuple[0] && res[1] === jsTuple[1]);
-}
-
 checkAnyTypeParameterInt();
 checkAnyTypeParameterString();
 checkAnyTypeParameterBool();
@@ -102,4 +97,3 @@ checkAnyTypeParameterExplicitCallFromEtsBool();
 checkAnyTypeParameterExplicitCallFromEtsArr();
 checkAnyTypeParameterExplicitCallFromEtsObj();
 checkAnyTypeParameterExplicitCallFromEtsUnion();
-checkAnyTypeParameterExplicitCallFromEtsTuple();

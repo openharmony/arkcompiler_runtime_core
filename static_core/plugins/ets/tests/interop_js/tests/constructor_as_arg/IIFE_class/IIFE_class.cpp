@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,17 +22,17 @@ class EtsIIFEClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsIIFEClassTsToEtsTest, check_IIFE_create_class_main)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFECreateClassMain"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIIFECreateClassMain"));
 }
 
 TEST_F(EtsIIFEClassTsToEtsTest, check_IIFE_create_class_anonymous)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFECreateClassAnonymous"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIIFECreateClassAnonymous"));
 }
 
 TEST_F(EtsIIFEClassTsToEtsTest, check_IIFE_create_class_IIFE)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFECreateClassIIFE"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkIIFECreateClassIIFE"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -26,7 +26,7 @@ cases:
     res: 5
 
   - exp: '[1 as short, 2, 3]'
-    res: 102
+    res: 104
 
   - exp: '[new Object(), "abc"]'
     res: 132

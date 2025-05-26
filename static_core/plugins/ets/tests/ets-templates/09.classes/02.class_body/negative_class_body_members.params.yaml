@@ -11,12 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of valid class members
+--- # List of invalid class members
 class_members:
-  - "f: int;"
-  - "m(): void {}"
   - "class B{}"
-  - "interface I{}"
-  - "enum E{V1, V2}"
-  - "constructor() {}"
-  - "final get age(): int {return 2}; set age(i: int) {}"
+  - "protected interface I{}"
+  - "enum Color {Red, Green}"

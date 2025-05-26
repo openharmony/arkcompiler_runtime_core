@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
 #include "include/method.h"
+#include "include/thread_scopes.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
 #include "plugins/ets/runtime/ets_annotation.h"
@@ -24,8 +25,9 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
-#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/language_context.h"
@@ -51,29 +53,40 @@ enum class EtsNapiType {
 
 extern "C" void EtsAsyncEntryPoint();
 
-static EtsNapiType GetEtsNapiType([[maybe_unused]] Method *method)
+static EtsNapiType GetEtsNapiType(Method *method)
 {
-    // NOTE(#18101): support other NAPI types after annotations have been implemented.
-    return EtsNapiType::GENERIC;
+    EtsNapiType napiType = EtsNapiType::GENERIC;
+    const panda_file::File &pf = *method->GetPandaFile();
+    panda_file::MethodDataAccessor mda(pf, method->GetFileId());
+    mda.EnumerateAnnotations([&pf, &napiType](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
+        if (className == panda_file_items::class_descriptors::ANI_UNSAFE_QUICK) {
+            napiType = EtsNapiType::FAST;
+        } else if (className == panda_file_items::class_descriptors::ANI_UNSAFE_DIRECT) {
+            napiType = EtsNapiType::CRITICAL;
+        }
+    });
+    return napiType;
 }
 
 static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
 {
     switch (error) {
         case ClassLinker::Error::CLASS_NOT_FOUND:
-            return panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION;
+            return panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR;
         case ClassLinker::Error::FIELD_NOT_FOUND:
-            return panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR;
+            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR;
         case ClassLinker::Error::METHOD_NOT_FOUND:
-            return panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
+            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR;
         case ClassLinker::Error::NO_CLASS_DEF:
-            return panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR;
+            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_CLASS_ERROR;
         case ClassLinker::Error::CLASS_CIRCULARITY:
-            return panda_file_items::class_descriptors::CLASS_CIRCULARITY_ERROR;
+            return panda_file_items::class_descriptors::LINKER_TYPE_CIRCULARITY_ERROR;
         case ClassLinker::Error::OVERRIDES_FINAL:
         case ClassLinker::Error::MULTIPLE_OVERRIDE:
         case ClassLinker::Error::MULTIPLE_IMPLEMENT:
-            return panda_file_items::class_descriptors::LINKAGE_ERROR;
+            return panda_file_items::class_descriptors::LINKER_METHOD_CONFLICT_ERROR;
         default:
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
             UNREACHABLE();
@@ -453,6 +466,45 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
     }
 
     FreeLoadedClasses();
+
+    // References from `EtsClassLinkerContext` are removed in their destructors, need to process only boot context.
+    RemoveRefToLinker(GetBootContext());
+}
+
+bool EtsClassLinkerExtension::IsMethodNativeApi(const Method *method) const
+{
+    // intrinsics and async methods are marked as native, but they are not native api calls
+    return method->IsNative() && !method->IsIntrinsic() && !EtsAnnotation::FindAsyncAnnotation(method).IsValid();
+}
+
+bool EtsClassLinkerExtension::CanThrowException(const Method *method) const
+{
+    if (!method->IsNative()) {
+        return true;
+    }
+
+    const EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
+    return !etsMethod->IsCriticalNative();
+}
+
+bool EtsClassLinkerExtension::IsNecessarySwitchThreadState(const Method *method) const
+{
+    if (!IsMethodNativeApi(method)) {
+        return false;
+    }
+
+    const EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
+    return !(etsMethod->IsFastNative() || etsMethod->IsCriticalNative());
+}
+
+bool EtsClassLinkerExtension::CanNativeMethodUseObjects(const Method *method) const
+{
+    if (!IsMethodNativeApi(method)) {
+        return false;
+    }
+
+    const EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(method);
+    return !etsMethod->IsCriticalNative();
 }
 
 const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) const
@@ -525,27 +577,37 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
     using namespace panda_file_items::class_descriptors;
 
     CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
-    undefinedClass_ = CacheClass(INTERNAL_UNDEFINED, [](auto *c) {
-        c->SetUndefined();
+    CacheClass(NULL_VALUE, [](auto *c) {
+        c->SetNullValue();
         c->SetValueTyped();
     });
     auto const setupBoxedFlags = [](EtsClass *c) {
         c->SetBoxed();
         c->SetValueTyped();
     };
-    boxBooleanClass_ = CacheClass(BOX_BOOLEAN, setupBoxedFlags);
-    boxByteClass_ = CacheClass(BOX_BYTE, setupBoxedFlags);
-    boxCharClass_ = CacheClass(BOX_CHAR, setupBoxedFlags);
-    boxShortClass_ = CacheClass(BOX_SHORT, setupBoxedFlags);
-    boxIntClass_ = CacheClass(BOX_INT, setupBoxedFlags);
-    boxLongClass_ = CacheClass(BOX_LONG, setupBoxedFlags);
-    boxFloatClass_ = CacheClass(BOX_FLOAT, setupBoxedFlags);
-    boxDoubleClass_ = CacheClass(BOX_DOUBLE, setupBoxedFlags);
-    bigintClass_ = CacheClass(BIG_INT, [](auto *c) {
+    CacheClass(BOX_BOOLEAN, setupBoxedFlags);
+    CacheClass(BOX_BYTE, setupBoxedFlags);
+    CacheClass(BOX_CHAR, setupBoxedFlags);
+    CacheClass(BOX_SHORT, setupBoxedFlags);
+    CacheClass(BOX_INT, setupBoxedFlags);
+    CacheClass(BOX_LONG, setupBoxedFlags);
+    CacheClass(BOX_FLOAT, setupBoxedFlags);
+    CacheClass(BOX_DOUBLE, setupBoxedFlags);
+    CacheClass(BIG_INT, [](auto *c) {
         c->SetBigInt();
         c->SetValueTyped();
     });
-    functionClass_ = CacheClass(FUNCTION, [](auto *c) { c->SetFunction(); });
+    CacheClass(FUNCTION, [](auto *c) { c->SetFunction(); });
+    CacheClass(BASE_ENUM, [](auto *c) {
+        c->SetEtsEnum();
+        c->SetValueTyped();
+    });
+
+    CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
+        c->SetFinalizeReference();
+        c->SetWeakReference();
+    });
+    CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
 }
 
 void EtsClassLinkerExtension::InitializeBuiltinClasses()
@@ -555,41 +617,89 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
 
     InitializeBuiltinSpecialClasses();
 
-    promiseClass_ = CacheClass(PROMISE);
-    if (promiseClass_ != nullptr) {
-        subscribeOnAnotherPromiseMethod_ = EtsMethod::ToRuntimeMethod(
-            EtsClass::FromRuntimeClass(promiseClass_)->GetMethod("subscribeOnAnotherPromise"));
-        ASSERT(subscribeOnAnotherPromiseMethod_ != nullptr);
-    }
-    promiseRefClass_ = CacheClass(PROMISE_REF);
-    waiterListClass_ = CacheClass(WAITERS_LIST);
-    mutexClass_ = CacheClass(MUTEX);
-    eventClass_ = CacheClass(EVENT);
-    condVarClass_ = CacheClass(COND_VAR);
-    exceptionClass_ = CacheClass(EXCEPTION);
-    errorClass_ = CacheClass(ERROR);
-    arraybufClass_ = CacheClass(ARRAY_BUFFER);
-    stringBuilderClass_ = CacheClass(STRING_BUILDER);
-    arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);
-    arrayClass_ = CacheClass(ARRAY);
-    typeapiFieldClass_ = CacheClass(FIELD);
-    typeapiMethodClass_ = CacheClass(METHOD);
-    typeapiParameterClass_ = CacheClass(PARAMETER);
-    sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
-    jsvalueClass_ = CacheClass(JS_VALUE);
-    finalizableWeakClass_ = CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
-        c->SetFinalizeReference();
-        c->SetWeakReference();
-    });
-    CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
+    plaformTypes_ = PandaUniquePtr<EtsPlatformTypes>(
+        Runtime::GetCurrent()->GetInternalAllocator()->New<EtsPlatformTypes>(EtsCoroutine::GetCurrent()));
 
-    auto coro = EtsCoroutine::GetCurrent();
-    coro->SetPromiseClass(promiseClass_);
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
+    auto coro = EtsCoroutine::GetCurrent();
+    coro->SetPromiseClass(GetPlatformTypes()->corePromise->GetRuntimeClass());
+    coro->SetJobClass(GetPlatformTypes()->coreJob->GetRuntimeClass());
     coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));
     coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
     coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
+}
+
+static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+    auto *ref = ctx->GetRefToLinker();
+    if (ref == nullptr) {
+        return nullptr;
+    }
+    return EtsRuntimeLinker::FromCoreType(PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(ref));
+}
+
+static EtsRuntimeLinker *CreateBootRuntimeLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx->IsBootContext());
+    ASSERT(ctx->GetRefToLinker() == nullptr);
+    auto *etsObject = EtsObject::Create(PlatformTypes()->coreBootRuntimeLinker);
+    if (UNLIKELY(etsObject == nullptr)) {
+        LOG(FATAL, CLASS_LINKER) << "Could not allocate BootRuntimeLinker";
+    }
+    auto *runtimeLinker = EtsRuntimeLinker::FromEtsObject(etsObject);
+    runtimeLinker->SetClassLinkerContext(ctx);
+    return runtimeLinker;
+}
+
+/* static */
+EtsRuntimeLinker *EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+
+    // CC-OFFNXT(G.CTL.03) false positive
+    while (true) {
+        auto *runtimeLinker = GetEtsRuntimeLinker(ctx);
+        if (runtimeLinker != nullptr) {
+            return runtimeLinker;
+        }
+        // Only BootRuntimeLinker is created after its corresponding context
+        ASSERT(ctx->IsBootContext());
+        runtimeLinker = CreateBootRuntimeLinker(ctx);
+        auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
+        auto *refToLinker = objectStorage->Add(runtimeLinker->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        if (ctx->CompareAndSetRefToLinker(nullptr, refToLinker)) {
+            return runtimeLinker;
+        }
+        objectStorage->Remove(refToLinker);
+    }
+    UNREACHABLE();
+}
+
+/* static */
+void EtsClassLinkerExtension::RemoveRefToLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+    if (Thread::GetCurrent() == nullptr) {
+        // Do not remove references during runtime destruction
+        return;
+    }
+    auto *ref = ctx->GetRefToLinker();
+    if (ref != nullptr) {
+        auto *etsVm = PandaEtsVM::GetCurrent();
+        ASSERT(etsVm != nullptr);
+        auto *objectStorage = etsVm->GetGlobalObjectStorage();
+        ASSERT(objectStorage != nullptr);
+        objectStorage->Remove(ref);
+    }
+}
+
+ClassLinkerContext *EtsClassLinkerExtension::CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path)
+{
+    ClassLinkerContext *ctx = PandaEtsVM::GetCurrent()->CreateApplicationRuntimeLinker(path);
+    ASSERT(ctx != nullptr);
+    return ctx;
 }
 
 }  // namespace ark::ets

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,6 +30,7 @@ class CoverageOptions:
             "use-llvm-cov": self.use_llvm_cov,
             "llvm-cov-profdata-out-path": self.llvm_profdata_out_path,
             "llvm-cov-html-out-path": self.llvm_cov_html_out_path,
+            "llvm-cov-report-by-components": self.llvm_cov_report_by_components,
         }
 
     @cached_property
@@ -59,6 +60,15 @@ class CoverageOptions:
     def llvm_cov_html_out_path(self) -> Optional[str]:
         return None
 
+    @cached_property
+    @value(
+        yaml_path="general.coverage.llvm-cov-report-by-components",
+        cli_name="llvm_cov_report_by_components",
+        cast_to_type=_to_bool
+    )
+    def llvm_cov_report_by_components(self) -> bool:
+        return False
+
     def get_command_line(self) -> str:
         options = [
             '--use-llvm-cov' if self.use_llvm_cov else '',
@@ -66,5 +76,6 @@ class CoverageOptions:
             if self.llvm_profdata_out_path is not None else '',
             f'--llvm-cov-html-out-path="{self.llvm_cov_html_out_path}"'
             if self.llvm_cov_html_out_path is not None else '',
+            '--llvm-cov-report-by-components' if self.llvm_cov_report_by_components else '',
         ]
         return ' '.join(options)

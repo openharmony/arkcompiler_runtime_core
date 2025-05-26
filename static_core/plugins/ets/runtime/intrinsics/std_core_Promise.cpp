@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/coroutines/coroutine_manager.h"
@@ -33,21 +34,8 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 {
     PandaVector<Value> args {Value(outsidePromise), Value(internalPromise)};
 
-    auto subscribeOnAnotherPromise = [&args]() {
-        EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetSubscribeOnAnotherPromiseMethod()->Invoke(
-            EtsCoroutine::GetCurrent(), args.data());
-    };
-
-    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
-    Coroutine *current = Coroutine::GetCurrent();
-    if (current != mainCoro && mainCoro->GetId() == current->GetId()) {
-        // Call ExecuteOnThisContext is possible only in the same thread.
-        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
-            &subscribeOnAnotherPromise, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
-    } else {
-        subscribeOnAnotherPromise();
-    }
+    PlatformTypes()->corePromiseSubscribeOnAnotherPromise->GetPandaMethod()->Invoke(EtsCoroutine::GetCurrent(),
+                                                                                    args.data());
 }
 
 static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
@@ -58,7 +46,7 @@ static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
         return;
     }
     auto newQueueLength = queueLength * 2U + 1U;
-    auto *objectClass = coro->GetPandaVM()->GetClassLinker()->GetObjectClass();
+    auto *objectClass = coro->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
     auto *newCallbackQueue = EtsObjectArray::Create(objectClass, newQueueLength);
     if (hpromise->GetQueueSize() != 0) {
         hpromise->GetCallbackQueue(coro)->CopyDataTo(newCallbackQueue);
@@ -75,7 +63,7 @@ static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
     hpromise->SetLaunchModeQueue(coro, newLaunchModeQueue);
 }
 
-void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
+void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLinked)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (promise == nullptr) {
@@ -86,28 +74,44 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hvalue(coro, value);
-    EtsMutex::LockHolder lh(hpromise);
-    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
-        return;
-    }
-    if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(coro->GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
-        auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
-        EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
-        if (hInternalPromise->IsPending() || coro->GetCoroutineManager()->IsJsMode()) {
+
+    if (wasLinked == 0) {
+        /* When the value is still a Promise, the lock must be unlocked first. */
+        hpromise->Lock();
+        if (!hpromise->IsPending()) {
+            hpromise->Unlock();
+            return;
+        }
+        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
+            auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
+            EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
+            hpromise->Unlock();
             SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
             return;
         }
-        if (hInternalPromise->IsRejected()) {
-            hpromise->Reject(coro, hInternalPromise->GetValue(coro));
+        hpromise->Resolve(coro, hvalue.GetPtr());
+        hpromise->Unlock();
+    } else {
+        /* When the value is still a Promise, the lock must be unlocked first. */
+        hpromise->Lock();
+        if (!hpromise->IsLinked()) {
+            hpromise->Unlock();
             return;
         }
-        // We can use internal promise's value as return value
-        hvalue = EtsHandle<EtsObject>(coro, hInternalPromise->GetValue(coro));
+        if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(coro)->corePromise)) {
+            auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
+            EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
+            hpromise->ChangeStateToPendingFromLinked();
+            hpromise->Unlock();
+            SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+            return;
+        }
+        hpromise->Resolve(coro, hvalue.GetPtr());
+        hpromise->Unlock();
     }
-    hpromise->Resolve(coro, hvalue.GetPtr());
 }
 
-void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
+void EtsPromiseReject(EtsPromise *promise, EtsObject *error, EtsBoolean wasLinked)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (promise == nullptr) {
@@ -119,7 +123,7 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> herror(coro, error);
     EtsMutex::LockHolder lh(hpromise);
-    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
+    if ((!hpromise->IsPending() && wasLinked == 0) || (!hpromise->IsLinked() && wasLinked != 0)) {
         return;
     }
     hpromise->Reject(coro, herror.GetPtr());
@@ -134,7 +138,7 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hcallback(coro, callback);
     EtsMutex::LockHolder lh(hpromise);
-    if (hpromise->GetState() == EtsPromise::STATE_PENDING) {
+    if (hpromise->IsPending() || hpromise->IsLinked()) {
         EnsureCapacity(coro, hpromise);
         hpromise->SubmitCallback(coro, hcallback.GetPtr(), launchMode);
         return;
@@ -145,20 +149,11 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     EtsPromise::LaunchCallback(coro, hcallback.GetPtr(), launchMode);
 }
 
-void EtsPromiseCreateLink(EtsObject *source, EtsPromise *target)
-{
-    EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
-    auto *jobQueue = currentCoro->GetPandaVM()->GetJobQueue();
-    if (jobQueue != nullptr) {
-        jobQueue->CreateLink(source, target->AsObject());
-    }
-}
-
 static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsPromise> &promiseHandle)
 {
     /**
      * This is a backed by JS equivalent promise.
-     * STS mode: error, no one can create such a promise!
+     * ETS mode: error, no one can create such a promise!
      * JS mode:
      *      - add a callback to JQ, that will:
      *          - resolve the promise with some value OR reject it
@@ -170,10 +165,9 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      *          (the last two steps are actually the cm->await()'s job)
      *      - return promise.value() if resolved or throw() it if rejected
      */
-    EtsPromiseCreateLink(promiseHandle->GetLinkedPromise(currentCoro), promiseHandle.GetPtr());
 
     promiseHandle->Wait();
-    ASSERT(!promiseHandle->IsPending());
+    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
 
     // will get here after the JS callback is called
     if (promiseHandle->IsResolved()) {
@@ -203,15 +197,15 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
         return AwaitProxyPromise(currentCoro, promiseHandle);
     }
 
-    /* CASE 2. This is a native STS promise */
+    /* CASE 2. This is a native ETS promise */
     LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a promise...";
     promiseHandle->Wait();
-    ASSERT(!promiseHandle->IsPending());
+    ASSERT(!promiseHandle->IsPending() && !promiseHandle->IsLinked());
     LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
 
     /**
      * The promise is already resolved or rejected. Further actions:
-     *      STS mode:
+     *      ETS mode:
      *          if resolved: return Promise.value
      *          if rejected: throw Promise.value
      *      JS mode: NOTE!

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,9 @@ enum InstFlags {
     TYPE_ID = (1U << 10U),
     STRING_ID = (1U << 11U),
     LITERALARRAY_ID = (1U << 12U),
-    CALL_RANGE = (1U << 13U)
+    CALL_RANGE = (1U << 13U),
+    STATIC_FIELD_ID = (1U << 14U),
+    STATIC_METHOD_ID = (1U << 15U)
 };
 
 constexpr int INVALID_REG_IDX = -1;
@@ -123,7 +125,9 @@ struct Ins {
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
+              const std::unordered_map<std::string, panda_file::BaseMethodItem *> &staticMethods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
+              const std::unordered_map<std::string, panda_file::BaseFieldItem *> &staticFields,
               const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
               const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
               const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
@@ -144,8 +148,9 @@ struct Ins {
 
     bool CanThrow() const
     {
-        return HasFlag(InstFlags::THROWING) || HasFlag(InstFlags::METHOD_ID) || HasFlag(InstFlags::FIELD_ID) ||
-               HasFlag(InstFlags::TYPE_ID) || HasFlag(InstFlags::STRING_ID);
+        return HasFlag(InstFlags::THROWING) || HasFlag(InstFlags::METHOD_ID) || HasFlag(InstFlags::STATIC_METHOD_ID) ||
+               HasFlag(InstFlags::FIELD_ID) || HasFlag(InstFlags::STATIC_FIELD_ID) || HasFlag(InstFlags::TYPE_ID) ||
+               HasFlag(InstFlags::STRING_ID);
     }
 
     bool IsJump() const

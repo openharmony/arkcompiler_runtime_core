@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,38 +26,46 @@ def runner_fixture(ark_build):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("compile_opts, disasm", [
+@pytest.mark.parametrize("compile_opts, disasm, verifier", [
     (
             [],
+            False,
+            True
+    ),
+    (
+            [],
+            True,
             False
     ),
     (
-            [],
-            True
-    ),
-    (
             ["--opt-level=2"],
-            True
+            True,
+            False
     )
 ])
-async def test_compile(monkeypatch, ark_build, compile_opts, disasm):
+async def test_compile(monkeypatch, ark_build, compile_opts, disasm, verifier):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts", *compile_opts],
+            FakeCommand(opts=["--extension=ets", *compile_opts],
                         expected=str(ark_build[1]),
                         stdout=b"executed",
                         return_code=0),
             FakeCommand(expected=str(ark_build[2]),
                         opts=[],
                         stdout=b"disassembly",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[5]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets"],
+                        stdout=b"verified",
                         return_code=0)
+
         ]
     )
     monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
 
     r = Runner(ark_build[0])
-    res = await r.compile_arkts("code", compile_opts, disasm)
-    expected = {"compile": {"error": "", "exit_code": 0, "output": "executed"}, "disassembly": None}
+    res = await r.compile_arkts("code", compile_opts, disasm, verifier)
+    expected = {"compile": {"error": "", "exit_code": 0, "output": "executed"}, "disassembly": None, "verifier": None}
     if disasm:
         expected["disassembly"] = {
             "code": "disassembly output",
@@ -65,45 +73,65 @@ async def test_compile(monkeypatch, ark_build, compile_opts, disasm):
             "exit_code": 0,
             "output": "disassembly"
         }
+    if verifier:
+        expected["verifier"] = {
+            "output": "verified",
+            "error": "",
+            "exit_code": 0
+        }
     assert res == expected
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize("compile_opts, disasm", [
-    (
-            [],
-            False
-    ),
-    (
-            [],
-            True
-    ),
-    (
-            ["--opt-level=2"],
-            True
-    )
-])
-async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disasm):
-    mocker = MockAsyncSubprocess(
+def _get_mocker_compile_and_run(ark_build, compile_opts: list) -> MockAsyncSubprocess:
+    return MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts", *compile_opts],
+            FakeCommand(opts=["--extension=ets", *compile_opts],
                         expected=str(ark_build[1]),
                         stdout=b"executed",
                         return_code=0),
             FakeCommand(expected=str(ark_build[3]),
-                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        opts=[f"--boot-panda-files={ark_build[4]}",
+                              "--load-runtimes=ets",
+                              f"--icu-data-path={ark_build[6]}",
+                              "ETSGLOBAL::main"],
                         stdout=b"run and compile",
                         return_code=0),
             FakeCommand(expected=str(ark_build[2]),
                         opts=[],
                         stdout=b"disassembly",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[5]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets"],
+                        stdout=b"verified",
                         return_code=0)
         ]
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("compile_opts, disasm, verifier", [
+    (
+            [],
+            False,
+            False,
+    ),
+    (
+            [],
+            True,
+            True
+    ),
+    (
+            ["--opt-level=2"],
+            True,
+            False
+    )
+])
+async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disasm: bool, verifier: bool):
+    mocker = _get_mocker_compile_and_run(ark_build, compile_opts)
     monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
 
-    r = Runner(ark_build[0])
-    res = await r.compile_run_arkts("code", compile_opts, disasm)
+    r = Runner(ark_build[0], icu_data=ark_build[6])
+    res = await r.compile_run_arkts("code", compile_opts, disasm, verifier=verifier)
     expected = {
         "compile": {
             "error": "",
@@ -111,6 +139,7 @@ async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disas
             "output": "executed"
         },
         "disassembly": None,
+        "verifier": None,
         "run": {
             "error": "", "exit_code": 0, "output": "run and compile"
         }
@@ -122,6 +151,12 @@ async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disas
             "exit_code": 0,
             "output": "disassembly"
         }
+    if verifier:
+        expected["verifier"] = {
+            "output": "verified",
+            "error": "",
+            "exit_code": 0
+        }
     assert res == expected
 
 
@@ -129,7 +164,7 @@ async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disas
 async def test_run_when_compile_failed(monkeypatch, ark_build):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"compile error",
                         return_code=-1)
@@ -145,6 +180,7 @@ async def test_run_when_compile_failed(monkeypatch, ark_build):
             "output": "compile error"
         },
         "disassembly": None,
+        "verifier": None,
         "run": None
     }
     assert res == expected
@@ -154,7 +190,7 @@ async def test_run_when_compile_failed(monkeypatch, ark_build):
 async def test_run_when_compile_segfault(monkeypatch, ark_build):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"compile error",
                         return_code=-11)
@@ -170,6 +206,7 @@ async def test_run_when_compile_segfault(monkeypatch, ark_build):
             "output": "compile error"
         },
         "disassembly": None,
+        "verifier": None,
         "run": None
     }
     assert res == expected
@@ -178,7 +215,7 @@ async def test_run_when_compile_segfault(monkeypatch, ark_build):
 async def test_run_disasm_failed(monkeypatch, ark_build, ):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"executed",
                         return_code=0),
@@ -212,7 +249,8 @@ async def test_run_disasm_failed(monkeypatch, ark_build, ):
             "exit_code": -2,
             "error": "disassembly failed",
             "output": ""
-        }
+        },
+        "verifier": None
     }
     assert res == expected
 
@@ -220,7 +258,7 @@ async def test_run_disasm_failed(monkeypatch, ark_build, ):
 async def test_compile_failed_with_disasm(monkeypatch, ark_build):
     mocker = MockAsyncSubprocess(
         [
-            FakeCommand(opts=["--extension=sts"],
+            FakeCommand(opts=["--extension=ets"],
                         expected=str(ark_build[1]),
                         stdout=b"compile error",
                         return_code=1),
@@ -229,14 +267,51 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
     monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
 
     r = Runner(ark_build[0])
-    res = await r.compile_arkts("code", [], True)
+    res = await r.compile_arkts("code", [], True, False)
     expected = {
         "compile": {
             "error": "",
             "exit_code": 1,
             "output": "compile error"
         },
-        "disassembly": None
+        "disassembly": None,
+        "verifier": None
+    }
+    assert res == expected
+
+
+async def test_run_with_verify_on_the_fly(monkeypatch, ark_build, ):
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets",
+                              "--verification-enabled=true", "--verification-mode=on-the-fly", "ETSGLOBAL::main"],
+                        stderr=b"runtime verify error",
+                        return_code=1),
+
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    res = await r.compile_run_arkts("code", [], False, runtime_verify=True)
+    expected = {
+        "compile": {
+            "error": "",
+            "exit_code": 0,
+            "output": "executed"
+        },
+        "run": {
+            "error": "runtime verify error",
+            "exit_code": 1,
+            "output": ""
+        },
+        "disassembly": None,
+        "verifier": None
     }
     assert res == expected
 

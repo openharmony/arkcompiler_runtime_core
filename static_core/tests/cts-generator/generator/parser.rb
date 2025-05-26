@@ -42,7 +42,11 @@ module Generator
       updated_tests = @tests.flat_map do |test|
         if test.key? Generator::TESTS_INCLUDE
           file_name = test[Generator::TESTS_INCLUDE]
-          included_data = YAML.load_file("#{@src_dir}/#{file_name}")
+          if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.1.0')
+            included_data = YAML.load_file("#{@src_dir}/#{file_name}")
+          else
+            included_data = YAML.load_file("#{@src_dir}/#{file_name}", aliases: true)
+          end
           if !skip
             res = JSON::Validator.fully_validate("#{@src_dir}/yaml-schema.json", included_data)
             unless res.empty?

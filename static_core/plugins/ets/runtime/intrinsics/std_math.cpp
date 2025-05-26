@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,72 +28,23 @@
 namespace ark::ets::intrinsics {
 
 namespace {
-constexpr uint64_t SIGN_MASK = 0x8000'0000'0000'0000;
-constexpr uint64_t EXPONENT_MASK = 0x7FF0'0000'0000'0000;
-constexpr uint64_t SIGNIFICANT_MASK = 0x000F'FFFF'FFFF'FFFF;
-constexpr uint64_t WORD_MASK = 0xFFFF'FFFFUL;
-constexpr uint64_t HIDDEN_BIT = 0x0010'0000'0000'0000;
-constexpr uint64_t PHYSICAL_SIGNIFICAND_SIZE = 52;
-constexpr int MAX_EXPONENT = 31;
-constexpr int SIGNIFICAND_SIZE = 53;
-constexpr int EXPONENT_BIAS = 0x3FF + PHYSICAL_SIGNIFICAND_SIZE;
-constexpr int DENORMAL_EXPONENT = -EXPONENT_BIAS + 1;
-
-bool IsDenormal(uint64_t d64)
-{
-    return (d64 & EXPONENT_MASK) == 0;
-}
-
-int Sign(uint64_t d64)
-{
-    return (d64 & SIGN_MASK) == 0 ? 1 : -1;
-}
-
-int Exponent(uint64_t d64)
-{
-    if (IsDenormal(d64)) {
-        return DENORMAL_EXPONENT;
-    }
-    int biasedE = static_cast<int>((d64 & EXPONENT_MASK) >> PHYSICAL_SIGNIFICAND_SIZE);
-    return biasedE - EXPONENT_BIAS;
-}
-
-uint64_t Significand(uint64_t d64)
-{
-    uint64_t significand = d64 & SIGNIFICANT_MASK;
-    if (!IsDenormal(d64)) {
-        return significand + HIDDEN_BIT;
-    }
-    return significand;
-}
+constexpr int INT_MAX_SIZE = 63;
 
 int32_t ToInt32(double x)
 {
+    if (std::isinf(x)) {
+        return 0;
+    }
+
     if ((std::isfinite(x)) && (x <= INT_MAX) && (x >= INT_MIN)) {
         return static_cast<int32_t>(x);
     }
 
-    uint64_t d64;
-    // NOTE(kirill-mitkin): can be __builtin_bit_cast() if defined
-    if (memcpy_s(&d64, sizeof(uint64_t), &x, sizeof(uint64_t)) != 0) {
-        UNREACHABLE();
-    }
-
-    int exponent = Exponent(d64);
-    uint64_t significand = Significand(d64);
-    uint64_t bits;
-    if (exponent < 0) {
-        if (exponent <= SIGNIFICAND_SIZE) {
-            return 0;
-        }
-        bits = significand >> static_cast<uint64_t>(-exponent);
-    } else {
-        if (exponent > MAX_EXPONENT) {
-            return 0;
-        }
-        bits = (significand << static_cast<uint64_t>(exponent)) & WORD_MASK;
-    }
-    return static_cast<int32_t>(Sign(d64) * static_cast<int64_t>(bits));
+    double intPart = 0.0;
+    std::modf(x, &intPart);
+    double int64Max = std::pow(2, INT_MAX_SIZE);
+    intPart = std::fmod(intPart, int64Max);
+    return static_cast<int32_t>(static_cast<int64_t>(intPart));
 }
 
 uint32_t ToUint32(double x)

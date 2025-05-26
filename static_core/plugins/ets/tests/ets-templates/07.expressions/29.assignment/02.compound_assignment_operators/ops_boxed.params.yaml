@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,9 +43,9 @@ cases:
   - { type: Double, v: Double.NEGATIVE_INFINITY, op: '+', q: Double.NEGATIVE_INFINITY }
   - { type: Double, v: 0.0, op: '+', q: -0.0 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '+', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '+', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '+', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '+', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '+', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '+', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '-', q: -1 }
   - { type: Byte, v: -128, op: '-', q: -128 }
@@ -77,9 +77,9 @@ cases:
   - { type: Double, v: Double.NEGATIVE_INFINITY, op: '-', q: Double.POSITIVE_INFINITY }
   - { type: Double, v: -0.0, op: '-', q: 0.0 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '-', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '-', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '-', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '-', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '-', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '-', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '*', q: 1 }
   - { type: Byte, v: 127, op: '*', q: 127 }
@@ -111,9 +111,9 @@ cases:
   - { type: Double, v: Double.NEGATIVE_INFINITY, op: '*', q: Double.NEGATIVE_INFINITY }
   - { type: Double, v: 0.0, op: '*', q: -0.0 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '*', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '*', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '*', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '*', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '*', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '*', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '/', q: 1 }
   - { type: Byte, v: 127, op: '/', q: 127 }
@@ -139,9 +139,9 @@ cases:
   - { type: Double, v: 1.7976931348623157e+308, op: '/', q: 1.7976931348623157e+308 }
   - { type: Double, v: -1.7976931348623157e+308, op: '/', q: -1.0 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '/', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '/', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '/', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '/', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '/', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '/', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '%', q: 1 }
   - { type: Byte, v: 127, op: '%', q: 127 }
@@ -167,9 +167,9 @@ cases:
   - { type: Double, v: 1.7976931348623157e+308, op: '%', q: 1.7976931348623157e+308 }
   - { type: Double, v: -1.7976931348623157e+308, op: '%', q: -1.0 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '%', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '%', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '%', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '%', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '%', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '%', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '<<', q: 1 }
   - { type: Byte, v: 127, op: '<<', q: 127 }
@@ -187,9 +187,9 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '<<', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '<<', q: -1 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '<<', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '<<', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '<<', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '<<', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '<<', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '<<', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '>>', q: 1 }
   - { type: Byte, v: 127, op: '>>', q: 127 }
@@ -207,9 +207,9 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '>>', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '>>', q: -1 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '>>', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '>>', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '>>', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '>>', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '>>', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '>>', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '>>>', q: 1 }
   - { type: Byte, v: 127, op: '>>>', q: 127 }
@@ -227,9 +227,9 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '>>>', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '>>>', q: -1 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '>>>', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '>>>', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '>>>', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '>>>', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '>>>', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '>>>', q: "c'\\uFFFF'" }
 
   - { type: Byte, v: 127, op: '&', q: 1 }
   - { type: Byte, v: 127, op: '&', q: 127 }
@@ -247,9 +247,9 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '&', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '&', q: -1 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '&', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '&', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '&', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '&', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '&', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '&', q: "c'\\uFFFF'" }
 
   - { type: Boolean, v: 'true', op: '&', q: 'true' }
   - { type: Boolean, v: 'true', op: '&', q: 'false' }
@@ -271,9 +271,9 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '|', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '|', q: -1 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '|', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '|', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '|', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '|', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '|', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '|', q: "c'\\uFFFF'" }
 
   - { type: Boolean, v: 'false', op: '|', q: 'false' }
   - { type: Boolean, v: 'true', op: '|', q: 'false' }
@@ -295,9 +295,9 @@ cases:
   - { type: Long, v: 9223372036854775807, op: '^', q: 9223372036854775807 }
   - { type: Long, v: -9223372036854775808, op: '^', q: -1 }
 
-  - { type: Char, v: "с'\\uFFFF'", op: '^', q: "с'\\u0001'" }
-  - { type: Char, v: "с'\\uFFFF'", op: '^', q: "с'\\uFFFF'" }
-  - { type: Char, v: "с'\\u0000'", op: '^', q: "с'\\uFFFF'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '^', q: "c'\\u0001'" }
+  - { type: Char, v: "c'\\uFFFF'", op: '^', q: "c'\\uFFFF'" }
+  - { type: Char, v: "c'\\u0000'", op: '^', q: "c'\\uFFFF'" }
 
   - { type: Boolean, v: 'true', op: '^', q: 'true' }
   - { type: Boolean, v: 'true', op: '^', q: 'false' }

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,15 +27,21 @@ set(ARKINSPECTOR_ROOTS
     init.cpp
     inspector.cpp
     inspector_server.cpp
+    json_serialization/jrpc_error.cpp
     object_repository.cpp
     session_manager.cpp
     source_manager.cpp
     thread_state.cpp
+    types/custom_url_breakpoint_response.cpp
+    types/debugger_evaluation_request.cpp
+    types/debugger_call_function_on_request.cpp
     types/exception_details.cpp
     types/location.cpp
     types/remote_object.cpp
     types/object_preview.cpp
     types/scope.cpp
+    types/url_breakpoint_request.cpp
+    types/url_breakpoint_response.cpp
 )
 set(ARKINSPECTOR_LINKED_LIBRARIES
     arkbase

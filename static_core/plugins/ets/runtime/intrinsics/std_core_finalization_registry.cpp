@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,21 @@ namespace ark::ets::intrinsics {
  * The function register FinalizationRegistry instance in ETS VM.
  * @param instance - FinalizationRegistry class instance needed to register for managing by GC.
  */
-extern "C" void StdFinalizationRegistryRegisterInstance(EtsObject *instance)
+extern "C" EtsInt StdFinalizationRegistryRegisterInstance(EtsObject *instance)
 {
-    ManagedThread *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
-    static_cast<PandaEtsVM *>(thread->GetVM())->RegisterFinalizationRegistryInstance(instance);
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    coro->GetPandaVM()->RegisterFinalizationRegistryInstance(instance);
+    auto launchMode = coro->GetCoroutineManager()->IsMainWorker(coro) ? CoroutineLaunchMode::MAIN_WORKER
+                                                                      : CoroutineLaunchMode::DEFAULT;
+    return static_cast<EtsInt>(launchMode);
+}
+
+extern "C" void StdFinalizationRegistryFinishCleanup()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    coro->GetPandaVM()->FinalizationRegistryCoroutineExecuted();
 }
 
 }  // namespace ark::ets::intrinsics

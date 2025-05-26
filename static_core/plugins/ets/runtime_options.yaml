@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -73,7 +73,7 @@ options:
   lang:
     - ets
   type: std::string
-  default: heap-trigger-test
+  default: heap-trigger
   possible_values:
     - heap-trigger-test
     - heap-trigger
@@ -193,12 +193,28 @@ options:
   default: 0
   description: Number of worker threads for the NxM coroutine scheme (use 0 for auto)
 
-- name: coroutine-js-mode
+- name: coroutine-e-workers-limit
   lang:
     - ets
-  type: bool
-  default: false
-  description: Enable JS interop mode (affects launch behaviour and async functions)
+  type: uint32_t
+  default: 3
+  description: Limit on the number of exclusive coroutines workers
+
+- name: coroutine-enable-features
+  description: Specify a list of experimental features
+  sub_options:
+  - name: ani-drain-queue
+    type: bool
+    default: false
+    description: "Drain the coroutine queue after native interface calls"
+  - name: migration
+    type: bool
+    default: false
+    description: "migration"
+  - name: migrate-await
+    type: bool
+    default: false
+    description: "migrate awakened coroutines"
 
 - name: coroutine-dump-stats
   lang:
@@ -214,3 +230,10 @@ options:
   default: []
   description: Pathes to find native libraries
   delimiter: ":"
+
+- name: coroutine-enable-external-scheduling
+  lang:
+    - ets
+  type: bool
+  default: false
+  description: Enable external coroutine scheduling (e.g. in event loop)

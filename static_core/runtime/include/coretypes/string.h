@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,12 @@ public:
         return sizeof(String) + mutf8Length;
     }
 
+    uint8_t *GetDataUtf8()
+    {
+        ASSERT_PRINT(!IsUtf16(), "String: Read data as utf8 for utf16 string");
+        return reinterpret_cast<uint8_t *>(dataUtf16_);
+    }
+
     /// It's MUtf8 format, but without 0 in the end.
     uint8_t *GetDataMUtf8()
     {
@@ -134,6 +140,38 @@ public:
     size_t GetUtf16Length()
     {
         return GetLength();
+    }
+
+    size_t GetUtf8Length()
+    {
+        if (!IsUtf16()) {
+            return GetLength();
+        }
+        return ark::utf::Utf16ToUtf8Size(dataUtf16_, GetLength(), false) - 1;
+    }
+
+    size_t CopyDataRegionUtf8(uint8_t *buf, size_t start, size_t length, size_t maxLength)
+    {
+        if (length > maxLength) {
+            return 0;
+        }
+        uint32_t len = GetUtf8Length();
+        if (start + length > len) {
+            return 0;
+        }
+        if (!IsUtf16()) {
+            constexpr size_t MAX_LEN = std::numeric_limits<size_t>::max() / 2 - 1;
+            if (length > MAX_LEN) {
+                LOG(FATAL, RUNTIME) << __func__ << " length is higher than half of size_t::max";
+            }
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (memcpy_s(buf, sizeof(uint8_t) * (maxLength + 1), GetDataUtf8() + start, length) != EOK) {
+                LOG(FATAL, RUNTIME) << __func__ << " length is higher than buf size";
+            }
+            return length;
+        }
+        length = GetUtf16Length();
+        return ark::utf::ConvertRegionUtf16ToUtf8(GetDataUtf16(), buf, length, maxLength, start, false);
     }
 
     inline size_t CopyDataMUtf8(uint8_t *buf, size_t maxLength, bool isCString)

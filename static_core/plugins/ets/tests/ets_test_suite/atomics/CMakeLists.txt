@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,7 +40,7 @@ set(atomics_tests
 set(tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 set(tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
-set(coroutine_options --coroutine-impl=threaded --coroutine-js-mode=false --coroutine-workers-count=10 --gc-type=g1-gc)
+set(coroutine_options --coroutine-impl=threaded --coroutine-workers-count=10 --gc-type=g1-gc)
 
 add_custom_target(ets_test_suite_atomics)
 
@@ -55,14 +55,14 @@ function(run_atomics_tests ETS_SRC WORK_DIR TARGET)
 
     # TODO(egor-porsev): Add jit and aot. Currently, they do not work because of the data race issue #13551
     # int
-    run_int_ets_code(${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-int OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+    run_int_ets_code(${TARGET}-ets-int ${WORK_DIR} SOURCES "${ETS_SRC}" OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
     if(TARGET ${TARGET}-ets-int)
         add_dependencies(${TARGET} ${TARGET}-ets-int)
     endif()
 endfunction()
 
 foreach(test ${atomics_tests})
-    set(test_in "${tests_in_dir}/${test}.sts")
+    set(test_in "${tests_in_dir}/${test}.ets")
     set(test_out_dir "${tests_out_dir}/${test}")
     file(MAKE_DIRECTORY ${test_out_dir})
     set(target ets_test_suite_atomics_${test})

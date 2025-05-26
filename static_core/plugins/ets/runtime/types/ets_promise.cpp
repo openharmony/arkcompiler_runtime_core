@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 
@@ -26,7 +27,7 @@ namespace ark::ets {
 EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
 {
     [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *klass = coro->GetPandaVM()->GetClassLinker()->GetPromiseClass();
+    auto *klass = PlatformTypes(coro)->corePromise;
     auto hPromise = EtsHandle<EtsPromise>(coro, EtsPromise::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *mutex = EtsMutex::Create(coro);
     hPromise->SetMutex(coro, mutex);
@@ -50,39 +51,21 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
         EtsPromise::LaunchCallback(coro, thenCallback, launchMode);
     }
     ClearQueues(coro);
-
-    auto resolver = GetPromiseResolver();
-    InvalidatePromiseResolver();
-    if (resolver == nullptr) {
-        return;
-    }
-    auto remotePromiseResolverAction =
-        IsResolved() ? RemotePromiseResolver::Action::RESOLVE : RemotePromiseResolver::Action::REJECT;
-    if (coro == coro->GetCoroutineManager()->GetMainThread()) {
-        resolver->ResolveInPlace(GetValue(coro), remotePromiseResolverAction);
-    } else {
-        resolver->ResolveViaCallback(GetValue(coro), remotePromiseResolverAction);
-    }
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(resolver);
 }
 
 /* static */
 void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode)
 {
-    // Post callback to js env
-    auto *jobQueue = coro->GetPandaVM()->GetJobQueue();
-    if (launchMode == CoroutineLaunchMode::MAIN_WORKER && jobQueue != nullptr) {
-        jobQueue->Post(callback);
-        return;
-    }
     // Launch callback in its own coroutine
     auto *coroManager = coro->GetCoroutineManager();
     auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
-    auto *method = EtsMethod::ToRuntimeMethod(callback->GetClass()->GetMethod("invoke"));
+
+    EtsMethod *etsmethod = callback->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
+    auto *method = EtsMethod::ToRuntimeMethod(etsmethod);
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
-    [[maybe_unused]] auto *launchedCoro = coroManager->Launch(event, method, std::move(args), launchMode);
-    ASSERT(launchedCoro != nullptr);
+    [[maybe_unused]] bool launchResult = coroManager->Launch(event, method, std::move(args), launchMode);
+    ASSERT(launchResult);
 }
 
 }  // namespace ark::ets

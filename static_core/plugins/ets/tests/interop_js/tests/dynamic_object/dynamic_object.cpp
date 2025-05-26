@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ TEST_F(EtsInteropJsJSValue, double2jsvalue)
     constexpr double TEST_VALUE = 3.6;
 
     // Call ets method
-    auto ret = CallEtsMethod<napi_value>("double2jsvalue", TEST_VALUE);
+    auto ret = CallEtsFunction<napi_value>(GetPackageName(), "double2jsvalue", TEST_VALUE);
     ASSERT_TRUE(ret.has_value());
 
     // Get double from napi_value
@@ -46,7 +46,7 @@ TEST_F(EtsInteropJsJSValue, jsvalue2double)
     ASSERT_EQ(napi_ok, napi_create_double(GetJsEnv(), TEST_VALUE, &jsValue));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("jsvalue2double", jsValue);
+    auto ret = CallEtsFunction<double>(GetPackageName(), "jsvalue2double", jsValue);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -68,7 +68,7 @@ TEST_F(EtsInteropJsJSValue, get_property_from_jsvalue)
     ASSERT_EQ(napi_ok, napi_set_named_property(env, jsObj, "prop", jsValue));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("getPropertyFromJsvalue", jsObj);
+    auto ret = CallEtsFunction<double>(GetPackageName(), "getPropertyFromJsvalue", jsObj);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -95,7 +95,7 @@ TEST_F(EtsInteropJsJSValue, get_property_from_jsvalue2)
     ASSERT_EQ(napi_ok, napi_set_named_property(env, jsProp1, "prop_2", jsProp2));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("getPropertyFromJsvalue2", jsObj);
+    auto ret = CallEtsFunction<double>(GetPackageName(), "getPropertyFromJsvalue2", jsObj);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -113,7 +113,7 @@ TEST_F(EtsInteropJsJSValue, set_property_to_jsvalue)
     ASSERT_EQ(napi_ok, napi_create_object(env, &jsObj));
 
     // Call ets method
-    auto ret = CallEtsMethod<napi_value>("setPropertyToJsvalue", jsObj, TEST_VALUE);
+    auto ret = CallEtsFunction<napi_value>(GetPackageName(), "setPropertyToJsvalue", jsObj, TEST_VALUE);
     ASSERT_TRUE(ret.has_value());
 
     // Return js object:

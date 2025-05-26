@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,6 +31,7 @@ set(intrinsics_tests
     string_endswith
     string_indexof
     string_repeat
+    string_compare_to
     char_isuppercase
     abs
     min
@@ -56,7 +57,7 @@ add_custom_target(ets_test_suite_intrinsics)
 foreach(test ${intrinsics_tests})
     set(test_out_dir "${intrinsics_tests_out_dir}/${test}")
 
-    set(test_in "${intrinsics_tests_in_dir}/${test}.sts")
+    set(test_in "${intrinsics_tests_in_dir}/${test}.ets")
     set(target ets_test_suite_intrinsics_${test})
     set(extra_options "")
 
@@ -65,7 +66,8 @@ foreach(test ${intrinsics_tests})
         set(extra_options RUNTIME_EXTRA_OPTIONS "--compiler-enable-osr=false")
     endif()
 
-    if ("${test}" STREQUAL "stringbuilder")
+    if ("${test}" STREQUAL "stringbuilder" OR
+        "${test}" STREQUAL "string_compare_to")
         run_int_jit_aot_ets_code_foreach_gc(ets_test_suite_intrinsics ${test_in} ${test_out_dir} ${target})
     else()
         run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})

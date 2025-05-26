@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,27 +49,9 @@ public:
     EtsClass *GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
                        ClassLinkerContext *classLinkerContext = nullptr,
                        ClassLinkerErrorHandler *errorHandler = nullptr);
-    Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id);
+    Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *classLinkerContext,
+                      ClassLinkerErrorHandler *errorHandler = nullptr);
     Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
-    EtsClass *GetPromiseClass();
-    EtsClass *GetPromiseRefClass();
-    EtsClass *GetArrayClass();
-    EtsClass *GetWaitersListClass();
-    EtsClass *GetMutexClass();
-    EtsClass *GetEventClass();
-    EtsClass *GetCondVarClass();
-    EtsClass *GetArrayBufferClass();
-    EtsClass *GetStringBuilderClass();
-    EtsClass *GetSharedMemoryClass();
-    EtsClass *GetObjectClass();
-    EtsClass *GetVoidClass();
-    EtsClass *GetTypeAPIFieldClass();
-    EtsClass *GetTypeAPIMethodClass();
-    EtsClass *GetTypeAPIParameterClass();
-    EtsClass *GetFunctionClass();
-    EtsClass *GetFinalizableWeakRefClass();
-    // NOTE(molotkovmikhail): Need to implement a method cache that should be accessible by some class and method ids.
-    Method *GetSubscribeOnAnotherPromiseMethod();
 
     EtsClassLinkerExtension *GetEtsClassLinkerExtension()
     {

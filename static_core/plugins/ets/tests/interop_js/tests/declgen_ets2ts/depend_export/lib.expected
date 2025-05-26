@@ -1,0 +1,127 @@
+/**
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+export declare let p1: CP1;
+export declare function foo1(a: CP2): CP3;
+export declare let p5: CP4 | CP5;
+export declare function foo5(a: CP6 | CP7): CP8 | CP9;
+export declare let p6: IP1;
+export declare function foo6(a: IP2): IP3;
+export declare let p8: NN1.C1;
+export declare let p9: Promise<CP10>;
+export declare let p10: Promise<IP5>;
+declare interface I0 {
+    I0Method(a: string): string;
+}
+declare interface I1 {
+    I1Method(a: number): number;
+}
+declare class Base {
+    public get a(): number;
+    public set a(value: number);
+    public constructor(a: number);
+}
+export declare class Derived extends Base implements I0, I1 {
+    public I0Method(a: string): string;
+    public I1Method(a: number): number;
+    public get b(): number;
+    public set b(value: number);
+    public constructor(a: number, b: number);
+}
+export declare class C1 {
+    public get a(): CC1;
+    public set a(value: CC1);
+    public foo(a: CC2): CC3;
+    constructor();
+}
+export declare interface I2 {
+    get a(): CI1;
+    set a(value: CI1);
+    foo(a: CI2): CI3;
+}
+export declare class C4<T extends CC4> {
+    constructor();
+}
+export declare class C5 extends CC5 implements IP4 {
+    constructor();
+}
+declare class CC1 {
+    constructor();
+}
+declare class CC2 {
+    constructor();
+}
+declare class CC3 {
+    constructor();
+}
+declare class CC4 {
+    constructor();
+}
+declare class CC5 {
+    constructor();
+}
+declare class CP1 {
+    constructor();
+}
+declare class CP2 {
+    constructor();
+}
+declare class CP3 {
+    constructor();
+}
+declare class CP4 {
+    constructor();
+}
+declare class CP5 {
+    constructor();
+}
+declare class CP6 {
+    constructor();
+}
+declare class CP7 {
+    constructor();
+}
+declare class CP8 {
+    constructor();
+}
+declare class CP9 {
+    constructor();
+}
+declare class CP10 {
+    constructor();
+}
+declare class CI1 {
+    constructor();
+}
+declare class CI2 {
+    constructor();
+}
+declare class CI3 {
+    constructor();
+}
+declare interface IP1 {
+}
+declare interface IP2 {
+}
+declare interface IP3 {
+}
+declare interface IP4 {
+}
+declare interface IP5 {
+}
+export declare namespace NN1 {
+    class C1 {
+        constructor();
+    }
+}

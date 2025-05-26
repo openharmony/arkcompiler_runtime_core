@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,18 @@
 #include "plugins/ets/runtime/ets_vm_api.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_proxy.h"
-#include "plugins/ets/runtime/interop_js/event_loop_module.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
-#include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
-#include "plugins/ets/runtime/interop_js/timer_module.h"
+
 #include "generated/base_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 #include "interop_js/napi_impl/napi_impl.h"
+
+#include "os/thread.h"
+
+#include "plugins/ets/runtime/interop_js/interop_context_api.h"
 
 namespace ark::ets::interop::js {
 
@@ -41,12 +43,6 @@ static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info
     ASSERT(status == napi_ok);
 
     return result;
-}
-
-static napi_value Fatal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_callback_info info)
-{
-    [[maybe_unused]] JSNapiEnvScope napiScope(InteropCtx::Current(), env);
-    InteropCtx::Fatal("etsVm.Fatal");
 }
 
 static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
@@ -84,6 +80,12 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
     return ets_proxy::GetETSFunction(env, packageName, methodName);
 }
 
+// This function returns napi_value, thus it is possible to get accessto it`s fields
+// It gives opportunity to get acces to global variables from ETSGLOBAL
+// test.ets
+// export let x = 1
+// test.js
+// etsvm.getClass("ETSGLOBAL").x
 static napi_value GetEtsClass(napi_env env, napi_callback_info info)
 {
     ASSERT_SCOPED_NATIVE_CODE();
@@ -104,159 +106,8 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
     return ets_proxy::GetETSClass(env, classDescriptor);
 }
 
-static napi_value CallEtsFunctionImpl(EtsCoroutine *coro, InteropCtx *ctx, Span<napi_value> jsargv)
-{
-    auto env = ctx->GetJSEnv();
-
-    if (UNLIKELY(jsargv.Empty())) {
-        InteropCtx::ThrowJSError(env, "CallEtsFunction: method name required");
-        return nullptr;
-    }
-    if (UNLIKELY(GetValueType(env, jsargv[0]) != napi_string)) {
-        InteropCtx::ThrowJSError(env, "CallEtsFunction: method name is not a string");
-        return nullptr;
-    }
-
-    auto callTarget = GetString(env, jsargv[0]);
-    INTEROP_LOG(DEBUG) << "CallEtsFunction: method name: " << callTarget;
-
-    auto methodRes = ResolveEntryPoint(ctx, callTarget);
-    if (UNLIKELY(!methodRes)) {
-        InteropCtx::ThrowJSError(env, "CallEtsFunction: " + callTarget + " " + methodRes.Error());
-        return nullptr;
-    }
-    return CallETSStatic(coro, ctx, methodRes.Value(), jsargv.SubSpan(1));
-}
-
-static napi_value Call(napi_env env, napi_callback_info info)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS(coro, env);
-
-    size_t argc = 0;
-    [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    ASSERT(status == napi_ok);
-
-    auto argv = ctx->GetTempArgs<napi_value>(argc);
-    napi_value thisArg {};
-    void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
-    ASSERT(status == napi_ok);
-
-    return CallEtsFunctionImpl(coro, ctx, *argv);
-}
-
-static napi_value CallWithCopy(napi_env env, napi_callback_info info)
-{
-    ASSERT_SCOPED_NATIVE_CODE();
-
-    size_t argc = 0;
-    [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    ASSERT(status == napi_ok);
-
-    auto coro = EtsCoroutine::GetCurrent();
-    auto argv = InteropCtx::Current(coro)->GetTempArgs<napi_value>(argc);
-    napi_value thisArg {};
-    void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
-    ASSERT(status == napi_ok);
-
-    return InvokeEtsMethodImpl(env, argv->data(), argc, false);
-}
-
-static bool RegisterTimerModule(napi_env jsEnv)
-{
-    EtsVM *vm = nullptr;
-    ets_size count = 0;
-    ETS_GetCreatedVMs(&vm, 1, &count);
-    if (count != 1) {
-        LogError("No one VM is created");
-        return false;
-    }
-    EtsEnv *etsEnv = nullptr;
-    vm->GetEnv(&etsEnv, ETS_NAPI_VERSION_1_0);
-    return TimerModule::Init(etsEnv, jsEnv);
-}
-
-static std::vector<napi_value> GetArgs(napi_env env, napi_callback_info info)
-{
-    size_t argc = 0;
-    NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
-
-    std::vector<napi_value> argv(argc);
-    napi_value thisArg {};
-    void *data = nullptr;
-    NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, argv.data(), &thisArg, &data));
-
-    return argv;
-}
-
-static void RegisterEventLoopModule()
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
-    coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
-}
-
-static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
-{
-    napi_value napiFalse;
-    NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
-
-    auto argv = GetArgs(env, info);
-    if (argv.size() != 4U) {
-        LogError("CreateEtsRuntime: exactly 4 arguments are required");
-        return napiFalse;
-    }
-
-    napi_valuetype type;
-    napi_typeof(env, argv[0], &type);
-    if (type != napi_string) {
-        LogError("CreateEtsRuntime: first argument is not a string");
-        return napiFalse;
-    }
-    auto stdlibPath = GetString(env, argv[0]);
-
-    napi_typeof(env, argv[1], &type);
-    if (type != napi_string) {
-        LogError("CreateEtsRuntime: second argument is not a string");
-        return napiFalse;
-    }
-    auto indexPath = GetString(env, argv[1]);
-
-    napi_typeof(env, argv[2U], &type);
-    if (type != napi_boolean) {
-        LogError("CreateEtsRuntime: third argument is not a boolean");
-        return napiFalse;
-    }
-    bool useJit;
-    napi_get_value_bool(env, argv[2U], &useJit);
-
-    napi_typeof(env, argv[3U], &type);
-    if (type != napi_boolean) {
-        LogError("CreateEtsRuntime: fourth argument is not a boolean");
-        return napiFalse;
-    }
-    bool useAot;
-    napi_get_value_bool(env, argv[3U], &useAot);
-
-    bool res = ark::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
-    res &= RegisterTimerModule(env);
-    RegisterEventLoopModule();
-    if (res) {
-        auto coro = EtsCoroutine::GetCurrent();
-        ScopedManagedCodeThread scoped(coro);
-        napi_add_env_cleanup_hook(
-            env, [](void *) { DestroyRuntime(); }, nullptr);
-        InteropCtx::Init(coro, env);
-    }
-    napi_value napiRes;
-    NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));
-    return napiRes;
-}
-
-static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options)
+static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options,
+                                                             bool needFakeArgv0 = true)
 {
     uint32_t numOptions;
     std::vector<std::string> argStrings;
@@ -280,8 +131,10 @@ static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_
         NAPI_ASSERT_OK(napi_get_property_names(env, options, &propNames));
         NAPI_ASSERT_OK(napi_get_array_length(env, propNames, &numOptions));
 
-        argStrings.reserve(numOptions + 1);
-        argStrings.emplace_back("argv[0] placeholder");
+        argStrings.reserve(needFakeArgv0 ? numOptions + 1 : numOptions);
+        if (needFakeArgv0) {
+            argStrings.emplace_back("argv[0] placeholder");
+        }
 
         for (uint32_t i = 0; i < numOptions; ++i) {
             napi_value key;
@@ -327,8 +180,19 @@ static bool AddOptions(base_options::Options *baseOptions, ark::RuntimeOptions *
     return true;
 }
 
-static napi_value CreateRuntime(napi_env env, napi_callback_info info)
+[[maybe_unused]] static napi_value CreateRuntimeLegacy(napi_env env, napi_callback_info info)
 {
+    // NOTE(konstanting): this is needed for a sole purpose of introducing a dependency on libarktsbase.so.
+    // In the standalone hybrid release build we have a REALLY REALLY strange behavior in the XGC tests:
+    // libarktsbase's mem hooks REQUIRE the libarksbase.so to be loaded into the process address space
+    // BEFORE libarkruntime.so. Otherwise dlsym would return NULL and everything will break. Since the
+    // ets_vm_plugin module gets loaded first, we have to forcefully introduce a dependency on
+    // libartktsbase.so for it, so it can be loaded before libarkruntime.
+    // Sorry. I will try to find a more clean way to handle this ugly situation later on.
+    volatile auto tid = ark::os::thread::GetCurrentThreadId();
+    ++tid;
+    // end of NOTE(konstanting)
+
     size_t constexpr ARGC = 1;
     std::array<napi_value, ARGC> argv {};
 
@@ -339,13 +203,13 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
 
     if (argc != ARGC) {
-        LogError("CreateEtsRuntime: bad args number");
+        LogError("CreateRuntimeLegacy: bad args number");
         return napiFalse;
     }
 
     napi_value options = argv[0];
     if (GetValueType(env, options) != napi_object) {
-        LogError("CreateEtsRuntime: argument is not an object");
+        LogError("CreateRuntimeLegacy: argument is not an object");
         return napiFalse;
     }
 
@@ -359,17 +223,69 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     };
 
     bool res = ets::CreateRuntime(addOpts);
-    res &= RegisterTimerModule(env);
-    RegisterEventLoopModule();
     if (res) {
-        auto coro = EtsCoroutine::GetCurrent();
-        ScopedManagedCodeThread scoped(coro);
-        napi_add_env_cleanup_hook(
-            env, [](void *) { DestroyRuntime(); }, nullptr);
-        InteropCtx::Init(coro, env);
+        res = ark::ets::interop::js::CreateMainInteropContext(EtsCoroutine::GetCurrent(), env);
     }
     napi_value napiRes;
     NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));
+    return napiRes;
+}
+
+static napi_value CreateRuntimeViaAni(napi_env env, napi_callback_info info)
+{
+    // NOTE(konstanting): we need to migrate various CreateRuntime features to this function in order
+    // to fully migrate to ANI_CreateVM. The obvious examples are compiler-specific options and logging,
+    // XGC-related checks and so on. See ets_vm_api.cpp:CreateRuntime and AddOptions function
+    // above for reference.
+
+    size_t constexpr ARGC = 1;
+    std::array<napi_value, ARGC> argv {};
+
+    size_t argc = ARGC;
+    NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
+
+    napi_value napiFalse;
+    NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
+
+    if (argc != ARGC) {
+        LogError("CreateRuntimeViaAni: bad args number");
+        return napiFalse;
+    }
+
+    napi_value options = argv[0];
+    if (GetValueType(env, options) != napi_object) {
+        LogError("CreateRuntimeViaAni: argument is not an object");
+        return napiFalse;
+    }
+
+    auto argStrings = GetArgStrings(env, options, false);
+    if (argStrings == std::nullopt) {
+        LogError("CreateRuntimeViaAni: cannot parse options");
+        return napiFalse;
+    }
+
+    // NOTE(konstanting, #23205): kind of messy, need to prettify
+    const std::string optionPrefix = "--ext:";
+    std::vector<std::string> extraVmAniStrings;
+    for (auto &opt : *argStrings) {
+        extraVmAniStrings.push_back(optionPrefix + opt);
+    }
+    std::vector<ani_option> optVector;
+    for (auto &aniOptStr : extraVmAniStrings) {
+        ani_option aniOpt = {aniOptStr.data(), nullptr};
+        optVector.push_back(aniOpt);
+    }
+    optVector.push_back(ani_option {"--ext:interop", env});
+    ani_options aniOptions = {optVector.size(), optVector.data()};
+
+    ani_vm *panda;
+    ani_status aniStatus = ANI_CreateVM(&aniOptions, ANI_VERSION_1, &panda);
+    if (aniStatus != ANI_OK) {
+        LogError("CreateRuntimeViaAni: ANI_CreateVM failed");
+    }
+
+    napi_value napiRes;
+    NAPI_ASSERT_OK(napi_get_boolean(env, aniStatus == ANI_OK, &napiRes));
     return napiRes;
 }
 
@@ -377,11 +293,10 @@ static napi_value Init(napi_env env, napi_value exports)
 {
     const std::array desc = {
         napi_property_descriptor {"version", 0, Version, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"fatal", 0, Fatal, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"call", 0, Call, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"callWithCopy", 0, CallWithCopy, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"createEtsRuntime", 0, CreateEtsRuntime, 0, 0, 0, napi_enumerable, 0},
-        napi_property_descriptor {"createRuntime", 0, CreateRuntime, 0, 0, 0, napi_enumerable, 0},
+        // NOTE(konstanting, #23205): to be deleted
+        napi_property_descriptor {"createRuntimeLegacy", 0, CreateRuntimeLegacy, 0, 0, 0, napi_enumerable, 0},
+        // NOTE(konstanting, #23205): to be renamed once migration is complete
+        napi_property_descriptor {"createRuntime", 0, CreateRuntimeViaAni, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getFunction", 0, GetEtsFunction, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getClass", 0, GetEtsClass, 0, 0, 0, napi_enumerable, 0},
     };

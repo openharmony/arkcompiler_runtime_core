@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,57 +22,57 @@ class EtsAgeNameArgGenericTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkArgFuFromSts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkArgFuFromSts"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkArgFuFromSts"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkTypeClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkTypeClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTypeClass"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkClassMethod"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkCreateClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassFromTs"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkCallMethodClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodClassFromTs"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkInstanceClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceClass"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkChildClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildClass"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkChildClassMethod)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkChildClassMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkChildClassMethod"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkCreateChildClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateChildClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateChildClassFromTs"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkCallMethodChildClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCallMethodChildClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCallMethodChildClassFromTs"));
 }
 
 TEST_F(EtsAgeNameArgGenericTsToEtsTest, checkInstanceChildClass)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceChildClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceChildClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

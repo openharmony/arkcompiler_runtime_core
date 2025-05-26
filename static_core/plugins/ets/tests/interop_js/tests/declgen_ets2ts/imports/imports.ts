@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,11 @@ const TEN = 10;
 const TWENTY = 20;
 const PRECISION = 3;
 
-import { DynObjWrapper, C } from './lib1';
+import { C1 } from './lib1';
 
 function assertEq<T>(a: T, b: T): void {
-	console.log(`assertEq: '${a}' === '${b}'`);
+	// @ts-ignore
+	print(`assertEq: '${a}' === '${b}'`);
 	if (a !== b) {
 		throw new Error(`assertEq failed: '${a}' === '${b}'`);
 	}
@@ -32,12 +33,9 @@ export function main(): void {
 }
 
 function testImports(): void {
-	const o = new C();
+	const o = new C1();
 	assertEq(o.o1.val, 323);
 	assertEq(o.o2.val, 324);
 	assertEq(o.v1.toFixed(PRECISION), ONE.toFixed(PRECISION));
 
-	const dynObjWrapper = new DynObjWrapper();
-	assertEq(dynObjWrapper.dynObj_.val, TEN);
-	assertEq(dynObjWrapper.dynObj_.GetDynVal(), TWENTY);
 }

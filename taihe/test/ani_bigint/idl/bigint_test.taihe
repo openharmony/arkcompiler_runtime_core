@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@!sts_inject("""
+function bigIntToArrayInt64(a : BigInt) : long[] {
+    let array : Array<long> = new Array<long>(0);
+    let tmp : BigInt = a;
+    if (tmp === 0n) {
+        array.push(0);
+    }
+    while (tmp !== 0n) {
+        let big = BigInt.asIntN(64, tmp);
+        let lg : long = big.getLong();
+        array.push(lg);
+        tmp = tmp >> 64n;
+    }
+    let out : long[] = new long[array.length];
+    for (let i = 0; i < array.length; i++) {
+        out[array.length as int - 1 - i] = array[i];
+        console.info("array:" + array[i]);
+    }
+    return out;
+}
+
+function arrayInt64ToBigInt(a : long[]) : BigInt {
+    let big: BigInt = 0n;
+    for (let i = 0; i < a.length; i++) {
+        let tmp: BigInt = new BigInt(a[i]);
+        big = (big << 64n) | tmp;
+    }
+    return big;
+}
+
+export function Bigint01(a : number, b : BigInt) : boolean {
+    let array : long[] = bigIntToArrayInt64(b);
+    return BigInt01(a, array);
+}
+
+export function Bigint02(a: number) : number {
+    return BigInt02(a);
+}
+
+export function Bigint03(a : BigInt) : BigInt {
+    let array : long[] = bigIntToArrayInt64(a);
+    array = BigInt03(array);
+    return arrayInt64ToBigInt(array);
+}
+
+export function Bigint04(a : BigInt) : void {
+    let array : long[] = bigIntToArrayInt64(a);
+    BigInt04(array);
+}
+
+export function Bigint05(a : number, b : BigInt) : BigInt {
+    let array : long[] = bigIntToArrayInt64(b);
+    array = BigInt05(a, array);
+    return arrayInt64ToBigInt(array);
+}
+
+export function Bigint06(a : number, b : BigInt) : number {
+    let array : long[] = bigIntToArrayInt64(b);
+    return BigInt06(a, array);
+}
+
+""")
+
+function BigInt01(a : f64, b : Array<i64>) : bool;
+function BigInt02(a : f64) : f64;
+function BigInt03(a : Array<i64>) : Array<i64>;
+function BigInt04(a : Array<i64>) : void;
+function BigInt05(a : f64, b : Array<i64>) : Array<i64>;
+function BigInt06(a : f64, b : Array<i64>) : f64;
+

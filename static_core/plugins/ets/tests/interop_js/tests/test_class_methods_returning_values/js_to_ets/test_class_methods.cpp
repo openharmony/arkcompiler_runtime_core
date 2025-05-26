@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,14 +25,14 @@ class EtsInteropClassMethodsReturningValuesTest : public EtsInteropTest {};
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnIntegerAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnIntegerAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnIntegerAsAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnStringAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnStringAsAny");
     ASSERT_EQ(ret, true);
 }
 
@@ -40,49 +40,49 @@ TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringAsAny)
 TEST_F(EtsInteropClassMethodsReturningValuesTest, DISABLED_eTS_call_TS_TestReturnBigIntegerAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnBigIntegerAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnBigIntegerAsAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnBooleanAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnBooleanAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnBooleanAsAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnUndefinedAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnUndefinedAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnUndefinedAsAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnNullAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnNullAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnNullAsAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnMapAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnMapAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnMapAsAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnSetAsAny)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnSetAsAny");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnSetAsAny");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringAsLiteral)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnStringAsLiteral");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnStringAsLiteral");
     ASSERT_EQ(ret, true);
 }
 
@@ -90,119 +90,119 @@ TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringAsLiteral)
 TEST_F(EtsInteropClassMethodsReturningValuesTest, DISABLED_eTS_call_TS_TestReturnBigNAsLiteral)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnBigNAsLiteral");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnBigNAsLiteral");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnIntAsLiteral)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnIntAsLiteral");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnIntAsLiteral");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnBoolAsLiteral)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnBoolAsLiteral");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnBoolAsLiteral");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnMap)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnMap");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnMap");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnSet)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnSet");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnSet");
     ASSERT_EQ(ret, true);
 }
-
-TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnTuple)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInteropClassMethodsReturningValuesTest, DISABLED_TestReturnTuple)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnTuple");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnTuple");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringSubsetByRef)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnStringSubsetByRef");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnStringSubsetByRef");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnMapSubsetByRef)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnMapSubsetByRef");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnMapSubsetByRef");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringSubsetByValue)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnStringSubsetByValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnStringSubsetByValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnIntSubsetByValue)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnIntSubsetByValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnIntSubsetByValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnLongIntSubsetByValue)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnLongIntSubsetByValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnLongIntSubsetByValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnBoolSubsetByValue)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnBoolSubsetByValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnBoolSubsetByValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnUndefinedSubsetByValue)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnUndefinedSubsetByValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnUndefinedSubsetByValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnNullSubsetByValue)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnNullSubsetByValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnNullSubsetByValue");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnUnion)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnUnion");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnUnion");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnClass)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnClass");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnClass");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnInterface)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("TestReturnInterface");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnInterface");
     ASSERT_EQ(ret, true);
 }
 

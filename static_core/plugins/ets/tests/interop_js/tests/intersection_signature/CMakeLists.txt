@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,50 +14,58 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_gtest(ets_interop_js__intersection_arg_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface/arg_interface.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface/arg_interface.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface/arg_interface.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__intersection_arg_negative_result_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_negative_result_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface_negative_result/arg_interface_negative_result.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface_negative_result/arg_interface_negative_result.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_interface_negative_result/arg_interface_negative_result.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__arg_generic_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_generic_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic/arg_generic.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic/arg_generic.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic/arg_generic.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__intersection_arg_generic_negative_result_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_generic_negative_result_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic_negative_result/arg_generic_negative_result.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic_negative_result/arg_generic_negative_result.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_generic_negative_result/arg_generic_negative_result.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__arg_union_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_union_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union/arg_union.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union/arg_union.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union/arg_union.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__intersection_arg_union_negative_result_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_union_negative_result_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union_negative_result/arg_union_negative_result.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union_negative_result/arg_union_negative_result.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_union_negative_result/arg_union_negative_result.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__arg_literal_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__arg_literal_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal/arg_literal.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal/arg_literal.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal/arg_literal.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js__intersection_arg_literal_negative_result_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__intersection_arg_literal_negative_result_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal_negative_result/arg_literal_negative_result.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal_negative_result/arg_literal_negative_result.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/arg_literal_negative_result/arg_literal_negative_result.ets
+    JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.js
     ETS_CONFIG ${ETS_CONFIG}
 )

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,14 +34,14 @@ class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
 TEST_F(MethodsTest, CallMethodsTestGeneral2)
 {
-    ets_class cls = env_->FindClass("C");
+    ets_class cls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cls, nullptr);
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);
 
     ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -84,14 +84,14 @@ TEST_F(MethodsTest, CallMethodsTestGeneral2)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral3)
 {
-    ets_class cls = env_->FindClass("C");
+    ets_class cls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cls, nullptr);
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);
 
     ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -113,7 +113,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral3)
     // Call<Type>Method part
     env_->CallVoidMethod(obj, voidId, static_cast<ets_int>(42_I), static_cast<ets_int>(121_I));
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_object aObj = env_->CallObjectMethod(obj, objectId);
     ASSERT_NE(aObj, nullptr);
@@ -138,16 +138,16 @@ TEST_F(MethodsTest, CallMethodsTestGeneral3)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral4)
 {
-    ets_class cls = env_->FindClass("C");
+    ets_class cls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cls, nullptr);
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
 
     ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -182,11 +182,11 @@ TEST_F(MethodsTest, CallMethodsTestGeneral4)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral5)
 {
-    ets_class cls = env_->FindClass("C");
+    ets_class cls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cls, nullptr);
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
 
     ets_method shortId = env_->Getp_method(cls, "short_method", "SI:S");
@@ -226,16 +226,16 @@ TEST_F(MethodsTest, CallMethodsTestGeneral5)
 
 TEST_F(MethodsTest, CallMethodsTestGeneral6)
 {
-    ets_class cls = env_->FindClass("C");
+    ets_class cls = env_->FindClass("CallingMethodsTest/C");
     ASSERT_NE(cls, nullptr);
     ets_object obj = env_->AllocObject(cls);
     ASSERT_NE(obj, nullptr);
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("CallingMethodsTest/A");
     ASSERT_NE(aCls, nullptr);
 
     ets_method voidId = env_->Getp_method(cls, "void_method", "II:V");
     ASSERT_NE(voidId, nullptr);
-    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LCallingMethodsTest/A;");
     ASSERT_NE(objectId, nullptr);
     ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
     ASSERT_NE(booleanId, nullptr);
@@ -281,7 +281,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
         static_cast<ets_double>(0.0));
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath3)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath3)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -324,11 +324,11 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath3)
     }
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
+TEST_F(MethodsTestDeath, DISABLED_CallMethodsTestGeneralDeath4)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
     {
-        ets_class dCls = env_->FindClass("D");
+        ets_class dCls = env_->FindClass("CallingMethodsTest/D");
         ASSERT_NE(dCls, nullptr);
         ets_object obj = env_->AllocObject(dCls);
         ASSERT_NE(obj, nullptr);

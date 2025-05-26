@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -236,9 +236,9 @@ TEST(RuntimeAdapter, Fields)
     const auto fieldId = adapter.ResolveFieldIndex(storeToStatic, 0U);
     EXPECT_NE(fieldId, 0U);
     EXPECT_EQ(adapter.GetClassIdForField(storeToStatic, fieldId), reinterpret_cast<uint64_t>(recordWithStaticField));
-    uint32_t immutVar = 0;
-    const auto fieldPtr = adapter.ResolveField(storeToStatic, fieldId, false, &immutVar);
-    EXPECT_EQ(immutVar, 0U);
+    uint32_t classId = 0;
+    const auto fieldPtr = adapter.ResolveField(storeToStatic, fieldId, true, false, &classId);
+    EXPECT_EQ(classId, reinterpret_cast<uint64_t>(recordWithStaticField));
     EXPECT_EQ(adapter.GetClassForField(fieldPtr), recordWithStaticField);
     EXPECT_EQ(adapter.GetFieldTypeById(storeToStatic, fieldId), compiler::DataType::Type::INT64);
     EXPECT_EQ(adapter.IsFieldVolatile(fieldPtr), false);

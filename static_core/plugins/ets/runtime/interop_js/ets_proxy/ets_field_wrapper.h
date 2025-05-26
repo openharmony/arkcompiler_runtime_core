@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <node_api.h>
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/typed_pointer.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_set.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "runtime/include/field.h"
 
@@ -49,6 +50,21 @@ public:
         return field_;
     }
 
+    EtsMethodSet *GetGetterSetterMethod(int argc) const
+    {
+        return argc == 0 ? getter_ : setter_;
+    }
+
+    void SetSetterMethod(EtsMethodSet *setter)
+    {
+        this->setter_ = setter;
+    }
+
+    void SetGetterMethod(EtsMethodSet *getter)
+    {
+        this->getter_ = getter;
+    }
+
     uint32_t GetObjOffset() const
     {
         return objOffset_;
@@ -61,6 +77,7 @@ public:
     napi_property_descriptor MakeStaticProperty(EtsClassWrapper *owner, Field *field);
 
     EtsFieldWrapper() = default;
+    explicit EtsFieldWrapper(EtsClassWrapper *owner) : owner_(owner) {};
     ~EtsFieldWrapper() = default;
     NO_COPY_SEMANTIC(EtsFieldWrapper);
     NO_MOVE_SEMANTIC(EtsFieldWrapper);
@@ -79,6 +96,8 @@ private:
 
     EtsClassWrapper *owner_ {};
     Field *field_ {};
+    EtsMethodSet *getter_ {};
+    EtsMethodSet *setter_ {};
     TypedPointer<const Field, JSRefConvert> lazyRefconvertLink_ {};
 
     uint32_t objOffset_ {};

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ public:
         bytecodePc_.store(pc, std::memory_order_release);
     }
 
-    std::vector<Class *> GetClassesCopy()
+    std::vector<Class *> GetClassesCopy() const
     {
         std::vector<Class *> result;
         for (uint32_t i = 0; i < classes_.size();) {
@@ -150,14 +150,14 @@ public:
         return span;
     }
 
-    void Init(uintptr_t pc)
+    void Init(uintptr_t pc, uint64_t taken = 0, uint64_t notTaken = 0)
     {
         // Atomic with relaxed order reason: data race with pc_
         pc_.store(pc, std::memory_order_relaxed);
         // Atomic with relaxed order reason: data race with taken_counter_
-        takenCounter_.store(0, std::memory_order_relaxed);
+        takenCounter_.store(taken, std::memory_order_relaxed);
         // Atomic with relaxed order reason: data race with not_taken_counter_
-        notTakenCounter_.store(0, std::memory_order_relaxed);
+        notTakenCounter_.store(notTaken, std::memory_order_relaxed);
     }
 
     uintptr_t GetPc() const
@@ -208,12 +208,12 @@ public:
         return span;
     }
 
-    void Init(uintptr_t pc)
+    void Init(uintptr_t pc, uint64_t taken = 0)
     {
         // Atomic with relaxed order reason: data race with pc_
         pc_.store(pc, std::memory_order_relaxed);
         // Atomic with relaxed order reason: data race with taken_counter_
-        takenCounter_.store(0, std::memory_order_relaxed);
+        takenCounter_.store(taken, std::memory_order_relaxed);
     }
 
     uintptr_t GetPc() const
@@ -247,9 +247,19 @@ public:
     {
     }
 
-    Span<CallSiteInlineCache> GetInlineCaches()
+    Span<CallSiteInlineCache> GetInlineCaches() const
     {
         return inlineCaches_;
+    }
+
+    Span<BranchData> GetBranchData() const
+    {
+        return branchData_;
+    }
+
+    Span<ThrowData> GetThrowData() const
+    {
+        return throwData_;
     }
 
     CallSiteInlineCache *FindInlineCache(uintptr_t pc)
@@ -309,6 +319,25 @@ public:
         auto thr0w = FindThrowData(pc);
         ASSERT(thr0w != nullptr);
         return thr0w->GetTakenCounter();
+    }
+
+    template <typename Callback>
+    static ProfilingData *Make(mem::InternalAllocatorPtr allocator, size_t nInlineCaches, size_t nBranches,
+                               size_t nThrows, Callback &&callback)
+    {
+        auto vcallDataOffset = RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
+        auto branchesDataOffset =
+            RoundUp(vcallDataOffset + sizeof(CallSiteInlineCache) * nInlineCaches, alignof(BranchData));
+        auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * nBranches, alignof(ThrowData));
+        auto data = allocator->Alloc(throwsDataOffset + sizeof(ThrowData) * nThrows);
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto vcallsMem = reinterpret_cast<uint8_t *>(data) + vcallDataOffset;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto branchesMem = reinterpret_cast<uint8_t *>(data) + branchesDataOffset;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto throwsMem = reinterpret_cast<uint8_t *>(data) + throwsDataOffset;
+        return callback(data, vcallsMem, branchesMem, throwsMem);
     }
 
 private:

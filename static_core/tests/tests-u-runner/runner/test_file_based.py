@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -101,7 +101,10 @@ class TestFileBased(Test):
         profraw_file, profdata_file = None, None
         if self.test_env.config.general.coverage.use_llvm_cov:
             params = deepcopy(params)
-            profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
+            if self.test_env.config.general.coverage.llvm_cov_report_by_components:
+                profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths(name)
+            else:
+                profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
             params.env['LLVM_PROFILE_FILE'] = profraw_file
 
         cmd = self.test_env.cmd_prefix + [params.executor]
@@ -174,7 +177,7 @@ class TestFileBased(Test):
 
     def run_runtime(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
-        ark_flags = []
+        ark_flags: List[str] = []
         ark_flags.extend(self.ark_extra_options)
         ark_flags.extend(self.runtime_args)
         if self.test_env.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
@@ -194,6 +197,12 @@ class TestFileBased(Test):
 
         if self.test_env.config.ark.interpreter_type is not None:
             ark_flags.extend([f'--interpreter-type={self.test_env.config.ark.interpreter_type}'])
+
+        # Runtime treats the entry panda file as boot file if the option `--panda-files` was not specify.
+        # Here we prevent this by manually adding `--panda-file` option with entry file
+        panda_files_opt_name = '--panda-files'
+        if not any(opt.startswith(panda_files_opt_name) for opt in ark_flags):
+            ark_flags.append(f'{panda_files_opt_name}={test_abc}')
 
         ark_flags.extend([test_abc, self.main_entry_point])
 

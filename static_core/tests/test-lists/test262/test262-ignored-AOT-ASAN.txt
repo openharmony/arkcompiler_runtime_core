@@ -52,12 +52,3 @@ built-ins/String/prototype/toLocaleLowerCase/special_casing.js
 intl402/Number/prototype/toLocaleString/returns-same-results-as-NumberFormat.js
 # Timeout #9959
 built-ins/RegExp/S15.10.2_A1_T1.js
-# #10404
-built-ins/RegExp/dotall/with-dotall-unicode.js
-
-# #10175
-harness/compare-array-falsy-arguments.js
-# 10037
-intl402/DateTimeFormat/date-time-options.js
-# 10036
-intl402/DateTimeFormat/constructor-no-instanceof.js

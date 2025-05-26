@@ -1,0 +1,84 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # functions
+  - import: |-
+      import {decode} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertEQ( decode("some%20str"), "some str" )
+
+  - import: |-
+      import {encode} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertEQ( encode("some str"), "some%20str" )
+
+  - import: |-
+      import {encodeComp} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertEQ( encodeComp("some str"), "some%20str" )
+
+  # classes
+  - import: |-
+      import {iteratorRes} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( iteratorRes() instanceof IteratorResult )
+
+  - import: |-
+      import {json} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( json() instanceof JSON )
+
+  - import: |-
+      import {promise} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( promise() instanceof Promise )
+
+  - import: |-
+      import {rangeError} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( rangeError() instanceof RangeError )
+      assertTrue( rangeError() instanceof Error )
+
+  - import: |-
+      import {referenceError} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( referenceError() instanceof ReferenceError )
+      assertTrue( referenceError() instanceof Error )
+
+  - import: |-
+      import {syntaxError} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( syntaxError() instanceof SyntaxError )
+      assertTrue( syntaxError() instanceof Error )
+
+  - import: |-
+      import {uriError} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( uriError() instanceof URIError )
+      assertTrue( uriError() instanceof Error )
+
+  - import: |-
+      import {regexp} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( regexp() instanceof RegExp )
+
+  - import: |-
+      import {weakMap} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( weakMap() instanceof WeakMap )
+
+  - import: |-
+      import {weakSet} from "./modules/stdlib_implicit_import.ets"
+    call: |-
+      assertTrue( weakSet() instanceof WeakSet )

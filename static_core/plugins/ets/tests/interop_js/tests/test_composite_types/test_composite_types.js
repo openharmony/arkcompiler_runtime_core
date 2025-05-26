@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.compositeTypesTestClassInstance =
-	exports.CompositeTypesTestClass =
-	exports.returnInterface =
-	exports.returnRecord =
-	exports.returnNumArray =
-	exports.returnStrArray =
-	exports.returnTuple =
-	exports.isTTupleTS =
-		void 0;
 
 const TEST_STRING = 'This is a test string';
 const TEST_INT = 100;
 const TEST_BOOLEAN = true;
-const isTTupleTS = (testedVar) => {
+export const isTTupleTS = (testedVar) => {
 	return (
 		Array.isArray(testedVar) &&
 		testedVar.length === 3 &&
@@ -36,23 +26,19 @@ const isTTupleTS = (testedVar) => {
 		typeof testedVar[2] === 'boolean'
 	);
 };
-exports.isTTupleTS = isTTupleTS;
 const testTuple = [TEST_STRING, TEST_INT, TEST_BOOLEAN];
-const returnTuple = function returnTuple() {
+export const returnTuple = function returnTuple() {
 	return testTuple;
 };
-exports.returnTuple = returnTuple;
-const returnStrArray = function returnArray() {
+export const returnStrArray = function returnArray() {
 	const testArray = ['One', 'Two', 'Three'];
 	return testArray;
 };
-exports.returnStrArray = returnStrArray;
-const returnNumArray = function returnArrayNum() {
+export const returnNumArray = function returnArrayNum() {
 	const testArray = [1, 2, 3];
 	return testArray;
 };
-exports.returnNumArray = returnNumArray;
-const returnRecord = function returnRecord() {
+export const returnRecord = function returnRecord() {
 	const testRecord = {
 		one: 1,
 		two: 2,
@@ -60,8 +46,7 @@ const returnRecord = function returnRecord() {
 	};
 	return testRecord;
 };
-exports.returnRecord = returnRecord;
-const returnInterface = function returnInterface(returnThreeDimensioned) {
+export const returnInterface = function returnInterface(returnThreeDimensioned) {
 	const testTwoDimensioned = {
 		width: 100,
 		length: 40,
@@ -76,23 +61,21 @@ const returnInterface = function returnInterface(returnThreeDimensioned) {
 	}
 	return testTwoDimensioned;
 };
-exports.returnInterface = returnInterface;
-class CompositeTypesTestClass {
+export class CompositeTypesTestClass {
 	constructor() {
-		this.returnTuple = exports.returnTuple.bind(this);
-		this.returnStrArray = exports.returnStrArray.bind(this);
-		this.returnNumArray = exports.returnNumArray.bind(this);
-		this.returnRecord = exports.returnRecord.bind(this);
-		this.returnInterface = exports.returnInterface.bind(this);
+		this.returnTuple = returnTuple.bind(this);
+		this.returnStrArray = returnStrArray.bind(this);
+		this.returnNumArray = returnNumArray.bind(this);
+		this.returnRecord = returnRecord.bind(this);
+		this.returnInterface = returnInterface.bind(this);
 	}
 }
-exports.CompositeTypesTestClass = CompositeTypesTestClass;
-exports.compositeTypesTestClassInstance = new CompositeTypesTestClass();
+export let compositeTypesTestClassInstance = new CompositeTypesTestClass();
 const test = () => {
-	console.log([exports.returnTuple, exports.returnStrArray, exports.returnNumArray, exports.returnRecord].map((x) => x()));
+	print([returnTuple, returnStrArray, returnNumArray, returnRecord].map((x) => x()));
 };
 const testInterface = () => {
-	console.log((0, exports.returnInterface)(true), (0, exports.returnInterface)(false));
+	print((0, returnInterface)(true), (0, returnInterface)(false));
 };
 test();
 testInterface();

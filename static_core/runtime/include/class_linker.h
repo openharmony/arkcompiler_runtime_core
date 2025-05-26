@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,10 +91,10 @@ public:
     Method *GetMethod(const Method &caller, panda_file::File::EntityId id,
                       ClassLinkerErrorHandler *errorHandler = nullptr);
 
-    Field *GetField(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *context = nullptr,
-                    ClassLinkerErrorHandler *errorHandler = nullptr);
+    Field *GetField(const panda_file::File &pf, panda_file::File::EntityId id, bool isStatic,
+                    ClassLinkerContext *context = nullptr, ClassLinkerErrorHandler *errorHandler = nullptr);
 
-    Field *GetField(const Method &caller, panda_file::File::EntityId id,
+    Field *GetField(const Method &caller, panda_file::File::EntityId id, bool isStatic,
                     ClassLinkerErrorHandler *errorHandler = nullptr);
 
     PANDA_PUBLIC_API void AddPandaFile(std::unique_ptr<const panda_file::File> &&pf,
@@ -332,10 +332,10 @@ private:
                                   const uint8_t *descriptor);
 
     Field *GetFieldById(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
-                        ClassLinkerErrorHandler *errorHandler);
+                        ClassLinkerErrorHandler *errorHandler, bool isStatic);
 
     Field *GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
-                               ClassLinkerErrorHandler *errorHandler);
+                               ClassLinkerErrorHandler *errorHandler, bool isStatic);
 
     Method *GetMethod(const Class *klass, const panda_file::MethodDataAccessor &methodDataAccessor,
                       ClassLinkerErrorHandler *errorHandler);
@@ -357,6 +357,8 @@ private:
 
     std::optional<Span<Class *>> LoadInterfaces(panda_file::ClassDataAccessor *cda, ClassLinkerContext *context,
                                                 ClassLinkerErrorHandler *errorHandler);
+
+    void FreeITableAndInterfaces(ITable itable, Span<Class *> &interfaces);
 
     [[nodiscard]] bool LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler);
 

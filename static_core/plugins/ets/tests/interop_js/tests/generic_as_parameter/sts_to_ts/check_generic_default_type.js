@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ const {
     jsObj,
     jsTuple,
     getFunction,
-} = require('generic_as_parameter.test.js');
+} = require('generic_as_parameter.test.abc');
 
 const genericDefaultInt = getFunction('genericDefaultInt');
 const genericDefaultString = getFunction('genericDefaultString');
@@ -65,7 +65,7 @@ function checkGenericDefaultObj() {
 
 function checkGenericDefaultTuple() {
     const res = genericDefaultTuple(jsTuple);
-    ASSERT_TRUE(checkArray(res) && res[0] === jsTuple[0] && res[1] === jsTuple[1]);
+    ASSERT_TRUE(checkObj(res) && res.$0 === jsTuple[0] && res.$1 === jsTuple[1]);
 }
 
 function checkGenericDefaultUnion() {
@@ -96,7 +96,7 @@ function checkGenericDefaultObjCallFromEts() {
 
 function checkGenericDefaultTupleCallFromEts() {
     const res = genericDefaultTupleCallFromEts();
-    ASSERT_TRUE(checkArray(res) && res[0] === jsTuple[0] && res[1] === jsTuple[1]);
+    ASSERT_TRUE(checkObj(res) && res.$0 === jsTuple[0] && res.$1 === jsTuple[1]);
 }
 
 function checkGenericDefaultUnionCallFromEts() {

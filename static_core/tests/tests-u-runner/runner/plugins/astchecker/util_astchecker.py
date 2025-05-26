@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -90,7 +90,7 @@ class UtilASTChecker:
             self.skip_warnings = False
 
     def __init__(self) -> None:
-        self.regex = re.compile(r'/\*\s*@@\s*(?P<pattern>.*?)\s*\*/', re.DOTALL)
+        self.regex = re.compile(r'/\*\s*@@\s*(?P<pattern>.*?)\s*\*/[ ]*', re.DOTALL)
         self.reset_skips()
 
     @staticmethod
@@ -156,7 +156,7 @@ class UtilASTChecker:
         return self.skip_options["SkipWarnings"]
 
     def parse_define_statement(self, match: re.Match[str],
-                               link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]],
+                               link_defs_map: Dict[str, List[Tuple[UtilASTChecker._TestType, str]]],
                                link_sources_map: Dict[str, re.Match[str]]) -> Optional[UtilASTChecker._TestCase]:
         """
         Parses `@<id> <pattern-type> <pattern>`
@@ -167,26 +167,23 @@ class UtilASTChecker:
         if sep1 == -1 or sep2 == -1:
             Log.exception_and_raise(_LOGGER, 'Wrong definition format: expected '
                                              f'`/* @@@ <id> <pattern-type> <pattern> */`, got /* @@@ {match_str} */')
-        name = match_str[:sep1]
         pattern_type = UtilASTChecker._TestType(match_str[sep1 + 1:sep2])
         pattern = match_str[sep2 + 1:]
 
-        if name in link_defs_map:
-            line, col = self.get_match_location(match)
-            Log.exception_and_raise(_LOGGER, f'Link {name} (at location {line}:{col}) is already defined')
+        name = match_str[:sep1]
+        link_def = link_defs_map.get(name, [])
+        link_def.append((pattern_type, pattern))
+        link_defs_map[name] = link_def
 
         if name in link_sources_map:
             match = link_sources_map[name]
-            del link_sources_map[name]
             line, col = self.get_match_location(match)
             return self.create_test_case(name, UtilASTChecker._Pattern(pattern_type, pattern, line, col))
-
-        link_defs_map[name] = (pattern_type, pattern)
         return None
 
     def parse_match_statement(self, match: re.Match[str],
-                              link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]],
-                              link_sources_map: Dict[str, re.Match[str]]) -> Optional[UtilASTChecker._TestCase]:
+                              link_defs_map: Dict[str, List[Tuple[UtilASTChecker._TestType, str]]],
+                              link_sources_map: Dict[str, re.Match[str]]) -> List[UtilASTChecker._TestCase]:
         """
         Parses `<pattern-type> <pattern>` and `<id>`
         """
@@ -203,19 +200,20 @@ class UtilASTChecker:
                 Log.exception_and_raise(_LOGGER, f'Link {name} (at location {line}:{col}) is already defined')
 
             if name in link_defs_map:
-                pattern_type, pattern = link_defs_map[name]
-                del link_defs_map[name]
-                line, col = self.get_match_location(match)
-                return self.create_test_case(name, UtilASTChecker._Pattern(pattern_type, pattern, line, col))
-
+                result = []
+                for (pattern_type, pattern) in link_defs_map[name]:
+                    line, col = self.get_match_location(match)
+                    result.append(
+                        self.create_test_case(name, UtilASTChecker._Pattern(pattern_type, pattern, line, col)))
+                return result
             link_sources_map[name] = match
-            return None
+            return []
 
         # parse `<pattern-type> <pattern>`
         pattern_type = UtilASTChecker._TestType(str_match[:sep])
         pattern = str_match[sep + 1:]
         line, col = self.get_match_location(match)
-        return self.create_test_case(None, UtilASTChecker._Pattern(pattern_type, pattern, line, col))
+        return [self.create_test_case(None, UtilASTChecker._Pattern(pattern_type, pattern, line, col))]
 
     def parse_skip_statement(self, match: re.Match[str]) -> None:
         """
@@ -275,27 +273,27 @@ class UtilASTChecker:
         """
         self.reset_skips()
         test_text = file.read()
-        link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]] = {}
+        link_defs_map: Dict[str, List[Tuple[UtilASTChecker._TestType, str]]] = {}
         link_sources_map: Dict[str, re.Match[str]] = {}
         test_cases = set()
         matches = list(re.finditer(self.regex, test_text))
         for match in matches:
             pattern = match.group('pattern')
+            tests = []
             if pattern.startswith('@'):
                 test = self.parse_define_statement(match, link_defs_map, link_sources_map)
+                if test is not None:
+                    tests.append(test)
             elif pattern.startswith('?'):
                 test = self.parse_match_at_loc_statement(match)
+                if test is not None:
+                    tests.append(test)
             elif pattern.startswith('#'):
-                test = None
                 self.parse_skip_statement(match)
             else:
-                test = self.parse_match_statement(match, link_defs_map, link_sources_map)
-            if test is not None:
+                tests = self.parse_match_statement(match, link_defs_map, link_sources_map)
+            for test in tests:
                 test_cases.add(test)
-
-        if len(link_defs_map) or len(link_sources_map):
-            Log.exception_and_raise(_LOGGER, 'link defined twice')
-
         test_case_list = UtilASTChecker.TestCasesList(test_cases)
         test_case_list.skip_errors = self.check_skip_error()
         test_case_list.skip_warnings = self.check_skip_warning()
@@ -361,7 +359,7 @@ class UtilASTChecker:
             if actual_error[0].split()[0] == "Warning:" and not self.check_skip_warning():
                 Log.all(_LOGGER, f'Unexpected warning {actual_error}')
                 failed_tests += 1
-            if ((actual_error[0].split()[0] == "TypeError:" or actual_error[0].split()[0] == "SyntaxError:")
+            if (actual_error[0].split()[0] in ("TypeError:", "SyntaxError:", "Error:")
                     and not self.check_skip_error()):
                 Log.all(_LOGGER, f'Unexpected error {actual_error}')
                 failed_tests += 1

@@ -22,33 +22,36 @@
 namespace ark {
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                             std::optional<EntrypointInfo> &&epInfo)
+                             std::optional<EntrypointInfo> &&epInfo, Type type)
 {
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
                                          ark::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
-                                         std::move(epInfo));
+                                         std::move(epInfo), type);
     co->Initialize();
     return co;
 }
 
 Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                      ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&epInfo)
+                     std::optional<EntrypointInfo> &&epInfo, Type type)
     : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, threadLang),
       name_(std::move(name)),
       context_(context),
-      startSuspended_(epInfo.has_value())
+      manager_(static_cast<CoroutineManager *>(GetVM()->GetThreadManager())),
+      startSuspended_(epInfo.has_value()),
+      type_(type)
 {
     ASSERT(vm != nullptr);
     ASSERT(context != nullptr);
+    ASSERT(manager_ != nullptr);
     SetEntrypointData(std::move(epInfo));
-    coroutineId_ = static_cast<CoroutineManager *>(GetVM()->GetThreadManager())->AllocateCoroutineId();
+    coroutineId_ = GetManager()->AllocateCoroutineId();
 }
 
 Coroutine::~Coroutine()
 {
-    static_cast<CoroutineManager *>(GetVM()->GetThreadManager())->FreeCoroutineId(coroutineId_);
+    GetManager()->FreeCoroutineId(coroutineId_);
 }
 
 void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
@@ -83,6 +86,7 @@ void Coroutine::CleanUp()
     name_ = "";
     entrypoint_ = std::monostate();
     startSuspended_ = false;
+    worker_ = nullptr;
     context_->CleanUp();
 }
 
@@ -105,6 +109,21 @@ Coroutine::Status Coroutine::GetCoroutineStatus() const
 void Coroutine::SetCoroutineStatus(Coroutine::Status newStatus)
 {
     context_->SetStatus(newStatus);
+}
+
+void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
+{
+    // issue required status change events to the CoroutineManager
+    bool hasWorker = (GetWorker() != nullptr);
+    bool wasActive = hasWorker && (oldStatus == Coroutine::Status::RUNNABLE || oldStatus == Coroutine::Status::RUNNING);
+    bool isActive = hasWorker && (newStatus == Coroutine::Status::RUNNABLE || newStatus == Coroutine::Status::RUNNING);
+    if (UNLIKELY(wasActive != isActive)) {
+        if (wasActive && !isActive) {
+            GetManager()->OnCoroBecameNonActive(this);
+        } else if (!wasActive && isActive) {
+            GetManager()->OnCoroBecameActive(this);
+        }
+    }
 }
 
 void Coroutine::Destroy()
@@ -148,6 +167,29 @@ void Coroutine::RequestCompletion([[maybe_unused]] Value returnValue)
 {
     auto *e = GetCompletionEvent();
     e->Happen();
+}
+
+bool Coroutine::IsActive()
+{
+    bool workerAssigned = (GetWorker() != nullptr);
+    auto status = GetCoroutineStatus();
+    bool isRunnableOrRunning = (status == Status::RUNNABLE) || (status == Status::RUNNING);
+    return (workerAssigned && isRunnableOrRunning);
+}
+
+void Coroutine::SetWorker(CoroutineWorker *w)
+{
+    auto *oldWorker = worker_;
+    worker_ = w;
+    if (w != oldWorker) {
+        OnHostWorkerChanged();
+    }
+    // being ACTIVE requires an assigned worker!
+    if ((oldWorker == nullptr) && (w != nullptr)) {
+        GetManager()->OnCoroBecameActive(this);
+    } else if ((oldWorker != nullptr) && (w == nullptr)) {
+        GetManager()->OnCoroBecameNonActive(this);
+    }
 }
 
 std::ostream &operator<<(std::ostream &os, Coroutine::Status status)

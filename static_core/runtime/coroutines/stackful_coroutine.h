@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ public:
      * (stack + stack_size_bytes)
      */
     explicit StackfulCoroutineContext(uint8_t *stack, size_t stackSizeBytes);
-    ~StackfulCoroutineContext() override = default;
+    ~StackfulCoroutineContext() override;
 
     /**
      * Prepares the context for execution, links it to the managed context part (Coroutine instance) and registers the
@@ -92,20 +92,17 @@ public:
     template <class L>
     bool ExecuteOnThisContext(L *lambda, StackfulCoroutineContext *requester)
     {
+        ASSERT_PRINT(false, "This method should not be called");
         ASSERT(requester != nullptr);
         return rpcCallContext_.Execute(lambda, &requester->context_, &context_);
-    }
-
-    /// assign this coroutine to a worker thread
-    void SetWorker(StackfulCoroutineWorker *w)
-    {
-        worker_ = w;
     }
 
     /// get the currently assigned worker thread
     StackfulCoroutineWorker *GetWorker() const
     {
-        return worker_;
+        auto *coro = GetCoroutine();
+        ASSERT(coro != nullptr);
+        return reinterpret_cast<StackfulCoroutineWorker *>(coro->GetWorker());
     }
 
     /// @return current coroutine's affinity bits
@@ -121,6 +118,7 @@ public:
 
 protected:
     void SetStatus(Coroutine::Status newStatus) override;
+    StackfulCoroutineManager *GetManager() const;
 
 private:
     void ThreadProcImpl();
@@ -177,8 +175,10 @@ private:
     size_t stackSizeBytes_ = 0;
     fibers::FiberContext context_;
     Coroutine::Status status_ {Coroutine::Status::CREATED};
-    StackfulCoroutineWorker *worker_ = nullptr;
     stackful_coroutines::AffinityMask affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
+#if defined(PANDA_TSAN_ON)
+    void *tsanFiberCtx_ {nullptr};
+#endif /* PANDA_TSAN_ON */
 };
 
 }  // namespace ark

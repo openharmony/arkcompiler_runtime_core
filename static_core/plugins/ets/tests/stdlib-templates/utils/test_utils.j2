@@ -36,4 +36,6 @@ function parametrize<T>(name: string, inputs: T[], cb: (x: T) => number): () => 
     return inner
 }
 
-const boolToResult = (x: boolean, inverse: boolean = false): number => (inverse ? !x : x) ? success : fail;
+const boolToResult = (x: boolean, inverse?: boolean): number => (
+    ((inverse === undefined ? false : inverse) ? !x : x) ? 0 : 1
+)

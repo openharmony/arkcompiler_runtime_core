@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,37 +17,22 @@ if (NOT TARGET es2panda)
 endif()
 
 add_custom_target(ets_gtests)
-add_dependencies(ets_tests ets_gtests)
+add_custom_target(ets_panda_gtests)
+add_dependencies(ets_tests ets_gtests ets_panda_gtests)
 
 include(cmake/native_gtest.cmake)
+
+set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
 
 add_panda_assembly(TARGET mock_stdlib SOURCE integrational/mock_stdlib.pa)
 
 function(panda_ets_add_gtest)
     panda_add_gtest(
-        TEST_GROUP ets_tests
+        TEST_GROUP ets_panda_gtests
         STASH_LIST ets_stash_list
         ${ARGV}
     )
 endfunction()
-
-panda_ets_add_gtest(
-    NO_CORES
-    NAME ets_tests_runtime
-    SOURCES
-        runtime/ets_vm_test.cpp
-        runtime/ets_vm_init_prealloc_test.cpp
-    LIBRARIES
-        arkbase arkfile arkruntime
-    INCLUDE_DIRS
-        ${PANDA_ETS_PLUGIN_SOURCE}/runtime
-    SANITIZERS
-        ${PANDA_SANITIZERS_LIST}
-    PANDA_STD_LIB
-        $<TARGET_PROPERTY:mock_stdlib,FILE>
-    DEPS_TARGETS
-        mock_stdlib
-)
 
 panda_add_asm_file(
     FILE ${PANDA_ETS_PLUGIN_SOURCE}/tests/integrational/empty_program.pa
@@ -58,6 +43,8 @@ panda_add_asm_file(
 )
 
 add_dependencies(tests ets_tests)
+
+add_custom_target(ets_deterministic_tests)
 
 function(run_deterministic_tests ETS_SRC TARGET)
     set(oneValueArgs ITER_NUM)
@@ -97,8 +84,11 @@ function(run_deterministic_tests ETS_SRC TARGET)
         COMMENT "Running ${ETS_SRC} determenistic compilation test"
         DEPENDS ${dependencies}
     )
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_deterministic_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_deterministic_tests)
+add_custom_target(ets_code_verifier_tests)
 
 function(run_ets_code_verifier ETS_SRC WORK_DIR TARGET)
     if (NOT TARGET verifier)
@@ -111,7 +101,7 @@ function(run_ets_code_verifier ETS_SRC WORK_DIR TARGET)
     compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
 
     set(VERIFIER_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
         ${OUTPUT_ABC}
     )
@@ -122,194 +112,171 @@ function(run_ets_code_verifier ETS_SRC WORK_DIR TARGET)
         DEPENDS verifier etsstdlib ${ABC_TARGET}
     )
 
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_code_verifier_tests ${TARGET})
 endfunction()
 
-function(compile_int_ets_export_files INTERPRETER_TYPE WORK_DIR TARGET EXTRA_BOOT_PANDAFILES)
-    set(oneValueArgs OPT_LEVEL)
-    set(multiValueArgs EXPORT_FILES)
-    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+add_dependencies(ets_tests ets_code_verifier_tests)
 
-    set(COUNTER 0)
-    set(RESULT "")
-    foreach(ARG_EXPORT_FILE IN LISTS ARG_EXPORT_FILES)
-        get_filename_component(SRC_EXPORT_FNAME ${ARG_EXPORT_FILE} NAME)
-        set(OUTPUT_EXPORT_ABC ${WORK_DIR}/${SRC_EXPORT_FNAME}-${INTERPRETER_TYPE}.abc)
-        set(ABC_EXPORT_TARGET ${TARGET}-export-ets-es2panda_${COUNTER})
-        math(EXPR COUNTER "${COUNTER} + 1")
-        compile_ets_code(${ARG_EXPORT_FILE} ${OUTPUT_EXPORT_ABC} ${ABC_EXPORT_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL} COMPILER_EXTRA_OPTIONS "--ets-module")
-        set(RESULT ${RESULT}:${OUTPUT_EXPORT_ABC})
-    endforeach()
-
-    set(${EXTRA_BOOT_PANDAFILES} ${RESULT} PARENT_SCOPE)
-endfunction()
-
-function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
+function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
     if (NOT TARGET es2panda)
         return()
     endif()
 
-    set(oneValueArgs OPT_LEVEL EXPORT_FILE)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS EXPORT_FILES)
+    set(oneValueArgs ENTRYPOINT ETSPATH OPT_LEVEL)
+    set(multiValueArgs ARKTS_CONFIGS RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
-    set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-${INTERPRETER_TYPE}.abc)
-    set(ABC_TARGET ${TARGET}-ets-es2panda)
-    compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
-
-    if (DEFINED ARG_EXPORT_FILES)
-        compile_int_ets_export_files(${INTERPRETER_TYPE} ${WORK_DIR} ${TARGET} EXTRA_BOOT_PANDAFILES OPT_LEVEL ${ARG_OPT_LEVEL} EXPORT_FILES ${ARG_EXPORT_FILES})
-    endif()
-
-    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
-    file(MAKE_DIRECTORY "${BUILD_DIR}")
-
-    set(BUILD_LOG   "${BUILD_DIR}/build.log")
-    set(BUILD_OUT   "${BUILD_DIR}/build.out")
-    set(BUILD_ERR   "${BUILD_DIR}/build.err")
-    set(CAT_PROGRAM 'cat')
-
-    set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc${EXTRA_BOOT_PANDAFILES}
-        --load-runtimes=ets
-        --compiler-enable-jit=false
-        --interpreter-type=${INTERPRETER_TYPE}
-        ${ARG_RUNTIME_EXTRA_OPTIONS}
-        ${OUTPUT_ABC}
-        ETSGLOBAL::main
-        --log-file ${BUILD_LOG}
+    set(ABC_TARGET ${TARGET}-abc)
+    compile_ets_sources(${WORK_DIR} ${ABC_TARGET} ABC_FILES "${ETS_SOURCES}"
+                        ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
+                        ETSPATH ${ARG_ETSPATH}
+                        OPT_LEVEL ${ARG_OPT_LEVEL}
     )
 
-    add_custom_target(${TARGET}
-        COMMENT "Running ark INT(${INTERPRETER_TYPE}) for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
-        DEPENDS ark etsstdlib ${ABC_TARGET}
+    list(GET ABC_FILES 0 ENTRY_ABC)
+    string(REPLACE ";" ":" ABC_FILES "${ABC_FILES}")
+
+    if(NOT DEFINED ARG_ENTRYPOINT)
+        list(GET ETS_SOURCES 0 ENTRY_SOURCE)
+        get_filename_component(ARG_ENTRYPOINT ${ENTRY_SOURCE} NAME_WE)
+    endif()
+
+    set(RUNTIME_ARGUMENTS
+        --boot-panda-files=${BOOT_PANDA_FILES}
+        --panda-files=${ABC_FILES}
+        --load-runtimes=ets
+        --verification-enabled=true
+        --verification-mode=on-the-fly
+        ${ARG_RUNTIME_EXTRA_OPTIONS}
+        ${ENTRY_ABC}
+        "${ARG_ENTRYPOINT}.ETSGLOBAL::main"
     )
 
     string(FIND "${RUNTIME_ARGUMENTS}" "--gc-type" GC_TYPE_SET)
     if(NOT PANDA_LLVM_INTERPRETER AND ${GC_TYPE_SET} EQUAL -1)
-        add_custom_target(${TARGET}-gc
-            COMMENT "Running ark INT(${INTERPRETER_TYPE}) for ets file: ${OUTPUT_ABC}"
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (false)
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw 1>"${BUILD_OUT}" 2>>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
-            DEPENDS ark etsstdlib ${ABC_TARGET}
+        add_custom_target(${TARGET}
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw
         )
-        add_dependencies(ets_tests ${TARGET}-gc)
+    else()
+        add_custom_target(${TARGET}
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
+        )
     endif()
-
-    set(COUNTER 0)
-    foreach(ARG_EXPORT_FILE IN LISTS ARG_EXPORT_FILES)
-        set(ABC_EXPORT_TARGET ${TARGET}-export-ets-es2panda_${COUNTER})
-        math(EXPR COUNTER "${COUNTER} + 1")
-        add_dependencies(${TARGET} ${ABC_EXPORT_TARGET})
-        if(NOT PANDA_LLVM_INTERPRETER AND ${GC_TYPE_SET} EQUAL -1)
-            add_dependencies(${TARGET}-gc ${ABC_EXPORT_TARGET})
-        endif()
-    endforeach()
-
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(${TARGET} ark etsstdlib ${ABC_TARGET})
 endfunction()
 
-function(run_int_ets_code ETS_SRC WORK_DIR TARGET)
-    set(oneValueArgs OPT_LEVEL)
-    set(multiValueArgs RUNTIME_EXTRA_OPTIONS EXPORT_FILES)
+add_custom_target(ets_run_int_ets_code_tests)
+
+# NOTE(vpukhov): use a common format
+function(run_int_ets_code TARGET WORK_DIR)
+    set(oneValueArgs ENTRYPOINT ETSPATH OPT_LEVEL)
+    set(multiValueArgs SOURCES ARKTS_CONFIGS RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     add_custom_target(${TARGET})
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_run_int_ets_code_tests ${TARGET})
 
-    run_int_ets_code_impl(cpp ${ETS_SRC} ${WORK_DIR} ${TARGET}-cpp OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILES ${ARG_EXPORT_FILES})
-    run_int_ets_code_impl(irtoc ${ETS_SRC} ${WORK_DIR} ${TARGET}-irtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILES ${ARG_EXPORT_FILES})
-    add_dependencies(${TARGET} ${TARGET}-irtoc ${TARGET}-cpp)
+    set(arkopts_cpp
+        --compiler-enable-jit=false
+        --interpreter-type=cpp
+        --profilesaver-enabled=true
+        ${ARG_RUNTIME_EXTRA_OPTIONS}
+    )
+    run_ets_code_impl(${TARGET}-cpp ${WORK_DIR} "${ARG_SOURCES}"
+                      ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
+                      ETSPATH ${ARG_ETSPATH}
+                      ENTRYPOINT ${ARG_ENTRYPOINT}
+                      OPT_LEVEL ${ARG_OPT_LEVEL}
+                      RUNTIME_EXTRA_OPTIONS "${arkopts_cpp}"
+    )
+    add_dependencies(${TARGET} ${TARGET}-cpp)
+
+    set(arkopts_irtoc
+        --compiler-enable-jit=false
+        --interpreter-type=irtoc
+        --profilesaver-enabled=true
+        ${ARG_RUNTIME_EXTRA_OPTIONS}
+    )
+    run_ets_code_impl(${TARGET}-irtoc ${WORK_DIR} "${ARG_SOURCES}"
+                      ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
+                      ETSPATH ${ARG_ETSPATH}
+                      ENTRYPOINT ${ARG_ENTRYPOINT}
+                      OPT_LEVEL ${ARG_OPT_LEVEL}
+                      RUNTIME_EXTRA_OPTIONS "${arkopts_irtoc}"
+    )
+    add_dependencies(${TARGET} ${TARGET}-irtoc)
+
     if (PANDA_LLVM_INTERPRETER)
-        run_int_ets_code_impl(llvm ${ETS_SRC} ${WORK_DIR} ${TARGET}-llvmirtoc OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS} EXPORT_FILES ${ARG_EXPORT_FILES})
+        set(arkopts_llvm
+            --compiler-enable-jit=false
+            --interpreter-type=llvm
+            --profilesaver-enabled=true
+            ${ARG_RUNTIME_EXTRA_OPTIONS}
+        )
+        run_ets_code_impl(${TARGET}-llvmirtoc ${WORK_DIR} "${ARG_SOURCES}"
+                          ARKTS_CONFIGS ${ARG_ARKTS_CONFIGS}
+                          ETSPATH ${ARG_ETSPATH}
+                          ENTRYPOINT ${ARG_ENTRYPOINT}
+                          OPT_LEVEL ${ARG_OPT_LEVEL}
+                          RUNTIME_EXTRA_OPTIONS "${arkopts_llvm}"
+        )
         add_dependencies(${TARGET} ${TARGET}-llvmirtoc)
     endif()
 endfunction()
 
+add_dependencies(ets_tests ets_run_int_ets_code_tests)
+add_custom_target(ets_run_jit_ets_code_tests)
+
 function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
-    set(oneValueArgs OPT_LEVEL)
+    set(oneValueArgs ENTRYPOINT OPT_LEVEL)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
-    set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-jit.abc)
-    set(ABC_TARGET ${TARGET}-ets-es2panda)
-    compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
-
-    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
-    set(BUILD_LOG   "${BUILD_DIR}/build.log")
-    set(BUILD_OUT   "${BUILD_DIR}/build.out")
-    set(BUILD_ERR   "${BUILD_DIR}/build.err")
-    set(CAT_PROGRAM 'cat')
-
-    set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
-        --load-runtimes=ets
+    set(arkopts
         --compiler-enable-jit=true
         --no-async-jit=true
         --compiler-hotness-threshold=0
         --compiler-ignore-failures=false
         ${ARG_RUNTIME_EXTRA_OPTIONS}
-        ${OUTPUT_ABC}
-        ETSGLOBAL::main
-        --log-file ${BUILD_LOG}
     )
-
-    add_custom_target(${TARGET}
-        COMMENT "Running ark JIT for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
-        DEPENDS ark etsstdlib ${ABC_TARGET}
+    run_ets_code_impl(${TARGET} ${WORK_DIR} ${ETS_SRC}
+                      ENTRYPOINT ${ARG_ENTRYPOINT}
+                      OPT_LEVEL ${ARG_OPT_LEVEL}
+                      RUNTIME_EXTRA_OPTIONS "${arkopts}"
     )
-
-    add_dependencies(ets_tests ${TARGET})
 endfunction()
 
+add_dependencies(ets_tests ets_run_jit_ets_code_tests)
+add_custom_target(ets_run_jit_osr_ets_code_tests)
+
 function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
-    set(oneValueArgs OPT_LEVEL)
+    set(oneValueArgs ENTRYPOINT OPT_LEVEL)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
-    set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-jit.abc)
-    set(ABC_TARGET ${TARGET}-ets-es2panda)
-    compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
-
-    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
-    set(BUILD_LOG   "${BUILD_DIR}/build.log")
-    set(BUILD_OUT   "${BUILD_DIR}/build.out")
-    set(BUILD_ERR   "${BUILD_DIR}/build.err")
-    set(CAT_PROGRAM 'cat')
-
-    set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
-        --load-runtimes=ets
+    set(arkopts
         --compiler-enable-jit=true
         --compiler-hotness-threshold=2
         --compiler-enable-osr=true
         --compiler-ignore-failures=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
-        ${OUTPUT_ABC}
-        ETSGLOBAL::main
-        --log-file ${BUILD_LOG}
     )
-
-    add_custom_target(${TARGET}
-        COMMENT "Running ark JIT for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
-        DEPENDS ark etsstdlib ${ABC_TARGET}
+    run_ets_code_impl(${TARGET} ${WORK_DIR} ${ETS_SRC}
+                      ENTRYPOINT ${ARG_ENTRYPOINT}
+                      OPT_LEVEL ${ARG_OPT_LEVEL}
+                      RUNTIME_EXTRA_OPTIONS "${arkopts}"
     )
-
-    add_dependencies(ets_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_run_jit_osr_ets_code_tests)
 
 function(compile_aot_ets_code PAOC_MODE ETS_ABC OUTPUT_AN TARGET ABC_TARGET)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "" "${multiValueArgs}" ${ARGN})
 
     set(AOT_RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
         --compiler-ignore-failures=false
         --paoc-panda-files=${ETS_ABC}
@@ -324,6 +291,8 @@ function(compile_aot_ets_code PAOC_MODE ETS_ABC OUTPUT_AN TARGET ABC_TARGET)
         DEPENDS ark_aot etsstdlib ${ABC_TARGET}
     )
 endfunction()
+
+add_custom_target(ets_run_aot_ets_code_tests)
 
 function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     if (CMAKE_CROSSCOMPILING)
@@ -343,30 +312,29 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     set(TARGET_AOT ${TARGET}-${PAOC_MODE}-files)
     compile_aot_ets_code(${PAOC_MODE} ${OUTPUT_ABC} ${OUTPUT_AN} ${TARGET_AOT} ${ABC_TARGET} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
 
-    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
-    set(BUILD_LOG   "${BUILD_DIR}/build.log")
-    set(BUILD_OUT   "${BUILD_DIR}/build.out")
-    set(BUILD_ERR   "${BUILD_DIR}/build.err")
-    set(CAT_PROGRAM 'cat')
+    if(NOT ARG_ENTRYPOINT)
+        get_filename_component(ARG_ENTRYPOINT ${ETS_SRC} NAME_WE)
+    endif()
 
     set(RUNTIME_ARGUMENTS
-        --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
+        --boot-panda-files=${BOOT_PANDA_FILES}
         --load-runtimes=ets
         --aot-file=${OUTPUT_AN}
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}
-        ETSGLOBAL::main
-        --log-file ${BUILD_LOG}
+        "${ARG_ENTRYPOINT}.ETSGLOBAL::main"
     )
 
     add_custom_target(${TARGET}
         COMMENT "Running ark AOT(${PAOC_MODE}) for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
+        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
         DEPENDS ark etsstdlib ${TARGET_AOT}
     )
 
-    add_dependencies(ets_tests ${TARGET})
+    add_dependencies(ets_run_aot_ets_code_tests ${TARGET})
 endfunction()
+
+add_dependencies(ets_tests ets_run_aot_ets_code_tests)
 
 function(run_deterministic_test ETS_SRC WORK_DIR TARGET)
     # deterministic binary
@@ -385,7 +353,7 @@ function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
     add_custom_target(${TARGET})
 
     # int
-    run_int_ets_code(${ETS_SRC} ${WORK_DIR} ${TARGET}-ets-int OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
+    run_int_ets_code(${TARGET}-ets-int ${WORK_DIR} SOURCES "${ETS_SRC}" OPT_LEVEL ${ARG_OPT_LEVEL} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
     if(TARGET ${TARGET}-ets-int)
         add_dependencies(${TARGET} ${TARGET}-ets-int)
     endif()
@@ -453,7 +421,7 @@ function(compile_stdlib TARGET_ARCH)
         DEPENDS ark_aot etsstdlib
     )
     add_dependencies(ets-compile-stdlib ets-compile-stdlib-aot-${TARGET_ARCH} ets-compile-stdlib-jit-${TARGET_ARCH} ets-compile-stdlib-aot-${TARGET_ARCH}-no-inline ets-compile-stdlib-aot-${TARGET_ARCH}-stw)
-    if (PANDA_LLVM_AOT)
+    if(PANDA_LLVM_AOT AND NOT PANDA_THREAD_SAFETY AND NOT PANDA_ENABLE_THREAD_SANITIZER AND NOT PANDA_ENABLE_ADDRESS_SANITIZER)
         add_custom_target(ets-compile-stdlib-llvm-${TARGET_ARCH}
             COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with llvm"
             COMMAND ${ARK_AOT_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=llvm -compiler-options="${COMPILER_OPTIONS_LLVM}" -paoc-output=etsstdlib_llvmaot_${TARGET_ARCH}.an
@@ -493,6 +461,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     endif()
 endif()
 
+
 if(PANDA_TEST_COMPILE_STDLIB)
     set (ARK_AOT_RUNNER ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh)
     if (NOT PANDA_CI_TESTING_MODE STREQUAL "Nightly")
@@ -528,7 +497,8 @@ add_subdirectory(lookup_by_name)
 add_subdirectory(ets_test_suite)
 add_subdirectory(runtime)
 add_subdirectory(napi)
-add_subdirectory(nark)
+add_subdirectory(ani)
+add_subdirectory(libani_helpers)
 if(NOT (PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
     add_subdirectory(micro-benchmarks)
 endif()
@@ -568,10 +538,10 @@ function(panda_ets_napi_add_gtest)
 
     set(es2panda_target_test es2panda)
     set(es2panda_bin  $<TARGET_FILE:${es2panda_target_test}>)
-    set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --opt-level=0)
+    set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 
     foreach(c ${ARG_ETS_SOURCE})
-        STRING(REPLACE ".sts" "" CLEAR_NAME ${c})
+        STRING(REPLACE ".ets" "" CLEAR_NAME ${c})
         if(NOT TARGET es2panda_${CLEAR_NAME})
             add_custom_target(es2panda_${CLEAR_NAME}
                 COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${CMAKE_CURRENT_BINARY_DIR}/${CLEAR_NAME}.abc ${CMAKE_CURRENT_SOURCE_DIR}/${c}
@@ -602,3 +572,64 @@ if (PANDA_ETS_INTEROP_JS)
 endif()
 
 add_subdirectory(debugger)
+
+# This section should be located at the end of this file to include all targets created here!
+# Targets to divide ets_tests subtargets by execution time to ensure that
+# each group is not executed more that 1 hour.
+# All this ets_timeXXX_tests targets should contain all ets_tests subtargets.
+# It's not very important what subtarget where is included
+add_custom_target(ets_time01_tests)
+add_custom_target(ets_time02_tests)
+add_custom_target(ets_time03_tests)
+add_custom_target(ets_time04_tests)
+add_custom_target(ets_time05_tests)
+
+add_dependencies(ets_tests
+    ets_time01_tests
+    ets_time02_tests
+    ets_time03_tests
+    ets_time04_tests
+    ets_time05_tests)
+
+function(add_target_to_group group test_target)
+    if (TARGET ${test_target})
+        add_dependencies(${group} ${test_target})
+    endif()
+endfunction()
+
+add_target_to_group(ets_time01_tests ets_deterministic_tests)
+add_target_to_group(ets_time01_tests ets_run_jit_osr_ets_code_tests)
+add_target_to_group(ets_time01_tests ets_tests_lookup_by_name)
+add_target_to_group(ets_time01_tests etsnapi_test_suite)
+if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+    add_target_to_group(ets_time01_tests es2panda_tests)
+endif()
+if(PANDA_COMPILER_ENABLE)
+    add_target_to_group(ets_time01_tests ets_checked_tests)
+endif()
+
+add_target_to_group(ets_time02_tests etsnative_symbols_test)
+add_target_to_group(ets_time02_tests ets_code_verifier_tests)
+add_target_to_group(ets_time02_tests ets_run_jit_ets_code_tests)
+add_target_to_group(ets_time02_tests ets_tests_equals)
+add_target_to_group(ets_time02_tests ets_modules_tests)
+add_target_to_group(ets_time02_tests ets_app_linker_context_tests)
+
+if (PANDA_USE_CUSTOM_SIGNAL_STACK)
+    add_target_to_group(ets_time01_tests sampler_asm_test_suite)
+    add_target_to_group(ets_time02_tests sampler_test_suite)
+endif()
+
+add_target_to_group(ets_time03_tests ets_gtests)
+add_target_to_group(ets_time03_tests ets_panda_gtests)
+add_target_to_group(ets_time03_tests ets_run_aot_ets_code_tests)
+add_target_to_group(ets_time03_tests ets_napi_tests)
+if(PANDA_TEST_COMPILE_STDLIB)
+    add_target_to_group(ets_time03_tests ets-compile-stdlib)
+endif()
+
+# NOTE(vshirunova): revise group division: now time4 and time5 are the same
+add_target_to_group(ets_time04_tests ets_run_int_ets_code_tests)
+
+add_target_to_group(ets_time05_tests ets_run_int_ets_code_tests)
+# ---- end of groups by time

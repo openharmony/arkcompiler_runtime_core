@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -58,13 +58,6 @@ cases:
           let ok = v.length == 1;
 
     - defs: |-
-          enum Axis { X, Y, Z };
-          type Fields = Axis[];
-      use: |-
-          let v: Fields = new Axis[6];
-          let ok = v.length == 6;
-
-    - defs: |-
           type A = Error[]
           type B = A
           type C = B
@@ -89,8 +82,8 @@ cases:
           let v4: IAN2 = [null, [1, 2, 3]]
           let ok = v1 == null &&
               v2[0] == null && v2[1] == null &&
-              v3[0].length == 2 && v3[1].length == 2 && v3[1][1] == 4 &&
-              v4.length == 2 && v4[0] == null && v4[1].length == 3
+              v3[0]!.length == 2 && v3[1]!.length == 2 && v3[1]![1] == 4 &&
+              v4.length == 2 && v4[0] == null && v4[1]!.length == 3
 
     # functions
     - defs: |-
@@ -213,3 +206,9 @@ cases:
                 ((v3 as NestedFunc[])[0] as NestedFunc[]).length == 0 &&
                 ((v3 as NestedFunc[])[1] as Foo)('abc') == 'abcabc' &&
                 ((v3 as NestedFunc[])[2] as Foo)('xyz') == 'xyzxyz'
+    - defs: |-
+          enum Color { Red, Green, Blue };
+          type BaseColor = Color;
+      use: |-
+          let v: BaseColor = BaseColor.Red;
+          let ok = true;

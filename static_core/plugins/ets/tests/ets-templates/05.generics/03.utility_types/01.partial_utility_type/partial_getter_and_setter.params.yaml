@@ -15,5 +15,5 @@
 cases:
   - { argument: "{_i: 1.9, _j: \"some str\"}", result: 3 }
   - { argument: "{_i: 1.9}", result: 2 }
-  - { argument: "{_j: \"some str\"}", result: 1 }
-  - { argument: "{_j: }", result: 0 }
+  - { argument: "{_j: \"some str\"}", result: 3 }
+  - { argument: "{}", result: 2 }

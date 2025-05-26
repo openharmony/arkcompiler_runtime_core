@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,16 +93,16 @@ export class SetterAnyType<T> {
 	}
 }
 
-type Tuple = [number, string];
+type TupleT = [number, string];
 
 export class TupleSet {
-	private _value?: Tuple;
+	private _value?: TupleT;
 
-	public set value(arg: Tuple) {
+	public set value(arg: TupleT) {
 		this._value = arg;
 	}
 
-	public get value(): Tuple | undefined {
+	public get value(): TupleT | undefined {
 		return this._value;
 	}
 }

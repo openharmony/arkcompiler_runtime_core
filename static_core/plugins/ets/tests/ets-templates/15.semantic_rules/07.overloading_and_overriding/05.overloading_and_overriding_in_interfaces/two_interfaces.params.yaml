@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,8 +32,8 @@ cases:
   - { arg: "i: boolean", call: "false", res: 17}
   - { arg: "i: Boolean", call: "new Boolean()", res: 18}
   - { arg: "i: int, j: int", call: "1 as int, 2 as int", res: 19}
-  - { arg: "i: Gen<T>", call: "new Gen<String>", res: 20}
-  - { arg: "i: Gen2<T, S>", call: "new Gen2<String, Number>", res: 21}
+  - { arg: "i: Gen<T>", call: "new Gen<Number>", res: 20}
+  - { arg: "i: Gen2<T, S>", call: "new Gen2<Number, String>", res: 21}
   - { arg: "i: Number|undefined|null", call: "undefined", res: 22}
   - { arg: "i: number, j: Number", call: "1, new Number()", res: 23}
   - { arg: "i: FUN", call: "() => { return true; }", res: 24}

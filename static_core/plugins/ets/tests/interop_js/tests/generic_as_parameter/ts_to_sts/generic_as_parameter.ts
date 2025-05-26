@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 export type Union = string | number;
-export type Tuple = [number, boolean];
+export type TupleT = [number, boolean];
 export type Literal = 1 | 'string';
 
 export const tsNumber = 1;
@@ -23,7 +23,7 @@ export const tsBool = true;
 export const tsArr = [tsNumber];
 export const tsObj = {};
 export const tsUnion: Union = tsNumber;
-export const tsTuple: Tuple = [tsNumber, tsBool];
+export const tsTuple: TupleT = [tsNumber, tsBool];
 export const tsLiteral: Literal = tsNumber;
 
 
@@ -56,8 +56,8 @@ export function anyTypeParameterExplicitCallFromTsUnion(): Union {
 
 }
 
-export function anyTypeParameterExplicitCallFromTsTuple(): Tuple {
-    return anyTypeParameter<Tuple>(tsTuple);
+export function anyTypeParameterExplicitCallFromTsTuple(): TupleT {
+    return anyTypeParameter<TupleT>(tsTuple);
 }
 
 export function anyTypeParameterExplicitCallFromTsLiteral(): Literal {
@@ -95,8 +95,8 @@ export function genericTypeFunctionExplicitCallFromTsUnion(): Union {
 
 }
 
-export function genericTypeFunctionExplicitCallFromTsTuple(): Tuple {
-    return genericTypeFunctionReturnAny<Tuple>(tsTuple);
+export function genericTypeFunctionExplicitCallFromTsTuple(): TupleT {
+    return genericTypeFunctionReturnAny<TupleT>(tsTuple);
 }
 
 export function genericTypeFunctionExplicitCallFromTsLiteral(): Literal {
@@ -109,7 +109,7 @@ export type gFunExtendBool = <T extends boolean> (arg: T) => T;
 export type gFunExtendArr = <T extends number[]> (arg: T) => T;
 export type gFunExtendObj = <T extends object> (arg: T) => T;
 export type gFunExtendUnion = <T extends Union> (arg: T) => T;
-export type gFunExtendTuple = <T extends Tuple> (arg: T) => T;
+export type gFunExtendTuple = <T extends TupleT> (arg: T) => T;
 export type gFunExtendLiteral = <T extends Literal> (arg: T) => T;
 
 export const extendGenericNumber: gFunExtendNumber = (arg) => arg;
@@ -209,7 +209,7 @@ export function genericDefaultUnion<T = Union>(arg: T): T {
     return arg;
 }
 
-export function genericDefaultTuple<T = Tuple>(arg: T): T {
+export function genericDefaultTuple<T = TupleT>(arg: T): T {
     return arg;
 }
 
@@ -241,8 +241,8 @@ export function genericDefaultUnionCallFromTs(): Union {
     return genericDefaultUnion<Union>(tsUnion);
 }
 
-export function genericDefaultTupleCallFromTs(): Tuple {
-    return genericDefaultTuple<Tuple>(tsTuple);
+export function genericDefaultTupleCallFromTs(): TupleT {
+    return genericDefaultTuple<TupleT>(tsTuple);
 }
 
 export function genericDefaultLiteralCallFromTs(): Literal {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,28 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class NoArgClass {
+export class NoArgClass {
     constructor() {
         this.message = 'Class without args';
     }
 }
-class OneArgClass {
+export class OneArgClass {
     constructor(name) {
         this.name = name;
     }
-} class SubClass extends OneArgClass {
+}
+export class SubClass extends OneArgClass {
     constructor(name, surname) {
         super(name);
         this.surname = surname;
     }
 }
-class TwoArgClass {
+export class TwoArgClass {
     constructor(name, city) {
         this.name = name;
         this.city = city;
     }
 }
-class ManyArgsClass {
+export class ManyArgsClass {
     constructor(name, age, country, city) {
         this.name = name;
         this.age = age;
@@ -44,7 +45,7 @@ class ManyArgsClass {
         return `Name: ${this.name}, age:${this.age}, country: ${this.country}, city: ${this.city}`;
     }
 }
- function fnTestUser(name, surname) {
+export function fnTestUser(name, surname) {
     this.name = name;
     this.surname = surname;
 }
@@ -54,19 +55,8 @@ fnTestUser.prototype.showInfo = function () {
 function testfn() {
     return 'test';
 }
-const TestObject = {
+export const TestObject = {
     name: 'Test',
     surname: 'Test'
 };
-const primitive = 10;
-
-module.exports = {
-    NoArgClass,
-    OneArgClass,
-    SubClass,
-    TwoArgClass,
-    ManyArgsClass,
-    fnTestUser,
-    TestObject,
-    primitive,
-};
+export const primitive = 10;

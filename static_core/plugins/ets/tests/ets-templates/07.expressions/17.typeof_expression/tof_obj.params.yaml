@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -121,8 +121,8 @@ cases:
           interface I {}
           class A implements I {}
       vals:
-          - { type: 'A[]', init_value: '[]', expr: 'new A[1]' }
-          - { type: 'I[]', init_value: '[]', expr: 'new A[1]' }
+          - { type: 'A[]', init_value: '[]', expr: '[new A]' }
+          - { type: 'I[]', init_value: '[]', expr: '[new A]' }
           - { type: 'Comparable<Float>[]', init_value: '[]', expr: '[new Float(3.14f)]' }
 
     - res: 'object'
@@ -151,21 +151,21 @@ cases:
 
     - res: 'object'
       vals:
-          - { type: 'null', expr: 'null' }
+          - { type: 'null', init_value: 'null', expr: 'null' }
 
     - res: 'object'
       decl: |-
           interface I {}
           class A implements I {}
       vals:
-          - { type: 'A|null', expr: 'new A()' }
-          - { type: 'A|null', expr: 'null' }
-          - { type: 'I|null', expr: 'new A()' }
-          - { type: 'I|null', expr: 'null' }
-          - { type: 'A[]|null', expr: '[new A()]' }
-          - { type: 'A[]|null', expr: 'null' }
-          - { type: 'I[]|null', expr: '[new A()]' }
-          - { type: 'I[]|null', expr: 'null' }
+          - { type: 'A|null', init_value: 'null', expr: 'new A()' }
+          - { type: 'A|null', init_value: 'null', expr: 'null' }
+          - { type: 'I|null', init_value: 'null', expr: 'new A()' }
+          - { type: 'I|null', init_value: 'null', expr: 'null' }
+          - { type: 'A[]|null', init_value: 'null', expr: '[new A()]' }
+          - { type: 'A[]|null', init_value: 'null', expr: 'null' }
+          - { type: 'I[]|null', init_value: 'null', expr: '[new A()]' }
+          - { type: 'I[]|null', init_value: 'null', expr: 'null' }
 
     - res: 'number'
       decl: |-
@@ -222,10 +222,10 @@ cases:
 
     - res: 'number'
       vals:
-          - { type: 'Comparable<Float>', expr: 'new Float()' }
-          - { type: 'Comparable<Double>', expr: 'new Double()' }
-          - { type: 'Comparable<Byte>', expr: 'new Byte()' }
-          - { type: 'Comparable<Short>', expr: 'new Short()' }
-          - { type: 'Comparable<Int>', expr: 'new Int()' }
-          - { type: 'Comparable<Long>', expr: 'new Long()' }
-          - { type: 'Comparable<Char>', expr: 'new Char()' }
+          - { type: 'Comparable<Float>', init_value: 'new Float()', expr: 'new Float()' }
+          - { type: 'Comparable<Double>', init_value: 'new Double()',  expr: 'new Double()' }
+          - { type: 'Comparable<Byte>', init_value: 'new Byte()',  expr: 'new Byte()' }
+          - { type: 'Comparable<Short>', init_value: 'new Short()',  expr: 'new Short()' }
+          - { type: 'Comparable<Int>', init_value: 'new Int()',  expr: 'new Int()' }
+          - { type: 'Comparable<Long>', init_value: 'new Long()',  expr: 'new Long()' }
+          - { type: 'Comparable<Char>', init_value: 'new Char()',  expr: 'new Char()' }

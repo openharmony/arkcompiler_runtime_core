@@ -1,6 +1,6 @@
 
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,39 +17,43 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
+#include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
 
 template <typename T>
-static std::optional<T> GetBoxedNumericValue(EtsClassLinkerExtension *ext, EtsObject *obj)
+static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, EtsObject *obj)
 {
-    auto *cls = obj->GetClass()->GetRuntimeClass();
+    auto *cls = obj->GetClass();
 
     auto const getValue = [obj](auto typeId) {
         using Type = typename decltype(typeId)::type;
         return static_cast<T>(EtsBoxPrimitive<Type>::FromCoreType(obj)->GetValue());
     };
 
-    if (cls == ext->GetBoxDoubleClass()) {
+    if (cls == ptypes->coreDouble) {
         return getValue(helpers::TypeIdentity<EtsDouble>());
     }
-    if (cls == ext->GetBoxIntClass()) {
+    if (cls == ptypes->coreInt) {
         return getValue(helpers::TypeIdentity<EtsInt>());
     }
 
-    if (cls == ext->GetBoxByteClass()) {
+    if (cls == ptypes->coreByte) {
         return getValue(helpers::TypeIdentity<EtsByte>());
     }
-    if (cls == ext->GetBoxShortClass()) {
+    if (cls == ptypes->coreShort) {
         return getValue(helpers::TypeIdentity<EtsShort>());
     }
-    if (cls == ext->GetBoxLongClass()) {
+    if (cls == ptypes->coreLong) {
         return getValue(helpers::TypeIdentity<EtsLong>());
     }
-    if (cls == ext->GetBoxFloatClass()) {
+    if (cls == ptypes->coreFloat) {
         return getValue(helpers::TypeIdentity<EtsFloat>());
+    }
+    if (cls == ptypes->coreChar) {
+        return getValue(helpers::TypeIdentity<EtsChar>());
     }
     return std::nullopt;
 }
@@ -60,27 +64,18 @@ static bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2)
     auto bytes2 = obj2->GetBytes();
     ASSERT(bytes1 != nullptr && bytes2 != nullptr);
 
-    auto size1 = bytes1->GetActualLength();
-    auto size2 = bytes2->GetActualLength();
-    ASSERT(size1 != 0 && size2 != 0);
-    auto data1 = bytes1->GetData();
-    auto data2 = bytes2->GetData();
-    ASSERT(data1 != nullptr && data2 != nullptr);
-    ASSERT(data1->GetLength() >= size1 && data2->GetLength() >= size2);
-
-    auto const readElem = [](auto *arr, uint32_t i) { return arr->Get(i)->GetValue(); };
-
+    auto size1 = bytes1->GetLength();
+    auto size2 = bytes2->GetLength();
     if (size1 != size2) {
         return false;
     }
 
-    // start with check of MSD, which is sign.
-    for (int i = size1 - 1; i >= 0; --i) {
-        if (readElem(data1, i) != readElem(data2, i)) {
-            return false;
-        }
+    if (obj1->GetSign() != obj2->GetSign()) {
+        return false;
     }
-    return true;
+
+    return (std::memcmp(bytes1->GetCoreType()->GetData(), bytes2->GetCoreType()->GetData(), size1 * sizeof(EtsInt)) ==
+            0);
 }
 
 template <typename BoxedType>
@@ -92,43 +87,59 @@ static bool CompareBoxedPrimitive(EtsObject *obj1, EtsObject *obj2)
 
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
-    auto ecls1 = obj1->GetClass();
-    auto ecls2 = obj2->GetClass();
-    auto cls1 = ecls1->GetRuntimeClass();
-    auto cls2 = ecls2->GetRuntimeClass();
-    ASSERT(ecls1->IsValueTyped() && ecls1->IsValueTyped());
+    auto cls1 = obj1->GetClass();
+    auto cls2 = obj2->GetClass();
+    ASSERT(cls1->IsValueTyped() && cls1->IsValueTyped());
 
-    auto ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
+    auto ptypes = PlatformTypes(coro);
+    ASSERT(ptypes != nullptr);
 
     if (cls1->IsStringClass()) {
         return cls2->IsStringClass() &&
                coretypes::String::Cast(obj1->GetCoreType())->Compare(coretypes::String::Cast(obj2->GetCoreType())) == 0;
     }
-    if (cls1 == ext->GetBoxBooleanClass()) {
-        return cls2 == ext->GetBoxBooleanClass() && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);
+    if (cls1 == ptypes->coreBoolean) {
+        return cls2 == ptypes->coreBoolean && CompareBoxedPrimitive<EtsBoolean>(obj1, obj2);
     }
-    if (cls1 == ext->GetBoxCharClass()) {
-        return cls2 == ext->GetBoxCharClass() && CompareBoxedPrimitive<EtsChar>(obj1, obj2);
+    if (cls1 == ptypes->coreChar) {
+        return cls2 == ptypes->coreChar && CompareBoxedPrimitive<EtsChar>(obj1, obj2);
     }
-    if (UNLIKELY(ecls1->IsBigInt())) {
-        return ecls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
+    if (UNLIKELY(cls1->IsBigInt())) {
+        return cls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
     }
-    if (cls1 == ext->GetBoxLongClass() && cls2 == ext->GetBoxLongClass()) {
+    if (cls1 == ptypes->coreLong && cls2 == ptypes->coreLong) {
         return CompareBoxedPrimitive<EtsLong>(obj1, obj2);
     }
-    if (auto num1 = GetBoxedNumericValue<EtsDouble>(ext, obj1); num1.has_value()) {
-        auto num2 = GetBoxedNumericValue<EtsDouble>(ext, obj2);
+    if (auto num1 = GetBoxedNumericValue<EtsDouble>(ptypes, obj1); num1.has_value()) {
+        auto num2 = GetBoxedNumericValue<EtsDouble>(ptypes, obj2);
         return num2.has_value() && num2.value() == num1.value();
     }
+    if (cls1->IsEtsEnum()) {
+        if (UNLIKELY(!cls2->IsEtsEnum())) {
+            return false;
+        }
+        auto *value1 = EtsBaseEnum::FromEtsObject(obj1)->GetValue();
+        auto *value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
+        if (UNLIKELY(value1->GetClass()->IsEtsEnum() || value2->GetClass()->IsEtsEnum())) {
+            return false;
+        }
+        return EtsReferenceEquals(coro, value1, value2);
+    }
     UNREACHABLE();
+}
+
+[[maybe_unused]] static bool DbgIsBoxedNumericClass(EtsCoroutine *coro, EtsClass *cls)
+{
+    auto ptypes = PlatformTypes(coro);
+    return cls == ptypes->coreByte || cls == ptypes->coreChar || cls == ptypes->coreShort || cls == ptypes->coreInt ||
+           cls == ptypes->coreLong || cls == ptypes->coreFloat || cls == ptypes->coreDouble;
 }
 
 EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
 {
     // NOTE(vpukhov): #19799 use string constants
-    auto ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
     if (obj == nullptr) {
-        return EtsString::CreateFromMUtf8("object");
+        return EtsString::CreateFromMUtf8("undefined");
     }
     EtsClass *cls = obj->GetClass();
 
@@ -140,8 +151,8 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
         return EtsString::CreateFromMUtf8("object");
     }
 
-    if (cls->IsUndefined()) {
-        return EtsString::CreateFromMUtf8("undefined");
+    if (cls->IsNullValue()) {
+        return EtsString::CreateFromMUtf8("object");
     }
     if (obj->IsStringClass()) {
         return EtsString::CreateFromMUtf8("string");
@@ -149,34 +160,62 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
     if (cls->IsBigInt()) {
         return EtsString::CreateFromMUtf8("bigint");
     }
+    if (cls->IsEtsEnum()) {
+        auto *value = EtsBaseEnum::FromEtsObject(obj)->GetValue();
+        if (UNLIKELY(value->GetClass()->IsEtsEnum())) {
+            // This situation is unexpected from language point of view. If BaseEnum object is contained
+            // as value of enum, then it's treated as object
+            return EtsString::CreateFromMUtf8("object");
+        }
+        return EtsGetTypeof(coro, EtsBaseEnum::FromEtsObject(obj)->GetValue());
+    }
 
     ASSERT(cls->IsBoxed());
 
-    auto rcls = cls->GetRuntimeClass();
-    if (rcls == ext->GetBoxBooleanClass()) {
+    if (cls == PlatformTypes(coro)->coreBoolean) {
         return EtsString::CreateFromMUtf8("boolean");
     }
-    // NOTE(vpukhov): #19653 numerics must map to "number"
-    if (rcls == ext->GetBoxByteClass()) {
-        return EtsString::CreateFromMUtf8("byte");
+
+    ASSERT(DbgIsBoxedNumericClass(coro, cls));
+    return EtsString::CreateFromMUtf8("number");
+}
+
+bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
+{
+    if (IsReferenceNullish(coro, obj)) {
+        return false;
     }
-    if (rcls == ext->GetBoxCharClass()) {
-        return EtsString::CreateFromMUtf8("char");
+    EtsClass *cls = obj->GetClass();
+
+    if (!cls->IsValueTyped()) {
+        return true;
     }
-    if (rcls == ext->GetBoxShortClass()) {
-        return EtsString::CreateFromMUtf8("short");
+    if (obj->IsStringClass()) {
+        return !EtsString::FromEtsObject(obj)->IsEmpty();
     }
-    if (rcls == ext->GetBoxIntClass()) {
-        return EtsString::CreateFromMUtf8("int");
+    if (cls->IsBigInt()) {
+        return EtsBigInt::FromEtsObject(obj)->GetSign() != 0;
     }
-    if (rcls == ext->GetBoxLongClass()) {
-        return EtsString::CreateFromMUtf8("long");
+    if (cls->IsEtsEnum()) {
+        auto *value = EtsBaseEnum::FromEtsObject(obj)->GetValue();
+        if (UNLIKELY(value->GetClass()->IsEtsEnum())) {
+            // This situation is unexpected from language point of view. If BaseEnum object is contained
+            // as value of enum, then it's treated as object
+            return true;
+        }
+        return EtsGetIstrue(coro, value);
     }
-    if (rcls == ext->GetBoxFloatClass()) {
-        return EtsString::CreateFromMUtf8("float");
+
+    ASSERT(cls->IsBoxed());
+
+    auto ptypes = PlatformTypes(coro);
+    if (cls == ptypes->coreBoolean) {
+        return EtsBoxPrimitive<EtsBoolean>::FromCoreType(obj)->GetValue() != 0;
     }
-    if (rcls == ext->GetBoxDoubleClass()) {
-        return EtsString::CreateFromMUtf8("number");
+
+    ASSERT(DbgIsBoxedNumericClass(coro, cls));
+    if (auto num = GetBoxedNumericValue<EtsDouble>(ptypes, obj); num.has_value()) {
+        return num.value() != 0 && !std::isnan(num.value());
     }
     UNREACHABLE();
 }

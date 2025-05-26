@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,7 @@
 #include "runtime/methodtrace/trace.h"
 #include "trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
+#include "runtime/jit/profiling_saver.h"
 
 namespace ark {
 
@@ -419,6 +420,16 @@ bool Runtime::Destroy()
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
 
+    if (instance_->SaveProfileInfo()) {
+        ProfilingSaver profileSaver;
+        auto isAotVerifyAbsPath = instance_->GetOptions().IsAotVerifyAbsPath();
+        auto classCtxStr = instance_->GetClassLinker()->GetClassContextForAot(isAotVerifyAbsPath);
+        auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
+        auto profiledPandaFiles = instance_->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
+        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledPandaFiles);
+    }
+
     if (GetOptions().ShouldLoadBootPandaFiles()) {
         // Performing some actions before Runtime destroy.
         // For example, traversing FinalizableWeakRefList
@@ -434,8 +445,6 @@ bool Runtime::Destroy()
     if (Trace::isTracing_) {
         Trace::StopTracing();
     }
-
-    instance_->GetPandaVM()->SaveProfileInfo();
 
     instance_->GetNotificationManager()->VmDeathEvent();
 
@@ -567,10 +576,6 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     InitializeVerifierRuntime();
 
     isZygote_ = options_.IsStartAsZygote();
-
-#ifdef PANDA_ENABLE_RELAYOUT_PROFILE
-    relayoutProfiler_ = internalAllocator_->New<RelayoutProfiler>();
-#endif
     /* @sync 2
      * @description At the very end of the Runtime's constructor when all initialization actions have completed.
      * */
@@ -603,11 +608,6 @@ Runtime::~Runtime()
          * */
     }
 
-#ifdef PANDA_ENABLE_RELAYOUT_PROFILE
-    if (relayoutProfiler_ != nullptr) {
-        internalAllocator_->Delete(relayoutProfiler_);
-    }
-#endif
     /* @sync 1
      * @description Right after runtime's destructor has deleted panda virtual machine
      * */
@@ -735,7 +735,7 @@ bool Runtime::CreatePandaVM(std::string_view runtimeType)
     if (options_.GetPandaFiles().empty() && !options_.IsStartAsZygote()) {
         // Main from panda.cpp puts application file into boot panda files as the last element.
         // During AOT compilation of boot files no application panda files were used.
-        auto idx = aotBootCtx.find_last_of(':');
+        auto idx = aotBootCtx.find_last_of(compiler::AotClassContextCollector::DELIMETER);
         if (idx == std::string::npos) {
             // Only application file is in aot_boot_ctx
             classLinker_->GetAotManager()->SetAppClassContext(aotBootCtx);
@@ -795,16 +795,33 @@ bool Runtime::HandleAotOptions()
     if (!aotFiles.empty()) {
         for (auto &fname : aotFiles) {
             auto res = FileManager::LoadAnFile(fname, true);
+#ifdef PANDA_TARGET_OHOS
+            if (!res) {
+                LOG(ERROR, AOT) << "Failed to load AoT file: " << res.Error();
+                continue;
+            }
+            if (!res.Value()) {
+                LOG(ERROR, AOT) << "Failed to load '" << fname << "' with unknown reason";
+            }
+#else
             if (!res) {
                 LOG(FATAL, AOT) << "Failed to load AoT file: " << res.Error();
             }
             if (!res.Value()) {
                 LOG(FATAL, AOT) << "Failed to load '" << fname << "' with unknown reason";
             }
+#endif
         }
     }
 
     return true;
+}
+
+template <typename Handler>
+static void RegisterSignalHandler(SignalManager *manager, bool inCompiledCode)
+{
+    auto *handler = manager->GetAllocator()->New<Handler>();
+    manager->AddHandler(handler, inCompiledCode);
 }
 
 void Runtime::HandleJitOptions()
@@ -828,14 +845,12 @@ void Runtime::HandleJitOptions()
     }
 
 #ifndef PANDA_TARGET_WINDOWS
+    RegisterSignalHandler<SamplingProfilerHandler>(signalManager_, true);
     if (signalManager_->IsInitialized() && enableNpHandler) {
-        auto *handler = signalManager_->GetAllocator()->New<NullPointerHandler>();
-        signalManager_->AddHandler(handler, true);
+        RegisterSignalHandler<NullPointerHandler>(signalManager_, true);
     }
-    {
-        auto *handler = signalManager_->GetAllocator()->New<StackOverflowHandler>();
-        signalManager_->AddHandler(handler, true);
-    }
+    RegisterSignalHandler<StackOverflowHandler>(signalManager_, true);
+    RegisterSignalHandler<CrashFallbackDumpHandler>(signalManager_, false);
 #endif
 }
 
@@ -1010,7 +1025,7 @@ Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view e
     if (method == nullptr) {
         method = cls->GetDirectMethod(methodNameBytes);
         if (method == nullptr) {
-            LOG(ERROR, RUNTIME) << "Cannot find method '" << entryPoint << "'";
+            LOG(ERROR, RUNTIME) << "Entry point '" << entryPoint << "' not found";
             return Unexpected(Runtime::Error::METHOD_NOT_FOUND);
         }
     }
@@ -1126,10 +1141,15 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
             appFiles.push_back(path);
         }
         appContext_.ctx = ext->CreateApplicationClassLinkerContext(appFiles);
+        ASSERT(appContext_.ctx != nullptr);
     }
 
     PandaString aotCtx;
-    appContext_.ctx->EnumeratePandaFiles(compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
+    {
+        ScopedManagedCodeThread smct(ManagedThread::GetCurrent());
+        appContext_.ctx->EnumeratePandaFiles(
+            compiler::AotClassContextCollector(&aotCtx, options_.IsAotVerifyAbsPath()));
+    }
     classLinker_->GetAotManager()->SetAppClassContext(aotCtx);
 
     tooling::DebugInf::AddCodeMetaInfo(pf.get());
@@ -1178,7 +1198,7 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
             }
             return true;
         });
-        UNREACHABLE();
+        return false;
     }
 
     return Execute(entryPoint, args);
@@ -1469,8 +1489,6 @@ void Runtime::DumpForSigQuit(std::ostream &os)
     os << "-> Dump Ark VM\n";
     pandaVm_->DumpForSigQuit(os);
     os << "\n";
-
-    WRITE_RELAYOUT_PROFILE_DATA();
 }
 
 void Runtime::InitNonZygoteOrPostFork(bool isSystemServer, [[maybe_unused]] const char *isa,
