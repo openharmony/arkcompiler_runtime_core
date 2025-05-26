@@ -141,11 +141,11 @@ std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetContinueToLocati
     return locations;
 }
 
-std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
+std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetBreakpointLocations(
     const std::function<bool(std::string_view)> &sourceFileFilter, size_t lineNumber,
-    std::set<std::string_view> &sourceFiles)
+    std::set<std::string_view> &sourceFiles) const
 {
-    std::vector<PtLocation> locations;
+    std::unordered_set<PtLocation, HashLocation> locations;
     sourceFiles.clear();
     // clang-format off
     EnumerateLineEntries(
@@ -157,7 +157,7 @@ std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
                                                auto &entry, auto /* next */) {
             if (entry.line == lineNumber) {
                 sourceFiles.insert(debugInfo.GetSourceFile(methodId));
-                locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
+                locations.emplace(pandaFile->GetFilename().data(), methodId, entry.offset);
                 // Must choose the first found bytecode location in each method
                 return false;
             }
@@ -413,7 +413,7 @@ std::vector<std::string> DebugInfoCache::GetPandaFiles(const std::function<bool(
     return pandaFiles;
 }
 
-const panda_file::DebugInfoExtractor *DebugInfoCache::GetDebugInfo(const panda_file::File *file)
+const panda_file::DebugInfoExtractor *DebugInfoCache::GetDebugInfo(const panda_file::File *file) const
 {
     os::memory::LockHolder lock(debugInfosMutex_);
     auto it = debugInfos_.find(file);

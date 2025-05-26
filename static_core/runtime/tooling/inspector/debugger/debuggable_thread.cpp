@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "include/method.h"
-
 #include "debuggable_thread.h"
+
+#include "breakpoint_storage.h"
 #include "error.h"
+#include "include/method.h"
 #include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
-DebuggableThread::DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks)
-    : PtThreadEvaluationEngine(debugger, thread), callbacks_(std::move(callbacks)), state_(*this)
+DebuggableThread::DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks,
+                                   BreakpointStorage &bpStorage)
+    : PtThreadEvaluationEngine(debugger, thread), callbacks_(std::move(callbacks)), state_(*this, bpStorage)
 {
 }
 
@@ -90,12 +92,6 @@ void DebuggableThread::Pause()
     state_.Pause();
 }
 
-void DebuggableThread::SetBreakpointsActive(bool active)
-{
-    os::memory::LockHolder lock(mutex_);
-    state_.SetBreakpointsActive(active);
-}
-
 void DebuggableThread::SetSkipAllPauses(bool skip)
 {
     os::memory::LockHolder lock(mutex_);
@@ -106,43 +102,6 @@ void DebuggableThread::SetMixedDebugEnabled(bool mixedDebugEnabled)
 {
     os::memory::LockHolder lock(mutex_);
     state_.SetMixedDebugEnabled(mixedDebugEnabled);
-}
-
-std::optional<BreakpointId> DebuggableThread::SetBreakpoint(const std::vector<PtLocation> &locations,
-                                                            const std::string *condition)
-{
-    os::memory::LockHolder lock(mutex_);
-    if (locations.empty()) {
-        LOG(WARNING, DEBUGGER) << "Will not set breakpoint for empty locations";
-        return {};
-    }
-    if (condition != nullptr && locations.size() != 1) {
-        LOG(WARNING, DEBUGGER) << "Conditional breakpoint must have only one location, but found " << locations.size();
-        return {};
-    }
-    return state_.SetBreakpoint(locations, condition);
-}
-
-void DebuggableThread::RemoveBreakpoint(BreakpointId id)
-{
-    os::memory::LockHolder lock(mutex_);
-    state_.RemoveBreakpoint(id);
-}
-
-void DebuggableThread::RemoveBreakpoints(const std::function<bool(const PtLocation &loc)> &filter)
-{
-    os::memory::LockHolder lock(mutex_);
-
-    std::vector<BreakpointId> breakpointsToRemove;
-    state_.EnumerateBreakpoints([&breakpointsToRemove, &filter](const auto &loc, auto id) {
-        if (filter(loc)) {
-            breakpointsToRemove.emplace_back(id);
-        }
-    });
-
-    for (auto id : breakpointsToRemove) {
-        state_.RemoveBreakpoint(id);
-    }
 }
 
 void DebuggableThread::SetPauseOnExceptions(PauseOnExceptionsState state)

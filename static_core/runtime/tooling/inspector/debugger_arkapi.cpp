@@ -15,6 +15,7 @@
 
 #include "debugger_arkapi.h"
 #include "runtime/include/panda_vm.h"
+
 namespace ark {
 bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused]] int32_t instanceId,
                                         [[maybe_unused]] bool debugApp)

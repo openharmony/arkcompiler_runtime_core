@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "debug_info_cache.h"
+#include "debugger/debug_info_cache.h"
 
 #include "gtest/gtest.h"
 

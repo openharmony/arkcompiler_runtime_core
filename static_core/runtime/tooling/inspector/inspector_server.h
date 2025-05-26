@@ -27,9 +27,10 @@
 #include "console_call_type.h"
 #include "include/tooling/pt_thread.h"
 
+#include "common.h"
 #include "session_manager.h"
 #include "source_manager.h"
-#include "thread_state.h"
+#include "debugger/thread_state.h"
 #include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
@@ -45,8 +46,7 @@ class UrlBreakpointRequest;
 
 class InspectorServer final {
 public:
-    using SourceFileFilter = std::function<bool(std::string_view)>;
-    using SetBreakpointHandler = std::optional<BreakpointId>(PtThread, const SourceFileFilter &, size_t,
+    using SetBreakpointHandler = std::optional<BreakpointId>(PtThread, SourceFileFilter &&, size_t,
                                                              std::set<std::string_view> &, const std::string *);
     using FrameInfoHandler = std::function<void(FrameId, std::string_view, std::string_view, size_t,
                                                 const std::vector<Scope> &, const std::optional<RemoteObject> &)>;
@@ -69,7 +69,7 @@ public:
                             const std::optional<RemoteObject> &exception, PauseReason pauseReason,
                             const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
     void CallDebuggerResumed(PtThread thread);
-    void CallDebuggerScriptParsed(PtThread thread, ScriptId scriptId, std::string_view sourceFile);
+    void CallDebuggerScriptParsed(ScriptId scriptId, std::string_view sourceFile);
     void CallRuntimeConsoleApiCalled(PtThread thread, ConsoleCallType type, uint64_t timestamp,
                                      const std::vector<RemoteObject> &arguments);
     void CallRuntimeExecutionContextCreated(PtThread thread);
@@ -78,6 +78,7 @@ public:
     void CallTargetDetachedFromTarget(PtThread thread);
 
     void OnCallDebuggerContinueToLocation(std::function<void(PtThread, std::string_view, size_t)> &&handler);
+    void OnCallDebuggerEnable(std::function<void()> &&handler);
     void OnCallDebuggerGetPossibleBreakpoints(
         std::function<std::set<size_t>(std::string_view, size_t, size_t, bool)> &&handler);
     void OnCallDebuggerGetScriptSource(std::function<std::string(std::string_view)> &&handler);
@@ -119,6 +120,11 @@ public:
     void OnCallProfilerSetSamplingInterval(std::function<void(uint32_t)> &&handler);
     void OnCallProfilerStart(std::function<Expected<bool, std::string>()> &&handler);
     void OnCallProfilerStop(std::function<Expected<Profile, std::string>()> &&handler);
+
+    SourceManager &GetSourceManager()
+    {
+        return sourceManager_;
+    }
 
 private:
     struct CallFrameInfo {
