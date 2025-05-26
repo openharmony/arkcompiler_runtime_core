@@ -18,6 +18,22 @@ require 'logger'
 require 'fileutils'
 require 'open3'
 
+module BuildConfig
+  module Static
+    OBJECT_HEADER_SIZE = 8
+    MANAGED_REFERENCE_SIZE = 4
+  end
+
+  module Hybrid
+    OBJECT_HEADER_SIZE = 16
+    MANAGED_REFERENCE_SIZE = 8
+  end
+
+  CONFIGS = [Static, Hybrid]
+  CONFIGS_BY_NAME = CONFIGS.map {|c| [c.name.split('::')[1], c]}.to_h
+  CONFIGS_NAMES = CONFIGS_BY_NAME.map {|k, v| k}
+end
+
 options = OpenStruct.new
 OptionParser.new do |opts|
   opts.banner = 'Usage: checker.rb [options] TEST_FILE'
@@ -50,6 +66,9 @@ OptionParser.new do |opts|
   opts.on('--release', 'Run in release mode. EVENT, INST and other will not be checked')
   opts.on('-v', '--verbose', 'Verbose logging')
   opts.on('--arch=ARCHITECTURE', 'Architecture of system where start panda')
+  opts.on('--build-config=CONFIG', BuildConfig::CONFIGS_NAMES, "Build configuration to use: #{BuildConfig::CONFIGS_NAMES.join(', ')}") do |k|
+      options.build_config = BuildConfig::CONFIGS_BY_NAME[k]
+  end
   opts.on("--keep-data", "Do not remove generated data from disk") { |v| options.keep_data = true }
   opts.on("--with-llvm", "Tells checker that ARK was built with LLVM support") do |v|
     options.with_llvm = true
@@ -191,6 +210,7 @@ class Checker
     @args = ''
     @ir_files = []
     @architecture = options.arch
+    @build_config = options.build_config
     @profdata_file = nil
     @aot_file = ''
     @aot_mode = nil
@@ -240,6 +260,10 @@ class Checker
 
   def match_filter?
     @options.checker_filter.nil? or @name.match? @options.checker_filter
+  end
+
+  def is_hybrid_config?
+    @options.build_config == BuildConfig::Hybrid
   end
 
   def append_line(line)

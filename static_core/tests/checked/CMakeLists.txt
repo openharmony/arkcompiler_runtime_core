@@ -112,6 +112,12 @@ function(panda_add_checked_test)
         set(ARCHITECTURE "arm32")
     endif()
 
+    if (ARK_HYBRID OR PANDA_TARGET_64 AND NOT PANDA_USE_32_BIT_POINTER)
+        set (CHECKER_BUILD_CONFIG "Hybrid")
+    else()
+        set (CHECKER_BUILD_CONFIG "Static")
+    endif()
+
     # Run checker
     add_custom_target(${TEST_NAME}
                       COMMAND ${CHECKER} --source ${ARG_FILE}
@@ -123,6 +129,7 @@ function(panda_add_checked_test)
                                          --paoc-options \"${OPTIONS}\"
                                          --command-token \"${COMMAND_TOKEN}\"
                                          --arch ${ARCHITECTURE}
+                                         --build-config ${CHECKER_BUILD_CONFIG}
                                          ${RELEASE_OPT}
                                          ${WITH_LLVM}
                       WORKING_DIRECTORY ${TEST_DIR}
