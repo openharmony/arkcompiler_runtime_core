@@ -396,6 +396,7 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &os, Coroutine::Status status);
+std::ostream &operator<<(std::ostream &os, Coroutine::Type type);
 
 }  // namespace ark
 

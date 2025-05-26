@@ -98,7 +98,10 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
     ASSERT(inserted);
 
     runnablesLock_.Lock();
-    ASSERT(RunnableCoroutinesExist());
+    if (!RunnableCoroutinesExist()) {
+        auto coroManager = static_cast<StackfulCoroutineManager *>(waiter->GetManager());
+        LOG(FATAL, COROUTINES) << coroManager->GetAllWorkerFullStatus()->OutputInfo();
+    }
     // will unlock waiters_lock_ and switch ctx.
     // NB! If migration on await is enabled, current coro can migrate to another worker, so
     // IsCrossWorkerCall() will become true after resume!
@@ -576,6 +579,12 @@ bool StackfulCoroutineWorker::IsPotentiallyBlocked()
 void StackfulCoroutineWorker::OnContextSwitch()
 {
     lastCtxSwitchTimeMillis_ = ark::os::time::GetClockTimeInMilli();
+}
+
+void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStateInfo *info) const
+{
+    os::memory::LockHolder lock(runnablesLock_);
+    runnables_.IterateOverCoroutines([&info](Coroutine *co) { info->AddCoroutine(co); });
 }
 
 }  // namespace ark

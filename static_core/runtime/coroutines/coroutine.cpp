@@ -239,4 +239,22 @@ std::ostream &operator<<(std::ostream &os, Coroutine::Status status)
     return os;
 }
 
+std::ostream &operator<<(std::ostream &os, Coroutine::Type type)
+{
+    switch (type) {
+        case Coroutine::Type::FINALIZER:
+            os << "FINALIZER";
+            break;
+        case Coroutine::Type::MUTATOR:
+            os << "MUTATOR";
+            break;
+        case Coroutine::Type::SCHEDULER:
+            os << "SCHEDULER";
+            break;
+        default:
+            break;
+    }
+    return os;
+}
+
 }  // namespace ark

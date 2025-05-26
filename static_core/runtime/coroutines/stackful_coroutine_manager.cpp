@@ -1172,4 +1172,14 @@ void StackfulCoroutineManager::StopManagerThread()
     }
 }
 
+PandaUniquePtr<StackfulCoroutineStateInfoTable> StackfulCoroutineManager::GetAllWorkerFullStatus() const
+{
+    os::memory::LockHolder lkWorkers(workersLock_);
+    auto infoTable = MakePandaUnique<StackfulCoroutineStateInfoTable>();
+    for (auto *worker : workers_) {
+        infoTable->AddWorker(worker);
+    }
+    return infoTable;
+}
+
 }  // namespace ark

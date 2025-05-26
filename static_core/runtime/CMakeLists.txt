@@ -163,6 +163,7 @@ set(SOURCES
     coroutines/threaded_coroutine_manager.cpp
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp
+    coroutines/stackful_coroutine_state_info.cpp
     coroutines/coroutine_events.cpp
     coroutines/coroutine_stats.cpp
     coroutines/priority_queue.cpp
