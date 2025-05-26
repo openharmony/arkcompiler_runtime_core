@@ -1226,10 +1226,6 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             this.sort()
             return this
         }
-        let arr: FixedArray<int> = new int[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: int, r: int): number => {
                 return (l - r).toDouble()
@@ -1241,13 +1237,24 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             }
         }
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<int> = new int[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                arr[i] = this.getUnsafe(i)
+            }
             arr = mergeSort(arr, cmp)
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<Int> = new Int[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                buffer[i] = this.getUnsafe(i)
+            }
+            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i])
+            }
         }
         return this
     }
@@ -2976,10 +2983,6 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             this.sort()
             return this
         }
-        let arr: FixedArray<int> = new int[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: int, r: int): number => {
                 return (l - r).toDouble()
@@ -2991,13 +2994,24 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<int> = new int[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                arr[i] = this.getUnsafe(i)
+            }
             arr = mergeSort(arr, cmp)
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<Int> = new Int[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                buffer[i] = this.getUnsafe(i)
+            }
+            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i])
+            }
         }
         return this
     }
@@ -4712,10 +4726,6 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             this.sort()
             return this
         }
-        let arr: FixedArray<int> = new int[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: int, r: int): number => {
                 return (l - r).toDouble()
@@ -4727,13 +4737,24 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<int> = new int[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                arr[i] = this.getUnsafe(i)
+            }
             arr = mergeSort(arr, cmp)
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<Int> = new Int[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                buffer[i] = this.getUnsafe(i)
+            }
+            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i])
+            }
         }
         return this
     }
@@ -6483,10 +6504,6 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             this.sort()
             return this
         }
-        let arr: FixedArray<long> = new long[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: long, r: long): number => {
                 return (l - r).toDouble()
@@ -6498,13 +6515,24 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             }
         }
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<long> = new long[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                arr[i] = this.getUnsafe(i)
+            }
             arr = mergeSort(arr, cmp)
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<Long> = new Long[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                buffer[i] = this.getUnsafe(i)
+            }
+            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i])
+            }
         }
         return this
     }
@@ -8261,10 +8289,6 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             this.sort()
             return this
         }
-        let arr: FixedArray<long> = new long[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; ++i) {
-            arr[i] = this.getUnsafe(i)
-        }
 
         let cmp = (l: long, r: long): number => {
                 return (l - r).toDouble()
@@ -8280,13 +8304,24 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             }
         }
         const MAX_SHORT_LENGTH = 24
-        if (arr.length > MAX_SHORT_LENGTH) {
+        if (this.lengthInt > MAX_SHORT_LENGTH) {
+            let arr: FixedArray<long> = new long[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                arr[i] = this.getUnsafe(i)
+            }
             arr = mergeSort(arr, cmp)
+            for (let i = 0; i < arr.length; ++i) {
+                this.setUnsafe(i, arr[i])
+            }
         } else {
-            sort(arr, cmp)
-        }
-        for (let i = 0; i < arr.length; ++i) {
-            this.setUnsafe(i, arr[i])
+            let buffer: FixedArray<Long> = new Long[this.lengthInt]
+            for (let i = 0; i < this.lengthInt; ++i) {
+                buffer[i] = this.getUnsafe(i)
+            }
+            arr_sort_stable(buffer, 0, buffer.length as int, cmp)
+            for (let i = 0; i < buffer.length; ++i) {
+                this.setUnsafe(i, buffer[i])
+            }
         }
         return this
     }

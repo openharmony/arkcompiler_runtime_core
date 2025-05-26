@@ -45,12 +45,6 @@ function test(result: boolean, name: String): int {
     return 1;
 }
 
-function swap(arr: FixedArray<int>, i: int, k: int): void {
-    let tmp = arr[i];
-    arr[i] = arr[k];
-    arr[k] = tmp;
-}
-
 function bubble_sort(arr: FixedArray<int>): void {
         for (let i = 0; i + 1 < arr.length; ++i) {
         for (let j = 0; j + 1 < arr.length - i; ++j) {
