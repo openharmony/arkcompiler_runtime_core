@@ -62,6 +62,11 @@ public:
 
     virtual bool InitializeClass(Class *klass) = 0;
 
+    virtual bool InitializeClass(Class *klass, [[maybe_unused]] ClassLinkerErrorHandler *handler)
+    {
+        return InitializeClass(klass);
+    }
+
     virtual const void *GetNativeEntryPointFor(Method *method) const = 0;
 
     virtual bool CanThrowException(const Method *method) const = 0;

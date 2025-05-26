@@ -227,6 +227,10 @@ static constexpr std::string_view PROCESS                              = "Lescom
 static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =
     "Lstd/annotations/functions/OptionalParametersAnnotation;";
 
+// Annotation for function reference
+static constexpr std::string_view ANNOTATION_FUNCTIONAL_REFERENCE      =
+    "Lets/annotation/FunctionalReference;";
+
 }  // namespace class_descriptors
 
 static constexpr std::string_view CCTOR = "<cctor>";

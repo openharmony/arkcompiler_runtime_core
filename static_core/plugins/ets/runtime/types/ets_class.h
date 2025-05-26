@@ -337,6 +337,16 @@ public:
         return &klass_;
     }
 
+    EtsLong GetTypeMetaData() const
+    {
+        return typeMetaData_;
+    }
+
+    void SetTypeMetaData(EtsLong metaData)
+    {
+        typeMetaData_ = metaData;
+    }
+
     EtsObject *AsObject()
     {
         return reinterpret_cast<EtsObject *>(this);
@@ -364,6 +374,11 @@ public:
         return MEMBER_OFFSET(EtsClass, klass_);
     }
 
+    static constexpr size_t GetTypeMetaDataOffset()
+    {
+        return MEMBER_OFFSET(EtsClass, typeMetaData_);
+    }
+
     static constexpr size_t GetHeaderOffset()
     {
         return MEMBER_OFFSET(EtsClass, header_);
@@ -388,7 +403,8 @@ public:
 
     static EtsClass *GetPrimitiveClass(EtsString *primitiveName);
 
-    void Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType);
+    void Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType,
+                    ClassLinkerErrorHandler *errorHandler);
 
     void SetComponentType(EtsClass *componentType);
 
@@ -465,6 +481,11 @@ public:
     [[nodiscard]] bool IsFunction() const
     {
         return (GetFlags() & IS_FUNCTION) != 0;
+    }
+
+    [[nodiscard]] bool IsFunctionReference() const
+    {
+        return (GetFlags() & IS_FUNCTION_REFERENCE) != 0;
     }
 
     [[nodiscard]] bool IsEtsEnum() const
@@ -602,6 +623,8 @@ private:
     constexpr static uint32_t IS_MODULE = 1U << 24U;
     // Class is enum
     constexpr static uint32_t IS_ETS_ENUM = 1U << 25U;
+    // Class is Function Reference
+    constexpr static uint32_t IS_FUNCTION_REFERENCE = 1U << 26U;
 
     ark::ObjectHeader header_;  // EtsObject
 
@@ -609,6 +632,7 @@ private:
     FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
     FIELD_UNUSED uint32_t flags_;
+    FIELD_UNUSED EtsLong typeMetaData_;
     // ets.Class fields END
 
     ark::Class klass_;
