@@ -106,7 +106,7 @@ TEST_F(ServerTest, CallDebuggerScriptParsed)
     EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.scriptParsed", testing::_))
         .WillOnce([&](testing::Unused, testing::Unused, auto s) {
             ASSERT_THAT(ToObject(std::move(s)),
-                        JsonProperties(JsonProperty<JsonObject::NumT> {"executionContextId", g_mthread.GetId()},
+                        JsonProperties(JsonProperty<JsonObject::NumT> {"executionContextId", 0},
                                        JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(scriptId)},
                                        JsonProperty<JsonObject::NumT> {"startLine", 0},
                                        JsonProperty<JsonObject::NumT> {"startColumn", 0},
@@ -115,7 +115,7 @@ TEST_F(ServerTest, CallDebuggerScriptParsed)
                                        JsonProperty<JsonObject::StringT> {"hash", ""},
                                        JsonProperty<JsonObject::StringT> {"url", g_sourceFile.c_str()}));
         });
-    inspectorServer.CallDebuggerScriptParsed(g_mthread, ScriptId(scriptId), g_sourceFile);
+    inspectorServer.CallDebuggerScriptParsed(ScriptId(scriptId), g_sourceFile);
 }
 
 using ResultHolder = std::optional<JsonObject>;
@@ -146,6 +146,7 @@ TEST_F(ServerTest, DebuggerEnable)
                                    JsonProperty<JsonObject::ArrayT> {"protocols", JsonElementsAreArray(protocols)}));
     });
     InspectorServer inspector_server1(server1);
+    inspector_server1.OnCallDebuggerEnable([] {});
 }
 
 static auto g_simpleHandler = []([[maybe_unused]] auto unused, auto handler) {
@@ -334,7 +335,6 @@ TEST_F(ServerTest, OnCallDebuggerGetScriptSource)
 
     EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.paused", testing::_))
         .WillOnce([&](testing::Unused, testing::Unused, auto s) { ToObject(std::move(s)); });
-    EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.scriptParsed", testing::_)).Times(1);
 
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
     inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, PauseReason::OTHER, DefaultFrameEnumerator);
