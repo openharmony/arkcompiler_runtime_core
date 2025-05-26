@@ -25,7 +25,7 @@ class B {}
 let a = new A
 let b = new B
 
-let aa: Array<A> = []
+let aa: A[] = []
 
 function main() {
     let obj: Object = aa as Object
