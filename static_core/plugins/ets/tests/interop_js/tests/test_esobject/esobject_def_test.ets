@@ -22,6 +22,9 @@ let jsUndefined = module.getProperty("jsUndefined");
 let jsBigInt = module.getProperty("bi");
 let jsNull = module.getProperty("jsNull");
 let jsFunc = module.getProperty("jsFunc");
+let jsFuncNoReturn = module.getProperty("jsFuncNoReturn");
+let jsFuncReturnNull = module.getProperty("jsFuncReturnNull");
+let jsFuncReturnUndefined = module.getProperty("jsFuncReturnUndefined");
 let jsFuncWithParam = module.getProperty("jsFuncWithParam");
 let jsArray = module.getProperty("jsArray");
 let jsArray1 = module.getProperty("jsArray1");
@@ -172,9 +175,29 @@ function checkToUndefined(): boolean {
     return jsUndefined.toUndefined() == undefined;
 }
 
+function checkJsIsUndefined(): boolean {
+    return jsUndefined.isUndefined();
+}
+
+function checkTypeOfUndefined(): boolean {
+    return jsUndefined.typeOf() == "undefined";
+}
+
+function checkStrictlyEqualUndefined(): boolean {
+    return ESObject.areStrictlyEqual(jsUndefined, ESObject.Undefined);
+}
+
 // toNull(): null
 function checkToNull(): boolean {
     return jsNull.toNull() == null;
+}
+
+function checkIsNull(): boolean {
+    return jsNull.isNull();
+}
+
+function checkStrictlyEqualNull(): boolean {
+    return ESObject.areStrictlyEqual(jsNull, ESObject.Null);
 }
 
 function checkAreStrictEqual(): boolean {
@@ -302,7 +325,22 @@ function checkInvokeNoParam(): boolean {
     return result.toNumber() == 6;
 }
 
-// public invoke(...args: ESObject[]): ESObject
+function checkInvokeNoReturn(): boolean {
+    let result = jsFuncNoReturn.invoke();
+    return result.isUndefined();
+}
+
+function checkInvokeReturnNull(): boolean {
+    let result = jsFuncReturnNull.invoke();
+    return result.isNull();
+}
+
+function checkInvokeReturnUndefined(): boolean {
+    let result = jsFuncReturnUndefined.invoke();
+    return result.isUndefined();
+}
+
+// public invoke(...args: FixedArray<ESObject>): ESObject
 function checkInvokeHasParam(): boolean {
     let args = [ESObject.wrapDouble(2), ESObject.wrapDouble(3)];
     let result = jsFuncWithParam.invoke(...args);
