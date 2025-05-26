@@ -153,7 +153,7 @@ T EtsEscompatArrayBuffer::GetAndBitwiseOr(uint32_t index, uint32_t byteOffset, T
     auto *currentCoro = EtsCoroutine::GetCurrent();
     auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsEscompatArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
-    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, byteOffset, element);
+    EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseOr, T, obj, index, byteOffset, element);
     return val;
 }
 
