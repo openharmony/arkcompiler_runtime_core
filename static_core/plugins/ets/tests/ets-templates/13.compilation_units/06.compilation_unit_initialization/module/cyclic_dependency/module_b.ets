@@ -15,17 +15,10 @@
 
 /*---
 tags: [compile-only, not-a-test]
+files:
+- ./test2.ets
 ---*/
 
-package pkg;
+import {c} from "./test2.ets"
 
-// import
-import {i} from "../global"
-
-// init statement
-static { i++; }
-
-// export
-export function foo() {
-  return i;
-}
+export let b: number = 2

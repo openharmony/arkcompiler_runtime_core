@@ -14,18 +14,15 @@
  */
 
 /*---
-tags: [compile-only, not-a-test]
+desc: >-
+    If there is a cyclic dependency between top-level variable declarations, then a
+    compile-time error occurs.
+    Module A imports module B, which imports module C. Module C imports module A.
+tags: [compile-only, negative,not-a-test]
+files:
+- ./module_a.ets
 ---*/
 
-package pkg;
+import {a} from "./module_a.ets"
 
-// import
-import {i} from "../global"
-
-// init statement
-static { i++; }
-
-// export
-export function foo() {
-  return i;
-}
+export let c: number = 3;
