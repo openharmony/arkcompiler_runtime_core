@@ -34,11 +34,79 @@ function getArrayBufferFrom(value: buffer.Buffer | Uint8Array): ArrayBuffer {
     return value.buffer;
 }
 
+function normalizeBase64Url(str: string): string {
+    return str
+        .replace(new RegExp('-', 'g'), '+')
+        .replace(new RegExp('_', 'g'), '/');
+}
+
+function sanitizeBase64(str: string, urlSafe: boolean = false): string {
+    const allowedPattern = urlSafe
+        ? "[^A-Za-z0-9\\-_=]"
+        : "[^A-Za-z0-9+/=]";
+    return str.replace(new RegExp(allowedPattern, "g"), "");
+}
+
 function fillInPaddingBase64(str: string): string {
-    let base64Divisible: int = 4;
-    let remainder: int = Double.toInt(str.length % base64Divisible);
+    const base64Divisible: int = 4;
+    const normalized: String = normalizeBase64Url(str);
+    const clean: String = sanitizeBase64(normalized);
+    const remainder: int = Double.toInt(clean.length % base64Divisible);
     const paddingCount: int = remainder != 0 ? base64Divisible - remainder : 0;
-    return str.padRight(c'=', str.length.toInt() + paddingCount);
+    return clean.padRight(c'=', clean.length.toInt() + paddingCount);
+}
+
+function takeValidHexPrefix(str: string): string {
+    const hexPairRegex = new RegExp('^[0-9A-Fa-f]{2}$');
+    let prefix = '';
+    for (let i = 0; i + 1 < str.length; i += 2) {
+        const pair = str.slice(i, i + 2);
+        if (hexPairRegex.test(pair)) {
+            prefix += pair;
+        } else {
+            break;
+        }
+    }
+    return prefix;
+}
+
+function sanitizeAscii(str: string): string {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+        result += String.fromCharCode(str.charCodeAt(i) & 0x7F);
+    }
+    return result;
+}
+
+function sanitizeUtf8(str: string): string {
+    const sb = new StringBuilder();
+    for (let i = 0; i < str.length; i++) {
+        const cu = str.charCodeAt(i) as char;
+        if (Char.isHighSurrogate(cu) && i + 1 < str.length) {
+            const cu2 = str.charCodeAt(i + 1) as char;
+            if (Char.isLowSurrogate(cu2)) {
+                sb.append(str.charAt(i));
+                sb.append(str.charAt(i + 1));
+                i++;
+                continue;
+            }
+        }
+        if (Char.isHighSurrogate(cu) || Char.isLowSurrogate(cu)) {
+            sb.append('\uFFFD');
+        } else {
+            sb.append(str.charAt(i));
+        }
+    }
+    return sb.toString();
+}
+
+function sanitizeLatin1(str: string): string {
+    const sb = new StringBuilder();
+    for (let i = 0; i < str.length; i++) {
+        const low = str.charCodeAt(i) & 0xFF;
+        sb.append(String.fromCharCode(low));
+    }
+    return sb.toString();
 }
 
 /**
@@ -140,7 +208,19 @@ export default namespace buffer {
     export function from(string: String, encoding?: BufferEncoding): Buffer {
         const resolvedEncoding: string = (encoding ?? "utf8");
         let resolvedString = string;
-        if (encoding == 'base64' || encoding == 'base64url') {
+        if (resolvedEncoding == 'ascii') {
+            resolvedString = sanitizeAscii(resolvedString);
+        } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
+            resolvedString = sanitizeUtf8(resolvedString);
+        }
+         else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
+            resolvedString = sanitizeLatin1(resolvedString);
+        } else if (resolvedEncoding == 'hex') {
+            resolvedString = takeValidHexPrefix(resolvedString);
+            if (resolvedString.length == 0) {
+                return new Buffer(new ArrayBuffer(0));
+            }
+        } else if (encoding == 'base64' || encoding == 'base64url') {
             resolvedString = fillInPaddingBase64(string);
         }
         return new Buffer(ArrayBuffer.from(resolvedString, resolvedEncoding));
@@ -445,7 +525,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         /** The underlying ArrayBuffer storing the binary data */
         public buffer: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
-        private byteOffset: number;
+        internal readonly byteOffsetNumber: number;
 
         /**
          * Gets the length of the buffer in bytes
@@ -453,6 +533,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
          */
         get length(): number { return this.buffer.getByteLength() }
 
+        get byteOffset(): number { return this.byteOffsetNumber }
         /**
          * Creates a new Buffer instance
          * @param {ArrayBuffer} buffer - The underlying ArrayBuffer to use
@@ -461,7 +542,7 @@ It must be >= 0 and <= uint32 max. Received value is: ${length}`)
         public constructor(buffer: ArrayBuffer, byteOffset: number = 0)
         {
             this.buffer = buffer;
-            this.byteOffset = 0;
+            this.byteOffsetNumber = 0;
         }
 
         /**
@@ -759,8 +840,22 @@ Received value is: ${resolvedEnd}`)
 
             switch (klass) {
                 case "string":
-                    let buff = ArrayBuffer.from(value as string,
-                                                resolvedEncoding as string);
+                    let strValue = value as string;
+                    if (resolvedEncoding == 'ascii') {
+                        strValue = sanitizeAscii(strValue);
+                    } else if (resolvedEncoding == 'utf8' || resolvedEncoding == 'utf-8') {
+                        strValue = sanitizeUtf8(strValue);
+                    } else if (resolvedEncoding == 'latin1' || resolvedEncoding == 'binary') {
+                        strValue = sanitizeLatin1(strValue);
+                    } else if (resolvedEncoding == 'hex') {
+                        strValue = takeValidHexPrefix(strValue);
+                        if (strValue.length == 0) {
+                            return this;
+                        }
+                    } else if (resolvedEncoding == 'base64' || resolvedEncoding == 'base64url') {
+                        strValue = fillInPaddingBase64(strValue);
+                    }
+                    let buff = ArrayBuffer.from(strValue, resolvedEncoding as string);
                     for (let i: int = offsetInt; i < resolvedEndInt; i++) {
                         this.buffer.set(i, buff.at((i % buff.byteLength).toInt()).toByte());
                     }
