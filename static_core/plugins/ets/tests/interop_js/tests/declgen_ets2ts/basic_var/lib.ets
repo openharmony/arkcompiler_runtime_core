@@ -55,3 +55,5 @@ export let s : string = "Hi"
 export type Greeting = "Hello"
 export let a2: "Hello" = "Hello"
 export let b2: Greeting = "Hello"
+
+export let a3: Record<string, string>;
