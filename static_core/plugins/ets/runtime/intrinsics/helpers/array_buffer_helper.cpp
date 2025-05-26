@@ -348,17 +348,69 @@ Result<PandaVector<uint8_t>> ConvertBase64ToBytes(const PandaString &input, std:
     return BytesFromString(decoded);
 }
 
+bool IsSymbolHex(char c)
+{
+    return (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f') || ((c >= '0') && (c <= '9'));
+}
+
+PandaString FoundInputHex(const PandaString &input, bool &error)
+{
+    if (input.size() == 1) {
+        error = true;
+        return "";
+    }
+
+    PandaString inputHex;
+    bool isFirstPair = true;
+    size_t idx = 1;
+    while (idx < input.size()) {
+        if (isFirstPair) {
+            if (IsSymbolHex(input[idx - 1]) && IsSymbolHex(input[idx])) {
+                inputHex += input[idx - 1];
+                inputHex += input[idx];
+            } else {
+                error = true;
+                return "";
+            }
+            isFirstPair = false;
+        } else {
+            if (IsSymbolHex(input[idx - 1]) && IsSymbolHex(input[idx])) {
+                inputHex += input[idx - 1];
+                inputHex += input[idx];
+            } else {
+                break;
+            }
+        }
+        idx += K_HEX_PAIR_SIZE;
+    }
+    error = false;
+    return inputHex;
+}
+
 Result<PandaVector<uint8_t>> ConvertHexToBytes(const PandaString &input)
 {
-    if (input.size() % K_HEX_PAIR_SIZE != 0) {
+    // Found hex codes in input. Other symbols should be ignored
+    // input should start with hex code(-s)
+    bool error = false;
+    PandaString inputHex = FoundInputHex(input, error);
+    if (error) {
+        return Err<PandaString>(PandaString("The argument 'value' is invalid. Received is '") + input +
+                                PandaString("'"));
+    }
+
+    // Check size
+    if (inputHex.empty()) {
+        inputHex += "0";
+        inputHex += "0";
+    } else if (inputHex.size() % K_HEX_PAIR_SIZE != 0) {
         return Err<PandaString>(PandaString("Hex string must have an even length"));
     }
     PandaVector<uint8_t> bytes;
-    size_t bytesLength = input.size() / K_HEX_PAIR_SIZE;
+    size_t bytesLength = inputHex.size() / K_HEX_PAIR_SIZE;
     bytes.reserve(bytesLength);
     const size_t kHexStringLength = 3;
-    for (size_t i = 0; i < input.size(); i += K_HEX_PAIR_SIZE) {
-        std::array<char, kHexStringLength> hex = {input[i], input[i + 1], '\0'};
+    for (size_t i = 0; i < inputHex.size(); i += K_HEX_PAIR_SIZE) {
+        std::array<char, kHexStringLength> hex = {inputHex[i], inputHex[i + 1], '\0'};
         char *endptr = nullptr;
         uint64_t value = std::strtoul(hex.data(), &endptr, HEX_BASE);
         if (*endptr != '\0') {
