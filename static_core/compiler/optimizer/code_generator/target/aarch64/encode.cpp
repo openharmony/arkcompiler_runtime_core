@@ -924,7 +924,7 @@ void Aarch64Encoder::EncodeRoundAway(Reg dst, Reg src)
     GetMasm()->Frinta(VixlVReg(dst), VixlVReg(src));
 }
 
-void Aarch64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
+void Aarch64Encoder::EncodeRoundToPInfReturnScalar(Reg dst, Reg src)
 {
     auto done = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
     ScopedTmpReg tmp(this, src.GetType());
@@ -940,6 +940,33 @@ void Aarch64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     GetMasm()->Fcmp(VixlVReg(tmp), 0.5F);
     GetMasm()->Cinc(VixlReg(dst), VixlReg(dst), vixl::aarch64::Condition::eq);
     GetMasm()->Bind(done);
+}
+
+void Aarch64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
+{
+    ASSERT(src.GetType() == FLOAT64_TYPE);
+    ASSERT(dst.GetType() == FLOAT64_TYPE);
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double HALF = 0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ONE = 1.0;
+
+    ScopedTmpRegF64 ceil(this);
+
+    // calculate ceil(val)
+    GetMasm()->Frintp(VixlVReg(ceil), VixlVReg(src));
+
+    // compare ceil(val) - val with 0.5
+    GetMasm()->Fsub(VixlVReg(dst), VixlVReg(ceil), VixlVReg(src));
+    GetMasm()->Fcmp(VixlVReg(dst), HALF);
+
+    // calculate ceil(val) - 1
+    GetMasm()->Fmov(VixlVReg(dst), ONE);
+    GetMasm()->Fsub(VixlVReg(dst), VixlVReg(ceil), VixlVReg(dst));
+
+    // select final value based on comparison result
+    GetMasm()->Fcsel(VixlVReg(dst), VixlVReg(dst), VixlVReg(ceil), vixl::aarch64::Condition::gt);
 }
 
 void Aarch64Encoder::EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg)

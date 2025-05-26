@@ -272,7 +272,8 @@ public:
     virtual void EncodeRint(Reg dst, Reg src);
     virtual void EncodeTrunc(Reg dst, Reg src);
     virtual void EncodeRoundAway(Reg dst, Reg src);
-    virtual void EncodeRoundToPInf(Reg dst, Reg src);
+    virtual void EncodeRoundToPInfReturnFloat(Reg dst, Reg src);
+    virtual void EncodeRoundToPInfReturnScalar(Reg dst, Reg src);
 
     virtual void EncodeGetTypeSize(Reg size, Reg type);
     virtual void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem);

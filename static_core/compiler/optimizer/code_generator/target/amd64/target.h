@@ -325,7 +325,8 @@ public:
     void EncodeRint([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeTrunc([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeRoundAway([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
-    void EncodeRoundToPInf([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
+    void EncodeRoundToPInfReturnFloat([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
+    void EncodeRoundToPInfReturnScalar([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeReverseBytes(Reg dst, Reg src) override;
     void EncodeReverseBits(Reg dst, Reg src) override;
     void EncodeReverseHalfWords(Reg dst, Reg src) override;

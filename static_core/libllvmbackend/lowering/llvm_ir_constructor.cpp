@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <llvm/IR/Intrinsics.h>
 #include "optimizer/code_generator/codegen.h"
 #include "runtime/include/coretypes/string.h"
 
@@ -1050,6 +1051,27 @@ bool LLVMIrConstructor::EmitMemoryFenceRelease([[maybe_unused]] Inst *inst)
 bool LLVMIrConstructor::EmitMemoryFenceAcquire([[maybe_unused]] Inst *inst)
 {
     CreateMemoryFence(memory_order::ACQUIRE);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitRoundToPInf(Inst *inst)
+{
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double HALF = 0.5;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr double ONE = 1.0;
+
+    auto input = GetInputValue(inst, 0);
+    ASSERT_TYPE(input, builder_.getDoubleTy());
+
+    auto ceil = builder_.CreateIntrinsic(llvm::Intrinsic::ceil, {builder_.getDoubleTy()}, {input});
+    auto diff = builder_.CreateFSub(ceil, input);
+    auto roundBias = llvm::ConstantFP::get(builder_.getDoubleTy(), HALF);
+    auto cmp = builder_.CreateFCmpOGT(diff, roundBias);
+    auto compensation = llvm::ConstantFP::get(builder_.getDoubleTy(), ONE);
+    auto adjusted = builder_.CreateFSub(ceil, compensation);
+    auto result = builder_.CreateSelect(cmp, adjusted, ceil);
+    ValueMapAdd(inst, result);
     return true;
 }
 

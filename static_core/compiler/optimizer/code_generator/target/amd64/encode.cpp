@@ -2636,7 +2636,7 @@ void Amd64Encoder::EncodeRoundToPInfDouble(Reg dst, Reg src)
     BindLabel(doneId);
 }
 
-void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
+void Amd64Encoder::EncodeRoundToPInfReturnScalar(Reg dst, Reg src)
 {
     if (src.GetType() == FLOAT32_TYPE) {
         EncodeRoundToPInfFloat(dst, src);
@@ -2645,6 +2645,46 @@ void Amd64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     } else {
         UNREACHABLE();
     }
+}
+
+void Amd64Encoder::EncodeRoundToPInfReturnFloat(Reg dst, Reg src)
+{
+    ASSERT(src.GetType() == FLOAT64_TYPE);
+    ASSERT(dst.GetType() == FLOAT64_TYPE);
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t HALF = 0x3FE0000000000000;  // double precision representation of 0.5
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr int64_t ONE = 0x3FF0000000000000;  // double precision representation of 1.0
+
+    ScopedTmpRegF64 ceil(this);
+    GetMasm()->roundsd(ArchVReg(ceil), ArchVReg(src), asmjit::imm(0b10));
+
+    // calculate ceil(val) - val
+    ScopedTmpRegF64 diff(this);
+    GetMasm()->movapd(ArchVReg(diff), ArchVReg(ceil));
+    GetMasm()->subsd(ArchVReg(diff), ArchVReg(src));
+
+    // load 0.5 constant and compare
+    ScopedTmpRegF64 constReg(this);
+    ScopedTmpRegU64 tmpReg(this);
+    GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(HALF));
+    GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+    GetMasm()->comisd(ArchVReg(diff), ArchVReg(constReg));
+
+    // if difference > 0.5, subtract 1 from result
+    auto done = GetMasm()->newLabel();
+    GetMasm()->jbe(done);  // If difference <= 0.5, jump to end
+
+    // Load 1.0 and subtract
+    GetMasm()->mov(ArchReg(tmpReg), asmjit::imm(ONE));
+    GetMasm()->movq(ArchVReg(constReg), ArchReg(tmpReg));
+    GetMasm()->subsd(ArchVReg(ceil), ArchVReg(constReg));
+
+    GetMasm()->bind(done);
+
+    // move result to destination register
+    GetMasm()->movapd(ArchVReg(dst), ArchVReg(ceil));
 }
 
 template <typename T>

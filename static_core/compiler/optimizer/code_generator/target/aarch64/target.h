@@ -314,7 +314,8 @@ public:
     void EncodeRint(Reg dst, Reg src) override;
     void EncodeTrunc(Reg dst, Reg src) override;
     void EncodeRoundAway(Reg dst, Reg src) override;
-    void EncodeRoundToPInf(Reg dst, Reg src) override;
+    void EncodeRoundToPInfReturnScalar(Reg dst, Reg src) override;
+    void EncodeRoundToPInfReturnFloat(Reg dst, Reg src) override;
 
     void EncodeReverseBytes(Reg dst, Reg src) override;
     void EncodeReverseBits(Reg dst, Reg src) override;

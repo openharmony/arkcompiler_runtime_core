@@ -408,8 +408,8 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: ark::ets::intrinsics::StdMathRound
-    llvm_impl: round
-    codegen_func: CreateMathRoundAway
+    llvm_codegen_func: EmitRoundToPInf
+    codegen_func: CreateETSMathRound
     can_encode_func: CheckSSE42
     safe_intrinsic: true
 
