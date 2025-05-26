@@ -136,10 +136,11 @@ export class Declgen {
 
     if (Declgen.isFileInAllowedPath(this.declgenOptions, [sourceFile])) {
       const outPath = path.dirname(dEtsFilePath);
+      const finalCode = `'use static'\n${transformedCode}`;
       if (!fs.existsSync(outPath)) {
         fs.mkdirSync(outPath, { recursive: true });
       }
-      fs.writeFileSync(dEtsFilePath, transformedCode, { encoding: 'utf8' });
+      fs.writeFileSync(dEtsFilePath, finalCode, { encoding: 'utf8' });
     }
   }
 
@@ -203,6 +204,7 @@ export class Declgen {
         if (!Declgen.isFileInAllowedPath(declgenOptions, sourceFiles)) {
           return;
         }
+        const newText = `'use static'\n${text}`;
         const parsedPath = path.parse(fileName);
         fallbackWriteFile(
           /*
@@ -210,7 +212,7 @@ export class Declgen {
            * use `Extension.Ets` for output file name generation.
            */
           path.join(parsedPath.dir, `${parsedPath.name}${Extension.ETS}`),
-          text,
+          newText,
           writeByteOrderMark,
           onError,
           sourceFiles,
