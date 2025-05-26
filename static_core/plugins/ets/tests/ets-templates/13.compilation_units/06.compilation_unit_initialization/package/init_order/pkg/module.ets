@@ -19,13 +19,10 @@ tags: [compile-only, not-a-test]
 
 package pkg;
 
-// import
-import {i} from "../global"
+export let i: number = 1.0
+export let j: number
 
-// init statement
-static { i++; }
-
-// export
-export function foo() {
-  return i;
+static {
+  i = 2.0
+  j = 3.0
 }

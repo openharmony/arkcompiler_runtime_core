@@ -1,0 +1,2 @@
+# 17363 incorrect test runner work with cyclic dependency with modules
+13.compilation_units/06.compilation_unit_initialization/module/cyclic_dependency/test2.ets

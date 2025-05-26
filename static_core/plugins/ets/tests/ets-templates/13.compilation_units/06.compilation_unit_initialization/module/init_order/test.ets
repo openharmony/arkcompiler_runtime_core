@@ -14,18 +14,19 @@
  */
 
 /*---
-tags: [compile-only, not-a-test]
+desc:  >-
+    Compilation unit is a separate module (see Separate Module Initializer) or a package (see Package Initializer) that
+    is initialized once before an entity (function, variable, or type), exported from the compilation unit, is used for the
+    first time.
+tags: [no-warmup]
+files:
+- ./module.ets
 ---*/
 
-package pkg;
+import {i} from "./module.ets";
+import {j} from "./module.ets";
 
-// import
-import {i} from "../global"
-
-// init statement
-static { i++; }
-
-// export
-export function foo() {
-  return i;
+function main() {
+  assertEQ(i, 1.0, i + " != 1.0");
+  assertEQ(j, 3.0, j + " != 3.0");
 }
