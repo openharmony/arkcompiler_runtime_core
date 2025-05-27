@@ -507,36 +507,7 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
- <%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: T, fromIndex: int): int {
-    if (<%= this_len_int %> == 0) {
-        return -1;
-    }
-    let n = fromIndex;
-    let k: int;
-    if (n >= 0) {
-        k = min(<%= this_len_int %> - 1, n);
-    } else {
-        k = <%= this_len_int %> + n;
-    }
-
-    if (searchElement instanceof String) {
-        return this.lastIndexOfString(searchElement, k)
-    } else if (searchElement instanceof Number) {
-        return this.lastIndexOfNumber(searchElement, k)
-    } else if (searchElement instanceof Float) {
-        return this.lastIndexOfFloat(searchElement, k)
-    } else if (searchElement instanceof Long) {
-        return this.lastIndexOfLong(searchElement, k)
-    } else if (searchElement instanceof Int) {
-        return this.lastIndexOfInt(searchElement, k)
-    } else if (searchElement === undefined) {
-        return this.lastIndexOfUndefined(k)
-    } else if (searchElement == null) {
-            return this.lastIndexOfNull(k)
-    } else {
-        return this.lastIndexOfCommon(searchElement, k)
-    }
-}
+ <%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: T, fromIndex: int): int;
 
 /**
  * Returns the last index at which a given element can be found in the array,
@@ -572,9 +543,7 @@
  *
  * @returns The last index of the element in the array; -1 if not found.
  */
-<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>): number {
-    return <%= this_call.('lastIndexOf') %>searchElement, <%= this_len_int %> - 1);
-}
+<%= access_public %> native lastIndexOf<%= this_generic %>(<%= this_arg %>searchElement: <%= el_type %>): number;
 <% end %>
 
 /**
@@ -805,36 +774,19 @@
  *
  * @returns index of val, -1 otherwise
  */
+% if el_type != 'T'
 <%= access_public %> indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, <%= this_len_int %>)
-% if el_type != 'T'
     for (let i = fromIndex; i < <%= this_len_int %>; i++) {
         if (__runtimeEquals(val, <%= get_unsafe.(this, 'i') %>)) {
             return i
         }
     }
     return -1
-% else
-    const len = <%= this_len_int %>;
-    if (val instanceof String) {
-        return this.indexOfString(val, fromIndex, len)
-    } else if (val instanceof Number) {
-        return this.indexOfNumber(val, fromIndex, len)
-    } else if (val instanceof Float) {
-        return this.indexOfFloat(val, fromIndex, len)
-    } else if (val instanceof Long) {
-        return this.indexOfLong(val, fromIndex, len)
-    } else if (val instanceof Int) {
-        return this.indexOfInt(val, fromIndex, len)
-    } else if (val === undefined) {
-        return this.indexOfUndefined(fromIndex, len)
-    } else if (val === null) {
-        return this.indexOfNull(fromIndex, len)
-    } else {
-        return this.indexOfCommon(val, fromIndex, len)
-    }
-% end
 }
+% else
+<%= access_public %> native indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex: int): int;
+% end
 
 /**
  * Returns the first index at which a given element
@@ -849,6 +801,10 @@
 <%= access_public %> <%= override %> indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex?: Number): number {
     return <%= this_call.('indexOf') %>val, asIntOrDefault(fromIndex, 0))
 }
+
+% if this_array == 'escompat_array'
+<%= access_public %> native indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>): number;
+%end
 
 /**
  * Copying version of the sort() method.

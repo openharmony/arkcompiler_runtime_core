@@ -1429,6 +1429,46 @@ intrinsics:
       args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArraySet
 
+  - name: EscompatArrayIndexOf
+    space: ets
+    class_name: escompat.Array
+    method_name: indexOf
+    static: false
+    signature:
+      ret: f64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayIndexOf
+
+  - name: EscompatInternalArrayIndexOf
+    space: ets
+    class_name: escompat.Array
+    method_name: indexOf
+    static: false
+    signature:
+      ret: i32
+      args: [ std.core.Object, i32 ]
+    impl: ark::ets::intrinsics::EtsEscompatArrayInternalIndexOf
+
+  - name: EscompatArrayLastIndexOf
+    space: ets
+    class_name: escompat.Array
+    method_name: lastIndexOf
+    static: false
+    signature:
+      ret: f64
+      args: [ std.core.Object]
+    impl: ark::ets::intrinsics::EtsEscompatArrayLastIndexOf
+
+  - name: EscompatArrayInternalLastIndexOf
+    space: ets
+    class_name: escompat.Array
+    method_name: lastIndexOf
+    static: false
+    signature:
+      ret: i32
+      args: [ std.core.Object, i32]
+    impl: ark::ets::intrinsics::EtsEscompatArrayInternalLastIndexOf
+
 ########################
 # escompat.ArrayBuffer #
 ########################

@@ -1540,36 +1540,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-     public lastIndexOf(searchElement: T, fromIndex: int): int {
-        if (this.actualLength == 0) {
-            return -1;
-        }
-        let n = fromIndex;
-        let k: int;
-        if (n >= 0) {
-            k = min(this.actualLength - 1, n);
-        } else {
-            k = this.actualLength + n;
-        }
-
-        if (searchElement instanceof String) {
-            return this.lastIndexOfString(searchElement, k)
-        } else if (searchElement instanceof Number) {
-            return this.lastIndexOfNumber(searchElement, k)
-        } else if (searchElement instanceof Float) {
-            return this.lastIndexOfFloat(searchElement, k)
-        } else if (searchElement instanceof Long) {
-            return this.lastIndexOfLong(searchElement, k)
-        } else if (searchElement instanceof Int) {
-            return this.lastIndexOfInt(searchElement, k)
-        } else if (searchElement === undefined) {
-            return this.lastIndexOfUndefined(k)
-        } else if (searchElement == null) {
-                return this.lastIndexOfNull(k)
-        } else {
-            return this.lastIndexOfCommon(searchElement, k)
-        }
-    }
+     public native lastIndexOf(searchElement: T, fromIndex: int): int;
 
     /**
      * Returns the last index at which a given element can be found in the array,
@@ -1605,9 +1576,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public lastIndexOf(searchElement: T): number {
-        return this.lastIndexOf(searchElement, this.actualLength - 1);
-    }
+    public native lastIndexOf(searchElement: T): number;
 
     /**
      * Creates and returns a new string by concatenating all of the elements in an `Array`,
@@ -1811,27 +1780,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    public indexOf(val: T, fromIndex: int): int {
-        fromIndex = normalizeIndex(fromIndex, this.actualLength)
-        const len = this.actualLength;
-        if (val instanceof String) {
-            return this.indexOfString(val, fromIndex, len)
-        } else if (val instanceof Number) {
-            return this.indexOfNumber(val, fromIndex, len)
-        } else if (val instanceof Float) {
-            return this.indexOfFloat(val, fromIndex, len)
-        } else if (val instanceof Long) {
-            return this.indexOfLong(val, fromIndex, len)
-        } else if (val instanceof Int) {
-            return this.indexOfInt(val, fromIndex, len)
-        } else if (val === undefined) {
-            return this.indexOfUndefined(fromIndex, len)
-        } else if (val === null) {
-            return this.indexOfNull(fromIndex, len)
-        } else {
-            return this.indexOfCommon(val, fromIndex, len)
-        }
-    }
+    public native indexOf(val: T, fromIndex: int): int;
 
     /**
      * Returns the first index at which a given element
@@ -1846,6 +1795,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public override indexOf(val: T, fromIndex?: Number): number {
         return this.indexOf(val, asIntOrDefault(fromIndex, 0))
     }
+
+    public native indexOf(val: T): number;
 
     /**
      * Copying version of the sort() method.
