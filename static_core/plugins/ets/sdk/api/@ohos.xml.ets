@@ -102,13 +102,13 @@ export namespace xml {
         }
 
         private helper: XmlParseHelper
-        public parse(option: ParseOptions): void {
+        public parseXml(option: ParseOptions): void {
             this.helper.supportDoctype = (option.supportDoctype != undefined) ? option.supportDoctype! : false
             this.helper.ignoreNameSpace = (option.ignoreNameSpace != undefined) ? option.ignoreNameSpace! : false
             this.helper.tagFunc_ = option.tagValueCallbackFunction
             this.helper.attrFunc_ = option.attributeValueCallbackFunction
             this.helper.tokenFunc_ = option.tokenValueCallbackFunction
-            this.helper.parse()
+            this.helper.parseXml()
         }
     }
     
@@ -419,7 +419,7 @@ export namespace xml {
             }
         }
 
-        public parse(): void {
+        public parseXml(): void {
             if (this.strXml_ == "") {
                 return
             }

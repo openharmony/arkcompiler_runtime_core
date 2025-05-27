@@ -91,7 +91,7 @@ function testWithAttributeValueCb() {
 
     let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const expected = "{ importance : high }; { logged : true }; { xmln:h : http://www.w3.org/TR/html4/ }; "
     assertEQ(processStr(g_testStr), processStr(expected))
@@ -121,7 +121,7 @@ function testWithAttributeValueCbWithSupportDocTypeAndIgnoreNS() {
 
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const expected = "{ importance : high }; { logged : true }; { xmln:h : http://www.w3.org/TR/html4/ }; "
     assertEQ(processStr(g_testStr), processStr(expected));
@@ -151,7 +151,7 @@ function testGetAttributeCount() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{ note : 2 }; { title : 0 }; { todo : 0 }; { todo : 0 }; '
 
@@ -186,7 +186,7 @@ function testGetAttributeValue() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "attributeValueCallbackFunction": attrCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{ importance : heigh }; { logged : true }; { xmlns:h : http://www.w3.org/TR/html4/ }; '
 
@@ -207,7 +207,7 @@ function testXmlGetAttributeCount0001() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:1"));
     } catch (err) {
         const TAG = 'testXmlGetAttributeCount0001';
@@ -231,7 +231,7 @@ function testXmlGetAttributeCount0002() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(str.includes("key:2 value:2"))
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -252,7 +252,7 @@ function testXmlGetAttributeCount0003() {
         let options: xml.ParseOptions = {
             supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
         }
-        parser.parse(options);
+        parser.parseXml(options);
         assertTrue(false)
     } catch (err: BusinessError) {
         console.error(`${TAG} failed, error: ${err}`);
@@ -278,7 +278,7 @@ function testXmlPullParserParseOptions0007() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             attributeValueCallbackFunction: (name: string, value: string) => true,
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)
@@ -301,7 +301,7 @@ function testXmlPullParserParseOptions0010() {
             tagValueCallbackFunction: (name: string, value: string) => true,
             attributeValueCallbackFunction: undefined,
         };
-        parser.parse(options);
+        parser.parseXml(options);
     } catch (err) {
         console.error(`${TAG} failed, error: ${err}`);
         assertTrue(false)

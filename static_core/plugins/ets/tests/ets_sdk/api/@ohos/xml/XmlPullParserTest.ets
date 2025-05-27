@@ -38,7 +38,7 @@ function testXmlPullParserDefault(){
     let buffer = new ArrayBuffer(0)
     let parser = new xml.XmlPullParser(buffer)
     assertNE(parser, null)
-    parser.parse({} as xml.ParseOptions)
+    parser.parseXml({} as xml.ParseOptions)
 }
 
 function rawStringToBuffer( str: string ) : ArrayBuffer {
@@ -79,7 +79,7 @@ function testWithTagValueCb() {
 
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tagValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const res = '{  :  note [ foo "baa"] }; {  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1} }; \
 {  : Hello, World! }; { company :  }; {  : John &amp Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; \
@@ -113,7 +113,7 @@ function testWithTagValueCbWithIgnoreNS() {
 
     let options: xml.ParseOptions = {"supportDoctype": false, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const res = '{  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1;} }; {  : Hello, World! }; \
 { company :  }; {  : John & Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; { title :  }; \
@@ -147,7 +147,7 @@ function testWithTagValueCbWithSupportDocTypeAndIgnoreNS() {
 
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const res = '{  :  note [ foo "baa"] }; {  :  foo "baa" }; { note :  }; {  : function matchwo(a,6){return 1;} }; \
 {  : Hello, World! }; { company :  }; {  : John & Hans }; { company :  }; { title :  }; {  : Happy }; { title :  }; \
@@ -211,7 +211,7 @@ function testWithTokenValueCb() {
 
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": cb}
 
-    parser.parse(options)
+    parser.parseXml(options)
 
     const expected = '{ START_DOCUMENT : { depth : 0}; { columnNumber : 1}; { lineNumber : 1}; { attributeCount : 2}; \
 { isEmptyElementTag : false}; { isWhitespace : false}; { namespace : }; { name : }; { prefix : }; \
@@ -267,7 +267,7 @@ function testReplaceXmlSpecChars() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb, "attributeValueCallbackFunction": attrCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = 'Hello>World\'Wo"rk'
     let expectedAttrStr = "{ importance : hi&gh }; { logged : <true }; "
@@ -298,7 +298,7 @@ function testCDATA() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = 'Hello\nWorld Work\n This is a \n CDATA section '
 
@@ -329,7 +329,7 @@ function testIsEmptyElementTag() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{ note : false }; { title : true }; { todo : false }; { todo : true }; '
 
@@ -363,7 +363,7 @@ function testGetText() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tokenValueCallbackFunction": tokenCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{  : Happy }; {  : Work }; {  : Play }; '
 
@@ -397,7 +397,7 @@ function testGetPrefix() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tokenValueCallbackFunction": tokenCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{ note :  }; { table : h }; { tr : h }; { td : h }; { td : h }; { tr : h }; { table : h }; { note :  }; '
 
@@ -432,7 +432,7 @@ function testGetNamespace() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": false, "tokenValueCallbackFunction": tokenCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{ note :  }; { table : html4 }; { tr : html4 }; { td : html4 }; { td : html4 }; { tr : html4 }; { table : html4 }; { note :  }; '
 
@@ -468,7 +468,7 @@ function testTagValue() {
     let data = rawStringToBuffer(strXml)
     let parser = new xml.XmlPullParser(data, "utf-8")
     let options: xml.ParseOptions = {"supportDoctype": true, "ignoreNameSpace": true, "tagValueCallbackFunction": tagCb}
-    parser.parse(options)
+    parser.parseXml(options)
 
     let expectedTextStr = '{ note :  }; {  :      }; {  : function \n matchwo(a,6) }; {  :      }; {  : Hello, World! }; \
 {  :      }; { company :  }; {  : John & Hans }; { company :  }; {  :      }; { title :  }; {  : Happy }; { title :  }; \
@@ -519,7 +519,7 @@ let testXml =
             let options: xml.ParseOptions = {
                 supportDoctype: true, ignoreNameSpace: true, tokenValueCallbackFunction: func
             }
-            parser.parse(options);
+            parser.parseXml(options);
             assertTrue(str.includes("key:2 value:true"))
         } catch (err) {
             const TAG = 'testXmlIsWhitespace0001';
