@@ -161,11 +161,12 @@ case:
     decl: |-
       let tmp: number = 1;
     logic: |-
-        let callbacks: Array<() => void> = new Array<() => void>(
+        let callbacks: Array<() => void> = [
           () => { tmp++; },
           () => { tmp++; }
-        );
-        assertEQ(tmp1, 3);
+        ];
+        callbacks.forEach(cb => cb());
+        assertEQ(tmp, 3);
 
   - desc: |-
       Constraint array instantiation type in type alias.
