@@ -22,6 +22,8 @@
 #include <vector>
 #include <iostream>
 
+#define MAX_INPUT_SIZE 256
+
 class FuzzTestEngine {
 public:
     FuzzTestEngine()
