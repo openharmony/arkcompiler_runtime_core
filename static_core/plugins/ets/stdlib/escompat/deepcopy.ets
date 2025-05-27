@@ -15,6 +15,10 @@
 
 package escompat;
 
+export interface Cloneable {
+	clone(): Cloneable;
+}
+
 export function deepcopy<T>(src: Nullish<T>, depth: int = -1): Nullish<T> {
 	const maxDepth = (depth == -1) ? Int.MAX_VALUE : depth
 	return new DeepCloner(maxDepth).clone<T>(src)
@@ -56,6 +60,8 @@ class DeepCloner {
 			return Float.valueOf(src) as T
 		} else if (src instanceof Double) {
 			return Double.valueOf(src) as T
+		} else if (src instanceof BaseEnum) {
+			return src as T
 		} else {
 			const existingCopy = this.copies.get(src as Object)
 			if (existingCopy !== undefined) {
@@ -98,6 +104,11 @@ class DeepCloner {
 		this.currentDepth++
 		if (this.currentDepth > this.maxDepth) {
 			return obj
+		}
+
+		if (obj instanceof Cloneable) {
+			let objClone = obj as Cloneable
+			return objClone.clone()
 		}
 
 		if (!this.hasEmptyConstructor(objType)) {
