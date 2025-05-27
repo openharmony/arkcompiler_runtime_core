@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,11 @@ std::string MangleString(const std::string &name)
 {
     std::stringstream res;
     const uint8_t *utf8 = ark::utf::CStringAsMutf8(name.c_str());
-    while (*utf8 != '\0') {
-        auto [ch, len] = ark::utf::ConvertMUtf8ToUtf16Pair(utf8);
+    const size_t nameLength = name.size();
+    size_t decodedLength = 0;
+    while (*utf8 != '\0' && decodedLength < nameLength) {
+        auto [ch, len] = ark::utf::ConvertMUtf8ToUtf16Pair(utf8, nameLength - decodedLength);
+        decodedLength += len;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         utf8 += len;
         if (ch == '.' || ch == '/') {
