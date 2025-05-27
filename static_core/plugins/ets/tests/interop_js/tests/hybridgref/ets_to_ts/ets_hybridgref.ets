@@ -15,7 +15,7 @@
 
 package ets_functions;
 
-type refType = Object | ESObject;
+type refType = Object | ESValue;
 native function saveHybridGref(ref: refType):void;
 
 export function etsSaveNativeGrefChar(): void {

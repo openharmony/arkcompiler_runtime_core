@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const module = ESObject.load('../../plugins/ets/tests/interop_js/tests/test_record/ts_to_ets/record');
+const module = ESValue.load('../../plugins/ets/tests/interop_js/tests/test_record/ts_to_ets/record');
 const myRecord = module.getProperty('myRecord');
 const originalRecord = module.getProperty('originalRecord');
 const testNewRecordValueFromStatic = module.getProperty('testNewRecordValueFromStatic');
@@ -29,9 +29,9 @@ function testGetRecordValue(): boolean {
 }
 
 function testChangeRecordValue(): boolean {
-  originalRecord.setProperty('day', ESObject.wrapString('one'));
-  originalRecord.setProperty('month', ESObject.wrapString('two'));
-  originalRecord.setProperty('year', ESObject.wrapString('three'));
+  originalRecord.setProperty('day', ESValue.wrapString('one'));
+  originalRecord.setProperty('month', ESValue.wrapString('two'));
+  originalRecord.setProperty('year', ESValue.wrapString('three'));
 
   return testNewRecordValueFromStatic.invoke().toBoolean();
 }

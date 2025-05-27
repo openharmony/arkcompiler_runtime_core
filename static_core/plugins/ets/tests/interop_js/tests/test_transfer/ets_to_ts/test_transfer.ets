@@ -37,7 +37,7 @@ function testTransferArrayBufferStaticToDynamic(): void {
     uint32View[1] = 0xcafe;
 
     let dynamicArrayBuffer = InteropTransferHelper.transferArrayBufferToDynamic(staticArrayBuffer);
-    testDynamicArrayBuffer.invoke(ESObject.wrap(dynamicArrayBuffer));
+    testDynamicArrayBuffer.invoke(ESValue.wrap(dynamicArrayBuffer));
 }
 
 function testTransferInt8ArrayStaticToDynamic(): void {
@@ -46,7 +46,7 @@ function testTransferInt8ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2;
 
     let dynamicTypedArray = InteropTransferHelper.transferInt8ArrayToDynamic(staticTypedArray);
-    testDynamicInt8Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicInt8Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferUint8ArrayStaticToDynamic(): void {
@@ -55,7 +55,7 @@ function testTransferUint8ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2;
 
     let dynamicTypedArray = InteropTransferHelper.transferUint8ArrayToDynamic(staticTypedArray);
-    testDynamicUint8Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicUint8Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferUint8ClampedArrayStaticToDynamic(): void {
@@ -64,7 +64,7 @@ function testTransferUint8ClampedArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2;
 
     let dynamicTypedArray = InteropTransferHelper.transferUint8ClampedArrayToDynamic(staticTypedArray);
-    testDynamicUint8ClampedArray.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicUint8ClampedArray.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferInt16ArrayStaticToDynamic(): void {
@@ -73,7 +73,7 @@ function testTransferInt16ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2;
 
     let dynamicTypedArray = InteropTransferHelper.transferInt16ArrayToDynamic(staticTypedArray);
-    testDynamicInt16Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicInt16Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferUint16ArrayStaticToDynamic(): void {
@@ -82,7 +82,7 @@ function testTransferUint16ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2;
 
     let dynamicTypedArray = InteropTransferHelper.transferUint16ArrayToDynamic(staticTypedArray);
-    testDynamicUint16Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicUint16Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferInt32ArrayStaticToDynamic(): void {
@@ -91,7 +91,7 @@ function testTransferInt32ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 0xcafe;
 
     let dynamicTypedArray = InteropTransferHelper.transferInt32ArrayToDynamic(staticTypedArray);
-    testDynamicInt32Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicInt32Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferUint32ArrayStaticToDynamic(): void {
@@ -100,7 +100,7 @@ function testTransferUint32ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 0xcafe;
 
     let dynamicTypedArray = InteropTransferHelper.transferUint32ArrayToDynamic(staticTypedArray);
-    testDynamicUint32Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicUint32Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferFloat32ArrayStaticToDynamic(): void {
@@ -109,7 +109,7 @@ function testTransferFloat32ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2.0;
 
     let dynamicTypedArray = InteropTransferHelper.transferFloat32ArrayToDynamic(staticTypedArray);
-    testDynamicFloat32Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicFloat32Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferFloat64ArrayStaticToDynamic(): void {
@@ -118,7 +118,7 @@ function testTransferFloat64ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2.0;
 
     let dynamicTypedArray = InteropTransferHelper.transferFloat64ArrayToDynamic(staticTypedArray);
-    testDynamicFloat64Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicFloat64Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferDataViewStaticToDynamic(): void {
@@ -127,7 +127,7 @@ function testTransferDataViewStaticToDynamic(): void {
     staticDynamicDataView.setUint32(4, 0xcafe, true);
 
     let dynamicDataView = InteropTransferHelper.transferDataViewToDynamic(staticDynamicDataView);
-    testDynamicDataView.invoke(ESObject.wrap(dynamicDataView));
+    testDynamicDataView.invoke(ESValue.wrap(dynamicDataView));
 }
 
 function testTransferBigInt64ArrayStaticToDynamic(): void {
@@ -136,7 +136,7 @@ function testTransferBigInt64ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2n;
 
     let dynamicTypedArray = InteropTransferHelper.transferBigInt64ArrayToDynamic(staticTypedArray);
-    testDynamicBigInt64Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicBigInt64Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
 function testTransferBigUint64ArrayStaticToDynamic(): void {
@@ -145,11 +145,11 @@ function testTransferBigUint64ArrayStaticToDynamic(): void {
     staticTypedArray[1] = 2n;
 
     let dynamicTypedArray = InteropTransferHelper.transferBigUint64ArrayToDynamic(staticTypedArray);
-    testDynamicBigUint64Array.invoke(ESObject.wrap(dynamicTypedArray));
+    testDynamicBigUint64Array.invoke(ESValue.wrap(dynamicTypedArray));
 }
 
-const errStrPre = 'Error: Seamless conversion for class '
-const errStrPost = ' is not supported'
+const errStrPre = 'Error: Seamless conversion for class ';
+const errStrPost = ' is not supported';
 
 function testNoSeamlessForClass(func: ESValue, arg: Object, className: String): void {
     let res = false;
@@ -163,9 +163,9 @@ function testNoSeamlessForClass(func: ESValue, arg: Object, className: String): 
 
 function testDirectTransferStaticToDynamic(): void {
     let buffer = new ArrayBuffer(100);
-    testNoSeamlessForClass(testDirectTransfer, buffer, 'Lescompat/ArrayBuffer;')
-    testNoSeamlessForClass(testDirectTransfer, new Uint8Array(buffer), 'Lescompat/Uint8Array;')
-    testNoSeamlessForClass(testDirectTransfer, new DataView(buffer), 'Lescompat/DataView;')
+    testNoSeamlessForClass(testDirectTransfer, buffer, 'Lescompat/ArrayBuffer;');
+    testNoSeamlessForClass(testDirectTransfer, new Uint8Array(buffer), 'Lescompat/Uint8Array;');
+    testNoSeamlessForClass(testDirectTransfer, new DataView(buffer), 'Lescompat/DataView;');
 }
 
 function testTransferStaticToDynamic(): boolean {

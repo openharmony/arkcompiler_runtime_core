@@ -66,7 +66,7 @@ static bool InitializeGlobal(ani_env *env)
     static constexpr std::string_view LENGTH_PROPERTY_NAME = "length";
 
     ani_class esobjectClass {};
-    if (UNLIKELY(!CacheGlobalClass(env, "std.interop.js.ESObject", &g_esValueClass, &esobjectClass))) {
+    if (UNLIKELY(!CacheGlobalClass(env, "std.interop.ESValue", &g_esValueClass, &esobjectClass))) {
         return false;
     }
     ani_class doubleClass {};
@@ -77,12 +77,12 @@ static bool InitializeGlobal(ani_env *env)
     [[maybe_unused]] auto status = env->Class_FindMethod(doubleClass, "<ctor>", "d:", &g_doubleCtor);
     ASSERT(status == ANI_OK);
 
-    status = env->Class_FindStaticMethod(esobjectClass, "getGlobal", ":C{std.interop.js.ESObject}", &g_methodGetGlobal);
+    status = env->Class_FindStaticMethod(esobjectClass, "getGlobal", ":C{std.interop.ESValue}", &g_methodGetGlobal);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindMethod(esobjectClass, "getPropertySafe", "C{std.core.String}:C{std.interop.js.ESObject}",
+    status = env->Class_FindMethod(esobjectClass, "getPropertySafe", "C{std.core.String}:C{std.interop.ESValue}",
                                    &g_methodGetPropertyByName);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindMethod(esobjectClass, "getPropertySafe", "d:C{std.interop.js.ESObject}",
+    status = env->Class_FindMethod(esobjectClass, "getPropertySafe", "d:C{std.interop.ESValue}",
                                    &g_methodGetPropertyByIndex);
     ASSERT(status == ANI_OK);
     status = env->Class_FindMethod(esobjectClass, "setProperty",
@@ -90,8 +90,8 @@ static bool InitializeGlobal(ani_env *env)
     ASSERT(status == ANI_OK);
     status = env->Class_FindMethod(esobjectClass, "setProperty", "dC{std.core.Object}:", &g_methodSetPropertyByIndex);
     ASSERT(status == ANI_OK);
-    status = env->Class_FindStaticMethod(esobjectClass, "<get>Undefined", ":C{std.interop.js.ESObject}",
-                                         &g_methodGetUndefined);
+    status =
+        env->Class_FindStaticMethod(esobjectClass, "<get>Undefined", ":C{std.interop.ESValue}", &g_methodGetUndefined);
     ASSERT(status == ANI_OK);
     status = env->Class_FindMethod(esobjectClass, "isUndefined", ":z", &g_methodIsUndefined);
     ASSERT(status == ANI_OK);
@@ -177,7 +177,7 @@ static bool GetStorage(ani_env *env, ani_object *result)
         ani_static_method instantiateEmptyArray {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         status = env->Class_FindStaticMethod(static_cast<ani_class>(g_esValueClass), "instantiateEmptyArray",
-                                             ":C{std.interop.js.ESObject}", &instantiateEmptyArray);
+                                             ":C{std.interop.ESValue}", &instantiateEmptyArray);
         if (UNLIKELY(status != ANI_OK)) {
             return false;
         }
