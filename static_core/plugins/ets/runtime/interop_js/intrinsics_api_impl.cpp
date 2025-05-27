@@ -1311,4 +1311,17 @@ EtsObject *CreateDynamicDataView(EtsEscompatArrayBuffer *staticArrayBuffer, doub
     return reinterpret_cast<EtsObject *>(etsJSValue);
 }
 
+void SetInteropRuntimeLinker(EtsRuntimeLinker *linker)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    if (ctx == nullptr) {
+        ThrowNoInteropContextException();
+        return;
+    }
+    INTEROP_CODE_SCOPE_ETS(coro);
+
+    ctx->SetDefaultLinkerContext(linker);
+}
+
 }  // namespace ark::ets::interop::js

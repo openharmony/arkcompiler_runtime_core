@@ -419,6 +419,7 @@ public:
     static void ThrowJSValue(napi_env env, napi_value val);
 
     static void InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker);
+    static void SetDefaultLinkerContext(EtsRuntimeLinker *linker);
 
     void ForwardEtsException(EtsCoroutine *coro);
     void ForwardJSException(EtsCoroutine *coro);

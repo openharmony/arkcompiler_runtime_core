@@ -411,4 +411,9 @@ EtsObject *InteropTransferHelperCreateDynamicDataViewIntrinsic(EtsEscompatArrayB
     return CreateDynamicDataView(object, length, byteOffset);
 }
 
+void InteropContextSetInteropRuntimeLinkerImplIntrinsic(EtsRuntimeLinker *linker)
+{
+    SetInteropRuntimeLinker(linker);
+}
+
 }  // namespace ark::ets::interop::js::intrinsics
