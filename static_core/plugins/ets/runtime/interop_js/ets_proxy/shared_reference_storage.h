@@ -109,6 +109,7 @@ public:
     }
 
     static constexpr size_t MAX_POOL_SIZE = (sizeof(void *) > 4) ? 1_GB : 64_MB;
+    static constexpr std::string_view PROXY_NAPI_WRAPPER = "_proxynapiwrapper";
 
 private:
     SharedReferenceStorage(PandaEtsVM *vm, void *data, size_t size) : SharedReferencePool(data, size), vm_(vm) {}

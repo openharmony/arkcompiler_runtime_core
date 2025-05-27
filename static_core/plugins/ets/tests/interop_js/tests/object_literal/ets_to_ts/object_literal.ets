@@ -13,28 +13,23 @@
  * limitations under the License.
  */
 
-type KeyType = 'day' | 'month' | 'year';
+class Entity {
+    public id: number = 1
+}
 
-export let myRecord: Record<KeyType, number | string> = {
-    day: 199999999,
-    month: 'two',
-    year: 3
-};
+function isEntity(obj: Entity) {
+    return obj instanceof Entity;
+}
 
-export let originalRecord: Record<KeyType, number | string> = {
-    day: 1,
-    month: 2,
-    year: 3
-};
+class DataModel {
+    public numericId: number = 1;
+    public stringCode: string = 'default'
+}
 
-export function testNewRecordValueFromStatic(): boolean {
-    let res = true;
-    try {
-        ASSERT_TRUE(originalRecord.day === 'one');
-        ASSERT_TRUE(originalRecord.month === 'two');
-        ASSERT_TRUE(originalRecord.year === 'three');
-    } catch (e) {
-        res = false;
-    }
-    return res;
+function isDataModel(obj: DataModel) {
+    return obj instanceof DataModel;
+}
+
+function hasValidRecordProperty(record: Record<string, number>) {
+    return record['prop'] === 1;
 }

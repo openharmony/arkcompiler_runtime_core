@@ -13,28 +13,16 @@
  * limitations under the License.
  */
 
-type KeyType = 'day' | 'month' | 'year';
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
 
-export let myRecord: Record<KeyType, number | string> = {
-    day: 199999999,
-    month: 'two',
-    year: 3
-};
+namespace ark::ets::interop::js::testing {
 
-export let originalRecord: Record<KeyType, number | string> = {
-    day: 1,
-    month: 2,
-    year: 3
-};
+class EtsFunctionTsToEtsTest : public EtsInteropTest {};
 
-export function testNewRecordValueFromStatic(): boolean {
-    let res = true;
-    try {
-        ASSERT_TRUE(originalRecord.day === 'one');
-        ASSERT_TRUE(originalRecord.month === 'two');
-        ASSERT_TRUE(originalRecord.year === 'three');
-    } catch (e) {
-        res = false;
-    }
-    return res;
+TEST_F(EtsFunctionTsToEtsTest, test_object_literal)
+{
+    ASSERT_TRUE(RunJsTestSuite("test_object_literal.ts"));
 }
+
+}  // namespace ark::ets::interop::js::testing

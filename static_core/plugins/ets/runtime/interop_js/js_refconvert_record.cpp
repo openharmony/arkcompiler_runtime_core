@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 
@@ -38,7 +39,7 @@ napi_value JSRefConvertRecord::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     napi_value proxyObj;
     NAPI_CHECK_FATAL(napi_new_instance(env, proxy, args.size(), args.data(), &proxyObj));
 
-    storage->CreateETSObjectRef(ctx, obj, handlerObj);
+    storage->CreateETSObjectRef(ctx, obj, proxyObj);
 
     return proxyObj;
 }
@@ -48,18 +49,24 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_JS(coro);
-    ScopedManagedCodeThread managedScope(coro);
 
     size_t argc;
-    napi_value jsThis;
-    void *data;
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, &jsThis, &data));
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, nullptr, nullptr));
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), &jsThis, &data));
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), nullptr, nullptr));
+
+    std::string value = GetString(env, jsArgs[1]);
+    if (value == ets_proxy::SharedReferenceStorage::PROXY_NAPI_WRAPPER) {
+        napi_value result;
+        napi_get_property(env, jsArgs->data()[0], jsArgs->data()[1], &result);
+        return result;
+    }
+
+    ScopedManagedCodeThread managedScope(coro);
 
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ASSERT(storage != nullptr);
-    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsThis);
+    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs->data()[0]);
     ASSERT(sharedRef != nullptr);
 
     auto *etsThis = sharedRef->GetEtsObject();
@@ -84,15 +91,13 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
     ScopedManagedCodeThread managedScope(coro);
 
     size_t argc;
-    napi_value jsThis;
-    void *data;
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, &jsThis, &data));
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, nullptr, nullptr));
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), &jsThis, &data));
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), nullptr, nullptr));
 
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ASSERT(storage != nullptr);
-    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsThis);
+    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs->data()[0]);
     ASSERT(sharedRef != nullptr);
 
     auto *etsThis = sharedRef->GetEtsObject();
@@ -113,10 +118,22 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
     return trueValue;
 }
 
-EtsObject *JSRefConvertRecord::UnwrapImpl([[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] napi_value jsFun)
+EtsObject *JSRefConvertRecord::UnwrapImpl([[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    InteropCtx::ThrowETSError(coro, "Object is not compatible with escompat.Record");
+    napi_env env = ctx->GetJSEnv();
+    ets_proxy::SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
+
+    if (LIKELY(sharedRef != nullptr)) {
+        EtsObject *etsObject = sharedRef->GetEtsObject();
+        if (UNLIKELY(!PlatformTypes()->escompatRecord->IsAssignableFrom(etsObject->GetClass()))) {
+            InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with escompat.Record"));
+            return nullptr;
+        }
+
+        return etsObject;
+    }
+
+    InteropCtx::ThrowJSTypeError(env, std::string("Object is not compatible with escompat.Record"));
     return nullptr;
 }
 

@@ -17,7 +17,7 @@ const stsVm = globalThis.gtest.etsVm;
 const myRecord = stsVm.getClass('Lrecord/ETSGLOBAL;').myRecord;
 const testNewRecordValueFromDynamic = stsVm.getFunction('Lrecord/ETSGLOBAL;', 'testNewRecordValueFromDynamic');
 
-function testGetRecordValue() {
+function testGetRecordValue(): void {
   let dayValue = myRecord.day;
   let monthValue = myRecord.month;
   let yearValue = myRecord.year;
@@ -26,10 +26,10 @@ function testGetRecordValue() {
   ASSERT_TRUE(yearValue === 3);
 }
 
-function testChangeRecordValue() {
-  myRecord['day'] = 'one';
-  myRecord['month'] = 2;
-  myRecord['year'] = 'three';
+function testChangeRecordValue(): void {
+  myRecord.day = 'one';
+  myRecord.month = 2;
+  myRecord.year = 'three';
   let dayValue = myRecord.day;
   let monthValue = myRecord.month;
   let yearValue = myRecord.year;

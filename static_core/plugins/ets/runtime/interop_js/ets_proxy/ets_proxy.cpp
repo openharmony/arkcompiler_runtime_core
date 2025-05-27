@@ -15,12 +15,14 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_proxy.h"
 
+#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_set.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_wrapper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_record.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -73,6 +75,38 @@ napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
     }
 
     return etsClassWrapper->GetJsCtor(env);
+}
+
+napi_value CreateEtsRecordInstance(napi_env env)
+{
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(coro);
+
+    INTEROP_CODE_SCOPE_JS(coro);
+    ScopedManagedCodeThread managedScope(coro);
+
+    EtsClass *etsClass = PlatformTypes()->escompatRecord;
+    EtsObject *etsInstance = etsClass->CreateInstance();
+    if (UNLIKELY(etsInstance == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        InteropCtx::ThrowJSError(env, "Failed to create ETS record instance");
+        return nullptr;
+    }
+
+    JSRefConvertRecord converter(ctx);
+    napi_value jsWrapper = converter.WrapImpl(ctx, etsInstance);
+
+    return jsWrapper;
+}
+
+napi_value GetETSInstance(napi_env env, std::string_view classDescriptor)
+{
+    if (classDescriptor == ark::ets::panda_file_items::class_descriptors::RECORD) {
+        return CreateEtsRecordInstance(env);
+    }
+
+    InteropCtx::ThrowJSError(env, "Unsupported ETS instance type: " + std::string(classDescriptor));
+    return nullptr;
 }
 
 }  // namespace ark::ets::interop::js::ets_proxy
