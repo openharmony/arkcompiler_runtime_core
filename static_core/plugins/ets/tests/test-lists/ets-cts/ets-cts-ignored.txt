@@ -327,7 +327,7 @@
 #24410
 07.expressions/06.spread_expression/spex_lmbd_45.ets
 
-#24408 Fails on spread expression with tuple, tuples in rest parameters not supported
+#25077
 07.expressions/06.spread_expression/spex_lmbd_32.ets
 07.expressions/06.spread_expression/spex_lmbd_33.ets
 07.expressions/06.spread_expression/spex_lmbd_34.ets
@@ -338,8 +338,10 @@
 07.expressions/06.spread_expression/spex_lmbd_42.ets
 07.expressions/06.spread_expression/spex_lmbd_43.ets
 07.expressions/06.spread_expression/spex_lmbd_44.ets
-07.expressions/06.spread_expression/spex_lmbd_46.ets
 07.expressions/06.spread_expression/spex_lmbd_47.ets
+
+#20214
+07.expressions/06.spread_expression/spex_lmbd_46.ets
 
 #20376 No support for spread arguments in lambda
 07.expressions/06.spread_expression/spex_lmbd_2.ets

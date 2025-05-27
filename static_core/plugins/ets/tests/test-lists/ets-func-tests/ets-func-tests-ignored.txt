@@ -401,10 +401,3 @@ std/math/std_math_clz64_long.ets
 
 #18766
 spec/partial_type/partialType_main.ets
-
-#25752
-float32array_newFloat32Array_newArrayBuffer_2_Float32Array_BYTES_PER_ELEMENT___1_0_pars_0.ets
-#25740
-uint32array_newUint32Array_newArrayBuffer_2_Uint32Array_BYTES_PER_ELEMENT__1_0_pars_0.ets
-#25741
-uint32array_newUint32Array_newArrayBuffer_2_Uint32Array_BYTES_PER_ELEMENT__9_0_pars_0.ets
