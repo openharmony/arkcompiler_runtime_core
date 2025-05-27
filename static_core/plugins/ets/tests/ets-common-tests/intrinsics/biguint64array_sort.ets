@@ -14,8 +14,8 @@
  */
 
 const ARRAY_SIZE = 15;
-const UNSORTED = [5,3,127,2,4,255,99,10,7,0,45,1,88,6,0xffffffffffffffff];
-const SORTED =   [0,1,2,3,4,5,6,7,10,45,88,99,127,255,0xffffffffffffffff];
+const UNSORTED = [5, 3, 127, 2, 4, 255, 99, 10, 7, 0, 45, 1, 88, 6, 0xffffffffffffffff];
+const SORTED = [0, 1, 2, 3, 4, 5, 6, 7, 10, 45, 88, 99, 127, 255, 0xffffffffffffffff];
 const SINGLE = [88];
 
 function checkSorted(a: BigUint64Array): void {
@@ -43,9 +43,9 @@ function sortNormal(): void {
 
 function main(): int {
     assertEQ(UNSORTED.length, SORTED.length);
-    const suite = new ArkTestsuite("BigUint64Array.sort() tests")
-    suite.addTest("sort an empty BigUint64Array", sortEmpty)
-    suite.addTest("sort a single-element BigUint64Array", sortSingle)
-    suite.addTest("sort a normal BigUint64Array", sortNormal)
+    const suite = new ArkTestsuite('BigUint64Array.sort() tests')
+    suite.addTest('sort an empty BigUint64Array', sortEmpty)
+    suite.addTest('sort a single-element BigUint64Array', sortSingle)
+    suite.addTest('sort a normal BigUint64Array', sortNormal)
     return suite.run();
 }
