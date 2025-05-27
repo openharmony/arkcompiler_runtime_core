@@ -45,11 +45,11 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     bool Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                CoroutineLaunchMode mode, CoroutinePriority priority) override;
+                CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                           CoroutineLaunchMode mode, CoroutinePriority priority) override;
+                           CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag) override;
     bool LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName, CoroutineLaunchMode mode,
-                      CoroutinePriority priority) override;
+                      CoroutinePriority priority, bool abortFlag) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;

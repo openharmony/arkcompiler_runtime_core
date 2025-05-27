@@ -1428,7 +1428,7 @@ intrinsics:
       ret: void
       args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsEscompatArraySet
-   
+
   - name: EscompatArrayJoin
     space: ets
     class_name: escompat.Array
@@ -7756,6 +7756,7 @@ intrinsics:
       args:
         - std.core.Object
         - std.core.Object[]
+        - u1
     impl: ark::ets::intrinsics::PostToMainThread
 
 
@@ -7808,6 +7809,7 @@ intrinsics:
       args:
         - std.core.Object
         - std.core.Object[]
+        - u1
     impl: ark::ets::intrinsics::EtsLaunchInternalJobNative
 
   - name: EtsLaunchOnTheSameWorker

@@ -89,7 +89,7 @@ static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *
 }
 
 template <typename CoroResult>
-ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool postToMain = false)
+ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag, bool postToMain = false)
 {
     static_assert(std::is_same<CoroResult, EtsJob>::value || std::is_same<CoroResult, EtsPromise>::value);
 
@@ -138,7 +138,7 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool postToMain = false)
     PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
     auto mode = postToMain ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
     bool launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs), mode,
-                                                            EtsCoroutine::LAUNCH);
+                                                            EtsCoroutine::LAUNCH, abortFlag);
     if (UNLIKELY(!launchResult)) {
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         ThrowOutOfMemoryError("OOM");
@@ -149,16 +149,16 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool postToMain = false)
 }
 
 extern "C" {
-EtsJob *PostToMainThread(EtsObject *func, EtsArray *arr)
+EtsJob *PostToMainThread(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
 {
-    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, true));
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U, true));
 }
 }
 
 extern "C" {
-EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr)
+EtsJob *EtsLaunchInternalJobNative(EtsObject *func, EtsArray *arr, EtsBoolean abortFlag)
 {
-    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr));
+    return static_cast<EtsJob *>(Launch<EtsJob>(func, arr, abortFlag != 0U));
 }
 
 void EtsLaunchSameWorker(EtsObject *callback)
@@ -170,8 +170,9 @@ void EtsLaunchSameWorker(EtsObject *callback)
     auto *method = ResolveInvokeMethod(coro, hCallback);
     auto *coroMan = coro->GetCoroutineManager();
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
-    [[maybe_unused]] auto launched = coroMan->Launch(evt, method->GetPandaMethod(), std::move(args),
-                                                     CoroutineLaunchMode::SAME_WORKER, EtsCoroutine::TIMER_CALLBACK);
+    [[maybe_unused]] auto launched =
+        coroMan->Launch(evt, method->GetPandaMethod(), std::move(args), CoroutineLaunchMode::SAME_WORKER,
+                        EtsCoroutine::TIMER_CALLBACK, true);
     ASSERT(launched);
 }
 }

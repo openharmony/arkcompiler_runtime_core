@@ -152,6 +152,10 @@ void StackfulCoroutineContext::ThreadProcImpl()
         // profiling: jump to the NATIVE EP, will end the SCH_ALL there
         co->GetNativeEntrypoint()(co->GetNativeEntrypointParam());
     }
+    if (co->HasPendingException() && co->HasAbortFlag()) {
+        co->HandleUncaughtException();
+        UNREACHABLE();
+    }
     SetStatus(Coroutine::Status::TERMINATING);
     co->GetManager()->TerminateCoroutine(co);
 }

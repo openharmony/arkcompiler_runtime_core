@@ -436,25 +436,25 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
 
 bool StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
                                       PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
-                                      CoroutinePriority priority)
+                                      CoroutinePriority priority, bool abortFlag)
 {
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
-    return LaunchWithMode(std::move(epInfo), entrypoint->GetFullName(), mode, priority, false);
+    return LaunchWithMode(std::move(epInfo), entrypoint->GetFullName(), mode, priority, false, abortFlag);
 }
 
 bool StackfulCoroutineManager::LaunchImmediately(CompletionEvent *completionEvent, Method *entrypoint,
                                                  PandaVector<Value> &&arguments, CoroutineLaunchMode mode,
-                                                 CoroutinePriority priority)
+                                                 CoroutinePriority priority, bool abortFlag)
 {
     auto epInfo = Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)};
-    return LaunchWithMode(std::move(epInfo), entrypoint->GetFullName(), mode, priority, true);
+    return LaunchWithMode(std::move(epInfo), entrypoint->GetFullName(), mode, priority, true, abortFlag);
 }
 
 bool StackfulCoroutineManager::LaunchNative(NativeEntrypointFunc epFunc, void *param, PandaString coroName,
-                                            CoroutineLaunchMode mode, CoroutinePriority priority)
+                                            CoroutineLaunchMode mode, CoroutinePriority priority, bool abortFlag)
 {
     auto epInfo = Coroutine::NativeEntrypointInfo {epFunc, param};
-    return LaunchWithMode(epInfo, std::move(coroName), mode, priority, false);
+    return LaunchWithMode(epInfo, std::move(coroName), mode, priority, false, abortFlag);
 }
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
@@ -618,7 +618,8 @@ stackful_coroutines::AffinityMask StackfulCoroutineManager::CalcAffinityMaskFrom
 
 Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(EntrypointInfo &&epInfo, PandaString &&coroName,
                                                                    CoroutinePriority priority,
-                                                                   stackful_coroutines::AffinityMask affinityMask)
+                                                                   stackful_coroutines::AffinityMask affinityMask,
+                                                                   bool abortFlag)
 {
     Coroutine *co = nullptr;
     if (Runtime::GetOptions().IsUseCoroutinePool()) {
@@ -634,20 +635,21 @@ Coroutine *StackfulCoroutineManager::GetCoroutineInstanceForLaunch(EntrypointInf
             << "StackfulCoroutineManager::GetCoroutineInstanceForLaunch: failed to create a coroutine!";
         return co;
     }
+    co->SetAbortFlag(abortFlag);
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
     co->GetContext<StackfulCoroutineContext>()->SetAffinityMask(affinityMask);
     return co;
 }
 
 bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &&coroName, CoroutineLaunchMode mode,
-                                          CoroutinePriority priority)
+                                          CoroutinePriority priority, bool abortFlag)
 {
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
 #endif
     Coroutine *co = nullptr;
     auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
-    co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask);
+    co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask, abortFlag);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImpl: failed to create a coroutine!";
         return false;
@@ -664,7 +666,8 @@ bool StackfulCoroutineManager::LaunchImpl(EntrypointInfo &&epInfo, PandaString &
 }
 
 bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, PandaString &&coroName,
-                                                     CoroutineLaunchMode mode, CoroutinePriority priority)
+                                                     CoroutineLaunchMode mode, CoroutinePriority priority,
+                                                     bool abortFlag)
 {
     Coroutine *co = nullptr;
     ASSERT(mode == CoroutineLaunchMode::SAME_WORKER);
@@ -672,7 +675,7 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, Pa
 
     ASSERT(affinityMask == CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode::SAME_WORKER));
 
-    co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask);
+    co = GetCoroutineInstanceForLaunch(std::move(epInfo), std::move(coroName), priority, affinityMask, abortFlag);
     if (co == nullptr) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchImmediatelyImpl: failed to create a coroutine!";
         return false;
@@ -694,7 +697,7 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, Pa
 
 bool StackfulCoroutineManager::LaunchWithMode(Coroutine::EntrypointInfo &&epInfo, PandaString &&coroName,
                                               CoroutineLaunchMode mode, CoroutinePriority priority,
-                                              bool launchImmediately)
+                                              bool launchImmediately, bool abortFlag)
 {
     // profiling: scheduler and launch time
     ScopedCoroutineStats sSch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
@@ -707,9 +710,9 @@ bool StackfulCoroutineManager::LaunchWithMode(Coroutine::EntrypointInfo &&epInfo
     mode = (mode == CoroutineLaunchMode::DEFAULT && w->InExclusiveMode()) ? CoroutineLaunchMode::SAME_WORKER : mode;
     bool result = false;
     if (launchImmediately) {
-        result = LaunchImmediatelyImpl(std::move(epInfo), std::move(coroName), mode, priority);
+        result = LaunchImmediatelyImpl(std::move(epInfo), std::move(coroName), mode, priority, abortFlag);
     } else {
-        result = LaunchImpl(std::move(epInfo), std::move(coroName), mode, priority);
+        result = LaunchImpl(std::move(epInfo), std::move(coroName), mode, priority, abortFlag);
     }
     if (!result) {
         ThrowOutOfMemoryError("LaunchWithMode failed");

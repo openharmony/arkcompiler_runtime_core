@@ -293,7 +293,7 @@ ObjectHeader *PandaCoreVM::GetOOMErrorObject()
     return obj;
 }
 
-void PandaCoreVM::HandleUncaughtException()
+[[noreturn]] void PandaCoreVM::HandleUncaughtException()
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
     LOG(ERROR, RUNTIME) << "Unhandled exception: " << thread->GetException()->ClassAddr<Class>()->GetName();
