@@ -122,6 +122,11 @@ public:
         return mutatorBase_->mutator_;
     }
 
+    GCPhase GetMutatorPhase() const
+    {
+        return mutatorBase_->GetMutatorPhase();
+    }
+
     // Return if thread has already binded mutator.
     class TryBindMutatorScope {
     public:
