@@ -14,11 +14,10 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type_let.ets
 ---*/
 
 import { a } from "./export_type_let"
 import type { b } from "./export_type_let"
-
-

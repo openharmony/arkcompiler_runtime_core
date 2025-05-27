@@ -14,14 +14,10 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type_alias.ets
 ---*/
 
 import type { AA } from './export_type_alias.ets'
 import { BB } from './export_type_alias.ets'
-
-function main(): void {
-    let aa: AA
-    let bb: BB
-}

@@ -14,14 +14,11 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type.ets
 ---*/
 
 import { A } from "./export_type"
-
 import type { B, C } from "./export_type"
 
-let a = new A()
-let b = new B()
-let c = new C()

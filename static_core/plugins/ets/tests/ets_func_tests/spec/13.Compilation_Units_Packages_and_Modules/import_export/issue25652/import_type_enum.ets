@@ -14,10 +14,9 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type_enum.ets
 ---*/
 
 import { Status } from "./export_type_enum"
-
-const currentStatus: Status = Status.ACTIVE

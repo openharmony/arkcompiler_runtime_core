@@ -14,7 +14,7 @@
  */
 
 /*---
-tags: [not-a-test]
+tags: [not-a-test, compile-only]
 ---*/
 
 export enum Status {

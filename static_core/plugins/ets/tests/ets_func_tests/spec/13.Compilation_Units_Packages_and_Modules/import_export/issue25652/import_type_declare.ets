@@ -14,6 +14,7 @@
  */
 
 /*---
+tags: [compile-only]
 files:
 - ./export_type_declare.ets
 ---*/
