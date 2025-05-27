@@ -1738,6 +1738,8 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(ani_env *env, ani_fn_obje
     }
     CHECK_PTR_ARG(result);
 
+    // API should migrate to a correct threshold
+    static constexpr size_t STD_CORE_FUNCTION_MAX_ARITY = EtsPlatformTypes::CORE_FUNCTION_ARITY_THRESHOLD - 2U;
     ANI_CHECK_RETURN_IF_GT(argc, STD_CORE_FUNCTION_MAX_ARITY, ANI_INVALID_ARGS);
 
     ani_status status = ANI_OK;

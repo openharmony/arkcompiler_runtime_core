@@ -23,76 +23,104 @@ namespace ark::ets {
 class EtsClass;
 class EtsMethod;
 class EtsCoroutine;
+class EtsClassLinker;
 
 // A set of types defined and used in platform implementation, owned by the VM
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
-    EtsClass *coreBoolean;
-    EtsClass *coreByte;
-    EtsClass *coreChar;
-    EtsClass *coreShort;
-    EtsClass *coreInt;
-    EtsClass *coreLong;
-    EtsClass *coreFloat;
-    EtsClass *coreDouble;
+    // Classes should follow the common naming schema
 
-    EtsClass *coreObject;
+    // Arity threshold for functional types
+    static constexpr uint32_t CORE_FUNCTION_ARITY_THRESHOLD = 17U;
 
-    EtsClass *escompatBigint;
-    EtsClass *coreFunction;
+    /* Core runtime type system */
+    EtsClass *coreObject {};  // IsObjectClass
+    EtsClass *coreClass {};   // IsClassClass
+    EtsClass *coreString {};  // IsStringClass
 
-    EtsClass *escompatError;
-    EtsClass *coreOutOfMemoryError;
-    EtsClass *coreException;
+    /* ets numeric classes */
+    EtsClass *coreBoolean {};
+    EtsClass *coreByte {};
+    EtsClass *coreChar {};
+    EtsClass *coreShort {};
+    EtsClass *coreInt {};
+    EtsClass *coreLong {};
+    EtsClass *coreFloat {};
+    EtsClass *coreDouble {};
 
-    EtsClass *coreStringBuilder;
+    /* ets base language classes */
+    EtsClass *escompatBigint {};
+    EtsClass *escompatError {};
+    EtsClass *coreFunction {};
+    std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctions {};
+    std::array<EtsClass *, CORE_FUNCTION_ARITY_THRESHOLD> coreFunctionRs {};
+    EtsClass *coreTupleN {};
 
-    EtsClass *corePromise;
-    EtsClass *coreJob;
-    EtsMethod *corePromiseSubscribeOnAnotherPromise;
-    EtsClass *corePromiseRef;
-    EtsClass *coreWaitersList;
-    EtsClass *coreMutex;
-    EtsClass *coreEvent;
-    EtsClass *coreCondVar;
-    EtsClass *coreQueueSpinlock;
+    /* Runtime linkage classes */
+    EtsClass *coreRuntimeLinker {};
+    EtsClass *coreBootRuntimeLinker {};
+    EtsClass *coreAbcRuntimeLinker {};
+    EtsClass *coreMemoryRuntimeLinker {};
+    EtsClass *coreAbcFile {};
 
-    EtsClass *escompatArray;
-    EtsClass *escompatArrayBuffer;
-    EtsClass *containersArrayAsListInt;
+    /* Error handling */
+    EtsClass *coreOutOfMemoryError {};
+    EtsClass *coreException {};
+    EtsClass *coreStackTraceElement {};
 
-    EtsClass *interopJSValue;
+    /* StringBuilder */
+    EtsClass *coreStringBuilder {};
 
-    EtsClass *coreTupleN;
+    /* Concurrency classes */
+    EtsClass *corePromise {};
+    EtsClass *coreJob {};
+    EtsMethod *corePromiseSubscribeOnAnotherPromise {};
+    EtsClass *corePromiseRef {};
+    EtsClass *coreWaitersList {};
+    EtsClass *coreMutex {};
+    EtsClass *coreEvent {};
+    EtsClass *coreCondVar {};
+    EtsClass *coreQueueSpinlock {};
 
-    EtsClass *coreStackTraceElement;
+    /* Finalization */
+    EtsClass *coreFinalizableWeakRef {};
+    EtsClass *coreFinalizationRegistry {};
+    EtsMethod *coreFinalizationRegistryExecCleanup {};
 
-    EtsClass *coreFinalizableWeakRef;
-    EtsClass *coreFinalizationRegistry;
-    EtsMethod *coreFinalizationRegistryExecCleanup;
+    /* Containers */
+    EtsClass *escompatArray {};
+    EtsClass *escompatArrayBuffer {};
+    EtsClass *containersArrayAsListInt {};
+    EtsClass *escompatRecord {};
+    EtsMethod *escompatRecordGetter {};
+    EtsMethod *escompatRecordSetter {};
 
-    EtsClass *coreRuntimeLinker;
-    EtsClass *coreBootRuntimeLinker;
-    EtsClass *coreAbcRuntimeLinker;
-    EtsClass *memoryRuntimeLinker;
-    EtsClass *coreAbcFile;
+    /* InteropJS */
+    EtsClass *interopJSValue {};
 
-    EtsClass *coreField;
-    EtsClass *coreMethod;
-    EtsClass *coreParameter;
+    /* TypeAPI */
+    EtsClass *coreField {};
+    EtsClass *coreMethod {};
+    EtsClass *coreParameter {};
 
-    EtsClass *escompatRecord;
-    EtsMethod *escompatRecordGetter;
-    EtsMethod *escompatRecordSetter;
+    /* escompat.Process */
+    EtsClass *escompatProcess {};
+    EtsMethod *escompatProcessListUnhandledJobs {};
+    EtsMethod *escompatProcessListUnhandledPromises {};
 
-    EtsClass *escompatProcess;
-    EtsMethod *escompatProcessListUnhandledJobs;
-    EtsMethod *escompatProcessListUnhandledPromises;
+    struct Entry {
+        size_t slotIndex {};
+    };
+
+    Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
+
+    void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
+    PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 
     explicit EtsPlatformTypes(EtsCoroutine *coro);
 };

@@ -36,7 +36,7 @@ bool EtsMethod::IsMethod(const PandaString &td)
 static EtsMethod *FindInvokeMethodInFunctionalType(EtsClass *type)
 {
     ASSERT(type->IsFunction());
-    for (size_t arity = 0; arity <= STD_CORE_FUNCTION_MAX_ARITY; ++arity) {
+    for (size_t arity = 0; arity < EtsPlatformTypes::CORE_FUNCTION_ARITY_THRESHOLD; ++arity) {
         PandaStringStream ss;
         ss << STD_CORE_FUNCTION_INVOKE_PREFIX << arity;
         PandaString str = ss.str();

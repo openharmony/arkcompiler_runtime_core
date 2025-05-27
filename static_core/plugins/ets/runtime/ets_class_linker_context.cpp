@@ -108,7 +108,7 @@ bool TryLoadingClassInChain(const uint8_t *descriptor, DecoratorErrorHandler &er
     auto *etsLinkerContext = reinterpret_cast<EtsClassLinkerContext *>(ctx);
     auto *runtimeLinker = etsLinkerContext->GetRuntimeLinker();
     if (runtimeLinker->GetClass() != PlatformTypes()->coreAbcRuntimeLinker &&
-        runtimeLinker->GetClass() != PlatformTypes()->memoryRuntimeLinker) {
+        runtimeLinker->GetClass() != PlatformTypes()->coreMemoryRuntimeLinker) {
         // Must call managed implementation.
         return false;
     }
