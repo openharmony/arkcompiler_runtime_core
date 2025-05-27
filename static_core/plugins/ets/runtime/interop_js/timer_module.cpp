@@ -166,7 +166,7 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
         }
         timerInfo.InvokeCallback(env);
         if (!oneShotTimer) {
-            uv_timer_again(timerHandle);
+            RepeatTimer(timerHandle, timerId);
         }
     };
     auto timerId = reinterpret_cast<uint64_t>(timer->data);
@@ -174,6 +174,16 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
     ark::ets::EtsCoroutine::GetCurrent()->GetCoroutineManager()->LaunchNative(timerFunc, timer, std::move(coroName),
                                                                               ark::CoroutineLaunchMode::SAME_WORKER,
                                                                               ark::ets::EtsCoroutine::TIMER_CALLBACK);
+    uv_timer_stop(timer);
+}
+
+void TimerModule::RepeatTimer(uv_timer_t *timer, uint64_t timerId)
+{
+    auto *env = ark::ets::EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+    auto [_, exists] = FindTimerInfo(env, timerId);
+    if (exists) {
+        uv_timer_again(timer);
+    }
 }
 
 void TimerModule::DisarmTimer(uv_timer_t *timer)
