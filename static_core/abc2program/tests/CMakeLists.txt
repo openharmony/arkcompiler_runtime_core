@@ -14,13 +14,14 @@
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ets)
 
 set(abc2progTestFiles
-    "HelloWorld"
-    "Functions"
-    "LiteralArray"
-    "Type"
-    "Record"
     "Field"
+    "Functions"
+    "HelloWorld"
     "Ins"
+    "LiteralArray"
+    "Metadata"
+    "Record"
+    "Type"
 )
 
 add_custom_target(abc2program_gen)
