@@ -51,24 +51,38 @@ class Waiter {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return true;
     }
-    
+
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private promiseQueue: BlockingQueue<CompletableJob<string>> = new LinkedBlockingQueue<CompletableJob<string>>();
 }
 
+/**
+ * This class implements basic atomic operations
+ */
 export class Atomics {
 
     /**
-     * isLockFree(n) returns true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == n"
-     * use hardware atomics instructions instead of locks.
+     * Checks if atomics implementation uses hardware atomic instructions instead of locks
      *
      * Warning: currently, all Atomic operations use locks,
      * but isLockFree(1), isLockFree(2), isLockFree(4), isLockFree(8) following the ECMA specification return true.
+     *
+     * @param { int } byteSize size of memory localion
+     * @returns { boolean } true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == byteSize"
+     *     use hardware atomics instructions instead of locks.
      */
     public static isLockFree(byteSize: int): boolean {
         return byteSize == 1 || byteSize == 2 || byteSize == 4 || byteSize == 8
     }
-    
+
+    /**
+     * Atomically adds value to current value and replaces it with the result
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } value value to add to current value
+     * @returns { number } current value before the operation
+     */
     public static add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -88,6 +102,14 @@ export class Atomics {
         }
     }
 
+    /**
+     * Atomically adds value to current value and replaces it with the result
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } value value to add to current value
+     * @returns { bigint } current value before the operation
+     */
     public static add(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigUint64Array) {
@@ -99,6 +121,14 @@ export class Atomics {
         }
     }
 
+    /**
+     * Atomically replaces current value it with the result of bitwise AND with value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } value value to perform bitwise AND with current value
+     * @returns { number } current value before the operation
+     */
     public static and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: int, value: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -118,6 +148,14 @@ export class Atomics {
         }
     }
 
+    /**
+     * Atomically replaces current value it with the result of bitwise AND with value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } value value to perform bitwise AND with current value
+     * @returns { bigint } current value before the operation
+     */
     public static and(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigUint64Array) {
@@ -129,6 +167,17 @@ export class Atomics {
         }
     }
 
+    /**
+     * Performs a compare and swap operation with the location from the typed array
+     * Atomically compares current value with the expected value. It they're equal, replaces
+     * current value with the new value, else does nothing
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } expectedValue expected value for the current value
+     * @param { number } replacementValue value to replace current value with in case of success
+     * @returns { number } current value before the operation
+     */
     public static compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, expectedValue: number, replacementValue: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -147,7 +196,18 @@ export class Atomics {
             throw new Error("Unhandled array type!")
         }
     }
-    
+
+    /**
+     * Performs a compare and swap operation with the location from the typed array
+     * Atomically compares current value with the expected value
+     * If they're equal, replaces current value with the new value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } expectedValue expected value for the current value
+     * @param { bigint } replacementValue value to replace current value with in case of success
+     * @returns { bigint } current value before the operation
+     */
     public static compareExchange(typedArray: BigInt64Array | BigUint64Array, index: int, expectedValue: bigint, replacementValue: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigUint64Array) {
@@ -159,6 +219,16 @@ export class Atomics {
         }
     }
 
+    /**
+     * Performs an exchange operation with the location from the typed array
+     * Atomically compares current value with the expected value
+     * If they're equal, replaces current value with the new value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } value value to replace current value with
+     * @returns { number } current value before the operation
+     */
     public static exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -177,7 +247,16 @@ export class Atomics {
             throw new Error("Unhandled array type!")
         }
     }
-    
+
+    /**
+     * Performs an exchange operation with the location from the typed array
+     * Atomically replaces current value with the new value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } value value to replace current value with
+     * @returns { bigint } current value before the operation
+     */
     public static exchange(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigInt64Array) {
@@ -188,7 +267,14 @@ export class Atomics {
             throw new Error("Unhandled array type!")
         }
     }
-    
+
+    /**
+     * Atomically reads value from the typed array
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @returns { number } current value
+     */
     public static load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -208,17 +294,38 @@ export class Atomics {
         }
     }
 
-
+    /**
+     * Atomically reads value from the typed array
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @returns { bigint } current value
+     */
     public static load(typedArray: BigInt64Array, index: int): bigint {
         let buffer = typedArray.buffer
         return new BigInt(buffer.atomicLoadI64(index))
     }
-    
+
+    /**
+     * Atomically reads value from the typed array
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @returns { bigint } current value
+     */
     public static load(typedArray: BigUint64Array, index: int): bigint {
         let buffer = typedArray.buffer
         return new BigInt(buffer.atomicLoadU64(index))
     }
 
+    /**
+     * Atomically replaces current value it with the result of bitwise OR with value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } value value to perform bitwise OR with current value
+     * @returns { number } current value before the operation
+     */
     public static or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -237,7 +344,15 @@ export class Atomics {
             throw new Error("Unhandled array type!")
         }
     }
-    
+
+    /**
+     * Atomically replaces current value it with the result of bitwise OR with value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } value value to perform bitwise OR with current value
+     * @returns { bigint } current value before the operation
+     */
     public static or(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigInt64Array) {
@@ -249,6 +364,14 @@ export class Atomics {
         }
     }
 
+    /**
+     * Atomically writes new value into the typed array
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } value new value
+     * @returns { number } new value
+     */
     public static store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -267,7 +390,15 @@ export class Atomics {
             throw new Error("Unhandled array type!")
         }
     }
-    
+
+    /**
+     * Atomically writes new value into the typed array
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } value new value
+     * @returns { bigint } new value
+     */
     public static store(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigInt64Array) {
@@ -279,6 +410,14 @@ export class Atomics {
         }
     }
 
+    /**
+     * Atomically subtracts value from current value and replaces it with the result
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } value value to subtract from current value
+     * @returns { number } current value before the operation
+     */
     public static sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -297,7 +436,15 @@ export class Atomics {
             throw new Error("Unhandled array type!")
         }
     }
-    
+
+    /**
+     * Atomically subtracts value from current value and replaces it with the result
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } value value to subtract from current value
+     * @returns { bigint } current value before the operation
+     */
     public static sub(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigInt64Array) {
@@ -309,6 +456,14 @@ export class Atomics {
         }
     }
 
+    /**
+     * Atomically replaces current value it with the result of bitwise XOR with value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { number } value value to perform bitwise XOR with current value
+     * @returns { number } current value before the operation
+     */
     public static xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: number): number {
         let buffer = typedArray.buffer
         if (typedArray instanceof Int8Array) {
@@ -327,7 +482,15 @@ export class Atomics {
             throw new Error("Unhandled array type!")
         }
     }
-    
+
+    /**
+     * Atomically replaces current value it with the result of bitwise XOR with value
+     *
+     * @param typedArray typed array of values
+     * @param { int } index index of current value in the typedArray
+     * @param { bigint } value value to perform bitwise XOR with current value
+     * @returns { bigint } current value before the operation
+     */
     public static xor(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         let buffer = typedArray.buffer
         if (typedArray instanceof BigInt64Array) {
@@ -340,36 +503,93 @@ export class Atomics {
     }
 
     /**
-     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify.
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { number } value value to compare current value with
+     * @returns { string } status "ok", "not-equal" or "timed-out"
      */
     public static wait(typedArray: Int32Array, index: number, value: number): string {
         return Atomics.waitImpl(typedArray, index, value as long);
     }
 
+    /**
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { number } value value to compare current value with
+     * @param { number } timeout timeout in ms
+     * @returns { string } status "ok", "not-equal" or "timed-out"
+     */
     public static wait(typedArray: Int32Array, index: number, value: number, timeout: number): string {
         return Atomics.waitImpl(typedArray, index, value as long, timeout);
     }
 
+    /**
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @returns { string } status "ok", "not-equal" or "timed-out"
+     */
     public static wait(typedArray: BigInt64Array, index: number, value: bigint): string {
         return Atomics.waitImpl(typedArray, index, value.getLong());
     }
 
+    /**
+     * If "typedArray[offset] == value" suspends the current thread until it is notified by Atomics.notify.
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @param { number } timeout timeout in ms
+     * @returns { string } status "ok", "not-equal" or "timed-out"
+     */
     public static wait(typedArray: BigInt64Array, index: number, value: bigint, timeout: number): string {
         return Atomics.waitImpl(typedArray, index, value.getLong(), timeout);
     }
 
     /**
-     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify
-     * or until the given timeout passes.
+     * Creates a coroutine that will sleep if "typedArray[offset] == value" until it is notified by Atomics.notify
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @returns { Promise<string> } that will be resolved after the coroutine get notified
+     *    or rejected if exception were thrown
      */
     public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint): Promise<string> {
         return Atomics.asyncWaitImpl(typedArray, index, value.getLong()) as Promise<string>;
     }
 
+    /**
+     * Creates a coroutine that will sleep if "typedArray[offset] == value" until it is notified by Atomics.notify
+     * or until the given timeout passes.
+     *
+     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index of current value in the typedArray
+     * @param { bigint } value value to compare current value with
+     * @param { number } timeout timeout in ms
+     * @returns { Promise<string> } that will be resolved after the coroutine get notified
+     *    or rejected if exception were thrown
+     */
     public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint, timeout: number): Promise<string> {
         return Atomics.asyncWaitImpl(typedArray, index, value.getLong(), timeout) as Promise<string>;
     }
@@ -377,6 +597,10 @@ export class Atomics {
     /**
      * Notifies (wakes up) threads that are suspended by the Atomics.wait() calls at the given index.
      * (index = typedArray.byteOffset + offset * sizeof(arrayElement))
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index in the typed array to read current value from
+     * @returns { number } number of notified threads
      */
     public static notify(typedArray: Int32Array | BigInt64Array, index: number): number {
         return Atomics.notifyImpl(typedArray, index)
@@ -384,6 +608,11 @@ export class Atomics {
 
     /**
      * Operates exactly like Atomics.notify(Int32Array | BigInt64Array, int) but specifies the maximum number of threads to notify using 'count'.
+     *
+     * @param typedArray typed array of values
+     * @param { number } index index in the typed array to read current value from
+     * @param { number } count maximum number of threads to notify
+     * @returns { number } number of notified threads
      */
     public static notify(typedArray: Int32Array | BigInt64Array, index: number, count: number): number {
         return Atomics.notifyImpl(typedArray, index, count)
@@ -402,7 +631,7 @@ export class Atomics {
             return waiter!.wait(value, () => { return buffer.atomicLoadI64(index as int); }, timeout)
         }
     }
-    
+
     private static asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): Promise<string> {
         let resolver: (((v: String) => void) | undefined) = undefined;
         let rejecter: (((error: Error) => void) | undefined) = undefined;

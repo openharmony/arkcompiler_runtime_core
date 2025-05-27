@@ -23,6 +23,9 @@ export interface PromiseLike<out T> {
             onRejected?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E>;
 }
 
+/**
+ * Class represents the promise status.
+ */
 export class PromiseStatus{
     static readonly fulfilled = "fulfilled";
     static readonly rejected = "rejected";
@@ -70,6 +73,12 @@ export final class Promise<out T> implements PromiseLike<T> {
     private constructor() {
     }
 
+    /**
+     * Creates an instance of a Promise class
+     *
+     * @param callback callback that is called in the constructor
+     * Takes resolve and reject function that would complete the promise
+     */
     constructor(callback: (resolve: (value: T|PromiseLike<T>) => void,
             reject: (error: Error) => void) => void) {
         try {
@@ -83,6 +92,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Schedule callback to execute after the promise is resolved
+     *
+     * @param onFulfilled callback that will be called after the promise is resolved
+     * @returns { Promise } new promise that will be resolved after the execution of the callback
+     *     or rejected if current promise is rejected or the callback finished with an exception
+     */
     then<U = T>(onFulfilled: () => U|PromiseLike<U>): Promise<U> {
         let promise = new Promise<U>();
         let fn: () => void = (): void => {
@@ -100,6 +116,14 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
+    /**
+     * Schedule callbacks to execute after the promise is completed
+     *
+     * @param onFulfilled callback that will be called after the promise is resolved
+     * @param [onRejected] callback that will be called after the promise is rejected
+     * @returns { Promise } new promise that will be resolved after the execution of one of the callbacks
+     *     or rejected in the callback finished with an exception
+     */
     then<U = T, E = never>(onFulfilled: (value: T) => U|PromiseLike<U>,
             onRejected?: (error: Error) => E|PromiseLike<E>): Promise<U|E> {
         let promise = new Promise<U|E>();
@@ -123,6 +147,13 @@ export final class Promise<out T> implements PromiseLike<T> {
     }
 
     // NOTE(audovichenko): Add '?' to onRejection param. Issue #20001
+    /**
+     * Schedule callback to execute after the promise is rejected
+     *
+     * @param onRejected callback that will be called after the promise is rejected
+     * @returns { Promise } new promise that will be resolved after the execution of the callback
+     *     or rejected if current promise is rejected or the callback finished with an exception
+     */
     catch<U = never>(onRejected: () => U|PromiseLike<U>): Promise<T|U> {
         let promise = new Promise<T|U>();
         let fn: () => void = (): void => {
@@ -141,6 +172,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
+    /**
+     * Schedule callback to execute after the promise is rejected
+     *
+     * @param [onRejected] callback that will be called after the promise is rejected
+     * @returns { Promise } new promise that will be resolved after the execution of the callback
+     *     or rejected or the callback finished with an exception
+     */
     catch<U = never>(onRejected?: (error: Error) => U|PromiseLike<U>): Promise<T|U> {
         let promise = new Promise<T|U>();
         let fn: () => void = (): void => {
@@ -163,6 +201,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
+    /**
+     * Schedule callback to execute after the promise is completed
+     *
+     * @param [onFinally] callback that will be called after the promise is completed
+     * @returns { Promise } new promise that will be completed the same way as the current promise after the execution of the callback
+     *     or rejected if the callback finished with an exception
+     */
     finally(onFinally?: () => void): Promise<T> {
         let promise = new Promise<T>();
         let fn: () => void = (): void => {
@@ -187,12 +232,23 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
+    /**
+     * Create a resolved promise
+     *
+     * @returns { Promise<void> } resolved promise
+     */
     static resolve(): Promise<void> {
         let p = new Promise<void>();
         p.resolveImpl(undefined, false);
         return p;
     }
 
+    /**
+     * Create a resolved promise
+     *
+     * @param value value to resolve promise with
+     * @returns { Promise } resolved promise
+     */
     static resolve<U>(value: U|PromiseLike<U>): Promise<U> {
         if (value instanceof Promise) {
             return value as Promise<U>;
@@ -202,24 +258,49 @@ export final class Promise<out T> implements PromiseLike<T> {
         return p;
     }
 
+    /**
+     * Create a rejected promise
+     *
+     * @returns { Promise<void> } rejected promise
+     */
     static reject(): Promise<void> {
         let p = new Promise<void>();
         p.rejectImpl(new Error(), false);
         return p;
     }
 
+    /**
+     * Create a rejected promise
+     *
+     * @param { Error } value value to reject promise with
+     * @returns { Promise } rejected promise
+     */
     static reject<U = never>(error: Error): Promise<U> {
         let p = new Promise<U>();
         p.rejectImpl(error, false);
         return p;
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are resolved
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will be resolved after all promises are resolved with an array of results
+     *     or rejected if at least one promise is rejected with the rejection result
+     */
     static all<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Array<U>> {
         return new Promise<Array<U>>((resolve: (value: Array<U>) => void, reject: (error: Error) => void): void => {
             new AllPromiseConcurrency<U>(resolve, reject).all(promises);
         });
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are resolved
+     *
+     * @param promises iterable object with promise-like objets
+     * @returns { Promise } promise that will be resolved after all promises are resolved with an array of results
+     *     or rejected if at least one promise is rejected with the rejection result
+     */
     static all<U>(promises: Iterable<U|PromiseLike<U>>): Promise<Array<U>> {
         try {
             return Promise.all<U>(Promise.toArray(promises));
@@ -228,6 +309,12 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are completed
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will be resolved after all promises are completed with an array of results
+     */
     static allSettled<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<PromiseSettledResult<U>[]> {
         return new Promise<PromiseSettledResult<U>[]>((resolve: (value: PromiseSettledResult<U>[]) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
@@ -235,6 +322,12 @@ export final class Promise<out T> implements PromiseLike<T> {
         });
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are completed
+     *
+     * @param promises iterable object of promise-like objects
+     * @returns { Promise } promise that will be resolved after all promises are completed with an array of results
+     */
     static allSettled<U>(promises: Iterable<U|PromiseLike<U>>): Promise<PromiseSettledResult<U>[]> {
         try {
             return Promise.allSettled<U>(Promise.toArray(promises));
@@ -243,6 +336,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are completed and at least one is resolved
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will be resolved if at least one promise is resolved with the result of resolved promise
+     * or rejected with AggregateError if all promises are rejected
+     */
     static any<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
@@ -250,6 +350,13 @@ export final class Promise<out T> implements PromiseLike<T> {
         });
     }
 
+    /**
+     * Create a promise that will be resolved after all promises are completed and at least one is resolved
+     *
+     * @param promises iterable object of promise-like objects
+     * @returns { Promise } promise that will be resolved if at least one promise is resolved with the result of resolved promise
+     *     or rejected with AggregateError if all promises are rejected
+     */
     static any<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
         try {
             return Promise.any<U>(Promise.toArray(promises));
@@ -258,6 +365,12 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Create a promise that will be completed after at least one promise is completed
+     *
+     * @param promises array of promise-like objects
+     * @returns { Promise } promise that will completed with the same value as one of the promises in the argument
+     */
     static race<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<U> {
         return new Promise<U>((resolve: (value: U) => void, reject: (error: Error) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
@@ -265,6 +378,12 @@ export final class Promise<out T> implements PromiseLike<T> {
         });
     }
 
+    /**
+     * Create a promise that will be completed after at least one promise is completed
+     *
+     * @param promises iterable object of promise-like objects
+     * @returns { Promise } promise that will completed with the same value as one of the promises in the argument
+     */
     static race<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
         try {
             return Promise.race<U>(Promise.toArray(promises));
@@ -354,6 +473,11 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
+    /**
+     * Suspend coroutine until the promise is completed
+     *
+     * @returns promise completion value
+     */
     public native awaitResolution(): T;
 
     private native resolveImpl<U>(value: U, wasLinked: boolean): void;

@@ -25,6 +25,9 @@ export enum AsyncLockMode {
 
 export final class AsyncLock {
 
+    /**
+     * Creates instance of AsyncLock class
+     */
     constructor() {
         this(AsyncLock.generateAnonymousLockName());
     }
@@ -173,6 +176,12 @@ export final class AsyncLock {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
 
+    /**
+     * Query information about the specified lock.
+     *
+     * @param { string } name - name of the lock.
+     * @returns { AsyncLockState } Returns an instance of AsyncLockState.
+     */
     public static query(name: string): AsyncLockState {
         try {
             return asyncLockManager.query(name);
@@ -181,10 +190,20 @@ export final class AsyncLock {
         }
     }
 
+    /**
+     * Query information about all locks.
+     *
+     * @returns { AsyncLockState[] } Returns an array of AsyncLockState.
+     */
     public static queryAll(): AsyncLockState[] {
         return asyncLockManager.queryAll();
     }
 
+    /**
+     * Query information about the lock.
+     *
+     * @returns { AsyncLockState } Returns an instance of AsyncLockState.
+     */
     public query(): AsyncLockState {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let state = new AsyncLockState(this.held, this.pending);

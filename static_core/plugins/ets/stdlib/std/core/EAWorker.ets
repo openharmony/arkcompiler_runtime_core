@@ -26,6 +26,13 @@ type Task = () => void;
  * A JS runtime is also created if the needInterop parameter is set to true
  */
 export class ExclusiveLauncher {
+    /**
+     * Run task in exclusive mode
+     * Creates a new worker
+     *
+     * @param { Task } task will be scheduled on created worker
+     * @param { boolean } [needInterop=false] true if need to create JS runtime
+     */
     public static elaunch(task: Task, needInterop: boolean = false): void {
         let eTask = needInterop ? () => { ExclusiveLauncher.asyncCall(task); } : task;
         ExclusiveLauncher.elaunch(eTask as Object, needInterop);
@@ -45,6 +52,10 @@ export class ExclusiveLauncher {
 export class EAWorker {
     private worker: InternalWorker;
 
+    /**
+     * Create EAWorker instance
+     * @param { boolean } [needInterop=false] true if need to create JS runtime
+     */
     constructor(needInterop: boolean = false) {
         this.worker = needInterop ? new InteropWorker() : new StaticWorker();
     }
@@ -52,6 +63,10 @@ export class EAWorker {
     /**
      * Run task in EAWorker
      * Note: it has no effect if EAWorker was stoped
+     *
+     * @param { Function } task function to execute
+     * @param { ...NullishType } args argumnents for task to execute with
+     * @returns { Job<R> } Job that represents the task
      */
     public run<R> (task: Function, ...args: FixedArray<NullishType>): Job<R> {
         return this.worker.run<R>(task, ...args);
