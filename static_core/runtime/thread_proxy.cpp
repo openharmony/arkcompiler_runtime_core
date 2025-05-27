@@ -221,6 +221,8 @@ void ThreadProxyStatic::MakeTSANHappyForThreadState()
 
 using namespace panda;
 
+static thread_local ThreadHolder *g_SharedExternalHolder = nullptr;
+
 enum ThreadStatus ThreadProxyHybrid::GetStatus() const
 {
     if (GetThreadHolder()->IsInRunningState()) {
@@ -301,16 +303,50 @@ void ThreadProxyHybrid::MakeTSANHappyForThreadState()
     UNREACHABLE();
 }
 
+void ThreadProxyHybrid::BindMutator()
+{
+    GetThreadHolder()->BindMutator();
+}
+
+void ThreadProxyHybrid::UnbindMutator()
+{
+    GetThreadHolder()->UnbindMutator();
+}
+
 bool ThreadProxyHybrid::CreateExternalHolderIfNeeded(bool useSharedHolder)
 {
     if (threadHolder_ != nullptr) {
         return false;
     }
-    // NOTE(panferovi): replace ThreadHolder::GerCurrent by new interface
-    // that obtain ThreadHolder from JS, when it is implemented
-    threadHolder_ =
-        useSharedHolder ? ThreadHolder::GetCurrent() : ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
+
+    if (useSharedHolder) {
+        if (GetSharedExternalHolder() != nullptr) {
+            threadHolder_ = GetSharedExternalHolder();
+            return true;
+        }
+        // NOTE(panferovi): replace ThreadHolder::GerCurrent by new interface
+        // that obtain ThreadHolder from JS, when it is implemented
+        threadHolder_ = ThreadHolder::GetCurrent() != nullptr ? ThreadHolder::GetCurrent()
+                                                              : ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
+        ASSERT(threadHolder_ != nullptr);
+        SetSharedExternalHolder(threadHolder_);
+        return true;
+    }
+
+    threadHolder_ = ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
     return true;
+}
+
+/* static */
+void ThreadProxyHybrid::SetSharedExternalHolder(ThreadHolder *externalHolder)
+{
+    g_SharedExternalHolder = externalHolder;
+}
+
+/* static */
+ThreadHolder *ThreadProxyHybrid::GetSharedExternalHolder()
+{
+    return g_SharedExternalHolder;
 }
 
 #endif

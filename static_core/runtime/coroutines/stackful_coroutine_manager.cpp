@@ -667,6 +667,7 @@ bool StackfulCoroutineManager::LaunchImmediatelyImpl(EntrypointInfo &&epInfo, Pa
                                                      CoroutineLaunchMode mode, CoroutinePriority priority)
 {
     Coroutine *co = nullptr;
+    ASSERT(mode == CoroutineLaunchMode::SAME_WORKER);
     auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
 
     ASSERT(affinityMask == CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode::SAME_WORKER));
