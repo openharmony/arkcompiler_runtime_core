@@ -1624,6 +1624,56 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
     return true;
 }
 
+// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE: handle it
+    UNREACHABLE();
+}
+
+// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                          [[maybe_unused]] DataType::Type type)
+{
+    // NOTE: handle it
+    UNREACHABLE();
+}
+
+// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+void InstBuilder::BuildLoadFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                        [[maybe_unused]] DataType::Type type)
+{
+    // NOTE: handle it
+    UNREACHABLE();
+}
+
+// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+void InstBuilder::BuildStoreFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE: handle it
+    UNREACHABLE();
+}
+
+// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+void InstBuilder::BuildLoadFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                        [[maybe_unused]] DataType::Type type)
+{
+    // NOTE: handle it
+    UNREACHABLE();
+}
+
+// NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
+void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
+                                         [[maybe_unused]] DataType::Type type)
+{
+    // NOTE: handle it
+    UNREACHABLE();
+}
+
 }  // namespace ark::compiler
 
 #endif  // PANDA_INST_BUILDER_INL_H

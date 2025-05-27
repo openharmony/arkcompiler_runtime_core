@@ -3778,6 +3778,153 @@ public:
         }
     }
 
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyLdbyname()
+    {
+        uint16_t vs = this->GetInst().template GetVReg<FORMAT>();
+        auto id = this->GetInst().template GetId<FORMAT>();
+
+        LOG_INST() << "any.ldbyname v" << vs << ", " << std::hex << "0x" << id;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
+        if (UNLIKELY(obj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyLdbynameV()
+    {
+        uint16_t vd = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        auto id = this->GetInst().template GetId<FORMAT>();
+
+        LOG_INST() << "any.ldbyname.v v" << vd << ", v" << vs << ", " << std::hex << "0x" << id;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
+        if (UNLIKELY(obj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyStbyname()
+    {
+        uint16_t vs = this->GetInst().template GetVReg<FORMAT>();
+        auto id = this->GetInst().template GetId<FORMAT>();
+
+        LOG_INST() << "any.stbyname v" << vs << ", " << std::hex << "0x" << id;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
+        if (UNLIKELY(obj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyStbynameV()
+    {
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
+        auto id = this->GetInst().template GetId<FORMAT>();
+
+        LOG_INST() << "any.stbyname.v v" << vs1 << ", v" << vs2 << ", " << std::hex << "0x" << id;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs2).GetReference();
+        if (UNLIKELY(obj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyLdbyidx()
+    {
+        uint16_t vs = this->GetInst().template GetVReg<FORMAT>();
+
+        LOG_INST() << "any.ldbyidx v" << vs << ", " << std::hex;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
+        if (UNLIKELY(obj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyStbyidx()
+    {
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
+
+        LOG_INST() << "any.stbyidx v" << vs1 << ", v" << vs2 << ", " << std::hex;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
+        if (UNLIKELY(obj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyLdbyval()
+    {
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
+
+        LOG_INST() << "any.ldbyval v" << vs1 << ", v" << vs2 << ", " << std::hex;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
+        ObjectHeader *valObj = this->GetFrame()->GetVReg(vs2).GetReference();
+        if (UNLIKELY(obj == nullptr || valObj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyStbyval()
+    {
+        uint16_t vs1 = this->GetInst().template GetVReg<FORMAT, 0x0>();
+        uint16_t vs2 = this->GetInst().template GetVReg<FORMAT, 0x1>();
+
+        LOG_INST() << "any.stbyval v" << vs1 << ", v" << vs2 << ", " << std::hex;
+
+        ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
+        ObjectHeader *valObj = this->GetFrame()->GetVReg(vs2).GetReference();
+        if (UNLIKELY(obj == nullptr || valObj == nullptr)) {
+            RuntimeIfaceT::ThrowNullPointerException();
+            this->MoveToExceptionHandler();
+        }
+
+        // NOTE: handle it
+        UNREACHABLE();
+    }
+
 private:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE ObjectHeader *GetObjHelper()

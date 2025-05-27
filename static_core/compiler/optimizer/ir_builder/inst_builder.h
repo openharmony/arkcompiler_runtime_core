@@ -380,6 +380,16 @@ private:
     }
 
     bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
+
+    template <bool IS_ACC_WRITE>
+    void BuildLoadFromAnyByName(const BytecodeInstruction *bcInst, DataType::Type type);
+    template <bool IS_ACC_WRITE>
+    void BuildStoreFromAnyByName(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
+
 #include "inst_builder_extensions.inl.h"
 
     auto GetClassId() const

@@ -258,6 +258,9 @@ prefixes:
   - name: f32
     description: IEEE-754 single precision floating-point operations.
     opcode_idx: 0xec
+  - name: any
+    description: Any type operations.
+    opcode_idx: 0xeb
 
 # Define elements allowed to be used in a profile description.
 profiles_schema: {}
@@ -2971,3 +2974,193 @@ groups:
         format: [op_imm_64]
         opcode_idx: [0xa5]
         properties: [float, dynamic]
+
+  - title: Get field from reference of any type by name
+    description: >
+      Get field value from reference of any type by field name string_id and put it into
+      accumulator
+    verification:
+      - v1_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if vs == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(vs, string_id)
+      if op == any.ldbyname and size(field) < 32 then
+        acc = extendto32(vs.get(field))
+      else
+        acc = vs.get(field)
+      end
+    instructions:
+      - sig: any.ldbyname v:in:ref, string_id
+        acc: out:ref
+        format: [pref_op_v_8_id_32]
+        prefix: any
+        opcode_idx: [0xa6]
+
+  - title: Get field from reference of any type by name
+    description: >
+      Get field value from reference of any type by field name string_id and put it into
+      register
+    verification:
+      - v2_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if v2 == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(v2, string_id)
+      if op == any.ldbyname.v and size(field) < 32 then
+        v1 = extendto32(v2.get(field))
+      else
+        v1 = v2.get(field)
+      end
+    instructions:
+      - sig: any.ldbyname.v v1:out:ref, v2:in:ref, string_id
+        acc: none
+        format: [pref_op_v1_8_v2_8_id_32]
+        prefix: any
+        opcode_idx: [0xa7]
+
+  - title: Store accumulator content into reference of any type field by name
+    description: >
+      Store accumulator content into reference of any type field by field name string_id
+    verification:
+      - acc_obj_or_null
+      - v1_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if vs == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(vs, string_id)
+      if op == any.stbyname and size(field) < 32 then
+        vs.set(field, truncate(field, acc))
+      else
+        vs.set(field, acc)
+      end
+    instructions:
+      - sig: any.stbyname v:in:ref, string_id
+        acc: in:ref
+        format: [pref_op_v_8_id_32]
+        prefix: any
+        opcode_idx: [0xa8]
+
+  - title: Store register content into reference of any type field by name
+    description: >
+      Store register content into reference of any type field by field name string_id
+    verification:
+      - v1_obj_or_null
+      - v2_object
+    properties:
+      - string_id
+    exceptions:
+      - x_null
+    pseudo: |
+      if v2 == null then
+        throw NullPointerException
+      end
+      field = resolve_field_by_name(v2, string_id)
+      if op == any.stbyname.v and size(field) < 32 then
+        v2.set(field, truncate(field, v1))
+      else
+        v2.set(field, v1)
+      end
+    instructions:
+      - sig: any.stbyname.v v1:in:ref, v2:in:ref, string_id
+        acc: none
+        format: [pref_op_v1_8_v2_8_id_32]
+        prefix: any
+        opcode_idx: [0xa9]
+
+  - title: Load value to accumulator from reference of any type by index
+    description: >
+      Load content from reference of any type by index and put it into accumulator
+    verification:
+      - v1_object
+      - acc_i32
+    exceptions:
+      - x_null
+    pseudo: |
+      if vs == null then
+        throw NullPointerException
+      end
+      acc = vs[acc]
+    instructions:
+      - sig: any.ldbyidx v:in:ref
+        acc: inout:i32->ref
+        format: [pref_op_v_8]
+        prefix: any
+        opcode_idx: [0xaa]
+
+  - title: Store value from accumulator in reference of any type by index
+    description: >
+      Store content from accumulator in reference of any type by index
+    verification:
+      - acc_obj_or_null
+      - v1_object
+      - v2_i32
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null then
+        throw NullPointerException
+      end
+      v1[v2] = acc
+    instructions:
+      - sig: any.stbyidx v1:in:ref, v2:in:i32
+        acc: in:ref
+        format: [pref_op_v1_8_v2_8]
+        prefix: any
+        opcode_idx: [0xab]
+
+  - title: Load value to accumulator from reference of any type by value
+    description: >
+      Load content from reference of any type by value and put it into accumulator
+    verification:
+      - v1_object
+      - v2_object
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null || v2 == null then
+        throw NullPointerException
+      end
+      acc = v1[v2]
+    instructions:
+      - sig: any.ldbyval v1:in:ref, v2:in:ref
+        acc: out:ref
+        format: [pref_op_v1_8_v2_8]
+        prefix: any
+        opcode_idx: [0xac]
+
+  - title: Store value from accumulator in reference of any type by value
+    description: >
+      Store content from accumulator in reference of any type by value
+    verification:
+      - acc_obj_or_null
+      - v1_object
+      - v2_object
+    exceptions:
+      - x_null
+    pseudo: |
+      if v1 == null || v2 == null then
+        throw NullPointerException
+      end
+      v1[v2] = acc
+    instructions:
+      - sig: any.stbyval v1:in:ref, v2:in:ref
+        acc: in:ref
+        format: [pref_op_v1_8_v2_8]
+        prefix: any
+        opcode_idx: [0xad]

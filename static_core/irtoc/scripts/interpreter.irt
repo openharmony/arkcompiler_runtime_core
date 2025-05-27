@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -2092,6 +2092,47 @@ end
 
 include_plugin 'interpreter_handlers'
 
+# Any type support
+macro(:handle_any_ldbyname_v8_id32) do |vs, id|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
+macro(:handle_any_ldbyname_v_v8_v8_id32) do |vd, vs, id|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
+macro(:handle_any_stbyname_v8_id32) do |vs, id|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
+macro(:handle_any_stbyname_v_v8_v8_id32) do |vs1, vs2, id|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
+macro(:handle_any_ldbyidx_v8) do |vs|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
+macro(:handle_any_stbyidx_v8_v8) do |vs1, vs2|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
+macro(:handle_any_ldbyval_v8_v8) do |vs1, vs2|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
+macro(:handle_any_stbyval_v8_v8) do |vs1, vs2|
+  # NOTE: handle it
+  Intrinsic(:UNREACHABLE).Terminator.void
+end
+
 # Functions:
 
 function(:ExecuteImplFast,
@@ -2880,6 +2921,23 @@ Panda.instructions.each do |i|
     # throw
     when "THROW_V8"
       handle_throw(vreg_value(op[0]).ref)
+    # any type support
+    when "ANY_LDBYNAME_PREF_V8_ID32"
+      handle_any_ldbyname_v8_id32(vreg_value(op[0]).ref, as_id(op[1]))
+    when "ANY_LDBYNAME_PREF_V8_V8_ID32"
+      handle_any_ldbyname_v_v8_v8_id32(vreg_value(op[0]).ref, vreg_value(op[1]).ref, as_id(op[2]))
+    when "ANY_STBYNAME_PREF_V8_ID32"
+      handle_any_stbyname_v8_id32(vreg_value(op[0]).ref, as_id(op[1]))
+    when "ANY_STBYNAME_PREF_V8_V8_ID32"
+      handle_any_stbyname_v_v8_v8_id32(vreg_value(op[0]).ref, vreg_value(op[1]).ref, as_id(op[2]))
+    when "ANY_LDBYIDX_PREF_V8"
+      handle_any_ldbyidx_v8(vreg_value(op[0]).ref)
+    when "ANY_STBYIDX_PREF_V8_V8"
+      handle_any_stbyidx_v8_v8(vreg_value(op[0]).ref, vreg_value(op[1]).i32)
+    when "ANY_LDBYVAL_PREF_V8_V8"
+      handle_any_ldbyval_v8_v8(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
+    when "ANY_STBYVAL_PREF_V8_V8"
+      handle_any_stbyval_v8_v8(vreg_value(op[0]).ref, vreg_value(op[1]).ref)
 
 include_plugin 'interpreter_main_loop'
 
