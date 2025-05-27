@@ -23,7 +23,8 @@ import os
 
 
 def add_path_to_file(input_file, output_file, prefix_path):
-    with open(output_file, 'w') as outfile, open(input_file, 'r') as infile:
+    fd = os.open(output_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+    with os.fdopen(fd, 'w') as outfile, open(input_file, 'r') as infile:
         for line in infile:
             outfile.write(f"{prefix_path}{line}")
 
