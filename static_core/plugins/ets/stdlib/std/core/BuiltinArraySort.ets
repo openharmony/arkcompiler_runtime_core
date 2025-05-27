@@ -201,10 +201,6 @@ function countSortBoolsInv(arr: FixedArray<boolean>, startIndex: int, endIndex: 
     }
 }
 
-export function sort(arr: FixedArray<boolean>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
-
 // ======== tests section ========
 
 /** note: used for tests, {@link test_sortAllOn} */
@@ -353,6 +349,57 @@ export function test_sortAllOn(arr: FixedArray<boolean>) {
     }
 }
 // ======== end of tests section ========
+
+function copyPart(dst: FixedArray<byte>, counter: int, src: FixedArray<byte>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<byte>, right: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) => number): FixedArray<byte> {
+    const result:FixedArray<byte> = new byte[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) => number, begin: int = 0, end: int = 0): FixedArray<byte> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<byte> = new byte[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<byte> = new byte[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
 
 function bubbleSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
     let was = true
@@ -935,10 +982,6 @@ function countSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void 
     }
 }
 
-export function sort(arr: FixedArray<byte>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
-
 // ======== tests section ========
 
 /** note: used for tests, {@link test_sortAllOn} */
@@ -1114,6 +1157,57 @@ export function test_sortAllOn(arr: FixedArray<byte>) {
     }
 }
 // ======== end of tests section ========
+
+function copyPart(dst: FixedArray<short>, counter: int, src: FixedArray<short>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<short>, right: FixedArray<short>, cmp: (lhs: short, rhs: short) => number): FixedArray<short> {
+    const result:FixedArray<short> = new short[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<short>, cmp: (lhs: short, rhs: short) => number, begin: int = 0, end: int = 0): FixedArray<short> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<short> = new short[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<short> = new short[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
 
 function bubbleSort(arr: FixedArray<short>, startIndex: int, endIndex: int): void {
     let was = true
@@ -1680,10 +1774,6 @@ export function sort_subarray(arr: FixedArray<short>, startIndex: int, mustPrece
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-export function sort(arr: FixedArray<short>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
-
 // ======== tests section ========
 
 /** note: used for tests, {@link test_sortAllOn} */
@@ -1856,6 +1946,57 @@ export function test_sortAllOn(arr: FixedArray<short>) {
     }
 }
 // ======== end of tests section ========
+
+function copyPart(dst: FixedArray<int>, counter: int, src: FixedArray<int>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<int>, right: FixedArray<int>, cmp: (lhs: int, rhs: int) => number): FixedArray<int> {
+    const result:FixedArray<int> = new int[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<int>, cmp: (lhs: int, rhs: int) => number, begin: int = 0, end: int = 0): FixedArray<int> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<int> = new int[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<int> = new int[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
 
 function bubbleSort(arr: FixedArray<int>, startIndex: int, endIndex: int): void {
     let was = true
@@ -2422,10 +2563,6 @@ export function sort_subarray(arr: FixedArray<int>, startIndex: int, mustPrecede
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-export function sort(arr: FixedArray<int>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
-
 // ======== tests section ========
 
 /** note: used for tests, {@link test_sortAllOn} */
@@ -2598,6 +2735,57 @@ export function test_sortAllOn(arr: FixedArray<int>) {
     }
 }
 // ======== end of tests section ========
+
+function copyPart(dst: FixedArray<long>, counter: int, src: FixedArray<long>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<long>, right: FixedArray<long>, cmp: (lhs: long, rhs: long) => number): FixedArray<long> {
+    const result:FixedArray<long> = new long[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<long>, cmp: (lhs: long, rhs: long) => number, begin: int = 0, end: int = 0): FixedArray<long> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<long> = new long[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<long> = new long[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
 
 function bubbleSort(arr: FixedArray<long>, startIndex: int, endIndex: int): void {
     let was = true
@@ -3164,10 +3352,6 @@ export function sort_subarray(arr: FixedArray<long>, startIndex: int, mustPreced
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-export function sort(arr: FixedArray<long>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
-
 // ======== tests section ========
 
 /** note: used for tests, {@link test_sortAllOn} */
@@ -3340,6 +3524,57 @@ export function test_sortAllOn(arr: FixedArray<long>) {
     }
 }
 // ======== end of tests section ========
+
+function copyPart(dst: FixedArray<float>, counter: int, src: FixedArray<float>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<float>, right: FixedArray<float>, cmp: (lhs: float, rhs: float) => number): FixedArray<float> {
+    const result:FixedArray<float> = new float[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<float>, cmp: (lhs: float, rhs: float) => number, begin: int = 0, end: int = 0): FixedArray<float> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<float> = new float[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<float> = new float[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
 
 function bubbleSort(arr: FixedArray<float>, startIndex: int, endIndex: int): void {
     let was = true
@@ -3906,10 +4141,6 @@ export function sort_subarray(arr: FixedArray<float>, startIndex: int, mustPrece
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }
 
-export function sort(arr: FixedArray<float>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
-
 // ======== tests section ========
 
 /** note: used for tests, {@link test_sortAllOn} */
@@ -4082,6 +4313,57 @@ export function test_sortAllOn(arr: FixedArray<float>) {
     }
 }
 // ======== end of tests section ========
+
+function copyPart(dst: FixedArray<double>, counter: int, src: FixedArray<double>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<double>, right: FixedArray<double>, cmp: (lhs: double, rhs: double) => number): FixedArray<double> {
+    const result:FixedArray<double> = new double[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<double>, cmp: (lhs: double, rhs: double) => number, begin: int = 0, end: int = 0): FixedArray<double> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<double> = new double[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<double> = new double[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
 
 function bubbleSort(arr: FixedArray<double>, startIndex: int, endIndex: int): void {
     let was = true
@@ -4646,10 +4928,6 @@ export function sort_subarray(arr: FixedArray<double>, mustPrecede: (lhs: double
 
 export function sort_subarray(arr: FixedArray<double>, startIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
-}
-
-export function sort(arr: FixedArray<double>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
 }
 
 // ======== tests section ========
@@ -5388,10 +5666,6 @@ export function sort_subarray(arr: FixedArray<char>, mustPrecede: (lhs: char, rh
 
 export function sort_subarray(arr: FixedArray<char>, startIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
-}
-
-export function sort(arr: FixedArray<char>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
 }
 
 // ======== tests section ========

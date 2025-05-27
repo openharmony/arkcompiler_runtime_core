@@ -1484,6 +1484,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
+
         let cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): number => {
             const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
             {%- if element['name'] == 'BigUint64' %}
@@ -1496,8 +1497,13 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             return result
             {%- endif %}
         }
-        sort(arr, cmp)
-        for (let i = 0; i < this.lengthInt; ++i) {
+        const MAX_SHORT_LENGTH = 24
+        if (arr.length > MAX_SHORT_LENGTH) {
+            arr = mergeSort(arr, cmp)
+        } else {
+            sort(arr, cmp)
+        }
+        for (let i = 0; i < arr.length; ++i) {
             this.setUnsafe(i, arr[i])
         }
         return this
