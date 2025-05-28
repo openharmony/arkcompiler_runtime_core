@@ -414,8 +414,8 @@ TEST_F(ClassFindMethodTest, find_intrinsics)
         const char *moduleName = "Lescompat;";
         const char *className = "LArrayBuffer;";
 
-        CheckIntrinsicsFindMethod(moduleName, className, "atomicAndI32", "II:I");
-        CheckIntrinsicsFindMethod(moduleName, className, "atomicXorI32", "II:I");
+        CheckIntrinsicsFindMethod(moduleName, className, "atomicAndI32", "III:I");
+        CheckIntrinsicsFindMethod(moduleName, className, "atomicXorI32", "III:I");
     }
 }
 

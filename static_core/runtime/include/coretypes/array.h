@@ -159,36 +159,42 @@ public:
     T GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false, bool IS_VOLATILE = false>
-    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, void> Set(ArraySizeT idx, T elem);
+    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, void> Set(ArraySizeT idx, T elem,
+                                                                          uint32_t byteOffset = 0);
 
     template <class T, bool NEED_READ_BARRIER = true, bool IS_DYN = false, bool IS_VOLATILE = false>
-    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Get(ArraySizeT idx) const;
+    std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Get(ArraySizeT idx, uint32_t byteOffset = 0) const;
 
     template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
     std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, std::pair<bool, T>> CompareAndExchange(
-        ArraySizeT idx, T oldValue, T newValue, std::memory_order memoryOrder, bool strong);
+        ArraySizeT idx, T oldValue, T newValue, std::memory_order memoryOrder, bool strong, uint32_t byteOffset = 0);
 
     template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
     std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Exchange(ArraySizeT idx, T value,
-                                                                            std::memory_order memoryOrder);
+                                                                            std::memory_order memoryOrder,
+                                                                            uint32_t byteOffset = 0);
 
     template <class T>
-    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndAdd(ArraySizeT idx, T value, std::memory_order memoryOrder);
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndAdd(ArraySizeT idx, T value, std::memory_order memoryOrder,
+                                                           uint32_t byteOffset = 0);
 
     template <class T>
-    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndSub(ArraySizeT idx, T value, std::memory_order memoryOrder);
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndSub(ArraySizeT idx, T value, std::memory_order memoryOrder,
+                                                           uint32_t byteOffset = 0);
 
     template <class T>
-    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndBitwiseOr(ArraySizeT idx, T value,
-                                                                 std::memory_order memoryOrder);
+    std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndBitwiseOr(ArraySizeT idx, T value, std::memory_order memoryOrder,
+                                                                 uint32_t byteOffset = 0);
 
     template <class T>
     std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndBitwiseAnd(ArraySizeT idx, T value,
-                                                                  std::memory_order memoryOrder);
+                                                                  std::memory_order memoryOrder,
+                                                                  uint32_t byteOffset = 0);
 
     template <class T>
     std::enable_if_t<std::is_arithmetic_v<T>, T> GetAndBitwiseXor(ArraySizeT idx, T value,
-                                                                  std::memory_order memoryOrder);
+                                                                  std::memory_order memoryOrder,
+                                                                  uint32_t byteOffset = 0);
 
     template <class T, bool IS_DYN>
     static constexpr size_t GetElementSize();

@@ -118,15 +118,15 @@ protected:
     }
 
     template <class T, bool IS_VOLATILE = false>
-    void SetImpl(uint32_t idx, T elem)
+    void SetImpl(uint32_t idx, T elem, uint32_t byteOffset = 0)
     {
-        GetCoreType()->Set<T, true, false, IS_VOLATILE>(idx, elem);
+        GetCoreType()->Set<T, true, false, IS_VOLATILE>(idx, elem, byteOffset);
     }
 
     template <class T, bool IS_VOLATILE = false>
-    T GetImpl(uint32_t idx) const
+    T GetImpl(uint32_t idx, uint32_t byteOffset = 0) const
     {
-        return GetCoreType()->Get<T, true, false, IS_VOLATILE>(idx);
+        return GetCoreType()->Get<T, true, false, IS_VOLATILE>(idx, byteOffset);
     }
 
     template <class T>
@@ -136,45 +136,47 @@ protected:
     }
 
     template <class T>
-    std::pair<bool, T> CompareAndExchangeImpl(uint32_t idx, T oldElemValue, T newValue, bool strong)
+    std::pair<bool, T> CompareAndExchangeImpl(uint32_t idx, T oldElemValue, T newValue, bool strong,
+                                              uint32_t byteOffset = 0)
     {
-        return GetCoreType()->CompareAndExchange(idx, oldElemValue, newValue, std::memory_order_seq_cst, strong);
+        return GetCoreType()->CompareAndExchange(idx, oldElemValue, newValue, std::memory_order_seq_cst, strong,
+                                                 byteOffset);
     }
 
     template <class T>
-    T ExchangeImpl(uint32_t idx, T val)
+    T ExchangeImpl(uint32_t idx, T val, uint32_t byteOffset = 0)
     {
-        return GetCoreType()->Exchange(idx, val, std::memory_order_seq_cst);
+        return GetCoreType()->Exchange(idx, val, std::memory_order_seq_cst, byteOffset);
     }
 
     template <class T>
-    T GetAndAddImpl(uint32_t idx, T value)
+    T GetAndAddImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
     {
-        return GetCoreType()->GetAndAdd(idx, value, std::memory_order_seq_cst);
+        return GetCoreType()->GetAndAdd(idx, value, std::memory_order_seq_cst, byteOffset);
     }
 
     template <class T>
-    T GetAndSubImpl(uint32_t idx, T value)
+    T GetAndSubImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
     {
-        return GetCoreType()->GetAndSub(idx, value, std::memory_order_seq_cst);
+        return GetCoreType()->GetAndSub(idx, value, std::memory_order_seq_cst, byteOffset);
     }
 
     template <class T>
-    T GetAndBitwiseOrImpl(uint32_t idx, T value)
+    T GetAndBitwiseOrImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
     {
-        return GetCoreType()->GetAndBitwiseOr(idx, value, std::memory_order_seq_cst);
+        return GetCoreType()->GetAndBitwiseOr(idx, value, std::memory_order_seq_cst, byteOffset);
     }
 
     template <class T>
-    T GetAndBitwiseAndImpl(uint32_t idx, T value)
+    T GetAndBitwiseAndImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
     {
-        return GetCoreType()->GetAndBitwiseAnd(idx, value, std::memory_order_seq_cst);
+        return GetCoreType()->GetAndBitwiseAnd(idx, value, std::memory_order_seq_cst, byteOffset);
     }
 
     template <class T>
-    T GetAndBitwiseXorImpl(uint32_t idx, T value)
+    T GetAndBitwiseXorImpl(uint32_t idx, T value, uint32_t byteOffset = 0)
     {
-        return GetCoreType()->GetAndBitwiseXor(idx, value, std::memory_order_seq_cst);
+        return GetCoreType()->GetAndBitwiseXor(idx, value, std::memory_order_seq_cst, byteOffset);
     }
 };
 
@@ -331,41 +333,42 @@ public:
     {
         return GetImpl<ClassType>(index);
     }
-    void SetVolatile(uint32_t index, ClassType element)
+    void SetVolatile(uint32_t index, uint32_t byteOffset, ClassType element)
     {
-        SetImpl<ClassType, true>(index, element);
+        SetImpl<ClassType, true>(index, element, byteOffset);
     }
-    ClassType GetVolatile(uint32_t index) const
+    ClassType GetVolatile(uint32_t index, uint32_t byteOffset) const
     {
-        return GetImpl<ClassType, true>(index);
+        return GetImpl<ClassType, true>(index, byteOffset);
     }
-    std::pair<bool, ClassType> CompareAndExchange(uint32_t index, ClassType oldVal, ClassType newVal, bool strong)
+    std::pair<bool, ClassType> CompareAndExchange(uint32_t index, uint32_t byteOffset, ClassType oldVal,
+                                                  ClassType newVal, bool strong)
     {
-        return CompareAndExchangeImpl(index, oldVal, newVal, strong);
+        return CompareAndExchangeImpl(index, oldVal, newVal, strong, byteOffset);
     }
-    ClassType Exchange(uint32_t index, ClassType val)
+    ClassType Exchange(uint32_t index, uint32_t byteOffset, ClassType val)
     {
-        return ExchangeImpl(index, val);
+        return ExchangeImpl(index, val, byteOffset);
     }
-    ClassType GetAndAdd(uint32_t index, ClassType val)
+    ClassType GetAndAdd(uint32_t index, uint32_t byteOffset, ClassType val)
     {
-        return GetAndAddImpl(index, val);
+        return GetAndAddImpl(index, val, byteOffset);
     }
-    ClassType GetAndSub(uint32_t index, ClassType val)
+    ClassType GetAndSub(uint32_t index, uint32_t byteOffset, ClassType val)
     {
-        return GetAndSubImpl(index, val);
+        return GetAndSubImpl(index, val, byteOffset);
     }
-    ClassType GetAndBitwiseAnd(uint32_t index, ClassType val)
+    ClassType GetAndBitwiseAnd(uint32_t index, uint32_t byteOffset, ClassType val)
     {
-        return GetAndBitwiseXorImpl(index, val);
+        return GetAndBitwiseXorImpl(index, val, byteOffset);
     }
-    ClassType GetAndBitwiseOr(uint32_t index, ClassType val)
+    ClassType GetAndBitwiseOr(uint32_t index, uint32_t byteOffset, ClassType val)
     {
-        return GetAndBitwiseOrImpl(index, val);
+        return GetAndBitwiseOrImpl(index, val, byteOffset);
     }
-    ClassType GetAndBitwiseXor(uint32_t index, ClassType val)
+    ClassType GetAndBitwiseXor(uint32_t index, uint32_t byteOffset, ClassType val)
     {
-        return GetAndBitwiseXorImpl(index, val);
+        return GetAndBitwiseXorImpl(index, val, byteOffset);
     }
 
     static EtsClass *GetComponentClass()

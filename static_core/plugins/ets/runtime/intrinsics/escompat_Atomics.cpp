@@ -32,121 +32,125 @@
 namespace ark::ets::intrinsics {
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define SHARED_MEMORY_AT(type, postfix)                                                \
-    extern "C" type ArrayBufferAt##postfix(EtsEscompatArrayBuffer *mem, int32_t index) \
-    {                                                                                  \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                         \
-        return mem->GetElement<type>(index);                                           \
+#define SHARED_MEMORY_AT(type, postfix)                                                                    \
+    extern "C" type ArrayBufferAt##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset) \
+    {                                                                                                      \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                             \
+        return mem->GetElement<type>(index, byteOffset);                                                   \
     }
 
-#define SHARED_MEMORY_SET(type, postfix)                                                            \
-    extern "C" void ArrayBufferSet##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                               \
-        mem->SetElement<type>(index, value);                                                        \
+#define SHARED_MEMORY_SET(type, postfix)                                                                    \
+    extern "C" void ArrayBufferSet##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                            type value)                                                     \
+    {                                                                                                       \
+        mem->SetElement<type>(index, byteOffset, value);                                                    \
     }
 
-#define SHARED_MEMORY_ADD(type, postfix)                                                            \
-    extern "C" type ArrayBufferAdd##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                               \
-        auto result = mem->GetAndAdd<type>(index, value);                                           \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                      \
-        return result;                                                                              \
+#define SHARED_MEMORY_ADD(type, postfix)                                                                    \
+    extern "C" type ArrayBufferAdd##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                            type value)                                                     \
+    {                                                                                                       \
+        auto result = mem->GetAndAdd<type>(index, byteOffset, value);                                       \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                              \
+        return result;                                                                                      \
     }
 
-#define SHARED_MEMORY_AND_SIGNED(type, postfix)                                                     \
-    extern "C" type ArrayBufferAnd##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                               \
-        auto result = mem->GetAndBitwiseAnd<type>(index, value);                                    \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                      \
-        return result;                                                                              \
+#define SHARED_MEMORY_AND_SIGNED(type, postfix)                                                             \
+    extern "C" type ArrayBufferAnd##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                            type value)                                                     \
+    {                                                                                                       \
+        auto result = mem->GetAndBitwiseAnd<type>(index, byteOffset, value);                                \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                              \
+        return result;                                                                                      \
     }
 
-#define SHARED_MEMORY_AND_UNSIGNED(type, postfix)                                                   \
-    extern "C" type ArrayBufferAnd##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                               \
-        auto result = mem->GetAndBitwiseAnd<type>(index, value);                                    \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                      \
-        return result;                                                                              \
+#define SHARED_MEMORY_AND_UNSIGNED(type, postfix)                                                           \
+    extern "C" type ArrayBufferAnd##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                            type value)                                                     \
+    {                                                                                                       \
+        auto result = mem->GetAndBitwiseAnd<type>(index, byteOffset, value);                                \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                              \
+        return result;                                                                                      \
     }
 
-#define SHARED_MEMORY_COMPARE_EXCHANGE(type, postfix)                                                     \
-    extern "C" type ArrayBufferCompareExchange##postfix(EtsEscompatArrayBuffer *mem, int32_t index,       \
-                                                        type expectedValue, type replacementValue)        \
-    {                                                                                                     \
-        auto result = mem->CompareAndExchangeElement<type>(index, expectedValue, replacementValue, true); \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
-        return result.second;                                                                             \
+#define SHARED_MEMORY_COMPARE_EXCHANGE(type, postfix)                                                                  \
+    extern "C" type ArrayBufferCompareExchange##postfix(EtsEscompatArrayBuffer *mem, int32_t index,                    \
+                                                        int32_t byteOffset, type expectedValue, type replacementValue) \
+    {                                                                                                                  \
+        auto result = mem->CompareAndExchangeElement<type>(index, byteOffset, expectedValue, replacementValue, true);  \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                         \
+        return result.second;                                                                                          \
     }
 
-#define SHARED_MEMORY_EXCHANGE(type, postfix)                                                            \
-    extern "C" type ArrayBufferExchange##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                                    \
-        auto result = mem->ExchangeElement<type>(index, value);                                          \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                           \
-        return result;                                                                                   \
+#define SHARED_MEMORY_EXCHANGE(type, postfix)                                                                    \
+    extern "C" type ArrayBufferExchange##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                                 type value)                                                     \
+    {                                                                                                            \
+        auto result = mem->ExchangeElement<type>(index, byteOffset, value);                                      \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                   \
+        return result;                                                                                           \
     }
 
-#define SHARED_MEMORY_LOAD(type, postfix)                                                \
-    extern "C" type ArrayBufferLoad##postfix(EtsEscompatArrayBuffer *mem, int32_t index) \
-    {                                                                                    \
-        auto result = mem->GetVolatileElement<type>(index);                              \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                           \
-        return result;                                                                   \
+#define SHARED_MEMORY_LOAD(type, postfix)                                                                    \
+    extern "C" type ArrayBufferLoad##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset) \
+    {                                                                                                        \
+        auto result = mem->GetVolatileElement<type>(index, byteOffset);                                      \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                               \
+        return result;                                                                                       \
     }
 
 // CC-OFFNXT(G.PRE.05) function gen
-#define SHARED_MEMORY_OR_SIGNED(type, postfix)                                                     \
-    extern "C" type ArrayBufferOr##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                              \
-        auto result = mem->GetAndBitwiseOr<type>(index, value);                                    \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                     \
-        return result;                                                                             \
+#define SHARED_MEMORY_OR_SIGNED(type, postfix)                                                                         \
+    extern "C" type ArrayBufferOr##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, type value) \
+    {                                                                                                                  \
+        auto result = mem->GetAndBitwiseOr<type>(index, byteOffset, value);                                            \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                         \
+        return result;                                                                                                 \
     }
 
-#define SHARED_MEMORY_OR_UNSIGNED(type, postfix)                                                   \
-    extern "C" type ArrayBufferOr##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                              \
-        auto result = mem->GetAndBitwiseOr<type>(index, value);                                    \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                     \
-        return result;                                                                             \
+#define SHARED_MEMORY_OR_UNSIGNED(type, postfix)                                                                       \
+    extern "C" type ArrayBufferOr##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, type value) \
+    {                                                                                                                  \
+        auto result = mem->GetAndBitwiseOr<type>(index, byteOffset, value);                                            \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                         \
+        return result;                                                                                                 \
     }
 
 // CC-OFFNXT(G.PRE.06) code generation
-#define SHARED_MEMORY_STORE(type, postfix)                                                                \
-    extern "C" type ArrayBufferStore##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value)     \
-    {                                                                                                     \
-        type oldVal;                                                                                      \
-        bool stored = false;                                                                              \
-        do {                                                                                              \
-            oldVal = mem->GetElement<type>(index);                                                        \
-            std::tie(stored, oldVal) = mem->CompareAndExchangeElement<type>(index, oldVal, value, false); \
-        } while (!stored);                                                                                \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
-        return value;                                                                                     \
+#define SHARED_MEMORY_STORE(type, postfix)                                                                    \
+    extern "C" type ArrayBufferStore##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                              type value)                                                     \
+    {                                                                                                         \
+        mem->SetVolatileElement<type>(index, byteOffset, value);                                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
+        return value;                                                                                         \
     }
 
-#define SHARED_MEMORY_SUB(type, postfix)                                                            \
-    extern "C" type ArrayBufferSub##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                               \
-        auto result = mem->GetAndSub<type>(index, value);                                           \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                      \
-        return result;                                                                              \
+#define SHARED_MEMORY_SUB(type, postfix)                                                                    \
+    extern "C" type ArrayBufferSub##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                            type value)                                                     \
+    {                                                                                                       \
+        auto result = mem->GetAndSub<type>(index, byteOffset, value);                                       \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                              \
+        return result;                                                                                      \
     }
 
-#define SHARED_MEMORY_XOR_SIGNED(type, postfix)                                                     \
-    extern "C" type ArrayBufferXor##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                               \
-        auto result = mem->GetAndBitwiseOr<type>(index, value);                                     \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                      \
-        return result;                                                                              \
+#define SHARED_MEMORY_XOR_SIGNED(type, postfix)                                                             \
+    extern "C" type ArrayBufferXor##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                            type value)                                                     \
+    {                                                                                                       \
+        auto result = mem->GetAndBitwiseXor<type>(index, byteOffset, value);                                \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                              \
+        return result;                                                                                      \
     }
 
-#define SHARED_MEMORY_XOR_UNSIGNED(type, postfix)                                                   \
-    extern "C" type ArrayBufferXor##postfix(EtsEscompatArrayBuffer *mem, int32_t index, type value) \
-    {                                                                                               \
-        auto result = mem->GetAndBitwiseOr<type>(index, value);                                     \
-        /* CC-OFFNXT(G.PRE.05) function gen */                                                      \
-        return result;                                                                              \
+#define SHARED_MEMORY_XOR_UNSIGNED(type, postfix)                                                           \
+    extern "C" type ArrayBufferXor##postfix(EtsEscompatArrayBuffer *mem, int32_t index, int32_t byteOffset, \
+                                            type value)                                                     \
+    {                                                                                                       \
+        auto result = mem->GetAndBitwiseXor<type>(index, byteOffset, value);                                \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                              \
+        return result;                                                                                      \
     }
 
 #define FOR_ALL_TYPES(ArrayBufferMethod)                                                                    \
