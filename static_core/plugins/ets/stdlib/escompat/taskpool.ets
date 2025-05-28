@@ -1284,6 +1284,7 @@ export namespace taskpool {
         }
         ConcurrencyHelpers.lockGuard(workersMutex, () => {
             workers.clear();
+            isWorkersInitialized = false;
         })
     }
 
