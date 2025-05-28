@@ -59,7 +59,8 @@ function main() {
 	// This object is used by gtests as storage to save and restore variables
 	globalThis.gtest = {};
 
-	globalThis.gtest.etsVm = requireNapiPreview('lib/ets_interop_js_napi_arkjsvm.so', false);
+	globalThis.gtest.etsVm = requireNapiPreview('lib/ets_interop_js_napi.so', false);
+    globalThis.gtest.helper = helper;
 
 	let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 	let gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
@@ -71,6 +72,7 @@ function main() {
 		'panda-files': gtestAbcPath,
 		'gc-trigger-type': 'heap-trigger',
 		'compiler-enable-jit': 'false',
+        'coroutine-enable-external-scheduling': 'true',
 	});
 
 	if (!etsVmRes) {
@@ -115,5 +117,5 @@ function main() {
 
 let res = main();
 if (res !== 0) {
-	throw Error('gtest_launcher_arkjsvm.js main return 1');
+	throw Error('gtest_launcher.js main return 1');
 }

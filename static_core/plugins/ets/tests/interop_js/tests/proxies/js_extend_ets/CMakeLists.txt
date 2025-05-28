@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js_test__js_extend_ets
+panda_ets_interop_js_gtest(ets_interop_js_test__js_extend_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js_extend_ets.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js_extend_ets.ets
     JS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js_extend_ets.js

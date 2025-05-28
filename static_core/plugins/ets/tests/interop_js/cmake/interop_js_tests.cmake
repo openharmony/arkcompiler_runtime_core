@@ -13,12 +13,8 @@
 
 add_custom_target(ets_interop_tests COMMENT "Common target to run ETS interop tests")
 
-if(PANDA_JS_ETS_HYBRID_MODE)
-    include(cmake/interop_js_tests_arkjsvm.cmake)
-    include(cmake/interop_js_checked_tests.cmake)
-else()
-    include(cmake/interop_js_tests_nodevm.cmake)
-endif()
+include(cmake/interop_js_tests_arkjsvm.cmake)
+include(cmake/interop_js_checked_tests.cmake)
 
 function(gen_file)
     cmake_parse_arguments(

@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-// This file is needed only for using panda_ets_interop_js_nodevm_gtest with event_loop_module_tests.cpp in interop js mode
+// This file is needed only for using panda_ets_interop_js_gtest with event_loop_module_tests.cpp in interop js mode

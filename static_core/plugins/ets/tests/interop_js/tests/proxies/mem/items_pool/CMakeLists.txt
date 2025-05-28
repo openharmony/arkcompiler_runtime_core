@@ -18,4 +18,4 @@ panda_ets_add_gtest(
     LIBRARIES arkbase
     SANITIZERS ${PANDA_SANITIZERS_LIST}
 )
-add_dependencies(ets_interop_js_arkjsvm_gtests ets_interop_js__test_items_pool_gtests)
+add_dependencies(ets_interop_js_gtests ets_interop_js__test_items_pool_gtests)

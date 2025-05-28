@@ -15,30 +15,11 @@ set(DISABLES_TESTS
     standalone_function
 )
 
-set(TESTS_EXECUTED_WITH_NODEJS
+SUBDIRLIST(EXECUTED_TESTS
+    ${CMAKE_CURRENT_LIST_DIR}
+    DISABLES_TESTS
 )
 
-# NOTE: Remove this condition after all tests have been migrated to ArkJSVM.
-list(LENGTH TESTS_EXECUTED_WITH_NODEJS INTEROP_NODEJS_TEST_NUM)
-if(NOT ${INTEROP_NODEJS_TEST_NUM} EQUAL 0)
-    message(FATAL_ERROR "All new interop tests should be executed on ArkJSVM.
-                         INTEROP_NODEJS_TEST_NUM = ${INTEROP_NODEJS_TEST_NUM}")
-endif()
-
-if(PANDA_JS_ETS_HYBRID_MODE)
-    set(NOT_ARKJSVM_TEST_PACKAGES ${TESTS_EXECUTED_WITH_NODEJS})
-    list(APPEND NOT_ARKJSVM_TEST_PACKAGES ${DISABLES_TESTS})
-
-    SUBDIRLIST(TESTS_EXECUTED_ON_ARKJSVM
-        ${CMAKE_CURRENT_LIST_DIR}
-        NOT_ARKJSVM_TEST_PACKAGES
-    )
-
-    foreach(TEST_DIR ${TESTS_EXECUTED_ON_ARKJSVM})
-        add_subdirectory(${TEST_DIR})
-    endforeach()
-else()
-    foreach(TEST_DIR ${TESTS_EXECUTED_WITH_NODEJS})
-        add_subdirectory(${TEST_DIR})
-    endforeach()
-endif()
+foreach(TEST_DIR ${EXECUTED_TESTS})
+    add_subdirectory(${TEST_DIR})
+endforeach()

@@ -388,7 +388,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 #     LAUNCHER_ARGS ".testAwaitPromiseProxyThenRejectShouldFail"
 # )
 
-panda_ets_interop_js_test_arkjsvm(ets_interop_js_test_promise_then_on_rejection
+panda_ets_interop_js_test(ets_interop_js_test_promise_then_on_rejection
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
     LAUNCHER_ARGS "testPromiseThenOnRejection"

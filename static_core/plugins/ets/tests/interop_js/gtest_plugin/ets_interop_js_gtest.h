@@ -61,17 +61,14 @@ public:
         interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
         jsAbcFilePath_ = std::getenv("JS_ABC_OUTPUT_PATH");
 
-        if (std::getenv("NODE_PATH") == nullptr) {
-            runOnArkJSVM_ = true;
-        }
-
         // This object is used to save global js names
         if (!SetGtestEnv()) {
             std::abort();
         }
 
-        if (std::getenv("PACKAGE_NAME") != nullptr) {
-            packageName_ = std::string(std::getenv("PACKAGE_NAME"));
+        auto packageName = std::getenv("PACKAGE_NAME");
+        if (packageName != nullptr) {
+            packageName_ = packageName;
         } else {
             std::cerr << "PACKAGE_NAME is not set" << std::endl;
             std::abort();
@@ -112,9 +109,6 @@ public:
 
     [[nodiscard]] bool RunJsTestSuite(const std::string &path)
     {
-        if (runOnArkJSVM_) {
-            return DoRunJsTestSuiteArkJsVM(jsEnv_, path);
-        }
         return DoRunJsTestSuite(jsEnv_, path);
     }
 
@@ -144,41 +138,8 @@ public:
     }
 
 private:
-    bool LoadModuleNodeJS(const std::string &moduleName, const std::string &modulePath)
-    {
-        [[maybe_unused]] napi_status status;
-
-        napi_value jsUndefined;
-        status = napi_get_undefined(jsEnv_, &jsUndefined);
-        ASSERT(status == napi_ok);
-
-        napi_value jsGlobalObject = GetGlobalObject(jsEnv_);
-
-        napi_value jsRequire;
-        status = napi_get_named_property(jsEnv_, jsGlobalObject, "require", &jsRequire);
-        ASSERT(status == napi_ok);
-
-        napi_value jsPath;
-        std::string pathToModule = interopJsTestPath_ + "/" + modulePath;
-        status = napi_create_string_utf8(jsEnv_, pathToModule.data(), pathToModule.length(), &jsPath);
-
-        napi_value jsGtestEnvObject = GetJsGtestEnvObject(jsEnv_);
-
-        napi_value jsModule;
-        status = napi_call_function(jsEnv_, jsUndefined, jsRequire, 1, &jsPath, &jsModule);
-        ASSERT(status == napi_ok);
-
-        status = napi_set_named_property(jsEnv_, jsGtestEnvObject, moduleName.c_str(), jsModule);
-
-        return status == napi_ok;
-    }
-
     bool LoadModule(const std::string &moduleName, const std::string &modulePath)
     {
-        if (!runOnArkJSVM_) {
-            return LoadModuleNodeJS(moduleName, modulePath);
-        }
-
         napi_value jsModule;
         std::string pathToModule = jsAbcFilePath_ + "/" + modulePath;
 
@@ -195,17 +156,6 @@ private:
         status = napi_set_named_property(jsEnv_, jsGtestEnvObject, moduleName.c_str(), jsModule);
 
         return status == napi_ok;
-    }
-
-    [[nodiscard]] bool DoRunJsTestSuite(napi_env env, const std::string &path)
-    {
-        std::string fullPath = interopJsTestPath_ + "/" + path;
-        std::string testSouceCode = ReadFile(fullPath);
-
-        // NOTE:
-        //  We wrap the test source code to anonymous lambda function to avoid pollution the global namespace.
-        //  We also set the 'use strict' mode, because right now we are checking interop only in the strict mode.
-        return DoRunJsScript(env, "(() => { \n'use strict'\n" + testSouceCode + "\n})()");
     }
 
     [[nodiscard]] static bool DoRunJsScript(napi_env env, const std::string &script)
@@ -231,7 +181,7 @@ private:
         return status == napi_ok;
     }
 
-    [[nodiscard]] bool DoRunJsTestSuiteArkJsVM(napi_env env, const std::string &path)
+    [[nodiscard]] bool DoRunJsTestSuite(napi_env env, const std::string &path)
     {
         std::string fileWithoutExtension = path.substr(0, path.find_last_of('.'));
         std::string outputPath = jsAbcFilePath_ + "/" + fileWithoutExtension + ".abc";
@@ -451,7 +401,6 @@ private:
 
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    bool runOnArkJSVM_ {false};
     std::string interopJsTestPath_;
     std::string jsAbcFilePath_;
     std::string packageName_;

@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__escompat_interface
+panda_ets_interop_js_gtest(ets_interop_js__escompat_interface
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/escompat_interface.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/escompat_interface.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_escompat_interface.ts

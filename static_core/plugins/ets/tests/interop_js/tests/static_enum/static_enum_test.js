@@ -23,7 +23,7 @@ const helper = requireNapiPreview('libinterop_test_helper.so', false);
 const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 
-globalThis.etsVm = requireNapiPreview('ets_interop_js_napi_arkjsvm.so', false);
+globalThis.etsVm = requireNapiPreview('ets_interop_js_napi.so', false);
 
 function runTest() {
     const etsOpts = {

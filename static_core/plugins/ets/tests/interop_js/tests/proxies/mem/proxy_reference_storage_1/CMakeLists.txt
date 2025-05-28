@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__test_proxy_reference_storage_1
+panda_ets_interop_js_gtest(ets_interop_js__test_proxy_reference_storage_1
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_proxy_reference_storage_1.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_proxy_reference_storage_1.ets
 )
