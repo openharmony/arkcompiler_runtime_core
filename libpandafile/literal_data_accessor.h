@@ -60,6 +60,7 @@ enum class LiteralTag : uint8_t {
     BUILTINTYPEINDEX = 0x19,
     GETTER = 0x1a,
     SETTER = 0x1b,
+    ETS_IMPLEMENTS = 0x1c,
     NULLVALUE = 0xff
 };
 

@@ -81,6 +81,7 @@ void AbcLiteralArrayProcessor::FillLiteralData(pandasm::LiteralArray *lit_array,
             value_lit.value_ = std::get<double>(value);
             break;
         case panda_file::LiteralTag::STRING:
+        case panda_file::LiteralTag::ETS_IMPLEMENTS:
             value_lit.value_ = GetStringById(panda_file::File::EntityId{std::get<uint32_t>(value)});
             break;
         case panda_file::LiteralTag::METHOD:

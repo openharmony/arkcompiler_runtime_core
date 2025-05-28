@@ -47,6 +47,7 @@ LiteralTagToStringMap PandasmDumperUtils::literal_tag_to_string_map_ = {
     {panda_file::LiteralTag::LITERALBUFFERINDEX, "literal_buffer_index"},
     {panda_file::LiteralTag::LITERALARRAY, "literal_array"},
     {panda_file::LiteralTag::BUILTINTYPEINDEX, "builtin_type_index"},
+    {panda_file::LiteralTag::ETS_IMPLEMENTS, "ets_implements"},
 };
 
 FunctionKindToStringMap PandasmDumperUtils::function_kind_to_string_map_ = {
