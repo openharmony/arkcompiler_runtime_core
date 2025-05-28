@@ -400,6 +400,7 @@ ohos_source_set("libarkruntime_set_static") {
     ":arkruntime_interpreter_impl",
     ":libpcre2_16",
     ":libpcre2_8",
+    "$ark_root/assembler:libarktsassembler",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_entrypoints_bridge_asm_macro_inl",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
     "$ark_root/compiler:libarktscompiler",

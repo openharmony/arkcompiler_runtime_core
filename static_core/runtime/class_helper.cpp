@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,6 +117,76 @@ const uint8_t *ClassHelper::GetTypeDescriptor(const PandaString &name, PandaStri
     *storage = "L" + name + ";";
     std::replace(storage->begin(), storage->end(), '.', '/');
     return utf::CStringAsMutf8(storage->c_str());
+}
+
+/* static */
+bool ClassHelper::IsPrimitive(const uint8_t *descriptor)
+{
+    switch (*descriptor) {
+        case 'V':
+        case 'Z':
+        case 'B':
+        case 'H':
+        case 'S':
+        case 'C':
+        case 'I':
+        case 'U':
+        case 'J':
+        case 'Q':
+        case 'F':
+        case 'D':
+        case 'A':
+            return true;
+        default:
+            return false;
+    }
+}
+
+/* static */
+bool ClassHelper::IsReference(const uint8_t *descriptor)
+{
+    Span<const uint8_t> sp(descriptor, 1);
+    return sp[0] == 'L';
+}
+
+/* static */
+bool ClassHelper::IsUnion(const uint8_t *descriptor)
+{
+    Span<const uint8_t> sp(descriptor, 2);
+    return sp[0] == '{' && sp[1] == 'U';
+}
+
+static size_t GetUnionTypeComponentsNumber(const uint8_t *descriptor)
+{
+    size_t length = 1;
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    while (descriptor[length] != '}') {
+        if (descriptor[length] == '{') {
+            length += GetUnionTypeComponentsNumber(&(descriptor[length]));
+        } else {
+            length += 1;
+        }
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    return length;
+}
+
+/* static */
+Span<const uint8_t> ClassHelper::GetUnionComponent(const uint8_t *descriptor)
+{
+    if (IsPrimitive(descriptor)) {
+        return Span(descriptor, 1);
+    }
+    if (IsArrayDescriptor(descriptor)) {
+        auto dim = GetDimensionality(descriptor);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return Span(descriptor, dim + GetUnionComponent(&(descriptor[dim])).Size());
+    }
+    if (IsUnion(descriptor)) {
+        return Span(descriptor, GetUnionTypeComponentsNumber(descriptor));
+    }
+    ASSERT(IsReference(descriptor));
+    return Span(descriptor, std::string(utf::Mutf8AsCString(descriptor)).find(';') + 1);
 }
 
 }  // namespace ark

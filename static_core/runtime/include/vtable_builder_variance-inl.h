@@ -52,6 +52,11 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessClassMethod
         auto &[itInfo, itEntry] = it.Value();
 
         if (!itInfo->IsBase()) {
+            if (UNLIKELY(ProtoCompatibility(ctx)(itInfo->GetProtoId(), info->GetProtoId(), true))) {
+                OnVTableConflict(errorHandler_, ClassLinker::Error::REDECL_BY_TYPE_SIG, "Method is redeclarated", info,
+                                 itInfo);
+                return false;
+            }
             continue;
         }
         if (IsOverriddenBy(ctx, itInfo->GetProtoId(), info->GetProtoId()) && OverridePred()(itInfo, info)) {

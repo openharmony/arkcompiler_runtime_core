@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include "assembly-emitter.h"
+#include "assembly-parser.h"
 #include "types/ets_runtime_linker.h"
 #include "tests/runtime/types/ets_test_mirror_classes.h"
 
@@ -88,10 +90,19 @@ TEST_F(EtsRuntimeLinkerTest, RuntimeLinkerMemoryLayout)
 }
 
 class SuppressErrorHandler : public ark::ClassLinkerErrorHandler {
-    void OnError([[maybe_unused]] ark::ClassLinker::Error error,
-                 [[maybe_unused]] const ark::PandaString &message) override
+    void OnError([[maybe_unused]] ark::ClassLinker::Error error, const ark::PandaString &message) override
     {
+        message_ = message;
     }
+
+public:
+    const ark::PandaString &GetMessage() const
+    {
+        return message_;
+    }
+
+private:
+    ark::PandaString message_;
 };
 
 TEST_F(EtsRuntimeLinkerTest, GetClassReturnsNullWhenErrorSuppressed)
@@ -104,6 +115,82 @@ TEST_F(EtsRuntimeLinkerTest, GetClassReturnsNullWhenErrorSuppressed)
 
     Class *klass = ext->GetClass(fakeDescriptor, true, nullptr, &handler);
     ASSERT_EQ(klass, nullptr);
+}
+
+TEST_F(EtsRuntimeLinkerTest, CreateUnionClassRedecl)
+{
+    pandasm::Parser p;
+
+    const char *source =
+        ".language eTS\n"
+
+        ".record A <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record B <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record C <ets.extends=B, access.record=public> {}\n"
+        ".record D <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record std.core.Object <external>\n"
+        ".record {UA,B} <external>\n"
+        ".record {UA,C} <external>\n"
+
+        ".function void D.foo(D a0, {UA,B} a1) <access.function=public> { return.void }\n"
+        ".function void D.foo(D a0, {UA,C} a1) <access.function=public> { return.void }";
+
+    auto res = p.Parse(source);
+    ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ASSERT(classLinker);
+    classLinker->AddPandaFile(std::move(pf));
+
+    auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
+        ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
+    SuppressErrorHandler handler;
+    const auto *classWithError = reinterpret_cast<const uint8_t *>("LD;");
+    Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
+    ASSERT_EQ(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "Method is redeclarated LD;foo LD;foo");
+}
+
+TEST_F(EtsRuntimeLinkerTest, CreateUnionClassMultiOverriding)
+{
+    pandasm::Parser p;
+
+    const char *source =
+        ".language eTS\n"
+
+        ".record A <ets.extends=AA, access.record=public> {}\n"
+        ".record AA <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record B <ets.extends=BB, access.record=public> {}\n"
+        ".record BB <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record C <ets.extends=CC, access.record=public> {}\n"
+        ".record CC <ets.extends=BB, access.record=public> {}\n"
+        ".record D <ets.extends=std.core.Object, access.record=public> {}\n"
+        ".record E <ets.extends=D, access.record=public> {}\n"
+        ".record std.core.Object <external>\n"
+        ".record {UA,C} <external>\n"
+        ".record {UAA,BB} <external>\n"
+        ".record {UB,C} <external>\n"
+        ".function void D.foo(D a0, {UA,C} a1) <access.function=public> { return.void }\n"
+        ".function void D.foo(D a0, {UB,C} a1) <access.function=public> { return.void }\n"
+        ".function void E.foo(E a0, {UBB,AA} a1) <access.function=public> { return.void }\n"
+        ".function void E.foo(E a0, {UB,C} a1) <access.function=public> { return.void }";
+
+    auto res = p.Parse(source);
+    ASSERT_EQ(p.ShowError().err, pandasm::Error::ErrorType::ERR_NONE);
+    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ASSERT(classLinker);
+    classLinker->AddPandaFile(std::move(pf));
+
+    auto *ext = static_cast<ark::ets::EtsClassLinkerExtension *>(
+        ark::Runtime::GetCurrent()->GetClassLinker()->GetExtension(ark::panda_file::SourceLang::ETS));
+    SuppressErrorHandler handler;
+    const auto *classWithError = reinterpret_cast<const uint8_t *>("LE;");
+    Class *klass = ext->GetClass(classWithError, true, nullptr, &handler);
+    ASSERT_EQ(klass, nullptr);
+    ASSERT_EQ(handler.GetMessage(), "Multiple override LE;foo LD;foo");
 }
 
 }  // namespace ark::ets::test

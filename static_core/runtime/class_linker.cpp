@@ -1201,6 +1201,14 @@ Class *ClassLinker::CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *d
     return arrayClass;
 }
 
+Class *ClassLinker::LoadUnionClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                                   ClassLinkerErrorHandler *errorHandler)
+{
+    auto langCtx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
+    const uint8_t *descriptorLUB = GetExtension(langCtx)->ComputeLUB(context, descriptor);
+    return GetClass(descriptorLUB, needCopyDescriptor, context, errorHandler);
+}
+
 Class *ClassLinker::LoadArrayClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
                                    ClassLinkerErrorHandler *errorHandler)
 {
@@ -1279,6 +1287,10 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor,
         return cls;
     }
 
+    if (ClassHelper::IsUnion(descriptor)) {
+        return LoadUnionClass(descriptor, needCopyDescriptor, context, errorHandler);
+    }
+
     if (ClassHelper::IsArrayDescriptor(descriptor)) {
         return LoadArrayClass(descriptor, needCopyDescriptor, context, errorHandler);
     }
@@ -1322,7 +1334,11 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
     if (cls != nullptr) {
         return cls;
     }
+
     const uint8_t *descriptor = pf.GetStringData(id).data;
+    if (ClassHelper::IsUnion(descriptor)) {
+        return LoadUnionClass(descriptor, false, context, errorHandler);
+    }
 
     cls = FindLoadedClass(descriptor, context);
     if (cls != nullptr) {
