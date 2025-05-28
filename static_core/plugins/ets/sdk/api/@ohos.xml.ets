@@ -554,4 +554,270 @@ export namespace xml {
             return true
         }
     }
+
+    const DepthOffset = 1;
+    const BufferIndexOffset = 1;
+    const IndentationSpaces = 2;
+
+    enum XmlType {
+        NONE,
+        START_AND_ATTRIBUTES,
+        DECLARATION,
+        TEXT,
+        OTHERS
+    }
+
+    export class XmlSerializer {
+        private iPos: int = 0;
+        private buffer: ArrayBuffer | DataView;
+        private encoding: string = 'utf-8';
+        private depth: int = 0;
+        private type = XmlType.NONE;
+        private elementStack = new Array<XmlNode>();
+        private multNsp = new Map<int, XmlNode>();
+        private isHasDecl: boolean = false;
+
+        /**
+         * Constructs an instance of the class with the specified buffer and encoding.
+         *
+         * @param {ArrayBuffer | DataView} buffer - The buffer containing the data to be processed.
+         * @param {string} encoding - The encoding format of the data. Only 'utf-8' is supported.
+         * @throws {BusinessError} Throws an error if the encoding is not 'utf-8'.
+         */
+        constructor(buffer: ArrayBuffer | DataView, encoding: string) {
+            if (encoding !== 'utf-8') {
+                throw new BusinessError(TypeErrorCodeId, new Error('Parameter error.Just support utf-8'));
+            }
+
+            this.buffer = buffer;
+            this.increaseStackLength();
+        }
+
+        /**
+         * Constructs an instance of the class with the specified buffer.
+         *
+         * @param {ArrayBuffer | DataView} buffer - The buffer containing the data to be processed.
+         */
+        constructor(buffer: ArrayBuffer | DataView) {
+            this.buffer = buffer;
+            this.increaseStackLength();
+        }
+
+        /**
+         * Sets an attribute for the current XML element.
+         *
+         * @param {string} name - The name of the attribute to set.
+         * @param {string} value - The value of the attribute to set.
+         * @throws {BusinessError} Throws an error if the method is called in an illegal position.
+         */
+        public setAttributes(name: string, value: string): void {
+            this.checkEmptyParameter(name);
+            if (this.type !== XmlType.START_AND_ATTRIBUTES) {
+                throw new BusinessError(TypeErrorCodeId, new Error('Illegal position for attribute'));
+            }
+
+            let temp = new StringBuilder(` ${name}=\"`);
+            this.writeEscaped(temp, value);
+            temp.append(`\"`);
+            this.type = XmlType.START_AND_ATTRIBUTES;
+            this.writeToBuffer(temp, 'SetAttributes');
+        }
+
+        /**
+         * Handles the start of an XML element.
+         *
+         * @param {string} name - The name of the XML element being started.
+         */
+        public startElement(name: string): void {
+            this.checkEmptyParameter(name);
+            let temp = new StringBuilder();
+            if (this.type === XmlType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(temp);
+                temp.append('>');
+            }
+            if (this.type !== XmlType.NONE && this.type !== XmlType.DECLARATION) {
+                this.nextItem(temp);
+            }
+
+            this.elementStack[this.depth].name = name;
+            temp.append('<');
+            if (this.elementStack[this.depth].prefix !== '') {
+                temp.append(`${this.elementStack[this.depth].prefix}:`);
+            } else if (this.depth !== 0) {
+                if (this.elementStack[this.depth - DepthOffset].prefix !== '') {
+                    this.elementStack[this.depth].prefix = this.elementStack[this.depth - DepthOffset].prefix;
+                    temp.append(`${this.elementStack[this.depth].prefix}:`);
+                }
+            }
+            temp.append(`${this.elementStack[this.depth].name}`);
+            this.type = XmlType.START_AND_ATTRIBUTES;
+            this.depth++;
+            this.increaseStackLength();
+            this.writeToBuffer(temp, 'StartElement');
+        }
+
+        /**
+         * Handles the end of an XML element during parsing.
+         */
+        public endElement(): void {
+            let temp = new StringBuilder();
+            if (this.type == XmlType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(temp);
+                temp.append('/>');
+                this.type = XmlType.OTHERS;
+                this.depth--;
+                this.writeToBuffer(temp, 'EndElement');
+                return;
+            }
+            this.depth--;
+            if (this.type !== XmlType.TEXT) {
+                this.nextItem(temp);
+            }
+
+            temp.append('</');
+            if (this.elementStack[this.depth].prefix !== '') {
+                temp.append(`${this.elementStack[this.depth].prefix}:`);
+            }
+            temp.append(`${this.elementStack[this.depth].name}`);
+            this.elementStack[this.depth].prefix = '';
+            this.elementStack[this.depth].namespace_ = '';
+            this.type = XmlType.OTHERS;
+            temp.append('>');
+            this.writeToBuffer(temp, 'EndElement');
+        }
+
+        /**
+         * Sets the namespace for the current XML element.
+         *
+         * @param {string} prefix - The namespace prefix to be set.
+         * @param {string} namespace - The namespace URI associated with the prefix.
+         */
+        public setNamespace(prefix: string, namespace: string): void {
+            this.checkEmptyParameter(prefix);
+            if (namespace.length === 0) {
+                throw new BusinessError(TypeErrorCodeId,
+                    new Error(`Parameter error. The type of ${namespace} must be string`));
+            }
+            let temp = new StringBuilder();
+            if (this.type === XmlType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(temp);
+                temp.append('>');
+            }
+
+            this.elementStack[this.depth].prefix = prefix;
+            this.elementStack[this.depth].namespace_ = namespace;
+            let node: XmlNode = {
+                prefix: this.elementStack[this.depth]!.prefix,
+                namespace_: this.elementStack[this.depth]!.namespace_
+            }
+            this.multNsp.set(this.depth, node);
+            this.type = XmlType.OTHERS;
+            this.writeToBuffer(temp, 'SetNamespace');
+        }
+
+        /**
+         * Increases the length of the element stack by creating a new `XmlNode` object with default empty values for
+         * `name`, `prefix`, and `namespace_`, and pushing it onto the `elementStack`.
+         */
+        private increaseStackLength(): void {
+            let node: XmlNode = {
+                name: '',
+                prefix: '',
+                namespace_: ''
+            }
+            this.elementStack.push(node);
+        }
+
+        /**
+         * Escapes special characters in the given string and appends the result to the provided StringBuilder.
+         *
+         * @param {StringBuilder} stringBuilder - The StringBuilder to which the escaped string will be appended.
+         * @param {string} s - The input string to be escaped.
+         */
+        private writeEscaped(stringBuilder: StringBuilder, s: string): void {
+            s = s.replaceAll('&', '&amp;');
+            s = s.replaceAll('\'', '&apos;');
+            s = s.replaceAll('\"', '&quot;');
+            s = s.replaceAll('>', '&gt;');
+            s = s.replaceAll('<', '&lt;');
+            stringBuilder.append(s);
+        }
+
+        /**
+         * Writes the content of the `stringBuilder` array to the `buffer` starting at the current position (`iPos`).
+         * If the buffer does not have enough space to accommodate the data, an error is thrown.
+         *
+         * @param {StringBuilder} stringBuilder - The StringBuilder will be write.
+         * @param {string} name - The name used in the error message if the operation fails.
+         * @throws {BusinessError} Throws an error if the buffer does not have enough space to write the data.
+         */
+        private writeToBuffer(stringBuilder: StringBuilder, name: string): void {
+            let tempString = stringBuilder.toString();
+            let iLenTemp = tempString.length;
+            if (this.buffer.byteLength > this.iPos + iLenTemp - BufferIndexOffset) {
+                for (let i = 0; i < iLenTemp; i++) {
+                    if (this.buffer instanceof ArrayBuffer) {
+                        (this.buffer as ArrayBuffer).set((i + this.iPos) as int, tempString[i] as byte);
+                    } else {
+                        ((this.buffer as DataView).buffer as ArrayBuffer).set((i + this.iPos) as int,
+                            tempString[i] as byte);
+                    }
+                }
+                this.iPos += iLenTemp;
+            } else {
+                throw new BusinessError(TypeErrorCodeId, new Error(`XmlSerializer:: ${name} memcpy_s failed`));
+            }
+        }
+
+        /**
+         * Handles the namespace processing for the current element in the stack.
+         *
+         * @param {StringBuilder} stringBuilder - The `StringBuilder` instance used to append
+         * namespace declarations to the XML output.
+         */
+        private spliceNamespace(stringBuilder: StringBuilder): void {
+            if (this.depth === 0) {
+                return;
+            }
+
+            this.elementStack[this.depth].prefix = this.elementStack[this.depth - DepthOffset].prefix;
+            this.elementStack[this.depth].namespace_ = this.elementStack[this.depth - DepthOffset].namespace_;
+
+            let prevDepthInfo = this.multNsp.get(this.depth - DepthOffset);
+            if (prevDepthInfo === undefined) {
+                return;
+            }
+
+            if (this.type === XmlType.START_AND_ATTRIBUTES) {
+                let prefix = prevDepthInfo.prefix;
+                let namespace = prevDepthInfo.namespace_;
+                stringBuilder.append(` xmlns:${prefix}=\"${namespace}\"`);
+                this.multNsp.get(this.depth - DepthOffset)!.prefix = '';
+                this.multNsp.get(this.depth - DepthOffset)!.namespace_ = '';
+
+            }
+        }
+
+        /**
+         * Appends a newline character followed by indentation spaces to the `out` property.
+         *
+         * @param {StringBuilder} stringBuilder - The `StringBuilder` instance used to append spaces to the XML output.
+         */
+        private nextItem(stringBuilder: StringBuilder): void {
+            stringBuilder.append('\r\n');
+            stringBuilder.append(' '.repeat(IndentationSpaces * this.depth));
+        }
+
+        /**
+         * Checks if the provided parameter is an empty string.
+         * Throws a `BusinessError` if the parameter is empty.
+         *
+         * @param {string} para - The parameter to be checked.
+         */
+        private checkEmptyParameter(para: string): void {
+            if (para.length === 0) {
+                throw new BusinessError(TypeErrorCodeId, new Error('Parameter error. Parameter cannot be empty'));
+            }
+        }
+    }
 }
