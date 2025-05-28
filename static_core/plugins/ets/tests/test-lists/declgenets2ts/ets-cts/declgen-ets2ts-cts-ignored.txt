@@ -55,7 +55,7 @@
 09.classes/06.method_declarations/01.static_methods/static_method_declaration_without_body.ets
 09.classes/06.method_declarations/03.abstract_methods/abstract_method_declaration_with_keywords_3.ets
 09.classes/06.method_declarations/08.method_body/method_declaration_with_semicolon.ets
-10.interfaces/03.interface_body/issue24865.ets
+10.interfaces/03.interface_body/issue24685.ets
 14.ambient_declarations/bad_ambient_declarations_8.ets
 17.experimental_features/09.native_functions_and_methods/01.native_functions/nat10.ets
 17.experimental_features/09.native_functions_and_methods/01.native_functions/nat11.ets
