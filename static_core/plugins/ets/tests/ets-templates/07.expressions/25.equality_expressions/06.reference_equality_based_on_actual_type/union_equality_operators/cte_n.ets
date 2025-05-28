@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@ desc: >-
     Where one operand is of type T1, and the other operand is of type T2,
     while T1, T2, or both are a union type, then a compile-time error occurs
     if T1 and T2 have no overlap
+tags: [compile-only, negative]
 ---*/
 {{c.decl}}
 
