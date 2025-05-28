@@ -1593,6 +1593,16 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt8ArrayGet
 
+  - name: Int8ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i8
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayGetUnsafe
+
   - name: Int8ArraySetValues
     space: ets
     class_name: escompat.Int8Array
@@ -1676,6 +1686,16 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt16ArrayGet
 
+  - name: Int16ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i16
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayGetUnsafe
+
   - name: Int16ArraySetValues
     space: ets
     class_name: escompat.Int16Array
@@ -1748,6 +1768,16 @@ intrinsics:
       ret: f64
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatInt32ArrayGet
+
+  - name: Int32ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i32
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayGetUnsafe
 
   - name: Int32ArraySetValues
     space: ets
@@ -1822,6 +1852,16 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayGet
 
+  - name: BigInt64ArrayGetUnsafe
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayGetUnsafe
+
   - name: BigInt64ArraySetValues
     space: ets
     class_name: escompat.BigInt64Array
@@ -1894,6 +1934,16 @@ intrinsics:
       ret: f64
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayGet
+
+  - name: Float32ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: f32
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayGetUnsafe
 
   - name: Float32ArraySetValues
     space: ets
@@ -1968,6 +2018,16 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayGet
 
+  - name: Float64ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: f64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayGetUnsafe
+
   - name: Float64ArraySetValues
     space: ets
     class_name: escompat.Float64Array
@@ -2040,6 +2100,16 @@ intrinsics:
       ret: f64
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayGet
+
+  - name: UInt8ClampedArrayGetUnsafe
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i32
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ClampedArrayGetUnsafe
 
   - name: UInt8ClampedArraySetValues
     space: ets
@@ -2114,6 +2184,16 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayGet
 
+  - name: UInt8ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i32
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayGetUnsafe
+
   - name: UInt8ArraySetValues
     space: ets
     class_name: escompat.Uint8Array
@@ -2186,6 +2266,16 @@ intrinsics:
       ret: f64
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayGet
+
+  - name: UInt16ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i32
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayGetUnsafe
 
   - name: UInt16ArraySetValues
     space: ets
@@ -2270,6 +2360,16 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayGet
 
+  - name: UInt32ArrayGetUnsafe
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayGetUnsafe
+
   - name: UInt32ArraySetValues
     space: ets
     class_name: escompat.Uint32Array
@@ -2352,6 +2452,16 @@ intrinsics:
       ret: i64
       args: [i32]
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayGet
+
+  - name: BigUInt64ArrayGetUnsafe
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: getUnsafe
+    static: false
+    signature:
+      ret: i64
+      args: [i32]
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayGetUnsafe
 
   - name: BigUInt64ArraySetValues
     space: ets

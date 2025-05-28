@@ -94,7 +94,7 @@ void InstBuilder::BuildUint8ClampedArraySetIntrinsic(const BytecodeInstruction *
 void InstBuilder::BuildTypedArraySetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type, bool accRead)
 {
     ASSERT(type != DataType::INT64);
-    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead, true);
     auto *value = GetArgDefinition(bcInst, 2, accRead);
     BuildTypedArraySet(bcInst, value, type, loadDataInst, dataOffsetInst);
 }
@@ -103,7 +103,7 @@ void InstBuilder::BuildTypedUnsignedArraySetIntrinsic(const BytecodeInstruction 
                                                       DataType::Type type, bool accRead)
 {
     ASSERT(type != DataType::INT64);
-    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead, true);
     BuildTypedArraySet(bcInst, value, type, loadDataInst, dataOffsetInst);
 }
 
@@ -129,7 +129,7 @@ void InstBuilder::BuildTypedArraySet(const BytecodeInstruction *bcInst, Inst *va
 
 void InstBuilder::BuildBigInt64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
-    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead, true);
     auto *value = GetArgDefinition(bcInst, 2, accRead);
     if (value->GetType() != DataType::INT64) {
         auto bcAddr = GetPc(bcInst->GetAddress());
@@ -142,7 +142,8 @@ void InstBuilder::BuildBigInt64ArraySetIntrinsic(const BytecodeInstruction *bcIn
 
 void InstBuilder::BuildBigUint64ArraySetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
-    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto [loadDataInst, dataOffsetInst] =
+        BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead, true);
     auto *value = GetArgDefinition(bcInst, 2, accRead);
     if (value->GetType() != DataType::INT64) {
         auto bcAddr = GetPc(bcInst->GetAddress());
@@ -157,11 +158,20 @@ void InstBuilder::BuildTypedArrayGetIntrinsic(const BytecodeInstruction *bcInst,
 {
     ASSERT(type != DataType::INT64);
     auto bcAddr = GetPc(bcInst->GetAddress());
-    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead, true);
     auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
     auto result = GetGraph()->CreateInstCast(DataType::FLOAT64, bcAddr, loadInst, loadInst->GetType());
     AddInstruction(result);
     UpdateDefinitionAcc(result);
+}
+
+void InstBuilder::BuildTypedArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type,
+                                                    bool accRead)
+{
+    ASSERT(type != DataType::INT64);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, type, accRead, false);
+    auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
+    UpdateDefinitionAcc(loadInst);
 }
 
 void InstBuilder::BuildTypedUnsignedArrayGetIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type,
@@ -169,9 +179,29 @@ void InstBuilder::BuildTypedUnsignedArrayGetIntrinsic(const BytecodeInstruction 
 {
     ASSERT(type != DataType::INT64);
     auto bcAddr = GetPc(bcInst->GetAddress());
-    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead, true);
     auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
     auto result = GetGraph()->CreateInstCast(DataType::FLOAT64, bcAddr, loadInst, loadInst->GetType());
+    AddInstruction(result);
+    UpdateDefinitionAcc(result);
+}
+
+void InstBuilder::BuildTypedUnsignedArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, DataType::Type type,
+                                                            bool accRead)
+{
+    ASSERT(type != DataType::INT64);
+    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, type, accRead, false);
+    auto *loadInst = BuildTypedArrayGet(bcInst, type, loadDataInst, dataOffsetInst);
+    UpdateDefinitionAcc(loadInst);
+}
+
+void InstBuilder::BuildUint32ArrayGetUnsafeIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto [loadDataInst, dataOffsetInst] =
+        BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::UINT32, accRead, false);
+    auto *loadInst = BuildTypedArrayGet(bcInst, DataType::UINT32, loadDataInst, dataOffsetInst);
+    auto result = GetGraph()->CreateInstCast(DataType::INT64, bcAddr, loadInst, loadInst->GetType());
     AddInstruction(result);
     UpdateDefinitionAcc(result);
 }
@@ -187,16 +217,18 @@ Inst *InstBuilder::BuildTypedArrayGet(const BytecodeInstruction *bcInst, DataTyp
     return loadInst;
 }
 
-void InstBuilder::BuildBigInt64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+void InstBuilder::BuildBigInt64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead, bool needBoundCheck)
 {
-    auto [loadDataInst, dataOffsetInst] = BuildTypedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto [loadDataInst, dataOffsetInst] =
+        BuildTypedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead, needBoundCheck);
     auto *loadInst = BuildTypedArrayGet(bcInst, DataType::INT64, loadDataInst, dataOffsetInst);
     UpdateDefinitionAcc(loadInst);
 }
 
-void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcInst, bool accRead, bool needBoundCheck)
 {
-    auto [loadDataInst, dataOffsetInst] = BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead);
+    auto [loadDataInst, dataOffsetInst] =
+        BuildTypedUnsignedArrayLoadDataAndOffset(bcInst, DataType::INT64, accRead, needBoundCheck);
     auto *loadInst = BuildTypedArrayGet(bcInst, DataType::INT64, loadDataInst, dataOffsetInst);
     UpdateDefinitionAcc(loadInst);
 }
@@ -217,7 +249,8 @@ void InstBuilder::BuildBigUint64ArrayGetIntrinsic(const BytecodeInstruction *bcI
     Returns (v6, v14)
  */
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
-                                                                         DataType::Type type, bool accRead)
+                                                                         DataType::Type type, bool accRead,
+                                                                         bool needBoundCheck)
 {
     ASSERT(DataType::IsTypeSigned(type));
     auto bcAddr = GetPc(bcInst->GetAddress());
@@ -250,12 +283,13 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
         graph->CreateInstCast(DataType::INT32, bcAddr, loadDataOffsetFloat64Inst, loadDataOffsetFloat64Inst->GetType());
     AddInstruction(loadDataOffsetInst);
 
-    auto *loadLengthInst =
-        graph->CreateInstLoadNative(DataType::INT32, bcAddr, nullCheck,
-                                    graph->FindOrCreateConstant(ark::cross_values::GetTypedArrayLengthOffset(arch)));
-    AddInstruction(loadLengthInst);
-
-    BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
+    if (needBoundCheck) {
+        auto *loadLengthInst = graph->CreateInstLoadNative(
+            DataType::INT32, bcAddr, nullCheck,
+            graph->FindOrCreateConstant(ark::cross_values::GetTypedArrayLengthOffset(arch)));
+        AddInstruction(loadLengthInst);
+        BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
+    }
 
     auto *arrayDataOffset = graph->FindOrCreateConstant(ark::cross_values::GetCoretypesArrayDataOffset(arch));
     auto scale = DataType::ShiftByType(type, graph->GetArch());
@@ -308,7 +342,8 @@ void InstBuilder::BuildTypedArrayDeoptimizeIfOutOfRange(Inst *posInst, Inst *len
     Returns (v6, v14)
  */
 std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset(const BytecodeInstruction *bcInst,
-                                                                                 DataType::Type type, bool accRead)
+                                                                                 DataType::Type type, bool accRead,
+                                                                                 bool needBoundCheck)
 {
     auto bcAddr = GetPc(bcInst->GetAddress());
     auto *obj = GetArgDefinition(bcInst, 0, accRead);
@@ -337,12 +372,13 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedUnsignedArrayLoadDataAndOffset
         graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayByteOffsetOffset(arch)));
     AddInstruction(loadDataOffsetInst);
 
-    auto *loadLengthInst = graph->CreateInstLoadNative(
-        DataType::INT32, bcAddr, nullCheck,
-        graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayLengthOffset(arch)));
-    AddInstruction(loadLengthInst);
-
-    BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
+    if (needBoundCheck) {
+        auto *loadLengthInst = graph->CreateInstLoadNative(
+            DataType::INT32, bcAddr, nullCheck,
+            graph->FindOrCreateConstant(ark::cross_values::GetTypedUnsignedArrayLengthOffset(arch)));
+        AddInstruction(loadLengthInst);
+        BuildTypedArrayDeoptimizeIfOutOfRange(pos, loadLengthInst, bcAddr, saveState);
+    }
 
     auto *arrayDataOffset = graph->FindOrCreateConstant(ark::cross_values::GetCoretypesArrayDataOffset(arch));
     auto scale = DataType::ShiftByType(type, graph->GetArch());

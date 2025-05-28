@@ -69,7 +69,7 @@ class {{element['name']}}ArrayIterator implements IterableIterator<{{element['su
         if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
             return new IteratorResult<{{element['subsetTypeValues']}}>()
         }
-        return new IteratorResult<{{element['subsetTypeValues']}}>(false, new {{element['subsetTypeValues']}}(this.parent.getUnsafe(this.idx++)))
+        return new IteratorResult<{{element['subsetTypeValues']}}>(false, new {{element['subsetTypeValues']}}(this.parent[this.idx++]))
     }
 }
 
@@ -93,7 +93,7 @@ class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subs
         }
         return new IteratorResult<{{subsetTypeValuesEntries}}>(
             false,
-            [new Number(this.idx), new {{element['subsetTypeValues']}}(this.parent.getUnsafe(this.idx++))]{{ '' if element['subsetType'] != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
+            [new Number(this.idx), new {{element['subsetTypeValues']}}(this.parent[this.idx++])]{{ '' if element['subsetType'] != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
         )
     }
 }
@@ -431,7 +431,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             return undefined
         }
         {%- if element['subsetType'] == 'BigInt'%}
-        return new BigInt(this.getUnsafe(k))
+        return BigInt.fromULong(this.getUnsafe(k))
         {%- else %}
         return new Number(this.getUnsafe(k))
         {%- endif %}
@@ -2029,24 +2029,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         this.setUnsafe(insertPos, val)
     }
 
-    internal getUnsafe(index: int): {{element['primitiveType']}} {
-        index = index * {{element['name']}}Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
-        let res: {{element['primitiveType']}} = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < {{element['name']}}Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + i) as {{element['primitiveType']}}
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        } else {
-            for (let i = 0; i < {{element['name']}}Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + {{element['bytes'] - 1}} - i) as {{element['primitiveType']}}
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        }
-        return res
-    }
+    private final native getUnsafe(index: int): {{element['primitiveType']}}
 
     internal setUnsafe(index: int, val: {{element['primitiveType']}}): void {
         index = index * {{element['name']}}Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt

@@ -55,7 +55,7 @@ class Uint8ClampedArrayIterator implements IterableIterator<Number> {
         if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
             return new IteratorResult<Number>()
         }
-        return new IteratorResult<Number>(false, new Number(this.parent.getUnsafe(this.idx++)))
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
     }
 }
 
@@ -77,7 +77,7 @@ class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Numb
         }
         return new IteratorResult<[Number, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+            [new Number(this.idx), new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -1818,24 +1818,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         this.setUnsafe(insertPos, val)
     }
 
-    internal getUnsafe(index: int): int {
-        index = index * Uint8ClampedArray.BYTES_PER_ELEMENT as int + this.byteOffsetInt
-        let res: int = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint8ClampedArray.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + i) as int
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        } else {
-            for (let i = 0; i < Uint8ClampedArray.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + 0 - i) as int
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        }
-        return res
-    }
+    private final native getUnsafe(index: int): int
 
     internal setUnsafe(index: int, val: int): void {
         index = index * Uint8ClampedArray.BYTES_PER_ELEMENT as int + this.byteOffsetInt
@@ -1891,7 +1874,7 @@ class Uint8ArrayIterator implements IterableIterator<Number> {
         if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
             return new IteratorResult<Number>()
         }
-        return new IteratorResult<Number>(false, new Number(this.parent.getUnsafe(this.idx++)))
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
     }
 }
 
@@ -1913,7 +1896,7 @@ class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         }
         return new IteratorResult<[Number, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+            [new Number(this.idx), new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -3669,24 +3652,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         this.setUnsafe(insertPos, val)
     }
 
-    internal getUnsafe(index: int): int {
-        index = index * Uint8Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
-        let res: int = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint8Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + i) as int
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        } else {
-            for (let i = 0; i < Uint8Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + 0 - i) as int
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        }
-        return res
-    }
+    private final native getUnsafe(index: int): int
 
     internal setUnsafe(index: int, val: int): void {
         index = index * Uint8Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
@@ -3742,7 +3708,7 @@ class Uint16ArrayIterator implements IterableIterator<Number> {
         if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
             return new IteratorResult<Number>()
         }
-        return new IteratorResult<Number>(false, new Number(this.parent.getUnsafe(this.idx++)))
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
     }
 }
 
@@ -3764,7 +3730,7 @@ class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         }
         return new IteratorResult<[Number, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+            [new Number(this.idx), new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -5512,24 +5478,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         this.setUnsafe(insertPos, val)
     }
 
-    internal getUnsafe(index: int): int {
-        index = index * Uint16Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
-        let res: int = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint16Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + i) as int
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        } else {
-            for (let i = 0; i < Uint16Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + 1 - i) as int
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        }
-        return res
-    }
+    private final native getUnsafe(index: int): int
 
     internal setUnsafe(index: int, val: int): void {
         index = index * Uint16Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
@@ -5585,7 +5534,7 @@ class Uint32ArrayIterator implements IterableIterator<Number> {
         if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
             return new IteratorResult<Number>()
         }
-        return new IteratorResult<Number>(false, new Number(this.parent.getUnsafe(this.idx++)))
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
     }
 }
 
@@ -5607,7 +5556,7 @@ class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         }
         return new IteratorResult<[Number, Number]>(
             false,
-            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+            [new Number(this.idx), new Number(this.parent[this.idx++])]
         )
     }
 }
@@ -7390,24 +7339,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         this.setUnsafe(insertPos, val)
     }
 
-    internal getUnsafe(index: int): long {
-        index = index * Uint32Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
-        let res: long = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < Uint32Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + i) as long
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        } else {
-            for (let i = 0; i < Uint32Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + 3 - i) as long
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        }
-        return res
-    }
+    private final native getUnsafe(index: int): long
 
     internal setUnsafe(index: int, val: long): void {
         index = index * Uint32Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
@@ -7463,7 +7395,7 @@ class BigUint64ArrayIterator implements IterableIterator<BigInt> {
         if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
             return new IteratorResult<BigInt>()
         }
-        return new IteratorResult<BigInt>(false, new BigInt(this.parent.getUnsafe(this.idx++)))
+        return new IteratorResult<BigInt>(false, new BigInt(this.parent[this.idx++]))
     }
 }
 
@@ -7485,7 +7417,7 @@ class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]
         }
         return new IteratorResult<[Number, BigInt]>(
             false,
-            [new Number(this.idx), new BigInt(this.parent.getUnsafe(this.idx++))] as [Number, BigInt]
+            [new Number(this.idx), new BigInt(this.parent[this.idx++])] as [Number, BigInt]
         )
     }
 }
@@ -7776,7 +7708,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         if (k < 0 || k >= this.lengthInt) {
             return undefined
         }
-        return new BigInt(this.getUnsafe(k))
+        return BigInt.fromULong(this.getUnsafe(k))
     }
 
     /**
@@ -9278,24 +9210,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         this.setUnsafe(insertPos, val)
     }
 
-    internal getUnsafe(index: int): long {
-        index = index * BigUint64Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt
-        let res: long = 0
-        if (IS_LITTLE_ENDIAN) {
-            for (let i = 0; i < BigUint64Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + i) as long
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        } else {
-            for (let i = 0; i < BigUint64Array.BYTES_PER_ELEMENT as int; i++) {
-                let el = this.buffer.at(index + 7 - i) as long
-                el &= 0xff
-                res |= el << (8 * i)
-            }
-        }
-        return res
-    }
+    private final native getUnsafe(index: int): long
 
     internal setUnsafe(index: int, val: long): void {
         index = index * BigUint64Array.BYTES_PER_ELEMENT as int + this.byteOffsetInt

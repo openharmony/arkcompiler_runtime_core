@@ -2047,49 +2047,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return this
     }
 
-    internal getUnsafe(index: int): {{T}} {
-        let byteIndex = index * {{N}}Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        {%- if T == "float" %}
-            {%- set ET = "int" %}
-        {%- elif T == "double" %}
-            {%- set ET = "long" %}
-        {%- else %}
-            {%- set ET = T %}
-        {%- endif %}
-        let res : {{ET}} = 0
-        let byteVal : {{ET}}
-        if (IS_LITTLE_ENDIAN) {
-            for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                {%- if ET != "byte" %}
-                byteVal &= 0xff
-                {%- endif %}
-                res = (res | byteVal << (8 * i)) as {{ET}}
-            }
-            {%- if T == "float" %}
-            return Float.bitCastFromInt(res)
-            {%- elif T == "double" %}
-            return Double.bitCastFromLong(res)
-            {%- else %}
-            return res
-            {%- endif %}
-        } else {
-            for (let i: int = 0; i < {{N}}Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = this.buffer.at(byteIndex as int + {{S - 1}} - i)
-                {%- if ET != "byte" %}
-                byteVal &= 0xff
-                {%- endif %}
-                res = (res | byteVal << (8 * i)) as {{ET}}
-            }
-            {%- if T == "float" %}
-            return Float.bitCastFromInt(res)
-            {%- elif T == "double" %}
-            return Double.bitCastFromLong(res)
-            {%- else %}
-            return res
-            {%- endif %}
-        }
-    }
+    private final native getUnsafe(index: int): {{T}}
 
     internal setUnsafe(insertPos: int, val: {{T}}): void {
         let startByte = insertPos * {{N}}Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
