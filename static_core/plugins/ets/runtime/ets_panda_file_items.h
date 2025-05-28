@@ -224,7 +224,7 @@ static constexpr std::string_view MAPITERATOR                          = "Lescom
 static constexpr std::string_view EMPTYMAPITERATOR                     = "Lescompat/EmptyMapIterator;";
 static constexpr std::string_view SET                                  = "Lescompat/Set;";
 static constexpr std::string_view RECORD                               = "Lescompat/Record;";
-static constexpr std::string_view PROCESS                              = "Lescompat/StdProcess/process;";
+static constexpr std::string_view PROCESS                              = "Lescompat/StdProcess;";
 
 // Annotation for optional parameters
 static constexpr std::string_view OPTIONAL_PARAMETERS_ANNOTATION       =

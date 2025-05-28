@@ -26,19 +26,19 @@ function SingleRejectedJob(): null {
 }
 
 function main(): void {
-    StdProcess.process.on("unhandledJobRejection", (obj: Object): void => {
+    StdProcess.on("unhandledJobRejection", (obj: Object): void => {
         assertTrue(false, "Job handler didn't switch");
     });
-    StdProcess.process.on("unhandledPromiseRejection", (obj: Object): void => {
+    StdProcess.on("unhandledPromiseRejection", (obj: Object): void => {
         assertTrue(false, "All promises should be handled");
     });
 
-    StdProcess.process.on("unhandledJobRejection", (obj: Object): void => {
+    StdProcess.on("unhandledJobRejection", (obj: Object): void => {
         assertTrue(obj instanceof Error, "not Erorr is not expected")
 
         assertEQ((obj as Error).message, "I'm your single rejected job");
 
-        StdProcess.process.on("unhandledJobRejection", (obj: Object): void => {
+        StdProcess.on("unhandledJobRejection", (obj: Object): void => {
             assertTrue(false, "All jobs should be handled");
         });
     });
@@ -55,7 +55,8 @@ function main(): void {
     let p = Promise.reject(new Error("promise1"));
     let q = p.then(() => {
         console.println("Test failed: unreachable code");
-        StdProcess.ProcessManager.exit(1);
+        let procManager = new StdProcess.ProcessManager();
+        procManager.exit(1);
     });
     q.catch((e: NullishType) => {});
 

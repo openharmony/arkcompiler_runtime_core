@@ -34,7 +34,7 @@ let longTimeout = 1000;
 function assertTrue(expr: boolean) {
     if (!expr) {
         console.log(new Error().stack);
-        StdProcess.process.abort();
+        StdProcess.abort();
     }
 }
 
