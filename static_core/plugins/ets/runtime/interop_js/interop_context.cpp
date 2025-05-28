@@ -35,11 +35,11 @@
 #include "plugins/ets/runtime/interop_js/napi_impl/napi_impl.h"
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style
+napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
-// NOLINTEND(readability-identifier-naming)
+// NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 #endif
 
 // NOTE(konstanting, #23205): this function is not listed in the ENUMERATE_NAPI macro, but now runtime needs it.
@@ -281,6 +281,22 @@ void InteropCtx::SharedEtsVmState::SetJsProxyInstance(EtsClass *cls, js_proxy::J
 {
     os::memory::LockHolder lock(mutex_);
     jsProxies_.insert_or_assign(cls, PandaUniquePtr<js_proxy::JSProxy>(proxy));
+}
+
+js_proxy::JSProxy *InteropCtx::SharedEtsVmState::GetInterfaceProxyInstance(std::string &interfaceName) const
+{
+    os::memory::LockHolder lock(mutex_);
+    auto item = interfaceProxies_.find(interfaceName);
+    if (item != interfaceProxies_.end()) {
+        return item->second.get();
+    }
+    return nullptr;
+}
+
+void InteropCtx::SharedEtsVmState::SetInterfaceProxyInstance(std::string &interfaceName, js_proxy::JSProxy *proxy)
+{
+    os::memory::LockHolder lock(mutex_);
+    interfaceProxies_.insert_or_assign(interfaceName, PandaUniquePtr<js_proxy::JSProxy>(proxy));
 }
 
 InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)

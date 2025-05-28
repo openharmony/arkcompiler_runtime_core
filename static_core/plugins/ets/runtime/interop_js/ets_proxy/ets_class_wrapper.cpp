@@ -16,9 +16,14 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include <js_native_api.h>
 #include <js_native_api_types.h>
+#include <iostream>
+#include <ostream>
+#include <vector>
 
-#include "interop_js/ets_proxy/ets_proxy.h"
+#include "include/mem/panda_containers.h"
 #include "interop_js/interop_common.h"
+#include "interop_js/js_proxy/js_proxy.h"
+#include "interop_js/js_refconvert.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -27,6 +32,11 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+
+// NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
+// CC-OFFNXT(G.FMT.10-CPP) project code style
+napi_status __attribute__((weak)) napi_get_ets_implements(napi_env env, napi_value jsValue, napi_value *result);
+// NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -226,15 +236,52 @@ public:
 
     EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
     {
-        auto objectConverter =
-            ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
-        auto ret = objectConverter->Unwrap(ctx, jsValue);
-        if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
-            ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
-                                                       " is not assignable to " + klass_->GetName());
+        auto *coro = EtsCoroutine::GetCurrent();
+        napi_env env = ctx->GetJSEnv();
+        SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
+        if (LIKELY(sharedRef != nullptr)) {
+            EtsObject *etsObject = sharedRef->GetEtsObject();
+            return etsObject;
+        }
+        if (IsStdClass(klass_)) {
+            auto objectConverter =
+                ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+            auto ret = objectConverter->Unwrap(ctx, jsValue);
+            if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
+                ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " +
+                                                           ret->GetClass()->GetRuntimeClass()->GetName() +
+                                                           " is not assignable to " + klass_->GetName());
+                return nullptr;
+            }
+            return ret;
+        }
+
+        napi_value result;
+        NAPI_CHECK_FATAL(napi_get_ets_implements(env, jsValue, &result));
+        if (GetValueType(env, result) != napi_string) {
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(), std::string("object is not a type of Interface: ") +
+                                                       utf::Mutf8AsCString(klass_->GetDescriptor()));
             return nullptr;
         }
-        return ret;
+        auto interfaceName = GetString(env, result);
+        auto proxy = ctx->GetInterfaceProxyInstance(interfaceName);
+        if (proxy == nullptr) {
+            auto interfaces = GetInterfaceClass(ctx, interfaceName);
+            proxy = js_proxy::JSProxy::CreateInterfaceProxy(interfaces, interfaceName);
+            ctx->SetInterfaceProxyInstance(interfaceName, proxy);
+        }
+        LocalObjectHandle<EtsObject> etsObject(coro, EtsObject::Create(proxy->GetProxyClass()));
+        if (UNLIKELY(etsObject.GetPtr() == nullptr)) {
+            ctx->ThrowJSTypeError(ctx->GetJSEnv(),
+                                  "Interface Proxy EtsObject create failed, interfaceList: " + interfaceName);
+            return nullptr;
+        }
+        sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject.GetPtr(), jsValue);
+        if (UNLIKELY(sharedRef == nullptr)) {
+            ASSERT(InteropCtx::SanityJSExceptionPending());
+            return nullptr;
+        }
+        return etsObject.GetPtr();
     }
 
 protected:
@@ -243,6 +290,22 @@ protected:
     {
         ASSERT(klass->IsInterface());
     }
+
+    PandaSet<Class *> GetInterfaceClass(InteropCtx *ctx, std::string &interfaces)
+    {
+        PandaSet<Class *> interfaceList;
+        std::istringstream iss {interfaces};
+        std::string descriptor;
+        auto *coro = EtsCoroutine::GetCurrent();
+        while (std::getline(iss, descriptor, ',')) {
+            auto interfaceCls =
+                coro->GetPandaVM()->GetClassLinker()->GetClass(descriptor.data(), true, ctx->LinkerCtx());
+            ASSERT(interfaceCls != nullptr);
+            interfaceList.insert(interfaceCls->GetRuntimeClass());
+        }
+        return interfaceList;
+    }
+
     Class *GetKlass()
     {
         return klass_;

@@ -405,6 +405,16 @@ public:
         sharedEtsVmState_->SetJsProxyInstance(cls, proxy);
     }
 
+    js_proxy::JSProxy *GetInterfaceProxyInstance(std::string &interfaceName) const
+    {
+        return sharedEtsVmState_->GetInterfaceProxyInstance(interfaceName);
+    }
+
+    void SetInterfaceProxyInstance(std::string &interfaceName, js_proxy::JSProxy *proxy)
+    {
+        sharedEtsVmState_->SetInterfaceProxyInstance(interfaceName, proxy);
+    }
+
     EtsObject *CreateETSCoreESError(EtsCoroutine *coro, JSValue *jsvalue);
 
     static void ThrowETSError(EtsCoroutine *coro, napi_value val);
@@ -536,6 +546,8 @@ private:
 
         js_proxy::JSProxy *GetJsProxyInstance(EtsClass *cls) const;
         void SetJsProxyInstance(EtsClass *cls, js_proxy::JSProxy *proxy);
+        js_proxy::JSProxy *GetInterfaceProxyInstance(std::string &interfaceName) const;
+        void SetInterfaceProxyInstance(std::string &interfaceName, js_proxy::JSProxy *proxy);
 
         // Intentionally leaving these members public to avoid duplicating the InteropCtx's accessors.
         // Maybe its worth to add some e.g. VmState() method to the InteropCtx and move all its accessors here
@@ -566,6 +578,7 @@ private:
 
         // class -> proxy instance, should be accessed under a mutex, hence private
         PandaMap<EtsClass *, PandaUniquePtr<js_proxy::JSProxy>> jsProxies_;
+        PandaMap<std::string, PandaUniquePtr<js_proxy::JSProxy>> interfaceProxies_;
 
         static std::shared_ptr<SharedEtsVmState> instance_;
         static ClassLinkerContext *linkerCtx_;

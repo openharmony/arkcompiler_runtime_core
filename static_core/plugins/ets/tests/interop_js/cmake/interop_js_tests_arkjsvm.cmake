@@ -119,7 +119,7 @@ function(panda_ets_interop_js_gtest TARGET)
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
 
-    set(JS_COMPILATION_OPTIONS --module --merge-abc)
+    set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
     endif()
@@ -206,7 +206,7 @@ function(panda_ets_interop_js_test TARGET)
         ETS_CONFIG ${ARG_ETS_CONFIG}
     )
 
-    set(JS_COMPILATION_OPTIONS --module --merge-abc)
+    set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
     endif()
