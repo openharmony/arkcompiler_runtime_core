@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as skillTest from "@generated/skill";
-import * as abilityInfo from "@generated/abilityInfo";
-import * as overlayModuleInfo from "@generated/overlayModuleInfo";
-import * as metadata from "@generated/metadata";
-import * as hapModuleInfo from "@generated/hapModuleInfo";
-import * as extensionAbilityInfo from "@generated/extensionAbilityInfo";
-import * as applicationInfo from "@generated/applicationInfo";
-import * as elementName from "@generated/elementName";
-import * as bundleInfo from "@generated/bundleInfo";
+import * as skillTest from "skill";
+import * as abilityInfo from "abilityInfo";
+import * as overlayModuleInfo from "overlayModuleInfo";
+import * as metadata from "metadata";
+import * as hapModuleInfo from "hapModuleInfo";
+import * as extensionAbilityInfo from "extensionAbilityInfo";
+import * as applicationInfo from "applicationInfo";
+import * as elementName from "elementName";
+import * as bundleInfo from "bundleInfo";
 
 loadLibrary("ani_bundlemanager");
 

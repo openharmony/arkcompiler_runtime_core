@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import * as System from "std/core/System";
-import * as ohosBundle from "@generated/ohos_bundle";
-import * as abilityInfo from "@generated/abilityInfo";
-import * as bundleInfo from "@generated/bundleInfo";
-import * as customizeData from "@generated/customizeData";
-import * as hapModuleInfo from "@generated/hapModuleInfo";
-import * as moduleInfo from "@generated/moduleInfo";
-import * as shortcutInfo from "@generated/shortcutInfo";
-import * as elementName from "@generated/elementName";
-import * as applicationInfo from "@generated/applicationInfo";
-import { Want } from "@generated/ohos_app_ability_want";
+
+import * as ohosBundle from "ohos_bundle";
+import * as abilityInfo from "abilityInfo";
+import * as bundleInfo from "bundleInfo";
+import * as customizeData from "customizeData";
+import * as hapModuleInfo from "hapModuleInfo";
+import * as moduleInfo from "moduleInfo";
+import * as shortcutInfo from "shortcutInfo";
+import * as elementName from "elementName";
+import * as applicationInfo from "applicationInfo";
+import { Want } from "ohos_app_ability_want";
 
 loadLibrary("ani_bundle");
 
@@ -1288,5 +1288,5 @@ function main() {
     suite.addTest("test applicatohos.app.ability.Want class with moduleName _noSet", test_bundle_class_want_with_moduleName_noSet);
     suite.addTest("test applicatohos.app.ability.Want class with moduleName", test_bundle_class_want_with_moduleName);
 
-    System.exit(suite.run());
+    exit(suite.run());
 }

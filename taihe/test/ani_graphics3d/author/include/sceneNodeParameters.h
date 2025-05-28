@@ -12,33 +12,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface Foo {
-    Bar(): void;
-    @set("name") SetName(name: String): void;
-    @get("name") GetName(): String;
-}
+#ifndef SCENENODEPARAMETERS_H
+#define SCENENODEPARAMETERS_H
 
-function GetFooIface(): Foo;
-function PrintFooName(foo: Foo): String;
+#include "stdexcept"
+#include <string>
 
-interface BaseFun {
-    Base(): String;
-    Fun(): String;
-}
-function GetBaseFun(): BaseFun;
+using namespace taihe;
 
-interface SubBaseFun: BaseFun {
-    Sub(): String;
-}
-function GetSubBaseFun(): SubBaseFun;
+class SceneNodeParametersImpl {
+public:
+    string name = "name";
+    optional<string> path;
+    SceneNodeParametersImpl() {}
 
-interface BaseElem {
-    @get GetBase(): String;
-    @set SetBase(s: String): void;
-}
-function GetBaseElem(): BaseElem;
+    string GetName()
+    {
+        return name;
+    }
 
-interface SubBaseElem: BaseElem {
-    Sub(): String;
-}
-function GetSubBaseElem(): SubBaseElem;
+    void SetName(string_view name)
+    {
+        this->name = name;
+    }
+
+    optional<string> GetPath()
+    {
+        return path;
+    }
+
+    void SetPath(optional_view<string> name)
+    {
+        this->path = path;
+    }
+};
+#endif
