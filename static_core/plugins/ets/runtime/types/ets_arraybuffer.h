@@ -205,27 +205,28 @@ public:
     }
 
     template <typename T>
-    T GetElement(uint32_t index);
+    T GetElement(uint32_t index, uint32_t offset);
     template <typename T>
-    void SetElement(uint32_t index, T element);
+    void SetElement(uint32_t index, uint32_t offset, T element);
     template <typename T>
-    T GetVolatileElement(uint32_t index);
+    T GetVolatileElement(uint32_t index, uint32_t offset);
     template <typename T>
-    void SetVolatileElement(uint32_t index, T element);
+    void SetVolatileElement(uint32_t index, uint32_t offset, T element);
     template <typename T>
-    std::pair<bool, T> CompareAndExchangeElement(uint32_t index, T oldElement, T newElement, bool strong);
+    std::pair<bool, T> CompareAndExchangeElement(uint32_t index, uint32_t offset, T oldElement, T newElement,
+                                                 bool strong);
     template <typename T>
-    T ExchangeElement(uint32_t index, T element);
+    T ExchangeElement(uint32_t index, uint32_t offset, T element);
     template <typename T>
-    T GetAndAdd(uint32_t index, T element);
+    T GetAndAdd(uint32_t index, uint32_t offset, T element);
     template <typename T>
-    T GetAndSub(uint32_t index, T element);
+    T GetAndSub(uint32_t index, uint32_t offset, T element);
     template <typename T>
-    T GetAndBitwiseOr(uint32_t index, T element);
+    T GetAndBitwiseOr(uint32_t index, uint32_t offset, T element);
     template <typename T>
-    T GetAndBitwiseAnd(uint32_t index, T element);
+    T GetAndBitwiseAnd(uint32_t index, uint32_t offset, T element);
     template <typename T>
-    T GetAndBitwiseXor(uint32_t index, T element);
+    T GetAndBitwiseXor(uint32_t index, uint32_t offset, T element);
 
 private:
     struct FinalizationInfo final {

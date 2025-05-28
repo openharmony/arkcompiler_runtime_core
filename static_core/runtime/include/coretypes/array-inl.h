@@ -158,10 +158,11 @@ inline T Array::GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_or
 }
 
 template <class T, bool NEED_WRITE_BARRIER, bool IS_DYN, bool IS_VOLATILE>
-inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, void> Array::Set(ArraySizeT idx, T elem)
+inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, void> Array::Set(ArraySizeT idx, T elem,
+                                                                                    uint32_t byteOffset)
 {
     size_t elemSize = (is_object_v<T> && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
-    size_t offset = elemSize * idx;
+    size_t offset = elemSize * idx + byteOffset;
     // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (is_object_v<T>) {
@@ -174,9 +175,10 @@ inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, void> Array::
 
 // NEED_READ_BARRIER = true , IS_DYN = false
 template <class T, bool NEED_READ_BARRIER, bool IS_DYN, bool IS_VOLATILE>
-inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Array::Get(ArraySizeT idx) const
+inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Array::Get(ArraySizeT idx,
+                                                                                 uint32_t byteOffset) const
 {
-    size_t offset = GetElementSize<T, IS_DYN>() * idx;
+    size_t offset = GetElementSize<T, IS_DYN>() * idx + byteOffset;
     if constexpr (is_object_v<T>) {
         return ObjectAccessor::GetObject<IS_VOLATILE, NEED_READ_BARRIER, IS_DYN>(this, GetDataOffset() + offset);
     }
@@ -185,9 +187,9 @@ inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Array::Get
 
 template <class T, bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, std::pair<bool, T>> Array::CompareAndExchange(
-    ArraySizeT idx, T oldValue, T newValue, std::memory_order memoryOrder, bool strong)
+    ArraySizeT idx, T oldValue, T newValue, std::memory_order memoryOrder, bool strong, uint32_t byteOffset)
 {
-    size_t offset = GetElementSize<T, IS_DYN>() * idx;
+    size_t offset = GetElementSize<T, IS_DYN>() * idx + byteOffset;
     if constexpr (is_object_v<T>) {
         auto [success, obj] = ObjectAccessor::CompareAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(
             this, GetDataOffset() + offset, oldValue, newValue, memoryOrder, strong);
@@ -199,9 +201,10 @@ inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, std::pair<boo
 
 template <class T, bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Array::Exchange(ArraySizeT idx, T value,
-                                                                                      std::memory_order memoryOrder)
+                                                                                      std::memory_order memoryOrder,
+                                                                                      uint32_t byteOffset)
 {
-    size_t offset = GetElementSize<T, IS_DYN>() * idx;
+    size_t offset = GetElementSize<T, IS_DYN>() * idx + byteOffset;
     if constexpr (is_object_v<T>) {
         return ObjectAccessor::GetAndSetFieldObject(this, GetDataOffset() + offset, value, memoryOrder);
     }
@@ -210,41 +213,44 @@ inline std::enable_if_t<std::is_arithmetic_v<T> || is_object_v<T>, T> Array::Exc
 
 template <class T>
 inline std::enable_if_t<std::is_arithmetic_v<T>, T> Array::GetAndAdd(ArraySizeT idx, T value,
-                                                                     std::memory_order memoryOrder)
+                                                                     std::memory_order memoryOrder, uint32_t byteOffset)
 {
-    size_t offset = GetElementSize<T, false>() * idx;
+    size_t offset = GetElementSize<T, false>() * idx + byteOffset;
     return ObjectAccessor::GetAndAddFieldPrimitive<T, true>(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <class T>
 inline std::enable_if_t<std::is_arithmetic_v<T>, T> Array::GetAndSub(ArraySizeT idx, T value,
-                                                                     std::memory_order memoryOrder)
+                                                                     std::memory_order memoryOrder, uint32_t byteOffset)
 {
-    size_t offset = GetElementSize<T, false>() * idx;
+    size_t offset = GetElementSize<T, false>() * idx + byteOffset;
     return ObjectAccessor::GetAndSubFieldPrimitive<T, true>(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <class T>
 inline std::enable_if_t<std::is_arithmetic_v<T>, T> Array::GetAndBitwiseOr(ArraySizeT idx, T value,
-                                                                           std::memory_order memoryOrder)
+                                                                           std::memory_order memoryOrder,
+                                                                           uint32_t byteOffset)
 {
-    size_t offset = GetElementSize<T, false>() * idx;
+    size_t offset = GetElementSize<T, false>() * idx + byteOffset;
     return ObjectAccessor::GetAndBitwiseOrFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <class T>
 inline std::enable_if_t<std::is_arithmetic_v<T>, T> Array::GetAndBitwiseAnd(ArraySizeT idx, T value,
-                                                                            std::memory_order memoryOrder)
+                                                                            std::memory_order memoryOrder,
+                                                                            uint32_t byteOffset)
 {
-    size_t offset = GetElementSize<T, false>() * idx;
+    size_t offset = GetElementSize<T, false>() * idx + byteOffset;
     return ObjectAccessor::GetAndBitwiseAndFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
 template <class T>
 inline std::enable_if_t<std::is_arithmetic_v<T>, T> Array::GetAndBitwiseXor(ArraySizeT idx, T value,
-                                                                            std::memory_order memoryOrder)
+                                                                            std::memory_order memoryOrder,
+                                                                            uint32_t byteOffset)
 {
-    size_t offset = GetElementSize<T, false>() * idx;
+    size_t offset = GetElementSize<T, false>() * idx + byteOffset;
     return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
