@@ -17,61 +17,67 @@
 
 import os
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, NamedTuple
 
 from dotenv import load_dotenv
 
-from runner.init_runner import InitRunner, MandatoryProps, MustExist, PropName
+from runner.init_runner import IsPath, MandatoryProp, MandatoryProps, PropName, RequireExist
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
 
-MandatoryPropDescription = list[tuple[PropName, MustExist]]
+
+class MandatoryPropDescription(NamedTuple):
+    name: PropName
+    is_path: IsPath
+    require_exist: RequireExist
 
 
 class RunnerEnv:
-    mandatory_props: ClassVar[MandatoryPropDescription] = [
-        ('ARKCOMPILER_RUNTIME_CORE_PATH', True),
-        ('ARKCOMPILER_ETS_FRONTEND_PATH', True),
-        ('PANDA_BUILD', True),
-        ('WORK_DIR', False)
+    mandatory_props: ClassVar[list[MandatoryPropDescription]] = [
+        MandatoryPropDescription('ARKCOMPILER_RUNTIME_CORE_PATH', is_path=True, require_exist=True),
+        MandatoryPropDescription('ARKCOMPILER_ETS_FRONTEND_PATH', is_path=True, require_exist=True),
+        MandatoryPropDescription('PANDA_BUILD', is_path=True, require_exist=True),
+        MandatoryPropDescription('WORK_DIR', is_path=True, require_exist=False)
     ]
     urunner_path_name: ClassVar[str] = 'URUNNER_PATH'
 
     def __init__(self, *,
+                 global_env: Path,
                  local_env: Path | None = None,
-                 global_env: Path = InitRunner.urunner_env_default,
                  urunner_path: Path | None = None):
         self.global_env_path: Path = global_env
         self.local_env_path: Path | None = local_env
         self.urunner_path: Path | None = urunner_path
 
     @staticmethod
-    def check_expand_mandatory_prop(var_name: PropName, must_exist: MustExist) -> None:
-        var_value = os.getenv(var_name)
+    def expand_mandatory_prop(prop_desc: MandatoryPropDescription) -> None:
+        var_value = os.getenv(prop_desc.name)
         if var_value is None:
-            raise OSError(f"Mandatory environment variable '{var_name}' is not set. "
+            raise OSError(f"Mandatory environment variable '{prop_desc.name}' is not set. "
                           "Either specify it in the system environment or "
                           "run the runner with the only option `--init`")
+        if not prop_desc.is_path:
+            return
         expanded = Path(var_value).expanduser().resolve()
-        if must_exist and not expanded.exists():
-            raise OSError(f"Mandatory environment variable '{var_name}' is set "
+        if prop_desc.require_exist and not expanded.exists():
+            raise OSError(f"Mandatory environment variable '{prop_desc.name}' is set "
                           f"to value {var_value} which does not exist.")
-        os.environ[var_value] = expanded.as_posix()
+        os.environ[prop_desc.name] = expanded.as_posix()
 
     @classmethod
     def get_mandatory_props(cls) -> MandatoryProps:
         result: MandatoryProps = {}
-        for (prop_name, must_exist) in cls.mandatory_props:
-            result[prop_name] = os.getenv(prop_name), must_exist
+        for (prop_name, is_path, require_exist) in cls.mandatory_props:
+            result[prop_name] = MandatoryProp(value=os.getenv(prop_name), is_path=is_path, require_exist=require_exist)
         return result
 
     def load_environment(self) -> None:
         self.load_home_env()
         self.load_local_env()
 
-        for (prop, must_exist) in self.mandatory_props:
-            self.check_expand_mandatory_prop(prop, must_exist)
+        for prop in self.mandatory_props:
+            self.expand_mandatory_prop(prop)
 
         if self.urunner_path:
             os.environ[self.urunner_path_name] = self.urunner_path.as_posix()

@@ -17,8 +17,10 @@
 import os
 import shutil
 import unittest
+from io import StringIO
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.base_enum import IncorrectEnumValue
@@ -64,10 +66,17 @@ class TestSuiteConfigTest2(unittest.TestCase):
         with self.assertRaises(InvalidConfiguration):
             CliOptions(args)
 
-    def test_option_without_value(self) -> None:
+    @patch("sys.stderr", new_callable=StringIO)
+    def test_option_without_value(self, handle: StringIO) -> None:
         args = [self.workflow_name, self.test_suite_name, "--verbose"]
         with self.assertRaises(IncorrectEnumValue):
-            CliOptions(args)
+            try:
+                CliOptions(args)
+            except IncorrectEnumValue as exc:
+                std_err = str(handle.getvalue())
+                pos = std_err.find("error: argument --verbose/-v: expected one argument")
+                self.assertGreaterEqual(pos, 0, "Error message about `--verbose` is not found")
+                raise IncorrectEnumValue from exc
 
     def test_option_with_incorrect_value(self) -> None:
         args = [self.workflow_name, self.test_suite_name, "--verbose", "abc"]
