@@ -14,16 +14,16 @@
  */
 class PoisonedIterable<T> implements Iterable<T> {
     [Symbol.iterator](): Iterator<T> {
-        throw new Error("error");
+        throw new Error('error');
     }
 }
 
 Promise.all<Object>(new PoisonedIterable<Object>()).then<void, void>((value: Array<Object>): void => {
-    console.log("Test failed. The promise should not be resolved.");
+    console.log('Test failed. The promise should not be resolved.');
 }, (err: Error): void => {
     if (!(err instanceof Error)) {
-        console.log("Test failed. The promise should be rejected by the Error.");
+        console.log('Test failed. The promise should be rejected by the Error.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });

@@ -15,20 +15,20 @@
 
 function checkSequence(actual: Array<number>, expectedLength: number): void {
     if (actual.length != expectedLength) {
-        console.log("Test failed. Expected sequence length " + expectedLength + ", but got " + actual.length);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
+        throw new Error('Test failed');
     }
     for (let i = 0; i < expectedLength; ++i) {
         if (actual[i] != i + 1) {
-            console.log("Test failed. Expected element at " + i + " to be " + i + ", but got " + actual[i]);
-            throw new Error("Test failed");
+            console.log('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
+            throw new Error('Test failed');
         }
     }
 }
 
 let sequence = new Array<number>();
-let p1Err = new Error("abc");
-let p2Err = new Error("def");
+let p1Err = new Error('abc');
+let p2Err = new Error('def');
 let p1 = Promise.reject<Error>(p1Err);
 let p2 = Promise.reject<Error>(p2Err);
 
@@ -45,18 +45,18 @@ Promise.any<Error>([p1, p2]).then<number>((): number => {
     return 0;
 }).then<void, void>((value: number): void => {}, (err: AggregateError): void => {
     if (err.errors.length != 2) {
-        console.log("Test failed. Expected number of errors 2, but got " + err.errors.length);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected number of errors 2, but got ' + err.errors.length);
+        throw new Error('Test failed');
     }
     if (err.errors[0] != p1Err) {
-        console.log("Test failed. Expected the first error is 'abc', but got " + err.errors[0]);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected the first error is \'abc\', but got ' + err.errors[0]);
+        throw new Error('Test failed');
     }
     if (err.errors[1] != p2Err) {
-        console.log("Test failed. Expected the first error is 'def', but got " + err.errors[1]);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected the first error is \'def\', but got ' + err.errors[1]);
+        throw new Error('Test failed');
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 });
 
 p2.catch<void>((): void => {

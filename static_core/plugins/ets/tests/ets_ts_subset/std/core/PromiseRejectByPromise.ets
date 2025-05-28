@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-let reject: ((err: Error) => void)|null = null;
-let error = new Error("error")
+let reject: ((err: Error) => void) | null = null;
+let error = new Error('error')
 let p1 = new Promise<number>((_resolve: (value: number) => void, _reject: (err: Error) => void): void => {
     reject = _reject;
 });
-let p2 = new Promise<number>((_resolve: (value: number| PromiseLike<number>) => void, _reject: (err: Error) => void): void => {
+let p2 = new Promise<number>((_resolve: (value: number | PromiseLike<number>)
+        => void, _reject: (err: Error) => void): void => {
     _resolve(p1);
-    _reject(new Error("NotMe"));
+    _reject(new Error('NotMe'));
     _resolve(7);
 });
 p2.then((v:number): void => {
-    console.log("Test failed. The promise should not be fulfilled.");
+    console.log('Test failed. The promise should not be fulfilled.');
 }, (err: Error): void => {
     if(err == error) {
-        console.log("Test passed.")
+        console.log('Test passed.')
     } else {
-        console.log("Test failed. The promise should be rejected with the provided value.")
+        console.log('Test failed. The promise should be rejected with the provided value.')
     }
 })
 reject!(error);

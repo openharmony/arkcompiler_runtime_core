@@ -19,10 +19,10 @@ let p = new Promise<number>((resolve: (v: number) => void, _: (error: Error) => 
 
 p.then<void, void>((value: number): void => {
     if (value != 7) {
-        console.log("Test failed. The promise shoule be fulfilled by 7 but got " + value + ".");
+        console.log('Test failed. The promise shoule be fulfilled by 7 but got ' + value + '.');
         return;
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 }, (err: Error): void => {
-    console.log("Test failed. The promise shouldn`t be rejected.");
+    console.log('Test failed. The promise shouldn`t be rejected.');
 });

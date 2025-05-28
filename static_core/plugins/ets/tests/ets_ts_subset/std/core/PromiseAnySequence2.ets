@@ -15,21 +15,21 @@
 
 function checkSequence(actual: Array<number>, expectedLength: number): void {
     if (actual.length != expectedLength) {
-        console.log("Test failed. Expected sequence length " + expectedLength + ", but got " + actual.length);
-        throw new Error("Test failed");
+        console.log('Test failed. Expected sequence length ' + expectedLength + ', but got ' + actual.length);
+        throw new Error('Test failed');
     }
     for (let i = 0; i < expectedLength; ++i) {
         if (actual[i] != i + 1) {
-            console.log("Test failed. Expected element at " + i + " to be " + i + ", but got " + actual[i]);
-            throw new Error("Test failed");
+            console.log('Test failed. Expected element at ' + i + ' to be ' + i + ', but got ' + actual[i]);
+            throw new Error('Test failed');
         }
     }
 }
 
 let sequence = new Array<number>();
-let p1 = Promise.reject<number>(new Error("1"));
+let p1 = Promise.reject<number>(new Error('1'));
 let p2 = Promise.resolve<number>(2);
-let p3 = Promise.reject<number>(new Error("3"));
+let p3 = Promise.reject<number>(new Error('3'));
 
 sequence.push(1);
 
@@ -41,7 +41,7 @@ p1.catch<void>((err: Error): void => {
 Promise.any([p1, p2, p3]).then<void>((): void => {
     sequence.push(6);
     checkSequence(sequence, 6);
-    console.log("Test passed.");
+    console.log('Test passed.');
 });
 
 p2.then<void>((): void => {

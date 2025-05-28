@@ -14,18 +14,20 @@
  */
 
 class Resolver implements PromiseLike<number> {
-    then<U, E>(onFulfilled?: (value: number) => U|PromiseLike<U>, _?: (error: Error) => E|PromiseLike<E>): PromiseLike<U|E>{
-        return Promise.resolve().then<U>((): U|PromiseLike<U> => {
+    then<U, E>(onFulfilled?: (value: number) => U | PromiseLike<U>, _?:
+            (error: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<U>((): U | PromiseLike<U> => {
             return onFulfilled!(42);
         })
     }
 }
 
 class LateRejector implements PromiseLike<number> {
-    then<U, E>(onFulfilled?: (value: number) => U|PromiseLike<U>, onRejected?: (err: Error) => E|PromiseLike<E>): PromiseLike<U|E> {
-        return Promise.resolve().then<U>((): U|PromiseLike<U> => {
+    then<U, E>(onFulfilled?: (value: number) => U | PromiseLike<U>, onRejected?:
+            (err: Error) => E | PromiseLike<E>): PromiseLike<U | E> {
+        return Promise.resolve().then<U>((): U | PromiseLike<U> => {
             let v = onFulfilled!(9);
-            onRejected!(new Error("err"));
+            onRejected!(new Error('err'));
             return v;
         });
     }
@@ -35,18 +37,18 @@ let thenable: PromiseLike<number>[] = [new Resolver(), new LateRejector()];
 Promise.allSettled(thenable).then<void, void>((values:PromiseSettledResult<number>[]): void => {
     let v = (values[0] as PromiseFulfilledResult<number>).value;
     if(v != 42) {
-        console.log("Test failed. Expected 42, but got " + v + ".");
+        console.log('Test failed. Expected 42, but got ' + v + '.');
     }
     if(values[0].status != 'fulfilled' || values[1].status != 'fulfilled') {
-        console.log("Test failed. Both the status should be fulfilled.");
+        console.log('Test failed. Both the status should be fulfilled.');
     }
     v = (values[1] as PromiseFulfilledResult<number>).value;
     if(v != 9) {
-        console.log("Test failed. Expected 9, but got " + v + ".");
+        console.log('Test failed. Expected 9, but got ' + v + '.');
     }
-    console.log("Test passed.");
+    console.log('Test passed.');
 },(e: Error): void => {
-    console.log("Test failed. The promise should not be rejected.");
+    console.log('Test failed. The promise should not be rejected.');
 }).catch((error: Error) : void => {
-    console.log("Test failed. The error is " + error.message + ".");
+    console.log('Test failed. The error is ' + error.message + '.');
 });
