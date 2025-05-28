@@ -17,6 +17,7 @@
 #define PANDA_INST_BUILDER_INL_H
 
 #include "inst_builder.h"
+#include "macros.h"
 #include "optimizer/code_generator/encode.h"
 
 namespace ark::compiler {
@@ -1671,6 +1672,15 @@ void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruct
                                          [[maybe_unused]] DataType::Type type)
 {
     // NOTE: handle it
+    UNREACHABLE();
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <bool IS_ACC_WRITE>
+void InstBuilder::BuildAnyCall([[maybe_unused]] const BytecodeInstruction *bcInst)
+{
+    // NOTE(nsizov): issue(26115) support any type in 1.2 bytecode
+    // handle it
     UNREACHABLE();
 }
 

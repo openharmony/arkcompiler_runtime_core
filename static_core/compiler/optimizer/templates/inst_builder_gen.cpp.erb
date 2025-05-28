@@ -118,7 +118,7 @@ end
   /^monitor/ => "monitor",
   /^nop/ => "nop",
   /^builtin/ => "builtin",
-  /^any/ => "any",
+  /^any?$/ => "any",
   /^$/ => "unimplemented"
 }
 Panda::prefixes.select{|p| !p.public?}.each do |p|

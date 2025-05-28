@@ -333,7 +333,7 @@ class Operand
     end
 
     @srcdst = srcdst.to_sym || :in
-    types = %i[none u1 u2 i8 u8 i16 u16 i32 u32 b32 f32 i64 u64 b64 f64 ref top any]
+    types = %i[none u1 u2 u4 i8 u8 i16 u16 i32 u32 b32 f32 i64 u64 b64 f64 ref top any]
     raise "Incorrect type #{type}" unless types.include?(type.sub('[]', '').to_sym)
 
     @type = type

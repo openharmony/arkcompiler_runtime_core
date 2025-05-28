@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -330,7 +330,7 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, const uint8_t *instructio
         }
         // Break if we meet terminator instruction. If instruction in the middle of basic block we don't create
         // further dead instructions.
-        if (inst.IsTerminator() && !inst.IsSuspend()) {
+        if (inst.IsTerminator()) {
             break;
         }
     }
@@ -563,8 +563,7 @@ void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst, B
 
 BasicBlock *IrBuilder::GetBlockToJump(BytecodeInstruction *inst, size_t pc)
 {
-    if ((inst->HasFlag(BytecodeInstruction::RETURN) && !inst->HasFlag(BytecodeInstruction::SUSPEND)) ||
-        inst->IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
+    if (inst->HasFlag(BytecodeInstruction::RETURN) || inst->IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
         return GetGraph()->GetEndBlock();
     }
 

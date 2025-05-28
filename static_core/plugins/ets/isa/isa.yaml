@@ -155,6 +155,7 @@ groups:
       - method_id
       - call
       - short_long_range
+      - id_shift
     exceptions:
       - x_null
       - x_abstract

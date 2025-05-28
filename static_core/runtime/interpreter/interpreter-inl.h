@@ -1205,6 +1205,69 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCall0()
+    {
+        LOG_INST() << "Unimplemented instruction call.0";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallRange()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.range";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallShort()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.short";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallThis0()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.this.0";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallThisRange()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.this.range";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallThisShort()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.this.short";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallNew0()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.new.0";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallNewRange()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.new.range";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleAnyCallNewShort()
+    {
+        LOG_INST() << "Unimplemented instruction any.call.new.short";
+        UNREACHABLE();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleAddi()
     {
         LOG_INST() << "addi ->";
