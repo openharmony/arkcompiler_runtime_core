@@ -144,8 +144,8 @@ class GeneralOptions(IOptions):
 
     @cached_property
     def static_core_root(self) -> Path:
-        panda_source_path = cast(str, Macros.expand_macros_in_path("${PANDA_SOURCE_PATH}", self))
-        static_core_path = Path(panda_source_path).expanduser() / "runtime_core" / "static_core"
+        runtime_core_path = cast(str, Macros.expand_macros_in_path("${ARKCOMPILER_RUNTIME_CORE_PATH}", self))
+        static_core_path = Path(runtime_core_path) / "static_core"
         return static_core_path
 
     @cached_property

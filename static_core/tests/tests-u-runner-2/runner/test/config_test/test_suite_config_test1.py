@@ -35,7 +35,8 @@ class TestSuiteConfigTest1(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        os.environ["PANDA_SOURCE_PATH"] = "."
+        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
+        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
         os.environ["WORK_DIR"] = "."
         os.environ["PANDA_BUILD"] = "."
 
@@ -60,6 +61,7 @@ class TestSuiteConfigTest1(unittest.TestCase):
         args = [
             self.workflow_name, self.test_suite_name, "--show-progress", "--verbose", "short",
             "--processes", "12", "--detailed-report", "--detailed-report-file", "my-report",
+            "--report-dir", "my-report-dir",
             "--verbose-filter", "ignored", "--enable-time-report", "--use-llvm-cov", "--qemu", "arm64",
             "--profdata-files-dir", ".", "--coverage-html-report-dir", ".",
             "--time-edges", "1,10,100,500"

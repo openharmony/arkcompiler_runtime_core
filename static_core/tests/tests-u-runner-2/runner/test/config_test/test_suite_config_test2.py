@@ -36,7 +36,8 @@ class TestSuiteConfigTest2(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        os.environ["PANDA_SOURCE_PATH"] = "."
+        os.environ["ARKCOMPILER_RUNTIME_CORE_PATH"] = "."
+        os.environ["ARKCOMPILER_ETS_FRONTEND_PATH"] = "."
         os.environ["WORK_DIR"] = "."
         os.environ["PANDA_BUILD"] = "."
 

@@ -31,7 +31,8 @@ MandatoryPropDescription = list[tuple[PropName, MustExist]]
 
 class RunnerEnv:
     mandatory_props: ClassVar[MandatoryPropDescription] = [
-        ('PANDA_SOURCE_PATH', True),
+        ('ARKCOMPILER_RUNTIME_CORE_PATH', True),
+        ('ARKCOMPILER_ETS_FRONTEND_PATH', True),
         ('PANDA_BUILD', True),
         ('WORK_DIR', False)
     ]
@@ -46,16 +47,17 @@ class RunnerEnv:
         self.urunner_path: Path | None = urunner_path
 
     @staticmethod
-    def check_mandatory_prop(var_name: PropName, must_exist: MustExist) -> None:
+    def check_expand_mandatory_prop(var_name: PropName, must_exist: MustExist) -> None:
         var_value = os.getenv(var_name)
         if var_value is None:
             raise OSError(f"Mandatory environment variable '{var_name}' is not set. "
                           "Either specify it in the system environment or "
                           "run the runner with the only option `--init`")
-        if must_exist and not Path(var_value).expanduser().exists():
+        expanded = Path(var_value).expanduser().resolve()
+        if must_exist and not expanded.exists():
             raise OSError(f"Mandatory environment variable '{var_name}' is set "
                           f"to value {var_value} which does not exist.")
-
+        os.environ[var_value] = expanded.as_posix()
 
     @classmethod
     def get_mandatory_props(cls) -> MandatoryProps:
@@ -69,7 +71,7 @@ class RunnerEnv:
         self.load_local_env()
 
         for (prop, must_exist) in self.mandatory_props:
-            self.check_mandatory_prop(prop, must_exist)
+            self.check_expand_mandatory_prop(prop, must_exist)
 
         if self.urunner_path:
             os.environ[self.urunner_path_name] = self.urunner_path.as_posix()
