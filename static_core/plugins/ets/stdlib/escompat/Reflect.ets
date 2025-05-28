@@ -19,6 +19,7 @@ export class Reflect {
 
     private static readonly GETTER_PREFIX = "<get>"
     private static readonly SETTER_PREFIX = "<set>"
+    private static native isLiteralInitializedInterfaceImpl(target: Object): boolean
 
     private constructor () {}
 
@@ -326,6 +327,18 @@ export class Reflect {
     */
     public static has(target: Object, index: number): boolean {
         return Object.hasOwn(target, index)
+    }
+
+    /**
+    * Determines whether an object is an interface initialized with a literal
+    *
+    * @param target an object
+    *
+    * @returns a boolean indicating whether or not the target is an interface
+    *          initialized with a literal
+    */
+    public static isLiteralInitializedInterface(target: Object): boolean {
+        return Reflect.isLiteralInitializedInterfaceImpl(target)
     }
 }
 

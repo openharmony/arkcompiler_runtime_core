@@ -7264,6 +7264,20 @@ intrinsics:
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
 
+##############################
+#      escompat.Reflect      #
+##############################
+
+  - name: escompatReflectIsInterfaceLiteral
+    space: ets
+    class_name: escompat.Reflect
+    method_name: isLiteralInitializedInterfaceImpl
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::IsLiteralInitializedInterfaceImpl
+
 ######################################
 # std.concurrency.ConcurrencyHelpers #
 ######################################

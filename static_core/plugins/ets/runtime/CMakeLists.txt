@@ -39,6 +39,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_Reflect.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/debugger_api.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_AniHelpers.cpp

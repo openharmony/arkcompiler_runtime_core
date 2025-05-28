@@ -74,6 +74,7 @@
   "plugins/ets/tests/ets_test_suite/linker": "*",
   "plugins/ets/tests/ets_test_suite/strings": "*",
   "plugins/ets/tests/ets_test_suite/functions/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/ets_test_suite/object_literal/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/ets_warnings_tests": "*",
   "plugins/ets/tests/integrational": "*",
   "plugins/ets/tests/interop_js/tests/builtin_not_implement/ets_to_ts/test_builtin_not_implement.ts": "*",
