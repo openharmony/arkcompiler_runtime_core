@@ -19,7 +19,7 @@ PREBUILTS_DOWNLOAD_SCRIPT=$ARK_THIRD_PARTY_DIR/prebuilts_download.sh
 
 if [ ! -d "${ARK_THIRD_PARTY_DIR}/prebuilts" ]; then
     if [ ! -f ${PREBUILTS_DOWNLOAD_SCRIPT} ]; then
-        ln -s ${ARK_THIRD_PARTY_DIR}/arkcompiler/toolchain/build/prebuilts_download/prebuilts_download.sh $PREBUILTS_DOWNLOAD_SCRIPT
+        ln -s ${ARK_THIRD_PARTY_DIR}/build/prebuilts_download/prebuilts_download.sh $PREBUILTS_DOWNLOAD_SCRIPT
     fi
 
     cd $ARK_THIRD_PARTY_DIR && $PREBUILTS_DOWNLOAD_SCRIPT
