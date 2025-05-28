@@ -1598,14 +1598,20 @@ void Codegen::EmitResolveVirtual(ResolveVirtualInst *resolver)
     } else if (GetRuntime()->IsInterfaceMethod(resolver->GetCallMethod())) {
         SCOPED_DISASM_STR(this, "Create runtime call to resolve a known virtual call");
         if (GetGraph()->IsAotMode()) {
+#if !defined(PANDA_TARGET_64) || defined(PANDA_USE_32_BIT_POINTER)
             if (GetArch() == Arch::AARCH64) {
+                EVENT_CODEGEN("Interface cache used");
                 ScopedTmpReg tmpReg(GetEncoder(), ConvertDataType(DataType::REFERENCE, GetArch()));
                 IntfInlineCachePass(resolver, tmpMethodReg, tmpReg, objectReg);
             } else {
+#endif
+                EVENT_CODEGEN("Interface cache not used");
                 LoadMethod(tmpMethodReg);
                 CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL_AOT, tmpMethodReg, {}, tmpMethodReg, objectReg,
                             TypedImm(resolver->GetCallMethodId()), TypedImm(0));
+#if !defined(PANDA_TARGET_64) || defined(PANDA_USE_32_BIT_POINTER)
             }
+#endif
         } else {
             CallRuntime(resolver, EntrypointId::RESOLVE_VIRTUAL_CALL, tmpMethodReg, {},
                         TypedImm(reinterpret_cast<size_t>(resolver->GetCallMethod())), objectReg);
