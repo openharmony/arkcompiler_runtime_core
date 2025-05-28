@@ -114,6 +114,14 @@ public:
     void UnregisterCoroutine(Coroutine *coroutine);
     void VisitAllThreads(CommonRootVisitor visitor);
 
+    // Get the thread-local alloction buffer, which is used for fast path of allocating heap objects.
+    // It should be used after binding mutator, and will be invalid after unbinding.
+    void* GetAllocBuffer() const
+    {
+        DCHECK_CC(allocBuffer_ != nullptr);
+        return allocBuffer_;
+    }
+
     JSThread* GetJSThread() const
     {
         return jsThread_;
@@ -149,6 +157,9 @@ private:
     bool TryBindMutator();
 
     MutatorBase *mutatorBase_ {nullptr};
+
+    // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
+    void* allocBuffer_ {nullptr};
 
     // Access jsThreads/coroutines(iterate/insert/remove) must happen in RunningState from the currentThreadHolder, or
     // in SuspendAll from others, because daemon thread may iterate if in NativeState.
