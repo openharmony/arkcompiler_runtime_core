@@ -187,13 +187,16 @@ public:
     {
         pgoFilePath_ = CreateTmpFileName();
         auto *runtime = Runtime::GetCurrent();
-
+        if (!runtime->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
+            return;
+        }
         ProfilingSaver profileSaver;
         classCtxStr_ = runtime->GetClassLinker()->GetClassContextForAot(true);
         auto &writtenMethods = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethods();
+        auto writtenMethodsFinal = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
         profileSaver.SaveProfile(PandaString(pgoFilePath_), PandaString(classCtxStr_), writtenMethods,
-                                 profiledPandaFiles);
+                                 writtenMethodsFinal, profiledPandaFiles);
     }
 
     void LoadProfile(ProfilingLoader &profilingLoader)

@@ -154,7 +154,7 @@ public:
         return !aotFiles_.empty();
     }
 
-    void TryAddMethodToProfile(const Method *method)
+    void TryAddMethodToProfile(Method *method)
     {
         auto pfName = method->GetPandaFile()->GetFullFileName();
         if (profiledPandaFiles_.find(pfName) != profiledPandaFiles_.end()) {
@@ -163,7 +163,19 @@ public:
         }
     }
 
-    PandaVector<const Method *> &GetProfiledMethods()
+    bool HasProfiledMethods()
+    {
+        os::memory::LockHolder lock {profiledMethodsLock_};
+        return !profiledMethods_.empty();
+    }
+
+    PandaList<Method *>::const_iterator GetProfiledMethodsFinal() const
+    {
+        os::memory::LockHolder lock {profiledMethodsLock_};
+        return --profiledMethods_.cend();
+    }
+
+    PandaList<Method *> &GetProfiledMethods()
     {
         return profiledMethods_;
     }
@@ -180,7 +192,7 @@ private:
     PandaString appClassContext_;
 
     mutable os::memory::Mutex profiledMethodsLock_;
-    PandaVector<const Method *> profiledMethods_ GUARDED_BY(profiledMethodsLock_);
+    PandaList<Method *> profiledMethods_ GUARDED_BY(profiledMethodsLock_);
     PandaUnorderedSet<std::string_view> profiledPandaFiles_;
 
     os::memory::RecursiveMutex aotStringRootsLock_;
