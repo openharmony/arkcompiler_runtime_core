@@ -105,7 +105,7 @@ export final class AsyncLock {
                 rejecter!(e)
             }
         }
-        launch<void, () => void>(cb)
+        launchSameWorker(cb)
         return p;
     }
 
@@ -116,24 +116,30 @@ export final class AsyncLock {
         ConcurrencyHelpers.mutexUnlock(this.mutex);
 
         this.lock<U>(callerCID, mode, asyncLockInfo, options);
-        try {
-            return Promise.resolve<T>(callback());
-        } finally {
-            this.unlock(asyncLockInfo);
-        }
+
+        return Promise.resolve<T>(callback()).finally(() => {this.unlock(asyncLockInfo); });
     }
 
     private lock<U>(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>): void {
         let isDone = false;
         let timeout = options.timeout;
-        let startTime = Chrono.milliNow();
+        let isTimeoutExec: boolean = false;
+
+        if (timeout) {
+           setTimeout(() => {
+               isTimeoutExec = true;
+           }, timeout);
+        }
 
         while (isDone == false) {
-
-            if (timeout != 0 && timeout < (Chrono.milliNow() - startTime)) {
-                throw new Error("AsyncLock timeout");
+             if (options.signal != null && options.signal!.aborted == true) {
+                 throw new Error("Aborted");
             }
 
+            if(isTimeoutExec == true) {
+                throw new Error("AsyncLock timeout");
+            }
+           
             ConcurrencyHelpers.mutexLock(this.mutex);
 
             if (this.holderCID == 0) {
