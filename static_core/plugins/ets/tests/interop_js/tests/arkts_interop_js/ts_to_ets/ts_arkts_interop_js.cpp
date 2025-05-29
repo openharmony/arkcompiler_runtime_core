@@ -41,79 +41,78 @@ public:
         status = aniVm->GetEnv(ANI_VERSION_1, env);
         return status == ANI_OK && *env != nullptr;
     }
-};
 
-static constexpr uintptr_t DUMMY_POINTER = 0x1234;
+    static constexpr uintptr_t dummyPoiner = 0x1234;
 
-static bool CheckNativePointer(void *data)
-{
-    return reinterpret_cast<uintptr_t>(data) == DUMMY_POINTER;
-}
-
-static void DummyFinalizer([[maybe_unused]] napi_env env, [[maybe_unused]] void *data, [[maybe_unused]] void *hint)
-{
-    ASSERT_TRUE(CheckNativePointer(data));
-}
-
-static ani_ref CreateJsObject(ani_env *env)
-{
-    ani_ref undefinedRef {};
-    env->GetUndefined(&undefinedRef);
-    ani_ref anyRef {};
+    static bool CheckNativePointer(void *data)
     {
-        napi_env napiEnv {};
-        if (!arkts_napi_scope_open(env, &napiEnv)) {
-            return undefinedRef;
-        }
-        NapiScope jsScope(napiEnv);
-
-        napi_value jsObj {};
-        if (napi_create_object(napiEnv, &jsObj) != napi_ok) {
-            return undefinedRef;
-        }
-        // Use N-API which don't have counterparts in other ArkTS interfaces
-        auto status =
-            napi_wrap(napiEnv, jsObj, reinterpret_cast<void *>(DUMMY_POINTER), DummyFinalizer, nullptr, nullptr);
-        if (status != napi_ok) {
-            return undefinedRef;
-        }
-
-        napi_value nameValue {};
-        if (napi_create_string_utf8(napiEnv, "jsProperty", NAPI_AUTO_LENGTH, &nameValue) != napi_ok) {
-            return undefinedRef;
-        }
-        if (napi_set_named_property(napiEnv, jsObj, "jsProperty", nameValue) != napi_ok) {
-            return undefinedRef;
-        }
-        if (!arkts_napi_scope_close_n(napiEnv, 1, &jsObj, &anyRef)) {
-            return undefinedRef;
-        }
-    }
-    return anyRef;
-}
-
-static ani_boolean CheckCreatedJsObject(ani_env *env, ani_object esValue)
-{
-    void *data = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &data)) {
-        return ANI_FALSE;
-    }
-    return CheckNativePointer(data) ? ANI_TRUE : ANI_FALSE;
-}
-
-static ani_status RegisterNativeFunctions(ani_env *env)
-{
-    ani_module mod {};
-    if (auto status = env->FindModule("ets_functions", &mod); status != ANI_OK) {
-        return status;
+        return reinterpret_cast<uintptr_t>(data) == dummyPoiner;
     }
 
-    std::array methods = {
-        ani_native_function {"createJsObject", nullptr, reinterpret_cast<void *>(CreateJsObject)},
-        ani_native_function {"checkCreatedJsObject", nullptr, reinterpret_cast<void *>(CheckCreatedJsObject)},
-    };
-    return env->Module_BindNativeFunctions(mod, methods.data(), methods.size());
-}
+    static void DummyFinalizer([[maybe_unused]] napi_env env, [[maybe_unused]] void *data, [[maybe_unused]] void *hint)
+    {
+        ASSERT_TRUE(CheckNativePointer(data));
+    }
+
+    static ani_ref CreateJsObject(ani_env *env)
+    {
+        ani_ref undefinedRef {};
+        env->GetUndefined(&undefinedRef);
+        ani_ref anyRef {};
+        {
+            napi_env napiEnv {};
+            if (!arkts_napi_scope_open(env, &napiEnv)) {
+                return undefinedRef;
+            }
+            NapiScope jsScope(napiEnv);
+
+            napi_value jsObj {};
+            if (napi_create_object(napiEnv, &jsObj) != napi_ok) {
+                return undefinedRef;
+            }
+            // Use N-API which don't have counterparts in other ArkTS interfaces
+            auto status =
+                napi_wrap(napiEnv, jsObj, reinterpret_cast<void *>(dummyPoiner), DummyFinalizer, nullptr, nullptr);
+            if (status != napi_ok) {
+                return undefinedRef;
+            }
+
+            napi_value nameValue {};
+            if (napi_create_string_utf8(napiEnv, "jsProperty", NAPI_AUTO_LENGTH, &nameValue) != napi_ok) {
+                return undefinedRef;
+            }
+            if (napi_set_named_property(napiEnv, jsObj, "jsProperty", nameValue) != napi_ok) {
+                return undefinedRef;
+            }
+            if (!arkts_napi_scope_close_n(napiEnv, 1, &jsObj, &anyRef)) {
+                return undefinedRef;
+            }
+        }
+        return anyRef;
+    }
+
+    static ani_boolean CheckCreatedJsObject(ani_env *env, ani_object esValue)
+    {
+        void *data = nullptr;
+        if (!arkts_esvalue_unwrap(env, esValue, &data)) {
+            return ANI_FALSE;
+        }
+        return CheckNativePointer(data) ? ANI_TRUE : ANI_FALSE;
+    }
+
+    ani_status RegisterNativeFunctions(ani_env *env)
+    {
+        ani_ref classRef = GetClassRefObject(env, "ets_functions.ETSGLOBAL");
+        if (classRef == nullptr) {
+            return ANI_ERROR;
+        }
+        std::array methods = {
+            ani_native_function {"createJsObject", nullptr, reinterpret_cast<void *>(CreateJsObject)},
+            ani_native_function {"checkCreatedJsObject", nullptr, reinterpret_cast<void *>(CheckCreatedJsObject)},
+        };
+        return env->Module_BindNativeFunctions(static_cast<ani_module>(classRef), methods.data(), methods.size());
+    }
+};
 
 TEST_F(ArktsNapiScopeTest, CreateAnyFromJSObject)
 {

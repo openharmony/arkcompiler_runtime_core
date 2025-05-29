@@ -16,7 +16,9 @@
 #ifndef PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H_
 #define PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H_
 
+#include <ani.h>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <gtest/gtest.h>
 #include <node_api.h>
@@ -39,6 +41,147 @@ namespace ark::ets::interop::js::testing {
 
 class EtsInteropTest : public ::testing::Test {
 public:
+    std::string GetPathFromPlugin(const std::string &path)
+    {
+        size_t pluginPos = path.find("/plugin");
+        if (pluginPos != std::string::npos) {
+            return path.substr(pluginPos);
+        }
+        return std::string();
+    }
+
+    std::string GetABCPath()
+    {
+        const char *abcSource = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
+        const char *targetPackageName = std::getenv("ARK_ETS_INTEROP_JS_TARGET_GTEST_PACKAGE");
+        const char *oldPath = std::getenv("OLDPWD");
+        if (abcSource == nullptr || targetPackageName == nullptr || oldPath == nullptr) {
+            return std::string();
+        }
+
+        // Keep the gdb command path consistent with the running command path.
+        std::string binPath = std::string(oldPath);
+        std::string buildName = "/build";
+        size_t pluginPos = binPath.find(buildName);
+        if (pluginPos != std::string::npos) {
+            binPath = binPath.substr(0, pluginPos + buildName.size());
+        }
+
+        std::string abcPath = binPath + GetPathFromPlugin(abcSource) + "/" + targetPackageName + "/src/classes.abc";
+        return abcPath;
+    }
+
+    ani_object CreateBoolean(ani_env *env, ani_boolean boo)
+    {
+        static constexpr const char *className = "std.core.Boolean";
+        ani_class booleanCls {};
+        env->FindClass(className, &booleanCls);
+        ani_method ctor {};
+
+        env->Class_FindMethod(booleanCls, "<ctor>", "z:", &ctor);
+        ani_object obj {};
+        if (env->Object_New(booleanCls, ctor, &obj, boo) != ANI_OK) {
+            std::cerr << "Failed to cllocate Boolean!" << std::endl;
+        }
+        return obj;
+    }
+
+    bool SetRuntimeLinker(ani_env *env, const std::string &modulePath)
+    {
+        ani_ref undefinedRef {};
+        env->GetUndefined(&undefinedRef);
+
+        const char *asmAbcPath = std::getenv("ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH");
+        int arrArgSize = std::strlen(asmAbcPath) ? 2 : 1;
+
+        ani_class stringCls {};
+        env->FindClass("std.core.String", &stringCls);
+
+        ani_ref undefined {};
+        env->GetUndefined(&undefined);
+
+        ani_array refArray {};
+        env->Array_New(arrArgSize, undefined, &refArray);
+
+        ani_string aniStr {};
+        env->String_NewUTF8(modulePath.c_str(), modulePath.size(), &aniStr);
+        env->Array_Set(refArray, 0, aniStr);
+
+        if (asmAbcPath != nullptr) {
+            ani_string aniStr2 {};
+            env->String_NewUTF8(asmAbcPath, std::strlen(asmAbcPath), &aniStr2);
+            env->Array_Set(refArray, 1, aniStr2);
+        }
+
+        std::string clsDescriptor = "std.core.AbcRuntimeLinker";
+        ani_class cls {};
+        ani_status status = env->FindClass(clsDescriptor.c_str(), &cls);
+        if (status != ANI_OK) {
+            std::cerr << "Failed to find class: std.core.AbcRuntimeLinker!" << std::endl;
+            return false;
+        }
+        env->Class_FindMethod(cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}",
+                              &loadMethodRef_);
+
+        ani_method ctor {};
+        env->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &ctor);
+
+        ani_object obj {};
+        // NOLINTNEXTLINE
+        if (env->Object_New(cls, ctor, &obj, undefinedRef, refArray) != ANI_OK) {
+            std::cerr << "Failed to create AbcRuntimeLinker object." << std::endl;
+            return false;
+        }
+
+        if (env->GlobalReference_Create(static_cast<ani_ref>(obj), &classObjRef_) != ANI_OK) {
+            std::cerr << "Failed to create global reference." << std::endl;
+            return false;
+        }
+
+        ani_class contextCls {};
+        env->FindClass("std.interop.InteropContext", &contextCls);
+
+        // NOLINTNEXTLINE
+        status = env->Class_CallStaticMethodByName_Void(contextCls, "setDefaultInteropLinker",
+                                                        "C{std.core.RuntimeLinker}:", obj);
+        if (status != ANI_OK || ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException()) {
+            std::cerr << env->DescribeError() << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    ani_ref GetClassRefObject(ani_env *env, std::string moduleName)
+    {
+        ani_status status {};
+        ani_ref clsRef = nullptr;
+        ani_string moduleStr = nullptr;
+        if (status != ANI_OK) {
+            std::cerr << "Failed to find loadClass Method!" << std::endl;
+        }
+        env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &moduleStr);
+        status = env->Object_CallMethod_Ref(static_cast<ani_object>(classObjRef_), loadMethodRef_, &clsRef, moduleStr,
+                                            CreateBoolean(env, ANI_FALSE));
+        if (status != ANI_OK || ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException()) {
+            std::cerr << env->DescribeError() << std::endl;
+            return nullptr;
+        }
+        return clsRef;
+    }
+
+    EtsInteropTest()
+    {
+        ani_vm *vm {};
+        ani_env *aniEnv_ {};
+        ani_size vmCount;
+        ANI_GetCreatedVMs(&vm, 1, &vmCount);
+        ASSERT(vmCount == 1);
+        vm->GetEnv(ANI_VERSION_1, &aniEnv_);
+
+        std::string modulePath = GetABCPath();
+        SetRuntimeLinker(aniEnv_, modulePath);
+    }
+
     static void SetUpTestSuite()
     {
         if (std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES") == nullptr) {
@@ -404,6 +547,8 @@ protected:
     std::string interopJsTestPath_;
     std::string jsAbcFilePath_;
     std::string packageName_;
+    ani_method loadMethodRef_;
+    ani_ref classObjRef_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 

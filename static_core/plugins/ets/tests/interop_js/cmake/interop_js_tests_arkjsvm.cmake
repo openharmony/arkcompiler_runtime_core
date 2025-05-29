@@ -97,7 +97,7 @@ function(panda_ets_interop_js_gtest TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
+        "COMPILATION_JS_WITH_CJS_ON"
         "ETS_CONFIG;PACKAGE_NAME;VERIFY_SOURCES"
         "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;ASM_SOURCE;LIBRARIES"
         ${ARGN}
@@ -165,9 +165,6 @@ function(panda_ets_interop_js_gtest TARGET)
 
         # Add launcher <${TARGET}_gtests> target
         set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH ${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip)
-        if(ARG_COMPILATION_WITH_RUNTIMELINKER)
-            set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH "")
-        endif()
     endif()
 
     panda_ets_add_gtest(
@@ -213,7 +210,7 @@ function(panda_ets_interop_js_test TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        "COMPILATION_JS_WITH_CJS_ON;COMPILATION_WITH_RUNTIMELINKER"
+        "COMPILATION_JS_WITH_CJS_ON"
         "JS_LAUNCHER;ETS_CONFIG;DYNAMIC_ABC_OUTPUT_DIR;PACKAGE_NAME"
         "ETS_SOURCES;JS_SOURCES;ABC_FILE;LAUNCHER_ARGS;"
         ${ARGN}
@@ -272,14 +269,9 @@ function(panda_ets_interop_js_test TARGET)
 
     set(OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_interop_js_output.txt")
 
-    set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH ${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip)
-    if(ARG_COMPILATION_WITH_RUNTIMELINKER)
-        set(ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH "")
-    endif()
-
     set(CUSTOM_PRERUN_ENVIRONMENT
         "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
-        "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH}"
+        "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip"
         "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
         "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
     )
