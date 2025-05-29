@@ -115,10 +115,12 @@ void Thread::InitCardTableData(mem::GCBarrierSet *barrier)
             postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
             break;
         case mem::POST_RB_NONE:
+        case ark::mem::BarrierType::POST_CMC_WRITE_BARRIER:
             break;
         case mem::PRE_WRB_NONE:
         case mem::PRE_RB_NONE:
         case mem::PRE_SATB_BARRIER:
+        case ark::mem::BarrierType::PRE_CMC_READ_BARRIER:
             LOG(FATAL, RUNTIME) << "Post barrier expected";
             break;
     }

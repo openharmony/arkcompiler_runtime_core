@@ -97,6 +97,12 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
 
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
+#ifdef ARK_HYBRID
+    if (!runtimeOptions.WasSetGcType("ets")) {
+        runtimeOptions.SetGcType("cmc-gc");
+        LOG(INFO, RUNTIME) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
+    }
+#endif
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     if ((runtimeOptions.GetXgcTriggerType() != "never") &&
         (runtimeOptions.GetGcType("ets") != "g1-gc" || runtimeOptions.IsNoAsyncJit())) {

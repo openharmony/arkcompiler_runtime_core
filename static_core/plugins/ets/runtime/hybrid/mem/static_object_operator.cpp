@@ -17,6 +17,10 @@
 #include "runtime/mem/object-references-iterator-inl.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
+#if defined(ARK_HYBRID)
+#include "plugins/ets/runtime/hybrid/mem/external-gc.h"
+#endif
+
 namespace ark::mem {
 
 StaticObjectOperator StaticObjectOperator::instance_;
@@ -43,6 +47,8 @@ void StaticObjectOperator::Initialize()
 {
 #if defined(ARK_HYBRID)
     panda::BaseObject::RegisterStatic(&instance_);
+
+    panda::RegisterStaticRootsProcessFunc();
 #endif
 }
 

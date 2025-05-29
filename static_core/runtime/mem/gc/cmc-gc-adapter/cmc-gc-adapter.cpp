@@ -18,6 +18,9 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
+#ifdef ARK_HYBRID
+#include "base_runtime.h"
+#endif
 
 namespace ark::mem {
 template <class LanguageConfig>
@@ -31,7 +34,7 @@ template <class LanguageConfig>
 void CMCGCAdapter<LanguageConfig>::InitializeImpl()
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
-    auto barrierSet = allocator->New<GCDummyBarrierSet>(allocator);
+    auto barrierSet = allocator->New<GCCMCBarrierSet>(allocator);
     ASSERT(barrierSet != nullptr);
     this->SetGCBarrierSet(barrierSet);
     LOG(DEBUG, GC) << "CMC GC adapter initialized...";
@@ -72,6 +75,15 @@ template <class LanguageConfig>
 bool CMCGCAdapter<LanguageConfig>::IsPostponeGCSupported() const
 {
     return true;
+}
+
+template <class LanguageConfig>
+void CMCGCAdapter<LanguageConfig>::StopGC()
+{
+#ifdef ARK_HYBRID
+    // Change to a more accurate function, when the function was provided (see #26240).
+    panda::BaseRuntime::RequestGC(panda::GcType::FULL);
+#endif
 }
 
 template <class LanguageConfig>

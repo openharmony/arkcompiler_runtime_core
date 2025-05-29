@@ -32,8 +32,13 @@ void VisitRoots(const RefFieldVisitor &visitor, bool isMark);
 void VisitWeakRoots(const WeakRefFieldVisitor &visitorFunc);
 
 // Static VM Roots scanning
-void VisitStaticRoots(const RefFieldVisitor &visitor);
-void UpdateStaticRoots(const RefFieldVisitor &visitor);
-void SweepStaticRoots(const WeakRefFieldVisitor &visitor);
+using VisitStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
+using UpdateStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
+using SweepStaticRootsHookFunc = void (*)(const WeakRefFieldVisitor &visitor);
+
+void RegisterVisitStaticRootsHook(VisitStaticRootsHookFunc func);
+void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc func);
+void RegisterweepStaticRootsHook(SweepStaticRootsHookFunc func);
+
 }  // namespace panda
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H
