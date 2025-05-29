@@ -237,6 +237,9 @@ static bool IsValidStorage(ani_env *env, ani_object storage, ani_size *outLength
 
 bool HybridGrefGetESValue(ani_env *env, hybridgref ref, ani_object *result)
 {
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
     ani_object storage {};
     if (!GetStorage(env, &storage)) {
         return false;
@@ -251,6 +254,9 @@ bool HybridGrefGetESValue(ani_env *env, hybridgref ref, ani_object *result)
     }
 
     SharedRefIndex refIndex = reinterpret_cast<uintptr_t>(ref);
+    if (refIndex == 0 || refIndex >= arrayLength) {
+        return false;
+    }
     ani_ref refHolder {};
     auto status =
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -269,6 +275,9 @@ bool HybridGrefGetESValue(ani_env *env, hybridgref ref, ani_object *result)
 
 bool HybridGrefCreateRefFromAni(ani_env *env, ani_ref value, hybridgref *result)
 {
+    if (env == nullptr || result == nullptr) {
+        return false;
+    }
     ani_object storage {};
     if (!GetStorage(env, &storage)) {
         return false;
@@ -289,6 +298,9 @@ bool HybridGrefCreateRefFromAni(ani_env *env, ani_ref value, hybridgref *result)
 
 bool HybridGrefDeleteRefFromAni(ani_env *env, hybridgref ref)
 {
+    if (env == nullptr) {
+        return false;
+    }
     ani_object storage {};
     if (!GetStorage(env, &storage)) {
         return false;

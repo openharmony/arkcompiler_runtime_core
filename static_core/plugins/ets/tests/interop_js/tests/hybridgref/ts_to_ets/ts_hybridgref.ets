@@ -95,3 +95,45 @@ export function etsCheckDateObject(): boolean {
     let dateStr = date.invokeMethod("toString").toString();
     return dateStr.includes("2025");
 }
+
+export function etsCheckArrayBuffer(): boolean {
+    const buffer = nativeGetRef();
+    const len = buffer.getProperty("byteLength").toNumber();
+    return len === 8;
+}
+
+export function etsCheckTypedArray(): boolean {
+    const arr = nativeGetRef();
+    const val0 = arr.getProperty(0).toNumber();
+    const val1 = arr.getProperty(1).toNumber();
+    const val2 = arr.getProperty(2).toNumber();
+    return val0 === 1 && val1 === 2 && val2 === 3;
+}
+
+export function etsCheckPromiseResolved(): boolean {
+    const promise = nativeGetRef();
+
+    let result: number = -1;
+    let done: boolean = false;
+    let cb = (val: number) => {
+        result = val;
+        done = true;
+    }
+    promise.invokeMethod("then",cb);
+    return done && result === 42;
+}
+
+export function etsCheckErrorObject(): boolean {
+    const err = nativeGetRef();
+    const msg = err.getProperty("message").toString();
+    const name = err.getProperty("name").toString();
+    return name === "Error" && msg.includes("hybridgref error test");
+}
+
+export function etsCheckSetObject(): boolean {
+    const set = nativeGetRef();
+    let size = set.getProperty("size").toNumber();
+    let hasValue = set.invokeMethod("has", ESValue.wrap(3)).toBoolean();
+
+    return size === 3 && hasValue;
+}

@@ -19,7 +19,7 @@
 #include <ani.h>
 #include "libpandabase/macros.h"
 namespace ark::ets::interop::js {
-
+// Experimental API, only for internal usage.
 PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esValue, void **result);
 }  // namespace ark::ets::interop::js
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NATIVE_API_ARKTS_ESVALUE_H

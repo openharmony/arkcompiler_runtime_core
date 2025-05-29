@@ -95,4 +95,41 @@ TEST_F(HybridGrefPrimitiveEtsToTsTest, check_ets_hybridgref)
     ASSERT_TRUE(RunJsTestSuite("ets_hybridgref.ts"));
 }
 
+TEST_F(HybridGrefPrimitiveEtsToTsTest, hybridgref_create_from_ani_invalid_args)
+{
+    hybridgref ref = nullptr;
+    constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
+    ASSERT_FALSE(hybridgref_create_from_ani(nullptr, reinterpret_cast<ani_ref>(DUMMY_NATIVE_POINTER), &ref));
+
+    ani_env *env = nullptr;
+    ASSERT_TRUE(GetAniEnv(&env));
+    ASSERT_TRUE(hybridgref_create_from_ani(env, nullptr, &ref));
+
+    ASSERT_FALSE(hybridgref_create_from_ani(env, reinterpret_cast<ani_ref>(DUMMY_NATIVE_POINTER), nullptr));
+}
+
+TEST_F(HybridGrefPrimitiveEtsToTsTest, hybridgref_get_esvalue_invalid_args)
+{
+    ani_env *env = nullptr;
+    ASSERT_TRUE(GetAniEnv(&env));
+    constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
+    auto dummyRef = reinterpret_cast<hybridgref>(DUMMY_NATIVE_POINTER);
+
+    ani_object result = nullptr;
+    ASSERT_FALSE(hybridgref_get_esvalue(nullptr, dummyRef, &result));
+    ASSERT_FALSE(hybridgref_get_esvalue(env, nullptr, &result));
+    ASSERT_FALSE(hybridgref_get_esvalue(env, dummyRef, nullptr));
+}
+
+TEST_F(HybridGrefPrimitiveEtsToTsTest, hybridgref_delete_from_ani_invalid_args)
+{
+    ani_env *env = nullptr;
+    ASSERT_TRUE(GetAniEnv(&env));
+    constexpr uintptr_t DUMMY_NATIVE_POINTER = 0x12345678;
+    auto dummyRef = reinterpret_cast<hybridgref>(DUMMY_NATIVE_POINTER);
+
+    ASSERT_FALSE(hybridgref_delete_from_ani(nullptr, dummyRef));
+    ASSERT_FALSE(hybridgref_delete_from_ani(env, nullptr));
+}
+
 }  // namespace ark::ets::interop::js::testing

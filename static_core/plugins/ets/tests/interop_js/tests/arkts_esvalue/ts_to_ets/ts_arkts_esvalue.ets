@@ -37,3 +37,14 @@ export function etsCheckWrappedPtrFromTS(): boolean {
     }
     return false;
 }
+
+export function etsCheckUnWrappedPtrFromTS(): boolean {
+    const longValue: long = 0x0;
+    let module = ESValue.getGlobal();
+    let esValue = module.getPropertySafe('unwrapobjTS')
+    let nativePtr:long = nativeGetWrappedPtr(esValue);
+    if( nativePtr === longValue){
+        return true;
+    }
+    return false;
+}
