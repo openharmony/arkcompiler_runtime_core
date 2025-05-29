@@ -46,7 +46,7 @@ function(panda_ets_interop_js_checked_test)
         ETS_VERIFICATOR_ERRORS ${ETS_VERIFICATOR_ERRORS}
     )
 
-    set(JS_COMPILATION_OPTIONS --module --merge-abc)
+    set(JS_COMPILATION_OPTIONS --module --merge-abc --enable-ets-implements)
     if(ARG_COMPILATION_JS_WITH_CJS_ON)
         set(JS_COMPILATION_OPTIONS --commonjs)
     endif()
