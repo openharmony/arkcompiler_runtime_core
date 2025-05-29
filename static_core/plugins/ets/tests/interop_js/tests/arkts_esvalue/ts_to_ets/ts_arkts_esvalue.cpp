@@ -17,6 +17,7 @@
 #include "ets_interop_js_gtest.h"
 #include "plugins/ets/runtime/libani_helpers/interop_js/hybridgref_ani.h"
 #include "plugins/ets/runtime/libani_helpers/interop_js/hybridgref_napi.h"
+#include "plugins/ets/runtime/libani_helpers/interop_js/arkts_esvalue.h"
 #include <ani.h>
 
 namespace ark::ets::interop::js::testing {
@@ -81,6 +82,15 @@ static napi_value NativeWrapRef(napi_env env, napi_callback_info info)
     return result;
 }
 
+static ani_long NativeGetWrappedPtr([[maybe_unused]] ani_env *env, ani_object esValue)
+{
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        return 0;
+    }
+    return reinterpret_cast<ani_long>(nativePtr);
+}
+
 static ani_object NativeGetRef(ani_env *env)
 {
     ani_object result {};
@@ -88,7 +98,7 @@ static ani_object NativeGetRef(ani_env *env)
     return result;
 }
 
-class NativeGrefTsToEtsTest : public EtsInteropTest {
+class NativeArktsESvalueTsToEtsTest : public EtsInteropTest {
 public:
     static bool GetAniEnv(ani_env **env)
     {
@@ -143,12 +153,13 @@ public:
 
         std::array methods = {
             ani_native_function {"nativeGetRef", nullptr, reinterpret_cast<void *>(NativeGetRef)},
+            ani_native_function {"nativeGetWrappedPtr", nullptr, reinterpret_cast<void *>(NativeGetWrappedPtr)},
         };
         return env->Module_BindNativeFunctions(mod, methods.data(), methods.size()) == ANI_OK;
     }
 };
 
-TEST_F(NativeGrefTsToEtsTest, check_js_to_ets_hybridgref)
+TEST_F(NativeArktsESvalueTsToEtsTest, check_js_to_ets_arkts_value)
 {
     ani_env *aniEnv {};
     ASSERT_TRUE(GetAniEnv(&aniEnv));
@@ -157,6 +168,6 @@ TEST_F(NativeGrefTsToEtsTest, check_js_to_ets_hybridgref)
     ASSERT_TRUE(RegisterNativeSaveRef(napiEnv));
     ASSERT_TRUE(RegisterNativeWrapRef(napiEnv));
     ASSERT_TRUE(RegisterETSGetter(aniEnv));
-    ASSERT_TRUE(RunJsTestSuite("ts_hybridgref.ts"));
+    ASSERT_TRUE(RunJsTestSuite("ts_arkts_esvalue.ts"));
 }
 }  // namespace ark::ets::interop::js::testing

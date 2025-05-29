@@ -29,10 +29,14 @@ ohos_source_set("hybridgref_static") {
   include_dirs = [ "$ark_root/plugins/ets/runtime/ani" ]
 
   sources = [
+    "arkts_esvalue.cpp",
     "hybridgref_ani.cpp",
     "hybridgref_napi.cpp",
   ]
-  deps = [ "$ark_root/libpandabase:libarktsbase" ]
+  deps = [
+    "$ark_root/libpandabase:libarktsbase",
+    "$ark_root/runtime:libarkruntime",
+  ]
   if (is_ohos && is_standard_system) {
     external_deps = [ "napi:ace_napi" ]
   } else if (ark_standalone_build && ark_ets_hybrid) {

@@ -138,6 +138,11 @@ bool HybridGrefGetNapiValue(napi_env env, hybridgref ref, napi_value *result)
         // Element at 0 position must always present and contain thread-id
         return false;
     }
+
+    if (!CheckCorrectThread(env, storage)) {
+        return false;
+    }
+
     SharedRefIndex refIndex = reinterpret_cast<uintptr_t>(ref);
     if (refIndex == 0 || refIndex >= arrayLength) {
         return false;
