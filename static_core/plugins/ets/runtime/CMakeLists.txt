@@ -26,6 +26,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_napi_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp
     ${ETS_EXT_SOURCES}/ets_native_library_provider.cpp
+    ${ETS_EXT_SOURCES}/ets_namespace_manager.cpp
+    ${ETS_EXT_SOURCES}/ets_namespace_manager_impl.cpp
     ${ETS_EXT_SOURCES}/ets_platform_types.cpp
     ${ETS_EXT_SOURCES}/ets_runtime_interface.cpp
     ${ETS_EXT_SOURCES}/ets_vm.cpp

@@ -27,6 +27,7 @@ function(panda_promote_to_definitions)
 endfunction()
 
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+add_compile_definitions(PANDA_CMAKE_SDK)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     panda_set_flag(PANDA_TARGET_LINUX)

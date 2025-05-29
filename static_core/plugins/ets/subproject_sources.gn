@@ -103,6 +103,8 @@ srcs_runtime = [
   "runtime/ets_napi_env.cpp",
   "runtime/ets_native_library.cpp",
   "runtime/ets_native_library_provider.cpp",
+  "runtime/ets_namespace_manager.cpp",
+  "runtime/ets_namespace_manager_impl.cpp",
   "runtime/ets_object_state_info.cpp",
   "runtime/ets_object_state_table.cpp",
   "runtime/ets_platform_types.cpp",
