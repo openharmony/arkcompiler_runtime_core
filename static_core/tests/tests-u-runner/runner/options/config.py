@@ -79,7 +79,6 @@ class Config:
             "declgen_ts2ets_cts",
             "recheck",
             "declgen_ets2ets",
-            "declgen_ets2etsisolated",
         ],
         cast_to_type=_to_test_suites,
         required=True,
