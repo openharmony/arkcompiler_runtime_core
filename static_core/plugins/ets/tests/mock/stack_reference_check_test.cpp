@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,7 @@ TEST_F(StackReferenceCheckTest, SingleObjectStackTest)
     ets_string ets_str = env->NewStringUTF("Hello world");
     ASSERT_NE(ets_str, nullptr);
 
-    ets_class cls_A = env->FindClass("StackReferenceCheckTest");
+    ets_class cls_A = env->FindClass("StackReferenceCheckTest/StackReferenceCheckTest");
     ASSERT_NE(cls_A, nullptr);
 
     std::array<EtsNativeMethod, 1> native_methods {
@@ -119,7 +119,7 @@ TEST_F(StackReferenceCheckTest, MultiObjectStackTest)
     ets_string ets_str4 = env->NewStringUTF("Hello world");
     ASSERT_NE(ets_str4, nullptr);
 
-    ets_class cls_A = env->FindClass("StackReferenceCheckTest");
+    ets_class cls_A = env->FindClass("StackReferenceCheckTest/StackReferenceCheckTest");
     ASSERT_NE(cls_A, nullptr);
 
     const std::string signature("Lstd/core/String;Lstd/core/String;Lstd/core/String;Lstd/core/String;:Z");

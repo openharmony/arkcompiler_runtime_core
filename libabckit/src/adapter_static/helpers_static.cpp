@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -180,8 +180,8 @@ AbckitIsaApiStaticOpcode GetStaticOpcode(ark::compiler::Inst *inst)
             return ABCKIT_ISA_API_STATIC_OPCODE_NULLPTR;
         case ark::compiler::Opcode::Phi:
             return ABCKIT_ISA_API_STATIC_OPCODE_PHI;
-        case ark::compiler::Opcode::LoadUndefined:
-            return ABCKIT_ISA_API_STATIC_OPCODE_LOADUNDEFINED;
+        case ark::compiler::Opcode::LoadUniqueObject:
+            return ABCKIT_ISA_API_STATIC_OPCODE_LOADNULLVALUE;
         case ark::compiler::Opcode::Try:
             return ABCKIT_ISA_API_STATIC_OPCODE_TRY;
         case ark::compiler::Opcode::CatchPhi:

@@ -1,5 +1,5 @@
 #
-#     Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+#     Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
 #     You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 chapters:
   - ch1:
-      - folder1/file1.sts
+      - folder1/file1.ets
       - folder2
-      - folder3/file*.sts
+      - folder3/file*.ets
   - ch2:
       - ch1
   - ch3:
@@ -25,20 +25,20 @@ chapters:
       - exclude:
           - ch1
   - ch4_1:
-      - folder1/file1.sts
+      - folder1/file1.ets
       - exclude:
-          - folder1/file2.sts
+          - folder1/file2.ets
   - ch4_2:
-      - folder1/file2.sts
+      - folder1/file2.ets
       - exclude:
-          - folder1/file1.sts
+          - folder1/file1.ets
   - ch4:
     - ch4_1
     - ch4_2
   - ch5:
       - folder3
       - exclude:
-          - folder3/test*.sts
+          - folder3/test*.ets
   - ch6:
       - '*'
   - ch7:
@@ -48,15 +48,15 @@ chapters:
   - ch8:
       - ch1
       - exclude:
-          - folder2/file1.sts
+          - folder2/file1.ets
   - ch9:
       - ch1
-      - folder4/*.sts
+      - folder4/*.ets
       - exclude:
           - folder2
   - ch10:
       - ch1
-      - folder4/*.sts
+      - folder4/*.ets
       - exclude:
           - folder2
           - ch1
@@ -66,14 +66,14 @@ chapters:
       - exclude:
         - ch4_2
   - ch12:
-      - folder3/test*.sts
+      - folder3/test*.ets
       - exclude:
         - folder3
   - ch13:
       - folder5
   - ch14:
-      - folder5/file1.sts
+      - folder5/file1.ets
   - ch15:
-      - folder1/file0.sts
+      - folder1/file0.ets
   - ch16:
-      - 'fol-der 1/fi_le 1.sts'
+      - 'fol-der 1/fi_le 1.ets'

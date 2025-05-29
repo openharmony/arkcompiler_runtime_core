@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -330,6 +330,51 @@ public:
         return true;
     }
 
+    virtual bool IsMethodNativeApi([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsNecessarySwitchThreadState([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual uint8_t GetStackReferenceMask() const
+    {
+        return 0U;
+    }
+
+    virtual bool CanNativeMethodUseObjects([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsNativeMethodOptimizationEnabled() const
+    {
+        return false;
+    }
+
+    virtual void *GetMethodNativePointer([[maybe_unused]] MethodPtr method) const
+    {
+        return nullptr;
+    }
+
+    virtual uint64_t GetDeprecatedNativeApiMask() const
+    {
+        return 0U;
+    }
+
+    virtual uint32_t GetRuntimeClassOffset([[maybe_unused]] Arch arch) const
+    {
+        return 0U;
+    }
+
     virtual bool IsMethodFinal([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -594,6 +639,10 @@ public:
     {
         return ark::cross_values::GetMethodCompiledEntryPointOffset(arch);
     }
+    uint32_t GetNativePointerOffset(Arch arch) const
+    {
+        return ark::cross_values::GetMethodNativePointerOffset(arch);
+    }
     uint32_t GetPandaFileOffset(Arch arch) const
     {
         return ark::cross_values::GetMethodPandaFileOffset(arch);
@@ -641,11 +690,15 @@ public:
     {
         return 0;
     }
-    virtual uint64_t GetUndefinedObject() const
+    virtual size_t GetTlsNativeApiOffset([[maybe_unused]] Arch arch) const
     {
         return 0;
     }
-    virtual size_t GetTlsUndefinedObjectOffset([[maybe_unused]] Arch arch) const
+    virtual uint64_t GetUniqueObject() const
+    {
+        return 0;
+    }
+    virtual size_t GetTlsUniqueObjectOffset([[maybe_unused]] Arch arch) const
     {
         return 0;
     }
@@ -969,6 +1022,11 @@ public:
         return 0;
     }
 
+    virtual uint64_t GetUniqClassId([[maybe_unused]] ClassPtr klass) const
+    {
+        return 0;
+    }
+
     virtual IdType GetClassIdWithinFile([[maybe_unused]] MethodPtr method, [[maybe_unused]] ClassPtr klass) const
     {
         return 0;
@@ -1041,7 +1099,8 @@ public:
      * @return return field or nullptr if it cannot be resolved
      */
     virtual FieldPtr ResolveField([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t unused,
-                                  [[maybe_unused]] bool allowExternal, [[maybe_unused]] uint32_t *classId)
+                                  [[maybe_unused]] bool isStatic, [[maybe_unused]] bool allowExternal,
+                                  [[maybe_unused]] uint32_t *classId)
     {
         return nullptr;
     }
@@ -1583,9 +1642,10 @@ enum class DeoptimizeType : uint8_t {
     NEGATIVE_CHECK,
     CHECK_CAST,
     ANY_TYPE_CHECK,
-    OVERFLOW,
+    OVERFLOW_TYPE,
     HOLE,
     NOT_NUMBER,
+    NOT_SUPPORTED_NATIVE,
     CAUSE_METHOD_DESTRUCTION,
     NOT_SMALL_INT = CAUSE_METHOD_DESTRUCTION,
     BOUNDS_CHECK_WITH_DEOPT,
@@ -1599,23 +1659,15 @@ enum class DeoptimizeType : uint8_t {
 
 inline constexpr auto DEOPT_COUNT = static_cast<uint8_t>(DeoptimizeType::COUNT);
 
-inline constexpr std::array<const char *, DEOPT_COUNT> DEOPT_TYPE_NAMES = {"INVALID_TYPE",
-                                                                           "INLINE_CHA",
-                                                                           "NULL_CHECK",
-                                                                           "BOUNDS_CHECK",
-                                                                           "ZERO_CHECK",
-                                                                           "NEGATIVE_CHECK",
-                                                                           "CHECK_CAST",
-                                                                           "ANY_TYPE_CHECK",
-                                                                           "OVERFLOW",
-                                                                           "HOLE ",
-                                                                           "NOT_NUMBER",
-                                                                           "NOT_SMALL_INT",
-                                                                           "BOUNDS_CHECK_WITH_DEOPT",
-                                                                           "DOUBLE_WITH_INT",
-                                                                           "INLINE_IC",
-                                                                           "INLINE_DYN",
-                                                                           "NOT_PROFILED",
+inline constexpr std::array<const char *, DEOPT_COUNT> DEOPT_TYPE_NAMES = {"INVALID_TYPE",    "INLINE_CHA",
+                                                                           "NULL_CHECK",      "BOUNDS_CHECK",
+                                                                           "ZERO_CHECK",      "NEGATIVE_CHECK",
+                                                                           "CHECK_CAST",      "ANY_TYPE_CHECK",
+                                                                           "OVERFLOW",        "HOLE ",
+                                                                           "NOT_NUMBER",      "NOT_SUPPORTED_NATIVE",
+                                                                           "NOT_SMALL_INT",   "BOUNDS_CHECK_WITH_DEOPT",
+                                                                           "DOUBLE_WITH_INT", "INLINE_IC",
+                                                                           "INLINE_DYN",      "NOT_PROFILED",
                                                                            "IFIMM_TRY"};
 
 inline const char *DeoptimizeTypeToString(DeoptimizeType deoptType)

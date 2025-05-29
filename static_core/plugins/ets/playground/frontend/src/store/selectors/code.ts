@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@ import { ICodeReq } from '../../models/code';
 
 export const selectCompileLoading = (state: RootState): boolean => state.code.isCompileLoading;
 export const selectRunLoading = (state: RootState): boolean => state.code.isRunLoading;
+export const selectShareLoading = (state: RootState): boolean => state.code.isShareLoading;
 export const selectCode = (state: RootState): string => state.code.code;
 export const selectCompileRes = (state: RootState): ICodeReq | null => state.code.compileRes;
 export const selectRunRes = (state: RootState): ICodeReq | null => state.code.runRes;

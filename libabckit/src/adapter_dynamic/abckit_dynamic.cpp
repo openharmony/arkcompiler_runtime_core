@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -611,8 +611,9 @@ std::unique_ptr<AbckitCoreNamespace> CreateNamespace(pandasm::Function &func, Ab
     namespaceFunc->impl = std::make_unique<AbckitArktsFunction>();
     namespaceFunc->GetArkTSImpl()->impl = &func;
     namespaceFunc->GetArkTSImpl()->core = namespaceFunc.get();
-    ASSERT(file->nameToFunction.count(func.name) == 0);
-    file->nameToFunction[func.name] = namespaceFunc.get();
+    auto &nameToFunction = func.IsStatic() ? file->nameToFunctionStatic : file->nameToFunctionInstance;
+    ASSERT(nameToFunction.count(func.name) == 0);
+    nameToFunction[func.name] = namespaceFunc.get();
 
     auto n = std::make_unique<AbckitCoreNamespace>(m.get());
     n->impl = std::make_unique<AbckitArktsNamespace>();
@@ -896,8 +897,9 @@ std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionNa
         function->isAnonymous = IsAnonymousName(functionName);
     }
     SetImpl(function, functionImpl, m);
-    ASSERT(file->nameToFunction.count(functionImpl.name) == 0);
-    file->nameToFunction[functionImpl.name] = function.get();
+    auto &nameToFunction = functionImpl.IsStatic() ? file->nameToFunctionStatic : file->nameToFunctionInstance;
+    ASSERT(nameToFunction.count(functionImpl.name) == 0);
+    nameToFunction[functionImpl.name] = function.get();
 
     CreateFunctionAnnotations(file, functionImpl, function.get());
 

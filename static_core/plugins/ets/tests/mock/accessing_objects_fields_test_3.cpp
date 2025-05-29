@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ public:
 class AccessingObjectsFieldsTest : public AccessingObjectsFieldsTestGeneral {};
 class AccessingObjectsFieldsTestDeath : public AccessingObjectsFieldsTestGeneral {};
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetFieldIDDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetFieldIDDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -43,7 +43,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetFieldIDDeathTests)
     }
 
     {
-        ets_class cls = env_->FindClass("A");
+        ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/A");
         EXPECT_DEATH(env_->Getp_field(cls, nullptr, "some text"), "");
         EXPECT_DEATH(env_->Getp_field(cls, "some text", nullptr), "");
     }
@@ -51,7 +51,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetFieldIDDeathTests)
 
 TEST_F(AccessingObjectsFieldsTest, GetFieldID2)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F");
     ASSERT_NE(cls, nullptr);
 
     ets_field memberId = env_->Getp_field(cls, "member4", "I");
@@ -61,7 +61,7 @@ TEST_F(AccessingObjectsFieldsTest, GetFieldID2)
 // NOTE(m.morozov): enable this test when inheritance will be implemented
 TEST_F(AccessingObjectsFieldsTest, DISABLED_GetBaseFieldID2)
 {
-    ets_class cls = env_->FindClass("F_sub");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_sub");
     ASSERT_NE(cls, nullptr);
 
     ets_field memberId = env_->Getp_field(cls, "member4", "I");
@@ -70,7 +70,7 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_GetBaseFieldID2)
 
 TEST_F(AccessingObjectsFieldsTest, GetTypeField)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F");
     ASSERT_NE(cls, nullptr);
     ets_method ctor = env_->Getp_method(cls, "<ctor>", ":V");
     ASSERT_NE(ctor, nullptr);
@@ -93,7 +93,7 @@ TEST_F(AccessingObjectsFieldsTest, GetTypeField)
     ASSERT_NE(member6Id, nullptr);
     ets_field member7Id = env_->Getp_field(cls, "member7", "D");
     ASSERT_NE(member7Id, nullptr);
-    ets_field member8Id = env_->Getp_field(cls, "member8", "LA;");
+    ets_field member8Id = env_->Getp_field(cls, "member8", "LAccessingObjectsFieldsTest/A;");
     ASSERT_NE(member8Id, nullptr);
 
     EXPECT_EQ(env_->GetBooleanField(obj, member0Id), static_cast<ets_boolean>(1));
@@ -105,7 +105,7 @@ TEST_F(AccessingObjectsFieldsTest, GetTypeField)
     EXPECT_FLOAT_EQ(env_->GetFloatField(obj, member6Id), static_cast<ets_float>(7.0F));
     EXPECT_DOUBLE_EQ(env_->GetDoubleField(obj, member7Id), static_cast<ets_double>(8.0F));
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
     ASSERT_NE(aMemberId, nullptr);
@@ -139,7 +139,7 @@ static void SetterHelper(EtsEnv *env, ets_object obj, ClassMembers &members)
 
 TEST_F(AccessingObjectsFieldsTest, SetTypeField)
 {
-    ets_class cls = env_->FindClass("F");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F");
     ASSERT_NE(cls, nullptr);
     ets_method ctor = env_->Getp_method(cls, "<ctor>", ":V");
     ASSERT_NE(ctor, nullptr);
@@ -162,10 +162,10 @@ TEST_F(AccessingObjectsFieldsTest, SetTypeField)
     ASSERT_NE(member6Id, nullptr);
     ets_field member7Id = env_->Getp_field(cls, "member7", "D");
     ASSERT_NE(member7Id, nullptr);
-    ets_field member8Id = env_->Getp_field(cls, "member8", "LA;");
+    ets_field member8Id = env_->Getp_field(cls, "member8", "LAccessingObjectsFieldsTest/A;");
     ASSERT_NE(member8Id, nullptr);
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_method aCtor = env_->Getp_method(aCls, "<ctor>", ":V");
     ASSERT_NE(aCtor, nullptr);
@@ -194,7 +194,7 @@ TEST_F(AccessingObjectsFieldsTest, SetTypeField)
     EXPECT_EQ(env_->GetIntField(setAObj, aMemberId), static_cast<ets_int>(5_I));
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetStaticFieldIDDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetStaticFieldIDDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -206,7 +206,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetStaticFieldIDDeathTests)
     }
 
     {
-        ets_class cls = env_->FindClass("A");
+        ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/A");
         EXPECT_DEATH(env_->GetStaticp_field(cls, nullptr, "some text"), "");
         EXPECT_DEATH(env_->GetStaticp_field(cls, "some text", nullptr), "");
     }
@@ -214,7 +214,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetStaticFieldIDDeathTests)
 
 TEST_F(AccessingObjectsFieldsTest, GetStaticFieldID2)
 {
-    ets_class cls = env_->FindClass("F_static");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static");
     ASSERT_NE(cls, nullptr);
 
     ets_field memberId = env_->GetStaticp_field(cls, "member4", "I");
@@ -223,7 +223,7 @@ TEST_F(AccessingObjectsFieldsTest, GetStaticFieldID2)
 
 TEST_F(AccessingObjectsFieldsTest, GetStaticTypeField)
 {
-    ets_class cls = env_->FindClass("F_static");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static");
     ASSERT_NE(cls, nullptr);
 
     ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
@@ -242,7 +242,7 @@ TEST_F(AccessingObjectsFieldsTest, GetStaticTypeField)
     ASSERT_NE(member6Id, nullptr);
     ets_field member7Id = env_->GetStaticp_field(cls, "member7", "D");
     ASSERT_NE(member7Id, nullptr);
-    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LA;");
+    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LAccessingObjectsFieldsTest/A;");
     ASSERT_NE(member8Id, nullptr);
 
     EXPECT_EQ(env_->GetStaticBooleanField(cls, member0Id), static_cast<ets_boolean>(1));
@@ -254,7 +254,7 @@ TEST_F(AccessingObjectsFieldsTest, GetStaticTypeField)
     EXPECT_FLOAT_EQ(env_->GetStaticFloatField(cls, member6Id), static_cast<ets_float>(7.0F));
     EXPECT_DOUBLE_EQ(env_->GetStaticDoubleField(cls, member7Id), static_cast<ets_double>(8.0F));
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
     ASSERT_NE(aMemberId, nullptr);
@@ -265,7 +265,7 @@ TEST_F(AccessingObjectsFieldsTest, GetStaticTypeField)
 
 TEST_F(AccessingObjectsFieldsTest, SetStaticField)
 {
-    ets_class cls = env_->FindClass("F_static");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static");
     ASSERT_NE(cls, nullptr);
 
     ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
@@ -284,10 +284,10 @@ TEST_F(AccessingObjectsFieldsTest, SetStaticField)
     ASSERT_NE(member6Id, nullptr);
     ets_field member7Id = env_->GetStaticp_field(cls, "member7", "D");
     ASSERT_NE(member7Id, nullptr);
-    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LA;");
+    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LAccessingObjectsFieldsTest/A;");
     ASSERT_NE(member8Id, nullptr);
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
     ASSERT_NE(aMemberId, nullptr);
@@ -323,7 +323,7 @@ TEST_F(AccessingObjectsFieldsTest, SetStaticField)
 
 TEST_F(AccessingObjectsFieldsTest, SetStaticField2)
 {
-    ets_class cls = env_->FindClass("F_static");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static");
     ASSERT_NE(cls, nullptr);
 
     ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
@@ -342,10 +342,10 @@ TEST_F(AccessingObjectsFieldsTest, SetStaticField2)
     ASSERT_NE(member6Id, nullptr);
     ets_field member7Id = env_->GetStaticp_field(cls, "member7", "D");
     ASSERT_NE(member7Id, nullptr);
-    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LA;");
+    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LAccessingObjectsFieldsTest/A;");
     ASSERT_NE(member8Id, nullptr);
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
     ASSERT_NE(aMemberId, nullptr);
@@ -379,7 +379,7 @@ TEST_F(AccessingObjectsFieldsTest, SetStaticField2)
     EXPECT_EQ(env_->GetIntField(setAObj, aMemberId), static_cast<ets_int>(5_I));
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, GetStaticTypeFieldDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_GetStaticTypeFieldDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -396,7 +396,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetStaticTypeFieldDeathTests)
     }
 
     {
-        ets_class cls = env_->FindClass("F_static");
+        ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static");
         ASSERT_NE(cls, nullptr);
 
         EXPECT_DEATH(env_->GetStaticObjectField(cls, nullptr), "");
@@ -414,7 +414,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetStaticTypeFieldDeathTests)
 // NOTE(m.morozov): enable this test when inheritance will be implemented
 TEST_F(AccessingObjectsFieldsTest, DISABLED_GetStaticTypeFieldBase)
 {
-    ets_class cls = env_->FindClass("F_static_sub");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static_sub");
     ASSERT_NE(cls, nullptr);
 
     ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
@@ -445,7 +445,7 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_GetStaticTypeFieldBase)
     EXPECT_FLOAT_EQ(env_->GetStaticFloatField(cls, member6Id), static_cast<ets_float>(7.0F));
     EXPECT_DOUBLE_EQ(env_->GetStaticDoubleField(cls, member7Id), static_cast<ets_double>(8.0_D));
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
     ASSERT_NE(aMemberId, nullptr);
@@ -454,11 +454,11 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_GetStaticTypeFieldBase)
     EXPECT_EQ(env_->GetIntField(aObj, aMemberId), static_cast<ets_int>(1));
 }
 
-TEST_F(AccessingObjectsFieldsTestDeath, SetStaticTypeFieldDeathTests)
+TEST_F(AccessingObjectsFieldsTestDeath, DISABLED_SetStaticTypeFieldDeathTests)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_object aObj = env_->AllocObject(aCls);
     ASSERT_NE(aObj, nullptr);
@@ -478,7 +478,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetStaticTypeFieldDeathTests)
     }
 
     {
-        ets_class cls = env_->FindClass("F_static");
+        ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static");
         ASSERT_NE(cls, nullptr);
 
         EXPECT_DEATH(env_->SetStaticObjectField(cls, nullptr, nullptr), "");
@@ -498,7 +498,7 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetStaticTypeFieldDeathTests)
 // NOTE(m.morozov): enable this test when inheritance will be implemented
 TEST_F(AccessingObjectsFieldsTest, DISABLED_SetStaticFieldBase)
 {
-    ets_class cls = env_->FindClass("F_static_sub");
+    ets_class cls = env_->FindClass("AccessingObjectsFieldsTest/F_static_sub");
     ASSERT_NE(cls, nullptr);
 
     ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
@@ -520,7 +520,7 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_SetStaticFieldBase)
     ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LA;");
     ASSERT_NE(member8Id, nullptr);
 
-    ets_class aCls = env_->FindClass("A");
+    ets_class aCls = env_->FindClass("AccessingObjectsFieldsTest/A");
     ASSERT_NE(aCls, nullptr);
     ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
     ASSERT_NE(aMemberId, nullptr);

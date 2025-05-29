@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,9 +19,9 @@ cases:
       use: |-
           let a: A = {}
           let b: B = {}
-          assert a instanceof A
-          assert b instanceof B
-          assert a != b
+          assertTrue( a instanceof A )
+          assertTrue( b instanceof B )
+          assertTrue( a != b )
 
     - decl: |-
           class A {}
@@ -33,17 +33,17 @@ cases:
           let b1: B = { ref: {} }
           let b2: B = { ref: a }
           let b3: B = { ref: new A() }
-          assert b1.ref instanceof A
-          assert b2.ref instanceof A
-          assert b3.ref instanceof A
-          assert b2.ref == a
+          assertTrue( b1.ref instanceof A )
+          assertTrue( b2.ref instanceof A )
+          assertTrue( b3.ref instanceof A )
+          assertTrue( b2.ref == a )
 
     - decl: |-
           class A {
-              b: B|null
+              b: B|null = null
           }
           class B {
-              c: C|null
+              c: C|null = null
           }
           class C {
               name: string = "";
@@ -51,8 +51,8 @@ cases:
           }
       use: |-
           let a: A = { b: { c: { age: 42, name: "John" }}}
-          assert a.b.c.name == "John"
-          assert a.b.c.age == 42
+          assertTrue( a.b.c.name == "John" )
+          assertTrue( a.b.c.age == 42 )
 
     - decl: |-
           class A {
@@ -62,10 +62,10 @@ cases:
               return { arr: [ a.arr[1], a.arr[0] ]}
           }
       use: |-
-          assert { arr: ["a", "b"] } as A != { arr: ["a", "b"] } as A
+          assertTrue( { arr: ["a", "b"] } as A != { arr: ["a", "b"] } as A )
           let a: A = foo({ arr: ["a", "b"]})
-          assert a.arr[0] == "b"
-          assert a.arr[1] == "a"
+          assertTrue( a.arr[0] == "b" )
+          assertTrue( a.arr[1] == "a" )
 
     - decl: |-
           class A {
@@ -75,8 +75,8 @@ cases:
           let arr: A[] = new A[2]
           arr[0] = { name: "John" }
           arr[1] = { name: "Jack" }
-          assert arr[0] instanceof A && arr[0].name == "John"
-          assert arr[1] instanceof A && arr[1].name == "Jack"
+          assertTrue( arr[0] instanceof A && arr[0].name == "John" )
+          assertTrue( arr[1] instanceof A && arr[1].name == "Jack" )
 
     - decl: |-
           class A {
@@ -84,8 +84,8 @@ cases:
           }
       use: |-
           let arr: A[] = [ { name: "John" }, { name: null } ]
-          assert arr[0] instanceof A && arr[0].name == "John"
-          assert arr[1] instanceof A && arr[1].name == null
+          assertTrue( arr[0] instanceof A && arr[0].name == "John" )
+          assertTrue( arr[1] instanceof A && arr[1].name == null )
 
     - decl: |-
           class A {
@@ -96,11 +96,11 @@ cases:
           }
       use: |-
           let b: B = { name: "John", age: 42 }
-          assert b instanceof B && b.age == 42 && b.name == "John"
+          assertTrue( b instanceof B && b.age == 42 && b.name == "John" )
           let a: A = b
-          assert a instanceof A && a.name == "John"
+          assertTrue( a instanceof A && a.name == "John" )
           let c: B = {}
-          assert c instanceof B && c.age == 0 && c.name == null
+          assertTrue( c instanceof B && c.age == 0 && c.name == null )
 
     - decl: |-
           class A {
@@ -108,11 +108,11 @@ cases:
           }
       use: |-
           let a: A = {}
-          assert a instanceof A && a.age == 42
+          assertTrue( a instanceof A && a.age == 42 )
 
     - use: |-
           let v: Object[] = [{}, {}, {}, {}, {}]
-          assert v.length == 5 && v[0] instanceof Object && v[0] != v[4]
+          assertTrue( v.length == 5 && v[0] instanceof Object && v[0] != v[4] )
 
     - decl: |-
           class A {
@@ -123,17 +123,17 @@ cases:
           }
       use: |-
           let v: Object[] = [ {} as A, {} as B, {} ]
-          assert v[0] instanceof A && (v[0] as A).age == 1
-          assert v[1] instanceof B && (v[1] as B).age == 2
-          assert v[2] instanceof Object
+          assertTrue( v[0] instanceof A && (v[0] as A).age == 1 )
+          assertTrue( v[1] instanceof B && (v[1] as B).age == 2 )
+          assertTrue( v[2] instanceof Object )
 
     - decl: |-
           class A {
-              readonly name: string|null
+              readonly name: string|null = null
           }
       use: |-
           let a: A = { name: "John" }
-          assert a.name == "John"
+          assertTrue( a.name == "John" )
 
     - decl: |-
           class A {
@@ -144,7 +144,7 @@ cases:
           let v = 42
           // expressions in field values
           let a: A = { age: v, adult: v >= 18 }
-          assert(a.age == 42 && a.adult)
+          assertTrue(a.age == 42 && a.adult)
 
     - decl: |-
           class A {
@@ -156,7 +156,7 @@ cases:
           let v = 42
           // expressions in field values
           let a: A = { fld1: v++, fld2: v++, fld3: v++ }
-          assert(v == 45 && a.fld1 == 42 && a.fld2 == 43 && a.fld3 == 44)
+          assertTrue(v == 45 && a.fld1 == 42 && a.fld2 == 43 && a.fld3 == 44)
 
     - decl: |-
           class A {
@@ -171,7 +171,7 @@ cases:
           let fn = "John"
           // expressions in field values
           let a: A = { first_name: fn, last_name: ln(), full_name: fn + " " + ln() }
-          assert(a.full_name == "John Smith")
+          assertTrue(a.full_name == "John Smith")
 
     - decl: |-
           class A {
@@ -181,4 +181,4 @@ cases:
       use: |-
           // expressions in field values
           let a: A = { first_name: undefined, last_name: null }
-          assert(a.first_name === undefined && a.last_name === null)
+          assertTrue(a.first_name === undefined && a.last_name === null)

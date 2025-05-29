@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,8 @@ public:
     bool Start()
     {
         managedThread_ = os::thread::GetCurrentThreadId();
-        isActive_ = true;
+        // Atomic with release order reason: To ensure start store correctly
+        isActive_.store(true, std::memory_order_release);
 
         // All prepairing actions should be done before this thread is started
         samplerThread_ = std::make_unique<std::thread>(&Sampler::SamplerThreadEntry, this);
@@ -74,7 +75,8 @@ public:
             UNREACHABLE();
         }
 
-        isActive_ = false;
+        // Atomic with release order reason: To ensure stop store correctly
+        isActive_.store(false, std::memory_order_release);
 
         samplerThread_->join();
     }
@@ -98,8 +100,8 @@ private:
         }
 
         auto pid = getpid();
-        // Atomic with relaxed order reason: data race with is_active_
-        while (isActive_.load(std::memory_order_relaxed)) {
+        // Atomic with acquire order reason: To ensure start/stop load correctly
+        while (isActive_.load(std::memory_order_acquire)) {
             {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 if (syscall(SYS_tgkill, pid, managedThread_, SIGPROF) != 0) {
@@ -112,7 +114,7 @@ private:
 
     std::unique_ptr<std::thread> samplerThread_ {nullptr};
 
-    std::atomic<bool> isActive_ = false;
+    std::atomic<bool> isActive_ {false};
 
     std::chrono::microseconds sampleInterval_ {200};  // NOLINT(readability-magic-numbers)
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,22 +22,22 @@ class EtsGenericStaticLiteralTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsGenericStaticLiteralTsToEtsTest, checkGenericLiteralStart)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericLiteralStart"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericLiteralStart"));
 }
 
 TEST_F(EtsGenericStaticLiteralTsToEtsTest, checkGenericLiteralStop)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericLiteralStop"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericLiteralStop"));
 }
 
 TEST_F(EtsGenericStaticLiteralTsToEtsTest, checkGenericLiteralCallFromTsStart)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericLiteralCallFromTsStart"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericLiteralCallFromTsStart"));
 }
 
 TEST_F(EtsGenericStaticLiteralTsToEtsTest, checkGenericLiteralCallFromTsStop)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkGenericLiteralCallFromTsStop"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkGenericLiteralCallFromTsStop"));
 }
 
 }  // namespace ark::ets::interop::js::testing

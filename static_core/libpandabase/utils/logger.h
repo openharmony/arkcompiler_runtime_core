@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/dfx.h"
 
+#include <cstdio>
 #include <cstdint>
 
 #include <bitset>
@@ -52,6 +53,17 @@ public:
 #include <logger_enum_gen.h>
 
     using ComponentMask = std::bitset<Component::LAST>;
+    using Formatter = void (*)(FILE *stream, int level, const char *component, const char *message);
+
+    // NOTE:
+    //  The Level enumeration is represented as int in the public interface,
+    //  so we must provide it unchanged in the future.
+    static_assert(static_cast<int>(Level::FATAL) == 0);
+    static_assert(static_cast<int>(Level::ERROR) == 1);
+    static_assert(static_cast<int>(Level::WARNING) == 2);
+    static_assert(static_cast<int>(Level::INFO) == 3);
+    static_assert(static_cast<int>(Level::DEBUG) == 4);
+    static_assert(static_cast<int>(Level::LAST) == 5);
 
     enum PandaLog2MobileLog : int {
         UNKNOWN = 0,
@@ -129,14 +141,17 @@ public:
         NO_MOVE_SEMANTIC(Message);
     };
 
-    PANDA_PUBLIC_API static void Initialize(const base_options::Options &options);
+    PANDA_PUBLIC_API static void Initialize(const base_options::Options &options, Formatter formatter = nullptr);
 
     PANDA_PUBLIC_API static void InitializeFileLogging(const std::string &logFile, Level level,
-                                                       ComponentMask componentMask, bool isFastLogging = false);
+                                                       ComponentMask componentMask, bool isFastLogging = false,
+                                                       Formatter formatter = nullptr);
 
-    PANDA_PUBLIC_API static void InitializeStdLogging(Level level, ComponentMask componentMask);
+    PANDA_PUBLIC_API static void InitializeStdLogging(Level level, ComponentMask componentMask,
+                                                      Formatter formatter = nullptr);
 
-    PANDA_PUBLIC_API static void InitializeDummyLogging(Level level = Level::DEBUG, ComponentMask componentMask = 0);
+    PANDA_PUBLIC_API static void InitializeDummyLogging(Level level = Level::DEBUG, ComponentMask componentMask = 0,
+                                                        Formatter formatter = nullptr);
 
     PANDA_PUBLIC_API static void Destroy();
 
@@ -281,8 +296,10 @@ public:
     }
 
 protected:
-    Logger(Level level, ComponentMask componentMask)
-        : level_(level),
+    Logger(FILE *stream, Level level, ComponentMask componentMask, Formatter formatter)
+        : stream_(stream),
+          formatter_(formatter),
+          level_(level),
           componentMask_(componentMask)
 #ifndef NDEBUG
           ,
@@ -292,8 +309,11 @@ protected:
     {
     }
 
-    Logger(Level level, ComponentMask componentMask, [[maybe_unused]] Level nestedAllowedLevel)
-        : level_(level),
+    Logger(FILE *stream, Level level, ComponentMask componentMask, Formatter formatter,
+           [[maybe_unused]] Level nestedAllowedLevel)
+        : stream_(stream),
+          formatter_(formatter),
+          level_(level),
           componentMask_(componentMask)
 #ifndef NDEBUG
           ,
@@ -318,7 +338,13 @@ protected:
 
     static thread_local int nesting_;
 
+protected:
+    FILE *stream_;         // NOLINT(misc-non-private-member-variables-in-classes)
+    Formatter formatter_;  // NOLINT(misc-non-private-member-variables-in-classes)
+
 private:
+    static void DefaultFormatter(FILE *stream, int level, const char *component, const char *message);
+
     Level level_;
     ComponentMask componentMask_;
 #ifndef NDEBUG
@@ -341,21 +367,22 @@ inline constexpr Logger::ComponentMask LOGGER_COMPONENT_MASK_ALL = Logger::Compo
 
 class FileLogger : public Logger {
 protected:
-    FileLogger(std::ofstream &&stream, Level level, ComponentMask componentMask)
-        : Logger(level, componentMask), stream_(std::forward<std::ofstream>(stream))
+    FileLogger(FILE *stream, Level level, ComponentMask componentMask, Formatter formatter)
+        : Logger(stream, level, componentMask, formatter)
     {
     }
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
     void SyncOutputResource() override {}
 
-    ~FileLogger() override = default;
-
+    ~FileLogger() override
+    {
+        if (stream_ != stdout && stream_ != stderr) {
+            fclose(stream_);
+        }
+    }
     NO_COPY_SEMANTIC(FileLogger);
     NO_MOVE_SEMANTIC(FileLogger);
-
-private:
-    std::ofstream stream_;
 
     friend Logger;
 };
@@ -363,28 +390,34 @@ private:
 class FastFileLogger : public Logger {
 protected:
     // Uses advanced Logger constructor, so we tell to suppress all nested messages below WARNING severity
-    FastFileLogger(std::ofstream &&stream, Level level, ComponentMask componentMask)
-        : Logger(level, componentMask, Logger::Level::WARNING), stream_(std::forward<std::ofstream>(stream))
+    FastFileLogger(FILE *stream, Level level, ComponentMask componentMask, Formatter formatter)
+        : Logger(stream, level, componentMask, formatter, Logger::Level::WARNING)
     {
     }
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
     void SyncOutputResource() override;
 
-    ~FastFileLogger() override = default;
+    ~FastFileLogger() override
+    {
+        if (stream_ != stdout && stream_ != stderr) {
+            fclose(stream_);
+        }
+    }
 
     NO_COPY_SEMANTIC(FastFileLogger);
     NO_MOVE_SEMANTIC(FastFileLogger);
 
 private:
-    std::ofstream stream_;
-
     friend Logger;
 };
 
 class StderrLogger : public Logger {
 private:
-    StderrLogger(Level level, ComponentMask componentMask) : Logger(level, componentMask) {}
+    StderrLogger(Level level, ComponentMask componentMask, Formatter formatter)
+        : Logger(stderr, level, componentMask, formatter)
+    {
+    }
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
     void SyncOutputResource() override {}
@@ -399,7 +432,10 @@ private:
 
 class DummyLogger : public Logger {
 private:
-    DummyLogger(Level level, ComponentMask componentMask) : Logger(level, componentMask) {}
+    DummyLogger(Level level, ComponentMask componentMask, Formatter formatter)
+        : Logger(nullptr, level, componentMask, formatter)
+    {
+    }
 
     void LogLineInternal([[maybe_unused]] Level level, [[maybe_unused]] Component component,
                          [[maybe_unused]] const std::string &str) override

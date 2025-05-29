@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,5 +22,6 @@ cases:
     - { decl: 'const x = 1; let y = 2; const x = 3;' }
     - { decl: 'const x:int = new Object();' }
     - { decl: 'const x:Object = null;' }
+    - { decl: 'const x:Object|null' }
     - { decl: 'let y = "yes"; const x:boolean = y;' }
     - { decl: 'const obj: Object|null = new Object();', use: 'obj = null;' }

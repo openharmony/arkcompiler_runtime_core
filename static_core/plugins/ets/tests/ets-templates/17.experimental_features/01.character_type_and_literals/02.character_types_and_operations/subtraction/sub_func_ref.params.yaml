@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ vals:
 
     - v1: c'\u0041'
       v2: c'\u0001'
-      exp: "sub(v1, v2) - c' '"
+      exp: "(sub(v1, v2) - c' ') as Char"
       r: c' '
 
     - v1: c'\uFFFF'
@@ -39,7 +39,7 @@ vals:
 
     - v1: c'\u1010'
       v2: c'\u0101'
-      exp: "sub(v1 - c'\\u0101', v2 - c'\\u1010')"
+      exp: "sub((v1 - c'\\u0101') as Char, (v2 - c'\\u1010') as Char)"
       r: c'\u1E1E'
 
     - v1: c'∬'

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,6 +200,14 @@ void ThrowClassCircularityError(const PandaString &className, const LanguageCont
     ThrowException(ctx, thread, ctx.GetClassCircularityErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
+void ThrowCoroutinesLimitExceedError(const PandaString &msg)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    auto ctx = GetLanguageContext(thread);
+
+    ThrowException(ctx, thread, ctx.GetCoroutinesLimitExceedErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
+}
+
 NO_ADDRESS_SANITIZE void DropCFrameIfNecessary(ManagedThread *thread, StackWalker *stack, Frame *origFrame,
                                                FrameAccessor nextFrame, Method *method)
 {
@@ -350,6 +358,10 @@ void ThrowOutOfMemoryError(ManagedThread *thread, const PandaString &msg)
     auto ctx = GetLanguageContext(thread);
 
     if (thread->IsThrowingOOM()) {
+        // In case of OOM try to allocate exception object first,
+        // because allocator still may have some space that will be enough for allocating OOM exception.
+        // If during allocation allocator throws OOM once again, we use preallocate object without collecting stack
+        // trace.
         thread->SetUsePreAllocObj(true);
     }
 
@@ -440,7 +452,8 @@ void HandlePendingException(UnwindPolicy policy)
     ASSERT(thread->HasPendingException());
     LOG(DEBUG, INTEROP) << "HandlePendingException";
 
-    thread->GetVM()->ClearInteropHandleScopes(thread->GetCurrentFrame());
+    // NOTE(konstanting): a potential candidate for moving out of the core part
+    thread->GetVM()->CleanupCompiledFrameResources(thread->GetCurrentFrame());
 
     auto stack = StackWalker::Create(thread, policy);
     ASSERT(stack.IsCFrame());

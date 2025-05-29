@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -268,12 +268,12 @@ test_ets_files = [
   "ut/isa/isa_static/call/call_static_static",
   "ut/isa/isa_static/call/call_virtual_static",
   "ut/isa/isa_static/cmp/create_cmp_static",
+  "ut/isa/isa_static/load_nullvalue/load_nullvalue_static",
   "ut/isa/isa_static/load_string/load_string_static",
-  "ut/isa/isa_static/load_undefined/load_undefined_static",
   "ut/isa/isa_static/equals/equals_static",
   "ut/isa/isa_static/get_opcode/get_opcode_static",
   "ut/isa/isa_static/is_instance/is_instance_static",
-  "ut/isa/isa_static/is_undefined/is_undefined_static",
+  "ut/isa/isa_static/is_nullvalue/is_nullvalue_static",
   "ut/isa/isa_static/create_if/create_if_static",
   "ut/isa/isa_static/objects/objects",
   "ut/isa/isa_static/throw/throw_static",
@@ -497,7 +497,7 @@ foreach(file, test_ts_files) {
 
 foreach(file, test_ets_files) {
   ets2abc_gen_abc("gen_${file}_abc") {
-    test_ets = "${test_js_path}${file}.sts"
+    test_ets = "${test_js_path}${file}.ets"
     test_abc = "$target_out_dir/${file}.abc"
 
     # Only targets in this file can depend on this.
@@ -541,7 +541,9 @@ template("libabckit_host_unittest_action") {
           "/arkcompiler/runtime_core:" + rebase_path(_root_out_dir_) +
           "/arkcompiler/ets_runtime:" + rebase_path(_root_out_dir_) +
           "/thirdparty/icu:" + rebase_path(_root_out_dir_) +
-          "/thirdparty/zlib:",
+          "/thirdparty/zlib:" + rebase_path(_root_out_dir_) +
+          "/thirdparty/libuv:" + rebase_path(_root_out_dir_) + "/arkui/napi:" +
+          rebase_path(_root_out_dir_) + "/thirdparty/bounds_checking_function:",
     ]
 
     if (abckit_with_sanitizers) {
@@ -784,9 +786,9 @@ libabckit_host_unittest_action("abckit_gtests") {
     "ut/isa/isa_static/equals/equals_static.cpp",
     "ut/isa/isa_static/get_opcode/get_opcode_static.cpp",
     "ut/isa/isa_static/is_instance/is_instance.cpp",
-    "ut/isa/isa_static/is_undefined/is_undefined.cpp",
+    "ut/isa/isa_static/is_nullvalue/is_nullvalue.cpp",
+    "ut/isa/isa_static/load_nullvalue/load_nullvalue_static.cpp",
     "ut/isa/isa_static/load_string/load_string_static.cpp",
-    "ut/isa/isa_static/load_undefined/load_undefined_static.cpp",
     "ut/isa/isa_static/objects/objects.cpp",
     "ut/isa/isa_static/return/return_static.cpp",
     "ut/isa/isa_static/throw/throw_static.cpp",

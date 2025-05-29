@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ CoroutineManager::CoroutineManager(CoroutineFactory factory) : coFactory_(factor
 Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
 {
     CoroutineContext *ctx = CreateCoroutineContext(false);
-    auto *main = coFactory_(runtime, vm, "_main_", ctx, std::nullopt);
+    auto *main = coFactory_(runtime, vm, "_main_", ctx, std::nullopt, Coroutine::Type::MUTATOR);
     ASSERT(main != nullptr);
 
     Coroutine::SetCurrent(main);
@@ -49,7 +49,7 @@ void CoroutineManager::DestroyMainCoroutine()
 }
 
 Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent,
-                                                           PandaString name)
+                                                           PandaString name, Coroutine::Type type)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -60,7 +60,7 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
         // do not proceed if we cannot create a context for the new coroutine
         return nullptr;
     }
-    auto *co = coFactory_(runtime, vm, std::move(name), ctx, std::nullopt);
+    auto *co = coFactory_(runtime, vm, std::move(name), ctx, std::nullopt, type);
     ASSERT(co != nullptr);
     co->InitBuffers();
     if (makeCurrent) {
@@ -83,7 +83,8 @@ void CoroutineManager::DestroyEntrypointlessCoroutine(Coroutine *co)
 }
 
 Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completionEvent, Method *entrypoint,
-                                                     PandaVector<Value> &&arguments, PandaString name)
+                                                     PandaVector<Value> &&arguments, PandaString name,
+                                                     Coroutine::Type type)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -97,7 +98,7 @@ Coroutine *CoroutineManager::CreateCoroutineInstance(CompletionEvent *completion
     // assuming that the main coro is already created and Coroutine::GetCurrent is not nullptr
     ASSERT(Coroutine::GetCurrent() != nullptr);
     auto *coro = coFactory_(Runtime::GetCurrent(), Coroutine::GetCurrent()->GetVM(), std::move(name), ctx,
-                            Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)});
+                            Coroutine::ManagedEntrypointInfo {completionEvent, entrypoint, std::move(arguments)}, type);
     return coro;
 }
 
@@ -115,7 +116,7 @@ CoroutineManager::CoroutineFactory CoroutineManager::GetCoroutineFactory()
 uint32_t CoroutineManager::AllocateCoroutineId()
 {
     // Taken by copy-paste from MTThreadManager. Need to generalize if possible.
-    // NOTE(konstanting, #I67QXC): try to generalize internal ID allocation
+    // NOTE(konstanting, #IAD5MH): try to generalize internal ID allocation
     os::memory::LockHolder lock(idsLock_);
     for (size_t i = 0; i < coroutineIds_.size(); i++) {
         lastCoroutineId_ = (lastCoroutineId_ + 1) % coroutineIds_.size();
@@ -131,7 +132,7 @@ uint32_t CoroutineManager::AllocateCoroutineId()
 void CoroutineManager::FreeCoroutineId(uint32_t id)
 {
     // Taken by copy-paste from MTThreadManager. Need to generalize if possible.
-    // NOTE(konstanting, #I67QXC): try to generalize internal ID allocation
+    // NOTE(konstanting, #IAD5MH): try to generalize internal ID allocation
     id--;  // 0 is reserved as uninitialized value.
     os::memory::LockHolder lock(idsLock_);
     ASSERT(coroutineIds_[id]);
@@ -140,11 +141,13 @@ void CoroutineManager::FreeCoroutineId(uint32_t id)
 
 void CoroutineManager::SetSchedulingPolicy(CoroutineSchedulingPolicy policy)
 {
+    os::memory::LockHolder lock(policyLock_);
     schedulingPolicy_ = policy;
 }
 
 CoroutineSchedulingPolicy CoroutineManager::GetSchedulingPolicy() const
 {
+    os::memory::LockHolder lock(policyLock_);
     return schedulingPolicy_;
 }
 

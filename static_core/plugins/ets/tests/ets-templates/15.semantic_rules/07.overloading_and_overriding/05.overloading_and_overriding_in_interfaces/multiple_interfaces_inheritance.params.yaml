@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,10 +27,11 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assert(a.foo(1.1 as number) == 1);
-      assert(a.foo("some string") == 2);
+      assertTrue(a.foo(1.1 as number) == 1);
+      assertTrue(a.foo("some string") == 2);
 
-  - decl: |-
+  - tags: 'negative, compile-only'
+    decl: |-
       interface I {
           foo(i: number) {
               return 1;
@@ -44,7 +45,7 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assert(a.foo(1.1 as number) == 2);
+      assertTrue(a.foo(1.1 as number) == 2);
 
   - decl: |-
       interface I {
@@ -60,10 +61,11 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assert(a.foo(1.1 as number) == 1);
-      assert(a.foo("some string") == 2);
+      assertTrue(a.foo(1.1 as number) == 1);
+      assertTrue(a.foo("some string") == 2);
 
-  - decl: |-
+  - tags: 'negative, compile-only'
+    decl: |-
       interface I {
           foo(i: number) {
               return 1;
@@ -77,9 +79,10 @@ cases:
       class A implements I, J {}
     call: |-
       let a = new A();
-      assert(a.foo(1.1 as number) == 2);
+      assertTrue(a.foo(1.1 as number) == 2);
 
-  - decl: |-
+  - tags: 'negative, compile-only'
+    decl: |-
       interface I {
           foo(i: number) {
               return 1;
@@ -93,4 +96,4 @@ cases:
       class A implements J, I {}
     call: |-
       let a = new A();
-      assert(a.foo(1.1 as number) == 1);
+      assertTrue(a.foo(1.1 as number) == 1);

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -136,10 +136,6 @@ endif()
 
 include(cmake/RegisterPlugins.cmake)
 
-panda_promote_to_definitions(
-    PANDA_ENABLE_RELAYOUT_PROFILE
-)
-
 # ----- Deliverable executables and libraries ----------------------------------
 # Please override with per-target properties if your artifact should reside
 # elsewhere, like this:
@@ -200,6 +196,7 @@ define_property(TARGET
                 FULL_DOCS  "Whether the target is a first-level dependency of tests")
 
 add_custom_target(core_tests COMMENT "Running core test suites")
+set(DEFAULT_TEST_GROUP core_tests)
 
 # NB! ADDING THIS PROPERTY IS ALLOWED ONLY IN SPECIAL CASES. DO NOT COPY-PASTE IT.
 set_target_properties(core_tests PROPERTIES first-level-tests-dependency TRUE)
@@ -318,6 +315,7 @@ if(PANDA_WITH_RUNTIME)
 
     set(ICU_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/icu)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/icu)
+    add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/pcre2)
 endif()
 
 # ----- Testing ----------------------------------------------------------------
@@ -327,6 +325,7 @@ if(PANDA_WITH_TESTS)
     set_target_properties(gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set_target_properties(gtest_main PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set_target_properties(gmock PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    panda_target_compile_options(gtest PRIVATE "-Wno-implicit-float-conversion")
 
     option(RC_ENABLE_RTTI OFF)
     if(NOT PANDA_USE_PREBUILT_TARGETS)

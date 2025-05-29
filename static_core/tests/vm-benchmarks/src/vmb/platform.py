@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -51,6 +51,7 @@ class PlatformBase(CrossShell, ABC):
                                    tmp_dir=args.device_dir)
         if self.target == Target.OHOS:
             self.__hdc = ShellHdc(dev_serial=args.device,
+                                  dev_host=args.device_host,
                                   timeout=args.timeout,
                                   tmp_dir=args.device_dir)
         ToolBase.sh_ = self.sh
@@ -71,6 +72,7 @@ class PlatformBase(CrossShell, ABC):
             tool: ToolBase = t.Tool(self.target,
                                     self.flags,
                                     args.get_custom_opts(n))
+            tool.set_custom_opts(args.custom_opts)
             self.tools[n] = tool
             log.info('%s %s', tool.name, tool.version)
 

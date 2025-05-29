@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,12 @@ export interface DeclgenCLIOptions {
   inputFiles: string[];
   tsconfig?: string;
   inputDirs: string[];
+  rootDir?: string;
+  /**
+   * Only files in this directory will be generated into declaration files
+   * default is [*]
+   */
+  includePaths?: string[];
 }
 
 export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
@@ -62,6 +68,14 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
       },
       [] as string[]
     );
+    cliParser.option(
+      '-i, --include <includePath>',
+      'Only files in these directories will be generated into declaration files. (default: [*])',
+      (val, prev) => {
+        return prev.concat(val);
+      },
+      [] as string[]
+    );
 
     return cliParser;
   }
@@ -72,7 +86,8 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
       outDir: opts.out,
       inputFiles: opts.file,
       tsconfig: opts.project,
-      inputDirs: opts.dir
+      inputDirs: opts.dir,
+      includePaths: opts.include,
     };
   }
 

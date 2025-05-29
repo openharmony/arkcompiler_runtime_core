@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
@@ -30,7 +30,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
@@ -39,7 +39,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -47,8 +47,6 @@ cases:
       class Derived extends Base {
         protected override public_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -56,8 +54,6 @@ cases:
       class Derived implements Interface {
         protected override public_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -65,8 +61,6 @@ cases:
       class Derived extends Base {
         private override public_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -74,8 +68,6 @@ cases:
       class Derived implements Interface {
         private override public_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -83,8 +75,6 @@ cases:
       class Derived extends Base {
         internal override public_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -92,8 +82,6 @@ cases:
       class Derived implements Interface {
         internal override public_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   # override internal
   - doc: Internal member can be overridden by the internal one only
@@ -103,7 +91,7 @@ cases:
       }
     use: |-
       new Derived().internal_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Internal member can be overridden by the internal one only
     tags: negative, compile-only
@@ -111,24 +99,18 @@ cases:
       class Derived extends Base {
         public override internal_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - tags: negative, compile-only
     decl: |-
       class Derived extends Base {
         protected override internal_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - tags: negative, compile-only
     decl: |-
       class Derived extends Base {
         private override internal_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   # Override protected
   - doc: Protected member can be overridden by the protected or public one.
@@ -138,16 +120,17 @@ cases:
       }
     use: |-
       new Derived().protected_foo(new Number());
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     decl: |-
       class Derived extends Base {
         protected override protected_foo(i: Number) { res = 11;}
+        get_protected_foo(i: Number) {this.protected_foo(i);}
       }
     use: |-
-      new Derived().protected_foo(new Number());
-      assert(res == 11);
+      new Derived().get_protected_foo(new Number());
+      assertEQ( res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     tags: negative, compile-only
@@ -155,8 +138,6 @@ cases:
       class Derived extends Base {
         internal override protected_foo(i: Number) { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: Protected member can be overridden by the protected or public one.
     tags: negative, compile-only
@@ -164,8 +145,6 @@ cases:
       class Derived extends Base {
         private override protected_foo(i: Number) { res = 11;}
       }
-    use: |-
-      new Derived();
 
   # Override protected
   - doc: A compile-time error occurs if an attempt is made to override private member
@@ -174,8 +153,6 @@ cases:
       class Derived extends Base {
         override private_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
@@ -183,8 +160,6 @@ cases:
       class Derived extends Base implements Interface {
         public override private_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
@@ -192,8 +167,6 @@ cases:
       class Derived extends Base implements Interface {
         protected override private_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
@@ -201,8 +174,6 @@ cases:
       class Derived extends Base {
         internal override private_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   - doc: A compile-time error occurs if an attempt is made to override private member
     tags: negative, compile-only
@@ -210,8 +181,6 @@ cases:
       class Derived extends Base implements Interface {
         private override private_foo() { res = 11;}
       }
-    use: |-
-      new Derived();
 
   # use method with the same name as private method of the Base class
   - decl: |-
@@ -221,7 +190,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -229,17 +198,9 @@ cases:
       }
     use: |-
       new Derived().private_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
-  # overload-equivalent, expected to fail without 'override' keyword
-  - tags: negative, compile-only
-    decl: |-
-      class Derived extends Base implements Interface {
-        public public_foo() { res = 11;}
-      }
-    use: |-
-      new Derived().public_foo();
-
+  # not override-compatible
   - tags: negative, compile-only
     decl: |-
       class Derived extends Base implements Interface {
@@ -248,50 +209,58 @@ cases:
           return "some str";
         }
       }
-    use: |-
-      new Derived().public_foo();
-
-  - tags: negative, compile-only
-    decl: |-
-      class Derived extends Base {
-        protected protected_foo(a: Number) { res = 11;}
-      }
-    use: |-
-      new Derived().protected_foo(new Number());
 
   - tags: negative, compile-only
     decl: |-
       class Derived<T> extends Base {
         protected protected_foo(y: T) { res = 11;}
       }
-    use: |-
-      new Derived().protected_foo(new Number());
 
-  - tags: negative, compile-only
-    decl: |-
-      class Derived extends Gen<T> {
-        protected foo(y: String) { res = 11;}
+  #override-compatible (without override keyword)
+  - decl: |-
+      class Derived extends Base implements Interface {
+        public public_foo() { res = 11;}
       }
     use: |-
-      new Derived().foo(new String());
+      new Derived().public_foo();
+      assertEQ( res, 11);
 
-  - tags: negative, compile-only
-    decl: |-
-      class Derived extends Gen<T,S> {
+  - decl: |-
+      class Derived extends Base {
+        protected protected_foo(a: Number) { res = 11;}
+        get_protected_foo(i: Number) {this.protected_foo(i);}
+      }
+    use: |-
+      new Derived().get_protected_foo(new Number());
+      assertEQ( res, 11);
+
+  - decl: |-
+      class Derived<T,S> extends Gen2<T,S> {
         protected foo(y: S) { res = 11;}
+        get_foo(y: S) {this.foo(y)}
       }
     use: |-
-      new Derived().foo(new Number());
+      new Derived<String, Number>().get_foo(new Number());
+      assertEQ( res, 11);
 
-  - tags: negative, compile-only
-    decl: |-
+  - decl: |-
       class Derived extends Base {
         internal internal_foo() { res = 11;}
       }
     use: |-
       new Derived().internal_foo();
+      assertEQ( res, 11);
 
   # not overload-equivalent
+  - decl: |-
+      class Derived extends Gen<Number> {
+        protected foo(y: String) { res = 11;}
+        get_foo(i: String) {this.foo(i);}
+      }
+    use: |-
+      new Derived().get_foo(new String());
+      assertEQ( res, 11);
+
   - decl: |-
       class Derived extends Base {
         public public_foo(i: number) {
@@ -302,50 +271,58 @@ cases:
     use: |-
       let a = new Derived();
       a.public_foo();
-      assert(res == 1);
+      assertEQ( res, 1);
       a.public_foo(new Number());
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
         protected protected_foo(x: String) { res = 11;}
+        get_foo(a: Number) {this.protected_foo(a)}
+        get_foo(a: String) {this.protected_foo(a)}
       }
     use: |-
       let a = new Derived();
-      a.protected_foo(new Number());
-      assert(res == 2);
-      a.protected_foo("some str");
-      assert(res == 11);
+      a.get_foo(new Number());
+      assertEQ( res, 2);
+      a.get_foo("some str");
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
         protected protected_foo(i: Number, x: String) { res = 11;}
+        get_foo(a: Number) {this.protected_foo(a)}
+        get_foo(a: Number, b: String) {this.protected_foo(a, b)}
       }
     use: |-
       let a = new Derived();
-      a.protected_foo(new Number());
-      assert(res == 2);
-      a.protected_foo(new Number(), "some str");
-      assert(res == 11);
+      a.get_foo(new Number());
+      assertEQ( res, 2);
+      a.get_foo(new Number(), "some str");
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
         protected protected_foo(i: number) { res = 11;}
+        get_foo(a: Number) {this.protected_foo(a)}
+        get_foo(a: number) {this.protected_foo(a)}
       }
     use: |-
       let a = new Derived();
-      a.protected_foo(new Number());
-      assert(res == 2);
-      a.protected_foo(1 as number);
-      assert(res == 11);
+      a.get_foo(new Number());
+      assertEQ( res, 2);
+      a.get_foo(1 as number);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
         protected protected_foo(i: Gen2<Number, String>) { res = 11;}
+        get_foo(a: Number) {this.protected_foo(a)}
+        get_foo(a: Gen2<Number, String>) {this.protected_foo(a)}
       }
     use: |-
       let a = new Derived();
-      a.protected_foo(new Number());
-      assert(res == 2);
-      a.protected_foo(new Gen2<Number, String>());
-      assert(res == 11);
+      a.get_foo(new Number());
+      assertEQ( res, 2);
+      a.get_foo(new Gen2<Number, String>());
+      assertEQ( res, 11);

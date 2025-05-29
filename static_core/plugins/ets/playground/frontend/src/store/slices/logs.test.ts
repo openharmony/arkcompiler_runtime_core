@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,9 +26,11 @@ describe('codeSlice', () => {
     const initialState = {
         isRunLoading: false,
         isCompileLoading: false,
+        isShareLoading: false,
         code: '',
         compileRes: null,
-        runRes: null
+        runRes: null,
+        verifierRes: null
     };
 
     it('should update isRunLoading state when setRunLoading is called', () => {
@@ -52,7 +54,8 @@ describe('codeSlice', () => {
     it('should update compileRes state when setCompileRes is called', () => {
         const compileRes: ICodeReq = {
             compile: { output: 'Compile output', error: '', exit_code: 0 },
-            disassembly: { output: '', code: '', error: '', exit_code: 0 }
+            disassembly: { output: '', code: '', error: '', exit_code: 0 },
+            verifier: { output: '', error: '', exit_code: 0 }
         };
         const action = setCompileRes(compileRes);
         const state = codeReducer(initialState, action);
@@ -62,7 +65,8 @@ describe('codeSlice', () => {
     it('should update runRes state when setRunRes is called', () => {
         const runRes: ICodeReq = {
             compile: { output: 'Compile output', error: '', exit_code: 0 },
-            disassembly: { output: '', code: '', error: '', exit_code: 0 }
+            disassembly: { output: '', code: '', error: '', exit_code: 0 },
+            verifier: { output: '', error: '', exit_code: 0 }
         };
         const action = setRunRes(runRes);
         const state = codeReducer(initialState, action);

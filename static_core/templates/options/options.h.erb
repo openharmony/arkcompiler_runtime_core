@@ -27,6 +27,46 @@
 #include <vector>
 
 namespace <%= Common::module.namespace %> {
+% Common::options.select { |op| op.has_enum? }.each do |op|
+namespace <%= op.camel_name.snakecase %> {
+enum Enum : size_t {
+%   op.flat_enum.each do |enumerator|
+    <%= enumerator.snakecase.upcase %>,
+%   end
+%   op.sub_enums.each do |name, sub_enum|
+    <%= name.snakecase.upcase %>_FIRST = <%= sub_enum[0].snakecase.upcase %>,
+    <%= name.snakecase.upcase %>_LAST = <%= sub_enum[-1].snakecase.upcase %>,
+%   end
+    FIRST = <%= op.flat_enum[0].snakecase.upcase %>,
+    LAST = <%= op.flat_enum[-1].snakecase.upcase %>,
+    COUNT = LAST - FIRST + 1,
+    INVALID = COUNT,
+};
+
+inline auto FromString(std::string_view str) {
+    static const std::map<std::string_view, Enum> MAP {
+%   op.flat_enum.each do |enumerator|
+        {"<%= enumerator %>", <%= enumerator.snakecase.upcase %>},
+%   end
+    };
+    if (MAP.find(str) == MAP.end()) {
+        return INVALID;
+    }
+    return MAP.at(str);
+}
+
+constexpr std::string_view ToString(Enum e) {
+    constexpr std::array<std::string_view, COUNT> MAP {
+%   op.flat_enum.each do |enumerator|
+        "<%= enumerator %>",
+%   end
+    };
+    return MAP[e];
+}
+
+}  // namespace <%= op.camel_name.snakecase %>
+
+% end
 // NOLINTBEGIN(readability-identifier-naming)
 class PANDA_PUBLIC_API Options {
 public:
@@ -46,8 +86,8 @@ public:
 % Common::options.each do |op|
 %   next if op.sub_option?
 %   next if op.deprecated?
-%   if (op.default_value.is_a?(Hash))
-        ,<%= op.field_name %>{"<%= op.name %>", ark::default_target_options::<%= op.getter_name %>({<% op.default_value.each_with_index do |(key, value), index| %> { "<%= key %>", <%= value.is_a?(Integer) ? value : "\"#{value}\"" %>}<%= "," unless index == op.default_value.size - 1 %> <% end %>}) , <%= op.full_description %>}
+%   if op.default_target_specific?
+        ,<%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>}
 % end
 % end
     {}
@@ -77,7 +117,7 @@ public:
 
 % Common::options.each do |op|
 %   if !op.lang_specific? && !op.has_lang_suboptions?
-    <%= op.type %> <%= op.getter_name %>([[maybe_unused]] std::string_view lang = "") const {
+    <%= op.getter_signature %> {
 %   if op.deprecated?
         std::cerr << "WARNING: Option '<%= op.name %>' is deprecated and should not be used\n";
 %   end
@@ -99,7 +139,7 @@ public:
     }
 %   end
 %   if op.has_lang_suboptions?
-    <%= op.type %> <%= op.getter_name %>(std::string_view lang) const {
+    <%= op.getter_signature %> {
 %   if op.deprecated?
         std::cerr << "WARNING: Option '<%= op.name %>' is deprecated and should not be used\n";
 %   end
@@ -168,12 +208,19 @@ private:
 % end
 
     static std::string GetExeDir(const std::string &exe_path) {
-        auto pos = exe_path.find_last_of('/');
+#ifdef PANDA_TARGET_WINDOWS
+        const char preferred_separator = '\\';
+#else
+        const char preferred_separator = '/';
+#endif
+        auto pos = exe_path.find_last_of(preferred_separator);
+        if (pos == std::string::npos) {
+            return ".";
+        }
         return exe_path.substr(0, pos);
     }
 
 % Common::options.each do |op|
-%   next if (op.default_value.is_a?(Hash))
 %   next unless op.need_default_constant
     static constexpr <%= op.type %> <%= op.default_constant_name %> = <%= op.default %>;
 
@@ -181,7 +228,7 @@ private:
     std::string exe_dir_;
     PandArg<bool> version_{"version", false, R"(Ark version, file format version and minimum supported file format version)"};
 % Common::options.each do |op|
-% if (op.default_value.is_a?(Hash))
+% if op.default_target_specific?
     PandArg<<%= op.type %>> <%= op.field_name %>;
 % elsif defined? op.delimiter
     PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>, "<%= op.delimiter %>"};
@@ -191,7 +238,7 @@ private:
 %     abort "FAILED: Default value of argument " + op.name + " has out of range default parameter"
 %   end
     PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>, <%= min.to_i %>, <%= max.to_i %>};
-% elsif op.has_sub_options
+% elsif op.has_sub_options?
     PandArgCompound <%= op.field_name %>{"<%= op.name %>", <%= op.full_description %>, {<%= op.sub_options.map{|o| '&' + o.field_name}.join(', ') %>}};
 % else
     PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>};

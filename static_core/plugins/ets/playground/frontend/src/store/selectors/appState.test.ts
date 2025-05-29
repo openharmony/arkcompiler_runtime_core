@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,11 @@ export const mockAllState: RootState = {
         theme: 'light',
         primaryColor: '#e32b49',
         disasm: false,
+        verifier: true,
+        runtimeVerify: false,
+        versions: {},
+        versionsLoading: false,
+        clearLogsEachRun: false
     },
     options: {
         isLoading: false,
@@ -34,9 +39,11 @@ export const mockAllState: RootState = {
     code: {
         isRunLoading: false,
         isCompileLoading: false,
+        isShareLoading: false,
         code: 'initial code',
         compileRes: null,
         runRes: null,
+        verifierRes: null
     },
     logs: {
         compileOut: [],
@@ -45,6 +52,8 @@ export const mockAllState: RootState = {
         runErr: [],
         disasmOut: [],
         disasmErr: [],
+        verifierOut: [],
+        verifierErr: [],
         out: [],
         err: [],
     },

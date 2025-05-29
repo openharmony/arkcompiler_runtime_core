@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5036,10 +5036,10 @@ void ChecksEliminationTest::BuildHoistCheckCastGraph()
         {
             INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);  // i
             INST(7U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(8U, Opcode::CheckCast).ref().Inputs(3U, 22U, 7U).TypeId(1U);
+            INST(8U, Opcode::CheckCast).Inputs(3U, 22U, 7U).TypeId(1U);
             INST(9U, Opcode::LoadObject).ref().Inputs(3U);
             INST(23U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 9U).SrcVregs({0U, 1U, 2U, 3U, 4U});
-            INST(11U, Opcode::CheckCast).ref().Inputs(9U, 22U, 23U).TypeId(1U);
+            INST(11U, Opcode::CheckCast).Inputs(9U, 22U, 23U).TypeId(1U);
 
             INST(10U, Opcode::Add).s32().Inputs(4U, 1U);               // i++
             INST(13U, Opcode::Compare).CC(CC_LT).b().Inputs(10U, 2U);  // i < 10
@@ -5068,7 +5068,7 @@ TEST_F(ChecksEliminationTest, HoistCheckCastTest)
             INST(21U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
             INST(22U, Opcode::LoadClass).ref().Inputs(21U).TypeId(1U);
             INST(20U, Opcode::SaveStateDeoptimize).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(8U, Opcode::CheckCast).ref().Inputs(3U, 22U, 20U).TypeId(1U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
+            INST(8U, Opcode::CheckCast).Inputs(3U, 22U, 20U).TypeId(1U).SetFlag(inst_flags::CAN_DEOPTIMIZE);
             INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 2U);  // 0 < 10
             INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
         }
@@ -5078,7 +5078,7 @@ TEST_F(ChecksEliminationTest, HoistCheckCastTest)
             INST(7U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
             INST(9U, Opcode::LoadObject).ref().Inputs(3U);
             INST(23U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 9U).SrcVregs({0U, 1U, 2U, 3U, 4U});
-            INST(11U, Opcode::CheckCast).ref().Inputs(9U, 22U, 23U).TypeId(1U);
+            INST(11U, Opcode::CheckCast).Inputs(9U, 22U, 23U).TypeId(1U);
 
             INST(10U, Opcode::Add).s32().Inputs(4U, 1U);               // i++
             INST(13U, Opcode::Compare).CC(CC_LT).b().Inputs(10U, 2U);  // i < 10
@@ -5437,12 +5437,12 @@ TEST_F(ChecksEliminationTest, OverflowCheckOptimize)
         BASIC_BLOCK(3U, -1L)
         {
             INST(16U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({1U, 2U});
-            INST(17U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW).Inputs(16U);  // must overflow
+            INST(17U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW_TYPE).Inputs(16U);  // must overflow
         }
         BASIC_BLOCK(4U, -1L)
         {
             INST(18U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({1U, 2U});
-            INST(19U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW).Inputs(18U);  // must overflow
+            INST(19U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW_TYPE).Inputs(18U);  // must overflow
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(graph, GetGraph()));
@@ -5657,7 +5657,7 @@ TEST_F(ChecksEliminationTest, NegOverflowAndZeroCheck1)
             BASIC_BLOCK(2U, -1L)
             {
                 INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-                INST(6U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW).Inputs(5U);
+                INST(6U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::OVERFLOW_TYPE).Inputs(5U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));

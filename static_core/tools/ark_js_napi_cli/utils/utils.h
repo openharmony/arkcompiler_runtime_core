@@ -23,8 +23,9 @@
 #include <vector>
 
 namespace panda::utils {
-
-void GetAsset(const std::string &uri, std::vector<uint8_t> &content, std::string &ami);
+// CC-OFFNXT(G.FUN.01): public API
+void GetAsset(const std::string &uri, uint8_t **buff, size_t *buffSize, std::vector<uint8_t> &content, std::string &ami,
+              bool &useSecureMem, void **mapper, bool isRestricted);
 
 }  // namespace panda::utils
 

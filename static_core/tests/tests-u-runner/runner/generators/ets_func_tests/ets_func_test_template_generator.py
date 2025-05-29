@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,7 +29,7 @@ import runner.utils
 
 class EtsFuncTestsCodeGenerator:
     _TEST_SEPARATOR = "---"
-    _TEMPLATE_PATTERN = '/*.sts.j2'
+    _TEMPLATE_PATTERN = '/*.ets.j2'
 
 
     def __init__(self, template_root_path: pathlib.Path):
@@ -101,7 +101,7 @@ class EtsFuncTestsCodeGenerator:
 
         for test in content_list:
             test = self.__save_artefact_of_generator(test, template_fname, template_config_name)
-            output_fname = "test-" + fname + "-" + str(test_idx).zfill(4) + ".sts"
+            output_fname = "test-" + fname + "-" + str(test_idx).zfill(4) + ".ets"
             outpath_final = outpath / output_fname
             generated_tests_list.append(str(outpath))
             runner.utils.write_2_file(outpath_final, test)

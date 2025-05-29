@@ -6,8 +6,8 @@
             "std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"]
         },
         "dynamicPaths": {
-            "${ETS_SCENARIOS}/js_to_ets/scenarios.js": {"language": "js", "hasDecl": false},
-            "${ETS_SCENARIOS}/js_to_ets/symbol.js": {"language": "js", "hasDecl": false}
+            "scenarios": {"language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}//scenarios"},
+            "symbol": {"language": "js", "ohmUrl": "${CMAKE_CURRENT_BINARY_DIR}/symbol"}
         }
     }
 }

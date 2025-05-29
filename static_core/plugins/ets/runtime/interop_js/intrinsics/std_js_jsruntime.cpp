@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #include "intrinsics.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
+#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
+#include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "interop_js/call/call.h"
 
@@ -45,6 +47,11 @@ JSValue *JSRuntimeNewJSValueObjectIntrinsic(EtsObject *v)
     return JSRuntimeNewJSValueObject(v);
 }
 
+JSValue *JSRuntimeNewJSValueBigIntIntrinsic(EtsBigInt *v)
+{
+    return JSRuntimeNewJSValueBigInt(v);
+}
+
 double JSRuntimeGetValueDoubleIntrinsic(JSValue *etsJsValue)
 {
     return JSRuntimeGetValueDouble(etsJsValue);
@@ -68,6 +75,11 @@ EtsObject *JSRuntimeGetValueObjectIntrinsic(JSValue *etsJsValue, EtsClass *cls)
 JSValue *JSRuntimeGetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
 {
     return JSValueNamedGetter<JSConvertJSValue>(etsJsValue, etsPropName);
+}
+
+JSValue *JSRuntimeGetPropertyJSValueyByKeyIntrinsic(JSValue *objectValue, JSValue *keyValue)
+{
+    return JSRuntimeGetPropertyJSValueyByKey(objectValue, keyValue);
 }
 
 double JSRuntimeGetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
@@ -105,6 +117,11 @@ void JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPro
     JSValueNamedSetter<JSConvertU1>(etsJsValue, etsPropName, static_cast<bool>(value));
 }
 
+void JSRuntimeSetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index, JSValue *value)
+{
+    JSValueIndexedSetter<JSConvertJSValue>(etsJsValue, index, value);
+}
+
 JSValue *JSRuntimeGetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index)
 {
     return JSValueIndexedGetter<JSConvertJSValue>(etsJsValue, index);
@@ -135,6 +152,11 @@ JSValue *JSRuntimeCreateObjectIntrinsic()
     return JSRuntimeCreateObject();
 }
 
+JSValue *JSRuntimeCreateArrayIntrinsic()
+{
+    return JSRuntimeCreateArray();
+}
+
 uint8_t JSRuntimeInstanceOfDynamicIntrinsic(JSValue *object, JSValue *ctor)
 {
     return JSRuntimeInstanceOfDynamic(object, ctor);
@@ -163,6 +185,76 @@ JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)
 uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 {
     return JSRuntimeStrictEqual(lhs, rhs);
+}
+
+uint8_t JSRuntimeHasPropertyIntrinsic(JSValue *object, EtsString *name)
+{
+    return JSRuntimeHasProperty(object, name);
+}
+
+JSValue *JSRuntimeGetPropertyIntrinsic(JSValue *object, JSValue *property)
+{
+    return JSRuntimeGetProperty(object, property);
+}
+
+uint8_t JSRuntimeHasPropertyJSValueIntrinsic(JSValue *object, JSValue *property)
+{
+    return JSRuntimeHasPropertyJSValue(object, property);
+}
+
+uint8_t JSRuntimeHasElementIntrinsic(JSValue *object, int index)
+{
+    return JSRuntimeHasElement(object, index);
+}
+
+uint8_t JSRuntimeHasOwnPropertyIntrinsic(JSValue *object, EtsString *name)
+{
+    return JSRuntimeHasOwnProperty(object, name);
+}
+
+uint8_t JSRuntimeHasOwnPropertyJSValueIntrinsic(JSValue *object, JSValue *property)
+{
+    return JSRuntimeHasOwnPropertyJSValue(object, property);
+}
+
+EtsString *JSRuntimeTypeOfIntrinsic(JSValue *object)
+{
+    return JSRuntimeTypeOf(object);
+}
+
+uint8_t JSRuntimeIsPromiseIntrinsic(JSValue *object)
+{
+    return JSRuntimeIsPromise(object);
+}
+
+uint8_t JSRuntimeInstanceOfStaticTypeIntrinsic(JSValue *object, EtsTypeAPIType *paramType)
+{
+    return JSRuntimeInstanceOfStaticType(object, paramType);
+}
+
+JSValue *JSRuntimeInvokeIntrinsic(JSValue *recv, JSValue *func, ObjectHeader *args)
+{
+    return JSRuntimeInvoke(recv, func, reinterpret_cast<EtsArray *>(args));
+}
+JSValue *JSRuntimeInstantiateIntrinsic(JSValue *callable, ObjectHeader *args)
+{
+    return JSRuntimeInstantiate(callable, reinterpret_cast<EtsArray *>(args));
+}
+
+EtsLong JSRuntimeXgcStartIntrinsic()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    auto *gc = coro->GetPandaVM()->GetGC();
+    auto &gcTaskTracker = ets::intrinsics::GCTaskTracker::InitIfNeededAndGet(gc);
+    auto task = MakePandaUnique<GCTask>(GCTaskCause::CROSSREF_CAUSE, time::GetCurrentTimeInNanos());
+    auto id = task->GetId();
+    gcTaskTracker.AddTaskId(id);
+    if (!XGC::GetInstance()->Trigger(gc, std::move(task))) {
+        gcTaskTracker.RemoveId(id);
+        return static_cast<EtsLong>(-1);
+    }
+    return static_cast<EtsLong>(id);
 }
 
 EtsString *JSValueToStringIntrinsic(JSValue *object)

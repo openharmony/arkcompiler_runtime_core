@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,10 @@ if (!defined(ark_standalone_build)) {
 }
 
 ark_root = "//arkcompiler/runtime_core/static_core"
+arkplatform_root = "//arkcompiler/runtime_core/arkplatform"
+arkplatform_include = "$arkplatform_root"
+arkui_root = "//foundation/arkui"
+etsruntime_root = "//arkcompiler/ets_runtime"
 
 ark_third_party_root = "//third_party"
 

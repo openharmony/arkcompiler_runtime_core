@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,115 +21,117 @@ class EtsIndexedType : public EtsInteropTest {};
 
 TEST_F(EtsIndexedType, getArrValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("getArrValueByIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "getArrValueByIndex");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, changeArrValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("changeArrValueByIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "changeArrValueByIndex");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, checkLengthArr)
 {
-    auto ret = CallEtsMethod<bool>("checkLengthArr");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkLengthArr");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, checkAllArrValue)
 {
-    auto ret = CallEtsMethod<bool>("checkAllArrValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkAllArrValue");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, getCustomArrValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("getCustomArrValueByIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "getCustomArrValueByIndex");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, changeCustomArrValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("changeCustomArrValueByIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "changeCustomArrValueByIndex");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, checkLengthCustomArr)
 {
-    auto ret = CallEtsMethod<bool>("checkLengthCustomArr");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkLengthCustomArr");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, checkAllCustomArrValue)
 {
-    auto ret = CallEtsMethod<bool>("checkAllCustomArrValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkAllCustomArrValue");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, getRecordValue)
 {
-    auto ret = CallEtsMethod<bool>("getRecordValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "getRecordValue");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, changeRecordValue)
 {
-    auto ret = CallEtsMethod<bool>("changeRecordValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "changeRecordValue");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #17821
 TEST_F(EtsIndexedType, DISABLED_getRecordValueIndex)
 {
-    auto ret = CallEtsMethod<bool>("getRecordValueIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "getRecordValueIndex");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #17821
 TEST_F(EtsIndexedType, DISABLED_changeRecordValueIndex)
 {
-    auto ret = CallEtsMethod<bool>("changrRecordValueIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "changrRecordValueIndex");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #17821
 TEST_F(EtsIndexedType, DISABLED_checkRecordValueLength)
 {
-    auto ret = CallEtsMethod<bool>("checkRecordValueLength");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkRecordValueLength");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #17821
 TEST_F(EtsIndexedType, DISABLED_checkRecordValue)
 {
-    auto ret = CallEtsMethod<bool>("checkRecordValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkRecordValue");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, getTypedArrayValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("getTypedArrayValueByIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "getTypedArrayValueByIndex");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #18131
 TEST_F(EtsIndexedType, DISABLED_changeTypedArrayValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("changeTypedArrayValueByIndex");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "changeTypedArrayValueByIndex");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #18131
 TEST_F(EtsIndexedType, DISABLED_checkLengthTypedArray)
 {
-    auto ret = CallEtsMethod<bool>("checkLengthTypedArray");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkLengthTypedArray");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #18131
 TEST_F(EtsIndexedType, DISABLED_checkAllTypedArrayValue)
 {
-    auto ret = CallEtsMethod<bool>("checkAllTypedArrayValue");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "checkAllTypedArrayValue");
     ASSERT_EQ(ret, true);
 }
-TEST_F(EtsIndexedType, getValueFromProxyRecord)
+// NOTE enable after fixing #22422
+TEST_F(EtsIndexedType, DISABLED_getValueFromProxyRecord)
 {
-    auto ret = CallEtsMethod<bool>("getValueFromProxyRecord");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "getValueFromProxyRecord");
     ASSERT_EQ(ret, true);
 }
-TEST_F(EtsIndexedType, changeValueFromProxyRecord)
+// NOTE enable after fixing #22422
+TEST_F(EtsIndexedType, DISABLED_changeValueFromProxyRecord)
 {
-    auto ret = CallEtsMethod<bool>("changeValueFromProxyRecord");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "changeValueFromProxyRecord");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #18238
 TEST_F(EtsIndexedType, DISABLED_getValueFromProxyByKeyRecord)
 {
-    auto ret = CallEtsMethod<bool>("getValueFromProxyByKeyRecord");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "getValueFromProxyByKeyRecord");
     ASSERT_EQ(ret, true);
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,14 @@
 #include "libpandabase/utils/utils.h"
 
 extern "C" {
-ETS_EXPORT ets_int ETS_CALL ETS_InnerNativeTest_Inner_innerNative([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
+ETS_EXPORT ets_int ETS_CALL ETS_InterfaceNativeTest_InnerNativeTest_Inner_innerNative([[maybe_unused]] EtsEnv *,
+                                                                                      [[maybe_unused]] ets_class)
 {
     return 2_I;
 }
 
-ETS_EXPORT ets_int ETS_CALL ETS_InnerNativeTest_Inner_InnerInner_innerNative([[maybe_unused]] EtsEnv *,
-                                                                             [[maybe_unused]] ets_class)
+ETS_EXPORT ets_int ETS_CALL ETS_InterfaceNativeTest_InnerNativeTest_Inner_InnerInner_innerNative(
+    [[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
 {
     return 3_I;
 }

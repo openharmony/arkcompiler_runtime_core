@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H
 #define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H
 
+#include <atomic>
 #include <csignal>
 
 #include "libpandabase/macros.h"
@@ -68,7 +69,8 @@ public:
 
     void SetSampleInterval(uint32_t us)
     {
-        ASSERT(isActive_ == false);
+        // Atomic with acquire order reason: To ensure start/stop load correctly
+        ASSERT(isActive_.load(std::memory_order_acquire) == false);
         sampleInterval_ = static_cast<std::chrono::microseconds>(us);
     }
 

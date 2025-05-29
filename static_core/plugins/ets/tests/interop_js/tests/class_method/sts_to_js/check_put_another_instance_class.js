@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ const {
     createChildProtectedClassFromSts,
     ChildAbstractClass,
     createChildAbstractClassFromSts,
-} = require('class_method.test');
+} = require('class_method.test.abc');
 
 function checkUserClassMethod() {
     const ETSClass = new UserClass();
@@ -36,11 +36,11 @@ function checkUserClassMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreateUserClassFromSts() {
@@ -49,11 +49,11 @@ function checkCreateUserClassFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkProtectedClassMethod() {
@@ -62,11 +62,11 @@ function checkProtectedClassMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreateProtectedClassFromSts() {
@@ -75,11 +75,11 @@ function checkCreateProtectedClassFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkPrivateClassMethod() {
@@ -88,11 +88,11 @@ function checkPrivateClassMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreatePrivateClassFromSts() {
@@ -101,11 +101,11 @@ function checkCreatePrivateClassFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkChildProtectedClassMethod() {
@@ -114,11 +114,11 @@ function checkChildProtectedClassMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreateChildProtectedClassFromSts() {
@@ -127,11 +127,11 @@ function checkCreateChildProtectedClassFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkChildClassMethod() {
@@ -140,11 +140,11 @@ function checkChildClassMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreateChildClassFromSts() {
@@ -153,11 +153,11 @@ function checkCreateChildClassFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkChildClassOwnMethod() {
@@ -166,11 +166,11 @@ function checkChildClassOwnMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreateChildClassOwnMethodFromSts() {
@@ -179,11 +179,11 @@ function checkCreateChildClassOwnMethodFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkAbstractClassMethod() {
@@ -192,11 +192,11 @@ function checkAbstractClassMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreateChildAbstractClassFromSts() {
@@ -205,11 +205,11 @@ function checkCreateChildAbstractClassFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkInterfaceClassMethod() {
@@ -218,11 +218,11 @@ function checkInterfaceClassMethod() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 function checkCreateInterfaceClassFromSts() {
@@ -231,11 +231,11 @@ function checkCreateInterfaceClassFromSts() {
 
     try {
         ETSClass.compare(AnotherClass);
-
-        ASSERT_TRUE(false);
     } catch (e) {
         ASSERT_TRUE(true);
+        return;
     }
+    ASSERT_TRUE(false);
 }
 
 

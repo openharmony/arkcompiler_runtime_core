@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,6 +253,48 @@ bool Lexer::LexString()
     return true;
 }
 
+bool Lexer::IsAngleBracketInFunctionName(char c, Line *currLine)
+{
+    // <get> and <set> are used for mangling function name for setter and getter
+    // ensure "<" and ">" are only valid for function name:
+    // .function return_type <get>...(...)
+
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr size_t FUNCTION_KEY_WORD_OFFSET = 2;
+    size_t currTokenSize = currLine->tokens.size();
+    if (currTokenSize < FUNCTION_KEY_WORD_OFFSET) {
+        return false;
+    }
+    bool isManglingName = (FindDelim(c) == Token::Type::DEL_LT || FindDelim(c) == Token::Type::DEL_GT);
+    return currLine->tokens[currTokenSize - FUNCTION_KEY_WORD_OFFSET].type == Token::Type::ID_FUN && isManglingName;
+}
+
+void Lexer::EatSpace()
+{
+    while (currLine_->end > currLine_->pos && isspace(currLine_->buffer[currLine_->end - 1]) != 0) {
+        --(currLine_->end);
+    }
+
+    while (isspace(currLine_->buffer[currLine_->pos]) != 0 && !Eol()) {
+        ++(currLine_->pos);
+    }
+}
+
+void Lexer::HandleBrackets()
+{
+    size_t position = currLine_->pos;
+    while (FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
+           FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
+        position++;
+    }
+    if (IsAngleBracketInFunctionName(currLine_->buffer[position], currLine_)) {
+        position++;
+    }
+    if (isspace(currLine_->buffer[position]) == 0 && (position != currLine_->end)) {
+        currLine_->pos = position;
+    }
+}
+
 /*
  * Tokens handling: set a corresponding
  * elements bound_left and bound_right of the array tokens
@@ -276,15 +318,7 @@ void Lexer::LexTokens()
     LOG(DEBUG, ASSEMBLER) << "token search started (line " << lines_.size() << "): "
                           << std::string_view(&*(currLine_->buffer.begin() + currLine_->pos),
                                               currLine_->end - currLine_->pos);
-
-    while (currLine_->end > currLine_->pos && isspace(currLine_->buffer[currLine_->end - 1]) != 0) {
-        --(currLine_->end);
-    }
-
-    while (isspace(currLine_->buffer[currLine_->pos]) != 0 && !Eol()) {
-        ++(currLine_->pos);
-    }
-
+    EatSpace();
     size_t boundRight;
     size_t boundLeft;
 
@@ -311,9 +345,7 @@ void Lexer::LexTokens()
 
         currLine_->tokens.emplace_back(boundLeft, boundRight, LexGetType(boundLeft, boundRight), currLine_->buffer);
 
-        while (isspace(currLine_->buffer[currLine_->pos]) != 0 && !Eol()) {
-            ++(currLine_->pos);
-        }
+        EatSpace();
     }
 
     LOG(DEBUG, ASSEMBLER) << "all tokens identified (line " << lines_.size() << ")";
@@ -324,14 +356,7 @@ void Lexer::LexBadTokens()
     while (!Eol() && FindDelim(currLine_->buffer[currLine_->pos]) == Token::Type::ID_BAD &&
            isspace(currLine_->buffer[currLine_->pos]) == 0) {
         ++(currLine_->pos);
-        size_t position = currLine_->pos;
-        while (FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
-               FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
-            position++;
-        }
-        if (isspace(currLine_->buffer[position]) == 0 && (position != currLine_->end)) {
-            currLine_->pos = position;
-        }
+        HandleBrackets();
     }
 }
 

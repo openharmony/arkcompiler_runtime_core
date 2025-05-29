@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,182 +22,182 @@ class EtsInterfaceTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsInterfaceTsToEtsTest, check_any_type_interface_class_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeInterfaceClassString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeInterfaceClassString"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_any_type_interface_class_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeInterfaceClassInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeInterfaceClassInt"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_any_type_interface_class_bool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeInterfaceClassBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeInterfaceClassBool"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_any_type_interface_class_array)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeInterfaceClassArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeInterfaceClassArray"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_any_type_interface_class_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnyTypeInterfaceClassObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkAnyTypeInterfaceClassObject"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_interface_class_any_type_method_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassAnyTypeMethodString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassAnyTypeMethodString"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_interface_class_any_type_method_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassAnyTypeMethodInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassAnyTypeMethodInt"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_interface_class_any_type_method_bool)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassAnyTypeMethodBool"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassAnyTypeMethodBool"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_interface_class_any_type_method_array)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassAnyTypeMethodArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassAnyTypeMethodArray"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_interface_class_any_type_method_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassAnyTypeMethodObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassAnyTypeMethodObject"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_union_type_interface_class_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkUnionTypeInterfaceClassString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUnionTypeInterfaceClassString"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_union_type_interface_class_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkUnionTypeInterfaceClassInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkUnionTypeInterfaceClassInt"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_interface_class_union_type_method_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassUnionTypeMethodString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassUnionTypeMethodString"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_interface_class_union_type_method_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateInterfaceClassUnionTypeMethodInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateInterfaceClassUnionTypeMethodInt"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_subset_by_ref_interface)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkSubsetByRefInterface"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSubsetByRefInterface"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_subset_by_ref_interface_error)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkSubsetByRefInterfaceError"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSubsetByRefInterfaceError"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_subset_by_value_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkSubsetByValueClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSubsetByValueClass"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_subset_by_value_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateSubsetByValueClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateSubsetByValueClassFromTs"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_instance_interface_class_union_type_method_int)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceInterfaceClassUnionTypeMethodInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceInterfaceClassUnionTypeMethodInt"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_instance_interface_class_union_type_method_string)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceInterfaceClassUnionTypeMethodString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceInterfaceClassUnionTypeMethodString"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_instance_subset_by_value_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceSubsetByValueClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceSubsetByValueClassFromTs"));
 }
-
-TEST_F(EtsInterfaceTsToEtsTest, check_tuple_type_class)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_tuple_type_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkTupleTypeClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkTupleTypeClass"));
 }
-
-TEST_F(EtsInterfaceTsToEtsTest, check_create_tuple_class_from_ts)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_create_tuple_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateTupleClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateTupleClassFromTs"));
 }
-
-TEST_F(EtsInterfaceTsToEtsTest, check_instance_tuple_class_from_ts)
+// NOTE (#24570): fix interop tests with tuples
+TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_instance_tuple_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkInstanceTupleClassFromTs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstanceTupleClassFromTs"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_with_optional_method_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkWithOptionalMethodClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWithOptionalMethodClass"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_without_optional_method_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkWithoutOptionalMethodClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWithoutOptionalMethodClass"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_class_with_optional_method)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassWithOptionalMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassWithOptionalMethod"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_create_class_without_optional_method)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassWithoutOptionalMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkCreateClassWithoutOptionalMethod"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_with_optional_method_instance_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkWithOptionalMethodInstanceClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWithOptionalMethodInstanceClass"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_without_optional_method_instance_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkWithoutOptionalMethodInstanceClass"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWithoutOptionalMethodInstanceClass"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_optional_arg_with_all_args)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalArgWithAllArgs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalArgWithAllArgs"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_optional_arg_with_one_args)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkOptionalArgWithOneArgs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkOptionalArgWithOneArgs"));
 }
 // NOTE (issues 17772) fix spread operator
 TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_spread_operator_arg_with_all_args)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkSpreadOperatorArgWithAllArgs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSpreadOperatorArgWithAllArgs"));
 }
 // NOTE (issues 17772) fix spread operator
 TEST_F(EtsInterfaceTsToEtsTest, DISABLED_check_spread_operator_arg_with_one_args)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkSpreadOperatorArgWithOneArgs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSpreadOperatorArgWithOneArgs"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_without_spread_operator_arg_with_all_args)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkWithoutSpreadOperatorArgWithAllArgs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWithoutSpreadOperatorArgWithAllArgs"));
 }
 
 TEST_F(EtsInterfaceTsToEtsTest, check_without_spread_operator_arg_with_one_args)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("checkWithoutSpreadOperatorArgWithOneArgs"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkWithoutSpreadOperatorArgWithOneArgs"));
 }
 
 }  // namespace ark::ets::interop::js::testing

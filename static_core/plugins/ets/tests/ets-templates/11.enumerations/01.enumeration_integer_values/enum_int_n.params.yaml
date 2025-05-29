@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,31 +19,31 @@ cases:
           let c: int = 2147483647 - 2   // not a constant expression
           enum Enum { first = a, second = b, third = c }
       use: |-
-          assert Enum.first.valueOf() == a
-          assert Enum.second.valueOf() == b
-          assert Enum.third.valueOf() == c
+          assertEQ( Enum.first.valueOf(), a )
+          assertEQ( Enum.second.valueOf(), b )
+          assertEQ( Enum.third.valueOf(), c )
 
     - decl: |-
           enum Enum { first = 1.0, second, third }  // wrong init type
       use: |-
-          assert Enum.first.valueOf() == 1.0
+          assertEQ( Enum.first.valueOf(), 1.0 )
 
     - decl: |-
           enum Enum { first = 10e1, second, third }  // wrong init type
       use: |-
-          assert Enum.first.valueOf() == 100
+          assertEQ( Enum.first.valueOf(), 100 )
 
     - decl: |-
           enum Enum { first = true, second = false }  // wrong init type
       use: |-
-          assert true
+          assertTrue( true )
 
     - decl: |-
           enum Enum1 { first = 42, second }
           enum Enum2 { first = Enum1.first.valueOf(), second }  // not a constant expression
       use: |-
-          assert Enum2.first.valueOf() == 42
-          assert Enum2.second.valueOf() == 43
+          assertEQ( Enum2.first.valueOf(), 42 )
+          assertEQ( Enum2.second.valueOf(), 43 )
 
     - decl: |-
           enum Enum1 { first = 42, second }

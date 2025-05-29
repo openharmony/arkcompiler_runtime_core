@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2712,16 +2712,12 @@ public:
 #endif  // PANDA_WITH_ETS
 
     template <bool IS_LOAD>
-    bool CheckFieldAccessByName(int regIdx, Type expectedFieldType)
+    bool CheckFieldAccessByName(int regIdx, [[maybe_unused]] Type expectedFieldType)
     {
         Field const *rawField = GetCachedField();
         Type objType;
-        Type fieldType;
-        if (!CheckFieldAccessByNameStartCheck(regIdx, rawField, objType)) {
-            return false;
-        }
 
-        // currently all union types are encoded as single one class “$UNION_FIELD_DUMMY_CLASS”
+        // currently all union type named access sites are encoded as “$NamedAccessMeta” class fields
         // at bytecode level, thus we do not have accurate union type info to verify each variables
         // so the current temporary solution would be to skip verification for union types.This
         // actually introduce insecure possibilities here. Accurate verification for union types
@@ -2730,52 +2726,7 @@ public:
         // based on the above,here we skip:
         // 1. checking whether a field existed in the union or not
         // 2. skip checking member access violiations
-        if (ark::panda_file::IsDummyClassName(rawField->GetClass()->GetName())) {
-            return true;
-        }
-
-        auto objClass = objType.GetClass();
-        auto field = objClass->LookupFieldByName(rawField->GetName());
-        if (field != nullptr) {
-            fieldType = Type::FromTypeId(field->GetTypeId());
-        } else {
-            Method *method = CheckFieldAccessByNameGetFieldType<IS_LOAD>(expectedFieldType, objClass, rawField);
-            if (method == nullptr) {
-                SHOW_MSG(BadFieldNameOrBitWidth)
-                LOG_VERIFIER_BAD_FIELD_NAME_OR_BIT_WIDTH(GetFieldName(field), ToString(obj_type),
-                                                         ToString(expectedFieldType));
-                END_SHOW_MSG();
-                return false;
-            }
-            if constexpr (IS_LOAD) {
-                fieldType = Type::FromTypeId(method->GetReturnType().GetId());
-            } else {
-                fieldType = Type::FromTypeId(method->GetArgType(1).GetId());
-            }
-        }
-
-        if (!IsSubtype(fieldType, expectedFieldType, GetTypeSystem())) {
-            SHOW_MSG(UnexpectedFieldType)
-            LOG_VERIFIER_UNEXPECTED_FIELD_TYPE(GetFieldName(field), ToString(fieldType), ToString(expectedFieldType));
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(UnexpectedFieldType, WARNING);
-            return false;
-        }
-
-        auto *plugin = job_->JobPlugin();
-        auto const *jobMethod = job_->JobMethod();
-        auto result = plugin->CheckFieldAccessViolation(field, jobMethod, GetTypeSystem());
-        if (!result.IsOk()) {
-            const auto &verifOpts = config->opts;
-            if (verifOpts.debug.allow.fieldAccessViolation && result.IsError()) {
-                result.status = VerificationStatus::WARNING;
-            }
-            LogInnerMessage(result);
-            LOG_VERIFIER_DEBUG_FIELD2(GetFieldName(field));
-            return (status_ = result.status) != VerificationStatus::ERROR;
-        }
-
-        return !result.IsError();
+        return CheckFieldAccessByNameStartCheck(regIdx, rawField, objType);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2939,7 +2890,37 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsLdundefined()
+    bool HandleEtsCallNameShort()
+    {
+        LOG_INST();
+        DBGBRK();
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsCallName()
+    {
+        LOG_INST();
+        DBGBRK();
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsCallNameRange()
+    {
+        LOG_INST();
+        DBGBRK();
+        // NOTE issue(21892) support callbyname
+        // This stub should be replaced with appropriate handler
+        return false;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsLdnullvalue()
     {
         LOG_INST();
         DBGBRK();
@@ -2950,7 +2931,7 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsMovundefined()
+    bool HandleEtsMovnullvalue()
     {
         LOG_INST();
         DBGBRK();
@@ -2962,13 +2943,32 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
-    bool HandleEtsIsundefined()
+    bool HandleEtsIsnullvalue()
     {
         LOG_INST();
         DBGBRK();
         Sync();
 
         if (!CheckRegType(ACC, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        SetAcc(i32_);
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsEqualityHelper(uint16_t v1, uint16_t v2)
+    {
+        if (!CheckRegType(v1, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegType(v2, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -2988,12 +2988,49 @@ public:
         uint16_t v2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
 
+        return HandleEtsEqualityHelper<FORMAT>(v1, v2);
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsStrictequals()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t v2 = inst_.GetVReg<FORMAT, 0x01>();
+        Sync();
+
+        return HandleEtsEqualityHelper<FORMAT>(v1, v2);
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsTypeof()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t v1 = inst_.GetVReg<FORMAT, 0x00>();
+        Sync();
+
         if (!CheckRegType(v1, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        if (!CheckRegType(v2, refType_)) {
+        SetAcc(GetTypeSystem()->StringClass());
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool HandleEtsIstrue()
+    {
+        LOG_INST();
+        DBGBRK();
+        uint16_t v = inst_.GetVReg<FORMAT, 0x00>();
+        Sync();
+
+        if (!CheckRegType(v, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -4255,42 +4292,6 @@ private:
         }
 
         return true;
-    }
-
-    template <bool IS_LOAD>
-    Method *CheckFieldAccessByNameGetFieldType(Type &expectedFieldType, Class const *&objClass, Field const *&rawField)
-    {
-        Method *method = nullptr;
-        if constexpr (IS_LOAD) {
-            switch (expectedFieldType.GetTypeWidth()) {
-                case coretypes::INT32_BITS:
-                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
-                    break;
-                case coretypes::INT64_BITS:
-                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
-                    break;
-                case 0:
-                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-        } else {
-            switch (expectedFieldType.GetTypeWidth()) {
-                case coretypes::INT32_BITS:
-                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
-                    break;
-                case coretypes::INT64_BITS:
-                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
-                    break;
-                case 0:
-                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-        }
-        return method;
     }
 
     bool CheckCastArrayObjectRegDef(Type &cachedType)

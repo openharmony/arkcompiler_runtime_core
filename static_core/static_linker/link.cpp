@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <algorithm>
 
+#include "libpandabase/os/file.h"
 #include "libpandabase/utils/pandargs.h"
 #include "libpandabase/utils/logger.h"
 #include "generated/link_options.h"
@@ -44,6 +45,50 @@ std::string MangleClass(std::string s)
     return s;
 }
 
+bool SplitContentByLine(const std::string &input, std::vector<std::string> &lines)
+{
+    std::ifstream ifs;
+    std::string line;
+    ifs.open(input);
+    if (!ifs.is_open()) {
+        std::cerr << "Failed to open source list file '" << input << "' during input file collection." << std::endl
+                  << "Please check if the file exists or the path is correct, "
+                  << "and you have the necessary permissions to access it." << std::endl;
+        return false;
+    }
+
+    while (std::getline(ifs, line)) {
+        lines.push_back(line);
+    }
+    ifs.close();
+    return true;
+}
+
+bool CollectAbcFiles(const std::vector<std::string> &files, std::vector<std::string> &abcFiles)
+{
+    for (const auto &file : files) {
+        if (file.length() > 0 && file[0] == '@') {
+            auto inputAbs = ark::os::file::File::GetAbsolutePath(file.substr(1));
+            if (!inputAbs) {
+                std::cerr << "Failed to find file '" << file.substr(1) << "' during input file resolution" << std::endl
+                          << "Please check if the file name is correct, the file exists at the specified path, "
+                          << "and your project has the necessary permissions to access it." << std::endl;
+                return false;
+            }
+            auto fpath = inputAbs.Value();
+            std::vector<std::string> lines;
+            if (!SplitContentByLine(fpath, lines)) {
+                return false;
+            }
+
+            std::move(lines.begin(), lines.end(), std::back_inserter(abcFiles));
+        } else {
+            abcFiles.push_back(file);
+        }
+    }
+    return true;
+}
+
 }  // namespace
 
 int main(int argc, const char *argv[])
@@ -62,13 +107,17 @@ int main(int argc, const char *argv[])
         ark::Logger::ComponentMask().set(ark::Logger::Component::STATIC_LINKER).set(ark::Logger::Component::PANDAFILE));
 
     const auto files = paParser.GetRemainder();
-    if (files.empty()) {
+    std::vector<std::string> abcFiles;
+    if (!CollectAbcFiles(files, abcFiles)) {
+        return 1;
+    }
+    if (abcFiles.empty()) {
         std::cerr << "must have at least one file" << std::endl;
         return PrintHelp(paParser);
     }
 
     if (options.GetOutput().empty()) {
-        auto const &fn = files[0];
+        auto const &fn = abcFiles[0];
         options.SetOutput(fn.substr(0, fn.find_last_of('.')) + ".linked.abc");
     }
 
@@ -84,7 +133,7 @@ int main(int argc, const char *argv[])
     classesVecToSet(options.GetPartialClasses(), conf.partial);
     classesVecToSet(options.GetRemainsPartialClasses(), conf.remainsPartial);
 
-    auto res = ark::static_linker::Link(conf, options.GetOutput(), files);
+    auto res = ark::static_linker::Link(conf, options.GetOutput(), abcFiles);
 
     size_t i = 0;
     for (const auto &s : res.errors) {

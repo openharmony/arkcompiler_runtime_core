@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -10,39 +10,38 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-
 .. _Contributors:
 
 Contributors
 ############
 
-  Nedoria Aleksei
+Language design lead:
 
-  Bronnikov Georgy
-  
-  Gavrin Evgeny
+- Nedoria Aleksei
 
-  Kanatov Alexey
+Contributors:
 
-  Pavlyuk Alexander
+- Bronnikov Georgy
+- Gavrin Evgeny
+- Huo Qingyi
+- Kanatov Alexey
+- Nedoria Aleksei
+- Pavlyuk Alexander
+- Pei Jiajun
+- Polyakov Alexander
+- Qiu Yu
+- Rubanov Vladimir
+- Soldatov Anton
+- Solomennikov Dmitry
+- Trubenkov Dmitrii
+- Velikanov Michael
+- Xian Yuqiang
+- Zouev Evgeniy
 
-  Polyakov Alexander
-  
-  Rubanov Vladimir
+Technical writer:
 
-  Soldatov Anton
-
-  Solomennikov Dmitry
-
-  Trubenkov Dmitrii
-
-  Velikanov Michael
-
-  Zouev Evgeniy
-
+- Baranov Dmitry
 
 .. raw:: pdf
 
    PageBreak
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,18 +165,24 @@ void GCWorker::RunGC(PandaUniquePtr<GCTask> task)
     if (task == nullptr || task->reason == GCTaskCause::INVALID_CAUSE) {
         return;
     }
-    if (gc_->IsPostponeEnabled() && task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) {
-        // If GC was postponed then return task back to local gc tasks queue
-        this->AddTask(std::move(task));
-        // In task manager case worker does not wait new task, otherwise we capture this worker and decrese
-        // possibilities for Task manager usages
-        if (gc_->GetSettings()->UseThreadPoolForGC()) {
-            gcTaskQueue_->WaitForGCTask();
+    if (gc_->IsPostponeEnabled() && (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE)) {
+        os::memory::LockHolder lh(postponedTasksMutex_);
+        if (postponedTasks_.empty() || postponedTasks_.back()->reason != task->reason) {
+            postponedTasks_.push(std::move(task));
         }
         return;
     }
     LOG(DEBUG, GC) << "Running GC task, reason " << task->reason;
     task->Run(*gc_);
+}
+
+void GCWorker::OnPostponeGCEnd()
+{
+    os::memory::LockHolder lh(postponedTasksMutex_);
+    while (!postponedTasks_.empty()) {
+        AddTask(std::move(postponedTasks_.back()));
+        postponedTasks_.pop();
+    }
 }
 
 }  // namespace ark::mem

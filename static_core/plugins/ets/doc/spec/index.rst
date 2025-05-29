@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -38,7 +38,6 @@
    /18_annotations
    /19_stdlib
    /20_implementation
-   /21_TS_compatibility
-   /22_grammar
+   /21_grammar
    /0_authors
 

@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+export declare function foo3(a: Array<string>): void;
+export declare function foo6(iface5: Iface5): void;
+export declare interface Iface {
+    get n(): number;
+    set n(value: number);
+    s(): string;
+}
+export declare interface Iface2 {
+    foo1(): void;
+}
+export declare interface Iface3 {
+    foo2(...nums: number[]): void;
+}
+export declare class C {
+    public static foo3(a: Array<string>): void;
+    public bar(a: Array<string>): void;
+    constructor();
+}
+export declare interface Iface4 {
+    foo3(a: Array<string>): void;
+}
+export declare interface I {
+    get s(): string;
+    set s(value: string);
+}
+export declare interface Iface5 {
+    foo5(): void;
+}

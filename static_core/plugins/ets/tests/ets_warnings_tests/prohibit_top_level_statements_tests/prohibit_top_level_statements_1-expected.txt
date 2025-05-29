@@ -1,4 +1,4 @@
-ETS Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.sts:16:1]
-ETS Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.sts:18:5]
-ETS Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.sts:19:1]
-ETS Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.sts:21:5]
+Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.ets:16:1]
+Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.ets:18:5]
+Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.ets:19:1]
+Warning: Prohibit top-level statements. [prohibit_top_level_statements_1.ets:21:5]

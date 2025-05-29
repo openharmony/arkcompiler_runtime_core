@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -17,14 +17,15 @@ Ambient Declarations
 
 .. meta:
     frontend_status: Done
-    
-Ambient declarations are the way to specify entities that are declared
-somewhere else. Ambient declarations do not introduce new entities---as regular
-declarations do---but instead provide type information for the entities that
-are included in a program by external means. Ambient declarations cannot
-include executable code. As a consequence, they have no initializers.
 
-Ambient declaration can be specified in :ref:`Declaration Modules` only.
+*Ambient declaration* specifies an entity that is declared somewhere else.
+Ambient declarations:
+
+-  Provide type information for entities included in a program from an external
+   source.
+-  Introduce no new entities like regular declarations do.
+-  Cannot include executable code and thus have no initializers.
+-  Can be specified in :ref:`Declaration Modules` only.
 
 Ambient functions, methods, and constructors have no bodies.
 
@@ -46,12 +47,13 @@ Ambient functions, methods, and constructors have no bodies.
 
     ambientDeclaration:
         'declare'
-        ( ambientConstantDeclaration 
+        ( ambientConstantDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | 'const'? enumDeclaration
+        | typeAlias
         )
         ;
 
@@ -86,7 +88,7 @@ Ambient Constant Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientConstantDeclaration:
@@ -98,11 +100,11 @@ Ambient Constant Declarations
         ;
 
     ambientConst:
-        identifier (':' type)? initializer
+        identifier ((':' type) | ('=' (IntegerLiteral|FloatLiteral|StringLiteral|MultilineStringLiteral)))
         ;
 
-The initializer expression for an ambient constant
-must be a numeric or string literal.
+The initializer expression for an ambient constant must be a numeric or string
+literal.
 
 .. index::
    ambient constant
@@ -121,33 +123,22 @@ Ambient Function Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientFunctionDeclaration:
-        ambientFunctionOverloadSignature*
         'function' identifier
         typeParameters? signature
         ;
 
-    ambientFunctionOverloadSignature:
-        'declare'? 'function' identifier
-          typeParameters? signature ';'
-        ;        
-
-A :index:`compile-time error` occurs if:
-
--  Explicit return type is not specified for an ambient function declaration;
--  Not all overload signatures are marked as ambient in top-level ambient
-   overload signatures.
+A :index:`compile-time error` occurs if explicit return type for an ambient
+function declaration is not specified.
 
 .. index::
    ambient function declaration
    compile-time error
    type annotation
    return type
-   overload signature
-   top-level ambient overload signature
 
 .. code-block:: typescript
    :linenos:
@@ -165,9 +156,8 @@ Ambient function declarations cannot specify function bodies.
 
     declare function foo(x?: string): void // ok
     declare function bar(y: number = 1): void // compile-time error
-    
 
-**Note**: The modifier ``async`` cannot be used in an ambient context.
+**Note**. The modifier ``async`` cannot be used in an ambient context.
 
 .. index::
    ambient function declaration
@@ -186,7 +176,7 @@ Ambient Class Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientClassDeclaration:
@@ -197,7 +187,7 @@ Ambient Class Declarations
 
     ambientClassBodyDeclaration:
         ambientAccessModifier?
-        ( ambientFieldDeclaration 
+        ( ambientFieldDeclaration
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
         | ambientAccessorDeclaration
@@ -206,11 +196,10 @@ Ambient Class Declarations
         | ambientIterableDeclaration
         )
         ;
-    
+
     ambientAccessModifier:
         'public' | 'protected'
         ;
-
 
 Ambient field declarations have no initializers:
 
@@ -226,7 +215,7 @@ Ambient field declarations have no initializers:
 
     ambientFieldModifier:
         'static' | 'readonly'
-        ;       
+        ;
 
 Ambient constructor, method, and accessor declarations have no bodies:
 
@@ -237,24 +226,19 @@ Ambient constructor, method, and accessor declarations have no bodies:
         ;
 
     ambientMethodDeclaration:
-        ambientMethodOverloadSignature*
         ambientMethodModifier* identifier signature
         ;
 
-    ambientMethodOverloadSignature:
-        ambientMethodModifier* identifier signature ';'
-        ;
-        
     ambientMethodModifier:
         'static'
-        ;       
+        ;
 
     ambientAccessorDeclaration:
         ambientMethodModifier*
-        ( 'get' identifier '(' ')' returnType 
+        ( 'get' identifier '(' ')' returnType
         | 'set' identifier '(' parameter ')'
         )
-        ;       
+        ;
 
 .. index::
    constructor
@@ -270,9 +254,9 @@ Ambient Indexer
 
 .. meta:
     frontend_status: Done
-       
-Ambient indexer declarations specify the indexing of a class instance
-in an ambient context. This feature is provided for |TS| compatibility:
+
+*Ambient indexer declarations* specify the indexing of a class instance
+in an ambient context. The feature is provided for |TS| compatibility:
 
 .. code-block:: abnf
 
@@ -297,9 +281,8 @@ in an ambient context. This feature is provided for |TS| compatibility:
         [index: number]: number
     }
 
-
-**Note**: *Ambient indexer declaration* is supported in ambient contexts only.
-If ambient class implementation is written in |LANG|, then it must conform to
+**Note**. *Ambient indexer declaration* is supported in ambient contexts only.
+If written in |LANG|, ambient class implementation must conform to
 :ref:`Indexable Types`.
 
 .. index::
@@ -317,9 +300,9 @@ Ambient Call Signature
 
 .. meta:
     frontend_status: Done
-       
-Ambient call signature declarations used to specify *callable types*
-in an ambient context. This feature is provided for |TS| compatibility:
+
+*Ambient call signature* declarations are used to specify *callable types*
+in an ambient context. The feature is provided for |TS| compatibility:
 
 .. code-block:: abnf
 
@@ -334,9 +317,9 @@ in an ambient context. This feature is provided for |TS| compatibility:
         (someArg: number): boolean
     }
 
-**Note**: *Ambient class signature declaration* is supported in ambient contexts
-only. If ambient class implementation is written in |LANG|, then it must conform
-to :ref:`Callable Types with Invoke Method`.
+**Note**. *Ambient class signature declaration* is supported in ambient contexts
+only. If written in |LANG|, ambient class implementation must conform to
+:ref:`Callable Types with $_invoke Method`.
 
 .. index::
    ambient call signature declaration
@@ -354,10 +337,9 @@ Ambient Iterable
 
 .. meta:
     frontend_status: Done
-       
-An ambient iterable declaration indicates that a class instance is iterable.
-This feature is provided for |TS| compatibility, and can be used in ambient
-contexts only:
+
+*Ambient iterable declaration* indicates that a class instance is iterable
+in an ambient context. The feature is provided for |TS| compatibility:
 
 .. code-block:: abnf
 
@@ -365,9 +347,8 @@ contexts only:
         '[Symbol.iterator]' '(' ')' returnType
         ;
 
-**Restriction**: *returnType* must be a type that
-implements ``Iterator`` interface defined in the standard library (see
-:ref:`Standard Library`).
+**Restriction**: *returnType* must be a type that implements ``Iterator``
+interface defined in the standard library (see :ref:`Standard Library`).
 
 .. code-block:: typescript
    :linenos:
@@ -376,9 +357,8 @@ implements ``Iterator`` interface defined in the standard library (see
         [Symbol.iterator]: CIterator
     }
 
-
-**Note**: *Ambient iterable declaration* is supported in ambient contexts only.
-If ambient class implementation is written in |LANG|, then it must conform to
+**Note**. *Ambient iterable declaration* is supported in ambient contexts only.
+If written in |LANG|, ambient class implementation must conform to
 :ref:`Iterable Types`.
 
 .. index::
@@ -398,12 +378,12 @@ Ambient Interface Declarations
 
 .. meta:
     frontend_status: Done
-    
+
 .. code-block:: abnf
 
     ambientInterfaceDeclaration:
         'interface' identifier typeParameters?
-        interfaceExtendsClause? 
+        interfaceExtendsClause?
         '{' ambientInterfaceMember* '}'
         ;
 
@@ -415,7 +395,7 @@ Ambient Interface Declarations
         | ambientIterableDeclaration
         ;
 
-An ambient interface can contain additional members in the same manner as
+*Ambient interface* can contain additional members in the same manner as
 an ambient class (see :ref:`Ambient Indexer`, :ref:`Ambient Call Signature`,
 and :ref:`Ambient Iterable`).
 
@@ -434,8 +414,8 @@ Ambient Namespace Declarations
     frontend_status: Done
 
 Namespaces are used to logically group multiple entities. |LANG| supports
-ambient namespaces to provide better |TS| compatibility as |TS| often uses
-them to specify the platform API or a third-party library API.
+*ambient namespaces* for better |TS| compatibility. |TS| often uses ambient
+namespaces to specify the platform API or a third-party library API.
 
 .. code-block:: abnf
 
@@ -448,7 +428,7 @@ them to specify the platform API or a third-party library API.
     ;
 
     ambientNamespaceElementDeclaration:
-        'export'? 
+        'export'?
         ( ambientConstantDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
@@ -459,12 +439,11 @@ them to specify the platform API or a third-party library API.
         )
         ;
 
-An enumeration type declaration can be prefixed by the keyword ``const`` for
-|TS| compatibility. It has no influence on the declared type.
-
+An *enumeration type declaration* can be prefixed with the keyword ``const``
+for |TS| compatibility. The prefix has no influence on the declared type.
 Only exported entities can be accessed outside a namespace.
 
-Namespace nesting is allowed:
+Namespaces can be nested:
 
 .. code-block:: typescript
    :linenos:
@@ -475,8 +454,8 @@ Namespace nesting is allowed:
         }
     }
 
-A namespace is not an object but just a scope for entities that can only be
-accessed by using qualified names.
+A namespace is not an object but merely a scope for entities that can be
+accessed by using qualified names only.
 
 .. index::
    namespace
@@ -488,6 +467,35 @@ accessed by using qualified names.
    qualified name
    access
 
+If an ambient namespace is imported from the declaration module then all
+ambient namespace declarations are accessible across all declarations and
+top-level statements of the current module.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1.d.ets
+    export declare namespace A { // namespace itself must be exported
+        function foo(): void
+        type X = Array<number>
+    }
+
+    // File2.ets
+    import {A} from 'File1.d.ets'
+
+    A.foo() // Valid function call, as 'foo' is acessible for top-level statements
+    function foo () {
+        A.foo() // Valid function call, as 'foo' is acessible here as well
+    }
+    class C {
+        method () {
+            A.foo() // Valid function call, as 'foo' is acessible here too
+            let x: A.X = [] // Type A.X can be used
+        }
+    }
+
+
+
 |
 
 .. _Implementing Ambient Namespace Declaration:
@@ -495,10 +503,14 @@ accessed by using qualified names.
 Implementing Ambient Namespace Declaration
 ==========================================
 
-In case an *ambient namespace* is implemented in |LANG|, a namespace with the
-same name must be declared (see :ref:`Namespace Declarations`) as the 
-top-level declaration of a compilation unit. If a namespace is embedded into
-another namespace, then all namespace names must be same as in ambient context.
+.. meta:
+    frontend_status: Done
+
+If an *ambient namespace* is implemented in |LANG|, a namespace with the
+same name must be declared (see :ref:`Namespace Declarations`) as the
+top-level declaration of a compilation unit. All namespace names of a nested
+namespace (i.e. a namespace embedded into another namespace) must be the same
+as in ambient context.
 
 A compilation unit that implements a namespace is the unit for which the
 declaration module is built (see :ref:`Declaration Modules`).
@@ -510,5 +522,3 @@ declaration module is built (see :ref:`Declaration Modules`).
 .. raw:: pdf
 
    PageBreak
-
-

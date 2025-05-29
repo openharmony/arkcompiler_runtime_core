@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,39 +28,9 @@ let __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (ConstFoo.prototype = b.prototype, new ConstFoo());
     };
 })();
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.instanceChildAgeNameLiteralClass = exports.ChildAgeNameLiteralClass = 
-exports.instanceAgeNameLiteralClass = exports.AgeNameLiteralClass = 
-exports.instanceChildAgeNameUnionClass = exports.ChildAgeNameUnionClass = 
-exports.instanceAgeNameUnionClass = exports.AgeNameUnionClass = 
-exports.instanceChildAgeNameGenericClass = exports.ChildAgeNameGenericClass = 
-exports.instanceAgeNameGenericClass = exports.AgeNameGenericClass = 
-exports.instanceChildAgeNameInterfaceClass = exports.ChildAgeNameInterfaceClass = 
-exports.instanceAgeNameInterfaceClass = exports.AgeNameInterfaceClass = 
-exports.tsString = exports.tsNumber = void 0;
-exports.createAgeNameClassInterfaceFromTs = createAgeNameClassInterfaceFromTs;
-exports.callMethodAgeNameClassInterfaceFromTs = callMethodAgeNameClassInterfaceFromTs;
-exports.createChildAgeNameClassInterfaceFromTs = createChildAgeNameClassInterfaceFromTs;
-exports.callMethodChildAgeNameClassInterfaceFromTs = callMethodChildAgeNameClassInterfaceFromTs;
-exports.checkIntersectionInterface = checkIntersectionInterface;
-exports.checkAgeNameGeneric = checkAgeNameGeneric;
-exports.createAgeNameClassGenericFromTs = createAgeNameClassGenericFromTs;
-exports.callMethodAgeNameClassGenericFromTs = callMethodAgeNameClassGenericFromTs;
-exports.createChildAgeNameClassGenericFromTs = createChildAgeNameClassGenericFromTs;
-exports.callMethodChildAgeNameClassGenericFromTs = callMethodChildAgeNameClassGenericFromTs;
-exports.checkUnionType = checkUnionType;
-exports.createAgeNameUnionClassFromTs = createAgeNameUnionClassFromTs;
-exports.callMethodAgeNameUnionClassFromTs = callMethodAgeNameUnionClassFromTs;
-exports.createChildAgeNameUnionClassFromTs = createChildAgeNameUnionClassFromTs;
-exports.callMethodChildAgeNameUnionClassFromTs = callMethodChildAgeNameUnionClassFromTs;
-exports.checkLiteralType = checkLiteralType;
-exports.createAgeNameLiteralClassFromTs = createAgeNameLiteralClassFromTs;
-exports.callMethodAgeNameLiteralClassFromTs = callMethodAgeNameLiteralClassFromTs;
-exports.createChildAgeNameLiteralClassFromTs = createChildAgeNameLiteralClassFromTs;
-exports.callMethodChildAgeNameLiteralClassFromTs = callMethodChildAgeNameLiteralClassFromTs;
-exports.tsNumber = 1;
-exports.tsString = 'string';
-let AgeNameInterfaceClass = /** @class */ (function () {
+export let tsNumber = 1;
+export let tsString = 'string';
+export let AgeNameInterfaceClass = /** @class */ (function () {
     function AgeNameInterfaceClass(name, age) {
         throwExceptionInterface({ name: name, age: age });
         this.name = name;
@@ -72,59 +42,56 @@ let AgeNameInterfaceClass = /** @class */ (function () {
     };
     return AgeNameInterfaceClass;
 }());
-exports.AgeNameInterfaceClass = AgeNameInterfaceClass;
-function createAgeNameClassInterfaceFromTs() {
-    new AgeNameInterfaceClass(exports.tsString, exports.tsNumber);
+export function createAgeNameClassInterfaceFromTs() {
+    new AgeNameInterfaceClass(tsString, tsNumber);
     return true;
 }
-function callMethodAgeNameClassInterfaceFromTs() {
-    let user = new AgeNameInterfaceClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodAgeNameClassInterfaceFromTs() {
+    let user = new AgeNameInterfaceClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceAgeNameInterfaceClass = new AgeNameInterfaceClass(exports.tsString, exports.tsNumber);
-let ChildAgeNameInterfaceClass = /** @class */ (function (_super) {
+export let instanceAgeNameInterfaceClass = new AgeNameInterfaceClass(tsString, tsNumber);
+export let ChildAgeNameInterfaceClass = /** @class */ (function (_super) {
     __extends(ChildAgeNameInterfaceClass, _super);
     function ChildAgeNameInterfaceClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return ChildAgeNameInterfaceClass;
 }(AgeNameInterfaceClass));
-exports.ChildAgeNameInterfaceClass = ChildAgeNameInterfaceClass;
-;
-function createChildAgeNameClassInterfaceFromTs() {
-    new ChildAgeNameInterfaceClass(exports.tsString, exports.tsNumber);
+export function createChildAgeNameClassInterfaceFromTs() {
+    new ChildAgeNameInterfaceClass(tsString, tsNumber);
     return true;
 }
-function callMethodChildAgeNameClassInterfaceFromTs() {
-    let user = new ChildAgeNameInterfaceClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodChildAgeNameClassInterfaceFromTs() {
+    let user = new ChildAgeNameInterfaceClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceChildAgeNameInterfaceClass = new ChildAgeNameInterfaceClass(exports.tsString, exports.tsNumber);
-function checkIntersectionInterface(arg) {
+export let instanceChildAgeNameInterfaceClass = new ChildAgeNameInterfaceClass(tsString, tsNumber);
+export function checkIntersectionInterface(arg) {
     if (checkInterfaceAge(arg) && checkInterfaceName(arg)) {
         return true;
     }
     ;
     return false;
 }
-function checkInterfaceAge(object) {
+export function checkInterfaceAge(object) {
     let key = 'age';
     return key in object && typeof object[key] === 'number';
 }
-function checkInterfaceName(object) {
+export function checkInterfaceName(object) {
     let key = 'name';
     return key in object && typeof object[key] === 'string';
 }
-function throwExceptionInterface(arg) {
+export function throwExceptionInterface(arg) {
     let check = checkIntersectionInterface(arg);
     if (!check) {
         throw new Error('Invalid input');
     }
 }
 //<< generic type
-function checkAgeNameGeneric(arg) {
+export function checkAgeNameGeneric(arg) {
     if (checkTypeGenericAge(arg) && checkTypeGenericName(arg)) {
         return true;
     }
@@ -139,7 +106,7 @@ function checkTypeGenericName(object) {
     let key = 'name';
     return key in object && typeof object[key] === 'string';
 }
-let AgeNameGenericClass = /** @class */ (function () {
+export let AgeNameGenericClass = /** @class */ (function () {
     function AgeNameGenericClass(name, age) {
         throwExceptionGeneric({ name: name, age: age });
         this.name = name;
@@ -151,43 +118,40 @@ let AgeNameGenericClass = /** @class */ (function () {
     };
     return AgeNameGenericClass;
 }());
-exports.AgeNameGenericClass = AgeNameGenericClass;
-function createAgeNameClassGenericFromTs() {
-    new AgeNameGenericClass(exports.tsString, exports.tsNumber);
+export function createAgeNameClassGenericFromTs() {
+    new AgeNameGenericClass(tsString, tsNumber);
     return true;
 }
-function callMethodAgeNameClassGenericFromTs() {
-    let user = new AgeNameGenericClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodAgeNameClassGenericFromTs() {
+    let user = new AgeNameGenericClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceAgeNameGenericClass = new AgeNameGenericClass(exports.tsString, exports.tsNumber);
-let ChildAgeNameGenericClass = /** @class */ (function (_super) {
+export let instanceAgeNameGenericClass = new AgeNameGenericClass(tsString, tsNumber);
+export let ChildAgeNameGenericClass = /** @class */ (function (_super) {
     __extends(ChildAgeNameGenericClass, _super);
     function ChildAgeNameGenericClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return ChildAgeNameGenericClass;
 }(AgeNameGenericClass));
-exports.ChildAgeNameGenericClass = ChildAgeNameGenericClass;
-;
-function createChildAgeNameClassGenericFromTs() {
-    new ChildAgeNameGenericClass(exports.tsString, exports.tsNumber);
+export function createChildAgeNameClassGenericFromTs() {
+    new ChildAgeNameGenericClass(tsString, tsNumber);
     return true;
 }
-function callMethodChildAgeNameClassGenericFromTs() {
-    let user = new ChildAgeNameGenericClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodChildAgeNameClassGenericFromTs() {
+    let user = new ChildAgeNameGenericClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceChildAgeNameGenericClass = new ChildAgeNameGenericClass(exports.tsString, exports.tsNumber);
+export let instanceChildAgeNameGenericClass = new ChildAgeNameGenericClass(tsString, tsNumber);
 function throwExceptionGeneric(arg) {
     let check = checkIntersectionInterface(arg);
     if (!check) {
         throw new Error('Invalid input');
     }
 }
-function checkUnionType(arg) {
+export function checkUnionType(arg) {
     if (checkTypeAgeUnion(arg) && checkTypeNameUnion(arg)) {
         return true;
     }
@@ -202,7 +166,7 @@ function checkTypeNameUnion(object) {
     let key = 'name';
     return key in object && (typeof object[key] === 'string' || typeof object[key] === 'number');
 }
-let AgeNameUnionClass = /** @class */ (function () {
+export let AgeNameUnionClass = /** @class */ (function () {
     function AgeNameUnionClass(name, age) {
         throwExceptionUnion({ name: name, age: age });
         this.name = name;
@@ -214,43 +178,40 @@ let AgeNameUnionClass = /** @class */ (function () {
     };
     return AgeNameUnionClass;
 }());
-exports.AgeNameUnionClass = AgeNameUnionClass;
-function createAgeNameUnionClassFromTs() {
-    new AgeNameUnionClass(exports.tsString, exports.tsNumber);
+export function createAgeNameUnionClassFromTs() {
+    new AgeNameUnionClass(tsString, tsNumber);
     return true;
 }
-function callMethodAgeNameUnionClassFromTs() {
-    let user = new AgeNameUnionClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodAgeNameUnionClassFromTs() {
+    let user = new AgeNameUnionClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceAgeNameUnionClass = new AgeNameUnionClass(exports.tsString, exports.tsNumber);
-let ChildAgeNameUnionClass = /** @class */ (function (_super) {
+export let instanceAgeNameUnionClass = new AgeNameUnionClass(tsString, tsNumber);
+export let ChildAgeNameUnionClass = /** @class */ (function (_super) {
     __extends(ChildAgeNameUnionClass, _super);
     function ChildAgeNameUnionClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return ChildAgeNameUnionClass;
 }(AgeNameUnionClass));
-exports.ChildAgeNameUnionClass = ChildAgeNameUnionClass;
-;
-function createChildAgeNameUnionClassFromTs() {
-    new ChildAgeNameUnionClass(exports.tsString, exports.tsNumber);
+export function createChildAgeNameUnionClassFromTs() {
+    new ChildAgeNameUnionClass(tsString, tsNumber);
     return true;
 }
-function callMethodChildAgeNameUnionClassFromTs() {
-    let user = new ChildAgeNameUnionClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodChildAgeNameUnionClassFromTs() {
+    let user = new ChildAgeNameUnionClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceChildAgeNameUnionClass = new ChildAgeNameUnionClass(exports.tsString, exports.tsNumber);
+export let instanceChildAgeNameUnionClass = new ChildAgeNameUnionClass(tsString, tsNumber);
 function throwExceptionUnion(arg) {
     let check = checkUnionType(arg);
     if (!check) {
         throw new Error('Invalid input');
     }
 }
-function checkLiteralType(arg) {
+export function checkLiteralType(arg) {
     if (checkTypeAgeLiteral(arg) && checkTypeNameLiteral(arg)) {
         return true;
     }
@@ -265,7 +226,7 @@ function checkTypeNameLiteral(object) {
     let key = 'name';
     return key in object && (object[key] === 'string' || object[key] === 1);
 }
-let AgeNameLiteralClass = /** @class */ (function () {
+export let AgeNameLiteralClass = /** @class */ (function () {
     function AgeNameLiteralClass(name, age) {
         throwExceptionLiteral({ name: name, age: age });
         this.name = name;
@@ -277,36 +238,33 @@ let AgeNameLiteralClass = /** @class */ (function () {
     };
     return AgeNameLiteralClass;
 }());
-exports.AgeNameLiteralClass = AgeNameLiteralClass;
-function createAgeNameLiteralClassFromTs() {
-    new AgeNameLiteralClass(exports.tsString, exports.tsNumber);
+export function createAgeNameLiteralClassFromTs() {
+    new AgeNameLiteralClass(tsString, tsNumber);
     return true;
 }
-function callMethodAgeNameLiteralClassFromTs() {
-    let user = new AgeNameLiteralClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodAgeNameLiteralClassFromTs() {
+    let user = new AgeNameLiteralClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceAgeNameLiteralClass = new AgeNameLiteralClass(exports.tsString, exports.tsNumber);
-let ChildAgeNameLiteralClass = /** @class */ (function (_super) {
+export let instanceAgeNameLiteralClass = new AgeNameLiteralClass(tsString, tsNumber);
+export let ChildAgeNameLiteralClass = /** @class */ (function (_super) {
     __extends(ChildAgeNameLiteralClass, _super);
     function ChildAgeNameLiteralClass(...arg) {
         return _super !== null && _super.apply(this, arg) || this;
     }
     return ChildAgeNameLiteralClass;
 }(AgeNameLiteralClass));
-exports.ChildAgeNameLiteralClass = ChildAgeNameLiteralClass;
-;
-function createChildAgeNameLiteralClassFromTs() {
-    new ChildAgeNameLiteralClass(exports.tsString, exports.tsNumber);
+export function createChildAgeNameLiteralClassFromTs() {
+    new ChildAgeNameLiteralClass(tsString, tsNumber);
     return true;
 }
-function callMethodChildAgeNameLiteralClassFromTs() {
-    let user = new ChildAgeNameLiteralClass(exports.tsString, exports.tsNumber);
-    user.createUser(exports.tsString, exports.tsNumber);
+export function callMethodChildAgeNameLiteralClassFromTs() {
+    let user = new ChildAgeNameLiteralClass(tsString, tsNumber);
+    user.createUser(tsString, tsNumber);
     return true;
 }
-exports.instanceChildAgeNameLiteralClass = new ChildAgeNameLiteralClass(exports.tsString, exports.tsNumber);
+export let instanceChildAgeNameLiteralClass = new ChildAgeNameLiteralClass(tsString, tsNumber);
 function throwExceptionLiteral(arg) {
     let check = checkLiteralType(arg);
     if (!check) {

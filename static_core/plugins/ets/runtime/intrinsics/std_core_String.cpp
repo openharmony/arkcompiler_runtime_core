@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,16 +166,6 @@ uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
         return UINT8_C(0);
     }
     return static_cast<uint8_t>(owner->StringsAreEqual(s));
-}
-
-EtsString *StdCoreStringMatch(EtsString *thisStr, EtsString *reg)
-{
-    PandaVector<uint8_t> buf;
-    auto thisS = std::string(thisStr->ConvertToStringView(&buf));
-    auto regex = std::string(reg->ConvertToStringView(&buf));
-
-    std::regex e(regex);
-    return EtsString::CreateFromMUtf8(std::sregex_iterator(thisS.begin(), thisS.end(), e)->str().c_str());
 }
 
 EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
@@ -589,6 +579,11 @@ EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
         }
     }
     return rep;
+}
+
+uint16_t StdCoreStringGet(EtsString *str, EtsInt index)
+{
+    return StdCoreStringCharAt(str, index);
 }
 
 }  // namespace ark::ets::intrinsics

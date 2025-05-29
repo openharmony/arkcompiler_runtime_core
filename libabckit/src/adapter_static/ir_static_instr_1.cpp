@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1993,9 +1993,9 @@ AbckitInst *IcreateIsInstanceStatic(AbckitGraph *graph, AbckitInst *inputObj, Ab
     return CreateInstFromImpl(graph, intrImpl);
 }
 
-AbckitInst *IcreateLoadUndefinedStatic(AbckitGraph *graph)
+AbckitInst *IcreateLoadNullValueStatic(AbckitGraph *graph)
 {
-    auto instImpl = graph->impl->CreateInstLoadUndefined(compiler::DataType::REFERENCE);
+    auto instImpl = graph->impl->CreateInstLoadUniqueObject(compiler::DataType::REFERENCE);
     return CreateInstFromImpl(graph, instImpl);
 }
 
@@ -2015,7 +2015,7 @@ AbckitInst *IcreateIsUndefinedStatic(AbckitGraph *graph, AbckitInst *inputObj)
 {
     LIBABCKIT_LOG_FUNC;
     auto intrImpl = graph->impl->CreateInstIntrinsic(
-        compiler::DataType::BOOL, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_IS_UNDEFINED);
+        compiler::DataType::BOOL, 0, compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_IS_NULL_VALUE);
     size_t argsCount {1U};
     intrImpl->ReserveInputs(argsCount);
     intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
@@ -2081,6 +2081,21 @@ AbckitInst *IcreateModStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst 
 }
 
 AbckitInst *IcreateEqualsStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+{
+    LIBABCKIT_LOG_FUNC;
+
+    auto intrImpl = graph->impl->CreateInstIntrinsic(compiler::DataType::BOOL, compiler::INVALID_PC,
+                                                     compiler::IntrinsicInst::IntrinsicId::INTRINSIC_ABCKIT_EQUALS);
+    size_t argsCount {2U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(input0->impl, input0->impl->GetType());
+    intrImpl->AppendInput(input1->impl, input1->impl->GetType());
+
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *IcreateStrictEqualsStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
 

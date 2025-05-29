@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,8 +14,11 @@
 set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-panda_ets_interop_js_gtest(ets_interop_js__indexed_signature_ts_to_sts
+panda_ets_interop_js_arkjsvm_gtest(ets_interop_js__indexed_signature_ts_to_sts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indexed_signature.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indexed_signature.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indexed_signature.ets
+    JS_SOURCES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/main.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/utils.js
     ETS_CONFIG ${ETS_CONFIG}
 )

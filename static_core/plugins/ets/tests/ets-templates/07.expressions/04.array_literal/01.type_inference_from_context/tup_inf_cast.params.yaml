@@ -1,0 +1,145 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # casting context
+    - use: |-
+          // casting context, tuple of primitives
+          let a = [1, 2, 3, -9223372036854775808] as [short, int, int, long]
+          assertEQ(a[0], 1)
+          assertEQ(a[3], -9223372036854775808)
+
+    - use: |-
+          // casting context, tuple of primitives
+          let a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ] as [number, byte, float, number]
+          assertTrue(Number.isNaN(a[0]))
+          assertEQ(a[1], 0)
+          assertEQ(a[2], 3.14f)
+          assertEQ(a[3], 1.7976931348623157e+308)
+
+    - use: |-
+          // casting context, tuple of boxed
+          let a = [0b1, 2, 0x7f, -9223372036854775808,] as [Short, Int, Byte, Long]
+          assertEQ(a[0].unboxed(), 1)
+          assertEQ(a[1].unboxed(), 2)
+          assertEQ(a[2].unboxed(), 127)
+          assertEQ(a[3].unboxed(), -9223372036854775808)
+
+    - use: |-
+          // casting context, tuple of boxed
+          let a = [Number.NaN, 0, 3.14, 1.7976931348623157e+308, ] as [Number, Byte, Float, Double]
+          assertTrue(Number.isNaN(a[0].unboxed()))
+          assertEQ(a[1].unboxed(), 0)
+          assertEQ(a[2].unboxed(), 3.14f)
+          assertEQ(a[3].unboxed(), 1.7976931348623157e+308)
+
+    - use: |-
+          // casting context, tuple of strings
+          let a = ['1', '2', ['', '-9223372036854775808', ], ] as [string, string, [string, string]]
+          assertEQ(a[0], '1')
+          assertEQ(a[1], '2')
+          assertEQ(a[2][0], '')
+          assertEQ(a[2][1], '-9223372036854775808')
+
+    - decl: |-
+          class A {}
+      use: |-
+          // casting context, tuple of class objects
+          let a = [{}, null, new A, {} ] as [A, Object|null, A, Object]
+          assertTrue(a[0] instanceof A)
+          assertEQ(a[1], null)
+          assertTrue(a[2] instanceof A)
+          assertTrue(a[3] instanceof Object)
+
+    - use: |-
+          // casting context, tuple of tuples
+          let a = [["a", {}, ], [Double.POSITIVE_INFINITY - 1.0 , 16777215, ], ] as [[string, Object], [Double, float]]
+          assertEQ(a[0][0],  "a")
+          assertTrue(a[0][1] instanceof Object)
+          assertEQ(a[1][0].unboxed(), Number.POSITIVE_INFINITY)
+          assertEQ(a[1][1], 16777215f)
+
+    - use: |-
+          // casting context, tuple of tuple of primitives
+          let a = [[-2147483647, Double.NEGATIVE_INFINITY], [ 0x7f, 16777215f, -32768]] as [[int, double], [byte, float, short]]
+          assertEQ(a[0][0], -2147483647)
+          assertEQ(a[0][1], Double.NEGATIVE_INFINITY)
+          assertEQ(a[1][0], 127)
+          assertEQ(a[1][1], 16777215f)
+          assertEQ(a[1][2], -32768)
+
+    - use: |-
+          // casting context, tuple of tuple of boxed
+          let a = [9223372036854775807, [9007199254740991, -9007199254740991], [ 2147483647, -9223372036854775808]] as [Long, [Double, Number], [Int, Long]]
+          assertEQ(a[0].unboxed(), 9223372036854775807)
+          assertEQ(a[1][0].unboxed(), 9007199254740991)
+          assertEQ(a[1][1].unboxed(), -9007199254740991)
+          assertEQ(a[2][0].unboxed(), 2147483647)
+          assertEQ(a[2][1].unboxed(), -9223372036854775808)
+
+    - decl: |-
+          enum Color { Red, Green, Blue }
+          enum Size { S, L, M, XL }
+      use: |-
+          // casting context, tuple of enums
+          let a = [Color.Green, Size.XL, 'a'] as [Color, Size, string]
+          assertEQ(a[0], Color.Green)
+          assertEQ(a[1], Size.XL)
+          assertEQ(a[2], 'a')
+
+    - decl: |-
+          type S = (p: string) => string
+          type N = (p: number) => number
+      use: |-
+          // casting context, tuple of functions
+          let a = [(p: string): string => p + p, (p: number): number => p + p, true] as [S, N, boolean]
+          assertEQ(a[0]('a'), 'aa')
+          assertEQ(a[1](42), 84)
+          assertEQ(a[2], true)
+
+    - use: |-
+          // casting context, tuple of arrays
+          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']] as [byte[], long[], string[]]
+          assertEQ(a[0][0], 0)
+          assertEQ(a[0][1], 15)
+          assertEQ(a[0][2], 127)
+          assertEQ(a[1][0], -9223372036854775808)
+          assertEQ(a[1][1], 9223372036854775807)
+          assertEQ(a[2][0], 'a')
+          assertEQ(a[2][1], 'b')
+          assertEQ(a[2][2], 'c')
+
+    - use: |-
+          // declaration context, tuple of arrays
+          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']] as [Array<byte>, Array<long>, Array<string>]
+          assertEQ(a[0][0], 0)
+          assertEQ(a[0][1], 15)
+          assertEQ(a[0][2], 127)
+          assertEQ(a[1][0], -9223372036854775808)
+          assertEQ(a[1][1], 9223372036854775807)
+          assertEQ(a[2][0], 'a')
+          assertEQ(a[2][1], 'b')
+          assertEQ(a[2][2], 'c')
+
+    - use: |-
+          // declaration context, tuple of arrays
+          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']] as [FixedArray<byte>, FixedArray<long>, FixedArray<string>]
+          assertEQ(a[0][0], 0)
+          assertEQ(a[0][1], 15)
+          assertEQ(a[0][2], 127)
+          assertEQ(a[1][0], -9223372036854775808)
+          assertEQ(a[1][1], 9223372036854775807)
+          assertEQ(a[2][0], 'a')
+          assertEQ(a[2][1], 'b')
+          assertEQ(a[2][2], 'c')

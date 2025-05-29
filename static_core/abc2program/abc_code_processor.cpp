@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,7 +109,8 @@ void AbcCodeProcessor::FillProgramData()
     LabelTable labelTable = GetExceptions(methodId_, entityId_);
 
     while (bcIns.GetAddress() != bcInsLast.GetAddress()) {
-        if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID)) {
+        if (bcIns.HasFlag(BytecodeInstruction::Flags::FIELD_ID) ||
+            bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_FIELD_ID)) {
             auto idx = bcIns.GetId().AsIndex();
             auto id = file_->ResolveFieldIndex(methodId_, idx);
             CollectExternalFields(id);
@@ -121,7 +122,8 @@ void AbcCodeProcessor::FillProgramData()
             TranslateImmToLabel(immToLabel);
         }
         // check if method id is unknown external method. if so, emplace it in table
-        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+        if (bcIns.HasFlag(BytecodeInstruction::Flags::METHOD_ID) ||
+            bcIns.HasFlag(BytecodeInstruction::Flags::STATIC_METHOD_ID)) {
             const auto argMethodIdx = bcIns.GetId().AsIndex();
             const auto argMethodId = file_->ResolveMethodIndex(methodId_, argMethodIdx);
 

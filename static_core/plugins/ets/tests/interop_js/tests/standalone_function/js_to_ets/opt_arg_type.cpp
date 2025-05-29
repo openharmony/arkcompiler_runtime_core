@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,85 +22,85 @@ class EtsInteropScenariosJsToEts : public EtsInteropTest {};
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_double_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeDoubleOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeDoubleOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_byte_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeByteOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeByteOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_short_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeShortOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeShortOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_int_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeIntOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeIntOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_long_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeLongOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeLongOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_float_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeFloatOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeFloatOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_char_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeCharOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeCharOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_boolean_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeBooleanOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeBooleanOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_string_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeStringOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeStringOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_object_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeObjectOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeObjectOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_class_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeClassOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeClassOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_array_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeArrayOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeArrayOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_tuple_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeTupleOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeTupleOpt");
     ASSERT_EQ(ret, true);
 }
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_callable_opt)
 {
-    auto ret = CallEtsMethod<bool>("TestFunctionArgTypeCallableOpt");
+    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestFunctionArgTypeCallableOpt");
     ASSERT_EQ(ret, true);
 }
 

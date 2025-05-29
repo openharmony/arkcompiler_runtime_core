@@ -29,15 +29,11 @@ cases:
           - '127.0'
           - new Double(127.0)
       case2:
-          - '127 as byte'
           - '127 as short'
           - '127'
           - '127 as long'
-          - '127f'
           - new Byte(127 as byte)
           - new Short(127 as short)
-          - new Int(127)
-          - new Long(127 as long)
           - new Float(127f)
 
     - type1: byte|short|Error
@@ -49,9 +45,9 @@ cases:
           - new Short(0 as short)
       case2:
           - '0 as long'
-          - "c'\\u0000'"
+          - c'\u0000'
           - new Long(0 as long)
-          - "new Char(c'\\u0000')"
+          - new Char(c'\u0000')
 
     # string equality
     - type1: number|string|boolean

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,29 +44,31 @@ public:
 
     struct AsmEntityCollections {
         std::unordered_map<std::string, panda_file::BaseMethodItem *> methodItems;
+        std::unordered_map<std::string, panda_file::BaseMethodItem *> staticMethodItems;
         std::unordered_map<std::string, panda_file::BaseFieldItem *> fieldItems;
+        std::unordered_map<std::string, panda_file::BaseFieldItem *> staticFieldItems;
         std::unordered_map<std::string, panda_file::BaseClassItem *> classItems;
         std::unordered_map<std::string_view, panda_file::StringItem *> stringItems;
         std::unordered_map<std::string, panda_file::LiteralArrayItem *> literalarrayItems;
     };
 
-    PANDA_PUBLIC_API static bool Emit(panda_file::ItemContainer *items, const Program &program,
+    PANDA_PUBLIC_API static bool Emit(panda_file::ItemContainer *items, Program &program,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool emitDebugInfo = true,
                                       ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
-    PANDA_PUBLIC_API static bool Emit(panda_file::Writer *writer, const Program &program,
+    PANDA_PUBLIC_API static bool Emit(panda_file::Writer *writer, Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
                                       ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
-    PANDA_PUBLIC_API static bool Emit(const std::string &filename, const Program &program,
+    PANDA_PUBLIC_API static bool Emit(const std::string &filename, Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
                                       ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
-    PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(const Program &program,
+    PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(Program &program,
                                                                          PandaFileToPandaAsmMaps *maps = nullptr);
 
     PANDA_PUBLIC_API static bool AssignProfileInfo(Program *program);
@@ -92,6 +94,12 @@ private:
                                  const Record &rec, panda_file::ClassItem *record);
     static bool HandleInterfaces(panda_file::ItemContainer *items, const Program &program, const std::string &name,
                                  const Record &rec, panda_file::ClassItem *record);
+    static void UpdateFieldList(AsmEmitter::AsmEntityCollections &entities, const std::string &fullFieldName,
+                                panda_file::BaseFieldItem *field);
+    static panda_file::MethodItem *FindMethod(const Function &func, const std::string &name,
+                                              const AsmEmitter::AsmEntityCollections &entities);
+    static panda_file::MethodItem *FindAmongAllMethods(const std::string &name,
+                                                       const AsmEmitter::AsmEntityCollections &entities);
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool HandleFields(
         panda_file::ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
@@ -126,13 +134,18 @@ private:
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool CreateMethodItem(panda_file::ItemContainer *items, AsmEmitter::AsmEntityCollections &entities,
                                  const Function &func, panda_file::TypeItem *typeItem, panda_file::ClassItem *area,
-                                 panda_file::ForeignClassItem *foreignArea, uint32_t accessFlags,
-                                 panda_file::StringItem *methodName, const std::string &mangledName,
-                                 const std::string &name, std::vector<panda_file::MethodParamItem> &params);
+                                 panda_file::ForeignClassItem *foreignArea, panda_file::StringItem *methodName,
+                                 const std::string &mangledName, const std::string &name,
+                                 std::vector<panda_file::MethodParamItem> &params);
+    static bool MakeFunctionItems(
+        panda_file::ItemContainer *items, Program &program, AsmEntityCollections &entities,
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
+        bool emitDebugInfo);
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool MakeFunctionItems(
         panda_file::ItemContainer *items, const Program &program, AsmEntityCollections &entities,
         const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
-        bool emitDebugInfo);
+        bool emitDebugInfo, bool isStatic);
     static bool MakeRecordAnnotations(panda_file::ItemContainer *items, const Program &program,
                                       const AsmEntityCollections &entities);
     static void SetCodeAndDebugInfo(panda_file::ItemContainer *items, panda_file::MethodItem *method,
@@ -144,6 +157,10 @@ private:
                                               panda_file::MethodItem *method, const Function &func);
     static bool MakeFunctionDebugInfoAndAnnotations(panda_file::ItemContainer *items, const Program &program,
                                                     const AsmEntityCollections &entities, bool emitDebugInfo);
+    static bool MakeFunctionDebugInfoAndAnnotations(panda_file::ItemContainer *items, const Program &program,
+                                                    const std::map<std::string, Function> &functionTable,
+                                                    const AsmEmitter::AsmEntityCollections &entities,
+                                                    bool emitDebugInfo);
     static void FillMap(PandaFileToPandaAsmMaps *maps, AsmEntityCollections &entities);
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static void EmitDebugInfo(panda_file::ItemContainer *items, const Program &program,
@@ -151,6 +168,8 @@ private:
                               const Function &func, const std::string &name, bool emitDebugInfo);
     static bool EmitFunctions(panda_file::ItemContainer *items, const Program &program,
                               const AsmEntityCollections &entities, bool emitDebugInfo);
+    static bool EmitFunctions(panda_file::ItemContainer *items, const Program &program,
+                              const AsmEntityCollections &entities, bool emitDebugInfo, bool isStatic);
 
     static panda_file::TypeItem *GetTypeItem(
         panda_file::ItemContainer *items,
@@ -174,6 +193,9 @@ private:
     static panda_file::LiteralItem *CreateLiteralItem(panda_file::ItemContainer *container, const Value *value,
                                                       std::vector<panda_file::LiteralItem> *out,
                                                       const AsmEmitter::AsmEntityCollections &entities);
+    static panda_file::LiteralItem *CreateLiteralItemFromMethod(const Value *value,
+                                                                std::vector<panda_file::LiteralItem> *out,
+                                                                const AsmEmitter::AsmEntityCollections &entities);
 
     template <class PrimType>
     static panda_file::ScalarValueItem *CreateScalarPrimValueItem(panda_file::ItemContainer *container,
@@ -207,9 +229,10 @@ private:
     static panda_file::ScalarValueItem *CreateScalarRecordValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes);
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static panda_file::ScalarValueItem *CreateScalarMethodValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
-        const Program &program, const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+        const Program &program, const AsmEmitter::AsmEntityCollections &entities, std::pair<bool, bool> searchInfo);
     static panda_file::ScalarValueItem *CreateScalarLiteralArrayItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays);
@@ -225,18 +248,21 @@ private:
     static panda_file::ScalarValueItem *CreateScalarValueItem(panda_file::ItemContainer *container, const Value *value,
                                                               std::vector<panda_file::ScalarValueItem> *out,
                                                               const Program &program,
-                                                              const AsmEmitter::AsmEntityCollections &entities);
+                                                              const AsmEmitter::AsmEntityCollections &entities,
+                                                              std::pair<bool, bool> searchInfo);
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static panda_file::ValueItem *CreateValueItem(panda_file::ItemContainer *container, const Value *value,
                                                   const Program &program,
-                                                  const AsmEmitter::AsmEntityCollections &entities);
+                                                  const AsmEmitter::AsmEntityCollections &entities,
+                                                  std::pair<bool, bool> searchInfo = {false, false});
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static panda_file::AnnotationItem *CreateAnnotationItem(panda_file::ItemContainer *container,
                                                             const AnnotationData &annotation, const Program &program,
                                                             const AsmEmitter::AsmEntityCollections &entities);
-
+    static std::optional<std::map<std::basic_string<char>, ark::pandasm::Function>::const_iterator>
+    GetMethodForAnnotationElement(const std::string &functionName, const Value *value, const Program &program);
     static panda_file::MethodHandleItem *CreateMethodHandleItem(
         panda_file::ItemContainer *container, const MethodHandle &mh,
         const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
@@ -246,6 +272,9 @@ private:
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool AddAnnotations(T *item, panda_file::ItemContainer *container, const AnnotationMetadata &metadata,
                                const Program &program, const AsmEmitter::AsmEntityCollections &entities);
+
+    static bool AssignProfileInfo(std::unordered_map<size_t, std::vector<Ins *>> &instMap,
+                                  const std::map<std::string, pandasm::Function> &functionTable);
 
     // NOTE(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)

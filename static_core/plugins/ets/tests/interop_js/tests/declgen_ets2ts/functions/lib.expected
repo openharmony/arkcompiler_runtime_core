@@ -12,43 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
-
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-_$init$_();
-
-function SumDouble(a: number, b: number): number { return {} as any; };
-(SumDouble as any) = ETSGLOBAL.SumDouble;
-export {SumDouble};
-exports.SumDouble = SumDouble;
-
-
-function SumBoxedDouble(a: number, b: number): number { return {} as any; };
-(SumBoxedDouble as any) = ETSGLOBAL.SumBoxedDouble;
-export {SumBoxedDouble};
-exports.SumBoxedDouble = SumBoxedDouble;
-
-
-function SumString(a: string, b: string): string { return {} as any; };
-(SumString as any) = ETSGLOBAL.SumString;
-export {SumString};
-exports.SumString = SumString;
-
-
-function ReplaceFirst(arr: Simple[], e: Simple): Simple[] { return {} as any; };
-(ReplaceFirst as any) = ETSGLOBAL.ReplaceFirst;
-export {ReplaceFirst};
-exports.ReplaceFirst = ReplaceFirst;
-
-
-class Simple {
-    public constructor(x: number) {};
-    public val: number = {} as any;
-};
-(Simple as any) = (globalThis as any).Panda.getClass('LSimple;');
-export {Simple};
-exports.Simple = Simple;
-
+export declare function SumDouble(a: number, b: number): number;
+export declare function SumBoxedDouble(a: number, b: number): number;
+export declare function SumString(a: string, b: string): string;
+export declare function ReplaceFirst(arr: Simple[], e: Simple): Simple[];
+export declare function error(msg: string): never;
+export declare function foo(x: string): void;
+export declare function foo1(arg: X): void;
+export declare function foo2(a?: number): void;
+export declare function foo3(...nums: number[]): void;
+export declare function foo4(a: number): void;
+export declare function foo5(a: number): number;
+export declare function foo6(): Promise<void>;
+export declare function foo7(this: A): void;
+export declare function foo8(cb: Callback): void;
+export declare function foo9(cb: () => void): void;
+export declare class Simple {
+    public constructor(x: number);
+    public get val(): number;
+    public set val(value: number);
+}
+export declare class X {
+    public get data(): number;
+    public set data(value: number);
+    constructor();
+}
+export declare class A {
+    constructor();
+}
+export type Callback = (arg: number) => void;

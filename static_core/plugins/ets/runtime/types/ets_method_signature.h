@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,18 @@
 
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/method.h"
-#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_value.h"
+#include "plugins/ets/runtime/ani/ani_mangle.h"
 
 namespace ark::ets {
 
 // Arguments type separated from return type by ":". Object names bounded by 'L' and ';'
 class EtsMethodSignature {
 public:
-    explicit EtsMethodSignature(const PandaString &signature)
+    explicit EtsMethodSignature(const std::string_view sign, bool isANIFormat = false)
     {
+        const PandaString signature = isANIFormat ? ani::Mangle::ConvertSignature(sign) : PandaString(sign);
+
         size_t dots = signature.find(':');
         // Return if ':' wasn't founded or was founded at the end
         if (dots == PandaString::npos || dots == signature.size() - 1) {
@@ -51,6 +53,17 @@ public:
         }
     }
 
+    bool IsValid()
+    {
+        return isValid_;
+    }
+
+    Method::Proto &GetProto()
+    {
+        return pandaProto_;
+    }
+
+private:
     size_t ProcessParameter(const PandaString &signature, size_t i)
     {
         EtsType paramType = GetTypeByFirstChar(signature[i]);
@@ -72,17 +85,6 @@ public:
         return i;
     }
 
-    bool IsValid()
-    {
-        return isValid_;
-    }
-
-    Method::Proto &GetProto()
-    {
-        return pandaProto_;
-    }
-
-private:
     PandaSmallVector<PandaString> paramTypes_;
     Method::Proto pandaProto_;
     bool isValid_ {false};

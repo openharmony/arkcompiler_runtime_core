@@ -2,9 +2,15 @@
 
 ### Build SDK:
 ```sh
-./build_sdk.sh /path/to/ohos/sdk /path/to/panda/sdk/destination
+./build_sdk.sh /path/to/panda/sdk/destination [OPTIONS]
 ```
+
 Note: see script `test.sh` for more details
+
+### Test SDK:
+```sh
+./test_sdk [OPTIONS]
+```
 
 ### Install SDK from local tarball
 ```sh

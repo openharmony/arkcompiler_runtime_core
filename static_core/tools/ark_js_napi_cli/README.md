@@ -2,7 +2,7 @@
 
 ark_js_napi_cli is a CLI tool to execute JS abc files (similar to `ark_js_vm`) based on `arkui/napi`.
 
-## How to build
+## How to build (workaround)
 
 1. Add ark_js_napi_cli to ark_host_linux_tools_packages in ohos:
 ```bash
@@ -19,4 +19,9 @@ $ vim ./arkcompiler/runtime_core/BUILD.gn
 2. Run build command:
 ```bash
 $ ./build.sh --product-name rk3568 --build-target ark_js_napi_cli
+```
+
+## How to build in standalone mode
+```bash
+python3 ark.py x64.debug hybrid
 ```

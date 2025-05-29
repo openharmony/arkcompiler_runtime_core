@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -75,15 +75,14 @@ In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
 identifier that can follow a sequence of identifiers separated with '``.``'
 tokens), *N* can name the following:
 
--  The name of a compilation unit (see :ref:`Modules and Compilation Units`)
-   that is introduced as a result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
+-  Name of a compilation unit (see :ref:`Compilation Units`) that is introduced
+   as a result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
    with ``x`` to name the exported entity;
 
 -  A class or interface type (see :ref:`Classes`, :ref:`Interfaces`) with ``x``
    to name its static member;
 
 -  A class or interface type variable with ``x`` to name its instance member.
-
 
 .. index::
    name
@@ -161,9 +160,8 @@ The examples below represent declarations distinguishable by names:
         static field: number = PI + pi
     }
 
-If a declaration is not distinguishable by name for functions, methods, or
-constructors (except a valid overloading as in
-:ref:`Function and Method Overloading` and
+If a declaration is not distinguishable by name (except a valid overloading as
+in :ref:`Function, Method and Constructor Overloading` and
 :ref:`Declaration Distinguishable by Signatures`), then a
 :index:`compile-time error` occurs:
 
@@ -171,8 +169,8 @@ constructors (except a valid overloading as in
    :linenos:
 
     // compile-time error: The constant and the function have the same name.
-    const PI = 3.14                   
-    function PI() { return 3.14 }     
+    const PI = 3.14
+    function PI() { return 3.14 }
 
     // compile-time error: The type and the variable have the same name.
     class Person {}
@@ -186,10 +184,17 @@ constructors (except a valid overloading as in
         }
     }
 
+    /* compile-time error: Name of the declaration clashes with the predefined
+        type or standard library entity name. */
+    let number: number = 1
+    let String = true
+    function Record () {}
+    interface Object {}
+    let Array = 42
+
     // Functions have the same name but they are distinguishable by signatures
     function foo() {}
     function foo(p: number) {}
-
 
 .. index::
    distinguishable declaration
@@ -211,8 +216,9 @@ Different entity declarations introduce new names in different *scopes*. Scope
 along with other regions it can be used in. The following entities are always
 referred to by their qualified names only:
 
--  Class and interface members (both static and instance ones);
--  Entities imported via qualified import.
+- Class and interface members (both static and instance ones);
+- Entities imported via qualified import; and
+- Entities declared in namespaces (see :ref:`Namespace Declarations`).
 
 Other entities are referred to by their simple (unqualified) names.
 
@@ -250,10 +256,21 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _module-access:
 
--  *Module level scope* is applicable for separate modules only. A name
+-  *Module level scope* is applicable to separate modules only. A name
    declared on the module level is accessible (see :ref:`Accessible`)
    throughout the entire module. If exported, a name can be accessed in other
    compilation units.
+
+.. _namespace-access:
+
+.. meta:
+    frontend_status: Done
+
+-  *Namespace level scope* is applicable to namespaces only. A name
+   declared in a namespace is accessible (see :ref:`Accessible`)
+   throughout the entire namespace and in all embedded namespaces. If exported,
+   a name can be accessed outside the namespace with mandatory namespace name
+   qualification.
 
 .. index::
    module level scope
@@ -264,7 +281,7 @@ The scope of an entity depends on the context the entity is declared in:
    compilation unit
 
 .. _class-access:
-  
+
 -  A name declared inside a class (*class level scope*) is accessible (see
    :ref:`Accessible`) in the class and sometimes, depending on the access
    modifier (see :ref:`Access Modifiers`), outside the class, or by means of a
@@ -361,7 +378,7 @@ The scope of an entity depends on the context the entity is declared in:
    :linenos:
 
     function foo() {
-        let x = y // compile-time error – y is not accessible yet
+        let x = y // compile-time error - y is not accessible yet
         let y = 1
     }
 
@@ -371,10 +388,8 @@ of two names overlap, then:
 -  The innermost declaration takes precedence; and
 -  Access to the outer name is not possible.
 
-
 Class, interface, and enum members can only be accessed by applying the dot
 operator '``.``' to an instance. Accessing them otherwise is not possible.
-
 
 .. index::
    name
@@ -408,7 +423,7 @@ follows:
   or interface properties;
 - Function or method name is used to call the function or method;
 - Variable name is used to read or change the value of the variable;
-- Compilation unit name introduced as a result of import with Bind All with
+- Name of a compilation unit introduced as a result of import with Bind All with
   Qualified Access (see :ref:`Bind All with Qualified Access`) is used to deal
   with exported entities.
 
@@ -472,10 +487,9 @@ following:
 -  Names for anonymous types (array, function, and union types); or
 -  Alternative names for existing types.
 
-
-Scopes of type aliases are package or module level scopes. Names
-of all type aliases must be unique across all types in the current
-context.
+Scopes of type aliases are package, module, or namespace level scopes. Names of
+all type aliases must be follow uniqueness rules of
+:ref:`Distinguishable Declarations` in the current context.
 
 .. index::
    type alias
@@ -503,8 +517,8 @@ Meaningful names can be provided for anonymous types as follows:
 
     type Matrix = number[][]
     type Handler = (s: string, no: number) => string
-    type Predicate<T> = (x: T) => Boolean
-    type NullableNumber = Number | null
+    type Predicate<T> = (x: T) => boolean
+    type NullableNumber = number | null
 
 If the existing type name is too long, then a shorter new name can be
 introduced by using type alias (particularly for a generic type).
@@ -558,7 +572,6 @@ if it is one of the following:
 
     type D = string | Array<D> // ok
 
-
 Any other use causes a :index:`compile-time error`, because the compiler
 does not have enough information about the defined alias:
 
@@ -567,7 +580,6 @@ does not have enough information about the defined alias:
 
     type E = E // compile-time error
     type F = string | E // compile-time error
-
 
 .. index::
    alias
@@ -592,7 +604,6 @@ The same rules apply to a generic type alias defined as
 
     type A<T> = A<T> // compile-time error
 
-
 A :index:`compile-time error` occurs if a generic type alias is used without
 a type argument:
 
@@ -601,17 +612,17 @@ a type argument:
 
 .. code-block:: typescript
    :linenos:
-   
+
     type A<T> = Array<A> // compile-time error
 
-**Note**: There is no restriction on using a type parameter *T* in
+**Note**. There is no restriction on using a type parameter *T* in
 the right side of a type alias declaration. The following code
 is valid:
 
 .. code-block:: typescript
    :linenos:
 
-    type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>; 
+    type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>;
 
 .. index::
    alias
@@ -636,7 +647,9 @@ Variable Declarations
 =====================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: arrays never have default values 
+	todo: raise error for non initialized arrays: let x: number[];console.log(x)
 
 A *variable declaration* introduces a new named storage location. The named
 storage location is assigned an initial value as part of the declaration, or
@@ -653,7 +666,7 @@ via initialization before the first usage:
         ;
 
     variableDeclaration:
-        identifier ('?')? ':' ('readonly')? type initializer? 
+        identifier ('?')? ':' ('readonly')? type initializer?
         | identifier initializer
         ;
 
@@ -669,7 +682,7 @@ variable is determined as follows:
    - If the name of the variable is followed by the '``?``' sign, then the
      type of the variable is semantically equivalent to ``type | undefined``.
    - If the declaration also has an initializer, then the initializer expression
-     type must be compatible with ``T`` (see :ref:`Type Compatibility with Initializer`).
+     type must be assignable to ``T`` (see :ref:`Assignability with Initializer`).
 
 -  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
@@ -693,7 +706,7 @@ variable is determined as follows:
    :linenos:
 
     let a: number // ok
-    let b = 1 // ok, number type is inferred
+    let b = 1 // ok, type 'int' is inferred
     let c: number = 6, d = 1, e = "hello" // ok
 
     // ok, type of lambda and type of 'f' can be inferred
@@ -707,24 +720,19 @@ Every variable in a program must have an initial value before it can be used:
 
 - Otherwise, the following situations are possible:
 
-   + If a type of a variable is ``T`` and ``T`` has a *default value*
-     (see :ref:`Default Values for Types`), it is initialized with the 
-     default value.
-   + If a type of a variable is ``T[]``
-     (or multidimensional array with elements of type ``T``)
-     and *T* has a *default value* (see :ref:`Default Values for Types`), 
-     all array elements are initialized with the default value.
-   + If a variable does not have a default value, its value must be set 
-     by :ref:`Simple Assignment Operator` before any attempt to use its 
-     value. Note, the variable of an array type must be initalized as whole
-     by single assignment.
+   + If the type of a variable is ``T``, and ``T`` has a *default value*
+     (see :ref:`Default Values for Types`), then the variable is initialized
+     with the default value.
+   + If a variable has no default value, then a value must be set by the
+     :ref:`Simple Assignment Operator` before attempting to use the variable.
 
-Otherwise, the variable is not initialized, and a :index:`compile-time error`
-occurs.
+**Note**. A variable of an array type must be initialized as a whole by a single
+assignment. Otherwise, the variable is not initialized, and a
+:index:`compile-time error` occurs.
 
 If an initializer expression is provided, then additional restrictions apply to
 the content of the expression as described in
-:ref:`Exceptions and Initialization Expression`. An initializer expression
+:ref:`Errors and Initialization Expression`. An initializer expression
 must not lead to cyclic dependencies caused by the use of non-initialized
 variables. Otherwise, a :index:`compile-time error` occurs.
 
@@ -739,7 +747,6 @@ variables. Otherwise, a :index:`compile-time error` occurs.
    argument value
    class instance
    creation expression
-   exception parameter
    thrown object
    variable
    constructor
@@ -755,32 +762,29 @@ variables. Otherwise, a :index:`compile-time error` occurs.
 
    let a = b // a uses b for its initialization
    let b = a // b uses a for its initialization
-   
+
    class A {
      a = this.b // a uses b for its initialization
      b = this.a // b uses a for its initialization
    }
 
-
 If the type of a variable declaration has the prefix ``readonly``, then the
-type must be of the *array* kind, and the restrictions on its operations
-apply to the variable as described in :ref:`Readonly Parameters`, and in
-:ref:`Contexts and Conversions`. If the prefix ``readonly`` is used with a
-non-array type, then a :index:`compile-time error` occurs:
+type must be of the *array* or *tuple* kind, and the restrictions on its
+operations apply to the variable as described in :ref:`Readonly Parameters`,
+and in :ref:`Contexts and Conversions`. If the prefix ``readonly`` is used with
+a non-array or non-tuple type, then a :index:`compile-time error` occurs:
 
 .. code-block-meta:
    expect-cte:
-
 
 .. code-block:: typescript
    :linenos:
 
     function foo (p: number[]) {
        let x: readonly number [] = p
-       x[0] = 666 // compile-time error as array itself is readonly
+       x[0] = 42 // compile-time error as array itself is readonly
        console.log (x[0]) // read operation is OK
     }
-
 
 .. index::
    variable declaration
@@ -799,9 +803,6 @@ non-array type, then a :index:`compile-time error` occurs:
    initialization
    instance creation expression
    explicit constructor call
-   exception parameter
-   exception
-   error
    class
    instance
    local variable
@@ -844,8 +845,8 @@ its properties or items can be modified.
 The type ``T`` of a constant declaration is determined as follows:
 
 -  If ``T`` is the type specified in a type annotation (if any) of the
-   declaration, then the initializer expression must be compatible with
-   ``T`` (see :ref:`Type Compatibility with Initializer`).
+   declaration, then the initializer expression must be assignable to
+   ``T`` (see :ref:`Assignability with Initializer`).
 -  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
 -  If '``?``' is used after the name of the constant, then the type of the
@@ -876,21 +877,21 @@ The type ``T`` of a constant declaration is determined as follows:
     const y: number // compile-time error -- initializer is mandatory
 
 Additional restrictions on the content of the initializer expression are
-described in :ref:`Exceptions and Initialization Expression`.
+described in :ref:`Errors and Initialization Expression`.
 
 |
 
-.. _Type Compatibility with Initializer:
+.. _Assignability with Initializer:
 
-Type Compatibility with Initializer
-===================================
+Assignability with Initializer
+==============================
 
 .. meta:
     frontend_status: Done
 
 If a variable or constant declaration contains type annotation ``T`` and
-initializer expression *E*, then the type of *E* must be compatible with ``T``
-(see :ref:`Assignment-like Contexts`).
+initializer expression *E*, then the type of *E* must be assignable to ``T``
+(see :ref:`Assignability`).
 
 .. index::
    initializer expression
@@ -953,14 +954,25 @@ If the type of the initializer expression cannot be inferred, then a
     let b = cond ? 1 : 2         // type of 'b' is int
     let c = cond ? 3 : 3.14      // type of 'c' is double
     let d = cond ? "one" : "two" // type of 'd' is string
-    let e = cond ? 1 : "one"     // type of 'e' is Int | string
+    let e = cond ? 1 : "one"     // type of 'e' is int | string
 
-    const bb = cond ? 1 : 2         // type of 'bb' is int 
+    const bb = cond ? 1 : 2         // type of 'bb' is int
     const cc = cond ? 3 : 3.14      // type of 'cc' is double
     const dd = cond ? "one" : "two" // type of 'dd' is "one" | "two"
-    const ee = cond ? 1 : "one"     // type of 'ee' is Int | "one"
+    const ee = cond ? 1 : "one"     // type of 'ee' is int | "one"
 
     let f = {name: "aa"} // compile-time error
+
+    declare let   x1 = 1 // type of 'x1' is int
+    declare const x2 = 1 // type of 'x2' is int
+    let           x3 = 1 // type of 'x3' is int
+    const         x4 = 1 // type of 'x4' is int
+
+    declare let   s1 = "1" // type of 's1' is string
+    declare const s2 = "1" // type of 's2' is "1"
+    let           s3 = "1" // type of 's3' is string
+    const         s4 = "1" // type of 's4' is "1"
+
 
 |
 
@@ -979,7 +991,6 @@ introducing *named functions*. An optional function body is a block
 .. code-block:: abnf
 
     functionDeclaration:
-        functionOverloadSignature*
         modifiers? 'function' identifier
         typeParameters? signature block?
         ;
@@ -987,9 +998,6 @@ introducing *named functions*. An optional function body is a block
     modifiers:
         'native' | 'async'
         ;
-
-Function *overload signature* allows calling a function in different ways (see
-:ref:`Function Overload Signatures`).
 
 If a function is declared *generic* (see :ref:`Generics`), then its type
 parameters must be specified.
@@ -1008,7 +1016,6 @@ Functions must be declared on the top level (see :ref:`Top-Level Statements`).
    function body
    block
    body
-   function overload signature
    function call
    native function
    generic function
@@ -1031,26 +1038,15 @@ of a function, method, or constructor.
 .. code-block:: abnf
 
     signature:
-        parameters returnType? throwMark?
-        ;
-
-    parameters:
-        '(' parameterList? ')'
+        '(' parameterList? ')' returnType?
         ;
 
     returnType:
         ':' type
         ;
 
-    throwMark:
-        'throws' | 'rethrows'
-        ;
-
-See :ref:`Throwing Functions` for the details of ``throws`` marks, and
-:ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
-
-Overloading (see :ref:`Function and Method Overloading`) is supported for
-functions and methods. The signatures of functions and methods are important
+Overloading (see :ref:`Function, Method and Constructor Overloading`) is supported for
+functions, methods and constructors. The signatures of overloaded entities are important
 for their unique identification.
 
 .. index::
@@ -1060,10 +1056,6 @@ for their unique identification.
    function
    method
    constructor
-   throwing function
-   rethrowing function
-   throws mark
-   rethrows mark
    function overloading
    method overloading
    identification
@@ -1076,7 +1068,8 @@ Parameter List
 ==============
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: change parser as grammar rules, are changed - rest can be after optional, annotation for rest
 
 A signature may contain a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
@@ -1086,30 +1079,21 @@ the function or the method has no parameters.
 .. code-block:: abnf
 
     parameterList:
-        parameter (',' parameter)* (',' optionalParameters|restParameter)? 
-        | restParameter
-        | optionalParameters
+        parameter (',' parameter)* (',' restParameter)? ','?
+        | restParameter ','?
         ;
 
     parameter:
-        identifier ':' 'readonly'? type
+        annotationUsage? (requiredParameter | optionalParameter)
         ;
 
-    restParameter:
-        '...' parameter
+    requiredParameter:
+        identifier ':' type
         ;
 
-If a parameter type is prefixed with ``readonly``, then there are additional
-restrictions on the parameter as described in :ref:`Readonly Parameters`.
-
-The last parameter of a function or a method can be a *rest parameter*
-(see :ref:`Rest Parameter`), or a sequence of *optional parameters*
-(see :ref:`Optional Parameters`). This construction allows omitting
-the corresponding argument when calling the function or the method.
-
-If a parameter is not *optional*, then each function or method call must contain
-an argument corresponding to that parameter. Non-optional parameters are called
-the *required parameters*. The function below has *required parameters*:
+If a parameter is *required*, then each function or method call must contain
+an argument corresponding to that parameter.
+The function below has *required parameters*:
 
 .. code-block:: typescript
    :linenos:
@@ -1119,8 +1103,14 @@ the *required parameters*. The function below has *required parameters*:
     }
     power(2, 3) // both arguments are required in the call
 
+Several parameters can be *optional*, allowing to omit
+corresponding arguments in a call (see :ref:`Optional Parameters`).
+
 A :index:`compile-time error` occurs if an *optional parameter* precedes a
 *required parameter* in the parameter list.
+
+The last parameter of a function or a method can be a single *rest parameter*
+(see :ref:`Rest Parameter`).
 
 .. index::
    signature
@@ -1131,12 +1121,13 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
    function
    method
    rest parameter
-   optional parameter
    argument
-   non-optional parameter
    required parameter
    prefix readonly
    readonly parameter
+
+If a parameter type is prefixed with ``readonly``, then there are additional
+restrictions on the parameter as described in :ref:`Readonly Parameters`.
 
 |
 
@@ -1199,15 +1190,10 @@ Optional Parameters
 
 .. code-block:: abnf
 
-    optionalParameters:
-        optionalParameter (',' optionalParameter)
-        ;
-    
     optionalParameter:
-        identifier ':' 'readonly'? type '=' expression
-        | identifier '?' ':' 'readonly'? type
+        identifier ':' type '=' expression
+        | identifier '?' ':' type
         ;
-
 
 The first form contains an expression that specifies a *default value*. It is
 called a *parameter with default value*. The value of the parameter is set
@@ -1237,23 +1223,16 @@ omitted in a function or method call:
 The second form is a short-cut notation and ``identifier '?' ':' type``
 effectively means that ``identifier`` has type ``T | undefined`` with the
 default value ``undefined``.
-If a type is of the *value* kind, then implicit boxing (see
-:ref:`Boxing Conversions`) must be applied (as in :ref:`Union Types`) as
-follows:
-``identifier '?' ':' valueType`` is equivalent to
-``identifier ':' referenceTypeForValueType | undefined = undefined``.
 
 .. index::
    notation
    parameter
-   boxing
    union type
    undefined
    default value
    identifier
    value type
    union type
-   implicit boxing
    function
 
 For example, the following two functions can be used in the same way:
@@ -1270,12 +1249,12 @@ For example, the following two functions can be used in the same way:
     hello2("John") // 'name' has a string value
 
     function foo1 (p?: number) {}
-    function foo2 (p: Number | undefined = undefined) {}
+    function foo2 (p: number | undefined = undefined) {}
 
     foo1()  // 'p' has 'undefined' value
-    foo1(5) // 'p' has an integer value
+    foo1(5) // 'p' has an numeric value
     foo2()  // 'p' has 'undefined' value
-    foo2(5) // 'p' has an integer value
+    foo2(5) // 'p' has an numeric value
 
 |
 
@@ -1291,30 +1270,20 @@ Rest Parameter
 arbitrary numbers of arguments. *Rest parameters* have the ``spread`` operator
 '``...``' as prefix before the parameter name:
 
-.. code-block:: typescript
-   :linenos:
+.. code-block:: abnf
 
-    function sum(...numbers: number[]): number { // function
-      let res = 0
-      for (let n of numbers)
-        res += n
-      return res
-    }
-    const lambda = (...numbers: number[]): number => 0 // lambda
-    class A {
-        constructor (...numbers: number[]) {} // constructor
-        foo (...p: [undefined, null, Object]) {} // method
-    }
-
+    restParameter:
+        annotationUsage? '...' identifier ':' type
+        ;
 
 A :index:`compile-time error` occurs if a rest parameter:
 
 -  Is not the last parameter in a parameter list;
 -  Has a type that is neither an array type nor a tuple type.
 
-A function, method, constructor, or lambda with a rest parameter of type ``T[]``
-can accept any number of arguments of types that are compatible (see
-:ref:`Type Compatibility`) with ``T``:
+A call of entity with a rest parameter of array type ``T[]``
+(or ``FixedArray<T>``) can accept any number of arguments
+of types that are assignable (see :ref:`Assignability`) to ``T``:
 
 .. index::
    rest parameter
@@ -1346,12 +1315,10 @@ can accept any number of arguments of types that are compatible (see
     sum(1) // returns 1
     sum(1, 2, 3) // returns 6
 
-
-If an argument of array type ``T[]`` is to be passed to a function or a method
+If an argument of array type ``T[]`` is to be passed to a call of entity
 with the rest parameter, then the spread expression (see
 :ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
 as prefix before the array argument:
-
 
 .. code-block-meta:
 
@@ -1377,9 +1344,9 @@ as prefix before the array argument:
    method
    array argument
 
-A function, method, constructor, or lambda with a rest parameter of type
-``[T1, T2, ... Tn]`` can accept only ``n`` arguments of types that are
-compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
+A call of entity with a rest parameter of tuple type
+[``T``:sub:`1` ``, ..., T``:sub:`n`] can accept only ``n`` arguments of types that are
+assignable (see :ref:`Assignability`) to the corresponding ``T``:sub:`i`:
 
 .. index::
    rest parameter
@@ -1400,16 +1367,16 @@ compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
       return numbers[0] + numbers[1] + numbers[2]
     }
 
-    sum()        // compile-time error: incorrect number of arguments, 0 instead of 3
-    sum(1)       // compile-time error: incorrect number of arguments, 1 instead of 3
-    sum(1, 2, 3) // returns 6
+    sum()          // compile-time error: wrong number of arguments, 0 instead of 3
+    sum(1)         // compile-time error: wrong number of arguments, 1 instead of 3
+    sum(1, 2, "a") // compile-time error: wrong type of the 3rd argument
+    sum(1, 2, 3)   // returns 6
 
-
-If an argument of tuple type ``[T1, T2, ... Tn]`` is to be passed to a function
-or a method with the rest parameter, then a spread expression (see
-:ref:`Spread Expression`) must have the ``spread`` operator '``...``' as a
+If an argument of tuple type [``T``:sub:`1` ``, ..., T``:sub:`n`]
+is to be passed to a call of entity with the rest parameter,
+then a spread expression (see :ref:`Spread Expression`)
+must have the ``spread`` operator '``...``' as a
 prefix before the tuple argument:
-
 
 .. code-block-meta:
 
@@ -1432,6 +1399,36 @@ prefix before the tuple argument:
    rest parameter
    tuple argument
    spread operator
+
+If an argument of fixed array type ``FixedArray<T>`` is to be passed to a function or a method
+with the rest parameter, then the spread expression (see
+:ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
+as prefix before the fixed array argument:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    function sum(...numbers: Array<number>): number {
+      let res = 0
+      for (let n of numbers)
+        res += n
+      return res
+    }
+
+    let x: FixedArray<number> = [1, 2, 3]
+    sum(...x) // spread an fixed array 'x'
+       // returns 6
+
+.. index::
+   argument
+   prefix
+   spread operator
+   function
+   method
+   array argument
+
 
 |
 
@@ -1490,7 +1487,7 @@ Return Type
 Function or method return type defines the static type of the result of the
 function or method execution (see :ref:`Function Call Expression` and
 :ref:`Method Call Expression`). During the execution, the function or method
-can produce a value of a type compatible (see :ref:`Type Compatibility`) to the
+can produce a value of a type assignable (see :ref:`Assignability`) to the
 return type.
 
 If function or method return type is not ``void`` (see :ref:`Type void`), and
@@ -1505,7 +1502,7 @@ function or method return type is ``void`` (see :ref:`Type void`).
    return type
    function
    method
-   type compatibility
+   assignability
    return statement
    method body
    type void
@@ -1584,90 +1581,11 @@ The example below represents type inference:
     }
     // That is a compile-time error as there is an execution path with no return
 
-
 If the compiler fails to recognize a particular type inference case, then
 a corresponding :index:`compile-time error` occurs.
 
 |
 
-.. _Function Overload Signatures:
-
-Function Overload Signatures
-============================
-
-.. meta:
-    frontend_status: None
-    todo: implement TS overload signature #16181
-
-|LANG| allows specifying a function that can have several *overload signatures*
-with the same name followed by one implementation function body:
-
-.. code-block:: abnf
-
-    functionOverloadSignature:
-      'async'? 'function' identifier typeParameters? signature
-      ;
-
-A call of a function with overload signatures is always a call of the
-implementation function. If the function implementation is missing, or does
-not immediately follow the declaration, then a :index:`compile-time error`
-occurs.
-
-The example below has overload signatures defined (one overload signature is
-parameterless, and other two have one parameter each):
-
-.. index::
-   function
-   overload signature
-   function
-   overload signature
-   function header
-   signature
-   implementation function
-   implementation
-   method overload signature
-   parameter
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(): void           // 1st signature
-    function foo(x: string): void  // 2nd signature
-    function foo(x?: string): void // 3rd - implementation signature
-    {
-        console.log(x)
-    }
-
-    foo()          // ok, call fits 1st and 3rd signatures
-    foo("aa")      // ok, call fits 2nd and 3rd signatures
-    foo(undefined) // ok, call fits the 3rd signature
-
-
-The call of ``foo()`` is executed as a call of the implementation function
-with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
-of the implementation function with the ``x`` argument.
-
-The compatibility requirements of *overload signatures* are described in
-:ref:`Overload Signature Correctness Check`.
-
-If not all overload signatures are either exported or non-exported, then a
-:index:`compile-time error` occurs.
-
-.. index::
-   call
-   implementation function
-   argument null
-   argument undefined
-   execution
-   signature
-   function
-   implementation
-   overload signature
-   compatibility
-
-
 .. raw:: pdf
 
    PageBreak
-
-

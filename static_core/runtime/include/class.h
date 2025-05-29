@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -596,6 +596,30 @@ public:
 
     Field *GetDeclaredFieldByName(const uint8_t *mutf8Name) const;
 
+    Method *GetClassMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetStaticClassMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetVirtualClassMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetStaticClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetVirtualClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetInterfaceMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetStaticInterfaceMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetVirtualInterfaceMethod(const uint8_t *mutf8Name) const;
+
+    Method *GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetStaticInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
+    Method *GetVirtualInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
+
     Method *GetVirtualInterfaceMethod(panda_file::File::EntityId id) const;
 
     Method *GetStaticInterfaceMethod(panda_file::File::EntityId id) const;
@@ -606,15 +630,11 @@ public:
 
     Method *GetDirectMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
 
-    Method *GetClassMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
-
     Method *GetClassMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
     Method *GetStaticClassMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
     Method *GetVirtualClassMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
-
-    Method *GetInterfaceMethod(const uint8_t *mutf8Name, const Method::Proto &proto) const;
 
     Method *GetInterfaceMethod(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
@@ -623,10 +643,6 @@ public:
     Method *GetVirtualInterfaceMethodByName(const panda_file::File::StringData &sd, const Method::Proto &proto) const;
 
     Method *GetDirectMethod(const uint8_t *mutf8Name) const;
-
-    Method *GetClassMethod(const uint8_t *mutf8Name) const;
-
-    Method *GetInterfaceMethod(const uint8_t *mutf8Name) const;
 
     Method *ResolveVirtualMethod(const Method *method) const;
 
@@ -834,98 +850,6 @@ public:
     static constexpr size_t ComputeClassSize(size_t vtableSize, size_t imtSize, size_t num8bitSfields,
                                              size_t num16bitSfields, size_t num32bitSfields, size_t num64bitSfields,
                                              size_t numRefSfields, size_t numTaggedSfields);
-
-    Field *LookupFieldByName(panda_file::File::StringData name) const
-    {
-        for (auto &f : GetFields()) {
-            if (name == f.GetName()) {
-                return &f;
-            }
-        }
-        return nullptr;
-    }
-
-    template <panda_file::Type::TypeId FIELD_TYPE>
-    Method *LookupGetterByName(panda_file::File::StringData name) const
-    {
-        for (auto &m : GetMethods()) {
-            if (name != m.GetName()) {
-                continue;
-            }
-            auto retType = m.GetReturnType();
-            if (retType.IsVoid()) {
-                continue;
-            }
-            if (m.GetNumArgs() != 1) {
-                continue;
-            }
-            if (!m.GetArgType(0).IsReference()) {
-                continue;
-            }
-            if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
-                if (retType.IsPrimitive()) {
-                    continue;
-                }
-                return &m;
-            }
-
-            if (retType.IsReference()) {
-                continue;
-            }
-            if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
-                if (retType.GetBitWidth() != coretypes::INT64_BITS) {
-                    continue;
-                }
-            } else {
-                if (retType.GetBitWidth() > coretypes::INT32_BITS) {
-                    continue;
-                }
-            }
-            return &m;
-        }
-        return nullptr;
-    }
-
-    template <panda_file::Type::TypeId FIELD_TYPE>
-    Method *LookupSetterByName(panda_file::File::StringData name) const
-    {
-        for (auto &m : GetMethods()) {
-            if (name != m.GetName()) {
-                continue;
-            }
-            if (!m.GetReturnType().IsVoid()) {
-                continue;
-            }
-            if (m.GetNumArgs() != 2U) {
-                continue;
-            }
-            if (!m.GetArgType(0).IsReference()) {
-                continue;
-            }
-            if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
-                if (m.GetArgType(1).IsPrimitive()) {
-                    continue;
-                }
-                return &m;
-            }
-
-            auto arg1 = m.GetArgType(1);
-            if (arg1.IsReference()) {
-                continue;
-            }
-            if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
-                if (arg1.GetBitWidth() != coretypes::INT64_BITS) {
-                    continue;
-                }
-            } else {
-                if (arg1.GetBitWidth() > coretypes::INT32_BITS) {
-                    continue;
-                }
-            }
-            return &m;
-        }
-        return nullptr;
-    }
 
 private:
     static constexpr void Pad(size_t size, size_t *padding, size_t *n);

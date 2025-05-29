@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,60 @@
 #include "libpandabase/macros.h"
 #include "interop_js/napi_impl/napi_impl.h"
 #include "interop_js/napi_impl/detail/enumerate_napi.h"
+#include "interop_js/interop_common.h"
 #include "utils/logger.h"
 #include "interop_js/logger.h"
 
 #include <iostream>
+
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+// NOLINTBEGIN(readability-identifier-naming)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_wrap_with_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object,
+                    [[maybe_unused]] void *native_object, [[maybe_unused]] napi_finalize finalize_cb,
+                    [[maybe_unused]] napi_ref *result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_xref_unwrap([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value js_object, [[maybe_unused]] void **result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_create_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value value,
+                 [[maybe_unused]] uint32_t initial_refcount, [[maybe_unused]] napi_ref *result)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref)
+{
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+                       << " is implemented in later versions of OHOS, please update." << std::endl;
+    return napi_ok;
+}
+// NOLINTEND(readability-identifier-naming)
+#endif  // PANDA_JS_ETS_HYBRID_MODE
+
+#ifdef PANDA_TARGET_OHOS
+// NOLINTBEGIN(readability-identifier-naming)
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_register_appstate_callback([[maybe_unused]] napi_env env, [[maybe_unused]] void (*f)(int a1, int64_t a2))
+{
+    return napi_ok;
+}
+// NOLINTEND(readability-identifier-naming)
+#endif  // PANDA_TARGET_OHOS
 
 namespace ark::ets::interop::js {
 

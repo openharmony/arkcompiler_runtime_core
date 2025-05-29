@@ -16,12 +16,13 @@
   type: "number",
   primitiveType: "byte",
   elementType: "byte",
-  cast2primitive: "",
+  cast2primitive: " as byte",
   create: "",
   primitiveSizeBytes: 1,
   primitiveTypeWide: "short",
   sourceElementsType: "number",
-  data: "[0 as byte, 18 as byte, 37 as byte, 72 as byte, Byte.MAX_VALUE as byte, 180 as byte, 221 as byte, 0xFF as byte]",
+  data: "[0 as byte, 18 as byte, 37 as byte, 72 as byte, Byte.MAX_VALUE as byte]",
+  abnormalData: "[180 as byte, 221 as byte, 0xFF as byte]",
 }
 
 - {
@@ -34,7 +35,8 @@
   primitiveSizeBytes: 2,
   primitiveTypeWide: "int",
   sourceElementsType: "number",
-  data: "[0 as short, 10234 as short, 21445 as short, Short.MAX_VALUE as short, 43690 as short, 55321 as short, 65504 as short, 0xFFFF as short]",
+  data: "[0 as short, 10234 as short, 21445 as short, Short.MAX_VALUE as short]",
+  abnormalData: "[43690 as short, 55321 as short, 65504 as short, 0xFFFF as short]",
 }
 
 - {
@@ -47,7 +49,10 @@
   primitiveSizeBytes: 4,
   primitiveTypeWide: "long",
   sourceElementsType: "number",
-  data: "[0 as int, 1073741824 as int, Int.MAX_VALUE as int, 3221225472 as int, 3758096384 as int, 4026531840 as int, 4160749568 as int]",
+  data: "[0 as int, 1073741824 as int, Int.MAX_VALUE as int]",
+  abnormalData: "[]",
+  # Note: uncomment once the issue(21569) is fixed
+  # abnormalData: "[3221225472 as int, 3758096384 as int, 4026531840 as int, 4160749568 as int]",
 }
 
 - {
@@ -61,6 +66,7 @@
   primitiveTypeWide: "short",
   sourceElementsType: "number",
   data: "[0 as short, 18 as short, 37 as short, 72 as short, Byte.MAX_VALUE as short, 180 as short, 221 as short, 0xFF as short]",
+  abnormalData: "[]",
 }
 
 - {
@@ -73,4 +79,5 @@
   primitiveSizeBytes: 8,
   sourceElementsType: "long",
   data: "[0 as long, 1073741824 as long, 2147483648 as long, 3221225472 as long, 3758096384 as long, 4026531840 as long, 4160749568 as long, 4294967295 as long]",
+  abnormalData: "[]",
 }

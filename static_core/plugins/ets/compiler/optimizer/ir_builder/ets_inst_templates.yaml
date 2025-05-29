@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,14 +31,23 @@
     } else {
       BuildStObjByName<false>(instruction, <%= get_type(inst.type(0)) %>);
     }
-    % when "LDUNDEFINED"
-    UpdateDefinitionAcc(graph_->GetOrCreateUndefinedInst());
-    % when "MOVUNDEFINED"
-    UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), graph_->GetOrCreateUndefinedInst());
-    % when "ISUNDEFINED"
-    BuildIsUndefined(instruction);
+    % when "CALL"
+    %   is_range = inst.opcode.include? 'range'
+    BuildCallByName<<%= is_range ? 'true' : 'false' %>>(instruction);
+    % when "LDNULLVALUE"
+    UpdateDefinitionAcc(graph_->GetOrCreateUniqueObjectInst());
+    % when "MOVNULLVALUE"
+    UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), graph_->GetOrCreateUniqueObjectInst());
+    % when "ISNULLVALUE"
+    BuildIsNullValue(instruction);
+    % when "STRICTEQUALS"
+    BuildEquals<true>(instruction);
     % when "EQUALS"
     BuildEquals(instruction);
+    % when "TYPEOF"
+    BuildTypeof(instruction);
+    % when "ISTRUE"
+    BuildIstrue(instruction);
     % else
     UNREACHABLE();
     % end

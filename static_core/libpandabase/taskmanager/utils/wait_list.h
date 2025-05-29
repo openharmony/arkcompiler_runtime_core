@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,9 @@
 #define LIBPANDABASE_TASKMANAGER_UTILS_WAIT_LIST_H
 
 #include "libpandabase/utils/time.h"
-#include <atomic>
-#include <functional>
+#include <algorithm>
 #include <optional>
 #include <list>
-#include <memory>
 #include <limits>
 
 namespace ark::taskmanager {

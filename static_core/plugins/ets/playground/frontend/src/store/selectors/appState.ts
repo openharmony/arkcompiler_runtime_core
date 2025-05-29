@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,13 @@
  */
 
 import { RootState } from '..';
-import { Theme } from '../slices/appState';
+import { Theme, Versions } from '../slices/appState';
 
 export const theme = (state: RootState): Theme => state.appState.theme;
 export const primaryColor = (state: RootState): string => state.appState.primaryColor;
 export const withDisasm = (state: RootState): boolean => state.appState.disasm;
+export const withVerifier = (state: RootState): boolean => state.appState.verifier;
+export const withRuntimeVerify = (state: RootState): boolean => state.appState.runtimeVerify;
+export const versions = (state: RootState): Versions => state.appState.versions;
+export const isVersionsLoading = (state: RootState): boolean => state.appState.versionsLoading;
+export const clearLogsEachRun = (state: RootState): boolean => state.appState.clearLogsEachRun;

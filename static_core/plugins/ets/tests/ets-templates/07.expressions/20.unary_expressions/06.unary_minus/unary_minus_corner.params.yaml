@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,8 +13,12 @@
 
 --- # List of corner cases for unary minus
 unary_minus_corner:
-  - {origin: "sqrt (-1)", dest: "sqrt (-1)"}
+  - {origin: "sqrt (-1)", dest: "sqrt (-1)", ne: true}
   - {origin: "1.0/0.0", dest: "log(0)"}
+  - {origin: Infinity,  dest: -Infinity }
   - {origin: "log(0)", dest: "1.0/0.0"}
+  - {origin: -Infinity, dest: Infinity }
   - {origin: 0.0, dest: -0.0}
   - {origin: -0.0, dest: 0.0}
+  - {origin: -0, dest: 0 }
+  - {origin: 0, dest: -0 }

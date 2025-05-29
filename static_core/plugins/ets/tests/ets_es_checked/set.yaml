@@ -27,7 +27,8 @@ sub:
       - method: clear
         ret_type: void
       - method: entries
-        ret_type: Iterable<[number, number]>
+        excluded: true # NOTE (#24570): align test with new tuple types
+        ret_type: Iterable<[Number, Number]>
       - expr: self.size
       - self:
         - new Set<string>(Array.of<string>("", "123"))

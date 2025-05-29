@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,6 +30,9 @@ runtime_yaml += plugin_runtime_yamls
 config("arkruntime_public_config") {
   include_dirs = [
     "$ark_root/runtime",
+
+    # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
+    "$ark_root/plugins/ets/runtime/ani/",
     get_label_info(
         "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
         "target_gen_dir"),
@@ -141,6 +144,7 @@ ohos_source_set("libarkruntime_set_static") {
     "coroutines/coroutine_events.cpp",
     "coroutines/coroutine_manager.cpp",
     "coroutines/coroutine_stats.cpp",
+    "coroutines/coroutine_worker.cpp",
     "coroutines/stackful_coroutine.cpp",
     "coroutines/stackful_coroutine_manager.cpp",
     "coroutines/stackful_coroutine_worker.cpp",
@@ -162,6 +166,9 @@ ohos_source_set("libarkruntime_set_static") {
     "interpreter/interpreter.cpp",
     "interpreter/runtime_interface.cpp",
     "intrinsics.cpp",
+    "jit/libprofile/pgo_file_builder.cpp",
+    "jit/profiling_loader.cpp",
+    "jit/profiling_saver.cpp",
     "language_context.cpp",
     "loadable_agent.cpp",
     "lock_order_graph.cpp",
@@ -239,7 +246,6 @@ ohos_source_set("libarkruntime_set_static") {
     "regexp/ecmascript/regexp_executor.cpp",
     "regexp/ecmascript/regexp_opcode.cpp",
     "regexp/ecmascript/regexp_parser.cpp",
-    "relayout_profiler.cpp",
     "runtime.cpp",
     "runtime_controller.cpp",
     "runtime_helpers.cpp",
@@ -376,6 +382,8 @@ ohos_source_set("libarkruntime_set_static") {
   deps = [
     ":arkruntime_header_deps",
     ":arkruntime_interpreter_impl",
+    ":libpcre2_16",
+    ":libpcre2_8",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_entrypoints_bridge_asm_macro_inl",
     "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
     "$ark_root/compiler:libarktscompiler",
@@ -390,13 +398,20 @@ ohos_source_set("libarkruntime_set_static") {
   ]
 
   if (ark_static_standalone_build) {
-    deps += [ icui18n_dep ]
+    public_configs += [ zlib_public_config ]
+    deps += [
+      icui18n_dep,
+      zlib_dep,
+    ]
   }
 
   external_deps = [
+    "napi:ace_napi",
+    "node:node_header_notice",
     icui18n_dep,
     icuuc_dep,
     sdk_libc_secshared_dep,
+    zlib_dep,
   ]
 
   if (!ark_standalone_build) {
@@ -431,13 +446,16 @@ ohos_source_set("libarkruntime_set_static") {
       ":bridge_dispatch_dyn_amd64",
     ]
   }
-  if (is_ohos && is_standard_system) {
-    defines = [ "PANDA_USE_OHOS_LOG" ]
-  }
 
   if (is_ohos && is_standard_system) {
-    external_deps += [ "hilog:libhilog" ]
+    defines = [ "PANDA_OHOS_USE_INNER_HILOG" ]
+    external_deps += [
+      "hilog:libhilog",
+      "libuv:uv",
+    ]
   }
+
+  include_dirs = [ "$target_gen_dir/pcre2/common" ]
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }
@@ -820,4 +838,124 @@ generated_file("get_profiling_any_type_h") {
   outputs = [ "$target_gen_dir/profiling/generated/get_profiling_any_type.h" ]
   contents = plugin_get_profiling_any_type_paths
   output_conversion = "list lines"
+}
+
+# NOTE(kirillparshukov): move to third_party scripts
+if (!ark_standalone_build) {
+  pcre2_lib_dir = "$ark_third_party_root/pcre2/pcre2"
+} else {
+  pcre2_lib_dir = "//third_party/pcre2/pcre2"
+}
+
+copy("pcre2_copy_config_h") {
+  sources = [ "$pcre2_lib_dir/src/config.h.generic" ]
+  outputs = [ "$target_gen_dir/pcre2/internal/config.h" ]
+}
+
+copy("pcre2_copy_pcre2_h") {
+  sources = [ "$pcre2_lib_dir/src/pcre2.h.generic" ]
+  outputs = [ "$target_gen_dir/pcre2/common/pcre2.h" ]
+}
+
+ohos_static_library("libpcre2_16") {
+  output_name = "libpcre2_16"
+  deps = [
+    ":pcre2_copy_config_h",
+    ":pcre2_copy_pcre2_h",
+  ]
+  sources = [
+    "$pcre2_lib_dir/src/pcre2_auto_possess.c",
+    "$pcre2_lib_dir/src/pcre2_compile.c",
+    "$pcre2_lib_dir/src/pcre2_config.c",
+    "$pcre2_lib_dir/src/pcre2_context.c",
+    "$pcre2_lib_dir/src/pcre2_convert.c",
+    "$pcre2_lib_dir/src/pcre2_dfa_match.c",
+    "$pcre2_lib_dir/src/pcre2_error.c",
+    "$pcre2_lib_dir/src/pcre2_extuni.c",
+    "$pcre2_lib_dir/src/pcre2_find_bracket.c",
+    "$pcre2_lib_dir/src/pcre2_jit_compile.c",
+    "$pcre2_lib_dir/src/pcre2_maketables.c",
+    "$pcre2_lib_dir/src/pcre2_match.c",
+    "$pcre2_lib_dir/src/pcre2_match_data.c",
+    "$pcre2_lib_dir/src/pcre2_newline.c",
+    "$pcre2_lib_dir/src/pcre2_ord2utf.c",
+    "$pcre2_lib_dir/src/pcre2_pattern_info.c",
+    "$pcre2_lib_dir/src/pcre2_script_run.c",
+    "$pcre2_lib_dir/src/pcre2_serialize.c",
+    "$pcre2_lib_dir/src/pcre2_string_utils.c",
+    "$pcre2_lib_dir/src/pcre2_study.c",
+    "$pcre2_lib_dir/src/pcre2_substitute.c",
+    "$pcre2_lib_dir/src/pcre2_substring.c",
+    "$pcre2_lib_dir/src/pcre2_tables.c",
+    "$pcre2_lib_dir/src/pcre2_ucd.c",
+    "$pcre2_lib_dir/src/pcre2_valid_utf.c",
+    "$pcre2_lib_dir/src/pcre2_xclass.c",
+  ]
+  include_dirs = [
+    "$target_gen_dir/pcre2/common",
+    "$target_gen_dir/pcre2/internal",
+  ]
+  sources += [ "$pcre2_lib_dir/src/pcre2_chartables.c" ]
+  cflags = [
+    "-D_GNU_SOURCE",
+    "-DHAVE_CONFIG_H",
+    "-DSUPPORT_PCRE2_16=1",
+    "-DSUPPORT_UNICODE=1",
+    "-DPCRE2_CODE_UNIT_WIDTH=16",
+    "-w",
+  ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
+}
+
+ohos_static_library("libpcre2_8") {
+  output_name = "libpcre2_8"
+  deps = [
+    ":pcre2_copy_config_h",
+    ":pcre2_copy_pcre2_h",
+  ]
+  sources = [
+    "$pcre2_lib_dir/src/pcre2_auto_possess.c",
+    "$pcre2_lib_dir/src/pcre2_chkdint.c",
+    "$pcre2_lib_dir/src/pcre2_compile.c",
+    "$pcre2_lib_dir/src/pcre2_config.c",
+    "$pcre2_lib_dir/src/pcre2_context.c",
+    "$pcre2_lib_dir/src/pcre2_convert.c",
+    "$pcre2_lib_dir/src/pcre2_dfa_match.c",
+    "$pcre2_lib_dir/src/pcre2_error.c",
+    "$pcre2_lib_dir/src/pcre2_extuni.c",
+    "$pcre2_lib_dir/src/pcre2_find_bracket.c",
+    "$pcre2_lib_dir/src/pcre2_jit_compile.c",
+    "$pcre2_lib_dir/src/pcre2_maketables.c",
+    "$pcre2_lib_dir/src/pcre2_match.c",
+    "$pcre2_lib_dir/src/pcre2_match_data.c",
+    "$pcre2_lib_dir/src/pcre2_newline.c",
+    "$pcre2_lib_dir/src/pcre2_ord2utf.c",
+    "$pcre2_lib_dir/src/pcre2_pattern_info.c",
+    "$pcre2_lib_dir/src/pcre2_script_run.c",
+    "$pcre2_lib_dir/src/pcre2_serialize.c",
+    "$pcre2_lib_dir/src/pcre2_string_utils.c",
+    "$pcre2_lib_dir/src/pcre2_study.c",
+    "$pcre2_lib_dir/src/pcre2_substitute.c",
+    "$pcre2_lib_dir/src/pcre2_substring.c",
+    "$pcre2_lib_dir/src/pcre2_tables.c",
+    "$pcre2_lib_dir/src/pcre2_ucd.c",
+    "$pcre2_lib_dir/src/pcre2_valid_utf.c",
+    "$pcre2_lib_dir/src/pcre2_xclass.c",
+  ]
+  include_dirs = [
+    "$target_gen_dir/pcre2/common",
+    "$target_gen_dir/pcre2/internal",
+  ]
+  sources += [ "$pcre2_lib_dir/src/pcre2_chartables.c" ]
+  cflags = [
+    "-D_GNU_SOURCE",
+    "-DHAVE_CONFIG_H",
+    "-DSUPPORT_PCRE2_8=1",
+    "-DSUPPORT_UNICODE=1",
+    "-DPCRE2_CODE_UNIT_WIDTH=8",
+    "-w",
+  ]
+  part_name = ark_part_name
+  subsystem_name = ark_subsystem_name
 }

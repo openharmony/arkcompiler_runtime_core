@@ -119,10 +119,10 @@ EtsNapiCriticalNativeEntryPoint:
     
     mov r2, r7
 
-    pop {r7}
-    CFI_RESTORE(r7)
-    ldr r4, [sp], #12
+    pop {r4}
     CFI_RESTORE(r4)
+    ldr r7, [sp], #12
+    CFI_RESTORE(r7)
     pop {fp}
     CFI_DEF_CFA(sp, 4)
     CFI_RESTORE(fp)

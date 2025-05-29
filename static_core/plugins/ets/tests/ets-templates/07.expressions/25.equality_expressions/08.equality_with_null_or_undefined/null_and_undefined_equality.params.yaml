@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,138 +14,134 @@
 ---
 cases:
     - use: |-
-        let a: null;
-        assert a == null;
-
-    - use: |-
         let a: undefined;
-        assert a == undefined;
+        assertEQ( a, undefined )
 
     - use: |-
         let a: undefined|null;
-        assert a == undefined;
+        assertEQ( a, undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assert a == undefined;
+        assertEQ( a, undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assert a == null;
+        assertTrue( a == null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assert a === undefined;
+        assertTrue( a === undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null;
-        assert a !== null;
+        assertTrue( a !== null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null = new A();
-        assert a != null;
+        assertNE( a, null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A|undefined|null = new A();
-        assert a != undefined;
+        assertNE( a, undefined )
 
     - use: |-
-        assert ((): void => {}) != null;
+        assertNE( ((): void => {}), null )
 
     - use: |-
-        assert ((): void => {}) != undefined;
+        assertNE( ((): void => {}), undefined )
 
     - use: |-
-        assert 3 != null;
+        assertNE( 3, null )
 
     - use: |-
-        assert 3 != undefined;
+        assertNE( 3, undefined )
 
     - decl: |-
         function foo(x: string | null): boolean {
           return x == null;
         }
       use: |-
-        assert foo(null);
+        assertTrue( foo(null) )
 
     - decl: |-
         function foo(x: String | undefined): boolean {
           return x == undefined;
         }
       use: |-
-        assert foo(undefined);
+        assertTrue( foo(undefined) )
 
     - decl: |-
         function foo(x: string | null | undefined): boolean {
           return x == null;
         }
       use: |-
-        assert foo(null);
+        assertTrue( foo(null) )
 
     - decl: |-
         function foo(x: Object | null | undefined): boolean {
           return x == null;
         }
       use: |-
-        assert foo(undefined);
+        assertTrue( foo(undefined) )
 
     - decl: |-
         function foo(x: String | null | undefined): boolean {
           return x == null;
         }
       use: |-
-        assert !foo("");
+        assertTrue( !foo("") )
 
     - use: |-
         let a: Float;
-        assert a != null;
+        assertTrue( a != null );
 
     - use: |-
         let a: Float;
-        assert a != undefined;
+        assertTrue( a != undefined );
 
     - use: |-
         let a: Object = new Object();
-        assert a != null;
+        assertNE( a, null )
 
     - use: |-
         let a: Object = new Object();
-        assert a != undefined;
+        assertNE( a, undefined )
 
     - decl: |-
         class A {}
       use: |-
         let a: A;
-        assert a != null;
+        assertTrue( a != null )
 
     - decl: |-
         class A {}
       use: |-
         let a: A;
-        assert a != undefined;
+        assertTrue( a != undefined );
 
     - decl: |-
         function foo(x: string | undefined): boolean {
           return x == undefined
         }
       use: |-
-        assert foo(undefined);
+        assertTrue( foo(undefined) )
 
     - decl: |-
         function foo(x: String | null): boolean {
           return x == null
         }
       use: |-
-        assert foo(null);
+        assertTrue( foo(null) )

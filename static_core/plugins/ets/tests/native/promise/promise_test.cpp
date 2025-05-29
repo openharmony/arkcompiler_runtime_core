@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,8 @@ TEST_F(EtsNativePromiseTest, PromiseResolve)
     ASSERT_EQ(env_->DeferredResolve(deferred, value), ETS_OK);
 
     ets_boolean result;
-    CallEtsFuntion(&result, "check_resolve", promise);
+
+    CallEtsFunction(&result, "promise_test", "check_resolve", promise);
     ASSERT_EQ(result, true);
 }
 
@@ -51,7 +52,7 @@ TEST_F(EtsNativePromiseTest, PromiseReject)
     ASSERT_EQ(env_->DeferredReject(deferred, exception), ETS_OK);
 
     ets_boolean result;
-    CallEtsFuntion(&result, "check_reject", promise);
+    CallEtsFunction(&result, "promise_test", "check_reject", promise);
     ASSERT_EQ(result, true);
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,49 +25,49 @@ public:
 
 TEST_F(DynamicFunctionalCall, RegularFunc)
 {
-    auto ret = CallEtsMethod<int>("regularFunc");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "regularFunc");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, DynamicField)
 {
-    auto ret = CallEtsMethod<int>("dynamicField");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "dynamicField");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, MethodCall)
 {
-    auto ret = CallEtsMethod<int>("methodCall");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "methodCall");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, MultipleCall)
 {
-    auto ret = CallEtsMethod<int>("multipleCall");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "multipleCall");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, Lambda)
 {
-    auto ret = CallEtsMethod<int>("lambda");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "lambda");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, SimpleArray)
 {
-    auto ret = CallEtsMethod<int>("simpleArr");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "simpleArr");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, MultiDimArray)
 {
-    auto ret = CallEtsMethod<int>("multidimArray");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "multidimArray");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, LambdaArray)
 {
-    auto ret = CallEtsMethod<int>("lambdaArrCall");
+    auto ret = CallEtsFunction<int>(GetPackageName(), "lambdaArrCall");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 

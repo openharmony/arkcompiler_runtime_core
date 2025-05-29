@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,8 @@
 #ifndef PANDA_TOOLING_INSPECTOR_INSPECTOR_H
 #define PANDA_TOOLING_INSPECTOR_INSPECTOR_H
 
-#include <array>
 #include <atomic>
 #include <cstddef>
-#include <functional>
-#include <memory>
 #include <optional>
 #include <set>
 #include <string_view>
@@ -34,6 +31,7 @@
 #include "debuggable_thread.h"
 #include "inspector_server.h"
 #include "object_repository.h"
+#include "types/evaluation_result.h"
 #include "types/numeric_id.h"
 #include "types/pause_on_exceptions_state.h"
 #include "types/property_descriptor.h"
@@ -74,15 +72,25 @@ private:
 
     void Pause(PtThread thread);
     void Continue(PtThread thread);
-
+    void Disable(PtThread thread);
+    void ClientDisconnect(PtThread thread);
+    void SetAsyncCallStackDepth(PtThread thread);
+    void SetBlackboxPatterns(PtThread thread);
+    void SmartStepInto(PtThread thread);
+    void DropFrame(PtThread thread);
+    void SetNativeRange(PtThread thread);
+    void ReplyNativeCalling(PtThread thread);
     void SetBreakpointsActive(PtThread thread, bool active);
+    void SetSkipAllPauses(PtThread thread, bool skip);
+    void SetMixedDebugEnabled(PtThread thread, bool mixedDebugEnabled);
     std::set<size_t> GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
                                             bool restrictToFunction);
     std::optional<BreakpointId> SetBreakpoint(PtThread thread,
-                                              const std::function<bool(std::string_view)> &sourceFilesFilter,
+                                              const InspectorServer::SourceFileFilter &sourceFilesFilter,
                                               size_t lineNumber, std::set<std::string_view> &sourceFiles,
                                               const std::string *condition);
     void RemoveBreakpoint(PtThread thread, BreakpointId id);
+    void RemoveBreakpoints(PtThread thread, const InspectorServer::SourceFileFilter &sourceFilesFilter);
 
     void SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state);
 
@@ -101,7 +109,8 @@ private:
 
     void NotifyExecutionEnded();
 
-    InspectorServer::EvaluationResult Evaluate(PtThread thread, const std::string &bytecodeBase64);
+    Expected<EvaluationResult, std::string> Evaluate(PtThread thread, const std::string &bytecodeBase64,
+                                                     size_t frameNumber);
 
     ALWAYS_INLINE bool CheckVmDead() REQUIRES_SHARED(vmDeathLock_)
     {
@@ -119,6 +128,8 @@ private:
     size_t GetNewExceptionId();
 
     DebuggableThread *GetDebuggableThread(PtThread thread);
+
+    void RegisterMethodHandlers();
 
 private:
     bool breakOnStart_;

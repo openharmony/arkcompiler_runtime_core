@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ cases:
           let cnt: int = 0
           let a: int[] = [foo(++cnt) + cnt++, ++cnt + foo(--cnt), cnt++ - foo(cnt--), foo(++cnt) + ++cnt, 2 * foo(--cnt) + --cnt,]
           for (let i = 0; i < a.length; i++) {
-              assert expected[i] == a[i]
+              assertTrue( expected[i] == a[i] )
           }
 
     - decl: |-
@@ -37,8 +37,8 @@ cases:
           let cnt: int = 0
           let a: int[][] = [foo(cnt++), foo(cnt++), foo(cnt++), foo(cnt++), foo(cnt++)]
           for (let i = 0; i < a.length; i++) {
-              assert i == a[i].length
+              assertTrue( i == a[i].length )
               for (let j = 0; j < i; j++) {
-                  assert a[i][j] == j * 10
+                  assertTrue( a[i][j] == j * 10 )
               }
           }

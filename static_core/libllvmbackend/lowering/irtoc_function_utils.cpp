@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,8 @@ constexpr std::array NOALIAS_IRTOC_FUNC = {
     "LaunchFromInterpreterShort"sv,        "LaunchFromInterpreterLong"sv,        "LaunchFromInterpreterRange"sv,
     "LookupGetterByNameShortEntrypoint"sv, "LookupGetterByNameLongEntrypoint"sv, "LookupGetterByNameObjEntrypoint"sv,
     "LookupSetterByNameShortEntrypoint"sv, "LookupSetterByNameLongEntrypoint"sv, "LookupSetterByNameObjEntrypoint"sv,
-    "LookupFieldByNameEntrypoint"sv,
+    "LookupFieldByNameEntrypoint"sv,       "EtsGetTypeofEntrypoint"sv,           "EtsGetIstrueEntrypoint"sv,
+    "LookupMethodByNameEntrypoint"sv,
 #endif
 };
 
