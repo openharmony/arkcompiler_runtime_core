@@ -221,9 +221,6 @@
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_14.ets
 05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_15.ets
 
-#25179
-05.generics/generic_declarations/create_array_using_generic_types/create_array_using_generic_types_ext_11.ets
-
 #22450 - should throw an exception
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.class_or_interface_casting_conversions/cce_5.ets
 
