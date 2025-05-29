@@ -113,6 +113,7 @@ srcs_runtime = [
   "runtime/ets_vtable_builder.cpp",
   "runtime/finalreg/finalization_registry_manager.cpp",
   "runtime/intrinsics/escompat_Array.cpp",
+  "runtime/integrate/ets_ani_expo.cpp",
   "runtime/intrinsics/escompat_ArrayBuffer.cpp",
   "runtime/intrinsics/escompat_TypedArrays.cpp",
   "runtime/intrinsics/compiler_intrinsics.cpp",

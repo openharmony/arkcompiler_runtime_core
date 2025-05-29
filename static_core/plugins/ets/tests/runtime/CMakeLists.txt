@@ -33,5 +33,15 @@ panda_add_gtest_with_ani(ets_vm_init_prealloc_test
     TEST_GROUP ets_tests_runtime_gtests
 )
 
+if (NOT PANDA_QEMU_BUILD)
+    panda_add_gtest_with_ani(ets_vm_postfork_aot_load_test
+        CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_postfork_aot_load_test.cpp
+        ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_postfork_aot_load_test.ets
+        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+        LIBRARIES arkbase arkfile arkruntime
+        TEST_GROUP ets_tests_runtime_gtests
+    )
+endif()
+
 add_subdirectory(types)
 add_subdirectory(tooling)
