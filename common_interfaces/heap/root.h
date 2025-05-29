@@ -16,7 +16,7 @@
 #ifndef COMMON_INTERFACES_HEAP_ROOT_H
 #define COMMON_INTERFACES_HEAP_ROOT_H
 
-#include "common_interfaces/heap/visitor.h"
+#include "heap/visitor.h"
 
 namespace panda {
 class Root {

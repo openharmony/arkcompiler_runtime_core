@@ -76,11 +76,6 @@ protected:
     size_t VerifyHeap() override;
 
 private:
-    void UpdateRootRefsToMovedObjects(const GCRootUpdater &gcRootUpdater) override
-    {
-        rootManager_.UpdateRefsToMovedObjects(gcRootUpdater);
-    }
-
     void ClearLocalInternalAllocatorPools() override;
 
     RootManager<LanguageConfig> rootManager_ {nullptr};

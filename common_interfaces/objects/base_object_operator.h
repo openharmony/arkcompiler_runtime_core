@@ -19,10 +19,10 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "common_interfaces/heap/heap_visitor.h"
-#include "common_interfaces/objects/field.h"
-#include "common_interfaces/objects/ref_field.h"
-#include "common_interfaces/objects/base_state_word.h"
+#include "heap/heap_visitor.h"
+#include "objects/field.h"
+#include "objects/ref_field.h"
+#include "objects/base_state_word.h"
 
 namespace panda {
 class BaseObject;

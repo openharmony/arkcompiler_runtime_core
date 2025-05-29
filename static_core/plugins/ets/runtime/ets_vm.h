@@ -105,7 +105,6 @@ public:
     void InitializeGC() override;
     void StartGC() override;
     void StopGC() override;
-    void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor) override;
     void VisitVmRoots(const GCRootVisitor &visitor) override;
     void UpdateVmRefs(const GCRootUpdater &gcRootUpdater) override;
     void UninitializeThreads() override;

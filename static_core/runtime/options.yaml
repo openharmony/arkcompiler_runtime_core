@@ -261,6 +261,7 @@ options:
     - stw
     - gen-gc
     - g1-gc
+    - cmc-gc
   description: Type of used GC
 
 - name: ic-enable

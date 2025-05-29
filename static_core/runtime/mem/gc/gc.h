@@ -578,10 +578,6 @@ protected:
     /// Update all refs to moved objects
     virtual void CommonUpdateRefsToMovedObjects() = 0;
 
-    virtual void UpdateRootRefsToMovedObjects(const GCRootUpdater &gcRootUpdater) = 0;
-
-    void UpdateRefsInVRegs(ManagedThread *thread);
-
     const ObjectHeader *PopObjectFromStack(GCMarkingStackType *objectsStack);
 
     Timing *GetTiming()

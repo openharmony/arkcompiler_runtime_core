@@ -16,8 +16,8 @@
 #ifndef COMMON_INTERFACES_THREAD_BASE_THREAD_H
 #define COMMON_INTERFACES_THREAD_BASE_THREAD_H
 
-#include "common_interfaces/base/common.h"
-#include "common_interfaces/thread/thread_holder-inl.h"
+#include "base/common.h"
+#include "thread/thread_holder-inl.h"
 
 namespace panda {
 // Fixme: replace with real RootVisitor

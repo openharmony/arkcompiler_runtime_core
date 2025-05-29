@@ -19,9 +19,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "common_interfaces/base/common.h"
-#include "common_interfaces/objects/base_object_operator.h"
-#include "common_interfaces/objects/base_state_word.h"
+#include "base/common.h"
+#include "objects/base_object_operator.h"
+#include "objects/base_state_word.h"
 
 namespace panda {
 class BaseObject {

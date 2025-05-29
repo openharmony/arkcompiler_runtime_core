@@ -98,7 +98,6 @@ private:
     }
     void CommonUpdateRefsToMovedObjects() override {}
     void UpdateRefsToMovedObjectsInPygoteSpace() override {}
-    void UpdateRootRefsToMovedObjects([[maybe_unused]] const GCRootUpdater &gcRootUpdater) override {}
     void ClearLocalInternalAllocatorPools() override {}
 };
 

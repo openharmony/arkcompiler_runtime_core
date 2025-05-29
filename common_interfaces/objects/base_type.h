@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "common_interfaces/objects/base_object.h"
+#include "objects/base_object.h"
 
 namespace panda::ecmascript {
 class JSTaggedValue;

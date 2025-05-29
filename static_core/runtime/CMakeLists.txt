@@ -81,6 +81,8 @@ set(SOURCES
     mem/gc/stw-gc/stw-gc.cpp
     mem/gc/gc_barrier_set.cpp
     mem/gc/gen-gc/gen-gc.cpp
+    mem/gc/cmc-gc-adapter/cmc-gc-adapter.cpp
+    mem/gc/cmc-gc-adapter/cmc-allocator-adapter.cpp
     mem/refstorage/ref_block.cpp
     mem/refstorage/reference_storage.cpp
     mem/refstorage/global_object_storage.cpp

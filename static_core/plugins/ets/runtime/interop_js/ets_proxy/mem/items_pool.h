@@ -48,7 +48,7 @@ class ItemsPool {
         NO_MOVE_SEMANTIC(PaddedItem);
     };
 
-    static constexpr size_t MAX_INDEX = 1U << NR_INDEX_BITS;
+    static constexpr size_t MAX_INDEX = 1ULL << NR_INDEX_BITS;
     static constexpr size_t PADDED_ITEM_SIZE = sizeof(PaddedItem);
 
     static PaddedItem *GetPaddedItem(Item *item)

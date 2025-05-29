@@ -128,6 +128,8 @@ private:
      */
     void VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor) const;
 
+    void UpdateRefsInVRegs(ManagedThread *thread, const GCRootUpdater &gcRootUpdater);
+
     /// Updates references to moved objects in TLS
     void UpdateThreadLocals(const GCRootUpdater &gcRootUpdater);
 
