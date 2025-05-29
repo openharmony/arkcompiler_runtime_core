@@ -46,6 +46,7 @@ const DEFAULTS_TOEXPNEG = -7;
 const DEFAULTS_TOEXPPOS = 21;
 
 let external: boolean = true;
+let inexact: boolean = false;
 const tag: string = '[object Decimal]';
 
 const isBinary: RegExp = new RegExp("^0b([01]+(\\.[01]*)?|\\.[01]+)(p[+-]?\\d+)?$", "i");
@@ -195,6 +196,106 @@ export class Decimal {
     }
 
     /**
+     * Return a string representing the value of this Decimal in base 2.
+     *
+     * @returns { string } the string type
+     */
+    public toBinary(): string {
+        return this.toStringBinary(2);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 2, round to `significantDigits`
+     * significant digits.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
+     */
+    public toBinary(significantDigits: number): string {
+        return this.toStringBinary(2, significantDigits);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 2, round to `significantDigits`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
+     */
+    public toBinary(significantDigits: number, rounding: Rounding): string {
+        return this.toStringBinary(2, significantDigits, rounding);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 8.
+     *
+     * @returns { string } the string type
+     */
+    public toOctal(): string {
+        return this.toStringBinary(8);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 8, round to `significantDigits` significant.
+     *
+     * @param { number } significantDigits {number | string | Decimal}
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
+     */
+    public toOctal(significantDigits: number): string {
+        return this.toStringBinary(8, significantDigits);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 8, round to `significantDigits` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { number } significantDigits {number | string | Decimal}
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
+     */
+    public toOctal(significantDigits: number, rounding: Rounding): string {
+        return this.toStringBinary(8, significantDigits, rounding);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 16
+     *
+     * @returns { string } the string type
+     */
+    public toHexadecimal(): string {
+        return this.toStringBinary(16);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 16, round to `significantDigits` significant.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
+     */
+    public toHexadecimal(significantDigits: number): string {
+        return this.toStringBinary(16, significantDigits);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in base 16, round to `significantDigits` significant
+     * digits using rounding mode `rounding`.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
+     */
+    public toHexadecimal(significantDigits: number, rounding: Rounding): string {
+        return this.toStringBinary(16, significantDigits, rounding);
+    }
+
+    /**
      * Return a new Decimal whose value is the value of this Decimal.
      *
      * @returns { Decimal } the Decimal type
@@ -230,6 +331,210 @@ export class Decimal {
     }
 
     /**
+     * Return a string representing the value of this Decimal in exponential notation.
+     *
+     * @returns { string } the string type
+     */
+    public toExponential(): string {
+        let str = this.finiteToString(true);
+        return this.isNegative() && !this.isZero() ? '-' + str : str;
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in exponential notation rounded to
+     * `decimalPlaces` fixed decimal places.
+     *
+     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `decimalPlaces` is out of range.
+     */
+    public toExponential(decimalPlaces: number): string {
+        return this.toExponential(decimalPlaces, Decimal.rounding);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in exponential notation rounded to
+     * `decimalPlaces` fixed decimal places using rounding mode `rounding`.
+     *
+     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `decimalPlaces | rounding` is out of range.
+     */
+    public toExponential(decimalPlaces: number, rounding: Rounding): string {
+        Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
+        Utils.checkInt32(rounding, 0, 8);
+        let x = Utils.finalise(new Decimal(this), decimalPlaces + 1, rounding);
+        let str = x.finiteToString(true, decimalPlaces + 1);
+        return x.isNegative() && !x.isZero() ? '-' + str : str;
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in normal (fixed-point).
+     *
+     * @returns { string } the string type
+     */
+    public toFixed(): string {
+        let str = this.finiteToString(false);
+        return this.isNegative() && !this.isZero() ? '-' + str : str;
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in normal (fixed-point) notation to
+     * `decimalPlaces` fixed decimal places.
+     *
+     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `decimalPlaces` is out of range.
+     */
+    public toFixed(decimalPlaces: number): string {
+        return this.toFixed(decimalPlaces, Decimal.rounding);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal in normal (fixed-point) notation to
+     * `decimalPlaces` fixed decimal places and rounded using rounding mode `rounding`.
+     *
+     * @param { number } decimalPlaces Decimal places. Integer, 0 to MAX_DIGITS inclusive.
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `decimalPlaces | rounding` is out of range.
+     */
+    public toFixed(decimalPlaces: number, rounding: Rounding): string {
+        Utils.checkInt32(decimalPlaces, 0, MAX_DIGITS);
+        Utils.checkInt32(rounding, 0, 8);
+        let y = Utils.finalise(new Decimal(this), decimalPlaces + this.e + 1, rounding);
+        let str = y.finiteToString(false, decimalPlaces + y.e + 1);
+        return this.isNegative() && !this.isZero() ? '-' + str : str;
+    }
+
+    /**
+     * Returns a new Decimal whose value is the nearest multiple of `n`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    public toNearest(n: DecimalValue): Decimal {
+        return this.toNearest(n, Decimal.rounding);
+    }
+
+    /**
+     * Returns a new Decimal whose value is the nearest multiple of `n` in the direction of rounding
+     * mode `rounding`, to the value of this Decimal.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200001 - The value of `rounding` is out of range.
+     */
+    public toNearest(n: DecimalValue, rounding: Rounding): Decimal {
+        let x = new Decimal(this);
+        let y = new Decimal(n);
+        Utils.checkInt32(rounding, 0, 8);
+
+        // If x is not finite, return x if y is not NaN, else NaN.
+        if (!x.d) {
+            return y.s ? x : y;
+        }
+
+        // If y is not finite, return Infinity with the sign of x if y is Infinity, else NaN.
+        if (!y.d) {
+            if (y.s) {
+                y.sign = x.s;
+            }
+            return y;
+        }
+
+        // If y is not zero, calculate the nearest multiple of y to x.
+        if (y.d![0]) {
+            external = false;
+            x = Utils.divide(x, y, 0, rounding, true).mul(y);
+            external = true;
+            Utils.finalise(x, undefined, undefined);
+        } else {
+            // If y is zero, return zero with the sign of x.
+            y.sign = x.s;
+            x = y;
+        }
+
+        return x;
+    }
+
+    /**
+     * Return a string representing the value of this Decimal.
+     *
+     * @returns { string } the string type
+     */
+    public toPrecision(): string {
+        let str = this.finiteToString(this.e <= Decimal.toExpNeg || this.e >= Decimal.toExpPos);
+        return this.isNegative() && !this.isZero() ? '-' + str : str;
+    }
+
+    /**
+     * Return a string representing the value of this Decimal rounded to `significantDigits` significant digits.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
+     */
+    public toPrecision(significantDigits: number): string {
+        return this.toPrecision(significantDigits, Decimal.rounding);
+    }
+
+    /**
+     * Return a string representing the value of this Decimal rounded to `significantDigits` significant digits
+     * using rounding mode `rounding`.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { string } the string type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
+     */
+    public toPrecision(significantDigits: number, rounding: Rounding): string {
+        Utils.checkInt32(significantDigits, 1, MAX_DIGITS);
+        Utils.checkInt32(rounding, 0, 8);
+        let x = Utils.finalise(new Decimal(this), significantDigits, rounding);
+        let str = x.finiteToString(significantDigits <= x.e || x.e <= Decimal.toExpNeg, significantDigits);
+        return x.isNegative() && !x.isZero() ? '-' + str : str;
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public toSignificantDigits(): Decimal {
+        return Utils.finalise(new Decimal(this), Decimal.precision, Decimal.rounding);
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal rounded to a maximum of `significantDigits`
+     * significant digits.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits` is out of range.
+     */
+    public toSignificantDigits(significantDigits: number): Decimal {
+        return this.toSignificantDigits(significantDigits, Decimal.rounding);
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal rounded to a maximum of `significantDigits`
+     * significant digits using rounding mode `rounding`.
+     *
+     * @param { number } significantDigits Significant digits. Integer, 1 to MAX_DIGITS inclusive.
+     * @param { Rounding } rounding Rounding mode. Integer, 0 to 8 inclusive.
+     * @returns { Decimal } the Decimal type
+     * @throws { BusinessError } 10200001 - The value of `significantDigits | rounding` is out of range.
+     */
+    public toSignificantDigits(significantDigits: number, rounding: Rounding): Decimal {
+        Utils.checkInt32(significantDigits, 1, MAX_DIGITS);
+        Utils.checkInt32(rounding, 0, 8);
+        return Utils.finalise(new Decimal(this), significantDigits, rounding);
+    }
+
+    /**
      * Return the value of this Decimal converted to a number primitive. Zero keeps its sign.
      *
      * @returns { number } the number type
@@ -248,6 +553,30 @@ export class Decimal {
     public toString(): string {
         let str = this.finiteToString(this.exponent <= Decimal.toExpNeg || this.exponent >= Decimal.toExpPos);
         return this.isNegative() && !this.isZero() ? '-' + str : str;
+    }
+
+    /**
+     * Return the number of decimal places of the value of this Decimal.
+     *
+     * @returns { number } the number type
+     */
+    public decimalPlaces(): number {
+        let digits = this.digits;
+        let result: number = NaN;
+        if (digits) {
+            let len = digits!.length - 1;
+            result = (len - Math.floor(this.exponent / LOG_BASE)) * LOG_BASE;
+            let value = digits[len];
+            if (value) {
+                for (; value % 10 == 0; value /= 10) {
+                    result--;
+                }
+            }
+            if (result < 0) {
+                result = 0;
+            }
+        }
+        return result;
     }
 
     /**
@@ -1307,6 +1636,162 @@ export class Decimal {
         }
         return Utils.finalise(new Decimal(LN10), sd, 1, true);
     }
+
+    private getDigitsValidIndex(digits: Array<number>): number {
+        let len: number = 0;
+        for (len = digits.length; !digits[len - 1]; --len);
+        return len;
+    }
+
+    private digitsToString(digits: Array<number>, start: number, orgStr: string, length?: number): string {
+        let len: number;
+        let str: string = orgStr;
+        if (length != undefined) {
+            len = length;
+        } else {
+            len = this.getDigitsValidIndex(digits);
+        }
+
+        for (let i = start; i < len; i++) {
+            str += NUMERALS.charAt(digits[i]);
+        }
+        return str;
+    }
+
+    private completeStringWithZero(isExp: boolean, len: number, baseOut: number,
+        orgStr: string, base: number, exp: number): string {
+        let str = orgStr;
+        if (isExp) {
+            if (len > 1) {
+                if (baseOut == 16 || baseOut == 8) {
+                    let i = baseOut == 16 ? 4 : 3;
+                    for (let j = len - 1; j % i; j++) {
+                        str += '0';
+                    }
+                    let xd = this.convertBase(str, base, baseOut);
+                    str = this.digitsToString(xd, 1, '1.');
+                } else {
+                    str = str.charAt(0) + '.' + str.slice(1);
+                }
+            }
+            str =  str + (exp < 0 ? 'p' : 'p+') + exp;
+        } else if (exp < 0) {
+            while (++exp != 0) {
+                str = '0' + str;
+            }
+            str = '0.' + str;
+        } else {
+            if (++exp > len) {
+                for (exp -= len; exp != 0; exp--) {
+                    str += '0';
+                }
+            } else if (exp < len) {
+                str = str.slice(0, exp) + '.' + str.slice(exp);
+            }
+        }
+        return str;
+    }
+
+    private toStringBinary(baseOut: number, sd?: number, rm?: number) {
+        let isExp = (sd != undefined);
+        if (isExp) {
+            Utils.checkInt32(sd!, 1, MAX_DIGITS);
+            if (rm == undefined) {
+                rm = Decimal.rounding;
+            } else {
+                Utils.checkInt32(rm!, 0, 8);
+            }
+        } else {
+            sd = Decimal.precision;
+            rm = Decimal.rounding;
+        }
+
+        if (!this.isFinite()) {
+            let str = this.nonFiniteToString();
+            return this.sign < 0 ? '-' + str : str;
+        } else {
+            let str = this.finiteToString(false);
+            let i = str.indexOf('.');
+            let base: number = baseOut;
+            if (isExp) {
+                base = 2;
+                if (baseOut == 16) {
+                    sd = sd! * 4 - 3;
+                } else if (baseOut == 8) {
+                    sd = sd! * 3 - 2;
+                }
+            }
+
+            let x: Decimal = new Decimal(this);
+            let y: Decimal = new Decimal(1);
+            if (i >= 0) {
+                str = str.replace('.', '');
+                y.exponent = str.length - i;
+                y.digits = this.convertBase(y.finiteToString(false), 10, base);
+                y.exponent = y.d!.length;
+            }
+            let xd = this.convertBase(str, 10, base);
+            let e = xd.length;
+            let len = xd.length;
+            for (; len >= 1 && xd[--len] == 0;) {
+                xd.pop();
+            }
+
+            let roundUp: boolean = false;
+            if (xd.length == 0 || !xd[0]) {
+                str = isExp ? '0p+0' : '0';
+            } else {
+                if (i < 0) {
+                    e--;
+                } else {
+                    x.digits = xd;
+                    x.exponent = e;
+                    x = Utils.divide(x, y, sd, rm, false, base);
+                    xd = x.d!;
+                    e = x.e;
+                    roundUp = inexact;
+                }
+          
+                i = sd! < xd.length ? xd[sd!] : -1;
+                let k = base / 2;
+                roundUp = roundUp || (sd! + 1 < xd.length ? xd[sd! + 1] != undefined : false);
+                roundUp = rm != undefined && rm < 4
+                    ? roundUp && (rm === 0 || rm === (x.s < 0 ? 3 : 2))
+                    : i > k || i === k && (rm === 4 || roundUp || rm === 6 && (xd[sd! - 1] & 1) > 0 ||
+                        rm === (x.s < 0 ? 8 : 7));
+
+                // ArkTs1.2's Array can't change length to bigger or negative.
+                if (sd! <= xd.length) {
+                    xd.length = sd!;
+                } else {
+                    xd.extendTo(sd!, 0);
+                }     
+
+                if (roundUp) {
+                    sd!--;
+                    xd[sd!] += 1
+                    for (; xd[sd!] > (base - 1);) {
+                        xd[sd!] = 0;
+                        if (!sd) {
+                            ++e;
+                            xd.unshift(1);
+                        }
+                        sd!--;
+                        if (sd! < 0) {
+                            break;
+                        }
+                        xd[sd!] += 1
+                    }
+                }
+
+                len = this.getDigitsValidIndex(xd);
+                str = this.digitsToString(xd, 0, '', len);
+                str = this.completeStringWithZero(isExp, len, baseOut, str, base, e);
+            }
+            str = (baseOut == 16 ? '0x' : baseOut == 2 ? '0b' : baseOut == 8 ? '0o' : '') + str;
+            return x.s < 0 ? '-' + str : str;
+        }
+    }
 }
 
 class Utils {
@@ -1576,7 +2061,7 @@ class Utils {
             let roundUp = (rm != undefined && rm! < 4)
                 ? (rd || isTruncated) && (rm == 0 || rm == (x.s < 0 ? 3 : 2))
                 : rd > 5 || rd == 5 && (rm == 4 || isTruncated || rm == 6 &&
-                ((i > 0 ? j > 0 ? w / Math.pow(10, digits - j) : 0 : xd![xdi - 1]) % 10) & 1 ||
+                ((i > 0 ? j > 0 ? w / Math.pow(10, digits - j) : 0 : xdi - 1 >= 0 ? xd![xdi - 1] : NaN) % 10) & 1 ||
                 rm == (x.s < 0 ? 8 : 7));
 
             if (signDigits < 1 || !(xd![0])) {
@@ -1808,6 +2293,7 @@ class Utils {
         }
         if (logBase == 1) {
             q.exponent = e;
+            inexact = more;
         } else {
             for (i = 1, k = qd![0]; k >= 10; k /= 10) {
                 i++;
