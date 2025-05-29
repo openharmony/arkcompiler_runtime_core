@@ -15,14 +15,12 @@ limitations under the License.
 
 /*---
 desc: First simple sample from spec
-tags: [compile-only]
 files:
 - ./simple_spec4_3.ets
-- ./namespace_storage.ets
 ---*/
 
 import {Space1 as mySpace} from "./simple_spec4_3.ets";
 
 function main() {
-    arktest.assertEQ("Space1", "Space1")
+    arktest.assertEQ(mySpace.foo(), "Local Space1")
 }

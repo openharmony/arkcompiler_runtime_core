@@ -156,6 +156,8 @@ class TestSuite:
         self.__search_both_excluded_and_ignored_tests()
         executed_set = self.__get_by_groups(executed_set)
         tests = self.__create_tests(executed_set)
+        Log.default(_LOGGER, f"Loaded {len(tests)} valid tests from the folder '{self.test_root}'. "
+                             f"Excluded {self.excluded} tests are not loaded.")
         return tests
 
     def set_preparation_steps(self) -> list[TestPreparationStep]:
@@ -199,7 +201,7 @@ class TestSuite:
                     collection=collection,
                     extension=extension
                 ))
-        else:
+        elif copy_source_path != self.test_root / collection.name:
             steps.append(CopyStep(
                 test_source_path=copy_source_path,
                 test_gen_path=self.test_root / collection.name,
@@ -331,7 +333,10 @@ class TestSuite:
         excluded: list[Path] = list(self.excluded_tests)[:]
         if self.config.test_suite.groups.chapters:
             test_files = self.__filter_by_chapters(self.test_root, test_files)
-        pattern = re.compile(self.config.test_suite.filter.replace(".", r"\.").replace("*", ".*"))
+        mask = self.config.test_suite.filter.replace(".", r"\.").replace("*", ".*")
+        coll_names = "|".join(self.__collections_parameters.keys())
+        mask = f"({coll_names})?/{mask}" if coll_names else mask
+        pattern = re.compile(f"{self.test_root / mask}")
         return [test for test in test_files if test not in excluded and pattern.search(str(test))]
 
     def __filter_by_chapters(self, base_folder: Path, files: list[Path]) -> list[Path]:
@@ -394,9 +399,9 @@ class TestSuite:
         """
         Read excluded_lists and load list of excluded tests
         """
-        excluded_tests = self.__load_tests_from_lists(self._test_lists.excluded_lists)
-        self.excluded = len(excluded_tests)
+        excluded_tests = self.__get_by_groups(self.__load_tests_from_lists(self._test_lists.excluded_lists))
         self.__search_duplicates(excluded_tests, "excluded")
+        self.excluded = len(set(excluded_tests))
         return excluded_tests
 
     def __load_ignored_tests(self) -> list[Path]:

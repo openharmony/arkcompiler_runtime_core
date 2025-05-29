@@ -187,12 +187,18 @@ class TestLists:
         return int(level) if level is not None else None
 
     def debug_info(self) -> bool:
+        debug_info_opt = "--debug-info"
         args = self.config.workflow.get_parameter("es2panda-extra-args")
-        return len(self.__search_option_in_list("--es2panda-debug-info", args)) > 0
+        if isinstance(args, str):
+            return args == debug_info_opt
+        return len(self.__search_option_in_list(debug_info_opt, args)) > 0
 
     def is_full_ast_verifier(self) -> bool:
+        option = "--verifier-all-checks"
         args = self.config.workflow.get_parameter("es2panda-extra-args")
-        return len(self.__search_option_in_list("--verifier-all-checks", args)) > 0
+        if isinstance(args, str):
+            return args == option
+        return len(self.__search_option_in_list(option, args)) > 0
 
     def cmake_cache(self) -> list[str]:
         cmake_cache_txt = "CMakeCache.txt"

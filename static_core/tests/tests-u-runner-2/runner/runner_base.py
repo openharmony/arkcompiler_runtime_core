@@ -58,7 +58,7 @@ class Runner(ABC):
         # excluded test is a test what should not be loaded and should be tried to run
         # excluded_list: either absolute path or path relative from list_root to the file with the list of such tests
         self.excluded_lists: list[str] = []
-        self.excluded_tests: set[str] = set([])
+        self.excluded_tests: set[Path] = set([])
         # ignored test is a test what should be loaded and executed, but its failure should be ignored
         # ignored_list: either absolute path or path relative from list_root to the file with the list of such tests
         # aka: kfl stands for `known failures list`

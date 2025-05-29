@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-[TID 005b50] E/verifier: Cannot link class: Cannot find method 'bar (Lstd/core/String;)D' in class 'declarations_n.ETSGLOBAL'
-[TID 005b50] E/verifier: Verifier error 54: Cache miss for method at offset
-[TID 005b50] E/verifier: Verifier error 62: Cannot resolve method id
-[TID 005b50] E/verifier: Method verification failed: void import_declarations_n_0.ETSGLOBAL::main()
+E/verifier: Cannot link class: Cannot find method 'bar (Lstd/core/String;)D' in class 'declarations_n.ETSGLOBAL'
+E/verifier: Verifier error 54: Cache miss for method at offset
+E/verifier: Verifier error 62: Cannot resolve method id
+E/verifier: Method verification failed: void import_declarations_n_0.ETSGLOBAL::main()
+E/verifier: Class verification failed: 'import_declarations_n_0.ETSGLOBAL' method: void import_declarations_n_0.ETSGLOBAL::main()
+E/runtime: Cannot initialize class 'import_declarations_n_0.ETSGLOBAL'
 Unhandled exception: std.core.LinkerVerificationError
-LinkerVerificationError: Limport_declarations_n_0/ETSGLOBAL;

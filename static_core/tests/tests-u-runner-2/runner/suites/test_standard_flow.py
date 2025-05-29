@@ -42,6 +42,7 @@ IS_PANDA = "is-panda"
 
 class TestStandardFlow(Test):
     __DEFAULT_ENTRY_POINT = "ETSGLOBAL::main"
+    CTE_RETURN_CODE = 1
 
     def __init__(self, test_env: TestEnv, test_path: Path, *,
                  params: IOptions, test_id: str, is_dependent: bool = False,
@@ -188,7 +189,7 @@ class TestStandardFlow(Test):
 
     @staticmethod
     def _remove_file_info_from_error(error_message: str) -> str:
-        pattern = r'\s*\[\s*[^]]+\.ets:\d+:\d+\s*]|\s*\[\s*[^]]+\.abc\s*]'
+        pattern = r'\s*[\[\(]\s*[^]\()]+\.ets:\d+:\d+\s*[\]\)]|\s*[\[\(]\s*[^]\()]+\.abc\s*[\]\)]'
         return re.sub(pattern, '', error_message)
 
     @staticmethod
@@ -279,9 +280,7 @@ class TestStandardFlow(Test):
             return step
         new_step = copy.copy(step)
         new_step.args = step.args[:]
-        if self.dependent_tests:
-            new_step.args = self.__add_boot_panda_files(new_step.args)
-            return new_step
+        new_step.args.insert(-2, "--verification-mode=ahead-of-time")
 
         new_step.args.insert(-2, self.__add_panda_files())
         return new_step
@@ -425,7 +424,7 @@ class TestStandardFlow(Test):
                      if step.name in self.validator.validators
                      else self.validator.get_validator(step.step_kind.value))
         if validator is not None:
-            return validator(self, step.name, output, error, return_code)
+            return validator(self, step.step_kind.value, output, error, return_code)
         return True
 
     def _read_expected_file(self) -> None:

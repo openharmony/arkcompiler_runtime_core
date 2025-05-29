@@ -18,6 +18,7 @@ desc: Functions to import to another test
 tags:
 - compile-only
 - not-a-test
+- negative
 ---*/
 
 export type TPL2 = [Char, Int];

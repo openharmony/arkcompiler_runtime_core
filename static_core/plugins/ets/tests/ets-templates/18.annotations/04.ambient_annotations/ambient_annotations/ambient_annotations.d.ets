@@ -17,7 +17,6 @@
 desc: Ambient declaration does not introduce a new annotation but provides type information
       to use an annotation that must be defined elsewhere
 tags: [not-a-test, compile-only]
-files: ['./ambient_annotations.ets']
 ---*/
 
 export enum MyEnum { EnumField1, EnumField2 }

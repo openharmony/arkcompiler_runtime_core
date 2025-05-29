@@ -32,14 +32,14 @@ class BaseValidator(IValidator):
             self.add(value, BaseValidator.check_return_code_0)
 
     @staticmethod
-    def check_return_code_0(test: "TestStandardFlow", step_name: str, output: str,
+    def check_return_code_0(test: "TestStandardFlow", step_value: str, output: str,
                             error_output: str, return_code: int) -> bool:
         if error_output.strip():
-            _LOGGER.all(f"Step validator {step_name}: get error output '{error_output}'")
+            _LOGGER.all(f"Step validator {step_value}: get error output '{error_output}'")
         if output.find('[Fail]Device not founded or connected') > -1:
             return False
 
-        if BaseValidator._step_passed(test, return_code):
+        if BaseValidator._step_passed(test, return_code, step_value):
             # the step has passed
 
             if (test.has_expected or test.has_expected_err) and (output or error_output):
@@ -61,12 +61,15 @@ class BaseValidator(IValidator):
         return False
 
     @staticmethod
-    def _step_passed(test: "TestStandardFlow", return_code: int) -> bool:
-        if (return_code == 0 and not test.is_negative_compile) or \
-            (return_code == 0 and not test.is_negative_runtime):
-            return True
-        if (return_code == 1 and test.is_negative_compile) or \
-            (return_code == 1 and test.is_negative_runtime):
-            return True
+    def _step_passed(test: "TestStandardFlow", return_code: int, step: str) -> bool:
+        if step == StepKind.COMPILER.value:
+            if test.is_negative_compile:
+                return return_code == 1
+            return return_code == 0
 
-        return False
+        if step == StepKind.RUNTIME.value:
+            if test.is_negative_runtime:
+                return return_code == 1
+            return return_code == 0
+
+        return return_code == 0

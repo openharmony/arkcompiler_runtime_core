@@ -95,6 +95,7 @@ class TestStepsTest(TestCase):
         expected_main_ets = "imports_nat.ets"
         expected_dependent_ets_abc = f"{INTERMEDIATE}/imports_nat_dependent_nat.ets.abc"
         expected_main_ets_abc = f"{INTERMEDIATE}/imports_nat.ets.abc"
+        expected_stdlib = "stdlib"
 
         self.assertEqual(len(steps), len(expected_types))
         self.check_steps(steps, expected_types)
@@ -106,7 +107,7 @@ class TestStepsTest(TestCase):
         self.check_args(
             step=steps[2],
             option="--boot-panda-files=",
-            expected_args=[expected_dependent_ets_abc, expected_main_ets_abc])
+            expected_args=expected_stdlib)
 
         # clear up
         work_dir = Path(os.environ["WORK_DIR"])
@@ -137,6 +138,7 @@ class TestStepsTest(TestCase):
         expected_main_ets = "imports_nat_co1.ets"
         expected_dependent_ets_abc = f"{INTERMEDIATE}/imports_nat_co1_dependent_nat_co.ets.abc"
         expected_main_ets_abc = f"{INTERMEDIATE}/imports_nat_co1.ets.abc"
+        expected_stdlib = "stdlib"
 
         self.assertEqual(len(steps), len(expected_types))
         self.check_steps(steps, expected_types)
@@ -148,7 +150,7 @@ class TestStepsTest(TestCase):
         self.check_args(
             step=steps[2],
             option="--boot-panda-files=",
-            expected_args=[expected_dependent_ets_abc, expected_main_ets_abc])
+            expected_args=expected_stdlib)
 
         # clear up
         work_dir = Path(os.environ["WORK_DIR"])
@@ -182,6 +184,7 @@ class TestStepsTest(TestCase):
         expected_dependent2_ets_abc = f"{INTERMEDIATE}/imports_nat_co2_dependent_nat_co.ets.abc"
         expected_dependent1_ets_abc = f"{INTERMEDIATE}/imports_nat_co2_imports_nat_co1.ets.abc"
         expected_main_ets_abc = f"{INTERMEDIATE}/imports_nat_co2.ets.abc"
+        expected_stdlib = "stdlib"
 
         self.assertEqual(len(steps), len(expected_types))
         self.check_steps(steps, expected_types)
@@ -195,7 +198,7 @@ class TestStepsTest(TestCase):
         self.check_args(
             step=steps[3],
             option="--boot-panda-files=",
-            expected_args=[expected_dependent2_ets_abc, expected_dependent1_ets_abc, expected_main_ets_abc])
+            expected_args=expected_stdlib)
 
         # clear up
         work_dir = Path(os.environ["WORK_DIR"])
@@ -331,10 +334,14 @@ class TestStepsTest(TestCase):
         actual_names = [step.name for step in steps]
         self.assertListEqual(actual_names, expected_names)
 
-    def check_args(self, step: TestStep, option: str, expected_args: list[str]) -> None:
+    def check_args(self, step: TestStep, option: str, expected_args: list[str] | str) -> None:
         for arg in step.args:
             if arg.startswith(option):
                 pos = arg.find("=")
                 arg_value = arg[pos + 1:].strip()
-                values = [value[value.find(INTERMEDIATE):] for value in arg_value.split(":") if INTERMEDIATE in value]
-                self.assertListEqual(values, expected_args)
+                if isinstance(expected_args, str):
+                    self.assertEqual(arg_value, expected_args)
+                else:
+                    values = [value[value.find(INTERMEDIATE):] for value in arg_value.split(":")
+                              if INTERMEDIATE in value]
+                    self.assertListEqual(values, expected_args)

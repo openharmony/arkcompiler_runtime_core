@@ -17,6 +17,7 @@ limitations under the License.
 desc: Type export class type. Type is having the same name as non-exported class.
 tags:
 - compile-only
+- negative
 - not-a-test
 - negative
 ---*/

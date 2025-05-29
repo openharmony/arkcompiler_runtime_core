@@ -22,6 +22,7 @@ desc: >-
 tags:
 - compile-only
 - not-a-test
+- negative
 ---*/
 
 class A {
