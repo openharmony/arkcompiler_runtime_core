@@ -299,6 +299,30 @@ inline T Array::Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx
     return ObjectAccessor::GetPrimitive<T>(this, GetDataOffset() + offset);
 }
 
+template <class T, bool NEED_BARRIER, bool IS_DYN>
+inline void Array::Fill(T elem, ArraySizeT start, ArraySizeT end)
+{
+    static_assert(std::is_arithmetic_v<T> || is_object_v<T>,
+                  "T should be arithmetic type or pointer to managed object type");
+    size_t elemSize = (is_object_v<T> && !IS_DYN) ? sizeof(ObjectPointerType) : sizeof(T);
+    if constexpr (is_object_v<T>) {
+        size_t startOff = GetDataOffset() + elemSize * start;
+        size_t count = end > start ? end - start : 0;
+        ObjectAccessor::FillObjects<false, NEED_BARRIER, IS_DYN>(this, startOff, count, elemSize, elem);
+    } else {
+        FillPrimitiveElem<T>(elem, start, end, elemSize);
+    }
+}
+
+template <class T>
+inline void Array::FillPrimitiveElem(T elem, ArraySizeT start, ArraySizeT end, size_t elemSize)
+{
+    for (ArraySizeT i = start; i < end; i++) {
+        size_t offset = GetDataOffset() + elemSize * i;
+        ObjectAccessor::SetPrimitive(this, offset, elem);
+    }
+}
+
 /* static */
 template <class DimIterator>
 Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, ark::Class *klass, uint32_t nargs,

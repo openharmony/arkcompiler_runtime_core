@@ -130,6 +130,12 @@ protected:
     }
 
     template <class T>
+    void FillImpl(T elem, uint32_t start, uint32_t end)
+    {
+        GetCoreType()->Fill(elem, start, end);
+    }
+
+    template <class T>
     std::pair<bool, T> CompareAndExchangeImpl(uint32_t idx, T oldElemValue, T newValue, bool strong)
     {
         return GetCoreType()->CompareAndExchange(idx, oldElemValue, newValue, std::memory_order_seq_cst, strong);
@@ -204,6 +210,15 @@ public:
     {
         return reinterpret_cast<Component *>(
             GetImpl<std::invoke_result_t<decltype(&Component::GetCoreType), Component>>(index));
+    }
+
+    void Fill(Component *element, uint32_t start, uint32_t end)
+    {
+        if (element == nullptr) {
+            FillImpl<ObjectHeader *>(nullptr, start, end);
+        } else {
+            FillImpl(element->GetCoreType(), start, end);
+        }
     }
 
     void Set(uint32_t index, Component *element, std::memory_order memoryOrder)

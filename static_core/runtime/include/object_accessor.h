@@ -123,6 +123,9 @@ public:
     template <typename T>
     static inline void SetDynPrimitive(const ManagedThread *thread, void *obj, size_t offset, T value);
 
+    template <bool IS_VOLATILE = false, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
+    static void FillObjects(void *objArr, size_t dataOffset, size_t count, size_t elemSize, ObjectHeader *value);
+
     template <class T>
     static inline T GetDynValue(const void *obj, size_t offset)
     {
@@ -194,6 +197,13 @@ private:
         // Atomic with relaxed order reason: to be compatible with other vms
         return reinterpret_cast<const std::atomic<T> *>(addr)->load(std::memory_order_relaxed);
     }
+
+    template <bool IS_VOLATILE = false, bool IS_DYN = false>
+    static void FillObjsWithPreBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                       ObjectHeader *value);
+
+    template <bool IS_VOLATILE = false, bool IS_DYN = false>
+    static void FillObjsNoBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize, ObjectHeader *value);
 
     template <class T, bool IS_VOLATILE>
     static void Set(void *obj, size_t offset, T value)

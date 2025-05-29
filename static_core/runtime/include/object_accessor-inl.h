@@ -81,6 +81,54 @@ inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThr
 
 /* static */
 template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+inline void ObjectAccessor::FillObjects(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                        ObjectHeader *value)
+{
+    auto *barrierSet = GetBarrierSet();
+    if (NEED_WRITE_BARRIER && barrierSet->IsPreBarrierEnabled()) {
+        FillObjsWithPreBarrier<IS_VOLATILE, IS_DYN>(objArr, dataOffset, count, elemSize, value);
+    } else {
+        FillObjsNoBarrier<IS_VOLATILE, IS_DYN>(objArr, dataOffset, count, elemSize, value);
+    }
+    if (NEED_WRITE_BARRIER && (!mem::IsEmptyBarrier(barrierSet->GetPostType()))) {
+        barrierSet->PostBarrier(objArr, dataOffset, count * elemSize);
+    }
+}
+
+/* static */
+template <bool IS_VOLATILE /* = false */, bool IS_DYN /* = false */>
+inline void ObjectAccessor::FillObjsWithPreBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                                   ObjectHeader *value)
+{
+    auto *barrierSet = GetBarrierSet();
+    for (size_t i = 0; i < count; i++) {
+        auto offset = dataOffset + elemSize * i;
+        barrierSet->PreBarrier(GetObject<IS_VOLATILE, false, IS_DYN>(objArr, offset));
+        if (!IS_DYN) {
+            Set<ObjectPointerType, IS_VOLATILE>(objArr, offset, ToObjPtrType(value));
+        } else {
+            Set<ObjectHeader *, IS_VOLATILE>(objArr, offset, value);
+        }
+    }
+}
+
+/* static */
+template <bool IS_VOLATILE /* = false */, bool IS_DYN /* = false */>
+inline void ObjectAccessor::FillObjsNoBarrier(void *objArr, size_t dataOffset, size_t count, size_t elemSize,
+                                              ObjectHeader *value)
+{
+    for (size_t i = 0; i < count; i++) {
+        auto offset = dataOffset + elemSize * i;
+        if (!IS_DYN) {
+            Set<ObjectPointerType, IS_VOLATILE>(objArr, offset, ToObjPtrType(value));
+        } else {
+            Set<ObjectHeader *, IS_VOLATILE>(objArr, offset, value);
+        }
+    }
+}
+
+/* static */
+template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
 // CC-OFFNXT(G.FUD.06) perf critical
 inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value)
 {

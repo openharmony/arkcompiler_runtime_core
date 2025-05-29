@@ -203,6 +203,9 @@ public:
     template <class T, bool NEED_READ_BARRIER = true, bool IS_DYN = false>
     T Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx) const;
 
+    template <class T, bool NEED_BARRIER = true, bool IS_DYN = false>
+    void Fill(T elem, ArraySizeT start, ArraySizeT end);
+
     size_t ObjectSize(uint32_t componentSize) const
     {
         return ComputeSize(componentSize, length_);
@@ -242,6 +245,9 @@ private:
         // imposed on other reads or writes
         length_.store(length, std::memory_order_relaxed);
     }
+
+    template <class T>
+    void FillPrimitiveElem(T elem, ArraySizeT start, ArraySizeT end, size_t elemSize);
 
     std::atomic<ArraySizeT> length_;
     // Align by 64bits, because dynamic language data is always 64bits

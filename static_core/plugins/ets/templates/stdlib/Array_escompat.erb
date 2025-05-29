@@ -1099,6 +1099,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % ctx.set_unsafe = Proc.new { |t, i, v| "#{t}.$_set_unsafe(#{i}, #{v})" }
 % ctx.el_type = 'T'
 % ctx.el_type_boxed = 'T'
+% ctx.function_type = 'has_native'
 % ctx.this_type = 'Array<T>'
 % ctx.this_return_type = 'this'
 % ctx.clone_this = 'new Array<T>(FROM_BUFFER, this.copyArray())'
