@@ -33,6 +33,7 @@ export class Error {
     private stackLines: FixedArray<StackTraceElement> = []
     private stack_?: String
     private cause_?: Object
+    private code_: number
 
     /**
     * Constructs a new error instance with provided message and cause
@@ -42,9 +43,21 @@ export class Error {
     * @param options options of the error
     */
     constructor(message?: String, options?: ErrorOptions) {
-        this("Error", message, options)
+        this("Error", 0 as number, message, options)
     }
 
+    /**
+     * Constructs a new error instance with provided code, message and cause
+     *
+     * @param code code of the error
+     *
+     * @param message message of the error
+     *
+     * @param options options of the error
+     */
+    constructor(code: number, message?: String, options?: ErrorOptions) {
+        this("Error", code, message, options)
+    }
 
     /**
     * Constructs a new error instance with provided message, options and name
@@ -56,6 +69,22 @@ export class Error {
     * @param options options of the error
     */
     constructor(name: String, message: String | undefined, options: ErrorOptions | undefined) {
+        this(name, 0 as number, message, options)
+    }
+
+    /**
+     * Constructs a new error instance with provided code, message, options and name
+     *
+     * @param name name of the error
+     *
+     * @param code code of the error
+     *
+     * @param message message of the error
+     *
+     * @param options options of the error
+     */
+    constructor(name: String, code: number, message: String | undefined, options: ErrorOptions | undefined) {
+        this.code_ = code
         this.message_ = (message == undefined) ? "" : message
         this.cause_ = (options == undefined) ? undefined : options.cause
         this.name_ = name
@@ -76,6 +105,22 @@ export class Error {
      */
     set name(val: string) {
         this.name_ = val
+    }
+
+    /**
+     * Gets the code of the error.
+     * @returns The error code.
+     */
+    get code(): number {
+        return this.code_
+    }
+
+    /**
+     * Sets the code of the error.
+     * @param val The new code of the error.
+     */
+    set code(val: number) {
+        this.code_ = val
     }
 
     /**
