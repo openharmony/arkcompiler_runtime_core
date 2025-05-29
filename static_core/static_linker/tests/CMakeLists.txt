@@ -86,6 +86,9 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
     set(STS_TESTS_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/data/output)
 
     set(STS_TESTS
+        annotation
+        classcall_doublefile
+        classcall_multifile
         fclass
         filesinfo
         fmethod
@@ -93,6 +96,7 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         fmethod_overloaded_2
         hello_world
         mix
+        singlefile
         sys
     )
     set(STS_TESTS_OUTPUT_SUBDIRS "")
@@ -106,6 +110,14 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
     endforeach()
 
     set(STS_TESTS_SOURCES
+        annotation/field.ets
+        annotation/method.ets
+        classcall_doublefile/bedependent.ets
+        classcall_doublefile/dependency.ets
+        classcall_multifile/dependency.ets
+        classcall_multifile/main_dependencyUser.ets
+        classcall_multifile/product_user.ets
+        classcall_multifile/user_dependency.ets
         fclass/1.ets
         fclass/2.ets
         filesinfo/1.ets
@@ -124,6 +136,11 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         hello_world/1.ets
         mix/1.ets
         mix/2.ets
+        singlefile/classExtension.ets
+        singlefile/interImpl.ets
+        singlefile/lambda_test.ets
+        singlefile/ObjectLiteral.ets
+        singlefile/teserror.ets
         sys/1.ets
         sys/2.ets
     )
@@ -167,6 +184,8 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
             --ets-module --extension=ets --debug-info "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomInt.ets"
         COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/CustomLong.abc"
             --ets-module --extension=ets --debug-info "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomLong.ets"
+        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/data/ets/classcall_doublefile/dependency_debug.abc"
+            --ets-module --extension=ets --debug-info "${CMAKE_CURRENT_SOURCE_DIR}/data/ets/classcall_doublefile/dependency_debug.ets"
         COMMAND $<TARGET_FILE:ark_link> --output "${CMAKE_CURRENT_BINARY_DIR}/CustomIntLongLinked.abc"
             -- "${CMAKE_CURRENT_BINARY_DIR}/CustomInt.abc" "${CMAKE_CURRENT_BINARY_DIR}/CustomLong.abc"
         COMMAND $<TARGET_FILE:ark> --load-runtimes ets --boot-panda-files $<TARGET_PROPERTY:etsstdlib,FILE>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,6 +115,11 @@ public:
     }
 
     PANDA_PUBLIC_API uint32_t ComputeLayout();
+    PANDA_PUBLIC_API void MarkLiteralarrayMap();
+    PANDA_PUBLIC_API void DeleteReferenceFromAnno(AnnotationItem *annoItem);
+    PANDA_PUBLIC_API void CleanupArrayValueItems(ValueItem *value);
+    PANDA_PUBLIC_API uint32_t DeleteItems();
+    PANDA_PUBLIC_API uint32_t DeleteForeignItems();
 
     PANDA_PUBLIC_API bool Write(Writer *writer, bool deduplicateItems = true, bool computeLayout = true);
 
