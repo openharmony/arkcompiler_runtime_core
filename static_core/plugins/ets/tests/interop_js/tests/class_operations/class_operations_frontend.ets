@@ -33,6 +33,24 @@ function jscallEmpty(): int {
 	return 0;
 }
 
+//! CHECKER      testJSONStringifyESObjectInstance JIT
+//! RUN          force_jit: true, entry: "testJSONStringifyESObjectInstance", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::testJSONStringifyESObjectInstance"
+//! METHOD       "testJSONStringifyESObjectInstance"
+//! PASS_AFTER   "IrBuilder"
+
+function testJSONStringifyESObjectInstance(): boolean {
+	return true
+}
+
+//! CHECKER      testJSONStringifyESObjectArray JIT
+//! RUN          force_jit: true, entry: "testJSONStringifyESObjectArray", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::testJSONStringifyESObjectArray"
+//! METHOD       "testJSONStringifyESObjectArray"
+//! PASS_AFTER   "IrBuilder"
+
+function testJSONStringifyESObjectArray(): boolean {
+	return true
+}
+
 //! CHECKER      jsnewEmpty JIT
 //! RUN          force_jit: true, entry: "jsnewEmpty", options: "--compiler-regex=class_operations_frontend.ETSGLOBAL::jsnewEmpty"
 //! METHOD       "jsnewEmpty"

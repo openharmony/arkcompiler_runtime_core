@@ -1,8 +1,7 @@
 /*
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * you may not use this file except in compliance with the License. * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -23,6 +22,10 @@ function toStringReplacer(key: string, value: NullishType): NullishType {
     }
 
     return "" + value
+}
+
+function toFnReplacer(key: string, value: NullishType): NullishType {
+    return key == "id" ? () => {} : value
 }
 
 class A {
@@ -94,16 +97,18 @@ class D<T> {
 }
 
 function jsonStringifyObjectWithFunctionReplacer(): void {
-    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer), '{"id":1,"name":"A"}')
-    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer, '\t'), '{\n\t"id": 1,\n\t"name": "A"\n}')
-    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer, 1), '{\n "id": 1,\n "name": "A"\n}')
-    arktest.assertEQ(JSON.stringify(new A(), toStringReplacer), '{"id":"1","name":"A"}')
-    arktest.assertEQ(JSON.stringify(new N(), toStringReplacer), '{"n":"null","u":"undefined"}')
+    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer), `{"id":1,"name":"A"}`)
+    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer, "\t"), `{\n\t"id": 1,\n\t"name": "A"\n}`)
+    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer, 1), `{\n "id": 1,\n "name": "A"\n}`)
+    arktest.assertEQ(JSON.stringify(new A(), toStringReplacer), `{"id":"1","name":"A"}`)
+    arktest.assertEQ(JSON.stringify(new N(), toStringReplacer), `{"n":"null","u":"undefined"}`)
+    arktest.assertEQ(JSON.stringify(new A(), toFnReplacer), `{"name":"A"}`)
 }
 
 function jsonStringifyRecordWithFunctionReplacer(): void {
-    const record: Record<string, NullishType> = { 'id': 1, 'name': 'R' }
-    arktest.assertEQ(JSON.stringify(record, dummyReplacer), '{"id":1,"name":"R"}')
+    const record: Record<string, NullishType> = { "id": 1, "name": "R" }
+    arktest.assertEQ(JSON.stringify(record, dummyReplacer), `{"id":1,"name":"R"}`)
+    arktest.assertEQ(JSON.stringify(record, toFnReplacer), `{"name":"R"}`)
 }
 
 function jsonStringifyArrayWithFunctionReplacer(): void {

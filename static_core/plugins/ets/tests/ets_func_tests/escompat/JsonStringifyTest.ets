@@ -117,9 +117,12 @@ function jsonStringifyMapWithEntries(): void {
 }
 
 function jsonStringifyRecord(): void {
-    let record: Record<string, NullishType> = new Record<string, NullishType>();
+    let record: Record<string | number, NullishType> = {}
     record["name"] = "arkts";
     record["version"] = 1;
+
+    const fn: () => void = () => {}
+    record[2] = fn
 
     let jsonStr = JSON.stringify(record);
     let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
@@ -127,6 +130,7 @@ function jsonStringifyRecord(): void {
 
     arktest.assertEQ(fields.get("name")?.toString(), "arkts");
     arktest.assertEQ(fields.get("version")?.toString(), "1");
+    arktest.assertTrue(fields.get("2") === undefined)
 }
 
 function jsonStringifyRecordWithSpace(): void {
