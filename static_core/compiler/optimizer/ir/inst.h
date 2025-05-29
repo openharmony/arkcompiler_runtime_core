@@ -1543,6 +1543,11 @@ public:
         return Accessor::Get(bitFields_);
     }
 
+    void SetAllFields(uint64_t bitFields)
+    {
+        bitFields_ = bitFields;
+    }
+
     uint64_t GetAllFields() const
     {
         return bitFields_;
