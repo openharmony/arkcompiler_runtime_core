@@ -89,6 +89,16 @@ struct HeapParam {
 */
 struct GCParam {
     /*
+    * Set false to disable GC, default is true
+    */
+    bool enableGC;
+
+    /*
+    * Set true swicth to stop-the-world GC, set false swicth to concurrent-copying GC, default is false
+    */
+    bool enableStwGC;
+
+    /*
     * GC will be triggered when heap allocated size is greater than this threshold.
     * Measured in KB, must be > 0.
     */
