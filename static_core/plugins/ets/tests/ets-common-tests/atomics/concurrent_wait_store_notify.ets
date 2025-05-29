@@ -32,7 +32,7 @@ function main() {
 
     launch<Int, () => Int>(writer)
 
-    let res = Atomics.wait(arr, 0, new BigInt(0)) as string
+    let res = Atomics.wait(arr, 0, 0) as string
     c.println(res)
     assertTrue(res == "ok" || res == "not-equal")
 }

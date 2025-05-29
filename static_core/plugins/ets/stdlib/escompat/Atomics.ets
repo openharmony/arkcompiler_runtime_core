@@ -14,33 +14,30 @@
  */
 package escompat;
 
-type Resolver = (value: string) => void;
+import { launch } from "std/concurrency"
 
 class Waiter {
     public static okStatus: string = "ok";
     public static notEqualStatus: string = "not-equal";
     public static timeOutStatus: string = "timed-out";
 
-    public wait(val: long, check: long, timeout?: long): Promise<string> {
+    public wait(val: long, getCurrentValue: () => long, timeout?: number): string {
         ConcurrencyHelpers.mutexLock(this.mutex);
-
+        let check = getCurrentValue();
+        console.log(check, val);
         if (val != check) {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
-            return Promise.resolve<string>(Waiter.notEqualStatus);
+            return Waiter.notEqualStatus;
         }
-        if(!(timeout instanceof undefined)) {
+        if(!(timeout instanceof undefined) && (timeout as number) > 0) {
             setTimeout((waiter: Waiter) => {
                 waiter.notify(Waiter.timeOutStatus);
-            }, timeout, this);
+            }, timeout as number, this);
         }
-
-        let resolver: Resolver | undefined = undefined;
-        let p = new Promise<string>((resolve: Resolver) => {
-            resolver = resolve;
-        });
-        this.promiseQueue.push(resolver!);
+        let job = new CompletableJob<string>();
+        this.promiseQueue.push(job);
         ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return p;
+        return job.Await();
     }
 
     public notify(val: string): boolean {
@@ -50,13 +47,13 @@ class Waiter {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
             return false;
         }
-        res!(val);
+        res!.finish(val);
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return true;
     }
     
-    private mutex: Object =  ConcurrencyHelpers.mutexCreate();
-    private promiseQueue: BlockingQueue<Resolver> = new LinkedBlockingQueue<Resolver>();
+    private mutex: Object = ConcurrencyHelpers.mutexCreate();
+    private promiseQueue: BlockingQueue<CompletableJob<string>> = new LinkedBlockingQueue<CompletableJob<string>>();
 }
 
 export class Atomics {
@@ -347,19 +344,21 @@ export class Atomics {
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
-    public static wait(typedArray: Int32Array | BigInt64Array, offset: int, value: bigint): string {
-        return await Atomics.waitAsync(typedArray, offset, value)
-    }
-    
-    public async static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: bigint): Promise<string> {
-        let buffer = typedArray.buffer
-        if (typedArray instanceof Int32Array) {
-            return Atomics.wait(buffer, offset, value.getLong(), (b: ArrayBuffer, offset: int) => { return b.atomicLoadI32(offset) as long; })
-        } else {
-            return Atomics.wait(buffer, offset, value.getLong(), (b: ArrayBuffer, offset: int) => { return buffer.atomicLoadI64(offset); })
-        } 
+    public static wait(typedArray: Int32Array, index: number, value: number): string {
+        return Atomics.waitImpl(typedArray, index, value as long);
     }
 
+    public static wait(typedArray: Int32Array, index: number, value: number, timeout: number): string {
+        return Atomics.waitImpl(typedArray, index, value as long, timeout);
+    }
+
+    public static wait(typedArray: BigInt64Array, index: number, value: bigint): string {
+        return Atomics.waitImpl(typedArray, index, value.getLong());
+    }
+
+    public static wait(typedArray: BigInt64Array, index: number, value: bigint, timeout: number): string {
+        return Atomics.waitImpl(typedArray, index, value.getLong(), timeout);
+    }
 
     /**
      * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify
@@ -367,57 +366,71 @@ export class Atomics {
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
-    public static wait(typedArray: Int32Array | BigInt64Array, offset: int, value: bigint, timeout: long): string {
-        return await Atomics.waitAsync(typedArray, offset, value, timeout);
+    public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint): Promise<string> {
+        return Atomics.asyncWaitImpl(typedArray, index, value.getLong()) as Promise<string>;
     }
-    
-    public async static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: bigint, timeout: long): Promise<string> {
-        let buffer = typedArray.buffer
-        if (typedArray instanceof Int32Array) {
-            return Atomics.wait(buffer, offset, value.getLong(), (b: ArrayBuffer, offset: int) => { return b.atomicLoadI32(offset) as long; }, timeout)
-        } else {
-            return Atomics.wait(buffer, offset, value.getLong(), (b: ArrayBuffer, offset: int) => { return buffer.atomicLoadI64(offset); }, timeout)
-        } 
+
+    public async static waitAsync(typedArray: Int32Array | BigInt64Array, index: number, value: bigint, timeout: number): Promise<string> {
+        return Atomics.asyncWaitImpl(typedArray, index, value.getLong(), timeout) as Promise<string>;
     }
 
     /**
      * Notifies (wakes up) threads that are suspended by the Atomics.wait() calls at the given index.
      * (index = typedArray.byteOffset + offset * sizeof(arrayElement))
      */
-    public static notify(typedArray: Int32Array | BigInt64Array, offset: int): int {
-        let buffer = typedArray.buffer
-        if (typedArray instanceof Int32Array) {
-            return Atomics.notify(buffer, offset)
-        } else {
-            return Atomics.notify(buffer, offset)
-        }
+    public static notify(typedArray: Int32Array | BigInt64Array, index: number): number {
+        return Atomics.notifyImpl(typedArray, index)
     }
 
     /**
      * Operates exactly like Atomics.notify(Int32Array | BigInt64Array, int) but specifies the maximum number of threads to notify using 'count'.
      */
-    public notify(typedArray: Int32Array | BigInt64Array, offset: int, count: int): int {
+    public static notify(typedArray: Int32Array | BigInt64Array, index: number, count: number): number {
+        return Atomics.notifyImpl(typedArray, index, count)
+    }
+
+    public static waitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): string {
+        // Getting correct waiter
         let buffer = typedArray.buffer
         if (typedArray instanceof Int32Array) {
-            return Atomics.notify(buffer, offset, count)
+            let offset = Atomics.index2byteOffset(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let waiter = Atomics.getWaiter(buffer, offset);
+            return waiter!.wait(value, () => { return buffer.atomicLoadI32(index as int) as long; }, timeout)
         } else {
-            return Atomics.notify(buffer, offset, count)
+            let offset = Atomics.index2byteOffset(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let waiter = Atomics.getWaiter(buffer, offset);
+            return waiter!.wait(value, () => { return buffer.atomicLoadI64(index as int); }, timeout)
         }
     }
     
-    private static globalWaitingTable: ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>> = new ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>>();
-    private static globalWaitingTableMutex = ConcurrencyHelpers.mutexCreate();
-
-    private static wait(buffer: ArrayBuffer, byteOffset: int, waitValue: long, currentValueGetter: (b: ArrayBuffer, offset: int) => long, timeout?: long): Promise<string> {
-        // Getting correct waiter
-        let waiter = Atomics.getWaiter(buffer, byteOffset);
-        // Check condition to wait
-        let value = currentValueGetter(buffer, byteOffset);
-        return waiter!.wait(value, waitValue, timeout);
+    private static asyncWaitImpl(typedArray: Int32Array | BigInt64Array, index: number, value: long, timeout?: number): Promise<string> {
+        let resolver: (((v: String) => void) | undefined) = undefined;
+        let rejecter: (((error: Error) => void) | undefined) = undefined;
+        let p = new Promise<String>((res, rej) => {
+            resolver = res
+            rejecter = rej;
+        })
+        let cb = () => {
+            try {
+                let v = Atomics.waitImpl(typedArray, index, value, number)
+                resolver!(v)
+            } catch (e: Error) {
+                rejecter!(e)
+            }
+        }
+        launch<void, () => void>(cb)
+        return p;
     }
 
-    private static notify(buffer: ArrayBuffer, byteOffset: int, count: int = 1): int {
-        let waiter = Atomics.getWaiter(buffer, byteOffset);
+    private static notifyImpl(typedArray: Int32Array | BigInt64Array, index: number, count: number = 1): int {
+        let buffer = typedArray.buffer
+        let offset = 0;
+        if (typedArray instanceof Int32Array) {
+            offset = Atomics.index2byteOffset(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+        } else {
+            offset = Atomics.index2byteOffset(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+        }
+        let waiter = Atomics.getWaiter(buffer, offset);
         let notified = 0;
         for(let i = 0; i < count; i++) {
             if (waiter!.notify(Waiter.okStatus)) {
@@ -426,6 +439,9 @@ export class Atomics {
         }
         return notified;
     }
+
+    private static globalWaitingTable: ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>> = new ConcurrentHashMap<ArrayBuffer, ConcurrentHashMap<int, Waiter>>();
+    private static globalWaitingTableMutex = ConcurrencyHelpers.mutexCreate();
 
     private static getWaiter(buffer: ArrayBuffer, byteOffset: int): Waiter {
         let waiterTable = Atomics.globalWaitingTable.get(buffer);
@@ -453,10 +469,11 @@ export class Atomics {
     }
 
     // https://tc39.es/ecma262/multipage/structured-data.html#sec-validateatomicaccess
-    private static validateAtomicAccess(startByteOffset: int, elementSize: int, length: int, index: int): int {
+    private static index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: number): int {
         if (index < 0 || index >= length) {
             throw new RangeError("Index out of bounds")
         }
-        return startByteOffset + (index * elementSize)
+        return startByteOffset + (index as int * elementSize)
     }
+
 }

@@ -41,7 +41,7 @@ function main() {
     let cur: byte = Atomics.load(bytearr_i8, 0) as byte
     while (cur != N) {
         L.log("waiting, finished tasks: " + cur)
-        Atomics.wait(arr_1, 0, new BigInt(cur))
+        Atomics.wait(arr_1, 0, cur)
         cur = Atomics.load(bytearr_i8, 0) as byte
     }
 
