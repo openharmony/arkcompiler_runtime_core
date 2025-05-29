@@ -86,12 +86,13 @@ cases:
           assertEQ(a.length, 4)
 
     - decl: |-
-          function bar(i: int): char {
-              return (i + 1) as char
+          function bar(i: Int): Char {
+              let v: Int = i + 1 
+              return v.toChar()
           }
       use: |-
           // casting context, array of chars
-          let a = [bar(42), bar(43), bar(44), ] as char[]
+          let a = [bar(42), bar(43), bar(44), ] as Char[]
           assertEQ(a[0], c'+')
           assertEQ(a[1], c',')
           assertEQ(a[2], c'-')

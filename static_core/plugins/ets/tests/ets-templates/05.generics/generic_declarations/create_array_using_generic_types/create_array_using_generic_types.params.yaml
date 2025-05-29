@@ -64,9 +64,9 @@ cases_two:
     values: "1, 2, 3"
     expected_values: [1, 2, 3]
 
-  - type: float
+  - type: Float
     desc: Instantiated array T[] with float type.
-    values: "1.1, 2.1, 3.9"
+    values: "1.1f, 2.1f, 3.9f"
     expected_values: [1.1f, 2.1f, 3.9f]
 
   - type: double
