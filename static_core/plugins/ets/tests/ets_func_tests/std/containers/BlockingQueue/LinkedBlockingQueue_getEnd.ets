@@ -51,7 +51,7 @@ function getEndMoreTypeTest() {
 function getEndEmptyTest() {
     let testBQ = new containers.LinkedBlockingQueue<int>(10)
     arktest.assertTrue(testBQ.isEmpty())
-    arktest.assertEQ(testBQ.getEnd(), null)
+    arktest.assertEQ(testBQ.getEnd(), undefined)
 }
 
 function getEndOneTest() {

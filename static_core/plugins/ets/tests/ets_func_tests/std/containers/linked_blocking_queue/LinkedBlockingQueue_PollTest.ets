@@ -36,7 +36,7 @@ function main(): int {
             arktest.assertEQ(queueInt.poll(), i);
         }
         arktest.assertEQ(queueInt.size, 0);
-        arktest.assertEQ(queueInt.poll(), null);
+        arktest.assertEQ(queueInt.poll(), undefined);
     });
     LinkedBlockingQueueTestsuite.addTest("PollStressTest004", () =>
     {

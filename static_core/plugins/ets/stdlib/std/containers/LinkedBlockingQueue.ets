@@ -16,14 +16,15 @@
 package std.containers;
 
 export namespace containers {
-
+    
     /**
     * A node in the linked list.
     */
     final class ListNode<T> {
-        element: T;
-        prev: ListNode<T> | undefined = undefined;
+        element: T | undefined = undefined;
         next: ListNode<T> | undefined = undefined;
+
+        constructor() { }
 
         constructor(element: T) {
             this.element = element;
@@ -39,12 +40,12 @@ export namespace containers {
         */
         constructor() {
             this.actualCapacity = Int.MAX_VALUE;
+            this.tail = this.head = new ListNode<T>();
             this.pushMutex = ConcurrencyHelpers.mutexCreate();
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
             this.sizeMutex = ConcurrencyHelpers.mutexCreate();
-            this.mutex = ConcurrencyHelpers.mutexCreate();
         }
 
         /**
@@ -57,12 +58,12 @@ export namespace containers {
                 throw new RangeError("Invalid capacity for LinkedBlockingQueue's constructor.");
             }
             this.actualCapacity = capacity;
+            this.tail = this.head = new ListNode<T>();
             this.pushMutex = ConcurrencyHelpers.mutexCreate();
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
             this.sizeMutex = ConcurrencyHelpers.mutexCreate();
-            this.mutex = ConcurrencyHelpers.mutexCreate();
         }
 
         /**
@@ -72,12 +73,12 @@ export namespace containers {
         */
         constructor(iterable: Iterable<T>) {
             this.actualCapacity = Int.MAX_VALUE;
+            this.tail = this.head = new ListNode<T>();
             this.pushMutex = ConcurrencyHelpers.mutexCreate();
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
             this.sizeMutex = ConcurrencyHelpers.mutexCreate();
-            this.mutex = ConcurrencyHelpers.mutexCreate();
             if (iterable) {
                 const entriesIter = iterable.$_iterator();
                 for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
@@ -95,17 +96,17 @@ export namespace containers {
         * @param { int } capacity the capacity of LinkedBlockingQueue
         * @param { Iterable<T> } iterable the Iterable of LinkedBlockingQueue
         */
-        constructor(capacity: int , iterable: Iterable<T>) {
+        constructor(capacity: int, iterable: Iterable<T>) {
             if (capacity <= 0) {
                 throw new RangeError("Invalid capacity for LinkedBlockingQueue's constructor.");
             }
             this.actualCapacity = capacity;
+            this.tail = this.head = new ListNode<T>();
             this.pushMutex = ConcurrencyHelpers.mutexCreate();
             this.pushCondVar = ConcurrencyHelpers.condVarCreate();
             this.popMutex = ConcurrencyHelpers.mutexCreate();
             this.popCondVar = ConcurrencyHelpers.condVarCreate();
             this.sizeMutex = ConcurrencyHelpers.mutexCreate();
-            this.mutex = ConcurrencyHelpers.mutexCreate();
             const entriesIter = (iterable as Iterable<T>).$_iterator();
             for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
                 const val = iterRes.value;
@@ -121,41 +122,46 @@ export namespace containers {
         * @param { T } element the element pushed to the BlockingQueue
         */
         override push(element: T): void {
+            let newNode = new ListNode<T>(element);
             ConcurrencyHelpers.mutexLock(this.pushMutex);
             this.waitFullQueue();
-            this.pushListNode(element);
-            if(this.atomicsGetSize() < this.actualCapacity) {
+            this.pushListNode(newNode);
+            let c = this.fetchAndAddSize();
+            if (c + 1 < this.actualCapacity) {
                 ConcurrencyHelpers.condVarNotifyOne(this.pushCondVar, this.pushMutex);
             }
             ConcurrencyHelpers.mutexUnlock(this.pushMutex);
-            this.resumePopQueue();
+            if (c == 0)
+                this.resumePopQueue();
         }
 
         /**
-        * pop() is remove operation and returns T
-        * If the BlockingQueue is empty, blocking.
+        * Removes and returns the first element in the BlockingQueue. If the queue is empty, blocking.
         *
-        * @returns { T } The first element.
+        * @returns { T } the fisrt element poped in the queue.
         */
         override pop(): T {
             ConcurrencyHelpers.mutexLock(this.popMutex);
             this.waitEmptyQueue();
+            let c = -1;
             try {
-                const val = this.head;
-                let first = val!.element;
+                let firstNode = this.head.next;
+                let first = firstNode!.element;
                 this.popListNode();
-                if(this.atomicsGetSize() > 0) {
+                c = this.fetchAndSubSize();
+                if (c - 1 > 0) {
                     ConcurrencyHelpers.condVarNotifyOne(this.popCondVar, this.popMutex);
                 }
-                return first;
+                return first as T;
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.popMutex);
-                this.resumePushQueue();
+                if (c == this.capacity)
+                    this.resumePushQueue();
             }
         }
 
         /**
-        * The insert operation. Return true upon success and false if no space is currently available, no blocking.
+        * The insert operation. Returns true upon success and false if no space is currently available, no blocking.
         *
         * @param { T } element the element inserted to the BlockingQueue
         *
@@ -165,65 +171,68 @@ export namespace containers {
             if (this.atomicsGetSize() == this.actualCapacity) {
                 return false;
             }
+            let newNode = new ListNode<T>(element);
+            let c: int = -1;
             ConcurrencyHelpers.mutexLock(this.pushMutex);
             try {
                 if (this.atomicsGetSize() < this.actualCapacity) {
-                    this.pushListNode(element);
-                    if(this.atomicsGetSize() < this.actualCapacity) {
+                    this.pushListNode(newNode);
+                    c = this.fetchAndAddSize();
+                    if (c + 1 < this.actualCapacity) {
                         ConcurrencyHelpers.condVarNotifyOne(this.pushCondVar, this.pushMutex);
                     }
                     return true;
-                }else {
+                } else {
                     return false;
                 }
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.pushMutex);
-                this.resumePopQueue();
+                if (c == 0)
+                    this.resumePopQueue();
             }
         }
 
         /**
         * The poll operation. Pop one element and return it if the queue is not empty.
-        * Return null when the queue is empty. No blocking.
+        * Returns undefined when the queue is empty. No blocking.
         *
-        * @returns { T | null } Return the deleted element or null.
+        * @returns { T | undefined } the deleted element or undefined when the queue is empty.
         */
-        override poll(): T | null {
+        override poll(): T | undefined {
             if (this.atomicsGetSize() == 0) {
-                return null;
+                return undefined;
             }
+            let c: int = -1;
             ConcurrencyHelpers.mutexLock(this.popMutex);
             try {
                 if (this.atomicsGetSize() > 0) {
-                    const val = this.head;
-                    let first = val!.element;
+                    let firstNode = this.head.next;
+                    let first = firstNode!.element;
                     this.popListNode();
-                    if(this.atomicsGetSize() > 0) {
+                    c = this.fetchAndSubSize();
+                    if (c - 1 > 0) {
                         ConcurrencyHelpers.condVarNotifyOne(this.popCondVar, this.popMutex);
                     }
-                    return first;
-                }else {
-                    return null;
+                    return first as T;
+                } else {
+                    return undefined;
                 }
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.popMutex);
-                this.resumePushQueue();
+                if (c == this.capacity)
+                    this.resumePushQueue();
             }
         }
 
         /**
         * Returns the first element in a BlockingQueue.
         *
-        * @returns { T | null } return the first element or null.
+        * @returns { T | undefined } the first element or undefined when the queue is empty.
         */
-        override getFirst(): T | null {
+        override getFirst(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.popMutex);
             try {
-                if (this.atomicsGetSize() == 0) {
-                    return null;
-                } else {
-                    return this.head!.element;
-                }
+                return this.head.next!.element;
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.popMutex);
             }
@@ -232,16 +241,15 @@ export namespace containers {
         /**
         * Returns the end element in a LinkedBlockingQueue.
         *
-        * @returns { T | null } return the end element or null.
+        * @returns { T | undefined } the end element or undefined when the queue is empty.
         */
-        public getEnd(): T | null {
+        public getEnd(): T | undefined {
             ConcurrencyHelpers.mutexLock(this.pushMutex);
             try {
-                if (this.atomicsGetSize() == 0) {
-                    return null;
-                } else {
-                    return this.tail!.element;
-                }
+                ConcurrencyHelpers.mutexLock(this.popMutex);
+                let element = this.tail.element;
+                ConcurrencyHelpers.mutexUnlock(this.popMutex);
+                return element;
             } finally {
                 ConcurrencyHelpers.mutexUnlock(this.pushMutex);
             }
@@ -259,7 +267,7 @@ export namespace containers {
         /**
         * Returns the size of a BlockingQueue.
         *
-        * @returns { int } The size of the BlockingQueue.
+        * @returns { int } the size of the BlockingQueue.
         */
         override get size(): int {
             return this.atomicsGetSize();
@@ -268,7 +276,7 @@ export namespace containers {
         /**
         * Returns the capacity of a BlockingQueue.
         *
-        * @returns { int } The capacity of the BlockingQueue.
+        * @returns { int } the capacity of the BlockingQueue.
         */
         override get capacity(): int {
             return this.actualCapacity;
@@ -277,10 +285,10 @@ export namespace containers {
         /**
         * Returns the number of additional elements that this queue can ideally accept without blocking.
         *
-        * @returns { int } The capacity of the BlockingQueue.
+        * @returns { int } the remainingcapacity of the BlockingQueue.
         */
         override remainingCapacity(): int {
-            return (this.actualCapacity - this.atomicsGetSize()) as int;
+            return this.actualCapacity - this.atomicsGetSize();
         }
 
         private waitFullQueue() {
@@ -296,31 +304,31 @@ export namespace containers {
         }
 
         private resumePopQueue() {
-            if (this.atomicsGetSize() == 1) {
-                ConcurrencyHelpers.mutexLock(this.popMutex);
-                ConcurrencyHelpers.condVarNotifyOne(this.popCondVar, this.popMutex);
-                ConcurrencyHelpers.mutexUnlock(this.popMutex);
-            }
+            ConcurrencyHelpers.mutexLock(this.popMutex);
+            ConcurrencyHelpers.condVarNotifyOne(this.popCondVar, this.popMutex);
+            ConcurrencyHelpers.mutexUnlock(this.popMutex);
         }
 
         private resumePushQueue() {
-            if (this.atomicsGetSize() == this.actualCapacity - 1) {
-                ConcurrencyHelpers.mutexLock(this.pushMutex);
-                ConcurrencyHelpers.condVarNotifyOne(this.pushCondVar, this.pushMutex);
-                ConcurrencyHelpers.mutexUnlock(this.pushMutex);
-            }
+            ConcurrencyHelpers.mutexLock(this.pushMutex);
+            ConcurrencyHelpers.condVarNotifyOne(this.pushCondVar, this.pushMutex);
+            ConcurrencyHelpers.mutexUnlock(this.pushMutex);
         }
 
-        private atomicsAddSize() {
+        private fetchAndAddSize(): int {
             ConcurrencyHelpers.mutexLock(this.sizeMutex);
+            let res = this.actualSize;
             this.actualSize++;
             ConcurrencyHelpers.mutexUnlock(this.sizeMutex);
+            return res;
         }
 
-        private atomicsSubSize() {
+        private fetchAndSubSize(): int {
             ConcurrencyHelpers.mutexLock(this.sizeMutex);
+            let res = this.actualSize;
             this.actualSize--;
             ConcurrencyHelpers.mutexUnlock(this.sizeMutex);
+            return res;
         }
 
         private atomicsGetSize(): int {
@@ -332,61 +340,29 @@ export namespace containers {
             }
         }
 
-        private pushListNode(element: T): void {
-            let newNode: ListNode<T> = new ListNode<T>(element);
-            if (this.atomicsGetSize() < 3) {
-                ConcurrencyHelpers.mutexLock(this.mutex);
-                if (this.head === undefined) {
-                    this.head = this.tail = newNode;
-                    ConcurrencyHelpers.mutexUnlock(this.mutex);
-                    this.atomicsAddSize();
-                    return;
-                }
-                this.tail!.next = newNode;
-                newNode.prev = this.tail;
-                this.tail = newNode;
-                ConcurrencyHelpers.mutexUnlock(this.mutex);
-            } else {
-                this.tail!.next = newNode;
-                newNode.prev = this.tail;
-                this.tail = newNode;
-            }
-
-            this.atomicsAddSize();
+        private pushListNode(newNode: ListNode<T>): void {
+            this.tail.next = newNode;
+            this.tail = newNode;
             return;
         }
 
         private popListNode(): void {
-            if (this.head !== undefined) {
-                if (this.atomicsGetSize() < 3) {
-                    ConcurrencyHelpers.mutexLock(this.mutex);
-                    this.head = this.head!.next;
-                    if (this.head !== undefined) {
-                        this.head!.prev = undefined;
-                    }
-                    if (this.head === undefined) {
-                        this.tail = undefined;
-                    }
-                    ConcurrencyHelpers.mutexUnlock(this.mutex);
-                } else {
-                    this.head = this.head!.next;
-                    this.head!.prev = undefined;
-                }
-
-                this.atomicsSubSize();
-            }
+            let firstNode = this.head.next;
+            let h = this.head;
+            h.next = h;
+            this.head = firstNode!;
+            firstNode!.element = undefined;
             return;
         }
 
-        private mutex: Object;
         private pushMutex: Object;                          // push/add mutex
         private popMutex: Object;                           // pop/remove mutex
-        private pushCondVar: Object;                        // push/add CondVar
-        private popCondVar: Object;                         // pop/remove CondVar
-        private actualCapacity : int = 0;                   // the capacity of the LinkedBlockingQueue.
-        private actualSize : int = 0;                       // the size of the LinkedBlockingQueue.
+        private pushCondVar: Object;                        // push/add CondVar, notify when NotFull
+        private popCondVar: Object;                         // pop/remove CondVar, notify when NotEmpty
+        private actualCapacity: int = 0;                    // the capacity of the LinkedBlockingQueue.
+        private actualSize: int = 0;                        // the size of the LinkedBlockingQueue.
         private sizeMutex: Object;                          // size mutex
-        private head: ListNode<T> | undefined = undefined;
-        private tail: ListNode<T> | undefined = undefined;
+        private head: ListNode<T>;
+        private tail: ListNode<T>;
     }
 }

@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-import { Job } from "std/core"
-
 const elementsNum: int = 10;
 const stressNum: int = 100;
 
@@ -39,7 +36,7 @@ function main(): int {
             arktest.assertEQ(queueInt.poll(), i);
         }
         arktest.assertEQ(queueInt.size, 0);
-        arktest.assertEQ(queueInt.poll(), null);
+        arktest.assertEQ(queueInt.poll(), undefined);
     });
     ArrayBlockingQueueTestsuite.addTest("PollStressTest004", () =>
     {

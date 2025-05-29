@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-
 const elementsNum: int = 100;
-let b1: int | null = 0;
-let f1: int | null = 0;
 
 let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 let queueIntPopN: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
@@ -90,9 +86,9 @@ function queueIntAdddata() {
 }
 
 function queueIntBackB1data() {
-    b1 = queueInt.getEnd();
+    queueInt.getEnd();
 }
 
 function queueIntFrontF1data() {
-    f1 = queueInt.getFirst();
+    queueInt.getFirst();
 }
