@@ -205,6 +205,11 @@ bool EtsClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *com
 
 bool EtsClassLinkerExtension::InitializeClass(Class *klass)
 {
+    return InitializeClass(klass, GetErrorHandler());
+}
+
+bool EtsClassLinkerExtension::InitializeClass(Class *klass, [[maybe_unused]] ClassLinkerErrorHandler *handler)
+{
     ASSERT(IsInitialized());
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
 
@@ -212,7 +217,7 @@ bool EtsClassLinkerExtension::InitializeClass(Class *klass)
 
     EtsClass::FromRuntimeClass(klass)->Initialize(
         klass->GetBase() != nullptr ? EtsClass::FromRuntimeClass(klass->GetBase()) : nullptr,
-        klass->GetAccessFlags() & ETS_ACCESS_FLAGS_MASK, klass->IsPrimitive());
+        klass->GetAccessFlags() & ETS_ACCESS_FLAGS_MASK, klass->IsPrimitive(), handler);
 
     return true;
 }

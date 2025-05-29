@@ -84,6 +84,12 @@ static bool CompareBoxedPrimitive(EtsObject *obj1, EtsObject *obj2)
            EtsBoxPrimitive<BoxedType>::FromCoreType(obj2)->GetValue();
 }
 
+static bool EqualityResursionAllowed(EtsObject *obj)
+{
+    return !(obj->GetClass()->IsEtsEnum() || obj->GetClass()->IsFunctionReference());
+}
+
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
 {
     auto cls1 = obj1->GetClass();
@@ -116,10 +122,31 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
         }
         auto *value1 = EtsBaseEnum::FromEtsObject(obj1)->GetValue();
         auto *value2 = EtsBaseEnum::FromEtsObject(obj2)->GetValue();
-        if (UNLIKELY(value1->GetClass()->IsEtsEnum() || value2->GetClass()->IsEtsEnum())) {
+        if (!EqualityResursionAllowed(value1) || !EqualityResursionAllowed(value2)) {
             return false;
         }
         return EtsReferenceEquals(coro, value1, value2);
+    }
+
+    if (cls1->IsFunctionReference()) {
+        if (UNLIKELY(!cls2->IsFunctionReference())) {
+            return false;
+        }
+        if (cls1->GetTypeMetaData() != cls2->GetTypeMetaData()) {
+            return false;
+        }
+        // function or static method
+        if (obj1->GetClass()->GetFieldsNumber() == 0) {
+            return true;
+        }
+        // For instance method, always only have one field as guaranteed by class initialization
+        ASSERT((obj1->GetClass()->GetFieldsNumber() == 1) && (obj2->GetClass()->GetFieldsNumber() == 1));
+        auto instance1 = obj1->GetFieldObject(obj1->GetClass()->GetFieldByIndex(0));
+        auto instance2 = obj2->GetFieldObject(obj2->GetClass()->GetFieldByIndex(0));
+        if (!EqualityResursionAllowed(instance1) || !EqualityResursionAllowed(instance2)) {
+            return false;
+        }
+        return EtsReferenceEquals(coro, instance1, instance2);
     }
     UNREACHABLE();
 }
@@ -145,6 +172,10 @@ EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
             return EtsString::CreateFromMUtf8("function");
         }
         return EtsString::CreateFromMUtf8("object");
+    }
+
+    if (cls->IsFunctionReference()) {
+        return EtsString::CreateFromMUtf8("function");
     }
 
     if (cls->IsNullValue()) {
@@ -184,6 +215,9 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
     EtsClass *cls = obj->GetClass();
 
     if (!cls->IsValueTyped()) {
+        return true;
+    }
+    if (cls->IsFunctionReference()) {
         return true;
     }
     if (obj->IsStringClass()) {

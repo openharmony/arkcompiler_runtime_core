@@ -22,7 +22,7 @@ desc: Uniqueness of functional objects - compare a function with itself
 function foo{{c}}
 
 function main() {
-    assertNE(foo, foo)
+    assertEQ(foo, foo)
 }
 
 {% endfor %}
