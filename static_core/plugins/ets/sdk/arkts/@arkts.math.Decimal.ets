@@ -22,6 +22,7 @@ export type DecimalValue = Decimal | number | string;
 const RANGE_ERROR_CODE = 10200001;
 const TYPE_ERROR_CODE = 401;
 const PRECISION_LIMIT_EXCEEDED_ERROR_CODE = 10200060;
+const CRYPTO_UNAVAILABLE_ERROR_CODE = 10200061;
 
 const EXP_LIMIT: number = 9e15;
 const MAX_DIGITS: number = 1e9;
@@ -40,6 +41,7 @@ const LN10 = ('2.302585092994045684017991454684364207601101488628772976033327900
 
 const DEFAULTS_PRECISION = 20;
 const DEFAULTS_ROUNDING = 4;
+const DEFAULTS_MODULO = 1;
 const DEFAULTS_TOEXPNEG = -7;
 const DEFAULTS_TOEXPPOS = 21;
 
@@ -81,6 +83,8 @@ export class Decimal {
     public static rounding: number = DEFAULTS_ROUNDING;
     public static toExpNeg: number = DEFAULTS_TOEXPNEG;
     public static toExpPos: number = DEFAULTS_TOEXPPOS;
+    public static modulo: number = DEFAULTS_MODULO;
+    public static crypto: boolean = false;
 
     get d(): Array<number> | null {
         return this.digits;
@@ -113,6 +117,19 @@ export class Decimal {
     }
 
     /**
+     * Return a new Decimal whose value is the absolute value of this Decimal.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public abs(): Decimal {
+        let x = new Decimal(this);
+        if (x.sign < 0) {
+            x.sign = 1;
+        }
+        return Utils.finaliseExternal(x);
+    }
+
+    /**
      * Return true if the value of this Decimal is a finite number, otherwise return false.
      *
      * @returns { boolean } the boolean type
@@ -122,12 +139,59 @@ export class Decimal {
     }
 
     /**
+     * Return true if the value of this Decimal is an integer, otherwise return false.
+     *
+     * @returns { boolean } the boolean type
+     */
+    public isInteger(): boolean {
+        return !!this.digits && Math.floor(this.exponent / LOG_BASE) > this.digits!.length - 2;
+    }
+
+    /**
+     * Return true if the value of this Decimal is NaN, otherwise return false.
+     *
+     * @returns { boolean } the boolean type
+     */
+    public isNaN(): boolean {
+        return !this.sign;
+    }
+
+    /**
+     * Return true if the value of this Decimal is negative, otherwise return false.
+     *
+     * @returns { boolean } the boolean type
+     */
+    public isNegative(): boolean {
+        return this.sign < 0;
+    }
+
+    /**
+     * Return true if the value of this Decimal is positive, otherwise return false.
+     *
+     * @returns { boolean } the boolean type
+     */
+    public isPositive(): boolean {
+        return this.sign > 0;
+    }
+
+    /**
      * Return true if the value of this Decimal is 0 or -0, otherwise return false.
      *
      * @returns { boolean } the boolean type
      */
     public isZero (): boolean {
         return !!this.digits && this.digits![0] === 0;
+    }
+
+    /**
+     * Return a new Decimal whose value is the value of this Decimal negated, i.e. as if multiplied by -1.
+     *
+     * @returns { Decimal } the Decimal type
+     */
+    public negate(): Decimal {
+        let x = new Decimal(this);
+        x.sign = -x.sign;
+        return Utils.finaliseExternal(x);
     }
 
     /**
@@ -183,7 +247,7 @@ export class Decimal {
      */
     public toString(): string {
         let str = this.finiteToString(this.exponent <= Decimal.toExpNeg || this.exponent >= Decimal.toExpPos);
-        return this.isNeg() && !this.isZero() ? '-' + str : str;
+        return this.isNegative() && !this.isZero() ? '-' + str : str;
     }
 
     /**
@@ -194,7 +258,17 @@ export class Decimal {
      */
     public valueOf(): string {
         let str = this.finiteToString(this.exponent <= Decimal.toExpNeg || this.exponent >= Decimal.toExpPos);
-        return this.isNeg() ? '-' + str : str;
+        return this.isNegative() ? '-' + str : str;
+    }
+
+    /**
+     * Return a new Decimal whose value is the absolute value of `n`.
+     *
+     * @param { DecimalValue } n {number | string | Decimal}
+     * @returns { Decimal } the Decimal type
+     */
+    static abs(n: DecimalValue): Decimal {
+        return new Decimal(n).abs();
     }
 
     /**
@@ -224,6 +298,45 @@ export class Decimal {
     }
 
     /**
+     * Configures the 'global' settings for this particular Decimal constructor.
+     *
+     * @param { DecimalConfig } config object with one or more of the following properties,
+     *   precision  {number}
+     *   rounding   {number}
+     *   toExpNeg   {number}
+     *   toExpPos   {number}
+     *   maxE       {number}
+     *   minE       {number}
+     *   modulo     {number}
+     *   crypto     {boolean|number}
+     *   defaults   {true}
+     * @returns { void }
+     * @throws { BusinessError } 10200001 - The value of `DecimalConfig.properties` is out of range.
+     * @throws { BusinessError } 10200061 - Crypto unavailable
+     */
+    static set(config: DecimalConfig): void {
+        let useDefaults = (config.defaults != undefined && config.defaults === true);
+        Decimal.precision = Utils.checkRange(config.precision, 1, MAX_DIGITS, useDefaults, DEFAULTS_PRECISION);
+        Decimal.rounding = Utils.checkRange(config.rounding, 0, 8, useDefaults, DEFAULTS_ROUNDING);
+        Decimal.toExpNeg = Utils.checkRange(config.toExpNeg, -EXP_LIMIT, 0, useDefaults, DEFAULTS_TOEXPNEG);
+        Decimal.toExpPos = Utils.checkRange(config.toExpPos, 0, EXP_LIMIT, useDefaults, DEFAULTS_TOEXPPOS);
+        Decimal.maxE = Utils.checkRange(config.maxE, 0, EXP_LIMIT, useDefaults, EXP_LIMIT);
+        Decimal.minE = Utils.checkRange(config.minE, -EXP_LIMIT, 0, useDefaults, -EXP_LIMIT);
+        Decimal.modulo = Utils.checkRange(config.modulo, 0, 9, useDefaults, DEFAULTS_MODULO);
+
+        if (useDefaults) {
+            Decimal.crypto = false;
+        }
+        if (config.crypto != undefined) {
+            if (config.crypto!) {
+                throw Utils.createBusinessError(CRYPTO_UNAVAILABLE_ERROR_CODE, `Crypto unavailable`);
+            } else {
+                Decimal.crypto = false;
+            }
+        }
+    }
+
+    /**
      * Return a new Decimal whose value is the square root of this Decimal, rounded to `precision`
      * significant digits using rounding mode `rounding`.
      *
@@ -240,7 +353,7 @@ export class Decimal {
 
         external = false;
         s = Math.sqrt(+(x.toNumber()));
-        let n: string;
+        let n: string = '';
         let e: number = x.e;
         let r: Decimal;
         if (s == 0 || s == Infinity) {
@@ -574,52 +687,53 @@ export class Decimal {
             return external ? Utils.finalise(y, pr, rm) : y;
         }
 
-        let e = Math.floor(y.e / LOG_BASE);
-        let xe = Math.floor(x.e / LOG_BASE);
+        // Calculate base 1e7 exponents.
+        let yExp = Math.floor(y.e / LOG_BASE);
+        let xExp = Math.floor(x.e / LOG_BASE);
         xd = xd!.slice();
-        let k = xe - e;
+        let expDiff = xExp - yExp;
         let len: number;
         let i: number;
-        let xLTy: boolean = false;
-        if (k) {
-            let xLTy = k < 0;
+        let xLessThanY: boolean = false;
+        if (expDiff) {
+            xLessThanY = expDiff < 0;
             let d: Array<number>;
-            if (xLTy) {
+            if (xLessThanY) {
                 d = xd!;
-                k = -k;
+                expDiff = -expDiff;
                 len = yd!.length;
             } else {
                 d = yd!;
-                e = xe;
+                yExp = xExp;
                 len = xd!.length;
             }
             let i = Math.max(Math.ceil(pr / LOG_BASE), len) + 2;
-            if (k > i) {
-                k = i;
+            if (expDiff > i) {
+                expDiff = i;
                 d.length = 1;
             }
             d.reverse();
-            for (i = k; i--;) {
+            for (i = expDiff; i--;) {
                 d.push(0);
             }
             d.reverse();
         } else {
             let i = xd!.length;
             len = yd!.length;
-            xLTy = i < len;
-            if (xLTy) {
+            xLessThanY = i < len;
+            if (xLessThanY) {
                 len = i;
             }
             for (i = 0; i < len; i++) {
                 if (xd![i] != yd![i]) {
-                    xLTy = xd![i] < yd![i];
+                    xLessThanY = xd![i] < yd![i];
                     break;
                 }
             }
-            k = 0;
+            expDiff = 0;
         }
 
-        if (xLTy) {
+        if (xLessThanY) {
             let d = xd;
             xd = yd;
             yd = d;
@@ -627,10 +741,11 @@ export class Decimal {
         }
         len = xd!.length;
         for (i = yd!.length - len; i > 0; --i) {
-            xd![len++] = 0;
+            xd!.push(0);
+            len++
         }
         let j: number;
-        for (i = yd!.length; i > k;) {
+        for (i = yd!.length; i > expDiff;) {
             if (xd![--i] < yd![i]) {
                 for (j = i; j && xd![--j] === 0;) {
                     xd![j] = BASE - 1;
@@ -646,18 +761,18 @@ export class Decimal {
         }
 
         for (; xd![0] === 0; xd!.shift()) {
-            --e;
+            --yExp;
         }
 
         if (!xd![0]) {
             return new Decimal(rm === 3 ? -0 : 0);
         }
         y.digits = xd;
-        y.exponent = this.getBase10Exponent(xd!, e);
+        y.exponent = this.getBase10Exponent(xd!, yExp);
         return external ? Utils.finalise(y, pr, rm) : y;
     }
 
-     /**
+    /**
      * Return a new Decimal whose value is this Decimal times `n`, rounded to `precision` significant
      * digits using rounding mode `rounding`.
      *
@@ -1044,10 +1159,6 @@ export class Decimal {
         return String(this.sign * this.sign / 0);
     }
 
-    private isNeg(): boolean {
-        return this.sign < 0;
-    }
-
     private naturalExponential(x: Decimal, sd?: number): Decimal {
         let rm = Decimal.rounding;
         let pr = Decimal.precision;
@@ -1374,6 +1485,22 @@ class Utils {
 
     public static toString(n: number): String {
         return new String(n);
+    }
+
+    public static checkRange(v: number | undefined, min: number, max: number, useDef: boolean, def: number): number {
+        if (v == undefined && useDef) {
+            return def;
+        }
+        if (v != undefined) {
+            if (Math.floor(v) === v && v >= min && v <= max) {
+                return v!;
+            } else {
+                throw Utils.createBusinessError(RANGE_ERROR_CODE,
+                    `The value of "${v!}" is out of range. It must be >= ${min} && <= ${max}. Received value is: ${v!}`
+                );
+            }
+        }
+        return def;
     }
 
     /**
