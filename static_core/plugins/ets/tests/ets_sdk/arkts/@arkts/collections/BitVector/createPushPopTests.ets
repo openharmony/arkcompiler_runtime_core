@@ -14,11 +14,15 @@
  */
 
 import { collections } from "@arkts.collections"
+import { BusinessError } from "@ohos.base";
+
+const TypeErrorCodeId: number = 401;
 
 function main() {
     const suite = new ArkTestsuite("BitVector API tests");
 
     suite.addTest("A constructor used to create a BitVector object.", BitVector_constructor_Func_001);
+    suite.addTest("Tests BitVector constructor with invalid non-integer length parameter.", BitVector_constructor_Func_002);
     suite.addTest("Appends the bit element to the end of this bit vector.", BitVector_push_Func_001);
     suite.addTest("Appends multiple bit elements to the end of this bit vector in a loop.", BitVector_push_Func_002);
     suite.addTest("Appends multiple bit elements to the end of this bit vector, starting with an initial length.", BitVector_push_Func_003);
@@ -40,6 +44,15 @@ function main() {
 function BitVector_constructor_Func_001() {
     let bitVector = new collections.BitVector(10);
     assertEQ(bitVector.length, 10, "BitVector length should be 10");
+}
+
+function BitVector_constructor_Func_002() {
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return e instanceof BusinessError &&
+            ((e as BusinessError).code === TypeErrorCodeId &&
+                (e as BusinessError).message === `The type of "length" must be integer. Received value is: 1.1`);
+    }
+    arktest.expectThrow(() => { let bitVector = new collections.BitVector(1.1); }, exceptionCheck);
 }
 
 /**

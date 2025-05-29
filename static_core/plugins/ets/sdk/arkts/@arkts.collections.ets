@@ -21,7 +21,7 @@ const TypeErrorCodeId: number = 401;
 
 export namespace collections {
     final class BitVectorIterator implements IterableIterator<number> {
-        private index: number = 0;
+        private index: int = 0;
         private parent: BitVector;
 
         constructor(parent: BitVector) {
@@ -52,9 +52,9 @@ export namespace collections {
         elementId: number;
         index: number;
 
-        constructor(elementIdAndIndex: [number, number]) {
-            this.elementId = elementIdAndIndex[0];
-            this.index = elementIdAndIndex[1];
+        constructor(elementId: number, index: number) {
+            this.elementId = elementId;
+            this.index = index
         }
     }
     /**
@@ -68,7 +68,7 @@ export namespace collections {
         static readonly BIT_SET_LENGTH = 32;    // ArkTS Specification, Release 1.1.0 <Integer Types and Operations>
 
         private buffer: Array<int>;
-        private _length: number = 0;
+        private _length: int = 0;
 
         /**
         * A constructor used to create a BitVector object.
@@ -76,10 +76,12 @@ export namespace collections {
         * @param { number } length - The length of BitVector object.
         */
         public constructor(length: number) {
+            this.integerCheck("length", length);
+
             if (length === 0) {
                 this.buffer = new Array<int>();
             } else {
-                this._length = length;
+                this._length = length as int;
                 this.buffer = Array.create<int>(this.getUsedCapacity(), 0);
             }
         }
@@ -99,7 +101,11 @@ export namespace collections {
          * @returns { boolean } The boolean type, returns true if the addition is successful, and returns false if it fails.
          */
         public push(element: number): boolean {
-            let index = new BitIndex(this.computeElementIdAndBitId(this._length));
+            if (this.length >= Int.MAX_VALUE) {
+                return false;
+            }
+
+            let index = this.computeElementIdAndBitId(this._length);
             this.checkAndIncrement(index.elementId);
 
             this.setBitUnsafe(this._length++, element);
@@ -128,9 +134,7 @@ export namespace collections {
          * @throws { BusinessError } 10200001 - If the index is out of range.
          */
         public $_get(index: number): number {
-            if (index < 0 || index >= this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this._length - 1}. Received value is: ${index}`));
-            }
+            this.checkIndex(index);
 
             return this.getBitUnsafe(index);
         }
@@ -143,9 +147,7 @@ export namespace collections {
          * @throws { BusinessError } 10200001 - If the index is out of range.
          */
         public $_set(index: number, value: number): void {
-            if (index < 0 || index >= this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this._length - 1}. Received value is: ${index}`));
-            }
+            this.checkIndex(index);
 
             this.setBitUnsafe(index, value);
         }
@@ -163,18 +165,10 @@ export namespace collections {
          * @throws { BusinessError } 10200001 - The value of fromIndex or toIndex is out of range.
          */
         public has(element: number, fromIndex: number, toIndex: number): boolean {
-            this.integerCheckRange(fromIndex, toIndex);
+            this.checkRange(fromIndex, toIndex);
 
-            if (toIndex < 0 || toIndex > this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`));
-            }
-
-            if (fromIndex < 0 || fromIndex >= toIndex) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`));
-            }
-
-            let from = new BitIndex(this.computeElementIdAndBitId(fromIndex as int));
-            let to =  new BitIndex(this.computeElementIdAndBitId(toIndex as int));
+            let from = this.computeElementIdAndBitId(fromIndex);
+            let to =  this.computeElementIdAndBitId(toIndex);
 
             if (from.elementId === to.elementId) {
                 return this.checkBit(this.buffer[from.elementId], from.index, to.index - 1, element);
@@ -235,12 +229,9 @@ export namespace collections {
          */
         public flipBitByIndex(index: number): void {
             this.integerCheck("index", index);
+            this.checkIndex(index);
 
-            if (index < 0 || index >= this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this._length - 1}. Received value is: ${index}`));
-            }
-
-            let bitIndex = new BitIndex(this.computeElementIdAndBitId(index));
+            let bitIndex = this.computeElementIdAndBitId(index);
             this.buffer[bitIndex.elementId] = this.flipBits(this.buffer[bitIndex.elementId], bitIndex.index, bitIndex.index);
         }
 
@@ -255,18 +246,10 @@ export namespace collections {
          * @throws { BusinessError } 10200001 - The value of fromIndex or toIndex is out of range.
          */
         public flipBitsByRange(fromIndex: number, toIndex: number): void {
-            this.integerCheckRange(fromIndex, toIndex);
+            this.checkRange(fromIndex, toIndex);
 
-            if (toIndex < 0 || toIndex > this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`));
-            }
-
-            if (fromIndex < 0 || fromIndex >= toIndex) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`));
-            }
-
-            let from = new BitIndex(this.computeElementIdAndBitId(fromIndex as int));
-            let to =  new BitIndex(this.computeElementIdAndBitId(toIndex as int));
+            let from = this.computeElementIdAndBitId(fromIndex);
+            let to =  this.computeElementIdAndBitId(toIndex);
 
             if (from.elementId === to.elementId) {
                 this.buffer[from.elementId] = this.flipBits(this.buffer[from.elementId], from.index, to.index - 1);
@@ -298,18 +281,10 @@ export namespace collections {
          * @throws { BusinessError } 10200001 - The value of fromIndex or toIndex is out of range.
          */
         public getBitsByRange(fromIndex: number, toIndex: number): BitVector {
-            this.integerCheckRange(fromIndex, toIndex);
+            this.checkRange(fromIndex, toIndex);
 
-            if (toIndex < 0 || toIndex > this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`));
-            }
-
-            if (fromIndex < 0 || fromIndex >= toIndex) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`));
-            }
-
-            let from = new BitIndex(this.computeElementIdAndBitId(fromIndex as int));
-            let to =  new BitIndex(this.computeElementIdAndBitId(toIndex as int));
+            let from = this.computeElementIdAndBitId(fromIndex);
+            let to =  this.computeElementIdAndBitId(toIndex);
 
             let newBitVector = new BitVector(toIndex - fromIndex);
 
@@ -337,18 +312,10 @@ export namespace collections {
          * @throws { BusinessError } 10200001 - The value of fromIndex or toIndex is out of range.
          */
         public setBitsByRange(element: number, fromIndex: number, toIndex: number): void {
-            this.integerCheckRange(fromIndex, toIndex);
+            this.checkRange(fromIndex, toIndex);
 
-            if (toIndex < 0 || toIndex > this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`));
-            }
-
-            if (fromIndex < 0 || fromIndex >= toIndex) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`));
-            }
-
-            let from = new BitIndex(this.computeElementIdAndBitId(fromIndex as int));
-            let to =  new BitIndex(this.computeElementIdAndBitId(toIndex as int));
+            let from = this.computeElementIdAndBitId(fromIndex);
+            let to =  this.computeElementIdAndBitId(toIndex);
 
             if (from.elementId === to.elementId) {
                 this.buffer[from.elementId] = this.setBits(this.buffer[from.elementId], from.index, to.index - 1, element);
@@ -402,13 +369,14 @@ export namespace collections {
                 throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"length\" is out of range. It must be >= 0. Received value is: ${size}`));
             }
 
-            if (this._length >= size) {
-                this._length = size;
+            let sizeInt: int = size as int;
+            if (this._length >= sizeInt) {
+                this._length = sizeInt;
                 return;
             }
 
-            let after = new BitIndex(this.computeElementIdAndBitId(size));
-            let before = new BitIndex(this.computeElementIdAndBitId(this.length));
+            let after = this.computeElementIdAndBitId(sizeInt);
+            let before = this.computeElementIdAndBitId(this.length);
 
             this.checkAndIncrement(before.elementId);
             this.buffer[before.elementId] = this.setBits(this.buffer[before.elementId], before.index, BitVector.BIT_SET_LENGTH - 1, 0);
@@ -420,7 +388,7 @@ export namespace collections {
                     ++before.elementId;
                 }
             }
-            this._length = size;
+            this._length = sizeInt;
         }
 
         /**
@@ -436,18 +404,10 @@ export namespace collections {
          * @throws { BusinessError } 10200001 - The value of fromIndex or toIndex is out of range.
          */
         public getBitCountByRange(element: number, fromIndex: number, toIndex: number): number {
-            this.integerCheckRange(fromIndex, toIndex);
+            this.checkRange(fromIndex, toIndex);
 
-            if (toIndex < 0 || toIndex > this._length) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`));
-            }
-
-            if (fromIndex < 0 || fromIndex >= toIndex) {
-                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`));
-            }
-
-            let from = new BitIndex(this.computeElementIdAndBitId(fromIndex as int));
-            let to =  new BitIndex(this.computeElementIdAndBitId(toIndex as int));
+            let from = this.computeElementIdAndBitId(fromIndex);
+            let to =  this.computeElementIdAndBitId(toIndex);
 
             if (from.elementId === to.elementId) {
                 let count = this.countBit1InRange(this.buffer[from.elementId], from.index, to.index - 1);
@@ -475,9 +435,23 @@ export namespace collections {
             }
         }
 
-        private integerCheckRange(fromIndex: number, toIndex: number): void {
+        private checkRange(fromIndex: number, toIndex: number): void {
             this.integerCheck("fromIndex", fromIndex);
             this.integerCheck("toIndex", toIndex);
+
+            if (toIndex < 0 || toIndex > this._length) {
+                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"toIndex\" is out of range. It must be >= 0 && <= ${this._length}. Received value is: ${toIndex}`));
+            }
+
+            if (fromIndex < 0 || fromIndex >= toIndex) {
+                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"fromIndex\" is out of range. It must be >= 0 && <= ${toIndex - 1}. Received value is: ${fromIndex}`));
+            }
+        }
+
+        private checkIndex(index: number): void {
+            if (index < 0 || index >= this._length) {
+                throw new BusinessError(OutOfBoundsErrorCodeId, new Error(`The value of \"index\" is out of range. It must be >= 0 && <= ${this._length - 1}. Received value is: ${index}`));
+            }
         }
 
         private integerCheck(name: string, value: number): void {
@@ -487,13 +461,13 @@ export namespace collections {
         }
 
         private getUsedCapacity(): number {
-            return Math.ceil(this._length / BitVector.BIT_SET_LENGTH);
+            return Math.ceil(this._length as number / BitVector.BIT_SET_LENGTH);
         }
 
-        private computeElementIdAndBitId(index: number): [number, number] {
+        private computeElementIdAndBitId(index: number): BitIndex {
             let elementId = Math.floor(index / BitVector.BIT_SET_LENGTH);
             let bitId = index % BitVector.BIT_SET_LENGTH;
-            return [elementId, bitId];
+            return new BitIndex(elementId, bitId);
         }
 
         private computeIndex(elementId: number, bitId: number): number {
@@ -501,14 +475,14 @@ export namespace collections {
         }
 
         private getBitUnsafe(index: number): number {
-            let bitIndex = new BitIndex(this.computeElementIdAndBitId(index));
+            let bitIndex = this.computeElementIdAndBitId(index);
             let value = (this.buffer[bitIndex.elementId] >> bitIndex.index) & 1;
 
             return value;
         }
 
         private setBitUnsafe(index: number, value: number): void {
-            let bitIndex = new BitIndex(this.computeElementIdAndBitId(index));
+            let bitIndex = this.computeElementIdAndBitId(index);
             if (value === 0) {
                 let mask = ~(1 << bitIndex.index);
                 this.buffer[bitIndex.elementId] = (this.buffer[bitIndex.elementId] & mask);
