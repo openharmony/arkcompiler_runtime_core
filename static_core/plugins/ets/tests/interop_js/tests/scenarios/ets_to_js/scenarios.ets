@@ -66,7 +66,7 @@ function functionReturnBoxedDouble(): Double {
 }
 
 function functionReturnBoxedChar(): Char {
-    let stsChar: Char = new Char('a');
+    let stsChar: Char = new Char(c'a');
     return stsChar;
 }
 

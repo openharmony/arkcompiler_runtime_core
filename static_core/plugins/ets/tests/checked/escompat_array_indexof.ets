@@ -97,16 +97,16 @@ function test_array_float_index_of() {
 //! INST          /CallVirtual.*escompat.Array::indexOf/
 //! INST_COUNT    /CallVirtual.*escompat.Array::indexOf/, 5
 function test_array_char_index_of() {
-    let array: Array<char> = ['a', 'b', 'c', 'a', 'd', 'a', 'b'];
-    let searchElement : char = 'b';
+    let array: Array<char> = [c'a', c'b', c'c', c'a', c'd', c'a', c'b'];
+    let searchElement : char = c'b';
     assertEQ(array.indexOf(searchElement,   0),  1.);
-    searchElement = 'a';
+    searchElement = c'a';
     assertEQ(array.indexOf(searchElement,   2),  3.);
-    searchElement = 'd';
+    searchElement = c'd';
     assertEQ(array.indexOf(searchElement,   6), -1.);
-    searchElement = 'a';
+    searchElement = c'a';
     assertEQ(array.indexOf(searchElement,  -1), -1.);
-    searchElement = 'f';
+    searchElement = c'f';
     assertEQ(array.indexOf(searchElement,  3),  -1.);
 }
 
@@ -224,16 +224,16 @@ function test_array_float_last_index_of() {
 //! INST          /CallVirtual.*escompat.Array::lastIndexOf/
 //! INST_COUNT    /CallVirtual.*escompat.Array::lastIndexOf/, 5
 function test_array_char_last_index_of() {
-    let array: Array<char> = ['a', 'b', 'c', 'a', 'd', 'a', 'b'];
-    let searchElement : char = 'b';
+    let array: Array<char> = [c'a', c'b', c'c', c'a', c'd', c'a', c'b'];
+    let searchElement : char = c'b';
     assertEQ(array.lastIndexOf(searchElement,   0),  -1.);
-    searchElement = 'a';
+    searchElement = c'a';
     assertEQ(array.lastIndexOf(searchElement,   2),   0.);
-    searchElement = 'd';
+    searchElement = c'd';
     assertEQ(array.lastIndexOf(searchElement,   6),   4.);
-    searchElement = 'a';
+    searchElement = c'a';
     assertEQ(array.lastIndexOf(searchElement,  -1),   5.);
-    searchElement = 'f';
+    searchElement = c'f';
     assertEQ(array.lastIndexOf(searchElement,  3),   -1.);
 }
 

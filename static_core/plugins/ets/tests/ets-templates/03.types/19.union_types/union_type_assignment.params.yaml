@@ -23,7 +23,7 @@ cases2:
   - desc: Basic union type(number - int).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 66;
       assertEQ(value, 66);
@@ -31,7 +31,7 @@ cases2:
   - desc: Basic union type(number calculation).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 3 * 3;
       assertEQ(value, 9);
@@ -39,7 +39,7 @@ cases2:
   - desc: Basic union type(number - float).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 66.6;
       assertEQ(value, 66.6);
@@ -47,15 +47,15 @@ cases2:
   - desc: Basic union type(number - double).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 66.6666666666;
-      assertEQ(value,  66.6666666666); 
+      assertEQ(value,  66.6666666666);
 
   - desc: Basic union type(number - negative number).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = -0.001;
       assertEQ(value,  -0.001);
@@ -63,7 +63,7 @@ cases2:
   - desc: Basic union type(number - scientific notation).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 5e3;
       assertEQ(value, 5000);
@@ -71,7 +71,7 @@ cases2:
   - desc: Basic union type(number - negative scientific notation).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = -2.5e2;
       assertEQ(value, -250);
@@ -79,23 +79,23 @@ cases2:
   - desc: Basic union type(number infinity).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = Infinity;
-      assertEQ(value, Infinity); 
+      assertEQ(value, Infinity);
 
   - desc: Basic union type(number -infinity).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = -Infinity;
-      assertEQ(value, -Infinity); 
+      assertEQ(value, -Infinity);
 
   - desc: Basic union type(number - precision).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 0.1 + 0.2;
       assertEQ(value, 0.30000000000000004);
@@ -103,23 +103,23 @@ cases2:
   - desc: Basic union type(number - binary).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 0b1010;
-      assertEQ(value, 0b1010); 
+      assertEQ(value, 0b1010);
 
   - desc: Basic union type(number - octal).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 0o755;
-      assertEQ(value, 0o755); 
+      assertEQ(value, 0o755);
 
   - desc: Basic union type(number - hexadecimal).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 0x1A3F;
       assertEQ(value, 0x1A3F);
@@ -127,7 +127,7 @@ cases2:
   - desc: Basic union type(bigint).
     dec1: |-
       type StringOrNumber = string | bigint;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 123456789012345678901234567890n;
       assertEQ(value, 123456789012345678901234567890n);
@@ -135,7 +135,7 @@ cases2:
   - desc: Basic union type(boolean).
     dec1: |-
       type StringOrNumber = string | boolean;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = true;
       assertEQ(value, true);
@@ -143,31 +143,31 @@ cases2:
   - desc: Basic union type(boolean-false).
     dec1: |-
       type StringOrNumber = string | boolean;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = false;
-      assertEQ(value, false);  
+      assertEQ(value, false);
 
   - desc: Basic union type(null).
     dec1: |-
       type StringOrNumber = string | null;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = null;
-      assertEQ(value, null);  
+      assertEQ(value, null);
 
   - desc: Basic union type(undefined).
     dec1: |-
       type StringOrNumber = string | undefined;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = undefined;
-      assertEQ(value, undefined);  
+      assertEQ(value, undefined);
 
   - desc: Basic union type(string - template).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       let name: string = "Alice";
       let age: number = 25;
@@ -177,31 +177,31 @@ cases2:
   - desc: Basic union type(string - '\n').
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = "Hello\nArkTS!";
-      assertEQ(value, "Hello\nArkTS!"); 
+      assertEQ(value, "Hello\nArkTS!");
 
   - desc: Basic union type(string - '\t').
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = "Hello\tArkTS!";
-      assertEQ(value, "Hello\tArkTS!"); 
+      assertEQ(value, "Hello\tArkTS!");
 
   - desc: Basic union type(use the string method to assign values).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello tArkTS!").length;
-      assertEQ(value, 13); 
+      assertEQ(value, 13);
 
   - desc: Basic union type(string trim).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello").trim();
       assertEQ(value, "Hello");
@@ -209,7 +209,7 @@ cases2:
   - desc: Basic union type(string toUpperCase).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello").toUpperCase();
       assertEQ(value, "HELLO");
@@ -217,7 +217,7 @@ cases2:
   - desc: Basic union type(string substring).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello").substring(0, 1);
       assertEQ(value, "H");
@@ -225,7 +225,7 @@ cases2:
   - desc: Basic union type(string indexOf).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello").indexOf("Hello");
       assertEQ(value, 0);
@@ -233,7 +233,7 @@ cases2:
   - desc: Basic union type(string replace).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello").replace("Hello", 'h');
       assertEQ(value, 'h');
@@ -241,15 +241,15 @@ cases2:
   - desc: Basic union type(string charat).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
-      value = ("Hello").charAt(0) as string;
+      value = new Char(("Hello").charAt(0)).toString();
       assertEQ(value, 'H');
 
   - desc: Basic union type(string lastIndexOf).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello").lastIndexOf('1');
       assertEQ(value, -1);
@@ -257,7 +257,7 @@ cases2:
   - desc: Basic union type(string replaceAll).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = "hello".replaceAll('l', 'x');
       assertEQ(value, 'hexxo');
@@ -265,7 +265,7 @@ cases2:
   - desc: Basic union type(string charcodeat).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("ArkTS").charCodeAt(0) as number;
       assertEQ(value, 65);
@@ -273,28 +273,28 @@ cases2:
   - desc: Basic union type(string lastIndexOf).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber = ("Hello ArkTS, welcome to ArkTS".lastIndexOf("ArkTS"));     
+      let value: StringOrNumber = ("Hello ArkTS, welcome to ArkTS".lastIndexOf("ArkTS"));
     check: |-
       assertEQ(value, 24);
 
   - desc: Basic union type(string repeat).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber = ("Hello").repeat(0);   
+      let value: StringOrNumber = ("Hello").repeat(0);
     check: |-
       assertEQ(value, "");
 
   - desc: Basic union type(string padStart).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber = ("5").padStart(3, "0");   
+      let value: StringOrNumber = ("5").padStart(3, "0");
     check: |-
       assertEQ(value, "005");
 
   - desc: Basic union type(string padEnd).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber = ("Hi").padEnd(5, "!");  
+      let value: StringOrNumber = ("Hi").padEnd(5, "!");
     check: |-
       assertEQ(value, "Hi!!!");
 
@@ -311,9 +311,9 @@ cases2:
     dec1: |-
       function printValue(value: string | number): string {
       return(`Value: ${value}`);
-      }    
+      }
     check: |-
-      assertEQ(printValue("hello"), "Value: hello"); 
+      assertEQ(printValue("hello"), "Value: hello");
 
   - desc: Union types are assigned as attributes of a class(modify properties).
     dec1: |-
@@ -329,7 +329,7 @@ cases2:
       printInfo(): string {
         return(`Name: ${this.name}, Age: ${this.age}`);
         }
-      }   
+      }
     check: |-
       let person1 = new Person("Alice", 30);
       person1.age = 31;
@@ -338,7 +338,7 @@ cases2:
   - desc:  Union types as map types.
     dec1: |-
       type ID = string | number;
-      const users = new Map<ID, string>();     
+      const users = new Map<ID, string>();
     check: |-
       users.set("u1", "Alice");
       assertEQ(users.get("u1"), "Alice");
@@ -346,21 +346,21 @@ cases2:
   - desc:  Union type + readonly modifier.
     dec1: |-
       type ReadonlyData = readonly (string | number)[];
-      const data: ReadonlyData = ["A", 1, "B", 2];    
+      const data: ReadonlyData = ["A", 1, "B", 2];
     check: |-
       assertEQ(data[0], 'A');
 
   - desc:  Basic union type(use the string method to assign values).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello tArkTS!").length;
       assertEQ(value, 13);
 
   - desc:  union type + literal type.
     dec1: |-
-      type Status = "success" | "error" | "loading";     
+      type Status = "success" | "error" | "loading";
     check: |-
       let value: Status;
       value = 'success';
@@ -370,7 +370,7 @@ cases2:
     dec1: |-
       function printIfValid<T extends string | number>(value: T) {
       return(`Valid value: ${value}`);
-      }  
+      }
     check: |-
       assertEQ(printIfValid('test'), "Valid value: test");
 
@@ -390,7 +390,7 @@ cases2:
         setData(newData: string | number) {
           this.data = newData;
         }
-      } 
+      }
     check: |-
       const storage = new Storage("hello");
       assertEQ(storage.getData(), 'hello');
@@ -433,7 +433,7 @@ cases2:
       class Frog {
         name: string = 'frog';
       }
-      type Animal = Cat | Dog | Frog | number;     
+      type Animal = Cat | Dog | Frog | number;
     check: |-
       let animal: Animal = new Cat();
       assertEQ(animal.name, 'cat');
@@ -443,9 +443,9 @@ cases2:
       function getData(flag: boolean): string | int {
         if (flag) {
           return "Data is a string";
-        } 
+        }
         return "no string"
-      }    
+      }
     check: |-
       assertEQ(getData(true), "Data is a string");
 
@@ -454,9 +454,9 @@ cases2:
       function getData(flag: string): boolean | int {
         if (flag === 'yes') {
           return true;
-        } 
+        }
         return false
-      }  
+      }
     check: |-
       assertEQ(getData('yes'), true);
 
@@ -465,7 +465,7 @@ cases2:
       function getData(flag: string): boolean | number {
         if (flag === 'float') {
           return 3 * 3;
-        } 
+        }
         return false
       }
     check: |-
@@ -521,7 +521,7 @@ cases2:
   - desc: Basic union type(string - '').
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = 'hello';
       assertEQ(value, 'hello');
@@ -529,14 +529,14 @@ cases2:
   - desc: Basic union type(string toLowerCase).
     dec1: |-
       type StringOrNumber = string | number;
-      let value: StringOrNumber;      
+      let value: StringOrNumber;
     check: |-
       value = ("Hello").toLowerCase();
       assertEQ(value, "hello");
 
   - desc: Basic union type(string concat).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = "Hello";
       let value1: StringOrNumber = "ArkTS";
@@ -544,58 +544,58 @@ cases2:
 
   - desc: Basic union type(string lastIndexOf).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = ("Hello ArkTS, welcome to ArkTS".lastIndexOf("ArkTS"));
       assertEQ(value, 24);
 
   - desc: Basic union type(string includes).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = "Hello ArkTS, welcome to ArkTS";
       assertEQ(value.includes("ArkTS"), true);
 
   - desc: Basic union type(string startsWith).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = "Hello ArkTS, welcome to ArkTS";
       assertEQ(value.startsWith("Hel"), true);
 
   - desc: Basic union type(string endsWith).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = "Hello ArkTS, welcome to ArkTS";
       assertEQ(value.endsWith("ArkTS"), true);
 
   - desc: Basic union type(string repeat).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = ("Hello").repeat(0);
       assertEQ(value, "");
 
   - desc: Basic union type(number calculation except).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = 3 / 3;
-      assertEQ(value, 1);   
+      assertEQ(value, 1);
 
   - desc: Basic union type(number calculation delivery).
     dec1: |-
-      type StringOrNumber = string | number;     
+      type StringOrNumber = string | number;
     check: |-
       let value: StringOrNumber = 3 % 3;
-      assertEQ(value, 0); 
+      assertEQ(value, 0);
 
   - desc: Union types are assigned as parameters(number).
     dec1: |-
       function printValue(value: string | number): string {
         return(`Value: ${value}`);
-      }    
+      }
     check: |-
       assertEQ(printValue(6), "Value: 6");
 
@@ -638,7 +638,7 @@ cases2:
       printInfo(): string {
         return(`Name: ${this.name}, Age: ${this.age}`);
         }
-      }   
+      }
     check: |-
       let person1 = new Person("Alice", 30);
       assertEQ(person1.printInfo(), 'Name: Alice, Age: 30');
@@ -657,7 +657,7 @@ cases2:
       printInfo(): string {
         return(`Name: ${this.name}, Age: ${this.age}`);
         }
-      }   
+      }
     check: |-
       let person1 = new Person("Bob", "thirty");
       assertEQ(person1.printInfo(), 'Name: Bob, Age: thirty');
@@ -676,7 +676,7 @@ cases2:
       printInfo(): string {
         return(`Name: ${this.name}, Age: ${this.age}`);
         }
-      }   
+      }
     check: |-
       let person1 = new Person("Alice", 30);
       person1.name = 'Bob';
@@ -684,7 +684,7 @@ cases2:
 
   - desc: Union type + null or undefined.
     dec1: |-
-      type StringOrNumberOrNull = string | number | null | undefined;    
+      type StringOrNumberOrNull = string | number | null | undefined;
     check: |-
       let value: StringOrNumberOrNull;
       value = null;
@@ -692,7 +692,7 @@ cases2:
 
   - desc: Union type + array (mixed type).
     dec1: |-
-      type MixedArray = (string | number | boolean)[];    
+      type MixedArray = (string | number | boolean)[];
     check: |-
       let user: MixedArray;
       user = ["hello", 42, true];
@@ -700,7 +700,7 @@ cases2:
 
   - desc: Union type + array (mixed type output number).
     dec1: |-
-      type MixedArray = (string | number | boolean)[];    
+      type MixedArray = (string | number | boolean)[];
     check: |-
       let user: MixedArray;
       user = ["hello", 42, true];
@@ -708,7 +708,7 @@ cases2:
 
   - desc: Union type + array (array operation assignment).
     dec1: |-
-      type MixedArray = (string | number | boolean)[];    
+      type MixedArray = (string | number | boolean)[];
     check: |-
       let user: MixedArray;
       user = ["hello", 42, true];
@@ -717,7 +717,7 @@ cases2:
 
   - desc: Union type + array (array operation assignment length).
     dec1: |-
-      type MixedArray = (string | number | boolean)[];    
+      type MixedArray = (string | number | boolean)[];
     check: |-
       let user: MixedArray;
       user = ["hello", 42, true];
@@ -754,7 +754,7 @@ cases2:
       function getData(flag: string): boolean | int {
         if (flag === 'int') {
           return 66;
-        } 
+        }
         return false
       }
     check: |-
@@ -765,7 +765,7 @@ cases2:
       function getData(flag: string): boolean | int {
         if (flag === 'yes') {
           return true;
-        } 
+        }
         return false
       }
     check: |-

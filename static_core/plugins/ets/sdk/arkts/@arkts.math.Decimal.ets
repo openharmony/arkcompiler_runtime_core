@@ -394,7 +394,7 @@ export class Decimal {
                     rep = 1;
                 } else {
                     if (Utils.toNumber(n) > 0 || Utils.toNumber(n.slice(1)) > 0
-                        && (n.charAt(0) as String).equals('5')) {
+                        && (n.charAt(0) == c'5')) {
                         Utils.finalise(r, e + 1, 1);
                         m = !r.mul(r).equals(x);
                     }
@@ -1239,14 +1239,15 @@ export class Decimal {
         let guard: number = 10;
         Decimal.precision = wpr += guard;
         let c = Utils.digitsToString(xd!);
-        let c0 = Utils.toNumber(c.charAt(0));
+        let ch = new Char(c.charAt(0));
+        let c0 = Utils.toNumber(ch.toString());
         let e: number;
         if (Math.abs(e = x.e) < 1.5e15) {
             let n: number = 1;
-            while (c0 < 7 && c0 != 1 || c0 == 1 && (Utils.toNumber(c.charAt(1))) > 3) {
+            while (c0 < 7 && c0 != 1 || c0 == 1 && (Utils.toNumber((new Char(c.charAt(1))).toString())) > 3) {
                 x = x.mul(y);
                 c = Utils.digitsToString(x.d!);
-                c0 = Utils.toNumber(c.charAt(0));
+                c0 = Utils.toNumber((new Char(c.charAt(0))).toString());
                 n++;
             }
             e = x.e;

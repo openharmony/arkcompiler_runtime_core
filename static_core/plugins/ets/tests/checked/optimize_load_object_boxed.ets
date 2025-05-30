@@ -125,7 +125,7 @@ function testByte(input: Byte): byte {
 }
 
 function testChar(input: Char): char {
-    let result: char = 'A';
+    let result: char = c'A';
 
     for (let i = 0; i < 5000; i++) {
         result += Char.valueOf(input);
@@ -300,7 +300,7 @@ function main(): int {
     let valByte: Byte = new Byte(1 as byte);
     let resultByte: byte = testByte(valByte);
 
-    let valChar: Char = new Char('A');
+    let valChar: Char = new Char(c'A');
     let resultChar: char = testChar(valChar);
 
     let valShort: Short = new Short(42 as short);
@@ -322,8 +322,8 @@ function main(): int {
     let inputByteB: Byte = new Byte(2 as byte);
     resultByte = testByteVN(inputByteA, inputByteB);
 
-    let inputCharA: Char = new Char('A');
-    let inputCharB: Char = new Char('B');
+    let inputCharA: Char = new Char(c'A');
+    let inputCharB: Char = new Char(c'B');
     resultChar = testCharVN(inputCharA, inputCharB);
 
     let inputShortA: Short = new Short(42 as short);

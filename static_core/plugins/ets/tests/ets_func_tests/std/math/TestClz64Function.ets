@@ -42,7 +42,7 @@ function test_clz64_byte(): void {
 }
 
 function test_clz64_char(): void {
-    let result : char = '0'
+    let result : char = c'0'
     assertEQ(clz64(result), 58);
 }
 

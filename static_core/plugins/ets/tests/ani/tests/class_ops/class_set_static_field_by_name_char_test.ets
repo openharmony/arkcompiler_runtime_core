@@ -14,14 +14,14 @@
  */
 
 class CharStatic {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
     static string_value: String = "";
 }
 
 class CharStaticA extends CharStatic {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
 }
 
 final class CharStaticFinal extends CharStatic {
-    static char_value: char = 'a';
+    static char_value: char = c'a';
 }

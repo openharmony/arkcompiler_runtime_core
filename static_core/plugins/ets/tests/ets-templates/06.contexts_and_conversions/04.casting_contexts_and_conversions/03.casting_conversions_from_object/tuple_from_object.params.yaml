@@ -13,6 +13,6 @@
 ---
 cases:
   - { tType: '[number, string]',       type: TuType, data: '12.1, "OK"',     expected: '"OK"' }
-  - { tType: '[char, bigint, string]', type: TuType, data: '"e", 85n, "OK"', expected: 85n    }
+  - { tType: '[char, bigint, string]', type: TuType, data: 'c''e'', 85n, "OK"', expected: 85n    }
   - { tType: '[]', type: '[number, string]',         data: '12.1, "OK"',     expected: '"OK"' }
-  - { tType: '[]', type: '[char, bigint, string]',   data: '"e", 85n, "OK"', expected: 85n    }
+  - { tType: '[]', type: '[char, bigint, string]',   data: 'c''e'', 85n, "OK"', expected: 85n    }

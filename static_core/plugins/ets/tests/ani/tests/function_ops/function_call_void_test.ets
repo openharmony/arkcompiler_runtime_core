@@ -24,7 +24,7 @@ function getCount(): int {
 }
 
 export let intExport: int = 3;
-export let charExport: char = "a";
+export let charExport: char = c'a';
 function moduleFunction(value1: int, value2: int): void {
     intExport = value1 + value2;
 }
@@ -78,7 +78,7 @@ namespace A {
         };
         intValue = lambdaFunction(value1, value2);
     }
-    
+
     export function recursiveFunction(value: int): void {
         if (value <= 0) {
             return ;
