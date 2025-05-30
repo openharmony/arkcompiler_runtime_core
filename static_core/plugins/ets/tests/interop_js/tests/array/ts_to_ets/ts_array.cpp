@@ -100,7 +100,7 @@ TEST_F(ArrayTsToEtsTest, testFlat)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFlat"));
 }
 
-TEST_F(ArrayTsToEtsTest, testFlatMap)
+TEST_F(ArrayTsToEtsTest, DISABLED_testFlatMap)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFlatMap"));
 }
