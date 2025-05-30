@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,7 @@ protected:
     const panda_file::File *file_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
     AbcStringTable *stringTable_ = nullptr;   // NOLINT(misc-non-private-member-variables-in-classes)
     pandasm::Program *program_ = nullptr;     // NOLINT(misc-non-private-member-variables-in-classes)
+    friend class AbcFileProcessor;            // NOLINT(misc-non-private-member-variables-in-classes)
 };                                            // class AbcFileEntityProcessor
 
 }  // namespace ark::abc2program
