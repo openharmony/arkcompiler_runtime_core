@@ -49,6 +49,7 @@ private:
 
     static void TimerCallback(uv_timer_t *timer);
     static void DisarmTimer(uv_timer_t *timer);
+    static void RepeatTimer(uv_timer_t *timer, uint64_t timerId);
     static bool CheckMainThread(ani_env *env);
 
     static ani_object GetTimerTable(ani_env *env);
