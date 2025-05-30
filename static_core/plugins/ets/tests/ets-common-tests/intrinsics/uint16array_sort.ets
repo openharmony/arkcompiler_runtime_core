@@ -15,9 +15,9 @@
 
 const ARRAY_SIZE = 15;
 const AB_SIZE = ARRAY_SIZE * Short.BYTE_SIZE;
-const UNSORTED = [5,3,127,2,4,255,99,10,7,65535 as int,45,1,88,6,0];
-const SORTED =   [0,1,2,3,4,5,6,7,10,45,88,99,127,255,65535 as int];
-const SORTED_UNALIGNED = [0,1,2,3,4,6,7,10,45,88,99,127,255,65535 as int];
+const UNSORTED = [5, 3, 127, 2, 4, 255, 99, 10, 7, 65535 as int, 45, 1, 88, 6, 0];
+const SORTED = [0, 1, 2, 3, 4, 5, 6, 7, 10, 45, 88, 99, 127, 255, 65535 as int];
+const SORTED_UNALIGNED = [0, 1, 2, 3, 4, 6, 7, 10, 45, 88, 99, 127, 255, 65535 as int];
 const SINGLE = [88];
 
 function fillBuffer(buf: ArrayBuffer): void {
@@ -25,7 +25,7 @@ function fillBuffer(buf: ArrayBuffer): void {
     assertEQ(Short.BYTE_SIZE, 2);
     for (let i = 0; i < AB_SIZE; ++i) {
         if ((i % Short.BYTE_SIZE) == 0) {
-            let v: int = UNSORTED[i/2] as int;
+            let v: int = UNSORTED[i / 2] as int;
             if (Runtime.isLittleEndianPlatform()) {
                 buf.set(i, v as byte);
                 buf.set(i + 1, (v >>> 8) as byte);
@@ -78,10 +78,10 @@ function sortUnaligned(): void {
 
 function main(): int {
     assertEQ(UNSORTED.length, SORTED.length);
-    const suite = new ArkTestsuite("Uint16Array.sort() tests")
-    suite.addTest("sort an empty Uint16Array", sortEmpty)
-    suite.addTest("sort a single-element Uint16Array", sortSingle)
-    suite.addTest("sort a normal Uint16Array", sortNormal)
-    suite.addTest("sort a normal Uint16Array backed with unaligned ArrayBuffer", sortUnaligned)
+    const suite = new ArkTestsuite('Uint16Array.sort() tests')
+    suite.addTest('sort an empty Uint16Array', sortEmpty)
+    suite.addTest('sort a single-element Uint16Array', sortSingle)
+    suite.addTest('sort a normal Uint16Array', sortNormal)
+    suite.addTest('sort a normal Uint16Array backed with unaligned ArrayBuffer', sortUnaligned)
     return suite.run()
 }

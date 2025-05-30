@@ -15,11 +15,16 @@
 
 const ARRAY_SIZE = 15;
 const AB_SIZE = ARRAY_SIZE * Float.BYTE_SIZE;
-const UNSORTED = [Float.MAX_VALUE,0,100.5,3.375,1.125,-1.125,Float.POSITIVE_INFINITY,10.5,7.375,45.125,1.375,Float.NEGATIVE_INFINITY,Float.MIN_VALUE,36.625,123.375];
-const SORTED = [Float.NEGATIVE_INFINITY,-1.125,0,Float.MIN_VALUE,1.125,1.375,3.375,7.375,10.5,36.625,45.125,100.5,123.375,Float.MAX_VALUE,Float.POSITIVE_INFINITY];
-const SORTED_UNALIGNED = [Float.NEGATIVE_INFINITY,-1.125,0,Float.MIN_VALUE,1.125,1.375,3.375,7.375,10.5,36.625,45.125,100.5,123.375,Float.POSITIVE_INFINITY];
-const UNSORTED_WITH_NAN = [Float.MAX_VALUE,0.0,100.5,Float.NaN,1.125,-1.125,Float.POSITIVE_INFINITY,10.5,7.375,45.125,1.375,Float.NEGATIVE_INFINITY,Float.MIN_VALUE,36.625,123.375];
-const SORTED_WITH_NAN = [Float.NEGATIVE_INFINITY,-1.125,0.0,100.5,Float.MAX_VALUE,Float.NaN,Float.MIN_VALUE,1.125,1.375,7.375,10.5,36.625,45.125,123.375,Float.POSITIVE_INFINITY];
+const UNSORTED = [Float.MAX_VALUE, 0, 100.5, 3.375, 1.125, -1.125, Float.POSITIVE_INFINITY, 10.5, 7.375, 45.125, 1.375,
+                  Float.NEGATIVE_INFINITY, Float.MIN_VALUE, 36.625, 123.375];
+const SORTED = [Float.NEGATIVE_INFINITY, -1.125, 0, Float.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5, 36.625, 45.125,
+                100.5, 123.375, Float.MAX_VALUE, Float.POSITIVE_INFINITY];
+const SORTED_UNALIGNED = [Float.NEGATIVE_INFINITY, -1.125, 0, Float.MIN_VALUE, 1.125, 1.375, 3.375, 7.375, 10.5,
+                          36.625, 45.125, 100.5, 123.375, Float.POSITIVE_INFINITY];
+const UNSORTED_WITH_NAN = [Float.MAX_VALUE, 0.0, 100.5, Float.NaN, 1.125, -1.125, Float.POSITIVE_INFINITY, 10.5, 7.375,
+                           45.125, 1.375, Float.NEGATIVE_INFINITY, Float.MIN_VALUE, 36.625, 123.375];
+const SORTED_WITH_NAN = [Float.NEGATIVE_INFINITY, -1.125, 0.0, 100.5, Float.MAX_VALUE, Float.NaN, Float.MIN_VALUE,
+                         1.125, 1.375, 7.375, 10.5, 36.625, 45.125, 123.375, Float.POSITIVE_INFINITY];
 const SINGLE = [88.0];
 
 function fillBuffer(buf: ArrayBuffer): void {
@@ -27,7 +32,7 @@ function fillBuffer(buf: ArrayBuffer): void {
     assertEQ(Float.BYTE_SIZE, 4);
     for (let i = 0; i < AB_SIZE; ++i) {
         if ((i % Float.BYTE_SIZE) == 0) {
-            let v: int = Float.bitCastToInt(UNSORTED[i/Float.BYTE_SIZE] as float);
+            let v: int = Float.bitCastToInt(UNSORTED[i / Float.BYTE_SIZE] as float);
             if (Runtime.isLittleEndianPlatform()) {
                 buf.set(i, v as byte);
                 buf.set(i + 1, (v >>> 8) as byte);
@@ -101,10 +106,10 @@ function sortUnaligned(): void {
 
 function main(): int {
     assertEQ(UNSORTED.length, SORTED.length);
-    const suite = new ArkTestsuite("Float32Array.sort() tests")
-    suite.addTest("sort an empty Float32Array", sortEmpty)
-    suite.addTest("sort a single-element Float32Array", sortSingle)
-    suite.addTest("sort a normal Float32Array", sortNormal)
-    suite.addTest("sort a normal Float32Array backed with unaligned ArrayBuffer", sortUnaligned)
+    const suite = new ArkTestsuite('Float32Array.sort() tests')
+    suite.addTest('sort an empty Float32Array', sortEmpty)
+    suite.addTest('sort a single-element Float32Array', sortSingle)
+    suite.addTest('sort a normal Float32Array', sortNormal)
+    suite.addTest('sort a normal Float32Array backed with unaligned ArrayBuffer', sortUnaligned)
     return suite.run()
 }
