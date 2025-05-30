@@ -57,6 +57,7 @@ public:
     static void* ReadBarrier(void* field);
     static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
     static void RequestGC(GcType type);
+    static void WaitForGCFinish();
     static bool ForEachObj(HeapVisitor& visitor, bool safe);
 
     HeapParam &GetHeapParam()
