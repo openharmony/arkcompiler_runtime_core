@@ -77,15 +77,36 @@ function setSubFooName() {
     assertEQ(name, "aaa")
 }
 
+function test_iface_subBaseFun_base() {
+    let sub = IfaceTest.getSubBaseFun();
+    let info = sub.base();
+
+    console.log("sub.base is " + info)
+    assertEQ(info, "SubBaseFun.base")    
+}
+
+function test_iface_subBaseElem_base() {
+    let sub = IfaceTest.getSubBaseElem();
+    sub.base = "SubBaseElem.base";
+    let info = sub.base;
+
+    console.log("SubBaseElem.base is " + info)
+    assertEQ(info, "SubBaseElem.base")    
+}
+
 function main() {
     console.log("run main ... IfacePropTest ...")
-
     const suite = new ArkTestsuite("IfacePropTest")
+
     suite.addTest("getIfaceName", getIfaceName)
     suite.addTest("getIfaceReadonlyName", getIfaceReadonlyName)
     suite.addTest("setIfaceName", setIfaceName)
     suite.addTest("printFooName", printFooName)
     suite.addTest("printNooName", printNooName)
     suite.addTest("setSubFooName", setSubFooName)
+
+    suite.addTest("test_iface_subBaseFun_base", test_iface_subBaseFun_base)
+    suite.addTest("test_iface_subBaseElem_base", test_iface_subBaseElem_base)
+
     exit(suite.run())
 }

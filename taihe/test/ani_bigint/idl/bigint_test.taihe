@@ -15,15 +15,15 @@
 @!sts_inject("""
 function bigIntToArrayInt64(a : BigInt) : long[] {
     let array : Array<long> = new Array<long>(0);
-    let ocp : BigInt = a;
-    if (ocp === 0n) {
+    let tmp : BigInt = a;
+    if (tmp === 0n) {
         array.push(0);
     }
-    while (ocp !== 0n) {
-        let big = BigInt.asIntN(64, ocp);
+    while (tmp !== 0n) {
+        let big = BigInt.asIntN(64, tmp);
         let lg : long = big.getLong();
         array.push(lg);
-        ocp = ocp >> 64n;
+        tmp = tmp >> 64n;
     }
     let out : long[] = new long[array.length];
     for (let i = 0; i < array.length; i++) {
@@ -36,41 +36,41 @@ function bigIntToArrayInt64(a : BigInt) : long[] {
 function arrayInt64ToBigInt(a : long[]) : BigInt {
     let big: BigInt = 0n;
     for (let i = 0; i < a.length; i++) {
-        let ocp: BigInt = new BigInt(a[i]);
-        big = (big << 64n) | ocp;
+        let tmp: BigInt = new BigInt(a[i]);
+        big = (big << 64n) | tmp;
     }
     return big;
 }
 
-export function Bigint01(a : number, b : BigInt) : boolean {
+export function bigInt001(a : number, b : BigInt) : boolean {
     let array : long[] = bigIntToArrayInt64(b);
-    return BigInt01(a, array);
+    return bigInt01(a, array);
 }
 
-export function Bigint02(a: number) : number {
-    return BigInt02(a);
+export function bigInt002(a: number) : number {
+    return bigInt02(a);
 }
 
-export function Bigint03(a : BigInt) : BigInt {
+export function bigInt003(a : BigInt) : BigInt {
     let array : long[] = bigIntToArrayInt64(a);
-    array = BigInt03(array);
+    array = bigInt03(array);
     return arrayInt64ToBigInt(array);
 }
 
-export function Bigint04(a : BigInt) : void {
+export function bigInt004(a : BigInt) : void {
     let array : long[] = bigIntToArrayInt64(a);
-    BigInt04(array);
+    bigInt04(array);
 }
 
-export function Bigint05(a : number, b : BigInt) : BigInt {
+export function bigInt005(a : number, b : BigInt) : BigInt {
     let array : long[] = bigIntToArrayInt64(b);
-    array = BigInt05(a, array);
+    array = bigInt05(a, array);
     return arrayInt64ToBigInt(array);
 }
 
-export function Bigint06(a : number, b : BigInt) : number {
+export function bigInt006(a : number, b : BigInt) : number {
     let array : long[] = bigIntToArrayInt64(b);
-    return BigInt06(a, array);
+    return bigInt06(a, array);
 }
 
 """)

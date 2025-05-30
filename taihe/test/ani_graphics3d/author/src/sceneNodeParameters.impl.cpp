@@ -12,33 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface Foo {
-    Bar(): void;
-    @set("name") SetName(name: String): void;
-    @get("name") GetName(): String;
-}
+#include "sceneNodeParameters.proj.hpp"
+#include "sceneNodeParameters.impl.hpp"
+#include "taihe/runtime.hpp"
+#include "stdexcept"
+#include "sceneNodeParameters.h"
 
-function GetFooIface(): Foo;
-function PrintFooName(foo: Foo): String;
+namespace {
+// To be implemented.
 
-interface BaseFun {
-    Base(): String;
-    Fun(): String;
+::sceneNodeParameters::SceneNodeParameters GetSceneNodeParameters()
+{
+    return taihe::make_holder<SceneNodeParametersImpl, ::sceneNodeParameters::SceneNodeParameters>();
 }
-function GetBaseFun(): BaseFun;
+}  // namespace
 
-interface SubBaseFun: BaseFun {
-    Sub(): String;
-}
-function GetSubBaseFun(): SubBaseFun;
-
-interface BaseElem {
-    @get GetBase(): String;
-    @set SetBase(s: String): void;
-}
-function GetBaseElem(): BaseElem;
-
-interface SubBaseElem: BaseElem {
-    Sub(): String;
-}
-function GetSubBaseElem(): SubBaseElem;
+TH_EXPORT_CPP_API_GetSceneNodeParameters(GetSceneNodeParameters);

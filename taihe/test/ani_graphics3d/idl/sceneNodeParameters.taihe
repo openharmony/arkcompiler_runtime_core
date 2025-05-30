@@ -12,33 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-interface Foo {
-    Bar(): void;
-    @set("name") SetName(name: String): void;
+interface SceneNodeParameters {
     @get("name") GetName(): String;
+    @set("name") SetName(name:String);
+    @get("path") GetPath(): Optional<String>;
+    @set("path") SetPath(name: Optional<String>);
 }
-
-function GetFooIface(): Foo;
-function PrintFooName(foo: Foo): String;
-
-interface BaseFun {
-    Base(): String;
-    Fun(): String;
-}
-function GetBaseFun(): BaseFun;
-
-interface SubBaseFun: BaseFun {
-    Sub(): String;
-}
-function GetSubBaseFun(): SubBaseFun;
-
-interface BaseElem {
-    @get GetBase(): String;
-    @set SetBase(s: String): void;
-}
-function GetBaseElem(): BaseElem;
-
-interface SubBaseElem: BaseElem {
-    Sub(): String;
-}
-function GetSubBaseElem(): SubBaseElem;
+function GetSceneNodeParameters(): SceneNodeParameters;
