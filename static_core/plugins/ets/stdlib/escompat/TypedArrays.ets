@@ -1827,24 +1827,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    internal getUnsafe(index: int): byte {
-        let byteIndex = index * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res : byte = 0
-        let byteVal : byte
-        if (IS_LITTLE_ENDIAN) {
-            for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                res = (res | byteVal << (8 * i)) as byte
-            }
-            return res
-        } else {
-            for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = this.buffer.at(byteIndex as int + 0 - i)
-                res = (res | byteVal << (8 * i)) as byte
-            }
-            return res
-        }
-    }
+    private final native getUnsafe(index: int): byte
 
     internal setUnsafe(insertPos: int, val: byte): void {
         let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
@@ -3692,26 +3675,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    internal getUnsafe(index: int): short {
-        let byteIndex = index * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res : short = 0
-        let byteVal : short
-        if (IS_LITTLE_ENDIAN) {
-            for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as short
-            }
-            return res
-        } else {
-            for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = this.buffer.at(byteIndex as int + 1 - i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as short
-            }
-            return res
-        }
-    }
+    private final native getUnsafe(index: int): short
 
     internal setUnsafe(insertPos: int, val: short): void {
         let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
@@ -5524,26 +5488,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    internal getUnsafe(index: int): int {
-        let byteIndex = index * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res : int = 0
-        let byteVal : int
-        if (IS_LITTLE_ENDIAN) {
-            for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as int
-            }
-            return res
-        } else {
-            for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = this.buffer.at(byteIndex as int + 3 - i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as int
-            }
-            return res
-        }
-    }
+    private final native getUnsafe(index: int): int
 
     internal setUnsafe(insertPos: int, val: int): void {
         let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
@@ -7380,26 +7325,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         return this
     }
 
-    internal getUnsafe(index: int): long {
-        let byteIndex = index * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res : long = 0
-        let byteVal : long
-        if (IS_LITTLE_ENDIAN) {
-            for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as long
-            }
-            return res
-        } else {
-            for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = this.buffer.at(byteIndex as int + 7 - i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as long
-            }
-            return res
-        }
-    }
+    private final native getUnsafe(index: int): long
 
     internal setUnsafe(insertPos: int, val: long): void {
         let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
@@ -9210,26 +9136,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    internal getUnsafe(index: int): float {
-        let byteIndex = index * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res : int = 0
-        let byteVal : int
-        if (IS_LITTLE_ENDIAN) {
-            for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as int
-            }
-            return Float.bitCastFromInt(res)
-        } else {
-            for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = this.buffer.at(byteIndex as int + 3 - i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as int
-            }
-            return Float.bitCastFromInt(res)
-        }
-    }
+    private final native getUnsafe(index: int): float
 
     internal setUnsafe(insertPos: int, val: float): void {
         let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
@@ -10908,26 +10815,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    internal getUnsafe(index: int): double {
-        let byteIndex = index * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res : long = 0
-        let byteVal : long
-        if (IS_LITTLE_ENDIAN) {
-            for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as long
-            }
-            return Double.bitCastFromLong(res)
-        } else {
-            for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-                byteVal = this.buffer.at(byteIndex as int + 7 - i)
-                byteVal &= 0xff
-                res = (res | byteVal << (8 * i)) as long
-            }
-            return Double.bitCastFromLong(res)
-        }
-    }
+    private final native getUnsafe(index: int): double
 
     internal setUnsafe(insertPos: int, val: double): void {
         let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int

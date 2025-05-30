@@ -71,6 +71,20 @@ typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
         data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()));
 }
 
+template <typename T>
+typename T::ElementType EtsEscompatTypedArrayGetUnsafe(T *thisArray, EtsInt pos)
+{
+    ASSERT(pos >= 0 && pos < thisArray->GetLengthInt());
+
+    auto *data = GetNativeData(thisArray);
+    if (UNLIKELY(data == nullptr)) {
+        return 0;
+    }
+
+    return ObjectAccessor::GetPrimitive<typename T::ElementType>(
+        data, pos * sizeof(typename T::ElementType) + static_cast<EtsInt>(thisArray->GetByteOffset()));
+}
+
 extern "C" void EtsEscompatInt8ArraySetInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos, EtsInt val)
 {
     EtsEscompatTypedArraySet(thisArray, pos, val);
@@ -84,6 +98,11 @@ extern "C" void EtsEscompatInt8ArraySetByte(ark::ets::EtsEscompatInt8Array *this
 extern "C" EtsDouble EtsEscompatInt8ArrayGet(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsByte EtsEscompatInt8ArrayGetUnsafe(ark::ets::EtsEscompatInt8Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
 template <typename T>
@@ -159,6 +178,11 @@ extern "C" EtsDouble EtsEscompatInt16ArrayGet(ark::ets::EtsEscompatInt16Array *t
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
+extern "C" EtsShort EtsEscompatInt16ArrayGetUnsafe(ark::ets::EtsEscompatInt16Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+}
+
 extern "C" void EtsEscompatInt16ArraySetValues(ark::ets::EtsEscompatInt16Array *thisArray,
                                                ark::ets::EtsEscompatInt16Array *srcArray)
 {
@@ -185,6 +209,11 @@ extern "C" void EtsEscompatInt32ArraySetInt(ark::ets::EtsEscompatInt32Array *thi
 extern "C" EtsDouble EtsEscompatInt32ArrayGet(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsInt EtsEscompatInt32ArrayGetUnsafe(ark::ets::EtsEscompatInt32Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
 extern "C" void EtsEscompatInt32ArraySetValues(ark::ets::EtsEscompatInt32Array *thisArray,
@@ -215,6 +244,11 @@ extern "C" EtsLong EtsEscompatBigInt64ArrayGet(ark::ets::EtsEscompatBigInt64Arra
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
+extern "C" EtsLong EtsEscompatBigInt64ArrayGetUnsafe(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+}
+
 extern "C" void EtsEscompatBigInt64ArraySetValues(ark::ets::EtsEscompatBigInt64Array *thisArray,
                                                   ark::ets::EtsEscompatBigInt64Array *srcArray)
 {
@@ -241,6 +275,11 @@ extern "C" void EtsEscompatFloat32ArraySetFloat(ark::ets::EtsEscompatFloat32Arra
 extern "C" EtsDouble EtsEscompatFloat32ArrayGet(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsFloat EtsEscompatFloat32ArrayGetUnsafe(ark::ets::EtsEscompatFloat32Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
 extern "C" void EtsEscompatFloat32ArraySetValues(ark::ets::EtsEscompatFloat32Array *thisArray,
@@ -276,6 +315,11 @@ extern "C" void EtsEscompatFloat64ArraySetDouble(ark::ets::EtsEscompatFloat64Arr
 extern "C" EtsDouble EtsEscompatFloat64ArrayGet(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsDouble EtsEscompatFloat64ArrayGetUnsafe(ark::ets::EtsEscompatFloat64Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
 extern "C" void EtsEscompatFloat64ArraySetValues(ark::ets::EtsEscompatFloat64Array *thisArray,
@@ -318,6 +362,11 @@ extern "C" EtsDouble EtsEscompatUInt8ClampedArrayGet(ark::ets::EtsEscompatUInt8C
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
+extern "C" EtsInt EtsEscompatUInt8ClampedArrayGetUnsafe(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+}
+
 extern "C" void EtsEscompatUInt8ClampedArraySetValues(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
                                                       ark::ets::EtsEscompatUInt8ClampedArray *srcArray)
 {
@@ -348,6 +397,11 @@ extern "C" EtsDouble EtsEscompatUInt8ArrayGet(ark::ets::EtsEscompatUInt8Array *t
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
+extern "C" EtsInt EtsEscompatUInt8ArrayGetUnsafe(ark::ets::EtsEscompatUInt8Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+}
+
 extern "C" void EtsEscompatUInt8ArraySetValues(ark::ets::EtsEscompatUInt8Array *thisArray,
                                                ark::ets::EtsEscompatUInt8Array *srcArray)
 {
@@ -375,6 +429,11 @@ extern "C" void EtsEscompatUInt16ArraySetInt(ark::ets::EtsEscompatUInt16Array *t
 extern "C" EtsDouble EtsEscompatUInt16ArrayGet(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsInt EtsEscompatUInt16ArrayGetUnsafe(ark::ets::EtsEscompatUInt16Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
 extern "C" void EtsEscompatUInt16ArraySetValues(ark::ets::EtsEscompatUInt16Array *thisArray,
@@ -411,6 +470,11 @@ extern "C" EtsDouble EtsEscompatUInt32ArrayGet(ark::ets::EtsEscompatUInt32Array 
     return EtsEscompatTypedArrayGet(thisArray, pos);
 }
 
+extern "C" EtsLong EtsEscompatUInt32ArrayGetUnsafe(ark::ets::EtsEscompatUInt32Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
+}
+
 extern "C" void EtsEscompatUInt32ArraySetValues(ark::ets::EtsEscompatUInt32Array *thisArray,
                                                 ark::ets::EtsEscompatUInt32Array *srcArray)
 {
@@ -444,6 +508,11 @@ extern "C" void EtsEscompatBigUInt64ArraySetLong(ark::ets::EtsEscompatBigUInt64A
 extern "C" EtsLong EtsEscompatBigUInt64ArrayGet(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos)
 {
     return EtsEscompatTypedArrayGet(thisArray, pos);
+}
+
+extern "C" EtsLong EtsEscompatBigUInt64ArrayGetUnsafe(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsInt pos)
+{
+    return EtsEscompatTypedArrayGetUnsafe(thisArray, pos);
 }
 
 extern "C" void EtsEscompatBigUInt64ArraySetValues(ark::ets::EtsEscompatBigUInt64Array *thisArray,
