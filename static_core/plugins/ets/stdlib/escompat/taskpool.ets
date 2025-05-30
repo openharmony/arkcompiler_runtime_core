@@ -18,6 +18,47 @@ package escompat;
 import {launch} from "std/concurrency"
 
 export namespace taskpool {
+    const TASKPOOL_ERROR_NOT_IN_TASKPOOL: number = 10200022;
+    const TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED: number = 10200024;
+    const TASKPOOL_ERROR_CIRCULAR_DEPENDENCY: number = 10200026;
+    const TASKPOOL_ERROR_DEPENDENCY_NOT_EXIST: number = 10200027;
+    const TASKPOOL_ERROR_DELAY_TIME_NEGATIVE: number = 10200028;
+    const TASKPOOL_ERROR_LISTENER_REGISTRATION: number = 10200034;
+    const TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY: number = 10200070;
+    const TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY: number = 10200071;
+    const TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE: number = 10200072;
+    const TASKPOOL_ERROR_GROUP_TASK_ADD_DEPENDENCY: number = 10200073;
+    const TASKPOOL_ERROR_GROUP_TASK_RELIED_ON: number = 10200074;
+    const TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE: number = 10200075;
+    const TASKPOOL_ERROR_GROUP_TASK_EXECUTE_DELAYED: number = 10200076;
+    const TASKPOOL_ERROR_GROUP_TASK_ADD_GROUP: number = 10200077;
+    const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED: number = 10200078;
+    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_RELIED_ON: number = 10200079;
+    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE: number = 10200080;
+    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_DELAYED: number = 10200081;
+    const TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED: number = 10200082;
+    const TASKPOOL_ERROR_LONG_TASK_MULTIPLE_EXECUTIONS: number = 10200083;
+    const TASKPOOL_ERROR_LONG_TASK_NOT_SUPPORTED: number = 10200084;
+    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC: number = 10200085;
+    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_PERIODIC: number = 10200086;
+    const TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG: number = 10200087;
+    const TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK: number = 10200088;
+    const TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP: number = 10200089;
+    const TASKPOOL_ERROR_DEPENDENT_TASK_EXECUTE_PERIODIC: number = 10200090;
+    const TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED: number = 10200091;
+    const TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_DELAYED: number = 10200092;
+    const TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_AGAIN: number = 10200093;
+    const TASKPOOL_ERROR_PERIODIC_TASK_NOT_SUPPORTED: number = 10200094;
+    const TASKPOOL_ERROR_PERIODIC_TASK_SEQUENCE_RUNNER: number = 10200095;
+    const TASKPOOL_ERROR_PERIOD_NEGATIVE: number = 10200096;
+    const TASKPOOL_ERROR_NO_DEPENDENCY: number = 10200097;
+    const TASKPOOL_ERROR_TASK_CANCELED: number = 10200098;
+    const TASKPOOL_ERROR_GROUP_CANCELED: number = 10200099;
+    const TASKPOOL_ERROR_SEQ_RUNNER_CANCELED: number = 10200100;
+    const TASKPOOL_ERROR_NO_PARAMS: number = 10200101;
+    const TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP: number = 10200102;
+    const TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER: number = 10200103;
+
     class TaskPoolWorker extends EAWorker {
         constructor(supportInterop: boolean = false) {
             super(supportInterop);
@@ -203,23 +244,23 @@ export namespace taskpool {
          */
         addDependency(...tasks: Task[]): void {
             if (tasks.length == 0) {
-                throw new Error("addDependency has no params.");
+                throw new Error(TASKPOOL_ERROR_NO_PARAMS, "taskpool:: addDependency has no params.");
             }
             if (this.isSubmitted || this.seqId != 0) {
-                throw new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency");
+                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY, "taskpool:: seqRunnerTask or executedTask cannot addDependency");
             }
             if (this.groupId != 0) {
-                throw new Error("taskpool:: groupTask cannot addDependency");
+                throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_DEPENDENCY, "taskpool:: groupTask cannot addDependency");
             }
             for (const task: Task of tasks) {
                 if (task.isSubmitted || task.seqId != 0) {
-                    throw new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on");
+                    throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_RELIED_ON, "taskpool:: seqRunnerTask or executedTask cannot be relied on");
                 }
                 if (task.groupId != 0) {
-                    throw new Error("taskpool:: groupTask cannot be relied on");
+                    throw new Error(TASKPOOL_ERROR_GROUP_TASK_RELIED_ON, "taskpool:: groupTask cannot be relied on");
                 }
                 if (this.id == task.id || Task.hasTaskDFS(this, task)) {
-                    throw new Error("There is a circular dependency");
+                    throw new Error(TASKPOOL_ERROR_CIRCULAR_DEPENDENCY, "taskpool:: There is a circular dependency");
                 }
             }
             for (const task: Task of tasks) {
@@ -243,23 +284,23 @@ export namespace taskpool {
          */
         removeDependency(...tasks: Task[]): void {
             if (tasks.length == 0) {
-                throw new Error("removeDependency has no params.");
+                throw new Error(TASKPOOL_ERROR_NO_PARAMS, "taskpool:: removeDependency has no params.");
             }
             if (!this.isDependent) {
-                throw new Error("taskpool:: task has no dependency");
+                throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
             } 
             if (this.isSubmitted) {
-                throw new Error("taskpool:: executedTask cannot removeDependency");
+                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: executedTask cannot removeDependency");
             }
             for (const task: Task of tasks) {
                 if (task.dependentTasks.size == 0 && !task.isDependent) {
-                    throw new Error("taskpool:: task has no dependency");
+                    throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
                 }
                 if (task.isSubmitted) {
-                    throw new Error("taskpool:: cannot removeDependency on a dependent and executed task");
+                    throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: cannot removeDependency on a dependent and executed task");
                 }
                 if (!task.dependentTasks.has(this)) {
-                    throw new Error("The dependency does not exist, ");
+                    throw new Error(TASKPOOL_ERROR_DEPENDENCY_NOT_EXIST, "taskpool:: The dependency does not exist");
                 }
             }
             for (let task: Task of tasks) {
@@ -285,11 +326,11 @@ export namespace taskpool {
         static sendData(...args: FixedArray<NullishType>): void {
             const item: Task | undefined = getCurrentTask();
             if (item === undefined) {
-                throw new Error("The function is not called in the TaskPool thread");
+                throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
             }
             const task: Task = item;
             if (task.onReceiveCallback === undefined) {
-                throw new Error("The callback is not registered on the host side");
+                throw new Error(TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED, "taskpool:: The callback is not registered on the host side");
             }
             ConcurrencyHelpers.mutexLock(task.dataMutex);
             task.argsArray.push(args);
@@ -330,13 +371,13 @@ export namespace taskpool {
          */
         internal checkExecution(): void {
             if (this.groupId != 0) {
-                throw new Error("taskpool:: groupTask cannot execute outside");
+                throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE, "taskpool:: groupTask cannot execute outside");
             } else if (this.seqId != 0) {
-                throw new Error("taskpool:: seqRunnerTask cannot execute outside");
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: seqRunnerTask cannot execute outside");
             } else if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
-                throw new Error("taskpool:: executedTask with dependency cannot execute again");
+                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
             } else if (this.isSubmitted) {
-                throw new Error("taskpool:: task has been executed");
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
             }
         }
 
@@ -347,22 +388,22 @@ export namespace taskpool {
          */
         internal checkExecutionForDelayedTask(delayTime: number): void {
             if (delayTime < 0) {
-                throw new Error("taskpool:: The delayTime is less than zero");
+                throw new Error(TASKPOOL_ERROR_DELAY_TIME_NEGATIVE, "taskpool:: The delayTime is less than zero");
             }
             if (this.groupId != 0) {
-                throw new Error("taskpool:: groupTask cannot executeDelayed outside");
+                throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_DELAYED, "taskpool:: groupTask cannot executeDelayed outside");
             }
             if (this.seqId != 0) {
-                throw new Error("taskpool:: seqRunnerTask cannot executeDelayed outside");
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_DELAYED, "taskpool:: seqRunnerTask cannot executeDelayed outside");
             }
             if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
-                throw new Error("taskpool:: executedTask with dependency cannot execute again");
+                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
             }
             if (this.isSubmitted && (this instanceof LongTask)) {
-                throw new Error("taskpool:: Multiple executions of LongTask are not supported in the executeDelayed");
+                throw new Error(TASKPOOL_ERROR_LONG_TASK_MULTIPLE_EXECUTIONS, "taskpool:: Multiple executions of LongTask are not supported in the executeDelayed");
             }
             if (this.isPeriodicTask) {
-                throw new Error("taskpool:: the periodicTask cannot executeDelayed");
+                throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_DELAYED, "taskpool:: the periodicTask cannot executeDelayed");
             }
         }
 
@@ -373,13 +414,13 @@ export namespace taskpool {
          */
         internal checkExecutionForPeriodTask(period: number): void {
             if (period < 0) {
-                throw new Error("taskpool:: The period value is less than zero");
+                throw new Error(TASKPOOL_ERROR_PERIOD_NEGATIVE, "taskpool:: The period value is less than zero");
             }
             if (this.isSubmitted || this.isPeriodicTask || this.groupId != 0 || this.seqId != 0) {
-                throw new Error("taskpool:: The concurrent task has been executed and cannot be executed periodically");
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_PERIODIC, "taskpool:: The concurrent task has been executed and cannot be executed periodically");
             }
             if (this.isDependent || this.dependentTasks.size != 0) {
-                throw new Error("taskpool:: the task with dependency cannot executePeriodically");
+                throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_EXECUTE_PERIODIC, "taskpool:: the task with dependency cannot executePeriodically");
             }
         }
 
@@ -449,17 +490,17 @@ export namespace taskpool {
         /// @throws Error for the canceled task
         private throwCancelTaskError(): void {
             if (this.groupId != 0) {
-                throw new Error("taskpool:: taskGroup has been canceled");
+                throw new Error(TASKPOOL_ERROR_GROUP_CANCELED, "taskpool:: taskGroup has been canceled");
             }
             if (this.seqId != 0) {
-                throw new Error("taskpool:: sequenceRunner task has been canceled");
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_CANCELED, "taskpool:: sequenceRunner task has been canceled");
             }
-            throw new Error("taskpool:: task has been canceled");
+            throw new Error(TASKPOOL_ERROR_TASK_CANCELED, "taskpool:: task has been canceled");
         }
 
         private throwIfCallbackCannotBeAdded() {
             if (this.isSubmitted) {
-                throw new Error("taskpool:: The executed task does not support the registration of listeners.");
+                throw new Error(TASKPOOL_ERROR_LISTENER_REGISTRATION, "taskpool:: The executed task does not support the registration of listeners.");
             }
         }
 
@@ -616,15 +657,15 @@ export namespace taskpool {
 
         internal override checkExecution(): void {
             if (this.groupId != 0) {
-                throw new Error("taskpool:: groupTask cannot execute outside");
+                throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE, "taskpool:: groupTask cannot execute outside");
             } else if (this.seqId != 0) {
-                throw new Error("taskpool:: seqRunnerTask cannot execute outside");
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: seqRunnerTask cannot execute outside");
             } else if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
-                throw new Error("taskpool:: executedTask with dependency cannot execute again");
+                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
             } else if (this.isSubmitted) {
-                throw new Error("taskpool:: The long task can only be executed once");
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG, "taskpool:: The long task can only be executed once");
             } else if (this.isPeriodicTask) {
-                throw new Error("taskpool:: the periodicTask cannot execute again");
+                throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_AGAIN, "taskpool:: the periodicTask cannot execute again");
             }
         }
     }
@@ -678,17 +719,17 @@ export namespace taskpool {
 
         private checkExecution(task: Task): void {
             if (task.groupId != 0) {
-                throw new Error("taskpool:: taskGroup cannot add groupTask");
+                throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_GROUP, "taskpool:: taskGroup cannot add groupTask");
             } else if (task instanceof LongTask) {
-                throw new Error("taskpool:: The interface does not support the long task");
+                throw new Error(TASKPOOL_ERROR_LONG_TASK_NOT_SUPPORTED, "taskpool:: The interface does not support the long task");
             } else if (task.isPeriodicTask) {
-                throw new Error("taskpool:: The interface does not support the periodicTask");
+                throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_NOT_SUPPORTED, "taskpool:: The interface does not support the periodicTask");
             } else if (task.isSubmitted || task.seqId != 0) {
-                throw new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
+                throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER, "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
             } else if (task.isDependent || task.dependentTasks.size != 0) {
-                throw new Error("taskpool:: dependent task not allowed.");
+                throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: dependent task not allowed.");
             } else if (task.isSubmitted) {
-                throw new Error("taskpool:: task has been executed");
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
             }
         }
 
@@ -786,15 +827,15 @@ export namespace taskpool {
 
         private checkExecution(task: Task) {
             if (task.groupId != 0) {
-                throw new Error("taskpool:: SequenceRunner cannot execute groupTask");
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP, "taskpool:: sequenceRunner cannot execute groupTask");
             } else if (task.isSubmitted || task.seqId != 0) {
-                throw new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask");
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED, "taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask");
             } else if (task.isDependent || task.dependentTasks.size != 0) {
-                throw new Error("seqRunner:: dependent task not allowed.");
+                throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: sequenceRunner dependent task not allowed.");
             } else if (task.isPeriodicTask) {
-                throw new Error("taskpool:: SequenceRunner cannot execute the periodicTask");
+                throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_SEQUENCE_RUNNER, "taskpool:: sequenceRunner cannot execute the periodicTask");
             } else if (task.isSubmitted) {
-                throw new Error("taskpool:: task has been executed");
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
             }
         }
 
@@ -1001,9 +1042,9 @@ export namespace taskpool {
                 return;
             }
             if (task.seqId != 0) {
-                throw new Error("taskpool:: sequenceRunner task has been executed");
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED, "taskpool:: sequenceRunner task has been executed");
             } else {
-                throw new Error("taskpool:: task is not executed or has been executed");
+                throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
             }
         });
     }
@@ -1020,7 +1061,7 @@ export namespace taskpool {
                 groupsToBeCanceled.add(group.id);
                 return;
             }
-            throw new Error("taskpool:: taskGroup is not executed or has been executed");
+            throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP, "taskpool:: taskGroup is not executed or has been executed");
         });
     }
 

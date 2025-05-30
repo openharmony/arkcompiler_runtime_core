@@ -541,11 +541,11 @@ function main(): int {
         expectError(() => {
             let task = new taskpool.Task(returnAbc);
             task.addDependency();
-        }, new Error("addDependency has no params."));
+        }, new Error("taskpool:: addDependency has no params."));
         expectError(() => {
             let task = new taskpool.Task(returnAbc);
             task.removeDependency();
-        }, new Error("removeDependency has no params."));
+        }, new Error("taskpool:: removeDependency has no params."));
     });
     // #24758: Test is incorrect and flaky fails
     commonTaskSuiteDisabled.addTest("DependentTasksWithParamsTest", (): void throws =>
@@ -605,7 +605,7 @@ function main(): int {
         let task4 = new taskpool.Task(returnAbc);
         let task5 = new taskpool.Task(returnAbc);
         let task6 = new taskpool.Task(returnAbc);
-        let expectedError = new Error("There is a circular dependency");
+        let expectedError = new Error("taskpool:: There is a circular dependency");
         expectNoThrow(() => {
             task1.addDependency(task2);
             task2.addDependency(task3);
@@ -618,7 +618,7 @@ function main(): int {
             task6.addDependency(task1);
         }, expectedError);
         expectError(() => { task1.addDependency(task1) }, expectedError);
-        expectError(() => { task1.removeDependency(task3) }, new Error("The dependency does not exist, "));
+        expectError(() => { task1.removeDependency(task3) }, new Error("taskpool:: The dependency does not exist"));
     });
     commonTaskSuite.addTest("DependencyExecutedTaskTest", (): void throws =>
     {
