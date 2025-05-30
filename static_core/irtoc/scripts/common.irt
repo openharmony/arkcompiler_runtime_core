@@ -90,6 +90,7 @@ module Constants
     CLASS_STATE_OFFSET = "cross_values::GetClassStateOffset(GetArch())"
     ARRAY_LENGTH_OFFSET = "cross_values::GetCoretypesArrayLengthOffset(GetArch())"
     ARRAY_DATA_OFFSET = "cross_values::GetCoretypesArrayDataOffset(GetArch())"
+    ARRAY_CLASS_SIZE = "sizeof(coretypes::Array)"
     ARRAY_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::Array) + TLAB_ALIGNMENT - 1"
     VREGISTERS_NUM_OFFSET = "cross_values::GetFrameNumVregsOffset(GetArch())"
     VREGISTERS_OFFSET = "cross_values::GetFrameVregsOffset(GetArch())"

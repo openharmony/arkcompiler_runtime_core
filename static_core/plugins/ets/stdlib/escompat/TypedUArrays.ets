@@ -1455,9 +1455,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns a reversed copy
      */
-    public toReversed(): Uint8ClampedArray {
-        return new Uint8ClampedArray(this).reverse()
-    }
+    public final native toReversed(): Uint8ClampedArray
 
     /**
      * Creates a sorted copy
@@ -3295,9 +3293,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a reversed copy
      */
-    public toReversed(): Uint8Array {
-        return new Uint8Array(this).reverse()
-    }
+    public final native toReversed(): Uint8Array
 
     /**
      * Creates a sorted copy
@@ -5121,9 +5117,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a reversed copy
      */
-    public toReversed(): Uint16Array {
-        return new Uint16Array(this).reverse()
-    }
+    public final native toReversed(): Uint16Array
 
     /**
      * Creates a sorted copy
@@ -6982,9 +6976,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a reversed copy
      */
-    public toReversed(): Uint32Array {
-        return new Uint32Array(this).reverse()
-    }
+    public final native toReversed(): Uint32Array
 
     /**
      * Creates a sorted copy
@@ -8853,9 +8845,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns a reversed copy
      */
-    public toReversed(): BigUint64Array {
-        return new BigUint64Array(this).reverse()
-    }
+    public final native toReversed(): BigUint64Array
 
     /**
      * Creates a sorted copy

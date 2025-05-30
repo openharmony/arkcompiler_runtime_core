@@ -534,19 +534,18 @@ end  # compress_u16_to_u8_chars
 # Copy dwords (8-bytes)
 #
 scoped_macro(:copy_dwords) do |src, dst, size|
-    count := AndI(size).Imm(~0x7).u64
-    i1 := Cast(0).u64
+    count := AndI(size).Imm(~0x7).word
+    i1 := Cast(0).word
 Label(:CopyLoop_8b)
-    i := Phi(i1, i2).u64
-    If(i, count).AE.Unlikely.b {
+    i := Phi(i1, i2).word
+    If(i, count).AE.Unlikely {
         Goto(:End)
     }
-    Store(dst, i, Load(src, i).u64).u64
-    i2 := AddI(i).Imm(8).u64
+    Store(dst, i, Load(src, i).word).word
+    i2 := AddI(i).Imm(8).word
     Goto(:CopyLoop_8b)
 Label(:End)
 end # copy_dwords
-
 
 ###
 # Copy u8 chars from src to dst
@@ -557,14 +556,14 @@ scoped_macro(:copy_u8_chars) do |src, dst, count|
     copy_dwords(src, dst, len)
 
     # copy the tail if needed
-    i1 := AndI(len).Imm(~0x7).u64
+    i1 := AndI(len).Imm(~0x7).word
 Label(:CopyLoop)
-    i := Phi(i1, i2).u64
-    If(i, len).AE.Unlikely.b {
+    i := Phi(i1, i2).word
+    If(i, len).AE.Unlikely {
         Goto(:End)
     }
     Store(dst, i, Load(src, i).u8).u8
-    i2 := AddI(i).Imm(1).u64
+    i2 := AddI(i).Imm(1).word
     Goto(:CopyLoop)
 
 Label(:End)

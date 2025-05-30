@@ -835,6 +835,246 @@
     - ark::ObjectHeader*       # src string
     - int32_t                  # count
 
+- name: Int8ArrayToReversed
+  entrypoint: Int8ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int8ArrayToReversedOddSaved
+  entrypoint: EtsEscompatInt8ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int8ArrayToReversedSlowPath
+  entrypoint: EtsEscompatInt8ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int16ArrayToReversed
+  entrypoint: Int16ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int16ArrayToReversedOddSaved
+  entrypoint: EtsEscompatInt16ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int16ArrayToReversedSlowPath
+  entrypoint: EtsEscompatInt16ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int32ArrayToReversed
+  entrypoint: Int32ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int32ArrayToReversedOddSaved
+  entrypoint: EtsEscompatInt32ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Int32ArrayToReversedSlowPath
+  entrypoint: EtsEscompatInt32ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigInt64ArrayToReversed
+  entrypoint: BigInt64ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigInt64ArrayToReversedOddSaved
+  entrypoint: EtsEscompatBigInt64ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigInt64ArrayToReversedSlowPath
+  entrypoint: EtsEscompatBigInt64ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float32ArrayToReversed
+  entrypoint: Float32ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float32ArrayToReversedOddSaved
+  entrypoint: EtsEscompatFloat32ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float32ArrayToReversedSlowPath
+  entrypoint: EtsEscompatFloat32ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float64ArrayToReversed
+  entrypoint: Float64ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float64ArrayToReversedOddSaved
+  entrypoint: EtsEscompatFloat64ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Float64ArrayToReversedSlowPath
+  entrypoint: EtsEscompatFloat64ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint8ArrayToReversed
+  entrypoint: Uint8ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint8ArrayToReversedOddSaved
+  entrypoint: EtsEscompatUInt8ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint8ArrayToReversedSlowPath
+  entrypoint: EtsEscompatUInt8ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint16ArrayToReversed
+  entrypoint: Uint16ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint16ArrayToReversedOddSaved
+  entrypoint: EtsEscompatUInt16ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint16ArrayToReversedSlowPath
+  entrypoint: EtsEscompatUInt16ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint32ArrayToReversed
+  entrypoint: Uint32ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint32ArrayToReversedOddSaved
+  entrypoint: EtsEscompatUInt32ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: Uint32ArrayToReversedSlowPath
+  entrypoint: EtsEscompatUInt32ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigUint64ArrayToReversed
+  entrypoint: BigUint64ArrayToReversedTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigUint64ArrayToReversedOddSaved
+  entrypoint: EtsEscompatBigUInt64ArrayToReversed
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
+- name: BigUint64ArrayToReversedSlowPath
+  entrypoint: EtsEscompatBigUInt64ArrayToReversed
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*       # ret
+    - ark::ObjectHeader*       # obj
+
 - name: BeginGeneralNativeMethod
   entrypoint: BeginGeneralNativeMethod
   bridge: none

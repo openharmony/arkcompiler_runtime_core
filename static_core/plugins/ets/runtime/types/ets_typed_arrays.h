@@ -28,9 +28,19 @@ public:
     NO_COPY_SEMANTIC(EtsEscompatTypedArrayBase);
     NO_MOVE_SEMANTIC(EtsEscompatTypedArrayBase);
 
+    static constexpr size_t GetClassSize()
+    {
+        return sizeof(EtsEscompatTypedArrayBase);
+    }
+
     static constexpr size_t GetBufferOffset()
     {
         return MEMBER_OFFSET(EtsEscompatTypedArrayBase, buffer_);
+    }
+
+    static constexpr size_t GetBytesPerElementOffset()
+    {
+        return MEMBER_OFFSET(EtsEscompatTypedArrayBase, bytesPerElement_);
     }
 
     static constexpr size_t GetByteOffsetOffset()
@@ -58,14 +68,29 @@ public:
         return EtsObject::FromCoreType(ObjectAccessor::GetObject(this, GetBufferOffset()));
     }
 
+    void SetBuffer(ObjectPointer<EtsObject> buffer)
+    {
+        buffer_ = buffer;
+    }
+
     EtsDouble GetByteOffset() const
     {
         return byteOffset_;
     }
 
+    void SetByteOffset(EtsDouble offset)
+    {
+        byteOffset_ = offset;
+    }
+
     EtsDouble GetByteLength() const
     {
         return byteLength_;
+    }
+
+    void SetByteLength(EtsDouble byteLength)
+    {
+        byteLength_ = byteLength;
     }
 
     EtsDouble GetBytesPerElement() const
@@ -76,6 +101,11 @@ public:
     EtsInt GetLengthInt() const
     {
         return lengthInt_;
+    }
+
+    void SetLengthInt(EtsInt length)
+    {
+        lengthInt_ = length;
     }
 
     ObjectPointer<EtsString> GetName() const

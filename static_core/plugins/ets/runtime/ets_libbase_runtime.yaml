@@ -2636,6 +2636,150 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayReverse
 
+  - name: Int8ArrayToReversed
+    space: ets
+    class_name: escompat.Int8Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Int8Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt8ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt8ArrayToReversed
+    llvm_codegen_func: EmitInt8ArrayToReversed
+
+  - name: Int16ArrayToReversed
+    space: ets
+    class_name: escompat.Int16Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Int16Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt16ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt16ArrayToReversed
+    llvm_codegen_func: EmitInt16ArrayToReversed
+
+  - name: Int32ArrayToReversed
+    space: ets
+    class_name: escompat.Int32Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Int32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatInt32ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateInt32ArrayToReversed
+    llvm_codegen_func: EmitInt32ArrayToReversed
+
+  - name: BigInt64ArrayToReversed
+    space: ets
+    class_name: escompat.BigInt64Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.BigInt64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigInt64ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateBigInt64ArrayToReversed
+    llvm_codegen_func: EmitBigInt64ArrayToReversed
+
+  - name: Float32ArrayToReversed
+    space: ets
+    class_name: escompat.Float32Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Float32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat32ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateFloat32ArrayToReversed
+    llvm_codegen_func: EmitFloat32ArrayToReversed
+
+  - name: Float64ArrayToReversed
+    space: ets
+    class_name: escompat.Float64Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Float64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatFloat64ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateFloat64ArrayToReversed
+    llvm_codegen_func: EmitFloat64ArrayToReversed
+
+  - name: UInt8ArrayToReversed
+    space: ets
+    class_name: escompat.Uint8Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Uint8Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint8ArrayToReversed
+    llvm_codegen_func: EmitUint8ArrayToReversed
+
+  - name: UInt8ClampedArrayToReversed
+    space: ets
+    class_name: escompat.Uint8ClampedArray
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Uint8ClampedArray
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt8ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint8ArrayToReversed
+    llvm_codegen_func: EmitUint8ArrayToReversed
+
+  - name: UInt16ArrayToReversed
+    space: ets
+    class_name: escompat.Uint16Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Uint16Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt16ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint16ArrayToReversed
+    llvm_codegen_func: EmitUint16ArrayToReversed
+
+  - name: UInt32ArrayToReversed
+    space: ets
+    class_name: escompat.Uint32Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.Uint32Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatUInt32ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateUint32ArrayToReversed
+    llvm_codegen_func: EmitUint32ArrayToReversed
+
+
+  - name: BigUInt64ArrayToReversed
+    space: ets
+    class_name: escompat.BigUint64Array
+    method_name: toReversed
+    static: false
+    signature:
+      ret: escompat.BigUint64Array
+      args: []
+    impl: ark::ets::intrinsics::EtsEscompatBigUInt64ArrayToReversed
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateBigUint64ArrayToReversed
+    llvm_codegen_func: EmitBigUint64ArrayToReversed
+
   - name: Int8ArrayCopyWithin
     space: ets
     class_name: escompat.Int8Array
