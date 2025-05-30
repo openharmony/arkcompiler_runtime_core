@@ -122,7 +122,7 @@ namespace ark::ets::intrinsics {
             std::tie(stored, oldVal) = mem->CompareAndExchangeElement<type>(index, oldVal, value, false); \
         } while (!stored);                                                                                \
         /* CC-OFFNXT(G.PRE.05) function gen */                                                            \
-        return oldVal;                                                                                    \
+        return value;                                                                                     \
     }
 
 #define SHARED_MEMORY_SUB(type, postfix)                                                            \
