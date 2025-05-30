@@ -49,13 +49,13 @@ cases:
       f(n)
   - decl: |
       class A {
+        f(): string { return "A" }
+      }
+      class B {
         a:A
         constructor(a:A){
            this.a = a
         }
-        f(): string { return "A" }
-      }
-      class B {
         f = (this: A): string => { return this.f() }
       }
     use: |
@@ -72,4 +72,4 @@ cases:
     use: |
       let a: A = new A()
       let b: B = new B()
-      assertEQ(b.f(a), "A")
+      assertEQ(b.f(b, a), "A")
