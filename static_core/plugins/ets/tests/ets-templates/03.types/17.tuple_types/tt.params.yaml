@@ -180,3 +180,14 @@ cases:
           assertTrue( v[1][0] == 2.0 )
           assertTrue( v[1][1][0] == 3.0 )
           assertTrue( v[1][1][1] == "B" )
+
+    - use: |-
+          // test Array.push with tuple literal [boolean, int]
+          let arr: Array<[boolean, int]> = new Array<[boolean, int]>()
+          arr.push([true, 1])
+          arr.push([false, 2])
+          assertTrue( arr.length == 2 )
+          assertTrue( arr[0][0] == true )
+          assertTrue( arr[0][1] == 1 )
+          assertTrue( arr[1][0] == false )
+          assertTrue( arr[1][1] == 2 )
