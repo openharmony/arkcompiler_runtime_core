@@ -31,6 +31,7 @@ function main(): int {
     suite.addTest("Deque forEach with function with value and index", testDequeForEachWithValueAndIndex);
     suite.addTest("Deque forEach with function with value, index and tempArrayList", testDequeForEachWithValueIndexAndTempArrayList);
     suite.addTest("Deque forEach with change the elements", testDequeForEachChangeElements);
+    suite.addTest("Deque JSON stringify", testDequeJSONStringify);
 
     return suite.run();
 }
@@ -48,8 +49,10 @@ class TestData {
     static readonly testNumber31: number = 31;
     static readonly testObject1: Temp = { name: "Dylon", age: 13 };
     static readonly testString1: string = "string";
+    static readonly testString2: string = "a";
     static readonly forNumber: Number[] = [17, 3, 22, 8, 29, 11, 5, 19, 2, 26, 14, 7, 28, 10, 1, 24, 16, 13,
         21, 6, 27, 18, 4, 25, 12, 23, 9, 15, 20, 30];
+    static readonly result1 = `{"0":{"name":"Dylon","age":13},"1":"a","2":1}`; 
 }
 
 function testDequeHasElement() {
@@ -192,6 +195,15 @@ function testDequeForEachChangeElements() {
     for (let i: int = 0; i < TestData.forNumber.length; i++) {
         assertEQ(deque.popFirst(), TestData.forNumber[i], "ForEach should keep all elements the same");
     }
+}
+
+function testDequeJSONStringify() {
+    let deque: Deque<number | string | object> = new Deque<number | string | object>();
+    deque.insertEnd(TestData.testObject1);
+    deque.insertEnd(TestData.testString2);
+    deque.insertEnd(TestData.testNumber1);
+    let jsonResult = JSON.stringify(deque);
+    assertEQ(jsonResult, TestData.result1, `jsonResult should be ${TestData.result1}`);
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {

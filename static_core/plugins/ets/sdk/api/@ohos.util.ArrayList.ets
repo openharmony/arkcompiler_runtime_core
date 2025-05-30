@@ -21,10 +21,20 @@ const IncorrectBufferSizeId: number = 10200009;
 const CapacityErrorCodeId: number = 10200062;
 const INT_MAX_VALUE_OFFSET: number = 4294967296;
 
-export class ArrayList<T> implements Iterable<T> {
+export class ArrayList<T> implements Iterable<T>, JsonReplacer {
     private readonly DEFAULT_CAPACITY = 10;
     private capacity: int = this.DEFAULT_CAPACITY;
     private buffer: Array<T>;
+
+    public jsonReplacer(): Record<String, NullishType> {
+        const buf = this.buffer;
+        const len = buf.length;
+        let arrayObj: Record<String, NullishType> = {};
+        for (let i = 0; i < len; i++) {
+            arrayObj[String(i)] = buf[i];
+        }
+        return arrayObj;
+    }
 
     /**
      * property: The number of elements in the ArrayList.

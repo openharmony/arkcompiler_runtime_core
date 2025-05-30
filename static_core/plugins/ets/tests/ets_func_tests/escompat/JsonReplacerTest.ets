@@ -49,6 +49,50 @@ class N {
     u = undefined
 }
 
+class C {
+    age: number = 0
+    name: string = ""
+}
+
+class O<T> implements JsonReplacer {
+    private buffer: Array<T>
+    private capacity: number = 20
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.buffer = new Array<T>(this.capacity)
+        this.buffer.length = 0
+    }
+
+    pushBack(val: T): void {
+        this.buffer.push(val)
+    }
+
+    jsonReplacer(): Record<String, NullishType> {
+        const buf = this.buffer
+        const len = buf.length
+        let arrayObj: Record<String, NullishType> = {}
+        for (let i = 0; i < len; i++) {
+            arrayObj[String(i)] = buf[i]
+        }
+        return arrayObj
+    }
+}
+
+class D<T> {
+    private value: O<T>
+    private capacity: number
+
+    constructor(capacity: number) {
+        this.capacity = capacity
+        this.value = new O<T>(capacity)
+    }
+
+    pushBack(val: T): void {
+        this.value.pushBack(val)
+    }
+}
+
 function jsonStringifyObjectWithFunctionReplacer(): void {
     assertEQ(JSON.stringify(new A(), dummyReplacer), `{"id":1,"name":"A"}`)
     assertEQ(JSON.stringify(new A(), dummyReplacer, "\t"), `{\n\t"id": 1,\n\t"name": "A"\n}`)
@@ -138,11 +182,79 @@ function jsonStringifyWithUndefinedReplacer(): void {
     assertEQ(JSON.stringify(rec, undefined), `{"id":1,"name":"R"}`)
 }
 
+function jsonStringifyWithJsonReplacer(): void {
+    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
+        = new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    testClass.pushBack("zhang san")
+    testClass.pushBack(1)
+    testClass.pushBack({
+        age: 10, name: "zhang"
+    } as C)
+    testClass.pushBack(undefined)
+    testClass.pushBack(null)
+    testClass.pushBack(true)
+    let jsonResult = JSON.stringify(testClass)
+    let result = `{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true}`
+    assertEQ(jsonResult, result, `{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true}`)
+}
+
+function jsonStringifyWithNestedReplacer(): void {
+    let testClass: D<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
+        = new D<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    testClass.pushBack("zhang san")
+    testClass.pushBack(1)
+    testClass.pushBack({
+        age: 10, name: "zhang"
+    } as C)
+    testClass.pushBack(undefined)
+    testClass.pushBack(null)
+    testClass.pushBack(true)
+    let jsonResult = JSON.stringify(testClass)
+    let result = `{"value":{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true},"capacity":20}`
+    assertEQ(jsonResult, result, `{"value":{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true},"capacity":20}`)
+}
+
+function jsonStringifyWithSpaceReplacer(): void {
+    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
+        = new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    testClass.pushBack("zhang san")
+    testClass.pushBack(1)
+    testClass.pushBack({
+        age: 10, name: "zhang"
+    } as C)
+    testClass.pushBack(undefined)
+    testClass.pushBack(null)
+    testClass.pushBack(true)
+    let jsonResult = JSON.stringify(testClass, undefined, " ")
+    let result = `{\n "0": "zhang san",\n "1": 1,\n "2": {\n  "age": 10,\n  "name": "zhang"\n },\n "4": null,\n "5": true\n}`
+    assertEQ(jsonResult, result, `{\n "0": "zhang san",\n "1": 1,\n "2": {\n  "age": 10,\n  "name": "zhang"\n },\n "4": null,\n "5": true\n}`)
+}
+
+function jsonStringifyWithReplacer(): void {
+    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
+        = new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    testClass.pushBack("zhang san")
+    testClass.pushBack(1)
+    testClass.pushBack({
+        age: 10, name: "zhang"
+    } as C)
+    testClass.pushBack(undefined)
+    testClass.pushBack(null)
+    testClass.pushBack(true)
+    let jsonResult = JSON.stringify(testClass, ["0"], " ")
+    let result = `{\n "0": "zhang san"\n}`
+    assertEQ(jsonResult, result, `{\n "0": "zhang san"\n}`)
+}
+
 function main(): int {
     const suite = new ArkTestsuite("JSON.stringify")
     suite.addTest("object with function replacer", jsonStringifyObjectWithFunctionReplacer)
     suite.addTest("record with function replacer", jsonStringifyRecordWithFunctionReplacer)
     suite.addTest("array with function replacer", jsonStringifyArrayWithFunctionReplacer)
+    suite.addTest("class implements JsonReplacer", jsonStringifyWithJsonReplacer)
+    suite.addTest("class implements JsonReplacer nested case", jsonStringifyWithNestedReplacer)
+    suite.addTest("class implements JsonReplacer with space", jsonStringifyWithSpaceReplacer)
+    suite.addTest("class implements JsonReplacer with space and replacer", jsonStringifyWithReplacer)
     suite.addTest("with array replacer", jsonStringifyWithArrayReplacer)
     suite.addTest("with 'null' replacer", jsonStringifyWithNullReplacer)
     suite.addTest("with 'undefined' replacer", jsonStringifyWithUndefinedReplacer)
