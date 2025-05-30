@@ -692,6 +692,19 @@ void SaveStateInst::AllocateImmediates(ArenaAllocator *allocator, size_t size)
     immediates_->resize(size);
 }
 
+bool SaveStateInst::GetInputsWereDeletedRec() const
+{
+    if (GetInputsWereDeleted()) {
+        return true;
+    }
+    if (callerInst_ != nullptr) {
+        auto *saveState = callerInst_->GetSaveState();
+        ASSERT(saveState != nullptr);
+        return saveState->GetInputsWereDeletedRec();
+    }
+    return false;
+}
+
 void TryInst::AppendCatchTypeId(uint32_t id, uint32_t catchEdgeIndex)
 {
     if (catchTypeIds_ == nullptr) {

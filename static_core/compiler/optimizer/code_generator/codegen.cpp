@@ -912,7 +912,8 @@ void Codegen::CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, I
         // 1 for acc, number of env regs for dynamic method
         vregsCount += 1U + GetGraph()->GetEnvCount();
 #ifndef NDEBUG
-        ASSERT_PRINT(!saveState->GetInputsWereDeleted(), "Some vregs were deleted from the save state");
+        ASSERT_PRINT(!saveState->GetInputsWereDeleted() || saveState->GetInputsWereDeletedSafely(),
+                     "Some vregs were deleted from the save state");
 #endif
     }
 

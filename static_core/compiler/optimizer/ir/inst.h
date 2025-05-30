@@ -2968,6 +2968,11 @@ public:
         return GetInput(GetObjectIndex()).GetInst();
     }
 
+    const Inst *GetObjectInst() const
+    {
+        return GetInput(GetObjectIndex()).GetInst();
+    }
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(inputTypes_ != nullptr);
@@ -3956,21 +3961,55 @@ public:
     }
 
     Inst *Clone(const Graph *targetGraph) const override;
-#ifndef NDEBUG
+
     void SetInputsWereDeleted()
     {
         SetField<FlagInputsWereDeleted>(true);
     }
 
-    bool GetInputsWereDeleted()
+    bool GetInputsWereDeleted() const
     {
         return GetField<FlagInputsWereDeleted>();
+    }
+
+    bool GetInputsWereDeletedRec() const;
+
+    static bool InstMayRequireRegMap(const Inst *inst)
+    {
+        // The call may be inlined later on and have Deoptimize or DeoptimizeIf
+        // Or the block may become try after inlining
+        return inst->RequireRegMap() || inst->IsCall() || inst->CanThrow();
+    }
+
+    template <typename PredT = bool (*)(const Inst *)>
+    bool CanRemoveInputs(PredT &&mayRequireRegMap = SaveStateInst::InstMayRequireRegMap) const
+    {
+        for (auto &user : GetUsers()) {
+            if (mayRequireRegMap(user.GetInst())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+#ifndef NDEBUG
+    bool GetInputsWereDeletedSafely() const
+    {
+        return GetField<FlagInputsWereDeletedSafely>();
+    }
+
+    void SetInputsWereDeletedSafely()
+    {
+        SetField<FlagInputsWereDeletedSafely>(true);
     }
 #endif
 
 protected:
-#ifndef NDEBUG
     using FlagInputsWereDeleted = LastField::NextFlag;
+#ifndef NDEBUG
+    using FlagInputsWereDeletedSafely = FlagInputsWereDeleted::NextFlag;
+    using LastField = FlagInputsWereDeletedSafely;
+#else
     using LastField = FlagInputsWereDeleted;
 #endif
 

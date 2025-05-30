@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,17 @@
 namespace ark::compiler {
 
 bool IsStringBuilderInstance(Inst *inst);
-bool IsMethodStringConcat(Inst *inst);
-bool IsMethodStringBuilderConstructorWithStringArg(Inst *inst);
-bool IsMethodStringBuilderConstructorWithCharArrayArg(Inst *inst);
-bool IsStringBuilderToString(Inst *inst);
-bool IsMethodStringBuilderDefaultConstructor(Inst *inst);
+bool IsMethodStringConcat(const Inst *inst);
+bool IsMethodStringBuilderConstructorWithStringArg(const Inst *inst);
+bool IsMethodStringBuilderConstructorWithCharArrayArg(const Inst *inst);
+bool IsStringBuilderToString(const Inst *inst);
+bool IsMethodStringBuilderDefaultConstructor(const Inst *inst);
+
+bool IsStringBuilderCtorCall(const Inst *inst, const Inst *self = nullptr);
+bool IsStringBuilderMethod(const Inst *inst, const Inst *self = nullptr);
+bool IsNullCheck(const Inst *inst, const Inst *self = nullptr);
+
+bool IsIntrinsicStringConcat(const Inst *inst);
 void InsertBeforeWithSaveState(Inst *inst, Inst *before);
 void InsertAfterWithSaveState(Inst *inst, Inst *after);
 void InsertBeforeWithInputs(Inst *inst, Inst *before);
@@ -49,11 +55,11 @@ bool IsUsedOutsideBasicBlock(Inst *inst, BasicBlock *bb);
 SaveStateInst *FindFirstSaveState(BasicBlock *block);
 
 template <bool ALLOW_INLINED = false>
-bool IsStringBuilderAppend(Inst *inst)
+bool IsStringBuilderAppend(const Inst *inst)
 {
     auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
     if (inst->GetOpcode() == Opcode::CallStatic || inst->GetOpcode() == Opcode::CallVirtual) {
-        auto callInst = static_cast<CallInst *>(inst);
+        auto callInst = static_cast<const CallInst *>(inst);
         return (ALLOW_INLINED || !callInst->IsInlined()) &&
                runtime->IsMethodStringBuilderAppend(callInst->GetCallMethod());
     }
@@ -67,7 +73,7 @@ bool IsStringBuilderAppend(Inst *inst)
 bool IsIntrinsicStringBuilderAppendString(Inst *inst);
 
 using InputDesc = std::pair<Inst *, unsigned>;
-void RemoveFromInstructionInputs(ArenaVector<InputDesc> &inputDescriptors);
+void RemoveFromInstructionInputs(ArenaVector<InputDesc> &inputDescriptors, bool doMarkSaveStates = false);
 bool BreakStringBuilderAppendChains(BasicBlock *block);
 
 Inst *GetArrayLengthConstant(Inst *newArray);

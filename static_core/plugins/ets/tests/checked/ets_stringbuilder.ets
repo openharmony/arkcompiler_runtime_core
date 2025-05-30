@@ -68,9 +68,9 @@
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /NullCheck/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString4"
 //! PASS_BEFORE   "BranchElimination"
@@ -215,9 +215,9 @@
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /NullCheck/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
+//! INST          /StringBuilder::<ctor>/
+//! INST_NEXT     /SaveState/
+//! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString4"
 //! PASS_BEFORE   "BranchElimination"
@@ -348,7 +348,7 @@ function doSmthWithSB(sb: StringBuilder) : void {
 }
 
 function toString3(str: String): String {
-    let sb = new StringBuilder(str);
+    let sb = new StringBuilder(str);            // not removed, due to potential inlining of doSmth with potential deoptimize instructions
     sb.toString();                              // applied
     doSmth();
     return sb.toString();                       // applied
