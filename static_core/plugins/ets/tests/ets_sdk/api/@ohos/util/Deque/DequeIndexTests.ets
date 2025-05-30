@@ -58,11 +58,11 @@ function testIndexOutOfRange() {
     initializeDeque(deque, testNumbers);
     let exceptionCheck = (e: Error | Exception): boolean | string => {
         return (e instanceof BusinessError) && ((e as BusinessError).message ==
-            `The value of \"index\" is out of range. It must be >= 0 && <= ${Int.MAX_VALUE}. Received value is: 36`) &&
+            `The value of \"index\" is out of range. It must be >= 0 && <= 29. Received value is: -30`) &&
             ((e as BusinessError).code == OutOfBoundsErrorCodeId);
     }
-    expectThrow(() => {deque[testNumbers.length + 6]}, exceptionCheck);
-    expectThrow(() => {deque[testNumbers.length + 6] = 0}, exceptionCheck);
+    arktest.expectThrow(() => {deque[-testNumbers.length]}, exceptionCheck);
+    arktest.expectThrow(() => {deque[-testNumbers.length] = 0}, exceptionCheck);
 }
 
 function initializeDeque<T>(deque: Deque<T>, sourceArray: T[]) {

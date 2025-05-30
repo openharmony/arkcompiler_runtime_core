@@ -29,7 +29,8 @@ function main(): int {
     suite.addTest("Deque forEach with no parameter function", testDequeForEachNoParam);
     suite.addTest("Deque forEach with function with value", testDequeForEachWithValue);
     suite.addTest("Deque forEach with function with value and index", testDequeForEachWithValueAndIndex);
-    suite.addTest("Deque forEach with function with value, index and tempArrayList", testDequeForEachWithValueIndexAndTempArrayList);
+    suite.addTest("Deque forEach with function with value, index and tempArrayList",
+        testDequeForEachWithValueIndexAndTempArrayList);
     suite.addTest("Deque forEach with change the elements", testDequeForEachChangeElements);
 
     return suite.run();
