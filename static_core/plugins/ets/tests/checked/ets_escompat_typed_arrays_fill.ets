@@ -14,184 +14,184 @@
  */
 
 //! CHECKER       Int8Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_int8array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_int8array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt8Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt8Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int8ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_int8array() {
+function testFillInt8Array() {
     let a = new Int8Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, Int8Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, Int8Array.of(0, 0, 77, 77, 77, 0))
 }
 
 //! CHECKER       Int16Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_int16array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_int16array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt16Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt16Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int16ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_int16array() {
+function testFillInt16Array() {
     let a = new Int16Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, Int16Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, Int16Array.of(0, 0, 77, 77, 77, 0))
 }
 
 //! CHECKER       Int32Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_int32array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_int32array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt32Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt32Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int32ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_int32array() {
+function testFillInt32Array() {
     let a = new Int32Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, Int32Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, Int32Array.of(0, 0, 77, 77, 77, 0))
 }
 
 //! CHECKER       Float32Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_float32array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_float32array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillFloat32Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillFloat32Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Float32ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_float32array() {
+function testFillFloat32Array() {
     let a = new Float32Array(6)
     a.fill(0)
     a.fill(77.77, 2, 5)
     a.fill(NaN, 0, 2)
     a.fill(Infinity, 4, 6)
-    check_array(a, Float32Array.of(NaN, NaN, 77.77, 77.77, Infinity, Infinity))
+    checkArray(a, Float32Array.of(NaN, NaN, 77.77, 77.77, Infinity, Infinity))
 }
 
 //! CHECKER       Float64Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_float64array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_float64array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillFloat64Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillFloat64Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Float64ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_float64array() {
+function testFillFloat64Array() {
     let a = new Float64Array(6)
     a.fill(0)
     a.fill(77.77, 2, 5)
     a.fill(NaN, 0, 2)
     a.fill(Infinity, 4, 6)
-    check_array(a, Float64Array.of(NaN, NaN, 77.77, 77.77, Infinity, Infinity))
+    checkArray(a, Float64Array.of(NaN, NaN, 77.77, 77.77, Infinity, Infinity))
 }
 
 //! CHECKER       BigInt64Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_bigint64array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_bigint64array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillBigInt64Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillBigInt64Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigInt64ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_bigint64array() {
+function testFillBigInt64Array() {
     let a = new BigInt64Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, BigInt64Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, BigInt64Array.of(0, 0, 77, 77, 77, 0))
 }
 
 //! CHECKER       Uint8Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint8array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint8array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint8Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint8Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt8ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_uint8array() {
+function testFillUint8Array() {
     let a = new Uint8Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, Uint8Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, Uint8Array.of(0, 0, 77, 77, 77, 0))
 }
 
 //! CHECKER       Uint8ClampedArray fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint8clampedarray"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint8clampedarray"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint8ClampedArray"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint8ClampedArray"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt8ClampedArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_uint8clampedarray() {
+function testFillUint8ClampedArray() {
     let a = new Uint8ClampedArray(6)
     a.fill(0)
     a.fill(256, 2, 5)
-    check_array(a, Uint8ClampedArray.of(0, 0, 255, 255, 255, 0))
+    checkArray(a, Uint8ClampedArray.of(0, 0, 255, 255, 255, 0))
 }
 
 //! CHECKER       Uint16Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint16array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint16array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint16Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint16Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt16ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_uint16array() {
+function testFillUint16Array() {
     let a = new Uint16Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, Uint16Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, Uint16Array.of(0, 0, 77, 77, 77, 0))
 }
 
 //! CHECKER       Uint32Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint32array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_uint32array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint32Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillUint32Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.UInt32ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_uint32array() {
+function testFillUint32Array() {
     let a = new Uint32Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, Uint32Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, Uint32Array.of(0, 0, 77, 77, 77, 0))
 }
 
 //! CHECKER       BigUint64Array fill intrinsic
-//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_biguint64array"
-//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::test_fill_biguint64array"
+//! RUN           force_jit: true, entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillBigUint64Array"
+//! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillBigUint64Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigUInt64ArrayFillInternal "
 //! INST_NOT      /Call.*Array::fillInternal/
-function test_fill_biguint64array() {
+function testFillBigUint64Array() {
     let a = new BigUint64Array(6)
     a.fill(0)
     a.fill(77, 2, 5)
-    check_array(a, BigUint64Array.of(0, 0, 77, 77, 77, 0))
+    checkArray(a, BigUint64Array.of(0, 0, 77, 77, 77, 0))
 }
 
-function check_array(arr: ArrayLike<number>, expected: ArrayLike<number>) {
+function checkArray(arr: ArrayLike<number>, expected: ArrayLike<number>) {
     if (arr.length != expected.length) {
-        throw new Exception("Unexpected array length")
+        throw new Exception('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (isNaN(arr[i]) && isNaN(expected[i])) {
             continue
         }
         if (arr[i] != expected[i]) {
-            throw new Exception("Unexpected element with index " + i)
+            throw new Exception('Unexpected element with index ' + i)
         }
     }
 }
 
-function check_array(arr: BigInt64Array, expected: BigInt64Array) {
+function checkArray(arr: BigInt64Array, expected: BigInt64Array) {
     if (arr.length != expected.length) {
-        throw new Exception("Unexpected array length")
+        throw new Exception('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Exception("Unexpected element with index " + i)
+            throw new Exception('Unexpected element with index ' + i)
         }
     }
 }
 
-function check_array(arr: BigUint64Array, expected: BigUint64Array) {
+function checkArray(arr: BigUint64Array, expected: BigUint64Array) {
     if (arr.length != expected.length) {
-        throw new Exception("Unexpected array length")
+        throw new Exception('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Exception("Unexpected element with index " + i)
+            throw new Exception('Unexpected element with index ' + i)
         }
     }
 }
