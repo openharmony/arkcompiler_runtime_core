@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//arkcompiler/ets_runtime/js_runtime_config.gni")
-import("test_config.gni")
 if (!ark_standalone_build) {
   import("//build/ohos.gni")
 }
@@ -106,6 +105,6 @@ template("host_hybridtest_action") {
 
 if (ark_standalone_build) {
   host_hybridtest_action("HybridXGCTests") {
-    deps = [ "$toolchain_root/build/core/gn:hybrid" ]
+    deps = [ "//build/core/gn:hybrid" ]
   }
 }
