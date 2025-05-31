@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
                                     << " option is supported only with --interpreter-type=cpp";
                 return;
             }
-            if (Runtime::GetCurrent()->IsJitEnabled()) {
+            if (Runtime::GetCurrent()->IsProfilerEnabled()) {
                 LOG(INFO, RUNTIME) << "Dynamic types profiling disabled, use --interpreter-type=cpp to enable";
             }
         }

@@ -598,7 +598,7 @@ bool Method::IsProxy() const
 /* static */
 int16_t Method::GetInitialHotnessCounter()
 {
-    if (!Runtime::GetCurrent()->IsJitEnabled()) {
+    if (!Runtime::GetCurrent()->IsProfilerEnabled()) {
         return std::numeric_limits<int16_t>::max();
     }
 

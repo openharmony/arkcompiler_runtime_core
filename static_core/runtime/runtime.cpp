@@ -567,15 +567,14 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
         ark::os::mem_hooks::PandaHooks::Enable();
     }
 
-    saveProfilingInfo_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
-
 #ifdef PANDA_COMPILER_ENABLE
     // NOTE(maksenov): Enable JIT for debug mode
     isJitEnabled_ = !this->IsDebugMode() && Runtime::GetOptions().IsCompilerEnableJit();
 #else
     isJitEnabled_ = false;
 #endif
-
+    isProfilerEnabled_ = Runtime::GetOptions().IsProfilerEnabled();
+    saveProfilingInfo_ = Runtime::GetOptions().IsProfilesaverEnabled();
     verifierConfig_ = ark::verifier::NewConfig();
     InitializeVerifierRuntime();
 
@@ -1528,7 +1527,7 @@ void Runtime::PostZygoteFork()
 // Returns true if profile saving is enabled. GetJit() will be not null in this case.
 bool Runtime::SaveProfileInfo() const
 {
-    return saveProfilingInfo_;
+    return IsProfilerEnabled() && saveProfilingInfo_;
 }
 
 void Runtime::CheckOptionsFromOs() const

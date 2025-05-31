@@ -592,8 +592,8 @@ void TestTwoLabelsJmp(int64_t v1, int64_t v2, int64_t r,
 
     EXPECT_EQ(frameHandler.GetVReg(1).GetLong(), r) << ss->str();
     EXPECT_EQ(method->GetHotnessCounter(),
-              (r == 1 ? (Runtime::GetCurrent()->IsJitEnabled() ? 1499U : std::numeric_limits<int16_t>::max() - 1)
-                      : (Runtime::GetCurrent()->IsJitEnabled() ? 1500U : std::numeric_limits<int16_t>::max())))
+              (r == 1 ? (Runtime::GetCurrent()->IsProfilerEnabled() ? 1499U : std::numeric_limits<int16_t>::max() - 1)
+                      : (Runtime::GetCurrent()->IsProfilerEnabled() ? 1500U : std::numeric_limits<int16_t>::max())))
         << ss->str();
 }
 
@@ -672,8 +672,8 @@ void TestTwoLabelsJmpz(int64_t v, int64_t r, const std::function<void(BytecodeEm
     auto frameHandler = StaticFrameHandler(f.get());
     EXPECT_EQ(frameHandler.GetVReg(0).GetLong(), r) << ss->str();
     EXPECT_EQ(method->GetHotnessCounter(),
-              (r == 1 ? (Runtime::GetCurrent()->IsJitEnabled() ? 1499U : std::numeric_limits<int16_t>::max() - 1)
-                      : (Runtime::GetCurrent()->IsJitEnabled() ? 1500U : std::numeric_limits<int16_t>::max())))
+              (r == 1 ? (Runtime::GetCurrent()->IsProfilerEnabled() ? 1499U : std::numeric_limits<int16_t>::max() - 1)
+                      : (Runtime::GetCurrent()->IsProfilerEnabled() ? 1500U : std::numeric_limits<int16_t>::max())))
         << ss->str();
 }
 

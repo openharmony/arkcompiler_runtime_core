@@ -388,6 +388,11 @@ public:
         return isJitEnabled_;
     }
 
+    bool IsProfilerEnabled() const
+    {
+        return isProfilerEnabled_ || isJitEnabled_;
+    }
+
     void ForceEnableJit()
     {
         isJitEnabled_ = true;
@@ -537,6 +542,7 @@ private:
     bool checksNullptr_ {true};
     bool isStacktrace_ {false};
     bool isJitEnabled_ {false};
+    bool isProfilerEnabled_ {false};
 
     bool isDumpNativeCrash_ {true};
 
