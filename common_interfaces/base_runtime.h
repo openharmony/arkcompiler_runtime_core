@@ -48,7 +48,8 @@ public:
     void PreFork(ThreadHolder *holder);
     void PostFork();
 
-    void Init();
+    void Init(const RuntimeParam &param);   // Support setting custom parameters
+    void Init();                            // Use default parameters
     void Fini();
 
     // Need refactor, move to other file
