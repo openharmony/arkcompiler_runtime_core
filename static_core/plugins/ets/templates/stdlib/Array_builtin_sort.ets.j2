@@ -25,6 +25,60 @@ package std.core;
 {%- elif T == 'boolean' and arg == '' %}
 {%- set prec = '((%s) ? 1 : 0) < ((%s) ? 1 : 0)' %}
 {%- endif %}
+
+{%- if T not in ['NullishType', 'boolean', 'char'] and arg == '' %}
+function copyPart(dst: FixedArray<{{T}}>, counter: int, src: FixedArray<{{T}}>, start: int, end?: int) {
+    if (end == undefined) {
+        end = src.length
+    }
+    for (let i = start; i < end!; ++i) {
+        dst[counter++] = src[i]
+    }
+}
+
+function merge(left: FixedArray<{{T}}>, right: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => number): FixedArray<{{T}}> {
+    const result:FixedArray<{{T}}> = new {{T}}[right.length + left.length]
+    let leftIndex = 0;
+    let rightIndex = 0;
+    let counter: int = 0
+
+    while (leftIndex < left.length &&
+        rightIndex < right.length) {
+        if (cmp(left[leftIndex], right[rightIndex]) <= 0) {
+            result[counter++] = left[leftIndex];
+            leftIndex++;
+        } else {
+            result[counter++] = right[rightIndex]
+            rightIndex++;
+        }
+    }
+    copyPart(result, counter, left, leftIndex)
+    copyPart(result, counter, right, rightIndex)
+
+    return result
+}
+
+export function mergeSort(array: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => number, begin: int = 0, end: int = 0): FixedArray<{{T}}> {
+    if (end == 0) {
+        end = array.length
+    }
+    const arrLength = end - begin
+    if (arrLength <= 1) {
+        return array;
+    }
+    const middle = Math.floor(begin + arrLength / 2) as int
+    const leftHalf:FixedArray<{{T}}> = new {{T}}[middle]
+    let counter: int = 0
+    copyPart(leftHalf, counter, array, 0, middle)
+
+    counter = 0
+    const rightHalf:FixedArray<{{T}}> = new {{T}}[arrLength - middle]
+    copyPart(rightHalf, counter, array, middle)
+
+    return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
+}
+{%- endif %}
+
 function bubbleSort(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
     let was = true
     while (was) {
@@ -367,10 +421,6 @@ function countSortBoolsInv(arr: FixedArray<boolean>, startIndex: int, endIndex: 
     }
 }
 {%- endif %}
-
-export function sort(arr: FixedArray<{{T}}>, startIndex: int): void {
-    sort(arr, startIndex, arr.length)
-}
 
 // ======== tests section ========
 

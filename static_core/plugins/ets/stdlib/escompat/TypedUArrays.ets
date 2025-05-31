@@ -1304,12 +1304,18 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
+
         let cmp = (l: int, r: int): number => {
             const result = compareFn!(l as number, r as number)
             return result
         }
-        sort(arr, cmp)
-        for (let i = 0; i < this.lengthInt; ++i) {
+        const MAX_SHORT_LENGTH = 24
+        if (arr.length > MAX_SHORT_LENGTH) {
+            arr = mergeSort(arr, cmp)
+        } else {
+            sort(arr, cmp)
+        }
+        for (let i = 0; i < arr.length; ++i) {
             this.setUnsafe(i, arr[i])
         }
         return this
@@ -3142,12 +3148,18 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
+
         let cmp = (l: int, r: int): number => {
             const result = compareFn!(l as number, r as number)
             return result
         }
-        sort(arr, cmp)
-        for (let i = 0; i < this.lengthInt; ++i) {
+        const MAX_SHORT_LENGTH = 24
+        if (arr.length > MAX_SHORT_LENGTH) {
+            arr = mergeSort(arr, cmp)
+        } else {
+            sort(arr, cmp)
+        }
+        for (let i = 0; i < arr.length; ++i) {
             this.setUnsafe(i, arr[i])
         }
         return this
@@ -4966,12 +4978,18 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
+
         let cmp = (l: int, r: int): number => {
             const result = compareFn!(l as number, r as number)
             return result
         }
-        sort(arr, cmp)
-        for (let i = 0; i < this.lengthInt; ++i) {
+        const MAX_SHORT_LENGTH = 24
+        if (arr.length > MAX_SHORT_LENGTH) {
+            arr = mergeSort(arr, cmp)
+        } else {
+            sort(arr, cmp)
+        }
+        for (let i = 0; i < arr.length; ++i) {
             this.setUnsafe(i, arr[i])
         }
         return this
@@ -6825,12 +6843,18 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
+
         let cmp = (l: long, r: long): number => {
             const result = compareFn!(l as number, r as number)
             return result
         }
-        sort(arr, cmp)
-        for (let i = 0; i < this.lengthInt; ++i) {
+        const MAX_SHORT_LENGTH = 24
+        if (arr.length > MAX_SHORT_LENGTH) {
+            arr = mergeSort(arr, cmp)
+        } else {
+            sort(arr, cmp)
+        }
+        for (let i = 0; i < arr.length; ++i) {
             this.setUnsafe(i, arr[i])
         }
         return this
@@ -8690,6 +8714,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
+
         let cmp = (l: long, r: long): number => {
             const result = compareFn!(new BigInt(l), new BigInt(r))
             if (result instanceof BigInt) {
@@ -8698,8 +8723,13 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
                 return result as number
             }
         }
-        sort(arr, cmp)
-        for (let i = 0; i < this.lengthInt; ++i) {
+        const MAX_SHORT_LENGTH = 24
+        if (arr.length > MAX_SHORT_LENGTH) {
+            arr = mergeSort(arr, cmp)
+        } else {
+            sort(arr, cmp)
+        }
+        for (let i = 0; i < arr.length; ++i) {
             this.setUnsafe(i, arr[i])
         }
         return this
