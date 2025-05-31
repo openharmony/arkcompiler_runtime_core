@@ -130,8 +130,8 @@ def GenerateStringEquals(lang, dynamic, compression)
             }
             length := Cast(length1.u32).u64
         else
-            class1 := LoadI(str1).Imm(Constants::OBJECT_CLASS_OFFSET).u32
-            class2 := LoadI(str2).Imm(Constants::OBJECT_CLASS_OFFSET).u32
+            class1 := load_class(str1)
+            class2 := load_class(str2)
             If(class1, class2).NE.Unlikely.b {
                 Goto(:NotEqual)
             }
@@ -221,7 +221,7 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
     call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
   end
   # Store class of the object
-  StoreI(_start, string_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  store_class(_start, string_klass)
   # Update the TLAB state
   StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
   # Return a pointer to the newly allocated string
@@ -291,7 +291,7 @@ macro(:allocate_array_of_bytes_tlab) do |array_klass, char_count|
     call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
   end
   # Store class of the object
-  StoreI(_start, array_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  store_class(_start, array_klass)
   # Store array length
   StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
   # Update the TLAB state
@@ -329,7 +329,7 @@ macro(:allocate_array_of_chars_tlab) do |array_klass, char_count|
     call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
   end
   # Store class of the object
-  StoreI(_start, array_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  store_class(_start, array_klass)
   # Store array length
   StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
   # Update the TLAB state
@@ -356,7 +356,7 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
 
     # There is no check of the argument against NullPointer as
     # it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
-    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(str)
     length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     hashcode := LoadI(str).Imm(Constants::STRING_HASHCODE_OFFSET).u32
     data_size := unpack_length(Cast(length).u64, string_compression_enabled, 1)
@@ -918,7 +918,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
     src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
     src_str_data := Add(src_str_data, Cast(offset).u64).ptr
 
-    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(str)
     char_count := Sub(ex6, bx6).u32
 
     # Allocate a new string

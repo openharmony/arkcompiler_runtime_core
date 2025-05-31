@@ -46,7 +46,7 @@ macro(:fast_substring) do |_str, _str_len, _begin_index, _end_index, _not_compre
     _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
     Goto(:_Fast_Substring_Result_No_Barrier)
   }
-  _klass := LoadI(_str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  _klass := load_class(_str)
   If(_char_count, 0).EQ.Unlikely.b {
     # Allocate and return an empty string
     _empty_str := allocate_string_tlab(_klass, 0)
@@ -237,7 +237,7 @@ function(:StringEmpty,
     next
   end
 
-  klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  klass := load_class(str)
   empty_str := allocate_string_tlab(klass, 0)
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
@@ -1612,7 +1612,7 @@ function(:StringRepeatTlab,
   }
 
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
-    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    klass := load_class(str)
     new_str := allocate_string_tlab(klass, Cast(0).u64);
     Return(new_str).ptr
   }
@@ -1622,7 +1622,7 @@ function(:StringRepeatTlab,
   }
 
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
-  klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  klass := load_class(str)
   old_buf := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
   uncompressed := AndI(length).Imm(1).u32
   length := Shl(ShrI(length).Imm(1).u32, uncompressed).u32
