@@ -61,13 +61,21 @@ struct Function {
     };
 
     struct Parameter {
-        Type type;
-        std::unique_ptr<ParamMetadata> metadata;
+        Parameter(Type t, ark::panda_file::SourceLang sourceLang) : type(std::move(t)), lang(sourceLang) {}
 
-        Parameter(Type t, ark::panda_file::SourceLang lang)
-            : type(std::move(t)), metadata(extensions::MetadataExtension::CreateParamMetadata(lang))
+        ParamMetadata &GetOrCreateMetadata() const
         {
+            if (!metadata_) {
+                metadata_ = extensions::MetadataExtension::CreateParamMetadata(lang);
+            }
+            return *metadata_;
         }
+
+        Type type;
+        ark::panda_file::SourceLang lang;
+
+    private:
+        mutable std::unique_ptr<ParamMetadata> metadata_;
     };
 
     std::string name;
