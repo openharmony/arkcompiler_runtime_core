@@ -255,9 +255,6 @@
 06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_8.ets
 06.contexts_and_conversions/05.implicit_conversions/11.constant_to_enum_conversions/int2enum_9.ets
 
-#24036
-07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
-
 #25056
 07.expressions/01.evaluation_of_expressions/typ_2.ets
 
