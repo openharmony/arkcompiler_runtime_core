@@ -27,6 +27,7 @@ enum LogLevel {
     LOG = 2,
     WARN = 3,
     ERROR = 4,
+    PRINTLN = 5,
 }
 
 /**
@@ -89,6 +90,7 @@ export final class Console {
         this.lvl2Buf.set(LogLevel.LOG, new StringBuilder)
         this.lvl2Buf.set(LogLevel.WARN, new StringBuilder)
         this.lvl2Buf.set(LogLevel.ERROR, new StringBuilder)
+        this.lvl2Buf.set(LogLevel.PRINTLN, new StringBuilder)
     }
 
     private native printString(s: String, lvl: int): void;
@@ -120,31 +122,31 @@ export final class Console {
      * @deprecated Will be removed in future. Please use log instead
      */
     public print(i: String): void {
-        this.addToBuffer(i, LogLevel.LOG)
+        this.addToBuffer(i, LogLevel.PRINTLN)
     };
     public print(i: boolean): void {
-        this.addToBuffer(new Boolean(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Boolean(i).toString(), LogLevel.PRINTLN)
     };
     public print(i: byte): void {
-        this.addToBuffer(new Byte(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Byte(i).toString(), LogLevel.PRINTLN)
     };
     public print(i: short): void {
-        this.addToBuffer(new Short(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Short(i).toString(), LogLevel.PRINTLN)
     };
     public print(i: char): void {
-        this.addToBuffer(new Char(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Char(i).toString(), LogLevel.PRINTLN)
     };
     public print(i: int): void {
-        this.addToBuffer(new Int(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Int(i).toString(), LogLevel.PRINTLN)
     };
     public print(i: long): void {
-        this.addToBuffer(new Long(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Long(i).toString(), LogLevel.PRINTLN)
     };
     public print(i: float): void {
-        this.addToBuffer(new Float(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Float(i).toString(), LogLevel.PRINTLN)
     }
     public print(i: double): void {
-        this.addToBuffer(new Double(i).toString(), LogLevel.LOG)
+        this.addToBuffer(new Double(i).toString(), LogLevel.PRINTLN)
     }
     public print(o: NullishType): void {
         this.print(Console.NullishTypeToPrint(o))

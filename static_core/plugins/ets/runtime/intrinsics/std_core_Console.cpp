@@ -37,7 +37,8 @@ enum class ConsoleLevel : int32_t {
     LOG = 2,
     WARN = 3,
     ERROR = 4,
-    ENUM_END = ERROR
+    PRINTLN = 5,
+    ENUM_END = PRINTLN
 };
 
 #ifdef PANDA_TARGET_OHOS
@@ -101,7 +102,11 @@ void StdConsolePrintString(ObjectHeader *header [[maybe_unused]], EtsString *dat
     auto res = PandaString(data->GetUtf8());
 
 #ifdef PANDA_TARGET_OHOS
-    LogPrint(lvl, "arkts.console", res.data());
+    if (lvl == ConsoleLevel::PRINTLN) {
+        std::cout << res << std::flush;
+    } else {
+        LogPrint(lvl, "arkts.console", res.data());
+    }
 #else
     (lvl == ConsoleLevel::ERROR ? std::cerr : std::cout) << res << std::flush;
 #endif  // PANDA_TARGET_OHOS
