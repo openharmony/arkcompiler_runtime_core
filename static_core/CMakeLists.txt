@@ -72,6 +72,13 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror -Wshadow")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
+if(UNIT_TESTS_COVERAGE)
+    if(NOT USE_GCOV_TOOLS AND NOT USE_LLVM_COV_TOOLS)
+        message(SEND_ERROR "Please use USE_GCOV_TOOLS or USE_LLVM_COV_TOOLS with UNIT_TESTS_COVERAGE option" )
+    endif()
+    include(cmake/interceptor/AddCustomTargetInterceptor.cmake)
+endif()
+
 # CC-OFFNXT(bc-40028) FP
 include(cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
