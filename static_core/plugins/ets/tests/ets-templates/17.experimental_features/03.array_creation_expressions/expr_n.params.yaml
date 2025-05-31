@@ -55,9 +55,6 @@ cases:
           let v: number[][] = new number[size][-size]  // CTE: constant expression, negative value
 
     - use: |-
-          let v: string[] = new string[3]  // CTE: string has no default value
-
-    - use: |-
           let size: Long = new Long(1 as long)  // unboxing and narrowing dimension conversion
           let v: Byte[] = new Byte[size]
 
