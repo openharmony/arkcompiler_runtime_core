@@ -14,8 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: A enum must have at least one enum constant
-tags: [negative, compile-only]
+desc: Empty enum is supported as a corner case for compatibility with TypeScript.
 ---*/
 
 enum EmptyEnum {}
