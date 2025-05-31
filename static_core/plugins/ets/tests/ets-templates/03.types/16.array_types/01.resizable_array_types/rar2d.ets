@@ -20,8 +20,8 @@ tags: [compile-only, negative]
 
 class A {}
 
-let arr_a: A[] = [new A, new A]
+let arrA: A[] = [new A, new A]
 
 function main() {
-    let arr_obj: Object[] = arr_a
+    let arrObj: Object[] = arrA
 }

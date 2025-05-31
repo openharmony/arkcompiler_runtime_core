@@ -21,8 +21,8 @@ tags: [compile-only, negative]
 interface I {}
 class A implements I {}
 
-let arr_a: FixedArray<A> = [new A, new A]
+let arrA: FixedArray<A> = [new A, new A]
 
 function main() {
-    let arr_i: FixedArray<I> = arr_a
+    let arrI: FixedArray<I> = arrA
 }

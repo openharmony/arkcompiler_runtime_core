@@ -21,9 +21,9 @@ tags: [compile-only, negative]
 class A {}
 class B extends A {}
 
-let arr_a: Array<A> = [new B, new B]
-let arr_b: Array<B> = [new B, new B]
+let arrA: A[] = [new B, new B]
+let arrB: B[] = [new B, new B]
 
 function main() {
-    arr_b = arr_a
+    arrB = arrA
 }

@@ -20,8 +20,8 @@ tags: [compile-only, negative]
 
 class A {}
 
-let arr_a: FixedArray<A> = [new A, new A]
+let arrA: FixedArray<A> = [new A, new A]
 
 function main() {
-    let arr_obj: FixedArray<Object> = arr_a
+    let arrObj: FixedArray<Object> = arrA
 }

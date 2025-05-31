@@ -21,8 +21,8 @@ tags: [compile-only, negative]
 interface I {}
 class A implements I {}
 
-let arr_a: Array<A> = [new A, new A]
+let arrA: A[] = [new A, new A]
 
 function main() {
-    let arr_i: Array<I> = arr_a
+    let arrI: I[] = arrA
 }
