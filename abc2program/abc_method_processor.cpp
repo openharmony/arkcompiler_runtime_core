@@ -48,10 +48,18 @@ void AbcMethodProcessor::FillFunctionData()
 
 void AbcMethodProcessor::FillProto()
 {
+    static const uint32_t maxArgNum = 0xFFFF;
     uint32_t params_num = GetNumArgs();
+    if (params_num > maxArgNum) {
+        LOG(ERROR, ABC2PROGRAM) << "> error encountered at " << entity_id_.GetOffset() << " (0x" << std::hex
+                                << entity_id_.GetOffset() << "). number of function's arguments (" << std::dec
+                                << params_num << ") exceeds maxArgNum (" << maxArgNum << ") !";
+        return;
+    }
+
     pandasm::Type any_type = pandasm::Type(ANY_TYPE_NAME, 0);
     function_.return_type = any_type;
-    for (uint8_t i = 0; i < params_num; i++) {
+    for (uint32_t i = 0; i < params_num; i++) {
         function_.params.emplace_back(
             pandasm::Function::Parameter(any_type, function_.language)
         );
