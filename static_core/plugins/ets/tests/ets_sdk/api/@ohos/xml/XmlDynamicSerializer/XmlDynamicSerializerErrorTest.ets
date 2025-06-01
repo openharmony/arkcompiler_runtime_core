@@ -37,57 +37,95 @@ function main(): int {
     return suite.run();
 }
 
+/**
+ * Common helper function to perform XML tests with expected exceptions
+ * 
+ * @param setup Function to set up the test scenario
+ * @param errorAction Function that should trigger an error
+ * @param expectedErrorCodeId Expected error code ID
+ */
+function performXmlTest(
+    setup: (serializer: xml.XmlDynamicSerializer) => void,
+    errorAction: (serializer: xml.XmlDynamicSerializer) => void,
+    expectedErrorCodeId: number
+): void {
+    let thatSer = new xml.XmlDynamicSerializer();
+    
+    setup(thatSer);
+    
+    let exceptionCheck = (e: Error | Exception): boolean | string => {
+        return (e instanceof BusinessError) && ((e as BusinessError).code == expectedErrorCodeId);
+    }
+    
+    arktest.expectThrow(() => errorAction(thatSer), exceptionCheck);
+}
+
 // Test cases ported from ArkTS 1.0: XML_04800
 function testXMLBoundaryValueExceedsMaxLength() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    for (let i = 0; i < xml.MaxXmlLength / 25; ++i) {
-        thatSer.setNamespace('h', 'aaa');
-        thatSer.startElement('note');
-        thatSer.endElement();
-    }
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == BufferOverFlowErrorCodeId);
-    }
-    arktest.expectThrow(() => {thatSer.startElement('note1')}, exceptionCheck);
+    performXmlTest(
+        (serializer) => {
+            for (let i = 0; i < xml.MaxXmlLength / 25; ++i) {
+                serializer.setNamespace('h', 'aaa');
+                serializer.startElement('note');
+                serializer.endElement();
+            }
+        },
+        (serializer) => {
+            serializer.startElement('note1');
+        },
+        BufferOverFlowErrorCodeId
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_04900
 function testMismatchedStartAndEndElements() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note');
-    thatSer.endElement();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == NoElementMatchErrorCodeId);
-    }
-    arktest.expectThrow(() => {thatSer.endElement()}, exceptionCheck);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.endElement();
+        },
+        (serializer) => {
+            serializer.endElement();
+        },
+        NoElementMatchErrorCodeId
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_05000
 function testIllegalPositionToSetAttributes() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note');
-    thatSer.endElement();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == IllegalPositionErrorCodeId);
-    }
-    arktest.expectThrow(() => {thatSer.setAttributes('a', 'b')}, exceptionCheck);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.endElement();
+        },
+        (serializer) => {
+            serializer.setAttributes('a', 'b');
+        },
+        IllegalPositionErrorCodeId
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_05100
 function testSetEmptyNameForAttributes() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note');
-    thatSer.endElement();
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == EmptyErrorCodeId);
-    }
-    arktest.expectThrow(() => {thatSer.setAttributes('', 'b')}, exceptionCheck);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note');
+            serializer.endElement();
+        },
+        (serializer) => {
+            serializer.setAttributes('', 'b');
+        },
+        EmptyErrorCodeId
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_05200
 function testSetUnsupportedEncoding() {
-    let exceptionCheck = (e: Error | Exception): boolean | string => {
-        return (e instanceof BusinessError) && ((e as BusinessError).code == EncodingErrorCodeId);
-    }
-    arktest.expectThrow(() => {let thatSer = new xml.XmlDynamicSerializer('utf-16')}, exceptionCheck);
+    performXmlTest(
+        (serializer) => {},
+        (serializer) => {
+            let thatSer = new xml.XmlDynamicSerializer('utf-16')
+        },
+        EncodingErrorCodeId
+    );
 }

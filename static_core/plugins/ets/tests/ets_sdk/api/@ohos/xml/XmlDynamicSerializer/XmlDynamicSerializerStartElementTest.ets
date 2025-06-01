@@ -29,89 +29,82 @@ function main(): int {
     return suite.run();
 }
 
-// Test cases ported from ArkTS 1.0: XML_00600
-function testSingleElementStartElement() {
+// Helper function to perform XML serialization and verification
+function performXmlTest(operations: (serializer: xml.XmlDynamicSerializer) => void, expectedResult: string): void {
     let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note1');
-    thatSer.endElement();
-    let result = '<note1/>';
+    operations(thatSer);
     let arrayBuffer = thatSer.getOutput();
-    let view1 = '';
     let view = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < result.length; ++i) {
+    let view1 = '';
+    for (let i = 0; i < expectedResult.length; ++i) {
         view1 = view1 + String.fromCodePoint(view[i]);
     }
-    arktest.assertEQ(view1, result);
+    arktest.assertEQ(view1, expectedResult);
+}
+
+// Test cases ported from ArkTS 1.0: XML_00600
+function testSingleElementStartElement() {
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note1');
+            serializer.endElement();
+        },
+        '<note1/>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_00700
 function testMultipleElementStartAndEndElements() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note1');
-    thatSer.endElement();
-    thatSer.startElement('note2');
-    thatSer.endElement();
-    let arrayBuffer = thatSer.getOutput();
-    let result = '<note1/>\r\n<note2/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = '';
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note1');
+            serializer.endElement();
+            serializer.startElement('note2');
+            serializer.endElement();
+        },
+        '<note1/>\r\n<note2/>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_00800
 function testNestedElementStartAndEndElements() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note1');
-    thatSer.startElement('note2');
-    thatSer.endElement();
-    thatSer.endElement();
-    let arrayBuffer = thatSer.getOutput();
-    let result = '<note1>\r\n  <note2/>\r\n</note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = '';
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note1');
+            serializer.startElement('note2');
+            serializer.endElement();
+            serializer.endElement();
+        },
+        '<note1>\r\n  <note2/>\r\n</note1>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_00900
 function testDeeplyNestedElementStartAndEndElements() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note1');
-    thatSer.startElement('note2');
-    thatSer.startElement('note3');
-    thatSer.endElement();
-    thatSer.endElement();
-    thatSer.endElement();
-    let arrayBuffer = thatSer.getOutput();
-    let result = '<note1>\r\n  <note2>\r\n    <note3/>\r\n  </note2>\r\n</note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = '';
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note1');
+            serializer.startElement('note2');
+            serializer.startElement('note3');
+            serializer.endElement();
+            serializer.endElement();
+            serializer.endElement();
+        },
+        '<note1>\r\n  <note2>\r\n    <note3/>\r\n  </note2>\r\n</note1>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_01000
 function testSiblingElementsWithinParent() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.startElement('note1');
-    thatSer.startElement('note2');
-    thatSer.endElement();
-    thatSer.startElement('note3');
-    thatSer.endElement();
-    thatSer.endElement();
-    let arrayBuffer = thatSer.getOutput();
-    let result = '<note1>\r\n  <note2/>\r\n  <note3/>\r\n</note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = '';
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.startElement('note1');
+            serializer.startElement('note2');
+            serializer.endElement();
+            serializer.startElement('note3');
+            serializer.endElement();
+            serializer.endElement();
+        },
+        '<note1>\r\n  <note2/>\r\n  <note3/>\r\n</note1>'
+    );
 }

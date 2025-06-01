@@ -193,11 +193,11 @@ export namespace xml {
                 this.checkPosition();
             }
 
-            let temp = new StringBuilder(` ${name}=\"`);
-            this.writeEscaped(temp, value);
-            temp.append(`\"`);
+            let stringBuilder = new StringBuilder(` ${name}=\"`);
+            this.writeEscaped(stringBuilder, value);
+            stringBuilder.append(`\"`);
             this.type = XmlDynamicType.START_AND_ATTRIBUTES;
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -210,9 +210,9 @@ export namespace xml {
                 this.checkPosition();
             }
 
-            let temp = new StringBuilder(`<?xml version=\"1.0\" encoding=\"${this.encoding}\"?>`);
+            let stringBuilder = new StringBuilder(`<?xml version=\"1.0\" encoding=\"${this.encoding}\"?>`);
             this.type = XmlDynamicType.DECLARATION;
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -222,32 +222,24 @@ export namespace xml {
          * @throws {BusinessError} Throws an error if the `name` parameter is an empty string.
          */
         public startElement(name: string): void {
-            this.checkEmptyParameter(name);
-            let temp = new StringBuilder();
-            if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('>');
-            }
-            if (this.type !== XmlDynamicType.NONE) {
-                this.nextItem(temp);
-            }
+            let stringBuilder = this.prepareBufferForNewItem(name);
 
             this.elementStack[this.depth].name = name;
-            temp.append('<');
+            stringBuilder.append('<');
             if (this.elementStack[this.depth].prefix !== '') {
-                temp.append(`${this.elementStack[this.depth].prefix}:`);
+                stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
             } else if (this.depth !== 0) {
                 if (this.elementStack[this.depth - OffsetDepth].prefix !== '') {
                     this.elementStack[this.depth].prefix = this.elementStack[this.depth - OffsetDepth].prefix;
-                    temp.append(`${this.elementStack[this.depth].prefix}:`);
+                    stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
                 }
             }
-            temp.append(`${this.elementStack[this.depth].name}`);
+            stringBuilder.append(`${this.elementStack[this.depth].name}`);
             this.type = XmlDynamicType.START_AND_ATTRIBUTES;
             this.depth++;
             this.elementNum++;
             this.increaseStackLength();
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -262,30 +254,30 @@ export namespace xml {
             }
             this.elementNum--;
 
-            let temp = new StringBuilder();
+            let stringBuilder = new StringBuilder();
             if (this.type == XmlDynamicType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('/>');
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('/>');
                 this.type = XmlDynamicType.OTHERS;
                 this.depth--;
-                this.writeToBuffer(temp);
+                this.writeToBuffer(stringBuilder);
                 return;
             }
             this.depth--;
             if (this.type !== XmlDynamicType.TEXT) {
-                this.nextItem(temp);
+                this.nextItem(stringBuilder);
             }
 
-            temp.append('</');
+            stringBuilder.append('</');
             if (this.elementStack[this.depth].prefix !== '') {
-                temp.append(`${this.elementStack[this.depth].prefix}:`);
+                stringBuilder.append(`${this.elementStack[this.depth].prefix}:`);
             }
-            temp.append(`${this.elementStack[this.depth].name}`);
+            stringBuilder.append(`${this.elementStack[this.depth].name}`);
             this.elementStack[this.depth].prefix = '';
             this.elementStack[this.depth].namespace_ = '';
             this.type = XmlDynamicType.OTHERS;
-            temp.append('>');
-            this.writeToBuffer(temp);
+            stringBuilder.append('>');
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -299,10 +291,10 @@ export namespace xml {
             this.checkEmptyParameter(prefix);
             this.checkEmptyParameter(namespace);
 
-            let temp = new StringBuilder();
+            let stringBuilder = new StringBuilder();
             if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
-                this.spliceNamespace(temp);
-                temp.append('>');
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
             }
 
             this.elementStack[this.depth].prefix = prefix;
@@ -313,7 +305,83 @@ export namespace xml {
             }
             this.multNsp.set(this.depth, node);
             this.type = XmlDynamicType.OTHERS;
-            this.writeToBuffer(temp);
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Adds an empty XML element with the specified name to the output buffer.
+         *
+         * @param {string} name - The name of the empty XML element to be added.
+         * @throws {BusinessError} Throws an error if the `name` parameter is an empty string.
+         */
+        public addEmptyElement(name: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(name);
+
+            stringBuilder.append(`<${name}/>`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets a comment in the XML output.
+         *
+         * @param {string} comment - The comment string to be added to the XML output.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setComment(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            stringBuilder.append(`<!--${text}-->`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets the CDATA section for the XML content.
+         *
+         * @param {string} data - The string data to be wrapped in a Cdata section.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setCdata(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            text = text.replaceAll(']]>', ']]]]><![CDATA[>');
+            stringBuilder.append(`<![CDATA[${text}]]>`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets the text content for the current XML element.
+         *
+         * @param {string} text - The text content to set for the current XML element.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setText(text: string): void {
+            this.checkEmptyParameter(text);
+            let stringBuilder = new StringBuilder();
+            if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
+            }
+
+            this.writeEscaped(stringBuilder, text);
+            this.type = XmlDynamicType.TEXT;
+            this.writeToBuffer(stringBuilder);
+        }
+
+        /**
+         * Sets the document type (DOCTYPE) for the XML output.
+         *
+         * @param {string} text - The DOCTYPE declaration to be added to the XML output.
+         * @throws {BusinessError} Throws an error if the `text` parameter is an empty string.
+         */
+        public setDocType(text: string): void {
+            let stringBuilder = this.prepareBufferForNewItem(text);
+
+            stringBuilder.append(`<!DOCTYPE ${text}>`);
+            this.type = XmlDynamicType.OTHERS;
+            this.writeToBuffer(stringBuilder);
         }
 
         /**
@@ -429,6 +497,25 @@ export namespace xml {
          */
         private checkPosition(): void {
             throw new BusinessError(IllegalPositionErrorCodeId, new Error('Illegal position for xml'));
+        }
+
+        /**
+         * Prepares the buffer for adding a new item by handling namespace line break and indentation.
+         *
+         * @param {StringBuilder} stringBuilder - The StringBuilder instance to append content to.
+         */
+        private prepareBufferForNewItem(name: string): StringBuilder {
+            this.checkEmptyParameter(name);
+            let stringBuilder = new StringBuilder();
+            if (this.type === XmlDynamicType.START_AND_ATTRIBUTES) {
+                this.spliceNamespace(stringBuilder);
+                stringBuilder.append('>');
+            }
+            if (this.type !== XmlDynamicType.NONE) {
+                this.nextItem(stringBuilder);
+            }
+
+            return stringBuilder;
         }
     }
 

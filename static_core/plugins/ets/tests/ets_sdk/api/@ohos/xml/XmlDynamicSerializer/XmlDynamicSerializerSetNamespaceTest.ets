@@ -21,61 +21,77 @@ function main(): int {
     suite.addTest('Testing namespace without setting attributes.', testNamespaceWithoutAttributes);
     suite.addTest('Testing namespace with a single attribute.', testNamespaceWithSingleAttribute);
     suite.addTest('Testing namespace with nested elements.', testNamespaceWithNestedElements);
+    suite.addTest('Testing namespace, attributes, and text for an element.', testSetNamespaceWithAttributesAndText);
 
     return suite.run();
 }
 
-// Test cases ported from ArkTS 1.0: XML_02100
-function testNamespaceWithoutAttributes() {
+// Helper function to perform XML serialization and verification
+function performXmlTest(operations: (serializer: xml.XmlDynamicSerializer) => void, expectedResult: string): void {
     let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.setDeclaration();
-    thatSer.setNamespace('h', 'http://www.w3.org/TR/html4/');
-    thatSer.startElement('note');
-    thatSer.endElement();
-    let result = '<?xml version="1.0" encoding="utf-8"?>\r\n<h:note xmlns:h="http://www.w3.org/TR/html4/"/>';
+    operations(thatSer);
     let arrayBuffer = thatSer.getOutput();
-    let view1 = '';
     let view = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < result.length; ++i) {
+    let view1 = '';
+    for (let i = 0; i < expectedResult.length; ++i) {
         view1 = view1 + String.fromCodePoint(view[i]);
     }
-    arktest.assertEQ(view1, result);
+    arktest.assertEQ(view1, expectedResult);
+}
+
+// Test cases ported from ArkTS 1.0: XML_02100
+function testNamespaceWithoutAttributes() {
+    performXmlTest(
+        (serializer) => {
+            serializer.setDeclaration();
+            serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');
+            serializer.startElement('note');
+            serializer.endElement();
+        },
+        '<?xml version="1.0" encoding="utf-8"?>\r\n<h:note xmlns:h="http://www.w3.org/TR/html4/"/>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_02200
 function testNamespaceWithSingleAttribute() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.setDeclaration();
-    thatSer.setNamespace('b', 'http://www.w3.org/TR/html4/');
-    thatSer.startElement('note');
-    thatSer.setAttributes('a', '1');
-    thatSer.endElement();
-    let arrayBuffer = thatSer.getOutput();
-    let result = '<?xml version="1.0" encoding="utf-8"?>\r\n<b:note a="1" xmlns:b="http://www.w3.org/TR/html4/"/>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = '';
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.setDeclaration();
+            serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');
+            serializer.startElement('note');
+            serializer.setAttributes('a', '1');
+            serializer.endElement();
+        },
+        '<?xml version="1.0" encoding="utf-8"?>\r\n<b:note a="1" xmlns:b="http://www.w3.org/TR/html4/"/>'
+    );
+}
+
+// Test cases ported from ArkTS 1.0: XML_02300
+function testSetNamespaceWithAttributesAndText() {
+    performXmlTest(
+        (serializer) => {
+            serializer.setDeclaration();
+            serializer.setNamespace('b', 'http://www.w3.org/TR/html4/');
+            serializer.startElement('note');
+            serializer.setAttributes('a','1');
+            serializer.setText('cat');
+            serializer.endElement();
+        },
+        '<?xml version="1.0" encoding="utf-8"?>\r\n<b:note a="1" xmlns:b="http://www.w3.org/TR/html4/">cat</b:note>'
+    );
 }
 
 // Test cases ported from ArkTS 1.0: XML_02400
 function testNamespaceWithNestedElements() {
-    let thatSer = new xml.XmlDynamicSerializer();
-    thatSer.setDeclaration();
-    thatSer.setNamespace('h', 'http://www.w3.org/TR/html4/');
-    thatSer.startElement('note1');
-    thatSer.startElement('note2');
-    thatSer.endElement();
-    thatSer.endElement();
-    let arrayBuffer = thatSer.getOutput();
-    let result = '<?xml version="1.0" encoding="utf-8"?>\r\n<h:note1 xmlns:h="http://www.w3.org/TR/html4/">' +
-    '\r\n  <h:note2/>\r\n</h:note1>';
-    let view = new Uint8Array(arrayBuffer);
-    let view1 = '';
-    for (let i = 0; i < result.length; ++i) {
-        view1 = view1 + String.fromCodePoint(view[i]);
-    }
-    arktest.assertEQ(view1, result);
+    performXmlTest(
+        (serializer) => {
+            serializer.setDeclaration();
+            serializer.setNamespace('h', 'http://www.w3.org/TR/html4/');
+            serializer.startElement('note1');
+            serializer.startElement('note2');
+            serializer.endElement();
+            serializer.endElement();
+        },
+        '<?xml version="1.0" encoding="utf-8"?>\r\n<h:note1 xmlns:h="http://www.w3.org/TR/html4/">\r\n  <h:note2/>\r\n</h:note1>'
+    );
 }
